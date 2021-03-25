@@ -2,17 +2,6 @@ mat-card {
   padding: 10px;
 }
 
-.local-card-type {
-  text-transform: uppercase;
-  font-size: smaller;
-  color: var(--bd-text-secondary);
-}
-
-.local-card-title {
-  font-weight: bold;
-  height: 19px;
-}
-
 .local-card-description {
   height: 16px;
 }

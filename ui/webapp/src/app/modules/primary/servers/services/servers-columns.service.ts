@@ -44,7 +44,7 @@ export class ServersColumnsService {
     hint: BdDataColumnTypeHint.ACTIONS,
     data: (r) => `Synchronize ${r.hostName}`,
     action: (r) => this.servers.synchronize(r).subscribe(),
-    classes: (r) => (this.servers.isSynchronized(r) ? [] : ['bd-text-warn']),
+    classes: (r) => (this.servers.isSynchronized(r) ? [] : ['bd-warning-text']),
     icon: (r) => 'history',
     width: '50px',
   };

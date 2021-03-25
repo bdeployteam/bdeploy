@@ -4,18 +4,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -31,6 +19,7 @@ import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
@@ -44,6 +33,17 @@ import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -96,6 +96,7 @@ public interface InstanceResource {
             @PathParam("tag") String versionTag);
 
     @GET
+    @Deprecated
     @Path("/{instance}/{tag}/minionConfiguration")
     public Map<String, MinionDto> getMinionConfiguration(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("tag") String versionTag);
@@ -247,5 +248,10 @@ public interface InstanceResource {
     @Path("/{instance}/attributes")
     @RequiredPermission(permission = Permission.WRITE)
     public void updateAttributes(@ActivityScope @PathParam("instance") String instanceId, CustomAttributesRecord attributes);
+
+    @GET
+    @Path("/{instance}/clientUsage")
+    @RequiredPermission(permission = Permission.READ)
+    public ClientUsageData getClientUsageData(@ActivityScope @PathParam("instance") String instanceId);
 
 }

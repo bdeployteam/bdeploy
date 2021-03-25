@@ -22,4 +22,9 @@ public class MinionMonitoringDto {
      * The loadAvg[0] is newest and taken at <code>timestamp</code>.
      */
     public List<Double> loadAvg;
+
+    /**
+     * The recent CPU usage on the system.
+     */
+    public List<Double> cpuUsage;
 }

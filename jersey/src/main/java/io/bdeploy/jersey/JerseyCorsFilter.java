@@ -2,6 +2,7 @@ package io.bdeploy.jersey;
 
 import java.io.IOException;
 
+import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
@@ -9,8 +10,6 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
-
-import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
 
 /**
  * Allow CORS for testing.
@@ -66,6 +65,7 @@ public class JerseyCorsFilter implements ContainerResponseFilter, ContainerReque
                         // put it in this list. And remove the ones you don't want.
                         "X-Requested-With, Authorization, Accept-Version, Content-Type, Content-MD5, CSRF-Token, "
                                 + "X-No-Global-Error-Handling, " // dummy header to supress error handling in web-app.
+                                + "ignoreLoadingBar, " // used to avoid loading bar in the client.
                                 + JerseyRemoteActivityScopeClientFilter.PROXY_SCOPE_HEADER + ", "
                                 + JerseyOnBehalfOfFilter.ON_BEHALF_OF_HEADER);
             }

@@ -1,7 +1,9 @@
 import { ConnectedPosition, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
+import { cloneDeep } from 'lodash-es';
 import { BdButtonComponent } from '../bd-button/bd-button.component';
 
 /**
@@ -102,6 +104,7 @@ export class BdButtonPopupComponent implements OnInit {
   @Input() tooltip: TooltipPosition;
   @Input() preferredPosition: PopupPosition = 'below-left';
   @Input() backdropClass: string;
+  @Input() chevronColor: ThemePalette;
 
   @Output() popupOpened = new EventEmitter<BdButtonPopupComponent>();
 
@@ -122,7 +125,7 @@ export class BdButtonPopupComponent implements OnInit {
       positionStrategy: this.overlay
         .position()
         .flexibleConnectedTo(this.button._elementRef)
-        .withPositions(this.getPositions())
+        .withPositions(this.fixupPanelClasses(this.getPositions()))
         .withPush(false)
         .withViewportMargin(VIEWPORT_MARGIN),
       scrollStrategy: this.overlay.scrollStrategies.close(),
@@ -163,6 +166,17 @@ export class BdButtonPopupComponent implements OnInit {
       case 'right-below':
         return [RIGHT_BELOW, RIGHT_ABOVE, LEFT_BELOW];
     }
+  }
+
+  private fixupPanelClasses(pos: ConnectedPosition[]) {
+    const name = !!this.chevronColor ? this.chevronColor : 'default';
+    const result = [];
+    pos.forEach((p) => {
+      const x = cloneDeep(p);
+      x.panelClass = x.panelClass + '-' + name;
+      result.push(x);
+    });
+    return result;
   }
 
   /** Closes the overlay if present */

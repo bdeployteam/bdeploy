@@ -37,7 +37,15 @@
 
     <ng-container *ngFor="let col of _columns; let i = index" [matColumnDef]="col.id">
       <!-- Column headers -->
-      <th mat-header-cell *matHeaderCellDef [style.width]="col.width ? col.width : null" [matTooltip]="col.description" mat-sort-header [disabled]="!sortData">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        [style.width]="col.width ? col.width : null"
+        [matTooltip]="col.description"
+        [matTooltipShowDelay]="1000"
+        mat-sort-header
+        [disabled]="!sortData"
+      >
         <div [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null" class="bd-text-ellipsis">
           {{ col.name }}
         </div>
@@ -94,7 +102,12 @@
                 >
                   {{ col.data(row.node.item) }}
                 </div>
-                <app-bd-data-component-cell *ngIf="!!col.component" [componentType]="col.component" [record]="row.node.item"></app-bd-data-component-cell>
+                <app-bd-data-component-cell
+                  *ngIf="!!col.component"
+                  [componentType]="col.component"
+                  [record]="row.node.item"
+                  [column]="col"
+                ></app-bd-data-component-cell>
               </ng-container>
               <ng-container *ngIf="isImageColumn(col)">
                 <div fxLayout="row" fxLayoutAlign="start center">

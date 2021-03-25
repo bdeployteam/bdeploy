@@ -1,0 +1,45 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Bulk Control" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content *ngIf="instances.active$ | async as instance">
+    <app-bd-notification-card
+      icon="history"
+      [warning]="true"
+      [dismissable]="false"
+      header="Server Not Synchronized"
+      *ngIf="!servers.isSynchronized(instance.managedServer)"
+    >
+      <div [style.text-align]="'justify'">
+        The managed server responsible for this instance is not synchronized, bulk controls are unavailable. Please synchronize the server to use these
+        controls.
+      </div>
+    </app-bd-notification-card>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized(instance.managedServer)">
+      <app-bd-button
+        [collapsed]="false"
+        icon="play_arrow"
+        text="Start Instance"
+        (click)="doStart(instance)"
+        color="primary"
+        [loadingWhen$]="starting$"
+        [disabled]="starting$ | async"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        icon="stop"
+        text="Stop Instance"
+        (click)="doStop(instance)"
+        [loadingWhen$]="stopping$"
+        [disabled]="stopping$ | async"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        icon="replay"
+        text="Restart Instance"
+        (click)="doRestart(instance)"
+        [loadingWhen$]="restarting$"
+        [disabled]="restarting$ | async"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

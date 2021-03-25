@@ -3,9 +3,10 @@ import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
 import { StatusMessage } from 'src/app/models/config.model';
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { ApplicationType, InstanceTemplateDescriptor, InstanceTemplateGroup, MinionDto, ProductDto } from 'src/app/models/gen.dtos';
 import { ApplicationGroup } from 'src/app/modules/legacy/core/models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/modules/legacy/core/models/consts';
+import { EMPTY_INSTANCE_NODE_CONFIGURATION } from 'src/app/modules/legacy/core/models/consts';
 import { ProcessConfigDto } from 'src/app/modules/legacy/core/models/process.model';
 import { ApplicationService } from '../../services/application.service';
 

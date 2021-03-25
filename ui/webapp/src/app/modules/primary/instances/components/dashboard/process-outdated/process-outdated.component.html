@@ -1,0 +1,4 @@
+<div fxLayout="row" fxLayoutAlign="start">
+  <div class="local-chip local-outdated-chip" *ngIf="outdated$ | async" matTooltip="The process is still running in a non-active version.">Outdated</div>
+  <div class="local-chip local-ok-chip" *ngIf="!(outdated$ | async) && running$ | async" matTooltip="The process is running in the current version.">OK</div>
+</div>

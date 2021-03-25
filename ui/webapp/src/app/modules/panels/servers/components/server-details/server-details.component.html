@@ -10,13 +10,13 @@
       <ng-container *ngIf="server.update.updateAvailable">
         <div fxLayout="row" fxLayoutAlign="start center">
           <strong>Update available:</strong>&nbsp;{{ formatVersion(server.update.updateVersion)
-          }}<mat-icon class="bd-text-warn bd-small-icon">system_update</mat-icon>
+          }}<mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
         </div>
         <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server) && !server.update.forceUpdate">
-          <mat-icon class="bd-text-warn">warning</mat-icon>Please synchronize to enable update related actions.
+          <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize to enable update related actions.
         </div>
         <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server) && server.update.forceUpdate">
-          <mat-icon class="bd-text-warn">warning</mat-icon>A major version update must be installed to re-enable synchronizing.
+          <mat-icon class="bd-warning-text">warning</mat-icon>A major version update must be installed to re-enable synchronizing.
         </div>
         <div class="bd-description-text" [style.text-align]="'justify'">
           An update can be transfered without installing to prepare a future update up front. This option is only available if the update package is not yet
@@ -48,17 +48,7 @@
           <strong>This version is not used in any instance.</strong>
         </app-bd-no-data>
       </app-bd-data-display>
-      <app-bd-button
-        [collapsed]="false"
-        text="Synchronize"
-        icon="history"
-        (click)="doSynchronize(server)"
-        [loadingWhen$]="synchronizing$"
-        [disabled]="synchronizing$ | async"
-        [matTooltip]="!servers.isSynchronized(server) ? 'The server is not synchronized. Click to synchronize now' : null"
-        [ngClass]="!servers.isSynchronized(server) ? 'bd-text-warn' : []"
-        color="inherit"
-      ></app-bd-button>
+      <app-bd-server-sync-button [collapsed]="false" [server]="server"></app-bd-server-sync-button>
       <app-bd-panel-button
         text="Edit Server Details"
         icon="edit"

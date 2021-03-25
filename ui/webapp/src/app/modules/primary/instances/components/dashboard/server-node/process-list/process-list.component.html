@@ -1,0 +1,7 @@
+<app-bd-data-display
+  [records]="node.nodeConfiguration.applications"
+  [columns]="columns"
+  [grid]="gridWhen$ | async"
+  [grouping]="groupingWhen$ | async"
+  [recordRoute]="getRecordRoute"
+></app-bd-data-display>

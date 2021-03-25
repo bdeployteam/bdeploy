@@ -1,0 +1,15 @@
+.local-unknown {
+  color: var(--bd-text-secondary);
+}
+
+.local-running {
+  color: var(--bd-text-success);
+}
+
+.local-stopped {
+  color: var(--bd-text-secondary);
+}
+
+.local-crashed {
+  color: var(--bd-warn);
+}

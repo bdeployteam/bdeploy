@@ -1,0 +1,42 @@
+<svg width="100%" height="100%">
+  <!-- The NESTED SVG uses a viewBox and scaling to be able to use a 100x100 canvas, i.e. mapping coordinates to percent and vice versa. -->
+  <!-- This is *required* as paths cannot position with percent values, only absolute is supported. We can still place *other* elements -->
+  <!-- Outside of the graph using percent values later on without distortion. -->
+  <!-- Each element must use vector-effect="non-scaling-stroke" to keep the strokes from scaling. -->
+  <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <g *ngIf="hasVisiblePoint">
+      <!-- The actual curve -->
+      <path *ngIf="!!pathInfo" [attr.d]="pathInfo" class="local-graph-curve" fill="none" vector-effect="non-scaling-stroke"></path>
+
+      <!-- The "end marker" in case there are not a full 15 data points. -->
+      <g *ngIf="endMarker">
+        <line
+          [attr.x1]="pathPoints[pathPoints.length - 1].x"
+          x2="0"
+          [attr.y1]="pathPoints[pathPoints.length - 1].y"
+          [attr.y2]="pathPoints[pathPoints.length - 1].y"
+          class="local-graph-end"
+          stroke-dasharray="4 2"
+          vector-effect="non-scaling-stroke"
+        ></line>
+      </g>
+    </g>
+  </svg>
+
+  <g *ngIf="hasVisiblePoint">
+    <!-- Draw points for each data point -->
+    <circle
+      *ngFor="let point of pathPoints; let i = index"
+      [attr.cx]="point.x + '%'"
+      [attr.cy]="point.y + '%'"
+      r="3"
+      class="local-graph-point"
+      [matTooltip]="'Launches : ' + curve[i] + ' on ' + dayLabels[i]"
+      [matTooltipPosition]="point.y > 50 ? 'above' : 'below'"
+      [matTooltipShowDelay]="300"
+    ></circle>
+  </g>
+</svg>
+<div *ngIf="!appUid || !hasVisiblePoint" class="bd-hint-text local-no-data" fxLayout="column" fxLayoutAlign="center center">
+  <div>No data to show.</div>
+</div>

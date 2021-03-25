@@ -1,4 +1,4 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import { animate, animateChild, group, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { isString } from 'lodash-es';
@@ -15,7 +15,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
     trigger('openClose', [
       state('open', style({ transform: 'translateX(0%)' })),
       state('closed', style({ transform: 'translateX(100%)' })),
-      transition('open <=> closed', animate('0.2s ease')),
+      transition('open <=> closed', group([animate('0.2s ease'), animateChild()])),
     ]),
     trigger('flyInWidth', [
       state('normal', style({ width: '350px' })),
@@ -23,7 +23,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
       state('max-lg-menu', style({ width: 'calc(100% - 370px)' })),
       state('max-sm', style({ width: 'calc(100% - 74px)' })),
       state('max-sm-menu', style({ width: 'calc(100% - 220px)' })),
-      transition('* => *', animate('0.2s ease')),
+      transition('* => *', group([animateChild(), animate('0.2s ease')])),
     ]),
   ],
 })

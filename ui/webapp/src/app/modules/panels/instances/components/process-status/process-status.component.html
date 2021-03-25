@@ -1,0 +1,119 @@
+<app-bd-dialog [loadingWhen$]="details.loading$">
+  <app-bd-dialog-toolbar [closeablePanel]="true" header="Process {{ (details.processConfig$ | async)?.name }}">
+    <div fxFlex="1 0 auto"></div>
+    <app-process-status-icon [record]="details.processConfig$ | async"></app-process-status-icon>
+    <mat-divider [vertical]="true"></mat-divider>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content *ngIf="details.processConfig$ | async as config">
+    <app-bd-notification-card *ngIf="outdated$ | async" icon="warning" header="Outdated" [dismissable]="false" [warning]="true">
+      <div [style.text-align]="'justify'">
+        The process is currently running from an instance version (<strong>{{ details.processDetail$.value.status.instanceTag }}</strong
+        >) which is not the active version (<strong>{{ (instances.active$ | async)?.instance?.tag }}</strong
+        >). Stop the process and start it again to launch it from the active version instead.
+      </div>
+    </app-bd-notification-card>
+    <app-bd-notification-card *ngIf="!(details.processDetail$ | async)" icon="history" [warning]="true" [dismissable]="false" header="Server Not Synchronized">
+      <div [style.text-align]="'justify'">
+        The managed server hosting this instance is not synchronized, runtime details are unavailable. Please synchronize the server to see additional details.
+      </div>
+    </app-bd-notification-card>
+    <div gdColumns="24px 90px auto" gdGap="10px" [style.padding.px]="20" gdAlignColumns="start center">
+      <mat-icon class="local-id-labels">fingerprint</mat-icon>
+      <div class="local-id-labels">Process ID:</div>
+      <div class="local-id-labels">{{ config.uid }}</div>
+
+      <mat-icon>flight_takeoff</mat-icon>
+      <div>Start Type:</div>
+      <div>{{ formatStartType(config.processControl.startType) }}</div>
+
+      <mat-icon>favorite_outline</mat-icon>
+      <div>Keep Alive:</div>
+      <div>{{ config.processControl.keepAlive ? 'Enabled' : 'Disabled' }}</div>
+
+      <ng-container *ngIf="details.processDetail$ | async as detail">
+        <ng-container *ngIf="!isRunning(detail) && !isCrashedWaiting(detail)">
+          <ng-container *ngIf="detail.status.exitCode">
+            <mat-icon>exit_to_app</mat-icon>
+            <div>Exit Code:</div>
+            <div>{{ detail.status.exitCode }}</div>
+          </ng-container>
+
+          <ng-container *ngIf="detail.stopTime > 0">
+            <mat-icon>timer</mat-icon>
+            <div>Stopped At:</div>
+            <div>{{ getStopTime(detail) }}</div>
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="isRunning(detail)">
+          <mat-icon>timelapse</mat-icon>
+          <div>Up Time:</div>
+          <div>{{ uptime$ | async }}</div>
+
+          <mat-icon>timer</mat-icon>
+          <div>Started At:</div>
+          <div>{{ getStartTime(detail) }}</div>
+        </ng-container>
+        <ng-container *ngIf="isCrashedWaiting(detail)">
+          <mat-icon>report</mat-icon>
+          <div>Stopped At:</div>
+          <div>{{ getStopTime(detail) }}</div>
+
+          <mat-progress-spinner [value]="restartProgress$ | async" color="primary" [diameter]="24"></mat-progress-spinner>
+          <div>Restart In:</div>
+          <div>{{ restartProgressText$ | async }}</div>
+        </ng-container>
+      </ng-container>
+    </div>
+    <mat-divider></mat-divider>
+    <ng-container *ngIf="details.processDetail$ | async as detail">
+      <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10px" [style.padding.px]="10">
+        <app-bd-button class="local-control-button" [collapsed]="false" color="primary" [disabled]="!isStartAllowed(detail)" (click)="start(detail)">
+          <mat-icon fxFlex="1 0 auto" *ngIf="!(starting$ | async)">play_arrow</mat-icon>
+          <div fxLayout="row" fxLayoutAlign="center center" fxFlex="1 0 auto" *ngIf="starting$ | async">
+            <mat-spinner [diameter]="24"></mat-spinner>
+          </div>
+        </app-bd-button>
+        <app-bd-button class="local-control-button" [collapsed]="false" [disabled]="!isStopAllowed(detail)" (click)="stop(detail)">
+          <mat-icon fxFlex="1 0 auto" *ngIf="!(stopping$ | async)">stop</mat-icon>
+          <div fxLayout="row" fxLayoutAlign="center center" fxFlex="1 0 auto" *ngIf="stopping$ | async">
+            <mat-spinner [diameter]="24"></mat-spinner>
+          </div>
+        </app-bd-button>
+        <app-bd-button class="local-control-button" [collapsed]="false" [disabled]="!isRestartAllowed(detail)" (click)="restart(detail)">
+          <mat-icon fxFlex="1 0 auto" *ngIf="!(restarting$ | async)">replay</mat-icon>
+          <div fxLayout="row" fxLayoutAlign="center center" fxFlex="1 0 auto" *ngIf="restarting$ | async">
+            <mat-spinner [diameter]="24"></mat-spinner>
+          </div>
+        </app-bd-button>
+      </div>
+      <mat-divider></mat-divider>
+      <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="10">
+        <app-bd-panel-button
+          [collapsed]="false"
+          [toggle]="false"
+          [relative]="true"
+          [route]="['ports']"
+          icon="power"
+          text="Process Port Status"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          [toggle]="false"
+          [relative]="true"
+          [route]="['natives']"
+          icon="memory"
+          text="Native Processes"
+          [disabled]="!isRunning(detail)"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          [toggle]="false"
+          [relative]="true"
+          [route]="['console']"
+          icon="cast"
+          text="Process Console"
+        ></app-bd-panel-button>
+      </div>
+    </ng-container>
+  </app-bd-dialog-content>
+</app-bd-dialog>

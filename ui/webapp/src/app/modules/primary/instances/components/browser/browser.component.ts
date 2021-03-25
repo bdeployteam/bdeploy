@@ -16,7 +16,10 @@ import { InstancesService } from '../../services/instances.service';
   styleUrls: ['./browser.component.css'],
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
-  initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [{ name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose }];
+  initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
+    { name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose },
+    { name: 'Product', group: (r) => r.productDto.name },
+  ];
   grouping: BdDataGroupingDefinition<InstanceDto>[];
   defaultGrouping: BdDataGrouping<InstanceDto> = { definition: this.initGrouping[0], selected: [] };
   hasProducts$ = new BehaviorSubject<boolean>(false);

@@ -3,13 +3,8 @@ import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
-import {
-  ApplicationConfiguration,
-  OperatingSystem,
-  ProcessDetailDto,
-  ProcessHandleDto,
-} from '../../../../../models/gen.dtos';
-import { getAppOs } from '../../../../legacy/shared/utils/manifest.utils';
+import { ApplicationConfiguration, OperatingSystem, ProcessDetailDto, ProcessHandleDto } from '../../../../../models/gen.dtos';
+import { getAppOs } from '../../../../core/utils/manifest.utils';
 
 @Component({
   selector: 'app-process-list',

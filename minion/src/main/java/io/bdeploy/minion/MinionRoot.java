@@ -400,9 +400,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         if (minionMode != MinionMode.NODE) {
             MasterCleanupJob.create(this, getState().cleanupSchedule);
+            NodeMonitorJob.create(this); // master triggers an update for all nodes.
         }
         CleanupDownloadDirJob.create(scheduler, downloadDir);
-        NodeMonitorJob.create(this);
     }
 
     private void createJobScheduler() {

@@ -733,6 +733,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public ClientUsageData getClientUsage(String instanceId) {
+        return InstanceManifest.load(hive, instanceId, null).getClientUsage(hive).read();
+    }
+
+    @Override
     @DeleteAfterWrite
     public Path getClientInstanceConfiguration(Manifest.Key instanceId) {
         return null; // FIXME: DCS-396: client config shall not contain server config files.

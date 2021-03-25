@@ -1,0 +1,14 @@
+.local-client-node {
+  min-height: 200px;
+}
+
+.local-graph {
+  position: relative;
+  overflow: hidden;
+
+  min-width: 100px;
+
+  opacity: 0.5;
+
+  background-color: var(--bd-bg-toolbar);
+}

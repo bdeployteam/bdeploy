@@ -1,0 +1,47 @@
+.local-no-data {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+}
+
+.local-graph-curve {
+  stroke: var(--bd-accent);
+  stroke-width: 2px;
+
+  stroke-dasharray: 5000;
+  stroke-dashoffset: 5000;
+
+  animation: drawGraph 4s ease forwards;
+}
+
+@keyframes drawGraph {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.local-graph-end {
+  stroke: var(--bd-accent);
+  stroke-width: 2px;
+}
+
+.local-graph-point {
+  fill: var(--bd-accent);
+  stroke-width: 0px;
+  opacity: 0;
+
+  animation: showPoints 0.5s ease-out forwards;
+}
+
+@keyframes showPoints {
+  to {
+    opacity: 1;
+  }
+}
+
+.local-graph-point:hover {
+  stroke: var(--bd-accent);
+  stroke-width: 2px;
+}

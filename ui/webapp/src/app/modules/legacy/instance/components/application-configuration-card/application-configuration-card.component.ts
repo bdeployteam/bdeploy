@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ApplicationConfiguration, InstanceVersionDto, OperatingSystem } from '../../../../../models/gen.dtos';
+import { getAppOs } from '../../../../core/utils/manifest.utils';
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
-import { getAppOs } from '../../../../legacy/shared/utils/manifest.utils';
 import { EventWithCallback } from '../../../core/models/event';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';

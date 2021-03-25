@@ -7,8 +7,8 @@ import {
   ParameterDescriptor,
   ParameterType,
 } from '../../../../models/gen.dtos';
+import { getAppKeyName, getAppOs } from '../../../core/utils/manifest.utils';
 import { ApplicationService } from '../../instance/services/application.service';
-import { getAppKeyName, getAppOs } from '../../shared/utils/manifest.utils';
 
 /**
  * Default group names used in the application

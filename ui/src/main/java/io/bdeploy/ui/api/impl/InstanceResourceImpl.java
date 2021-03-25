@@ -81,6 +81,7 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
+import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -197,6 +198,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 // ignore: product not found
             }
 
+            Key activeVersion = null;
             Key activeProduct = null;
             ProductDto activeProductDto = null;
             try {
@@ -205,6 +207,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 if (state.activeTag != null) {
                     try {
                         InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
+                        activeVersion = mf.getManifest();
                         activeProduct = mf.getConfiguration().product;
                         activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
                     } catch (Exception e) {
@@ -242,8 +245,8 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceBannerRecord banner = im.getBanner(hive).read();
 
             // Clear security token before sending via REST
-            result.add(InstanceDto.create(config, productDto, activeProduct, activeProductDto, newerVersionAvailable,
-                    managedMaster, attributes, banner));
+            result.add(InstanceDto.create(imKey, config, productDto, activeProduct, activeProductDto, newerVersionAvailable,
+                    managedMaster, attributes, banner, im.getManifest(), activeVersion));
         }
         return result;
     }
@@ -1065,6 +1068,17 @@ public class InstanceResourceImpl implements InstanceResource {
 
         changes.change(ObjectChangeType.INSTANCE, im.getManifest(),
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.ATTRIBUTES));
+    }
+
+    @Override
+    public ClientUsageData getClientUsageData(String instanceId) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        return root.getNamedMaster(group).getClientUsage(instanceId);
     }
 
 }

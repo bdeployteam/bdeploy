@@ -1,0 +1,23 @@
+<div fxLayout="column" class="bd-rect-card">
+  <app-node-header fxLayout="column" [node]="node">
+    <div fxLayout="row">
+      <div fxLayout="column">
+        <div class="bd-type-text">NODE</div>
+        <div class="bd-title-text">{{ node.nodeName }}</div>
+      </div>
+      <div fxFlex="1 0 auto"></div>
+      <div fxLayout="row" fxLayoutGap="5px" [style.pointer-events]="'all'">
+        <app-bd-panel-button text="Details" icon="info" [route]="['panels', 'instances', 'node', node.nodeName]"></app-bd-panel-button>
+      </div>
+    </div>
+    <div fxFlex="1 0 auto"></div>
+    <app-node-state-panel fxFlexAlign="center" [items]="nodeStateItems$ | async" [narrowWhen$]="narrowWhen$"></app-node-state-panel>
+  </app-node-header>
+  <app-node-process-list
+    *ngIf="!(collapsedWhen$ | async)"
+    class="bd-default-padding"
+    [node]="node"
+    [gridWhen$]="gridWhen$"
+    [groupingWhen$]="groupingWhen$"
+  ></app-node-process-list>
+</div>

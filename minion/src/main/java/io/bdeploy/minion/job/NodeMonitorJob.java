@@ -77,7 +77,9 @@ public class NodeMonitorJob implements Job {
                     node.getValue().monitoring = monitoringDto;
                 } catch (Exception e) {
                     log.warn("Cannot get monitoring information on minion {} ({})", node.getKey(), e.getClass().getName());
-                    log.debug("Error details", e);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error details", e);
+                    }
                 }
             }
             minionManifest.update(configuration);

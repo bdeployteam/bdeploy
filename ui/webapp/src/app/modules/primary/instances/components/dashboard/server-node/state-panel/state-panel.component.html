@@ -1,0 +1,20 @@
+<div class="local-state-panel" fxLayout="row" *ngIf="!!items?.length" fxLayoutGap="20px">
+  <ng-container *ngFor="let item of items">
+    <div
+      fxLayout="row"
+      fxLayoutGap="5px"
+      fxLayoutAlign="start center"
+      [matTooltip]="makeObservable(item.tooltip ? item.tooltip : item.name) | async"
+      [matTooltipShowDelay]="300"
+      matTooltipPosition="above"
+    >
+      <ng-container *ngIf="makeObservable(item.type) | async as type">
+        <mat-icon class="bd-warning-text" *ngIf="type === 'warning'">warning</mat-icon>
+        <mat-icon class="local-ok" *ngIf="type === 'ok'">done</mat-icon>
+        <mat-icon class="local-info" *ngIf="type === 'info'">info</mat-icon>
+        <mat-icon class="local-unknown" *ngIf="type === 'unknown'">help</mat-icon>
+      </ng-container>
+      <div *ngIf="!(narrowWhen$ | async)">{{ makeObservable(item.name) | async }}</div>
+    </div>
+  </ng-container>
+</div>

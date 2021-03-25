@@ -1,0 +1,5 @@
+<div fxLayout="row" fxLayoutAlign="start">
+  <mat-icon *ngIf="column.data(record) === false" class="bd-warning-text">warning</mat-icon>
+  <mat-icon *ngIf="column.data(record) === true" class="bd-success-text">done</mat-icon>
+  <mat-icon *ngIf="column.data(record) === undefined" class="local-unknown">help</mat-icon>
+</div>

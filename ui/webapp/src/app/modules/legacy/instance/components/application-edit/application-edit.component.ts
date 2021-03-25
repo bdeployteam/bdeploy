@@ -7,6 +7,7 @@ import { MatButton } from '@angular/material/button';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { Observable, of } from 'rxjs';
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import {
   ApplicationConfiguration,
@@ -26,7 +27,7 @@ import {
   NamedParameter,
   UnknownParameter,
 } from '../../../core/models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../core/models/consts';
+import { EMPTY_PARAMETER_CONFIGURATION, EMPTY_PARAMETER_DESCRIPTOR } from '../../../core/models/consts';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../core/models/process.model';
 import { MessageBoxMode } from '../../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../../shared/services/messagebox.service';

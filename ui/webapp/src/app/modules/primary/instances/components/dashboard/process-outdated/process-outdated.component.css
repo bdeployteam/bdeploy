@@ -1,0 +1,16 @@
+.local-chip {
+  text-transform: uppercase;
+  font-size: smaller;
+  border-radius: 3px;
+  padding: 0px 5px;
+}
+
+.local-outdated-chip {
+  background-color: var(--bd-warn);
+  color: var(--bd-warn-contrast);
+}
+
+.local-ok-chip {
+  background-color: var(--bd-text-success);
+  color: var(--bd-warn-contrast);
+}

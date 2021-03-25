@@ -1,0 +1,15 @@
+.local-stdin-badge {
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 0px 5px;
+}
+
+.local-stdin-attached {
+  background-color: var(--bd-primary);
+  color: var(--bd-primary-contrast);
+}
+
+.local-stdin-detached {
+  background-color: #888888;
+}

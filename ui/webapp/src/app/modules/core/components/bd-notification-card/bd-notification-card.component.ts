@@ -8,6 +8,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 export class BdNotificationCardComponent implements OnInit {
   @Input() header: string;
   @Input() icon: string;
+  @Input() svgIcon: string;
   @Input() warning = false;
   @Input() disabled = false;
   @Input() dismissable = true;

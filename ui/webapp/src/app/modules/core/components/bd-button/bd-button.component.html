@@ -20,9 +20,13 @@
       >{{ icon }}</mat-icon
     >
     <mat-spinner *ngIf="loadingWhen$ | async" [diameter]="24" class="bd-inherited-spinner"></mat-spinner>
-    <span *ngIf="text && !collapsed" [ngClass]="!!icon ? 'local-label-position' : []" [fxFlex]="!icon ? '1 0 auto' : '0 0 auto'" [@scaleWidthFromZero]>{{
-      text
-    }}</span>
+    <span
+      *ngIf="text && !collapsed"
+      [ngClass]="!!icon && !(loadingWhen$ | async) ? 'local-label-position' : []"
+      [fxFlex]="!icon ? '1 0 auto' : '0 0 auto'"
+      [@scaleWidthFromZero]
+      >{{ text }}</span
+    >
     <ng-content></ng-content>
   </div>
 </button>

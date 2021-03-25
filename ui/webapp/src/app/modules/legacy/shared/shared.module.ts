@@ -36,6 +36,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { NgTerminalModule } from 'ng-terminal';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { CoreModule } from '../../core/core.module';
+import { InstanceService } from '../instance/services/instance.service';
 import { CustomAttributeEditComponent } from './components/custom-attribute-edit/custom-attribute-edit.component';
 import { CustomAttributeGroupingSelectorComponent } from './components/custom-attribute-grouping-selector/custom-attribute-grouping-selector.component';
 import { CustomAttributeValueComponent } from './components/custom-attribute-value/custom-attribute-value.component';
@@ -65,7 +66,7 @@ import { PortValidatorDirective } from './validators/port.validator';
     TextboxComponent,
     MessageboxComponent,
   ],
-  providers: [MessageboxService],
+  providers: [MessageboxService, InstanceService],
   imports: [
     CommonModule,
     CoreModule,

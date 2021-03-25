@@ -1,0 +1,22 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Ports of {{ (details.processConfig$ | async)?.name }}" [closeablePanel]="true"> </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-data-display [columns]="columns.defaultPortsColumns" [records]="ports$ | async">
+        <app-bd-no-data>
+          <div>No server ports configured.</div>
+        </app-bd-no-data>
+      </app-bd-data-display>
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

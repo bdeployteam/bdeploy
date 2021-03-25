@@ -156,5 +156,6 @@ export class GuideService {
 
   public enable(type: GuideType): void {
     this.saveType(type);
+    this.saveVisited([]);
   }
 }

@@ -6,8 +6,8 @@
       <div>
         Creating instance: <strong>{{ config.uuid }}</strong>
       </div>
-      <div class="bd-text-warn" *ngIf="!prodList?.length">No products are available. Upload a product first.</div>
-      <div class="bd-text-warn" *ngIf="cfg.isCentral() && !serverList?.length">No managed server available. Link a managed server first.</div>
+      <div class="bd-warning-text" *ngIf="!prodList?.length">No products are available. Upload a product first.</div>
+      <div class="bd-warning-text" *ngIf="cfg.isCentral() && !serverList?.length">No managed server available. Link a managed server first.</div>
       <app-bd-form-input label="Name" name="name" [(ngModel)]="config.name" required></app-bd-form-input>
       <app-bd-form-input label="Description" name="description" [(ngModel)]="config.description" required></app-bd-form-input>
       <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="config.purpose" [values]="getPurposes()" required></app-bd-form-select>

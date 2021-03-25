@@ -9,6 +9,7 @@ import { DragulaService } from 'ng2-dragula';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, finalize, mergeMap } from 'rxjs/operators';
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { isUpdateFailed, isUpdateInProgress, isUpdateSuccess, UpdateStatus } from 'src/app/modules/legacy/core/models/update.model';
@@ -42,7 +43,7 @@ import { FileUploadComponent } from '../../../../legacy/shared/components/file-u
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
 import { ProductService } from '../../../../legacy/shared/services/product.service';
 import { ApplicationGroup } from '../../../core/models/application.model';
-import { CLIENT_NODE_NAME, EMPTY_DEPLOYMENT_STATE } from '../../../core/models/consts';
+import { EMPTY_DEPLOYMENT_STATE } from '../../../core/models/consts';
 import { EventWithCallback } from '../../../core/models/event';
 import { EditAppConfigContext, ProcessConfigDto } from '../../../core/models/process.model';
 import { RoutingHistoryService } from '../../../core/services/routing-history.service';

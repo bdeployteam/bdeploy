@@ -1,0 +1,25 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Native Processes" [closeablePanel]="true">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-panel-button
+      #backButton
+      [collapsed]="false"
+      text="Back to overview"
+      icon="arrow_back"
+      [toggle]="false"
+      [route]="['..']"
+      [relative]="true"
+    ></app-bd-panel-button>
+    <mat-divider [vertical]="true"></mat-divider>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-data-display [columns]="columns" [records]="processes">
+        <app-bd-no-data>
+          <div>No native process details available.</div>
+        </app-bd-no-data>
+      </app-bd-data-display>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

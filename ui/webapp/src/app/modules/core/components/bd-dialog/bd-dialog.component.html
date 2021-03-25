@@ -4,8 +4,8 @@
     <ng-content select="app-bd-dialog-toolbar"></ng-content>
 
     <!-- main content -->
-    <div class="bd-scroll-container bd-default-padding mat-typography">
-      <ng-content *ngIf="(showContent$ | async)" select="app-bd-dialog-content"></ng-content>
+    <div class="bd-scroll-container bd-default-padding mat-typography local-fill-height">
+      <ng-content *ngIf="showContent$ | async" select="app-bd-dialog-content"></ng-content>
     </div>
   </div>
 

@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.management.MBeanServerConnection;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,41 +88,51 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
 
     @Override
     public MinionMonitoringDto getMonitoring(boolean update) {
-        try {
-            MBeanServerConnection mbsc = ManagementFactory.getPlatformMBeanServer();
-            OperatingSystemMXBean osMBean = ManagementFactory.newPlatformMXBeanProxy(mbsc,
-                    ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME, OperatingSystemMXBean.class);
+        OperatingSystemMXBean osMBean = ManagementFactory.getOperatingSystemMXBean();
+        com.sun.management.OperatingSystemMXBean extOsMBean = ManagementFactory
+                .getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class);
 
-            MinionManifest minionManifest = new MinionManifest(root.getHive());
-            MinionConfiguration configuration = minionManifest.read();
-            MinionDto minion = configuration.getMinion(root.getState().self);
-            if (minion != null) {
-                long now = System.currentTimeMillis();
-                if (minion.monitoring == null) {
-                    minion.monitoring = new MinionMonitoringDto();
-                }
-                // if existing data is older than 5min, assume that it's old data and start a new list
-                if ((now - minion.monitoring.timestamp > 1000 * 60 * 5) || minion.monitoring.loadAvg == null) {
-                    minion.monitoring.loadAvg = new ArrayList<>();
-                }
-                minion.monitoring.timestamp = now;
-                minion.monitoring.availableProcessors = osMBean.getAvailableProcessors();
-                minion.monitoring.loadAvg.add(0, osMBean.getSystemLoadAverage());
+        MinionManifest minionManifest = new MinionManifest(root.getHive());
+        MinionConfiguration configuration = minionManifest.read();
+        MinionDto minion = configuration.getMinion(root.getState().self);
 
-                // keep values for 15min
-                while (minion.monitoring.loadAvg.size() > 15) {
-                    minion.monitoring.loadAvg.remove(minion.monitoring.loadAvg.size() - 1);
-                }
-                if (update) {
-                    minionManifest.update(configuration);
-                    root.getHive().execute(new ManifestDeleteOldByIdOperation().setToDelete(minionManifest.getKey().getName()));
-                }
-                return minion.monitoring;
-            } else {
-                log.error("minion {} not found in MinionManifest", root.getState().self);
+        if (minion != null) {
+            long now = System.currentTimeMillis();
+            if (minion.monitoring == null) {
+                minion.monitoring = new MinionMonitoringDto();
             }
-        } catch (IOException e) {
-            log.error("can't get OperationSystemMXBean", e);
+
+            if (minion.monitoring.loadAvg == null) {
+                minion.monitoring.loadAvg = new ArrayList<>();
+            }
+            if (minion.monitoring.cpuUsage == null) {
+                minion.monitoring.cpuUsage = new ArrayList<>();
+            }
+
+            // if existing data is older than 5min, assume that it's old data and start a new list
+            if ((now - minion.monitoring.timestamp > 1000 * 60 * 5)) {
+                minion.monitoring.loadAvg = new ArrayList<>();
+                minion.monitoring.cpuUsage = new ArrayList<>();
+            }
+            minion.monitoring.timestamp = now;
+            minion.monitoring.availableProcessors = osMBean.getAvailableProcessors();
+            minion.monitoring.loadAvg.add(0, osMBean.getSystemLoadAverage());
+            minion.monitoring.cpuUsage.add(0, extOsMBean.getSystemCpuLoad());
+
+            // keep values for 15min
+            while (minion.monitoring.loadAvg.size() > 15) {
+                minion.monitoring.loadAvg.remove(minion.monitoring.loadAvg.size() - 1);
+            }
+            while (minion.monitoring.cpuUsage.size() > 15) {
+                minion.monitoring.cpuUsage.remove(minion.monitoring.cpuUsage.size() - 1);
+            }
+            if (update) {
+                minionManifest.update(configuration);
+                root.getHive().execute(new ManifestDeleteOldByIdOperation().setToDelete(minionManifest.getKey().getName()));
+            }
+            return minion.monitoring;
+        } else {
+            log.error("minion {} not found in MinionManifest", root.getState().self);
         }
         return null;
     }

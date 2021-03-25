@@ -1,4 +1,5 @@
 import { cloneDeep } from 'lodash-es';
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -10,9 +11,9 @@ import {
   ManifestKey,
   MinionDto,
 } from '../../../../models/gen.dtos';
-import { getAppKeyName } from '../../shared/utils/manifest.utils';
+import { getAppKeyName } from '../../../core/utils/manifest.utils';
 import { ApplicationGroup } from './application.model';
-import { CLIENT_NODE_NAME, EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
+import { EMPTY_INSTANCE_NODE_CONFIGURATION, EMPTY_INSTANCE_NODE_CONFIGURATION_DTO } from './consts';
 
 /**
  * Context information for EventEmitter

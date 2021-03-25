@@ -31,6 +31,7 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
   colType: BdDataColumn<T>;
   colTitle: BdDataColumn<T>;
   colDescription: BdDataColumn<T>;
+  colStatus: BdDataColumn<T>;
   colActions: BdDataColumn<T>[];
   colDetails: BdDataColumn<T>[];
   colAvatar: BdDataColumn<T>;
@@ -55,6 +56,7 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
     this.colType = this.columns.find((c) => c.hint === BdDataColumnTypeHint.TYPE);
     this.colTitle = this.columns.find((c) => c.hint === BdDataColumnTypeHint.TITLE);
     this.colDescription = this.columns.find((c) => c.hint === BdDataColumnTypeHint.DESCRIPTION);
+    this.colStatus = this.columns.find((c) => c.hint === BdDataColumnTypeHint.STATUS);
     this.colFooter = this.columns.find((c) => c.hint === BdDataColumnTypeHint.FOOTER);
     this.colAvatar = this.columns.find((c) => c.hint === BdDataColumnTypeHint.AVATAR);
     this.colActions = this.columns.filter((c) => c.hint === BdDataColumnTypeHint.ACTIONS);

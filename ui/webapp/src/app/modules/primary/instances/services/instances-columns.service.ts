@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { format } from 'date-fns';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ServersService } from '../../servers/services/servers.service';
 import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
+import { InstanceSyncCellComponent } from '../components/browser/instance-sync-cell/instance-sync-cell.component';
 import { InstancesService } from './instances.service';
 
 @Injectable({
@@ -92,10 +92,8 @@ export class InstancesColumnsService {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,
-    data: (r) => `Synchronize ${r.instanceConfiguration.name} - last synchronization ${format(new Date(r.managedServer.lastSync), 'dd.MM.yyyy HH:mm')}`,
-    action: (r) => this.servers.synchronize(r.managedServer).subscribe(),
-    classes: (r) => (this.servers.isSynchronized(r.managedServer) ? [] : ['bd-text-warn']),
-    icon: (r) => 'history',
+    data: (r) => r.managedServer.lastSync,
+    component: InstanceSyncCellComponent,
     width: '50px',
   };
 

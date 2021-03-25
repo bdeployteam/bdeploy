@@ -312,6 +312,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord',
         'io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord',
         'io.bdeploy.interfaces.manifest.state.InstanceStateRecord',
+        'io.bdeploy.interfaces.manifest.statistics.ClientUsageData',
         'io.bdeploy.interfaces.UserInfo',
         'io.bdeploy.interfaces.UserPermissionUpdateDto',
         'io.bdeploy.interfaces.UserChangePasswordDto',

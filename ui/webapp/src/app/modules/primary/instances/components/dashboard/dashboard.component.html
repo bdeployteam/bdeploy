@@ -1,8 +1,17 @@
-<app-bd-dialog [loadingWhen$]="instances.loading$">
-  <app-bd-dialog-toolbar *ngIf="!(instances.current$ | async)" header="Dashboard - loading"></app-bd-dialog-toolbar>
-  <app-bd-dialog-toolbar *ngIf="instances.current$ | async as instance" header="Dashboard - {{ instance.instanceConfiguration.name }}">
+<app-bd-dialog [loadingWhen$]="instances.activeLoading$">
+  <app-bd-dialog-toolbar *ngIf="instances.activeLoading$ | async" header="Dashboard - loading"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    *ngIf="!(instances.activeLoading$ | async)"
+    header="Dashboard - {{
+      !!(instances.active$ | async) ? (instances.active$ | async).instanceConfiguration.name : (instances.current$ | async)?.instanceConfiguration.name
+    }}"
+  >
     <div fxFlex="1 0 auto"></div>
-    <ng-container *ngIf="(instances.current$ | async)?.managedServer?.update?.updateAvailable">
+    <div class="local-version-text" *ngIf="instances.active$ | async as inst">
+      <ng-container *ngIf="!(narrow$ | async)">Showing Active Version: {{ inst.activeVersion.tag }}</ng-container>
+      <ng-container *ngIf="narrow$ | async">Ver.: {{ inst.activeVersion.tag }}</ng-container>
+    </div>
+    <ng-container *ngIf="(instances.active$ | async)?.managedServer?.update?.updateAvailable">
       <app-bd-button
         text="Server Update Available"
         icon="system_update"
@@ -11,24 +20,71 @@
         (click)="
           areas.navigateBoth(
             ['/servers', 'browser', areas.groupContext$.value],
-            ['panels', 'servers', 'details', instances.current$.value?.managedServer?.hostName]
+            ['panels', 'servers', 'details', instances.active$.value?.managedServer?.hostName]
           )
         "
       ></app-bd-button>
       <mat-divider *ngIf="cfg.isCentral()" [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="cfg.isCentral()">
-      <app-bd-button
-        text="Synchronize"
-        icon="history"
-        (click)="doSynchronize(instance.managedServer)"
-        [loadingWhen$]="synchronizing$"
-        [disabled]="synchronizing$ | async"
-        [matTooltip]="!servers.isSynchronized(instance.managedServer) ? 'The server is not synchronized. Click to synchronize now' : null"
-        [ngClass]="!servers.isSynchronized(instance.managedServer) ? 'bd-text-warn' : []"
-        color="inherit"
-      ></app-bd-button>
+      <ng-container *ngIf="instances.active$ | async as instance">
+        <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
+        <mat-divider [vertical]="true"></mat-divider>
+      </ng-container>
     </ng-container>
+    <app-bd-data-grouping
+      [multiple]="!(gridMode$ | async)"
+      (groupingChange)="grouping$.next($event)"
+      [definitions]="groupingDefinitions"
+      [records]="allApplications$ | async"
+      presetKey="dashboard"
+    ></app-bd-data-grouping>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [toggle]="gridMode$ | async"
+      (toggleChange)="gridMode$.next($event)"
+      tooltip="below"
+      [disabled]="collapsed$ | async"
+    ></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-button
+      [isToggle]="true"
+      icon="unfold_less"
+      text="Collapsed Mode"
+      [toggle]="collapsed$ | async"
+      (toggleChange)="collapsed$.next($event)"
+      tooltip="below"
+    ></app-bd-button>
+    <app-bd-panel-button text="Bulk Control" icon="dynamic_feed" [route]="['panels', 'instances', 'bulk']"></app-bd-panel-button>
   </app-bd-dialog-toolbar>
-  <app-bd-dialog-content></app-bd-dialog-content>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="instances.active$ | async as instance">
+      <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
+
+      <!-- Each node in the instance (the ones containing applications only) -->
+      <ng-container *ngIf="instances.activeNodeCfgs$ | async as nodes">
+        <app-instance-server-node
+          *ngFor="let node of serverNodes$ | async"
+          [node]="node"
+          [gridWhen$]="gridMode$"
+          [groupingWhen$]="grouping$"
+          [collapsedWhen$]="collapsed$"
+          [narrowWhen$]="narrow$"
+        ></app-instance-server-node>
+        <app-instance-client-node *ngIf="clientNode$ | async as node" [node]="node"></app-instance-client-node>
+      </ng-container>
+    </div>
+
+    <!-- Show hint if there is no active version. -->
+    <app-bd-no-data *ngIf="!(instances.active$ | async)">
+      <p>
+        <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> does not have an active version. Dashboard not yet available.
+      </p>
+      <p>Configure, install and activate instance version first.</p>
+      <!-- TODO: add route to button -->
+      <app-bd-button text="Configure Instance" icon="settings" [collapsed]="false"></app-bd-button>
+    </app-bd-no-data>
+  </app-bd-dialog-content>
 </app-bd-dialog>

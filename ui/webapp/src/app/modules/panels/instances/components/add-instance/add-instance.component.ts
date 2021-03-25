@@ -53,11 +53,23 @@ export class AddInstanceComponent implements OnInit {
         }
         item.versions.push(p.key.tag);
       });
+
+      const snap = this.areas.panelRoute$.value;
+      const prodKey = snap.queryParamMap.get('productKey');
+      const prodTag = snap.queryParamMap.get('productTag');
+      if (!!prodKey && !!prodTag) {
+        const prod = this.prodList.find((p) => p.id === prodKey);
+        if (!!prod) {
+          if (!!prod.versions.find((v) => v === prodTag)) {
+            this.selectedProduct = prod;
+            this.config.product.name = prodKey;
+            this.config.product.tag = prodTag;
+          }
+        }
+      }
     });
 
     this.servers.servers$.subscribe((s) => (this.serverList = s));
-
-    // TODO: init product from query params.
   }
 
   onSave(): void {

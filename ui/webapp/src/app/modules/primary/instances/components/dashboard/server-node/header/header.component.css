@@ -1,0 +1,145 @@
+.local-header-sizing {
+  height: 110px;
+
+  position: relative;
+
+  overflow: hidden;
+
+  background-color: var(--bd-bg-toolbar);
+
+  top: 0px;
+}
+
+.local-graph-sizing {
+  position: absolute;
+
+  top: 5px;
+  left: 0px;
+
+  width: 100%;
+  height: 100px;
+
+  overflow: visible;
+
+  opacity: 0.5;
+
+  z-index: 0;
+}
+
+.local-fade-out-left {
+  height: 100%;
+  width: max(120px, 20%);
+
+  position: absolute;
+
+  background: linear-gradient(90deg, var(--bd-bg-toolbar) 0%, var(--bd-bg-toolbar) 50%, rgba(0, 0, 0, 0) 100%);
+  opacity: 0.7;
+
+  z-index: 1;
+
+  /* allows hovering on SVG elements *beneath* the content */
+  pointer-events: none;
+}
+
+.local-no-data-overlay {
+  height: 100%;
+  width: 100%;
+
+  position: absolute;
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+.local-content-sizing {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+
+  width: 100%;
+  height: 100%;
+
+  padding: 10px;
+
+  z-index: 2;
+
+  /* allows hovering on SVG elements *beneath* the content */
+  pointer-events: none;
+}
+
+.local-event-info {
+  stroke: var(--bd-primary);
+  stroke-width: 2px;
+}
+
+.local-event-warning {
+  stroke: var(--bd-accent);
+  stroke-width: 2px;
+}
+
+.local-event-error {
+  stroke: var(--bd-warn);
+  stroke-width: 2px;
+}
+
+.local-event:hover {
+  stroke-width: 4px;
+}
+
+.local-graph-curve {
+  stroke: var(--bd-accent);
+  stroke-width: 2px;
+
+  stroke-dasharray: 5000;
+  stroke-dashoffset: 5000;
+
+  animation: drawGraph 4s ease forwards;
+}
+
+@keyframes drawGraph {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.local-graph-end {
+  stroke: var(--bd-accent);
+  stroke-width: 2px;
+}
+
+.local-max-line {
+  stroke: #888888;
+  stroke-width: 2px;
+}
+
+.local-max-label {
+  fill: #888888;
+  font-size: smaller;
+
+  /** give room for the details button */
+  transform: translateX(-10px);
+}
+
+.local-max-label-padded {
+  transform: translateX(-60px);
+}
+
+.local-graph-point {
+  fill: var(--bd-accent);
+  stroke-width: 0px;
+  opacity: 0;
+
+  animation: showPoints 0.5s ease-out forwards;
+}
+
+@keyframes showPoints {
+  to {
+    opacity: 1;
+  }
+}
+
+.local-graph-point:hover {
+  stroke: var(--bd-accent);
+  stroke-width: 2px;
+}

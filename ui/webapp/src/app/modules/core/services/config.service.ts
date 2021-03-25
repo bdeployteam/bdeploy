@@ -58,7 +58,7 @@ export class ConfigService {
   /** Used during application init to load the configuration. */
   public load(): Promise<AppConfig> {
     return new Promise((resolve) => {
-      this.getBackendInfo().subscribe(
+      this.getBackendInfo(true).subscribe(
         (bv) => {
           this.config = {
             version: bv.version,
@@ -80,7 +80,7 @@ export class ConfigService {
 
   /** Check whether there is a new version running on the backend, show dialog if it is. */
   public checkServerVersion() {
-    this.getBackendInfo().subscribe((bv) => {
+    this.getBackendInfo(true).subscribe((bv) => {
       this.doCheckVersion(bv);
     });
   }
@@ -162,9 +162,9 @@ export class ConfigService {
   }
 
   /** Tries to fetch the current server version, suppresses global error handling */
-  public getBackendInfo(): Observable<BackendInfoDto> {
+  public getBackendInfo(errorHandling = false): Observable<BackendInfoDto> {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
-      headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      headers: errorHandling ? {} : suppressGlobalErrorHandling(new HttpHeaders()),
     });
   }
 

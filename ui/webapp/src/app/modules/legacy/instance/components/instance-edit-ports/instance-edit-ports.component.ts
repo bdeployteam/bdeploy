@@ -13,10 +13,10 @@ import {
   ParameterType,
 } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
+import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { ProcessConfigDto } from 'src/app/modules/legacy/core/models/process.model';
 import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
 import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
-import { getAppOs } from 'src/app/modules/legacy/shared/utils/manifest.utils';
 import { URLish } from 'src/app/modules/legacy/shared/utils/url.utils';
 import { ApplicationService } from '../../services/application.service';
 import { InstanceShiftPortsComponent, ShiftableParameter } from '../instance-shift-ports/instance-shift-ports.component';

@@ -1,0 +1,33 @@
+.local-state-panel {
+  border: 1px solid #aaaaaa;
+  border-radius: 3px;
+
+  padding: 5px;
+  margin: 5px;
+
+  background-color: var(--bd-lighten-bg);
+
+  /** allow mouse events for tooltips, even though we then cannot select things in the underlying graph */
+  pointer-events: fill;
+  cursor: default;
+
+  font-size: smaller;
+}
+
+.local-state-panel mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.local-ok {
+  color: var(--bd-text-success);
+}
+
+.local-info {
+  color: var(--bd-primary);
+}
+
+.local-unknown {
+  color: var(--bd-text-secondary);
+}

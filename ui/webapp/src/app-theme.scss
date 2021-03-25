@@ -79,6 +79,7 @@
 
     --bd-text: #{mat-color($fg, 'text')};
     --bd-text-secondary: #{mat-color($fg, 'secondary-text')};
+    --bd-text-success: #{if($dark, mat-color($mat-green, 300), mat-color($mat-green, 700))};
 
     --bd-bg-dialog: #{mat-color($bg, 'dialog')};
     --bd-bg-toolbar: #{mat-color($bg, 'app-bar')};
@@ -90,8 +91,10 @@
 
     --bd-primary-contrast: #{mat-color($primary, 'default-contrast')};
     --bd-accent-contrast: #{mat-color($accent, 'default-contrast')};
-    --bd-warn-contrast: #{mat-color($warn, 'default-contrast')};
+    --bd-warn-contrast: #{mat-contrast($warn, 800)}; // intentionally pick the darker color to force a white contrast if available.
     --bd-main-bar-contrast: #{mat-color($maintb, 'default-contrast')};
+
+    --bd-lighten-bg: #{if($dark, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5))};
   }
 
   .inline-code {

@@ -487,7 +487,7 @@ ext.configureJlink = { task, String modHome, String outDir ->
             "--output", "$outDir/jre",
             "--compress=2", "--no-header-files", "--no-man-pages",
             "--add-modules",
-            "java.base,java.compiler,java.datatransfer,java.desktop,java.instrument,java.logging,java.management,java.naming,java.sql,java.xml,java.rmi,jdk.crypto.ec,jdk.jdwp.agent,jdk.jdi,jdk.zipfs,jdk.jcmd"
+            "java.base,java.compiler,java.datatransfer,java.desktop,java.instrument,java.logging,java.management,java.naming,java.sql,java.xml,java.rmi,jdk.crypto.ec,jdk.jdwp.agent,jdk.jdi,jdk.zipfs,jdk.jcmd,jdk.management"
         ])
 
         doFirst {

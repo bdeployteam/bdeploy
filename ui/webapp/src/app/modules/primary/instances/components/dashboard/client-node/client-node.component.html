@@ -1,0 +1,43 @@
+<div class="bd-rect-card local-client-node" fxLayout="row">
+  <div class="bd-default-padding" [fxFlex]="(showGraph$ | async) ? '300px' : '1 0 auto'" fxLayout="column">
+    <div class="bd-type-text">Usage Statistics</div>
+    <div class="bd-title-text">Client Applications</div>
+
+    <app-bd-form-select
+      label="Selected Application"
+      [values]="node.nodeConfiguration.applications"
+      [labels]="getLabels(node.nodeConfiguration.applications)"
+      [(ngModel)]="selected"
+      [style.padding-top.px]="10"
+    ></app-bd-form-select>
+
+    <div *ngIf="selected" fxLayout="column" fxLayoutGap="10px" [style.margin-top.px]="-10">
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px" [style.padding-left.px]="6">
+        <!-- padded to align with the icon on the button below -->
+        <mat-icon>launch</mat-icon>
+        <div>Total launches (30 days): {{ getTotalLaunches(selected.uid) }}</div>
+      </div>
+      <div fxLayout="row" fxLayoutGap="5px">
+        <app-bd-button
+          [collapsed]="false"
+          icon="cloud_download"
+          text="Installer"
+          color="primary"
+          fxFlex="50%"
+          (click)="clients.downloadInstaller(selected)"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          icon="play_arrow"
+          text="Click & Start"
+          fxFlex="50%"
+          (click)="clients.downloadClickAndStart(selected)"
+        ></app-bd-button>
+      </div>
+    </div>
+  </div>
+
+  <div fxLayout="row" class="local-graph" fxFlex="1 0 auto" *ngIf="showGraph$ | async">
+    <app-client-usage-graph fxFlex="1 0 auto" [appUid]="selected?.uid"></app-client-usage-graph>
+  </div>
+</div>

@@ -1,27 +1,56 @@
 <ng-template #cardContents>
-  <div *ngIf="!!colType" class="local-card-type bd-text-ellipsis" [ngClass]="colType.classes ? colType.classes(record) : []">
-    <ng-container *ngIf="!colType.component" class="bd-text-ellipsis">{{ colType.data(record) }}</ng-container>
-    <app-bd-data-component-cell *ngIf="!!colType.component" [componentType]="colType.component" [record]="record"></app-bd-data-component-cell>
-  </div>
-  <div
-    *ngIf="!!colTitle"
-    class="local-card-title bd-text-ellipsis"
-    [ngClass]="colTitle.classes ? colTitle.classes(record) : []"
-    [matTooltip]="colTitle.data(record)"
-    [matTooltipShowDelay]="1000"
-  >
-    <ng-container *ngIf="!colTitle.component" class="bd-text-ellipsis">{{ colTitle.data(record) }}</ng-container>
-    <app-bd-data-component-cell *ngIf="!!colTitle.component" [componentType]="colTitle.component" [record]="record"></app-bd-data-component-cell>
-  </div>
-  <div
-    *ngIf="!!colDescription"
-    class="bd-description-text local-card-description bd-text-ellipsis"
-    [ngClass]="colDescription.classes ? colDescription.classes(record) : []"
-    [matTooltip]="colDescription.data(record)"
-    [matTooltipShowDelay]="1000"
-  >
-    <ng-container *ngIf="!colDescription.component" class="bd-text-ellipsis">{{ colDescription.data(record) }}</ng-container>
-    <app-bd-data-component-cell *ngIf="!!colDescription.component" [componentType]="colDescription.component" [record]="record"></app-bd-data-component-cell>
+  <div fxLayout="row">
+    <div fxLayout="column">
+      <div *ngIf="!!colType" class="bd-type-text bd-text-ellipsis" [ngClass]="colType.classes ? colType.classes(record) : []">
+        <ng-container *ngIf="!colType.component" class="bd-text-ellipsis">{{ colType.data(record) }}</ng-container>
+        <app-bd-data-component-cell
+          *ngIf="!!colType.component"
+          [componentType]="colType.component"
+          [record]="record"
+          [column]="colType"
+        ></app-bd-data-component-cell>
+      </div>
+      <div
+        *ngIf="!!colTitle"
+        class="bd-title-text bd-text-ellipsis"
+        [ngClass]="colTitle.classes ? colTitle.classes(record) : []"
+        [matTooltip]="colTitle.data(record)"
+        [matTooltipShowDelay]="1000"
+      >
+        <ng-container *ngIf="!colTitle.component" class="bd-text-ellipsis">{{ colTitle.data(record) }}</ng-container>
+        <app-bd-data-component-cell
+          *ngIf="!!colTitle.component"
+          [componentType]="colTitle.component"
+          [record]="record"
+          [column]="colTitle"
+        ></app-bd-data-component-cell>
+      </div>
+      <div
+        *ngIf="!!colDescription"
+        class="bd-description-text local-card-description bd-text-ellipsis"
+        [ngClass]="colDescription.classes ? colDescription.classes(record) : []"
+        [matTooltip]="colDescription.data(record)"
+        [matTooltipShowDelay]="1000"
+      >
+        <ng-container *ngIf="!colDescription.component" class="bd-text-ellipsis">{{ colDescription.data(record) }}</ng-container>
+        <app-bd-data-component-cell
+          *ngIf="!!colDescription.component"
+          [componentType]="colDescription.component"
+          [record]="record"
+          [column]="colDescription"
+        ></app-bd-data-component-cell>
+      </div>
+    </div>
+    <div fxFlex="1 0 auto"></div>
+    <div *ngIf="!!colStatus" class="bd-text-ellipsis" [ngClass]="colStatus.classes ? colStatus.classes(record) : []">
+      <ng-container *ngIf="!colStatus.component" class="bd-text-ellipsis">{{ colStatus.data(record) }}</ng-container>
+      <app-bd-data-component-cell
+        *ngIf="!!colStatus.component"
+        [componentType]="colStatus.component"
+        [record]="record"
+        [column]="colStatus"
+      ></app-bd-data-component-cell>
+    </div>
   </div>
   <div
     class="local-card-actions"
@@ -35,11 +64,13 @@
     <div fxFlex="1 0 auto" fxLayout="column" fxLayoutAlign="center start">
       <div *ngIf="!!colDetails?.length" gdColumns="16px auto" gdGap="2px" gdAlignColumns="center center" class="local-card-detail-text">
         <ng-container *ngFor="let detail of colDetails">
-          <ng-container *ngIf="detail.component || !!detail.data(record)">
-            <mat-icon class="bd-small-icon" [matTooltip]="detail.name" [matTooltipShowDelay]="1000">{{ detail.icon(record) }}</mat-icon>
+          <ng-container *ngIf="!!detail.data(record)">
+            <mat-icon class="bd-small-icon" [matTooltip]="detail.description ? detail.description : detail.name" [matTooltipShowDelay]="1000">{{
+              detail.icon(record)
+            }}</mat-icon>
             <span *ngIf="!detail.component" class="bd-text-ellipsis">{{ detail.data(record) }}</span>
             <div *ngIf="!!detail.component">
-              <app-bd-data-component-cell [componentType]="detail.component" [record]="record"></app-bd-data-component-cell>
+              <app-bd-data-component-cell [componentType]="detail.component" [record]="record" [column]="detail"></app-bd-data-component-cell>
             </div>
           </ng-container>
         </ng-container>
@@ -48,16 +79,21 @@
 
     <ng-container *ngIf="!!colActions?.length">
       <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="end center">
-        <app-bd-button
-          *ngFor="let action of colActions"
-          [ngClass]="action.classes ? action.classes(record) : []"
-          [icon]="action.icon(record)"
-          [text]="action.data(record)"
-          tooltip="below"
-          (click)="action.action(record)"
-          color="inherit"
-          appClickStopPropagation
-        ></app-bd-button>
+        <ng-container *ngFor="let action of colActions">
+          <app-bd-button
+            *ngIf="!action.component"
+            [ngClass]="action.classes ? action.classes(record) : []"
+            [icon]="action.icon(record)"
+            [text]="action.data(record)"
+            tooltip="below"
+            (click)="action.action(record)"
+            color="inherit"
+            appClickStopPropagation
+          ></app-bd-button>
+          <div *ngIf="!!action.component">
+            <app-bd-data-component-cell [componentType]="action.component" [record]="record" [column]="action"></app-bd-data-component-cell>
+          </div>
+        </ng-container>
       </div>
     </ng-container>
   </div>
@@ -69,7 +105,12 @@
     [matTooltipShowDelay]="1000"
   >
     <ng-container *ngIf="!colFooter.component" class="bd-text-ellipsis">{{ colFooter.data(record) }}</ng-container>
-    <app-bd-data-component-cell *ngIf="!!colFooter.component" [componentType]="colFooter.component" [record]="record"></app-bd-data-component-cell>
+    <app-bd-data-component-cell
+      *ngIf="!!colFooter.component"
+      [componentType]="colFooter.component"
+      [record]="record"
+      [column]="colFooter"
+    ></app-bd-data-component-cell>
   </div>
 </ng-template>
 

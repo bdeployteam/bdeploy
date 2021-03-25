@@ -27,13 +27,16 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
+import { NgTerminalModule } from 'ng-terminal';
 import { ClipboardModule } from 'ngx-clipboard';
 import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.component';
+import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
+import { BdDataBooleanCellComponent } from './components/bd-data-boolean-cell/bd-data-boolean-cell.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataComponentCellComponent } from './components/bd-data-component-cell/bd-data-component-cell.component';
 import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-display.component';
@@ -60,7 +63,10 @@ import { BdNoDataComponent } from './components/bd-no-data/bd-no-data.component'
 import { BdNotificationCardComponent } from './components/bd-notification-card/bd-notification-card.component';
 import { BdPanelButtonComponent } from './components/bd-panel-button/bd-panel-button.component';
 import { BdSearchFieldComponent } from './components/bd-search-field/bd-search-field.component';
+import { BdServerSyncButtonComponent } from './components/bd-server-sync-button/bd-server-sync-button.component';
+import { BdTerminalComponent } from './components/bd-terminal/bd-terminal.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
+import { ConnectionVersionComponent } from './components/connection-version/connection-version.component';
 import { LoginComponent } from './components/login/login.component';
 import { MainNavButtonComponent } from './components/main-nav-button/main-nav-button.component';
 import { MainNavContentComponent } from './components/main-nav-content/main-nav-content.component';
@@ -77,7 +83,6 @@ import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { GroupIdValidator } from './validators/group-id';
 import { PasswordVerificationValidator } from './validators/password-verification';
-import { ConnectionVersionComponent } from './components/connection-version/connection-version.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -130,6 +135,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdGuideComponent,
     PasswordVerificationValidator,
     ConnectionVersionComponent,
+    BdDataBooleanCellComponent,
+    BdServerSyncButtonComponent,
+    BdTerminalComponent,
+    BdBannerComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -176,6 +185,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     // additional libraries used to provide cool UI :)
     GravatarModule,
     ClipboardModule,
+    NgTerminalModule,
   ],
   exports: [
     // core infrastructure usable by any other module.
@@ -223,6 +233,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
     BdGuideComponent,
+    BdDataBooleanCellComponent,
+    BdServerSyncButtonComponent,
+    BdTerminalComponent,
+    BdBannerComponent,
 
     // validators
     GroupIdValidator,

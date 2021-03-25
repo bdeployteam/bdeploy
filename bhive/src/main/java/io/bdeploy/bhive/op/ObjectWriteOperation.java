@@ -13,6 +13,8 @@ import com.google.common.io.CountingOutputStream;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
+import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
+import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -27,7 +29,9 @@ import io.bdeploy.common.util.StreamHelper;
 @ReadOnlyOperation
 public class ObjectWriteOperation extends BHive.Operation<Long> {
 
+    @AuditWith(AuditStrategy.COLLECTION_PEEK)
     private final Set<ObjectId> objects = new LinkedHashSet<>();
+
     private final Set<Manifest.Key> manifests = new LinkedHashSet<>();
 
     private OutputStream output;

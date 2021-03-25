@@ -3,7 +3,7 @@ import { DeviceDetectorService } from 'ngx-device-detector';
 import { finalize } from 'rxjs/operators';
 import { LauncherDto, ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
 import { SoftwareUpdateService } from '../../../admin/services/software-update.service';
-import { getAppOs } from '../utils/manifest.utils';
+import { getAppOs } from '../../../core/utils/manifest.utils';
 
 @Injectable()
 export class LauncherService {

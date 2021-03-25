@@ -40,8 +40,6 @@ export const SORT_PURPOSE = (a: InstancePurpose, b: InstancePurpose) => {
   return 0;
 };
 
-export const CLIENT_NODE_NAME = '__ClientApplications';
-
 export const EMPTY_MANIFEST_KEY: ManifestKey = {
   name: null,
   tag: null,

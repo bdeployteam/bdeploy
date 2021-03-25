@@ -1,0 +1,29 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Process Console for {{ (details.processConfig$ | async)?.name }}" [closeablePanel]="true">
+    <div fxFlex="1 0 auto"></div>
+    <ng-container *ngIf="(hasStdin$ | async) && (available$ | async)">
+      <div fxLayout="row" fxLayoutAlign="center center">
+        <div class="local-stdin-badge" [ngClass]="(stdin$ | async) ? 'local-stdin-attached' : 'local-stdin-detached'">
+          {{ (stdin$ | async) ? 'Input available' : 'Input unavailable' }}
+        </div>
+      </div>
+      <mat-divider [vertical]="true"></mat-divider>
+    </ng-container>
+    <app-bd-panel-button
+      #backButton
+      [collapsed]="narrow$ | async"
+      text="Back to overview"
+      icon="arrow_back"
+      [toggle]="false"
+      [route]="['..']"
+      [relative]="true"
+    ></app-bd-panel-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-button icon="cloud_download" text="Download Full Content" (click)="doDownload()" [disabled]="!(available$ | async)"></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-terminal *ngIf="available$ | async" [content$]="content$" [allowInput]="true" (userInput)="onUserInput($event)"></app-bd-terminal>
+    <app-bd-no-data *ngIf="!(available$ | async)"> Process details are unavailable. </app-bd-no-data>
+  </app-bd-dialog-content>
+</app-bd-dialog>

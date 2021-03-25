@@ -37,9 +37,7 @@ import { InstanceGroupService } from '../../instance-group/services/instance-gro
 import { MessageBoxMode } from '../../shared/components/messagebox/messagebox.component';
 import { MessageboxService } from '../../shared/services/messagebox.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class InstanceService {
   private readonly log: Logger = this.loggingService.getLogger('InstanceService');
 

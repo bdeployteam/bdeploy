@@ -16,7 +16,7 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() icon: string;
   @Input() text: string;
   @Input() tooltip: TooltipPosition;
-  @Input() badge: number;
+  @Input() badge: string | number;
   @Input() badgeColor: ThemePalette = 'accent';
   @Input() collapsed = true;
   @Input() color: BdButtonColorMode;

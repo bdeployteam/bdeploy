@@ -11,6 +11,8 @@ export enum BdDataColumnTypeHint {
   TITLE,
   /* The description of the displayed object. Shown below the title */
   DESCRIPTION,
+  /* A potential status, only works with a custom rendering component */
+  STATUS,
   /* May appear multiple times: A 'detail' about the displayed object, rendered using the 'icon' and 'data' in a table */
   DETAILS,
   /* May appear multiple times: An action which can be performed on the displayed object, will trigger the columns 'action' */
@@ -42,7 +44,7 @@ export interface BdDataColumn<T> {
   /** Receives a record, extracts the data to display for this column. Provides data for searching even if custom rendering component is used. */
   data: (record: T) => any;
 
-  /** Provides a alternative rendering component for the cell, which has a single Input named 'record' */
+  /** Provides a alternative rendering component for the cell, which has an Input named 'record', and an optional Input named 'column' */
   component?: Type<any>;
 
   /** The description of the column, usually displayed as a tooltip somewhere */

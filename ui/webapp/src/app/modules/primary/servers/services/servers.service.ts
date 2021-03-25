@@ -9,6 +9,8 @@ import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { GroupsService } from '../../groups/services/groups.service';
 
+const SYNC_TIMEOUT = 1000 * 60 * 15;
+
 export enum AttachType {
   AUTO = 'AUTO',
   MANUAL = 'MANUAL',
@@ -72,10 +74,23 @@ export class ServersService {
 
   public isSynchronized(server: ManagedMasterDto): boolean {
     if (this.cfg.isCentral()) {
-      const currentTime = new Date().getTime();
-      return currentTime - server.lastSync <= 1_000 * 60 * 15;
+      return this.getSynchronizedOffset(server) <= SYNC_TIMEOUT;
     }
     return true;
+  }
+
+  public getRemainingSynchronizedTime(server: ManagedMasterDto): number {
+    return SYNC_TIMEOUT - this.getSynchronizedOffset(server);
+  }
+
+  private getSynchronizedOffset(server: ManagedMasterDto): number {
+    if (this.cfg.isCentral()) {
+      // prefer current information if loaded.
+      const currentS = this.servers$.value?.find((s) => s.hostName === server.hostName);
+      const currentTime = new Date().getTime();
+      return currentTime - (!!currentS ? currentS : server).lastSync;
+    }
+    return 0;
   }
 
   public attachManaged(server: ManagedMasterDto): Observable<AttachType> {

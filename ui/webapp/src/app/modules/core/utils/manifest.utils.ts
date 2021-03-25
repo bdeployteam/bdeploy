@@ -1,4 +1,4 @@
-import { ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
+import { ManifestKey, OperatingSystem } from '../../../models/gen.dtos';
 
 /**
  * Returns the base name of the application manifest key.

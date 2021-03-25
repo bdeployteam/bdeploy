@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ApplicationConfiguration, InstanceStateRecord } from '../../../../../models/gen.dtos';
+import { getAppOs } from '../../../../core/utils/manifest.utils';
 import { LauncherService } from '../../../../legacy/shared/services/launcher.service';
-import { getAppOs } from '../../../../legacy/shared/utils/manifest.utils';
 import { EventWithCallback } from '../../../core/models/event';
 
 @Component({

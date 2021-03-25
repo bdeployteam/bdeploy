@@ -1,16 +1,22 @@
 package io.bdeploy.interfaces.manifest.statistics;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 public class ClientUsageData {
 
-    private transient final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private transient final SimpleDateFormat sdf;
 
     // day -> applicationId -> hostname -> count
     SortedMap<String, SortedMap<String, SortedMap<String, Integer>>> clientUsage = new TreeMap<>();
+
+    public ClientUsageData() {
+        sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     public void increment(String applicationId, String hostname) {
         String today = getToday();
@@ -18,9 +24,13 @@ public class ClientUsageData {
         SortedMap<String, SortedMap<String, Integer>> applicationMap = clientUsage.computeIfAbsent(today, t -> new TreeMap<>());
         SortedMap<String, Integer> hostnameMap = applicationMap.computeIfAbsent(applicationId, a -> new TreeMap<>());
         hostnameMap.compute(hostname, (k, count) -> count == null ? 1 : ++count);
+
+        while (clientUsage.size() > 30) {
+            clientUsage.remove(clientUsage.firstKey());
+        }
     }
 
     private String getToday() {
-        return sdf.format(Calendar.getInstance().getTime()); // TODO maybe use UTC here?
+        return sdf.format(new Date());
     }
 }
