@@ -23,6 +23,9 @@ repositories {
 version = "3.6.0"
 group = "io.bdeploy"
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
 dependencies {
     // Use JUnit test framework for unit tests
     testImplementation 'junit:junit:4.13.1'
