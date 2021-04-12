@@ -717,15 +717,10 @@ export class ApplicationService {
         templates
       );
     }
+    app.stop = cloneDeep(EMPTY_COMMAND_CONFIGURATION);
     if (desc.stopCommand) {
       app.stop.executable = desc.stopCommand.launcherPath;
-      this.updateParameter(
-        app.uid,
-        app.stop.parameters,
-        desc.stopCommand.parameters,
-        oldDesc?.stopCommand?.parameters ? oldDesc.stopCommand.parameters : [],
-        templates
-      );
+      app.stop.parameters = this.createParameters(app, desc.stopCommand.parameters, templates);
     }
     this.updateEndpoints(app, desc);
   }
