@@ -11,6 +11,7 @@ import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import { ConnectionVersionComponent, VERSION_DATA } from '../components/connection-version/connection-version.component';
+import { NO_LOADING_BAR_HDRS } from '../utils/loading-bar.util';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { LoggingService, LogLevel } from './logging.service';
 import { ThemeService } from './theme.service';
@@ -164,7 +165,7 @@ export class ConfigService {
   /** Tries to fetch the current server version, suppresses global error handling */
   public getBackendInfo(errorHandling = false): Observable<BackendInfoDto> {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
-      headers: errorHandling ? {} : suppressGlobalErrorHandling(new HttpHeaders()),
+      headers: errorHandling ? NO_LOADING_BAR_HDRS : suppressGlobalErrorHandling(new HttpHeaders(NO_LOADING_BAR_HDRS)),
     });
   }
 
