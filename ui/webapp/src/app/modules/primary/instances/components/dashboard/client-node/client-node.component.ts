@@ -24,7 +24,11 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    if (!!this.node?.nodeConfiguration?.applications?.length) {
+      this.selected = this.node.nodeConfiguration.applications[0];
+    }
+  }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
