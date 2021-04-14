@@ -22,20 +22,25 @@ public final class ScopedPermission {
     public enum Permission {
 
         /**
+         * Permission for users allowed to *only* see/download clients.
+         */
+        CLIENT(1),
+
+        /**
          * The resource can be viewed but not modified.
          */
-        READ(1),
+        READ(2),
 
         /**
          * The resource can be modified. Includes READ permissions.
          */
-        WRITE(2),
+        WRITE(3),
 
         /**
          * New resources can be created and existing ones can be deleted.
          * Includes WRITE and READ permissions.
          */
-        ADMIN(3);
+        ADMIN(4);
 
         int level;
 

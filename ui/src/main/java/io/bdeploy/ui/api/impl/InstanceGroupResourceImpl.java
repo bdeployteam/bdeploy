@@ -103,8 +103,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             if (cfg == null) {
                 continue;
             }
-            // The current user must have at least scoped read permissions
-            ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.READ);
+            // The current user must have at least scoped client download permissions
+            ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.CLIENT);
             if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
                 continue;
             }

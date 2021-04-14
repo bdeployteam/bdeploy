@@ -306,6 +306,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         // Other, generic
         'io.bdeploy.common.Version',
         'io.bdeploy.common.ActivitySnapshot',
+        'io.bdeploy.common.security.ApiAccessToken',
         'io.bdeploy.interfaces.cleanup.CleanupGroup',
         'io.bdeploy.interfaces.directory.RemoteDirectory',
         'io.bdeploy.interfaces.minion.MinionStatusDto',

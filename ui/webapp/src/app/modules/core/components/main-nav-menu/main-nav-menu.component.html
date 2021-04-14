@@ -21,11 +21,18 @@
   <!-- Menu Buttons -->
   <app-main-nav-button icon="view_carousel" text="Instance Groups" [collapsed]="!expanded" [route]="['/groups/browser']"></app-main-nav-button>
 
-  <app-main-nav-button icon="storage" text="Software Repositories" [collapsed]="!expanded" [route]="['/l/softwarerepo/browser']"></app-main-nav-button>
+  <app-main-nav-button
+    icon="storage"
+    *ngIf="!authService.isGlobalExclusiveReadClient()"
+    text="Software Repositories"
+    [collapsed]="!expanded"
+    [route]="['/l/softwarerepo/browser']"
+  ></app-main-nav-button>
 
   <mat-divider [style.position]="'relative'"></mat-divider>
 
   <app-main-nav-button
+    *ngIf="!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="settings_system_daydream"
     text="Instances"
@@ -34,6 +41,7 @@
   ></app-main-nav-button>
 
   <app-main-nav-button
+    *ngIf="!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="apps"
     text="Products"
@@ -50,7 +58,7 @@
   ></app-main-nav-button>
 
   <app-main-nav-button
-    *ngIf="cfgService.isCentral()"
+    *ngIf="cfgService.isCentral() && !authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="dns"
     text="Managed Servers"

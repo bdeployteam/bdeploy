@@ -18,6 +18,9 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
 
   /* template */ getRecordRoute = (row: InstanceGroupConfiguration) => {
+    if (this.authService.isScopedExclusiveReadClient(row.name)) {
+      return ['/groups', 'clients', row.name];
+    }
     return ['/instances', 'browser', row.name];
   };
 
