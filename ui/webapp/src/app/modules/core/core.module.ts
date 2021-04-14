@@ -54,7 +54,6 @@ import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-uploa
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
 import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
 import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
-import { BdGuideComponent } from './components/bd-guide/bd-guide.component';
 import { BdImageUploadComponent } from './components/bd-image-upload/bd-image-upload.component';
 import { BdLoadingOverlayComponent } from './components/bd-loading-overlay/bd-loading-overlay.component';
 import { BdLogoComponent } from './components/bd-logo/bd-logo.component';
@@ -132,7 +131,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
     BdDialogMessageComponent,
-    BdGuideComponent,
     PasswordVerificationValidator,
     ConnectionVersionComponent,
     BdDataBooleanCellComponent,
@@ -232,7 +230,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFileUploadComponent,
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
-    BdGuideComponent,
     BdDataBooleanCellComponent,
     BdServerSyncButtonComponent,
     BdTerminalComponent,

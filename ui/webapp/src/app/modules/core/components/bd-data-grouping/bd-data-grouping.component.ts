@@ -1,9 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-import { GuideService } from '../../services/guide.service';
 import { ErrorMessage, LoggingService } from '../../services/logging.service';
-import { BdDataGroupingGuideComponent } from './bd-data-grouping-guide';
 
 interface BdDataGroupingStorage {
   name: string;
@@ -15,7 +13,7 @@ interface BdDataGroupingStorage {
   templateUrl: './bd-data-grouping.component.html',
   styleUrls: ['./bd-data-grouping.component.css'],
 })
-export class BdDataGroupingComponent<T> extends BdDataGroupingGuideComponent implements OnInit, OnChanges {
+export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   private log = this.logging.getLogger('BdDataGroupingComponent');
 
   /** whether mutiple groupings are supported */
@@ -38,9 +36,7 @@ export class BdDataGroupingComponent<T> extends BdDataGroupingGuideComponent imp
 
   groupings: BdDataGrouping<T>[] = [];
 
-  constructor(private logging: LoggingService, private snackBar: MatSnackBar, guides: GuideService) {
-    super(guides);
-  }
+  constructor(private logging: LoggingService, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
     this.loadPreset();
