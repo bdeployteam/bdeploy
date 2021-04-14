@@ -3,9 +3,8 @@ import { Injectable } from '@angular/core';
 import { differenceInDays, parse } from 'date-fns';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ApplicationConfiguration, ClientUsageData } from 'src/app/models/gen.dtos';
+import { ClientUsageData } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { GroupsService } from '../../groups/services/groups.service';
 import { InstancesService } from './instances.service';
@@ -31,19 +30,13 @@ const DATE_FORMAT = 'yyyy-MM-dd';
 @Injectable({
   providedIn: 'root',
 })
-export class ClientsService {
+export class ClientsUsageService {
   public loading$ = new BehaviorSubject<boolean>(true);
   public clientUsage$ = new BehaviorSubject<ClientUsagePerApp[]>(null);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
-  constructor(
-    private http: HttpClient,
-    private cfg: ConfigService,
-    private groups: GroupsService,
-    private instances: InstancesService,
-    private downloads: DownloadService
-  ) {
+  constructor(private http: HttpClient, private cfg: ConfigService, private groups: GroupsService, private instances: InstancesService) {
     // we're using the node states purely as a trigger to reload client usage, as they should share the reload cycle (and node states only when synchyronized)
     combineLatest([this.instances.active$, this.instances.activeNodeStates$]).subscribe(([active, states]) => {
       if (!active || !states) {
@@ -62,26 +55,6 @@ export class ClientsService {
           this.clientUsage$.next(this.transform(usage));
         });
     });
-  }
-
-  /** Downloads the Click & Start file for the given client application */
-  public downloadClickAndStart(app: ApplicationConfiguration) {
-    this.http
-      .get(`${this.apiPath(this.groups.current$.value.name)}/${this.instances.active$.value.instanceConfiguration.uuid}/${app.uid}/clickAndStart`)
-      .subscribe((data) => {
-        this.downloads.downloadJson(app.name + '.bdeploy', data);
-      });
-  }
-
-  /** Download the Installer application for the given client application */
-  public downloadInstaller(app: ApplicationConfiguration) {
-    this.http
-      .get(`${this.apiPath(this.groups.current$.value.name)}/${this.instances.active$.value.instanceConfiguration.uuid}/${app.uid}/installer/zip`, {
-        responseType: 'text',
-      })
-      .subscribe((data) => {
-        this.downloads.download(this.downloads.createDownloadUrl(data));
-      });
   }
 
   /**

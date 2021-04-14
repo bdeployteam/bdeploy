@@ -50,6 +50,15 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       this.loadPreset();
       this.fireUpdate();
     }
+
+    if (!!changes['records']) {
+      // in case the previous set of records was completely empty, we need to reload
+      // default grouping (etc.) for the stored values to be available (potentially).
+      if (!changes['records'].previousValue?.length) {
+        this.loadPreset();
+        this.fireUpdate();
+      }
+    }
   }
 
   private getStorageKey() {
@@ -90,6 +99,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       }
 
       if (!!restored?.length) {
+        console.log(this.groupings, restored);
         this.groupings = restored;
       }
     } catch (e) {

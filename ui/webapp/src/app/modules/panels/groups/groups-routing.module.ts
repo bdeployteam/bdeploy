@@ -5,6 +5,7 @@ import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { PanelScopedAdminGuard } from '../../core/guards/panel-scoped-admin.guard';
 import { PanelScopedWriteGuard } from '../../core/guards/panel-scoped-write.guard';
 import { AddGroupComponent } from './components/add-group/add-group.component';
+import { ClientDetailComponent } from './components/client-detail/client-detail.component';
 import { AttributeDefinitionsComponent } from './components/settings/attribute-definitions/attribute-definitions.component';
 import { AttributeValuesComponent } from './components/settings/attribute-values/attribute-values.component';
 import { EditComponent } from './components/settings/edit/edit.component';
@@ -18,6 +19,7 @@ const GROUPS_ROUTES: Route[] = [
   { path: 'settings/attributes/values', component: AttributeValuesComponent, canActivate: [PanelScopedWriteGuard] },
   { path: 'settings/attributes/definitions', component: AttributeDefinitionsComponent, canActivate: [PanelScopedAdminGuard] },
   { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [PanelScopedWriteGuard] },
+  { path: 'client/:app', component: ClientDetailComponent },
 ];
 
 @NgModule({

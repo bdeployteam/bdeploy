@@ -285,7 +285,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 clientApp.description = appConfig.name;
                 ScopedManifestKey scopedKey = ScopedManifestKey.parse(appConfig.application);
                 clientApp.os = scopedKey.getOperatingSystem();
-                if (clientApp.os != os) {
+                if (os != null && clientApp.os != os) {
                     continue;
                 }
                 clientApps.applications.add(clientApp);

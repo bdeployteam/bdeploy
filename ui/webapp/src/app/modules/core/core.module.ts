@@ -43,6 +43,7 @@ import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-dis
 import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.component';
 import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
 import { BdDataGroupingComponent } from './components/bd-data-grouping/bd-data-grouping.component';
+import { BdDataSvgIconCellComponent } from './components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
 import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dialog-content.component';
 import { BdDialogMessageComponent } from './components/bd-dialog-message/bd-dialog-message.component';
@@ -137,6 +138,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdServerSyncButtonComponent,
     BdTerminalComponent,
     BdBannerComponent,
+    BdDataSvgIconCellComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -234,6 +236,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdServerSyncButtonComponent,
     BdTerminalComponent,
     BdBannerComponent,
+    BdDataSvgIconCellComponent,
 
     // validators
     GroupIdValidator,

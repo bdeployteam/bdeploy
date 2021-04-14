@@ -24,15 +24,11 @@
           text="Installer"
           color="primary"
           fxFlex="50%"
-          (click)="clients.downloadInstaller(selected)"
+          (click)="downloadInstaller(selected)"
+          [disabled]="(clients.loading$ | async) || !hasLauncher()"
+          [matTooltip]="!(clients.loading$ | async) && !hasLauncher() ? 'No Launcher available for the selected operating system' : null"
         ></app-bd-button>
-        <app-bd-button
-          [collapsed]="false"
-          icon="play_arrow"
-          text="Click & Start"
-          fxFlex="50%"
-          (click)="clients.downloadClickAndStart(selected)"
-        ></app-bd-button>
+        <app-bd-button [collapsed]="false" icon="play_arrow" text="Click & Start" fxFlex="50%" (click)="downloadClickAndStart(selected)"></app-bd-button>
       </div>
     </div>
   </div>

@@ -87,7 +87,7 @@ public interface InstanceGroupResource {
     public String createUuid(@ActivityScope @PathParam("group") String group);
 
     @Path("/{group}/instance")
-    @RequiredPermission(permission = Permission.READ, scope = "group")
+    @RequiredPermission(permission = Permission.CLIENT, scope = "group")
     public InstanceResource getInstanceResource(@ActivityScope @PathParam("group") String group);
 
     @Path("/{group}/product")

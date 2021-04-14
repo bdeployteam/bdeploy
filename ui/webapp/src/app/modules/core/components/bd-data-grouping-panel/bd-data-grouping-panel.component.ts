@@ -1,13 +1,7 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
-import {
-  BdDataGrouping,
-  BdDataGroupingDefinition,
-  bdExtractGroups,
-  bdSortGroups,
-  UNMATCHED_GROUP,
-} from 'src/app/models/data';
+import { BdDataGrouping, BdDataGroupingDefinition, bdExtractGroups, bdSortGroups, UNMATCHED_GROUP } from 'src/app/models/data';
 
 /**
  * A single grouping panel, providing a drop dow to choose the definition,
@@ -18,7 +12,7 @@ import {
   templateUrl: './bd-data-grouping-panel.component.html',
   styleUrls: ['./bd-data-grouping-panel.component.css'],
 })
-export class BdDataGroupingPanelComponent<T> implements OnInit, OnDestroy {
+export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDestroy {
   /** The available grouping definitions */
   @Input() definitions: BdDataGroupingDefinition<T>[];
   /** The records currently available for grouping */
@@ -40,8 +34,6 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnDestroy {
   constructor(private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.updateGroupingValues();
-
     this.subscription = this.popupEmitter.subscribe((_) => {
       // whenever the parent popup is shown, we need to update our values as the table contents may have changed.
       this.updateGroupingValues();
@@ -52,9 +44,13 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  ngOnChanges(): void {
+    this.updateGroupingValues();
+  }
+
   updateGroupingValues() {
     // calculate possible values for the grouping.
-    if (!!this.grouping?.definition) {
+    if (!!this.grouping?.definition && this.records?.length) {
       this.groupingValues = bdExtractGroups(this.grouping.definition, this.records).sort(
         !!this.grouping.definition.sort ? this.grouping.definition.sort : bdSortGroups
       );

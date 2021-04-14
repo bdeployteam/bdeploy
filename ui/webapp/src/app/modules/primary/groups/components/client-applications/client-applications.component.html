@@ -1,1 +1,21 @@
-<p>TODO: implement</p>
+<app-bd-dialog [loadingWhen$]="clients.loading$">
+  <app-bd-dialog-toolbar header="Client Applications - {{ (groups.current$ | async)?.name }}">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-data-grouping
+      [multiple]="!dataTable.grid"
+      (groupingChange)="dataTable.grouping = $event"
+      [definitions]="grouping"
+      [defaultGrouping]="!dataTable.grid ? defaultGrouping : [defaultGrouping[1]]"
+      [records]="clients.apps$ | async"
+      presetKey="clientApplications"
+    ></app-bd-data-grouping>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-data-display #dataTable [columns]="columns" [records]="clients.apps$ | async" [searchable]="true" [recordRoute]="getRecordRoute">
+      <app-bd-no-data>
+        <p>No instance in this instance group has configured client applications.</p>
+      </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

@@ -98,11 +98,13 @@ public interface InstanceResource {
     @GET
     @Deprecated
     @Path("/{instance}/{tag}/minionConfiguration")
+    @RequiredPermission(permission = Permission.READ)
     public Map<String, MinionDto> getMinionConfiguration(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("tag") String versionTag);
 
     @GET
     @Path("/{instance}/{tag}/minionState")
+    @RequiredPermission(permission = Permission.READ)
     public Map<String, MinionStatusDto> getMinionState(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("tag") String versionTag);
 
@@ -128,11 +130,13 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/{tag}/history")
+    @RequiredPermission(permission = Permission.READ)
     public InstanceManifestHistoryDto getHistory(@ActivityScope @PathParam("instance") String instanceId,
             @ActivityScope @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/state")
+    @RequiredPermission(permission = Permission.READ)
     public InstanceStateRecord getDeploymentStates(@ActivityScope @PathParam("instance") String instanceId);
 
     @GET
@@ -140,9 +144,11 @@ public interface InstanceResource {
     public List<InstancePurpose> getPurposes();
 
     @Path("/{instance}/processes")
+    @RequiredPermission(permission = Permission.READ)
     public ProcessResource getProcessResource(@ActivityScope @PathParam("instance") String instanceId);
 
     @Path("/{instance}/cfgFiles")
+    @RequiredPermission(permission = Permission.READ)
     public ConfigFileResource getConfigResource(@ActivityScope @PathParam("instance") String instanceId);
 
     @GET
@@ -172,6 +178,7 @@ public interface InstanceResource {
     @Unsecured
     @Path("/{instance}/export/{tag}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @RequiredPermission(permission = Permission.WRITE)
     public Response exportInstance(@ActivityScope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
 
     @POST
@@ -183,17 +190,20 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/output/{tag}/{app}")
+    @RequiredPermission(permission = Permission.READ)
     public RemoteDirectory getOutputEntry(@ActivityScope @PathParam("instance") String instanceId,
             @ActivityScope @PathParam("tag") String tag, @PathParam("app") String app);
 
     @POST
     @Path("/{instance}/content/{minion}")
+    @RequiredPermission(permission = Permission.READ)
     public StringEntryChunkDto getContentChunk(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, RemoteDirectoryEntry entry, @QueryParam("offset") long offset,
             @QueryParam("limit") long limit);
 
     @POST
     @Path("/{instance}/request/{minion}")
+    @RequiredPermission(permission = Permission.READ)
     public String getContentStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, RemoteDirectoryEntry entry);
 
@@ -206,10 +216,12 @@ public interface InstanceResource {
     @GET
     @Unsecured
     @Path("/{instance}/stream/{token}")
+    @RequiredPermission(permission = Permission.READ)
     public Response getContentStream(@ActivityScope @PathParam("instance") String instanceId, @PathParam("token") String token);
 
     @POST
     @Path("/{instance}/check-ports/{minion}")
+    @RequiredPermission(permission = Permission.READ)
     public Map<Integer, Boolean> getPortStates(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, List<Integer> ports);
 
@@ -224,15 +236,18 @@ public interface InstanceResource {
 
     @POST
     @Path("/{instance}/history")
+    @RequiredPermission(permission = Permission.READ)
     public HistoryResultDto getInstanceHistory(@ActivityScope @PathParam("instance") String instanceId, HistoryFilterDto filter);
 
     @GET
     @Path("/{instance}/history-compare-versions")
+    @RequiredPermission(permission = Permission.READ)
     public HistoryEntryVersionDto compareVersions(@ActivityScope @PathParam("instance") String instanceId,
             @QueryParam("a") int versionA, @QueryParam("b") int versionB);
 
     @POST
     @Path("/{instance}/history-compare-config")
+    @RequiredPermission(permission = Permission.READ)
     public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto);
 
     @GET

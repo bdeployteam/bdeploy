@@ -5,13 +5,13 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { ManagedMasterDto, OperatingSystem, Version } from 'src/app/models/gen.dtos';
+import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ServerDetailsService } from '../../services/server-details.service';
-import { ServerOsComponent } from './server-os/server-os.component';
 
 export interface MinionRow {
   name: string;
@@ -44,7 +44,7 @@ const detailOsCol: BdDataColumn<MinionRow> = {
   id: 'os',
   name: 'OS',
   data: (r) => r.os,
-  component: ServerOsComponent,
+  component: BdDataSvgIconCellComponent,
   width: '30px',
 };
 

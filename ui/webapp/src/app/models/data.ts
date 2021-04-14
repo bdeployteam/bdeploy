@@ -100,6 +100,9 @@ export interface BdDataGrouping<T> {
  * Note that null is a possible value returned, which will be translated to "No Group" by the filter panel.
  */
 export function bdExtractGroups<T>(grouping: BdDataGroupingDefinition<T>, records: T[]): string[] {
+  if (!records) {
+    return [];
+  }
   const allGroups = records.map((r) => grouping.group(r)).map((r) => (!!r ? r : UNMATCHED_GROUP));
   return [...new Set(allGroups)]; // unique.
 }

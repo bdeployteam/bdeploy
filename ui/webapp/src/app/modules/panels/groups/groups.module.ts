@@ -8,9 +8,10 @@ import { EditComponent } from './components/settings/edit/edit.component';
 import { AttributeValuesComponent } from './components/settings/attribute-values/attribute-values.component';
 import { AttributeDefinitionsComponent } from './components/settings/attribute-definitions/attribute-definitions.component';
 import { MaintenanceComponent } from './components/settings/maintenance/maintenance.component';
+import { ClientDetailComponent } from './components/client-detail/client-detail.component';
 
 @NgModule({
-  declarations: [AddGroupComponent, SettingsComponent, EditComponent, AttributeValuesComponent, AttributeDefinitionsComponent, MaintenanceComponent],
+  declarations: [AddGroupComponent, SettingsComponent, EditComponent, AttributeValuesComponent, AttributeDefinitionsComponent, MaintenanceComponent, ClientDetailComponent],
   imports: [CommonModule, CoreModule, GroupsRoutingModule],
 })
 export class GroupsModule {}

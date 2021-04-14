@@ -1,0 +1,55 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [closeablePanel]="true">
+    <mat-divider [vertical]="true"></mat-divider>
+    <mat-icon *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="app$ | async as app">
+      <div><strong>ID:</strong>&nbsp;{{ app.client.uuid }}</div>
+      <div><strong>Name:</strong>&nbsp;{{ app.client.description }}</div>
+      <div><strong>Instance:</strong>&nbsp;{{ app.instance.name }}</div>
+      <app-bd-button
+        color="primary"
+        icon="cloud_download"
+        text="Download Installer"
+        [collapsed]="false"
+        [disabled]="!clients.hasLauncher(app.client.os) || (downloadingInstaller$ | async)"
+        (click)="downloadInstaller(app)"
+        [loadingWhen$]="downloadingInstaller$"
+        [matTooltip]="!clients.hasLauncher(app.client.os) ? 'No Launcher available for the selected operating system' : null"
+      ></app-bd-button>
+      <app-bd-button
+        icon="play_arrow"
+        text="Click & Start"
+        [collapsed]="false"
+        (click)="downloadClickAndStart(app)"
+        [loadingWhen$]="downloadingClickAndStart$"
+        [disabled]="downloadingClickAndStart$ | async"
+      ></app-bd-button>
+      <mat-divider></mat-divider>
+      <div class="bd-description-text" [style.text-align]="'justify'">
+        For <em>Click & Start</em> to work, you need to have the <em>BDeploy Launcher</em> application installed. This is done by <strong>any</strong> installer
+        automatically. If you still don't have the launcher and don't want to install the application using its installer from above, you can download the
+        standalone launcher from there.
+      </div>
+      <app-bd-button
+        [svgIcon]="app.client.os"
+        text="Download Launcher Installer"
+        [collapsed]="false"
+        [disabled]="!clients.hasLauncher(app.client.os) || (downloadingLauncher$ | async)"
+        (click)="downloadLauncher(app.client.os)"
+        [loadingWhen$]="downloadingLauncher$"
+        [matTooltip]="!(clients.loading$ | async) && !clients.hasLauncher(app.client.os) ? 'No Launcher available for the selected operating system' : null"
+      ></app-bd-button>
+      <app-bd-button
+        icon="archive"
+        text="Download Portable Launcher"
+        [collapsed]="false"
+        [disabled]="!clients.hasLauncher(app.client.os) || (downloadingLauncherZip$ | async)"
+        (click)="downloadLauncherZip(app.client.os)"
+        [loadingWhen$]="downloadingLauncherZip$"
+        [matTooltip]="!(clients.loading$ | async) && !clients.hasLauncher(app.client.os) ? 'No Launcher available for the selected operating system' : null"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

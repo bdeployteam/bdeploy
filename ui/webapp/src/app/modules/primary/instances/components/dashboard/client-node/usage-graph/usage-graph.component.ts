@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { format } from 'date-fns';
 import { Subscription } from 'rxjs';
-import { ClientsService, ClientUsagePerApp } from '../../../../services/clients.service';
+import { ClientsUsageService, ClientUsagePerApp } from '../../../../services/clients-usage.service';
 
 const PERC_PER_DAY = 100 / 29;
 
@@ -23,7 +23,7 @@ export class ClientUsageGraphComponent implements OnInit, OnDestroy, OnChanges {
   /* template */ hasVisiblePoint = false;
   /* template */ endMarker = false;
 
-  constructor(private clients: ClientsService) {}
+  constructor(private clients: ClientsUsageService) {}
 
   ngOnInit(): void {
     this.subscription = this.clients.clientUsage$.subscribe((usage) => {

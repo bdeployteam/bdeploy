@@ -6,11 +6,10 @@ import { LinkCentralComponent } from './components/link-central/link-central.com
 import { LinkManagedComponent } from './components/link-managed/link-managed.component';
 import { ServerDetailsComponent } from './components/server-details/server-details.component';
 import { ServerEditComponent } from './components/server-details/server-edit/server-edit.component';
-import { ServerOsComponent } from './components/server-details/server-os/server-os.component';
 import { ServersRoutingModule } from './servers-routing.module';
 
 @NgModule({
-  declarations: [LinkCentralComponent, LinkManagedComponent, ServerDetailsComponent, ServerOsComponent, ServerEditComponent],
+  declarations: [LinkCentralComponent, LinkManagedComponent, ServerDetailsComponent, ServerEditComponent],
   imports: [CommonModule, CoreModule, ServersRoutingModule, MatExpansionModule],
 })
 export class ServersModule {}

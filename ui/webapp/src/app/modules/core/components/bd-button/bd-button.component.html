@@ -11,7 +11,7 @@
 >
   <div fxLayout="row" fxLayoutGap="5px" [class.local-wrapper-expanded]="!collapsed" [class.local-wrapper-collapsed]="collapsed">
     <mat-icon
-      *ngIf="icon && !(loadingWhen$ | async)"
+      *ngIf="icon && !svgIcon && !(loadingWhen$ | async)"
       class="local-icon-position"
       [matBadge]="badge"
       [matBadgeHidden]="!badge"
@@ -19,11 +19,20 @@
       [matBadgeColor]="badgeColor"
       >{{ icon }}</mat-icon
     >
+    <mat-icon
+      *ngIf="svgIcon && !(loadingWhen$ | async)"
+      class="local-icon-position"
+      [svgIcon]="svgIcon"
+      [matBadge]="badge"
+      [matBadgeHidden]="!badge"
+      matBadgeSize="small"
+      [matBadgeColor]="badgeColor"
+    ></mat-icon>
     <mat-spinner *ngIf="loadingWhen$ | async" [diameter]="24" class="bd-inherited-spinner"></mat-spinner>
     <span
       *ngIf="text && !collapsed"
-      [ngClass]="!!icon && !(loadingWhen$ | async) ? 'local-label-position' : []"
-      [fxFlex]="!icon ? '1 0 auto' : '0 0 auto'"
+      [ngClass]="(!!icon || !!svgIcon) && !(loadingWhen$ | async) ? 'local-label-position' : []"
+      [fxFlex]="!icon && !svgIcon ? '1 0 auto' : '0 0 auto'"
       [@scaleWidthFromZero]
       >{{ text }}</span
     >

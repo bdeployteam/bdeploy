@@ -12,9 +12,7 @@ export class BdBannerComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {
-    console.log(this.banner);
-  }
+  ngOnInit(): void {}
 
   /* template */ format(time: number) {
     return format(time, 'dd.MM.yyyy HH:mm:ss');
