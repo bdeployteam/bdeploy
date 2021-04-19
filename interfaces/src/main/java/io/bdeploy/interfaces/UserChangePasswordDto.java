@@ -1,9 +1,9 @@
 package io.bdeploy.interfaces;
 
-import javax.annotation.Generated;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.annotation.Generated;
 
 /**
  * Information required for updating the current local user's password

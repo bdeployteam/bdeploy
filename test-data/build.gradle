@@ -3,7 +3,7 @@ import java.util.concurrent.TimeUnit
 
 plugins {
     id 'base'
-    id "com.github.psxpaul.execfork" version "0.1.13"
+    id "com.github.psxpaul.execfork" version "0.1.15"
     id "de.undercouch.download" version "4.1.1"
     id "jacoco"
     id "com.github.breadmoirai.github-release" version "2.2.12"

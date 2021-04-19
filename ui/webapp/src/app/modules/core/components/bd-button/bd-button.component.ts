@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
@@ -12,7 +12,7 @@ export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inh
   styleUrls: ['./bd-button.component.css'],
   animations: [scaleWidthFromZero, scaleWidthToZero],
 })
-export class BdButtonComponent implements OnInit, OnChanges, AfterViewInit {
+export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() text: string;
@@ -54,12 +54,6 @@ export class BdButtonComponent implements OnInit, OnChanges, AfterViewInit {
         // we will not inhibit the click event here, as routerLink (etc.) will need it.
       }
     });
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['disabled']) {
-      console.log(this.text, changes['disabled']);
-    }
   }
 
   /* template */ getColorClass(): string | string[] {

@@ -5,13 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Generated;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.common.security.ScopedPermission;
+import jakarta.annotation.Generated;
 
 /**
  * Information about a successfully authenticated user at the point in time where authentication happened.

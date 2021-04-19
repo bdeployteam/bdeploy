@@ -24,7 +24,6 @@ import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
-import io.bdeploy.jersey.ws.WebSocketTest;
 import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.minion.TestMinion;
@@ -34,7 +33,7 @@ import jakarta.ws.rs.Path;
 
 public class WebSocketActivityProxyTest {
 
-    private static final Logger log = LoggerFactory.getLogger(WebSocketTest.class);
+    private static final Logger log = LoggerFactory.getLogger(WebSocketActivityProxyTest.class);
     private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     @RegisterExtension

@@ -123,6 +123,7 @@ public class SnapshotAndDiffTest {
         try (Transaction t = hive.getTransactions().begin()) {
             hive.execute(new ImportOperation().setManifest(key).setSourcePath(src));
         }
+
         // remove a tree
         hive.execute(new BHive.Operation<Void>() {
 

@@ -24,11 +24,11 @@ dependencies {
         'net.jsign:jsign-core:3.1'
     )
 
-    testCompile project(path: ":jersey", configuration: 'testRuntime')
-    testCompile project(path: ":bhive", configuration: 'testRuntime')
-    testCompile project(path: ":pcu", configuration: 'testRuntime')
-    testCompile project(path: ":ui", configuration: 'testRuntime')
-    testCompile project(path: ":launcher", configuration: 'testRuntime')
+    commonTestDeps(project(":launcher"))
+    commonTestDeps(testFixtures(project(":common")))
+    commonTestDeps(testFixtures(project(":jersey")))
+    commonTestDeps(testFixtures(project(":bhive")))
+    commonTestDeps(testFixtures(project(":pcu")))
 }
 
 rootProject.addMultiPlatformDistBuild(project)
@@ -70,15 +70,15 @@ void addLauncherDist(Distribution dist) {
 
 distributions {
     win64 {
-        baseName = 'bdeploy-win64'
+        distributionBaseName = 'bdeploy-win64'
         addLauncherDist(it)
     }
     linux64 {
-        baseName = 'bdeploy-linux64'
+        distributionBaseName = 'bdeploy-linux64'
         addLauncherDist(it)
     }
     mac64 {
-        baseName = 'bdeploy-mac64'
+        distributionBaseName = 'bdeploy-mac64'
         addLauncherDist(it)
     }
 }

@@ -1,12 +1,15 @@
-apply plugin: 'application'
+plugins {
+    id 'application'
+}
 
 mainClassName = 'io.bdeploy.bhive.cli.BHiveCli'
 
 dependencies {
     implementation project(":common")
     implementation project(":jersey")
-    testCompile    project(path: ":common", configuration: 'testRuntime')
-    testCompile    project(path: ":jersey", configuration: 'testRuntime')
+
+    commonTestDeps(testFixtures(project(":common")))
+    commonTestDeps(testFixtures(project(":jersey")))
 }
 
 distTar.enabled = false

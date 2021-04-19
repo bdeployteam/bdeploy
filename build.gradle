@@ -19,10 +19,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.adarshr:gradle-test-logger-plugin:2.1.1'
+        classpath 'com.adarshr:gradle-test-logger-plugin:3.0.0'
         classpath 'ru.vyarus:gradle-quality-plugin:4.5.0'
         classpath 'gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11'
-        classpath 'org.cyclonedx:cyclonedx-gradle-plugin:1.2.1'
+        classpath 'org.cyclonedx:cyclonedx-gradle-plugin:1.3.0'
     }
 }
 
@@ -91,6 +91,7 @@ task setVersion {
 
 configure(actualSubprojects) {
     apply plugin: 'java'
+    apply plugin: 'java-test-fixtures'
     apply plugin: 'jacoco'
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'ru.vyarus.quality'
@@ -99,6 +100,7 @@ configure(actualSubprojects) {
 
     compileJava.options.encoding = 'UTF-8'
     compileTestJava.options.encoding = 'UTF-8'
+    compileTestFixturesJava.options.encoding = 'UTF-8'
 	
 	eclipse {
 		classpath {
@@ -114,10 +116,20 @@ configure(actualSubprojects) {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
+    configurations {
+        commonTestDeps
+        testFixturesImplementation {
+            extendsFrom commonTestDeps
+        }
+        testImplementation {
+            extendsFrom commonTestDeps
+        }
+    }
+
     dependencies {
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1',
-                           'org.junit.jupiter:junit-jupiter-params:5.7.1',
-                           'org.hamcrest:hamcrest-core:2.2'
+        commonTestDeps 'org.junit.jupiter:junit-jupiter-api:5.7.1',
+                       'org.junit.jupiter:junit-jupiter-params:5.7.1',
+                       'org.hamcrest:hamcrest-core:2.2'
         testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.7.1'
     }
 
@@ -188,16 +200,6 @@ configure(actualSubprojects) {
         }
 
         rootProject.updateJavaPath(test)
-    }
-
-    // this is required to allow dependencies to test classes in src/test/java
-    task testJar(type: Jar) {
-        classifier = 'test'
-        from sourceSets.test.output
-    }
-
-    artifacts {
-        testRuntime testJar
     }
 
 	task sourcesJar(type: Jar) {

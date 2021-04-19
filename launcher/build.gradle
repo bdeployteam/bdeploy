@@ -1,4 +1,6 @@
-apply plugin: 'application'
+plugins {
+    id 'application'
+}
 
 ext {
     scriptDefVmArgs = [ '-Xms64m', '-Xmx128m' ]
@@ -18,8 +20,7 @@ dependencies {
         'com.twelvemonkeys.imageio:imageio-bmp:3.6.4',
     )
 
-    testCompile project(path: ":jersey", configuration: 'testRuntime')
-    testCompile project(path: ":bhive", configuration: 'testRuntime')
+    commonTestDeps(testFixtures(project(":bhive")))
 }
 
 applicationDefaultJvmArgs = [ "-Xmx256m" ]

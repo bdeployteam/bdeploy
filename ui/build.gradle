@@ -4,12 +4,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.29.814'
+        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.30.840'
     }
 }
 
 plugins {
-    id "com.github.psxpaul.execfork" version "0.1.13"
+    id "com.github.psxpaul.execfork" version "0.1.15"
 }
 
 apply plugin: 'cz.habarta.typescript-generator'
@@ -25,7 +25,7 @@ dependencies {
         project(":interfaces"),
         'net.jsign:jsign-core:3.1'
     )
-    testCompile project(path: ":jersey", configuration: 'testRuntime')
+    commonTestDeps(testFixtures(project(":jersey")))
 }
 
 sourceSets {

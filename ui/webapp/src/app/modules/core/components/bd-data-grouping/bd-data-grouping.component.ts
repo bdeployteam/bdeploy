@@ -99,7 +99,6 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       }
 
       if (!!restored?.length) {
-        console.log(this.groupings, restored);
         this.groupings = restored;
       }
     } catch (e) {
