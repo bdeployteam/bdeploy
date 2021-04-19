@@ -20,8 +20,11 @@ repositories {
     jcenter()
 }
 
-version = "3.6.0"
+version = "3.6.3"
 group = "io.bdeploy"
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     // Use JUnit test framework for unit tests
@@ -29,7 +32,7 @@ dependencies {
     testImplementation gradleTestKit()
 
     implementation (
-        'io.bdeploy:api:3.6.0'
+        'io.bdeploy:api:3.6.3'
     )
 }
 

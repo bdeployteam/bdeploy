@@ -53,7 +53,7 @@ import jakarta.ws.rs.core.Response.Status;
 public class InstanceManifest {
 
     private static final Logger log = LoggerFactory.getLogger(InstanceManifest.class);
-
+    private static final String ROOT_SUFFIX = "/root";
     public static final String INSTANCE_LABEL = "X-Instance";
 
     /**
@@ -71,7 +71,7 @@ public class InstanceManifest {
     }
 
     public static String getRootName(String uuid) {
-        return uuid + "/root";
+        return uuid + ROOT_SUFFIX;
     }
 
     /**
@@ -253,8 +253,9 @@ public class InstanceManifest {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
 
-        // for each manifest key find only the newest...
-        Set<String> names = allKeys.stream().map(Manifest.Key::getName).distinct().collect(Collectors.toSet());
+        // find all manifest which look like an instance root manifest (ending in /root).
+        Set<String> names = allKeys.stream().map(Manifest.Key::getName).distinct().filter(p -> p.endsWith(ROOT_SUFFIX))
+                .collect(Collectors.toSet());
         SortedSet<Manifest.Key> idKeys = new TreeSet<>();
 
         if (onlyLatest) {
