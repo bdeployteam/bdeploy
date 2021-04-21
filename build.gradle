@@ -101,6 +101,11 @@ configure(actualSubprojects) {
     compileJava.options.encoding = 'UTF-8'
     compileTestJava.options.encoding = 'UTF-8'
     compileTestFixturesJava.options.encoding = 'UTF-8'
+
+    java {
+        // enabled by default in gradle 7.0 - breaks executing anything from eclipse, but not from the CLI
+        modularity.inferModulePath = false
+    }
 	
 	eclipse {
 		classpath {
@@ -131,16 +136,6 @@ configure(actualSubprojects) {
                        'org.junit.jupiter:junit-jupiter-params:5.7.1',
                        'org.hamcrest:hamcrest-core:2.2'
         testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.7.1'
-    }
-
-    eclipse.classpath.file {
-        whenMerged {
-            entries.unique(true) {
-                (it instanceof org.gradle.plugins.ide.eclipse.model.ProjectDependency) ? it.path : it
-            }
-            entries.findAll { it instanceof org.gradle.plugins.ide.eclipse.model.ProjectDependency }
-                .each { it.entryAttributes['without_test_code'] = 'false' }
-        }
     }
 
     eclipseJdt.doLast {
