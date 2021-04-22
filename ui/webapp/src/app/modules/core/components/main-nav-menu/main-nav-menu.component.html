@@ -64,6 +64,9 @@
     text="Managed Servers"
     [collapsed]="!expanded"
     [route]="['/servers', 'browser', areas.groupContext$.value]"
+    [disabled]="!authService.isScopedAdmin(areas.groupContext$ | async)"
+    [matTooltip]="authService.isScopedAdmin(areas.groupContext$ | async) ? null : 'Only administrators can maintain managed server configuration'"
+    matTooltipPosition="right"
   ></app-main-nav-button>
 
   <mat-divider
@@ -79,6 +82,25 @@
     text="Instance Dashboard"
     [collapsed]="!expanded"
     [route]="['/instances', 'dashboard', areas.groupContext$.value, areas.instanceContext$.value]"
+  ></app-main-nav-button>
+
+  <app-main-nav-button
+    [visible]="!!(areas.instanceContext$ | async)"
+    icon="settings"
+    text="Instance Configuration"
+    [collapsed]="!expanded"
+    [route]="['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value]"
+    [disabled]="!authService.isScopedWrite(areas.groupContext$ | async)"
+    [matTooltip]="authService.isScopedWrite(areas.groupContext$ | async) ? null : 'Insufficient permissions to change configuration'"
+    matTooltipPosition="right"
+  ></app-main-nav-button>
+
+  <app-main-nav-button
+    [visible]="!!(areas.instanceContext$ | async)"
+    icon="history"
+    text="Instance History"
+    [collapsed]="!expanded"
+    [route]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]"
   ></app-main-nav-button>
 
   <!-- Footer -->

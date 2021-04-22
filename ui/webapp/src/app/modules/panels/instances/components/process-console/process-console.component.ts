@@ -1,6 +1,7 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
@@ -25,7 +26,7 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
 
   private offset = 0;
 
-  constructor(private instances: InstancesService, public details: ProcessDetailsService, bop: BreakpointObserver) {
+  constructor(private auth: AuthenticationService, private instances: InstancesService, public details: ProcessDetailsService, bop: BreakpointObserver) {
     this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
       this.narrow$.next(bs.matches);
     });
@@ -53,7 +54,10 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
         }
 
         this.hasStdin$.next(cfg.processControl.attachStdin);
-        this.stdin$.next(cfg.processControl.attachStdin && detail.hasStdin && ProcessesService.isRunning(detail.status.processState));
+        this.stdin$.next(
+          // if the process supports stdin, has stdin, is running, and the user has write permission.
+          cfg.processControl.attachStdin && detail.hasStdin && ProcessesService.isRunning(detail.status.processState) && this.auth.isCurrentScopeWrite()
+        );
         this.follow$.next(ProcessesService.isRunning(detail.status.processState));
         this.available$.next(true);
 

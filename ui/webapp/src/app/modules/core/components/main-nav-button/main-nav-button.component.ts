@@ -19,6 +19,7 @@ export class MainNavButtonComponent implements OnInit {
   @Input() icon: string;
   @Input() text: string;
   @Input() collapsed: boolean;
+  @Input() disabled: boolean;
   @Input() visible = true;
   @Input() route: any[];
 

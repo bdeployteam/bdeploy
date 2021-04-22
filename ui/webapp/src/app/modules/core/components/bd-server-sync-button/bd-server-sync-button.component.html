@@ -3,7 +3,7 @@
   icon="history"
   (click)="doSynchronize(server)"
   [loadingWhen$]="synchronizing$"
-  [disabled]="synchronizing$ | async"
+  [disabled]="(synchronizing$ | async) || (noPerm$ | async)"
   [matTooltip]="tooltip$ | async"
   [ngClass]="!(sync$ | async) ? 'bd-warning-text' : []"
   [badge]="badge$ | async"

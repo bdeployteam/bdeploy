@@ -5,6 +5,8 @@ import { MainNavComponent } from './modules/core/components/main-nav/main-nav.co
 import { AdminGuard } from './modules/core/guards/admin.guard';
 import { AuthGuard } from './modules/core/guards/authentication.guard';
 import { NotFoundGuard } from './modules/core/guards/not-found.guard';
+import { ScopedAdminGuard } from './modules/core/guards/scoped-admin.guard';
+import { ScopedReadGuard } from './modules/core/guards/scoped-read.guard';
 import { ServerCentralGuard } from './modules/core/guards/server-central.guard';
 
 const routes: Routes = [
@@ -26,46 +28,46 @@ const routes: Routes = [
   {
     path: 'groups',
     loadChildren: () => import('./modules/primary/groups/groups.module').then((x) => x.GroupsModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard], // Permission is granted to all users to view the things in here.
   },
   {
     path: 'panels/groups',
     outlet: 'panel',
     loadChildren: () => import('./modules/panels/groups/groups.module').then((x) => x.GroupsModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'instances',
     loadChildren: () => import('./modules/primary/instances/instances.module').then((x) => x.InstancesModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'panels/instances',
     outlet: 'panel',
     loadChildren: () => import('./modules/panels/instances/instances.module').then((x) => x.InstancesModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'products',
     loadChildren: () => import('./modules/primary/products/products.module').then((x) => x.ProductsModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'panels/products',
     outlet: 'panel',
     loadChildren: () => import('./modules/panels/products/products.module').then((x) => x.ProductsModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
     path: 'servers',
     loadChildren: () => import('./modules/primary/servers/servers.module').then((x) => x.ServersModule),
-    canActivate: [AuthGuard, ServerCentralGuard],
+    canActivate: [AuthGuard, ServerCentralGuard, ScopedAdminGuard],
   },
   {
     path: 'panels/servers',
     outlet: 'panel',
     loadChildren: () => import('./modules/panels/servers/servers.module').then((x) => x.ServersModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, ScopedAdminGuard],
   },
 
   {

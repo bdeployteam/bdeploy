@@ -1,0 +1,8 @@
+.local-version-text {
+  font-size: 0.7em;
+  font-weight: 300;
+  color: var(--bd-text-secondary);
+
+  align-self: center;
+  padding-right: 10px;
+}

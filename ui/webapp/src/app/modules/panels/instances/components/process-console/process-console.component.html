@@ -3,7 +3,15 @@
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="(hasStdin$ | async) && (available$ | async)">
       <div fxLayout="row" fxLayoutAlign="center center">
-        <div class="local-stdin-badge" [ngClass]="(stdin$ | async) ? 'local-stdin-attached' : 'local-stdin-detached'">
+        <div
+          class="local-stdin-badge"
+          [ngClass]="(stdin$ | async) ? 'local-stdin-attached' : 'local-stdin-detached'"
+          [matTooltip]="
+            (stdin$ | async)
+              ? 'Input is available and will be directed to the process when you type.'
+              : 'Input is not availble. Either the process is not running, the node has restarted, or the user has no write permission on this Instance.'
+          "
+        >
           {{ (stdin$ | async) ? 'Input available' : 'Input unavailable' }}
         </div>
       </div>

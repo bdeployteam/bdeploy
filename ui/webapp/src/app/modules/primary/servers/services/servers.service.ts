@@ -73,7 +73,7 @@ export class ServersService {
   }
 
   public isSynchronized(server: ManagedMasterDto): boolean {
-    if (this.cfg.isCentral()) {
+    if (this.cfg.isCentral() && !!server) {
       return this.getSynchronizedOffset(server) <= SYNC_TIMEOUT;
     }
     return true;

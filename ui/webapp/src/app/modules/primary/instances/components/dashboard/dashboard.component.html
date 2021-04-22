@@ -83,8 +83,12 @@
         <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> does not have an active version. Dashboard not yet available.
       </p>
       <p>Configure, install and activate instance version first.</p>
-      <!-- TODO: add route to button -->
-      <app-bd-button text="Configure Instance" icon="settings" [collapsed]="false"></app-bd-button>
+      <app-bd-button
+        text="Configure Instance"
+        icon="settings"
+        [collapsed]="false"
+        [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
+      ></app-bd-button>
     </app-bd-no-data>
   </app-bd-dialog-content>
 </app-bd-dialog>

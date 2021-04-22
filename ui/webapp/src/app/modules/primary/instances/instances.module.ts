@@ -16,6 +16,8 @@ import { NodeProcessListComponent } from './components/dashboard/server-node/pro
 import { ServerNodeComponent } from './components/dashboard/server-node/server-node.component';
 import { NodeStatePanelComponent } from './components/dashboard/server-node/state-panel/state-panel.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { ConfigurationComponent } from './components/configuration/configuration.component';
+import { HistoryComponent } from './components/history/history.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +34,8 @@ import { InstancesRoutingModule } from './instances-routing.module';
     ProcessStatusIconComponent,
     InstanceSyncCellComponent,
     ClientUsageGraphComponent,
+    ConfigurationComponent,
+    HistoryComponent,
   ],
   exports: [
     // for panels.

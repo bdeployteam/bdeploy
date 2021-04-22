@@ -3,6 +3,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   selector: 'app-bd-server-sync-button',
@@ -17,11 +18,12 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   /* template */ sync$ = new BehaviorSubject<boolean>(false);
   /* template */ tooltip$ = new BehaviorSubject<string>(null);
   /* template */ badge$ = new BehaviorSubject<number>(null);
+  /* template */ noPerm$ = new BehaviorSubject<boolean>(false);
 
   private interval;
   private sub: Subscription;
 
-  constructor(private servers: ServersService) {}
+  constructor(private servers: ServersService, private auth: AuthenticationService) {}
 
   ngOnInit(): void {
     this.sub = this.servers.servers$.subscribe((_) => {
@@ -51,6 +53,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.noPerm$.next(false);
     if (!this.servers.isSynchronized(this.server)) {
       this.sync$.next(false);
       this.tooltip$.next('The server is not synchronized. Click to synchronize now');
@@ -68,6 +71,11 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
         this.tooltip$.next(`The server is in synchronized state for ${remainingSeconds} seconds`);
         this.badge$.next(remainingSeconds);
       }
+    }
+
+    if (!this.auth.isCurrentScopeWrite()) {
+      this.tooltip$.next('Insufficient permissions to synchronize.');
+      this.noPerm$.next(true);
     }
   }
 }

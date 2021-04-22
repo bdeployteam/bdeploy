@@ -5,7 +5,7 @@ import { GroupsBrowserComponent } from './components/groups-browser/groups-brows
 
 const GROUPS_ROUTES: Route[] = [
   { path: 'browser', component: GroupsBrowserComponent },
-  { path: 'clients/:group', component: ClientApplicationsComponent }, // TODO: CLIENT ONLY Permission
+  { path: 'clients/:group', component: ClientApplicationsComponent },
 ];
 
 @NgModule({
