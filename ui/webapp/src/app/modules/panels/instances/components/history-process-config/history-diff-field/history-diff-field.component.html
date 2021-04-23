@@ -1,0 +1,11 @@
+<div
+  class="local-container"
+  [ngClass]="getBorderClass()"
+  [appBdPopup]="popup"
+  appBdPopupTrigger="hover"
+  [appBdPopupDelay]="500"
+  appBdPopupPosition="above-right"
+>
+  <div class="local-bg-position" [ngClass]="getBgClass()"></div>
+  <div class="local-text">{{ diff.value === null || diff.value === undefined ? '-' : diff.value }}</div>
+</div>

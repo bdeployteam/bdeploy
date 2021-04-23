@@ -2,4 +2,16 @@
   <ng-content></ng-content>
 </ng-template>
 
-<app-bd-button #button [text]="text" [icon]="icon" [badge]="badge" [collapsed]="collapsed" [tooltip]="tooltip" (click)="openOverlay()"> </app-bd-button>
+<app-bd-button
+  [text]="text"
+  [icon]="icon"
+  [badge]="badge"
+  [collapsed]="collapsed"
+  [tooltip]="tooltip"
+  [appBdPopup]="popup"
+  [appBdPopupBackdropClass]="backdropClass"
+  [appBdPopupChevronColor]="chevronColor"
+  [appBdPopupPosition]="preferredPosition"
+  (appBdPopupOpened)="popupOpened.emit(this)"
+>
+</app-bd-button>

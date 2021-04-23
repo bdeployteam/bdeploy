@@ -1,0 +1,68 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar
+    header="Compare version {{ base$ | async }} of {{ (instances.current$ | async)?.instanceConfiguration.name }} to version {{ compare$ | async }}"
+    [closeablePanel]="true"
+  >
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-panel-button
+      #backButton
+      [collapsed]="narrow$ | async"
+      text="Back to overview"
+      icon="arrow_back"
+      [toggle]="false"
+      [route]="['..', '..', '..']"
+      [relative]="true"
+    ></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="configPair$ | async as pair" [style.padding-top.px]="2">
+      <div class="bd-rect-card" fxLayout="column">
+        <!-- TODO: Instance base configuration diff! -->
+      </div>
+
+      <!-- Nodes. -->
+      <ng-container *ngFor="let nodePair of pair.nodes">
+        <div class="bd-rect-card" *ngIf="!!nodePair?.applications?.length">
+          <div class="local-header-bg" fxLayout="column">
+            <div fxLayout="row" class="bd-default-padding">
+              <div fxLayout="column">
+                <div class="bd-type-text">NODE</div>
+                <div class="bd-title-text">{{ getNodeName(nodePair) }}</div>
+              </div>
+            </div>
+          </div>
+          <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
+            <div fxLayout="row" fxLayoutGap="10px">
+              <div class="local-compare-header" fxFlex="50%" fxLayout="row">
+                <div>Version {{ base$ | async }}</div>
+                <div class="bd-description-text local-order-changed" *ngIf="nodePair.isOrderChanged">
+                  &nbsp;- Note: The order of the processes is not exactly as configured in this version.
+                </div>
+              </div>
+              <div class="local-compare-header" fxFlex="50%">Version {{ compare$ | async }}</div>
+            </div>
+
+            <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="stretch stretch" *ngFor="let appPair of nodePair.applications">
+              <app-history-process-config
+                fxFlex="50%"
+                [baseConfig]="appPair.base"
+                [compareConfig]="appPair.compare"
+                [baseDescriptor]="appPair.baseDesc"
+                [hasProcessControl]="hasProcessControl(nodePair)"
+                diffSide="left"
+              ></app-history-process-config>
+              <app-history-process-config
+                fxFlex="50%"
+                [baseConfig]="appPair.compare"
+                [compareConfig]="appPair.base"
+                [baseDescriptor]="appPair.compareDesc"
+                [hasProcessControl]="hasProcessControl(nodePair)"
+                diffSide="right"
+              ></app-history-process-config>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

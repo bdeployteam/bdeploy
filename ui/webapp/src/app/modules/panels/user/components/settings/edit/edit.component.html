@@ -4,12 +4,7 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <div fxLayout="row" fxLayoutAlign="center center">
-        <app-user-avatar
-          [gravatar]="!settings.isLoading() && settings.getSettings().general.enableGravatar"
-          [avatarSize]="64"
-          [hostSize]="64"
-          [mail]="mail$ | async"
-        ></app-user-avatar>
+        <app-user-avatar [avatarSize]="64" [hostSize]="64" [mail]="mail$ | async"></app-user-avatar>
       </div>
       <form fxLayout="column" *ngIf="!!user && !user.external" fxLayoutGap="10px" #editForm="ngForm" (ngSubmit)="onSave()">
         <app-bd-form-input [(ngModel)]="user.name" name="name" label="Username" [disabled]="true"></app-bd-form-input>

@@ -44,6 +44,7 @@ export class InstancesService {
   active$ = new BehaviorSubject<InstanceDto>(null);
   activeNodeCfgs$ = new BehaviorSubject<InstanceNodeConfigurationListDto>(null);
   activeNodeStates$ = new BehaviorSubject<{ [minionName: string]: MinionStatusDto }>(null);
+  /** the history for the *active* instance. this may not be fully complete history, it is meant for a brief overview of events on the instance. */
   activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
   private activeLoadInterval;
   private activeCheckInterval;
@@ -108,6 +109,12 @@ export class InstancesService {
       params: { offset: offset.toString(), length: length.toString() },
       headers: NO_LOADING_BAR_HDRS,
     });
+  }
+
+  public loadHistory(filter: Partial<HistoryFilterDto>): Observable<HistoryResultDto> {
+    return this.http
+      .post<HistoryResultDto>(`${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/history`, filter)
+      .pipe(measure('Current Instance History'));
   }
 
   private reload(group: string) {

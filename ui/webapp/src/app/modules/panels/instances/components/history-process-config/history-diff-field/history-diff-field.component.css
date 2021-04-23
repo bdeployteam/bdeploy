@@ -1,0 +1,63 @@
+.local-container {
+  position: relative;
+  top: 0px; /* to apply relative pos */
+
+  padding: 2px 4px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+}
+
+.local-text {
+  position: relative;
+  top: 0px;
+
+  z-index: 3;
+}
+
+.local-added {
+  border-bottom: 1px dashed var(--bd-text-success);
+}
+
+.local-removed {
+  border-bottom: 1px dashed var(--bd-warn);
+}
+
+.local-changed {
+  border-bottom: 1px dashed var(--bd-primary);
+}
+
+.local-unchanged {
+  border-bottom: 1px dashed var(--bd-text-secondary);
+}
+
+.local-bg-position {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  opacity: 0.15;
+
+  z-index: 2;
+}
+
+.local-container:hover > .local-bg-position {
+  opacity: 0.3;
+}
+
+.local-added-bg {
+  background-color: var(--bd-text-success);
+}
+
+.local-removed-bg {
+  background-color: var(--bd-warn);
+}
+
+.local-changed-bg {
+  background-color: var(--bd-primary);
+}
+
+.local-unchanged-bg {
+  background-color: var(--bd-text-secondary);
+  opacity: 0.07;
+}

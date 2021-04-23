@@ -1,0 +1,27 @@
+.local-border-added {
+  height: 100%;
+  border-left: 5px solid var(--bd-text-success);
+}
+
+.local-border-removed {
+  height: 100%;
+  border-left: 5px solid var(--bd-warn);
+}
+
+.local-border-changed {
+  height: 100%;
+  border-left: 5px solid var(--bd-primary);
+}
+
+.local-border-unchanged {
+  height: 100%;
+  border-left: 5px solid var(--bd-text-secondary);
+}
+
+.local-padding {
+  padding: 10px;
+}
+
+.local-header {
+  background-color: var(--bd-bg-toolbar);
+}

@@ -43,6 +43,7 @@ import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-dis
 import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.component';
 import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
 import { BdDataGroupingComponent } from './components/bd-data-grouping/bd-data-grouping.component';
+import { BdDataIconCellComponent } from './components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataSvgIconCellComponent } from './components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
 import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dialog-content.component';
@@ -62,6 +63,7 @@ import { BdMicroIconButtonComponent } from './components/bd-micro-icon-button/bd
 import { BdNoDataComponent } from './components/bd-no-data/bd-no-data.component';
 import { BdNotificationCardComponent } from './components/bd-notification-card/bd-notification-card.component';
 import { BdPanelButtonComponent } from './components/bd-panel-button/bd-panel-button.component';
+import { BdPopupDirective } from './components/bd-popup/bd-popup.directive';
 import { BdSearchFieldComponent } from './components/bd-search-field/bd-search-field.component';
 import { BdServerSyncButtonComponent } from './components/bd-server-sync-button/bd-server-sync-button.component';
 import { BdTerminalComponent } from './components/bd-terminal/bd-terminal.component';
@@ -139,6 +141,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdTerminalComponent,
     BdBannerComponent,
     BdDataSvgIconCellComponent,
+    BdDataIconCellComponent,
+    BdPopupDirective,
   ],
   providers: [
     httpInterceptorProviders,
@@ -208,9 +212,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     LoginComponent,
     UserAvatarComponent,
     VersionPipe,
+    BdPopupDirective,
     BdDynamicComponent,
-
-    // framework components to be used by others
     BdButtonComponent,
     BdDataTableComponent,
     BdDataGridComponent,
@@ -237,6 +240,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdTerminalComponent,
     BdBannerComponent,
     BdDataSvgIconCellComponent,
+    BdDataIconCellComponent,
 
     // validators
     GroupIdValidator,

@@ -1,4 +1,11 @@
 <div [ngStyle]="getStyle(hostSize)" fxLayout="row" fxLayoutAlign="center center">
-  <mat-icon [ngStyle]="getStyle(avatarSize)" *ngIf="!gravatar || !mail">account_circle</mat-icon>
-  <img *ngIf="gravatar && mail" ngxGravatar fallback="mm" [email]="mail" [size]="avatarSize" alt="user avatar" />
+  <mat-icon [ngStyle]="getStyle(avatarSize)" *ngIf="settings.isLoading() || !settings.getSettings().general.enableGravatar || !mail">account_circle</mat-icon>
+  <img
+    *ngIf="!settings.isLoading() && settings.getSettings().general.enableGravatar && mail"
+    ngxGravatar
+    fallback="mm"
+    [email]="mail"
+    [size]="avatarSize"
+    alt="user avatar"
+  />
 </div>

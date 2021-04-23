@@ -1,5 +1,45 @@
-<app-bd-dialog>
-  <app-bd-dialog-toolbar header="History - {{ (instances.current$ | async)?.instanceConfiguration.name }}"> </app-bd-dialog-toolbar>
+<app-bd-dialog [loadingWhen$]="history.loading$" (scrollTo)="onScrollContent($event)" [restoreScrollAfterLoad]="true" [hideContentWhenLoading]="false">
+  <app-bd-dialog-toolbar header="History - {{ (instances.current$ | async)?.instanceConfiguration.name }}">
+    <div fxFlex="1 0 auto"></div>
+    <ng-container *ngIf="cfg.isCentral()">
+      <ng-container *ngIf="instances.current$ | async as instance">
+        <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
+        <mat-divider [vertical]="true"></mat-divider>
+      </ng-container>
+    </ng-container>
+    <app-bd-button
+      [isToggle]="true"
+      [toggle]="showCreate$.value"
+      (toggleChange)="showCreate$.next($event)"
+      icon="add_circle_outline"
+      text="Show Creation Events"
+      tooltip="below"
+    ></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      [toggle]="showDeploy$.value"
+      (toggleChange)="showDeploy$.next($event)"
+      icon="downloading"
+      text="Show Deployment Events"
+      tooltip="below"
+    ></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      [toggle]="showRuntime$.value"
+      (toggleChange)="showRuntime$.next($event)"
+      icon="run_circle"
+      text="Show Runtime Events"
+      tooltip="below"
+    ></app-bd-button>
+  </app-bd-dialog-toolbar>
 
-  <app-bd-dialog-content> </app-bd-dialog-content>
+  <app-bd-dialog-content>
+    <app-bd-data-table
+      [records]="history.history$ | async"
+      [columns]="columns.defaultHistoryColumns"
+      [sortData]="null"
+      [searchable]="false"
+      [recordRoute]="getRecordRoute"
+    ></app-bd-data-table>
+  </app-bd-dialog-content>
 </app-bd-dialog>

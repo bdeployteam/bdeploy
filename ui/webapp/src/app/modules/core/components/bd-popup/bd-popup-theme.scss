@@ -1,7 +1,7 @@
 @import '~@angular/material/theming';
 
-@mixin _bd-button-popup-theme-colored($name, $card-color) {
-  .bd-button-popup-panel-below-left-#{$name} > mat-card::after {
+@mixin _bd-popup-theme-colored($name, $card-color) {
+  .bd-popup-panel-below-left-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(45deg);
@@ -14,7 +14,7 @@
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
   }
 
-  .bd-button-popup-panel-above-left-#{$name} > mat-card::after {
+  .bd-popup-panel-above-left-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(45deg);
@@ -27,7 +27,7 @@
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} 2px 2px 2px;
   }
 
-  .bd-button-popup-panel-below-right-#{$name} > mat-card::after {
+  .bd-popup-panel-below-right-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(45deg);
@@ -40,7 +40,7 @@
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
   }
 
-  .bd-button-popup-panel-above-right-#{$name} > mat-card::after {
+  .bd-popup-panel-above-right-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(45deg);
@@ -53,7 +53,7 @@
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} 2px 2px 2px;
   }
 
-  .bd-button-popup-panel-left-below-#{$name} > mat-card::after {
+  .bd-popup-panel-left-below-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(135deg);
@@ -66,7 +66,7 @@
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
   }
 
-  .bd-button-popup-panel-right-below-#{$name} > mat-card::after {
+  .bd-popup-panel-right-below-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(315deg);
@@ -79,7 +79,7 @@
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
   }
 
-  .bd-button-popup-panel-left-above-#{$name} > mat-card::after {
+  .bd-popup-panel-left-above-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(135deg);
@@ -92,7 +92,7 @@
     box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
   }
 
-  .bd-button-popup-panel-right-above-#{$name} > mat-card::after {
+  .bd-popup-panel-right-above-#{$name} > *::after {
     content: '';
     position: absolute;
     transform: rotate(315deg);
@@ -107,12 +107,12 @@
 }
 
 /** These classes are applied to the panel of the popup, thus they MUST be global */
-@mixin bd-button-popup-theme($theme) {
+@mixin bd-popup-theme($theme) {
   $dark: map-get($theme, 'is-dark');
   $bg: map-get($theme, 'background');
 
-  @include _bd-button-popup-theme-colored('default', map-get($bg, 'card'));
-  @include _bd-button-popup-theme-colored('primary', mat-color(map-get($theme, 'primary')));
-  @include _bd-button-popup-theme-colored('accent', mat-color(map-get($theme, 'accent')));
-  @include _bd-button-popup-theme-colored('warn', mat-color(map-get($theme, 'warn')));
+  @include _bd-popup-theme-colored('default', map-get($bg, 'card'));
+  @include _bd-popup-theme-colored('primary', mat-color(map-get($theme, 'primary')));
+  @include _bd-popup-theme-colored('accent', mat-color(map-get($theme, 'accent')));
+  @include _bd-popup-theme-colored('warn', mat-color(map-get($theme, 'warn')));
 }

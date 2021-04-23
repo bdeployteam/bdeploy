@@ -9,6 +9,8 @@ public class HistoryEntryDto {
     public HistoryEntryType type;
     public String user = "";
     public String email = "";
+    /** @deprecated calculated on client instead */
+    @Deprecated
     public HistoryEntryVersionDto content = null;
     public HistoryEntryRuntimeDto runtimeEvent = null;
 

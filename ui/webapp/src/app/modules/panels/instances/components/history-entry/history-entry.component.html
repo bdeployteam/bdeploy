@@ -1,0 +1,63 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar [closeablePanel]="true" header="History Details"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content *ngIf="entry$ | async as entry" fxLayout="column" fxLayoutGap="10px">
+    <div fxLayout="row" fxLayoutGap="10px">
+      <app-user-avatar [mail]="entry?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
+      <div fxFlex="1 0 auto" gdColumns="70px 180px" gdGap="3px 5px" [style.max-width.px]="250" gdAlignColumns="center center">
+        <div><strong>Username:</strong></div>
+        <div class="bd-text-ellipsis" [matTooltip]="entry.user" [matTooltipShowDelay]="1000">{{ entry.user }}</div>
+        <div><strong>E-Mail:</strong></div>
+        <div class="bd-text-ellipsis" [matTooltip]="entry.email" [matTooltipShowDelay]="1000">{{ entry.email }}</div>
+      </div>
+    </div>
+    <div gdColumns="100px auto" gdGap="5px" gdAlignColumns="start center">
+      <div>Occured at:</div>
+      <div>{{ formatTimestamp(entry.timestamp) }}</div>
+      <div>Type:</div>
+      <div>{{ entry.type }}</div>
+      <div>Version:</div>
+      <div>{{ entry.instanceTag }}</div>
+      <div>Event:</div>
+      <div>{{ entry.title }}</div>
+      <ng-container *ngIf="!!entry.runtimeEvent">
+        <div>Node:</div>
+        <div>{{ entry.runtimeEvent.node }}</div>
+        <div>Runtime State:</div>
+        <div>{{ entry.runtimeEvent.state }}</div>
+        <div>PID:</div>
+        <div>{{ entry.runtimeEvent.pid }}</div>
+        <div>Exit Code:</div>
+        <div>{{ entry.runtimeEvent.exitCode }}</div>
+      </ng-container>
+    </div>
+    <ng-container *ngIf="isCreate(entry)">
+      <app-bd-panel-button
+        [collapsed]="false"
+        [toggle]="false"
+        icon="visibility"
+        text="Show Details"
+        [route]="['panels', 'instances', 'history', index$ | async, 'view', entry.instanceTag]"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [toggle]="false"
+        icon="compare"
+        text="Compare with Current"
+        [disabled]="entry.instanceTag === (instances.current$ | async)?.instance.tag"
+        [route]="['panels', 'instances', 'history', index$ | async, 'compare', entry.instanceTag, (instances.current$ | async)?.instance.tag]"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [toggle]="false"
+        icon="compare"
+        text="Compare with Version..."
+        [route]="['panels', 'instances', 'history', index$ | async, 'select', entry.instanceTag]"
+      ></app-bd-panel-button>
+    </ng-container>
+  </app-bd-dialog-content>
+  <app-bd-dialog-content *ngIf="!(entry$ | async)">
+    <app-bd-notification-card icon="history" [warning]="true" [dismissable]="false" header="No Information">
+      <div [style.text-align]="'justify'">The selected history entry cannot be retrieved. Please select another one from the list.</div>
+    </app-bd-notification-card>
+  </app-bd-dialog-content>
+</app-bd-dialog>

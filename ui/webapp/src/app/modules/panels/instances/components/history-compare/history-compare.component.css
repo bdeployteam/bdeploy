@@ -1,0 +1,8 @@
+.local-compare-header {
+  background-color: var(--bd-bg-toolbar);
+  padding: 5px;
+}
+
+.local-order-changed {
+  color: var(--bd-warn);
+}

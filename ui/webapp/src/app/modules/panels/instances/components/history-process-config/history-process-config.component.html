@@ -1,0 +1,113 @@
+<ng-container *ngIf="diff$ | async as diff">
+  <div [ngClass]="getBorderClass()" *ngIf="diff.type !== 'not-in-base'">
+    <div class="local-padding local-header" fxLayout="column">
+      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+        <mat-icon [svgIcon]="diff.os"></mat-icon>
+        <div fxLayout="row" fxLayoutAlign="start center">
+          <ng-template #namePopup>
+            <app-process-config-desc-cards field="cfg.name"></app-process-config-desc-cards>
+          </ng-template>
+          <div [style.margin-right.px]="3">Process:</div>
+          <strong>
+            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.name" [popup]="namePopup"></app-history-diff-field>
+          </strong>
+          <div class="bd-description-text" *ngIf="hasProcessControl">,</div>
+        </div>
+        <ng-container *ngIf="hasProcessControl">
+          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+            <ng-template #ctrlStartTypePopup>
+              <app-process-config-desc-cards field="cfg.control.startType"></app-process-config-desc-cards>
+            </ng-template>
+            <div [style.margin-right.px]="3">Start Type:</div>
+            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.startType" [popup]="ctrlStartTypePopup"></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+            <ng-template #ctrlKeepAlivePopup>
+              <app-process-config-desc-cards field="cfg.control.keepAlive"></app-process-config-desc-cards>
+            </ng-template>
+            <div [style.margin-right.px]="3">Keep Alive:</div>
+            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.keepAlive" [popup]="ctrlKeepAlivePopup"></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+            <ng-template #ctrlNoRetriesPopup>
+              <app-process-config-desc-cards field="cfg.control.noRetries"></app-process-config-desc-cards>
+            </ng-template>
+            <div [style.margin-right.px]="3">Keep Alive Retries:</div>
+            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.noOfRetries" [popup]="ctrlNoRetriesPopup"></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+            <ng-template #ctrlGracePopup>
+              <app-process-config-desc-cards field="cfg.control.gracePeriod"></app-process-config-desc-cards>
+            </ng-template>
+            <div [style.margin-right.px]="3">Stop Grace Period:</div>
+            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.gracePeriod" [popup]="ctrlGracePopup"></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+            <ng-template #ctrlAttachPopup>
+              <app-process-config-desc-cards field="cfg.control.attachStdin"></app-process-config-desc-cards>
+            </ng-template>
+            <div [style.margin-right.px]="3">Attach Console:</div>
+            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.attachStdin" [popup]="ctrlAttachPopup"></app-history-diff-field>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="local-padding" fxLayout="column">
+      <div class="bd-description-text">Start Command:</div>
+      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+        <ng-template #exePopup>
+          <app-process-config-desc-cards field="cfg.executable"></app-process-config-desc-cards>
+        </ng-template>
+        <app-history-diff-field [diffSide]="diffSide" [diff]="diff.start.executable" [popup]="exePopup"></app-history-diff-field>
+        <ng-container *ngFor="let param of diff.start.parameters">
+          <ng-template #paramPopup>
+            <mat-card *ngIf="!!param.descriptor" [style.padding.px]="10" [style.max-width.px]="400" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
+              <div>
+                Parameter <strong>{{ param.descriptor.name }}</strong> of application <strong>{{ diff.descriptor.name }}</strong>
+              </div>
+              <div gdColumns="100px auto" gdGap="5px" gdAlignColumns="start start" [style.padding.px]="10">
+                <strong><div>Name:</div></strong>
+                <div>{{ param.descriptor?.name }}</div>
+                <strong><div>Description:</div></strong>
+                <div>{{ param.descriptor?.longDescription }}</div>
+                <strong><div>Parameter:</div></strong>
+                <div>
+                  <code>{{ param.descriptor?.parameter }}</code>
+                </div>
+                <strong><div>Type:</div></strong>
+                <div>
+                  <code>{{ param.descriptor?.type }}</code>
+                </div>
+                <strong><div>Default Value:</div></strong>
+                <div>
+                  <code>{{
+                    param.descriptor?.defaultValue
+                      ? param.descriptor?.type === 'PASSWORD'
+                        ? '*'.repeat(param.descriptor?.defaultValue?.length)
+                        : param.descriptor?.defaultValue
+                      : '(none)'
+                  }}</code>
+                </div>
+              </div>
+            </mat-card>
+            <mat-card *ngIf="!param.descriptor" [style.padding.px]="10" [style.max-width.px]="400" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
+              No further information about this parameter available.
+            </mat-card>
+          </ng-template>
+          <app-history-diff-field [diffSide]="diffSide" *ngFor="let val of param.values" [diff]="val" [popup]="paramPopup"></app-history-diff-field>
+        </ng-container>
+      </div>
+      <ng-container *ngIf="diff.endpoints?.http?.length">
+        <div class="bd-description-text" [style.margin-top.px]="10">Endpoints:</div>
+        <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+          <!-- TODO: Endpoints -->
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</ng-container>

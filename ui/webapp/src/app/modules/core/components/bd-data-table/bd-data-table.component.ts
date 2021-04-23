@@ -10,6 +10,9 @@ import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint, BdDataGrouping
 import { ErrorMessage, LoggingService } from '../../services/logging.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
+// member ordering due to default implementation for callbacks.
+// tslint:disable: member-ordering
+
 /** Represents the hirarchical presentation of the records after grouping/sorting/searching is applied. */
 interface Node<T> {
   item: T;
@@ -66,14 +69,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[];
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = (r, c, d) => r;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[];
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = (s, r, c) => r;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.

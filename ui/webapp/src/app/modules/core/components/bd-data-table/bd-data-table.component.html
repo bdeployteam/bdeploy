@@ -58,7 +58,8 @@
             class="bd-text-ellipsis"
             mat-cell
             [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-            [style.maxWidth]="col.width ? col.width : 0"
+            [style.width]="col.width ? col.width : 0"
+            [style.maxWidth]="0"
             [attr.colspan]="row.expandable ? _columns.length : 1"
           >
             <!-- Button to expand or collapse a group -->
@@ -91,7 +92,12 @@
 
         <!-- Columns after the first one -->
         <ng-container *ngIf="i !== 0 && !col.action && !row.expandable">
-          <td mat-cell [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []" [style.maxWidth]="col.width ? col.width : 0">
+          <td
+            mat-cell
+            [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
+            [style.width]="col.width ? col.width : 0"
+            [style.maxWidth]="0"
+          >
             <ng-container *ngIf="!row.expandable">
               <ng-container *ngIf="!isImageColumn(col)">
                 <div
@@ -120,7 +126,7 @@
 
         <!-- Items with an action (collapsed button), this may not occur on the first column -->
         <ng-container *ngIf="col.action && !row.expandable">
-          <td mat-cell [style.maxWidth]="col.width ? col.width : 0">
+          <td mat-cell [style.width]="col.width ? col.width : 0" [style.maxWidth]="0">
             <div fxLayout="row" fxLayoutAlign="start center">
               <app-bd-button
                 *ngIf="row.node.item"

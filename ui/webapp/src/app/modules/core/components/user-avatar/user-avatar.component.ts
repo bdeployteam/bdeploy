@@ -1,4 +1,5 @@
 import { Component, HostBinding, Input, OnInit } from '@angular/core';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-user-avatar',
@@ -16,10 +17,7 @@ export class UserAvatarComponent implements OnInit {
   @Input()
   public mail;
 
-  @Input()
-  public gravatar = false;
-
-  constructor() {}
+  constructor(public settings: SettingsService) {}
 
   ngOnInit() {}
 

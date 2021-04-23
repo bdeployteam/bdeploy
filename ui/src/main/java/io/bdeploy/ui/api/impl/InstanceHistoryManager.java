@@ -10,8 +10,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.core.SecurityContext;
-
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 
@@ -56,6 +54,7 @@ import io.bdeploy.ui.dto.HistoryEntryRuntimeDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class InstanceHistoryManager {
 
@@ -160,7 +159,9 @@ public class InstanceHistoryManager {
      * @param mfB
      *            the second manifest of the later version
      * @return the computed differences
+     * @deprecated comparing done on client instead.
      */
+    @Deprecated
     public HistoryEntryVersionDto compareManifests(InstanceManifest mfA, InstanceManifest mfB) {
         HistoryEntryVersionDto content = new HistoryEntryVersionDto();
 
