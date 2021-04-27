@@ -36,6 +36,9 @@ public class MinionServerCli extends ToolBase {
         register(PayloadTool.class);
         register(VerifySignatureTool.class);
 
+        // TESTING
+        register(GradleTestTool.class);
+
         // remote text UI
         TextUIResources.registerTextUi(this);
     }

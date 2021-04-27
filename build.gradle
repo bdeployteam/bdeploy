@@ -104,7 +104,7 @@ configure(actualSubprojects) {
 
     java {
         // enabled by default in gradle 7.0 - breaks executing anything from eclipse, but not from the CLI
-        modularity.inferModulePath = false
+        //modularity.inferModulePath = false
     }
 	
 	eclipse {
