@@ -1,7 +1,7 @@
 <ng-content></ng-content>
 
 <div
-  *ngIf="showWhen$ | async"
+  *ngIf="show"
   [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
   [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
   class="local-sizing bd-normal-backdrop"

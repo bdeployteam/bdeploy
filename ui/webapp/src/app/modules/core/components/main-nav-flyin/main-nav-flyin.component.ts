@@ -30,7 +30,9 @@ import { NavAreasService } from '../../services/nav-areas.service';
 export class MainNavFlyinComponent implements OnInit {
   constructor(private areas: NavAreasService, private media: BreakpointObserver) {}
 
-  @HostBinding('@openClose') get animationState() {
+  @HostBinding('attr.data-cy')
+  @HostBinding('@openClose')
+  get animationState() {
     return this.areas.panelVisible$.value ? 'open' : 'closed';
   }
 

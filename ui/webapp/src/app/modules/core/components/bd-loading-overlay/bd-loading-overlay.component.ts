@@ -1,5 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 
 @Component({
@@ -9,7 +8,11 @@ import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
   animations: [delayedFadeIn, delayedFadeOut],
 })
 export class BdLoadingOverlayComponent implements OnInit {
-  @Input() showWhen$: Observable<boolean>;
+  @Input() show: boolean;
+
+  @HostBinding('attr.data-cy') get dataCy() {
+    return this.show ? 'loading' : 'loaded';
+  }
 
   constructor() {}
 

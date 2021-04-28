@@ -3,14 +3,14 @@ describe('Login to Web UI', function () {
     cy.visit('/');
 
     cy.url().should('include', '/login');
-    cy.contains('Login');
+    cy.contains('BDeploy Login');
 
-    cy.get('[data-placeholder="Username"]').type('admin');
-    cy.get('[data-placeholder="Password"]').type('admin');
+    cy.get('app-bd-form-input[name="user"]').type('admin');
+    cy.get('app-bd-form-input[name="pass"]').type('admin');
 
-    cy.get('[type="submit"]').click();
+    cy.get('button[type="submit"]').click();
 
-    cy.url().should('include', '/instancegroup/browser');
+    cy.url().should('include', '/groups/browser');
     cy.contains('Instance Groups');
 
     cy.getCookie('st').should('exist');

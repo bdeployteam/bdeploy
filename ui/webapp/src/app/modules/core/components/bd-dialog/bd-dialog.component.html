@@ -1,4 +1,4 @@
-<app-bd-loading-overlay [showWhen$]="loadingWhen$">
+<app-bd-loading-overlay [show]="loadingWhen$ | async">
   <div class="bd-page-root" fxLayout="column">
     <!-- toolbar content -->
     <ng-content select="app-bd-dialog-toolbar"></ng-content>

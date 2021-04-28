@@ -168,7 +168,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   ngOnChanges(changes: SimpleChanges): void {
     // make sure that we update only if something changed which requires us to update :)
     // an update will re-create all content, so we want to avoid this as far as possible.
-    if (!!changes['records'] || !!changes['grouping']) {
+    if ((!!changes['records'] && !changes['records'].isFirstChange()) || (!!changes['grouping'] && !changes['grouping'].isFirstChange())) {
       this.update();
     }
   }
