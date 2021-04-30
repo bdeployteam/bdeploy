@@ -13,13 +13,24 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="config$ | async as cfg" [style.padding-top.px]="2">
-      <div class="bd-rect-card" fxLayout="column"></div>
+      <div class="bd-rect-card" fxLayout="column">
+        <div fxLayout="column">
+          <div fxLayout="row" class="bd-default-padding" [style.padding-bottom.px]="0">
+            <div fxLayout="column">
+              <div class="bd-type-text">Instance Configuration</div>
+            </div>
+          </div>
+        </div>
+        <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
+          <app-history-header-config fxFlex="50%" [baseConfig]="cfg.config" [compareConfig]="cfg.config"></app-history-header-config>
+        </div>
+      </div>
 
       <!-- Nodes. -->
       <ng-container *ngFor="let node of cfg.nodes?.nodeConfigDtos">
         <div class="bd-rect-card" *ngIf="!!node.nodeConfiguration?.applications?.length">
-          <div class="local-header-bg" fxLayout="column">
-            <div fxLayout="row" class="bd-default-padding">
+          <div fxLayout="column">
+            <div fxLayout="row" class="bd-default-padding" [style.padding-bottom.px]="0">
               <div fxLayout="column">
                 <div class="bd-type-text">NODE</div>
                 <div class="bd-title-text">{{ getNodeName(node) }}</div>

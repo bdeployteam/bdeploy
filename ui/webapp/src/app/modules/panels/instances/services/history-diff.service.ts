@@ -3,10 +3,12 @@ import { isEqual } from 'lodash-es';
 import {
   ApplicationConfiguration,
   ApplicationDescriptor,
+  ApplicationType,
   CommandConfiguration,
   EndpointsConfiguration,
   ExecutableDescriptor,
   HttpEndpoint,
+  InstanceConfiguration,
   OperatingSystem,
   ParameterConfiguration,
   ParameterDescriptor,
@@ -14,6 +16,7 @@ import {
 } from 'src/app/models/gen.dtos';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 
+/** The type of a difference, typically propagated from simple attributes to complex diffs. */
 export enum DiffType {
   NOT_IN_BASE = 'not-in-base',
   NOT_IN_COMPARE = 'not-in-compare',
@@ -21,29 +24,37 @@ export enum DiffType {
   UNCHANGED = 'unchanged',
 }
 
+/** Returns the DiffType for an object, comparing the two given instances in depth */
 function getChangeType(base: any, compare: any): DiffType {
-  if (isEqual(base, compare)) {
-    return DiffType.UNCHANGED;
-  } else if (base === null || base === undefined) {
+  const noBase = base === null || base === undefined;
+  const noCompare = compare === null || compare === undefined;
+
+  if (noBase && !noCompare) {
     return DiffType.NOT_IN_BASE;
-  } else if (compare === null || compare === undefined) {
+  } else if (noCompare && !noBase) {
     return DiffType.NOT_IN_COMPARE;
+  } else if (isEqual(base, compare)) {
+    return DiffType.UNCHANGED;
   } else {
     return DiffType.CHANGED;
   }
 }
 
+/** Given two complex objects and the DiffTypes of all the contained child objects, calculate a "outer" DiffType for the complex object */
 function getParentChangeType(base: any, compare: any, ...types: DiffType[]): DiffType {
-  if (base === null || base === undefined) {
+  const noBase = base === null || base === undefined;
+  const noCompare = compare === null || compare === undefined;
+  if (noBase && !noCompare) {
     return DiffType.NOT_IN_BASE;
-  } else if (compare === null || compare === undefined) {
+  } else if (noCompare && !noBase) {
     return DiffType.NOT_IN_COMPARE;
   }
 
   // changed if there is a single diff !== UNCHANGED.
-  return types.every((e) => e === DiffType.UNCHANGED) ? DiffType.UNCHANGED : DiffType.CHANGED;
+  return types.every((e) => e === DiffType.UNCHANGED || e === undefined) ? DiffType.UNCHANGED : DiffType.CHANGED;
 }
 
+/** Maintains information about the difference in an object. The given value is the base value is set, otherwise the compare value. */
 export class Difference {
   /** The value to display to the user */
   public value: any;
@@ -57,6 +68,7 @@ export class Difference {
   }
 }
 
+/** Differences in the ProcessControlConfiguration of an Application */
 export class ProcessControlDiff {
   public type: DiffType;
 
@@ -85,6 +97,7 @@ export class ProcessControlDiff {
   }
 }
 
+/** Differences in one of the CommandConfigurations in an ApplicationConfiguration */
 export class CommandDiff {
   public type: DiffType;
   public executable: Difference;
@@ -119,6 +132,7 @@ export class CommandDiff {
   }
 }
 
+/** Differences in a single parameter of a CommandConfiguration. Creates diffs for every pre-rendered part of the parameter if possible */
 export class ParameterDiff {
   public type: DiffType;
   public values: Difference[] = [];
@@ -146,6 +160,7 @@ export class ParameterDiff {
   }
 }
 
+/** Differences in declared EndpointsConfiguration of an ApplicationConfiguration */
 export class EndpointsDiff {
   public type: DiffType;
   public http: HttpEndpointDiff[] = [];
@@ -168,6 +183,7 @@ export class EndpointsDiff {
   }
 }
 
+/** Differences in a single HttpEndpoint */
 export class HttpEndpointDiff {
   public type: DiffType;
 
@@ -208,6 +224,7 @@ export class HttpEndpointDiff {
   }
 }
 
+/** All differences between two ApplicationConfigurations */
 export class ApplicationConfigurationDiff {
   public type: DiffType;
 
@@ -219,12 +236,49 @@ export class ApplicationConfigurationDiff {
 
   constructor(base: ApplicationConfiguration, compare: ApplicationConfiguration, public descriptor: ApplicationDescriptor) {
     this.name = new Difference(base?.name, compare?.name);
-    this.processControl = new ProcessControlDiff(base?.processControl, compare?.processControl);
+    if (descriptor?.type !== ApplicationType.CLIENT) {
+      this.processControl = new ProcessControlDiff(base?.processControl, compare?.processControl);
+    }
     this.start = new CommandDiff(base?.start, compare?.start, descriptor?.startCommand);
     this.endpoints = new EndpointsDiff(base?.endpoints, compare?.endpoints);
-    this.type = getParentChangeType(base, compare, this.name.type, this.processControl.type, this.start.type);
+    this.type = getParentChangeType(base, compare, this.name.type, this.processControl?.type, this.start.type);
 
     this.os = base === null || base === undefined ? getAppOs(compare.application) : getAppOs(base.application);
+  }
+}
+
+/** Differences in the configuration between two InstanceConfigurations */
+export class InstanceConfigurationDiff {
+  public type: DiffType;
+
+  public name: Difference;
+  public description: Difference;
+  public autoStart: Difference;
+  public purpose: Difference;
+  public productTag: Difference;
+  public configTree: Difference;
+  public autoUninstall: Difference;
+
+  constructor(base: InstanceConfiguration, compare: InstanceConfiguration) {
+    this.name = new Difference(base?.name, compare?.name);
+    this.description = new Difference(base?.description, compare?.description);
+    this.autoStart = new Difference(base?.autoStart, compare?.autoStart);
+    this.purpose = new Difference(base?.purpose, compare?.purpose);
+    this.productTag = new Difference(base?.product?.tag, compare?.product?.tag);
+    this.configTree = new Difference(base?.configTree?.id, compare?.configTree?.id);
+    this.autoUninstall = new Difference(base?.autoUninstall, compare?.autoUninstall);
+
+    this.type = getParentChangeType(
+      base,
+      compare,
+      this.name.type,
+      this.description.type,
+      this.autoStart.type,
+      this.purpose.type,
+      this.productTag.type,
+      this.configTree.type,
+      this.autoUninstall.type
+    );
   }
 }
 
@@ -234,7 +288,11 @@ export class ApplicationConfigurationDiff {
 export class HistoryDiffService {
   constructor() {}
 
-  public diff(base: ApplicationConfiguration, compare: ApplicationConfiguration, baseDescriptor: ApplicationDescriptor): ApplicationConfigurationDiff {
+  public diffAppConfig(base: ApplicationConfiguration, compare: ApplicationConfiguration, baseDescriptor: ApplicationDescriptor): ApplicationConfigurationDiff {
     return new ApplicationConfigurationDiff(base, compare, baseDescriptor);
+  }
+
+  public diffInstanceConfig(base: InstanceConfiguration, compare: InstanceConfiguration): InstanceConfigurationDiff {
+    return new InstanceConfigurationDiff(base, compare);
   }
 }

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -104,13 +103,6 @@ public class InstanceHistoryManager {
             // Load history
             InstanceManifest manifest = InstanceManifest.load(hive, instanceId, key.getTag());
             List<HistoryEntryDto> events = loadHistory(manifest);
-
-            // Compute difference to previous version
-            Optional<HistoryEntryDto> create = events.stream().filter(e -> e.type == HistoryEntryType.CREATE).findFirst();
-            if (create.isPresent() && nextKey != null) {
-                InstanceManifest nextManifest = InstanceManifest.load(hive, instanceId, nextKey.getTag());
-                create.get().content = compareManifests(nextManifest, manifest);
-            }
             result.addAll(events, filter);
 
             // Append all runtime events from this version
@@ -137,7 +129,9 @@ public class InstanceHistoryManager {
      * @param configB
      *            the second configuration of the later version
      * @return the computed differences
+     * @deprecated done on client now.
      */
+    @Deprecated
     public HistoryEntryVersionDto compare(InstanceConfigurationDto configA, InstanceConfigurationDto configB) {
         HistoryEntryVersionDto content = new HistoryEntryVersionDto();
 

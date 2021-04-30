@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME, mergeOrdererd, sortNodesMasterFirst } from 'src/app/models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, InstanceConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService, InstanceConfigCache } from '../../services/history-details.service';
@@ -58,10 +58,17 @@ class NodePair {
   }
 }
 
+class HeaderPair {
+  constructor(public base: InstanceConfiguration, public compare: InstanceConfiguration) {}
+}
+
 class ConfigPair {
   nodes: NodePair[] = [];
+  header: HeaderPair;
 
   constructor(base: InstanceConfigCache, compare: InstanceConfigCache) {
+    this.header = new HeaderPair(base?.config, compare?.config);
+
     const sortedNodes = !!base?.nodes?.nodeConfigDtos ? [...base.nodes.nodeConfigDtos] : [];
     if (!!compare?.nodes?.nodeConfigDtos) {
       for (const node of compare?.nodes?.nodeConfigDtos) {

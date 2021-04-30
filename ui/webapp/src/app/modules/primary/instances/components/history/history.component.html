@@ -28,8 +28,9 @@
       [toggle]="showRuntime$.value"
       (toggleChange)="showRuntime$.next($event)"
       icon="run_circle"
-      text="Show Runtime Events"
+      [text]="cfg.isCentral() ? 'Show Runtime Events - requires connection to managed server' : 'Show Runtime Events'"
       tooltip="below"
+      [disabled]="!servers.isSynchronized((instances.current$ | async)?.managedServer)"
     ></app-bd-button>
   </app-bd-dialog-toolbar>
 

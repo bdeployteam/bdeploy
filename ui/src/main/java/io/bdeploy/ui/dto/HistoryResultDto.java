@@ -3,7 +3,6 @@ package io.bdeploy.ui.dto;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.ui.api.impl.InstanceHistoryManager;
@@ -88,84 +87,7 @@ public class HistoryResultDto {
             }
         }
 
-        // Search in configured application
-        HistoryEntryVersionDto content = dto.content;
-        if (content != null && content.nodes != null) {
-            for (Map.Entry<String, HistoryEntryNodeDto> entry : content.nodes.entrySet()) {
-                HistoryEntryNodeDto value = entry.getValue();
-                if (matchesApp(value, text)) {
-                    return true;
-                }
-            }
-        }
-
         // No match found
-        return false;
-    }
-
-    private boolean matchesApp(HistoryEntryNodeDto value, String filter) {
-        // Check for added / deleted applications
-        if (matches(value.added, filter)) {
-            return true;
-        }
-        if (matches(value.deleted, filter)) {
-            return true;
-        }
-
-        // Check for changed parameters
-        for (Map.Entry<String, HistoryEntryApplicationDto> entry : value.changed.entrySet()) {
-            // Check the name of the application
-            String name = entry.getKey();
-            if (contains(name, filter)) {
-                return true;
-            }
-
-            // Check the added, changed and deleted parameters
-            HistoryEntryApplicationDto dto = entry.getValue();
-            if (dto.parameters == null) {
-                continue;
-            }
-
-            // Added and deleted parameters are represented as fixed size array
-            // Index 0 ... The UID of the parameter
-            // Index 1 ... The old / new value
-            if (matchesAppParams(dto.parameters.added, filter)) {
-                return true;
-            }
-            if (matchesAppParams(dto.parameters.deleted, filter)) {
-                return true;
-            }
-
-            // Changed parameters are represented as map
-            // Key of the map is the the UID of the parameter
-            // The value is a fixed size array
-            // Index 0 ... The old value
-            // Index 1 ... The new value
-            if (matches(dto.parameters.changed.keySet(), filter)) {
-                return true;
-            }
-        }
-
-        // no match
-        return false;
-    }
-
-    private boolean matchesAppParams(Collection<String[]> values, String filter) {
-        for (String[] entry : values) {
-            String paramUid = entry[0];
-            if (contains(paramUid, filter)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean matches(Collection<String> values, String filter) {
-        for (String value : values) {
-            if (contains(value, filter)) {
-                return true;
-            }
-        }
         return false;
     }
 

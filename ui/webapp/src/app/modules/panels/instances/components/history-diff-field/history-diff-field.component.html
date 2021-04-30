@@ -7,5 +7,8 @@
   appBdPopupPosition="above-right"
 >
   <div class="local-bg-position" [ngClass]="getBgClass()"></div>
-  <div class="local-text">{{ diff.value === null || diff.value === undefined ? '-' : diff.value }}</div>
+  <div *ngIf="!maxWidthPx" class="local-text">{{ getValue() }}</div>
+  <div *ngIf="!!maxWidthPx" class="local-text bd-text-ellipsis" [style.max-width.px]="maxWidthPx">
+    {{ getValue() }}
+  </div>
 </div>

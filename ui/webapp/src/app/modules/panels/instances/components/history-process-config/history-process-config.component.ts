@@ -23,15 +23,11 @@ export class HistoryProcessConfigComponent implements OnInit {
   constructor(private diffService: HistoryDiffService) {}
 
   ngOnInit(): void {
-    this.diff$.next(this.diffService.diff(this.baseConfig, this.compareConfig, this.baseDescriptor));
+    this.diff$.next(this.diffService.diffAppConfig(this.baseConfig, this.compareConfig, this.baseDescriptor));
   }
 
-  private hasDiff() {
-    return this.diff$.value?.type !== DiffType.UNCHANGED;
-  }
-
-  /* template */ getBorderClass(): string | string[] {
-    if (this.diffSide === 'none' || this.diff$.value?.type === DiffType.UNCHANGED) {
+  /* template */ getBorderClass(diffType: DiffType): string | string[] {
+    if (this.diffSide === 'none' || diffType === DiffType.UNCHANGED) {
       return 'local-border-unchanged';
     }
 

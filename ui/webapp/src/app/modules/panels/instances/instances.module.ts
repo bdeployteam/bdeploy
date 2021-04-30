@@ -6,10 +6,12 @@ import { CoreModule } from '../../core/core.module';
 import { InstancesModule as PrimaryInstancesModule } from '../../primary/instances/instances.module';
 import { AddInstanceComponent } from './components/add-instance/add-instance.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
+import { ConfigDescCardsComponent } from './components/config-desc-cards/config-desc-cards.component';
 import { HistoryCompareSelectComponent } from './components/history-compare-select/history-compare-select.component';
 import { HistoryCompareComponent } from './components/history-compare/history-compare.component';
+import { HistoryDiffFieldComponent } from './components/history-diff-field/history-diff-field.component';
 import { HistoryEntryComponent } from './components/history-entry/history-entry.component';
-import { HistoryDiffFieldComponent } from './components/history-process-config/history-diff-field/history-diff-field.component';
+import { HistoryHeaderConfigComponent } from './components/history-header-config/history-header-config.component';
 import { HistoryProcessConfigComponent } from './components/history-process-config/history-process-config.component';
 import { HistoryViewComponent } from './components/history-view/history-view.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
@@ -18,7 +20,6 @@ import { ProcessNativesComponent } from './components/process-natives/process-na
 import { ProcessPortsComponent } from './components/process-ports/process-ports.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
-import { ProcessConfigDescCardsComponent } from './components/process-config-desc-cards/process-config-desc-cards.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { ProcessConfigDescCardsComponent } from './components/process-config-des
     HistoryViewComponent,
     HistoryProcessConfigComponent,
     HistoryDiffFieldComponent,
-    ProcessConfigDescCardsComponent,
+    ConfigDescCardsComponent,
+    HistoryHeaderConfigComponent,
   ],
   imports: [CommonModule, CoreModule, InstancesRoutingModule, PrimaryInstancesModule, MatProgressSpinnerModule, MatCardModule],
 })

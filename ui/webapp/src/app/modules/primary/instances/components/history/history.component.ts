@@ -4,6 +4,7 @@ import { HistoryEntryDto } from 'src/app/models/gen.dtos';
 import { BdDialogScrollEvent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
+import { ServersService } from '../../../servers/services/servers.service';
 import { HistoryColumnsService } from '../../services/history-columns.service';
 import { HistoryService } from '../../services/history.service';
 import { InstancesService } from '../../services/instances.service';
@@ -27,6 +28,7 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
   constructor(
     public cfg: ConfigService,
     public instances: InstancesService,
+    public servers: ServersService,
     public columns: HistoryColumnsService,
     public history: HistoryService,
     private search: SearchService

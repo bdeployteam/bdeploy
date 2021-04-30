@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, TemplateRef } from '@angular/core';
-import { Difference, DiffType } from '../../../services/history-diff.service';
+import { Difference, DiffType } from '../../services/history-diff.service';
 
 @Component({
   selector: 'app-history-diff-field',
@@ -9,6 +9,9 @@ import { Difference, DiffType } from '../../../services/history-diff.service';
 export class HistoryDiffFieldComponent implements OnInit {
   @Input() diff: Difference;
   @Input() popup: TemplateRef<any>;
+
+  @Input() maxWidthPx: number;
+  @Input() maskValue = false;
 
   /** Which side of the diff is this field on. */
   @Input() diffSide: 'left' | 'right' | 'none' = 'none';
@@ -34,5 +37,13 @@ export class HistoryDiffFieldComponent implements OnInit {
 
   /* template */ getBgClass(): string {
     return this.getBorderClass() + '-bg';
+  }
+
+  /* template */ getValue(): string {
+    if (this.diff.value === null || this.diff.value === undefined) {
+      return '-';
+    }
+
+    return this.maskValue ? '*'.repeat(this.diff.value.length) : this.diff.value;
   }
 }

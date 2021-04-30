@@ -17,14 +17,40 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="configPair$ | async as pair" [style.padding-top.px]="2">
       <div class="bd-rect-card" fxLayout="column">
-        <!-- TODO: Instance base configuration diff! -->
+        <div fxLayout="column">
+          <div fxLayout="row" class="bd-default-padding" [style.padding-bottom.px]="0">
+            <div fxLayout="column">
+              <div class="bd-type-text">Instance Configuration</div>
+            </div>
+          </div>
+        </div>
+        <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
+          <div fxLayout="row" fxLayoutGap="10px">
+            <div class="local-compare-header" fxFlex="50%" fxLayout="row">Version {{ base$ | async }}</div>
+            <div class="local-compare-header" fxFlex="50%">Version {{ compare$ | async }}</div>
+          </div>
+          <div fxLayout="row" fxLayoutGap="10px">
+            <app-history-header-config
+              fxFlex="50%"
+              diffSide="left"
+              [baseConfig]="pair.header.base"
+              [compareConfig]="pair.header.compare"
+            ></app-history-header-config>
+            <app-history-header-config
+              fxFlex="50%"
+              diffSide="right"
+              [baseConfig]="pair.header.compare"
+              [compareConfig]="pair.header.base"
+            ></app-history-header-config>
+          </div>
+        </div>
       </div>
 
       <!-- Nodes. -->
       <ng-container *ngFor="let nodePair of pair.nodes">
         <div class="bd-rect-card" *ngIf="!!nodePair?.applications?.length">
-          <div class="local-header-bg" fxLayout="column">
-            <div fxLayout="row" class="bd-default-padding">
+          <div fxLayout="column">
+            <div fxLayout="row" class="bd-default-padding" [style.padding-bottom.px]="0">
               <div fxLayout="column">
                 <div class="bd-type-text">NODE</div>
                 <div class="bd-title-text">{{ getNodeName(nodePair) }}</div>
