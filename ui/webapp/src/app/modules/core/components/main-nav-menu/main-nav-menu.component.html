@@ -18,7 +18,7 @@
     </h2>
   </div>
 
-  <!-- Menu Buttons -->
+  <!-- Groups -->
   <app-main-nav-button icon="view_carousel" text="Instance Groups" [collapsed]="!expanded" [route]="['/groups/browser']"></app-main-nav-button>
 
   <app-main-nav-button
@@ -69,6 +69,16 @@
     matTooltipPosition="right"
   ></app-main-nav-button>
 
+  <app-main-nav-button
+    [visible]="!!(areas.groupContext$ | async)"
+    svgIcon="group-settings"
+    text="Group Settings"
+    [collapsed]="!expanded"
+    [route]="['', { outlets: { panel: ['panels', 'groups', 'settings'] } }]"
+  ></app-main-nav-button>
+
+  <!-- Instance -->
+
   <mat-divider
     *ngIf="areas.groupContext$ | async"
     [style.position]="'relative'"
@@ -86,8 +96,8 @@
 
   <app-main-nav-button
     [visible]="!!(areas.instanceContext$ | async)"
-    icon="settings"
-    text="Instance Configuration"
+    svgIcon="instance-settings"
+    text="Instance Config."
     [collapsed]="!expanded"
     [route]="['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value]"
     [disabled]="!authService.isScopedWrite(areas.groupContext$ | async)"

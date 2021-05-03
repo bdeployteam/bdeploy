@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { format } from 'date-fns';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { ServersService } from './servers.service';
 
 @Injectable({
@@ -42,10 +43,8 @@ export class ServersColumnsService {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,
-    data: (r) => `Synchronize ${r.hostName}`,
-    action: (r) => this.servers.synchronize(r).subscribe(),
-    classes: (r) => (this.servers.isSynchronized(r) ? [] : ['bd-warning-text']),
-    icon: (r) => 'history',
+    data: (r) => r,
+    component: BdDataSyncCellComponent,
     width: '50px',
   };
 

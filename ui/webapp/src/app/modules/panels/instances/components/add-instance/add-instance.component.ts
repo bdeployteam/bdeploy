@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceConfiguration, InstancePurpose, ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -20,7 +20,7 @@ interface ProductRow {
   templateUrl: './add-instance.component.html',
   styleUrls: ['./add-instance.component.css'],
 })
-export class AddInstanceComponent implements OnInit {
+export class AddInstanceComponent implements OnInit, OnDestroy {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ config: Partial<InstanceConfiguration> = { autoUninstall: true, product: { name: null, tag: null } };
   /* template */ server: ManagedMasterDto;
@@ -28,6 +28,8 @@ export class AddInstanceComponent implements OnInit {
 
   /* template */ prodList: ProductRow[] = [];
   /* template */ serverList: ManagedMasterDto[] = [];
+
+  private subscription: Subscription;
 
   constructor(
     private groups: GroupsService,
@@ -39,37 +41,43 @@ export class AddInstanceComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.groups
+    this.subscription = this.groups
       .newUuid()
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((r) => (this.config.uuid = r));
 
-    this.products.products$.subscribe((r) => {
-      r.forEach((p) => {
-        let item = this.prodList.find((x) => x.id === p.key.name);
-        if (!item) {
-          item = { id: p.key.name, name: p.name, versions: [] };
-          this.prodList.push(item);
-        }
-        item.versions.push(p.key.tag);
-      });
+    this.subscription.add(
+      this.products.products$.subscribe((r) => {
+        r.forEach((p) => {
+          let item = this.prodList.find((x) => x.id === p.key.name);
+          if (!item) {
+            item = { id: p.key.name, name: p.name, versions: [] };
+            this.prodList.push(item);
+          }
+          item.versions.push(p.key.tag);
+        });
 
-      const snap = this.areas.panelRoute$.value;
-      const prodKey = snap.queryParamMap.get('productKey');
-      const prodTag = snap.queryParamMap.get('productTag');
-      if (!!prodKey && !!prodTag) {
-        const prod = this.prodList.find((p) => p.id === prodKey);
-        if (!!prod) {
-          if (!!prod.versions.find((v) => v === prodTag)) {
-            this.selectedProduct = prod;
-            this.config.product.name = prodKey;
-            this.config.product.tag = prodTag;
+        const snap = this.areas.panelRoute$.value;
+        const prodKey = snap.queryParamMap.get('productKey');
+        const prodTag = snap.queryParamMap.get('productTag');
+        if (!!prodKey && !!prodTag) {
+          const prod = this.prodList.find((p) => p.id === prodKey);
+          if (!!prod) {
+            if (!!prod.versions.find((v) => v === prodTag)) {
+              this.selectedProduct = prod;
+              this.config.product.name = prodKey;
+              this.config.product.tag = prodTag;
+            }
           }
         }
-      }
-    });
+      })
+    );
 
-    this.servers.servers$.subscribe((s) => (this.serverList = s));
+    this.subscription.add(this.servers.servers$.subscribe((s) => (this.serverList = s)));
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   onSave(): void {

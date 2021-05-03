@@ -1,55 +1,40 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { InstanceDto } from 'src/app/models/gen.dtos';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { ServersService } from '../../../servers/services/servers.service';
-import { InstancesService } from '../../services/instances.service';
+import { InstanceEditService } from '../../services/instance-edit.service';
 
 @Component({
   selector: 'app-configuration',
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.css'],
 })
-export class ConfigurationComponent implements OnInit, OnDestroy {
+export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ narrow$ = new BehaviorSubject<boolean>(true);
-  /* tempalte */ instance$ = new BehaviorSubject<InstanceDto>(null);
+
+  @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   private subscription: Subscription;
-  private changesSubscription: Subscription;
 
   constructor(
     public cfg: ConfigService,
     public areas: NavAreasService,
-    public instances: InstancesService,
     public servers: ServersService,
-    private media: BreakpointObserver,
-    private changes: ObjectChangesService
+    public edit: InstanceEditService,
+    private media: BreakpointObserver
   ) {
     this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
   }
 
-  ngOnInit(): void {
-    this.instances.current$.subscribe((inst) => {
-      if (!!this.changesSubscription) {
-        this.changesSubscription.unsubscribe();
-      }
+  ngOnInit(): void {}
 
-      if (!!inst && !!this.instance$.value) {
-        // if both are set, we need to compare whether the version changed on the server.
-        if (inst.instance.tag !== this.instance$.value.instance.tag) {
-          // TODO: warn user
-          console.log('Server has a new version!');
-        }
-      }
+  ngOnDestroy(): void {}
 
-      this.instance$.next(inst);
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+  public isDirty(): boolean {
+    return this.edit.hasSaveableChanges() || this.edit.hasPendingChanges();
   }
 }

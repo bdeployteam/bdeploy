@@ -1,7 +1,7 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Configuration - {{ (instance$ | async)?.instanceConfiguration.name }}">
+  <app-bd-dialog-toolbar header="Configuration - {{ (edit.state$ | async)?.config.name }}">
     <div fxFlex="1 0 auto"></div>
-    <div class="local-version-text" *ngIf="instance$ | async as inst">
+    <div class="local-version-text" *ngIf="edit.current$ | async as inst">
       <ng-container *ngIf="!(narrow$ | async)"
         >Current Version: {{ inst.instance.tag }}, Active: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None' }}</ng-container
       >
@@ -9,20 +9,20 @@
         >Ver.: {{ inst.instance.tag }}<ng-container>, Act.: {{ inst.activeVersion?.tag }}</ng-container></ng-container
       >
     </div>
-    <ng-container *ngIf="(instance$ | async)?.managedServer?.update?.updateAvailable">
+    <ng-container *ngIf="(edit.current$ | async)?.managedServer?.update?.updateAvailable">
       <app-bd-button
         text="Server Update Available"
         icon="system_update"
         [collapsed]="narrow$ | async"
         color="accent"
         (click)="
-          areas.navigateBoth(['/servers', 'browser', areas.groupContext$.value], ['panels', 'servers', 'details', instance$.value?.managedServer?.hostName])
+          areas.navigateBoth(['/servers', 'browser', areas.groupContext$.value], ['panels', 'servers', 'details', edit.current$.value?.managedServer?.hostName])
         "
       ></app-bd-button>
       <mat-divider *ngIf="cfg.isCentral()" [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="cfg.isCentral()">
-      <ng-container *ngIf="instance$ | async as instance">
+      <ng-container *ngIf="edit.current$ | async as instance">
         <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
       </ng-container>
@@ -31,20 +31,49 @@
       text="Instance Settings"
       icon="settings"
       [route]="['panels', 'instances', 'settings']"
-      [disabled]="!servers.isSynchronized((instance$ | async)?.managedServer)"
+      [disabled]="!servers.isSynchronized((edit.current$ | async)?.managedServer)"
+      tooltip="below"
     ></app-bd-panel-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-button
+      [matTooltip]="!(edit.change$ | async) ? 'Undo not possible' : 'Undo ' + (edit.change$ | async)?.description"
+      matTooltipPosition="below"
+      text="Undo"
+      icon="undo"
+      [disabled]="!(edit.change$ | async)"
+      (click)="edit.undo()"
+    ></app-bd-button>
+    <app-bd-button
+      text="Save Changes"
+      icon="save"
+      color="primary"
+      [disabled]="!servers.isSynchronized((edit.current$ | async)?.managedServer) || !edit.hasSaveableChanges() || (edit.incompatible$ | async)"
+      [matTooltip]="(edit.incompatible$ | async) ? 'Saving is not possible due to a conflict on the server' : 'Save all changes'"
+      matTooltipPosition="below"
+      (click)="edit.save()"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div *ngIf="servers.isSynchronized((instance$ | async)?.managedServer)"></div>
+    <div *ngIf="edit.incompatible$ | async" class="bd-rect-card" [style.margin-top.px]="2">
+      <div fxLayout="column">
+        <div class="bd-default-padding bd-warning-text">
+          <strong>SAVING NOT POSSIBLE</strong> due to a conflicting changes on the server. You must reload the page to resume editing.
+        </div>
+      </div>
+    </div>
 
-    <app-bd-no-data *ngIf="!servers.isSynchronized((instance$ | async)?.managedServer)">
+    <div *ngIf="servers.isSynchronized((edit.current$ | async)?.managedServer)">
+      <!-- TODO: actual content -->
+    </div>
+
+    <app-bd-no-data *ngIf="!servers.isSynchronized((edit.current$ | async)?.managedServer)">
       <p>
-        <strong>{{ (instance$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
-        <strong>{{ (instance$ | async).managedServer.hostName }}</strong>
+        <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
+        <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
       </p>
       <p>Synchronize the instance to (re-)enable editing.</p>
-      <app-bd-server-sync-button [collapsed]="false" [server]="(instance$ | async).managedServer"></app-bd-server-sync-button>
+      <app-bd-server-sync-button [collapsed]="false" [server]="(edit.current$ | async).managedServer"></app-bd-server-sync-button>
     </app-bd-no-data>
   </app-bd-dialog-content>
 </app-bd-dialog>

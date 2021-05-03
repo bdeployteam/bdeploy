@@ -17,6 +17,7 @@ import { RouterLinkActive } from '@angular/router';
 })
 export class MainNavButtonComponent implements OnInit {
   @Input() icon: string;
+  @Input() svgIcon: string;
   @Input() text: string;
   @Input() collapsed: boolean;
   @Input() disabled: boolean;

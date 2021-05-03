@@ -20,6 +20,7 @@ import { ProcessNativesComponent } from './components/process-natives/process-na
 import { ProcessPortsComponent } from './components/process-ports/process-ports.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     HistoryDiffFieldComponent,
     ConfigDescCardsComponent,
     HistoryHeaderConfigComponent,
+    InstanceSettingsComponent,
   ],
   imports: [CommonModule, CoreModule, InstancesRoutingModule, PrimaryInstancesModule, MatProgressSpinnerModule, MatCardModule],
 })

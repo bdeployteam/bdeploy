@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { ACTION_NO, ACTION_OK, ACTION_YES, BdDialogMessage, BdDialogMessageComponent } from '../bd-dialog-message/bd-dialog-message.component';
 
 /** Amount of pixels within which we trigger "near" events */
@@ -84,8 +84,7 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   public message<T>(msg: BdDialogMessage<T>): Observable<T> {
     return new Observable((s) => {
       this.messageComp.message$.next(msg);
-      const sub = this.messageComp.result$.subscribe((r) => {
-        sub.unsubscribe();
+      this.messageComp.result$.pipe(first()).subscribe((r) => {
         s.next(r);
         s.complete();
       });

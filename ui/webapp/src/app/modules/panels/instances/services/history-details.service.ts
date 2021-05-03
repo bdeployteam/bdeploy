@@ -50,67 +50,65 @@ export class HistoryDetailsService {
   public getVersionDetails(version: string): Observable<InstanceConfigCache> {
     return new Observable<InstanceConfigCache>((s) => {
       this.loading$.next(true);
-      const sub = this.instances.current$.subscribe((instance) => {
-        const group = this.groups.current$.value;
+      this.instances.current$
+        .pipe(
+          skipWhile((i) => !i),
+          first()
+        )
+        .subscribe((instance) => {
+          const group = this.groups.current$.value;
 
-        if (!instance || !group) {
-          return;
-        }
+          // check if we have a cache entry already.
+          const cached = this.cache.find((c) => c.version === version);
+          if (!!cached) {
+            s.next(cached);
+            s.complete();
+            return;
+          }
 
-        // await initilization if required.
-        setTimeout(() => sub.unsubscribe());
+          let loadConfig: Observable<InstanceConfiguration>;
+          let loadNodes: Observable<InstanceNodeConfigurationListDto>;
 
-        // check if we have a cache entry already.
-        const cached = this.cache.find((c) => c.version === version);
-        if (!!cached) {
-          s.next(cached);
-          s.complete();
-          return;
-        }
+          if (version === instance.activeVersion.tag) {
+            // instances service loads the active version anyway, no need to do it again.
+            loadConfig = this.instances.active$.pipe(
+              skipWhile((i) => i === null),
+              map((c) => c.instanceConfiguration),
+              first()
+            );
+            loadNodes = this.instances.activeNodeCfgs$.pipe(
+              skipWhile((n) => n === null),
+              first()
+            );
+          } else {
+            // this is a version we do not normally need, except for history viewing. load it from the server.
+            loadConfig = this.http.get<InstanceConfiguration>(`${this.apiPath(group.name)}/${instance.instanceConfiguration.uuid}/${version}`);
+            loadNodes = this.http.get<InstanceNodeConfigurationListDto>(
+              `${this.apiPath(group.name)}/${instance.instanceConfiguration.uuid}/${version}/nodeConfiguration`
+            );
+          }
 
-        let loadConfig: Observable<InstanceConfiguration>;
-        let loadNodes: Observable<InstanceNodeConfigurationListDto>;
-
-        if (version === instance.activeVersion.tag) {
-          // instances service loads the active version anyway, no need to do it again.
-          loadConfig = this.instances.active$.pipe(
-            skipWhile((i) => i === null),
-            map((c) => c.instanceConfiguration),
-            first()
-          );
-          loadNodes = this.instances.activeNodeCfgs$.pipe(
-            skipWhile((n) => n === null),
-            first()
-          );
-        } else {
-          // this is a version we do not normally need, except for history viewing. load it from the server.
-          loadConfig = this.http.get<InstanceConfiguration>(`${this.apiPath(group.name)}/${instance.instanceConfiguration.uuid}/${version}`);
-          loadNodes = this.http.get<InstanceNodeConfigurationListDto>(
-            `${this.apiPath(group.name)}/${instance.instanceConfiguration.uuid}/${version}/nodeConfiguration`
-          );
-        }
-
-        forkJoin({
-          config: loadConfig,
-          nodes: loadNodes,
-        })
-          .pipe(
-            finalize(() => this.loading$.next(false)),
-            measure('Load Historic Configuration')
-          )
-          .subscribe(
-            ({ config, nodes }) => {
-              const entry: InstanceConfigCache = { version, config, nodes };
-              this.cache.push(entry);
-              s.next(entry);
-              s.complete();
-            },
-            (error) => {
-              s.error(error);
-              s.complete();
-            }
-          );
-      });
+          forkJoin({
+            config: loadConfig,
+            nodes: loadNodes,
+          })
+            .pipe(
+              finalize(() => this.loading$.next(false)),
+              measure('Load Historic Configuration')
+            )
+            .subscribe(
+              ({ config, nodes }) => {
+                const entry: InstanceConfigCache = { version, config, nodes };
+                this.cache.push(entry);
+                s.next(entry);
+                s.complete();
+              },
+              (error) => {
+                s.error(error);
+                s.complete();
+              }
+            );
+        });
     });
   }
 }

@@ -12,14 +12,6 @@
     <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
-      icon="settings"
-      text="Instance Group Settings"
-      [route]="['panels', 'groups', 'settings']"
-      [disabled]="!authService.isCurrentScopeAdmin()"
-      tooltip="below"
-    ></app-bd-panel-button>
-    <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-panel-button
       icon="add"
       text="Add Instance"
       [route]="['panels', 'instances', 'add']"

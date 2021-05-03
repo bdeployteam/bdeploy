@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { ServersService } from '../../servers/services/servers.service';
 import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
-import { InstanceSyncCellComponent } from '../components/browser/instance-sync-cell/instance-sync-cell.component';
 import { InstancesService } from './instances.service';
 
 @Injectable({
@@ -92,8 +92,8 @@ export class InstancesColumnsService {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,
-    data: (r) => r.managedServer.lastSync,
-    component: InstanceSyncCellComponent,
+    data: (r) => r.managedServer,
+    component: BdDataSyncCellComponent,
     width: '50px',
   };
 

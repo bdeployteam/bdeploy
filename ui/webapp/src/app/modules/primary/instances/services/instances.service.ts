@@ -117,6 +117,10 @@ export class InstancesService {
       .pipe(measure('Current Instance History'));
   }
 
+  public loadNodes(instance: string, tag: string): Observable<InstanceNodeConfigurationListDto> {
+    return this.http.get<InstanceNodeConfigurationListDto>(`${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`);
+  }
+
   private reload(group: string) {
     if (!group) {
       this.instances$.next([]);
