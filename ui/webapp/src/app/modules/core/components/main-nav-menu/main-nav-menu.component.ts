@@ -19,13 +19,13 @@ import { NavAreasService } from '../../services/nav-areas.service';
     scaleWidthToZero,
     trigger('menuOpenClose', [
       state('closed', style({ width: '64px' })),
-      state('open', style({ width: '210px' })),
+      state('open', style({ width: '220px' })),
       transition('open => closed', [animate('0.2s ease', style({ width: '64px' }))]),
-      transition('closed => open', [group([animate('0.2s ease', style({ width: '210px' })), query('@*', [animateChild()])])]),
+      transition('closed => open', [group([animate('0.2s ease', style({ width: '220px' })), query('@*', [animateChild()])])]),
     ]),
     trigger('headerOpenClose', [
       state('closed', style({ width: '104px' })),
-      state('open', style({ width: '182px' })),
+      state('open', style({ width: '192px' })),
       transition('open => closed', [animate('0.2s ease')]),
       transition('closed => open', [animate('0.2s ease')]),
     ]),

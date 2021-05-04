@@ -84,6 +84,10 @@ export class InstancesService {
     return this.http.put(`${this.apiPath(this.group)}`, instance, { params: { managedServer } });
   }
 
+  public delete(instance: string): Observable<any> {
+    return this.http.delete(`${this.apiPath(this.group)}/${instance}/delete`);
+  }
+
   public download(dir: RemoteDirectory, entry: RemoteDirectoryEntry) {
     const origin = this.current$.value;
 

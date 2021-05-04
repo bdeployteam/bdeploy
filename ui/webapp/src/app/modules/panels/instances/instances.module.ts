@@ -14,13 +14,17 @@ import { HistoryEntryComponent } from './components/history-entry/history-entry.
 import { HistoryHeaderConfigComponent } from './components/history-header-config/history-header-config.component';
 import { HistoryProcessConfigComponent } from './components/history-process-config/history-process-config.component';
 import { HistoryViewComponent } from './components/history-view/history-view.component';
+import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
+import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
+import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
+import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
+import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
 import { ProcessNativesComponent } from './components/process-natives/process-natives.component';
 import { ProcessPortsComponent } from './components/process-ports/process-ports.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
-import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +44,10 @@ import { InstanceSettingsComponent } from './components/instance-settings/instan
     ConfigDescCardsComponent,
     HistoryHeaderConfigComponent,
     InstanceSettingsComponent,
+    EditConfigComponent,
+    MaintenanceComponent,
+    AttributesComponent,
+    LocalChangesComponent,
   ],
   imports: [CommonModule, CoreModule, InstancesRoutingModule, PrimaryInstancesModule, MatProgressSpinnerModule, MatCardModule],
 })

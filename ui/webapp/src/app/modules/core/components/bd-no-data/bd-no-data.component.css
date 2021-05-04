@@ -1,5 +1,6 @@
 .local-sizing {
   padding: 30px;
+  max-width: 100%;
 }
 
 .local-header {

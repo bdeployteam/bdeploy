@@ -32,7 +32,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
 
   ngOnInit(): void {}
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 
   public isDirty(): boolean {
     return this.edit.hasSaveableChanges() || this.edit.hasPendingChanges();

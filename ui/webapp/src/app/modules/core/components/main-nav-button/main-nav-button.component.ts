@@ -23,8 +23,9 @@ export class MainNavButtonComponent implements OnInit {
   @Input() disabled: boolean;
   @Input() visible = true;
   @Input() route: any[];
+  @Input() panel = false;
 
-  @ViewChild(RouterLinkActive) /* template */ rla: RouterLinkActive;
+  @ViewChild(RouterLinkActive, { static: false }) /* template */ rla: RouterLinkActive;
 
   constructor() {}
 

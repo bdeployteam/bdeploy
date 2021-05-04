@@ -9,4 +9,5 @@
       <app-main-nav-flyin fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-flyin>
     </div>
   </div>
+  <div class="local-watermark">{{ cfg.config.version | formatVersion }}</div>
 </div>

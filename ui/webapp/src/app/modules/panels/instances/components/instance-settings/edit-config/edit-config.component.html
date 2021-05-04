@@ -1,0 +1,30 @@
+<app-bd-dialog [loadingWhen$]="edit.loading$">
+  <app-bd-dialog-toolbar header="Instance Configuration" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="doApply()" *ngIf="edit.state$ | async as state">
+        <div>
+          Edit instance: <strong>{{ state.config.uuid }}</strong>
+        </div>
+        <app-bd-form-input label="Name" name="name" [(ngModel)]="state.config.name" required></app-bd-form-input>
+        <app-bd-form-input label="Description" name="description" [(ngModel)]="state.config.description" required></app-bd-form-input>
+        <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="state.config.purpose" [values]="getPurposes()" required></app-bd-form-select>
+        <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="state.config.autoStart"></app-bd-form-toggle>
+        <app-bd-form-toggle label="Automatic Uninstallation" name="autoUninstall" [(ngModel)]="state.config.autoUninstall"></app-bd-form-toggle>
+
+        <app-bd-button type="submit" text="APPLY" [collapsed]="false" color="toolbar" [disabled]="!edit.hasPendingChanges()"></app-bd-button>
+      </form>
+      <!-- Attention: may *never* be inside the <form> tag! -->
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

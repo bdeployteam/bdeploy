@@ -239,17 +239,23 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.READ)
     public HistoryResultDto getInstanceHistory(@ActivityScope @PathParam("instance") String instanceId, HistoryFilterDto filter);
 
+    /** @deprecated no longer required with new UI, done on client */
+    @Deprecated
     @GET
     @Path("/{instance}/history-compare-versions")
     @RequiredPermission(permission = Permission.READ)
     public HistoryEntryVersionDto compareVersions(@ActivityScope @PathParam("instance") String instanceId,
             @QueryParam("a") int versionA, @QueryParam("b") int versionB);
 
+    /** @deprecated no longer required with new UI, done on client */
+    @Deprecated
     @POST
     @Path("/{instance}/history-compare-config")
     @RequiredPermission(permission = Permission.READ)
     public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto);
 
+    /** @deprecated no longer required with new UI, contained in InstanceDto */
+    @Deprecated
     @GET
     @Path("/list-attributes")
     public Map<String, CustomAttributesRecord> listAttributes();

@@ -5,9 +5,6 @@
       <ng-container *ngIf="!(narrow$ | async)"
         >Current Version: {{ inst.instance.tag }}, Active: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None' }}</ng-container
       >
-      <ng-container *ngIf="narrow$ | async"
-        >Ver.: {{ inst.instance.tag }}<ng-container>, Act.: {{ inst.activeVersion?.tag }}</ng-container></ng-container
-      >
     </div>
     <ng-container *ngIf="(edit.current$ | async)?.managedServer?.update?.updateAvailable">
       <app-bd-button
@@ -36,13 +33,29 @@
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-button
-      [matTooltip]="!(edit.change$ | async) ? 'Undo not possible' : 'Undo ' + (edit.change$ | async)?.description"
+      [matTooltip]="!(edit.undo$ | async) ? 'Undo not possible' : 'Undo ' + (edit.undo$ | async)?.description"
       matTooltipPosition="below"
       text="Undo"
       icon="undo"
-      [disabled]="!(edit.change$ | async)"
+      [disabled]="!(edit.undo$ | async)"
       (click)="edit.undo()"
     ></app-bd-button>
+    <app-bd-button
+      [matTooltip]="!(edit.redo$ | async) ? 'Redo not possible' : 'Redo ' + (edit.redo$ | async)?.description"
+      matTooltipPosition="below"
+      text="Redo"
+      icon="redo"
+      [disabled]="!(edit.redo$ | async)"
+      (click)="edit.redo()"
+    ></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button
+      text="Local Changes"
+      icon="settings_backup_restore"
+      [route]="['panels', 'instances', 'changes']"
+      tooltip="below"
+      [disabled]="!edit.hasSaveableChanges()"
+    ></app-bd-panel-button>
     <app-bd-button
       text="Save Changes"
       icon="save"
@@ -58,17 +71,23 @@
     <div *ngIf="edit.incompatible$ | async" class="bd-rect-card" [style.margin-top.px]="2">
       <div fxLayout="column">
         <div class="bd-default-padding bd-warning-text">
-          <strong>SAVING NOT POSSIBLE</strong> due to a conflicting changes on the server. You must reload the page to resume editing.
+          <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes on the server. You must reload the page to resume editing.
         </div>
       </div>
     </div>
 
-    <div *ngIf="servers.isSynchronized((edit.current$ | async)?.managedServer)">
-      <!-- TODO: actual content -->
-    </div>
+    <ng-container *ngIf="edit.current$ | async as instance">
+      <div *ngIf="servers.isSynchronized(instance?.managedServer)">
+        <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
+
+        <!-- TODO: Server Nodes with configured applications -->
+
+        <!-- TODO: Client Applications node if client applications available -->
+      </div>
+    </ng-container>
 
     <app-bd-no-data *ngIf="!servers.isSynchronized((edit.current$ | async)?.managedServer)">
-      <p>
+      <p [style.text-align]="'center'">
         <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
         <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
       </p>

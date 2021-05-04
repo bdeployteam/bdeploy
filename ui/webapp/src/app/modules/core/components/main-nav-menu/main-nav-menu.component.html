@@ -74,7 +74,8 @@
     svgIcon="group-settings"
     text="Group Settings"
     [collapsed]="!expanded"
-    [route]="['', { outlets: { panel: ['panels', 'groups', 'settings'] } }]"
+    [panel]="true"
+    [route]="['panels', 'groups', 'settings']"
   ></app-main-nav-button>
 
   <!-- Instance -->
@@ -97,7 +98,7 @@
   <app-main-nav-button
     [visible]="!!(areas.instanceContext$ | async)"
     svgIcon="instance-settings"
-    text="Instance Config."
+    text="Instance Configuration"
     [collapsed]="!expanded"
     [route]="['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value]"
     [disabled]="!authService.isScopedWrite(areas.groupContext$ | async)"

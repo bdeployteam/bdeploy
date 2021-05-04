@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { applyChangeset, Changeset, diff, revertChangeset } from 'json-diff-ts';
+import { applyChangeset, Changeset, diff } from 'json-diff-ts';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -22,10 +22,6 @@ export class InstanceEdit {
   public apply(current: InstanceConfigurationDto) {
     applyChangeset(current, this.changeset);
   }
-
-  public revert(current: InstanceConfigurationDto) {
-    revertChangeset(current, this.changeset);
-  }
 }
 
 @Injectable({
@@ -39,10 +35,13 @@ export class InstanceEditService {
 
   public incompatible$ = new BehaviorSubject<boolean>(false);
 
-  private changes: InstanceEdit[] = [];
+  public undos: InstanceEdit[] = [];
+  public redos: InstanceEdit[] = [];
+  private base$ = new BehaviorSubject<InstanceConfigurationDto>(null);
 
-  public change$ = new BehaviorSubject<InstanceEdit>(null);
-  public base$ = new BehaviorSubject<InstanceConfigurationDto>(null);
+  public undo$ = new BehaviorSubject<InstanceEdit>(null);
+  public redo$ = new BehaviorSubject<InstanceEdit>(null);
+
   public state$ = new BehaviorSubject<InstanceConfigurationDto>(null);
   public applications$ = new BehaviorSubject<{ [key: string]: ApplicationDescriptor }>(null);
 
@@ -59,8 +58,12 @@ export class InstanceEditService {
     private areas: NavAreasService
   ) {
     this.instances.current$.subscribe((instance) => {
-      if (instance?.instance?.name !== this.current$.value?.instance?.name || instance?.instance?.tag !== this.current$.value?.instance?.tag) {
-        if (!!this.changes?.length) {
+      // ALWAYS update current$ to pick up updated global data (banner, etc.).
+      const cur = this.current$.value;
+      this.current$.next(instance);
+
+      if (instance?.instance?.name !== cur?.instance?.name || instance?.instance?.tag !== cur?.instance?.tag) {
+        if (!!this.undos?.length || !!this.redos?.length) {
           // instance (version?) changes, but we have edits... this means we're basically doomed.
           this.log.warn('Instance update with pending changes.');
           this.incompatible$.next(true);
@@ -90,13 +93,17 @@ export class InstanceEditService {
       return;
     }
 
+    // clear redo, no longer valid.
+    this.redos = [];
+    this.redo$.next(null);
+
     // the current state
     const state = this.reBuild();
 
     // and the diff to it :)
     const change = new InstanceEdit(description, state, this.state$.value);
-    this.changes.push(change);
-    this.change$.next(change);
+    this.undos.push(change);
+    this.undo$.next(change);
 
     // re-publish the state to inform others.
     this.state$.next(this.state$.value);
@@ -108,12 +115,10 @@ export class InstanceEditService {
    * Note: this also discards all concealed (but not saved) edits.
    */
   public reset(): void {
-    // note that we stay in loading$ state if no instance is set, this is ok.
-    this.loading$.next(true);
-
-    this.changes = [];
-    this.current$.next(null);
-    this.change$.next(null);
+    this.undos = [];
+    this.redos = [];
+    this.undo$.next(null);
+    this.redo$.next(null);
     this.base$.next(null);
     this.state$.next(null);
     this.incompatible$.next(false);
@@ -121,11 +126,11 @@ export class InstanceEditService {
 
     const inst = this.instances.current$.value;
     if (!!inst) {
+      this.loading$.next(true);
       this.instances
         .loadNodes(inst.instanceConfiguration.uuid, inst.instance.tag)
         .pipe(finalize(() => this.loading$.next(false)))
         .subscribe((nodes) => {
-          this.current$.next(inst);
           this.applications$.next(nodes.applications);
 
           const base: InstanceConfigurationDto = { config: inst.instanceConfiguration, nodeDtos: nodes.nodeConfigDtos };
@@ -161,7 +166,7 @@ export class InstanceEditService {
    * @returns  whether there is one or more concealed changes.
    */
   public hasSaveableChanges(): boolean {
-    return this.changes.length > 0;
+    return this.undos.length > 0;
   }
 
   /** Applies all current InstanceEdits and saves the result to the server. */
@@ -192,25 +197,46 @@ export class InstanceEditService {
 
   /** Removes the last edit from the edit stack, effectively undoing it */
   public undo(): void {
-    this.changes.pop();
+    const change = this.undos.pop();
+    if (!!change) {
+      this.redos.push(change);
+      this.redo$.next(change);
+    }
     this.discard(); // rebuilds the current state.
 
     // now the next-oldest edit is the "current" one;
-    if (!this.changes.length) {
-      this.change$.next(null);
+    if (!this.undos.length) {
+      this.undo$.next(null);
     } else {
-      this.change$.next(this.changes[this.changes.length - 1]);
+      this.undo$.next(this.undos[this.undos.length - 1]);
+    }
+  }
+
+  /** Redoes an undone change if possible */
+  public redo(): void {
+    if (!this.redos.length) {
+      return;
+    }
+
+    const change = this.redos.pop();
+    this.undos.push(change);
+    this.discard(); // rebuilds the current state.
+
+    this.undo$.next(change);
+    if (!this.redos.length) {
+      this.redo$.next(null);
+    } else {
+      this.redo$.next(this.redos[this.redos.length - 1]);
     }
   }
 
   /** Creates the current state from the base and all recorded edits. */
   private reBuild(): InstanceConfigurationDto {
-    if (!this.isAllowEdit()) {
-      this.log.error(new ErrorMessage('Trying to edit with no state', new Error()));
-      return undefined;
+    if (!this.base$.value) {
+      return null;
     }
     const state = cloneDeep(this.base$.value);
-    this.changes.forEach((c) => c.apply(state));
+    this.undos.forEach((c) => c.apply(state));
     return state;
   }
 

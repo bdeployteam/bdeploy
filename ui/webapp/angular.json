@@ -32,7 +32,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "allowedCommonJsDependencies": ["brace/mode/xml", "brace/mode/json", "dragula"],
+            "allowedCommonJsDependencies": ["brace/mode/xml", "brace/mode/json", "dragula", "json-diff-ts"],
             "aot": true,
             "outputPath": "dist/webapp",
             "index": "src/index.html",

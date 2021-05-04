@@ -4,6 +4,15 @@
   overflow: hidden;
 }
 
+.local-watermark {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+
+  font-size: small;
+  color: var(--bd-text-secondary);
+}
+
 .local-content-sizing {
   /* see main-nav-top which is 114px high */
   max-height: calc(100% - 114px);

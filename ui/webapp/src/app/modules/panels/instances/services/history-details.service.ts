@@ -49,7 +49,6 @@ export class HistoryDetailsService {
 
   public getVersionDetails(version: string): Observable<InstanceConfigCache> {
     return new Observable<InstanceConfigCache>((s) => {
-      this.loading$.next(true);
       this.instances.current$
         .pipe(
           skipWhile((i) => !i),
@@ -69,7 +68,7 @@ export class HistoryDetailsService {
           let loadConfig: Observable<InstanceConfiguration>;
           let loadNodes: Observable<InstanceNodeConfigurationListDto>;
 
-          if (version === instance.activeVersion.tag) {
+          if (version === instance.activeVersion?.tag) {
             // instances service loads the active version anyway, no need to do it again.
             loadConfig = this.instances.active$.pipe(
               skipWhile((i) => i === null),
@@ -88,6 +87,7 @@ export class HistoryDetailsService {
             );
           }
 
+          this.loading$.next(true);
           forkJoin({
             config: loadConfig,
             nodes: loadNodes,

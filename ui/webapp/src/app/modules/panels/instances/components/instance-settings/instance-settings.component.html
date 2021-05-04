@@ -1,18 +1,35 @@
-<app-bd-dialog [loadingWhen$]="edit.loading$">
+<app-bd-dialog>
   <app-bd-dialog-toolbar header="Instance Settings" [closeablePanel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="doApply()" *ngIf="edit.state$ | async as state">
-      <div>
-        Edit instance: <strong>{{ state.config.uuid }}</strong>
-      </div>
-      <app-bd-form-input label="Name" name="name" [(ngModel)]="state.config.name" required></app-bd-form-input>
-      <app-bd-form-input label="Description" name="description" [(ngModel)]="state.config.description" required></app-bd-form-input>
-      <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="state.config.purpose" [values]="getPurposes()" required></app-bd-form-select>
-      <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="state.config.autoStart"></app-bd-form-toggle>
-      <app-bd-form-toggle label="Automatic Uninstallation" name="autoUninstall" [(ngModel)]="state.config.autoUninstall"></app-bd-form-toggle>
-
-      <app-bd-button type="submit" text="APPLY" [collapsed]="false" color="toolbar" [disabled]="!edit.hasPendingChanges()"></app-bd-button>
-    </form>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-panel-button
+        text="Configuration"
+        icon="edit"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['config']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        text="Instance Attribute Values"
+        icon="local_offer"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['attributes']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        text="Maintenance"
+        icon="build"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['maintenance']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-panel-button>
+    </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

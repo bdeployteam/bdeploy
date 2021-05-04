@@ -11,6 +11,7 @@ import { BdButtonColorMode } from '../bd-button/bd-button.component';
 })
 export class BdPanelButtonComponent implements OnInit {
   @Input() icon: string;
+  @Input() svgIcon: string;
   @Input() text: string;
   @Input() route: any[] = ['.'];
   @Input() relative = false;

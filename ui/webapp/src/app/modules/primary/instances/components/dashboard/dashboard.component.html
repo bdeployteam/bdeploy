@@ -79,10 +79,10 @@
 
     <!-- Show hint if there is no active version. -->
     <app-bd-no-data *ngIf="!(instances.active$ | async)">
-      <p>
+      <p [style.text-align]="'center'">
         <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> does not have an active version. Dashboard not yet available.
       </p>
-      <p>Configure, install and activate instance version first.</p>
+      <p [style.text-align]="'center'">Configure, install and activate instance version first.</p>
       <app-bd-button
         text="Configure Instance"
         icon="settings"

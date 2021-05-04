@@ -14,7 +14,7 @@
   <app-bd-dialog-content>
     <app-bd-data-display #dataTable [columns]="columns" [records]="clients.apps$ | async" [searchable]="true" [recordRoute]="getRecordRoute">
       <app-bd-no-data>
-        <p>No instance in this instance group has configured client applications.</p>
+        <p [style.text-align]="'center'">No instance in this instance group has configured client applications.</p>
       </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>

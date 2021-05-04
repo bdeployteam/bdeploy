@@ -1,4 +1,5 @@
 <app-bd-button
+  *ngIf="!panel"
   fxFlexAlign="center center"
   [icon]="icon"
   [svgIcon]="svgIcon"
@@ -14,3 +15,17 @@
   [@showHide]="visible ? 'visible' : 'hidden'"
   [disabled]="disabled"
 ></app-bd-button>
+
+<app-bd-panel-button
+  *ngIf="panel"
+  fxFlexAlign="center center"
+  [icon]="icon"
+  [svgIcon]="svgIcon"
+  [text]="text"
+  color="toolbar"
+  [collapsed]="collapsed"
+  tooltip="right"
+  [route]="route"
+  [@showHide]="visible ? 'visible' : 'hidden'"
+  [disabled]="disabled"
+></app-bd-panel-button>

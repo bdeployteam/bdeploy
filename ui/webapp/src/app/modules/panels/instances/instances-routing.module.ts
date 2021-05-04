@@ -9,7 +9,11 @@ import { HistoryCompareSelectComponent } from './components/history-compare-sele
 import { HistoryCompareComponent } from './components/history-compare/history-compare.component';
 import { HistoryEntryComponent } from './components/history-entry/history-entry.component';
 import { HistoryViewComponent } from './components/history-view/history-view.component';
+import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
+import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
+import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
+import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
 import { ProcessNativesComponent } from './components/process-natives/process-natives.component';
@@ -19,7 +23,11 @@ import { ProcessStatusComponent } from './components/process-status/process-stat
 const INSTANCES_ROUTES: Route[] = [
   { path: 'add', component: AddInstanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'bulk', component: BulkControlComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'settings', component: InstanceSettingsComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
+  { path: 'changes', component: LocalChangesComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings', component: InstanceSettingsComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/config', component: EditConfigComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
+  { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/attributes', component: AttributesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'node/:node', component: NodeDetailsComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process', component: ProcessStatusComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process/ports', component: ProcessPortsComponent, canActivate: [ScopedReadGuard] },
