@@ -7,7 +7,7 @@
       <div><strong>Description:</strong>&nbsp;{{ server.description }}</div>
       <div><strong>URI:</strong>&nbsp;{{ server.uri }}</div>
       <div><strong>Last Sync.:</strong>&nbsp;{{ formatDate(server.lastSync) }}</div>
-      <ng-container *ngIf="server.update.updateAvailable">
+      <ng-container *ngIf="server.update?.updateAvailable">
         <div fxLayout="row" fxLayoutAlign="start center">
           <strong>Update available:</strong>&nbsp;{{ formatVersion(server.update.updateVersion)
           }}<mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>

@@ -2,11 +2,21 @@
   <app-bd-dialog-toolbar header="Local Changes" [closeablePanel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
-      <div>The following <strong>local, unsaved</strong> can be discarded.</div>
+      <div>The following <strong>local, unsaved</strong> changes have been performed.</div>
       <app-bd-data-table [records]="records" [columns]="columns" [sortData]="null"></app-bd-data-table>
-      <app-bd-button
+      <app-bd-panel-button
+        text="Compare Local with Base"
+        icon="compare"
         [collapsed]="false"
-        text="Discard Changes"
+        [toggle]="false"
+        [disabled]="!edit.hasSaveableChanges()"
+        [relative]="true"
+        [route]="['diff']"
+      ></app-bd-panel-button>
+      <app-bd-button
+        color="primary"
+        [collapsed]="false"
+        text="Discard All Changes"
         icon="settings_backup_restore"
         (click)="doDiscard()"
         [disabled]="!edit.hasSaveableChanges()"

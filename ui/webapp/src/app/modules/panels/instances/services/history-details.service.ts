@@ -7,12 +7,7 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
-
-export interface InstanceConfigCache {
-  version: string;
-  config: InstanceConfiguration;
-  nodes: InstanceNodeConfigurationListDto;
-}
+import { InstanceConfigCache } from '../utils/instance-utils';
 
 @Injectable({
   providedIn: 'root',

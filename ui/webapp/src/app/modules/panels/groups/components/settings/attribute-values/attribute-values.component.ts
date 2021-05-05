@@ -49,7 +49,7 @@ export class AttributeValuesComponent implements OnInit {
   /* template */ defs: CustomAttributeDescriptor[];
 
   /* template */ newAttr: CustomAttributeDescriptor;
-  /* tempalte */ newValue: string;
+  /* template */ newValue: string;
 
   private group: InstanceGroupConfiguration;
   private attributes: CustomAttributesRecord;

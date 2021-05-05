@@ -161,7 +161,6 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         RuntimeAssert.assertEquals(group, config.name, "Group update changes group name");
         InstanceGroupManifest igm = new InstanceGroupManifest(getGroupHive(group));
         Manifest.Key key = igm.update(config);
-        changes.change(ObjectChangeType.INSTANCE_GROUP, key);
 
         if (minion.getMode() == MinionMode.CENTRAL) {
             // update all managed servers, user had to confirm this in web UI.
@@ -176,6 +175,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 }
             }
         }
+
+        changes.change(ObjectChangeType.INSTANCE_GROUP, key);
     }
 
     @Override

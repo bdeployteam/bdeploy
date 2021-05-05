@@ -4,6 +4,7 @@ import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, finalize, map } from 'rxjs/operators';
 import {
+  CustomAttributesRecord,
   HistoryFilterDto,
   HistoryResultDto,
   InstanceBannerRecord,
@@ -86,6 +87,10 @@ export class InstancesService {
 
   public delete(instance: string): Observable<any> {
     return this.http.delete(`${this.apiPath(this.group)}/${instance}/delete`);
+  }
+
+  public updateAttributes(instance: string, attributes: CustomAttributesRecord) {
+    return this.http.post(`${this.apiPath(this.group)}/${instance}/attributes`, attributes);
   }
 
   public download(dir: RemoteDirectory, entry: RemoteDirectoryEntry) {

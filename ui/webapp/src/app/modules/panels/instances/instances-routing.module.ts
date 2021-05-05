@@ -14,6 +14,7 @@ import { EditConfigComponent } from './components/instance-settings/edit-config/
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
+import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
 import { ProcessNativesComponent } from './components/process-natives/process-natives.component';
@@ -24,6 +25,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'add', component: AddInstanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'bulk', component: BulkControlComponent, canActivate: [ScopedWriteGuard] },
   { path: 'changes', component: LocalChangesComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'changes/diff', component: LocalDiffComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
   { path: 'settings', component: InstanceSettingsComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/config', component: EditConfigComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [ScopedWriteGuard] },

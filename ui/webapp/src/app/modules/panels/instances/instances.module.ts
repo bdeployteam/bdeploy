@@ -25,6 +25,7 @@ import { ProcessNativesComponent } from './components/process-natives/process-na
 import { ProcessPortsComponent } from './components/process-ports/process-ports.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     MaintenanceComponent,
     AttributesComponent,
     LocalChangesComponent,
+    LocalDiffComponent,
   ],
   imports: [CommonModule, CoreModule, InstancesRoutingModule, PrimaryInstancesModule, MatProgressSpinnerModule, MatCardModule],
 })

@@ -5,6 +5,7 @@ import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
 @Component({
   selector: 'app-edit-config',
@@ -15,7 +16,7 @@ export class EditConfigComponent implements OnInit, DirtyableDialog {
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild('backButton') back: BdPanelButtonComponent;
 
-  constructor(public cfg: ConfigService, public edit: InstanceEditService) {}
+  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService) {}
 
   ngOnInit(): void {}
 

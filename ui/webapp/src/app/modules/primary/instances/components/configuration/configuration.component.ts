@@ -34,6 +34,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    this.edit.reset();
   }
 
   public isDirty(): boolean {

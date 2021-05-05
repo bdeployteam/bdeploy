@@ -37,13 +37,14 @@ export class InstanceEditService {
 
   public undos: InstanceEdit[] = [];
   public redos: InstanceEdit[] = [];
-  private base$ = new BehaviorSubject<InstanceConfigurationDto>(null);
+  public base$ = new BehaviorSubject<InstanceConfigurationDto>(null);
 
   public undo$ = new BehaviorSubject<InstanceEdit>(null);
   public redo$ = new BehaviorSubject<InstanceEdit>(null);
 
   public state$ = new BehaviorSubject<InstanceConfigurationDto>(null);
-  public applications$ = new BehaviorSubject<{ [key: string]: ApplicationDescriptor }>(null);
+  public baseApplications$ = new BehaviorSubject<{ [key: string]: ApplicationDescriptor }>(null);
+  public stateApplications$ = new BehaviorSubject<{ [key: string]: ApplicationDescriptor }>(null);
 
   public current$ = new BehaviorSubject<InstanceDto>(null);
 
@@ -122,7 +123,8 @@ export class InstanceEditService {
     this.base$.next(null);
     this.state$.next(null);
     this.incompatible$.next(false);
-    this.applications$.next(null);
+    this.baseApplications$.next(null);
+    this.stateApplications$.next(null);
 
     const inst = this.instances.current$.value;
     if (!!inst) {
@@ -131,7 +133,8 @@ export class InstanceEditService {
         .loadNodes(inst.instanceConfiguration.uuid, inst.instance.tag)
         .pipe(finalize(() => this.loading$.next(false)))
         .subscribe((nodes) => {
-          this.applications$.next(nodes.applications);
+          this.baseApplications$.next(nodes.applications);
+          this.stateApplications$.next(nodes.applications);
 
           const base: InstanceConfigurationDto = { config: inst.instanceConfiguration, nodeDtos: nodes.nodeConfigDtos };
 

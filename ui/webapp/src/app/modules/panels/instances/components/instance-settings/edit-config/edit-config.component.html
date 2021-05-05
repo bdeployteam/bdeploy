@@ -3,6 +3,17 @@
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-notification-card
+        *ngIf="!servers.isSynchronized(edit.current$.value?.managedServer)"
+        icon="history"
+        [warning]="true"
+        [dismissable]="false"
+        header="Server Not Synchronized"
+      >
+        <div [style.text-align]="'justify'">
+          The managed server responsible for this instance is not synchronized, details are unavailable. Please synchronize the server to enable editing.
+        </div>
+      </app-bd-notification-card>
       <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="doApply()" *ngIf="edit.state$ | async as state">
         <div>
           Edit instance: <strong>{{ state.config.uuid }}</strong>
@@ -13,7 +24,13 @@
         <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="state.config.autoStart"></app-bd-form-toggle>
         <app-bd-form-toggle label="Automatic Uninstallation" name="autoUninstall" [(ngModel)]="state.config.autoUninstall"></app-bd-form-toggle>
 
-        <app-bd-button type="submit" text="APPLY" [collapsed]="false" color="toolbar" [disabled]="!edit.hasPendingChanges()"></app-bd-button>
+        <app-bd-button
+          type="submit"
+          text="APPLY"
+          [collapsed]="false"
+          color="toolbar"
+          [disabled]="!edit.hasPendingChanges() || !servers.isSynchronized(edit.current$.value?.managedServer)"
+        ></app-bd-button>
       </form>
       <!-- Attention: may *never* be inside the <form> tag! -->
       <app-bd-panel-button

@@ -5,7 +5,8 @@ import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
-import { HistoryDetailsService, InstanceConfigCache } from '../../services/history-details.service';
+import { HistoryDetailsService } from '../../services/history-details.service';
+import { InstanceConfigCache } from '../../utils/instance-utils';
 
 @Component({
   selector: 'app-history-view',
