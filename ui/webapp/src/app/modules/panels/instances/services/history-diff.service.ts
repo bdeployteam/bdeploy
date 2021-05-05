@@ -12,6 +12,7 @@ import {
   OperatingSystem,
   ParameterConfiguration,
   ParameterDescriptor,
+  ParameterType,
   ProcessControlConfiguration,
 } from 'src/app/models/gen.dtos';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
@@ -62,8 +63,8 @@ export class Difference {
   /** The type of difference to render */
   public type: DiffType;
 
-  constructor(private base: any, private compare: any) {
-    this.value = base === null || base === undefined ? compare : base;
+  constructor(private base: any, private compare: any, valueOverride?: any) {
+    this.value = !!valueOverride ? valueOverride : base === null || base === undefined ? compare : base;
     this.type = getChangeType(base, compare);
   }
 }
@@ -138,21 +139,27 @@ export class ParameterDiff {
   public values: Difference[] = [];
 
   constructor(base: ParameterConfiguration, compare: ParameterConfiguration, public descriptor: ParameterDescriptor) {
+    // in case we KNOW this is a PASSWORD parameter, we want to pre-mask the value in each actual value.
+    const maskingValue = descriptor?.type === ParameterType.PASSWORD ? (base?.value === null || base?.value === undefined ? compare?.value : base.value) : null;
+
     if (!!base?.preRendered?.length) {
       if (base.preRendered.length !== compare?.preRendered?.length) {
         // DIFFERENT length, we cannot *directly* compare the values.
         for (const val of base.preRendered) {
-          this.values.push(new Difference(val, compare?.value));
+          const masked = !!maskingValue ? val.replace(maskingValue, '*'.repeat(maskingValue.length)) : val;
+          this.values.push(new Difference(val, compare?.value, masked));
         }
       } else {
         for (let i = 0; i < base.preRendered.length; ++i) {
-          this.values.push(new Difference(base.preRendered[i], compare.preRendered[i]));
+          const masked = !!maskingValue ? base.preRendered[i].replace(maskingValue, '*'.repeat(maskingValue.length)) : base.preRendered[i];
+          this.values.push(new Difference(base.preRendered[i], compare.preRendered[i], masked));
         }
       }
     } else if (!!compare?.preRendered?.length) {
       // we don't have anything, but they got some.
       for (const compareVal of compare.preRendered) {
-        this.values.push(new Difference(null, compareVal));
+        const masked = !!maskingValue ? compareVal.replace(maskingValue, '*'.repeat(maskingValue.length)) : compareVal;
+        this.values.push(new Difference(null, compareVal, masked));
       }
     }
 

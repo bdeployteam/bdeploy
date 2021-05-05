@@ -99,14 +99,8 @@
               No further information about this parameter available.
             </mat-card>
           </ng-template>
-          <!-- TODO: better masking: this masks *all* of the parameter, not just the value -->
-          <app-history-diff-field
-            [maskValue]="param.descriptor?.type === 'PASSWORD'"
-            [diffSide]="diffSide"
-            *ngFor="let val of param.values"
-            [diff]="val"
-            [popup]="paramPopup"
-          ></app-history-diff-field>
+          <!-- Don't set masking by the field, as parameters are partially pre-masked in case of passwords. -->
+          <app-history-diff-field [diffSide]="diffSide" *ngFor="let val of param.values" [diff]="val" [popup]="paramPopup"></app-history-diff-field>
         </ng-container>
       </div>
       <ng-container *ngIf="diff.endpoints?.http?.length">

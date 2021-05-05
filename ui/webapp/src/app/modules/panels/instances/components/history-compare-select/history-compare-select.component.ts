@@ -3,6 +3,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceVersionDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
 
 @Component({
@@ -14,9 +15,9 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   private versionColumn: BdDataColumn<InstanceVersionDto> = {
     id: 'version',
     name: 'Instance Version',
-    data: (r) => (r.key.tag === this.base ? `${r.key.tag} - Selected` : r.key.tag),
+    data: (r) => this.getVersionText(r),
     width: '100px',
-    classes: (r) => (r.key.tag === this.base ? ['bd-warning-text'] : []),
+    classes: (r) => this.getVersionClass(r),
   };
 
   private productVersionColumn: BdDataColumn<InstanceVersionDto> = {
@@ -38,7 +39,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
     return ['', { outlets: { panel: ['panels', 'instances', 'history', this.index, 'compare', this.base, row.key.tag] } }];
   };
 
-  constructor(private areas: NavAreasService, public details: HistoryDetailsService) {
+  constructor(private areas: NavAreasService, public details: HistoryDetailsService, private instances: InstancesService) {
     this.subscription = this.areas.panelRoute$.subscribe((r) => {
       if (!r) {
         return;
@@ -62,6 +63,38 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  private getVersionText(row: InstanceVersionDto) {
+    if (row.key.tag === this.base) {
+      return `${row.key.tag} - Selected`;
+    }
+
+    if (row.key.tag === this.instances.current$.value?.activeVersion?.tag) {
+      return `${row.key.tag} - Active`;
+    }
+
+    if (row.key.tag === this.instances.current$.value?.instance?.tag) {
+      return `${row.key.tag} - Current`;
+    }
+
+    return row.key.tag;
+  }
+
+  private getVersionClass(row: InstanceVersionDto): string[] {
+    if (row.key.tag === this.base) {
+      return ['bd-warning-text'];
+    }
+
+    if (row.key.tag === this.instances.current$.value?.activeVersion?.tag) {
+      return ['bd-accent-text'];
+    }
+
+    if (row.key.tag === this.instances.current$.value?.instance?.tag) {
+      return ['bd-accent-text'];
+    }
+
+    return [];
   }
 
   /* template */ onBack() {

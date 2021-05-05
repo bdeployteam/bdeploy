@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { BdDataColumn } from 'src/app/models/data';
 import { HistoryEntryDto, HistoryEntryType } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { InstancesService } from './instances.service';
 import { ProcessesService } from './processes.service';
 
 const historyTimestampColumn: BdDataColumn<HistoryEntryDto> = {
@@ -69,17 +70,17 @@ const historyExitCodeColumn: BdDataColumn<HistoryEntryDto> = {
   showWhen: '(min-width: 1000px)',
 };
 
-const historyVersionColumn: BdDataColumn<HistoryEntryDto> = {
-  id: 'version',
-  name: 'Version',
-  data: (r) => r.instanceTag,
-  width: '50px',
-};
-
 @Injectable({
   providedIn: 'root',
 })
 export class HistoryColumnsService {
+  public historyVersionColumn: BdDataColumn<HistoryEntryDto> = {
+    id: 'version',
+    name: 'Version',
+    data: (r) => this.getVersionText(r),
+    width: '64px',
+  };
+
   public defaultHistoryColumns: BdDataColumn<HistoryEntryDto>[] = [
     historyTimestampColumn,
     historyUserColumn,
@@ -87,8 +88,20 @@ export class HistoryColumnsService {
     historyTitleColumn,
     historyPidColumn,
     historyExitCodeColumn,
-    historyVersionColumn,
+    this.historyVersionColumn,
   ];
 
-  constructor() {}
+  constructor(private instances: InstancesService) {}
+
+  private getVersionText(row: HistoryEntryDto) {
+    if (row.instanceTag === this.instances.current$.value?.activeVersion?.tag) {
+      return `${row.instanceTag} - Active`;
+    }
+
+    if (row.instanceTag === this.instances.current$.value?.instance?.tag) {
+      return `${row.instanceTag} - Current`;
+    }
+
+    return row.instanceTag;
+  }
 }
