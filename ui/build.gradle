@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-    id "com.github.psxpaul.execfork" version "0.1.15"
+    id "com.github.psxpaul.execfork" version "0.1.13"
 }
 
 apply plugin: 'cz.habarta.typescript-generator'
@@ -221,7 +221,7 @@ project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runCypressHeadles
 triggerStopCoverageStandalone.mustRunAfter runCypressHeadless
 triggerStopCoverageCentral.mustRunAfter runCypressHeadless
 triggerStopCoverageManaged.mustRunAfter runCypressHeadless
-//test.dependsOn doneWithCypressHeadless // FIXME deactivated for the UI/UX rework
+test.dependsOn doneWithCypressHeadless
 
 task release(type: Copy, dependsOn: runCypressHeadless) {
     from "${webappDir}/cypress/fixtures/export-test.zip"

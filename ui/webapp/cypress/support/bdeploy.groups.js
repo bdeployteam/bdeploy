@@ -10,7 +10,7 @@ Cypress.Commands.add('createGroup', function (groupName, mode = 'STANDALONE') {
     cy.pressToolbarPanelButton('Add Instance Group');
   });
 
-  cy.inMainNavFlyin('Add Instance Group', () => {
+  cy.inMainNavFlyin('app-add-group', () => {
     cy.contains('button', 'SAVE').should('exist').and('be.disabled');
 
     cy.fillFormInput('name', groupName);
@@ -35,11 +35,10 @@ Cypress.Commands.add('deleteGroup', function (groupName, mode = 'STANDALONE') {
   cy.waitUntilContentLoaded();
 
   cy.enterGroup(groupName);
-  cy.inMainNavContent(() => {
-    cy.pressToolbarPanelButton('Instance Group Settings');
-  });
 
-  cy.inMainNavFlyin('Instance Group Settings', () => {
+  cy.pressMainNavButton('Group Settings');
+
+  cy.inMainNavFlyin('app-settings', () => {
     cy.get(`app-bd-panel-button[text="Maintenance"]`).click();
 
     cy.get('app-bd-dialog-toolbar[header="Instance Group Maintenance"]').should('exist');
@@ -70,7 +69,7 @@ Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, mo
   cy.get('app-products-browser').should('exist');
 
   cy.pressToolbarPanelButton('Upload Product');
-  cy.inMainNavFlyin('Upload', () => {
+  cy.inMainNavFlyin('app-product-upload', () => {
     cy.fillFileDrop(fileName);
     cy.contains('app-bd-file-upload', `Uploading: ${fileName}`).should('not.exist');
   });
@@ -95,41 +94,63 @@ Cypress.Commands.add('verifyProductVersion', function (groupName, productName, p
 });
 
 /**
- * Command: createInstance
- */
-Cypress.Commands.add('createInstance', function (groupName, instanceName, productName, productVersion, mode = 'STANDALONE') {
-  cy.visitBDeploy('/', mode);
-  cy.waitUntilContentLoaded();
-
-  cy.enterGroup(groupName);
-  cy.inMainNavContent(() => {
-    cy.pressToolbarPanelButton('Add Instance');
-  });
-
-  cy.inMainNavFlyin('Add Instance', () => {
-    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-
-    cy.fillFormInput('name', instanceName);
-    cy.fillFormInput('description', `Description of ${instanceName}`);
-    cy.fillFormSelect('purpose', 'TEST');
-    cy.fillFormSelect('product', productName);
-    cy.fillFormSelect('version', productVersion);
-
-    cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
-  });
-  cy.checkMainNavFlyinClosed();
-
-  cy.inMainNavContent(() => {
-    cy.contains('tr', instanceName).should('exist');
-  });
-});
-
-/**
  * Command: enterGroup
  */
 Cypress.Commands.add('enterGroup', function (groupName) {
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('exist').click();
     cy.contains('mat-toolbar', `Instances of ${groupName}`).should('exist');
+  });
+});
+
+/**
+ * Command: attachManaged
+ */
+Cypress.Commands.add('attachManaged', function (groupName) {
+  // prepare MANAGED
+  cy.visitBDeploy('/', 'MANAGED');
+  cy.waitUntilContentLoaded();
+  cy.get('app-groups-browser').should('exist');
+  cy.inMainNavContent(() => {
+    cy.contains('tr', groupName).should('not.exist');
+  });
+  cy.pressToolbarPanelButton('Link Instance Group');
+  cy.inMainNavFlyin('app-link-central', () => {
+    cy.pressExpansionPanel('Manual and Offline Linking');
+
+    cy.get(`app-bd-button[text="Download Link Information"]`).within(() => {
+      cy.get('button').should('exist').and('be.enabled').downloadBlobFile('managed-ident.txt');
+    });
+  });
+
+  // prepare CENTRAL
+  cy.visitBDeploy('/', 'CENTRAL');
+  cy.waitUntilContentLoaded();
+  cy.get('app-groups-browser').should('exist');
+  cy.inMainNavContent(() => {
+    cy.contains('tr', groupName).should('exist');
+  });
+  cy.enterGroup(groupName);
+  cy.pressMainNavButton('Managed Servers');
+  cy.get('app-servers-browser').should('exist');
+  cy.pressToolbarPanelButton('Link Managed Server');
+  cy.inMainNavFlyin('app-link-managed', () => {
+    cy.contains('div', 'Details for server to link').should('not.exist');
+    cy.contains('mat-card', 'Drop managed server information here!')
+      .parent()
+      .within(() => {
+        cy.get('input[data-cy="managed-ident"]').attachFile({
+          filePath: 'managed-ident.txt',
+          mimeType: 'text/plain',
+        });
+      });
+    cy.contains('div', 'Details for server to link').should('exist');
+    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+    cy.fillFormInput('description', 'Description of managed server');
+    cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+  });
+
+  cy.inMainNavContent(() => {
+    cy.contains('tr', 'Description of managed server').should('exist');
   });
 });

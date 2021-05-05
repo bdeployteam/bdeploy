@@ -29,3 +29,4 @@ import 'cypress-file-upload';
 import './bdeploy.common';
 import './bdeploy.login';
 import './bdeploy.groups';
+import './bdeploy.instances';
