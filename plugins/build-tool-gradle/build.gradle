@@ -20,7 +20,7 @@ repositories {
     jcenter()
 }
 
-version = "3.6.3"
+version = "3.6.4"
 group = "io.bdeploy"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -32,7 +32,7 @@ dependencies {
     testImplementation gradleTestKit()
 
     implementation (
-        'io.bdeploy:api:3.6.3'
+        'io.bdeploy:api:3.6.4'
     )
 }
 
