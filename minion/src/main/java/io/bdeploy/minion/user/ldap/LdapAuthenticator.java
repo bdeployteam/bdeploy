@@ -123,7 +123,7 @@ public class LdapAuthenticator implements Authenticator {
 
         for (SearchResult sr : toIterable(res.asIterator())) {
             try {
-                trace.log("    found: " + String.valueOf(sr.getAttributes().get(LDAP_DN).get(0)));
+                trace.log("    found: " + sr.getAttributes().get(LDAP_DN).get(0));
                 return verifyAndUpdateSearchResult(user, password, server, ctx, sr);
             } catch (NamingException e) {
                 log.warn("Cannot authenticate {} on server {}", user.name, server.server, e);
@@ -213,9 +213,7 @@ public class LdapAuthenticator implements Authenticator {
                 result = exception2String(dto.server + ": query failed: ", e);
             } finally {
                 try {
-                    if (ctx != null) {
-                        closeServerContext(ctx);
-                    }
+                    closeServerContext(ctx);
                 } catch (Exception e) {
                     result = exception2String(dto.server + ": close failed: ", e);
                 }

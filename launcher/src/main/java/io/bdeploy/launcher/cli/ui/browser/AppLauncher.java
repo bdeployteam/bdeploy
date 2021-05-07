@@ -49,6 +49,10 @@ public class AppLauncher extends SwingWorker<Object, Void> {
     protected void done() {
         try {
             get();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            JOptionPane.showMessageDialog(null, "Failed to launch application: " + ie.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "Failed to launch application: " + ex.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);

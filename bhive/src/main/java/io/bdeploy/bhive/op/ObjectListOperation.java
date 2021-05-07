@@ -68,7 +68,7 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
                     log.warn("Skipping damaged tree: {}", tree);
                     continue;
                 }
-                treeView.visit(new TreeVisitor.Builder().onTree((t) -> {
+                treeView.visit(new TreeVisitor.Builder().onTree(t -> {
                     // Check if we already have that tree or if it is excluded
                     ObjectId treeId = t.getElementId();
                     if (object2Tree.containsKey(treeId) || treeExcludes.contains(treeId)) {

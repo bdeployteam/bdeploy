@@ -270,7 +270,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
 
         @Override
         public final T call() throws Exception {
-            if (!getTransactions().hasTransaction()) {
+            if (!super.getTransactions().hasTransaction()) {
                 throw new IllegalStateException("Operation requires active transaction: " + getClass().getSimpleName());
             }
 

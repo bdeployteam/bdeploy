@@ -14,19 +14,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.StreamingOutput;
-import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.core.UriInfo;
-
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +43,20 @@ import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.LauncherDto;
-import io.bdeploy.ui.utils.WindowsInstallerConfig;
 import io.bdeploy.ui.utils.WindowsInstaller;
+import io.bdeploy.ui.utils.WindowsInstallerConfig;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.StreamingOutput;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 
 public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
@@ -222,9 +221,8 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
         String fileName = null;
         if (os == OperatingSystem.WINDOWS) {
-            String installerName = "BDeploy Click & Start - Installer";
-            fileName = installerName + ".exe";
-            createWindowsInstaller(installerName, installerPath, launcherKey, launcherLocation);
+            fileName = "BDeploy Click & Start - Installer.exe";
+            createWindowsInstaller(installerPath, launcherKey, launcherLocation);
         } else if (os == OperatingSystem.LINUX || os == OperatingSystem.MACOS) {
             fileName = "BDeploy-Click-and-Start-Installer.run";
             createLinuxInstaller(installerPath, launcherKey, launcherLocation);
@@ -269,8 +267,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         }
     }
 
-    private void createWindowsInstaller(String installerName, Path installerPath, ScopedManifestKey launcherKey,
-            URI launcherLocation) {
+    private void createWindowsInstaller(Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation) {
         // Try to load the installer stored in the manifest tree
         BHive rootHive = getHive();
         Manifest mf = rootHive.execute(new ManifestLoadOperation().setManifest(launcherKey.getKey()));

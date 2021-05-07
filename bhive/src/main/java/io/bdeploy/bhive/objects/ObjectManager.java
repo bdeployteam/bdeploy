@@ -221,10 +221,10 @@ public class ObjectManager {
             try {
                 Files.move(tempLocation, location, StandardCopyOption.ATOMIC_MOVE);
                 break;
-            } catch (Throwable t) {
-                log.warn("Retry {}: Cannot move: {}", retries, t.toString());
+            } catch (Exception ex) {
+                log.warn("Retry {}: Cannot move: {}", retries, ex.toString());
                 if (retries++ > 40) {
-                    throw t;
+                    throw ex;
                 }
                 try {
                     Thread.sleep(250);

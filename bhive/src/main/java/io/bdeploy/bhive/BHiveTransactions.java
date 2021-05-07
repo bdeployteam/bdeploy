@@ -88,35 +88,32 @@ public class BHiveTransactions {
             log.debug("Starting transaction {}", uuid, new RuntimeException("Starting Transaction"));
         }
 
-        return new Transaction() {
+        return () -> {
+            MarkerDatabase.waitRootLock(markerRoot);
 
-            @Override
-            public void close() {
-                MarkerDatabase.waitRootLock(markerRoot);
-
-                Stack<String> stack = transactions.get();
-                if (stack == null || stack.isEmpty()) {
-                    throw new IllegalStateException("No transaction has been started on this thread!");
-                }
-
-                if (!stack.peek().equals(uuid)) {
-                    log.warn("Out-of-order transaction found: {}, expected: {}", stack.peek(), uuid);
-                }
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Ending transaction {}", uuid, new RuntimeException("Ending Transaction"));
-                }
-
-                stack.remove(uuid);
-                dbs.remove(uuid);
-
-                Path mdb = markerRoot.resolve(uuid);
-                if (!Files.isDirectory(mdb)) {
-                    return; // nothing to clean.
-                }
-
-                PathHelper.deleteRecursive(mdb);
+            Stack<String> stack = transactions.get();
+            if (stack == null || stack.isEmpty()) {
+                throw new IllegalStateException("No transaction has been started on this thread!");
             }
+
+            String top = stack.peek();
+            if (!top.equals(uuid)) {
+                log.warn("Out-of-order transaction found: {}, expected: {}", top, uuid);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Ending transaction {}", uuid, new RuntimeException("Ending Transaction"));
+            }
+
+            stack.remove(uuid);
+            dbs.remove(uuid);
+
+            Path mdb = markerRoot.resolve(uuid);
+            if (!Files.isDirectory(mdb)) {
+                return; // nothing to clean.
+            }
+
+            PathHelper.deleteRecursive(mdb);
         };
     }
 

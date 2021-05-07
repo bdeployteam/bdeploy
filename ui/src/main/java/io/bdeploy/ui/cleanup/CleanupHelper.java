@@ -280,7 +280,7 @@ public class CleanupHelper {
         for (String pName : context.getAllProductNames()) {
             List<Key> pAll = context.getAllProductVersions(pName);
             List<Key> pInst = productsInUseMap.get(pName);
-            Key oldestToKeep = pInst != null && pInst.size() > 0 ? pInst.get(0) : pAll.get(pAll.size() - 1); // oldest Installed or newest
+            Key oldestToKeep = pInst != null && !pInst.isEmpty() ? pInst.get(0) : pAll.get(pAll.size() - 1); // oldest Installed or newest
 
             Comparator<Key> comparator = context.getComparator(pAll.get(0));
             for (Key pKey : pAll) {
