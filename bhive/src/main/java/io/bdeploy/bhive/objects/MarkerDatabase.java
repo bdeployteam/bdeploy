@@ -45,13 +45,22 @@ public class MarkerDatabase extends ObjectDatabase {
      * The caller(s) must make sure to call this method only once with any given {@link ObjectId}.
      */
     public void addMarker(ObjectId id) {
-        Path markerFile = getObjectFile(id);
-        PathHelper.mkdirs(markerFile.getParent());
-        try {
-            Files.createFile(markerFile);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot add marker for " + id, e);
+        if (hasObject(id)) {
+            return;
         }
+
+        locked(() -> {
+            if (hasObject(id)) {
+                return;
+            }
+            Path markerFile = getObjectFile(id);
+            PathHelper.mkdirs(markerFile.getParent());
+            try {
+                Files.createFile(markerFile);
+            } catch (IOException e) {
+                throw new IllegalStateException("Cannot add marker for " + id, e);
+            }
+        });
     }
 
     @Override

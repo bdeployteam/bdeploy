@@ -59,9 +59,7 @@ public class BHiveTransactions {
             throw new IllegalStateException("Transaction database missing for transaction " + id);
         }
 
-        if (!mdb.hasObject(object)) {
-            mdb.addMarker(object);
-        }
+        mdb.addMarker(object);
     }
 
     /**
