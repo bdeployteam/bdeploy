@@ -1,13 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { max } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import {
-  BdDataColumn,
-  BdDataColumnDisplay,
-  BdDataGrouping,
-  bdExtractGroups,
-  UNMATCHED_GROUP,
-} from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnDisplay, BdDataGrouping, bdExtractGroups, UNMATCHED_GROUP } from 'src/app/models/data';
 import { LoggingService } from '../../services/logging.service';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
@@ -26,9 +20,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable {
   /* template */ _columns: BdDataColumn<T>[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
-    this._columns = val.filter(
-      (c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH
-    );
+    this._columns = val.filter((c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH);
   }
 
   /**
@@ -84,6 +76,10 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable {
     if (!!this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  public update(): void {
+    this.recordsToDisplay$.next(this.recordsToDisplay$.value);
   }
 
   bdOnSearch(search: string) {

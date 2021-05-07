@@ -13,6 +13,15 @@
         [disabled]="!auth.isCurrentScopeWrite()"
       ></app-bd-panel-button>
       <app-bd-panel-button
+        text="Manage Nodes"
+        icon="dns"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['nodes']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
         text="Instance Attribute Values"
         icon="local_offer"
         [collapsed]="false"

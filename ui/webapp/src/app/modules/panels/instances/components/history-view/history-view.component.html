@@ -42,7 +42,7 @@
               *ngFor="let app of node.nodeConfiguration.applications"
               [baseConfig]="app"
               [compareConfig]="app"
-              [baseDescriptor]="cfg?.nodes?.applications[app.application.name]"
+              [baseDescriptor]="getAppDesc(cfg?.nodes, app.application.name)"
               [hasProcessControl]="hasProcessControl(node)"
             ></app-history-process-config>
           </div>

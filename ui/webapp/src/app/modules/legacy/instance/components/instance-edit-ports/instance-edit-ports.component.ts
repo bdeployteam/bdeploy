@@ -61,7 +61,7 @@ export class InstanceEditPortsComponent implements OnInit, AfterViewInit {
     for (const node of this.processConfig.nodeList.nodeConfigDtos) {
       for (const app of node.nodeConfiguration?.applications) {
         for (const param of app.start.parameters) {
-          const appDesc = this.processConfig.nodeList.applications[app.application.name];
+          const appDesc = this.processConfig.nodeList.applications.find((a) => a.key.name === app.application.name).descriptor;
           const paramDesc = appDesc.startCommand.parameters.find((p) => p.uid === param.uid);
 
           if (!paramDesc) {

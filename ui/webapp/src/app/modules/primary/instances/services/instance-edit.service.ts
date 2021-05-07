@@ -2,25 +2,45 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { applyChangeset, Changeset, diff } from 'json-diff-ts';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ApplicationDescriptor, InstanceConfigurationDto, InstanceDto } from 'src/app/models/gen.dtos';
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
+import {
+  ApplicationDescriptor,
+  ApplicationDto,
+  ApplicationType,
+  InstanceConfiguration,
+  InstanceConfigurationDto,
+  InstanceDto,
+  InstanceNodeConfigurationDto,
+  MinionDto,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ErrorMessage, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { mapObjToArray } from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { GroupsService } from '../../groups/services/groups.service';
 import { InstancesService } from './instances.service';
+
+export enum ProcessEditState {
+  ADDED = 'ADDED',
+  CHANGED = 'CHANGED',
+  REMOVED = 'REMOVED',
+  NONE = 'NONE',
+}
 
 export class InstanceEdit {
   private changeset: Changeset;
 
   constructor(public description: string, base: InstanceConfigurationDto, current: InstanceConfigurationDto) {
-    this.changeset = diff(base, current);
+    // clone changeset to decouple from changes to the source object.
+    this.changeset = cloneDeep(diff(base, current));
   }
 
   public apply(current: InstanceConfigurationDto) {
-    applyChangeset(current, this.changeset);
+    // clone changeset to decouple from changes through applying *another* change.
+    applyChangeset(current, cloneDeep(this.changeset));
   }
 }
 
@@ -43,8 +63,9 @@ export class InstanceEditService {
   public redo$ = new BehaviorSubject<InstanceEdit>(null);
 
   public state$ = new BehaviorSubject<InstanceConfigurationDto>(null);
-  public baseApplications$ = new BehaviorSubject<{ [key: string]: ApplicationDescriptor }>(null);
-  public stateApplications$ = new BehaviorSubject<{ [key: string]: ApplicationDescriptor }>(null);
+  public nodes$ = new BehaviorSubject<{ [key: string]: MinionDto }>(null);
+  public baseApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
+  public stateApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
 
   public current$ = new BehaviorSubject<InstanceDto>(null);
 
@@ -126,20 +147,43 @@ export class InstanceEditService {
     this.baseApplications$.next(null);
     this.stateApplications$.next(null);
 
-    const inst = this.instances.current$.value;
+    const inst = this.current$.value;
     if (!!inst) {
       this.loading$.next(true);
-      this.instances
-        .loadNodes(inst.instanceConfiguration.uuid, inst.instance.tag)
-        .pipe(finalize(() => this.loading$.next(false)))
-        .subscribe((nodes) => {
+      forkJoin({
+        nodes: this.instances.loadNodes(inst.instanceConfiguration.uuid, inst.instance.tag),
+        minions: this.http.get<{ [key: string]: MinionDto }>(
+          `${this.apiPath(this.groups.current$.value.name)}/${inst.instanceConfiguration.uuid}/${inst.instance.tag}/minionConfiguration`
+        ),
+      })
+        .pipe(
+          finalize(() => this.loading$.next(false)),
+          measure('Load Node Configurations for Edit')
+        )
+        .subscribe(({ nodes, minions }) => {
           this.baseApplications$.next(nodes.applications);
           this.stateApplications$.next(nodes.applications);
 
           const base: InstanceConfigurationDto = { config: inst.instanceConfiguration, nodeDtos: nodes.nodeConfigDtos };
 
+          // make sure we have at least the master node if there is *no* node.
+          const nodesArray = mapObjToArray(minions);
+          if (!base.nodeDtos.length) {
+            const masterNode = nodesArray.find((n) => n.value.master);
+            if (!!masterNode) {
+              base.nodeDtos.push(this.createEmptyNode(masterNode.key, base.config));
+            }
+          }
+
+          // make sure we have the client application virtual node if there are client applications.
+          const clientNode = base.nodeDtos.find((n) => n.nodeName === CLIENT_NODE_NAME);
+          if (!clientNode && !!nodes.applications.find((a) => a.descriptor.type === ApplicationType.CLIENT)) {
+            base.nodeDtos.push(this.createEmptyNode(CLIENT_NODE_NAME, base.config));
+          }
+
           this.base$.next(base);
           this.state$.next(cloneDeep(base));
+          this.nodes$.next(minions);
         });
     }
   }
@@ -233,13 +277,78 @@ export class InstanceEditService {
     }
   }
 
+  /** Retrieves the ApplicationDescriptor for the application with the given name in the current product. */
+  public getApplicationDescriptor(name: string): ApplicationDescriptor {
+    if (!this.stateApplications$.value) {
+      return null;
+    }
+
+    return this.stateApplications$.value.find((a) => a.key.name === name)?.descriptor;
+  }
+
+  /** Creates an empty node, which can be added to an instance configuration */
+  public createEmptyNode(name: string, instance: InstanceConfiguration): InstanceNodeConfigurationDto {
+    return {
+      nodeName: name,
+      nodeConfiguration: {
+        name: instance.name,
+        autoStart: instance.autoStart,
+        product: instance.product,
+        purpose: instance.purpose,
+        uuid: instance.uuid,
+        applications: [],
+      },
+    };
+  }
+
+  public getProcessEditState(uid: string): ProcessEditState {
+    // process UID must be unique across nodes, so we check all nodes for the process.
+    const baseNodes = this.base$.value?.nodeDtos;
+    const stateNodes = this.state$.value?.nodeDtos;
+
+    if (!baseNodes || !stateNodes) {
+      return ProcessEditState.NONE;
+    }
+
+    const baseApp = this.getApplication(baseNodes, uid);
+    const stateApp = this.getApplication(stateNodes, uid);
+
+    if (!baseApp && !stateApp) {
+      return ProcessEditState.NONE;
+    } else if (!!baseApp && !stateApp) {
+      return ProcessEditState.REMOVED;
+    } else if (!baseApp && !!stateApp) {
+      return ProcessEditState.ADDED;
+    } else {
+      if (isEqual(baseApp, stateApp)) {
+        return ProcessEditState.NONE;
+      } else {
+        return ProcessEditState.CHANGED;
+      }
+    }
+  }
+
+  private getApplication(nodes: InstanceNodeConfigurationDto[], uid: string) {
+    for (const node of nodes) {
+      const app = node.nodeConfiguration.applications.find((a) => a.uid === uid);
+      if (!!app) {
+        return app;
+      }
+    }
+    return null;
+  }
+
   /** Creates the current state from the base and all recorded edits. */
   private reBuild(): InstanceConfigurationDto {
     if (!this.base$.value) {
       return null;
     }
     const state = cloneDeep(this.base$.value);
-    this.undos.forEach((c) => c.apply(state));
+
+    for (const change of this.undos) {
+      change.apply(state);
+    }
+
     return state;
   }
 

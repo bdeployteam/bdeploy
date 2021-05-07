@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.ws.rs.NotFoundException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +49,7 @@ import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import jakarta.ws.rs.NotFoundException;
 
 @ExtendWith(TempDirectory.class)
 @ExtendWith(TestMinion.class)
@@ -88,7 +87,7 @@ public class InstanceResourceTest {
         InstanceNodeConfigurationListDto instanceConfig = instanceResource.getNodeConfigurations("Instance1", "1");
         List<InstanceNodeConfigurationDto> nodeConfigs = instanceConfig.nodeConfigDtos;
         Map<String, InstanceNodeConfigurationDto> node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
-        assertEquals(4, node2NodeDto.size());
+        assertEquals(2, node2NodeDto.size());
         verifyNodeDto(node2NodeDto.get("Node1"), true);
         verifyNodeDto(node2NodeDto.get("Node2"), true);
         verifyNodeDto(node2NodeDto.get("Node3"), false);
@@ -98,7 +97,7 @@ public class InstanceResourceTest {
         instanceConfig = instanceResource.getNodeConfigurations("Instance2", "1");
         nodeConfigs = instanceConfig.nodeConfigDtos;
         node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
-        assertEquals(4, node2NodeDto.size());
+        assertEquals(1, node2NodeDto.size());
         verifyNodeDto(node2NodeDto.get("Node1"), false);
         verifyNodeDto(node2NodeDto.get("Node2"), true);
         verifyNodeDto(node2NodeDto.get("Node3"), false);
@@ -108,7 +107,7 @@ public class InstanceResourceTest {
         instanceConfig = instanceResource.getNodeConfigurations("Instance3", "1");
         nodeConfigs = instanceConfig.nodeConfigDtos;
         node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
-        assertEquals(4, node2NodeDto.size());
+        assertEquals(2, node2NodeDto.size());
         verifyNodeDto(node2NodeDto.get("Node1"), false);
         verifyNodeDto(node2NodeDto.get("Node2"), false);
         verifyNodeDto(node2NodeDto.get("Node3"), true);
@@ -148,7 +147,7 @@ public class InstanceResourceTest {
         InstanceNodeConfigurationListDto instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "2");
         List<InstanceNodeConfigurationDto> availableNodeConfigs = instanceConfigDto.nodeConfigDtos;
         Map<String, InstanceNodeConfigurationDto> node2Config = InstanceNodeConfigurationDto.groupByNode(availableNodeConfigs);
-        assertEquals(4, node2Config.size()); // one for each node available
+        assertEquals(1, node2Config.size()); // one for each node available
 
         // Master should not have a configuration
         verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false);
@@ -207,7 +206,7 @@ public class InstanceResourceTest {
         if (hasConfig) {
             assertNotNull(nodeDto.nodeConfiguration);
         } else {
-            assertNull(nodeDto.nodeConfiguration);
+            assertNull(nodeDto);
         }
     }
 

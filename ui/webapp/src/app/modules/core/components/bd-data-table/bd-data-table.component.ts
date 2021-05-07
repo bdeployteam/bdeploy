@@ -2,10 +2,11 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint, BdDataGrouping, bdSortGroups, UNMATCHED_GROUP } from 'src/app/models/data';
 import { ErrorMessage, LoggingService } from '../../services/logging.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
@@ -103,6 +104,13 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * Elements which should be checked.
    */
   @Input() checked: T[] = [];
+
+  /**
+   * A callback which can allow/prevent a check state change to the target state.
+   *
+   * This is not supported for multi-select/deselect on group nodes.
+   */
+  @Input() checkChangeAllowed: (row: T, target: boolean) => Observable<boolean>;
 
   /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
@@ -215,15 +223,18 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   bdOnSearch(value: string): void {
     this.search = value;
     if (!this.checkSelection.isEmpty()) {
-      // Whenever we performa a search/filter we clear all check selection.
+      // Whenever we perform a search/filter we clear all check selection.
       // This is to avoid having a check selection on a non-visible row.
-      this.checkSelection.clear();
-      this.checkedChange.emit([]);
+      // We *don't* do this if there is a callback which may prevent deselection.
+      if (!this.checkChangeAllowed) {
+        this.checkSelection.clear();
+        this.checkedChange.emit([]);
+      }
     }
     this.update();
   }
 
-  private update() {
+  public update(): void {
     // the check selection will be restored based on this.checked during generateModel
     this.checkSelection.clear();
 
@@ -342,9 +353,25 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     return 'help'; // default fallback.
   }
 
-  /* template */ toggleCheck(node: FlatNode<T>) {
+  /* template */ toggleCheck(node: FlatNode<T>, cb: MatCheckbox) {
     if (!node.expandable) {
-      this.checkSelection.toggle(node);
+      const target = !this.checkSelection.isSelected(node);
+      let confirm = of(true);
+      if (!!this.checkChangeAllowed) {
+        confirm = this.checkChangeAllowed(node.node.item, target);
+      }
+      confirm.subscribe((ok) => {
+        if (ok) {
+          if (target) {
+            this.checkSelection.select(node);
+          } else {
+            this.checkSelection.deselect(node);
+          }
+          this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
+        } else {
+          cb.checked = !target;
+        }
+      });
     } else {
       const isChecked = this.isChecked(node);
 
@@ -353,8 +380,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
       const children = this.treeControl.getDescendants(node);
       this.checkSelection.isSelected(node) ? this.checkSelection.select(...children) : this.checkSelection.deselect(...children);
+      this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
     }
-    this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
   }
 
   /* template */ isChecked(node: FlatNode<T>) {

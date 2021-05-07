@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Configuration - {{ (edit.state$ | async)?.config.name }}">
+  <app-bd-dialog-toolbar header="Configuration - {{ headerName$ | async }}">
     <div fxFlex="1 0 auto"></div>
     <div class="local-version-text" *ngIf="edit.current$ | async as inst">
       <ng-container *ngIf="!(narrow$ | async)"
@@ -68,31 +68,72 @@
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div *ngIf="edit.incompatible$ | async" class="bd-rect-card" [style.margin-top.px]="2">
-      <div fxLayout="column">
-        <div class="bd-default-padding bd-warning-text">
-          <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes on the server. You must reload the page to resume editing.
+    <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="2">
+      <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
+        <div fxLayout="column">
+          <div class="bd-default-padding bd-warning-text">
+            <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes on the server. You must reload the page to resume editing.
+          </div>
         </div>
       </div>
+
+      <ng-container *ngIf="edit.current$ | async as instance">
+        <ng-container *ngIf="servers.isSynchronized(instance?.managedServer)">
+          <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
+
+          <div *ngIf="instance.instance.tag !== instance.activeVersion?.tag" class="bd-rect-card">
+            <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
+              <div fxLayout="column" fxFlex="1 0 auto">
+                <div>
+                  The current version ({{ instance.instance.tag }}) is not <strong>active</strong>. You can <strong>install and active</strong> the current
+                  version now.
+                </div>
+                <div class="bd-description-text">
+                  To <strong>install, uninstall or activate</strong> historic versions, please go to the
+                  <a [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]">instance history</a>.
+                </div>
+              </div>
+              <ng-container *ngIf="states$ | async as state">
+                <app-bd-button
+                  fxFlexAlign="center"
+                  color="primary"
+                  text="Install"
+                  icon="layers"
+                  (click)="doInstall(instance.instance.tag)"
+                  [disabled]="(installing$ | async) || isInstalled(instance.instance.tag)"
+                  [loadingWhen$]="installing$"
+                  tooltip="below"
+                ></app-bd-button>
+                <app-bd-button
+                  fxFlexAlign="center"
+                  color="accent"
+                  text="Activate"
+                  icon="star"
+                  (click)="doActivate(instance.instance.tag)"
+                  [disabled]="(activating$ | async) || !isInstalled(instance.instance.tag)"
+                  [loadingWhen$]="activating$"
+                  tooltip="below"
+                ></app-bd-button>
+              </ng-container>
+            </div>
+          </div>
+
+          <ng-container *ngFor="let node of serverNodes$ | async; trackBy: doTrack">
+            <app-config-node [nodeName]="node.nodeName"></app-config-node>
+          </ng-container>
+
+          <app-config-node *ngIf="clientNode$ | async as node" [nodeName]="node.nodeName"></app-config-node>
+        </ng-container>
+      </ng-container>
+
+      <app-bd-no-data *ngIf="!servers.isSynchronized((edit.current$ | async)?.managedServer)">
+        <p [style.text-align]="'center'">
+          <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
+          <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
+        </p>
+        <p>Synchronize the instance to (re-)enable editing.</p>
+        <app-bd-server-sync-button [collapsed]="false" [server]="(edit.current$ | async).managedServer"></app-bd-server-sync-button>
+      </app-bd-no-data>
     </div>
-
-    <ng-container *ngIf="edit.current$ | async as instance">
-      <div *ngIf="servers.isSynchronized(instance?.managedServer)">
-        <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
-
-        <!-- TODO: Server Nodes with configured applications -->
-
-        <!-- TODO: Client Applications node if client applications available -->
-      </div>
-    </ng-container>
-
-    <app-bd-no-data *ngIf="!servers.isSynchronized((edit.current$ | async)?.managedServer)">
-      <p [style.text-align]="'center'">
-        <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
-        <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
-      </p>
-      <p>Synchronize the instance to (re-)enable editing.</p>
-      <app-bd-server-sync-button [collapsed]="false" [server]="(edit.current$ | async).managedServer"></app-bd-server-sync-button>
-    </app-bd-no-data>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { format } from 'date-fns';
 import { BdDataColumn } from 'src/app/models/data';
-import { HistoryEntryDto, HistoryEntryType } from 'src/app/models/gen.dtos';
+import { HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { InstanceStateService } from './instance-state.service';
 import { InstancesService } from './instances.service';
-import { ProcessesService } from './processes.service';
 
 const historyTimestampColumn: BdDataColumn<HistoryEntryDto> = {
   id: 'timestamp',
@@ -59,21 +59,22 @@ const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
   name: 'PID',
   data: (r) => (!!r.runtimeEvent && !!r.runtimeEvent.pid ? r.runtimeEvent.pid : null),
   width: '64px',
-  showWhen: '(min-width: 950px)',
-};
-
-const historyExitCodeColumn: BdDataColumn<HistoryEntryDto> = {
-  id: 'exitCode',
-  name: 'Exit Code',
-  data: (r) => (!!r.runtimeEvent && !ProcessesService.isRunning(r.runtimeEvent.state) ? r.runtimeEvent.exitCode : null),
-  width: '64px',
-  showWhen: '(min-width: 1000px)',
+  showWhen: '(min-width: 1200px)',
 };
 
 @Injectable({
   providedIn: 'root',
 })
 export class HistoryColumnsService {
+  public historyStateColumn: BdDataColumn<HistoryEntryDto> = {
+    id: 'state',
+    name: 'State',
+    data: (r) => this.getStateIcon(r),
+    width: '64px',
+    component: BdDataIconCellComponent,
+    classes: (r) => this.getStateClass(r),
+  };
+
   public historyVersionColumn: BdDataColumn<HistoryEntryDto> = {
     id: 'version',
     name: 'Version',
@@ -87,11 +88,15 @@ export class HistoryColumnsService {
     historyTypeColumn,
     historyTitleColumn,
     historyPidColumn,
-    historyExitCodeColumn,
+    this.historyStateColumn,
     this.historyVersionColumn,
   ];
 
-  constructor(private instances: InstancesService) {}
+  private states: InstanceStateRecord;
+
+  constructor(private instances: InstancesService, private state: InstanceStateService) {
+    this.state.state$.subscribe((s) => (this.states = s));
+  }
 
   private getVersionText(row: HistoryEntryDto) {
     if (row.instanceTag === this.instances.current$.value?.activeVersion?.tag) {
@@ -103,5 +108,31 @@ export class HistoryColumnsService {
     }
 
     return row.instanceTag;
+  }
+
+  private getStateIcon(row: HistoryEntryDto) {
+    if (this.states?.activeTag === row.instanceTag) {
+      return 'check_circle'; // active
+    } else if (!!this.states?.installedTags?.find((v) => v === row.instanceTag)) {
+      return 'check_circle_outline'; // installed
+    }
+
+    return null;
+  }
+
+  private getStateClass(row: HistoryEntryDto): string[] {
+    if (this.states?.activeTag === row.instanceTag) {
+      return [];
+    }
+
+    if (!!this.states?.installedTags?.find((v) => v === row.instanceTag)) {
+      // if the version is older than the last-active tag, we'll uninstall it later on.
+      if (!!this.states?.lastActiveTag) {
+        if (Number(this.states.lastActiveTag) > Number(row.instanceTag)) {
+          return ['bd-description-text'];
+        }
+      }
+    }
+    return [];
   }
 }

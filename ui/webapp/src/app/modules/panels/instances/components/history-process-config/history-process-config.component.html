@@ -15,6 +15,14 @@
         </div>
         <ng-container *ngIf="hasProcessControl">
           <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+            <ng-template #uidPopup>
+              <app-config-desc-cards field="cfg.uid"></app-config-desc-cards>
+            </ng-template>
+            <div [style.margin-right.px]="3">ID:</div>
+            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.uid" [popup]="uidPopup"></app-history-diff-field>
+            <div>,</div>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
             <ng-template #ctrlStartTypePopup>
               <app-config-desc-cards field="cfg.control.startType"></app-config-desc-cards>
             </ng-template>

@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 import { BdDataBooleanCellComponent } from 'src/app/modules/core/components/bd-data-boolean-cell/bd-data-boolean-cell.component';
+import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { ProcessOutdatedComponent } from '../components/dashboard/process-outdated/process-outdated.component';
 import { ProcessStatusIconComponent } from '../components/dashboard/process-status-icon/process-status-icon.component';
+import { InstanceEditService } from './instance-edit.service';
 import { InstancesService } from './instances.service';
 import { PortsService } from './ports.service';
 import { ProcessesService } from './processes.service';
@@ -15,7 +17,7 @@ import { ProcessesService } from './processes.service';
 export class ProcessesColumnsService {
   processNameColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'name',
-    name: 'Name',
+    name: 'Configuration Name',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.name,
   };
@@ -24,16 +26,32 @@ export class ProcessesColumnsService {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
-    data: (r) => r.uid,
+    data: (r) => (!!r.uid ? r.uid : 'New Process'),
+    width: '100px',
     showWhen: '(min-width:1000px)',
+    classes: (r) => (!!r.uid ? [] : ['bd-description-text']),
   };
 
   processAvatarColumn: BdDataColumn<ApplicationConfiguration> = {
-    id: 'os',
+    id: 'os-avatar',
     name: 'OS',
     hint: BdDataColumnTypeHint.AVATAR,
     data: (r) => `/assets/${getAppOs(r.application).toLowerCase()}.svg`,
     display: BdDataColumnDisplay.CARD,
+  };
+
+  processOsColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'os',
+    name: 'OS',
+    data: (r) => getAppOs(r.application),
+    component: BdDataSvgIconCellComponent,
+    width: '30px',
+  };
+
+  applicationNameColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'appName',
+    name: 'Application Type',
+    data: (r) => this.edit.getApplicationDescriptor(r.application.name)?.name,
   };
 
   applicationVersionColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -88,7 +106,24 @@ export class ProcessesColumnsService {
     this.processActualityColumn,
   ];
 
-  constructor(private processes: ProcessesService, private instances: InstancesService, private ports: PortsService) {}
+  defaultProcessesConfigColumns: BdDataColumn<ApplicationConfiguration>[] = [
+    this.processNameColumn,
+    this.processIdColumn,
+    this.processAvatarColumn,
+    this.applicationNameColumn,
+    this.applicationVersionColumn,
+  ];
+
+  defaultProcessesConfigClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
+    this.processOsColumn,
+    this.processNameColumn,
+    this.processIdColumn,
+    this.processAvatarColumn,
+    this.applicationNameColumn,
+    this.applicationVersionColumn,
+  ];
+
+  constructor(private processes: ProcessesService, private instances: InstancesService, private ports: PortsService, private edit: InstanceEditService) {}
 
   private getAllPortsRating(r: ApplicationConfiguration) {
     const currentStates = this.ports.activePortStates$.value;

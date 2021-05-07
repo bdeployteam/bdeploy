@@ -64,7 +64,7 @@ export class PortsService {
 
       for (const app of node.nodeConfiguration.applications) {
         for (const param of app.start.parameters) {
-          const appDesc = cfgs.applications[app.application.name];
+          const appDesc = cfgs.applications.find((a) => a.key.name === app.application.name).descriptor;
           const paramDesc = appDesc.startCommand.parameters.find((p) => p.uid === param.uid);
 
           if (!paramDesc || paramDesc.type !== ParameterType.SERVER_PORT) {

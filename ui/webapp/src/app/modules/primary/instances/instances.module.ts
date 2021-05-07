@@ -17,6 +17,7 @@ import { ServerNodeComponent } from './components/dashboard/server-node/server-n
 import { NodeStatePanelComponent } from './components/dashboard/server-node/state-panel/state-panel.component';
 import { HistoryComponent } from './components/history/history.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { ConfigNodeComponent } from './components/configuration/config-node/config-node.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +35,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     ClientUsageGraphComponent,
     ConfigurationComponent,
     HistoryComponent,
+    ConfigNodeComponent,
   ],
   exports: [
     // for panels.

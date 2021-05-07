@@ -1,0 +1,33 @@
+<ng-template #varTemplate>
+  <div>Please provide required values for the selected template.</div>
+  <ng-container *ngFor="let v of selectedTemplate.variables">
+    <app-bd-form-input [(ngModel)]="response[v.uid]" [label]="v.name" [matTooltip]="v.description" required></app-bd-form-input>
+  </ng-container>
+</ng-template>
+
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Add Process" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
+      <div>Click an application or application template from the list below to add it to the selected node.</div>
+      <div *ngIf="clipBoardCfg$ | async as cfg">
+        <app-bd-button [text]="'Paste ' + cfg.name" color="accent" icon="content_paste" [collapsed]="false" (click)="doPaste(cfg)"></app-bd-button>
+      </div>
+      <app-bd-notification-card header="Clipboard Permission" [dismissable]="false" icon="content_paste" *ngIf="clipBoardError$ | async as error">{{
+        error
+      }}</app-bd-notification-card>
+      <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
+    </div>
+    <app-bd-notification-card
+      icon="history"
+      *ngIf="!servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)"
+      [warning]="true"
+      [dismissable]="false"
+      header="Server Not Synchronized"
+    >
+      <div [style.text-align]="'justify'">
+        The managed server responsible for the selected node is not synchronized. Please synchronize the server to continue editing.
+      </div>
+    </app-bd-notification-card>
+  </app-bd-dialog-content>
+</app-bd-dialog>

@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash-es';
 import { mergeOrdererd, sortNodesMasterFirst } from 'src/app/models/consts';
-import { ApplicationConfiguration, ApplicationDescriptor, InstanceConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDescriptor, ApplicationDto, InstanceConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { InstanceConfigCache } from './instance-utils';
 
 export class ApplicationPair {
@@ -20,8 +20,8 @@ export class NodePair {
   constructor(
     base: InstanceNodeConfigurationDto,
     compare: InstanceNodeConfigurationDto,
-    baseApplications: { [index: string]: ApplicationDescriptor },
-    compareApplications: { [index: string]: ApplicationDescriptor }
+    baseApplications: ApplicationDto[],
+    compareApplications: ApplicationDto[]
   ) {
     this.name = base?.nodeName ? base.nodeName : compare?.nodeName;
 
@@ -45,8 +45,8 @@ export class NodePair {
         new ApplicationPair(
           baseApp,
           compareApp,
-          baseApplications ? baseApplications[baseApp?.application?.name] : null,
-          compareApplications ? compareApplications[compareApp?.application?.name] : null
+          baseApplications ? baseApplications.find((a) => a.key.name === baseApp?.application?.name)?.descriptor : null,
+          compareApplications ? compareApplications.find((a) => a.key.name === compareApp?.application?.name)?.descriptor : null
         )
       );
     }

@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -103,6 +104,7 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
+import io.bdeploy.ui.dto.ApplicationDto;
 import io.bdeploy.ui.dto.HistoryCompareDto;
 import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
@@ -494,14 +496,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest thisIm = InstanceManifest.load(hive, instance, versionTag);
         String thisMaster = new ControllingMaster(hive, thisIm.getManifest()).read().getName();
 
-        // Create a configuration entry for each configured minion
-        Map<String, MinionDto> minions = getMinionConfiguration(instance, versionTag);
-        for (Map.Entry<String, MinionDto> entry : minions.entrySet()) {
-            String minionName = entry.getKey();
-            result.nodeConfigDtos.add(new InstanceNodeConfigurationDto(minionName));
-        }
-
-        // Insert configuration and create nodes where we still have a configuration
+        // Insert configuration and create nodes where we have a configuration
         for (Key imKey : InstanceManifest.scan(hive, true)) {
             if (!imKey.getName().equals(thisIm.getManifest().getName())) {
                 continue;
@@ -520,10 +515,14 @@ public class InstanceResourceImpl implements InstanceResource {
         Key productKey = thisIm.getConfiguration().product;
         try {
             ProductManifest productManifest = ProductManifest.of(hive, productKey);
-            for (Key applicationKey : productManifest.getApplications()) {
-                ApplicationManifest manifest = ApplicationManifest.of(hive, applicationKey);
-                result.applications.put(applicationKey.getName(), manifest.getDescriptor());
-            }
+            result.applications
+                    .addAll(productManifest.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).map(mf -> {
+                        ApplicationDto descriptor = new ApplicationDto();
+                        descriptor.key = mf.getKey();
+                        descriptor.name = mf.getDescriptor().name;
+                        descriptor.descriptor = mf.getDescriptor();
+                        return descriptor;
+                    }).collect(Collectors.toList()));
         } catch (Exception e) {
             log.warn("Cannot load product of instance version {}: {}", thisIm.getManifest(), productKey, e);
         }

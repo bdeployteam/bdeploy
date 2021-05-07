@@ -158,16 +158,18 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         for (InstanceNodeConfigurationDto node : nodeConfigs.nodeConfigDtos) {
 
             for (ApplicationConfiguration config : node.nodeConfiguration.applications) {
-                var desc = nodeConfigs.applications.get(config.application.getName());
+
+                var desc = nodeConfigs.applications.stream().filter(a -> a.name.equals(config.application.getName())).findFirst()
+                        .orElseGet(null);
                 if (desc == null) {
                     throw new IllegalStateException("Cannot find application descriptor " + config.application.getName()
                             + " for configuration " + config.name);
                 }
 
-                if (desc.startCommand != null) {
+                if (desc.descriptor.startCommand != null) {
                     for (var param : config.start.parameters) {
-                        var paramDesc = desc.startCommand.parameters.stream().filter(p -> p.uid.equals(param.uid)).findFirst()
-                                .orElseThrow(
+                        var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.uid.equals(param.uid))
+                                .findFirst().orElseThrow(
                                         () -> new IllegalStateException("Cannot find parameter descriptor for " + param.uid));
                         if (paramDesc.type == ParameterType.CLIENT_PORT || paramDesc.type == ParameterType.SERVER_PORT) {
                             try {

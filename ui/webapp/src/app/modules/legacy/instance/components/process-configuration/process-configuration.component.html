@@ -34,11 +34,7 @@
 <ng-template #notificationNewerProduct>
   <div class="prod-update-notification">
     A newer product version is available to update this instance to.
-    <button
-      mat-raised-button
-      *ngIf="authService.isScopedWrite(groupParam)"
-      (click)="instanceNotifications.closeOverlay(); onNewerProductVersionAvailable()"
-    >
+    <button mat-raised-button *ngIf="authService.isScopedWrite(groupParam)" (click)="instanceNotifications.closeOverlay(); onNewerProductVersionAvailable()">
       Show Product Versions
     </button>
   </div>
@@ -53,11 +49,7 @@
           <div>
             <strong>{{ item.context.applicationConfiguration.name }}:</strong> {{ item.issue }}
           </div>
-          <button
-            mat-icon-button
-            matTooltip="Edit affected application"
-            (click)="instanceNotifications.closeOverlay(); onEditApp(item.context)"
-          >
+          <button mat-icon-button matTooltip="Edit affected application" (click)="instanceNotifications.closeOverlay(); onEditApp(item.context)">
             <mat-icon>arrow_forward</mat-icon>
           </button>
         </ng-container>
@@ -75,41 +67,23 @@
 <div class="box">
   <mat-toolbar class="mat-elevation-z1 header-toolbar process-config-header">
     <mat-toolbar-row id="page-header">
-      <button
-        mat-icon-button
-        type="button"
-        (click)="routingHistoryService.back('l/instance/browser/' + groupParam)"
-        *ngIf="!editMode"
-      >
+      <button mat-icon-button type="button" (click)="routingHistoryService.back('l/instance/browser/' + groupParam)" *ngIf="!editMode">
         <mat-icon>chevron_left</mat-icon>
       </button>
       <button mat-icon-button type="button" (click)="onDiscardAppChanges(true)" *ngIf="editMode">
         <mat-icon>chevron_left</mat-icon>
       </button>
-      <span
-        >Instance: <app-instance-group-title [instanceGroup]="groupParam"></app-instance-group-title> -
-        {{ selectedConfig?.instance?.name }}</span
-      >
+      <span>Instance: <app-instance-group-title [instanceGroup]="groupParam"></app-instance-group-title> - {{ selectedConfig?.instance?.name }}</span>
       <span class="fill-space"></span>
       <app-instance-notifications #instanceNotifications [notifications]="notifications"></app-instance-notifications>
       <ng-container *ngIf="!editMode">
         <button mat-button type="button" (click)="onDiscardChanges()" *ngIf="discardEnabled">DISCARD</button>
         <button mat-button type="button" (click)="onViewChanges()" *ngIf="saveEnabled">COMPARE</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="onSave()">
-          SAVE
-        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="onSave()">SAVE</button>
       </ng-container>
       <ng-container *ngIf="editMode">
-        <button mat-button type="button" [disabled]="!cancelEnabled" (click)="onDiscardAppChanges(false)">
-          CANCEL
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          [disabled]="!saveEnabled"
-          (click)="editPortsMode ? onApplyPortChanges() : onApplyAppChanges()"
-        >
+        <button mat-button type="button" [disabled]="!cancelEnabled" (click)="onDiscardAppChanges(false)">CANCEL</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!saveEnabled" (click)="editPortsMode ? onApplyPortChanges() : onApplyAppChanges()">
           APPLY
         </button>
       </ng-container>
@@ -121,9 +95,7 @@
         <div>
           Product:
           <strong *ngIf="!loading">{{
-            isProductAvailable(selectedConfig)
-              ? getProductOfInstance(selectedConfig).name
-              : selectedConfig.instance.product.name
+            isProductAvailable(selectedConfig) ? getProductOfInstance(selectedConfig).name : selectedConfig.instance.product.name
           }}</strong>
         </div>
         <div>
@@ -154,18 +126,12 @@
         (stateUpdateEvent)="onSyncStateUpdate()"
       ></app-instance-sync>
       <span class="fill-space"></span>
-      <app-remote-progress
-        *ngIf="isActionsVisible()"
-        [scope]="[groupParam, uuidParam]"
-        (events)="updateRemoteEvents($event)"
-      ></app-remote-progress>
+      <app-remote-progress *ngIf="isActionsVisible()" [scope]="[groupParam, uuidParam]" (events)="updateRemoteEvents($event)"></app-remote-progress>
       <ng-container *ngIf="isActionsVisible() && autoRefresh">
         <button
           mat-icon-button
           (click)="toggleAutoRefresh()"
-          matTooltip="Auto refresh of process status enabled. Next refresh in {{
-            nextAutoRefreshSec
-          }} seconds. Click to disable."
+          matTooltip="Auto refresh of process status enabled. Next refresh in {{ nextAutoRefreshSec }} seconds. Click to disable."
         >
           <div class="toolbar-progress">{{ getAutoRefreshSecFormatted() }}</div>
           <mat-icon>sync</mat-icon>
@@ -185,11 +151,7 @@
         <button
           mat-menu-item
           (click)="startInstance()"
-          [disabled]="
-            !authService.isScopedWrite(groupParam) ||
-            !isInstanceActivated() ||
-            (isReadonly() && !isActiveVersionSelected())
-          "
+          [disabled]="!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())"
           matTooltip="Starts all processes having the start type INSTANCE configured."
         >
           <mat-icon>play_arrow</mat-icon>Start Instance
@@ -197,11 +159,7 @@
         <button
           mat-menu-item
           (click)="stopInstance()"
-          [disabled]="
-            !authService.isScopedWrite(groupParam) ||
-            !isInstanceActivated() ||
-            (isReadonly() && !isActiveVersionSelected())
-          "
+          [disabled]="!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())"
           matTooltip="Stops all processes."
         >
           <mat-icon>stop</mat-icon>Stop Instance
@@ -209,31 +167,19 @@
         <button
           mat-menu-item
           (click)="restartInstance()"
-          [disabled]="
-            !authService.isScopedWrite(groupParam) ||
-            !isInstanceActivated() ||
-            (isReadonly() && !isActiveVersionSelected())
-          "
+          [disabled]="!authService.isScopedWrite(groupParam) || !isInstanceActivated() || (isReadonly() && !isActiveVersionSelected())"
           matTooltip="Stops all processes, then starts all having the start type INSTANCE configured."
         >
           <mat-icon>replay</mat-icon>Restart Instance
         </button>
         <mat-divider></mat-divider>
-        <button
-          mat-menu-item
-          [routerLink]="['/l/instance/edit', groupParam, uuidParam]"
-          [disabled]="!authService.isScopedAdmin(groupParam) || !isEditable()"
-        >
+        <button mat-menu-item [routerLink]="['/l/instance/edit', groupParam, uuidParam]" [disabled]="!authService.isScopedAdmin(groupParam) || !isEditable()">
           <mat-icon>edit</mat-icon>Edit Instance
         </button>
         <button mat-menu-item (click)="onConfigureBanner()" [disabled]="!authService.isScopedWrite(groupParam)">
           <mat-icon>speaker_notes</mat-icon>Configure Banner
         </button>
-        <button
-          mat-menu-item
-          (click)="importInstanceVersion()"
-          [disabled]="!authService.isScopedWrite(groupParam) || isReadonly()"
-        >
+        <button mat-menu-item (click)="importInstanceVersion()" [disabled]="!authService.isScopedWrite(groupParam) || isReadonly()">
           <mat-icon>import_export</mat-icon>Import Instance Version
         </button>
         <button
@@ -251,19 +197,12 @@
         >
           <mat-icon>folder</mat-icon>Data Files
         </button>
-        <button mat-menu-item [routerLink]="['/l/instance/history', groupParam, uuidParam]">
-          <mat-icon>history</mat-icon>Instance History
-        </button>
+        <button mat-menu-item [routerLink]="['/l/instance/history', groupParam, uuidParam]"><mat-icon>history</mat-icon>Instance History</button>
         <mat-divider></mat-divider>
         <button
           mat-menu-item
           (click)="setSidenavApplications()"
-          [disabled]="
-            !authService.isScopedWrite(groupParam) ||
-            isSidenavApplications() ||
-            !isEditable() ||
-            !isProductAvailable(selectedConfig)
-          "
+          [disabled]="!authService.isScopedWrite(groupParam) || isSidenavApplications() || !isEditable() || !isProductAvailable(selectedConfig)"
         >
           <mat-icon>layers</mat-icon>Configure Applications
         </button>
@@ -274,22 +213,11 @@
         >
           <mat-icon>power</mat-icon>Configure Ports
         </button>
-        <button
-          mat-menu-item
-          (click)="setSidenavProducts()"
-          [disabled]="!authService.isScopedWrite(groupParam) || isSidenavProducts() || !isEditable()"
-        >
+        <button mat-menu-item (click)="setSidenavProducts()" [disabled]="!authService.isScopedWrite(groupParam) || isSidenavProducts() || !isEditable()">
           <mat-icon>apps</mat-icon>Change Product Version
         </button>
       </mat-menu>
-      <button
-        data-cy="instance-options"
-        class="option-button"
-        *ngIf="isActionsVisible()"
-        mat-icon-button
-        [matMenuTriggerFor]="appMenu"
-        appClickStopPropagation
-      >
+      <button data-cy="instance-options" class="option-button" *ngIf="isActionsVisible()" mat-icon-button [matMenuTriggerFor]="appMenu" appClickStopPropagation>
         <mat-icon>more_vert</mat-icon>
       </button>
     </mat-toolbar-row>
@@ -327,9 +255,7 @@
           </p>
         </div>
       </ng-template>
-      <ng-container
-        *ngIf="!loading && !applyingTemplate && (!isEmptyInstance() || isSidenavApplications()); else emptyHint"
-      >
+      <ng-container *ngIf="!loading && !applyingTemplate && (!isEmptyInstance() || isSidenavApplications()); else emptyHint">
         <ng-container *ngFor="let node of selectedConfig.nodeList.nodeConfigDtos">
           <app-instance-node-card
             class="node"
@@ -381,17 +307,9 @@
               <mat-icon class="icon">storage</mat-icon>
               <span class="application-caption-text">Server Applications</span>
             </div>
-            <div
-              class="dragula-container dragula-nodeType-template"
-              dragula="APPS"
-              [dragulaModel]="selectedConfig.serverApps"
-            >
+            <div class="dragula-container dragula-nodeType-template" dragula="APPS" [dragulaModel]="selectedConfig.serverApps">
               <ng-container *ngFor="let group of selectedConfig.serverApps">
-                <app-application-descriptor-card
-                  class="app-card"
-                  [ngClass]="getDragulaClasses(group)"
-                  [applicationGroup]="group"
-                >
+                <app-application-descriptor-card class="app-card" [ngClass]="getDragulaClasses(group)" [applicationGroup]="group">
                 </app-application-descriptor-card>
               </ng-container>
             </div>
@@ -401,17 +319,9 @@
               <mat-icon class="icon">computer</mat-icon>
               <span class="application-caption-text">Client Applications</span>
             </div>
-            <div
-              class="dragula-container dragula-nodeType-template"
-              dragula="APPS"
-              [dragulaModel]="selectedConfig.clientApps"
-            >
+            <div class="dragula-container dragula-nodeType-template" dragula="APPS" [dragulaModel]="selectedConfig.clientApps">
               <ng-container *ngFor="let group of selectedConfig.clientApps">
-                <app-application-descriptor-card
-                  class="app-card"
-                  [ngClass]="getDragulaClasses(group)"
-                  [applicationGroup]="group"
-                >
+                <app-application-descriptor-card class="app-card" [ngClass]="getDragulaClasses(group)" [applicationGroup]="group">
                 </app-application-descriptor-card>
               </ng-container>
             </div>
@@ -508,7 +418,7 @@
       [instanceGroup]="groupParam"
       [processConfig]="selectedConfig"
       [appConfigContext]="editAppConfigContext"
-      [appDesc]="selectedConfig.nodeList.applications[editAppConfigContext.applicationConfiguration.application.name]"
+      [appDesc]="getAppDesc(editAppConfigContext.applicationConfiguration.application.name)"
       [readonly]="isReadonly()"
       (validationStateChanged)="updateDirtyStateAndValidate()"
     >
@@ -520,7 +430,7 @@
       [instanceGroup]="groupParam"
       [processConfig]="selectedConfig"
       [appConfigContext]="editAppConfigContext"
-      [appDesc]="selectedConfig.nodeList.applications[editAppConfigContext.applicationConfiguration.application.name]"
+      [appDesc]="getAppDesc(editAppConfigContext.applicationConfiguration.application.name)"
       [readonly]="isReadonly()"
       (validationStateChanged)="updateDirtyStateAndValidate()"
     >

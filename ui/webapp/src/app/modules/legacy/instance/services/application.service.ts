@@ -284,7 +284,7 @@ export class ApplicationService {
   /**
    * Validates all applications of the given node.
    */
-  public validateNode(nodeConfigDto: InstanceNodeConfigurationDto, apps: { [index: string]: ApplicationDescriptor }) {
+  public validateNode(nodeConfigDto: InstanceNodeConfigurationDto, apps: ApplicationDto[]) {
     const nodeConfig = nodeConfigDto.nodeConfiguration;
     if (!nodeConfig) {
       return;
@@ -293,7 +293,7 @@ export class ApplicationService {
       if (!appCfg.uid) {
         continue;
       }
-      const appDesc = apps[appCfg.application.name];
+      const appDesc = apps.find((a) => a.key.name === appCfg.application.name);
 
       if (!appDesc) {
         this.missingApps.push(appCfg.application);
@@ -302,7 +302,7 @@ export class ApplicationService {
 
       const isClientNode = nodeConfigDto.nodeName === CLIENT_NODE_NAME;
 
-      const errors = this.validateApp(isClientNode, appCfg, appDesc);
+      const errors = this.validateApp(isClientNode, appCfg, appDesc.descriptor);
       if (errors.length === 0) {
         this.validationStates.delete(appCfg.uid);
         this.log.debug('Application ' + appCfg.uid + ' is valid. Resetting error flag.');
@@ -661,7 +661,7 @@ export class ApplicationService {
       this.updateApplicationParams(appDesc, newAppDescriptor, oldAppDescriptor, appDescs);
     }
 
-    config.nodeList.applications = descriptors;
+    config.nodeList.applications = apps;
     config.setApplications(apps);
   }
 

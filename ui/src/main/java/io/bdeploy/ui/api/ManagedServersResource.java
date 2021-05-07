@@ -85,7 +85,6 @@ public interface ManagedServersResource {
     @GET
     @Path("/controlling-server/{group}/{instanceId}")
     @RequiredPermission(scope = "group", permission = Permission.READ)
-    @Deprecated
     public ManagedMasterDto getServerForInstance(@ActivityScope @PathParam("group") String instanceGroup,
             @PathParam("instanceId") String instanceId, @QueryParam("instanceTag") String instanceTag);
 

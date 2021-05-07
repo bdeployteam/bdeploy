@@ -6,7 +6,7 @@
         <div class="bd-title-text">{{ node.nodeName }}</div>
       </div>
       <div fxFlex="1 0 auto"></div>
-      <div fxLayout="row" fxLayoutGap="5px" [style.pointer-events]="'all'">
+      <div fxLayout="row" fxLayoutGap="5px" [style.pointer-events]="'all'" fxLayoutAlign="center center">
         <app-bd-panel-button text="Details" icon="info" [route]="['panels', 'instances', 'node', node.nodeName]"></app-bd-panel-button>
       </div>
     </div>

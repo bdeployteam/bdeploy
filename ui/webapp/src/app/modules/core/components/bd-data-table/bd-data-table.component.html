@@ -79,11 +79,19 @@
               matBadgeSize="small"
               matBadgeOverlap="false"
               [matTooltip]="!row.expandable ? row.node.groupOrFirstColumn : null"
-              [matTooltipShowDelay]="1000"
+              [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
             >
               <!-- Either simple label or check box in check mode -->
-              <ng-container *ngIf="!checkMode">{{ row.node.groupOrFirstColumn }}</ng-container>
-              <mat-checkbox *ngIf="checkMode" [checked]="isChecked(row)" [indeterminate]="isPartiallyChecked(row)" (change)="toggleCheck(row)">{{
+              <ng-container *ngIf="!checkMode">
+                <ng-container *ngIf="!col.component">{{ row.node.groupOrFirstColumn }}</ng-container>
+                <app-bd-data-component-cell
+                  *ngIf="!!col.component"
+                  [componentType]="col.component"
+                  [record]="row.node.item"
+                  [column]="col"
+                ></app-bd-data-component-cell>
+              </ng-container>
+              <mat-checkbox #cb *ngIf="checkMode" [checked]="isChecked(row)" [indeterminate]="isPartiallyChecked(row)" (change)="toggleCheck(row, cb)">{{
                 row.node.groupOrFirstColumn
               }}</mat-checkbox>
             </span>
@@ -104,7 +112,7 @@
                   *ngIf="!col.component"
                   class="bd-text-ellipsis"
                   [matTooltip]="!!row.node.item ? col.data(row.node.item) : null"
-                  [matTooltipShowDelay]="1000"
+                  [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
                 >
                   {{ col.data(row.node.item) }}
                 </div>

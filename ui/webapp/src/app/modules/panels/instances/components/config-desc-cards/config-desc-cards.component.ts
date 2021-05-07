@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-export type AppBaseFields = 'cfg.name';
+export type AppBaseFields = 'cfg.name' | 'cfg.uid';
 export type AppCommandFields = 'cfg.executable';
 export type AppProcessCtrlFields =
   | 'cfg.control.startType'
