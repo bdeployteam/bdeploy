@@ -1,4 +1,5 @@
 <div fxLayout="row" fxLayoutAlign="start center">
   <div class="bd-text-ellipsis">{{ record.instanceConfiguration.product.tag }}</div>
   <mat-icon *ngIf="record.newerVersionAvailable" class="bd-small-icon" matTooltip="A newer product version is available">system_update</mat-icon>
+  <div *ngIf="!record.productDto" class="local-na-chip" matTooltip="The product version is not available on this server.">N/A</div>
 </div>

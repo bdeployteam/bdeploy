@@ -1,0 +1,9 @@
+.local-na-chip {
+  font-size: smaller;
+  border-radius: 3px;
+  padding: 0px 5px;
+  background-color: var(--bd-accent);
+  color: var(--bd-accent-contrast);
+  margin-left: 10px;
+  margin-right: 5px;
+}
