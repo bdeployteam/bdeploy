@@ -8,7 +8,12 @@
         tool.
       </div>
       <div>
-        <mat-slide-toggle [(ngModel)]="genFull" (change)="regenPack()">Generate full token pack including certificate</mat-slide-toggle>
+        <app-bd-form-toggle
+          label="Generate full token pack including certificate"
+          name="genFull"
+          [(ngModel)]="genFull"
+          (ngModelChange)="regenPack()"
+        ></app-bd-form-toggle>
       </div>
       <div>
         A full token pack is typically required by the CLI, build tools, etc. A slim token is required to perform HTTPS communication with the BDeploy server.
