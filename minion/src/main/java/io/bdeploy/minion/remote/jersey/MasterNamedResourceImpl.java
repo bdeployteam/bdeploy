@@ -40,6 +40,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.TaskExecutor;
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -460,7 +461,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         for (Entry<String, InstanceNodeConfiguration> entry : nodes.entrySet()) {
             InstanceNodeConfiguration inc = entry.getValue();
-            if (inc == null || inc.applications == null || inc.applications.isEmpty()) {
+            if (inc == null) {
                 continue;
             }
 
@@ -471,6 +472,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
 
             inc.copyRedundantFields(config);
+
+            // make sure every application has an ID. NEW applications might have a null ID to be filled out.
+            for (ApplicationConfiguration cfg : inc.applications) {
+                if (cfg.uid == null) {
+                    cfg.uid = UuidHelper.randomId();
+                    log.info("New Application {} received ID {}", cfg.name, cfg.uid);
+                }
+            }
 
             RuntimeAssert.assertEquals(inc.uuid, config.uuid, "Instance ID not set on nodes");
 

@@ -2,7 +2,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
-import { InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
+import { InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
@@ -52,5 +52,9 @@ export class HistoryViewComponent implements OnInit, OnDestroy {
 
   /* template */ hasProcessControl(node: InstanceNodeConfigurationDto) {
     return node?.nodeName !== CLIENT_NODE_NAME;
+  }
+
+  /* template */ getAppDesc(nodes: InstanceNodeConfigurationListDto, name: string) {
+    return nodes?.applications.find((a) => a.key.name === name)?.descriptor;
   }
 }

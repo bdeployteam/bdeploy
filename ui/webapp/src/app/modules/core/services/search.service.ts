@@ -47,6 +47,8 @@ export class SearchService {
     // WHENEVER some searchable deregisters, clear the search since that must be some kind of navigation.
     this.currentSearch = '';
 
-    this.enableSearch$.next(this.registrations.length > 0);
+    setTimeout(() => {
+      this.enableSearch$.next(this.registrations.length > 0);
+    });
   }
 }

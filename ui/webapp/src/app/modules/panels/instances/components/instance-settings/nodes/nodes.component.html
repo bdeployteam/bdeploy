@@ -1,0 +1,33 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Manage Nodes" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div>You can choose which of the nodes available on the server will be available for configuration in this instance.</div>
+      <app-bd-data-table
+        [records]="records"
+        [columns]="columns"
+        [checkMode]="true"
+        [(checked)]="checked"
+        (checkedChange)="onCheckedChange($event)"
+        [checkChangeAllowed]="checkChangeAllowed"
+      ></app-bd-data-table>
+      <app-bd-button
+        text="APPLY"
+        [collapsed]="false"
+        color="toolbar"
+        [disabled]="!edit.hasPendingChanges() || !servers.isSynchronized(edit.current$.value?.managedServer)"
+        (click)="doApply()"
+      ></app-bd-button>
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

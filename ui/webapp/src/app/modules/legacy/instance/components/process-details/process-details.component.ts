@@ -410,7 +410,7 @@ export class ProcessDetailsComponent implements OnInit, OnChanges, OnDestroy {
         if (app.uid === this.appConfig.uid) {
           this.portListMinionName = node.nodeName;
           for (const paramCfg of this.appConfig.start.parameters) {
-            const appDesc = this.processConfig.nodeList.applications[this.appConfig.application.name];
+            const appDesc = this.processConfig.nodeList.applications.find((a) => a.key.name === this.appConfig.application.name).descriptor;
             const paramDesc = appDesc.startCommand.parameters.find((p) => p.uid === paramCfg.uid);
             if (paramDesc && paramDesc.type === ParameterType.SERVER_PORT) {
               // we want this one :)

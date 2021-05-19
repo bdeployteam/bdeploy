@@ -1,0 +1,27 @@
+<div class="bd-rect-card">
+  <div fxLayout="column" class="local-header">
+    <div fxLayout="row" class="bd-default-padding" fxLayoutAlign="start center">
+      <div fxLayout="column">
+        <div class="bd-type-text">{{ getNodeType() }}</div>
+        <div class="bd-title-text">{{ getNodeName() }}</div>
+      </div>
+      <div fxFlex="1 0 auto"></div>
+      <div fxLayout="row" fxLayoutGap="5px">
+        <ng-container *ngIf="node$ | async as node">
+          <mat-icon fxFlexAlign="center" [svgIcon]="node.os"></mat-icon>
+          <mat-divider [vertical]="true"></mat-divider>
+        </ng-container>
+        <app-bd-panel-button text="Add Application..." icon="add" [route]="['panels', 'instances', 'config', 'add-process', nodeName]"></app-bd-panel-button>
+      </div>
+    </div>
+  </div>
+  <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
+    <app-bd-data-display
+      #data
+      [records]="(config$ | async)?.nodeConfiguration?.applications"
+      [columns]="isClientNode() ? columns.defaultProcessesConfigClientColumns : columns.defaultProcessesConfigColumns"
+      [sortData]="null"
+      [recordRoute]='getRecordRoute'
+    ></app-bd-data-display>
+  </div>
+</div>

@@ -70,6 +70,9 @@ export interface BdDataColumn<T> {
 
   /** In which mode the colum should be displayed, both if unset */
   display?: BdDataColumnDisplay;
+
+  /** Override tooltip delay in milliseconds. */
+  tooltipDelay?: number;
 }
 
 /** The group used if a record does not match any group when grouping. */

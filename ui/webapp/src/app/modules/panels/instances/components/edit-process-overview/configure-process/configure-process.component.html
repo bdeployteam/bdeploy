@@ -1,0 +1,18 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Configure {{ (edit.process$ | async)?.name }}" [closeablePanel]="true">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-panel-button
+      #backButton
+      [collapsed]="narrow$ | async"
+      text="Back to overview"
+      icon="arrow_back"
+      [toggle]="false"
+      [route]="['..']"
+      [relative]="true"
+    ></app-bd-panel-button>
+    <app-bd-button text="APPLY" [collapsed]="false" color="primary" (click)="doApply()" [disabled]="!instanceEdit.hasPendingChanges()"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <!-- TODO -->
+  </app-bd-dialog-content>
+</app-bd-dialog>

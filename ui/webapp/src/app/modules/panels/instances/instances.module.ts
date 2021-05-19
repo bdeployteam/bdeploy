@@ -26,6 +26,11 @@ import { ProcessPortsComponent } from './components/process-ports/process-ports.
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
+import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
+import { AddProcessComponent } from './components/add-process/add-process.component';
+import { AppTemplateNameComponent } from './components/add-process/app-template-name/app-template-name.component';
+import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
+import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 
 @NgModule({
   declarations: [
@@ -50,6 +55,11 @@ import { LocalDiffComponent } from './components/local-changes/local-diff/local-
     AttributesComponent,
     LocalChangesComponent,
     LocalDiffComponent,
+    NodesComponent,
+    AddProcessComponent,
+    AppTemplateNameComponent,
+    EditProcessOverviewComponent,
+    ConfigureProcessComponent,
   ],
   imports: [CommonModule, CoreModule, InstancesRoutingModule, PrimaryInstancesModule, MatProgressSpinnerModule, MatCardModule],
 })

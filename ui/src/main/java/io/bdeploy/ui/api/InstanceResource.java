@@ -96,7 +96,6 @@ public interface InstanceResource {
             @PathParam("tag") String versionTag);
 
     @GET
-    @Deprecated
     @Path("/{instance}/{tag}/minionConfiguration")
     @RequiredPermission(permission = Permission.READ)
     public Map<String, MinionDto> getMinionConfiguration(@ActivityScope @PathParam("instance") String instanceId,

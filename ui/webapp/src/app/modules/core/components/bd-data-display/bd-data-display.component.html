@@ -1,4 +1,5 @@
 <app-bd-data-table
+  #table
   *ngIf="!_grid && !!records?.length"
   [caption]="caption"
   [columns]="columns"
@@ -15,6 +16,7 @@
 ></app-bd-data-table>
 
 <app-bd-data-grid
+  #grid
   *ngIf="_grid && !!records?.length"
   [columns]="columns"
   [searchData]="searchData"

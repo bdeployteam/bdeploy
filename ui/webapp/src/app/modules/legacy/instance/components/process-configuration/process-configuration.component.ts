@@ -1517,4 +1517,8 @@ export class ProcessConfigurationComponent implements OnInit, OnDestroy {
   formatTimestamp(timestamp: number): string {
     return format(new Date(timestamp), 'dd.MM.yyyy HH:mm');
   }
+
+  getAppDesc(name: string) {
+    return this.selectedConfig.nodeList.applications.find((a) => a.key.name === name).descriptor;
+  }
 }

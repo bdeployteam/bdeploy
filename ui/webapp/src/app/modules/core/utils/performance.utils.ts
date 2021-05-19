@@ -59,9 +59,7 @@ function logMeasurements(name: string, entries: PerformanceEntryList, jspEntries
 }
 
 function logTiming(label: string, duration: number) {
-  if (duration > 1000) {
-    console.error(label, duration);
-  } else if (duration > 300) {
+  if (duration > 300) {
     console.warn(label, duration);
   } else {
     console.log(label, duration);

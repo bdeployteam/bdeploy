@@ -61,6 +61,48 @@
         text="Compare with Version..."
         [route]="['panels', 'instances', 'history', index$ | async, 'select', entry.instanceTag]"
       ></app-bd-panel-button>
+      <ng-container *ngIf="state$ | async as state">
+        <mat-divider></mat-divider>
+        <app-bd-notification-card
+          icon="history"
+          [warning]="true"
+          [dismissable]="false"
+          header="Server Not Synchronized"
+          *ngIf="!servers.isSynchronized((instances.current$ | async)?.managedServer)"
+        >
+          <div [style.text-align]="'justify'">
+            The managed server responsible for this instance is not synchronized, version controls are unavailable. Please synchronize the server to use these
+            controls.
+          </div>
+        </app-bd-notification-card>
+        <app-bd-button
+          [collapsed]="false"
+          text="Install"
+          icon="layers"
+          color="primary"
+          [disabled]="(installing$ | async) || isInstalled() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
+          (click)="doInstall()"
+          [loadingWhen$]="installing$"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          text="Uninstall"
+          icon="layers_clear"
+          color="primary"
+          [disabled]="(uninstalling$ | async) || !isInstalled() || isActive() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
+          (click)="doUninstall()"
+          [loadingWhen$]="uninstalling$"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          text="Activate"
+          icon="star"
+          color="accent"
+          [disabled]="(activating$ | async) || !isInstalled() || isActive() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
+          (click)="doActivate()"
+          [loadingWhen$]="activating$"
+        ></app-bd-button>
+      </ng-container>
     </ng-container>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(entry$ | async)">

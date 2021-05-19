@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { BdDataColumn, bdDataDefaultSearch, bdDataDefaultSort, BdDataGrouping } from 'src/app/models/data';
+import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
+import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
 
 @Component({
   selector: 'app-bd-data-display',
@@ -94,7 +96,15 @@ export class BdDataDisplayComponent<T> implements OnInit {
    */
   @Output() recordClick = new EventEmitter<T>();
 
+  @ViewChild('table', { static: false }) tableComp: BdDataTableComponent<T>;
+  @ViewChild('grid', { static: false }) gridComp: BdDataGridComponent<T>;
+
   constructor() {}
 
   ngOnInit(): void {}
+
+  public update(): void {
+    this.tableComp?.update();
+    this.gridComp?.update();
+  }
 }

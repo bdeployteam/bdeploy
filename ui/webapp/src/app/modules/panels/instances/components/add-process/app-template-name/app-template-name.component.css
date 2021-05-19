@@ -1,0 +1,7 @@
+.local-template {
+  padding-left: 15px;
+}
+
+.local-app {
+  color: var(--bd-text-secondary);
+}

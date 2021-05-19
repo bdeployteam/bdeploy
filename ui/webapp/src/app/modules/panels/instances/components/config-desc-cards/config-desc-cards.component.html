@@ -3,6 +3,7 @@
 
   <!-- APPLICATION -->
   <div *ngIf="field === 'cfg.name'">The name of the process configuration, not to be confused with the name of the application launched by the process.</div>
+  <div *ngIf="field === 'cfg.uid'">The ID of the process, which is unique within the instance.</div>
   <div *ngIf="field === 'cfg.control.startType'">
     The start type of the process. This controls how a process can be started and whether it is considered <em>vital</em> for the instance.
     <ul>

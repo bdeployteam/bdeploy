@@ -235,6 +235,7 @@ export class HttpEndpointDiff {
 export class ApplicationConfigurationDiff {
   public type: DiffType;
 
+  public uid: Difference;
   public name: Difference;
   public processControl: ProcessControlDiff;
   public start: CommandDiff;
@@ -242,6 +243,7 @@ export class ApplicationConfigurationDiff {
   public os: OperatingSystem;
 
   constructor(base: ApplicationConfiguration, compare: ApplicationConfiguration, public descriptor: ApplicationDescriptor) {
+    this.uid = new Difference(base?.uid, compare?.uid);
     this.name = new Difference(base?.name, compare?.name);
     if (descriptor?.type !== ApplicationType.CLIENT) {
       this.processControl = new ProcessControlDiff(base?.processControl, compare?.processControl);
