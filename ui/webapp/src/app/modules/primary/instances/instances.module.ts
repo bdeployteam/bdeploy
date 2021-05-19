@@ -1,10 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatStepperModule } from '@angular/material/stepper';
 import { CoreModule } from '../../core/core.module';
 import { InstancesBrowserComponent } from './components/browser/browser.component';
 import { InstanceBannerHintComponent } from './components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from './components/browser/instance-product-version/instance-product-version.component';
+import { ConfigNodeComponent } from './components/configuration/config-node/config-node.component';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
 import { ClientNodeComponent } from './components/dashboard/client-node/client-node.component';
 import { ClientUsageGraphComponent } from './components/dashboard/client-node/usage-graph/usage-graph.component';
@@ -17,7 +21,6 @@ import { ServerNodeComponent } from './components/dashboard/server-node/server-n
 import { NodeStatePanelComponent } from './components/dashboard/server-node/state-panel/state-panel.component';
 import { HistoryComponent } from './components/history/history.component';
 import { InstancesRoutingModule } from './instances-routing.module';
-import { ConfigNodeComponent } from './components/configuration/config-node/config-node.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +45,6 @@ import { ConfigNodeComponent } from './components/configuration/config-node/conf
     NodeHeaderComponent,
     ProcessStatusIconComponent,
   ],
-  imports: [CommonModule, CoreModule, InstancesRoutingModule, MatCardModule],
+  imports: [CommonModule, CoreModule, InstancesRoutingModule, MatCardModule, MatStepperModule, MatButtonToggleModule, MatProgressSpinnerModule],
 })
 export class InstancesModule {}

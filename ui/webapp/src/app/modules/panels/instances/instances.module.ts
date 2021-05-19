@@ -31,6 +31,7 @@ import { AddProcessComponent } from './components/add-process/add-process.compon
 import { AppTemplateNameComponent } from './components/add-process/app-template-name/app-template-name.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
+import { InstanceTemplatesComponent } from './components/instance-templates/instance-templates.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { ConfigureProcessComponent } from './components/edit-process-overview/co
     AppTemplateNameComponent,
     EditProcessOverviewComponent,
     ConfigureProcessComponent,
+    InstanceTemplatesComponent,
   ],
   imports: [CommonModule, CoreModule, InstancesRoutingModule, PrimaryInstancesModule, MatProgressSpinnerModule, MatCardModule],
 })

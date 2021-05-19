@@ -13,6 +13,8 @@
         <app-bd-micro-icon-button (click)="dismiss.emit(null)" [disabled]="disabled">close</app-bd-micro-icon-button>
       </div>
     </div>
-    <ng-content></ng-content>
+    <div class="bd-scroll-container">
+      <ng-content></ng-content>
+    </div>
   </div>
 </div>

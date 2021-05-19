@@ -6,7 +6,6 @@ import { StatusMessage } from 'src/app/models/config.model';
 import {
   ApplicationConfiguration,
   ApplicationDto,
-  ApplicationTemplateDescriptor,
   CommandConfiguration,
   ExecutableDescriptor,
   InstanceNodeConfigurationDto,
@@ -16,6 +15,7 @@ import {
   ParameterType,
   ProcessControlConfiguration,
   ProductDto,
+  TemplateApplication,
   TemplateParameter,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -77,22 +77,25 @@ export class ProcessEditService {
     );
   }
 
-  public addProcess(application: ApplicationDto, template: ApplicationTemplateDescriptor, variableValues: { [key: string]: string }): Observable<any> {
-    if (!this.node$.value?.nodeConfiguration?.applications) {
-      throw new Error('Cannot add process, no current configuration');
-    }
-
+  public addProcess(
+    node: InstanceNodeConfigurationDto,
+    application: ApplicationDto,
+    template: TemplateApplication,
+    variableValues: { [key: string]: string },
+    status: StatusMessage[]
+  ): Observable<string> {
     const start: CommandConfiguration = this.calculateInitialCommand(
       application.descriptor.startCommand,
       !!template ? template.startParameters : [],
-      variableValues
+      variableValues,
+      status
     );
-    const stop: CommandConfiguration = this.calculateInitialCommand(application.descriptor.stopCommand, [], {});
+    const stop: CommandConfiguration = this.calculateInitialCommand(application.descriptor.stopCommand, [], {}, status);
 
     const process: ApplicationConfiguration = {
       uid: null, // calculated later
       application: application.key,
-      name: !!template ? template.name : application.name,
+      name: !!template?.name ? template.name : application.name,
       pooling: application.descriptor.pooling,
       endpoints: cloneDeep(application.descriptor.endpoints),
       processControl: {
@@ -129,12 +132,17 @@ export class ProcessEditService {
     return this.groups.newUuid().pipe(
       tap((uuid) => {
         process.uid = uuid;
-        this.node$.value.nodeConfiguration.applications.push(process);
+        node.nodeConfiguration.applications.push(process);
       })
     );
   }
 
-  private calculateInitialCommand(descriptor: ExecutableDescriptor, templates: TemplateParameter[], values: { [key: string]: string }): CommandConfiguration {
+  private calculateInitialCommand(
+    descriptor: ExecutableDescriptor,
+    templates: TemplateParameter[],
+    values: { [key: string]: string },
+    status: StatusMessage[]
+  ): CommandConfiguration {
     if (!descriptor) {
       return null;
     }
@@ -149,7 +157,6 @@ export class ProcessEditService {
 
         let val = p.defaultValue;
         if (!!tpl) {
-          const status = [];
           val = this.performVariableSubst(tpl.value, values, status);
         }
 
@@ -185,7 +192,7 @@ export class ProcessEditService {
   }
 
   private performVariableSubst(value: string, variables: { [key: string]: string }, status: StatusMessage[]): string {
-    if (value.indexOf('{{T:') !== -1) {
+    if (!!value && value.indexOf('{{T:') !== -1) {
       let found = true;
       while (found) {
         const rex = new RegExp('{{T:([^}]*)}}').exec(value);
