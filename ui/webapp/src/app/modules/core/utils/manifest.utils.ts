@@ -1,4 +1,4 @@
-import { ManifestKey, OperatingSystem } from '../../../models/gen.dtos';
+import { ManifestKey, MinionDto, OperatingSystem, ProductDto, TemplateApplication } from '../../../models/gen.dtos';
 
 /**
  * Returns the base name of the application manifest key.
@@ -7,6 +7,11 @@ export function getAppKeyName(appKey: ManifestKey) {
   const fullName = appKey.name;
   const lastSlashIdx = fullName.lastIndexOf('/');
   return fullName.substring(0, lastSlashIdx);
+}
+
+/** Returns the full target application key for a given template in a given product for application to the given node. */
+export function getTemplateAppKey(product: ProductDto, template: TemplateApplication, node: MinionDto) {
+  return product.product + '/' + template.application + '/' + node.os.toLowerCase();
 }
 
 /**

@@ -31,6 +31,15 @@
         [disabled]="!auth.isCurrentScopeWrite()"
       ></app-bd-panel-button>
       <app-bd-panel-button
+        text="Instance Templates"
+        icon="auto_fix_high"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['templates']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
         text="Maintenance"
         icon="build"
         [collapsed]="false"

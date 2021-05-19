@@ -5,7 +5,14 @@
   fxLayoutAlign="center center"
   [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
 >
-  <app-bd-notification-card class="mat-typography mat-elevation-z3" [dismissable]="false" [header]="msg.header" [icon]="msg.icon ? msg.icon : 'info'">
+  <app-bd-notification-card
+    class="mat-typography mat-elevation-z3"
+    [dismissable]="msg.dismissResult !== undefined"
+    (dismiss)="complete(msg.dismissResult)"
+    [header]="msg.header"
+    [icon]="msg.icon ? msg.icon : 'info'"
+    [style.max-height]="'99%'"
+  >
     <div fxLayout="column" fxLayoutGap="10px">
       <ng-container *ngIf="msg.template">
         <ng-container *ngTemplateOutlet="msg.template"></ng-container>
@@ -14,7 +21,7 @@
       <ng-container *ngIf="!!msg.confirmation">
         <app-bd-form-input [label]="msg.confirmationHint ? msg.confirmationHint : 'Enter confirmation'" [(ngModel)]="userConfirmation"></app-bd-form-input>
       </ng-container>
-      <app-bd-action-row>
+      <app-bd-action-row *ngIf="!!msg.actions?.length">
         <app-bd-button
           *ngFor="let action of msg.actions"
           [text]="action.name"

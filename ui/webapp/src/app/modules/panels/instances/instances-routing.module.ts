@@ -17,6 +17,7 @@ import { EditConfigComponent } from './components/instance-settings/edit-config/
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
+import { InstanceTemplatesComponent } from './components/instance-templates/instance-templates.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
@@ -35,6 +36,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/attributes', component: AttributesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/nodes', component: NodesComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/templates', component: InstanceTemplatesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'node/:node', component: NodeDetailsComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process', component: ProcessStatusComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process/ports', component: ProcessPortsComponent, canActivate: [ScopedReadGuard] },

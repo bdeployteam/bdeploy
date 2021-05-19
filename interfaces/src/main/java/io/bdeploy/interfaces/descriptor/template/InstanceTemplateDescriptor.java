@@ -3,8 +3,6 @@ package io.bdeploy.interfaces.descriptor.template;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-
 /**
  * Describes a template which can be used to fill an instance with pre-configured applications.
  */
@@ -28,7 +26,6 @@ public class InstanceTemplateDescriptor {
     /**
      * A list of group definitions
      */
-    @JsonAlias("nodes") // compat - remove after 2.4.0
     public List<InstanceTemplateGroup> groups = new ArrayList<>();
 
 }

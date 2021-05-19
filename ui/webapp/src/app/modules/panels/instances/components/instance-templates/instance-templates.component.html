@@ -1,0 +1,59 @@
+<!-- Dialog to choose group assignment to nodes. -->
+<ng-template #groupTemplate>
+  <div>Instance Templates can contain multiple groups of applications. These groups can be assigned to compatible target nodes.</div>
+  <ng-container *ngFor="let group of template.groups">
+    <app-bd-form-select
+      [label]="'Group \'' + group.name + '\''"
+      [matTooltip]="group.description"
+      [(ngModel)]="groups[group.name]"
+      [values]="getNodesFor(group)"
+      [labels]="getLabelsFor(group)"
+    ></app-bd-form-select>
+  </ng-container>
+</ng-template>
+
+<!-- Dialog to choose variable values. -->
+<ng-template #varTemplate>
+  <div>Please provide required values for the selected template.</div>
+  <ng-container *ngFor="let v of template?.variables">
+    <app-bd-form-input
+      [(ngModel)]="variables[v.uid]"
+      [label]="v.name"
+      [matTooltip]="v.description"
+      [suggested]="v.suggestedValues"
+      required
+    ></app-bd-form-input>
+  </ng-container>
+</ng-template>
+
+<!-- Dialog which shows result messages if there are any. -->
+<ng-template #msgTemplate>
+  <div fxLayout="column" fxLayoutGap="5px">
+    <div>The following possible problems occured:</div>
+    <app-bd-data-table [records]="messages" [columns]="msgColumns"></app-bd-data-table>
+    <div>You can choose to cancel and discard changes, or apply them despite the warnings.</div>
+  </div>
+</ng-template>
+
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Instance Templates" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
+      <div>
+        You can apply instance templates to the current instance by choosing below. An instance template will create and configure all required processes.
+      </div>
+      <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
+    </div>
+    <app-bd-notification-card
+      icon="history"
+      *ngIf="!servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)"
+      [warning]="true"
+      [dismissable]="false"
+      header="Server Not Synchronized"
+    >
+      <div [style.text-align]="'justify'">
+        The managed server responsible for the selected node is not synchronized. Please synchronize the server to continue editing.
+      </div>
+    </app-bd-notification-card>
+  </app-bd-dialog-content>
+</app-bd-dialog>

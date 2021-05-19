@@ -91,6 +91,10 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  public getMessage(): BdDialogMessageComponent {
+    return this.messageComp;
+  }
+
   /* template */ onScrollContent(event: any) {
     const ele = event.target; // the scroll container;
     const scrollTop = ele.scrollTop; // the offset within the scrollHeight of the currently top-most pixel.

@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, Optional, Self, ViewEncapsulation } from '@angular/core';
 import { ControlValueAccessor, FormControl, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
+import { BehaviorSubject } from 'rxjs';
 import { bdValidationMessage } from '../../validators/messages';
 
 @Component({
@@ -15,14 +16,17 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
   @Input() required: any;
   @Input() disabled: any;
   @Input() type: string;
+  @Input() suggested: string[];
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
+
+  /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
   /* template */ get value() {
     return this.internalValue;
   }
   /* template */ set value(v) {
     if (v !== this.internalValue) {
-      this.internalValue = v;
+      this.writeValue(v);
       this.onChangedCb(v);
     }
   }
@@ -37,7 +41,9 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
     }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.updateFilter();
+  }
 
   onBlur() {
     this.onTouchedCb();
@@ -46,6 +52,7 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
   writeValue(v: any): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
+      this.updateFilter();
     }
   }
 
@@ -79,5 +86,29 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
     }
 
     return bdValidationMessage(this.label, this.ngControl.errors);
+  }
+
+  private updateFilter() {
+    if (this.suggested === null || this.suggested === undefined) {
+      // no suggestions at all.
+      this.filteredSuggested$.next([]);
+      return;
+    }
+
+    if (this.internalValue === null || this.internalValue === undefined) {
+      // unfiltered.
+      this.filteredSuggested$.next(this.suggested);
+      return;
+    }
+
+    const inputAsString = this.internalValue.toString();
+
+    if (!inputAsString.length) {
+      // unfiltered
+      this.filteredSuggested$.next(this.suggested);
+      return;
+    }
+
+    this.filteredSuggested$.next(this.suggested.filter((e) => e.toLowerCase().includes(inputAsString.toLowerCase())));
   }
 }

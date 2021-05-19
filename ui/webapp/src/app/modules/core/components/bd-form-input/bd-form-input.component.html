@@ -3,6 +3,7 @@
     <mat-label>{{ label }}</mat-label>
     <input
       matInput
+      [matAutocomplete]="auto"
       [(ngModel)]="value"
       (blur)="onBlur()"
       [id]="name"
@@ -13,6 +14,11 @@
       [type]="type"
       [errorStateMatcher]="this"
     />
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let suggestedValue of filteredSuggested$ | async" [value]="suggestedValue">
+        {{ suggestedValue }}
+      </mat-option>
+    </mat-autocomplete>
     <mat-error *ngIf="isInvalid()">{{ getErrorMessage() }}</mat-error>
   </mat-form-field>
 </div>

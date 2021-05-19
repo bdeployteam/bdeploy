@@ -37,7 +37,10 @@ export interface BdDialogMessage<T> {
   validation?: () => boolean;
 
   /** The actions which should be shown on the message */
-  actions: BdDialogMessageAction<T>[];
+  actions?: BdDialogMessageAction<T>[];
+
+  /** If set, the message can be dismissed (using an 'X'). This will be the result in this case. */
+  dismissResult?: T;
 }
 
 export const ACTION_CONFIRM: BdDialogMessageAction<boolean> = { name: 'CONFIRM', result: true, confirm: true };
@@ -94,7 +97,7 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ complete(result: any) {
+  public complete(result: any) {
     this.message$.next(null);
     this.result$.next(result);
   }

@@ -11,6 +11,8 @@
   position: relative;
   top: 0px;
 
+  word-break: break-all;
+
   z-index: 3;
 }
 
