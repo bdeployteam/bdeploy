@@ -86,6 +86,10 @@ export class InstancesService {
   }
 
   public delete(instance: string): Observable<any> {
+    this.current$.next(null);
+    this.activeNodeCfgs$.next(null);
+    this.active$.next(null);
+    this.checkActiveReloadState(null);
     return this.http.delete(`${this.apiPath(this.group)}/${instance}/delete`);
   }
 
