@@ -26,7 +26,7 @@ import { InstancesService } from './instances.service';
 export enum ProcessEditState {
   ADDED = 'ADDED',
   CHANGED = 'CHANGED',
-  REMOVED = 'REMOVED',
+  INVALID = 'INVALID',
   NONE = 'NONE',
 }
 
@@ -98,7 +98,9 @@ export class InstanceEditService {
 
     this.areas.panelRoute$.subscribe((route) => {
       if (this.isAllowEdit() && this.hasPendingChanges()) {
-        this.log.warn('Unconcealed changes on route change, discarding.');
+        this.log.warn(
+          new ErrorMessage('Unconcealed changes on route change, discarding.', new InstanceEdit('Unconcealed Changes', this.reBuild(), this.state$.value))
+        );
         this.discard();
       }
     });
@@ -127,8 +129,8 @@ export class InstanceEditService {
     this.undos.push(change);
     this.undo$.next(change);
 
-    // re-publish the state to inform others.
-    this.state$.next(this.state$.value);
+    // re-publish the state to inform others. need to re-build to assure proper null/undefined diffing.
+    this.state$.next(this.reBuild());
   }
 
   /**
@@ -182,7 +184,7 @@ export class InstanceEditService {
           }
 
           this.base$.next(base);
-          this.state$.next(cloneDeep(base));
+          this.state$.next(cloneDeep(this.base$.value));
           this.nodes$.next(minions);
         });
     }
@@ -310,17 +312,26 @@ export class InstanceEditService {
       return ProcessEditState.NONE;
     }
 
-    const baseApp = this.getApplication(baseNodes, uid);
-    const stateApp = this.getApplication(stateNodes, uid);
+    const baseNodeApps = this.getNodeOfApplication(baseNodes, uid)?.nodeConfiguration?.applications;
+    const stateNodeApps = this.getNodeOfApplication(stateNodes, uid)?.nodeConfiguration?.applications;
 
-    if (!baseApp && !stateApp) {
+    const baseAppIndex = baseNodeApps?.findIndex((a) => a.uid === uid);
+    const stateAppIndex = stateNodeApps?.findIndex((a) => a.uid === uid);
+
+    // if undefined, we just switch to "not found" - the node might not even exist.
+    const baseComp = baseAppIndex === undefined || baseAppIndex === null ? -1 : baseAppIndex;
+    const stateComp = stateAppIndex === undefined || stateAppIndex === null ? -1 : stateAppIndex;
+
+    // TODO: Validation state, must override ADDED/CHANGED
+    if (baseComp === -1 && stateComp === -1) {
       return ProcessEditState.NONE;
-    } else if (!!baseApp && !stateApp) {
-      return ProcessEditState.REMOVED;
-    } else if (!baseApp && !!stateApp) {
+    } else if (baseComp !== -1 && stateComp === -1) {
+      return ProcessEditState.NONE; // removed means it's no longer there - it has no state.
+    } else if (baseComp === -1 && stateComp !== -1) {
       return ProcessEditState.ADDED;
     } else {
-      if (isEqual(baseApp, stateApp)) {
+      // both are !== -1
+      if (baseAppIndex === stateAppIndex && isEqual(baseNodeApps[baseAppIndex], stateNodeApps[stateAppIndex])) {
         return ProcessEditState.NONE;
       } else {
         return ProcessEditState.CHANGED;
@@ -328,11 +339,11 @@ export class InstanceEditService {
     }
   }
 
-  private getApplication(nodes: InstanceNodeConfigurationDto[], uid: string) {
+  private getNodeOfApplication(nodes: InstanceNodeConfigurationDto[], uid: string): InstanceNodeConfigurationDto {
     for (const node of nodes) {
       const app = node.nodeConfiguration.applications.find((a) => a.uid === uid);
       if (!!app) {
-        return app;
+        return node;
       }
     }
     return null;

@@ -1,6 +1,13 @@
 .local-sizing {
   min-height: 100px;
+}
+
+.local-bg-toolbar {
   background-color: var(--bd-bg-toolbar);
+}
+
+.local-bg-dialog {
+  background-color: var(--bd-bg-dialog);
 }
 
 .local-icon-area {

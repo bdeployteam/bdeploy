@@ -81,7 +81,10 @@
         <ng-container *ngIf="servers.isSynchronized(instance?.managedServer)">
           <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
 
-          <div *ngIf="instance.instance.tag !== instance.activeVersion?.tag && !isEmptyInstance()" class="bd-rect-card">
+          <div
+            *ngIf="instance.instance.tag !== instance.activeVersion?.tag && !isEmptyInstance() && !edit.hasPendingChanges() && !edit.hasSaveableChanges()"
+            class="bd-rect-card"
+          >
             <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
               <div fxLayout="column" fxFlex="1 0 auto">
                 <div>

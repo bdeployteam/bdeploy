@@ -51,8 +51,8 @@
         [toggle]="false"
         icon="compare"
         text="Compare with Active"
-        [disabled]="!(instances.current$ | async)?.activeVersion?.tag || entry.instanceTag === (instances.current$ | async).activeVersion.tag"
-        [route]="['panels', 'instances', 'history', index$ | async, 'compare', entry.instanceTag, (instances.current$ | async)?.activeVersion.tag]"
+        [disabled]="!(instances.current$ | async)?.activeVersion?.tag || entry.instanceTag === (instances.current$ | async).activeVersion?.tag"
+        [route]="['panels', 'instances', 'history', index$ | async, 'compare', entry.instanceTag, (instances.current$ | async)?.activeVersion?.tag]"
       ></app-bd-panel-button>
       <app-bd-panel-button
         [collapsed]="false"

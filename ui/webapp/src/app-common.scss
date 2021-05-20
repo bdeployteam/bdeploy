@@ -119,6 +119,22 @@
     color: var(--bd-accent);
   }
 
+  .bd-status-border-added {
+    border-left: solid 4px var(--bd-text-success);
+  }
+
+  .bd-status-border-changed {
+    border-left: solid 4px var(--bd-accent);
+  }
+
+  .bd-status-border-invalid {
+    border-left: solid 4px var(--bd-text-warn);
+  }
+
+  .bd-status-border-none {
+    border-left: solid 4px var(--bd-bg-toolbar);
+  }
+
   .bd-no-backdrop {
     background-color: rgba($color: #000000, $alpha: 0);
   }

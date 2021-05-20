@@ -80,6 +80,7 @@
     --bd-text: #{mat-color($fg, 'text')};
     --bd-text-secondary: #{mat-color($fg, 'secondary-text')};
     --bd-text-success: #{if($dark, mat-color($mat-green, 300), mat-color($mat-green, 700))};
+    --bd-text-very-light: rgb(116, 116, 116);
 
     --bd-bg-dialog: #{mat-color($bg, 'dialog')};
     --bd-bg-toolbar: #{mat-color($bg, 'app-bar')};

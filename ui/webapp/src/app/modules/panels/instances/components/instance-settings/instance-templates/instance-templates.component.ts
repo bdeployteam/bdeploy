@@ -11,11 +11,13 @@ import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/man
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
-import { ProcessEditService } from '../../services/process-edit.service';
+import { ProcessEditService } from '../../../services/process-edit.service';
+import { TemplateMessageDetailsComponent } from './template-message-details/template-message-details.component';
 
-interface TemplateMessage {
+export interface TemplateMessage {
   group: string;
   node: string;
+  appname: string;
   template: TemplateApplication;
   message: StatusMessage;
 }
@@ -24,6 +26,14 @@ const tplColName: BdDataColumn<TemplateMessage> = {
   id: 'name',
   name: 'Name',
   data: (r) => (!!r.template?.name ? r.template.name : r.template.application),
+};
+
+const tplColDetails: BdDataColumn<TemplateMessage> = {
+  id: 'details',
+  name: 'Details',
+  data: (r) => r.message.message,
+  component: TemplateMessageDetailsComponent,
+  width: '36px',
 };
 
 const colName: BdDataColumn<InstanceTemplateDescriptor> = {
@@ -56,7 +66,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   /* template */ variables: { [key: string]: string }; // key is var name, value is value.
   /* template */ groups: { [key: string]: string }; // key is group name, value is target node name.
   /* template */ messages: TemplateMessage[];
-  /* template */ msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName];
+  /* template */ msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('groupTemplate') private tplGroupMapping: TemplateRef<any>;
@@ -193,7 +203,13 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       const group = this.template.groups.find((g) => g.name === groupName);
 
       if (!node || !group) {
-        this.messages.push({ group: groupName, node: nodeName, template: null, message: { icon: 'warning', message: 'Cannot find node or group' } });
+        this.messages.push({
+          group: groupName,
+          node: nodeName,
+          appname: null,
+          template: null,
+          message: { icon: 'warning', message: 'Cannot find node or group' },
+        });
         continue;
       }
 
@@ -201,7 +217,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       if (group.type !== ApplicationType.CLIENT) {
         // for servers, we need to find the appropriate application with the correct OS.
         for (const app of group.applications) {
-          console.log(app);
           observables.push(
             this.instanceEdit.nodes$.pipe(
               // wait for node information
@@ -217,6 +232,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
                     group: groupName,
                     node: nodeName,
                     template: app,
+                    appname: !!app?.name ? app.name : app.application,
                     message: { icon: 'warning', message: 'Cannot find application in product for target OS.' },
                   });
                   return of<string>(null);
@@ -224,7 +240,9 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
                   const status = [];
                   return this.edit.addProcess(node, a, app, this.variables, status).pipe(
                     finalize(() => {
-                      status.forEach((e) => this.messages.push({ group: groupName, node: nodeName, template: app, message: e }));
+                      status.forEach((e) =>
+                        this.messages.push({ group: groupName, node: nodeName, appname: !!app?.name ? app.name : a.name, template: app, message: e })
+                      );
                     })
                   );
                 }
@@ -246,7 +264,15 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
               observables.push(
                 this.edit.addProcess(node, app, template, this.variables, status).pipe(
                   finalize(() => {
-                    status.forEach((e) => this.messages.push({ group: groupName, node: nodeName, template: template, message: e }));
+                    status.forEach((e) =>
+                      this.messages.push({
+                        group: groupName,
+                        node: nodeName,
+                        appname: !!template?.name ? template.name : app.name,
+                        template: template,
+                        message: e,
+                      })
+                    );
                   })
                 )
               );

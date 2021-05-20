@@ -15,9 +15,9 @@ import { HistoryViewComponent } from './components/history-view/history-view.com
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
+import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
-import { InstanceTemplatesComponent } from './components/instance-templates/instance-templates.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';

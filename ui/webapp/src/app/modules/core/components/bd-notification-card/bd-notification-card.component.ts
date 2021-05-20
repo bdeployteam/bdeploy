@@ -12,6 +12,7 @@ export class BdNotificationCardComponent implements OnInit {
   @Input() warning = false;
   @Input() disabled = false;
   @Input() dismissable = true;
+  @Input() background: 'toolbar' | 'dialog' = 'toolbar';
   @Output() dismiss = new EventEmitter<any>();
 
   constructor() {}

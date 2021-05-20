@@ -1,4 +1,10 @@
-<div class="local-sizing" fxLayout="row" fxFlex="1 0 auto">
+<div
+  class="local-sizing"
+  [class.local-bg-toolbar]="background === 'toolbar'"
+  [class.local-bg-dialog]="background === 'dialog'"
+  fxLayout="row"
+  fxFlex="1 0 auto"
+>
   <div class="bd-glow-bg local-icon-area" fxFlex="0 0 auto" fxLayout="column" fxLayoutAlign="center center">
     <mat-icon *ngIf="!!icon" [ngClass]="warning ? 'bd-warning-text' : []">{{ icon }}</mat-icon>
     <mat-icon *ngIf="!!svgIcon" [ngClass]="warning ? 'bd-warning-text' : []" [svgIcon]="svgIcon"></mat-icon>

@@ -1,5 +1,14 @@
 <div fxFlex="1 0 auto" fxLayout="column">
-  <table mat-table [dataSource]="dataSource" matSort fxFlex="1 0 auto" [style.width]="'100%'">
+  <table
+    mat-table
+    [dataSource]="dataSource"
+    matSort
+    fxFlex="1 0 auto"
+    [style.width]="'100%'"
+    cdkDropList
+    [cdkDropListDisabled]="!dragReorderMode"
+    (cdkDropListDropped)="onDrop($event)"
+  >
     <caption style="display: none">
       {{
         caption
@@ -17,6 +26,7 @@
         [routerLinkActive]="!!row.node.item ? 'mat-row-route-active' : []"
         [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
         class="local-row"
+        cdkDrag
       ></tr>
     </ng-container>
 
@@ -27,6 +37,7 @@
         *matRowDef="let row; columns: _visibleColumns"
         (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
         [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
+        cdkDrag
       ></tr>
     </ng-container>
 
@@ -62,28 +73,38 @@
             [style.maxWidth]="0"
             [attr.colspan]="row.expandable ? _columns.length : 1"
           >
-            <!-- Button to expand or collapse a group -->
-            <button *ngIf="row.expandable" mat-icon-button [style.marginLeft.px]="row.level * 24" (click)="treeControl.toggle(row)" appClickStopPropagation>
-              <mat-icon class="mat-icon-rtl-mirror">
-                {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
-              </mat-icon>
-            </button>
-
             <!-- Text for the first column, either group name or item text -->
-            <span
+            <div
               class="local-first-column"
               [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
               [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
-              [matBadge]="row.node.children.length"
-              [matBadgeHidden]="!row.expandable"
-              matBadgeSize="small"
-              matBadgeOverlap="false"
               [matTooltip]="!row.expandable ? row.node.groupOrFirstColumn : null"
               [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
+              fxLayout="row"
+              fxLayoutAlign="start center"
             >
+              <!-- Button to expand or collapse a group -->
+              <button *ngIf="row.expandable" mat-icon-button [style.marginLeft.px]="row.level * 24" (click)="treeControl.toggle(row)" appClickStopPropagation>
+                <mat-icon class="mat-icon-rtl-mirror">
+                  {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
+                </mat-icon>
+              </button>
+
               <!-- Either simple label or check box in check mode -->
               <ng-container *ngIf="!checkMode">
-                <ng-container *ngIf="!col.component">{{ row.node.groupOrFirstColumn }}</ng-container>
+                <!-- issue with angular: it cannot pick up the drag handle since it is in a child template, so the *whole* row can be dragged... -->
+                <mat-icon *ngIf="dragReorderMode" cdkDragHandle [style.cursor]="'grab'" [style.margin-bottom.px]="1" class="local-drag-handle"
+                  >drag_indicator</mat-icon
+                >
+                <div
+                  *ngIf="!col.component"
+                  [matBadge]="row.node.children.length"
+                  [matBadgeHidden]="!row.expandable"
+                  matBadgeSize="small"
+                  matBadgeOverlap="false"
+                >
+                  {{ row.node.groupOrFirstColumn }}
+                </div>
                 <app-bd-data-component-cell
                   *ngIf="!!col.component"
                   [componentType]="col.component"
@@ -94,7 +115,7 @@
               <mat-checkbox #cb *ngIf="checkMode" [checked]="isChecked(row)" [indeterminate]="isPartiallyChecked(row)" (change)="toggleCheck(row, cb)">{{
                 row.node.groupOrFirstColumn
               }}</mat-checkbox>
-            </span>
+            </div>
           </td>
         </ng-container>
 
