@@ -1,5 +1,5 @@
-<app-bd-dialog>
-  <app-bd-dialog-toolbar header="Configure {{ (edit.process$ | async)?.name }}" [closeablePanel]="true">
+<app-bd-dialog #dialog [padding]="false">
+  <app-bd-dialog-toolbar header="Configure {{ (edit.process$ | async)?.name }}{{ instanceEdit.hasPendingChanges() ? '*' : '' }}" [closeablePanel]="true">
     <div fxFlex="1 0 auto"></div>
     <app-bd-panel-button
       #backButton
@@ -10,9 +10,18 @@
       [route]="['..']"
       [relative]="true"
     ></app-bd-panel-button>
-    <app-bd-button text="APPLY" [collapsed]="false" color="primary" (click)="doApply()" [disabled]="!instanceEdit.hasPendingChanges()"></app-bd-button>
+    <app-bd-button
+      text="APPLY"
+      [collapsed]="false"
+      color="primary"
+      (click)="doApply()"
+      [disabled]="!instanceEdit.hasPendingChanges() || isInvalid()"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <!-- TODO -->
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-config-process-header></app-config-process-header>
+      <app-config-process-param-group [dialog]="dialog"></app-config-process-param-group>
+    </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

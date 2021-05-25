@@ -73,13 +73,7 @@
     <div class="search-title title-theme">
       <mat-form-field class="search">
         <mat-label></mat-label>
-        <input
-          #searchField
-          matInput
-          type="text"
-          placeholder="Type to filter parameters"
-          (input)="searchString = searchField.value"
-        />
+        <input #searchField matInput type="text" placeholder="Type to filter parameters" (input)="searchString = searchField.value" />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
@@ -100,29 +94,13 @@
         <mat-grid-list cols="2" rowHeight="5em">
           <mat-grid-tile *ngFor="let param of unknownParameters" class="allow-overflow">
             <mat-form-field>
-              <input
-                matInput
-                placeholder="{{ param.descriptor.name }}"
-                value="{{ param.getValue(appService) }}"
-                readonly
-                disabled
-              />
+              <input matInput placeholder="{{ param.descriptor.name }}" value="{{ param.getValue(appService) }}" readonly disabled />
             </mat-form-field>
             <div class="icons">
-              <button
-                mat-icon-button
-                type="button"
-                (click)="covertUnknownToCustomParameter(param.descriptor.uid)"
-                matTooltip="Convert to custom parameter"
-              >
+              <button mat-icon-button type="button" (click)="covertUnknownToCustomParameter(param.descriptor.uid)" matTooltip="Convert to custom parameter">
                 <mat-icon>save_alt</mat-icon>
               </button>
-              <button
-                mat-icon-button
-                type="button"
-                (click)="removeUnknownParameter(param.descriptor.uid)"
-                matTooltip="Delete parameter"
-              >
+              <button mat-icon-button type="button" (click)="removeUnknownParameter(param.descriptor.uid)" matTooltip="Delete parameter">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
@@ -137,39 +115,23 @@
       <ng-container *ngFor="let groupName of sortedGroups; let i = index">
         <ng-container *ngFor="let matches of [numberOfMatches(groupName, false)]">
           <ng-container *ngFor="let optionalMatches of [numberOfMatches(groupName, true)]">
-            <mat-expansion-panel
-              *ngIf="matches !== 0"
-              (opened)="setExpandedGroup(groupName)"
-              [expanded]="expandedGroup === groupName"
-            >
+            <mat-expansion-panel *ngIf="matches !== 0" (opened)="setExpandedGroup(groupName)" [expanded]="expandedGroup === groupName">
               <mat-expansion-panel-header>
                 <mat-panel-title>
                   <span>{{ groupName }}</span>
-                  <span class="group-hint error-theme" *ngIf="getErrorTextForGroup(groupName)"
-                    >&nbsp; {{ getErrorTextForGroup(groupName) }}</span
-                  >
-                  <span class="group-hint info-theme" *ngIf="!getErrorTextForGroup(groupName)"
-                    >&nbsp; {{ getHintTextForGroup(groupName) }}</span
-                  >
+                  <span class="group-hint error-theme" *ngIf="getErrorTextForGroup(groupName)">&nbsp; {{ getErrorTextForGroup(groupName) }}</span>
+                  <span class="group-hint info-theme" *ngIf="!getErrorTextForGroup(groupName)">&nbsp; {{ getHintTextForGroup(groupName) }}</span>
                   <span *ngIf="matches !== -1" class="mat-badge mat-badge-small mat-badge-accent fake-badge-padding"
                     ><span class="mat-badge-content mat-badge-active">{{ matches }}</span></span
                   >
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
-              <div
-                id="param-group-content-{{ i }}"
-                class="param-hint"
-                *ngIf="getParametersOfGroup(groupName).length === 0 && matches === -1"
-              >
+              <div id="param-group-content-{{ i }}" class="param-hint" *ngIf="getParametersOfGroup(groupName).length === 0 && matches === -1">
                 <span> No parameters of this group have been configured.</span>
               </div>
 
-              <div
-                id="param-group-content-{{ i }}"
-                class="param-hint"
-                *ngIf="matches !== -1 && matches === optionalMatches"
-              >
+              <div id="param-group-content-{{ i }}" class="param-hint" *ngIf="matches !== -1 && matches === optionalMatches">
                 <span> No parameters of this group match the given search.</span>
               </div>
 
@@ -189,8 +151,7 @@
                         [ngClass]="['boolean-param-field', param.desc.fixed ? 'boolean-param-field-readonly' : '']"
                         *ngIf="param.desc.hasValue || param.desc.mandatory"
                       >
-                        <mat-slide-toggle class="boolean-param-widget" [formControlName]="param.desc.uid">
-                        </mat-slide-toggle>
+                        <mat-slide-toggle class="boolean-param-widget" [formControlName]="param.desc.uid"> </mat-slide-toggle>
                         <label class="boolean-param-label">{{ getCtrlPlaceholderText(param.desc) }}</label>
                       </div>
 
@@ -211,17 +172,12 @@
                           type="{{ getCtrlInputType(param.desc.type) }}"
                         />
                         <mat-autocomplete #auto="matAutocomplete">
-                          <mat-option
-                            *ngFor="let suggestedValue of param.desc.suggestedValues"
-                            [value]="suggestedValue"
-                          >
+                          <mat-option *ngFor="let suggestedValue of param.desc.suggestedValues" [value]="suggestedValue">
                             {{ suggestedValue }}
                           </mat-option>
                         </mat-autocomplete>
                       </div>
-                      <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{
-                        getCtrlErrorMessage(param.desc.uid)
-                      }}</mat-error>
+                      <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{ getCtrlErrorMessage(param.desc.uid) }}</mat-error>
                     </mat-form-field>
 
                     <mat-form-field *ngSwitchDefault>
@@ -232,9 +188,7 @@
                         [formControlName]="param.desc.uid"
                         type="{{ getCtrlInputType(param.desc.type) }}"
                       />
-                      <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{
-                        getCtrlErrorMessage(param.desc.uid)
-                      }}</mat-error>
+                      <mat-error *ngIf="!isCtrlValid(param.desc.uid)">{{ getCtrlErrorMessage(param.desc.uid) }}</mat-error>
                     </mat-form-field>
 
                     <ng-template #infoPopup>
@@ -248,11 +202,7 @@
                           <div><strong>Raw Parameter:</strong></div>
                           <div class="info-grid-span-2">
                             {{ param.desc.parameter }} (value: {{ param.desc.hasValue ? 'yes' : 'no'
-                            }}{{
-                              param.desc.hasValue && !param.desc.valueAsSeparateArg
-                                ? ', separator: ' + param.desc.valueSeparator
-                                : ''
-                            }})
+                            }}{{ param.desc.hasValue && !param.desc.valueAsSeparateArg ? ', separator: ' + param.desc.valueSeparator : '' }})
                           </div>
                           <div><strong>Default:</strong></div>
                           <div class="info-default-value">
@@ -281,23 +231,18 @@
                       <mat-card class="info-card">
                         <div class="mat-title">{{ param.desc.name }}</div>
                         <mat-card-content>
-                          This is a global parameter. All applications of this instance referring to this parameter will
-                          be affected when the value is changed.
+                          This is a global parameter. All applications of this instance referring to this parameter will be affected when the value is changed.
                         </mat-card-content>
                       </mat-card>
                     </ng-template>
 
                     <div class="icons">
-                      <div
-                        #unlockDiv
-                        [hidden]="param.desc.type !== parameterType.PASSWORD"
-                        matTooltip="Unlock editing of this parameter"
-                      >
+                      <div #unlockDiv [hidden]="param.desc.type !== parameterType.PASSWORD" matTooltip="Unlock editing of this parameter">
                         <button mat-icon-button #unlockButton (click)="enablePasswordControl(param, unlockButton)">
                           <mat-icon>{{ unlockButton.disabled ? 'lock_open' : 'lock' }}</mat-icon>
                         </button>
                       </div>
-                      <app-custom-editor
+                      <!-- <app-custom-editor
                         *ngIf="param.desc.customEditor && authService.isScopedWrite(instanceGroup)"
                         [readonly]="readonly"
                         (valueConfirmed)="customValueConfirmed(param, $event)"
@@ -306,7 +251,7 @@
                         [descriptor]="param.desc"
                         [value]="param.conf"
                         [product]="appConfigContext.product"
-                      ></app-custom-editor>
+                      ></app-custom-editor> -->
 
                       <button
                         mat-icon-button
@@ -317,12 +262,7 @@
                       >
                         <mat-icon class="icons">public</mat-icon>
                       </button>
-                      <button
-                        mat-icon-button
-                        type="button"
-                        #infoButton
-                        (click)="openOverlay(param.desc, infoButton, infoPopup)"
-                      >
+                      <button mat-icon-button type="button" #infoButton (click)="openOverlay(param.desc, infoButton, infoPopup)">
                         <mat-icon class="info-icon">info</mat-icon>
                       </button>
                     </div>
@@ -343,22 +283,12 @@
                 >
                   Manage Optional Parameters
                 </button>
-                <button
-                  type="button"
-                  mat-button
-                  (click)="manageCustomParameters()"
-                  [disabled]="readonly"
-                  *ngIf="hasCustomParameters(groupName)"
-                >
+                <button type="button" mat-button (click)="manageCustomParameters()" [disabled]="readonly" *ngIf="hasCustomParameters(groupName)">
                   Manage Custom Parameters
                 </button>
                 <ng-container nfIf*="hasMultipleGroups()">
-                  <button type="button" mat-button (click)="expandPreviousGroup()" *ngIf="hasPreviousGroup(groupName)">
-                    Previous
-                  </button>
-                  <button type="button" mat-button (click)="expandNextGroup()" *ngIf="hasNextGroup(groupName)">
-                    Next
-                  </button>
+                  <button type="button" mat-button (click)="expandPreviousGroup()" *ngIf="hasPreviousGroup(groupName)">Previous</button>
+                  <button type="button" mat-button (click)="expandNextGroup()" *ngIf="hasNextGroup(groupName)">Next</button>
                 </ng-container>
               </mat-action-row>
             </mat-expansion-panel>

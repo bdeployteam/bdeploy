@@ -1,5 +1,6 @@
 .local-sizing {
   min-height: 100px;
+  max-width: 100%;
 }
 
 .local-bg-toolbar {
@@ -16,5 +17,4 @@
 
 .local-content {
   padding: 10px;
-  width: 266px;
 }

@@ -134,6 +134,12 @@ export class InstancesService {
     return this.http.get<InstanceNodeConfigurationListDto>(`${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`);
   }
 
+  public updateBanner(banner: InstanceBannerRecord): Observable<any> {
+    return this.http
+      .post(`${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/banner`, banner)
+      .pipe(measure('Update Instance Banner'));
+  }
+
   private reload(group: string) {
     if (!group) {
       this.instances$.next([]);

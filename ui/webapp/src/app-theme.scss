@@ -81,9 +81,11 @@
     --bd-text-secondary: #{mat-color($fg, 'secondary-text')};
     --bd-text-success: #{if($dark, mat-color($mat-green, 300), mat-color($mat-green, 700))};
     --bd-text-very-light: rgb(116, 116, 116);
+    --bd-text-disabled: #{mat-color($fg, 'disabled-text')};
 
     --bd-bg-dialog: #{mat-color($bg, 'dialog')};
     --bd-bg-toolbar: #{mat-color($bg, 'app-bar')};
+    --bd-bg-disabled: #{mat-color($fg, base, if($dark, 0.05, 0.02))};
 
     --bd-primary-darker: #{mat-color($primary, 'darker')};
     --bd-accent-darker: #{mat-color($accent, 'darker')};

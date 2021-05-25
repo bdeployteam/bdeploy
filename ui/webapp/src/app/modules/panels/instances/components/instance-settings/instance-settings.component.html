@@ -13,6 +13,15 @@
         [disabled]="!auth.isCurrentScopeWrite()"
       ></app-bd-panel-button>
       <app-bd-panel-button
+        text="Banner"
+        icon="lightbulb"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['banner']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
         text="Manage Nodes"
         icon="dns"
         [collapsed]="false"

@@ -2,26 +2,24 @@
   <div fxLayout="column" class="bd-form-toggle-appearance-fill" [ngClass]="disabled ? ['bd-form-toggle-disabled'] : []">
     <div
       fxLayout="row"
-      class="local-form-field-wrapper bd-form-toggle-flex"
+      class="bd-form-toggle-form-field-wrapper bd-form-toggle-flex"
       matRipple
       [matRippleDisabled]="disabled"
       (click)="onClick()"
       [style.cursor]="disabled ? undefined : 'pointer'"
     >
       <div fxFlex="1 0 auto" class="bd-form-toggle-label">{{ label }}</div>
-      <mat-checkbox
-        *ngIf="appearance === 'checkbox'"
-        [style.pointer-events]="'none'"
-        [checked]="value"
-        [disabled]="disabled"
-      ></mat-checkbox>
+      <mat-checkbox *ngIf="appearance === 'checkbox'" [style.pointer-events]="'none'" [checked]="value" [disabled]="disabled"></mat-checkbox>
       <mat-slide-toggle
         *ngIf="appearance === 'slide'"
         [style.pointer-events]="'none'"
         [checked]="value"
         [disabled]="disabled"
-        class="local-slide-toggle"
+        class="bd-form-toggle-slide-toggle"
       ></mat-slide-toggle>
+      <div class="bd-form-toggle-suffix">
+        <ng-content></ng-content>
+      </div>
     </div>
     <div class="bd-form-toggle-underline">
       <span class="bd-form-toggle-ripple"></span>

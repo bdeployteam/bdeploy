@@ -1,33 +1,35 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [closeablePanel]="true" header="Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
-  <app-bd-dialog-content *ngIf="nodeState$ | async as state" fxLayout="column" fxLayoutGap="10px">
-    <app-bd-notification-card [svgIcon]="state.config.os" [dismissable]="false" header="{{ nodeName$ | async }} - {{ state.config.os }}">
-      <div gdColumns="120px auto" gdRows="repeat(4, 24px)" gdGap="5px" gdAlignColumns="start center">
-        <div>BDeploy Version:</div>
-        <div>{{ formatVersion(state.config.version) }}</div>
-        <div>Number of CPUs:</div>
-        <div>{{ state.config.monitoring.availableProcessors }}</div>
-        <div>Master:</div>
-        <div>{{ state.config.master ? 'yes' : 'no' }}</div>
-        <ng-container *ngIf="!state.offline">
-          <div>Up Since:</div>
-          <div>{{ formatDate(state.startup) }}</div>
-        </ng-container>
-        <ng-container *ngIf="state.offline">
-          <div>Status:</div>
-          <div>{{ state.infoText }}</div>
-        </ng-container>
-      </div>
-    </app-bd-notification-card>
+  <app-bd-dialog-content>
+    <div *ngIf="nodeState$ | async as state" fxLayout="column" fxLayoutGap="10px">
+      <app-bd-notification-card [svgIcon]="state.config.os" [dismissable]="false" header="{{ nodeName$ | async }} - {{ state.config.os }}">
+        <div gdColumns="120px auto" gdRows="repeat(4, 24px)" gdGap="5px" gdAlignColumns="start center">
+          <div>BDeploy Version:</div>
+          <div>{{ formatVersion(state.config.version) }}</div>
+          <div>Number of CPUs:</div>
+          <div>{{ state.config.monitoring.availableProcessors }}</div>
+          <div>Master:</div>
+          <div>{{ state.config.master ? 'yes' : 'no' }}</div>
+          <ng-container *ngIf="!state.offline">
+            <div>Up Since:</div>
+            <div>{{ formatDate(state.startup) }}</div>
+          </ng-container>
+          <ng-container *ngIf="state.offline">
+            <div>Status:</div>
+            <div>{{ state.infoText }}</div>
+          </ng-container>
+        </div>
+      </app-bd-notification-card>
 
-    <ng-container *ngIf="nodeCfg$ | async as node">
-      <app-node-header [node]="node" show="load" [hasAction]="false">
-        <div class="bd-type-text">Load Average</div>
-      </app-node-header>
-      <app-node-header [node]="node" show="cpu" [hasAction]="false">
-        <div class="bd-type-text">CPU Usage</div>
-      </app-node-header>
-    </ng-container>
+      <ng-container *ngIf="nodeCfg$ | async as node">
+        <app-node-header [node]="node" show="load" [hasAction]="false">
+          <div class="bd-type-text">Load Average</div>
+        </app-node-header>
+        <app-node-header [node]="node" show="cpu" [hasAction]="false">
+          <div class="bd-type-text">CPU Usage</div>
+        </app-node-header>
+      </ng-container>
+    </div>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(nodeState$ | async)">
     <app-bd-notification-card icon="history" [warning]="true" [dismissable]="false" header="Server Not Synchronized">

@@ -6,6 +6,8 @@ import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
+import { ConfigProcessHeaderComponent } from './config-process-header/config-process-header.component';
+import { ConfigProcessParamGroupComponent } from './config-process-param-group/config-process-param-group.component';
 
 @Component({
   selector: 'app-configure-process',
@@ -17,6 +19,9 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
 
   @ViewChild('backButton') private back: BdPanelButtonComponent;
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
+
+  @ViewChild(ConfigProcessHeaderComponent) private cfgHeader: ConfigProcessHeaderComponent;
+  @ViewChild(ConfigProcessParamGroupComponent) private cfgParams: ConfigProcessParamGroupComponent;
 
   private subscription: Subscription;
 
@@ -35,8 +40,14 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
   public isDirty(): boolean {
     return this.instanceEdit.hasPendingChanges();
   }
+
   /* template */ doApply() {
+    this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);
     this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
     this.back.onClick();
+  }
+
+  /* template */ isInvalid(): boolean {
+    return this.cfgHeader.isInvalid() || this.cfgParams.isInvalid();
   }
 }

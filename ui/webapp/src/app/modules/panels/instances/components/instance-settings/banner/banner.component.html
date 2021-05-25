@@ -1,0 +1,57 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Instance Banner" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instances.current$ | async)?.managedServer)">
+      <div>A banner provides a version independent way of conveying information to other users working on the same instance.</div>
+
+      <app-bd-banner [banner]="banner"></app-bd-banner>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Banner Text</mat-label>
+        <textarea matInput [(ngModel)]="banner.text" [style.height.px]="100"></textarea>
+      </mat-form-field>
+
+      <app-bd-form-input type="color" label="Foreground Color" name="fgColor" [(ngModel)]="banner.foregroundColor"></app-bd-form-input>
+      <app-bd-form-input type="color" label="Background Color" name="bgColor" [(ngModel)]="banner.backgroundColor"></app-bd-form-input>
+
+      <app-bd-button
+        text="APPLY"
+        [collapsed]="false"
+        color="primary"
+        [disabled]="!isDirty()"
+        (click)="doApply()"
+        [disabled]="saving$ | async"
+        [loadingWhen$]="saving$"
+      ></app-bd-button>
+      <app-bd-button
+        text="Remove Banner"
+        [collapsed]="false"
+        icon="delete"
+        [disabled]="!(instances.current$ | async)?.banner?.text?.length || (removing$ | async)"
+        (click)="doRemove()"
+        [loadingWhen$]="removing$"
+      ></app-bd-button>
+
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+    <app-bd-notification-card
+      icon="history"
+      *ngIf="!servers.isSynchronized((instances.current$ | async)?.managedServer)"
+      [warning]="true"
+      [dismissable]="false"
+      header="Server Not Synchronized"
+    >
+      <div [style.text-align]="'justify'">
+        The managed server responsible for the current instance is not synchronized. Please synchronize the server to continue editing.
+      </div>
+    </app-bd-notification-card>
+  </app-bd-dialog-content>
+</app-bd-dialog>

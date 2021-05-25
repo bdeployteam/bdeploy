@@ -81,46 +81,6 @@
         <ng-container *ngIf="servers.isSynchronized(instance?.managedServer)">
           <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
 
-          <div
-            *ngIf="instance.instance.tag !== instance.activeVersion?.tag && !isEmptyInstance() && !edit.hasPendingChanges() && !edit.hasSaveableChanges()"
-            class="bd-rect-card"
-          >
-            <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
-              <div fxLayout="column" fxFlex="1 0 auto">
-                <div>
-                  The current version ({{ instance.instance.tag }}) is not <strong>active</strong>. You can <strong>install and active</strong> the current
-                  version now.
-                </div>
-                <div class="bd-description-text">
-                  To <strong>install, uninstall or activate</strong> historic versions, please go to the
-                  <a [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]">instance history</a>.
-                </div>
-              </div>
-              <ng-container *ngIf="states$ | async as state">
-                <app-bd-button
-                  fxFlexAlign="center"
-                  color="primary"
-                  text="Install"
-                  icon="layers"
-                  (click)="doInstall(instance.instance.tag)"
-                  [disabled]="(installing$ | async) || isInstalled(instance.instance.tag)"
-                  [loadingWhen$]="installing$"
-                  tooltip="below"
-                ></app-bd-button>
-                <app-bd-button
-                  fxFlexAlign="center"
-                  color="accent"
-                  text="Activate"
-                  icon="star"
-                  (click)="doActivate(instance.instance.tag)"
-                  [disabled]="(activating$ | async) || !isInstalled(instance.instance.tag)"
-                  [loadingWhen$]="activating$"
-                  tooltip="below"
-                ></app-bd-button>
-              </ng-container>
-            </div>
-          </div>
-
           <div *ngIf="isEmptyInstance() && !!(templates$ | async)?.length" class="bd-rect-card">
             <div fxLayout="row" [style.padding.px]="20">
               <div fxLayout="row" fxFlex="1 0 auto" fxLayoutAlign="center center" fxLayoutGap="5px">

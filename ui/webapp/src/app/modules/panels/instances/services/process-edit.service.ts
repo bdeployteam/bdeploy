@@ -31,6 +31,9 @@ export class ProcessEditService {
   public product$ = new BehaviorSubject<ProductDto>(null);
   public applications$ = new BehaviorSubject<ApplicationDto[]>(null);
   public process$ = new BehaviorSubject<ApplicationConfiguration>(null);
+  public application$ = new BehaviorSubject<ApplicationDto>(null);
+
+  private preliminary: ApplicationConfiguration[] = [];
 
   constructor(private edit: InstanceEditService, private products: ProductsService, private areas: NavAreasService, private groups: GroupsService) {
     combineLatest([this.areas.panelRoute$, this.products.products$, this.edit.state$, this.edit.stateApplications$]).subscribe(
@@ -52,6 +55,7 @@ export class ProcessEditService {
 
         if (!!process && !!this.node$.value?.nodeConfiguration?.applications) {
           this.process$.next(this.node$.value.nodeConfiguration.applications.find((a) => a.uid === process));
+          this.application$.next(apps.find((x) => x.key.name === this.process$.value?.application?.name));
         }
       }
     );
@@ -129,12 +133,74 @@ export class ProcessEditService {
       }
     }
 
+    this.preliminary.push(process);
+    this.alignGlobalParameters(application, process);
+
     return this.groups.newUuid().pipe(
       tap((uuid) => {
         process.uid = uuid;
         node.nodeConfiguration.applications.push(process);
+        this.preliminary.splice(this.preliminary.indexOf(process), 1);
       })
     );
+  }
+
+  public preRenderParameter(desc: ParameterDescriptor, value: any): string[] {
+    const strValue = !!value ? value : '';
+
+    if (!desc) {
+      // custom parameter;
+      return [strValue];
+    }
+
+    if (desc.hasValue) {
+      if (desc.valueAsSeparateArg) {
+        return [desc.parameter, strValue];
+      }
+      return [desc.parameter + desc.valueSeparator + strValue];
+    }
+    return [desc.parameter];
+  }
+
+  public alignGlobalParameters(appDto: ApplicationDto, process: ApplicationConfiguration) {
+    const globals = appDto.descriptor?.startCommand?.parameters?.filter((p) => p.global);
+    if (!globals?.length) {
+      return;
+    }
+
+    const values: { [key: string]: string } = {};
+    for (const g of globals) {
+      const v = process.start.parameters.find((p) => p.uid === g.uid);
+      if (!!v) {
+        values[v.uid] = v.value;
+      }
+    }
+
+    for (const node of this.edit.state$.value.nodeDtos) {
+      for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
+        for (const uid of Object.keys(values)) {
+          const p = app.start?.parameters?.find((x) => x.uid === uid);
+          if (!!p) {
+            p.value = values[uid];
+            p.preRendered = this.preRenderParameter(
+              globals.find((x) => x.uid === uid),
+              p.value
+            );
+          }
+        }
+      }
+    }
+  }
+
+  private getGlobalParameter(uid: string): ParameterConfiguration {
+    for (const node of this.edit.state$.value.nodeDtos) {
+      for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
+        const p = app.start?.parameters?.find((x) => x.uid === uid);
+        if (!!p) {
+          return p;
+        }
+      }
+    }
   }
 
   private calculateInitialCommand(
@@ -158,6 +224,11 @@ export class ProcessEditService {
         let val = p.defaultValue;
         if (!!tpl) {
           val = this.performVariableSubst(tpl.value, values, status);
+        } else if (p.global) {
+          const gp = this.getGlobalParameter(p.uid);
+          if (!!gp) {
+            val = gp.value;
+          }
         }
 
         return {
@@ -178,17 +249,6 @@ export class ProcessEditService {
         )
       ),
     };
-  }
-
-  private preRenderParameter(desc: ParameterDescriptor, value: any): string[] {
-    const strValue = !!value ? value : '';
-    if (desc.hasValue) {
-      if (desc.valueAsSeparateArg) {
-        return [desc.parameter, strValue];
-      }
-      return [desc.parameter + desc.valueSeparator + strValue];
-    }
-    return [desc.parameter];
   }
 
   private performVariableSubst(value: string, variables: { [key: string]: string }, status: StatusMessage[]): string {

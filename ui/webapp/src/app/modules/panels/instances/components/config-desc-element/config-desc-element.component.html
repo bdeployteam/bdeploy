@@ -1,0 +1,7 @@
+<ng-template #popup>
+  <app-config-desc-cards [field]="card"></app-config-desc-cards>
+</ng-template>
+
+<div [appBdPopup]="popup" appBdPopupTrigger="hover" [appBdPopupDelay]="500" [appBdPopupPosition]="position">
+  <ng-content></ng-content>
+</div>

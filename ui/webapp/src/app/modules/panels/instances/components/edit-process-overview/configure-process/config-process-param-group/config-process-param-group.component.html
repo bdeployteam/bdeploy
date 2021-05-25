@@ -1,0 +1,206 @@
+<ng-template #addCustom>
+  <div fxLayout="column" fxLayoutGap="10px" [style.max-width.px]="500">
+    <div>Provide a unique ID for the custom parameter.</div>
+    <app-bd-form-input
+      #validateCustom
+      label="Unique ID"
+      appEditCustomUidValidator
+      appEditUniqueValueValidator
+      [disallowedValues]="getAllValueUids()"
+      [(ngModel)]="customTemp.uid"
+      required
+    ></app-bd-form-input>
+    <div>
+      You can choose a predecessor from the list of existing parameters. The custom parameter will be added <em>after</em> the selected parameter, or at the
+      start of the list if none is selected.
+    </div>
+    <app-bd-form-select
+      label="Predecessor"
+      [values]="getAllValueUids()"
+      [labels]="getAllValueUidLabels()"
+      [allowNone]="true"
+      [(ngModel)]="customTemp.predecessor"
+    ></app-bd-form-select>
+    <div>
+      You may also provide a value right away, or edit the value later on. The value is put on the final command line <strong>as is</strong>, so make sure to
+      give a propper command line argument.
+    </div>
+    <app-bd-form-input label="Custom Parameter Value" [(ngModel)]="customTemp.value"></app-bd-form-input>
+  </div>
+</ng-template>
+
+<ng-container *ngIf="this.edit.process$ | async as process">
+  <div class="bd-default-padding" *ngIf="this.edit.application$ | async as app" fxLayout="column" fxLayoutGap="10px">
+    <!-- Single parameter group -->
+    <mat-accordion [multi]="true" class="local-headers-align">
+      <ng-container *ngFor="let group of groups$ | async; let i = index">
+        <mat-expansion-panel #panel *ngIf="hasGroupSearchMatch(group)">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              {{ group.name }}
+            </mat-panel-title>
+            <mat-panel-description *ngIf="!(narrow$ | async)">
+              <span *ngIf="!this.search">{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
+              <span *ngIf="!!this.search">Configured or optional parameters match search.</span>
+              <span *ngIf="groupForm.invalid && !panel.expanded" class="bd-warning-text" [style.font-size]="'smaller'">Validation Failed</span>
+              <div *ngIf="panel.expanded" fxLayout="row" fxLayoutGap="5px">
+                <app-bd-button
+                  *ngIf="group.isCustom"
+                  text="Add Custom Parameter..."
+                  icon="add"
+                  (click)="onAddCustomParameter(addCustom)"
+                  appClickStopPropagation
+                ></app-bd-button>
+                <app-bd-button
+                  [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters...'"
+                  [icon]="group.isSelectMode ? 'check' : 'tune'"
+                  tooltip="below"
+                  [disabled]="!hasOptionals(group)"
+                  [isToggle]="true"
+                  [(toggle)]="group.isSelectMode"
+                  appClickStopPropagation
+                ></app-bd-button>
+              </div>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <form #groupForm="ngForm" fxLayout="column">
+            <div fxFlexAlign="center" *ngIf="group.isSelectMode" fxLayout="row" fxLayoutAlign="start center" class="bd-hint-text" [style.padding-top.px]="20">
+              <span class="local-edit-desc">
+                Use the <mat-icon>add</mat-icon> and <mat-icon>delete</mat-icon> buttons in front of each optional parameter to add or remove them. Mandatory
+                parameters cannot be removed. When you are done, press the <mat-icon>check</mat-icon> button to confirm.
+              </span>
+            </div>
+            <div
+              [style.padding-top.px]="20"
+              gdColumns.sm="100%"
+              [gdColumns.gt-sm]="getValueCount(group) <= 1 && !group.isSelectMode ? '100%' : 'calc(50% - 5px) calc(50% - 5px)'"
+              gdGap="5px 10px"
+            >
+              <!-- Empty group hint -->
+              <div *ngIf="getValueCount(group) === 0 && !group.isSelectMode" class="bd-hint-text">No parameters are currently configured in this group.</div>
+
+              <!-- Single parameter -->
+              <ng-container *ngFor="let p of group.pairs">
+                <div fxLayout="row" *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)">
+                  <ng-template #popup>
+                    <app-param-desc-card [descriptor]="p.descriptor"></app-param-desc-card>
+                  </ng-template>
+
+                  <!-- Checkbox for select mode... -->
+                  <div class="local-select-wrapper" *ngIf="group.isSelectMode" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-icon
+                      (click)="!!p.descriptor?.mandatory ? null : doAddRemoveParameter(group, p)"
+                      [class.bd-disabled-text]="!!p.descriptor?.mandatory"
+                      [matTooltip]="
+                        !!p.descriptor?.mandatory ? 'Parameter is mandatory and cannot be removed.' : 'Click to add or remove this optional parameter'
+                      "
+                      [matTooltipShowDelay]="500"
+                      matRipple
+                      [style.cursor]="'pointer'"
+                      class="local-add-remove"
+                      >{{ !!p.value ? (p?.descriptor?.mandatory ? 'lock' : 'delete') : 'add' }}</mat-icon
+                    >
+                  </div>
+
+                  <!-- Input for STRING, NUMERIC, CLIENT_PORT, SERVER_PORT, PASSWORD -->
+                  <app-bd-form-input
+                    *ngIf="!isBoolean(p)"
+                    fxFlex="1 0 auto"
+                    [label]="!!p.descriptor ? p.descriptor.name : p.value.uid"
+                    [name]="p.value ? p.value.uid : p.descriptor.uid"
+                    [type]="getInputType(p)"
+                    [ngModel]="p.value?.value"
+                    (ngModelChange)="doChangeValue(p, $event)"
+                    errorDisplay="immediate"
+                    [required]="p.descriptor?.mandatory"
+                    [appBdPopup]="popup"
+                    appBdPopupTrigger="hover"
+                    [appBdPopupDelay]="500"
+                    appBdPopupPosition="above-right"
+                    [disabled]="p.passwordLock || !p.editorEnabled || group.isSelectMode || p.descriptor?.fixed"
+                    [suggested]="p.descriptor?.suggestedValues"
+                    class="local-form-input"
+                  >
+                    <div fxLayout="row" class="local-form-input-actions">
+                      <mat-icon
+                        class="local-revert-button"
+                        *ngIf="!!p.descriptor?.defaultValue && !p.descriptor?.fixed"
+                        matTooltip="Click to revert the parameter value to the default."
+                        [matTooltipShowDelay]="500"
+                        (click)="doChangeValue(p, p.descriptor.defaultValue)"
+                        [style.cursor]="'pointer'"
+                        >restore</mat-icon
+                      >
+                      <mat-icon
+                        *ngIf="p.passwordLock && p.editorEnabled && !group.isSelectMode"
+                        matTooltip="Click to enable editing of password field."
+                        [matTooltipShowDelay]="500"
+                        (click)="p.passwordLock = false"
+                        [style.cursor]="'pointer'"
+                        >lock</mat-icon
+                      >
+                      <app-custom-editor
+                        *ngIf="p.descriptor?.customEditor && !group.isSelectMode"
+                        (valueConfirmed)="doChangeValue(p, $event)"
+                        (pluginLoaded)="doSetCustomEditorState(p, $event)"
+                        [descriptor]="p.descriptor"
+                        [value]="p.value"
+                        [dialog]="dialog"
+                      ></app-custom-editor>
+                      <mat-icon
+                        *ngIf="p.descriptor?.global"
+                        class="bd-secondary-text"
+                        matTooltip="Global parameters are the same on all processes."
+                        [matTooltipShowDelay]="500"
+                        >public</mat-icon
+                      >
+                    </div>
+                  </app-bd-form-input>
+
+                  <!-- Input for BOOLEAN -->
+                  <app-bd-form-toggle
+                    *ngIf="isBoolean(p)"
+                    fxFlex="1 0 auto"
+                    [label]="!!p.descriptor ? p.descriptor.name : p.value.uid"
+                    [name]="p.value ? p.value.uid : p.descriptor.uid"
+                    [(ngModel)]="p.booleanValue"
+                    (ngModelChange)="doPreRenderBoolean(p)"
+                    [appBdPopup]="popup"
+                    appBdPopupTrigger="hover"
+                    [appBdPopupDelay]="500"
+                    appBdPopupPosition="above-right"
+                    [disabled]="group.isSelectMode || p.descriptor?.fixed"
+                  >
+                    <mat-icon
+                      *ngIf="p.descriptor?.global"
+                      class="bd-secondary-text"
+                      matTooltip="Global parameters are the same on all processes."
+                      [matTooltipShowDelay]="500"
+                      >public</mat-icon
+                    >
+                  </app-bd-form-toggle>
+                </div>
+              </ng-container>
+            </div>
+          </form>
+        </mat-expansion-panel>
+      </ng-container>
+    </mat-accordion>
+
+    <!-- CLI Preview -->
+    <mat-divider></mat-divider>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Command Line Preview </mat-panel-title>
+      </mat-expansion-panel-header>
+      <div [style.padding-top.px]="20">
+        <app-history-process-config
+          [baseConfig]="edit.process$ | async"
+          [baseDescriptor]="(edit.application$ | async).descriptor"
+          [compareConfig]="edit.process$ | async"
+          [onlyCommand]="true"
+        ></app-history-process-config>
+      </div>
+    </mat-expansion-panel>
+  </div>
+</ng-container>
