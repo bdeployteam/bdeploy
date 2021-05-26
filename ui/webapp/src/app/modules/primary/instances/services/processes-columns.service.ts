@@ -6,7 +6,7 @@ import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-d
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { ProcessOutdatedComponent } from '../components/dashboard/process-outdated/process-outdated.component';
 import { ProcessStatusIconComponent } from '../components/dashboard/process-status-icon/process-status-icon.component';
-import { InstanceEditService } from './instance-edit.service';
+import { InstanceEditService, ProcessEditState } from './instance-edit.service';
 import { InstancesService } from './instances.service';
 import { PortsService } from './ports.service';
 import { ProcessesService } from './processes.service';
@@ -38,6 +38,14 @@ export class ProcessesColumnsService {
     hint: BdDataColumnTypeHint.AVATAR,
     data: (r) => `/assets/${getAppOs(r.application).toLowerCase()}.svg`,
     display: BdDataColumnDisplay.CARD,
+  };
+
+  processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'name',
+    name: 'Configuration Name',
+    hint: BdDataColumnTypeHint.TITLE,
+    data: (r) => r.name,
+    classes: (r) => this.getStateClass(r),
   };
 
   processOsColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -107,7 +115,7 @@ export class ProcessesColumnsService {
   ];
 
   defaultProcessesConfigColumns: BdDataColumn<ApplicationConfiguration>[] = [
-    this.processNameColumn,
+    this.processNameAndEditStatusColumn,
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
@@ -115,8 +123,8 @@ export class ProcessesColumnsService {
   ];
 
   defaultProcessesConfigClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
+    this.processNameAndEditStatusColumn,
     this.processOsColumn,
-    this.processNameColumn,
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
@@ -140,5 +148,17 @@ export class ProcessesColumnsService {
       // process not running, all ports should be closed.
       return appPorts.every((p) => !p.state);
     }
+  }
+
+  private getStateClass(r: ApplicationConfiguration) {
+    switch (this.edit.getProcessEditState(r.uid)) {
+      case ProcessEditState.ADDED:
+        return ['bd-status-border-added'];
+      case ProcessEditState.INVALID:
+        return ['bd-status-border-invalid'];
+      case ProcessEditState.CHANGED:
+        return ['bd-status-border-changed'];
+    }
+    return ['bd-status-border-none'];
   }
 }

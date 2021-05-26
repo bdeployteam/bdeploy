@@ -30,7 +30,7 @@
 <ng-template #msgTemplate>
   <div fxLayout="column" fxLayoutGap="5px">
     <div>The following possible problems occured:</div>
-    <app-bd-data-table [records]="messages" [columns]="msgColumns"></app-bd-data-table>
+    <app-bd-data-table [records]="messages" [columns]="msgColumns" [sortData]="null"></app-bd-data-table>
     <div>You can choose to cancel and discard changes, or apply them despite the warnings.</div>
   </div>
 </ng-template>
@@ -43,6 +43,15 @@
         You can apply instance templates to the current instance by choosing below. An instance template will create and configure all required processes.
       </div>
       <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
     </div>
     <app-bd-notification-card
       icon="history"

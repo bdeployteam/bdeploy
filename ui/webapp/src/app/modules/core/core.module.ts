@@ -1,3 +1,4 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -156,6 +157,7 @@ export function loadAppConfig(cfgService: ConfigService) {
   ],
   imports: [
     CommonModule,
+    DragDropModule,
 
     // angular material components used in our own components.
     MatButtonModule,

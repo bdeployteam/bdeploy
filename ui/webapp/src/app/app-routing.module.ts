@@ -34,7 +34,7 @@ const routes: Routes = [
     path: 'panels/groups',
     outlet: 'panel',
     loadChildren: () => import('./modules/panels/groups/groups.module').then((x) => x.GroupsModule),
-    canActivate: [AuthGuard, ScopedReadGuard],
+    canActivate: [AuthGuard],
   },
   {
     path: 'instances',

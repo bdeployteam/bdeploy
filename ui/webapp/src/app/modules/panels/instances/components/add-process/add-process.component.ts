@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
-import { BehaviorSubject, combineLatest, concat, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -197,6 +197,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
       this.edit.getApplication(appConfig.application.name).subscribe(
         (app) => {
+          if (!app || !app.descriptor) {
+            return; // app not found, product mismatch?
+          }
           if (
             (app.descriptor.type === ApplicationType.SERVER && this.isClientNode(node)) ||
             (app.descriptor.type === ApplicationType.CLIENT && !this.isClientNode(node))
@@ -249,20 +252,18 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         // we have an empty object in any accepted case, null if cancelled.
         return;
       }
-      let allCreations: Observable<any>;
+      const allCreations: Observable<any>[] = [];
       if (this.isClientNode(row.node)) {
         // multiple applications for the same ID for multiple OS'.
-        const individualCreations = [];
         for (const app of row.app.applications) {
-          individualCreations.push(this.edit.addProcess(row.node, app, row.template, v, []));
+          allCreations.push(this.edit.addProcess(row.node, app, row.template, v, []));
         }
-        allCreations = concat(individualCreations);
       } else {
         // only one application may exist with the same ID.
-        allCreations = this.edit.addProcess(row.node, row.app.applications[0], row.template, v, []);
+        allCreations.push(this.edit.addProcess(row.node, row.app.applications[0], row.template, v, []));
       }
 
-      allCreations.subscribe((_) => {
+      combineLatest(allCreations).subscribe((_) => {
         this.instanceEdit.conceal('Add ' + (!!row.template ? row.template.name : row.app.appDisplayName));
       });
     });

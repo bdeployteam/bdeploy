@@ -1,4 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
@@ -26,6 +27,13 @@ interface FlatNode<T> {
   node: Node<T>;
   expandable: boolean;
   level: number;
+}
+
+/** Represents a request to reorder an item from one index to another in the *original* input records */
+export interface DragReorderEvent<T> {
+  item: T;
+  previousIndex: number;
+  currentIndex: number;
 }
 
 /**
@@ -118,6 +126,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   @Input() recordRoute: (r: T) => any[];
 
   /**
+   * Whether drag & drop re-ordering of rows is allowed.
+   */
+  @Input() dragReorderMode = false;
+
+  /**
    * Fires when the user changes the checked elements
    */
   @Output() checkedChange = new EventEmitter<T[]>();
@@ -126,6 +139,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * Event fired if a record is clicked.
    */
   @Output() recordClick = new EventEmitter<T>();
+
+  /**
+   * Event fired in dragReorderMode when the user drags and drops a record.
+   */
+  @Output() dragReorder = new EventEmitter<DragReorderEvent<T>>();
 
   /** The sort associated with the column headers */
   @ViewChild(MatSort)
@@ -189,6 +207,13 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       this.sort = s;
       this.update();
     });
+
+    // validate that input parameters are consistent and correct.
+    if (this.dragReorderMode) {
+      if (!!this.sortData || !!this.grouping?.length || this.checkMode) {
+        throw new Error('Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.');
+      }
+    }
 
     setTimeout(() => this.update());
   }
@@ -408,5 +433,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     if (!!url) {
       return this.sanitizer.bypassSecurityTrustUrl(url);
     }
+  }
+
+  /* template */ onDrop(event: CdkDragDrop<any>) {
+    // we made sure during init that indices match (no sorting, no grouping, no checking), so we can be "pretty" sure that just passing indices is a good idea.
+    this.dragReorder.emit({ previousIndex: event.previousIndex, currentIndex: event.currentIndex, item: this.records[event.previousIndex] });
   }
 }

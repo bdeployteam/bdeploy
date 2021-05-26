@@ -16,12 +16,14 @@
     </div>
   </div>
   <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
-    <app-bd-data-display
+    <app-bd-data-table
       #data
       [records]="(config$ | async)?.nodeConfiguration?.applications"
       [columns]="isClientNode() ? columns.defaultProcessesConfigClientColumns : columns.defaultProcessesConfigColumns"
       [sortData]="null"
-      [recordRoute]='getRecordRoute'
-    ></app-bd-data-display>
+      [recordRoute]="getRecordRoute"
+      [dragReorderMode]="true"
+      (dragReorder)="onReorder($event)"
+    ></app-bd-data-table>
   </div>
 </div>

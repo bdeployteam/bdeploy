@@ -1,8 +1,9 @@
+import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { ApplicationConfiguration, InstanceNodeConfigurationDto, MinionDto } from 'src/app/models/gen.dtos';
-import { BdDataDisplayComponent } from 'src/app/modules/core/components/bd-data-display/bd-data-display.component';
+import { BdDataTableComponent, DragReorderEvent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { InstanceEditService } from '../../../services/instance-edit.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
 
@@ -17,7 +18,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   /* template */ node$ = new BehaviorSubject<MinionDto>(null);
   /* template */ config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
 
-  @ViewChild('data') data: BdDataDisplayComponent<any>;
+  @ViewChild('data') data: BdDataTableComponent<any>;
 
   private subscription: Subscription;
 
@@ -62,5 +63,11 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /* template */ getNodeName() {
     return this.isClientNode() ? 'Client Applications' : this.nodeName;
+  }
+
+  /* template */ onReorder(order: DragReorderEvent<ApplicationConfiguration>) {
+    moveItemInArray(this.config$.value.nodeConfiguration.applications, order.previousIndex, order.currentIndex);
+    this.edit.conceal(`Re-arrange ${order.item.name}`);
+    this.data.update();
   }
 }
