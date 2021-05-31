@@ -1,13 +1,14 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { GroupDetailsService } from '../../../services/group-details.service';
@@ -17,18 +18,27 @@ import { GroupDetailsService } from '../../../services/group-details.service';
   templateUrl: './edit.component.html',
   styleUrls: ['./edit.component.css'],
 })
-export class EditComponent implements OnInit, DirtyableDialog {
+export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ group: InstanceGroupConfiguration;
   /* template */ origGroup: InstanceGroupConfiguration;
   /* template */ origImage$ = new Subject<SafeUrl>();
   private image: File;
   private imageChanged = false;
+  private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('backButton') back: BdPanelButtonComponent;
 
-  constructor(public groups: GroupsService, public details: GroupDetailsService, private http: HttpClient, private sanitizer: DomSanitizer) {}
+  constructor(
+    public groups: GroupsService,
+    public details: GroupDetailsService,
+    private http: HttpClient,
+    private sanitizer: DomSanitizer,
+    areas: NavAreasService
+  ) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {
     this.groups.current$.subscribe((g) => {
@@ -51,6 +61,10 @@ export class EditComponent implements OnInit, DirtyableDialog {
         });
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   /* template */ isDirty(): boolean {
@@ -86,6 +100,7 @@ export class EditComponent implements OnInit, DirtyableDialog {
   private reset() {
     this.imageChanged = false;
     this.saving$.next(false);
+    this.group = this.origGroup;
     this.back.onClick();
   }
 }

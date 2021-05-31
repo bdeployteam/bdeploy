@@ -8,7 +8,16 @@ import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Observable, of, Subscription } from 'rxjs';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint, BdDataGrouping, bdSortGroups, UNMATCHED_GROUP } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+  bdDataDefaultSearch,
+  bdDataDefaultSort,
+  BdDataGrouping,
+  bdSortGroups,
+  UNMATCHED_GROUP,
+} from 'src/app/models/data';
 import { ErrorMessage, LoggingService } from '../../services/logging.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
@@ -78,14 +87,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = (r, c, d) => r;
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = (s, r, c) => r;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.

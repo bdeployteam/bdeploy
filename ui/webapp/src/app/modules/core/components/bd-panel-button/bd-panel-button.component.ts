@@ -24,7 +24,7 @@ export class BdPanelButtonComponent implements OnInit {
   @ViewChild(RouterLink) private rl: RouterLink;
   @ViewChild(RouterLinkActive) /* template */ rla: RouterLinkActive;
 
-  constructor(public areas: NavAreasService) {}
+  constructor(private areas: NavAreasService) {}
 
   ngOnInit(): void {}
 
@@ -49,8 +49,8 @@ export class BdPanelButtonComponent implements OnInit {
     return [...result, ...snap.url.map((u) => u.path)];
   }
 
-  /* template */ toggleRoute(on: boolean) {
-    if (!on) {
+  /* template */ toggleRoute() {
+    if (this.toggle && this.rla.isActive) {
       this.areas.closePanel();
     }
   }

@@ -5,6 +5,8 @@ import { BdDataColumn } from 'src/app/models/data';
 import { InstanceNodeConfigurationDto, MinionDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
@@ -25,39 +27,47 @@ const colNodeName: BdDataColumn<NodeRow> = {
   templateUrl: './nodes.component.html',
   styleUrls: ['./nodes.component.css'],
 })
-export class NodesComponent implements OnInit, OnDestroy {
+export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ records: NodeRow[] = [];
   /* template */ columns: BdDataColumn<NodeRow>[] = [colNodeName];
   /* template */ checked: NodeRow[] = [];
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild('backButton') back: BdPanelButtonComponent;
 
   private subscription: Subscription;
 
-  constructor(public edit: InstanceEditService, public servers: ServersService) {}
+  constructor(public edit: InstanceEditService, public servers: ServersService, areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.edit.nodes$, this.edit.state$]).subscribe(([nodes, state]) => {
-      this.records = [];
+    this.subscription.add(
+      combineLatest([this.edit.nodes$, this.edit.state$]).subscribe(([nodes, state]) => {
+        this.records = [];
 
-      if (!nodes || !state) {
-        return;
-      }
-
-      for (const key of Object.keys(nodes)) {
-        const config = state.nodeDtos.find((n) => n.nodeName === key);
-        const row = { name: key, node: nodes[key], config: config };
-        this.records.push(row);
-        if (!!config) {
-          this.checked.push(row);
+        if (!nodes || !state) {
+          return;
         }
-      }
-    });
+
+        for (const key of Object.keys(nodes)) {
+          const config = state.nodeDtos.find((n) => n.nodeName === key);
+          const row = { name: key, node: nodes[key], config: config };
+          this.records.push(row);
+          if (!!config) {
+            this.checked.push(row);
+          }
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  isDirty(): boolean {
+    return this.edit.hasPendingChanges();
   }
 
   /* template */ onCheckedChange(rows: NodeRow[]) {

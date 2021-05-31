@@ -16,7 +16,7 @@
         text="APPLY"
         [collapsed]="false"
         color="toolbar"
-        [disabled]="!edit.hasPendingChanges() || !servers.isSynchronized(edit.current$.value?.managedServer)"
+        [disabled]="!isDirty() || !servers.isSynchronized(edit.current$.value?.managedServer)"
         (click)="doApply()"
       ></app-bd-button>
       <app-bd-panel-button

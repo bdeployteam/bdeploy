@@ -6,6 +6,7 @@ import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ServerDetailsService } from '../../../services/server-details.service';
@@ -27,19 +28,21 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   @ViewChild('backButton') private back: BdPanelButtonComponent;
   private subscription: Subscription;
 
-  constructor(private servers: ServersService, public details: ServerDetailsService) {}
+  constructor(private servers: ServersService, public details: ServerDetailsService, areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {
-    this.details.server$.subscribe((s) => {
-      this.server = s;
-      this.orig = cloneDeep(s);
-    });
+    this.subscription.add(
+      this.details.server$.subscribe((s) => {
+        this.server = s;
+        this.orig = cloneDeep(s);
+      })
+    );
   }
 
   ngOnDestroy(): void {
-    if (!!this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription.unsubscribe();
   }
 
   /* template */ isDirty() {

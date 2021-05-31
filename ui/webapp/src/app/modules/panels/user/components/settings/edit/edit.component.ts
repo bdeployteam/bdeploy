@@ -7,6 +7,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
@@ -26,8 +27,9 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private subscription: Subscription;
   private mailChanged = new Subject<string>();
 
-  constructor(private auth: AuthenticationService, public settings: SettingsService) {
+  constructor(private auth: AuthenticationService, public settings: SettingsService, areas: NavAreasService) {
     this.subscription = this.mailChanged.pipe(debounceTime(500)).subscribe((v) => this.mail$.next(v));
+    this.subscription.add(areas.registerDirtyable(this, 'panel'));
   }
 
   ngOnInit(): void {

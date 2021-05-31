@@ -2,7 +2,7 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { applyChangeset, Changeset, diff } from 'json-diff-ts';
-import { cloneDeep, isMatchWith, isNil } from 'lodash-es';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -63,7 +63,7 @@ export class InstanceEdit implements Edit {
 }
 
 /**
- * A special edit which move san application in the applications list.
+ * A special edit which moves an application in the applications list.
  *
  * This is required to avoid *huge* diffs (add/remove) between applications. The huge diffs have the
  * *huge* drawback that null/undefined handling is extremely diffficult.
@@ -425,10 +425,27 @@ export class InstanceEditService {
   }
 
   private hasChanges(object: any, original: any) {
-    return !isMatchWith(object, original, (value, other, key) => {
-      if (isNil(value) && isNil(other)) {
-        return true; // same regardless of "null" vs. "undefined".
-      }
-    });
+    if (!object || !original) {
+      return false;
+    }
+
+    // since some code regards null/undefined as equivalent, objects may not have properties which were null previously as they are simply left out.
+    return !isEqual(this.removeNullValues(object), this.removeNullValues(original));
+  }
+
+  /**
+   * Creates a new object which contains all defined non-null properties of the original.
+   *
+   * @param obj the original object
+   * @returns an object which contains all properties which are not null or undefined.
+   */
+  private removeNullValues(obj: any): any {
+    if (typeof obj === 'object') {
+      return Object.entries(obj)
+        .filter(([k, v]) => ![null, undefined].includes(v))
+        .reduce((r, [key, value]) => ({ ...r, [key]: this.removeNullValues(value) }), {});
+    } else {
+      return obj;
+    }
   }
 }

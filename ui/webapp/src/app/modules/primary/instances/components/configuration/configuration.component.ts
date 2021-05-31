@@ -39,6 +39,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     private products: ProductsService
   ) {
     this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
+    this.subscription.add(this.areas.registerDirtyable(this, 'primary'));
   }
 
   ngOnInit(): void {
@@ -70,7 +71,10 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   }
 
   public isDirty(): boolean {
-    return this.edit.hasSaveableChanges() || this.edit.hasPendingChanges();
+    // don't check pending changes - those have to be handled in panels, or concealed directly (e.g. process move).
+    // if pending unconcealed changes are present we ignore them. otherwise a "unsaved changes" dialog will pop up
+    // in the main dialog instead of the panel containing the changes.
+    return this.edit.hasSaveableChanges();
   }
 
   private isClientNode(node: InstanceNodeConfigurationDto) {

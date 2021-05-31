@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, NavigationExtras, Router } from '@angular/router';
 import { isString } from 'lodash-es';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { DirtyableDialog } from '../guards/dirty-dialog.guard';
 
+export type DirtyableKey = 'primary' | 'panel';
 @Injectable({
   providedIn: 'root',
 })
@@ -20,6 +22,14 @@ export class NavAreasService {
 
   /** should ONLY be used by InstancesService. Subscribe to InstancesService.current$ instead */
   instanceContext$ = new BehaviorSubject<string>(null);
+
+  /** should ONLY be used by DirtyDialogGuard. */
+  forcePanelClose$ = new BehaviorSubject<boolean>(false);
+
+  private dirtyables: { [P in DirtyableKey]: DirtyableDialog } = {
+    panel: null,
+    primary: null,
+  };
 
   private primaryState: string;
 
@@ -59,8 +69,9 @@ export class NavAreasService {
 
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link
         // which includes a panel navigation.
-        if (this.primaryState && newPrimaryState !== this.primaryState) {
-          this.closePanel();
+        if (!!this.forcePanelClose$.value || (this.primaryState && newPrimaryState !== this.primaryState)) {
+          this.closePanel(this.forcePanelClose$.value);
+          this.forcePanelClose$.next(false);
         }
 
         // we need the primary state to detect whether it changes to clear the panel routing. however
@@ -86,8 +97,12 @@ export class NavAreasService {
       });
   }
 
-  public closePanel() {
-    this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true });
+  public closePanel(force: boolean = false) {
+    if (force) {
+      this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true, state: { ignoreDirtyGuard: true } });
+    } else {
+      this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true });
+    }
   }
 
   public navigateBoth(primary: any[], panel: any[], primaryExtra?: NavigationExtras, panelExtra?: NavigationExtras) {
@@ -97,6 +112,42 @@ export class NavAreasService {
         this.router.navigate(['', { outlets: { panel } }], panelExtra);
       }
     });
+  }
+
+  public registerDirtyable(dirtyable: DirtyableDialog, type: DirtyableKey): Subscription {
+    this.dirtyables[type] = dirtyable;
+
+    return new Subscription(() => {
+      this.deregisterDirtyable(dirtyable, type);
+    });
+  }
+
+  public hasDirtyPanel() {
+    if (!this.dirtyables['panel']) {
+      return false;
+    }
+
+    return this.dirtyables['panel'].isDirty();
+  }
+
+  public getDirtyableType(dirtyable: DirtyableDialog): DirtyableKey {
+    if (this.dirtyables['panel'] === dirtyable) {
+      return 'panel';
+    } else if (this.dirtyables['primary'] === dirtyable) {
+      return 'primary';
+    }
+  }
+
+  public getDirtyable(type: DirtyableKey) {
+    return this.dirtyables[type];
+  }
+
+  private deregisterDirtyable(dirtyable: DirtyableDialog, type: DirtyableKey) {
+    if (this.dirtyables[type] !== dirtyable) {
+      console.error('Unexpected dirtyable while deregistering.', dirtyable, this.dirtyables[type]);
+    }
+
+    this.dirtyables[type] = null;
   }
 
   private findRouteLeaf(route: ActivatedRoute): ActivatedRoute {
