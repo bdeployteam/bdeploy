@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -196,7 +197,7 @@ public class ManifestDatabase extends LockableDatabase {
                     throw new IllegalStateException("Cannot read manifest " + key, e);
                 }
             });
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | UncheckedExecutionException e) {
             throw new IllegalStateException("Cannot load manifest into cache: " + key, e);
         }
     }

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { max } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { BdDataColumn, BdDataColumnDisplay, BdDataGrouping, bdExtractGroups, UNMATCHED_GROUP } from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnDisplay, bdDataDefaultSearch, BdDataGrouping, bdExtractGroups, UNMATCHED_GROUP } from 'src/app/models/data';
 import { LoggingService } from '../../services/logging.service';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
@@ -28,7 +28,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable {
    * concatenate each value in each record object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[];
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-grid should register itself as a BdSearchable with the global SearchService.

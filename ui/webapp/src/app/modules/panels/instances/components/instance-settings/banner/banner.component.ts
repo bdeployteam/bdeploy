@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceBannerRecord } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
@@ -32,7 +33,7 @@ export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   private subscription: Subscription;
 
-  constructor(public servers: ServersService, public instances: InstancesService, private auth: AuthenticationService) {
+  constructor(public servers: ServersService, public instances: InstancesService, private auth: AuthenticationService, areas: NavAreasService) {
     this.subscription = this.instances.current$.subscribe((s) => {
       let confirm = of(true);
       if (this.isDirty()) {
@@ -57,6 +58,8 @@ export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
         }
       });
     });
+
+    this.subscription.add(areas.registerDirtyable(this, 'panel'));
   }
 
   ngOnInit(): void {}

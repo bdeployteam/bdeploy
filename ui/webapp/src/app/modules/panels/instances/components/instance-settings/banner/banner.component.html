@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar header="Instance Banner" [closeablePanel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instances.current$ | async)?.managedServer)">
-      <div>A banner provides a version independent way of conveying information to other users working on the same instance.</div>
+      <div>A banner provides a version independent way of bringing information to other users attention.</div>
 
       <app-bd-banner [banner]="banner"></app-bd-banner>
 

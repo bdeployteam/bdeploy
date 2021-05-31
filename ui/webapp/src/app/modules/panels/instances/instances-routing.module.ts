@@ -37,7 +37,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'settings/config', component: EditConfigComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/attributes', component: AttributesComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'settings/nodes', component: NodesComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/nodes', component: NodesComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/templates', component: InstanceTemplatesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/banner', component: BannerComponent, canActivate: [ScopedWriteGuard] },
   { path: 'node/:node', component: NodeDetailsComponent, canActivate: [ScopedReadGuard] },

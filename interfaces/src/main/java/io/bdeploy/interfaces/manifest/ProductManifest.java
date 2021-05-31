@@ -319,9 +319,16 @@ public class ProductManifest {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
         for (Manifest.Key key : allKeys) {
-            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
-            if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
-                result.add(key);
+            try {
+                Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
+                if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
+                    result.add(key);
+                }
+            } catch (IllegalStateException iae) {
+                // this can happen if *any* manifest is removed after listing them.
+                if (log.isDebugEnabled()) {
+                    log.debug("Manifest cannot be loaded while scanning for products: {}", key, iae);
+                }
             }
         }
         return result;

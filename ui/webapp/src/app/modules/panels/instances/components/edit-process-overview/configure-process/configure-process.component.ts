@@ -4,6 +4,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
 import { ConfigProcessHeaderComponent } from './config-process-header/config-process-header.component';
@@ -25,10 +26,11 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
 
   private subscription: Subscription;
 
-  constructor(public edit: ProcessEditService, public instanceEdit: InstanceEditService, bop: BreakpointObserver) {
+  constructor(public edit: ProcessEditService, public instanceEdit: InstanceEditService, bop: BreakpointObserver, areas: NavAreasService) {
     this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
       this.narrow$.next(bs.matches);
     });
+    this.subscription.add(areas.registerDirtyable(this, 'panel'));
   }
 
   ngOnInit(): void {}

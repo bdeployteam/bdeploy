@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, TemplateRef, ViewChildren } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
-import { finalize, mergeMap, skipWhile } from 'rxjs/operators';
+import { filter, finalize, mergeMap } from 'rxjs/operators';
 import { CustomEditor, ParameterConfiguration, ParameterDescriptor, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -40,7 +40,7 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.subscription = combineLatest([this.groups.current$, this.edit.product$])
       .pipe(
-        skipWhile(([g, p]) => !g || !p),
+        filter(([g, p]) => !!g && !!p),
         mergeMap(([group, product]) => {
           return this.plugins.getEditorPlugin(group.name, product.key, this.descriptor.customEditor);
         })

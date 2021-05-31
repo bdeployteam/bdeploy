@@ -1,9 +1,11 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { InstancePurpose } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
@@ -12,13 +14,21 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './edit-config.component.html',
   styleUrls: ['./edit-config.component.css'],
 })
-export class EditConfigComponent implements OnInit, DirtyableDialog {
+export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog {
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild('backButton') back: BdPanelButtonComponent;
 
-  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService) {}
+  private subscription: Subscription;
+
+  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 
   public isDirty(): boolean {
     return this.edit.hasPendingChanges();
