@@ -23,6 +23,7 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() resetWhen$ = new BehaviorSubject<any>(false);
   @Input() hideContentWhenLoading = true;
   @Input() restoreScrollAfterLoad = false;
+  @Input() padding = true;
   @Output() scrollTo = new EventEmitter<BdDialogScrollEvent>();
 
   /* template */ showContent$: Observable<boolean>;

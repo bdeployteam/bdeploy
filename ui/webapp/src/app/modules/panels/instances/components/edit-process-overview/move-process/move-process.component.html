@@ -1,0 +1,22 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Move Process" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div>Select a node to move the process to:</div>
+      <div class="bd-description-text">
+        Note that only <a [routerLink]="['', { outlets: { panel: ['panels', 'instances', 'settings', 'nodes'] } }]">configured</a> and eligible (e.g. OS
+        supported) nodes are shown.
+      </div>
+      <app-bd-data-table [records]="records" [columns]="columns" (recordClick)="onSelectNode($event)"></app-bd-data-table>
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

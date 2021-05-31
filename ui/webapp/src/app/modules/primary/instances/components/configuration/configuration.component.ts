@@ -1,9 +1,8 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
-import { InstanceConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord, InstanceTemplateDescriptor } from 'src/app/models/gen.dtos';
+import { InstanceConfiguration, InstanceNodeConfigurationDto, InstanceTemplateDescriptor } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -11,7 +10,6 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { ProductsService } from '../../../products/services/products.service';
 import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceEditService } from '../../services/instance-edit.service';
-import { InstanceStateService } from '../../services/instance-state.service';
 
 @Component({
   selector: 'app-configuration',
@@ -26,10 +24,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   /* template */ serverNodes$ = new BehaviorSubject<InstanceNodeConfigurationDto[]>([]);
   /* template */ clientNode$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
 
-  /* template */ states$ = new BehaviorSubject<InstanceStateRecord>(null);
-  /* template */ installing$ = new BehaviorSubject<boolean>(false);
-  /* template */ activating$ = new BehaviorSubject<boolean>(false);
-
   /* template */ templates$ = new BehaviorSubject<InstanceTemplateDescriptor[]>(null);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
@@ -42,7 +36,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     public servers: ServersService,
     public edit: InstanceEditService,
     private media: BreakpointObserver,
-    private states: InstanceStateService,
     private products: ProductsService
   ) {
     this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
@@ -69,8 +62,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
         }
       })
     );
-
-    this.subscription.add(this.states.state$.subscribe((s) => this.states$.next(s)));
   }
 
   ngOnDestroy(): void {
@@ -97,26 +88,6 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
       }
     }
     return true;
-  }
-
-  /* template */ isInstalled(version: string) {
-    return !!this.states$.value?.installedTags?.find((s) => s === version);
-  }
-
-  /* template */ doInstall(version: string) {
-    this.installing$.next(true);
-    this.states
-      .install(version)
-      .pipe(finalize(() => this.installing$.next(false)))
-      .subscribe();
-  }
-
-  /* template */ doActivate(version: string) {
-    this.activating$.next(true);
-    this.states
-      .activate(version)
-      .pipe(finalize(() => this.activating$.next(false)))
-      .subscribe();
   }
 
   /* template */ doTrack(index: number, node: InstanceNodeConfigurationDto) {

@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -86,13 +87,12 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = combineLatest([
-      this.edit.node$,
-      this.edit.product$,
-      this.edit.applications$,
+      this.edit.node$.pipe(distinctUntilChanged()),
+      this.edit.product$.pipe(distinctUntilChanged()),
+      this.edit.applications$.pipe(distinctUntilChanged()),
       this.instanceEdit.nodes$,
-      this.instanceEdit.nodes$,
-    ]).subscribe(([node, prod, apps, nodeConfigs, nodeStates]) => {
-      if (!node || !prod || !apps || !nodeConfigs || !nodeStates) {
+    ]).subscribe(([node, prod, apps, nodeConfigs]) => {
+      if (!node || !prod || !apps || !nodeConfigs) {
         this.records$.next([]);
         return;
       }
@@ -144,7 +144,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.readFromClipboard(node, prod, apps, nodeStates[node.nodeName]);
+      this.readFromClipboard(node, prod, apps, nodeConfigs[node.nodeName]);
 
       this.records$.next(recs);
       this.loading$.next(false);

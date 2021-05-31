@@ -14,6 +14,7 @@ export class HistoryProcessConfigComponent implements OnInit {
 
   @Input() baseDescriptor: ApplicationDescriptor;
   @Input() hasProcessControl = true;
+  @Input() onlyCommand = false;
 
   /** Which side of the diff is this process on. */
   @Input() diffSide: 'left' | 'right' | 'none' = 'none';
@@ -23,10 +24,18 @@ export class HistoryProcessConfigComponent implements OnInit {
   constructor(private diffService: HistoryDiffService) {}
 
   ngOnInit(): void {
+    this.update();
+  }
+
+  public update(): void {
     this.diff$.next(this.diffService.diffAppConfig(this.baseConfig, this.compareConfig, this.baseDescriptor));
   }
 
   /* template */ getBorderClass(diffType: DiffType): string | string[] {
+    if (this.onlyCommand) {
+      return [];
+    }
+
     if (this.diffSide === 'none' || diffType === DiffType.UNCHANGED) {
       return 'local-border-unchanged';
     }

@@ -1,6 +1,6 @@
 <ng-container *ngIf="diff$ | async as diff">
   <div [ngClass]="getBorderClass(diff.type)" *ngIf="diff.type !== 'not-in-base'">
-    <div class="local-padding local-header" fxLayout="column">
+    <div class="local-padding local-header" fxLayout="column" *ngIf="!onlyCommand">
       <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
         <mat-icon [svgIcon]="diff.os"></mat-icon>
         <div fxLayout="row" fxLayoutAlign="start center">
@@ -65,8 +65,8 @@
       </div>
     </div>
 
-    <div class="local-padding" fxLayout="column">
-      <div class="bd-description-text">Start Command:</div>
+    <div [class.local-padding]="!onlyCommand" fxLayout="column">
+      <div class="bd-description-text" *ngIf="!onlyCommand">Start Command:</div>
       <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
         <ng-template #exePopup>
           <app-config-desc-cards field="cfg.executable"></app-config-desc-cards>
@@ -74,44 +74,13 @@
         <app-history-diff-field [diffSide]="diffSide" [diff]="diff.start.executable" [popup]="exePopup"></app-history-diff-field>
         <ng-container *ngFor="let param of diff.start.parameters">
           <ng-template #paramPopup>
-            <mat-card *ngIf="!!param.descriptor" [style.padding.px]="10" [style.max-width.px]="400" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
-              <div>
-                Parameter <strong>{{ param.descriptor.name }}</strong> of application <strong>{{ diff.descriptor.name }}</strong>
-              </div>
-              <div gdColumns="100px auto" gdGap="5px" gdAlignColumns="start start" [style.padding.px]="10">
-                <strong><div>Name:</div></strong>
-                <div>{{ param.descriptor?.name }}</div>
-                <strong><div>Description:</div></strong>
-                <div>{{ param.descriptor?.longDescription }}</div>
-                <strong><div>Parameter:</div></strong>
-                <div>
-                  <code>{{ param.descriptor?.parameter }}</code>
-                </div>
-                <strong><div>Type:</div></strong>
-                <div>
-                  <code>{{ param.descriptor?.type }}</code>
-                </div>
-                <strong><div>Default Value:</div></strong>
-                <div>
-                  <code>{{
-                    param.descriptor?.defaultValue
-                      ? param.descriptor?.type === 'PASSWORD'
-                        ? '*'.repeat(param.descriptor?.defaultValue?.length)
-                        : param.descriptor?.defaultValue
-                      : '(none)'
-                  }}</code>
-                </div>
-              </div>
-            </mat-card>
-            <mat-card *ngIf="!param.descriptor" [style.padding.px]="10" [style.max-width.px]="400" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
-              No further information about this parameter available.
-            </mat-card>
+            <app-param-desc-card [descriptor]="param.descriptor"></app-param-desc-card>
           </ng-template>
           <!-- Don't set masking by the field, as parameters are partially pre-masked in case of passwords. -->
           <app-history-diff-field [diffSide]="diffSide" *ngFor="let val of param.values" [diff]="val" [popup]="paramPopup"></app-history-diff-field>
         </ng-container>
       </div>
-      <ng-container *ngIf="diff.endpoints?.http?.length">
+      <ng-container *ngIf="diff.endpoints?.http?.length && !onlyCommand">
         <div class="bd-description-text" [style.margin-top.px]="10">Endpoints:</div>
         <div *ngFor="let epdiff of diff.endpoints.http" fxLayout="column" fxLayoutGap="5px">
           <div [ngClass]="getBorderClass(epdiff.type)" *ngIf="epdiff.type !== 'not-in-base'" [style.padding-left.px]="5">

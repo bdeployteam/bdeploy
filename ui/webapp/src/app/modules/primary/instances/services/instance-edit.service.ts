@@ -1,7 +1,8 @@
+import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { applyChangeset, Changeset, diff } from 'json-diff-ts';
-import { cloneDeep, isEqual } from 'lodash-es';
+import { cloneDeep, isMatchWith, isNil } from 'lodash-es';
 import { BehaviorSubject, forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -30,7 +31,24 @@ export enum ProcessEditState {
   NONE = 'NONE',
 }
 
-export class InstanceEdit {
+export interface Edit {
+  /** Describes the changes done by this edit */
+  description: string;
+
+  /** Applies the changes to the current state */
+  apply(current: InstanceConfigurationDto);
+}
+
+/**
+ * Creates a new edit, capturing delta between base and state.
+ *
+ * Note that a 'virtual' edit may be created without looking at base/state. Any edit will be
+ * applied after it has been created.
+ */
+export type EditFactory = (description: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto) => Edit;
+
+/** A generic edit, which may represent virtually any change. */
+export class InstanceEdit implements Edit {
   private changeset: Changeset;
 
   constructor(public description: string, base: InstanceConfigurationDto, current: InstanceConfigurationDto) {
@@ -41,6 +59,20 @@ export class InstanceEdit {
   public apply(current: InstanceConfigurationDto) {
     // clone changeset to decouple from changes through applying *another* change.
     applyChangeset(current, cloneDeep(this.changeset));
+  }
+}
+
+/**
+ * A special edit which move san application in the applications list.
+ *
+ * This is required to avoid *huge* diffs (add/remove) between applications. The huge diffs have the
+ * *huge* drawback that null/undefined handling is extremely diffficult.
+ */
+export class InstanceApplicationMoveEdit implements Edit {
+  constructor(public description: string, private nodeName: string, private previousIndex: number, private currentIndex: number) {}
+
+  public apply(current: InstanceConfigurationDto) {
+    moveItemInArray(current.nodeDtos.find((n) => n.nodeName === this.nodeName).nodeConfiguration.applications, this.previousIndex, this.currentIndex);
   }
 }
 
@@ -55,12 +87,12 @@ export class InstanceEditService {
 
   public incompatible$ = new BehaviorSubject<boolean>(false);
 
-  public undos: InstanceEdit[] = [];
-  public redos: InstanceEdit[] = [];
+  public undos: Edit[] = [];
+  public redos: Edit[] = [];
   public base$ = new BehaviorSubject<InstanceConfigurationDto>(null);
 
-  public undo$ = new BehaviorSubject<InstanceEdit>(null);
-  public redo$ = new BehaviorSubject<InstanceEdit>(null);
+  public undo$ = new BehaviorSubject<Edit>(null);
+  public redo$ = new BehaviorSubject<Edit>(null);
 
   public state$ = new BehaviorSubject<InstanceConfigurationDto>(null);
   public nodes$ = new BehaviorSubject<{ [key: string]: MinionDto }>(null);
@@ -98,20 +130,33 @@ export class InstanceEditService {
 
     this.areas.panelRoute$.subscribe((route) => {
       if (this.isAllowEdit() && this.hasPendingChanges()) {
-        this.log.warn(
-          new ErrorMessage('Unconcealed changes on route change, discarding.', new InstanceEdit('Unconcealed Changes', this.reBuild(), this.state$.value))
-        );
+        this.log.warn('Unconcealed changes on route change, discarding.');
         this.discard();
       }
     });
+  }
+
+  /** Creates a standard edit factory, capturing changes by diffing. */
+  public createStdEdit(): EditFactory {
+    return (desc: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto) => {
+      return new InstanceEdit(desc, base, state);
+    };
+  }
+
+  /** Creates a special edit factory which reorders applications on the given node */
+  public createApplicationMove(node: string, previous: number, current: number): EditFactory {
+    return (desc: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto) => {
+      return new InstanceApplicationMoveEdit(desc, node, previous, current);
+    };
   }
 
   /**
    * Conceals the current differences to the base state as a single InstanceEdit.
    *
    * @param description a textual description of the changes.
+   * @param factory an optional factory which is capable of creating an Edit.
    */
-  public conceal(description: string): void {
+  public conceal(description: string, factory?: EditFactory): void {
     if (!this.isAllowEdit()) {
       this.log.error(new ErrorMessage('Trying to edit with no current state', new Error()));
       return;
@@ -123,9 +168,10 @@ export class InstanceEditService {
 
     // the current state
     const state = this.reBuild();
+    const fct = !!factory ? factory : this.createStdEdit();
 
     // and the diff to it :)
-    const change = new InstanceEdit(description, state, this.state$.value);
+    const change = fct(description, state, this.state$.value);
     this.undos.push(change);
     this.undo$.next(change);
 
@@ -206,7 +252,7 @@ export class InstanceEditService {
    */
   public hasPendingChanges(): boolean {
     const concealed = this.reBuild();
-    return !isEqual(concealed, this.state$.value);
+    return this.hasChanges(concealed, this.state$.value);
   }
 
   /**
@@ -312,8 +358,11 @@ export class InstanceEditService {
       return ProcessEditState.NONE;
     }
 
-    const baseNodeApps = this.getNodeOfApplication(baseNodes, uid)?.nodeConfiguration?.applications;
-    const stateNodeApps = this.getNodeOfApplication(stateNodes, uid)?.nodeConfiguration?.applications;
+    const baseNode = this.getNodeOfApplication(baseNodes, uid);
+    const stateNode = this.getNodeOfApplication(stateNodes, uid);
+
+    const baseNodeApps = baseNode?.nodeConfiguration?.applications;
+    const stateNodeApps = stateNode?.nodeConfiguration?.applications;
 
     const baseAppIndex = baseNodeApps?.findIndex((a) => a.uid === uid);
     const stateAppIndex = stateNodeApps?.findIndex((a) => a.uid === uid);
@@ -331,7 +380,11 @@ export class InstanceEditService {
       return ProcessEditState.ADDED;
     } else {
       // both are !== -1
-      if (baseAppIndex === stateAppIndex && isEqual(baseNodeApps[baseAppIndex], stateNodeApps[stateAppIndex])) {
+      if (
+        baseAppIndex === stateAppIndex &&
+        baseNode.nodeName === stateNode.nodeName &&
+        !this.hasChanges(baseNodeApps[baseAppIndex], stateNodeApps[stateAppIndex])
+      ) {
         return ProcessEditState.NONE;
       } else {
         return ProcessEditState.CHANGED;
@@ -369,5 +422,13 @@ export class InstanceEditService {
     }
 
     return !this.incompatible$.value;
+  }
+
+  private hasChanges(object: any, original: any) {
+    return !isMatchWith(object, original, (value, other, key) => {
+      if (isNil(value) && isNil(other)) {
+        return true; // same regardless of "null" vs. "undefined".
+      }
+    });
   }
 }

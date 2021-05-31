@@ -1,0 +1,19 @@
+<ng-template #editorPopup>
+  <div #editorPanel class="editorPanel"></div>
+</ng-template>
+
+<mat-icon
+  [style.cursor]="'pointer'"
+  (click)="showEditor(editorPopup)"
+  [class.bd-secondary-text]="!plugin"
+  [matTooltip]="
+    !plugin
+      ? !error
+        ? 'Required custom editor not (yet) loaded'
+        : 'Error loading custom editor: ' + error.statusText
+      : readonly
+      ? 'Open custom editor to see parameter value'
+      : 'Open custom editor to modify the parameter value'
+  "
+  >{{ readonly ? 'visibility' : 'edit' }}</mat-icon
+>

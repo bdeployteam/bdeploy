@@ -1,0 +1,10 @@
+.local-header {
+  padding: 16px; /* same as material toolbar default */
+  padding-bottom: 10px;
+  background-color: var(--bd-bg-toolbar);
+}
+
+.local-field {
+  flex: 1 1 0;
+  min-width: 170px;
+}

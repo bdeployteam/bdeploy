@@ -3,10 +3,10 @@ import { combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { InstanceEdit, InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { Edit, InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 interface InstanceEditRow {
-  edit: InstanceEdit;
+  edit: Edit;
   isUndo: boolean;
   isCurrent: boolean;
 }

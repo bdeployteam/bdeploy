@@ -16,7 +16,6 @@ import { ApplicationEditOptionalComponent } from './components/application-edit-
 import { ApplicationEditComponent } from './components/application-edit/application-edit.component';
 import { ApplicationTemplateVariableDialogComponent } from './components/application-template-variable-dialog/application-template-variable-dialog.component';
 import { ClientInfoComponent } from './components/client-info/client-info.component';
-import { CustomEditorComponent } from './components/custom-editor/custom-editor.component';
 import { DataFilesBrowserComponent } from './components/data-files-browser/data-files-browser.component';
 import { InstanceAddEditComponent } from './components/instance-add-edit/instance-add-edit.component';
 import { InstanceBannerEditComponent } from './components/instance-banner-edit/instance-banner-edit.component';
@@ -73,7 +72,6 @@ import { InstanceRoutingModule } from './instance-routing.module';
     InstanceNotificationsItemComponent,
     InstanceSyncComponent,
     ApplicationEditEndpointsComponent,
-    CustomEditorComponent,
     InstanceTemplateComponent,
     InstanceTemplateGroupDetailComponent,
     ApplicationDescriptorDetailComponent,

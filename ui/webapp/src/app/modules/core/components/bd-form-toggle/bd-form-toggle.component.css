@@ -1,8 +1,8 @@
-.local-form-field-wrapper {
+.bd-form-toggle-form-field-wrapper {
   padding: 0.86em 0.86em 0.86em 0.6em;
 }
 
-.local-slide-toggle {
+.bd-form-toggle-slide-toggle {
   position: relative;
   top: -2px;
   margin-bottom: -4px;
@@ -14,4 +14,21 @@
 
 .bd-form-toggle-appearance-fill {
   position: relative;
+}
+
+.bd-form-toggle-suffix {
+  white-space: nowrap;
+  flex: none;
+  position: relative;
+
+  top: -1px;
+  right: -3px;
+  max-height: 20px;
+}
+
+.bd-form-toggle-suffix mat-icon {
+  font-size: 150%;
+  line-height: 1.125;
+
+  padding-left: 10px;
 }

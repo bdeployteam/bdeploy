@@ -1,0 +1,67 @@
+<ng-container *ngIf="edit.process$ | async as process">
+  <ng-container *ngIf="edit.application$ | async as app">
+    <div class="local-header">
+      <form fxLayout="row wrap" fxLayoutGap="10px grid" #form="ngForm">
+        <app-config-desc-element card="cfg.name" class="local-field">
+          <app-bd-form-input
+            label="Process Name"
+            name="name"
+            [(ngModel)]="process.name"
+            errorDisplay="immediate"
+            required
+            appEditProcessNameValidator
+          ></app-bd-form-input>
+        </app-config-desc-element>
+        <app-config-desc-element card="cfg.control.startType" class="local-field">
+          <app-bd-form-select
+            label="Start Type"
+            name="startType"
+            [(ngModel)]="process.processControl.startType"
+            [values]="getStartTypes(app)"
+            [labels]="getStartTypeLabels(app)"
+            errorDisplay="immediate"
+          ></app-bd-form-select>
+        </app-config-desc-element>
+        <app-config-desc-element card="cfg.control.keepAlive" class="local-field">
+          <app-bd-form-toggle
+            label="Keep Alive"
+            name="keepAlive"
+            [(ngModel)]="process.processControl.keepAlive"
+            [disabled]="!app.descriptor.processControl.supportsKeepAlive"
+          ></app-bd-form-toggle>
+        </app-config-desc-element>
+        <app-config-desc-element card="cfg.control.noRetries" class="local-field">
+          <app-bd-form-input
+            label="Number of Retries"
+            name="noOfRetries"
+            [(ngModel)]="process.processControl.noOfRetries"
+            [disabled]="!app.descriptor.processControl.supportsKeepAlive"
+            type="number"
+            [required]="app.descriptor.processControl.supportsKeepAlive"
+            errorDisplay="immediate"
+          ></app-bd-form-input>
+        </app-config-desc-element>
+        <app-config-desc-element card="cfg.control.attachStdin" class="local-field">
+          <app-bd-form-toggle
+            label="Attach StdIn"
+            name="attachStdIn"
+            [(ngModel)]="process.processControl.attachStdin"
+            [disabled]="!app.descriptor.processControl.attachStdin"
+          ></app-bd-form-toggle>
+        </app-config-desc-element>
+        <app-config-desc-element card="cfg.control.gracePeriod" class="local-field">
+          <app-bd-form-input
+            class="local-field"
+            label="Grace Period"
+            name="gracePeriod"
+            [(ngModel)]="process.processControl.gracePeriod"
+            [disabled]="!app.descriptor.processControl.gracePeriod"
+            type="number"
+            errorDisplay="immediate"
+            required
+          ></app-bd-form-input>
+        </app-config-desc-element>
+      </form>
+    </div>
+  </ng-container>
+</ng-container>

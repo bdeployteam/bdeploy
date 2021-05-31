@@ -10,6 +10,14 @@
         [relative]="true"
         [route]="['edit']"
       ></app-bd-panel-button>
+      <app-bd-panel-button
+        text="Move to Node..."
+        icon="dns"
+        [collapsed]="false"
+        [disabled]="!(edit.process$ | async)"
+        [relative]="true"
+        [route]="['move']"
+      ></app-bd-panel-button>
       <app-bd-button text="Copy to Clipboard" icon="content_copy" [collapsed]="false" (click)="doCopy()" [disabled]="!(edit.process$ | async)"></app-bd-button>
       <app-bd-button text="Delete" icon="delete" color="primary" [collapsed]="false" (click)="doDelete()" [disabled]="!(edit.process$ | async)"></app-bd-button>
     </div>

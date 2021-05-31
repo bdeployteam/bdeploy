@@ -9,7 +9,7 @@
     <mat-icon *ngIf="!!icon" [ngClass]="warning ? 'bd-warning-text' : []">{{ icon }}</mat-icon>
     <mat-icon *ngIf="!!svgIcon" [ngClass]="warning ? 'bd-warning-text' : []" [svgIcon]="svgIcon"></mat-icon>
   </div>
-  <div fxFlex="2 0 auto" fxLayout="column" fxLayoutGap="5px" fxLayoutAlign="center stretch" class="local-content">
+  <div fxFlex="2 0 0" fxLayout="column" fxLayoutGap="5px" fxLayoutAlign="center stretch" class="local-content">
     <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
       <div class="bd-text-ellipsis">
         <strong>{{ header }}</strong>
@@ -19,7 +19,7 @@
         <app-bd-micro-icon-button (click)="dismiss.emit(null)" [disabled]="disabled">close</app-bd-micro-icon-button>
       </div>
     </div>
-    <div class="bd-scroll-container">
+    <div class="bd-scroll-container" fxLayout="column">
       <ng-content></ng-content>
     </div>
   </div>

@@ -66,8 +66,14 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /* template */ onReorder(order: DragReorderEvent<ApplicationConfiguration>) {
+    if (order.previousIndex === order.currentIndex) {
+      return;
+    }
+
+    // this is NOT necessary, but prevents flickering while rebuilding state.
     moveItemInArray(this.config$.value.nodeConfiguration.applications, order.previousIndex, order.currentIndex);
-    this.edit.conceal(`Re-arrange ${order.item.name}`);
+
+    this.edit.conceal(`Re-arrange ${order.item.name}`, this.edit.createApplicationMove(this.config$.value.nodeName, order.previousIndex, order.currentIndex));
     this.data.update();
   }
 }

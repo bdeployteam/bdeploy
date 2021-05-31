@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Optional, Self, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, Optional, Self, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
@@ -7,6 +7,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   selector: 'app-bd-form-toggle',
   templateUrl: './bd-form-toggle.component.html',
   styleUrls: ['./bd-form-toggle.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class BdFormToggleComponent implements OnInit, ControlValueAccessor {
   @Input() label: string;
