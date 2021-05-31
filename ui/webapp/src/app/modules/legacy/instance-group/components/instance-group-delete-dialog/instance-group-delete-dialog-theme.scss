@@ -1,8 +1,8 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin instance-group-delete-dialog-theme($theme) {
   .instance-group-delete-warn {
-    background-color: mat-color(map-get($theme, warn));
+    background-color: mat.get-color-from-palette(map-get($theme, warn));
     border-radius: 5px;
   }
 }

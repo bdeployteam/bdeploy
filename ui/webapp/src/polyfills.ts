@@ -72,7 +72,7 @@
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */
-import 'zone.js/dist/zone'; // Required by mat-slide-toggle
+import 'zone.js'; // Required by mat-slide-toggle
 
 /***************************************************************************************************
  * Drag & Drop:

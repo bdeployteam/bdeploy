@@ -1,9 +1,9 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin instance-version-card-theme($theme) {
   $dark: map-get($theme, 'is-dark');
-  $selected-color: mat-color(map-get($theme, 'accent'));
-  $fg-color: mat-color(map-get($theme, 'accent'), default-contrast);
+  $selected-color: mat.get-color-from-palette(map-get($theme, 'accent'));
+  $fg-color: mat.get-color-from-palette(map-get($theme, 'accent'), default-contrast);
   $running-color: if($dark, #55da08, #146400);
 
   .instance-version-selected {

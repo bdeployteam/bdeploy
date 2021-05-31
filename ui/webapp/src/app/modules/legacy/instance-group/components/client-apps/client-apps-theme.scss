@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin client-apps-theme($theme) {
   $dark: map-get($theme, 'is-dark');
@@ -7,16 +7,16 @@
 
   .banner-warn-theme {
     color: #fff;
-    background-color: mat-color($warn);
+    background-color: mat.get-color-from-palette($warn);
   }
 
   .banner-info-theme {
     color: #fff;
-    background-color: mat-color($info);
+    background-color: mat.get-color-from-palette($info);
   }
 
   .toolbar-icon-active {
-    border-bottom: 4px solid mat-color(map-get($theme, 'warn'));
+    border-bottom: 4px solid mat.get-color-from-palette(map-get($theme, 'warn'));
   }
 
   .instance-card-theme {

@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import '~@angular/material/theming';
 
 @mixin client-info-theme($theme) {
@@ -5,10 +6,10 @@
   $warn: map-get($theme, 'warn');
 
   .subHeaderTheme {
-    color: if($dark, mat-color($mat-grey, 400), mat-color($mat-grey, 600));
+    color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 400), mat.get-color-from-palette(mat.$grey-palette, 600));
   }
 
   .launcher-warn-theme {
-    background-color: mat-color($warn);
+    background-color: mat.get-color-from-palette($warn);
   }
 }

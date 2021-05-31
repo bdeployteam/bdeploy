@@ -1,16 +1,16 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin application-edit-theme($theme) {
   $dark: map-get($theme, 'is-dark');
   $bg: map-get($theme, 'background');
 
-  $header-color: if($dark, mat-color($mat-grey, 800), mat-color($mat-grey, 200));
-  $content-color: if($dark, mat-color($mat-grey, 700), #fff);
+  $header-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 800), mat.get-color-from-palette(mat.$grey-palette, 200));
+  $content-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 700), #fff);
   $card-color: map-get($bg, 'card');
 
   .title-theme {
     background-color: $header-color !important;
-    @include mat-elevation-transition(0.3s, ease-in-out);
+    @include mat.elevation-transition(0.3s, ease-in-out);
   }
 
   .mat-expansion-panel-header {
@@ -61,7 +61,7 @@
     border-width: 10px;
     border-style: solid;
     border-color: transparent $card-color $card-color transparent;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} 2px 2px 2px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} 2px 2px 2px;
   }
 
   .info-card-below::after {
@@ -74,6 +74,6 @@
     border-width: 10px;
     border-style: solid;
     border-color: $card-color transparent transparent $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
   }
 }

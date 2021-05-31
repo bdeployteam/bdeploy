@@ -1,4 +1,4 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin instance-notifications-theme($theme) {
   $dark: map-get($theme, is-dark);
@@ -10,7 +10,7 @@
   $notificationBg: if($dark, #535353, #eeeeee);
 
   .infoNotificationIconTheme {
-    color: if($dark, mat-color($prim, 400), mat-color($prim, 600));
+    color: if($dark, mat.get-color-from-palette($prim, 400), mat.get-color-from-palette($prim, 600));
   }
 
   @keyframes errorNotificationBlink {
@@ -50,7 +50,7 @@
   }
 
   .warningNotificationIconTheme {
-    color: if($dark, mat-color($warn, 400), mat-color($warn, 600));
+    color: if($dark, mat.get-color-from-palette($warn, 400), mat.get-color-from-palette($warn, 600));
   }
 
   .notificationItem {

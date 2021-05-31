@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import '~@angular/material/theming';
 
 @mixin process-status-theme($theme) {
@@ -22,7 +23,7 @@
 
   .app-process-outdated-text {
     color: #fff;
-    background-color: mat-color($warn);
+    background-color: mat.get-color-from-palette($warn);
   }
 
   .app-process-not-loaded {

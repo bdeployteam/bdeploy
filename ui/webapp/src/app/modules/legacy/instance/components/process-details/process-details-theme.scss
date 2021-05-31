@@ -1,15 +1,15 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin process-details-theme($theme) {
   $dark: map-get($theme, is-dark);
   $warn: map-get($theme, 'warn');
 
   .subHeaderTheme {
-    color: if($dark, mat-color($mat-grey, 400), mat-color($mat-grey, 600));
+    color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 400), mat.get-color-from-palette(mat.$grey-palette, 600));
   }
 
   .outdated {
     color: #fff;
-    background-color: mat-color($warn);
+    background-color: mat.get-color-from-palette($warn);
   }
 }

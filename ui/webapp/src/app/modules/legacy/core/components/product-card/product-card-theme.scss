@@ -1,10 +1,10 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin product-card-theme($theme) {
   $accent: map-get($theme, 'accent');
 
   .product-card-selected {
     padding-left: 6px !important;
-    border-left: mat-color($accent) solid 10px !important;
+    border-left: mat.get-color-from-palette($accent) solid 10px !important;
   }
 }

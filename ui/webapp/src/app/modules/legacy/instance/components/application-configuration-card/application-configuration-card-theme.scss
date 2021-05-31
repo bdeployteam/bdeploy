@@ -1,10 +1,11 @@
+@use '~@angular/material' as mat;
 @import '~@angular/material/theming';
 
 @mixin application-configuration-card-theme($theme) {
   $dark: map-get($theme, 'is-dark');
 
-  $invalid-border: if($dark, mat-color($mat-red, 300), mat-color($mat-red, 200));
-  $modified-border: if($dark, mat-color($mat-yellow, 300), mat-color($mat-yellow, 200));
+  $invalid-border: if($dark, mat.get-color-from-palette(mat.$red-palette, 300), mat.get-color-from-palette(mat.$red-palette, 200));
+  $modified-border: if($dark, mat.get-color-from-palette(mat.$yellow-palette, 300), mat.get-color-from-palette(mat.$yellow-palette, 200));
 
   .app-config-invalid {
     border-left: 10px solid $invalid-border;

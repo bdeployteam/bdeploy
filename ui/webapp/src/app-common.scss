@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import '~@angular/material/theming';
 
 /**
@@ -30,7 +31,7 @@
     position: relative;
     z-index: 1000;
 
-    @include mat-overridable-elevation(1);
+    @include mat.overridable-elevation(1);
   }
 
   /* A scrolling container, which means that content to large for the current size will be reachable with scrollbars */
@@ -67,10 +68,10 @@
     $background: map-get($theme, background);
     $foreground: map-get($theme, foreground);
 
-    background: mat-color($background, card);
-    color: mat-color($foreground, text);
+    background: mat.get-color-from-palette($background, card);
+    color: mat.get-color-from-palette($foreground, text);
 
-    @include mat-overridable-elevation(2);
+    @include mat.overridable-elevation(2);
   }
 
   .bd-toggle-highlight {
@@ -162,8 +163,8 @@
     color: var(--bd-main-bar-contrast);
   }
 
-  $drag-color: if($dark, mat-color($mat-grey, 800), mat-color($mat-yellow, 200));
-  $border-color: if($dark, mat-color($mat-grey, 300), mat-color($mat-grey, 700));
+  $drag-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 800), mat.get-color-from-palette(mat.$yellow-palette, 200));
+  $border-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 300), mat.get-color-from-palette(mat.$grey-palette, 700));
   .bd-drag-card {
     background-color: $drag-color !important;
   }

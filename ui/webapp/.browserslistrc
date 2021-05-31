@@ -7,15 +7,16 @@
 
 
 # Desktop
-Edge >76
-Firefox >67
-Chrome >63
-#Safari >12.1 # seems broken...
-Opera >63
+last 2 Safari versions
+last 3 Edge versions
+last 5 Firefox versions
+last 5 Chrome versions
+Firefox ESR
 
 # Mobile
-iOS > 11
-Android >76
-ChromeAndroid >78
-FirefoxAndroid >68
-Samsung >9.2
+last 1 Android version
+last 1 iOS version
+last 3 ChromeAndroid versions
+last 3 FirefoxAndroid versions
+
+not dead

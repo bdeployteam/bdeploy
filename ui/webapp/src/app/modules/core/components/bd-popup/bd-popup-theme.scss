@@ -1,3 +1,4 @@
+@use '~@angular/material' as mat;
 @import '~@angular/material/theming';
 
 @mixin _bd-popup-theme-colored($name, $card-color) {
@@ -11,7 +12,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
   }
 
   .bd-popup-panel-above-left-#{$name} > *::after {
@@ -24,7 +25,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} 2px 2px 2px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} 2px 2px 2px;
   }
 
   .bd-popup-panel-below-right-#{$name} > *::after {
@@ -37,7 +38,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
   }
 
   .bd-popup-panel-above-right-#{$name} > *::after {
@@ -50,7 +51,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} 2px 2px 2px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} 2px 2px 2px;
   }
 
   .bd-popup-panel-left-below-#{$name} > *::after {
@@ -63,7 +64,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
   }
 
   .bd-popup-panel-right-below-#{$name} > *::after {
@@ -76,7 +77,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
   }
 
   .bd-popup-panel-left-above-#{$name} > *::after {
@@ -89,7 +90,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
   }
 
   .bd-popup-panel-right-above-#{$name} > *::after {
@@ -102,7 +103,7 @@
     border-width: 6px;
     border-style: solid;
     border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba($mat-elevation-color, $mat-elevation-opacity * 0.12)} -2px -3px 4px;
+    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
   }
 }
 
@@ -112,7 +113,7 @@
   $bg: map-get($theme, 'background');
 
   @include _bd-popup-theme-colored('default', map-get($bg, 'card'));
-  @include _bd-popup-theme-colored('primary', mat-color(map-get($theme, 'primary')));
-  @include _bd-popup-theme-colored('accent', mat-color(map-get($theme, 'accent')));
-  @include _bd-popup-theme-colored('warn', mat-color(map-get($theme, 'warn')));
+  @include _bd-popup-theme-colored('primary', mat.get-color-from-palette(map-get($theme, 'primary')));
+  @include _bd-popup-theme-colored('accent', mat.get-color-from-palette(map-get($theme, 'accent')));
+  @include _bd-popup-theme-colored('warn', mat.get-color-from-palette(map-get($theme, 'warn')));
 }

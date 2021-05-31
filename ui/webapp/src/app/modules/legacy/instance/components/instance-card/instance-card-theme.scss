@@ -1,9 +1,9 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin instance-card-theme($theme) {
-  $prod-border: mat-color(map-get($theme, 'warn'));
-  $test-border: mat-color(map-get($theme, 'primary'));
-  $dev-border: mat-color(map-get($theme, 'accent'));
+  $prod-border: mat.get-color-from-palette(map-get($theme, 'warn'));
+  $test-border: mat.get-color-from-palette(map-get($theme, 'primary'));
+  $dev-border: mat.get-color-from-palette(map-get($theme, 'accent'));
 
   .instance-card-DEVELOPMENT {
     border-left: 10px solid $dev-border;
@@ -18,7 +18,7 @@
   }
 
   .intance-card-row {
-    @include mat-typography-level-to-styles(mat-typography-config(), title);
+    @include mat.typography-level(mat.define-typography-config(), title);
 
     font-weight: lighter;
     font-size: medium;

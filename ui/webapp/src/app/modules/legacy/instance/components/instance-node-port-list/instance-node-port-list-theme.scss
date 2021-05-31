@@ -1,18 +1,18 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin instance-node-port-list-theme($theme) {
   $dark: map-get($theme, is-dark);
   $warn: map-get($theme, 'warn');
 
   .rating-ok {
-    color: if($dark, mat-color($mat-green, 400), mat-color($mat-green, 600));
+    color: if($dark, mat.get-color-from-palette(mat.$green-palette, 400), mat.get-color-from-palette(mat.$green-palette, 600));
   }
 
   .rating-failed {
-    color: mat-color($warn);
+    color: mat.get-color-from-palette($warn);
   }
 
   .dim-link-off {
-    color: if($dark, mat-color($mat-grey, 600), mat-color($mat-grey, 400));
+    color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 600), mat.get-color-from-palette(mat.$grey-palette, 400));
   }
 }

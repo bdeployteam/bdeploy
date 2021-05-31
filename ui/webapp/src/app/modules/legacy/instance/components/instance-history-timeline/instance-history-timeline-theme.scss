@@ -1,9 +1,9 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin instance-history-timeline-theme($theme) {
   $isDark: map-get($theme, 'is-dark');
   .timeline_line {
-    background-color: mat-color(if($isDark, mat-palette($mat-grey, 700), mat-palette($mat-grey, 400)));
+    background-color: mat.get-color-from-palette(if($isDark, mat.define-palette(mat.$grey-palette, 700), mat.define-palette(mat.$grey-palette, 400)));
   }
 
   .timeline_circle {

@@ -1,8 +1,8 @@
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 
 @mixin attach-central-theme($theme) {
   $dark: map-get($theme, 'is-dark');
-  $success-color: if($dark, mat-color($mat-green, 300), mat-color($mat-green, 700));
+  $success-color: if($dark, mat.get-color-from-palette(mat.$green-palette, 300), mat.get-color-from-palette(mat.$green-palette, 700));
 
   .success-icon mat-icon {
     color: $success-color;

@@ -1,5 +1,6 @@
-@import '~@angular/material/theming';
-@include mat-core();
+@use '~@angular/material' as mat;
+
+@include mat.core();
 
 @import 'app-common.scss';
 @import 'app-externals.scss';
@@ -18,7 +19,7 @@
 @import 'app/modules/legacy/core/legacy-themes.scss';
 
 @mixin all-themes($theme) {
-  @include angular-material-theme($theme);
+  @include mat.all-component-themes($theme);
   @include common-classes($theme);
   @include bd-popup-theme($theme);
   @include bd-image-upload-theme($theme);
@@ -55,12 +56,12 @@
   }
 
   a {
-    color: if($dark, mat-color($mat-blue, 300), mat-color($mat-blue, 800));
+    color: if($dark, mat.get-color-from-palette(mat.$blue-palette, 300), mat.get-color-from-palette(mat.$blue-palette, 800));
   }
 
   // Define scrollbar style on each element as it is not inherited in some cases.
   * {
-    @include scrollbars(mat-color(map-get($theme, 'primary')), if($dark, #555555, #cccccc));
+    @include scrollbars(mat.get-color-from-palette(map-get($theme, 'primary')), if($dark, #555555, #cccccc));
   }
 
   // Pseudo selector to define variables on the main theme class.
@@ -72,30 +73,30 @@
     $fg: map-get($theme, 'foreground');
     $maintb: map-get($theme, 'main-toolbar');
 
-    --bd-primary: #{mat-color($primary)};
-    --bd-accent: #{mat-color($accent)};
-    --bd-warn: #{mat-color($warn)};
-    --bd-main-bar: #{mat-color($maintb)};
+    --bd-primary: #{mat.get-color-from-palette($primary)};
+    --bd-accent: #{mat.get-color-from-palette($accent)};
+    --bd-warn: #{mat.get-color-from-palette($warn)};
+    --bd-main-bar: #{mat.get-color-from-palette($maintb)};
 
-    --bd-text: #{mat-color($fg, 'text')};
-    --bd-text-secondary: #{mat-color($fg, 'secondary-text')};
-    --bd-text-success: #{if($dark, mat-color($mat-green, 300), mat-color($mat-green, 700))};
+    --bd-text: #{mat.get-color-from-palette($fg, 'text')};
+    --bd-text-secondary: #{mat.get-color-from-palette($fg, 'secondary-text')};
+    --bd-text-success: #{if($dark, mat.get-color-from-palette(mat.$green-palette, 300), mat.get-color-from-palette(mat.$green-palette, 700))};
     --bd-text-very-light: rgb(116, 116, 116);
-    --bd-text-disabled: #{mat-color($fg, 'disabled-text')};
+    --bd-text-disabled: #{mat.get-color-from-palette($fg, 'disabled-text')};
 
-    --bd-bg-dialog: #{mat-color($bg, 'dialog')};
-    --bd-bg-toolbar: #{mat-color($bg, 'app-bar')};
-    --bd-bg-disabled: #{mat-color($fg, base, if($dark, 0.05, 0.02))};
+    --bd-bg-dialog: #{mat.get-color-from-palette($bg, 'dialog')};
+    --bd-bg-toolbar: #{mat.get-color-from-palette($bg, 'app-bar')};
+    --bd-bg-disabled: #{mat.get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
 
-    --bd-primary-darker: #{mat-color($primary, 'darker')};
-    --bd-accent-darker: #{mat-color($accent, 'darker')};
-    --bd-warn-darker: #{mat-color($warn, 'darker')};
-    --bd-main-bar-darker: #{mat-color($maintb, 900)};
+    --bd-primary-darker: #{mat.get-color-from-palette($primary, 'darker')};
+    --bd-accent-darker: #{mat.get-color-from-palette($accent, 'darker')};
+    --bd-warn-darker: #{mat.get-color-from-palette($warn, 'darker')};
+    --bd-main-bar-darker: #{mat.get-color-from-palette($maintb, 900)};
 
-    --bd-primary-contrast: #{mat-color($primary, 'default-contrast')};
-    --bd-accent-contrast: #{mat-color($accent, 'default-contrast')};
-    --bd-warn-contrast: #{mat-contrast($warn, 800)}; // intentionally pick the darker color to force a white contrast if available.
-    --bd-main-bar-contrast: #{mat-color($maintb, 'default-contrast')};
+    --bd-primary-contrast: #{mat.get-color-from-palette($primary, 'default-contrast')};
+    --bd-accent-contrast: #{mat.get-color-from-palette($accent, 'default-contrast')};
+    --bd-warn-contrast: #{mat.get-contrast-color-from-palette($warn, 800)}; // intentionally pick the darker color to force a white contrast if available.
+    --bd-main-bar-contrast: #{mat.get-color-from-palette($maintb, 'default-contrast')};
 
     --bd-lighten-bg: #{if($dark, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5))};
   }
@@ -111,9 +112,9 @@
 
 @mixin theme-chooser($theme) {
   $theme-bg: map-get($theme, 'background');
-  $theme-primary: mat-color(map-get($theme, 'primary'));
-  $theme-accent: mat-color(map-get($theme, 'accent'));
-  $theme-main-tb: mat-color(map-get($theme, 'main-toolbar'));
+  $theme-primary: mat.get-color-from-palette(map-get($theme, 'primary'));
+  $theme-accent: mat.get-color-from-palette(map-get($theme, 'accent'));
+  $theme-main-tb: mat.get-color-from-palette(map-get($theme, 'main-toolbar'));
 
   .preview-background {
     cursor: pointer;
@@ -200,29 +201,29 @@ $app-yellow-def: (
   A400: #fbf315,
   A700: #fbf315,
   contrast: (
-    50: $dark-primary-text,
-    100: $dark-primary-text,
-    200: $dark-primary-text,
-    300: $dark-primary-text,
-    400: $dark-primary-text,
-    500: $dark-primary-text,
-    600: $dark-primary-text,
-    700: $dark-primary-text,
-    800: $dark-primary-text,
-    900: $dark-primary-text,
-    A100: $dark-primary-text,
-    A200: $dark-primary-text,
-    A400: $dark-primary-text,
-    A700: $dark-primary-text,
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: rgba(black, 0.87),
+    700: rgba(black, 0.87),
+    800: rgba(black, 0.87),
+    900: rgba(black, 0.87),
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
   ),
 );
-$app-yellow-palette: mat-palette($app-yellow-def);
+$app-yellow-palette: mat.define-palette($app-yellow-def);
 
 /* light theme - default */
-$app-light-primary: mat-palette($mat-indigo, 500);
-$app-light-accent: mat-palette($mat-pink, A200);
-$app-light-warning: mat-palette($mat-orange, A700);
-$app-light-theme: add-toolbar-color(mat-light-theme($app-light-primary, $app-light-accent, $app-light-warning), $app-light-primary);
+$app-light-primary: mat.define-palette(mat.$indigo-palette, 500);
+$app-light-accent: mat.define-palette(mat.$pink-palette, A200);
+$app-light-warning: mat.define-palette(mat.$orange-palette, A700);
+$app-light-theme: add-toolbar-color(mat.define-light-theme($app-light-primary, $app-light-accent, $app-light-warning), $app-light-primary);
 .app-light-theme {
   @include all-themes($app-light-theme);
 }
@@ -231,11 +232,11 @@ $app-light-theme: add-toolbar-color(mat-light-theme($app-light-primary, $app-lig
 }
 
 /* light theme with yellow toolbar */
-$app-light-yellow-primary: mat-palette($mat-grey, 700);
-$app-light-yellow-accent: mat-palette($mat-red);
-$app-light-yellow-warning: mat-palette($mat-orange);
+$app-light-yellow-primary: mat.define-palette(mat.$grey-palette, 700);
+$app-light-yellow-accent: mat.define-palette(mat.$red-palette);
+$app-light-yellow-warning: mat.define-palette(mat.$orange-palette);
 $app-light-yellow-theme: add-toolbar-color(
-  mat-light-theme($app-light-yellow-primary, $app-light-yellow-accent, $app-light-yellow-warning),
+  mat.define-light-theme($app-light-yellow-primary, $app-light-yellow-accent, $app-light-yellow-warning),
   $app-yellow-palette
 );
 .app-light-yellow-theme {
@@ -246,10 +247,10 @@ $app-light-yellow-theme: add-toolbar-color(
 }
 
 /* dark blue theme */
-$app-dark-primary: mat-palette($mat-indigo, 200);
+$app-dark-primary: mat.define-palette(mat.$indigo-palette, 200);
 $app-dark-accent: $app-yellow-palette;
-$app-dark-warning: mat-palette($mat-deep-orange);
-$app-dark-theme: add-toolbar-color(mat-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning), mat-palette($mat-indigo, 500));
+$app-dark-warning: mat.define-palette(mat.$deep-orange-palette);
+$app-dark-theme: add-toolbar-color(mat.define-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning), mat.define-palette(mat.$indigo-palette, 500));
 $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 .app-dark-theme {
   @include all-themes($app-dark-theme);
@@ -261,9 +262,12 @@ $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 
 /* dark yellow theme */
 $app-dark-yellow-primary: $app-yellow-palette;
-$app-dark-yellow-accent: mat-palette($mat-blue, 700);
-$app-dark-yellow-warning: mat-palette($mat-deep-orange);
-$app-dark-yellow-theme: add-toolbar-color(mat-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning), $app-yellow-palette);
+$app-dark-yellow-accent: mat.define-palette(mat.$blue-palette, 700);
+$app-dark-yellow-warning: mat.define-palette(mat.$deep-orange-palette);
+$app-dark-yellow-theme: add-toolbar-color(
+  mat.define-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning),
+  $app-yellow-palette
+);
 $app-dark-yellow-theme: override-theme-background($app-dark-yellow-theme, app-bar, #3d3c3e);
 .app-dark-yellow-theme {
   @include all-themes($app-dark-yellow-theme);
