@@ -66,6 +66,7 @@
           [relative]="true"
           [route]="['select', entry.instanceTag]"
         ></app-bd-panel-button>
+        <app-bd-button [collapsed]="false" [toggle]="false" icon="file_download" text="Export..." (click)="doExport()"></app-bd-button>
         <ng-container *ngIf="state$ | async as state">
           <mat-divider></mat-divider>
           <app-bd-notification-card

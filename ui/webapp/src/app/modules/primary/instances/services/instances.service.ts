@@ -140,6 +140,13 @@ export class InstancesService {
       .pipe(measure('Update Instance Banner'));
   }
 
+  public export(tag: string) {
+    const url = `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/export/${tag}`;
+    this.downloads.download(url);
+  }
+
+  public import(file: Blob) {}
+
   private reload(group: string) {
     if (!group) {
       this.instances$.next([]);

@@ -90,4 +90,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.activating$.next(false)))
       .subscribe();
   }
+  /* template */ doExport() {
+    this.instances.export(this.entry$.value.instanceTag);
+  }
 }
