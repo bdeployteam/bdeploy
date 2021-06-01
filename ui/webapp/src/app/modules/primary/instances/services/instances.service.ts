@@ -93,6 +93,10 @@ export class InstancesService {
     return this.http.delete(`${this.apiPath(this.group)}/${instance}/delete`);
   }
 
+  public deleteVersion(version: string) {
+    return this.http.delete(`${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/deleteVersion/${version}`);
+  }
+
   public updateAttributes(instance: string, attributes: CustomAttributesRecord) {
     return this.http.post(`${this.apiPath(this.group)}/${instance}/attributes`, attributes);
   }

@@ -372,6 +372,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         createInstanceVersion(target, icCurrent, incs);
     }
 
+    @Deprecated
     private void updateNodeTo(InstanceNodeConfiguration cfg, ProductManifest pmCurrent, ProductManifest pmUpdate) {
         cfg.product = pmUpdate.getKey();
 
@@ -392,6 +393,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
+    @Deprecated
     private void updateApplicationTo(ApplicationConfiguration appCfg, ApplicationManifest amCurrent,
             ApplicationManifest amUpdate) {
         appCfg.application = amUpdate.getKey();
@@ -403,6 +405,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         appCfg.stop = updateApplicationCommandTo(appCfg, appCfg.stop, adCurrent.stopCommand, adUpdate.stopCommand);
     }
 
+    @Deprecated
     private CommandConfiguration updateApplicationCommandTo(ApplicationConfiguration appCfg, CommandConfiguration command,
             ExecutableDescriptor descCurrent, ExecutableDescriptor descUpdate) {
         // command was removed, remove as well.

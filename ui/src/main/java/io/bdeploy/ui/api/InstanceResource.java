@@ -13,6 +13,7 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -73,10 +74,20 @@ public interface InstanceResource {
     public InstanceConfiguration readVersion(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("versionTag") String versionTag);
 
+    /**
+     * @deprecated use #update
+     */
+    @Deprecated
     @POST
     @Path("/{instance}")
     @RequiredPermission(permission = Permission.WRITE)
-    public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config,
+    public void update_old(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config,
+            @QueryParam("managedServer") String managedServer, @QueryParam("expect") String expectedTag);
+
+    @POST
+    @Path("/{instance}/update")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceUpdateDto config,
             @QueryParam("managedServer") String managedServer, @QueryParam("expect") String expectedTag);
 
     @DELETE
@@ -122,6 +133,10 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.WRITE)
     public void activate(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
 
+    /**
+     * @deprecated no longer used in 4.0
+     */
+    @Deprecated
     @GET
     @Path("/{instance}/updateTo")
     @RequiredPermission(permission = Permission.WRITE)

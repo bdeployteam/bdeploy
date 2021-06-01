@@ -14,6 +14,7 @@ import {
   InstanceConfigurationDto,
   InstanceDto,
   InstanceNodeConfigurationDto,
+  InstanceUpdateDto,
   MinionDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -278,8 +279,10 @@ export class InstanceEditService {
     const managedServer = this.current$.value.managedServer?.hostName;
     const expect = this.current$.value.instance.tag;
 
+    const update: InstanceUpdateDto = { config: state, files: null /* TODO */ };
+
     return this.http
-      .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.uuid}`, state, { params: { managedServer, expect } })
+      .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.uuid}/update`, update, { params: { managedServer, expect } })
       .pipe(
         finalize(() => this.saving$.next(false)),
         measure('Save Instance')

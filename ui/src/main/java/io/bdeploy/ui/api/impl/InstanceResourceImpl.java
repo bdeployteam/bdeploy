@@ -382,7 +382,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void update(String instance, InstanceConfigurationDto dto, String managedServer, String expectedTag) {
+    public void update_old(String instance, InstanceConfigurationDto dto, String managedServer, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instance, null);
 
         if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
@@ -400,6 +400,24 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // immediately fetch back so we have it to create the association
         syncInstance(minion, rc, group, instance);
+
+        changes.create(ObjectChangeType.INSTANCE, key);
+    }
+
+    @Override
+    public void update(String instanceId, InstanceUpdateDto config, String managedServer, String expectedTag) {
+        InstanceManifest oldConfig = InstanceManifest.load(hive, instanceId, null);
+
+        if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
+            throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag + ", current="
+                    + oldConfig.getManifest().getTag(), Status.CONFLICT);
+        }
+
+        MasterRootResource root = getManagingRootResource(managedServer);
+        Manifest.Key key = root.getNamedMaster(group).update(config, expectedTag);
+
+        // immediately fetch back so we have it to create the association
+        syncInstance(minion, rc, group, instanceId);
 
         changes.create(ObjectChangeType.INSTANCE, key);
     }
@@ -897,6 +915,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 List<Key> keys = response.readEntity(new GenericType<List<Key>>() {
                 });
                 keys.forEach(k -> changes.create(ObjectChangeType.INSTANCE, k));
+                return keys;
             } catch (IOException e) {
                 throw new WebApplicationException("Cannot delegate import to managed server", e);
             }

@@ -97,7 +97,9 @@ public interface MasterNamedResource {
      *
      * @param uuid the UUID of the instance to update
      * @param productTag the tag of the product to update to.
+     * @deprecated happens all in the UI backend in 4.0.
      */
+    @Deprecated
     @POST
     @Path("/updateTo")
     public void updateTo(@QueryParam("u") String uuid, @QueryParam("t") String productTag);

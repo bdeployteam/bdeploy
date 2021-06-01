@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { format } from 'date-fns';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { HistoryService } from 'src/app/modules/primary/instances/services/history.service';
 import { InstanceStateService } from 'src/app/modules/primary/instances/services/instance-state.service';
@@ -23,6 +25,9 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   /* template */ installing$ = new BehaviorSubject<boolean>(false);
   /* template */ uninstalling$ = new BehaviorSubject<boolean>(false);
   /* template */ activating$ = new BehaviorSubject<boolean>(false);
+  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
+
+  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   private subscription: Subscription;
 
@@ -31,7 +36,8 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
     private history: HistoryService,
     public instances: InstancesService,
     public states: InstanceStateService,
-    public servers: ServersService
+    public servers: ServersService,
+    public auth: AuthenticationService
   ) {
     this.subscription = combineLatest([this.areas.panelRoute$, this.history.history$]).subscribe(([route, entries]) => {
       // Note: basing the selection on an index in the service has some drawbacks, but we can do that now without needing to change a lot in the backend.
@@ -76,6 +82,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.installing$.next(false)))
       .subscribe();
   }
+
   /* template */ doUninstall() {
     this.uninstalling$.next(true);
     this.states
@@ -83,6 +90,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.uninstalling$.next(false)))
       .subscribe();
   }
+
   /* template */ doActivate() {
     this.activating$.next(true);
     this.states
@@ -90,7 +98,27 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.activating$.next(false)))
       .subscribe();
   }
+
   /* template */ doExport() {
     this.instances.export(this.entry$.value.instanceTag);
+  }
+
+  /* template */ doDelete() {
+    this.dialog
+      .confirm(
+        `Delete Version`,
+        `This instance version and all its history will be deleted and <strong>cannot be restored</strong>. Are you sure you want to do this?`,
+        'delete'
+      )
+      .subscribe((r) => {
+        if (!r) {
+          return;
+        }
+        this.deleting$.next(true);
+        this.instances
+          .deleteVersion(this.entry$.value.instanceTag)
+          .pipe(finalize(() => this.deleting$.next(false)))
+          .subscribe();
+      });
   }
 }

@@ -34,6 +34,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -140,8 +141,9 @@ public class InstanceResourceTest {
             nodeConfig.name = "DemoInstance-Node1-Config";
             nodeDto.nodeConfiguration = nodeConfig;
         }
-        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), null,
-                "1");
+        instanceResource.update("DemoInstance",
+                new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.singletonList(nodeDto)), null),
+                null, "1");
 
         // Check node configuration
         InstanceNodeConfigurationListDto instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "2");
@@ -163,8 +165,9 @@ public class InstanceResourceTest {
 
         // Remove all applications from Node1
         nodeDto.nodeConfiguration.applications.clear();
-        instanceResource.update("DemoInstance", new InstanceConfigurationDto(null, Collections.singletonList(nodeDto)), null,
-                "2");
+        instanceResource.update("DemoInstance",
+                new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.singletonList(nodeDto)), null),
+                null, "2");
 
         // Check the updated configuration
         instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "3");
@@ -249,7 +252,7 @@ public class InstanceResourceTest {
         assertEquals(InstancePurpose.PRODUCTIVE, read.purpose);
 
         read.name = "New Desc";
-        res.update(instance.uuid, new InstanceConfigurationDto(read, null), null, "1");
+        res.update(instance.uuid, new InstanceUpdateDto(new InstanceConfigurationDto(read, null), null), null, "1");
 
         InstanceConfiguration reread = res.read(instance.uuid);
         assertEquals("New Desc", reread.name);
@@ -279,7 +282,7 @@ public class InstanceResourceTest {
         res.create(instance, null);
 
         instance.name = "My modified Instance";
-        res.update(instance.uuid, new InstanceConfigurationDto(instance, null), null, "1");
+        res.update(instance.uuid, new InstanceUpdateDto(new InstanceConfigurationDto(instance, null), null), null, "1");
 
         InstanceConfiguration read = res.read(instance.uuid);
         assertEquals(read.name, instance.name);

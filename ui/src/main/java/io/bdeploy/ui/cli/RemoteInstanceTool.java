@@ -9,13 +9,6 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 
@@ -41,6 +34,7 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
@@ -53,6 +47,12 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteInstanceTool.InstanceConfig;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
 
 @Help("List, create, import and export  instance configurations")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -192,7 +192,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
         InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
                 ir.getNodeConfigurations(config.update(), currentTag).nodeConfigDtos);
-        ir.update(config.update(), dto, server != null ? server.hostName : null, currentTag);
+        ir.update(config.update(), new InstanceUpdateDto(dto, null), server != null ? server.hostName : null, currentTag);
 
         return result;
     }
