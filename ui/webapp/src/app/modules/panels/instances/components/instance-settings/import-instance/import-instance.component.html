@@ -1,0 +1,29 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Import Instance Version" [closeablePanel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div>
+        Drop an instance version you previously exported to upload it. <strong>Note</strong> that the product used in the instance version must be available on
+        the server.
+      </div>
+      <app-bd-file-drop (fileAdded)="fileAdded($event)" [types]="['.zip', '.jar']"></app-bd-file-drop>
+      <app-bd-file-upload
+        *ngFor="let file of files; let i = index"
+        [file]="file"
+        [url]="instances.getImportURL()"
+        (dismiss)="onDismiss(i)"
+        [resultEvaluator]="resultEval"
+      ></app-bd-file-upload>
+      <app-bd-panel-button
+        #backButton
+        [collapsed]="false"
+        text="Back to overview"
+        icon="arrow_back"
+        [toggle]="false"
+        [route]="['..']"
+        [relative]="true"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

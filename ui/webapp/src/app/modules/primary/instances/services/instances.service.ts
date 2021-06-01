@@ -145,7 +145,9 @@ export class InstancesService {
     this.downloads.download(url);
   }
 
-  public import(file: Blob) {}
+  public getImportURL() {
+    return `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/import`;
+  }
 
   private reload(group: string) {
     if (!group) {

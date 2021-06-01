@@ -16,6 +16,7 @@ import { HistoryViewComponent } from './components/history-view/history-view.com
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { BannerComponent } from './components/instance-settings/banner/banner.component';
 import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
+import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
@@ -40,6 +41,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'settings/nodes', component: NodesComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/templates', component: InstanceTemplatesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/banner', component: BannerComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/import', component: ImportInstanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'node/:node', component: NodeDetailsComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process', component: ProcessStatusComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process/ports', component: ProcessPortsComponent, canActivate: [ScopedReadGuard] },

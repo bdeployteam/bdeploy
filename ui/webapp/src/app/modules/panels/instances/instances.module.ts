@@ -47,6 +47,7 @@ import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-va
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
+import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 
 @NgModule({
   declarations: [
@@ -88,6 +89,7 @@ import { MoveProcessComponent } from './components/edit-process-overview/move-pr
     CustomEditorComponent,
     BannerComponent,
     MoveProcessComponent,
+    ImportInstanceComponent,
   ],
   imports: [
     CommonModule,

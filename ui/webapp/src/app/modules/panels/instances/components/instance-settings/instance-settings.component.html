@@ -49,6 +49,15 @@
         [disabled]="!auth.isCurrentScopeWrite()"
       ></app-bd-panel-button>
       <app-bd-panel-button
+        text="Import Instance Version..."
+        icon="file_upload"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['import']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
         text="Maintenance"
         icon="build"
         [collapsed]="false"
