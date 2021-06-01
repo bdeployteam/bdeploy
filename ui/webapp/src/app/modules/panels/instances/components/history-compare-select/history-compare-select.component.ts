@@ -27,7 +27,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
   };
 
   private subscription: Subscription;
-  private index: string;
+  private key: string;
 
   /* template */ records$ = new BehaviorSubject<InstanceVersionDto[]>(null);
   /* template */ base: string;
@@ -36,7 +36,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
     if (row.key.tag === this.base) {
       return [];
     }
-    return ['', { outlets: { panel: ['panels', 'instances', 'history', this.index, 'compare', this.base, row.key.tag] } }];
+    return ['', { outlets: { panel: ['panels', 'instances', 'history', this.key, 'compare', this.base, row.key.tag] } }];
   };
 
   constructor(private areas: NavAreasService, public details: HistoryDetailsService, private instances: InstancesService) {
@@ -45,7 +45,7 @@ export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
         return;
       }
       this.base = r.paramMap.get('base');
-      this.index = r.paramMap.get('index');
+      this.key = r.paramMap.get('key');
     });
 
     this.subscription.add(

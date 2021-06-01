@@ -37,7 +37,8 @@
           [toggle]="false"
           icon="visibility"
           text="Show Details"
-          [route]="['panels', 'instances', 'history', index$ | async, 'view', entry.instanceTag]"
+          [relative]="true"
+          [route]="['view', entry.instanceTag]"
         ></app-bd-panel-button>
         <app-bd-panel-button
           [collapsed]="false"
@@ -45,7 +46,8 @@
           icon="compare"
           text="Compare with Current"
           [disabled]="entry.instanceTag === (instances.current$ | async)?.instance.tag"
-          [route]="['panels', 'instances', 'history', index$ | async, 'compare', entry.instanceTag, (instances.current$ | async)?.instance.tag]"
+          [relative]="true"
+          [route]="['compare', entry.instanceTag, (instances.current$ | async)?.instance.tag]"
         ></app-bd-panel-button>
         <app-bd-panel-button
           [collapsed]="false"
@@ -53,14 +55,16 @@
           icon="compare"
           text="Compare with Active"
           [disabled]="!(instances.current$ | async)?.activeVersion?.tag || entry.instanceTag === (instances.current$ | async).activeVersion?.tag"
-          [route]="['panels', 'instances', 'history', index$ | async, 'compare', entry.instanceTag, (instances.current$ | async)?.activeVersion?.tag]"
+          [relative]="true"
+          [route]="['compare', entry.instanceTag, (instances.current$ | async)?.activeVersion?.tag]"
         ></app-bd-panel-button>
         <app-bd-panel-button
           [collapsed]="false"
           [toggle]="false"
           icon="compare"
           text="Compare with Version..."
-          [route]="['panels', 'instances', 'history', index$ | async, 'select', entry.instanceTag]"
+          [relative]="true"
+          [route]="['select', entry.instanceTag]"
         ></app-bd-panel-button>
         <ng-container *ngIf="state$ | async as state">
           <mat-divider></mat-divider>

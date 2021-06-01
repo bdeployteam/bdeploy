@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { format } from 'date-fns';
+import { isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
@@ -8,6 +9,7 @@ import { HistoryService } from 'src/app/modules/primary/instances/services/histo
 import { InstanceStateService } from 'src/app/modules/primary/instances/services/instance-state.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { histKey, histKeyDecode } from '../../utils/history-key.utils';
 
 @Component({
   selector: 'app-history-entry',
@@ -16,7 +18,6 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 })
 export class HistoryEntryComponent implements OnInit, OnDestroy {
   /* template */ entry$ = new BehaviorSubject<HistoryEntryDto>(null);
-  /* template */ index$ = new BehaviorSubject<Number>(null);
   /* template */ state$ = new BehaviorSubject<InstanceStateRecord>(null);
 
   /* template */ installing$ = new BehaviorSubject<boolean>(false);
@@ -34,13 +35,12 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   ) {
     this.subscription = combineLatest([this.areas.panelRoute$, this.history.history$]).subscribe(([route, entries]) => {
       // Note: basing the selection on an index in the service has some drawbacks, but we can do that now without needing to change a lot in the backend.
-      const idx = route?.paramMap?.get('index');
-      if (!idx || !entries || Number(idx) >= entries.length) {
+      const key = route?.paramMap?.get('key');
+      if (!key || !entries) {
         this.entry$.next(null);
-        this.index$.next(null);
       } else {
-        this.entry$.next(entries[Number(idx)]);
-        this.index$.next(Number(idx));
+        const entry = entries.find((e) => isEqual(histKey(e), histKeyDecode(key)));
+        this.entry$.next(entry);
       }
     });
 
