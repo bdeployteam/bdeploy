@@ -41,7 +41,7 @@ Cypress.Commands.add('pressToolbarPanelButton', function (text) {
 
 Cypress.Commands.add('pressToolbarButton', function (text) {
   cy.get('app-bd-dialog-toolbar').within(() => {
-    cy.get(`app-bd-button[text="${text}"]`).click();
+    cy.get(`button[data-cy="${text}"]`).click();
   });
 });
 

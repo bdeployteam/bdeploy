@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Token for {{ (user$ | async)?.name }}" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Token for {{ (user$ | async)?.name }}" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
@@ -32,14 +32,6 @@
         icon="content_copy"
         [collapsed]="false"
       ></app-bd-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

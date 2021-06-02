@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Details" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Details" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="singleProduct.product$ | async as prod">
@@ -8,15 +8,6 @@
           <div>This product has no plugins.</div>
         </app-bd-no-data>
       </app-bd-data-display>
-
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

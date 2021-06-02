@@ -5,7 +5,7 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Instance Attribute Definitions" [closeablePanel]="true"> </app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Instance Attribute Definitions" [panel]="true" [route]="['..', '..']"> </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="groups.current$ | async as group">
@@ -15,15 +15,6 @@
         </app-bd-no-data>
       </app-bd-data-display>
       <app-bd-button text="Add Definition" icon="add" [collapsed]="false" (click)="showAddDialog(group, addTemplate)"></app-bd-button>
-      <app-bd-panel-button
-        #backButton
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..', '..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

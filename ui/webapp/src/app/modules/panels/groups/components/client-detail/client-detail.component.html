@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [closeablePanel]="true">
+  <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [panel]="true">
     <mat-divider [vertical]="true"></mat-divider>
     <mat-icon *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
   </app-bd-dialog-toolbar>

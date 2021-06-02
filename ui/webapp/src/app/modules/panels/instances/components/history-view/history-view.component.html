@@ -1,15 +1,10 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="View version {{ base$ | async }} of {{ (instances.current$ | async)?.instanceConfiguration.name }}" [closeablePanel]="true">
-    <div fxFlex="1 0 auto"></div>
-    <app-bd-panel-button
-      #backButton
-      [collapsed]="narrow$ | async"
-      text="Back to overview"
-      icon="arrow_back"
-      [toggle]="false"
-      [route]="['..', '..']"
-      [relative]="true"
-    ></app-bd-panel-button>
+  <app-bd-dialog-toolbar
+    header="View version {{ base$ | async }} of {{ (instances.current$ | async)?.instanceConfiguration.name }}"
+    [panel]="true"
+    [route]="['..', '..']"
+    [actionCollapsed]="narrow$ | async"
+  >
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="config$ | async as cfg" [style.padding-top.px]="2">

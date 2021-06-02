@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 
 @Component({
@@ -17,7 +17,7 @@ export class PasswordComponent implements OnInit {
   /* template */ passVerify = '';
   /* template */ remoteError: string = null;
 
-  @ViewChild('backButton') private back: BdPanelButtonComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   constructor(private auth: AuthenticationService) {}
 
@@ -30,7 +30,7 @@ export class PasswordComponent implements OnInit {
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe(
         (_) => {
-          this.back.onClick();
+          this.tb.closePanel();
         },
         (err) => {
           if (err instanceof HttpErrorResponse) {

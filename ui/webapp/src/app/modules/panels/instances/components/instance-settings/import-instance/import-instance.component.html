@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Import Instance Version" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Import Instance Version" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
@@ -15,15 +15,6 @@
         (dismiss)="onDismiss(i)"
         [resultEvaluator]="resultEval"
       ></app-bd-file-upload>
-      <app-bd-panel-button
-        #backButton
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="instanceEdit.loading$">
-  <app-bd-dialog-toolbar header="Edit {{ (edit.process$ | async)?.name }}" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit {{ (edit.process$ | async)?.name }}" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
       <app-bd-panel-button

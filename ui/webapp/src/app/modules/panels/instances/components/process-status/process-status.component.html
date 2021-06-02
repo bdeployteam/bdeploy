@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="details.loading$">
-  <app-bd-dialog-toolbar [closeablePanel]="true" header="Process {{ (details.processConfig$ | async)?.name }}">
+  <app-bd-dialog-toolbar [panel]="true" header="Process {{ (details.processConfig$ | async)?.name }}">
     <div fxFlex="1 0 auto"></div>
     <app-process-status-icon [record]="details.processConfig$ | async"></app-process-status-icon>
     <mat-divider [vertical]="true"></mat-divider>

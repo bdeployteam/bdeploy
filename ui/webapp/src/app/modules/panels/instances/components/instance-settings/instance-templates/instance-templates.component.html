@@ -36,22 +36,13 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Instance Templates" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Instance Templates" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
       <div>
         You can apply instance templates to the current instance by choosing below. An instance template will create and configure all required processes.
       </div>
       <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
-      <app-bd-panel-button
-        #backButton
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
     <app-bd-notification-card
       icon="history"

@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="edit.loading$">
-  <app-bd-dialog-toolbar header="Instance Configuration" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Instance Configuration" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
@@ -32,16 +32,6 @@
           [disabled]="!edit.hasPendingChanges() || !servers.isSynchronized(edit.current$.value?.managedServer)"
         ></app-bd-button>
       </form>
-      <!-- Attention: may *never* be inside the <form> tag! -->
-      <app-bd-panel-button
-        #backButton
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Edit Details" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Edit Details" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="server">
@@ -11,15 +11,6 @@
 
         <app-bd-button text="SAVE" [collapsed]="false" color="toolbar" [disabled]="!isDirty() || form.invalid"></app-bd-button>
       </form>
-
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

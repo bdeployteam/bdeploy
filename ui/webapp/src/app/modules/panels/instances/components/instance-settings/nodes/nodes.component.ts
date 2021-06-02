@@ -3,8 +3,8 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceNodeConfigurationDto, MinionDto } from 'src/app/models/gen.dtos';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -33,7 +33,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ checked: NodeRow[] = [];
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild('backButton') back: BdPanelButtonComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
@@ -111,6 +111,6 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   /* template */ doApply() {
     this.edit.conceal('Select Instance Nodes');
-    this.back.onClick();
+    this.tb.closePanel();
   }
 }

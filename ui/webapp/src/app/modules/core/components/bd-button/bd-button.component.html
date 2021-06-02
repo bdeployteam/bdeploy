@@ -1,5 +1,6 @@
 <button
   mat-raised-button
+  [attr.data-cy]="text"
   fxFlex="1 0 auto"
   [ngClass]="getColorClass()"
   [class.local-button-expanded]="!collapsed"

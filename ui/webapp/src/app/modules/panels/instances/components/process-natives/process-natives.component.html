@@ -1,17 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Native Processes" [closeablePanel]="true">
-    <div fxFlex="1 0 auto"></div>
-    <app-bd-panel-button
-      #backButton
-      [collapsed]="false"
-      text="Back to overview"
-      icon="arrow_back"
-      [toggle]="false"
-      [route]="['..']"
-      [relative]="true"
-    ></app-bd-panel-button>
-    <mat-divider [vertical]="true"></mat-divider>
-  </app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Native Processes" [panel]="true" [route]="['..']" [actionCollapsed]="false"> </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">

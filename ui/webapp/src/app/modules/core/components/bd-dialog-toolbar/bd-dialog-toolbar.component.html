@@ -4,6 +4,17 @@
     <div fxLayout="row" fxLayoutGap="5px" fxFlex="1 0 auto">
       <ng-content></ng-content>
     </div>
-    <app-bd-button *ngIf="closeablePanel" text="Close" icon="close" [routerLink]="['', { outlets: { panel: null } }]"></app-bd-button>
+    <app-bd-button *ngIf="panel && !route" text="Close" icon="close" tooltip="left" (click)="closePanel()"></app-bd-button>
+    <app-bd-panel-button
+      #backButton
+      *ngIf="panel && !!route"
+      [text]="actionText"
+      [icon]="actionIcon"
+      [toggle]="false"
+      [relative]="relative"
+      [route]="route"
+      [collapsed]="actionCollapsed"
+      tooltip="left"
+    ></app-bd-panel-button>
   </mat-toolbar-row>
 </mat-toolbar>

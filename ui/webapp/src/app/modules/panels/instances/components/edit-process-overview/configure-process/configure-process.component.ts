@@ -1,8 +1,8 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -18,7 +18,7 @@ import { ConfigProcessParamGroupComponent } from './config-process-param-group/c
 export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ narrow$ = new BehaviorSubject<boolean>(false);
 
-  @ViewChild('backButton') private back: BdPanelButtonComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   @ViewChild(ConfigProcessHeaderComponent) private cfgHeader: ConfigProcessHeaderComponent;
@@ -46,7 +46,7 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
   /* template */ doApply() {
     this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);
     this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
-    this.back.onClick();
+    this.tb.closePanel();
   }
 
   /* template */ isInvalid(): boolean {

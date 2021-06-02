@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { InstancePurpose } from 'src/app/models/gen.dtos';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -16,7 +16,7 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 })
 export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog {
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild('backButton') back: BdPanelButtonComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
@@ -40,6 +40,6 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   /* template */ doApply() {
     this.edit.conceal('Change Instance Configuration');
-    this.back.onClick();
+    this.tb.closePanel();
   }
 }

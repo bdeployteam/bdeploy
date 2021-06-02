@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Manage Nodes" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Manage Nodes" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
@@ -19,15 +19,6 @@
         [disabled]="!isDirty() || !servers.isSynchronized(edit.current$.value?.managedServer)"
         (click)="doApply()"
       ></app-bd-button>
-      <app-bd-panel-button
-        #backButton
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

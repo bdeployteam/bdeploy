@@ -121,7 +121,7 @@ describe('Tests related to the current user', function () {
         .then((text) => {
           expect(text.length > 2000);
         });
-      cy.get('app-bd-panel-button[text="Back to overview"]').click();
+      cy.pressToolbarButton('Back to Overview');
 
       cy.get('app-bd-dialog-toolbar[header="User Settings"]').should('exist');
       cy.pressToolbarButton('Close');

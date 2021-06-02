@@ -5,8 +5,8 @@ import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
@@ -28,7 +28,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
-  @ViewChild('backButton') back: BdPanelButtonComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   constructor(
     public groups: GroupsService,
@@ -101,6 +101,6 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.imageChanged = false;
     this.saving$.next(false);
     this.group = this.origGroup;
-    this.back.onClick();
+    this.tb.closePanel();
   }
 }

@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Instance Group Maintenance" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Instance Group Maintenance" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="groups.current$ | async as group">
@@ -29,15 +29,6 @@
         [loadingWhen$]="deleting$"
         color="toolbar"
       ></app-bd-button>
-      <mat-divider></mat-divider>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

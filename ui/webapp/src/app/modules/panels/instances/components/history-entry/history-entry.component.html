@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar [closeablePanel]="true" header="History Details"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [panel]="true" header="History Details"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="entry$ | async as entry" fxLayout="column" fxLayoutGap="10px">
       <div fxLayout="row" fxLayoutGap="10px">

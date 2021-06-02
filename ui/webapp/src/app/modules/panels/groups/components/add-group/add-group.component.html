@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar header="Add Instance Group" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Instance Group" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <form #groupForm="ngForm" (ngSubmit)="onSave()">

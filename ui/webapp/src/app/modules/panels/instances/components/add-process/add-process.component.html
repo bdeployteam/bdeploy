@@ -6,7 +6,7 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Add Process" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Process" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
       <div>Click an application or application template from the list below to add it to the selected node.</div>

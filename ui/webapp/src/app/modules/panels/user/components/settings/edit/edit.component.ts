@@ -3,8 +3,8 @@ import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -23,7 +23,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ orig: UserInfo;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
-  @ViewChild('backButton') private back: BdPanelButtonComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   private subscription: Subscription;
   private mailChanged = new Subject<string>();
 
@@ -61,7 +61,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
       .updateUserInfo(this.user)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((_) => {
-        this.back.onClick();
+        this.tb.closePanel();
       });
   }
 }

@@ -123,6 +123,7 @@ describe('Groups Tests', () => {
         cy.contains('button', 'OK').should('exist').and('be.enabled').click();
       });
 
+      cy.pressToolbarButton('Back to Overview');
       cy.pressToolbarButton('Close');
     });
   });

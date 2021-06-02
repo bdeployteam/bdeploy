@@ -1,5 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar [closeablePanel]="true" header="Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [panel]="true" header="Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="nodeState$ | async as state" fxLayout="column" fxLayoutGap="10px">
       <app-bd-notification-card [svgIcon]="state.config.os" [dismissable]="false" header="{{ nodeName$ | async }} - {{ state.config.os }}">

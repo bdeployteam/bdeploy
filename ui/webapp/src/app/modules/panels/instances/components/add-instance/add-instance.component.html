@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Add Instance" [closeablePanel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Instance" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="onSave()">

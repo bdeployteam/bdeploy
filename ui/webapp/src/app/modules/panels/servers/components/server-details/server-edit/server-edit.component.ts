@@ -3,8 +3,8 @@ import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdPanelButtonComponent } from 'src/app/modules/core/components/bd-panel-button/bd-panel-button.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
@@ -25,7 +25,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ orig: ManagedMasterDto;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
-  @ViewChild('backButton') private back: BdPanelButtonComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   private subscription: Subscription;
 
   constructor(private servers: ServersService, public details: ServerDetailsService, areas: NavAreasService) {
@@ -55,7 +55,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
       .update(this.server)
       .pipe(finalize(() => this.saving$.next(false)))
       .subscribe((_) => {
-        this.back.onClick();
+        this.tb.closePanel();
       });
   }
 }

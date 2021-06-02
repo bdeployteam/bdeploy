@@ -1,18 +1,8 @@
 <app-bd-dialog [loadingWhen$]="details.loading$">
-  <app-bd-dialog-toolbar [closeablePanel]="true" header="Choose Compare Version"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [panel]="true" header="Choose Compare Version" [route]="['..', '..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <app-bd-data-table [records]="records$ | async" [sortData]="null" [columns]="columns" [recordRoute]="getRecordRoute"></app-bd-data-table>
-
-      <app-bd-panel-button
-        #backButton
-        [collapsed]="false"
-        text="Back to overview"
-        icon="arrow_back"
-        [toggle]="false"
-        [route]="['..', '..']"
-        [relative]="true"
-      ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

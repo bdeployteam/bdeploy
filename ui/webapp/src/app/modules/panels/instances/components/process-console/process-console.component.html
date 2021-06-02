@@ -1,5 +1,10 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Process Console for {{ (details.processConfig$ | async)?.name }}" [closeablePanel]="true">
+  <app-bd-dialog-toolbar
+    header="Process Console for {{ (details.processConfig$ | async)?.name }}"
+    [panel]="true"
+    [route]="['..']"
+    [actionCollapsed]="narrow$ | async"
+  >
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="(hasStdin$ | async) && (available$ | async)">
       <div fxLayout="row" fxLayoutAlign="center center">
@@ -17,16 +22,6 @@
       </div>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
-    <app-bd-panel-button
-      #backButton
-      [collapsed]="narrow$ | async"
-      text="Back to overview"
-      icon="arrow_back"
-      [toggle]="false"
-      [route]="['..']"
-      [relative]="true"
-    ></app-bd-panel-button>
-    <mat-divider [vertical]="true"></mat-divider>
     <app-bd-button icon="cloud_download" text="Download Full Content" (click)="doDownload()" [disabled]="!(available$ | async)"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
