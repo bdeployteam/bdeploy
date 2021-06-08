@@ -60,47 +60,50 @@
     <app-bd-panel-button text="Bulk Control" icon="dynamic_feed" [route]="['panels', 'instances', 'bulk']"></app-bd-panel-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
+    <ng-container *ngIf="instances.current$ | async as current">
+      <div *ngIf="current.instance.tag !== current.activeVersion?.tag" class="bd-rect-card" fxLayout="column">
+        <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
+          <div fxLayout="column" fxFlex="1 0 0">
+            <div *ngIf="!!current.activeVersion?.tag">
+              This instance has a newer configuration version available to be activated ({{ current.instance.tag }}). You can
+              <strong>install and activate</strong> this version now.
+            </div>
+            <div *ngIf="!current.activeVersion?.tag">
+              This instance has no active version. You can <strong>install and activate</strong> the current version now.
+            </div>
+            <div class="bd-description-text">
+              To <strong>install, uninstall or activate</strong> other versions, please go to the
+              <a [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]">instance history</a>.
+            </div>
+          </div>
+          <ng-container *ngIf="states$ | async as state">
+            <app-bd-button
+              fxFlexAlign="center"
+              color="primary"
+              text="Install"
+              icon="layers"
+              (click)="doInstall(current.instance.tag)"
+              [disabled]="(installing$ | async) || isInstalled(current.instance.tag)"
+              [loadingWhen$]="installing$"
+              tooltip="below"
+            ></app-bd-button>
+            <app-bd-button
+              fxFlexAlign="center"
+              color="accent"
+              text="Activate"
+              icon="star"
+              (click)="doActivate(current.instance.tag)"
+              [disabled]="(activating$ | async) || !isInstalled(current.instance.tag)"
+              [loadingWhen$]="activating$"
+              tooltip="below"
+            ></app-bd-button>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="instances.active$ | async as instance">
       <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
-
-      <ng-container *ngIf="instances.current$ | async as current">
-        <div *ngIf="current.instance.tag !== instance.activeVersion.tag" class="bd-rect-card" fxLayout="column">
-          <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
-            <div fxLayout="column" fxFlex="1 0 0">
-              <div>
-                This instance has a newer configuration version available to be activated ({{ current.instance.tag }}). You can
-                <strong>install and activate</strong> this version now.
-              </div>
-              <div class="bd-description-text">
-                To <strong>install, uninstall or activate</strong> historic versions, please go to the
-                <a [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]">instance history</a>.
-              </div>
-            </div>
-            <ng-container *ngIf="states$ | async as state">
-              <app-bd-button
-                fxFlexAlign="center"
-                color="primary"
-                text="Install"
-                icon="layers"
-                (click)="doInstall(current.instance.tag)"
-                [disabled]="(installing$ | async) || isInstalled(current.instance.tag)"
-                [loadingWhen$]="installing$"
-                tooltip="below"
-              ></app-bd-button>
-              <app-bd-button
-                fxFlexAlign="center"
-                color="accent"
-                text="Activate"
-                icon="star"
-                (click)="doActivate(current.instance.tag)"
-                [disabled]="(activating$ | async) || !isInstalled(current.instance.tag)"
-                [loadingWhen$]="activating$"
-                tooltip="below"
-              ></app-bd-button>
-            </ng-container>
-          </div>
-        </div>
-      </ng-container>
 
       <!-- Each node in the instance (the ones containing applications only) -->
       <ng-container *ngIf="instances.activeNodeCfgs$ | async as nodes">

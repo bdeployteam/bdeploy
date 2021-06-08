@@ -28,7 +28,7 @@ public class ParameterConfiguration {
      * The pre-rendered complete parameter as it should be appended to the command
      * line, but with variables still in place.
      */
-    public final List<String> preRendered = new ArrayList<>();
+    public List<String> preRendered = new ArrayList<>();
 
     public void preRender(ParameterDescriptor desc) {
         preRendered.clear();

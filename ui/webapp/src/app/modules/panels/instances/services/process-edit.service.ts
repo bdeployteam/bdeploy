@@ -242,7 +242,7 @@ export class ProcessEditService {
     return {
       executable: descriptor.launcherPath,
       parameters: mandatoryParams.filter((p) =>
-        this.meetsCondition(
+        this.internalMeetsCondition(
           descriptor.parameters.find((x) => x.uid === p.uid),
           descriptor.parameters,
           mandatoryParams
@@ -292,14 +292,24 @@ export class ProcessEditService {
     return val;
   }
 
-  private meetsCondition(param: ParameterDescriptor, allDescriptors: ParameterDescriptor[], allConfigs: ParameterConfiguration[]): boolean {
+  public meetsCondition(param: ParameterDescriptor): Observable<boolean> {
+    return combineLatest([this.application$, this.process$]).pipe(
+      skipWhile(([a, c]) => !a || !c),
+      map(([app, cfg]) => {
+        return this.internalMeetsCondition(param, app.descriptor.startCommand.parameters, cfg.start.parameters);
+      }),
+      first()
+    );
+  }
+
+  private internalMeetsCondition(param: ParameterDescriptor, allDescriptors: ParameterDescriptor[], allConfigs: ParameterConfiguration[]): boolean {
     if (!param.condition || !param.condition.parameter) {
       return true; // no condition, all OK :)
     }
 
     const depDesc = allDescriptors.find((p) => p.uid === param.condition.parameter);
     const depCfg = allConfigs.find((p) => p.uid === param.condition.parameter);
-    if (!depDesc || !this.meetsCondition(depDesc, allDescriptors, allConfigs)) {
+    if (!depDesc || !this.internalMeetsCondition(depDesc, allDescriptors, allConfigs)) {
       return false; // parameter not found?!
     }
 

@@ -55,6 +55,7 @@ import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -93,6 +94,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
+import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
 import io.bdeploy.ui.api.AuthService;
@@ -170,6 +172,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private VersionSorterService vss;
+
+    @Inject
+    private ProductUpdateService pus;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -651,6 +656,29 @@ public class InstanceResourceImpl implements InstanceResource {
         syncInstance(minion, rc, group, instanceId);
         changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+    }
+
+    @Override
+    public InstanceUpdateDto updateProductVersion(String instanceId, String productTag, InstanceUpdateDto state) {
+        ProductManifest current = ProductManifest.of(hive, state.config.config.product);
+        List<ApplicationManifest> currentApps = current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
+                .collect(Collectors.toList());
+
+        ProductManifest target = ProductManifest.of(hive, new Manifest.Key(state.config.config.product.getName(), productTag));
+        List<ApplicationManifest> targetApps = target.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
+                .collect(Collectors.toList());
+
+        InstanceUpdateDto updated = pus.update(state, target, current, targetApps, currentApps);
+        return updated;
+    }
+
+    @Override
+    public List<ApplicationValidationDto> validate(String instanceId, InstanceUpdateDto state) {
+        ProductManifest pm = ProductManifest.of(hive, state.config.config.product);
+        List<ApplicationManifest> am = pm.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
+                .collect(Collectors.toList());
+
+        return pus.validate(state, am);
     }
 
     @Override

@@ -9,7 +9,7 @@
             [(ngModel)]="process.name"
             errorDisplay="immediate"
             required
-            appEditProcessNameValidator
+            [appEditProcessNameValidator]="process.uid"
           ></app-bd-form-input>
         </app-config-desc-element>
         <app-config-desc-element card="cfg.control.startType" class="local-field">

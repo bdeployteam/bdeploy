@@ -11,6 +11,10 @@
     <div class="local-break">
       <code>{{ descriptor?.parameter }}</code>
     </div>
+    <strong><div>Internal ID:</div></strong>
+    <div>
+      <code>{{ descriptor?.uid }}</code>
+    </div>
     <strong><div>Type:</div></strong>
     <div>
       <code>{{ descriptor?.type }}</code>
@@ -21,6 +25,12 @@
         descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ? '*'.repeat(descriptor?.defaultValue?.length) : descriptor?.defaultValue) : '(none)'
       }}</code>
     </div>
+    <ng-container *ngIf="!!descriptor.condition?.parameter">
+      <strong><div>Condition:</div></strong>
+      <div class="local-break">
+        Parameter <code>{{ descriptor.condition.parameter }}</code> must <code>{{ descriptor.condition.must }} {{ descriptor.condition.value }}</code>
+      </div>
+    </ng-container>
   </div>
 </mat-card>
 <mat-card *ngIf="!descriptor" [style.padding.px]="10" [style.max-width.px]="450" class="mat-typography" fxLayout="column" fxLayoutGap="5px">

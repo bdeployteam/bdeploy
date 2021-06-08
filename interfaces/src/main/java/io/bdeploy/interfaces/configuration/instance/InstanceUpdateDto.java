@@ -14,6 +14,8 @@ public class InstanceUpdateDto {
 
     public List<FileStatusDto> files;
 
+    public List<ApplicationValidationDto> validation;
+
     @JsonCreator
     public InstanceUpdateDto(@JsonProperty("config") InstanceConfigurationDto config,
             @JsonProperty("files") List<FileStatusDto> files) {

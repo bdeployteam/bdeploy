@@ -60,7 +60,14 @@
       text="Save Changes"
       icon="save"
       color="primary"
-      [disabled]="!servers.isSynchronized((edit.current$ | async)?.managedServer) || !edit.hasSaveableChanges() || (edit.incompatible$ | async)"
+      [loadingWhen$]="edit.validating$"
+      [disabled]="
+        !servers.isSynchronized((edit.current$ | async)?.managedServer) ||
+        !edit.hasSaveableChanges() ||
+        (edit.incompatible$ | async) ||
+        (edit.validating$ | async) ||
+        !!(edit.issues$ | async)?.length
+      "
       [matTooltip]="(edit.incompatible$ | async) ? 'Saving is not possible due to a conflict on the server' : 'Save all changes'"
       matTooltipPosition="below"
       (click)="edit.save()"
@@ -69,18 +76,49 @@
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="2">
-      <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
-        <div fxLayout="column">
-          <div class="bd-default-padding bd-warning-text">
-            <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes on the server. You must reload the page to resume editing.
-          </div>
-        </div>
-      </div>
-
       <ng-container *ngIf="edit.current$ | async as instance">
         <ng-container *ngIf="servers.isSynchronized(instance?.managedServer)">
+          <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
+            <div fxLayout="column">
+              <div class="bd-default-padding bd-warning-text">
+                <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes on the server. You must reload the page to resume editing.
+              </div>
+            </div>
+          </div>
+
+          <!-- "update" validation issues -->
+          <app-bd-notification-card
+            *ngIf="edit.updateIssues$ | async"
+            [dismissable]="true"
+            header="Product Update"
+            icon="lightbulb"
+            class="bd-rect-card"
+            background="dialog"
+            (dismiss)="edit.dismissUpdateIssues()"
+            [style.max-height.px]="450"
+          >
+            <div>The following messages describe automatically performed update steps which might require additional manual post-processing.</div>
+            <app-bd-data-table [records]="edit.updateIssues$ | async" [columns]="validationColumns"></app-bd-data-table>
+          </app-bd-notification-card>
+
+          <!-- "normal" validation issues -->
+          <app-bd-notification-card
+            *ngIf="edit.issues$ | async as issues"
+            [dismissable]="false"
+            header="Validation Issues"
+            icon="warning"
+            [warning]="true"
+            class="bd-rect-card"
+            background="dialog"
+            [style.max-height.px]="450"
+          >
+            <app-bd-data-table [records]="issues" [columns]="validationColumns"></app-bd-data-table>
+          </app-bd-notification-card>
+
+          <!-- banner if set. -->
           <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
 
+          <!-- empty instance hint and actions. -->
           <div *ngIf="isEmptyInstance() && !!(templates$ | async)?.length" class="bd-rect-card">
             <div fxLayout="row" [style.padding.px]="20">
               <div fxLayout="row" fxFlex="1 0 auto" fxLayoutAlign="center center" fxLayoutGap="5px">
@@ -96,6 +134,7 @@
             </div>
           </div>
 
+          <!-- all nodes -->
           <ng-container *ngFor="let node of serverNodes$ | async; trackBy: doTrack">
             <app-config-node [nodeName]="node.nodeName"></app-config-node>
           </ng-container>

@@ -21,6 +21,7 @@ import { InstanceSettingsComponent } from './components/instance-settings/instan
 import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
+import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
@@ -42,6 +43,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'settings/templates', component: InstanceTemplatesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/banner', component: BannerComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/import', component: ImportInstanceComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/product', component: ProductUpdateComponent, canActivate: [ScopedWriteGuard] },
   { path: 'node/:node', component: NodeDetailsComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process', component: ProcessStatusComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process/ports', component: ProcessPortsComponent, canActivate: [ScopedReadGuard] },

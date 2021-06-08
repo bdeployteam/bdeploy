@@ -7,6 +7,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.ui.ProductDiscUsageService;
 import io.bdeploy.ui.ProductTransferService;
+import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import jakarta.inject.Singleton;
 
@@ -46,6 +47,7 @@ public class UiResources {
                 bind(RemoteEntryStreamRequestService.class).in(Singleton.class).to(RemoteEntryStreamRequestService.class);
                 bind(ProductDiscUsageService.class).in(Singleton.class).to(ProductDiscUsageService.class);
                 bind(ChangeEventManager.class).in(Singleton.class).to(ChangeEventManager.class);
+                bind(ProductUpdateService.class).in(Singleton.class).to(ProductUpdateService.class);
             }
         });
     }

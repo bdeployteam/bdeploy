@@ -2,7 +2,8 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
-import { InstanceConfiguration, InstanceNodeConfigurationDto, InstanceTemplateDescriptor } from 'src/app/models/gen.dtos';
+import { BdDataColumn } from 'src/app/models/data';
+import { ApplicationValidationDto, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceTemplateDescriptor } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -17,6 +18,38 @@ import { InstanceEditService } from '../../services/instance-edit.service';
   styleUrls: ['./configuration.component.css'],
 })
 export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private readonly issueColApp: BdDataColumn<ApplicationValidationDto> = {
+    id: 'app',
+    name: 'Application',
+    data: (r) => this.getApplicationName(r.appUid),
+    width: '150px',
+    classes: (r) => (!r.appUid ? ['bd-hint-text'] : []),
+  };
+
+  private readonly issueColParam: BdDataColumn<ApplicationValidationDto> = {
+    id: 'param',
+    name: 'Parameter',
+    data: (r) => r.paramUid,
+    width: '200px',
+  };
+
+  private readonly issueColMsg: BdDataColumn<ApplicationValidationDto> = {
+    id: 'msg',
+    name: 'Message',
+    data: (r) => r.message,
+  };
+
+  private readonly issueColDismiss: BdDataColumn<ApplicationValidationDto> = {
+    id: 'dismiss',
+    name: 'Dismiss',
+    data: (r) => 'Dismiss this update message',
+    action: (r) => this.edit.dismissUpdateIssue(r),
+    icon: (r) => 'delete',
+    width: '40px',
+  };
+
+  /* template */ validationColumns: BdDataColumn<ApplicationValidationDto>[] = [this.issueColApp, this.issueColParam, this.issueColMsg, this.issueColDismiss];
+
   /* template */ narrow$ = new BehaviorSubject<boolean>(true);
   /* template */ headerName$ = new BehaviorSubject<string>('Loading');
 
@@ -60,6 +93,8 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
           if (!!prod) {
             this.templates$.next(prod.instanceTemplates);
           }
+
+          this.edit.requestValidation();
         }
       })
     );
@@ -96,5 +131,18 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
 
   /* template */ doTrack(index: number, node: InstanceNodeConfigurationDto) {
     return node.nodeName;
+  }
+
+  /* template */ getApplicationName(uid: string) {
+    if (!uid) {
+      return 'Global';
+    }
+
+    const cfg = this.edit.getApplicationConfiguration(uid);
+    if (!cfg) {
+      return uid;
+    }
+
+    return cfg.name;
   }
 }

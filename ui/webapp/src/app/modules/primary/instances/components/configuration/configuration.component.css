@@ -6,3 +6,8 @@
   align-self: center;
   padding-right: 10px;
 }
+
+.local-issues {
+  background-color: var(--bd-warn);
+  color: var(--bd-warn-contrast);
+}

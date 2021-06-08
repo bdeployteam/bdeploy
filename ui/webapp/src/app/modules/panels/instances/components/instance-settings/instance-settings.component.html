@@ -58,6 +58,16 @@
         [disabled]="!auth.isCurrentScopeWrite()"
       ></app-bd-panel-button>
       <app-bd-panel-button
+        text="Update Product Version"
+        icon="security_update_good"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['product']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+        [color]="(edit.current$ | async)?.newerVersionAvailable ? 'accent' : null"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
         text="Maintenance"
         icon="build"
         [collapsed]="false"
@@ -65,6 +75,7 @@
         [route]="['maintenance']"
         [relative]="true"
         [disabled]="!auth.isCurrentScopeAdmin()"
+        color="primary"
       ></app-bd-panel-button>
     </div>
   </app-bd-dialog-content>

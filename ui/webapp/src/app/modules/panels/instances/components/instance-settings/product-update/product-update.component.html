@@ -1,0 +1,6 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Update Product" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-data-table [sortData]="null" [records]="records$ | async" [columns]="columns" (recordClick)="onClick($event)"></app-bd-data-table>
+  </app-bd-dialog-content>
+</app-bd-dialog>

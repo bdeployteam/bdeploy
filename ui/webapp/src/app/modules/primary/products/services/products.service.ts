@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
+import { ApplicationDto, ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
@@ -26,6 +26,12 @@ export class ProductsService {
 
   public getUploadURL() {
     return `${this.apiPath(this.group)}/upload`;
+  }
+
+  public loadApplications(prod: ProductDto): Observable<ApplicationDto[]> {
+    return this.http
+      .get<ApplicationDto[]>(`${this.apiPath(this.group)}/${prod.key.name}/${prod.key.tag}/application`)
+      .pipe(measure('Load Applications of Product'));
   }
 
   private reload(group: string) {

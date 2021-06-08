@@ -19,6 +19,7 @@ import { ConfigProcessParamGroupComponent } from './components/edit-process-over
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { CustomEditorComponent } from './components/edit-process-overview/configure-process/custom-editor/custom-editor.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
+import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
 import { HistoryCompareSelectComponent } from './components/history-compare-select/history-compare-select.component';
 import { HistoryCompareComponent } from './components/history-compare/history-compare.component';
 import { HistoryDiffFieldComponent } from './components/history-diff-field/history-diff-field.component';
@@ -29,11 +30,14 @@ import { HistoryViewComponent } from './components/history-view/history-view.com
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { BannerComponent } from './components/instance-settings/banner/banner.component';
 import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
+import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
 import { TemplateMessageDetailsComponent } from './components/instance-settings/instance-templates/template-message-details/template-message-details.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
+import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
+import { UpdateActionComponent } from './components/instance-settings/product-update/update-action/update-action.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
@@ -45,9 +49,8 @@ import { ProcessStatusComponent } from './components/process-status/process-stat
 import { InstancesRoutingModule } from './instances-routing.module';
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
+import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
-import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
-import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 
 @NgModule({
   declarations: [
@@ -83,6 +86,7 @@ import { ImportInstanceComponent } from './components/instance-settings/import-i
     EditProcessNameValidatorDirective,
     EditCustomUidValidatorDirective,
     EditUniqueValueValidatorDirective,
+    EditServerIssuesValidatorDirective,
     ConfigDescElementComponent,
     ConfigProcessParamGroupComponent,
     ParamDescCardComponent,
@@ -90,6 +94,8 @@ import { ImportInstanceComponent } from './components/instance-settings/import-i
     BannerComponent,
     MoveProcessComponent,
     ImportInstanceComponent,
+    ProductUpdateComponent,
+    UpdateActionComponent,
   ],
   imports: [
     CommonModule,

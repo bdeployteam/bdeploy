@@ -18,6 +18,6 @@ public class CommandConfiguration {
     /**
      * The pre-rendered parameters.
      */
-    public final List<ParameterConfiguration> parameters = new ArrayList<>();
+    public List<ParameterConfiguration> parameters = new ArrayList<>();
 
 }

@@ -3,19 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { applyChangeset, Changeset, diff } from 'json-diff-ts';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, forkJoin } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, forkJoin, Observable, Subject } from 'rxjs';
+import { debounceTime, finalize, first } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   ApplicationDescriptor,
   ApplicationDto,
   ApplicationType,
+  ApplicationValidationDto,
   InstanceConfiguration,
   InstanceConfigurationDto,
   InstanceDto,
   InstanceNodeConfigurationDto,
   InstanceUpdateDto,
   MinionDto,
+  ProductDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ErrorMessage, LoggingService } from 'src/app/modules/core/services/logging.service';
@@ -23,6 +25,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { mapObjToArray } from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { GroupsService } from '../../groups/services/groups.service';
+import { ProductsService } from '../../products/services/products.service';
 import { InstancesService } from './instances.service';
 
 export enum ProcessEditState {
@@ -36,6 +39,9 @@ export interface Edit {
   /** Describes the changes done by this edit */
   description: string;
 
+  /** Associated warnings which should be restored when applying */
+  warnings: ApplicationValidationDto[];
+
   /** Applies the changes to the current state */
   apply(current: InstanceConfigurationDto);
 }
@@ -46,13 +52,13 @@ export interface Edit {
  * Note that a 'virtual' edit may be created without looking at base/state. Any edit will be
  * applied after it has been created.
  */
-export type EditFactory = (description: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto) => Edit;
+export type EditFactory = (description: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto, warnings: ApplicationValidationDto[]) => Edit;
 
 /** A generic edit, which may represent virtually any change. */
 export class InstanceEdit implements Edit {
   private changeset: Changeset;
 
-  constructor(public description: string, base: InstanceConfigurationDto, current: InstanceConfigurationDto) {
+  constructor(public description: string, base: InstanceConfigurationDto, current: InstanceConfigurationDto, public warnings: ApplicationValidationDto[]) {
     // clone changeset to decouple from changes to the source object.
     this.changeset = cloneDeep(diff(base, current));
   }
@@ -70,7 +76,13 @@ export class InstanceEdit implements Edit {
  * *huge* drawback that null/undefined handling is extremely diffficult.
  */
 export class InstanceApplicationMoveEdit implements Edit {
-  constructor(public description: string, private nodeName: string, private previousIndex: number, private currentIndex: number) {}
+  constructor(
+    public description: string,
+    private nodeName: string,
+    private previousIndex: number,
+    private currentIndex: number,
+    public warnings: ApplicationValidationDto[]
+  ) {}
 
   public apply(current: InstanceConfigurationDto) {
     moveItemInArray(current.nodeDtos.find((n) => n.nodeName === this.nodeName).nodeConfiguration.applications, this.previousIndex, this.currentIndex);
@@ -100,6 +112,12 @@ export class InstanceEditService {
   public baseApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
   public stateApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
 
+  public validationDebounce$ = new BehaviorSubject<any>(null);
+  public validating$ = new BehaviorSubject<boolean>(false);
+  public issues$ = new BehaviorSubject<ApplicationValidationDto[]>(null);
+  public updateIssues$ = new BehaviorSubject<ApplicationValidationDto[]>(null);
+  private issuesSubject$ = new Subject<ApplicationValidationDto[]>();
+
   public current$ = new BehaviorSubject<InstanceDto>(null);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
@@ -110,6 +128,7 @@ export class InstanceEditService {
     private logging: LoggingService,
     private groups: GroupsService,
     private instances: InstancesService,
+    private products: ProductsService,
     private areas: NavAreasService
   ) {
     this.instances.current$.subscribe((instance) => {
@@ -135,19 +154,22 @@ export class InstanceEditService {
         this.discard();
       }
     });
+
+    this.validationDebounce$.pipe(debounceTime(500)).subscribe((x) => this.validate());
+    this.issues$.subscribe((i) => this.issuesSubject$.next(i));
   }
 
-  /** Creates a standard edit factory, capturing changes by diffing. */
+  /** Creates a standard edit factory, capturing changes by diffing as well as the current update warnings */
   public createStdEdit(): EditFactory {
-    return (desc: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto) => {
-      return new InstanceEdit(desc, base, state);
+    return (desc: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto, warnings: ApplicationValidationDto[]) => {
+      return new InstanceEdit(desc, base, state, warnings);
     };
   }
 
   /** Creates a special edit factory which reorders applications on the given node */
-  public createApplicationMove(node: string, previous: number, current: number): EditFactory {
+  public createApplicationMove(node: string, previous: number, current: number, warnings: ApplicationValidationDto[]): EditFactory {
     return (desc: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto) => {
-      return new InstanceApplicationMoveEdit(desc, node, previous, current);
+      return new InstanceApplicationMoveEdit(desc, node, previous, current, warnings);
     };
   }
 
@@ -167,17 +189,33 @@ export class InstanceEditService {
     this.redos = [];
     this.redo$.next(null);
 
+    // capture before re-building - re-building resets this to the previous state(s).
+    const warnings = this.updateIssues$.value;
+
     // the current state
     const state = this.reBuild();
     const fct = !!factory ? factory : this.createStdEdit();
 
     // and the diff to it :)
-    const change = fct(description, state, this.state$.value);
+    const change = fct(description, state, this.state$.value, warnings);
     this.undos.push(change);
     this.undo$.next(change);
 
     // re-publish the state to inform others. need to re-build to assure proper null/undefined diffing.
     this.state$.next(this.reBuild());
+    this.requestValidation();
+  }
+
+  public dismissUpdateIssues() {
+    this.updateIssues$.next(null);
+    this.conceal('Dismiss all update messages');
+  }
+
+  public dismissUpdateIssue(issue: ApplicationValidationDto) {
+    const copy = [...this.updateIssues$.value];
+    copy.splice(copy.indexOf(issue), 1);
+    this.updateIssues$.next(copy);
+    this.conceal('Dismiss update message: ' + issue.message);
   }
 
   /**
@@ -195,6 +233,8 @@ export class InstanceEditService {
     this.incompatible$.next(false);
     this.baseApplications$.next(null);
     this.stateApplications$.next(null);
+    this.issues$.next(null);
+    this.updateIssues$.next(null);
 
     const inst = this.current$.value;
     if (!!inst) {
@@ -279,7 +319,7 @@ export class InstanceEditService {
     const managedServer = this.current$.value.managedServer?.hostName;
     const expect = this.current$.value.instance.tag;
 
-    const update: InstanceUpdateDto = { config: state, files: null /* TODO */ };
+    const update: InstanceUpdateDto = { config: state, files: null /* TODO */, validation: null };
 
     return this.http
       .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.uuid}/update`, update, { params: { managedServer, expect } })
@@ -374,7 +414,13 @@ export class InstanceEditService {
     const baseComp = baseAppIndex === undefined || baseAppIndex === null ? -1 : baseAppIndex;
     const stateComp = stateAppIndex === undefined || stateAppIndex === null ? -1 : stateAppIndex;
 
-    // TODO: Validation state, must override ADDED/CHANGED
+    if (!!this.issues$.value?.length) {
+      const issues = this.issues$.value.filter((i) => i.appUid === uid);
+      if (!!issues?.length) {
+        return ProcessEditState.INVALID;
+      }
+    }
+
     if (baseComp === -1 && stateComp === -1) {
       return ProcessEditState.NONE;
     } else if (baseComp !== -1 && stateComp === -1) {
@@ -395,6 +441,58 @@ export class InstanceEditService {
     }
   }
 
+  public requestValidation(): Observable<ApplicationValidationDto[]> {
+    this.validating$.next(true);
+    this.validationDebounce$.next(null);
+    return this.issuesSubject$.pipe(first());
+  }
+
+  private validate() {
+    if (!this.state$.value) {
+      return;
+    }
+
+    this.validating$.next(true);
+    const upd: InstanceUpdateDto = { config: this.state$.value, files: null /* TODO */, validation: null };
+    this.http
+      .post<ApplicationValidationDto[]>(`${this.apiPath(this.groups.current$.value.name)}/${this.state$.value.config.uuid}/validate`, upd)
+      .pipe(
+        finalize(() => this.validating$.next(false)),
+        measure('Validate Instance Configuration')
+      )
+      .subscribe((u) => this.issues$.next(!!u?.length ? u : null));
+  }
+
+  public updateProduct(target: ProductDto) {
+    this.validating$.next(true);
+    const upd: InstanceUpdateDto = { config: this.state$.value, files: null /* TODO */, validation: null };
+    forkJoin({
+      update: this.http.post<InstanceUpdateDto>(
+        `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value.config.uuid}/updateProductVersion/${target.key.tag}`,
+        upd
+      ),
+      apps: this.products.loadApplications(target),
+    })
+      .pipe(
+        finalize(() => this.validating$.next(false)),
+        measure('Update Product Version')
+      )
+      .subscribe(({ update, apps }) => {
+        this.stateApplications$.next(apps);
+        this.state$.next(update.config);
+        this.updateIssues$.next(!!update.validation?.length ? [...update.validation] : null);
+
+        this.conceal(`Update Product Version to ${target.key.tag}`);
+      });
+  }
+
+  public getApplicationConfiguration(uid: string) {
+    if (!this.state$.value?.nodeDtos?.length) {
+      return null;
+    }
+    return this.getNodeOfApplication(this.state$.value?.nodeDtos, uid)?.nodeConfiguration.applications.find((a) => a.uid === uid);
+  }
+
   private getNodeOfApplication(nodes: InstanceNodeConfigurationDto[], uid: string): InstanceNodeConfigurationDto {
     for (const node of nodes) {
       const app = node.nodeConfiguration.applications.find((a) => a.uid === uid);
@@ -407,6 +505,7 @@ export class InstanceEditService {
 
   /** Creates the current state from the base and all recorded edits. */
   private reBuild(): InstanceConfigurationDto {
+    this.updateIssues$.next(null);
     if (!this.base$.value) {
       return null;
     }
@@ -414,6 +513,8 @@ export class InstanceEditService {
 
     for (const change of this.undos) {
       change.apply(state);
+      this.updateIssues$.next(change.warnings);
+      console.log(change.warnings);
     }
 
     return state;

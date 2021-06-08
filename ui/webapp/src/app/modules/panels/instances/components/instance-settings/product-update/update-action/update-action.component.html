@@ -1,0 +1,8 @@
+<div fxLayout="row" fxLayoutAlign="start center">
+  <app-bd-button
+    text="Use this product version"
+    [icon]="isUpgrade() ? 'file_upload' : 'file_download'"
+    (click)="doUpdate()"
+    [disabled]="isCurrent()"
+  ></app-bd-button>
+</div>

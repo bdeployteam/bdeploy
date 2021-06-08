@@ -62,7 +62,7 @@ export class LocalChangesComponent implements OnInit, OnDestroy {
         recs[recs.length - 1].isCurrent = true;
       }
 
-      for (const redo of this.edit.redos) {
+      for (const redo of [...this.edit.redos].reverse()) {
         recs.push({ edit: redo, isUndo: false, isCurrent: false });
       }
 

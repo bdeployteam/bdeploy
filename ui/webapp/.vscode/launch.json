@@ -43,6 +43,7 @@
       "name": "Chrome (Central)",
       "url": "http://localhost:4201",
       "webRoot": "${workspaceFolder}",
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
       "runtimeArgs": ["--allow-insecure-localhost"]
     },
     {
@@ -51,6 +52,7 @@
       "name": "Chrome (Managed)",
       "url": "http://localhost:4202",
       "webRoot": "${workspaceFolder}",
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"],
       "runtimeArgs": ["--allow-insecure-localhost"]
     }
   ],

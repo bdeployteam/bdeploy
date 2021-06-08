@@ -10,6 +10,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.NoScopeInheritance;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
@@ -141,6 +142,18 @@ public interface InstanceResource {
     @Path("/{instance}/updateTo")
     @RequiredPermission(permission = Permission.WRITE)
     public void updateTo(@ActivityScope @PathParam("instance") String instanceId, @QueryParam("productTag") String productTag);
+
+    @POST
+    @Path("/{instance}/updateProductVersion/{target}")
+    @RequiredPermission(permission = Permission.WRITE)
+    public InstanceUpdateDto updateProductVersion(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("target") String productTag, InstanceUpdateDto state);
+
+    @POST
+    @Path("/{instance}/validate")
+    @RequiredPermission(permission = Permission.WRITE)
+    public List<ApplicationValidationDto> validate(@ActivityScope @PathParam("instance") String instanceId,
+            InstanceUpdateDto state);
 
     @GET
     @Path("/{instance}/{tag}/history")

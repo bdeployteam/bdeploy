@@ -1,7 +1,7 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { NgControl, NgForm } from '@angular/forms';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, skipWhile } from 'rxjs/operators';
 import { CustomEditor, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
@@ -256,6 +256,25 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   /* template */ doChangeValue(p: ParameterPair, val: any) {
     p.value.value = val;
     this.doPreRender(p);
+
+    // need to make sure we add/remove parameters which meet/don't meet their condition.
+    this.doUpdateConditionals(p);
+  }
+
+  private doUpdateConditionals(p: ParameterPair) {
+    const uid = !!p.descriptor ? p.descriptor.uid : p.value.uid;
+    for (const grp of this.groups$.value) {
+      for (const pair of grp.pairs) {
+        if (pair.descriptor?.condition?.parameter === uid) {
+          // the parameter is conditional on the changed parameter.
+          this.edit.meetsCondition(pair.descriptor).subscribe((ok) => {
+            if ((!ok && !!pair.value) || (ok && !pair.value)) {
+              this.doAddRemoveParameter(grp, pair);
+            }
+          });
+        }
+      }
+    }
   }
 
   /* template */ doPreRender(p: ParameterPair) {
@@ -266,6 +285,8 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   /* template */ doPreRenderBoolean(p: ParameterPair) {
     p.value.value = !p.booleanValue ? 'false' : 'true';
     this.doPreRender(p);
+
+    this.doUpdateConditionals(p);
   }
 
   /* template */ doSetCustomEditorState(p: ParameterPair, editor: CustomEditor) {
@@ -284,7 +305,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       case ParameterType.CLIENT_PORT:
       case ParameterType.SERVER_PORT:
       case ParameterType.NUMERIC:
-        return 'numeric';
+        return 'number';
       case ParameterType.PASSWORD:
         return 'password';
     }
@@ -326,6 +347,20 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       if (this.hasPairSearchMatch(p)) {
         return true;
       }
+    }
+  }
+
+  /* template */ canAddRemove(param: ParameterPair): Observable<boolean> {
+    if (!param.value) {
+      return this.edit.meetsCondition(param.descriptor);
+    }
+
+    if (!!param?.descriptor?.mandatory) {
+      // mandatory, cannot manually add/remove. triggering the condition on another parameter will automatically add/remove.
+      return of(false);
+    } else {
+      // optional
+      return of(true);
     }
   }
 }

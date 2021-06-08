@@ -89,16 +89,15 @@
                   <!-- Checkbox for select mode... -->
                   <div class="local-select-wrapper" *ngIf="group.isSelectMode" fxLayout="column" fxLayoutAlign="center center">
                     <mat-icon
-                      (click)="!!p.descriptor?.mandatory ? null : doAddRemoveParameter(group, p)"
-                      [class.bd-disabled-text]="!!p.descriptor?.mandatory"
-                      [matTooltip]="
-                        !!p.descriptor?.mandatory ? 'Parameter is mandatory and cannot be removed.' : 'Click to add or remove this optional parameter'
-                      "
+                      *ngFor="let canToggle of [canAddRemove(p) | async]"
+                      (click)="!canToggle ? null : doAddRemoveParameter(group, p)"
+                      [class.bd-disabled-text]="!canToggle"
+                      [matTooltip]="!canToggle ? 'Parameter cannot be added or removed, see description.' : 'Click to add or remove this optional parameter'"
                       [matTooltipShowDelay]="500"
                       matRipple
                       [style.cursor]="'pointer'"
                       class="local-add-remove"
-                      >{{ !!p.value ? (p?.descriptor?.mandatory ? 'lock' : 'delete') : 'add' }}</mat-icon
+                      >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add' }}</mat-icon
                     >
                   </div>
 
@@ -120,6 +119,7 @@
                     [disabled]="p.passwordLock || !p.editorEnabled || group.isSelectMode || p.descriptor?.fixed"
                     [suggested]="p.descriptor?.suggestedValues"
                     class="local-form-input"
+                    [appServerIssuesValidator]="p.value ? p.value.uid : p.descriptor.uid"
                   >
                     <div fxLayout="row" class="local-form-input-actions">
                       <mat-icon
