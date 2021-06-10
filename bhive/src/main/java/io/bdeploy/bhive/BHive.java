@@ -235,6 +235,13 @@ public class BHive implements AutoCloseable, BHiveExecution {
             return hive.reporter;
         }
 
+        /**
+         * @return the {@link Auditor} associated with the current {@link BHive}.
+         */
+        protected Auditor getAuditor() {
+            return hive.auditor;
+        }
+
         @Override
         public BHiveTransactions getTransactions() {
             return hive.getTransactions();

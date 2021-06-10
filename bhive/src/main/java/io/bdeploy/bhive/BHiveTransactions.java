@@ -4,7 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Stack;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class BHiveTransactions {
     private static final Logger log = LoggerFactory.getLogger(BHiveTransactions.class);
 
     private final InheritableThreadLocal<Stack<String>> transactions = new InheritableThreadLocal<>();
-    private final Map<String, MarkerDatabase> dbs = new TreeMap<>();
+    private final Map<String, MarkerDatabase> dbs = new ConcurrentHashMap<>();
     private final ActivityReporter reporter;
     private final Path markerRoot;
 

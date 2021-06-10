@@ -2,12 +2,18 @@ package io.bdeploy.bhive.op;
 
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -15,6 +21,8 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.objects.ObjectDatabase;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.jersey.audit.AuditRecord;
+import io.bdeploy.jersey.audit.AuditRecord.Severity;
 
 /**
  * Removes dangling (unreferenced) objects from the {@link ObjectDatabase}.
@@ -23,6 +31,8 @@ import io.bdeploy.common.ActivityReporter.Activity;
  * underlying file.
  */
 public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
+
+    private static final Logger log = LoggerFactory.getLogger(PruneOperation.class);
 
     @Override
     public SortedMap<ObjectId, Long> call() throws Exception {
@@ -37,18 +47,19 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
             MarkerDatabase.lockRoot(getMarkerRoot(), null, null);
 
-            // read existing manifests also inside the lock, so we are sure that the existing
-            // manifests and objects are in a consistent state.
-            Set<Manifest.Key> manifests = execute(new ManifestListOperation());
-            Set<ObjectId> referenced;
-            if (!manifests.isEmpty()) {
-                referenced = execute(new ObjectListOperation().addManifest(manifests));
-            } else {
-                referenced = new TreeSet<>();
-            }
-
             SortedSet<ObjectId> all;
             try {
+                // read existing manifests also inside the lock, so we are sure that the existing
+                // manifests and objects are in a consistent state.
+                Set<Manifest.Key> manifests = execute(new ManifestListOperation());
+                Set<ObjectId> referenced;
+                if (!manifests.isEmpty()) {
+                    // we list all object, ignoring manifests which disappeared in the meantime (since the list call).
+                    referenced = execute(new ObjectListOperation().addManifest(manifests).ignoreMissingManifest(true));
+                } else {
+                    referenced = new TreeSet<>();
+                }
+
                 SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
                 all = new TreeSet<>(orig);
                 all.removeAll(referenced);
@@ -62,19 +73,34 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                         }
                     }
                 }
+
+                List<ObjectId> auditList = new ArrayList<>();
+
+                // delete within the lock, just to be sure that nobody "re-needs" one of the objects.
+                for (ObjectId unreferenced : all) {
+                    result.put(unreferenced, getObjectManager().db(x -> {
+                        try {
+                            long sz = x.getObjectSize(unreferenced);
+                            x.removeObject(unreferenced);
+                            if (auditList.size() < 50) {
+                                auditList.add(unreferenced);
+                            }
+                            return sz;
+                        } catch (NoSuchFileException e) {
+                            log.debug("To-be-removed object is no longer existing: {}", unreferenced);
+                            return (long) 0;
+                        }
+                    }));
+                }
+
+                getAuditor().audit(AuditRecord.Builder.fromSystem().setSeverity(Severity.NORMAL)
+                        .setWhat(PruneOperation.class.getName()).setMessage("Removed " + result.size() + " Objects ")
+                        .addParameter("removed", auditList.toString()).build());
             } finally {
                 // Unlocking the root will allow:
                 //  1) Ongoing operations to continue clearing their markers
                 //  2) Other operations locking the root (e.g. another prune operation).
                 MarkerDatabase.unlockRoot(getMarkerRoot());
-            }
-
-            for (ObjectId unreferenced : all) {
-                result.put(unreferenced, getObjectManager().db(x -> {
-                    long sz = x.getObjectSize(unreferenced);
-                    x.removeObject(unreferenced);
-                    return sz;
-                }));
             }
 
             return result;

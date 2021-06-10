@@ -5,9 +5,11 @@ package io.bdeploy.bhive.objects;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.SortedSet;
@@ -206,12 +208,13 @@ public class ObjectDatabase extends LockableDatabase {
      * WARNING: use with care, this can cause corruption!
      */
     public void removeObject(ObjectId id) {
-        if (!hasObject(id)) {
-            return;
-        }
-
         Path file = getObjectFile(id);
-        locked(() -> Files.delete(file));
+        locked(() -> {
+            if (!hasObject(id)) {
+                return;
+            }
+            Files.delete(file);
+        });
     }
 
     /**
@@ -240,10 +243,20 @@ public class ObjectDatabase extends LockableDatabase {
      */
     public SortedSet<ObjectId> getAllObjects() throws IOException {
         Activity scan = reporter.start("Scanning objects...", 0);
-        try (Stream<Path> walk = Files.walk(root)) {
-            return walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
-                    .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1))
-                    .collect(Collectors.toCollection(TreeSet::new));
+        try {
+            long xctpCount = 0;
+            do {
+                try (Stream<Path> walk = Files.walk(root)) {
+                    return walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
+                            .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1))
+                            .collect(Collectors.toCollection(TreeSet::new));
+                } catch (UncheckedIOException e) {
+                    // something was removed in the middle of the walk... retry.
+                    if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 10) {
+                        throw e;
+                    }
+                }
+            } while (true);
         } finally {
             scan.done();
         }

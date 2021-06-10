@@ -445,6 +445,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR); // this could wait for other launchers.
             }
         }
+        log.info("Entered locked execution mode");
         try {
             return runnable.call();
         } catch (RuntimeException rex) {
@@ -452,6 +453,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to execute locked operation", ex);
         } finally {
+            log.info("Leaving locked execution mode");
             if (!readOnlyRootDir) {
                 MarkerDatabase.unlockRoot(rootDir);
             }

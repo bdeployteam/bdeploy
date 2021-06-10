@@ -5,7 +5,9 @@ package io.bdeploy.bhive.objects;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Set;
@@ -129,32 +131,40 @@ public class ManifestDatabase extends LockableDatabase {
     private Set<Manifest.Key> collectManifests(Path scanRoot) {
         Set<Manifest.Key> result = new TreeSet<>();
         try {
-            if (!Files.isDirectory(scanRoot)) {
-                // none exist in the given namespace.
-                return result;
-            }
+            long xctpCount = 0;
+            do {
+                if (!Files.isDirectory(scanRoot)) {
+                    // none exist in the given namespace.
+                    return result;
+                }
 
-            try (Stream<Path> walk = Files.walk(scanRoot)) {
-                walk.filter(Files::isRegularFile).forEach(f -> {
-                    if (f.startsWith(this.tmp)) {
-                        return;
+                try (Stream<Path> walk = Files.walk(scanRoot)) {
+                    walk.filter(Files::isRegularFile).forEach(f -> {
+                        if (f.startsWith(this.tmp)) {
+                            return;
+                        }
+
+                        Path rel = root.relativize(f);
+
+                        if (rel.getParent() == null) {
+                            // file in the db-root, cannot be a manifest.
+                            return;
+                        }
+
+                        // windows paths contain '\' - replace it to get proper names.
+                        String manifestName = rel.getParent().toString().replace('\\', '/');
+                        String manifestTag = rel.getFileName().toString();
+
+                        result.add(new Manifest.Key(manifestName, manifestTag));
+                    });
+                    return result;
+                } catch (UncheckedIOException e) {
+                    // something was removed in the middle of the walk... retry.
+                    if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 10) {
+                        throw e;
                     }
-
-                    Path rel = root.relativize(f);
-
-                    if (rel.getParent() == null) {
-                        // file in the db-root, cannot be a manifest.
-                        return;
-                    }
-
-                    // windows paths contain '\' - replace it to get proper names.
-                    String manifestName = rel.getParent().toString().replace('\\', '/');
-                    String manifestTag = rel.getFileName().toString();
-
-                    result.add(new Manifest.Key(manifestName, manifestTag));
-                });
-            }
-            return result;
+                }
+            } while (true);
         } catch (IOException e) {
             throw new IllegalStateException("Error reading manifest database", e);
         }

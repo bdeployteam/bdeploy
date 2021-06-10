@@ -39,6 +39,12 @@ public class ManifestConsistencyCheckOperation extends BHive.Operation<Set<Eleme
         try (Activity activity = getActivityReporter().start("Checking manifest tree consistency...", manifests.size())) {
             for (Manifest.Key key : manifests) {
                 List<ElementView> broken = new ArrayList<>();
+
+                // it is OK if it no longer exists.
+                if (!execute(new ManifestExistsOperation().setManifest(key))) {
+                    continue;
+                }
+
                 TreeView state = execute(new ScanOperation().setManifest(key));
                 state.visit(new TreeVisitor.Builder().onMissing(broken::add).build());
 

@@ -47,6 +47,8 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
     @AuditWith(AuditStrategy.COLLECTION_SIZE)
     private final Set<ObjectId> treeExcludes = new LinkedHashSet<>();
 
+    private boolean ignoreMissingManifest = false;
+
     @Override
     public Set<ObjectId> call() throws Exception {
         try (Activity activity = getActivityReporter().start("Listing objects...", -1)) {
@@ -56,7 +58,16 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
 
             // Load all trees that are referenced by the manifest
             for (Manifest.Key m : manifests) {
-                trees.add(execute(new ManifestLoadOperation().setManifest(m)).getRoot());
+                try {
+                    trees.add(execute(new ManifestLoadOperation().setManifest(m)).getRoot());
+                } catch (Exception e) {
+                    if (!execute(new ManifestExistsOperation().setManifest(m)) && ignoreMissingManifest) {
+                        // no longer exists, and we want to ignore this - just go on.
+                        continue;
+                    }
+
+                    throw e;
+                }
             }
 
             // Collect all (sub)-trees based on he provided root trees
@@ -154,6 +165,17 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
      */
     public ObjectListOperation excludeTree(ObjectId tree) {
         treeExcludes.add(tree);
+        return this;
+    }
+
+    /**
+     * Whether to ignore if a manifest is no longer present for listing.
+     * <p>
+     * Only if the manifest is not there anymore this fact will be ignored. If the manifest
+     * cannot be loaded for another reason, this still throws an Exception.
+     */
+    public ObjectListOperation ignoreMissingManifest(boolean ignore) {
+        this.ignoreMissingManifest = ignore;
         return this;
     }
 

@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.op;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -30,6 +31,11 @@ public class FsckOperation extends BHive.Operation<Set<ElementView>> {
         try (Activity activity = getActivityReporter().start("Checking manifests...", -1)) {
             if (manifests.isEmpty()) {
                 Set<Manifest.Key> localManifests = execute(new ManifestListOperation());
+
+                if (localManifests.isEmpty()) {
+                    return Collections.emptySet();
+                }
+
                 manifests.addAll(localManifests);
             }
 
