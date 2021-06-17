@@ -19,7 +19,7 @@ export class UpdateActionComponent implements OnInit {
   ngOnInit(): void {
     this.index = this.products.products$.value.indexOf(this.record);
     this.curIndex = this.products.products$.value.findIndex(
-      (r) => this.edit.state$.value.config.product.name === r.key.name && this.edit.state$.value.config.product.tag === r.key.tag
+      (r) => this.edit.state$.value?.config.config.product.name === r.key.name && this.edit.state$.value?.config.config.product.tag === r.key.tag
     );
   }
 
@@ -31,5 +31,7 @@ export class UpdateActionComponent implements OnInit {
     return this.index === this.curIndex;
   }
 
-  /* template */ doUpdate() {}
+  /* template */ doUpdate() {
+    this.edit.updateProduct(this.record);
+  }
 }

@@ -1,0 +1,9 @@
+<div fxLayout="row" fxLayoutAlign="start center">
+  <app-bd-panel-button
+    icon="edit"
+    [disabled]="!canEdit() || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
+    [route]="[cfgFiles.getPath(record)]"
+    [relative]="true"
+    [matTooltip]="cfgFiles.isText(record) ? null : 'Edit not possible for binary files.'"
+  ></app-bd-panel-button>
+</div>

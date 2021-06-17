@@ -3,6 +3,13 @@ package io.bdeploy.ui.api;
 import java.io.InputStream;
 import java.util.List;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.ui.dto.InstanceUsageDto;
+import io.bdeploy.ui.dto.ProductDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -12,15 +19,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.security.RequiredPermission;
-import io.bdeploy.common.security.ScopedPermission.Permission;
-import io.bdeploy.ui.dto.ConfigFileDto;
-import io.bdeploy.ui.dto.InstanceUsageDto;
-import io.bdeploy.ui.dto.ProductDto;
 
 @Path("/product")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -76,10 +74,6 @@ public interface ProductResource {
     @RequiredPermission(permission = Permission.WRITE)
     public void copyProduct(@QueryParam("repo") String softwareRepository, @QueryParam("name") String productName,
             @QueryParam("tag") String productTag);
-
-    @GET
-    @Path("/{name : .+}/{tag}/listConfig")
-    public List<ConfigFileDto> listConfigFiles(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @GET
     @Path("/{name : .+}/{tag}/config/{file: .+}")

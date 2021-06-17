@@ -728,7 +728,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public ConfigFileResource getConfigResource(String instanceId) {
-        return rc.initResource(new ConfigFileResourceImpl(hive, group, instanceId));
+        return rc.initResource(new ConfigFileResourceImpl(hive, instanceId));
     }
 
     @Override

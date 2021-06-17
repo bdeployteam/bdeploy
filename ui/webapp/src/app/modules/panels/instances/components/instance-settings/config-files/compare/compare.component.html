@@ -1,0 +1,11 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Compare/Edit {{ file$ | async }}" [panel]="true" [route]="['..', '..']" [actionCollapsed]="narrow$ | async">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button text="APPLY" color="primary" [collapsed]="false" [disabled]="!isDirty()" (click)="doApply()"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div *ngIf="!(loading$ | async) && file$ | async as file" [style.height]="'100%'" fxLayout="column">
+      <app-bd-editor-diff fxFlex="1 0 0" [(modifiedContent)]="content" [originalContent]="contentTemplate" [path]="file"></app-bd-editor-diff>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

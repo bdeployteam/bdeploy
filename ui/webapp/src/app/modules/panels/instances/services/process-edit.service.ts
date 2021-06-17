@@ -49,8 +49,8 @@ export class ProcessEditService {
           return;
         }
 
-        this.node$.next(state.nodeDtos.find((n) => n.nodeName === nodeName));
-        this.product$.next(prods.find((p) => p.key.name === state.config.product.name && p.key.tag === state.config.product.tag));
+        this.node$.next(state.config.nodeDtos.find((n) => n.nodeName === nodeName));
+        this.product$.next(prods.find((p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag));
         this.applications$.next(apps);
 
         if (!!process && !!this.node$.value?.nodeConfiguration?.applications) {
@@ -176,7 +176,7 @@ export class ProcessEditService {
       }
     }
 
-    for (const node of this.edit.state$.value.nodeDtos) {
+    for (const node of this.edit.state$.value?.config.nodeDtos) {
       for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
         for (const uid of Object.keys(values)) {
           const p = app.start?.parameters?.find((x) => x.uid === uid);
@@ -193,7 +193,7 @@ export class ProcessEditService {
   }
 
   private getGlobalParameter(uid: string): ParameterConfiguration {
-    for (const node of this.edit.state$.value.nodeDtos) {
+    for (const node of this.edit.state$.value?.config.nodeDtos) {
       for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
         const p = app.start?.parameters?.find((x) => x.uid === uid);
         if (!!p) {
@@ -222,7 +222,7 @@ export class ProcessEditService {
         }
 
         let val = p.defaultValue;
-        if (!!tpl) {
+        if (!!tpl && tpl.value !== undefined && tpl.value !== null) {
           val = this.performVariableSubst(tpl.value, values, status);
         } else if (p.global) {
           const gp = this.getGlobalParameter(p.uid);

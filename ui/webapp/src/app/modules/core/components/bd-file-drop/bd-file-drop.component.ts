@@ -13,6 +13,9 @@ export class BdFileDropComponent implements OnInit {
   /** A list of allowed file name endings, like '.zip' */
   @Input() types: string[];
 
+  /** The hint text about the upload field. */
+  @Input() hintText = 'Drop files to upload';
+
   /** Fired when a valid file is added */
   @Output() fileAdded = new EventEmitter<File>();
 

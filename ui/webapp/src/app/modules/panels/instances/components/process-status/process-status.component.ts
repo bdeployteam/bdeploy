@@ -167,6 +167,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
 
     confirmation.subscribe((b) => {
       if (!b) {
+        this.starting$.next(false);
         return;
       }
       this.processes

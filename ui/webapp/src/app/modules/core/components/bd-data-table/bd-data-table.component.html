@@ -3,6 +3,8 @@
     mat-table
     [dataSource]="dataSource"
     matSort
+    [matSortActive]="sort ? sort.active : null"
+    [matSortDirection]="sort ? sort.direction : null"
     fxFlex="1 0 auto"
     [style.width]="'100%'"
     cdkDropList

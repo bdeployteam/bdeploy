@@ -88,7 +88,7 @@
 
           <!-- "update" validation issues -->
           <app-bd-notification-card
-            *ngIf="edit.updateIssues$ | async"
+            *ngIf="(edit.state$ | async)?.warnings?.length"
             [dismissable]="true"
             header="Product Update"
             icon="lightbulb"
@@ -98,7 +98,7 @@
             [style.max-height.px]="450"
           >
             <div>The following messages describe automatically performed update steps which might require additional manual post-processing.</div>
-            <app-bd-data-table [records]="edit.updateIssues$ | async" [columns]="validationColumns"></app-bd-data-table>
+            <app-bd-data-table [records]="(edit.state$ | async)?.warnings" [columns]="issuesColumns"></app-bd-data-table>
           </app-bd-notification-card>
 
           <!-- "normal" validation issues -->

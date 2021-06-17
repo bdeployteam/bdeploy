@@ -48,7 +48,8 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     width: '40px',
   };
 
-  /* template */ validationColumns: BdDataColumn<ApplicationValidationDto>[] = [this.issueColApp, this.issueColParam, this.issueColMsg, this.issueColDismiss];
+  /* template */ issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [this.issueColApp, this.issueColParam, this.issueColMsg, this.issueColDismiss];
+  /* template */ validationColumns: BdDataColumn<ApplicationValidationDto>[] = [this.issueColApp, this.issueColParam, this.issueColMsg];
 
   /* template */ narrow$ = new BehaviorSubject<boolean>(true);
   /* template */ headerName$ = new BehaviorSubject<string>('Loading');
@@ -83,13 +84,13 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
           this.serverNodes$.next([]);
           this.clientNode$.next(null);
         } else {
-          this.config$.next(state.config);
-          this.headerName$.next(this.edit.hasPendingChanges() || this.edit.hasSaveableChanges() ? `${state.config.name}*` : state.config.name);
+          this.config$.next(state.config.config);
+          this.headerName$.next(this.edit.hasPendingChanges() || this.edit.hasSaveableChanges() ? `${state.config.config.name}*` : state.config.config.name);
 
-          this.serverNodes$.next(state.nodeDtos.filter((p) => !this.isClientNode(p)).sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)));
-          this.clientNode$.next(state.nodeDtos.find((n) => this.isClientNode(n)));
+          this.serverNodes$.next(state.config.nodeDtos.filter((p) => !this.isClientNode(p)).sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)));
+          this.clientNode$.next(state.config.nodeDtos.find((n) => this.isClientNode(n)));
 
-          const prod = products.find((p) => p.key.name === state.config.product.name && p.key.tag === state.config.product.tag);
+          const prod = products.find((p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag);
           if (!!prod) {
             this.templates$.next(prod.instanceTemplates);
           }
@@ -117,11 +118,11 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   }
 
   /* template */ isEmptyInstance() {
-    if (!this.edit.state$.value?.nodeDtos?.length) {
+    if (!this.edit.state$.value?.config?.nodeDtos?.length) {
       return true;
     }
 
-    for (const node of this.edit.state$.value.nodeDtos) {
+    for (const node of this.edit.state$.value?.config.nodeDtos) {
       if (!!node.nodeConfiguration?.applications?.length) {
         return false;
       }

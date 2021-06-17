@@ -29,6 +29,11 @@ import { HistoryProcessConfigComponent } from './components/history-process-conf
 import { HistoryViewComponent } from './components/history-view/history-view.component';
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { BannerComponent } from './components/instance-settings/banner/banner.component';
+import { ConfigFilesComponent } from './components/instance-settings/config-files/config-files.component';
+import { DeleteActionComponent } from './components/instance-settings/config-files/delete-action/delete-action.component';
+import { EditActionComponent } from './components/instance-settings/config-files/edit-action/edit-action.component';
+import { EditorComponent } from './components/instance-settings/config-files/editor/editor.component';
+import { RenameActionComponent } from './components/instance-settings/config-files/rename-action/rename-action.component';
 import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
 import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
@@ -47,10 +52,13 @@ import { ProcessNativesComponent } from './components/process-natives/process-na
 import { ProcessPortsComponent } from './components/process-ports/process-ports.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-validator.directive';
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
+import { ProductSyncComponent } from './components/instance-settings/config-files/product-sync/product-sync.component';
+import { CompareComponent } from './components/instance-settings/config-files/compare/compare.component';
 
 @NgModule({
   declarations: [
@@ -87,6 +95,7 @@ import { EditUniqueValueValidatorDirective } from './validators/edit-unique-valu
     EditCustomUidValidatorDirective,
     EditUniqueValueValidatorDirective,
     EditServerIssuesValidatorDirective,
+    CfgFileNameValidatorDirective,
     ConfigDescElementComponent,
     ConfigProcessParamGroupComponent,
     ParamDescCardComponent,
@@ -96,6 +105,13 @@ import { EditUniqueValueValidatorDirective } from './validators/edit-unique-valu
     ImportInstanceComponent,
     ProductUpdateComponent,
     UpdateActionComponent,
+    ConfigFilesComponent,
+    DeleteActionComponent,
+    EditActionComponent,
+    EditorComponent,
+    RenameActionComponent,
+    ProductSyncComponent,
+    CompareComponent,
   ],
   imports: [
     CommonModule,

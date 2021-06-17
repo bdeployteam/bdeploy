@@ -33,7 +33,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.records$.next(prods.filter((p) => p.key.name === state.config.product.name));
+      this.records$.next(prods.filter((p) => p.key.name === state.config.config.product.name));
     });
   }
 
@@ -41,9 +41,5 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  onClick(record: ProductDto) {
-    this.edit.updateProduct(record);
   }
 }

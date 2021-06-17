@@ -78,7 +78,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
   constructor(public servers: ServersService, public instanceEdit: InstanceEditService, private products: ProductsService, private edit: ProcessEditService) {
     this.subscription = combineLatest([this.instanceEdit.state$, this.products.products$]).subscribe(([state, prods]) => {
-      const prod = prods?.find((p) => p.key.name === state?.config?.product.name && p.key.tag === state?.config?.product.tag);
+      const prod = prods?.find((p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag);
 
       if (!prod) {
         this.records$.next([]);
@@ -100,7 +100,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     if (group.type === ApplicationType.CLIENT) {
       return [null, CLIENT_NODE_NAME];
     } else {
-      return [null, ...this.instanceEdit.state$.value?.nodeDtos.map((n) => n.nodeName).filter((n) => n !== CLIENT_NODE_NAME)];
+      return [null, ...this.instanceEdit.state$.value?.config?.nodeDtos.map((n) => n.nodeName).filter((n) => n !== CLIENT_NODE_NAME)];
     }
   }
 
@@ -199,7 +199,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         continue; // skipped.
       }
 
-      const node = this.instanceEdit.state$.value?.nodeDtos?.find((n) => n.nodeName === nodeName);
+      const node = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === nodeName);
       const group = this.template.groups.find((g) => g.name === groupName);
 
       if (!node || !group) {

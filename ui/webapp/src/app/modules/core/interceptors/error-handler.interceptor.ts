@@ -7,12 +7,19 @@ import { catchError } from 'rxjs/operators';
 import { NO_ERROR_HANDLING_HDR } from 'src/app/models/consts';
 import { ConfigService } from '../services/config.service';
 import { ErrorMessage, Logger, LoggingService } from '../services/logging.service';
+import { NavAreasService } from '../services/nav-areas.service';
 
 @Injectable()
 export class HttpErrorHandlerInterceptor implements HttpInterceptor {
   private log: Logger = this.loggingService.getLogger('HttpErrorHandlerInterceptor');
 
-  constructor(private loggingService: LoggingService, private config: ConfigService, private snackbar: MatSnackBar, private router: Router) {}
+  constructor(
+    private loggingService: LoggingService,
+    private config: ConfigService,
+    private snackbar: MatSnackBar,
+    private router: Router,
+    private areas: NavAreasService
+  ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -30,7 +37,8 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
             case 404:
               const msg = `Unfortunately, /${e.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`;
               this.snackbar.open(msg, 'DISMISS', { panelClass: 'error-snackbar' });
-              this.router.navigate(['/groups/browser']);
+              this.areas.forcePanelClose$.next(true);
+              this.router.navigate(['/groups/browser'], { state: { ignoreDirtyGuard: true } });
               return of(null);
             case 499:
               // special version mismatch code.

@@ -32,23 +32,17 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.objects.view.BlobView;
-import io.bdeploy.bhive.objects.view.TreeView;
-import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
-import io.bdeploy.bhive.op.ObjectLoadOperation;
-import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
-import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
@@ -60,7 +54,6 @@ import io.bdeploy.ui.ProductDiscUsageService;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
-import io.bdeploy.ui.dto.ConfigFileDto;
 import io.bdeploy.ui.dto.InstanceUsageDto;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.ProductDto;
@@ -400,32 +393,6 @@ public class ProductResourceImpl implements ProductResource {
 
         pdus.invalidateDiscUsageCalculation(group, productName);
         changes.create(ObjectChangeType.PRODUCT, key);
-    }
-
-    @Override
-    public List<ConfigFileDto> listConfigFiles(String name, String tag) {
-        Manifest.Key key = new Manifest.Key(name, tag);
-        ProductManifest productManifest = ProductManifest.of(hive, key);
-        ObjectId cfgTree = productManifest.getConfigTemplateTreeId();
-
-        if (cfgTree == null) {
-            return Collections.emptyList();
-        }
-
-        List<ConfigFileDto> cfgFilePaths = new ArrayList<>();
-        // collect all blobs from the product's config tree
-        TreeView view = hive.execute(new ScanOperation().setTree(cfgTree));
-        view.visit(new TreeVisitor.Builder().onBlob(b -> cfgFilePaths.add(new ConfigFileDto(b.getPathString(), isTextFile(b))))
-                .build());
-        return cfgFilePaths;
-    }
-
-    private boolean isTextFile(BlobView blob) {
-        try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(blob.getElementId()))) {
-            return StreamHelper.isTextFile(is);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot determine content type of BLOB: " + blob, e);
-        }
     }
 
     @Override

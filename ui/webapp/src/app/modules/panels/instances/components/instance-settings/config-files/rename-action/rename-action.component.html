@@ -1,0 +1,20 @@
+<ng-template #renameDialog>
+  <app-bd-form-input
+    [style.min-width.px]="300"
+    label="New Name"
+    name="newName"
+    [(ngModel)]="newName"
+    appCfgFileNameValidator
+    required
+    #renameInput
+  ></app-bd-form-input>
+</ng-template>
+
+<div fxLayout="row" fxLayoutAlign="start center">
+  <app-bd-button
+    text="Rename"
+    icon="drive_file_rename_outline"
+    [disabled]="!canRename() || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
+    (click)="onRename(renameDialog)"
+  ></app-bd-button>
+</div>

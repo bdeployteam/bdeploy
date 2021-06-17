@@ -159,7 +159,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   private sortHeader: MatSort;
 
   /** The current sort dicdated by the sortHeader */
-  private sort: Sort;
+  @Input() sort: Sort;
 
   /** The current search/filter string given by onBdSearch */
   private search: string;

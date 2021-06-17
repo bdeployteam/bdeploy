@@ -43,10 +43,10 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.currentNode = state.nodeDtos.find((n) => !!n.nodeConfiguration.applications.find((a) => a.uid === process.uid));
+        this.currentNode = state.config.nodeDtos.find((n) => !!n.nodeConfiguration.applications.find((a) => a.uid === process.uid));
 
         const result: NodeRow[] = [];
-        for (const node of state.nodeDtos) {
+        for (const node of state.config.nodeDtos) {
           const nodeType = node.nodeName === CLIENT_NODE_NAME ? ApplicationType.CLIENT : ApplicationType.SERVER;
           if (app.descriptor.type !== nodeType) {
             continue;
@@ -92,8 +92,8 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
 
     const cfg = this.edit.process$.value;
 
-    const origApps = this.instanceEdit.state$.value?.nodeDtos?.find((n) => n.nodeName === this.currentNode.nodeName)?.nodeConfiguration?.applications;
-    const targetApps = this.instanceEdit.state$.value?.nodeDtos?.find((n) => n.nodeName === node.name)?.nodeConfiguration?.applications;
+    const origApps = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === this.currentNode.nodeName)?.nodeConfiguration?.applications;
+    const targetApps = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === node.name)?.nodeConfiguration?.applications;
 
     if (!origApps || !targetApps) {
       return;

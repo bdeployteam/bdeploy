@@ -51,7 +51,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
         }
 
         for (const key of Object.keys(nodes)) {
-          const config = state.nodeDtos.find((n) => n.nodeName === key);
+          const config = state.config.nodeDtos.find((n) => n.nodeName === key);
           const row = { name: key, node: nodes[key], config: config };
           this.records.push(row);
           if (!!config) {
@@ -72,22 +72,22 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   /* template */ onCheckedChange(rows: NodeRow[]) {
     // need to propagate changes to the state object.
-    for (const node of [...this.edit.state$.value.nodeDtos]) {
+    for (const node of [...this.edit.state$.value?.config.nodeDtos]) {
       if (node.nodeName === CLIENT_NODE_NAME) {
         continue;
       }
 
       if (!rows.find((r) => r.name === node.nodeName)) {
         // no longer in the list, remove.
-        this.edit.state$.value.nodeDtos.splice(this.edit.state$.value.nodeDtos.indexOf(node), 1);
+        this.edit.state$.value?.config.nodeDtos.splice(this.edit.state$.value?.config.nodeDtos.indexOf(node), 1);
         this.records.find((r) => r.name === node.nodeName).config = null;
       }
     }
 
     for (const row of rows) {
-      if (!this.edit.state$.value.nodeDtos.find((n) => n.nodeName === row.name)) {
+      if (!this.edit.state$.value?.config.nodeDtos.find((n) => n.nodeName === row.name)) {
         const inst = this.edit.current$.value;
-        this.edit.state$.value.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration));
+        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration));
       }
     }
   }

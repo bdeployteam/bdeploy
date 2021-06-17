@@ -11,6 +11,7 @@ import {
   ApplicationDto,
   ApplicationType,
   ApplicationValidationDto,
+  FileStatusDto,
   InstanceConfiguration,
   InstanceConfigurationDto,
   InstanceDto,
@@ -28,6 +29,12 @@ import { GroupsService } from '../../groups/services/groups.service';
 import { ProductsService } from '../../products/services/products.service';
 import { InstancesService } from './instances.service';
 
+export interface GlobalEditState {
+  config: InstanceConfigurationDto;
+  warnings: ApplicationValidationDto[];
+  files: FileStatusDto[];
+}
+
 export enum ProcessEditState {
   ADDED = 'ADDED',
   CHANGED = 'CHANGED',
@@ -39,11 +46,8 @@ export interface Edit {
   /** Describes the changes done by this edit */
   description: string;
 
-  /** Associated warnings which should be restored when applying */
-  warnings: ApplicationValidationDto[];
-
   /** Applies the changes to the current state */
-  apply(current: InstanceConfigurationDto);
+  apply(current: GlobalEditState);
 }
 
 /**
@@ -52,18 +56,18 @@ export interface Edit {
  * Note that a 'virtual' edit may be created without looking at base/state. Any edit will be
  * applied after it has been created.
  */
-export type EditFactory = (description: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto, warnings: ApplicationValidationDto[]) => Edit;
+export type EditFactory = (description: string, base: GlobalEditState, state: GlobalEditState) => Edit;
 
 /** A generic edit, which may represent virtually any change. */
 export class InstanceEdit implements Edit {
   private changeset: Changeset;
 
-  constructor(public description: string, base: InstanceConfigurationDto, current: InstanceConfigurationDto, public warnings: ApplicationValidationDto[]) {
+  constructor(public description: string, base: GlobalEditState, current: GlobalEditState) {
     // clone changeset to decouple from changes to the source object.
     this.changeset = cloneDeep(diff(base, current));
   }
 
-  public apply(current: InstanceConfigurationDto) {
+  public apply(current: GlobalEditState) {
     // clone changeset to decouple from changes through applying *another* change.
     applyChangeset(current, cloneDeep(this.changeset));
   }
@@ -76,16 +80,10 @@ export class InstanceEdit implements Edit {
  * *huge* drawback that null/undefined handling is extremely diffficult.
  */
 export class InstanceApplicationMoveEdit implements Edit {
-  constructor(
-    public description: string,
-    private nodeName: string,
-    private previousIndex: number,
-    private currentIndex: number,
-    public warnings: ApplicationValidationDto[]
-  ) {}
+  constructor(public description: string, private nodeName: string, private previousIndex: number, private currentIndex: number) {}
 
-  public apply(current: InstanceConfigurationDto) {
-    moveItemInArray(current.nodeDtos.find((n) => n.nodeName === this.nodeName).nodeConfiguration.applications, this.previousIndex, this.currentIndex);
+  public apply(current: GlobalEditState) {
+    moveItemInArray(current.config.nodeDtos.find((n) => n.nodeName === this.nodeName).nodeConfiguration.applications, this.previousIndex, this.currentIndex);
   }
 }
 
@@ -102,12 +100,12 @@ export class InstanceEditService {
 
   public undos: Edit[] = [];
   public redos: Edit[] = [];
-  public base$ = new BehaviorSubject<InstanceConfigurationDto>(null);
+  public base$ = new BehaviorSubject<GlobalEditState>(null);
 
   public undo$ = new BehaviorSubject<Edit>(null);
   public redo$ = new BehaviorSubject<Edit>(null);
 
-  public state$ = new BehaviorSubject<InstanceConfigurationDto>(null);
+  public state$ = new BehaviorSubject<GlobalEditState>(null);
   public nodes$ = new BehaviorSubject<{ [key: string]: MinionDto }>(null);
   public baseApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
   public stateApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
@@ -115,7 +113,6 @@ export class InstanceEditService {
   public validationDebounce$ = new BehaviorSubject<any>(null);
   public validating$ = new BehaviorSubject<boolean>(false);
   public issues$ = new BehaviorSubject<ApplicationValidationDto[]>(null);
-  public updateIssues$ = new BehaviorSubject<ApplicationValidationDto[]>(null);
   private issuesSubject$ = new Subject<ApplicationValidationDto[]>();
 
   public current$ = new BehaviorSubject<InstanceDto>(null);
@@ -161,15 +158,15 @@ export class InstanceEditService {
 
   /** Creates a standard edit factory, capturing changes by diffing as well as the current update warnings */
   public createStdEdit(): EditFactory {
-    return (desc: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto, warnings: ApplicationValidationDto[]) => {
-      return new InstanceEdit(desc, base, state, warnings);
+    return (desc: string, base: GlobalEditState, state: GlobalEditState) => {
+      return new InstanceEdit(desc, base, state);
     };
   }
 
   /** Creates a special edit factory which reorders applications on the given node */
-  public createApplicationMove(node: string, previous: number, current: number, warnings: ApplicationValidationDto[]): EditFactory {
-    return (desc: string, base: InstanceConfigurationDto, state: InstanceConfigurationDto) => {
-      return new InstanceApplicationMoveEdit(desc, node, previous, current, warnings);
+  public createApplicationMove(node: string, previous: number, current: number): EditFactory {
+    return (desc: string, base: GlobalEditState, state: GlobalEditState) => {
+      return new InstanceApplicationMoveEdit(desc, node, previous, current);
     };
   }
 
@@ -189,15 +186,12 @@ export class InstanceEditService {
     this.redos = [];
     this.redo$.next(null);
 
-    // capture before re-building - re-building resets this to the previous state(s).
-    const warnings = this.updateIssues$.value;
-
     // the current state
     const state = this.reBuild();
     const fct = !!factory ? factory : this.createStdEdit();
 
     // and the diff to it :)
-    const change = fct(description, state, this.state$.value, warnings);
+    const change = fct(description, state, this.state$.value);
     this.undos.push(change);
     this.undo$.next(change);
 
@@ -207,14 +201,12 @@ export class InstanceEditService {
   }
 
   public dismissUpdateIssues() {
-    this.updateIssues$.next(null);
+    this.state$.value.warnings = null;
     this.conceal('Dismiss all update messages');
   }
 
   public dismissUpdateIssue(issue: ApplicationValidationDto) {
-    const copy = [...this.updateIssues$.value];
-    copy.splice(copy.indexOf(issue), 1);
-    this.updateIssues$.next(copy);
+    this.state$.value.warnings?.splice(this.state$.value.warnings?.indexOf(issue), 1);
     this.conceal('Dismiss update message: ' + issue.message);
   }
 
@@ -234,7 +226,6 @@ export class InstanceEditService {
     this.baseApplications$.next(null);
     this.stateApplications$.next(null);
     this.issues$.next(null);
-    this.updateIssues$.next(null);
 
     const inst = this.current$.value;
     if (!!inst) {
@@ -270,7 +261,7 @@ export class InstanceEditService {
             base.nodeDtos.push(this.createEmptyNode(CLIENT_NODE_NAME, base.config));
           }
 
-          this.base$.next(base);
+          this.base$.next({ config: base, files: [], warnings: [] });
           this.state$.next(cloneDeep(this.base$.value));
           this.nodes$.next(minions);
         });
@@ -293,7 +284,7 @@ export class InstanceEditService {
    */
   public hasPendingChanges(): boolean {
     const concealed = this.reBuild();
-    return this.hasChanges(concealed, this.state$.value);
+    return this.hasChanges(concealed.config, this.state$.value?.config);
   }
 
   /**
@@ -316,13 +307,20 @@ export class InstanceEditService {
 
     const state = this.reBuild();
 
+    if (!this.hasChanges(state, this.base$.value)) {
+      // we have literally undone all changes, so no need to save, we just reset.
+      this.log.warn('No changes detected, you have logically undone all changes, not saving');
+      this.reset();
+      return;
+    }
+
     const managedServer = this.current$.value.managedServer?.hostName;
     const expect = this.current$.value.instance.tag;
 
-    const update: InstanceUpdateDto = { config: state, files: null /* TODO */, validation: null };
+    const update: InstanceUpdateDto = { config: state.config, files: state.files, validation: null };
 
     return this.http
-      .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.uuid}/update`, update, { params: { managedServer, expect } })
+      .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.config.uuid}/update`, update, { params: { managedServer, expect } })
       .pipe(
         finalize(() => this.saving$.next(false)),
         measure('Save Instance')
@@ -394,8 +392,8 @@ export class InstanceEditService {
 
   public getProcessEditState(uid: string): ProcessEditState {
     // process UID must be unique across nodes, so we check all nodes for the process.
-    const baseNodes = this.base$.value?.nodeDtos;
-    const stateNodes = this.state$.value?.nodeDtos;
+    const baseNodes = this.base$.value?.config?.nodeDtos;
+    const stateNodes = this.state$.value?.config?.nodeDtos;
 
     if (!baseNodes || !stateNodes) {
       return ProcessEditState.NONE;
@@ -448,14 +446,17 @@ export class InstanceEditService {
   }
 
   private validate() {
-    if (!this.state$.value) {
+    if (!this.state$.value?.config || !this.groups.current$.value?.name) {
+      // re-request validation once loading is done...
+      this.requestValidation();
       return;
     }
 
+    // don't validate config files in case we have large files.
     this.validating$.next(true);
-    const upd: InstanceUpdateDto = { config: this.state$.value, files: null /* TODO */, validation: null };
+    const upd: InstanceUpdateDto = { config: this.state$.value?.config, files: null, validation: null };
     this.http
-      .post<ApplicationValidationDto[]>(`${this.apiPath(this.groups.current$.value.name)}/${this.state$.value.config.uuid}/validate`, upd)
+      .post<ApplicationValidationDto[]>(`${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.uuid}/validate`, upd)
       .pipe(
         finalize(() => this.validating$.next(false)),
         measure('Validate Instance Configuration')
@@ -465,10 +466,10 @@ export class InstanceEditService {
 
   public updateProduct(target: ProductDto) {
     this.validating$.next(true);
-    const upd: InstanceUpdateDto = { config: this.state$.value, files: null /* TODO */, validation: null };
+    const upd: InstanceUpdateDto = { config: this.state$.value?.config, files: this.state$.value?.files, validation: null };
     forkJoin({
       update: this.http.post<InstanceUpdateDto>(
-        `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value.config.uuid}/updateProductVersion/${target.key.tag}`,
+        `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.uuid}/updateProductVersion/${target.key.tag}`,
         upd
       ),
       apps: this.products.loadApplications(target),
@@ -479,18 +480,17 @@ export class InstanceEditService {
       )
       .subscribe(({ update, apps }) => {
         this.stateApplications$.next(apps);
-        this.state$.next(update.config);
-        this.updateIssues$.next(!!update.validation?.length ? [...update.validation] : null);
+        this.state$.next({ config: update.config, files: update.files, warnings: !!update.validation?.length ? [...update.validation] : null });
 
         this.conceal(`Update Product Version to ${target.key.tag}`);
       });
   }
 
   public getApplicationConfiguration(uid: string) {
-    if (!this.state$.value?.nodeDtos?.length) {
+    if (!this.state$.value?.config?.nodeDtos?.length) {
       return null;
     }
-    return this.getNodeOfApplication(this.state$.value?.nodeDtos, uid)?.nodeConfiguration.applications.find((a) => a.uid === uid);
+    return this.getNodeOfApplication(this.state$.value?.config?.nodeDtos, uid)?.nodeConfiguration.applications.find((a) => a.uid === uid);
   }
 
   private getNodeOfApplication(nodes: InstanceNodeConfigurationDto[], uid: string): InstanceNodeConfigurationDto {
@@ -504,8 +504,7 @@ export class InstanceEditService {
   }
 
   /** Creates the current state from the base and all recorded edits. */
-  private reBuild(): InstanceConfigurationDto {
-    this.updateIssues$.next(null);
+  private reBuild(): GlobalEditState {
     if (!this.base$.value) {
       return null;
     }
@@ -513,8 +512,6 @@ export class InstanceEditService {
 
     for (const change of this.undos) {
       change.apply(state);
-      this.updateIssues$.next(change.warnings);
-      console.log(change.warnings);
     }
 
     return state;

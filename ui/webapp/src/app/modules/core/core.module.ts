@@ -32,6 +32,7 @@ import { NgTerminalModule } from 'ng-terminal';
 import { ClipboardModule } from 'ngx-clipboard';
 import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.component';
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
@@ -53,6 +54,8 @@ import { BdDialogMessageComponent } from './components/bd-dialog-message/bd-dial
 import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
 import { BdDynamicComponent, DYNAMIC_BASE_MODULES as DYNAMIC_BASE_MODULES } from './components/bd-dynamic/bd-dynamic.component';
+import { BdEditorDiffComponent } from './components/bd-editor-diff/bd-editor-diff.component';
+import { BdEditorComponent } from './components/bd-editor/bd-editor.component';
 import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.component';
 import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-upload.component';
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
@@ -146,6 +149,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataIconCellComponent,
     BdPopupDirective,
     BdDataSyncCellComponent,
+    BdEditorComponent,
+    BdEditorDiffComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -171,7 +176,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatSelectModule,
     MatTableModule,
     MatDividerModule,
-    MatAutocompleteModule, // TODO: not used yet, but bd-form-input should be using it.
+    MatAutocompleteModule,
     MatTooltipModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
@@ -194,6 +199,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     GravatarModule,
     ClipboardModule,
     NgTerminalModule,
+    MonacoEditorModule.forRoot(),
   ],
   exports: [
     // core infrastructure usable by any other module.
@@ -246,6 +252,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataSvgIconCellComponent,
     BdDataIconCellComponent,
     BdDataSyncCellComponent,
+    BdEditorComponent,
+    BdEditorDiffComponent,
 
     // validators
     GroupIdValidator,

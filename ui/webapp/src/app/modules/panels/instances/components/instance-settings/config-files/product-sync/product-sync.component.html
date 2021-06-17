@@ -1,0 +1,33 @@
+<div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+  <ng-container [ngSwitch]="getStatus()">
+    <ng-container *ngSwitchCase="'local'">
+      <div class="bd-secondary-text">File not in selected product version.</div>
+    </ng-container>
+    <ng-container *ngSwitchCase="'unsync'">
+      <div>File differs from product.</div>
+      <div fxFlex="1 0 auto"></div>
+      <app-bd-button
+        *ngIf="!cfgFiles.isText(record)"
+        text="Update from product template"
+        icon="file_upload"
+        (click)="doRestoreFromTemplate()"
+        [style.padding-right.px]="30"
+        tooltip="below"
+      ></app-bd-button>
+      <app-bd-panel-button
+        text="Compare with product template."
+        icon="compare"
+        *ngIf="cfgFiles.isText(record)"
+        [route]="['compare', cfgFiles.getPath(record)]"
+        [relative]="true"
+        [style.padding-right.px]="30"
+        tooltip="below"
+      ></app-bd-panel-button>
+    </ng-container>
+    <ng-container *ngSwitchCase="'missing'">
+      <div>File only in product templates.</div>
+      <div fxFlex="1 0 auto"></div>
+      <app-bd-button text="Create from product template" icon="add" (click)="doAddFromTemplate()" [style.padding-right.px]="30" tooltip="below"></app-bd-button>
+    </ng-container>
+  </ng-container>
+</div>

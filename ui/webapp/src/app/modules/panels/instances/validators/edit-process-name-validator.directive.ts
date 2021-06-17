@@ -30,7 +30,7 @@ export class EditProcessNameValidatorDirective implements Validator, BdValidatio
     }
 
     const errors = {};
-    for (const n of this.edit.state$.value.nodeDtos) {
+    for (const n of this.edit.state$.value?.config.nodeDtos) {
       if (n.nodeName === CLIENT_NODE_NAME) {
         // it is OK for client applications!
         continue;

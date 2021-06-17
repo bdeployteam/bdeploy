@@ -1,0 +1,10 @@
+<div fxFlex="1 0 auto" fxLayout="column">
+  <ngx-monaco-editor
+    name="content"
+    [style.height]="'100%'"
+    [(ngModel)]="editorContent"
+    (ngModelChange)="onModelChange($event)"
+    [options]="editorOptions"
+    (onInit)="onMonacoInit($event)"
+  ></ngx-monaco-editor>
+</div>

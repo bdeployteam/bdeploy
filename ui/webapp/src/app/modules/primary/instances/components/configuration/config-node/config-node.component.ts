@@ -42,7 +42,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription.add(
       this.edit.state$.subscribe((s) => {
         setTimeout(() => {
-          this.config$.next(s?.nodeDtos?.find((n) => n.nodeName === this.nodeName));
+          this.config$.next(s?.config?.nodeDtos?.find((n) => n.nodeName === this.nodeName));
           this.data.update();
         });
       })
@@ -73,10 +73,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     // this is NOT necessary, but prevents flickering while rebuilding state.
     moveItemInArray(this.config$.value.nodeConfiguration.applications, order.previousIndex, order.currentIndex);
 
-    this.edit.conceal(
-      `Re-arrange ${order.item.name}`,
-      this.edit.createApplicationMove(this.config$.value.nodeName, order.previousIndex, order.currentIndex, this.edit.updateIssues$.value)
-    );
+    this.edit.conceal(`Re-arrange ${order.item.name}`, this.edit.createApplicationMove(this.config$.value.nodeName, order.previousIndex, order.currentIndex));
     this.data.update();
   }
 }

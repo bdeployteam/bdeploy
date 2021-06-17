@@ -61,7 +61,7 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <ng-container *ngIf="instances.current$ | async as current">
-      <div *ngIf="current.instance.tag !== current.activeVersion?.tag" class="bd-rect-card" fxLayout="column">
+      <div *ngIf="current.instance.tag !== current.activeVersion?.tag" class="bd-rect-card" fxLayout="column" [style.margin-bottom.px]="10">
         <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
           <div fxLayout="column" fxFlex="1 0 0">
             <div *ngIf="!!current.activeVersion?.tag">

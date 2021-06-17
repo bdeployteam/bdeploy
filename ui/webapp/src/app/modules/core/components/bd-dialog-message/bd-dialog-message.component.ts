@@ -94,12 +94,14 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
     if (!!this.message$.value) {
       this.result$.error('Dialog Message Reset');
       this.message$.next(null);
+      this._userConfirmation = '';
     }
   }
 
   public complete(result: any) {
     this.message$.next(null);
     this.result$.next(result);
+    this._userConfirmation = '';
   }
 
   /* template */ onConfirmationUpdate(value) {

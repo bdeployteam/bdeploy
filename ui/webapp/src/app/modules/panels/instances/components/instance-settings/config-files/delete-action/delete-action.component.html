@@ -1,0 +1,8 @@
+<div fxLayout="row" fxLayoutAlign="start center">
+  <app-bd-button
+    text="Delete"
+    icon="delete"
+    (click)="onDelete()"
+    [disabled]="!!record.persistent && !record.persistent.instanceId && !record.modification?.file"
+  ></app-bd-button>
+</div>

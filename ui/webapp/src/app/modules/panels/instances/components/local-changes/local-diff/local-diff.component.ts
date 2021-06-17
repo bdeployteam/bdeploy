@@ -30,11 +30,15 @@ export class LocalDiffComponent implements OnInit {
             return;
           }
           const baseCache = {
-            config: base.config,
-            nodes: { applications: baseApps, nodeConfigDtos: base.nodeDtos },
+            config: base.config.config,
+            nodes: { applications: baseApps, nodeConfigDtos: base.config.nodeDtos },
             version: `Server (${instance.instance.tag})`,
           };
-          const localCache = { config: compare.config, nodes: { applications: compareApps, nodeConfigDtos: compare.nodeDtos }, version: 'Local Changes' };
+          const localCache = {
+            config: compare.config.config,
+            nodes: { applications: compareApps, nodeConfigDtos: compare.config.nodeDtos },
+            version: 'Local Changes',
+          };
 
           this.configPair$.next(new ConfigPair(baseCache, localCache));
         }

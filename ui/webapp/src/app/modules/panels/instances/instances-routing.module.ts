@@ -15,6 +15,9 @@ import { HistoryEntryComponent } from './components/history-entry/history-entry.
 import { HistoryViewComponent } from './components/history-view/history-view.component';
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { BannerComponent } from './components/instance-settings/banner/banner.component';
+import { CompareComponent } from './components/instance-settings/config-files/compare/compare.component';
+import { ConfigFilesComponent } from './components/instance-settings/config-files/config-files.component';
+import { EditorComponent } from './components/instance-settings/config-files/editor/editor.component';
 import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
 import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
@@ -44,6 +47,15 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'settings/banner', component: BannerComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/import', component: ImportInstanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/product', component: ProductUpdateComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/config-files', component: ConfigFilesComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
+  { path: 'settings/config-files/:file', component: EditorComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard], data: { max: true } },
+  {
+    path: 'settings/config-files/compare/:file',
+    component: CompareComponent,
+    canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard],
+    data: { max: true },
+  },
   { path: 'node/:node', component: NodeDetailsComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process', component: ProcessStatusComponent, canActivate: [ScopedReadGuard] },
   { path: 'process/:process/ports', component: ProcessPortsComponent, canActivate: [ScopedReadGuard] },
