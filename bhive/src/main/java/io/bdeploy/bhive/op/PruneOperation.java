@@ -45,7 +45,7 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
             //  1) No NEW marker databases will be created and no concurrent prune operations will run.
             //  2) Existing transactions will be allowed to continue using their existing marker databases.
             //  3) Upon completion, existing trasactions will block removal of the markers until the root is unlocked.
-            MarkerDatabase.lockRoot(getMarkerRoot(), null, null);
+            execute(new LockDirectoryOperation().setDirectory(getMarkerRoot()));
 
             SortedSet<ObjectId> all;
             try {
@@ -100,7 +100,7 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                 // Unlocking the root will allow:
                 //  1) Ongoing operations to continue clearing their markers
                 //  2) Other operations locking the root (e.g. another prune operation).
-                MarkerDatabase.unlockRoot(getMarkerRoot());
+                execute(new ReleaseDirectoryLockOperation().setDirectory(getMarkerRoot()));
             }
 
             return result;

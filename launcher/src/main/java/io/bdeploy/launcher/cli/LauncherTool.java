@@ -38,8 +38,9 @@ import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.op.ExportOperation;
+import io.bdeploy.bhive.op.LockDirectoryOperation;
+import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.RemoteBHive;
@@ -251,6 +252,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
         try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
+            // Provide callback to detect stale locks
+            hive.setLockContentSupplier(LOCK_CONTENT);
+            hive.setLockContentValidator(LOCK_VALIDATOR);
+
             // Check for and install launcher updates
             // We always try to use the launcher matching the server version
             Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter, serverVersion);
@@ -274,7 +279,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Cleanup the installation directory and the hive.
             if (!readOnlyRootDir) {
-                doExecuteLocked(reporter, () -> {
+                doExecuteLocked(hive, reporter, () -> {
                     ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
                     cleanup.run();
                     return null;
@@ -326,7 +331,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Updates the launcher if there is a new version available */
     private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
-        return doExecuteLocked(reporter, () -> {
+        return doExecuteLocked(hive, reporter, () -> {
             Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
             doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
             return requiredLauncher;
@@ -410,7 +415,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // Install the application into the pool if missing
-        doExecuteLocked(reporter, () -> {
+        doExecuteLocked(hive, reporter, () -> {
             installApplication(hive, splash, reporter, clientAppCfg);
             return null;
         });
@@ -439,10 +444,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Locks the root in order to perform the given operation. The lock is not taken if the current user does
      * not have the permissions to modify the root directory. In that case the operation is directly executed.
      */
-    private <T> T doExecuteLocked(LauncherSplashReporter reporter, Callable<T> runnable) {
+    private <T> T doExecuteLocked(BHive hive, LauncherSplashReporter reporter, Callable<T> runnable) {
         if (!readOnlyRootDir) {
             try (Activity waiting = reporter.start("Waiting for other launchers...")) {
-                MarkerDatabase.lockRoot(rootDir, LOCK_CONTENT, LOCK_VALIDATOR); // this could wait for other launchers.
+                hive.execute(new LockDirectoryOperation().setDirectory(rootDir)); // this could wait for other launchers.
             }
         }
         log.info("Entered locked execution mode");
@@ -455,7 +460,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } finally {
             log.info("Leaving locked execution mode");
             if (!readOnlyRootDir) {
-                MarkerDatabase.unlockRoot(rootDir);
+                hive.execute(new ReleaseDirectoryLockOperation().setDirectory(rootDir));
             }
         }
     }
@@ -748,7 +753,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Install missing launcher
         Key launcher = requiredLauncher.getValue();
-        doExecuteLocked(reporter, () -> {
+        doExecuteLocked(hive, reporter, () -> {
             if (nativeLauncher.toFile().exists()) {
                 return null;
             }
@@ -777,7 +782,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
         }
         // Write updated manifest
-        doExecuteLocked(reporter, () -> {
+        doExecuteLocked(hive, reporter, () -> {
             ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
             newConfig.launcher = launcher;
             newConfig.clickAndStart = clickAndStart;

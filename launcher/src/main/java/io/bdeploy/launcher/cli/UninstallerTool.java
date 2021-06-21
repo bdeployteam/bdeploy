@@ -7,7 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.objects.MarkerDatabase;
+import io.bdeploy.bhive.op.LockDirectoryOperation;
+import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -49,39 +50,44 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
         Path rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         Path bhiveDir = rootDir.resolve("bhive");
-        MarkerDatabase.lockRoot(rootDir, null, null);
         try (BHive hive = new BHive(bhiveDir.toUri(), new ActivityReporter.Null())) {
+
             doUninstall(rootDir, hive, config.app());
-        } finally {
-            MarkerDatabase.unlockRoot(rootDir);
+
         }
         return createSuccess();
     }
 
     /** Uninstall the given application and removes all not required artifacts */
     private void doUninstall(Path rootDir, BHive hive, String appUid) {
-        log.info("Removing application {}", appUid);
-        Path appsDir = rootDir.resolve("apps");
-        Path poolDir = appsDir.resolve("pool");
+        try {
+            hive.execute(new LockDirectoryOperation().setDirectory(rootDir));
 
-        // Delegate removal to the delegated application
-        ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration config = cmf.readNewest(appUid);
-        if (config != null && config.launcher != null) {
-            Version version = VersionHelper.tryParse(config.launcher.getTag());
-            doUninstallVersioned(rootDir, version, appUid);
-        } else {
-            doUninstallApp(rootDir, appUid);
+            log.info("Removing application {}", appUid);
+            Path appsDir = rootDir.resolve("apps");
+            Path poolDir = appsDir.resolve("pool");
+
+            // Delegate removal to the delegated application
+            ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
+            ClientSoftwareConfiguration config = cmf.readNewest(appUid);
+            if (config != null && config.launcher != null) {
+                Version version = VersionHelper.tryParse(config.launcher.getTag());
+                doUninstallVersioned(rootDir, version, appUid);
+            } else {
+                doUninstallApp(rootDir, appUid);
+            }
+
+            // Remove the manifest which software is used by this application
+            if (cmf.remove(appUid)) {
+                log.info("Removed software manifest.");
+            }
+
+            // Trigger cleanup to remove from hive and from pool
+            ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
+            cleanup.run();
+        } finally {
+            hive.execute(new ReleaseDirectoryLockOperation().setDirectory(rootDir));
         }
-
-        // Remove the manifest which software is used by this application
-        if (cmf.remove(appUid)) {
-            log.info("Removed software manifest.");
-        }
-
-        // Trigger cleanup to remove from hive and from pool
-        ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
-        cleanup.run();
     }
 
     /**

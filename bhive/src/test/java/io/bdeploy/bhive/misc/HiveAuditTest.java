@@ -58,9 +58,9 @@ public class HiveAuditTest {
 
         RollingFileAuditor auditor = (RollingFileAuditor) hive.getAuditor();
         List<String> lines = Files.readAllLines(auditor.getLogFile());
-        assertEquals(4, lines.size());
-        assertTrue(lines.get(3).contains("ERROR"));
-        assertTrue(lines.get(3).contains("Asynchronous operation(s) failed"));
+        assertEquals(6, lines.size());
+        assertTrue(lines.get(5).contains("ERROR"));
+        assertTrue(lines.get(5).contains("Asynchronous operation(s) failed"));
     }
 
 }

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.objects.ObjectDatabase;
+import io.bdeploy.bhive.op.AwaitDirectoryLockOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -27,10 +28,12 @@ public class BHiveTransactions {
 
     private final InheritableThreadLocal<Stack<String>> transactions = new InheritableThreadLocal<>();
     private final Map<String, MarkerDatabase> dbs = new ConcurrentHashMap<>();
+    private final BHive hive;
     private final ActivityReporter reporter;
     private final Path markerRoot;
 
-    public BHiveTransactions(Path markerRoot, ActivityReporter reporter) {
+    public BHiveTransactions(BHive hive, Path markerRoot, ActivityReporter reporter) {
+        this.hive = hive;
         this.markerRoot = markerRoot;
         this.reporter = reporter;
     }
@@ -78,7 +81,7 @@ public class BHiveTransactions {
      * @return a {@link Transaction} which will cleanup associated resources when closed.
      */
     public Transaction begin() {
-        MarkerDatabase.waitRootLock(markerRoot);
+        hive.execute(new AwaitDirectoryLockOperation().setDirectory(markerRoot));
 
         String uuid = UuidHelper.randomId();
         getOrCreate().push(uuid);
@@ -89,7 +92,7 @@ public class BHiveTransactions {
         }
 
         return () -> {
-            MarkerDatabase.waitRootLock(markerRoot);
+            hive.execute(new AwaitDirectoryLockOperation().setDirectory(markerRoot));
 
             Stack<String> stack = transactions.get();
             if (stack == null || stack.isEmpty()) {
