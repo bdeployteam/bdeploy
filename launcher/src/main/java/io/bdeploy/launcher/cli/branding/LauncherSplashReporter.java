@@ -65,12 +65,13 @@ public class LauncherSplashReporter implements ActivityReporter {
 
     private final class SplashActivity implements Activity {
 
-        private final String activity;
         private final LongSupplier maxAmount;
         private final LongSupplier currentAmount;
         private final long startTime;
         private final LongAdder localCurrent = new LongAdder();
+
         private long stopTime;
+        private String activity;
 
         public SplashActivity(String activity, LongSupplier maxValue, LongSupplier currentValue) {
             this.activity = activity;
@@ -100,6 +101,11 @@ public class LauncherSplashReporter implements ActivityReporter {
         @Override
         public void worked(long amount) {
             localCurrent.add(amount);
+        }
+
+        @Override
+        public void activity(String activity) {
+            this.activity = activity;
         }
 
         @Override

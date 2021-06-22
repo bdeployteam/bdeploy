@@ -35,6 +35,8 @@ import io.bdeploy.common.util.ExceptionHelper;
 import io.bdeploy.common.util.FutureHelper;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.audit.AuditRecord.Severity;
 import io.bdeploy.jersey.audit.Auditor;
@@ -157,21 +159,55 @@ public class BHive implements AutoCloseable, BHiveExecution {
      */
     @Override
     public <T> T execute(Operation<T> op) {
-        try (Timer.Context timer = Metrics.getMetric(MetricGroup.HIVE).timer(op.getClass().getSimpleName()).time()) {
+        try {
             op.initOperation(this);
+            return doExecute(op, 0);
+        } finally {
+            op.closeOperation();
+        }
+    }
+
+    /**
+     * Executes the given operation and writes some metrics about the overal execution time.
+     */
+    private final <T> T doExecute(Operation<T> op, int attempt) {
+        try (Timer.Context timer = Metrics.getMetric(MetricGroup.HIVE).timer(op.getClass().getSimpleName()).time()) {
             if (op.getClass().getAnnotation(ReadOnlyOperation.class) == null) {
                 auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName())
                         .addParameters(new AuditParameterExtractor().extract(op)).build());
             }
             return op.call();
-        } catch (Exception e) {
-            auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName()).setSeverity(Severity.ERROR)
-                    .addParameters(new AuditParameterExtractor().extract(op))
-                    .setMessage(ExceptionHelper.mapExceptionCausesToReason(e)).build());
-            throw new IllegalStateException("operation on hive " + uri + " failed", e);
-        } finally {
-            op.closeOperation();
+        } catch (Exception ex) {
+            onOperationFailed(op, attempt, ex);
+            if (attempt >= op.retryCount) {
+                throw new IllegalStateException("Operation on hive " + op.hive + " failed", ex);
+            }
+            onOperationRetry(op, attempt, ex);
+            return doExecute(op, ++attempt);
         }
+    }
+
+    /** Audits the retry of the operation and delays the next retry. */
+    private <T> void onOperationRetry(Operation<T> op, int attempt, Exception ex) {
+        String retryString = (attempt + 1) + " / " + op.retryCount;
+        auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName()).setSeverity(Severity.NORMAL)
+                .setMessage("Retrying operation due to previous failure. Attempt " + retryString).build());
+
+        log.warn("Operation failed. Attempt " + retryString, ex);
+        try (Activity activity = reporter.start("Operation failed (" + retryString + "). Waiting before next retry...",
+                attempt)) {
+            for (int sleep = 0; sleep <= attempt; sleep++) {
+                Threads.sleep(1000);
+                activity.worked(1);
+            }
+        }
+    }
+
+    /** Audits the failed operation. */
+    private <T> void onOperationFailed(Operation<T> op, int attempt, Exception e) {
+        auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName()).setSeverity(Severity.ERROR)
+                .addParameters(new AuditParameterExtractor().extract(op))
+                .setMessage(ExceptionHelper.mapExceptionCausesToReason(e)).build());
     }
 
     /**
@@ -205,6 +241,9 @@ public class BHive implements AutoCloseable, BHiveExecution {
         private ObjectManager mgr;
         private ExecutorService fileOps;
         private static final AtomicInteger fileOpNum = new AtomicInteger(0);
+
+        /** Counter how often an operation should be retried. 0 means no retries at all */
+        private int retryCount = 0;
 
         /**
          * Used internally to associate the operation with the executing hive
@@ -301,6 +340,28 @@ public class BHive implements AutoCloseable, BHiveExecution {
             return hive.execute(other);
         }
 
+        /**
+         * Sets the number of times the operation should be retried in case of an exception. The default value is '0' which means
+         * that the operation is not retried on failure. A retry count of '4' means that the operation is executed up to 5 times
+         * before giving up (First run + 4 retries).
+         * <p>
+         * The default value is '0' which means an operation is not retried in case of an exception.
+         * </p>
+         *
+         * @param retryCount the number of times to retry the operation
+         */
+        public Operation<T> setRetryCount(int retryCount) {
+            RuntimeAssert.assertTrue(retryCount >= 0, "Counter must be >=0 but was " + retryCount);
+            this.retryCount = retryCount;
+            return this;
+        }
+
+        /**
+         * Returns the number of times the operation should be executed until giving up.
+         */
+        protected int getRetryCount() {
+            return retryCount;
+        }
     }
 
     /**

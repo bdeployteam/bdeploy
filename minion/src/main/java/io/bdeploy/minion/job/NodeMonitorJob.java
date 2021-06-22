@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -54,7 +54,7 @@ public class NodeMonitorJob implements Job {
             Trigger trigger = tBuilder.build();
             Date nextRun = minion.getScheduler().scheduleJob(job, trigger);
             log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), JOB_SCHEDULE,
-                    DateHelper.format(nextRun));
+                    FormatHelper.format(nextRun));
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule job", e);
         }

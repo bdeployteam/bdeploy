@@ -21,7 +21,7 @@ import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -91,7 +91,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
 
         for (Map.Entry<String, MinionStatusDto> e : minions.entrySet()) {
             MinionStatusDto s = e.getValue();
-            String startTime = s.startup != null ? DateHelper.format(s.startup) : "-";
+            String startTime = s.startup != null ? FormatHelper.format(s.startup) : "-";
             String status = s.offline ? "OFFLINE" : "ONLINE";
             MinionDto config = s.config;
             table.row().cell(e.getKey()).cell(status).cell(startTime).cell(config.os).cell(config.version).build();

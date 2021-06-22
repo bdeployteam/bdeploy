@@ -25,8 +25,6 @@ import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.DurationHelper;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.cli.ProductTool.ProductConfig;
@@ -100,12 +98,7 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
 
             TransferStatistics stats = hive
                     .execute(new PushOperation().setRemote(svc).setHiveName(config.instanceGroup()).addManifest(key));
-
-            result.addField("Number of Manifests", stats.sumManifests);
-            result.addField("Number of reused Trees", stats.sumTrees - stats.sumMissingTrees);
-            result.addField("Number of Objects", stats.sumMissingObjects);
-            result.addField("Transfer size", UnitHelper.formatFileSize(stats.transferSize));
-            result.addField("Duration", DurationHelper.formatDuration(stats.duration));
+            stats.toResult(result);
         }
         return result;
     }

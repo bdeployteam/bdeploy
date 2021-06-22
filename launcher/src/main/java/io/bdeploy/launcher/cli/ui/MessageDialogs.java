@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.ProcessHelper;
@@ -69,7 +69,7 @@ public class MessageDialogs {
     private static String getDetailedErrorMessage(ClickAndStartDescriptor config, Throwable ex) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("*** Date: ").append(DateHelper.format(new Date())).append("\n");
+        builder.append("*** Date: ").append(FormatHelper.format(new Date())).append("\n");
         builder.append("\n");
 
         StringWriter writer = new StringWriter();

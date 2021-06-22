@@ -27,6 +27,7 @@ import io.bdeploy.common.util.Hex;
 public class ObjectId implements Serializable, Comparable<ObjectId> {
 
     private static final long serialVersionUID = 1L;
+    private static final int BUFFER_SIZE = 8192;
     private static final Pattern ID_PATTERN = Pattern.compile("[0-9a-f]{40}");
 
     private final String id;
@@ -79,7 +80,7 @@ public class ObjectId implements Serializable, Comparable<ObjectId> {
     public static ObjectId createByCopy(InputStream source, Path target) throws IOException {
         MessageDigest digest = createDigest();
         try (OutputStream os = Files.newOutputStream(target)) {
-            byte[] buf = new byte[4096];
+            byte[] buf = new byte[BUFFER_SIZE];
             int read = 0;
             while ((read = source.read(buf)) > 0) {
                 digest.update(buf, 0, read);
@@ -100,7 +101,7 @@ public class ObjectId implements Serializable, Comparable<ObjectId> {
     public static ObjectId createFromStreamNoCopy(InputStream source) {
         try {
             MessageDigest digest = createDigest();
-            byte[] buf = new byte[4096];
+            byte[] buf = new byte[BUFFER_SIZE];
             int read = 0;
             while ((read = source.read(buf)) > 0) {
                 digest.update(buf, 0, read);

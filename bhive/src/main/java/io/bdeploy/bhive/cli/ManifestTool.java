@@ -33,7 +33,7 @@ import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.DurationHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 
@@ -171,7 +171,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
                 DataResult result = createSuccess();
                 result.addField("Number of Manifests", stats.sumManifests);
                 result.addField("Number of Objects", stats.sumMissingObjects);
-                result.addField("Duration", DurationHelper.formatDuration(stats.duration));
+                result.addField("Duration", FormatHelper.formatDuration(stats.duration));
                 return result;
             }
         } catch (Exception ex) {

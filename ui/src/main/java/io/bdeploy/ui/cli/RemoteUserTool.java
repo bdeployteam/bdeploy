@@ -11,7 +11,7 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -81,7 +81,7 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
 
             for (UserInfo info : admin.getAllUser()) {
                 table.row().cell(info.name).cell(info.externalSystem).cell(info.inactive ? "*" : "").cell(info.email)
-                        .cell(DateHelper.format(Instant.ofEpochMilli(info.lastActiveLogin))).cell(info.permissions.toString())
+                        .cell(FormatHelper.format(Instant.ofEpochMilli(info.lastActiveLogin))).cell(info.permissions.toString())
                         .build();
             }
             return table;

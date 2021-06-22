@@ -18,7 +18,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.CleanupTool.CleanupConfig;
 import io.bdeploy.minion.job.MasterCleanupJob;
@@ -65,7 +65,7 @@ public class CleanupTool extends ConfiguredCliTool<CleanupConfig> {
             } else {
                 DataResult result = createEmptyResult();
                 result.addField("Schedule", mr.getState().cleanupSchedule);
-                result.addField("Last Run", DateHelper.format(Instant.ofEpochMilli(mr.getState().cleanupLastRun)));
+                result.addField("Last Run", FormatHelper.format(Instant.ofEpochMilli(mr.getState().cleanupLastRun)));
                 return result;
             }
         }

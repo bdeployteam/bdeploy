@@ -55,13 +55,12 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.util.DurationHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.Threads;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -591,13 +590,16 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Fetch the application and all the requirements
         try (Activity info = reporter.start("Downloading..."); Transaction t = hive.getTransactions().begin()) {
             log.info("Fetching manifests from server...");
-            TransferStatistics stats = hive.execute(new FetchOperation().setHiveName(clickAndStart.groupId)
-                    .setRemote(clickAndStart.host).addManifest(appKey).addManifest(clientAppCfg.resolvedRequires));
+            TransferStatistics stats = hive
+                    .execute(new FetchOperation().setHiveName(clickAndStart.groupId).setRemote(clickAndStart.host)
+                            .addManifest(appKey).addManifest(clientAppCfg.resolvedRequires).setRetryCount(5));
             if (stats.sumManifests == 0) {
                 log.info("Local hive already contains all required arfifacts. No manifests where fetched.");
             } else {
-                log.info("Fetched {} manifests from server. Total size {}. Duration {}", stats.sumManifests,
-                        UnitHelper.formatFileSize(stats.transferSize), DurationHelper.formatDuration(stats.duration));
+                log.info("Fetched {} manifests from server. Total size {}. Total files {}, Duration {}. Transfer Rate {}",
+                        stats.sumManifests, FormatHelper.formatFileSize(stats.transferSize), stats.sumMissingObjects,
+                        FormatHelper.formatDuration(stats.duration),
+                        FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
             }
         }
 

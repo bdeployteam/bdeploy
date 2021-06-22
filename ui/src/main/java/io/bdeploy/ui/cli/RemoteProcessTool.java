@@ -15,7 +15,7 @@ import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -232,7 +232,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .cell(process.instanceTag + (process.instanceTag.equals(deploymentStates.activeTag) ? "" : "*")) //
                 .cell(instance.isPresent() ? instance.get().product.getTag() : "?") //
                 .cell(cfg.isPresent() ? cfg.get().processControl.startType : "?") //
-                .cell(handle == null ? "-" : DateHelper.format(handle.startTime)) //
+                .cell(handle == null ? "-" : FormatHelper.format(handle.startTime)) //
                 .cell(handle == null ? "-" : handle.user) //
                 .cell(handle == null ? "-" : Long.toString(handle.pid)) //
                 .cell(Integer.toString(process.exitCode)).build(); //

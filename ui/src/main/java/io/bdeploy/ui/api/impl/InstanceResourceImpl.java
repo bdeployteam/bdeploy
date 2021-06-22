@@ -21,20 +21,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
@@ -60,11 +46,11 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -128,6 +114,19 @@ import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 import io.bdeploy.ui.utils.WindowsInstaller;
 import io.bdeploy.ui.utils.WindowsInstallerConfig;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriBuilder;
 
 public class InstanceResourceImpl implements InstanceResource {
 
@@ -547,8 +546,10 @@ public class InstanceResourceImpl implements InstanceResource {
             TransferStatistics stats = hive.execute(
                     new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
-            log.info("Pushed {} to {}; trees={}, objs={}, size={}", instance.getConfiguration().product, svc.getUri(),
-                    stats.sumMissingTrees, stats.sumMissingObjects, UnitHelper.formatFileSize(stats.transferSize));
+            log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
+                    svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects, FormatHelper.formatFileSize(stats.transferSize),
+                    FormatHelper.formatDuration(stats.duration),
+                    FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
 
             // 3: tell master to deploy
             MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
