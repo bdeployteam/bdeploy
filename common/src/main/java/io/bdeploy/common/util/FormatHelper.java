@@ -16,7 +16,8 @@ import java.util.Locale;
 public class FormatHelper {
 
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("#,##0.#");
-    private static final DecimalFormat TRANSFER_FORMAT = new DecimalFormat("#0.##");
+
+    private static final DecimalFormat TRANSFER_FORMAT = new DecimalFormat("#0.0");
 
     private static final String[] SIZE_UNITS = new String[] { "B", "kB", "MB", "GB", "TB" };
 
@@ -34,20 +35,62 @@ public class FormatHelper {
     }
 
     /**
+     * Returns a human readable string of the given time. Only the most relevant unit is displayed.
+     *
+     * <pre>
+     * Sample output:  4 seconds
+     *                 15 minutes
+     *                 1 hour
+     * </pre>
+     *
+     * @param duration
+     *            The duration in milliseconds
+     * @return The string representation.
+     */
+    public static String formatRemainingTime(long duration) {
+        if (duration == 0) {
+            return "0 seconds";
+        }
+        long allSeconds = duration / 1000;
+
+        long seconds = allSeconds % 60;
+        long allMinutes = allSeconds / 60;
+
+        long minutes = allMinutes % 60;
+        long hours = allMinutes / 60;
+
+        final StringBuilder builder = new StringBuilder();
+        if (hours > 0) {
+            builder.append(hours);
+            builder.append(hours == 1 ? " hour" : " hours");
+            return builder.toString();
+        }
+        if (minutes > 0) {
+            builder.append(minutes);
+            builder.append(minutes == 1 ? " min" : " mins");
+            return builder.toString();
+        }
+        builder.append(seconds);
+        builder.append(seconds == 1 ? " sec" : " secs");
+        return builder.toString();
+    }
+
+    /**
      * Calculates and formats the transfer rate into a human readable string
      *
      * @param bytes the number of bytes that have been transfered
      * @param timeInMs the time in milliseconds that the transfer took
      */
     public static String formatTransferRate(long bytes, long timeInMs) {
-        if (bytes <= 0 || timeInMs <= 1000) {
-            return "";
+        if (bytes <= 0 || timeInMs < 1000) {
+            return "N/A";
         }
-        double rateInKb = (bytes / 1024) / (timeInMs / 1000) * 8;
-        if (rateInKb > 1000) {
-            return TRANSFER_FORMAT.format(rateInKb / 1024.0) + " Mbps";
+        double bps = (bytes * 8) / (timeInMs / 1000.0);
+        double kBs = bps / 8000.0;
+        if (kBs > 1000) {
+            return TRANSFER_FORMAT.format(kBs / 1000.0) + " MB/s";
         }
-        return TRANSFER_FORMAT.format(rateInKb) + " kbps";
+        return TRANSFER_FORMAT.format(kBs) + " KB/s";
     }
 
     /**

@@ -1,7 +1,6 @@
 package io.bdeploy.bhive.op;
 
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
@@ -20,7 +19,8 @@ import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.util.FormatHelper;
+import io.bdeploy.common.util.FixedLengthStream;
+import io.bdeploy.common.util.ReportingInputStream;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StreamHelper;
 
@@ -38,12 +38,13 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
         Instant start = Instant.now();
         RuntimeAssert.assertNotNull(input);
         try (CountingInputStream countingIn = new CountingInputStream(input);
-                GZIPInputStream zipIn = new GZIPInputStream(countingIn);
+                GZIPInputStream zipIn = new GZIPInputStream(countingIn, ObjectWriteOperation.BUFFER_SIZE);
                 DataInputStream dataIn = new DataInputStream(zipIn)) {
-            long maxWork = dataIn.readLong();
+            long totalSize = dataIn.readLong();
 
             String baseActivity = "Reading objects...";
-            try (Activity activity = getActivityReporter().start(baseActivity, maxWork)) {
+            try (Activity activity = getActivityReporter().start(baseActivity, totalSize);
+                    ReportingInputStream reportingIn = new ReportingInputStream(dataIn, totalSize, activity, baseActivity)) {
                 SortedSet<ObjectId> objects = new TreeSet<>();
                 SortedSet<Manifest> manifests = new TreeSet<>();
 
@@ -52,23 +53,17 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                 long counter = dataIn.readLong();
                 for (int i = 0; i < counter; i++) {
                     long size = dataIn.readLong();
-                    Manifest mf = StorageHelper.fromStream(new FixedLengthStream(dataIn, size), Manifest.class);
+                    Manifest mf = StorageHelper.fromStream(new FixedLengthStream(reportingIn, size), Manifest.class);
                     manifests.add(mf);
-                    activity.worked(1);
                     checkOp.addRoot(mf.getKey());
-                    activity.activity(baseActivity + " " + FormatHelper.formatTransferRate(countingIn.getCount(),
-                            Duration.between(start, Instant.now()).toMillis()));
                 }
 
                 // Read all objects from the stream
                 counter = dataIn.readLong();
                 for (int i = 0; i < counter; i++) {
                     long size = dataIn.readLong();
-                    ObjectId insertedId = getObjectManager().db(db -> db.addObject(new FixedLengthStream(dataIn, size)));
+                    ObjectId insertedId = getObjectManager().db(db -> db.addObject(new FixedLengthStream(reportingIn, size)));
                     objects.add(insertedId);
-                    activity.worked(1);
-                    activity.activity(baseActivity + " " + FormatHelper.formatTransferRate(countingIn.getCount(),
-                            Duration.between(start, Instant.now()).toMillis()));
                 }
                 result.sumMissingObjects = counter;
 
@@ -101,50 +96,6 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
     public ObjectReadOperation stream(InputStream input) {
         this.input = input;
         return this;
-    }
-
-    /**
-     * An input stream that reads a given amount of bytes from a stream.
-     */
-    private static class FixedLengthStream extends InputStream {
-
-        /** The underlying stream to read from */
-        private final InputStream in;
-
-        /** The number of bytes to read from the stream */
-        private long remaining;
-
-        protected FixedLengthStream(InputStream in, long totalSize) {
-            this.in = in;
-            this.remaining = totalSize;
-        }
-
-        @Override
-        public int read() throws IOException {
-            byte[] single = new byte[1];
-            int num = read(single, 0, 1);
-            return num == -1 ? -1 : (single[0] & 0xFF);
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            // Signal end of stream if we have consumed all bytes
-            if (remaining <= 0) {
-                return -1;
-            }
-
-            // Read up-to the remaining size
-            long bytesToRead = Math.min(len, remaining);
-            int numRead = in.read(b, off, (int) bytesToRead);
-            if (numRead == -1) {
-                throw new IOException("Unexpected end of stream. Expecting '" + remaining + "' bytes.");
-            }
-
-            // Provide the number of bytes that where read
-            remaining -= numRead;
-            return numRead;
-        }
-
     }
 
 }
