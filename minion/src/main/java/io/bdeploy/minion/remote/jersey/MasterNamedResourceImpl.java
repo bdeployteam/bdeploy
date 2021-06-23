@@ -736,7 +736,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public void logClientStart(String instanceId, String applicationId, String hostname) {
-        log.info("client start for " + instanceId + ", application " + applicationId + " on host " + hostname);
+        log.debug("client start for {}, application {} on host {}", instanceId, applicationId, hostname);
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         ClientUsage clientUsage = im.getClientUsage(hive);
         ClientUsageData data = clientUsage.read();

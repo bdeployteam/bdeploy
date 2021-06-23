@@ -12,6 +12,11 @@ dependencies {
     commonTestDeps(testFixtures(project(":jersey")))
 }
 
+if(project.hasProperty("test.hive.override")) {
+    ext.xTime = System.currentTimeMillis();
+    testResultsDirName = "${buildDir}/test-results/${ext.xTime}"
+}
+
 distTar.enabled = false
 
 sourceCompatibility = JavaVersion.VERSION_1_8

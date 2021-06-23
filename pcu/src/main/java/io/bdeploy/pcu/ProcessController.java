@@ -859,6 +859,9 @@ public class ProcessController {
                 logger.log(l -> l.warn("Stop command refuses to exit, killing."));
                 stopProcess.destroyForcibly();
             }
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            logger.log(l -> l.error("Failed to execute stop command.", ie));
         } catch (Exception e) {
             logger.log(l -> l.error("Failed to execute stop command.", e));
         }
@@ -896,6 +899,9 @@ public class ProcessController {
                 processExit.get(gracePeriod, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
                 logger.log(l -> l.warn("Timed-out waiting for application to exit. Timeout: {} ms", gracePeriod));
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                logger.log(l -> l.warn("Interrupted while waiting for application to terminate.", ie));
             } catch (Exception e) {
                 logger.log(l -> l.warn("Exception while waiting for application to terminate.", e));
             }

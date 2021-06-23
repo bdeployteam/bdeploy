@@ -13,7 +13,7 @@ public class AuthTrace {
 
     public static class Message {
 
-        private transient final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+        private final transient SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
         public long timestamp;
         public String text;
 
@@ -45,6 +45,6 @@ public class AuthTrace {
     }
 
     List<String> getMessages() {
-        return messages.stream().map(m -> m.format()).collect(Collectors.toList());
+        return messages.stream().map(Message::format).collect(Collectors.toList());
     }
 }

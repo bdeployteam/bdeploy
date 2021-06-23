@@ -4,7 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Stack;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.objects.ObjectDatabase;
+import io.bdeploy.bhive.op.AwaitDirectoryLockOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -26,11 +27,13 @@ public class BHiveTransactions {
     private static final Logger log = LoggerFactory.getLogger(BHiveTransactions.class);
 
     private final InheritableThreadLocal<Stack<String>> transactions = new InheritableThreadLocal<>();
-    private final Map<String, MarkerDatabase> dbs = new TreeMap<>();
+    private final Map<String, MarkerDatabase> dbs = new ConcurrentHashMap<>();
+    private final BHive hive;
     private final ActivityReporter reporter;
     private final Path markerRoot;
 
-    public BHiveTransactions(Path markerRoot, ActivityReporter reporter) {
+    public BHiveTransactions(BHive hive, Path markerRoot, ActivityReporter reporter) {
+        this.hive = hive;
         this.markerRoot = markerRoot;
         this.reporter = reporter;
     }
@@ -59,9 +62,7 @@ public class BHiveTransactions {
             throw new IllegalStateException("Transaction database missing for transaction " + id);
         }
 
-        if (!mdb.hasObject(object)) {
-            mdb.addMarker(object);
-        }
+        mdb.addMarker(object);
     }
 
     /**
@@ -80,7 +81,7 @@ public class BHiveTransactions {
      * @return a {@link Transaction} which will cleanup associated resources when closed.
      */
     public Transaction begin() {
-        MarkerDatabase.waitRootLock(markerRoot);
+        hive.execute(new AwaitDirectoryLockOperation().setDirectory(markerRoot));
 
         String uuid = UuidHelper.randomId();
         getOrCreate().push(uuid);
@@ -90,35 +91,32 @@ public class BHiveTransactions {
             log.debug("Starting transaction {}", uuid, new RuntimeException("Starting Transaction"));
         }
 
-        return new Transaction() {
+        return () -> {
+            hive.execute(new AwaitDirectoryLockOperation().setDirectory(markerRoot));
 
-            @Override
-            public void close() {
-                MarkerDatabase.waitRootLock(markerRoot);
-
-                Stack<String> stack = transactions.get();
-                if (stack == null || stack.isEmpty()) {
-                    throw new IllegalStateException("No transaction has been started on this thread!");
-                }
-
-                if (!stack.peek().equals(uuid)) {
-                    log.warn("Out-of-order transaction found: {}, expected: {}", stack.peek(), uuid);
-                }
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Ending transaction {}", uuid, new RuntimeException("Ending Transaction"));
-                }
-
-                stack.remove(uuid);
-                dbs.remove(uuid);
-
-                Path mdb = markerRoot.resolve(uuid);
-                if (!Files.isDirectory(mdb)) {
-                    return; // nothing to clean.
-                }
-
-                PathHelper.deleteRecursive(mdb);
+            Stack<String> stack = transactions.get();
+            if (stack == null || stack.isEmpty()) {
+                throw new IllegalStateException("No transaction has been started on this thread!");
             }
+
+            String top = stack.peek();
+            if (!top.equals(uuid)) {
+                log.warn("Out-of-order transaction found: {}, expected: {}", top, uuid);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Ending transaction {}", uuid, new RuntimeException("Ending Transaction"));
+            }
+
+            stack.remove(uuid);
+            dbs.remove(uuid);
+
+            Path mdb = markerRoot.resolve(uuid);
+            if (!Files.isDirectory(mdb)) {
+                return; // nothing to clean.
+            }
+
+            PathHelper.deleteRecursive(mdb);
         };
     }
 

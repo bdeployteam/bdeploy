@@ -58,6 +58,9 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
     protected void done() {
         try {
             get();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            MessageDialogs.showUninstallationFailed(app.clickAndStart, ie);
         } catch (Exception ex) {
             MessageDialogs.showUninstallationFailed(app.clickAndStart, ex);
         }

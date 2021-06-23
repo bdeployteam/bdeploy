@@ -2,6 +2,7 @@ package io.bdeploy.launcher.cli.ui.browser;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -9,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,7 +90,7 @@ public class BrowserDialog extends BaseDialog {
         add(header, BorderLayout.PAGE_START);
 
         // Content displaying the table
-        JScrollPane content = createContent();
+        JPanel content = createContent();
         add(content, BorderLayout.CENTER);
 
         // Footer displaying some progress
@@ -175,7 +177,12 @@ public class BrowserDialog extends BaseDialog {
     }
 
     /** Creates the widgets shown in the content */
-    private JScrollPane createContent() {
+    private JPanel createContent() {
+        JPanel content = new JPanel();
+        content.setBackground(Color.WHITE);
+        content.setLayout(new BorderLayout(10, 10));
+        content.setBorder(new EmptyBorder(0, 10, 10, 10));
+
         table.setRowHeight(25);
         table.setBackground(Color.WHITE);
         table.setShowHorizontalLines(true);
@@ -242,11 +249,17 @@ public class BrowserDialog extends BaseDialog {
         menu.add(uninstallItem);
         table.setComponentPopupMenu(menu);
 
-        // Scroll if there are too many entries
-        JScrollPane pane = new JScrollPane(table);
-        pane.setBorder(new EmptyBorder(10, 10, 10, 10));
-        pane.setBackground(Color.WHITE);
-        return pane;
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBackground(Color.WHITE);
+        scrollPane.setBorder(new EmptyBorder(10, 0, 0, 0));
+        content.add(scrollPane, BorderLayout.CENTER);
+
+        progressBar = new JProgressBar();
+        progressBar.setVisible(false);
+        progressBar.setStringPainted(true);
+        content.add(progressBar, BorderLayout.SOUTH);
+
+        return content;
     }
 
     /** Creates the widgets shown in the footer */
@@ -255,10 +268,13 @@ public class BrowserDialog extends BaseDialog {
         footer.setBorder(new EmptyBorder(0, 10, 10, 10));
         footer.setLayout(new BorderLayout(15, 15));
 
-        progressBar = new JProgressBar();
-        progressBar.setVisible(false);
-        progressBar.setStringPainted(true);
-        footer.add(progressBar, BorderLayout.CENTER);
+        JLabel home = new JLabel("<HTML><U>" + rootDir.toAbsolutePath().toString() + "</U></HTML>");
+        home.setToolTipText("Open home directory");
+        home.setHorizontalAlignment(SwingConstants.LEFT);
+        home.setOpaque(false);
+        home.setBackground(Color.WHITE);
+        home.addMouseListener(new OpenHomeFolder());
+        footer.add(home, BorderLayout.WEST);
 
         JLabel version = new JLabel("Launcher version: " + VersionHelper.getVersion().toString());
         footer.add(version, BorderLayout.EAST);
@@ -408,6 +424,19 @@ public class BrowserDialog extends BaseDialog {
 
         refreshItem.setEnabled(true);
         refreshButton.setEnabled(true);
+    }
+
+    private class OpenHomeFolder extends MouseAdapter {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            try {
+                Desktop.getDesktop().browse(rootDir.toUri());
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(null, "Failed to open home directory: " + ex.getMessage(), "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private class DoubleClickListener extends MouseAdapter {

@@ -301,6 +301,9 @@ public class ProductManifestBuilder {
                     c.call();
                 }
             }
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to import", ie);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to import", e);
         }

@@ -19,6 +19,9 @@ public class FutureHelper {
         futures.forEach(t -> {
             try {
                 t.get();
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                exceptions.add(ie);
             } catch (Exception e) {
                 exceptions.add(e);
             }

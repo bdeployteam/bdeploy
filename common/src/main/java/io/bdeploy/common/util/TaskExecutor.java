@@ -50,6 +50,12 @@ public class TaskExecutor {
             for (Future<?> future : futures) {
                 try {
                     future.get();
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    if (failure == null) {
+                        failure = new RuntimeException("Failed to execute task");
+                        failure.addSuppressed(ie);
+                    }
                 } catch (Exception ex) {
                     if (failure == null) {
                         failure = new RuntimeException("Failed to execute task");

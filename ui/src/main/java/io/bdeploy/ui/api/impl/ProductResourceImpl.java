@@ -169,8 +169,12 @@ public class ProductResourceImpl implements ProductResource {
     public String getProductDiskUsage(String name) {
         try {
             return UnitHelper.formatFileSize(pdus.getDiscUsage(group, name).get());
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            log.debug("Product disc usage calculation interrupted", ie);
+            return "Unknown";
         } catch (Exception e) {
-            log.debug("Product disc usage calculation interrupted or failed", e);
+            log.debug("Product disc usage calculation failed", e);
             return "Unknown";
         }
     }

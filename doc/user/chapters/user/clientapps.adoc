@@ -15,20 +15,30 @@ An *Installer* is provided for each *Client Application* to make the installatio
 The *Installer* checks if the latest version of the *Launcher* is already installed. If not then the *Launcher* is downloaded and stored on the client computer. The user can then start a *Client Application* with the branded *Link* that is stored on the *Desktop* or in the *Start Menu*.
 
 ===== Windows
-By default the *Launcher* is installed for the *Current User* in the _%LOCALAPPDATA%\BDeploy_ folder (_C:/Users/<user>/AppData/Local/BDeploy_). The location can be adopted by setting the *BDEPLOY_HOME* environment variable before launching the installer. No administrative privileges are required for this installation type. 
+The *Launcher* is installed for the *Current User* in the _%LOCALAPPDATA%\BDeploy_ folder (_C:/Users/<user>/AppData/Local/BDeploy_). The location can be adopted by setting the *BDEPLOY_HOME* environment variable before launching the installer. No administrative privileges are required for this installation type. 
 
-The *Launcher* can also be installed for *All* users by starting the installer with the */ForAllUsers* flag. The default location in that case is _%ProgramFiles%/BDeploy_ (_C:/Program Files/BDeploy_). The location can be adopted by setting the *BDEPLOY_HOME* environment variable before launching the installer. Ensure that all users have access to the customized location. Otherwise they cannot launch the application.
-
-    ./Installer.exe /ForAllUsers
-
-[NOTE]
-Installation for *All* users requires administrative privileges. Additional configuration might be required depending on the installation location. See <<Multi-User Installations>> for more information.
-
-===== Unattended Mode
+====== Unattended Mode
 The *Installer* can also be started in an unattended mode with the */Unattended* flag so that no UI is shown.
 
     ./Installer.exe /Unattended
-    ./Installer.exe /Unattended /ForAllUsers
+
+When automating the installation it might be required to wait until the actual installation is finished. To do that the _Start-Process_ cmdlet can be used:
+
+    Start -FilePath "./Installer.exe" -ArgumentList "/Unattended" -Wait 
+
+====== For All Users
+The *Launcher* can also be installed for *All* users by starting the installer with the */ForAllUsers* flag. The default location in that case is _%ProgramFiles%/BDeploy_ (_C:/Program Files/BDeploy_). The location can be adopted by setting the *BDEPLOY_HOME* environment variable before launching the installer. Ensure that all users have access to the customized location. Otherwise they cannot launch the application. 
+
+Installation for *All* users requires a terminal with elevated privileges (_Run as Administrator_). Just running the command as local administrator is not sufficient. 
+
+    Start -FilePath "./Installer.exe" -ArgumentList "/ForAllUsers" -Verb RunAs
+    Start -FilePath "./Installer.exe" -ArgumentList "/Unattended","/ForAllUsers" -Wait -Verb RunAs
+
+[NOTE]
+The _Start_ cmdlet with the _-Verb RunAs_ switch triggers a UAC prompt so that the installer is running with elevated privileges.
+
+[NOTE]
+Additional configuration might be required depending on the installation location. See <<Multi-User Installations>> for more information.
 
 ==== Linux
 

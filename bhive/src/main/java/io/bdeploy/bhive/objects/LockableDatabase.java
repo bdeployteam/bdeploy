@@ -1,6 +1,7 @@
 package io.bdeploy.bhive.objects;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -44,12 +45,27 @@ public abstract class LockableDatabase {
                 return;
             }
 
-            // super protected :)
-            try (RandomAccessFile raf = new RandomAccessFile(lockFile, "rw");
-                    FileChannel channel = raf.getChannel();
-                    FileLock lock = channel.lock()) {
-                toLock.run();
-            }
+            do {
+                long xctpCount = 0;
+
+                try (RandomAccessFile raf = new RandomAccessFile(lockFile, "rw");
+                        FileChannel channel = raf.getChannel();
+                        FileLock lock = channel.lock()) {
+                    toLock.run();
+                    return;
+                } catch (IOException ioe) {
+                    // this one is tricky. fcntl on linux will hold locks per-process (not thread), and has a deadlock detection.
+                    // if another (multi-threaded) process and we (multi-threaded) lock files, fcntl may detect a process level
+                    // deadlock, even though the locks are fine on a thread level. There is no easy way to work around this here,
+                    // especially not if we do not want to dramatically increase lock contention in the whole process. This means
+                    // we go for a quick'n'dirty approach and simply retry in this case.
+                    if (ioe.getMessage().equals("Resource deadlock avoided") && xctpCount++ <= 10) {
+                        Thread.sleep(5);
+                        continue;
+                    }
+                    throw ioe;
+                }
+            } while (true);
         } catch (Exception e) {
             throw new IllegalStateException("locked execution failed", e);
         }

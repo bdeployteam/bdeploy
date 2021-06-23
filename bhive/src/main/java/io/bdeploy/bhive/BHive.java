@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +61,9 @@ public class BHive implements AutoCloseable, BHiveExecution {
     private final ActivityReporter reporter;
     private final Auditor auditor;
     private int parallelism = 4;
+
+    private Predicate<String> lockContentValidator = null;
+    private Supplier<String> lockContentSupplier = null;
 
     /**
      * Creates a new hive instance. Supports ZIP and directory hives.
@@ -109,7 +114,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create temporary directory for zipped BHive", e);
         }
-        this.transactions = new BHiveTransactions(markerTmp, reporter);
+        this.transactions = new BHiveTransactions(this, markerTmp, reporter);
         this.objects = new ObjectDatabase(objRoot, objTmp, reporter, transactions);
         this.manifests = new ManifestDatabase(relRoot.resolve("manifests"));
         this.reporter = reporter;
@@ -131,6 +136,20 @@ public class BHive implements AutoCloseable, BHiveExecution {
      */
     public Auditor getAuditor() {
         return auditor;
+    }
+
+    /**
+     * Sets the supplier that provides the content that is written to a lock file.
+     */
+    public void setLockContentSupplier(Supplier<String> lockContentSupplier) {
+        this.lockContentSupplier = lockContentSupplier;
+    }
+
+    /**
+     * Sets the predicate that is used to validate an existing lock file.
+     */
+    public void setLockContentValidator(Predicate<String> lockContentValidator) {
+        this.lockContentValidator = lockContentValidator;
     }
 
     /**
@@ -235,6 +254,27 @@ public class BHive implements AutoCloseable, BHiveExecution {
             return hive.reporter;
         }
 
+        /**
+         * @return the {@link Auditor} associated with the current {@link BHive}.
+         */
+        protected Auditor getAuditor() {
+            return hive.auditor;
+        }
+
+        /**
+         * Returns the validator to check is a given lock file is still valid.
+         */
+        protected Predicate<String> getLockContentValidator() {
+            return hive.lockContentValidator;
+        }
+
+        /**
+         * Returns the supplier that provide the content to be written to the lock file.
+         */
+        protected Supplier<String> getLockContentSupplier() {
+            return hive.lockContentSupplier;
+        }
+
         @Override
         public BHiveTransactions getTransactions() {
             return hive.getTransactions();
@@ -270,7 +310,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
 
         @Override
         public final T call() throws Exception {
-            if (!getTransactions().hasTransaction()) {
+            if (!super.getTransactions().hasTransaction()) {
                 throw new IllegalStateException("Operation requires active transaction: " + getClass().getSimpleName());
             }
 
