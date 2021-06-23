@@ -6,6 +6,7 @@ import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { InstancesBrowserComponent as BrowserComponent } from './components/browser/browser.component';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryComponent } from './components/history/history.component';
 
 const INSTANCES_ROUTES: Route[] = [
@@ -13,6 +14,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'dashboard/:group/:instance', component: DashboardComponent, canActivate: [ScopedReadGuard] },
   { path: 'configuration/:group/:instance', component: ConfigurationComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'history/:group/:instance', component: HistoryComponent, canActivate: [ScopedReadGuard] },
+  { path: 'data-files/:group/:instance', component: DataFilesComponent, canActivate: [ScopedReadGuard] },
 ];
 
 @NgModule({

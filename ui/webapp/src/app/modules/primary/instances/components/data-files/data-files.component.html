@@ -1,0 +1,39 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Data Files - {{ (instances.current$ | async)?.instanceConfiguration?.name }}">
+    <div fxFlex="1 0 auto"></div>
+    <ng-container *ngIf="cfg.isCentral()">
+      <ng-container *ngIf="instances.current$ | async as instance">
+        <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
+        <mat-divider [vertical]="true"></mat-divider>
+      </ng-container>
+    </ng-container>
+    <app-bd-button text="Refresh" icon="refresh" (click)="load()" [loadingWhen$]="loading$" [disabled]="loading$ | async"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <ng-container *ngIf="servers.isSynchronized((instances.current$ | async)?.managedServer)">
+      <app-bd-data-display [records]="records$ | async" [columns]="columns" [grouping]="grouping" [recordRoute]="getRecordRoute">
+        <app-bd-no-data>
+          <p>No data available. This either means that the instance has no active version, or no files exist.</p>
+          <p>Try to refresh to fetch current information from the node(s).</p>
+          <app-bd-button
+            text="Refresh"
+            icon="refresh"
+            (click)="load()"
+            [collapsed]="false"
+            [loadingWhen$]="loading$"
+            [disabled]="loading$ | async"
+          ></app-bd-button>
+        </app-bd-no-data>
+      </app-bd-data-display>
+    </ng-container>
+
+    <app-bd-no-data *ngIf="!servers.isSynchronized((instances.current$ | async)?.managedServer)">
+      <p [style.text-align]="'center'">
+        <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
+        <strong>{{ (instances.current$ | async).managedServer.hostName }}</strong>
+      </p>
+      <p>Synchronize the instance to view data files.</p>
+      <app-bd-server-sync-button [collapsed]="false" [server]="(instances.current$ | async).managedServer"></app-bd-server-sync-button>
+    </app-bd-no-data>
+  </app-bd-dialog-content>
+</app-bd-dialog>

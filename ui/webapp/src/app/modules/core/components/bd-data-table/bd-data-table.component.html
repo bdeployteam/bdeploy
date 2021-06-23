@@ -68,7 +68,6 @@
         <!-- First column, can not be an action. -->
         <ng-container *ngIf="i === 0">
           <td
-            class="bd-text-ellipsis"
             mat-cell
             [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
             [style.width]="col.width ? col.width : 0"
@@ -104,6 +103,7 @@
                   [matBadgeHidden]="!row.expandable"
                   matBadgeSize="small"
                   matBadgeOverlap="false"
+                  class="bd-text-ellipsis"
                 >
                   {{ row.node.groupOrFirstColumn }}
                 </div>

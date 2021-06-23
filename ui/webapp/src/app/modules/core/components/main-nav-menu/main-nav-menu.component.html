@@ -109,6 +109,14 @@
 
   <app-main-nav-button
     [visible]="!!(areas.instanceContext$ | async)"
+    icon="source"
+    text="Data Files"
+    [collapsed]="!expanded"
+    [route]="['/instances', 'data-files', areas.groupContext$.value, areas.instanceContext$.value]"
+  ></app-main-nav-button>
+
+  <app-main-nav-button
+    [visible]="!!(areas.instanceContext$ | async)"
     icon="history"
     text="Instance History"
     [collapsed]="!expanded"

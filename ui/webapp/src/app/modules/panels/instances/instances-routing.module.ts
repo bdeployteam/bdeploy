@@ -6,6 +6,7 @@ import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { AddInstanceComponent } from './components/add-instance/add-instance.component';
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
+import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
 import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
@@ -75,6 +76,7 @@ const INSTANCES_ROUTES: Route[] = [
     canDeactivate: [DirtyDialogGuard],
     data: { max: true },
   },
+  { path: 'data-files/:node/:file', component: DataFileViewerComponent, canActivate: [ScopedReadGuard], data: { max: true } },
 ];
 
 @NgModule({

@@ -19,6 +19,7 @@ import { NodeHeaderComponent } from './components/dashboard/server-node/header/h
 import { NodeProcessListComponent } from './components/dashboard/server-node/process-list/process-list.component';
 import { ServerNodeComponent } from './components/dashboard/server-node/server-node.component';
 import { NodeStatePanelComponent } from './components/dashboard/server-node/state-panel/state-panel.component';
+import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryComponent } from './components/history/history.component';
 import { InstancesRoutingModule } from './instances-routing.module';
 
@@ -39,6 +40,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     ConfigurationComponent,
     HistoryComponent,
     ConfigNodeComponent,
+    DataFilesComponent,
   ],
   exports: [
     // for panels.

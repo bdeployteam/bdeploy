@@ -1,0 +1,102 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
+import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+
+const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
+
+@Component({
+  selector: 'app-data-file-viewer',
+  templateUrl: './data-file-viewer.component.html',
+  styleUrls: ['./data-file-viewer.component.css'],
+})
+export class DataFileViewerComponent implements OnInit, OnDestroy {
+  /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
+  /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
+  /* template */ content$ = new Subject<string>();
+  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
+  /* template */ follow$ = new BehaviorSubject<boolean>(false);
+
+  private followInterval;
+  private offset = 0;
+  private subscription: Subscription;
+
+  constructor(private instances: InstancesService, areas: NavAreasService, df: DataFilesService, bop: BreakpointObserver) {
+    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
+      this.narrow$.next(bs.matches);
+    });
+
+    this.subscription = combineLatest([areas.panelRoute$, df.directories$]).subscribe(([r, d]) => {
+      if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
+        return;
+      }
+
+      const nodeName = r.params['node'];
+      const fileName = r.params['file'];
+
+      // check if we need to reset, otherwise e.g. the file size was updated, which is fine to follow along.
+      if (nodeName !== this.directory$.value?.minion || fileName !== this.file$.value?.path) {
+        // reset!
+        this.offset = 0;
+      }
+
+      for (const dir of d) {
+        if (dir.minion !== nodeName) {
+          continue;
+        }
+
+        for (const f of dir.entries) {
+          if (f.path === fileName) {
+            this.directory$.next(dir);
+            this.file$.next(f);
+            this.nextChunk(); // initial
+            break;
+          }
+        }
+      }
+    });
+
+    this.subscription.add(
+      this.follow$.subscribe((b) => {
+        clearInterval(this.followInterval);
+        if (b) {
+          this.followInterval = setInterval(() => df.load(), 2000);
+        }
+      })
+    );
+  }
+
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+    clearInterval(this.followInterval);
+  }
+
+  private nextChunk() {
+    // these are current enough :) we're called when the size of a file was updated.
+    const dir = this.directory$.value;
+    const entry = this.file$.value;
+
+    if (!this.offset && entry.size > MAX_TAIL) {
+      this.offset = entry.size - MAX_TAIL;
+    }
+
+    if (this.offset === entry.size) {
+      // we have everything, no need to bother
+      return;
+    }
+
+    this.instances.getContentChunk(dir, entry, this.offset, 0).subscribe((chunk) => {
+      if (!chunk) {
+        return;
+      }
+
+      this.content$.next(chunk.content);
+      this.offset = chunk.endPointer;
+    });
+  }
+}

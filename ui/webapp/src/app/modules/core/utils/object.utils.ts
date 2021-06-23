@@ -13,3 +13,9 @@ export function mapObjToArray<V>(obj: { [key: string]: V }): SimpleEntry<V>[] {
 
   return result;
 }
+
+/** formats a size in bytes into a human readable string. */
+export function formatSize(size: number): string {
+  const i: number = size === 0 ? 0 : Math.min(4, Math.floor(Math.log(size) / Math.log(1024)));
+  return (i === 0 ? size : (size / Math.pow(1024, i)).toFixed(2)) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}

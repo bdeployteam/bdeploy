@@ -59,6 +59,7 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { ProductSyncComponent } from './components/instance-settings/config-files/product-sync/product-sync.component';
 import { CompareComponent } from './components/instance-settings/config-files/compare/compare.component';
+import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 
 @NgModule({
   declarations: [
@@ -112,6 +113,7 @@ import { CompareComponent } from './components/instance-settings/config-files/co
     RenameActionComponent,
     ProductSyncComponent,
     CompareComponent,
+    DataFileViewerComponent,
   ],
   imports: [
     CommonModule,
