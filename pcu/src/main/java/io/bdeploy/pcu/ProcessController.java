@@ -490,17 +490,23 @@ public class ProcessController {
             return;
         }
 
-        // Acquire a process handle for the stored PID
-        ProcessControllerDto dto = StorageHelper.fromPath(pidFile, ProcessControllerDto.class);
-        Optional<ProcessHandle> ph = ProcessHandle.of(dto.pid);
-        if (!ph.isPresent()) {
+        ProcessControllerDto dto;
+        try {
+            // Acquire a process handle for the stored PID
+            dto = StorageHelper.fromPath(pidFile, ProcessControllerDto.class);
+            Optional<ProcessHandle> ph = ProcessHandle.of(dto.pid);
+            if (!ph.isPresent()) {
+                PathHelper.deleteRecursive(pidFile);
+                return;
+            }
+
+            // Remember handle and exit hook
+            processHandle = ph.get();
+            processExit = processHandle.onExit();
+        } catch (Exception e) {
             PathHelper.deleteRecursive(pidFile);
             return;
         }
-
-        // Remember handle and exit hook
-        processHandle = ph.get();
-        processExit = processHandle.onExit();
 
         // make sure that this is still the process we're looking for.
         startTime = processHandle.info().startInstant().orElseGet(() -> {

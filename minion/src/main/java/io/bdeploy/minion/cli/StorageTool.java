@@ -14,8 +14,8 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import io.bdeploy.minion.MinionRoot;
@@ -78,7 +78,7 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
                 t.column("Storage Path", 100).column("Free Space", 20);
                 FileSystemSpaceService fsss = new FileSystemSpaceService();
                 r.getStorageLocations()
-                        .forEach(l -> t.row().cell(l).cell(UnitHelper.formatFileSize(fsss.getFreeSpace(l))).build());
+                        .forEach(l -> t.row().cell(l).cell(FormatHelper.formatFileSize(fsss.getFreeSpace(l))).build());
                 return t;
             } else {
                 return createNoOp();

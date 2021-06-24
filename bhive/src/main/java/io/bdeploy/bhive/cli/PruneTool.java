@@ -18,7 +18,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.util.UnitHelper;
+import io.bdeploy.common.util.FormatHelper;
 
 /**
  * A tool to remove unreferenced objects from a hive, for instance after
@@ -53,11 +53,11 @@ public class PruneTool extends ConfiguredCliTool<PruneConfig> {
 
             DataResult r = createSuccess();
             if (config.verbose()) {
-                result.forEach((k, v) -> r.addField(k.toString(), UnitHelper.formatFileSize(v)));
+                result.forEach((k, v) -> r.addField(k.toString(), FormatHelper.formatFileSize(v)));
             }
             long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
             r.addField("Sum Objects Removed", Integer.toString(result.size()));
-            r.addField("Sum Bytes Freed", UnitHelper.formatFileSize(sum));
+            r.addField("Sum Bytes Freed", FormatHelper.formatFileSize(sum));
 
             return r;
         }

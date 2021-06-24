@@ -40,10 +40,10 @@ import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -168,7 +168,7 @@ public class ProductResourceImpl implements ProductResource {
     @Override
     public String getProductDiskUsage(String name) {
         try {
-            return UnitHelper.formatFileSize(pdus.getDiscUsage(group, name).get());
+            return FormatHelper.formatFileSize(pdus.getDiscUsage(group, name).get());
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             log.debug("Product disc usage calculation interrupted", ie);

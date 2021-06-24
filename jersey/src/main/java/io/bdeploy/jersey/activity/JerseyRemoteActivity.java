@@ -15,7 +15,6 @@ final class JerseyRemoteActivity implements Activity {
 
     private static final Logger log = LoggerFactory.getLogger(JerseyRemoteActivity.class);
 
-    private final String name;
     private final Consumer<JerseyRemoteActivity> onDone;
     private final Consumer<JerseyRemoteActivity> onCancel;
     private final LongSupplier maxWork;
@@ -24,6 +23,8 @@ final class JerseyRemoteActivity implements Activity {
     private final String uuid;
     private final String parentUuid;
     private final List<String> scope;
+
+    private String name;
     private long stop = 0;
     private boolean cancel = false;
 
@@ -52,6 +53,11 @@ final class JerseyRemoteActivity implements Activity {
     @Override
     public void worked(long amount) {
         localCurrent.add(amount);
+    }
+
+    @Override
+    public void activity(String activity) {
+        this.name = activity;
     }
 
     @Override

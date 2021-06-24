@@ -12,12 +12,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +35,15 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.util.UnitHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.HiveResource;
 import io.bdeploy.ui.dto.HiveEntryDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 
 public class HiveResourceImpl implements HiveResource {
 
@@ -169,7 +168,7 @@ public class HiveResourceImpl implements HiveResource {
         SortedMap<ObjectId, Long> pruned = hive.execute(new PruneOperation());
         Long sumFreedBytes = pruned.entrySet().stream().collect(Collectors.summingLong(Map.Entry::getValue));
 
-        return UnitHelper.formatFileSize(sumFreedBytes);
+        return FormatHelper.formatFileSize(sumFreedBytes);
     }
 
     @Override

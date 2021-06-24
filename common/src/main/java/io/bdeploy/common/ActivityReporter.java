@@ -67,6 +67,11 @@ public interface ActivityReporter {
     public interface Activity extends NoThrowAutoCloseable {
 
         /**
+         * Updates the name of the activity
+         */
+        public void activity(String activity);
+
+        /**
          * Update the local work amount. Has no effect if the {@link Activity} was
          * started using a dynamic amount {@link Supplier}.
          */
@@ -274,11 +279,12 @@ public interface ActivityReporter {
 
         private final class AsyncActivity implements ActivityReporter.Activity {
 
-            private final String activity;
             private final LongAdder localCurrent = new LongAdder();
             private final LongSupplier currentAmount;
             private final LongSupplier maxAmount;
             private final long startTime;
+
+            private String activity;
             private long stopTime;
             private boolean isNested = false;
 
@@ -309,6 +315,11 @@ public interface ActivityReporter {
             @Override
             public void worked(long amount) {
                 localCurrent.add(amount);
+            }
+
+            @Override
+            public void activity(String activity) {
+                this.activity = activity;
             }
 
             @Override
@@ -393,6 +404,11 @@ public interface ActivityReporter {
 
             @Override
             public void worked(long amount) {
+                // nothing
+            }
+
+            @Override
+            public void activity(String activity) {
                 // nothing
             }
 

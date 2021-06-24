@@ -31,7 +31,7 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.util.UnitHelper;
+import io.bdeploy.common.util.FormatHelper;
 
 /**
  * A tool to list and diff {@link Manifest} {@link Tree}s.
@@ -118,7 +118,7 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
 
         Long size = hive.execute(oso);
 
-        return createSuccess().addField("Difference Size", UnitHelper.formatFileSize(size));
+        return createSuccess().addField("Difference Size", FormatHelper.formatFileSize(size));
     }
 
     private void format(TreeView snap) {

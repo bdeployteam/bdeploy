@@ -23,7 +23,7 @@ import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
 
 /**
@@ -57,7 +57,7 @@ public class CleanupDownloadDirJob implements Job {
             Trigger trigger = tBuilder.build();
             Date nextRun = scheduler.scheduleJob(job, trigger);
             log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), DEFAULT_CLEANUP_SCHEDULE,
-                    DateHelper.format(nextRun));
+                    FormatHelper.format(nextRun));
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule job", e);
         }

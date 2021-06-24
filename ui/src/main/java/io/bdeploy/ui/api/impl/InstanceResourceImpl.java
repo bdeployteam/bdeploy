@@ -47,11 +47,11 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.InstanceImportExportHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -589,8 +589,10 @@ public class InstanceResourceImpl implements InstanceResource {
             TransferStatistics stats = hive.execute(
                     new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
-            log.info("Pushed {} to {}; trees={}, objs={}, size={}", instance.getConfiguration().product, svc.getUri(),
-                    stats.sumMissingTrees, stats.sumMissingObjects, UnitHelper.formatFileSize(stats.transferSize));
+            log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
+                    svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects, FormatHelper.formatFileSize(stats.transferSize),
+                    FormatHelper.formatDuration(stats.duration),
+                    FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
 
             // 3: tell master to deploy
             MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);

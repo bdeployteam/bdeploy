@@ -159,9 +159,9 @@ public class ManifestDatabase extends LockableDatabase {
                         result.add(new Manifest.Key(manifestName, manifestTag));
                     });
                     return result;
-                } catch (UncheckedIOException e) {
+                } catch (UncheckedIOException | NoSuchFileException e) {
                     // something was removed in the middle of the walk... retry.
-                    if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 10) {
+                    if (!(e instanceof NoSuchFileException || e.getCause() instanceof NoSuchFileException || xctpCount++ > 10)) {
                         throw e;
                     }
                 }

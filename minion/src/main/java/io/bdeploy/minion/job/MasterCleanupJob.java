@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.minion.MinionRoot;
@@ -68,7 +68,7 @@ public class MasterCleanupJob implements Job {
                 nextRun = scheduler.scheduleJob(job, trigger);
             }
             log.info("Job '{}' scheduled. Trigger '{}'. Next run '{}'.", job.getDescription(), cronSchedule,
-                    DateHelper.format(nextRun));
+                    FormatHelper.format(nextRun));
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule cleanup job", e);
         }

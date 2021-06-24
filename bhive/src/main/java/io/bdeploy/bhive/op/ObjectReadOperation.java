@@ -20,6 +20,7 @@ import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StreamHelper;
 
@@ -41,7 +42,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                 DataInputStream dataIn = new DataInputStream(zipIn)) {
             long maxWork = dataIn.readLong();
 
-            try (Activity activity = getActivityReporter().start("Reading objects...", maxWork)) {
+            String baseActivity = "Reading objects...";
+            try (Activity activity = getActivityReporter().start(baseActivity, maxWork)) {
                 SortedSet<ObjectId> objects = new TreeSet<>();
                 SortedSet<Manifest> manifests = new TreeSet<>();
 
@@ -54,6 +56,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                     manifests.add(mf);
                     activity.worked(1);
                     checkOp.addRoot(mf.getKey());
+                    activity.activity(baseActivity + " " + FormatHelper.formatTransferRate(countingIn.getCount(),
+                            Duration.between(start, Instant.now()).toMillis()));
                 }
 
                 // Read all objects from the stream
@@ -63,6 +67,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                     ObjectId insertedId = getObjectManager().db(db -> db.addObject(new FixedLengthStream(dataIn, size)));
                     objects.add(insertedId);
                     activity.worked(1);
+                    activity.activity(baseActivity + " " + FormatHelper.formatTransferRate(countingIn.getCount(),
+                            Duration.between(start, Instant.now()).toMillis()));
                 }
                 result.sumMissingObjects = counter;
 
@@ -80,8 +86,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                     throw new IllegalStateException(
                             "Failed to stream all required objects. Removed " + damaged.size() + " missing/damaged elements.");
                 }
-                result.transferSize = countingIn.getCount();
             }
+            result.transferSize = countingIn.getCount();
         } finally {
             StreamHelper.close(input);
             result.duration = Duration.between(start, Instant.now()).toMillis();

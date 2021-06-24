@@ -343,6 +343,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         try {
+            // first step is to backup state.json (long-term backup) in case something is fishy during migration, or even later on.
+            Path cfgPath = config.resolve(STATE_FILE);
+            Path cfgBakPath = config.resolve(STATE_FILE + ".pre-mig-bak");
+            if (Files.exists(cfgPath)) {
+                Files.copy(cfgPath, cfgBakPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            }
+
             UpdatePackagingMigration.run(this);
             MinionStateMigration.run(this);
             SystemUserMigration.run(this);
@@ -564,9 +571,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private void storeConfig(String name, Object cfg) {
         Path cfgPath = config.resolve(name);
         Path cfgTmpPath = config.resolve(name + ".tmp");
+        Path cfgBakPath = config.resolve(name + ".bak");
 
         try {
             Files.write(cfgTmpPath, StorageHelper.toRawBytes(cfg));
+            if (Files.exists(cfgPath)) {
+                Files.move(cfgPath, cfgBakPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            }
             Files.move(cfgTmpPath, cfgPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot save minion config " + name, e);

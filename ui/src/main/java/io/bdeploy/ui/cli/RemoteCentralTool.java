@@ -10,8 +10,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.ws.rs.WebApplicationException;
-
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -25,7 +23,7 @@ import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.DateHelper;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -35,6 +33,7 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteCentralTool.CentralConfig;
 import io.bdeploy.ui.dto.BackendInfoDto;
+import jakarta.ws.rs.WebApplicationException;
 
 @Help("Manage attached managed servers on central server")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -254,7 +253,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
             List<InstanceConfiguration> instances = msr.getInstancesControlledBy(config.instanceGroup(), mmd.hostName);
 
             table.row().cell(mmd.hostName).cell(mmd.uri).cell(mmd.description)
-                    .cell(mmd.lastSync != null ? DateHelper.format(mmd.lastSync) : "never").cell(mmd.minions.size())
+                    .cell(mmd.lastSync != null ? FormatHelper.format(mmd.lastSync) : "never").cell(mmd.minions.size())
                     .cell(instances.size()).build();
         }
         return table;

@@ -18,8 +18,8 @@ import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.common.util.UnitHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 
@@ -159,7 +159,7 @@ public class ClientCleanup {
         SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
         long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
         if (sum > 0) {
-            log.info("Removed {} objects (Size={}).", result.size(), UnitHelper.formatFileSize(sum));
+            log.info("Removed {} objects (Size={}).", result.size(), FormatHelper.formatFileSize(sum));
         }
     }
 
