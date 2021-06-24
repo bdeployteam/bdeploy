@@ -57,7 +57,7 @@
     "@types/lodash-es": "^4.17.4",
     "@types/node": "^15.12.4",
     "codelyzer": "^6.0.2",
-    "cypress": "^7.5.0",
+    "cypress": "^7.6.0",
     "cypress-file-upload": "^5.0.8",
     "istanbul-instrumenter-loader": "^3.0.1",
     "istanbul-lib-coverage": "^3.0.0",
