@@ -1,6 +1,5 @@
 ﻿using Bdeploy.Shared;
 using Serilog;
-using System.IO;
 
 namespace Bdeploy.Launcher {
 

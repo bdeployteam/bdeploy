@@ -74,7 +74,7 @@ namespace Bdeploy.Launcher {
             builder.AppendFormat("\"--updateDir={0}\" ", UPDATES);
 
             // Append addional arguments from the command line
-            foreach (String arg in args) {
+            foreach (string arg in args) {
                 builder.AppendFormat("\"{0}\" ", arg);
             }
 

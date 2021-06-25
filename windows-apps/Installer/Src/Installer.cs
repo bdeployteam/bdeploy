@@ -2,6 +2,8 @@
 using Bdeploy.Installer.Models;
 using Bdeploy.Shared;
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -114,13 +116,44 @@ namespace Bdeploy.Installer {
         }
 
         /// <summary>
-        /// Launches the previously installed application. Does not wait for termination
+        /// Launches the previously installed application. 
         /// </summary>
         /// <returns></returns>
-        public void Launch() {
+        public int Launch(String[] arguments, bool waitForTermination) {
             string appUid = config.ApplicationUid;
-            string appShortcut = Path.Combine(appsHome, appUid, "launch.bdeploy");
-            Utils.RunProcess(launcherExe, appShortcut);
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("\"{0}\" ", Path.Combine(appsHome, appUid, "launch.bdeploy"));
+            foreach (String argument in arguments) {
+                builder.AppendFormat("\"{0}\" ", argument);
+            }
+
+            // Startup launcher and wait for termination
+            try {
+                using (Process process = new Process()) {
+                    process.StartInfo.FileName = launcherExe;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.Arguments = builder.ToString();
+                    process.StartInfo.WorkingDirectory = launcherHome;
+                    process.StartInfo.ErrorDialog = false;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    process.StartInfo.RedirectStandardError = true;
+                    process.Start();
+
+                    // Wait until the process terminates
+                    if (waitForTermination) {
+                        process.BeginOutputReadLine();
+                        process.BeginErrorReadLine();
+                        process.WaitForExit();
+                        return process.ExitCode;
+                    }
+                    return 0;
+                }
+            } catch (Win32Exception e) {
+                OnError(e.ToString());
+                return -1;
+            }
         }
 
         /// <summary>
