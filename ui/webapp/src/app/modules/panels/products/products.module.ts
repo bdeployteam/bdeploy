@@ -8,9 +8,10 @@ import { ApplicationComponent } from './components/product-details/templates/app
 import { InstanceComponent } from './components/product-details/templates/instance/instance.component';
 import { ProductUploadComponent } from './components/product-upload/product-upload.component';
 import { ProductsRoutingModule } from './products-routing.module';
+import { ProductSyncComponent } from './components/product-sync/product-sync.component';
 
 @NgModule({
-  declarations: [ProductUploadComponent, ProductDetailsComponent, LabelsComponent, ApplicationComponent, InstanceComponent, PluginsComponent],
+  declarations: [ProductUploadComponent, ProductDetailsComponent, LabelsComponent, ApplicationComponent, InstanceComponent, PluginsComponent, ProductSyncComponent],
   imports: [CommonModule, CoreModule, ProductsRoutingModule],
 })
 export class ProductsModule {}

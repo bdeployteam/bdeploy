@@ -3,12 +3,20 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
       <app-bd-panel-button
-        text="Configure..."
+        text="Configure Parameters..."
         icon="settings"
         [collapsed]="false"
         [disabled]="!(edit.process$ | async)"
         [relative]="true"
         [route]="['edit']"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        text="Configure Endpoints..."
+        icon="settings_ethernet"
+        [collapsed]="false"
+        [disabled]="!(edit.process$ | async)"
+        [relative]="true"
+        [route]="['endpoints']"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Move to Node..."

@@ -58,7 +58,7 @@ export class NavAreasService {
 
         // update the states visible to the flyin part of the main nav.
         this.panelVisible$.next(panelSnapshot ? true : false);
-        this.panelMaximized$.next(panelSnapshot && panelSnapshot.data && panelSnapshot.data['max']);
+        this.panelMaximized$.next(!!panelSnapshot && !!panelSnapshot.data && !!panelSnapshot.data['max']);
 
         // if the component (name) in the primary outlet changed, we want to leave the panel navigation.
         const newPrimaryState = isString(primarySnapshot.component) ? primarySnapshot.component : primarySnapshot.component.name;

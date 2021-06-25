@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, combineLatest, forkJoin, Subscription } from 'rxjs';
@@ -17,7 +16,6 @@ import { ConfigFilesService } from '../../../../services/config-files.service';
 })
 export class CompareComponent implements OnInit, DirtyableDialog {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ file$ = new BehaviorSubject<string>(null);
   /* template */ content = '';
   /* template */ originalContent = '';
@@ -28,30 +26,24 @@ export class CompareComponent implements OnInit, DirtyableDialog {
 
   private subscription: Subscription;
 
-  constructor(private bop: BreakpointObserver, public cfgFiles: ConfigFilesService, private edit: InstanceEditService, areas: NavAreasService) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
-      this.narrow$.next(bs.matches);
+  constructor(public cfgFiles: ConfigFilesService, private edit: InstanceEditService, areas: NavAreasService) {
+    this.subscription = combineLatest([this.cfgFiles.files$, areas.panelRoute$, this.edit.state$]).subscribe(([f, r, s]) => {
+      if (!f || !r || !r.params['file'] || !s?.config?.config?.product) {
+        this.file$.next(null);
+        this.content = null;
+        return;
+      }
+
+      const file = r.params['file'];
+      this.file$.next(file);
+      forkJoin([this.cfgFiles.load(file), this.cfgFiles.loadTemplate(file, s.config.config.product)])
+        .pipe(finalize(() => this.loading$.next(false)))
+        .subscribe(([c, t]) => {
+          this.content = Base64.decode(c);
+          this.originalContent = this.content;
+          this.contentTemplate = Base64.decode(t);
+        });
     });
-
-    this.subscription.add(
-      combineLatest([this.cfgFiles.files$, areas.panelRoute$, this.edit.state$]).subscribe(([f, r, s]) => {
-        if (!f || !r || !r.params['file'] || !s?.config?.config?.product) {
-          this.file$.next(null);
-          this.content = null;
-          return;
-        }
-
-        const file = r.params['file'];
-        this.file$.next(file);
-        forkJoin([this.cfgFiles.load(file), this.cfgFiles.loadTemplate(file, s.config.config.product)])
-          .pipe(finalize(() => this.loading$.next(false)))
-          .subscribe(([c, t]) => {
-            this.content = Base64.decode(c);
-            this.originalContent = this.content;
-            this.contentTemplate = Base64.decode(t);
-          });
-      })
-    );
   }
 
   ngOnInit(): void {}

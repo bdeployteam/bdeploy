@@ -33,6 +33,16 @@
       ></app-bd-panel-button>
 
       <app-bd-panel-button
+        text="Instance Group Permissions"
+        icon="security"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['permissions']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-panel-button>
+
+      <app-bd-panel-button
         text="Maintenance"
         icon="build"
         [collapsed]="false"

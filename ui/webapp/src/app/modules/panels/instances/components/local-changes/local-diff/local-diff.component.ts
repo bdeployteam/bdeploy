@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -11,16 +10,11 @@ import { ConfigPair, NodePair } from '../../../utils/diff-utils';
   styleUrls: ['./local-diff.component.css'],
 })
 export class LocalDiffComponent implements OnInit {
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
 
   private subscription: Subscription;
 
-  constructor(public edit: InstanceEditService, bop: BreakpointObserver) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
-      this.narrow$.next(bs.matches);
-    });
-  }
+  constructor(public edit: InstanceEditService) {}
 
   ngOnInit(): void {
     this.subscription.add(

@@ -1,6 +1,5 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -16,8 +15,6 @@ import { ConfigProcessParamGroupComponent } from './config-process-param-group/c
   styleUrls: ['./configure-process.component.css'],
 })
 export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDialog {
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
-
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
@@ -26,11 +23,8 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
 
   private subscription: Subscription;
 
-  constructor(public edit: ProcessEditService, public instanceEdit: InstanceEditService, bop: BreakpointObserver, areas: NavAreasService) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
-      this.narrow$.next(bs.matches);
-    });
-    this.subscription.add(areas.registerDirtyable(this, 'panel'));
+  constructor(public edit: ProcessEditService, public instanceEdit: InstanceEditService, areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnInit(): void {}

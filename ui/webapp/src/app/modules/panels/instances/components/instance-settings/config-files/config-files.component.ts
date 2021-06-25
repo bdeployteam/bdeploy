@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -16,7 +15,6 @@ import { ConfigFile, ConfigFilesService } from '../../../services/config-files.s
   styleUrls: ['./config-files.component.css'],
 })
 export class ConfigFilesComponent implements OnInit, OnDestroy {
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ records$ = new BehaviorSubject<ConfigFile[]>(null);
   /* template */ columns: BdDataColumn<ConfigFile>[] = this.cfgFileColumns.defaultColumns;
 
@@ -38,16 +36,10 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(bop: BreakpointObserver, public cfgFiles: ConfigFilesService, public cfgFileColumns: ConfigFilesColumnsService) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
-      this.narrow$.next(bs.matches);
+  constructor(public cfgFiles: ConfigFilesService, public cfgFileColumns: ConfigFilesColumnsService) {
+    this.subscription = this.cfgFiles.files$.subscribe((f) => {
+      this.records$.next(f?.filter((f) => f.modification?.type !== FileStatusType.DELETE));
     });
-
-    this.subscription.add(
-      this.cfgFiles.files$.subscribe((f) => {
-        this.records$.next(f?.filter((f) => f.modification?.type !== FileStatusType.DELETE));
-      })
-    );
   }
 
   ngOnInit(): void {}

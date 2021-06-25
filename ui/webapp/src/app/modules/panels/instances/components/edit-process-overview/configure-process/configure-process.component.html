@@ -3,7 +3,6 @@
     header="Configure {{ (edit.process$ | async)?.name }}{{ instanceEdit.hasPendingChanges() ? '*' : '' }}"
     [panel]="true"
     [route]="['..']"
-    [actionCollapsed]="narrow$ | async"
   >
     <div fxFlex="1 0 auto"></div>
     <app-bd-button

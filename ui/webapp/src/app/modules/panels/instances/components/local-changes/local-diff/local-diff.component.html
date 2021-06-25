@@ -1,10 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Compare version {{ (edit.current$ | async)?.instance?.tag }} with local changes"
-    [panel]="true"
-    [route]="['..']"
-    [actionCollapsed]="narrow$ | async"
-  >
+  <app-bd-dialog-toolbar header="Compare version {{ (edit.current$ | async)?.instance?.tag }} with local changes" [panel]="true" [route]="['..']">
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="configPair$ | async as pair" [style.padding-top.px]="2">

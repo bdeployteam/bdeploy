@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -14,30 +13,23 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
   styleUrls: ['./history-view.component.css'],
 })
 export class HistoryViewComponent implements OnInit, OnDestroy {
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ base$ = new BehaviorSubject<string>(null);
   /* template */ config$ = new BehaviorSubject<InstanceConfigCache>(null);
 
   private subscription: Subscription;
 
-  constructor(private areas: NavAreasService, private bop: BreakpointObserver, private details: HistoryDetailsService, public instances: InstancesService) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
-      this.narrow$.next(bs.matches);
+  constructor(private areas: NavAreasService, private details: HistoryDetailsService, public instances: InstancesService) {
+    this.subscription = this.areas.panelRoute$.subscribe((route) => {
+      const base = route?.paramMap?.get('base');
+      if (!base) {
+        this.base$.next(null);
+      } else {
+        this.base$.next(base);
+        this.details.getVersionDetails(base).subscribe((config) => {
+          this.config$.next(config);
+        });
+      }
     });
-
-    this.subscription.add(
-      this.areas.panelRoute$.subscribe((route) => {
-        const base = route?.paramMap?.get('base');
-        if (!base) {
-          this.base$.next(null);
-        } else {
-          this.base$.next(base);
-          this.details.getVersionDetails(base).subscribe((config) => {
-            this.config$.next(config);
-          });
-        }
-      })
-    );
   }
 
   ngOnInit(): void {}

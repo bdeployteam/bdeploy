@@ -7,6 +7,7 @@ import { PluginsComponent } from './components/product-details/plugins/plugins.c
 import { ProductDetailsComponent } from './components/product-details/product-details.component';
 import { ApplicationComponent } from './components/product-details/templates/application/application.component';
 import { InstanceComponent } from './components/product-details/templates/instance/instance.component';
+import { ProductSyncComponent } from './components/product-sync/product-sync.component';
 import { ProductUploadComponent } from './components/product-upload/product-upload.component';
 
 const PPRODUCTS_ROUTES: Route[] = [
@@ -16,6 +17,7 @@ const PPRODUCTS_ROUTES: Route[] = [
   { path: 'details/:key/:tag/templates/application', component: ApplicationComponent, canActivate: [ScopedReadGuard] },
   { path: 'details/:key/:tag/templates/instance', component: InstanceComponent, canActivate: [ScopedReadGuard] },
   { path: 'details/:key/:tag/plugins', component: PluginsComponent, canActivate: [ScopedReadGuard] },
+  { path: 'sync', component: ProductSyncComponent, canActivate: [ScopedWriteGuard] },
 ];
 
 @NgModule({

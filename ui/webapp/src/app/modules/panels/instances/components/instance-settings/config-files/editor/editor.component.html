@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Edit {{ file$ | async }}" [panel]="true" [route]="['..']" [actionCollapsed]="narrow$ | async">
+  <app-bd-dialog-toolbar header="Edit {{ file$ | async }}" [panel]="true" [route]="['..']">
     <div fxFlex="1 0 auto"></div>
     <app-bd-button text="APPLY" color="primary" [collapsed]="false" [disabled]="!isDirty()" (click)="doApply()"></app-bd-button>
   </app-bd-dialog-toolbar>

@@ -7,6 +7,7 @@ import { AddInstanceComponent } from './components/add-instance/add-instance.com
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
+import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
 import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
@@ -25,6 +26,7 @@ import { InstanceSettingsComponent } from './components/instance-settings/instan
 import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
+import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
@@ -46,6 +48,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'settings/nodes', component: NodesComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/templates', component: InstanceTemplatesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/banner', component: BannerComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'settings/ports', component: PortsComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/import', component: ImportInstanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/product', component: ProductUpdateComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/config-files', component: ConfigFilesComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
@@ -72,6 +75,13 @@ const INSTANCES_ROUTES: Route[] = [
   {
     path: 'config/process/:node/:process/edit',
     component: ConfigureProcessComponent,
+    canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard],
+    data: { max: true },
+  },
+  {
+    path: 'config/process/:node/:process/endpoints',
+    component: ConfigureEndpointsComponent,
     canActivate: [ScopedWriteGuard],
     canDeactivate: [DirtyDialogGuard],
     data: { max: true },

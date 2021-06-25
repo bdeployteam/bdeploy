@@ -1,5 +1,7 @@
-import { Component, Input, OnChanges, OnInit, ViewChild } from '@angular/core';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { Component, Input, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdPanelButtonComponent } from '../bd-panel-button/bd-panel-button.component';
 
@@ -8,18 +10,24 @@ import { BdPanelButtonComponent } from '../bd-panel-button/bd-panel-button.compo
   templateUrl: './bd-dialog-toolbar.component.html',
   styleUrls: ['./bd-dialog-toolbar.component.css'],
 })
-export class BdDialogToolbarComponent implements OnInit, OnChanges {
+export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
+  /* template */ narrow$ = new BehaviorSubject<boolean>(true);
+
   @Input() header: string;
   @Input() panel = false;
   @Input() route: any[];
   @Input() relative = true;
   @Input() actionText = 'Back to Overview';
   @Input() actionIcon = 'arrow_back';
-  @Input() actionCollapsed = true;
 
   @ViewChild('backButton', { static: false }) back: BdPanelButtonComponent;
+  private subscription: Subscription;
 
-  constructor(private title: Title, private areas: NavAreasService) {}
+  constructor(private title: Title, private areas: NavAreasService, bop: BreakpointObserver) {
+    this.subscription = combineLatest([bop.observe('(max-width: 800px)'), areas.panelMaximized$]).subscribe(([bs, max]) => {
+      this.narrow$.next(bs.matches || !max);
+    });
+  }
 
   ngOnInit(): void {
     this.ngOnChanges();
@@ -29,6 +37,10 @@ export class BdDialogToolbarComponent implements OnInit, OnChanges {
     if (!this.panel) {
       this.title.setTitle(`BDeploy - ${this.header}`);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   public closePanel() {

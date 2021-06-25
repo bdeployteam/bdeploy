@@ -14,6 +14,7 @@ import { AppTemplateNameComponent } from './components/add-process/app-template-
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
 import { ConfigDescCardsComponent } from './components/config-desc-cards/config-desc-cards.component';
 import { ConfigDescElementComponent } from './components/config-desc-element/config-desc-element.component';
+import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { ConfigProcessHeaderComponent } from './components/edit-process-overview/configure-process/config-process-header/config-process-header.component';
 import { ConfigProcessParamGroupComponent } from './components/edit-process-overview/configure-process/config-process-param-group/config-process-param-group.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
@@ -29,10 +30,12 @@ import { HistoryProcessConfigComponent } from './components/history-process-conf
 import { HistoryViewComponent } from './components/history-view/history-view.component';
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { BannerComponent } from './components/instance-settings/banner/banner.component';
+import { CompareComponent } from './components/instance-settings/config-files/compare/compare.component';
 import { ConfigFilesComponent } from './components/instance-settings/config-files/config-files.component';
 import { DeleteActionComponent } from './components/instance-settings/config-files/delete-action/delete-action.component';
 import { EditActionComponent } from './components/instance-settings/config-files/edit-action/edit-action.component';
 import { EditorComponent } from './components/instance-settings/config-files/editor/editor.component';
+import { ProductSyncComponent } from './components/instance-settings/config-files/product-sync/product-sync.component';
 import { RenameActionComponent } from './components/instance-settings/config-files/rename-action/rename-action.component';
 import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
 import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
@@ -41,6 +44,7 @@ import { InstanceTemplatesComponent } from './components/instance-settings/insta
 import { TemplateMessageDetailsComponent } from './components/instance-settings/instance-templates/template-message-details/template-message-details.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
+import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
 import { UpdateActionComponent } from './components/instance-settings/product-update/update-action/update-action.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
@@ -57,9 +61,7 @@ import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-va
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
-import { ProductSyncComponent } from './components/instance-settings/config-files/product-sync/product-sync.component';
-import { CompareComponent } from './components/instance-settings/config-files/compare/compare.component';
-import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
+import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 
 @NgModule({
   declarations: [
@@ -114,6 +116,8 @@ import { DataFileViewerComponent } from './components/data-file-viewer/data-file
     ProductSyncComponent,
     CompareComponent,
     DataFileViewerComponent,
+    PortsComponent,
+    ConfigureEndpointsComponent,
   ],
   imports: [
     CommonModule,

@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
@@ -17,18 +16,13 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
   /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
   /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
   /* template */ content$ = new Subject<string>();
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ follow$ = new BehaviorSubject<boolean>(false);
 
   private followInterval;
   private offset = 0;
   private subscription: Subscription;
 
-  constructor(private instances: InstancesService, areas: NavAreasService, df: DataFilesService, bop: BreakpointObserver) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
-      this.narrow$.next(bs.matches);
-    });
-
+  constructor(private instances: InstancesService, areas: NavAreasService, df: DataFilesService) {
     this.subscription = combineLatest([areas.panelRoute$, df.directories$]).subscribe(([r, d]) => {
       if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
         return;

@@ -1,4 +1,3 @@
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -18,7 +17,6 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
   /* template */ available$ = new BehaviorSubject<boolean>(false);
   /* template */ hasStdin$ = new BehaviorSubject<boolean>(false);
   /* template */ stdin$ = new BehaviorSubject<boolean>(false);
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ follow$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
@@ -26,11 +24,7 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
 
   private offset = 0;
 
-  constructor(private auth: AuthenticationService, private instances: InstancesService, public details: ProcessDetailsService, bop: BreakpointObserver) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
-      this.narrow$.next(bs.matches);
-    });
-  }
+  constructor(private auth: AuthenticationService, private instances: InstancesService, public details: ProcessDetailsService) {}
 
   ngOnInit(): void {
     this.subscription.add(
