@@ -156,7 +156,7 @@ public class InsertPruneLoadTest {
         long start = System.currentTimeMillis();
 
         String manifestName = System.getProperty("test.manifestName.override", "X") + num;
-        String content = "{" + start + "}";
+        String content = "{" + start + "_" + num + "}";
 
         Optional<Long> currentId = hive.execute(new ManifestMaxIdOperation().setManifestName(manifestName));
         if (currentId.isPresent()) {
