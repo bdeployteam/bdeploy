@@ -177,6 +177,10 @@
     stroke: currentColor;
   }
 
+  .bd-bg-toolbar {
+    background-color: var(--bd-bg-toolbar);
+  }
+
   code {
     background-color: var(--bd-bg-toolbar);
     border-radius: 2px;

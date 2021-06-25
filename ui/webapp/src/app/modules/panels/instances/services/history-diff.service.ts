@@ -250,7 +250,7 @@ export class ApplicationConfigurationDiff {
     }
     this.start = new CommandDiff(base?.start, compare?.start, descriptor?.startCommand);
     this.endpoints = new EndpointsDiff(base?.endpoints, compare?.endpoints);
-    this.type = getParentChangeType(base, compare, this.name.type, this.processControl?.type, this.start.type);
+    this.type = getParentChangeType(base, compare, this.name.type, this.processControl?.type, this.start.type, this.endpoints.type);
 
     this.os = base === null || base === undefined ? getAppOs(compare.application) : getAppOs(base.application);
   }

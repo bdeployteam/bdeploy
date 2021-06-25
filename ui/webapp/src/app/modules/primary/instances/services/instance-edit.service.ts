@@ -284,6 +284,9 @@ export class InstanceEditService {
    */
   public hasPendingChanges(): boolean {
     const concealed = this.reBuild();
+    if (!concealed || !this.state$.value?.config) {
+      return false;
+    }
     return this.hasChanges(concealed.config, this.state$.value?.config);
   }
 

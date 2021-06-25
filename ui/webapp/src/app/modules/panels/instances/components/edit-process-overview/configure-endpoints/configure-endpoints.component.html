@@ -1,4 +1,67 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Configure Endpoints of {{ (edit.process$ | async)?.name }}" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
-  <app-bd-dialog-content> TODO: endpoint configuration. </app-bd-dialog-content>
+  <app-bd-dialog-toolbar header="Configure Endpoints of {{ (edit.process$ | async)?.name }}{{ isDirty() ? '*' : '' }}" [panel]="true" [route]="['..']">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button text="APPLY" [collapsed]="false" color="primary" (click)="doApply()" [disabled]="!isDirty() || isInvalid()"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div *ngIf="edit.process$.value?.endpoints?.http?.length" [style.padding-top.px]="2" fxLayout="column" fxLayoutGap="10px">
+      <div *ngFor="let endpoint of edit.process$.value?.endpoints?.http; let i = index" class="bd-rect-card" fxLayout="column">
+        <div class="bd-bg-toolbar">
+          <div class="bd-default-padding">
+            Endpoint <strong>{{ endpoint.id }} - {{ endpoint.path }}</strong>
+          </div>
+        </div>
+        <div class="bd-default-padding">
+          <form #epForm="ngForm">
+            <div [style.padding-top.px]="20" gdColumns.sm="100%" [gdColumns.gt-sm]="'calc(50% - 5px) calc(50% - 5px)'" gdGap="5px 10px">
+              <app-bd-form-input name="epPort{{ i }}" label="Port" [(ngModel)]="endpoint.port" required></app-bd-form-input>
+              <app-bd-form-select
+                name="epAuthType{{ i }}"
+                label="Authentication"
+                [(ngModel)]="endpoint.authType"
+                [values]="getAuthTypeValues()"
+                [labels]="getAuthTypeLabels()"
+              ></app-bd-form-select>
+              <app-bd-form-input
+                name="epUser{{ i }}"
+                label="User"
+                [(ngModel)]="endpoint.authUser"
+                [disabled]="endpoint.authType === 'NONE'"
+                [required]="endpoint.authType !== 'NONE'"
+              ></app-bd-form-input>
+              <app-bd-form-input
+                name="epPass{{ i }}"
+                label="Password"
+                [(ngModel)]="endpoint.authPass"
+                [disabled]="endpoint.authType === 'NONE'"
+                [required]="endpoint.authType !== 'NONE'"
+                type="password"
+              ></app-bd-form-input>
+              <app-bd-form-toggle name="epSecure{{ i }}" label="Secure (Use HTTPS)" [(ngModel)]="endpoint.secure"></app-bd-form-toggle>
+              <app-bd-form-toggle name="epTrustAll{{ i }}" label="Trust All Certificates" [(ngModel)]="endpoint.trustAll"></app-bd-form-toggle>
+              <app-bd-form-input
+                name="tsPath{{ i }}"
+                label="Trust Store Path"
+                [(ngModel)]="endpoint.trustStore"
+                [disabled]="!endpoint.secure || endpoint.trustAll"
+                [required]="endpoint.secure && !endpoint.trustAll"
+              ></app-bd-form-input>
+              <app-bd-form-input
+                name="tsPass{{ i }}"
+                label="Trust Store Password"
+                [(ngModel)]="endpoint.trustStorePass"
+                [disabled]="!endpoint.secure || endpoint.trustAll"
+                [required]="endpoint.secure && !endpoint.trustAll"
+                type="password"
+              ></app-bd-form-input>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <app-bd-no-data *ngIf="!edit.process$.value?.endpoints?.http?.length">
+      <p>This process has no defined endpoints to configure.</p>
+    </app-bd-no-data>
+  </app-bd-dialog-content>
 </app-bd-dialog>
