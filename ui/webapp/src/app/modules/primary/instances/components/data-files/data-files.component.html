@@ -11,7 +11,13 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <ng-container *ngIf="servers.isSynchronized((instances.current$ | async)?.managedServer)">
-      <app-bd-data-display [records]="records$ | async" [columns]="columns" [grouping]="grouping" [recordRoute]="getRecordRoute">
+      <app-bd-data-table
+        [records]="records$ | async"
+        [columns]="columns"
+        [grouping]="grouping"
+        [recordRoute]="getRecordRoute"
+        [sort]="{ active: 'lastMod', direction: 'desc' }"
+      >
         <app-bd-no-data>
           <p>No data available. This either means that the instance has no active version, or no files exist.</p>
           <p>Try to refresh to fetch current information from the node(s).</p>
@@ -24,7 +30,7 @@
             [disabled]="loading$ | async"
           ></app-bd-button>
         </app-bd-no-data>
-      </app-bd-data-display>
+      </app-bd-data-table>
     </ng-container>
 
     <app-bd-no-data *ngIf="!servers.isSynchronized((instances.current$ | async)?.managedServer)">

@@ -56,7 +56,7 @@ export class DataFilesComponent implements OnInit {
   private readonly colDownload: BdDataColumn<FileListEntry> = {
     id: 'download',
     name: 'Downl.',
-    data: (r) => r,
+    data: (r) => 'Download File',
     action: (r) => this.doDownload(r),
     icon: (r) => 'cloud_download',
     width: '40px',

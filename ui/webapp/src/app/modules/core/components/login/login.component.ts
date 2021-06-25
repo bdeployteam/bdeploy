@@ -14,7 +14,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   private log: Logger = this.loggingService.getLogger('LoginComponent');
 
   private tokenSubscription: Subscription;
-  private returnUrl: string;
 
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
   /* template */ user: string;
@@ -25,19 +24,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   public loginFailed = false;
   public loginFailedMessage;
 
-  constructor(
-    private loggingService: LoggingService,
-    private route: ActivatedRoute,
-    private router: Router,
-    public auth: AuthenticationService
-  ) {}
+  constructor(private loggingService: LoggingService, private route: ActivatedRoute, private router: Router, public auth: AuthenticationService) {}
 
   ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-
     this.tokenSubscription = this.auth.getTokenSubject().subscribe((token) => {
       if (token !== null) {
-        this.router.navigate([this.returnUrl]);
+        const ret = this.route.snapshot.queryParams['returnUrl'];
+        const returnUrl = ret ? ret : '/';
+
+        this.router.navigateByUrl(returnUrl);
       }
     });
   }
