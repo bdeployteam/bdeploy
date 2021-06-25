@@ -347,7 +347,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             Path cfgPath = config.resolve(STATE_FILE);
             Path cfgBakPath = config.resolve(STATE_FILE + ".pre-mig-bak");
             if (Files.exists(cfgPath)) {
-                Files.copy(cfgPath, cfgBakPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(cfgPath, cfgBakPath, StandardCopyOption.REPLACE_EXISTING);
             }
 
             UpdatePackagingMigration.run(this);
