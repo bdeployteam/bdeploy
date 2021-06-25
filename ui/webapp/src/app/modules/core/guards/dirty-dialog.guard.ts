@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanDeactivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
+import { ACTION_CANCEL, ACTION_DISCARD } from '../components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from '../components/bd-dialog/bd-dialog.component';
 import { LoggingService } from '../services/logging.service';
 import { NavAreasService } from '../services/nav-areas.service';
@@ -81,12 +82,19 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
   }
 
   private confirm(component: DirtyableDialog) {
-    return component.dialog.confirm('Unsaved Changes', 'The dialog contains unsaved changes. Are you sure you want to leave the dialog?', 'save').pipe(
-      tap((result) => {
-        if (result) {
-          this.log.info('User confirmed discarding pending changes.');
-        }
+    return component.dialog
+      .message({
+        header: 'Unsaved Changes',
+        message: 'The dialog contains unsaved changes. Leaving the dialog will discard unsaved changes.',
+        icon: 'save',
+        actions: [ACTION_CANCEL, ACTION_DISCARD],
       })
-    );
+      .pipe(
+        tap((result) => {
+          if (result) {
+            this.log.info('User confirmed discarding pending changes.');
+          }
+        })
+      );
   }
 }

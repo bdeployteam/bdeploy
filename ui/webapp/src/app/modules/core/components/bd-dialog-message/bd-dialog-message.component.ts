@@ -47,6 +47,7 @@ export const ACTION_CONFIRM: BdDialogMessageAction<boolean> = { name: 'CONFIRM',
 export const ACTION_APPLY: BdDialogMessageAction<boolean> = { name: 'APPLY', result: true, confirm: true };
 
 export const ACTION_OK: BdDialogMessageAction<boolean> = { name: 'OK', result: true, confirm: true };
+export const ACTION_DISCARD: BdDialogMessageAction<boolean> = { name: 'DISCARD', result: true, confirm: true };
 export const ACTION_CANCEL: BdDialogMessageAction<boolean> = { name: 'CANCEL', result: false, confirm: false };
 
 export const ACTION_YES: BdDialogMessageAction<boolean> = { name: 'YES', result: true, confirm: true };
