@@ -150,5 +150,7 @@ describe('Tests related to the current user', function () {
 
     cy.contains('div', 'Light / Blue').should('exist').click();
     cy.get('body').should('have.class', 'app-light-theme');
+
+    cy.pressMainNavTopButton('Select Theme');
   });
 });

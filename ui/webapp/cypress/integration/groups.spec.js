@@ -84,6 +84,71 @@ describe('Groups Tests', () => {
     cy.verifyProductVersion(groupName, 'Demo Product', '2.0.0');
   });
 
+  it("Checks the product's details panel", function () {
+    cy.visit('/');
+    cy.waitUntilContentLoaded();
+
+    cy.enterGroup(groupName);
+
+    cy.pressMainNavButton('Products');
+    cy.get('app-products-browser').should('exist');
+
+    // open details of Demo Product 2.0.0
+    cy.inMainNavContent(() => {
+      cy.contains('tr', /Demo Product.*2.0.0/)
+        .should('exist')
+        .click();
+    });
+
+    cy.inMainNavFlyin('app-product-details', () => {
+      // check product is unused
+      cy.get('app-bd-no-data').should('exist');
+
+      // "Labels" panel
+      cy.get(`app-bd-panel-button[text="Labels"]`).click();
+      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
+      cy.contains('tr', /X-Product.*io.bdeploy\/demo/).should('exist');
+      cy.pressToolbarButton('Back to Overview');
+
+      // "Application Templates" panel
+      cy.get(`app-bd-panel-button[text="Application Templates"]`).click();
+      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
+      cy.contains('tr', 'Server With Sleep').should('exist');
+      cy.pressToolbarButton('Back to Overview');
+
+      // "Instance Templates" panel
+      cy.get(`app-bd-panel-button[text="Instance Templates"]`).click();
+      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
+      cy.contains('tr', 'Default Configuration').should('exist');
+      cy.pressToolbarButton('Back to Overview');
+
+      // "Plugins" panel
+      cy.get(`app-bd-panel-button[text="Plugins"]`).click();
+      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
+      cy.get('app-bd-no-data').should('exist');
+      cy.pressToolbarButton('Back to Overview');
+
+      // TODO: "Download" button ?
+
+      // TODO: "Create new Instance" button ?
+
+      // "Delete" button
+      cy.get(`app-bd-button[text="Delete"]`).click();
+
+      cy.get('app-bd-notification-card').within(() => {
+        cy.get('button[data-cy="YES"]').should('exist').and('be.enabled').click();
+      });
+    });
+    cy.checkMainNavFlyinClosed();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', /Demo Product.*2.0.0/).should('not.exist');
+    });
+
+    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+    cy.verifyProductVersion(groupName, 'Demo Product', '2.0.0');
+  });
+
   it('Creates an instance', () => {
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
   });
