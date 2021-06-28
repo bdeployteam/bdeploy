@@ -3,12 +3,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { cloneDeep } from 'lodash-es';
 import { Observable, of } from 'rxjs';
 import { CustomAttributeDescriptor, MinionMode } from 'src/app/models/gen.dtos';
+import { CustomAttributeEditComponent } from 'src/app/modules/admin/components/custom-attribute-edit/custom-attribute-edit.component';
+import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
-import { CustomAttributeEditComponent } from 'src/app/modules/legacy/shared/components/custom-attribute-edit/custom-attribute-edit.component';
-import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 
 @Component({
   selector: 'app-settings-instance-group',

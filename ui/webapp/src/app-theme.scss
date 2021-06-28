@@ -16,7 +16,8 @@
 @import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
 @import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
 
-@import 'app/modules/legacy/core/legacy-themes.scss';
+// TODO: remove legacy
+@import 'app/modules/admin/components/file-upload/file-upload-theme.scss';
 
 @mixin all-themes($theme) {
   @include mat.all-component-themes($theme);
@@ -30,7 +31,7 @@
   @include settings-shell-theme($theme);
 
   // TODO: remove legacy
-  @include legacy-themes($theme);
+  @include file-upload-theme($theme);
 
   $dark: map-get($theme, 'is-dark');
 

@@ -6,14 +6,14 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
+import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { UploadStatus } from 'src/app/modules/core/services/upload.service';
-import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
-import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { PluginAdminService } from '../../services/plugin-admin.service';
+import { FileUploadComponent } from '../file-upload/file-upload.component';
 
 @Component({
   selector: 'app-plugins-browser',

@@ -5,9 +5,9 @@ import { finalize } from 'rxjs/operators';
 import { HiveEntryDto, TreeEntryType } from '../../../../models/gen.dtos';
 import { DownloadService } from '../../../core/services/download.service';
 import { Logger, LoggingService } from '../../../core/services/logging.service';
-import { MessageBoxMode } from '../../../legacy/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from '../../../legacy/shared/services/messagebox.service';
 import { HiveService } from '../../services/hive.service';
+import { MessageboxService } from '../../services/messagebox.service';
+import { MessageBoxMode } from '../messagebox/messagebox.component';
 
 @Component({
   selector: 'app-hive',

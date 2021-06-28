@@ -77,35 +77,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
-  // LEGACY ROUTES
-  {
-    path: 'l/instancegroup',
-    loadChildren: () => import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
-  },
-  {
-    // TESTING
-    path: 'ig-side',
-    outlet: 'panel',
-    loadChildren: () => import('./modules/legacy/instance-group/instance-group.module').then((x) => x.InstanceGroupModule),
-  },
-  {
-    path: 'l/instance',
-    loadChildren: () => import('./modules/legacy/instance/instance.module').then((x) => x.InstanceModule),
-  },
-  {
-    path: 'l/softwarerepo',
-    loadChildren: () => import('./modules/legacy/repositories/repositories.module').then((x) => x.RepositoriesModule),
-  },
-  {
-    path: 'l/servers',
-    loadChildren: () => import('./modules/legacy/servers/servers.module').then((x) => x.ServersModule),
-  },
-  {
-    path: 'l/configfiles',
-    loadChildren: () => import('./modules/legacy/config-files/config-files.module').then((x) => x.ConfigFilesModule),
-  },
-  // END LEGACY ROUTES
-
   {
     path: '**',
     component: MainNavComponent, // This is a DUMMY! the NotFoundGuard will /always/ redirect

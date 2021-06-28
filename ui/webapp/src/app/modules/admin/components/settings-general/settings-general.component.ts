@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
+import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
 import { SettingsService } from '../../../core/services/settings.service';
 
 @Component({

@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { ManifestKey, OperatingSystem } from 'src/app/models/gen.dtos';
+import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
+import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
-import { FileUploadComponent } from 'src/app/modules/legacy/shared/components/file-upload/file-upload.component';
-import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { SoftwareUpdateService } from '../../services/software-update.service';
+import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { UpdateDialogComponent } from '../update-dialog/update-dialog.component';
 
 export class GroupedKeys {

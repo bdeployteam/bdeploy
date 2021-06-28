@@ -2,9 +2,9 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
-import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
-import { TextboxComponent } from 'src/app/modules/legacy/shared/components/textbox/textbox.component';
-import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
+import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
+import { TextboxComponent } from 'src/app/modules/admin/components/textbox/textbox.component';
+import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
 import { AuthAdminService } from '../../services/auth-admin.service';
 
 @Component({

@@ -7,14 +7,14 @@ import { cloneDeep } from 'lodash-es';
 import { Subscription } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
+import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
+import { UserEditComponent } from 'src/app/modules/admin/components/user-edit/user-edit.component';
+import { UserPasswordComponent } from 'src/app/modules/admin/components/user-password/user-password.component';
+import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
-import { UserEditComponent } from 'src/app/modules/legacy/core/components/user-edit/user-edit.component';
-import { UserPasswordComponent } from 'src/app/modules/legacy/core/components/user-password/user-password.component';
-import { MessageBoxMode } from 'src/app/modules/legacy/shared/components/messagebox/messagebox.component';
-import { MessageboxService } from 'src/app/modules/legacy/shared/services/messagebox.service';
 import { AuthAdminService } from '../../services/auth-admin.service';
 import { UserGlobalPermissionsComponent } from '../user-global-permissions/user-global-permissions.component';
 

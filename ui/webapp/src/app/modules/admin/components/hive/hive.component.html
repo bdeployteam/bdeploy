@@ -3,48 +3,26 @@
     <button class="back-button" mat-icon-button (click)="back()"><mat-icon>chevron_left</mat-icon></button>
     <mat-chip-list>
       <mat-chip (click)="selectTop()" color="accent" selected><mat-icon>home</mat-icon></mat-chip>
-      <mat-chip
-        *ngFor="let p of paths[_hive]; index as i"
-        (click)="selectHistory(i); hivetable ? hivetable.renderRows() : null"
-      >
+      <mat-chip *ngFor="let p of paths[_hive]; index as i" (click)="selectHistory(i); hivetable ? hivetable.renderRows() : null">
         <mat-icon>{{ getIcon(p) }}</mat-icon>
         <div [style.width.px]="6"></div>
         {{ p.name }}
       </mat-chip>
     </mat-chip-list>
     <div class="flex-spacer"></div>
-    <app-remote-progress [scope]="[_hive]"></app-remote-progress>
-    <button
-      mat-icon-button
-      (click)="fsckHive(false)"
-      class="icon-button"
-      matTooltip="Check BHive for errors."
-      [disabled]="longRunningOperation"
-    >
+    <button mat-icon-button (click)="fsckHive(false)" class="icon-button" matTooltip="Check BHive for errors." [disabled]="longRunningOperation">
       <mat-icon>bug_report</mat-icon>
     </button>
-    <button
-      mat-icon-button
-      (click)="fsckHive(true)"
-      class="icon-button"
-      matTooltip="Fix any errors in the BHive."
-      [disabled]="longRunningOperation"
-    >
+    <button mat-icon-button (click)="fsckHive(true)" class="icon-button" matTooltip="Fix any errors in the BHive." [disabled]="longRunningOperation">
       <mat-icon>build</mat-icon>
     </button>
-    <button
-      mat-icon-button
-      (click)="pruneHive()"
-      class="icon-button"
-      matTooltip="Prune unused elements from the BHive."
-      [disabled]="longRunningOperation"
-    >
+    <button mat-icon-button (click)="pruneHive()" class="icon-button" matTooltip="Prune unused elements from the BHive." [disabled]="longRunningOperation">
       <mat-icon>delete_sweep</mat-icon>
     </button>
   </div>
 
   <table mat-table [dataSource]="entries" #hivetable *ngIf="!fileEntry">
-    <caption style="display: none;">
+    <caption style="display: none">
       BHive Contents
     </caption>
 
@@ -72,12 +50,7 @@
     <ng-container matColumnDef="delete">
       <th scope="col" mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let element" align="right">
-        <mat-icon
-          class="icon-button"
-          (click)="delete(element)"
-          *ngIf="isTopLevelManifest(element)"
-          matTooltip="Delete File"
-          matTooltipShowDelay="1000"
+        <mat-icon class="icon-button" (click)="delete(element)" *ngIf="isTopLevelManifest(element)" matTooltip="Delete File" matTooltipShowDelay="1000"
           >delete</mat-icon
         >
       </td>
@@ -86,9 +59,7 @@
     <ng-container matColumnDef="download">
       <th scope="col" mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let element" align="right">
-        <mat-icon class="icon-button" (click)="download(element)" matTooltip="Download File" matTooltipShowDelay="1000"
-          >cloud_download</mat-icon
-        >
+        <mat-icon class="icon-button" (click)="download(element)" matTooltip="Download File" matTooltipShowDelay="1000">cloud_download</mat-icon>
       </td>
     </ng-container>
 
@@ -108,9 +79,7 @@
       <hr />
       <div *ngIf="fileContentLoading" class="file-nocontent"><mat-spinner [diameter]="48"></mat-spinner></div>
       <div *ngIf="!fileContentLoading && !fileContent" class="file-nocontent">
-        This view is limited to {{ FILE_SIZE_LIMIT }} bytes. You can&nbsp;<a
-          href="#"
-          (click)="loadFileContent(fileEntry)"
+        This view is limited to {{ FILE_SIZE_LIMIT }} bytes. You can&nbsp;<a href="#" (click)="loadFileContent(fileEntry)"
           >display this file on your own risk</a
         >
         &nbsp;or&nbsp;<a href="#" (click)="download(fileEntry)">download</a>&nbsp;it.

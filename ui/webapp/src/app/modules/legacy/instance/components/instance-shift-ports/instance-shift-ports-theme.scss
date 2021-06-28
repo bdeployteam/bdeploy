@@ -1,9 +1,0 @@
-@use '~@angular/material' as mat;
-
-@mixin instance-shift-ports-theme($theme) {
-  $warn: map-get($theme, 'warn');
-
-  .port-target-bad {
-    color: mat.get-color-from-palette($warn);
-  }
-}

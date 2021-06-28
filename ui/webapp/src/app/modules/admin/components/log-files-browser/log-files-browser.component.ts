@@ -11,7 +11,6 @@ import { Base64 } from 'js-base64';
 import { Observable, of, Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
-import { RoutingHistoryService } from 'src/app/modules/legacy/core/services/routing-history.service';
 import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from '../../../../models/gen.dtos';
 import { LoggingAdminService } from '../../services/logging-admin.service';
 
@@ -56,7 +55,6 @@ export class LogFilesBrowserComponent implements OnInit, OnDestroy, BdSearchable
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
     public location: Location,
-    public routingHistoryService: RoutingHistoryService,
     public authService: AuthenticationService,
     private loggingAdmin: LoggingAdminService,
     private dialog: MatDialog,
@@ -144,13 +142,7 @@ export class LogFilesBrowserComponent implements OnInit, OnDestroy, BdSearchable
 
   getOutputContentFetcher(): (offset: number, limit: number) => Observable<StringEntryChunkDto> {
     return (offset, limit) => {
-      return this.loggingAdmin.getLogContentChunk(
-        this.activeRemoteDirectory,
-        this.activeRemoteDirectoryEntry,
-        offset,
-        limit,
-        true
-      );
+      return this.loggingAdmin.getLogContentChunk(this.activeRemoteDirectory, this.activeRemoteDirectoryEntry, offset, limit, true);
     };
   }
 
@@ -158,11 +150,7 @@ export class LogFilesBrowserComponent implements OnInit, OnDestroy, BdSearchable
     return () => this.loggingAdmin.downloadLogFileContent(this.activeRemoteDirectory, this.activeRemoteDirectoryEntry);
   }
 
-  openOutputOverlay(
-    remoteDirectory: RemoteDirectory,
-    remoteDirectoryEntry: RemoteDirectoryEntry,
-    template: TemplateRef<any>
-  ) {
+  openOutputOverlay(remoteDirectory: RemoteDirectory, remoteDirectoryEntry: RemoteDirectoryEntry, template: TemplateRef<any>) {
     this.activeRemoteDirectory = remoteDirectory;
     this.activeRemoteDirectoryEntry = remoteDirectoryEntry;
 
