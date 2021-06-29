@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -238,7 +239,8 @@ public class InstanceNodeController {
         ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolvers, dc);
         try {
             Files.write(paths.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON),
-                    StorageHelper.toRawBytes(processGroupConfig));
+                    StorageHelper.toRawBytes(processGroupConfig), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.SYNC);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot write PCU information", e);
         }
@@ -314,7 +316,8 @@ public class InstanceNodeController {
         try {
             String content = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
             String processed = TemplateHelper.process(content, resolver);
-            Files.write(file, processed.getBytes(StandardCharsets.UTF_8));
+            Files.write(file, processed.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
         } catch (Exception e) {
             // might have missing variable references, since we only 'see' what is on our node. Applications from other nodes are not available.
             log.warn("Cannot process configuration file: {}", file);

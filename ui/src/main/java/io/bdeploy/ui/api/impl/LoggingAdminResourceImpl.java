@@ -5,13 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
-
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -26,6 +21,11 @@ import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
 import io.bdeploy.ui.api.LoggingAdminResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class LoggingAdminResourceImpl implements LoggingAdminResource {
 
@@ -86,7 +86,8 @@ public class LoggingAdminResourceImpl implements LoggingAdminResource {
         Path temp = null;
         try {
             temp = Files.createTempFile(minion.getTempDir(), "log4j2-", ".xml");
-            Files.write(temp, Base64.decodeBase64(config));
+            Files.write(temp, Base64.decodeBase64(config), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.SYNC);
             CommonRootResource root = ResourceProvider.getResource(minion.getSelf(), CommonRootResource.class, context);
             root.setLoggerConfig(temp);
         } catch (IOException e) {

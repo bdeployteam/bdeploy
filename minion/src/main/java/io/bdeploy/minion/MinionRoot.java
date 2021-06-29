@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -574,7 +575,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         Path cfgBakPath = config.resolve(name + ".bak");
 
         try {
-            Files.write(cfgTmpPath, StorageHelper.toRawBytes(cfg));
+            Files.write(cfgTmpPath, StorageHelper.toRawBytes(cfg), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
             if (Files.exists(cfgPath)) {
                 Files.move(cfgPath, cfgBakPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
             }

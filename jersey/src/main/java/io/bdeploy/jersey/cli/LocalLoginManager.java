@@ -6,16 +6,11 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-import jakarta.ws.rs.core.UriBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +19,12 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Manages stored local login sessions for CLI or build tools.
@@ -56,7 +57,8 @@ public class LocalLoginManager {
                 Files.createFile(getDataFile());
             }
 
-            try (OutputStream os = Files.newOutputStream(getDataFile())) {
+            try (OutputStream os = Files.newOutputStream(getDataFile(), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC)) {
                 JacksonHelper.createObjectMapper(MapperType.JSON).writeValue(os, data);
             }
         } catch (IOException e) {
