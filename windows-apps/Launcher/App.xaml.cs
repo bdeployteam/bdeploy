@@ -1,4 +1,5 @@
-﻿using Bdeploy.Shared;
+﻿using Bdeploy.Launcher.Views;
+using Bdeploy.Shared;
 using Serilog;
 using System;
 using System.IO;
@@ -23,7 +24,7 @@ namespace Bdeploy.Launcher {
         async void App_Startup(object sender, StartupEventArgs e) {
             // Set the shutdown mode. Otherwise we won't be able to 
             // Show the same window multiple times in our callback
-            this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             // Initialize logging infrastructure
             string path = Path.Combine(LogFactory.GetLogsDir(), "launcher-log.txt");
@@ -63,6 +64,7 @@ namespace Bdeploy.Launcher {
             launcher.UpdateFailed += Launcher_UpdateFailed;
             launcher.UpdateWaiting += Launcher_UpdateWaiting;
             launcher.StartUpdating += Launcher_StartUpdating;
+            launcher.LaunchFailed += Launcher_LaunchFailed;
             int exitCode = launcher.Start(args);
 
             // Check if another launcher has launched us
@@ -151,7 +153,17 @@ namespace Bdeploy.Launcher {
         /// </summary>
         private void Launcher_UpdateFailed(object sender, RetryCancelEventArgs e) {
             Dispatcher.Invoke(() => {
-                ErrorWindow window = new ErrorWindow(e);
+                UpdateFailedWindow window = new UpdateFailedWindow(e);
+                window.ShowDialog();
+            });
+        }
+
+        /// <summary>
+        /// Event raised by the launcher in case that launching the Java JVM fails.
+        /// </summary>
+        private void Launcher_LaunchFailed(object sender, MessageEventArgs e) {
+            Dispatcher.Invoke(() => {
+                LaunchFailedWindow window = new LaunchFailedWindow(e);
                 window.ShowDialog();
             });
         }

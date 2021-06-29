@@ -30,6 +30,13 @@ public class VersionHelper {
         return version;
     }
 
+    public static String getVersionAsString() {
+        if (isRunningUndefined()) {
+            return "undefined";
+        }
+        return version.toString();
+    }
+
     public static Properties getProperties() {
         Properties copy = new Properties();
         copy.putAll(properties);

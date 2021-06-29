@@ -3,12 +3,12 @@ using System.Windows.Input;
 
 namespace Bdeploy.Launcher {
     /// <summary>
-    /// Interaction logic for ErrorWindow.xaml
+    /// Interaction logic for UpdateFailedWindow.xaml
     /// </summary>
-    public partial class ErrorWindow : Window {
+    public partial class UpdateFailedWindow : Window {
         private readonly RetryCancelEventArgs eventArgs;
 
-        public ErrorWindow(RetryCancelEventArgs eventArgs) {
+        public UpdateFailedWindow(RetryCancelEventArgs eventArgs) {
             this.eventArgs = eventArgs;
             InitializeComponent();
         }

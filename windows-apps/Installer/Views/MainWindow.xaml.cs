@@ -54,7 +54,7 @@ namespace Bdeploy.Installer {
                 // If we installed an application then we automically close the window
                 // If we just installed the launcher we show the success view.
                 if (installer.config.CanInstallApp()) {
-                    installer.Launch();
+                    installer.Launch(new string[0], false);
                     Close();
                 } else {
                     WindowContent.Content = launchView;

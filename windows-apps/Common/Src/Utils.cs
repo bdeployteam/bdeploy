@@ -1,14 +1,49 @@
 ﻿using System;
+using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Principal;
+using System.Text;
 
 namespace Bdeploy.Shared {
     public class Utils {
 
         public static readonly int OPERATION_CANCELED = -2;
+
+        /// <summary>
+        /// Enriches the given error message with additional details about the system environment
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static string GetDetailedErrorMessage(string message) {
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("*** Date: {0}", DateTime.Now.ToString("dd.MM.yyyy hh:mm:ss"));
+            builder.AppendLine().AppendLine();
+
+            builder.AppendFormat("*** Error:").AppendLine();
+            builder.Append(message);
+            builder.AppendLine().AppendLine();
+
+            builder.AppendFormat("*** Application:").AppendLine();
+            builder.Append(Environment.CommandLine);
+            builder.AppendLine().AppendLine();
+
+            builder.Append("*** System environment variables: ").AppendLine();
+            foreach (DictionaryEntry entry in Environment.GetEnvironmentVariables()) {
+                builder.AppendFormat("{0}={1}", entry.Key, entry.Value).AppendLine();
+            }
+            builder.AppendLine();
+
+            builder.Append("*** Operating system: ").AppendLine();
+            builder.Append(ReadValueName("ProductName")).Append(Environment.NewLine);
+            builder.AppendFormat("Version {0} (OS Build {1}.{2})", ReadValueName("ReleaseId"), ReadValueName("CurrentBuildNumber"), ReadValueName("UBR"));
+            builder.AppendLine();
+
+            return builder.ToString();
+        }
 
         /// <summary>
         /// Returns whether or not the given array contains the given value
@@ -78,6 +113,10 @@ namespace Bdeploy.Shared {
                 // Thrown when the user cancels the UAC dialog
                 return OPERATION_CANCELED;
             }
+        }
+
+        private static string ReadValueName(String valueName) {
+            return Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", valueName, "").ToString();
         }
     }
 }

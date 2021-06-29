@@ -37,4 +37,13 @@ public class TransferStatistics {
         return result;
     }
 
+    /**
+     * Returns a string with the all statistics in a human readable format.
+     */
+    public Object toLogString() {
+        return String.format("Total size %1$s, Manifests %2$s, Total files %3$s, Duration %4$s, Transfer Rate %5$s",
+                FormatHelper.formatFileSize(transferSize), sumManifests, sumMissingObjects, FormatHelper.formatDuration(duration),
+                FormatHelper.formatTransferRate(transferSize, duration));
+    }
+
 }

@@ -48,7 +48,7 @@ public class MdcLogger {
     /**
      * The key to which all MDC data is associated with.
      */
-    private static final String MDC_NAME = "BDEPLOY";
+    public static final String MDC_NAME = "BDEPLOY";
 
     private final Logger logger;
     private Object[] mdcData = new Object[0];

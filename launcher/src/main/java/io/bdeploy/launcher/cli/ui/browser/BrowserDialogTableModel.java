@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 import javax.swing.table.AbstractTableModel;
 
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 
@@ -22,6 +23,7 @@ class BrowserDialogTableModel extends AbstractTableModel {
     public static final int COL_PURPOSE = 3;
     public static final int COL_PRODUCT = 4;
     public static final int COL_REMOTE = 5;
+    public static final int COL_LVERSION = 6;
 
     private final List<ClientSoftwareConfiguration> apps = new ArrayList<>();
 
@@ -79,7 +81,7 @@ class BrowserDialogTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 6;
+        return 7;
     }
 
     @Override
@@ -97,6 +99,8 @@ class BrowserDialogTableModel extends AbstractTableModel {
                 return "Product";
             case COL_REMOTE:
                 return "Remote";
+            case COL_LVERSION:
+                return "Launcher Version";
             default:
                 return null;
         }
@@ -142,6 +146,11 @@ class BrowserDialogTableModel extends AbstractTableModel {
                 return metadata.product.getTag();
             case COL_REMOTE:
                 return app.clickAndStart.host.getUri().toString();
+            case COL_LVERSION:
+                if (app.launcher == null) {
+                    return VersionHelper.getVersion().toString();
+                }
+                return app.launcher.getTag();
             default:
                 return null;
         }

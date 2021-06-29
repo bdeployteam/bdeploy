@@ -7,7 +7,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 
 /**
- * Stores software is used by a given application.
+ * Stores software used by a given application.
  */
 public class ClientSoftwareConfiguration {
 
