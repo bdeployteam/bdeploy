@@ -4,6 +4,7 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -97,6 +98,27 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
      */
     public CopyOperation addObject(ObjectId object) {
         objects.add(object);
+        return this;
+    }
+
+    /**
+     * Add an {@link ObjectId}s to be copied into the destination hive
+     */
+    public CopyOperation addObject(Collection<ObjectId> objectIds) {
+        this.objects.addAll(objectIds);
+        return this;
+    }
+
+    /**
+     * Adds multiple {@link Manifest}s to be inserted into the destination hive.
+     * <p>
+     * CAUTION: this will only insert the manifest, NO object which is
+     * required/referenced by the manifest will be copied automatically. All
+     * {@link ObjectId}s to be copied need to be added using
+     * {@link #addObject(ObjectId)}.
+     */
+    public CopyOperation addManifest(Collection<Manifest.Key> keys) {
+        manifests.addAll(keys);
         return this;
     }
 

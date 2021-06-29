@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -34,8 +35,10 @@ import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.LockDirectoryOperation;
+import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
@@ -256,9 +259,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             // Launch the application or delegate launching
             Process process = null;
             if (shouldDelegate(runningVersion, requiredVersion)) {
-                log.info("Server is running an older version. Application cannot be started with this launcher. ");
+                log.info("Application cannot be started with this launcher: Server is running an older version.");
                 log.info("Delegating to launcher {}", requiredVersion);
-                doInstallSideBySide(hive, reporter, requiredLauncher);
+                doExecuteLocked(hive, reporter, () -> {
+                    doInstallLauncherSideBySide(hive, reporter, requiredLauncher);
+                    doInstallAppSideBySide(hive, reporter, requiredLauncher);
+                    return null;
+                });
                 process = doDelegateLaunch(requiredVersion, config.launch());
                 log.info("Launcher successfully launched. PID={}", process.pid());
                 log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
@@ -567,7 +574,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Application is already installed. Nothing to install/update.");
                 return;
             }
-            log.info("Application needs to be installed/updated. Following parts are missing {}", missing);
+            log.info("Application needs to be installed/updated: {}", missing);
         } catch (Exception e) {
             log.warn("Failed to verify that application is installed, re-installing", e);
         }
@@ -664,7 +671,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Meta-Manifest about the installation must be there
         // and must refer to what the application actually requires
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.uid);
+        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.uid, false);
         if (clientConfig == null) {
             missing.add("Meta-Manifest:" + clientAppCfg.appConfig.uid);
         } else {
@@ -672,6 +679,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             applications.removeAll(clientConfig.requiredSoftware);
             if (!applications.isEmpty()) {
                 missing.add("Meta-Manifest-Entry: " + applications);
+            }
+
+            // Remove reference to the launcher
+            if (clientConfig.launcher != null) {
+                missing.add("Delete Meta-Manifest: " + clientConfig.launcher);
             }
         }
         return missing;
@@ -735,57 +747,86 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
-     * Installs the launcher required to launch the application side-by-side to this launcher. If the launcher is already
-     * installed then nothing will be done.
+     * Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed
      */
-    private void doInstallSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
-        // Check if the launcher is already installed
+    private void doInstallLauncherSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
         Version version = requiredLauncher.getKey();
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
         Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
 
-        // Install missing launcher
         Key launcher = requiredLauncher.getValue();
-        doExecuteLocked(hive, reporter, () -> {
-            if (nativeLauncher.toFile().exists()) {
-                log.info("Launcher is already installed. Nothing to install.");
-                return null;
-            }
-            log.info("Installing required launcher ...");
-            if (PathHelper.isReadOnly(homeDir)) {
-                throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
-            }
-            // Fetch and write to target directory
-            try (Transaction t = hive.getTransactions().begin()) {
-                hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
-            }
-            Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
-            hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
-            log.info("Launcher successfully installed.");
-            return null;
-        });
-
-        // Write manifest entry that the launcher needs to be retained
-        ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration storedConfig = manifest.readNewest(clickAndStart.applicationId);
-        if (storedConfig != null && storedConfig.launcher != null && storedConfig.launcher.equals(launcher)) {
+        if (nativeLauncher.toFile().exists()) {
+            log.info("Launcher is already installed.");
             return;
         }
-        // Ensure we have write permissions
+        log.info("Installing required launcher ...");
+        if (PathHelper.isReadOnly(homeDir)) {
+            throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
+        }
+        // Fetch and write to target directory
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+        }
+        Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
+        hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
+        log.info("Launcher successfully installed.");
+    }
+
+    /**
+     * Copies software that the application is using from our hive to the side-by-side hive.
+     */
+    private void doInstallAppSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
+        // Check if the stored configuration references the required launcher
+        // If so then we can continue. There is nothing that we need to do
+        Version version = requiredLauncher.getKey();
+        ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
+        ClientSoftwareConfiguration config = manifest.readNewest(clickAndStart.applicationId, true);
+        Key launcher = requiredLauncher.getValue();
+        if (config.launcher != null && config.launcher.equals(launcher)) {
+            log.info("Client software manifest is up-2-date.");
+            return;
+        }
+
+        Path homeDir = ClientPathHelper.getHome(rootDir, version);
         if (PathHelper.isReadOnly(homeDir)) {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
         }
-        // Write updated manifest
-        doExecuteLocked(hive, reporter, () -> {
-            ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
-            newConfig.launcher = launcher;
-            newConfig.clickAndStart = clickAndStart;
-            if (storedConfig != null) {
-                newConfig.metadata = storedConfig.metadata;
+
+        // Protocol that this launcher needs to be retained
+        // NOTE: We are intentionally not clearing out the required software entry
+        // As a result the software will be retained in our hive
+        // If the server hosting this application is upgraded the user do not need
+        // to download everything again. Thus start times remain fast.
+        config.launcher = launcher;
+        config.clickAndStart = clickAndStart;
+        manifest.update(clickAndStart.applicationId, config);
+
+        // We never started this application so we do not know which software it is using
+        if (config.requiredSoftware.isEmpty()) {
+            log.info("Skip copying required software: Application has never been started with this launcher.");
+            return;
+        }
+
+        // Copy the required software from our hive to the target hive
+        log.info("Copy required software ...");
+        Path hiveDir = homeDir.resolve("bhive");
+        try (BHive otherHive = new BHive(hiveDir.toUri(), reporter)) {
+            otherHive.setLockContentSupplier(LOCK_CONTENT);
+            otherHive.setLockContentValidator(LOCK_VALIDATOR);
+
+            Set<ObjectId> requiredObjects = hive.execute(new ObjectListOperation().addManifest(config.requiredSoftware));
+            TransferStatistics stats = hive.execute(new CopyOperation().setDestinationHive(otherHive).addObject(requiredObjects)
+                    .addManifest(config.requiredSoftware));
+            if (stats.sumManifests == 0) {
+                log.info("Hive already contains all required files.");
+            } else {
+                log.info("Copied missing files from this hive. {}", stats.toLogString());
             }
-            manifest.update(clickAndStart.applicationId, newConfig);
-            return null;
-        });
+        } catch (Exception ex) {
+            // We just log the error and continue
+            // The other launcher will download the required software
+            log.warn("Failed to copy required software.", ex);
+        }
     }
 
     /**

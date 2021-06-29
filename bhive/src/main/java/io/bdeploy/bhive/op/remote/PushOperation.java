@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -17,8 +18,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import jakarta.ws.rs.core.UriBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +39,7 @@ import io.bdeploy.bhive.op.ObjectWriteOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Pushes manifests from the local {@link BHive} to a remote {@link BHive}. If no
@@ -155,6 +155,11 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
     public PushOperation addManifest(Manifest.Key key) {
         manifests.add(key);
+        return this;
+    }
+
+    public PushOperation addManifest(Collection<Manifest.Key> keys) {
+        manifests.addAll(keys);
         return this;
     }
 

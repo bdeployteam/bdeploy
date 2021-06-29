@@ -58,17 +58,16 @@ public class ReportingInputStream extends FilterInputStream {
         long elapsedTime = now - start;
         long bytesRemaining = bytesTotal - bytesRead;
 
-        // Update activity once per second
+        // Update activity twice per second
         long timeSinceLastUpdate = now - lastUpdate;
-        if (timeSinceLastUpdate >= 1000 && elapsedTime >= 1000) {
-            long remainingTimeMs = (elapsedTime * bytesRemaining) / bytesRead;
-            String transferRate = FormatHelper.formatTransferRate(bytesTotal, elapsedTime);
-            String fSizeRead = FormatHelper.formatFileSize(bytesRead);
-            String fTotalSize = FormatHelper.formatFileSize(bytesTotal);
-            String fRemaining = FormatHelper.formatRemainingTime(remainingTimeMs).trim() + " remaining";
-
-            activity.activity(String.format(ACTIVITY_TEMPLATE, activityName, transferRate, fSizeRead, fTotalSize, fRemaining));
-            activity.worked(bytesToReport);
+        if (timeSinceLastUpdate >= 500 && elapsedTime >= 1000) {
+            // If the remaining bytes are negative then we received more bytes than expected
+            // We stop progress reporting as we cannot know how much more bytes are send and so we cannot calculate any statistics
+            if (bytesRemaining < 0) {
+                activity.activity(activityName);
+            } else {
+                notifyWorked(now, elapsedTime, bytesRemaining);
+            }
 
             // Reset counters for the next update
             bytesToReport = 0;
@@ -84,6 +83,17 @@ public class ReportingInputStream extends FilterInputStream {
         int result = in.read();
         activity.worked(1);
         return result;
+    }
+
+    private void notifyWorked(long now, long elapsedTime, long bytesRemaining) {
+        long remainingTimeMs = (elapsedTime * bytesRemaining) / bytesRead;
+        String transferRate = FormatHelper.formatTransferRate(bytesTotal, elapsedTime);
+        String fSizeRead = FormatHelper.formatFileSize(bytesRead);
+        String fTotalSize = FormatHelper.formatFileSize(bytesTotal);
+        String fRemaining = FormatHelper.formatRemainingTime(remainingTimeMs).trim() + " remaining";
+
+        activity.activity(String.format(ACTIVITY_TEMPLATE, activityName, transferRate, fSizeRead, fTotalSize, fRemaining));
+        activity.worked(bytesToReport);
     }
 
 }

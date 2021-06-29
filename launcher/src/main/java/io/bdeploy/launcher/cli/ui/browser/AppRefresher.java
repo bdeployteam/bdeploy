@@ -62,7 +62,7 @@ public class AppRefresher extends SwingWorker<Void, Object> {
                 clickAndStart.applicationId);
 
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration csc = manifest.readNewest(clickAndStart.applicationId);
+        ClientSoftwareConfiguration csc = manifest.readNewest(clickAndStart.applicationId, false);
         csc.metadata = ClientApplicationDto.create(clickAndStart, cac);
         manifest.update(clickAndStart.applicationId, csc);
     }

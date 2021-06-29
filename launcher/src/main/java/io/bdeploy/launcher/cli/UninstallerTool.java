@@ -69,7 +69,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
             // Delegate removal to the delegated application
             ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
-            ClientSoftwareConfiguration config = cmf.readNewest(appUid);
+            ClientSoftwareConfiguration config = cmf.readNewest(appUid, false);
             if (config != null && config.launcher != null) {
                 Version version = VersionHelper.tryParse(config.launcher.getTag());
                 doUninstallVersioned(rootDir, version, appUid);

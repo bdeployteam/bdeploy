@@ -14,7 +14,8 @@ public class ClientSoftwareConfiguration {
     /**
      * The key of the launcher required for this software.
      * <p>
-     * This key is ONLY written in case that launching of the application is delegated to another launcher.
+     * This key is ONLY written in case that launching of the application is delegated to another launcher. This information is
+     * used during cleanup so that the launcher is kept as long as at least one software manifest is referencing it.
      * </p>
      */
     public Manifest.Key launcher;
@@ -32,9 +33,6 @@ public class ClientSoftwareConfiguration {
 
     /**
      * The software that is required by the application.
-     * <p>
-     * This key is ONLY written in case that the application is directly launched.
-     * </p>
      */
     public Collection<Manifest.Key> requiredSoftware = new ArrayList<>();
 
