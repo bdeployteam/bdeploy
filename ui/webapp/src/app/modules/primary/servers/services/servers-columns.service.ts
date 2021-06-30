@@ -3,7 +3,6 @@ import { format } from 'date-fns';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
-import { ServersService } from './servers.service';
 
 @Injectable({
   providedIn: 'root',
@@ -56,5 +55,7 @@ export class ServersColumnsService {
     this.serverSyncColumn,
   ];
 
-  constructor(private servers: ServersService) {}
+  public defaultReducedServerColumns: BdDataColumn<ManagedMasterDto>[] = [this.serverNameColumn, this.serverDescColumn];
+
+  constructor() {}
 }

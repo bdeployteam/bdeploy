@@ -23,7 +23,10 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.jersey.JerseyScopeService;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.impl.ChangeEventManager;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 import jakarta.inject.Inject;
@@ -41,6 +44,9 @@ public class ProductTransferService {
 
     @Inject
     private ActivityReporter reporter;
+
+    @Inject
+    private ChangeEventManager changes;
 
     public void initTransfer(BHive instanceGroupHive, String groupName, ProductTransferDto data) {
         synchronized (inTransfer) {
@@ -61,6 +67,10 @@ public class ProductTransferService {
         }, transferExec).whenComplete((r, e) -> {
             synchronized (inTransfer) {
                 getInTransferFor(groupName).removeAll(data.versionsToTransfer);
+            }
+
+            if (data.targetMode == MinionMode.CENTRAL) {
+                data.versionsToTransfer.forEach(p -> changes.create(ObjectChangeType.PRODUCT, p.key, new ObjectScope(groupName)));
             }
 
             if (e != null) {

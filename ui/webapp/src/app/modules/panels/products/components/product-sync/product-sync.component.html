@@ -1,4 +1,26 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Product Synchronization" [panel]="true"></app-bd-dialog-toolbar>
-  <app-bd-dialog-content> TODO: fetch from managed, push to managed. </app-bd-dialog-content>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div [style.text-align]="'justify'">
+        You can move product data from or to the central server. This allows to provide a product version for configuration. If a product version is already
+        configured, there is no need to manually transfer it, it will be placed on the target system(s) automatically.
+      </div>
+
+      <app-bd-panel-button
+        text="Upload to managed server"
+        icon="cloud_upload"
+        [collapsed]="false"
+        [relative]="true"
+        [route]="['MANAGED', 'select']"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        text="Download to central server"
+        icon="cloud_download"
+        [collapsed]="false"
+        [relative]="true"
+        [route]="['CENTRAL', 'select']"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
 </app-bd-dialog>

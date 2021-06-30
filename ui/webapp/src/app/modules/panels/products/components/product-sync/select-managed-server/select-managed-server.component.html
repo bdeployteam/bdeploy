@@ -1,0 +1,13 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Select managed server" [panel]="true" [relative]="true" [route]="['..', '..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div>Select the managed server you want to transfer from/to.</div>
+    </div>
+    <app-bd-data-display
+      [records]="servers.servers$ | async"
+      [columns]="columns.defaultReducedServerColumns"
+      [recordRoute]="getRecordRoute"
+    ></app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

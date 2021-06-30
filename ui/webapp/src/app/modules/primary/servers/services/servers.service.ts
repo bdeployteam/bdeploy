@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
-import { ManagedMasterDto, ObjectChangeType } from 'src/app/models/gen.dtos';
+import { ManagedMasterDto, ObjectChangeType, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -131,5 +131,13 @@ export class ServersService {
   public getManagedIdent(): Observable<ManagedMasterDto> {
     // TODO: why is this method in the wrong service on the server?
     return this.http.get<ManagedMasterDto>(`${this.cfg.config.api}/backend-info/managed-master`);
+  }
+
+  public getRemoteProducts(server: string): Observable<ProductDto[]> {
+    return this.http.get<ProductDto[]>(`${this.apiPath}/list-products/${this.group}/${server}`).pipe(measure('Load remote products'));
+  }
+
+  public transferProducts(transfer: ProductTransferDto): Observable<any> {
+    return this.http.post(`${this.apiPath}/transfer-products/${this.group}`, transfer).pipe(measure('Initiate Product Transfer'));
   }
 }
