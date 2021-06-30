@@ -27,14 +27,12 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
   constructor(private auth: AuthenticationService, private instances: InstancesService, public details: ProcessDetailsService) {}
 
   ngOnInit(): void {
-    this.subscription.add(
-      this.follow$.subscribe((b) => {
-        clearInterval(this.followInterval);
-        if (b) {
-          this.followInterval = setInterval(() => this.nextChunk(), 2000);
-        }
-      })
-    );
+    this.subscription = this.follow$.subscribe((b) => {
+      clearInterval(this.followInterval);
+      if (b) {
+        this.followInterval = setInterval(() => this.nextChunk(), 2000);
+      }
+    });
 
     this.subscription.add(
       combineLatest([this.details.processConfig$, this.details.processDetail$]).subscribe(([cfg, detail]) => {
