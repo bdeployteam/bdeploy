@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -422,7 +423,8 @@ public class ProcessController {
             ProcessControllerDto dto = new ProcessControllerDto();
             dto.pid = processHandle.pid();
             dto.startTime = ProcessControllerHelper.getProcessStartTimestampCorrected(logger, processHandle, startTime);
-            Files.write(infoFile, StorageHelper.toRawBytes(dto));
+            Files.write(infoFile, StorageHelper.toRawBytes(dto), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.SYNC);
             logger.log(l -> l.info("Successfully started application. PID = {}.", dto.pid));
 
             // Attach exit handle to get notified about termination

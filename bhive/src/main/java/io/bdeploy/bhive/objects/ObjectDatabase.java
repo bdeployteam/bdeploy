@@ -11,6 +11,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -140,7 +141,7 @@ public class ObjectDatabase extends LockableDatabase {
      */
     public ObjectId addObject(byte[] bytes) throws IOException {
         return internalAddObject(p -> {
-            Files.write(p, bytes);
+            Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
             return ObjectId.create(bytes, 0, bytes.length);
         });
 

@@ -5,10 +5,11 @@ package io.bdeploy.bhive.model;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.file.Files;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
@@ -79,13 +80,18 @@ public class ObjectId implements Serializable, Comparable<ObjectId> {
      */
     public static ObjectId createByCopy(InputStream source, Path target) throws IOException {
         MessageDigest digest = createDigest();
-        try (OutputStream os = Files.newOutputStream(target)) {
+
+        try (FileChannel fc = FileChannel.open(target, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING)) {
             byte[] buf = new byte[BUFFER_SIZE];
             int read = 0;
             while ((read = source.read(buf)) > 0) {
                 digest.update(buf, 0, read);
-                os.write(buf, 0, read);
+                fc.write(ByteBuffer.wrap(buf, 0, read));
             }
+
+            // channel is not SYNC - force changes after all of them have been performed.
+            fc.force(true);
         }
         return new ObjectId(Hex.bytesToHex(digest.digest()));
     }
