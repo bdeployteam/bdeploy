@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -137,6 +138,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         @Help("Set by the launcher script to determine the directory where to put updates for automatic application.")
         String updateDir();
+
+        @Help(value = "Additional command line arguments for the application. The arguments must be a Base64 encoded JSON list.")
+        String appendArgs();
 
         @Help(value = "Makes the launcher quit immediately after updating and launching the application.", arg = false)
         boolean dontWait() default false;
@@ -730,6 +734,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Create the actual start command and replace all defined variables
         ProcessConfiguration pc = appCfg.renderDescriptor(appSpecificResolvers);
         List<String> command = TemplateHelper.process(pc.start, appSpecificResolvers);
+
+        // Append custom arguments if applicable
+        command.addAll(decodeAdditionalArguments(config.appendArgs()));
+
+        // Let the user modify the command-line before launching
         if (config.customizeArgs()) {
             TextAreaDialog dialog = new TextAreaDialog();
             if (!dialog.customize(appCfg.name, command)) {
@@ -846,6 +855,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             command.add("--updateOnly");
         }
 
+        Collection<String> appArguments = decodeAdditionalArguments(config.appendArgs());
+        if (!appArguments.isEmpty()) {
+            command.add("--");
+            appArguments.forEach(arg -> command.add("\"" + arg + "\""));
+        }
+
         log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
         try {
             ProcessBuilder b = new ProcessBuilder(command);
@@ -904,6 +919,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         String scopedName = ScopedManifestKey.createScopedName(launcherKey, runningOs);
         versions.put(runningVersion, new Manifest.Key(scopedName, runningVersion.toString()));
         return versions.firstEntry();
+    }
+
+    /**
+     * Decodes the additional arguments that are passed to the application.
+     */
+    @SuppressWarnings("unchecked")
+    private Collection<String> decodeAdditionalArguments(String appendArgs) {
+        if (appendArgs == null || appendArgs.isBlank()) {
+            return Collections.emptyList();
+        }
+        byte[] decodedBytes = Base64.decodeBase64(appendArgs);
+        return StorageHelper.fromRawBytes(decodedBytes, List.class);
     }
 
     /**

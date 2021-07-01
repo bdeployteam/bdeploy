@@ -50,7 +50,7 @@ namespace Bdeploy.FileAssoc {
                 bDeployKey.SetValue("FriendlyTypeName", "BDeploy Application");
 
                 using (RegistryKey commandKey = bDeployKey.CreateSubKey("Shell\\Open\\Command")) {
-                    commandKey.SetValue("", path + " \"%1\"");
+                    commandKey.SetValue("", path + " \"%1\" %*");
                 }
                 using (RegistryKey iconKey = bDeployKey.CreateSubKey("DefaultIcon")) {
                     iconKey.SetValue("", path);
