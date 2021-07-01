@@ -32,7 +32,16 @@ public class BrowserTool extends ConfiguredCliTool<BrowserConfig> {
             throw new IllegalStateException("Missing --homeDir argument");
         }
 
-        BrowserDialog dialog = new BrowserDialog(rootDir);
+        // Try to get a user-area if the root is readonly
+        Path userArea = null;
+        if (PathHelper.isReadOnly(rootDir)) {
+            userArea = ClientPathHelper.getUserArea();
+            if (userArea == null || PathHelper.isReadOnly(userArea)) {
+                throw new IllegalStateException("The user area '" + userArea + "' does not exist or cannot be modified.");
+            }
+        }
+
+        BrowserDialog dialog = new BrowserDialog(rootDir, userArea);
         dialog.setVisible(true);
         dialog.searchApps();
         dialog.waitForExit();

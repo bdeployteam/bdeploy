@@ -15,6 +15,7 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
@@ -27,10 +28,12 @@ public class AppRefresher extends SwingWorker<Void, Object> {
     private static final Logger log = LoggerFactory.getLogger(AppRefresher.class);
 
     private final Path rootDir;
+    private final Auditor auditor;
     private final Collection<ClientSoftwareConfiguration> apps;
 
-    public AppRefresher(Path rootDir, Collection<ClientSoftwareConfiguration> apps) {
+    public AppRefresher(Path rootDir, Auditor auditor, Collection<ClientSoftwareConfiguration> apps) {
         this.rootDir = rootDir;
+        this.auditor = auditor;
         this.apps = apps;
     }
 
@@ -38,7 +41,7 @@ public class AppRefresher extends SwingWorker<Void, Object> {
     protected Void doInBackground() throws Exception {
         log.info("Fetching configurations...");
         int i = 0;
-        try (BHive hive = new BHive(rootDir.resolve("bhive").toUri(), new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(rootDir.resolve("bhive").toUri(), auditor, new ActivityReporter.Null())) {
             for (ClientSoftwareConfiguration app : apps) {
                 try {
                     log.info("Updating {}", app.clickAndStart.applicationId);

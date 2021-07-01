@@ -52,6 +52,8 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.jersey.audit.Auditor;
+import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
@@ -67,6 +69,8 @@ public class BrowserDialog extends BaseDialog {
     private final BrowserDialogTableModel model = new BrowserDialogTableModel();
 
     private final transient Path rootDir;
+    private final transient Auditor auditor;
+    private final transient boolean readonlyRoot;
     private final transient TableRowSorter<BrowserDialogTableModel> sortModel = new TableRowSorter<>(model);
 
     private final JTable table = new JTable(model);
@@ -83,9 +87,11 @@ public class BrowserDialog extends BaseDialog {
 
     private JProgressBar progressBar;
 
-    public BrowserDialog(Path rootDir) {
+    public BrowserDialog(Path rootDir, Path userArea) {
         super(new Dimension(1024, 768));
         this.rootDir = rootDir;
+        this.readonlyRoot = userArea != null;
+        this.auditor = userArea != null ? new RollingFileAuditor(userArea.resolve("logs")) : null;
         setTitle("Client Applications");
 
         // Header area displaying a search field
@@ -111,7 +117,8 @@ public class BrowserDialog extends BaseDialog {
             return;
         }
         model.clear();
-        try (BHive hive = new BHive(hivePath.toUri(), new ActivityReporter.Null())) {
+
+        try (BHive hive = new BHive(hivePath.toUri(), auditor, new ActivityReporter.Null())) {
             ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
             model.addAll(manifest.list().stream().filter(mf -> mf.clickAndStart != null).collect(Collectors.toList()));
         }
@@ -277,7 +284,8 @@ public class BrowserDialog extends BaseDialog {
         footer.setBorder(new EmptyBorder(0, 10, 10, 10));
         footer.setLayout(new BorderLayout(15, 15));
 
-        JLabel home = new JLabel("<HTML><U>" + rootDir.toAbsolutePath().toString() + "</U></HTML>");
+        JLabel home = new JLabel(
+                "<HTML><U>" + rootDir.toAbsolutePath().toString() + "</U>" + (readonlyRoot ? (" (readonly)") : "") + "</HTML>");
         home.setToolTipText("Open home directory");
         home.setHorizontalAlignment(SwingConstants.LEFT);
         home.setOpaque(false);
@@ -397,7 +405,7 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setMaximum(apps.size());
         progressBar.setString("Refreshing applications...");
 
-        AppRefresher task = new AppRefresher(rootDir, apps);
+        AppRefresher task = new AppRefresher(rootDir, auditor, apps);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
@@ -442,17 +450,17 @@ public class BrowserDialog extends BaseDialog {
         launchButton.setEnabled(apps.size() == 1);
         launchItem.setEnabled(apps.size() == 1);
 
-        uninstallItem.setEnabled(apps.size() == 1);
-        uninstallButton.setEnabled(apps.size() == 1);
+        uninstallItem.setEnabled(!readonlyRoot && apps.size() == 1);
+        uninstallButton.setEnabled(!readonlyRoot && apps.size() == 1);
 
-        refreshItem.setEnabled(true);
-        refreshButton.setEnabled(true);
+        refreshItem.setEnabled(!readonlyRoot);
+        refreshButton.setEnabled(!readonlyRoot);
 
         // --customizeArgs and launch needs at version 3.3.0
         customizeAndLaunchItem.setEnabled(checkVersion(apps, new Version(3, 3, 0, null)));
 
         // --updateOnly flag needs at least version 3.6.5
-        updateItem.setEnabled(checkVersion(apps, new Version(3, 6, 5, null)));
+        updateItem.setEnabled(!readonlyRoot && checkVersion(apps, new Version(3, 6, 5, null)));
     }
 
     /** Returns if the selected applications have at least the given version */
