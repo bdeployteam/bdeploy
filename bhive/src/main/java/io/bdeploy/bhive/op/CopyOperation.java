@@ -46,7 +46,7 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
 
         assertNotNull(destinationHive, "Destination Hive not set");
 
-        try (Activity activity = getActivityReporter().start("Copying objects...");
+        try (Activity activity = getActivityReporter().start("Copying Objects");
                 Transaction t = destinationHive.getTransactions().begin()) {
             if (objects.isEmpty() && manifests.isEmpty()) {
                 // copy all from the local hive; don't check which are reachable from manifests,

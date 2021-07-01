@@ -18,8 +18,6 @@ import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.core.UriBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +38,7 @@ import io.bdeploy.bhive.op.ObjectWriteOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Pushes manifests from the local {@link BHive} to a remote {@link BHive}. If no
@@ -58,7 +57,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
         TransferStatistics stats = new TransferStatistics();
 
         Instant start = Instant.now();
-        try (Activity activity = getActivityReporter().start("Pushing manifests...", -1)) {
+        try (Activity activity = getActivityReporter().start("Pushing", -1)) {
             try (RemoteBHive rh = RemoteBHive.forService(getRemote(), hiveName, getActivityReporter())) {
                 // Add all local manifests if nothing is given
                 if (manifests.isEmpty()) {

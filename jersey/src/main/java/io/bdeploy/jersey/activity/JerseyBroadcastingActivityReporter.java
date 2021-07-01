@@ -110,6 +110,9 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
             }
             activeScopes.addAll(perScope.keySet());
 
+            // TODO: somebody in an "outer" scope will receive multiple messages for each scope which matches - this is not good :)
+            // also splitting activities might have one loose its parent if it has a finer scope than its parent...
+
             for (Map.Entry<List<String>, List<ActivitySnapshot>> e : perScope.entrySet()) {
                 bc.send(new ObjectChangeDto(OCT_ACTIVIES, new ObjectScope(e.getKey()), ObjectEvent.CHANGED,
                         Collections.singletonMap(OCT_ACTIVIES, serialize(e.getValue()))));

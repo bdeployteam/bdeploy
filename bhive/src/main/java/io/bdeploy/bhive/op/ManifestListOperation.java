@@ -5,7 +5,6 @@ import java.util.Set;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Lists all {@link Manifest}s available in the {@link BHive}.
@@ -17,12 +16,10 @@ public class ManifestListOperation extends BHive.Operation<Set<Manifest.Key>> {
 
     @Override
     public Set<Manifest.Key> call() throws Exception {
-        try (Activity activity = getActivityReporter().start("Listing manifests...", -1)) {
-            if (key == null) {
-                return getManifestDatabase().getAllManifests();
-            } else {
-                return getManifestDatabase().getAllForName(key);
-            }
+        if (key == null) {
+            return getManifestDatabase().getAllManifests();
+        } else {
+            return getManifestDatabase().getAllForName(key);
         }
     }
 

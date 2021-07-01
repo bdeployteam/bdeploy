@@ -39,7 +39,7 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
             roots.addAll(localManifests);
         }
 
-        Activity scanning = getActivityReporter().start("Scanning manifest trees...", roots.size());
+        Activity scanning = getActivityReporter().start("Scanning Objects", roots.size());
 
         Path markerPath = Files.createTempDirectory("markers-");
         MarkerDatabase markerDb = new MarkerDatabase(markerPath, getActivityReporter());

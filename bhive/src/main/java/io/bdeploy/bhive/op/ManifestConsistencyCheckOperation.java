@@ -36,7 +36,7 @@ public class ManifestConsistencyCheckOperation extends BHive.Operation<Set<Eleme
         assertFalse(manifests.isEmpty(), "Nothing to check");
 
         Set<ElementView> dmg = new TreeSet<>();
-        try (Activity activity = getActivityReporter().start("Checking manifest tree consistency...", manifests.size())) {
+        try (Activity activity = getActivityReporter().start("Checking Manifests", manifests.size())) {
             for (Manifest.Key key : manifests) {
                 List<ElementView> broken = new ArrayList<>();
 

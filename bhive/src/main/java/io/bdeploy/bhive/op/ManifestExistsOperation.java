@@ -5,7 +5,6 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Checks whether the given manifest exists in the underlying {@link BHive}
@@ -18,10 +17,7 @@ public class ManifestExistsOperation extends BHive.Operation<Boolean> {
     @Override
     public Boolean call() throws Exception {
         assertNotNull(manifest, "Manifest to check not set");
-
-        try (Activity activity = getActivityReporter().start("Manifest lookup...", -1)) {
-            return getManifestDatabase().hasManifest(manifest);
-        }
+        return getManifestDatabase().hasManifest(manifest);
     }
 
     /**

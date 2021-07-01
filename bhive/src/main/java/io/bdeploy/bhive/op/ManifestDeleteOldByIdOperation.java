@@ -42,7 +42,7 @@ public class ManifestDeleteOldByIdOperation extends BHive.Operation<Void> {
         }
 
         long i = (mfsByKey.size() - amountToKeep);
-        try (Activity activity = getActivityReporter().start("Deleting manifests...", i)) {
+        try (Activity activity = getActivityReporter().start("Deleting", i)) {
             for (Map.Entry<Long, List<Key>> entry : mfsByKey.entrySet()) {
                 if (entry.getValue().size() != 1) {
                     log.warn("Expected exactly one manifest match per tag: {}, {}", entry.getKey(), entry.getValue());

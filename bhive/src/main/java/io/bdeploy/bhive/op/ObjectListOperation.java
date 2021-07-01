@@ -51,7 +51,7 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
 
     @Override
     public Set<ObjectId> call() throws Exception {
-        try (Activity activity = getActivityReporter().start("Listing objects...", -1)) {
+        try (Activity activity = getActivityReporter().start("Finding Objects", -1)) {
             if (manifests.isEmpty() && trees.isEmpty()) {
                 throw new IllegalStateException("At least one manifest or root tree must be set.");
             }
@@ -89,6 +89,8 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
                     object2Tree.put(treeId, flattenTree(t));
                     return true;
                 }).build());
+
+                activity.workAndCancelIfRequested(1);
             }
 
             // Reverse the list so that sub-trees are first

@@ -87,8 +87,8 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         if (!fsss.hasFreeSpace(root.getDeploymentDir())) {
             throw new WebApplicationException("Not enough free space in " + root.getDeploymentDir(), Status.SERVICE_UNAVAILABLE);
         }
-        try (Activity deploying = reporter.start("Deploying " + key)) {
-            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
+        try (Activity deploying = reporter.start("Deploying Ver. " + key.getTag() + " of " + inm.getConfiguration().name)) {
             InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
             inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
             inc.install();

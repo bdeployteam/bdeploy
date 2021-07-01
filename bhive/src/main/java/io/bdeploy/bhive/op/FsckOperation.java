@@ -28,7 +28,7 @@ public class FsckOperation extends BHive.Operation<Set<ElementView>> {
         getObjectManager().invalidateCaches();
         getManifestDatabase().invalidateCaches();
 
-        try (Activity activity = getActivityReporter().start("Checking manifests...", -1)) {
+        try (Activity activity = getActivityReporter().start("Checking", -1)) {
             if (manifests.isEmpty()) {
                 Set<Manifest.Key> localManifests = execute(new ManifestListOperation());
 

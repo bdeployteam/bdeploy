@@ -1,3 +1,9 @@
+<ng-template #activitiesPopup>
+  <mat-card [style.padding.px]="10" class="mat-typography local-activity-popup-sizing" fxLayout="column" fxLayoutGap="5px">
+    <app-bd-activities></app-bd-activities>
+  </mat-card>
+</ng-template>
+
 <div class="bd-rect-card local-sizing" fxLayout="column" fxLayoutGap="5px">
   <!-- Logo & Expand Button -->
   <div fxLayout="row" [style.height.px]="100" [style.padding-bottom.px]="14" fxLayoutAlign="center center">
@@ -125,8 +131,22 @@
 
   <!-- Footer -->
   <div fxFlex="1 0 auto"></div>
-  <div *ngIf="!expanded" class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.5s' } }">
-    {{ cfgService.config.mode }}
+  <div class="local-server-type-wrapper">
+    <div *ngIf="!expanded" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.5s' } }">
+      <span class="local-server-type"
+        >{{ cfgService.config.mode }}
+        <div class="local-acitvity-indicator" [style.display]="!!(activities.activities$ | async)?.length ? null : 'none'">
+          <div
+            class="local-activity-bg"
+            matTooltip="Click to view background operations"
+            [appBdPopup]="activitiesPopup"
+            appBdPopupPosition="right-above"
+            [style.cursor]="'pointer'"
+          ></div>
+          <mat-spinner [diameter]="24" [style.pointer-events]="'none'"></mat-spinner>
+        </div>
+      </span>
+    </div>
   </div>
   <div fxLayout="column" fxLayoutGap="5px" *ngIf="expanded" class="local-footer" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
     <app-bd-button

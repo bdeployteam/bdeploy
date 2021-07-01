@@ -4,7 +4,6 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.ObjectDatabase;
-import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Create a {@link Manifest} reference in the {@link ObjectDatabase} and returns
@@ -16,9 +15,7 @@ public class InsertManifestRefOperation extends BHive.TransactedOperation<Object
 
     @Override
     public ObjectId callTransacted() throws Exception {
-        try (Activity activity = getActivityReporter().start("Inserting manifest reference...", -1)) {
-            return getObjectManager().insertManifestReference(manifest);
-        }
+        return getObjectManager().insertManifestReference(manifest);
     }
 
     /**

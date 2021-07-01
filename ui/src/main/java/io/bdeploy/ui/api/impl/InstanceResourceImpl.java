@@ -433,7 +433,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = readInstance(instance);
         List<InstanceVersionDto> versions = listVersions(instance);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
-        try (Activity deploy = reporter.start("Deleting " + instance + "...");
+        try (Activity deploy = reporter.start("Deleting " + im.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
             MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
             InstanceStatusDto status = root.getNamedMaster(group).getStatus(instance);
@@ -463,7 +463,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = readInstance(instanceId);
         Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
-        try (Activity deploy = reporter.start("Deleting " + instanceId + ":" + tag + "...");
+        try (Activity deploy = reporter.start("Deleting Ver. " + tag + " of " + im.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
             MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
             if (getDeploymentStates(instanceId).installedTags.contains(tag)) {
@@ -580,7 +580,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Installing " + instance.getConfiguration().name + ":" + tag);
+        try (Activity deploy = reporter.start("Installing Ver. " + tag + " of " + instance.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             // 1. push config to remote (small'ish).
             hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
@@ -608,7 +608,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void uninstall(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Uninstalling " + instance.getConfiguration().name + ":" + tag);
+        try (Activity deploy = reporter.start("Uninstalling Ver. " + tag + " of " + instance.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
 
             // 1: check for running or scheduled applications
@@ -617,7 +617,7 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
             Map<String, ProcessStatusDto> appStatus = instanceStatus.getAppStatus();
             Optional<ProcessStatusDto> runningOrScheduledInVersion = appStatus.values().stream()
-                    .filter(p -> tag.equals(p.instanceTag)).findFirst();
+                    .filter(p -> tag.equals(p.instanceTag) && p.processState.isRunningOrScheduled()).findFirst();
             if (runningOrScheduledInVersion.isPresent()) {
                 throw new WebApplicationException("Cannot uninstall instance version " + instance.getConfiguration().name + ":"
                         + tag + " because it has running or scheduled applications", Status.FORBIDDEN);
@@ -636,7 +636,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public void activate(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Activating " + instanceId + ":" + tag);
+        try (Activity deploy = reporter.start("Activating Ver. " + tag + " of " + instance.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
             master.getNamedMaster(group).activate(instance.getManifest());

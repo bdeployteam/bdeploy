@@ -1,9 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { isEqual } from 'lodash-es';
-import { ActivitySnapshot } from '../../../models/gen.dtos';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import { ActivitySnapshot, ObjectChangeDetails, ObjectChangeType, ObjectScope } from '../../../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { LoggingService } from './logging.service';
+import { NavAreasService } from './nav-areas.service';
+import { ObjectChangesService } from './object-changes.service';
 
 export class ActivitySnapshotTreeNode {
   constructor(public snapshot: ActivitySnapshot, public children: ActivitySnapshotTreeNode[]) {}
@@ -13,9 +17,40 @@ export class ActivitySnapshotTreeNode {
   providedIn: 'root',
 })
 export class ActivitiesService {
+  public activities$ = new BehaviorSubject<ActivitySnapshotTreeNode[]>(null);
+
   private log = this.loggingService.getLogger('ActivitiesService');
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
+  private changesSubscription: Subscription;
+
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private loggingService: LoggingService,
+    areas: NavAreasService,
+    changes: ObjectChangesService
+  ) {
+    combineLatest([areas.groupContext$, areas.instanceContext$])
+      .pipe(debounceTime(500))
+      .subscribe(([group, instance]) => {
+        const scope: ObjectScope = { scope: [] };
+        if (!!group) {
+          scope.scope.push(group);
+
+          if (!!instance) {
+            scope.scope.push(instance);
+          }
+        }
+
+        if (!!this.changesSubscription) {
+          this.changesSubscription.unsubscribe();
+        }
+
+        this.changesSubscription = changes.subscribe(ObjectChangeType.ACTIVITIES, scope, (c) => {
+          this.activities$.next(this.getActivitiesFromEvent(c.details[ObjectChangeDetails.ACTIVITIES], scope.scope));
+        });
+      });
+  }
 
   public cancelActivity(uuid: string) {
     return this.http.delete(this.cfg.config.api + '/activities/' + uuid);
@@ -23,6 +58,11 @@ export class ActivitiesService {
 
   public getActivitiesFromEvent(data: any, scope: string[]): ActivitySnapshotTreeNode[] {
     const allActivities = JSON.parse(data) as ActivitySnapshot[];
+
+    if (!allActivities?.length) {
+      return [];
+    }
+
     const allTreeNodes = new Map<string, ActivitySnapshotTreeNode>();
     const rootNodes: ActivitySnapshotTreeNode[] = [];
 

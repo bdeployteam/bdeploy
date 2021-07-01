@@ -9,7 +9,6 @@ import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ReferenceHandler;
-import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Export a {@link Tree} recursively into a directory and return the
@@ -26,9 +25,7 @@ public class ExportTreeOperation extends BHive.Operation<Void> {
         assertNotNull(target, "Target path not set");
         assertNotNull(treeId, "Source tree not set");
 
-        try (Activity activity = getActivityReporter().start("Exporting tree...", -1)) {
-            getObjectManager().exportTree(treeId, target, refHandler);
-        }
+        getObjectManager().exportTree(treeId, target, refHandler);
 
         return null;
     }

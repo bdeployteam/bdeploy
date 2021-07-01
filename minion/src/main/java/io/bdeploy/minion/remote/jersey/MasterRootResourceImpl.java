@@ -8,13 +8,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +35,12 @@ import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class MasterRootResourceImpl implements MasterRootResource {
 
@@ -67,7 +66,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
         SortedMap<String, MinionStatusDto> result = new TreeMap<>();
 
         MinionConfiguration minionConfig = root.getMinions();
-        try (Activity contacting = reporter.start("Contacting Minions...", minionConfig.size())) {
+        try (Activity contacting = reporter.start("Contacting Nodes", minionConfig.size())) {
             for (Map.Entry<String, MinionDto> entry : minionConfig.entrySet()) {
                 String name = entry.getKey();
                 MinionDto config = entry.getValue();
@@ -161,7 +160,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     private void pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, MinionConfiguration minionConfig,
             SortedMap<String, MinionUpdateResource> toUpdate) {
-        Activity pushing = reporter.start("Pushing update to Minions...", minionConfig.size());
+        Activity pushing = reporter.start("Pushing Update to Nodes", minionConfig.size());
         for (Entry<String, MinionDto> entry : minionConfig.entrySet()) {
             MinionDto minionDto = entry.getValue();
             RemoteService service = minionDto.remote;

@@ -46,7 +46,7 @@ public class ObjectWriteOperation extends BHive.Operation<Long> {
         }
 
         int maxWork = manifests.size() + objects.size();
-        try (Activity activity = getActivityReporter().start("Writing objects...", maxWork);
+        try (Activity activity = getActivityReporter().start("Sending Objects", maxWork);
                 CountingOutputStream countingOut = new CountingOutputStream(output);
                 GZIPOutputStream zipOut = new GZIPOutputStream(countingOut);
                 DataOutputStream dataOut = new DataOutputStream(zipOut)) {

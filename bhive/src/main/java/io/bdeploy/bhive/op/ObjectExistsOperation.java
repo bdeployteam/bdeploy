@@ -24,7 +24,7 @@ public class ObjectExistsOperation extends BHive.Operation<Result> {
     @Override
     public Result call() throws Exception {
         Result result = new Result();
-        try (Activity activity = getActivityReporter().start("Checking objects...", objects.size())) {
+        try (Activity activity = getActivityReporter().start("Looking up Objects", objects.size())) {
             for (ObjectId o : objects) {
                 if (Boolean.TRUE.equals(getObjectManager().db(x -> x.hasObject(o)))) {
                     result.existing.add(o);

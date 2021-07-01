@@ -3,6 +3,7 @@ import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
+import { ActivitiesService } from '../../services/activities.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { LoggingService, LogLevel } from '../../services/logging.service';
@@ -40,7 +41,13 @@ export class MainNavMenuComponent implements OnInit {
     return this.areas.menuMaximized$.value;
   }
 
-  constructor(public cfgService: ConfigService, public logging: LoggingService, public authService: AuthenticationService, public areas: NavAreasService) {}
+  constructor(
+    public cfgService: ConfigService,
+    public logging: LoggingService,
+    public authService: AuthenticationService,
+    public areas: NavAreasService,
+    public activities: ActivitiesService
+  ) {}
 
   ngOnInit(): void {}
 

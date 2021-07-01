@@ -176,7 +176,7 @@ public class HiveResourceImpl implements HiveResource {
         log.debug("fsck(\"{}\")", hiveParam);
         BHive hive = registry.get(hiveParam);
 
-        try (Activity fsck = reporter.start("FSCK " + hiveParam)) {
+        try (Activity fsck = reporter.start("Checking " + hiveParam)) {
             Set<ElementView> problematic = hive.execute(new FsckOperation().setRepair(fix));
             Map<String, String> result = new TreeMap<>();
             problematic.forEach(e -> result.put(e.getElementId().getId(), e.getPathString()));

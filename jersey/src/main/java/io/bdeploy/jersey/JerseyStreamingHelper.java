@@ -21,8 +21,8 @@ public class JerseyStreamingHelper {
             long length) throws IOException {
         long maxWork = Math.max(0, length) / 1024;
 
-        Activity stream = reporter
-                .start((direction == StreamDirection.READ ? "Reading... " : "Writing... ") + " (" + maxWork + "KB)...", maxWork);
+        Activity stream = reporter.start((direction == StreamDirection.READ ? "Reading" : "Writing") + " (" + maxWork + "KB)...",
+                maxWork);
 
         try {
             // consume no more than length

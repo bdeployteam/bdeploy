@@ -10,7 +10,6 @@ import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ReferenceHandler;
-import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Export a {@link Manifest}s root {@link Tree} to a target directory.
@@ -27,17 +26,15 @@ public class ExportOperation extends BHive.Operation<Manifest.Key> {
         assertNotNull(manifest, "Manifest not set");
         assertNotNull(target, "Target path not set");
 
-        try (Activity activity = getActivityReporter().start("Pushing manifests...", -1)) {
-            Set<Manifest.Key> keys = getManifestDatabase().getAllForName(manifest.getName());
-            if (!keys.contains(manifest)) {
-                throw new IllegalArgumentException("Manifest not found: " + manifest);
-            }
-
-            Manifest mf = getManifestDatabase().getManifest(manifest);
-            getObjectManager().exportTree(mf.getRoot(), target, refHandler);
-
-            return manifest;
+        Set<Manifest.Key> keys = getManifestDatabase().getAllForName(manifest.getName());
+        if (!keys.contains(manifest)) {
+            throw new IllegalArgumentException("Manifest not found: " + manifest);
         }
+
+        Manifest mf = getManifestDatabase().getManifest(manifest);
+        getObjectManager().exportTree(mf.getRoot(), target, refHandler);
+
+        return manifest;
     }
 
     /**

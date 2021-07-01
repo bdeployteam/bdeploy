@@ -22,7 +22,7 @@ public class ImportTreeOperation extends BHive.TransactedOperation<ObjectId> {
     public ObjectId callTransacted() throws Exception {
         assertNotNull(toImport, "Source path not set");
 
-        try (Activity activity = getActivityReporter().start("Importing tree...", -1)) {
+        try (Activity activity = getActivityReporter().start("Importing", -1)) {
             return getObjectManager().importTree(toImport, skipEmpty);
         }
     }

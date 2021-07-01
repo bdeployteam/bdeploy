@@ -60,7 +60,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
 
     @Override
     public Set<ObjectId> getMissingObjects(Set<ObjectId> all) {
-        try (Activity activity = reporter.start("Scanning for missing objects...")) {
+        try (Activity activity = reporter.start("Determining Objects")) {
             return hive.execute(new ObjectExistsOperation().addAll(all)).missing;
         }
     }

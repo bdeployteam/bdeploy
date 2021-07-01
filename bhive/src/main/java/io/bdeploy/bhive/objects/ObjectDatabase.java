@@ -242,7 +242,7 @@ public class ObjectDatabase extends LockableDatabase {
      * @throws IOException in case of an error.
      */
     public SortedSet<ObjectId> getAllObjects() throws IOException {
-        Activity scan = reporter.start("Scanning objects...", 0);
+        Activity scan = reporter.start("Listing Objects", 0);
         try {
             long xctpCount = 0;
             do {

@@ -30,7 +30,7 @@ public class ImportOperation extends BHive.TransactedOperation<Manifest.Key> {
         assertNotNull(toImport, "Source path not set");
         assertNotNull(manifest, "Manifest not set");
 
-        try (Activity activity = getActivityReporter().start("Importing manifest...", -1)) {
+        try (Activity activity = getActivityReporter().start("Importing", -1)) {
             Set<Manifest.Key> existing = execute(new ManifestListOperation());
             if (existing.contains(manifest)) {
                 throw new IllegalArgumentException("Manifest " + manifest + " already present");

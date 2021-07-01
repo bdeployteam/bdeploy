@@ -5,7 +5,6 @@ import java.util.Optional;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -20,7 +19,7 @@ public class ManifestMaxIdOperation extends BHive.Operation<Optional<Long>> {
     public Optional<Long> call() throws Exception {
         RuntimeAssert.assertNotNull(key, "No Manifest to inspect");
 
-        try (Activity activity = getActivityReporter().start("Evaluating latest manifest version...", -1)) {
+        try {
             return getManifestDatabase().getAllForName(key).stream().map(Manifest.Key::getTag).map(Long::parseLong)
                     .max(Long::compare);
         } catch (NumberFormatException e) {
