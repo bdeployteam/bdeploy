@@ -9,7 +9,6 @@ import java.util.TreeMap;
 
 import javax.swing.table.AbstractTableModel;
 
-import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.launcher.cli.ClientApplicationDto;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 
@@ -148,7 +147,7 @@ class BrowserDialogTableModel extends AbstractTableModel {
                 return app.clickAndStart.host.getUri().toString();
             case COL_LVERSION:
                 if (app.launcher == null) {
-                    return VersionHelper.getVersion().toString();
+                    return "";
                 }
                 return app.launcher.getTag();
             default:
