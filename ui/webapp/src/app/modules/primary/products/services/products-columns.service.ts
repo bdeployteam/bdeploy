@@ -42,5 +42,7 @@ export class ProductsColumnsService {
     this.productLogoCardColumn,
   ];
 
+  defaultReducedProductsColumns: BdDataColumn<ProductDto>[] = [this.productNameColumn, this.productVersionColumn];
+
   constructor() {}
 }

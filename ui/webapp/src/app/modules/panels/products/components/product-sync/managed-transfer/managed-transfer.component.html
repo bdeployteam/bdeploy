@@ -1,0 +1,15 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="{{ typeText$ | async }} {{ server$ | async }}" [panel]="true" [relative]="true" [route]="['..', '..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div>The following product versions are currently not available on the target system.</div>
+      <app-bd-data-table
+        [records]="records$ | async"
+        [columns]="productColumns.defaultReducedProductsColumns"
+        [checkMode]="true"
+        [(checked)]="selected"
+      ></app-bd-data-table>
+      <app-bd-button text="TRANSFER" [disabled]="!selected?.length" [collapsed]="false" color="primary" (click)="doTransfer()"></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>
