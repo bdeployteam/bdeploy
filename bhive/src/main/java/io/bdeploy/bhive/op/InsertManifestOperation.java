@@ -31,7 +31,7 @@ public class InsertManifestOperation extends BHive.Operation<Long> {
     public Long call() throws Exception {
         assertFalse(manifests.isEmpty(), "Nothing to insert");
 
-        try (Activity activity = getActivityReporter().start("Inserting manifests...", -1)) {
+        try (Activity activity = getActivityReporter().start("Inserting Manifests", -1)) {
             for (Map.Entry<Manifest.Key, Manifest> entry : manifests.entrySet()) {
                 if (getManifestDatabase().hasManifest(entry.getValue().getKey())) {
                     continue;

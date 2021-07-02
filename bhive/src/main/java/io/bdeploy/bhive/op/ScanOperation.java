@@ -28,7 +28,7 @@ public class ScanOperation extends BHive.Operation<TreeView> {
 
     @Override
     public TreeView call() throws Exception {
-        try (Activity activity = getActivityReporter().start("Scanning manifest...", -1)) {
+        try (Activity activity = getActivityReporter().start("Scanning", -1)) {
             if (manifest != null) {
                 Manifest mf = execute(new ManifestLoadOperation().setManifest(manifest));
                 RuntimeAssert.assertNotNull(mf, "Given manifest not found");

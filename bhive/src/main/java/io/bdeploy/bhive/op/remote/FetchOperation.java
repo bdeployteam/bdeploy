@@ -45,7 +45,7 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
         SortedSet<ObjectId> toFetchRootTrees = new TreeSet<>();
 
         Instant start = Instant.now();
-        try (Activity activity = getActivityReporter().start("Fetching manifests...", -1)) {
+        try (Activity activity = getActivityReporter().start("Fetching", -1)) {
             try (RemoteBHive rh = RemoteBHive.forService(getRemote(), hiveName, getActivityReporter())) {
                 // if manifests are empty, the array will be empty, returning all manifests on the remote
                 String[] manifestsAsArray = manifests.stream().map(Manifest.Key::toString).toArray(String[]::new);

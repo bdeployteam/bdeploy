@@ -33,7 +33,7 @@ public class ManifestRefLoadOperation extends BHive.Operation<SortedMap<ObjectId
     public SortedMap<ObjectId, Manifest.Key> call() throws Exception {
         assertFalse(ids.isEmpty(), "Nothing to load");
 
-        try (Activity activity = getActivityReporter().start("Loading referenced manifests...", -1)) {
+        try (Activity activity = getActivityReporter().start("Loading Relations", -1)) {
             SortedMap<ObjectId, Key> refs = new TreeMap<>();
             for (ObjectId id : ids) {
                 try (InputStream is = getObjectManager().db(x -> x.getStream(id))) {

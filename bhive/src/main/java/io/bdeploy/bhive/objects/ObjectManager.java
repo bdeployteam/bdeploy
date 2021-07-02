@@ -103,7 +103,7 @@ public class ObjectManager {
      * @return the {@link ObjectId} of the resulting {@link Tree}.
      */
     public ObjectId importTree(Path location, boolean skipEmpty) {
-        Activity importing = reporter.start("Importing objects...", 0);
+        Activity importing = reporter.start("Importing Files", 0);
         try {
             return internalImportTree(location, importing, skipEmpty);
         } catch (IOException e) {
@@ -194,7 +194,7 @@ public class ObjectManager {
                 PathHelper.deleteRecursive(tempLocation);
             }
 
-            Activity exporting = reporter.start("Writing objects...", 0);
+            Activity exporting = reporter.start("Exporting Files", 0);
             try {
                 internalExportTree(tree, tempLocation, tree, tempLocation, exporting, handler);
                 internalMoveRetrying(location, tempLocation);

@@ -9,16 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.ForbiddenException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +39,15 @@ import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.MinionMode;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class CommonRootResourceImpl implements CommonRootResource {
 
@@ -199,7 +198,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
     @Override
     public void setLoggerConfig(Path config) {
         MinionConfiguration minionConfig = minion.getMinions();
-        try (Activity updating = reporter.start("Updating logging configuration on minions...", minionConfig.size())) {
+        try (Activity updating = reporter.start("Update Node Logging", minionConfig.size())) {
             for (var entry : minionConfig.entrySet()) {
                 try {
                     ResourceProvider.getVersionedResource(entry.getValue().remote, MinionStatusResource.class, security)
@@ -220,7 +219,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
         List<RemoteDirectory> result = new ArrayList<>();
 
         MinionConfiguration minionConfig = minion.getMinions();
-        try (Activity reading = reporter.start("Reading log file information from minions...", minionConfig.size())) {
+        try (Activity reading = reporter.start("Reading Node Logs", minionConfig.size())) {
             for (var entry : minionConfig.entrySet()) {
                 RemoteDirectory dir = new RemoteDirectory();
                 dir.minion = entry.getKey();

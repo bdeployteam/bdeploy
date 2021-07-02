@@ -42,7 +42,7 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                 DataInputStream dataIn = new DataInputStream(zipIn)) {
             long maxWork = dataIn.readLong();
 
-            String baseActivity = "Reading objects...";
+            String baseActivity = "Receiving";
             try (Activity activity = getActivityReporter().start(baseActivity, maxWork)) {
                 SortedSet<ObjectId> objects = new TreeSet<>();
                 SortedSet<Manifest> manifests = new TreeSet<>();
@@ -56,7 +56,7 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                     manifests.add(mf);
                     activity.worked(1);
                     checkOp.addRoot(mf.getKey());
-                    activity.activity(baseActivity + " " + FormatHelper.formatTransferRate(countingIn.getCount(),
+                    activity.activity(baseActivity + ": " + FormatHelper.formatTransferRate(countingIn.getCount(),
                             Duration.between(start, Instant.now()).toMillis()));
                 }
 
@@ -67,7 +67,7 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                     ObjectId insertedId = getObjectManager().db(db -> db.addObject(new FixedLengthStream(dataIn, size)));
                     objects.add(insertedId);
                     activity.worked(1);
-                    activity.activity(baseActivity + " " + FormatHelper.formatTransferRate(countingIn.getCount(),
+                    activity.activity(baseActivity + ": " + FormatHelper.formatTransferRate(countingIn.getCount(),
                             Duration.between(start, Instant.now()).toMillis()));
                 }
                 result.sumMissingObjects = counter;

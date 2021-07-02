@@ -3,6 +3,7 @@ import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceBannerRecord } from 'src/app/models/gen.dtos';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -30,6 +31,7 @@ export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ orig: InstanceBannerRecord = cloneDeep(this.banner);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
@@ -78,7 +80,9 @@ export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.instances
       .updateBanner(this.banner)
       .pipe(finalize(() => this.saving$.next(false)))
-      .subscribe();
+      .subscribe((_) => {
+        this.tb.closePanel();
+      });
   }
 
   /* template */ doRemove() {

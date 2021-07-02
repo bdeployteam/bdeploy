@@ -9,7 +9,6 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.ObjectDatabase;
-import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Import a single {@link Path} into the {@link ObjectDatabase}. Useful mainly
@@ -21,10 +20,8 @@ public class ImportFileOperation extends BHive.TransactedOperation<ObjectId> {
 
     @Override
     public ObjectId callTransacted() throws Exception {
-        try (Activity activity = getActivityReporter().start("Importing file...", -1)) {
-            assertNotNull(file, "File to import not set");
-            return getObjectManager().db(x -> x.addObject(file));
-        }
+        assertNotNull(file, "File to import not set");
+        return getObjectManager().db(x -> x.addObject(file));
     }
 
     /**

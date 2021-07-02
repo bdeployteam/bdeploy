@@ -11,6 +11,8 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,10 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
     public SortedMap<ObjectId, Long> call() throws Exception {
         SortedMap<ObjectId, Long> result = new TreeMap<>();
 
-        try (Activity activity = getActivityReporter().start("Pruning hive...", -1)) {
+        AtomicLong max = new AtomicLong(-1);
+        LongAdder current = new LongAdder();
+
+        try (Activity activity = getActivityReporter().start("Prune (calculating)", () -> max.get(), () -> current.sum())) {
             // Wait for other operations locking the marker root (e.g. another prune).
             // The CreateObjectMarkersOperation and ClearObjectMarkersOperation will hold
             // off until the root is unlocked again, so:
@@ -76,6 +81,9 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
 
                 List<ObjectId> auditList = new ArrayList<>();
 
+                activity.activity("Prune (cleaning)");
+                max.set(all.size());
+
                 // delete within the lock, just to be sure that nobody "re-needs" one of the objects.
                 for (ObjectId unreferenced : all) {
                     result.put(unreferenced, getObjectManager().db(x -> {
@@ -91,6 +99,8 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                             return (long) 0;
                         }
                     }));
+
+                    current.increment();
                 }
 
                 getAuditor().audit(AuditRecord.Builder.fromSystem().setSeverity(Severity.NORMAL)

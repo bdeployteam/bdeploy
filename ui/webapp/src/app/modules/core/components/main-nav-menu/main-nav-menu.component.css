@@ -19,10 +19,34 @@
   padding-bottom: 3px;
 }
 
-.local-server-type {
+.local-server-type-wrapper {
   transform: rotate(-90deg);
-  margin-bottom: 20px;
+}
+
+.local-server-type {
+  position: relative;
+  left: 20px; /* attention: rotated coordinates! */
   color: var(--bd-text-secondary);
+}
+
+.local-activity-popup-sizing {
+  max-width: calc(100% - 10px);
+  width: 700px;
+}
+
+.local-acitvity-indicator {
+  position: absolute;
+  top: calc(50% - 12px);
+  left: calc(50% - 12px);
+}
+
+.local-activity-bg {
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
 .local-action-hidden {

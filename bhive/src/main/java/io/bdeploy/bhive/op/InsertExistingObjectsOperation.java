@@ -39,7 +39,7 @@ public class InsertExistingObjectsOperation extends BHive.TransactedOperation<Lo
         assertFalse(objects.isEmpty(), "Nothing to insert");
         assertNotNull(sourceMgr, "No source object manager");
 
-        Activity inserting = getActivityReporter().start("Inserting objects...", objects.size());
+        Activity inserting = getActivityReporter().start("Inserting Objects", objects.size());
 
         try {
             List<Future<?>> inserts = new ArrayList<>();

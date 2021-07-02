@@ -34,7 +34,7 @@ public class ManifestRefScanOperation extends BHive.Operation<SortedMap<String, 
         }
 
         SortedMap<String, Manifest.Key> referenced = new TreeMap<>();
-        try (Activity activity = getActivityReporter().start("Scanning for manifests references...", -1)) {
+        try (Activity activity = getActivityReporter().start("Finding Relations", -1)) {
             ObjectId root = mf.getRoot();
             if (allowMissing && execute(new ObjectExistsOperation().addObject(root)).isMissing(root)) {
                 // root tree is not here, but this is OK if copying from a partial hive

@@ -170,7 +170,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         // Execute all tasks
         try {
-            executor.run("Installing to minions...");
+            executor.run("Installing");
         } catch (Exception ex) {
             throw new WebApplicationException("Installation failed", ex, Status.INTERNAL_SERVER_ERROR);
         }
@@ -321,7 +321,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         // Execute all tasks
         try {
-            executor.run("Removing on minions...");
+            executor.run("Uninstalling");
         } catch (Exception ex) {
             throw new WebApplicationException("Failed to uninstall.", ex, Status.INTERNAL_SERVER_ERROR);
         }
@@ -783,7 +783,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         // Now launch this application on the minion
-        try (Activity activity = reporter.start("Starting application...", -1)) {
+        try (Activity activity = reporter.start("Launching " + status.getAppStatus(applicationId).appName, -1)) {
             RemoteService service = root.getMinions().getRemote(minion);
             NodeProcessResource spc = ResourceProvider.getVersionedResource(service, NodeProcessResource.class, context);
             spc.start(instanceId, applicationId);
@@ -798,7 +798,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         // Find out all nodes where at least one application is running
         Collection<String> nodes = status.getNodesWhereAppsAreRunningOrScheduled();
 
-        try (Activity activity = reporter.start("Stopping applications...", nodes.size())) {
+        try (Activity activity = reporter.start("Stopping Instance", nodes.size())) {
             for (String node : nodes) {
                 RemoteService service = minions.getRemote(node);
                 NodeProcessResource spc = ResourceProvider.getVersionedResource(service, NodeProcessResource.class, context);
@@ -818,7 +818,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         String nodeName = status.getNodeWhereAppIsRunningOrScheduled(applicationId);
 
         // Now stop this application on the minion
-        try (Activity activity = reporter.start("Stopping application...", -1)) {
+        try (Activity activity = reporter.start("Stopping " + status.getAppStatus(applicationId).appName, -1)) {
             RemoteService service = root.getMinions().getRemote(nodeName);
             NodeProcessResource spc = ResourceProvider.getVersionedResource(service, NodeProcessResource.class, context);
             spc.stop(instanceId, applicationId);
@@ -870,7 +870,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceStatusDto instanceStatus = new InstanceStatusDto(instanceId);
 
         MinionConfiguration minions = root.getMinions();
-        try (Activity activity = reporter.start("Get node status...", minions.size())) {
+        try (Activity activity = reporter.start("Read Node Processes", minions.size())) {
             for (Entry<String, MinionDto> entry : minions.entrySet()) {
                 String minion = entry.getKey();
                 MinionDto dto = entry.getValue();
