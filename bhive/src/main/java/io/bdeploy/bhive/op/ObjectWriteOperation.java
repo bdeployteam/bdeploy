@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
@@ -29,6 +31,8 @@ import io.bdeploy.common.util.StreamHelper;
 @ReadOnlyOperation
 public class ObjectWriteOperation extends BHive.Operation<Long> {
 
+    public static final int BUFFER_SIZE = 8192;
+
     @AuditWith(AuditStrategy.COLLECTION_PEEK)
     private final Set<ObjectId> objects = new LinkedHashSet<>();
 
@@ -45,12 +49,22 @@ public class ObjectWriteOperation extends BHive.Operation<Long> {
             manifests.addAll(refs);
         }
 
-        int maxWork = manifests.size() + objects.size();
-        try (Activity activity = getActivityReporter().start("Sending Objects", maxWork);
+        // Collect the entire size that we are going to transfer
+        long totalSize = 0;
+        Map<ObjectId, Long> object2FileSize = new HashMap<>();
+        for (ObjectId object : objects) {
+            long size = getObjectManager().db(db -> db.getObjectSize(object));
+            object2FileSize.put(object, size);
+            totalSize += size;
+        }
+
+        try (Activity activity = getActivityReporter().start("Sending", totalSize);
                 CountingOutputStream countingOut = new CountingOutputStream(output);
-                GZIPOutputStream zipOut = new GZIPOutputStream(countingOut);
+                GZIPOutputStream zipOut = new GZIPOutputStream(countingOut, BUFFER_SIZE);
                 DataOutputStream dataOut = new DataOutputStream(zipOut)) {
-            dataOut.writeLong(maxWork);
+
+            // First we send the total size so that the client can display a progress bar
+            dataOut.writeLong(totalSize);
 
             // Stream all manifests
             dataOut.writeLong(manifests.size());
@@ -59,21 +73,21 @@ public class ObjectWriteOperation extends BHive.Operation<Long> {
                 byte[] bytes = StorageHelper.toRawBytes(mf);
                 dataOut.writeLong(bytes.length);
                 dataOut.write(bytes);
-                activity.worked(1);
             }
 
             // Stream all objects
             dataOut.writeLong(objects.size());
-            for (ObjectId object : objects) {
+            for (Map.Entry<ObjectId, Long> entry : object2FileSize.entrySet()) {
+                ObjectId objectId = entry.getKey();
+                long size = entry.getValue();
                 getObjectManager().db(db -> {
-                    long size = db.getObjectSize(object);
                     dataOut.writeLong(size);
-                    try (InputStream input = db.getStream(object)) {
+                    try (InputStream input = db.getStream(objectId)) {
                         StreamHelper.copy(input, dataOut);
                     }
                     return null;
                 });
-                activity.worked(1);
+                activity.worked(size);
             }
             return countingOut.getCount();
         } finally {

@@ -1,31 +1,17 @@
 ﻿using Bdeploy.Shared;
-using Microsoft.Win32;
-using System;
-using System.Collections;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 
-namespace Bdeploy.Installer.Views {
+namespace Bdeploy.Launcher.Views {
     /// <summary>
-    /// Interaction logic for ErrorView.xaml
+    /// Interaction logic for LaunchFailedWindow.xaml
     /// </summary>
-    public partial class ErrorView : UserControl {
+    public partial class LaunchFailedWindow : Window {
 
-        private readonly Window window;
         private bool detailsVisible = false;
 
-        public ErrorView(Window window) {
+        public LaunchFailedWindow(MessageEventArgs e) {
             InitializeComponent();
-            this.window = window;
-        }
-
-        internal void SetMessage(string message) {
-            ErrorDetails.Text = Utils.GetDetailedErrorMessage(message);
-        }
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e) {
-            window.Close();
+            ErrorDetails.Text = Utils.GetDetailedErrorMessage(e.Message);
         }
 
         private void DetailsButton_Click(object sender, RoutedEventArgs e) {
@@ -33,12 +19,12 @@ namespace Bdeploy.Installer.Views {
                 ErrorMessage.Visibility = Visibility.Visible;
                 ErrorDetails.Visibility = Visibility.Hidden;
                 ErrorDetailsButton.Content = "Show Details";
-                window.Height = 300;
+                Height = 300;
             } else {
                 ErrorMessage.Visibility = Visibility.Hidden;
                 ErrorDetails.Visibility = Visibility.Visible;
                 ErrorDetailsButton.Content = "Hide Details";
-                window.Height = 450;
+                Height = 450;
             }
             detailsVisible = !detailsVisible;
         }
@@ -47,5 +33,8 @@ namespace Bdeploy.Installer.Views {
             Clipboard.SetText(ErrorDetails.Text);
         }
 
+        private void CloseButton_Click(object sender, RoutedEventArgs e) {
+            Close();
+        }
     }
 }

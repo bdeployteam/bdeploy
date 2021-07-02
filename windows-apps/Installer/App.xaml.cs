@@ -25,6 +25,9 @@ namespace Bdeploy.Installer {
             // Download and install application without user interaction
             if (unattended) {
                 int setupCode = await Task.Run(() => installer.SetupAsync());
+                if (setupCode == 0 && config.CanInstallApp()) {
+                    setupCode = installer.Launch(new string[] { "--updateOnly" }, true);
+                }
                 Current.Shutdown(setupCode);
                 return;
             }

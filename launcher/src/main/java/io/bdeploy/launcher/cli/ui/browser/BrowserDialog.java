@@ -48,8 +48,12 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.Version;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.jersey.audit.Auditor;
+import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
@@ -65,6 +69,8 @@ public class BrowserDialog extends BaseDialog {
     private final BrowserDialogTableModel model = new BrowserDialogTableModel();
 
     private final transient Path rootDir;
+    private final transient Auditor auditor;
+    private final transient boolean readonlyRoot;
     private final transient TableRowSorter<BrowserDialogTableModel> sortModel = new TableRowSorter<>(model);
 
     private final JTable table = new JTable(model);
@@ -74,15 +80,18 @@ public class BrowserDialog extends BaseDialog {
     private JButton uninstallButton;
 
     private JMenuItem launchItem;
+    private JMenuItem updateItem;
     private JMenuItem customizeAndLaunchItem;
     private JMenuItem refreshItem;
     private JMenuItem uninstallItem;
 
     private JProgressBar progressBar;
 
-    public BrowserDialog(Path rootDir) {
+    public BrowserDialog(Path rootDir, Path userArea) {
         super(new Dimension(1024, 768));
         this.rootDir = rootDir;
+        this.readonlyRoot = userArea != null;
+        this.auditor = userArea != null ? new RollingFileAuditor(userArea.resolve("logs")) : null;
         setTitle("Client Applications");
 
         // Header area displaying a search field
@@ -108,7 +117,8 @@ public class BrowserDialog extends BaseDialog {
             return;
         }
         model.clear();
-        try (BHive hive = new BHive(hivePath.toUri(), new ActivityReporter.Null())) {
+
+        try (BHive hive = new BHive(hivePath.toUri(), auditor, new ActivityReporter.Null())) {
             ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
             model.addAll(manifest.list().stream().filter(mf -> mf.clickAndStart != null).collect(Collectors.toList()));
         }
@@ -131,7 +141,7 @@ public class BrowserDialog extends BaseDialog {
 
         refreshButton = new JButton();
         refreshButton.setText("Refresh");
-        refreshButton.setToolTipText("Contacts the remote server to refresh the selected applications.");
+        refreshButton.setToolTipText("Updates the locally stored information (name, version...) of the selected applications.");
         refreshButton.setIcon(WindowHelper.loadIcon("/refresh.png", 24, 24));
         refreshButton.addActionListener(this::onRefreshButtonClicked);
         refreshButton.setBackground(Color.WHITE);
@@ -225,6 +235,11 @@ public class BrowserDialog extends BaseDialog {
         launchItem.setToolTipText(launchButton.getToolTipText());
         launchItem.addActionListener(this::onLaunchButtonClicked);
 
+        updateItem = new JMenuItem("Update");
+        updateItem.setIcon(WindowHelper.loadIcon("/update.png", 16, 16));
+        updateItem.setToolTipText("Installs the latest available version the selected application.");
+        updateItem.addActionListener(this::onUpdateButtonClicked);
+
         customizeAndLaunchItem = new JMenuItem("Customize & Launch");
         customizeAndLaunchItem.setToolTipText("Opens a dialog to modify the application arguments before launching.");
         customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/build.png", 16, 16));
@@ -242,9 +257,10 @@ public class BrowserDialog extends BaseDialog {
 
         JPopupMenu menu = new JPopupMenu();
         menu.add(launchItem);
-        menu.add(refreshItem);
-        menu.add(new JSeparator());
         menu.add(customizeAndLaunchItem);
+        menu.add(new JSeparator());
+        menu.add(refreshItem);
+        menu.add(updateItem);
         menu.add(new JSeparator());
         menu.add(uninstallItem);
         table.setComponentPopupMenu(menu);
@@ -268,7 +284,8 @@ public class BrowserDialog extends BaseDialog {
         footer.setBorder(new EmptyBorder(0, 10, 10, 10));
         footer.setLayout(new BorderLayout(15, 15));
 
-        JLabel home = new JLabel("<HTML><U>" + rootDir.toAbsolutePath().toString() + "</U></HTML>");
+        JLabel home = new JLabel(
+                "<HTML><U>" + rootDir.toAbsolutePath().toString() + "</U>" + (readonlyRoot ? (" (readonly)") : "") + "</HTML>");
         home.setToolTipText("Open home directory");
         home.setHorizontalAlignment(SwingConstants.LEFT);
         home.setOpaque(false);
@@ -305,6 +322,20 @@ public class BrowserDialog extends BaseDialog {
             args.add("--customizeArgs");
         }
         doLaunch(app, args);
+    }
+
+    /** Notification that the selected app should be updated */
+    private void onUpdateButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        List<String> args = new ArrayList<>();
+        args.add("--updateOnly");
+
+        progressBar.setIndeterminate(true);
+        progressBar.setString("Updating '" + app.clickAndStart.applicationId + "'");
+
+        AppUpdater task = new AppUpdater(rootDir, app, args);
+        task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.execute();
     }
 
     /** Notification that the selected app should be removed */
@@ -374,7 +405,7 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setMaximum(apps.size());
         progressBar.setString("Refreshing applications...");
 
-        AppRefresher task = new AppRefresher(rootDir, apps);
+        AppRefresher task = new AppRefresher(rootDir, auditor, apps);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
@@ -419,11 +450,32 @@ public class BrowserDialog extends BaseDialog {
         launchButton.setEnabled(apps.size() == 1);
         launchItem.setEnabled(apps.size() == 1);
 
-        uninstallItem.setEnabled(apps.size() == 1);
-        uninstallButton.setEnabled(apps.size() == 1);
+        uninstallItem.setEnabled(!readonlyRoot && apps.size() == 1);
+        uninstallButton.setEnabled(!readonlyRoot && apps.size() == 1);
 
-        refreshItem.setEnabled(true);
-        refreshButton.setEnabled(true);
+        refreshItem.setEnabled(!readonlyRoot);
+        refreshButton.setEnabled(!readonlyRoot);
+
+        // --customizeArgs and launch needs at version 3.3.0
+        customizeAndLaunchItem.setEnabled(checkVersion(apps, new Version(3, 3, 0, null)));
+
+        // --updateOnly flag needs at least version 3.6.5
+        updateItem.setEnabled(!readonlyRoot && checkVersion(apps, new Version(3, 6, 5, null)));
+    }
+
+    /** Returns if the selected applications have at least the given version */
+    private boolean checkVersion(List<ClientSoftwareConfiguration> apps, Version minVersion) {
+        for (ClientSoftwareConfiguration app : apps) {
+            Key launcher = app.launcher;
+            if (launcher == null) {
+                continue;
+            }
+            Version version = VersionHelper.tryParse(launcher.getTag());
+            if (version.compareTo(minVersion) == -1) {
+                return false;
+            }
+        }
+        return !apps.isEmpty();
     }
 
     private class OpenHomeFolder extends MouseAdapter {

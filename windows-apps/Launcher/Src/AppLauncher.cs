@@ -1,8 +1,11 @@
 ﻿using Bdeploy.Shared;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.Serialization.Json;
 using System.Text;
 
 namespace Bdeploy.Launcher {
@@ -73,9 +76,33 @@ namespace Bdeploy.Launcher {
             builder.AppendFormat("\"--homeDir={0}\" ", HOME);
             builder.AppendFormat("\"--updateDir={0}\" ", UPDATES);
 
-            // Append addional arguments from the command line
-            foreach (String arg in args) {
-                builder.AppendFormat("\"{0}\" ", arg);
+            // All arguments after the -- separator are passed to application that the Java launcher is starting
+            // All arguments before are forwarded to the Java launcher. They will not be passed to the launched application
+            List<string> appArgs = new List<string>();
+            List<string> launcherArgs = new List<string>();
+            int argSeparator = Array.IndexOf(args, "--");
+            if (argSeparator != -1) {
+                launcherArgs.AddRange(args.Take(argSeparator));
+                appArgs.AddRange(args.Skip(argSeparator+1));
+            } else {
+                launcherArgs = args.ToList();
+            }
+
+            // Arguments that will be forwarded to the final application are Base64 encoded and then 
+            // serialized as JSON list. Using that approach we can simply decode the value and convert the JSON to a list in Java
+            // without the need to worry about proper escaping those values while passing it to the new process
+            if (appArgs.Count != 0) {
+                MemoryStream stream = new MemoryStream();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(List<string>));
+                ser.WriteObject(stream, appArgs);
+
+                string argsEncoded = Convert.ToBase64String(stream.ToArray());
+                builder.AppendFormat("\"--appendArgs={0}\" ", argsEncoded);
+            }
+
+            // Arguments for the launcher are simply added as they have been passed
+            foreach (string appArg in launcherArgs) {
+                builder.AppendFormat("\"{0}\" ", appArg);
             }
 
             return StartLauncher(builder.ToString());

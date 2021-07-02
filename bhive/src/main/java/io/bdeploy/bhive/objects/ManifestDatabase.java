@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -92,11 +93,13 @@ public class ManifestDatabase extends LockableDatabase {
             // unfortunately there is no better way to detect a 'ZipPath' as the class is not accessible directly.
             if (pathForKey.getClass().getSimpleName().contains("Zip")) {
                 // in case of ZIP files we cannot move afterwards, so we need to write directly
-                Files.write(pathForKey, StorageHelper.toRawBytes(manifest));
+                Files.write(pathForKey, StorageHelper.toRawBytes(manifest), StandardOpenOption.SYNC, StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING);
             } else {
                 Path tmpFile = Files.createTempFile(tmp, "mf-", ".tmp");
                 try {
-                    Files.write(tmpFile, StorageHelper.toRawBytes(manifest));
+                    Files.write(tmpFile, StorageHelper.toRawBytes(manifest), StandardOpenOption.SYNC, StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING);
                     Files.move(tmpFile, pathForKey, StandardCopyOption.ATOMIC_MOVE);
                 } catch (Throwable t) {
                     PathHelper.deleteRecursive(tmpFile);

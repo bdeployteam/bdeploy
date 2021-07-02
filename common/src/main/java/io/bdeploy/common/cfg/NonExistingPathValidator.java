@@ -21,6 +21,7 @@ public class NonExistingPathValidator implements ConfigValidator<String> {
                 if (list.findAny().isPresent()) {
                     return false;
                 }
+                return true;
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot determine directory contents: " + p, e);
             }

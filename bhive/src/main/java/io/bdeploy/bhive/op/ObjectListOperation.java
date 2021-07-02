@@ -1,6 +1,7 @@
 package io.bdeploy.bhive.op;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -125,7 +126,7 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
     /**
      * Restrict {@link ObjectId} listing to the given {@link Manifest}(s).
      */
-    public ObjectListOperation addManifest(Set<Manifest.Key> manifests) {
+    public ObjectListOperation addManifest(Collection<Manifest.Key> manifests) {
         this.manifests.addAll(manifests);
         return this;
     }

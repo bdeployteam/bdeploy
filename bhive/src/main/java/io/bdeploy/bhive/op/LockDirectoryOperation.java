@@ -48,7 +48,8 @@ public class LockDirectoryOperation extends BHive.Operation<Void> {
         boolean infoWritten = false;
         for (int i = 0; i < 100_000; ++i) {
             try {
-                Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW).toFile().deleteOnExit();
+                Files.write(lockFile, Collections.singletonList(content), StandardOpenOption.CREATE_NEW, StandardOpenOption.SYNC)
+                        .toFile().deleteOnExit();
                 return null;
             } catch (IOException e) {
                 // validate to find stale lock files

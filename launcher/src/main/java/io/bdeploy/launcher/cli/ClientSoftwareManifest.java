@@ -53,14 +53,18 @@ public class ClientSoftwareManifest {
     }
 
     /**
-     * Returns the newest version of the software configuration for the given application.
+     * Returns the newest version of the software configuration for the given application and optionally creates a new one if
+     * nothing is stored.
      */
-    public ClientSoftwareConfiguration readNewest(String appUid) {
+    public ClientSoftwareConfiguration readNewest(String appUid, boolean createNew) {
         Key key = getNewestKey(appUid);
-        if (key == null) {
-            return null;
+        if (key != null) {
+            return read(key);
         }
-        return read(key);
+        if (createNew) {
+            return new ClientSoftwareConfiguration();
+        }
+        return null;
     }
 
     /**

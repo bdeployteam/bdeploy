@@ -9,6 +9,7 @@ import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +138,8 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         desc.activeInstanceVersion = getState(inm, hive).read().activeTag;
 
-        try (OutputStream os = Files.newOutputStream(file)) {
+        try (OutputStream os = Files.newOutputStream(file, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.SYNC)) {
             os.write(StorageHelper.toRawBytes(desc));
         } catch (Exception e) {
             log.warn("Cannot write information file to {}", file, e);

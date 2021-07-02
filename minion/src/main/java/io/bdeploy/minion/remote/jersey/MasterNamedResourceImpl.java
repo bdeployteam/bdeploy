@@ -595,13 +595,15 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             switch (update.type) {
                 case ADD:
                     PathHelper.mkdirs(file.getParent());
-                    Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE_NEW);
+                    Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE_NEW,
+                            StandardOpenOption.SYNC);
                     break;
                 case DELETE:
                     Files.delete(file);
                     break;
                 case EDIT:
-                    Files.write(file, Base64.decodeBase64(update.content));
+                    Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE,
+                            StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
                     break;
             }
         }

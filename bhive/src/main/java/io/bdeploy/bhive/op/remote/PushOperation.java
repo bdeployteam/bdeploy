@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -154,6 +155,11 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
     public PushOperation addManifest(Manifest.Key key) {
         manifests.add(key);
+        return this;
+    }
+
+    public PushOperation addManifest(Collection<Manifest.Key> keys) {
+        manifests.addAll(keys);
         return this;
     }
 

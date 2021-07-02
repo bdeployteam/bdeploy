@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
@@ -23,13 +24,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-import com.sun.jna.Platform;
-import com.sun.jna.platform.win32.Kernel32Util;
+import org.slf4j.MDC;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
@@ -38,8 +36,10 @@ import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.LockDirectoryOperation;
+import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
@@ -55,7 +55,7 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
-import io.bdeploy.common.util.FormatHelper;
+import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -139,6 +139,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help("Set by the launcher script to determine the directory where to put updates for automatic application.")
         String updateDir();
 
+        @Help(value = "Additional command line arguments for the application. The arguments must be a Base64 encoded JSON list.")
+        String appendArgs();
+
         @Help(value = "Makes the launcher quit immediately after updating and launching the application.", arg = false)
         boolean dontWait() default false;
 
@@ -147,6 +150,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         @Help(value = "Opens a dialog that allows to modify the arguments passed to the application.", arg = false)
         boolean customizeArgs() default false;
+
+        @Help(value = "Update the launcher and application and then terminate without launching the application.", arg = false)
+        boolean updateOnly() default false;
     }
 
     /** The currently running launcher version */
@@ -233,20 +239,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Launch application after installing updates
      */
     private void doLaunch(Auditor auditor, LauncherSplash splash) {
-        // Log details about our current version
-        if (VersionHelper.isRunningUndefined()) {
-            log.info("Launcher version: Undefined.");
-        } else {
-            log.info("Launcher version: {}", runningVersion);
-        }
-
-        // Log details about the server version
-        // NOTE: Not all servers can tell us their version
-        Version serverVersion = getServerVersion(clickAndStart);
-        if (VersionHelper.isUndefined(serverVersion)) {
-            log.info("Server version: Undefined.");
-        } else {
-            log.info("Server version: {}", serverVersion);
+        log.info("Launcher version '{}' started.", VersionHelper.getVersionAsString());
+        log.info("Home directory: {}", rootDir);
+        if (readOnlyRootDir) {
+            log.info("User directory: {}", userArea);
+            log.info("Home directory is readonly. No new applications or updates can be installed.");
         }
 
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
@@ -257,18 +254,36 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Check for and install launcher updates
             // We always try to use the launcher matching the server version
-            Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter, serverVersion);
-            Version requiredVersion = requiredLauncher.getKey();
+            Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter);
+            Version requiredVersion = VersionHelper.UNDEFINED;
+            if (requiredLauncher != null) {
+                requiredVersion = requiredLauncher.getKey();
+            }
 
             // Launch the application or delegate launching
             Process process = null;
             if (shouldDelegate(runningVersion, requiredVersion)) {
-                log.info("Application requires an older launcher version. Delegating...");
-                doInstallSideBySide(hive, reporter, requiredLauncher);
+                log.info("Application cannot be started with this launcher: Server is running an older version.");
+                log.info("Delegating to launcher {}", requiredVersion);
+                doExecuteLocked(hive, reporter, () -> {
+                    doInstallLauncherSideBySide(hive, reporter, requiredLauncher);
+                    doInstallAppSideBySide(hive, reporter, requiredLauncher);
+                    return null;
+                });
                 process = doDelegateLaunch(requiredVersion, config.launch());
                 log.info("Launcher successfully launched. PID={}", process.pid());
+                log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
             } else {
-                process = doLaunch(hive, reporter, splash);
+                doInstall(hive, reporter, splash);
+                if (config.updateOnly()) {
+                    log.info("Application successfully installed/updated.");
+                    return;
+                }
+
+                // Launch the application
+                try (Activity info = reporter.start("Launching...")) {
+                    process = launchApplication(clientAppCfg);
+                }
                 log.info("Application successfully launched. PID={}", process.pid());
             }
 
@@ -278,6 +293,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Cleanup the installation directory and the hive.
             if (!readOnlyRootDir) {
+                log.info("Cleaning unused launchers and applications ...");
                 doExecuteLocked(hive, reporter, () -> {
                     ClientCleanup cleanup = new ClientCleanup(hive, rootDir, appsDir, poolDir);
                     cleanup.run();
@@ -329,9 +345,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Updates the launcher if there is a new version available */
-    private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter, Version serverVersion) {
+    private Entry<Version, Key> doSelfUpdate(BHive hive, LauncherSplashReporter reporter) {
+        if (VersionHelper.isRunningUndefined()) {
+            log.warn("Skipping self update. The local running version is not defined.");
+            return null;
+        }
+        log.info("Checking for launcher updates...");
         return doExecuteLocked(hive, reporter, () -> {
-            Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter, serverVersion);
+            Entry<Version, Key> requiredLauncher = getLatestLauncherVersion(reporter);
             doCheckForLauncherUpdate(hive, reporter, requiredLauncher);
             return requiredLauncher;
         });
@@ -382,20 +403,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         appDir = appsDir.resolve(clickAndStart.applicationId);
         readOnlyRootDir = PathHelper.isReadOnly(rootDir);
 
-        log.info("Home directory: {}{}", rootDir, readOnlyRootDir ? " (readonly)" : "");
-        if (userArea != null) {
-            log.info("User-area: {}", userArea);
-        }
+        // Enrich log messages with the application that is about to be launched
+        String pid = String.format("PID: %1$5s", ProcessHandle.current().pid());
+        MDC.put(MdcLogger.MDC_NAME, pid + " | App: " + clickAndStart.applicationId);
     }
 
-    private Process doLaunch(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash) {
-        log.info("Launching application {}.", clickAndStart.applicationId);
+    private void doInstall(BHive hive, LauncherSplashReporter reporter, LauncherSplash splash) {
         MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
 
         // Fetch more information from the remote server.
         try (Activity info = reporter.start("Loading meta-data...")) {
-            log.info("Fetching client configuration from server...");
+            log.info("Fetching configuration from server...");
             clientAppCfg = namedMaster.getClientConfiguration(clickAndStart.instanceId, clickAndStart.applicationId);
         }
 
@@ -418,12 +437,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             installApplication(hive, splash, reporter, clientAppCfg);
             return null;
         });
-
-        // Launch the application
-        try (Activity info = reporter.start("Launching...")) {
-            namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
-            return launchApplication(clientAppCfg);
-        }
     }
 
     private String getHostname(String fallback) {
@@ -465,22 +478,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Checks for updates and installs them if required */
-    private void doCheckForLauncherUpdate(BHive hive, ActivityReporter reporter, Map.Entry<Version, Key> latestLauncher) {
-        if (VersionHelper.isRunningUndefined()) {
-            log.info("Running version is undefined. Skipping updates...");
-            return;
-        }
-        if (latestLauncher == null) {
-            log.warn("Cannot find any launcher version on the server.");
-            return;
-        }
-        log.info("Newest launcher version of server: {}", latestLauncher.getKey());
-        Version latestVersion = latestLauncher.getKey();
+    private void doCheckForLauncherUpdate(BHive hive, ActivityReporter reporter, Map.Entry<Version, Key> requiredLauncher) {
+        Version latestVersion = requiredLauncher.getKey();
         if (latestVersion.compareTo(runningVersion) <= 0) {
-            log.info("No updates found (running={}, newest={}). Continue...", runningVersion, latestVersion);
+            log.info("No launcher updates are available.");
             return;
         }
-        Key launcher = latestLauncher.getValue();
+        Key launcher = requiredLauncher.getValue();
+        log.info("Launcher updates found. Updating from {} to {}", runningVersion, latestVersion);
 
         // Check if we have write permissions to install the update
         if (PathHelper.isReadOnly(rootDir)) {
@@ -496,7 +501,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             return;
         }
 
-        log.info("Updating launcher from {} to {}", runningVersion, latestVersion);
         Path updateMarker = updateDir.resolve(".updating");
         try (Activity updating = reporter.start("Updating Launcher")) {
             waitForLauncherUpdates(updateMarker);
@@ -574,32 +578,26 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Application is already installed. Nothing to install/update.");
                 return;
             }
-            log.info("Missing artifacts {}", missing);
+            log.info("Application needs to be installed/updated: {}", missing);
         } catch (Exception e) {
-            log.warn("Cannot verify that application is installed, re-installing", e);
+            log.warn("Failed to verify that application is installed, re-installing", e);
         }
 
         // Throw an exception if we do not have write permissions in the directory
         if (readOnlyRootDir) {
-            throw new SoftwareUpdateException(appName, "Missing artifacts: " + missing.stream().collect(Collectors.joining(",")));
+            throw new SoftwareUpdateException(appName, "Missing parts: " + missing.stream().collect(Collectors.joining(",")));
         }
-
-        Key appKey = appCfg.application;
-        log.info("Starting installation of application {}", appKey);
 
         // Fetch the application and all the requirements
         try (Activity info = reporter.start("Downloading..."); Transaction t = hive.getTransactions().begin()) {
-            log.info("Fetching manifests from server...");
+            log.info("Downloading application...");
             TransferStatistics stats = hive
                     .execute(new FetchOperation().setHiveName(clickAndStart.groupId).setRemote(clickAndStart.host)
-                            .addManifest(appKey).addManifest(clientAppCfg.resolvedRequires).setRetryCount(5));
+                            .addManifest(appCfg.application).addManifest(clientAppCfg.resolvedRequires).setRetryCount(5));
             if (stats.sumManifests == 0) {
-                log.info("Local hive already contains all required arfifacts. No manifests where fetched.");
+                log.info("Local hive already contains all required files.");
             } else {
-                log.info("Fetched {} manifests from server. Total size {}. Total files {}, Duration {}. Transfer Rate {}",
-                        stats.sumManifests, FormatHelper.formatFileSize(stats.transferSize), stats.sumMissingObjects,
-                        FormatHelper.formatDuration(stats.duration),
-                        FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+                log.info("Fetched missing files from server. {}", stats.toLogString());
             }
         }
 
@@ -677,7 +675,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Meta-Manifest about the installation must be there
         // and must refer to what the application actually requires
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.uid);
+        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.uid, false);
         if (clientConfig == null) {
             missing.add("Meta-Manifest:" + clientAppCfg.appConfig.uid);
         } else {
@@ -685,6 +683,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             applications.removeAll(clientConfig.requiredSoftware);
             if (!applications.isEmpty()) {
                 missing.add("Meta-Manifest-Entry: " + applications);
+            }
+
+            // Remove reference to the launcher
+            if (clientConfig.launcher != null) {
+                missing.add("Delete Meta-Manifest: " + clientConfig.launcher);
             }
         }
         return missing;
@@ -694,9 +697,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      * Launches the client process using the given configuration.
      */
     private Process launchApplication(ClientApplicationConfiguration clientCfg) {
-        log.info("Attempting to launch application.");
+        log.info("Launching application.");
         ApplicationConfiguration appCfg = clientCfg.appConfig;
         DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
+
+        MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
+        MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
+        namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
 
         // General resolvers
         CompositeResolver resolvers = new CompositeResolver();
@@ -727,6 +734,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Create the actual start command and replace all defined variables
         ProcessConfiguration pc = appCfg.renderDescriptor(appSpecificResolvers);
         List<String> command = TemplateHelper.process(pc.start, appSpecificResolvers);
+
+        // Append custom arguments if applicable
+        command.addAll(decodeAdditionalArguments(config.appendArgs()));
+
+        // Let the user modify the command-line before launching
         if (config.customizeArgs()) {
             TextAreaDialog dialog = new TextAreaDialog();
             if (!dialog.customize(appCfg.name, command)) {
@@ -744,56 +756,86 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
-     * Installs the launcher required to launch the application side-by-side to this launcher. If the launcher is already
-     * installed then nothing will be done.
+     * Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed
      */
-    private void doInstallSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
-        // Check if the launcher is already installed
+    private void doInstallLauncherSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
         Version version = requiredLauncher.getKey();
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
         Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
 
-        // Install missing launcher
         Key launcher = requiredLauncher.getValue();
-        doExecuteLocked(hive, reporter, () -> {
-            if (nativeLauncher.toFile().exists()) {
-                return null;
-            }
-            log.info("Installing required launcher {}...", version);
-            if (PathHelper.isReadOnly(homeDir)) {
-                throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
-            }
-            // Fetch and write to target directory
-            try (Transaction t = hive.getTransactions().begin()) {
-                hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
-            }
-            Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
-            hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
-            log.info("Launcher successfully installed: {}", version);
-            return null;
-        });
-
-        // Write manifest entry that the launcher needs to be retained
-        ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration storedConfig = manifest.readNewest(clickAndStart.applicationId);
-        if (storedConfig != null && storedConfig.launcher != null && storedConfig.launcher.equals(launcher)) {
+        if (nativeLauncher.toFile().exists()) {
+            log.info("Launcher is already installed.");
             return;
         }
-        // Ensure we have write permissions
+        log.info("Installing required launcher ...");
+        if (PathHelper.isReadOnly(homeDir)) {
+            throw new SoftwareUpdateException("launcher", "Installed=" + runningVersion.toString() + " Required=" + version);
+        }
+        // Fetch and write to target directory
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new FetchOperation().addManifest(launcher).setRemote(clickAndStart.host));
+        }
+        Path launcherHome = homeDir.resolve(ClientPathHelper.LAUNCHER_DIR);
+        hive.execute(new ExportOperation().setManifest(launcher).setTarget(launcherHome));
+        log.info("Launcher successfully installed.");
+    }
+
+    /**
+     * Copies software that the application is using from our hive to the side-by-side hive.
+     */
+    private void doInstallAppSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
+        // Check if the stored configuration references the required launcher
+        // If so then we can continue. There is nothing that we need to do
+        Version version = requiredLauncher.getKey();
+        ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
+        ClientSoftwareConfiguration config = manifest.readNewest(clickAndStart.applicationId, true);
+        Key launcher = requiredLauncher.getValue();
+        if (config.launcher != null && config.launcher.equals(launcher)) {
+            log.info("Client software manifest is up-2-date.");
+            return;
+        }
+
+        Path homeDir = ClientPathHelper.getHome(rootDir, version);
         if (PathHelper.isReadOnly(homeDir)) {
             throw new SoftwareUpdateException(clickAndStart.applicationId, "Missing artifacts: Software Manifest");
         }
-        // Write updated manifest
-        doExecuteLocked(hive, reporter, () -> {
-            ClientSoftwareConfiguration newConfig = new ClientSoftwareConfiguration();
-            newConfig.launcher = launcher;
-            newConfig.clickAndStart = clickAndStart;
-            if (storedConfig != null) {
-                newConfig.metadata = storedConfig.metadata;
+
+        // Protocol that this launcher needs to be retained
+        // NOTE: We are intentionally not clearing out the required software entry
+        // As a result the software will be retained in our hive
+        // If the server hosting this application is upgraded the user do not need
+        // to download everything again. Thus start times remain fast.
+        config.launcher = launcher;
+        config.clickAndStart = clickAndStart;
+        manifest.update(clickAndStart.applicationId, config);
+
+        // We never started this application so we do not know which software it is using
+        if (config.requiredSoftware.isEmpty()) {
+            log.info("Skip copying required software: Application has never been started with this launcher.");
+            return;
+        }
+
+        // Copy the required software from our hive to the target hive
+        log.info("Copy required software ...");
+        Path hiveDir = homeDir.resolve("bhive");
+        try (BHive otherHive = new BHive(hiveDir.toUri(), reporter)) {
+            otherHive.setLockContentSupplier(LOCK_CONTENT);
+            otherHive.setLockContentValidator(LOCK_VALIDATOR);
+
+            Set<ObjectId> requiredObjects = hive.execute(new ObjectListOperation().addManifest(config.requiredSoftware));
+            TransferStatistics stats = hive.execute(new CopyOperation().setDestinationHive(otherHive).addObject(requiredObjects)
+                    .addManifest(config.requiredSoftware));
+            if (stats.sumManifests == 0) {
+                log.info("Hive already contains all required files.");
+            } else {
+                log.info("Copied missing files from this hive. {}", stats.toLogString());
             }
-            manifest.update(clickAndStart.applicationId, newConfig);
-            return null;
-        });
+        } catch (Exception ex) {
+            // We just log the error and continue
+            // The other launcher will download the required software
+            log.warn("Failed to copy required software.", ex);
+        }
     }
 
     /**
@@ -802,11 +844,22 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private Process doDelegateLaunch(Version version, String appDescriptor) {
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
         Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
-        log.info("Launching application {} using launcher version {}", clickAndStart.applicationId, version);
 
         List<String> command = new ArrayList<>();
         command.add(nativeLauncher.toFile().getAbsolutePath());
         command.add(appDescriptor);
+        if (config.customizeArgs()) {
+            command.add("--customizeArgs");
+        }
+        if (config.updateOnly()) {
+            command.add("--updateOnly");
+        }
+
+        Collection<String> appArguments = decodeAdditionalArguments(config.appendArgs());
+        if (!appArguments.isEmpty()) {
+            command.add("--");
+            appArguments.forEach(arg -> command.add("\"" + arg + "\""));
+        }
 
         log.info("Executing {}", command.stream().collect(Collectors.joining(" ")));
         try {
@@ -829,15 +882,17 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /** Returns the latest available launcher version */
-    private Map.Entry<Version, Key> getLatestLauncherVersion(ActivityReporter reporter, Version serverVersion) {
-        OperatingSystem runningOs = OsHelper.getRunningOs();
-
+    private Map.Entry<Version, Key> getLatestLauncherVersion(ActivityReporter reporter) {
         // Fetch all versions and filter out the one that corresponds to the server version
+        OperatingSystem runningOs = OsHelper.getRunningOs();
         String launcherKey = UpdateHelper.SW_META_PREFIX + UpdateHelper.SW_LAUNCHER;
-        boolean serverIsUndefined = VersionHelper.isUndefined(serverVersion);
         NavigableMap<Version, Key> versions = new TreeMap<>(VersionComparator.NEWEST_LAST);
         try (RemoteBHive rbh = RemoteBHive.forService(clickAndStart.host, null, reporter);
                 Activity check = reporter.start("Fetching launcher versions....")) {
+
+            Version serverVersion = getServerVersion(clickAndStart);
+            boolean serverIsUndefined = VersionHelper.isUndefined(serverVersion);
+
             SortedMap<Key, ObjectId> launchers = rbh.getManifestInventory(launcherKey);
             for (Key launcher : launchers.keySet()) {
                 ScopedManifestKey smk = ScopedManifestKey.parse(launcher);
@@ -867,6 +922,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     }
 
     /**
+     * Decodes the additional arguments that are passed to the application.
+     */
+    @SuppressWarnings("unchecked")
+    private Collection<String> decodeAdditionalArguments(String appendArgs) {
+        if (appendArgs == null || appendArgs.isBlank()) {
+            return Collections.emptyList();
+        }
+        byte[] decodedBytes = Base64.decodeBase64(appendArgs);
+        return StorageHelper.fromRawBytes(decodedBytes, List.class);
+    }
+
+    /**
      * Returns the server version or null in case that the version cannot be determined
      */
     public static Version getServerVersion(ClickAndStartDescriptor descriptor) {
@@ -878,39 +945,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.debug("Cannot determine server version.", ex);
             }
             return VersionHelper.UNDEFINED;
-        }
-    }
-
-    /**
-     * Native hostname lookup
-     */
-    private static final class NativeHostnameResolver {
-
-        /**
-         * Native Interface to: http://man7.org/linux/man-pages/man2/gethostname.2.html
-         */
-        private interface UnixCLibrary extends Library {
-
-            UnixCLibrary INSTANCE = Native.load("c", UnixCLibrary.class);
-
-            public int gethostname(byte[] hostname, int bufferSize);
-        }
-
-        /**
-         * @return the hostname the of the current machine
-         */
-        public static String getHostname() {
-            if (Platform.isWindows()) { /** perform windows "computername" lookup */
-                return Kernel32Util.getComputerName();
-            } else { /** try to call linux native library function */
-                byte[] hostnameBuffer = new byte[4097];
-                int result = UnixCLibrary.INSTANCE.gethostname(hostnameBuffer, hostnameBuffer.length);
-                if (result != 0) {
-                    log.error("Native Method call failed: gethostname");
-                    return null;
-                }
-                return Native.toString(hostnameBuffer);
-            }
         }
     }
 

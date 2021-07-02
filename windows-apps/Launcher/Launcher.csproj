@@ -64,6 +64,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -82,11 +83,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Views\LaunchFailedWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\WaitingWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\ErrorWindow.xaml">
+    <Page Include="Views\UpdateFailedWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -101,11 +106,14 @@
     <Compile Include="Src\BaseLauncher.cs" />
     <Compile Include="Src\LogFactory.cs" />
     <Compile Include="Src\AppUninstaller.cs" />
+    <Compile Include="Views\LaunchFailedWindow.xaml.cs">
+      <DependentUpon>LaunchFailedWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\WaitingWindow.xaml.cs">
       <DependentUpon>WaitingWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ErrorWindow.xaml.cs">
-      <DependentUpon>ErrorWindow.xaml</DependentUpon>
+    <Compile Include="Views\UpdateFailedWindow.xaml.cs">
+      <DependentUpon>UpdateFailedWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -151,6 +159,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="ILMergeOrder.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\copy.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
