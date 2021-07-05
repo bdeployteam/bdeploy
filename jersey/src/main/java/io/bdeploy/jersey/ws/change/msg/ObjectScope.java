@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Encapsulates scoping logic.
  */
-public class ObjectScope {
+public class ObjectScope implements Comparable<ObjectScope> {
 
     /**
      * An empty scope matching any incoming scope.
@@ -56,6 +56,25 @@ public class ObjectScope {
         return true;
     }
 
+    public int score(ObjectScope other) {
+        if (!matches(other)) {
+            return 0;
+        }
+
+        // might be empty scope, needs special handling.
+        if (scope.isEmpty() && other.scope.isEmpty()) {
+            return 100;
+        }
+
+        // the scope matches. the score is the percentage of present scope parts, so compare length.
+        // if our scope is longer than the compare scope we limit the match to 100 - full match.
+        return Math.min(100, Math.round((100f * other.scope.size()) / scope.size()));
+    }
+
+    public int length() {
+        return scope.size();
+    }
+
     @Override
     public String toString() {
         return scope.toString();
@@ -91,6 +110,23 @@ public class ObjectScope {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int compareTo(ObjectScope o) {
+        if (scope.size() > o.scope.size()) {
+            return 1;
+        }
+        if (scope.size() > o.scope.size()) {
+            return -1;
+        }
+        for (int i = 0; i < scope.size(); ++i) {
+            int r = scope.get(i).compareTo(o.scope.get(i));
+            if (r != 0) {
+                return r;
+            }
+        }
+        return 0;
     }
 
 }

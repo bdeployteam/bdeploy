@@ -54,6 +54,26 @@ public class ObjectChangeRegistration {
     }
 
     /**
+     * Calculates a match score, which determines "how much" the given scope matches.
+     */
+    public ObjectScope getBestScoring(String type, ObjectScope scope) {
+        if (!matches(type, scope)) {
+            return null;
+        }
+
+        ObjectScope result = null;
+        int score = 0;
+        for (ObjectScope s : registrations.get(type)) {
+            int ss = s.score(scope);
+            if (ss > score || (result != null && ss == score && s.length() < result.length())) {
+                score = ss;
+                result = s;
+            }
+        }
+        return result;
+    }
+
+    /**
      * @param listener a listener to be notified on changes.
      */
     public void addListener(Consumer<ObjectChangeRegistration> listener) {

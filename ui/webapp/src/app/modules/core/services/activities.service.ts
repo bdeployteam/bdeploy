@@ -46,6 +46,9 @@ export class ActivitiesService {
           this.changesSubscription.unsubscribe();
         }
 
+        // reset in case there are no more matching activities in the new scope.
+        this.activities$.next([]);
+
         this.changesSubscription = changes.subscribe(ObjectChangeType.ACTIVITIES, scope, (c) => {
           this.activities$.next(this.getActivitiesFromEvent(c.details[ObjectChangeDetails.ACTIVITIES], scope.scope));
         });

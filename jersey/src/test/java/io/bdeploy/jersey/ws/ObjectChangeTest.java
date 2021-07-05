@@ -2,7 +2,9 @@ package io.bdeploy.jersey.ws;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
@@ -81,6 +83,72 @@ public class ObjectChangeTest {
             withoutScope.get();
 
             assertEquals(2, receivedChanges.sum());
+        }
+    }
+
+    @Test
+    void testWebSocketMatching(RemoteService remote) throws Exception {
+        AtomicReference<CompletableFuture<ObjectChangeDto>> processed = new AtomicReference<>();
+        AtomicReference<CompletableFuture<?>> barrier = new AtomicReference<>();
+        ocb.addListener((r) -> {
+            barrier.get().complete(null);
+        });
+
+        try (ObjectChangeClientWebSocket occws = JerseyClientFactory.get(remote).getObjectChangeWebSocket((change) -> {
+            processed.get().complete(change);
+        })) {
+            barrier.set(new CompletableFuture<>());
+            occws.subscribe("X", new ObjectScope("SCOPE"));
+            barrier.get().get();
+
+            List<ObjectChangeDto> msgs;
+            ObjectChangeDto received;
+
+            // single event, matches type and scope 100%
+            processed.set(new CompletableFuture<>());
+            msgs = new ArrayList<>();
+            msgs.add(new ObjectChangeDto("X", new ObjectScope("SCOPE"), ObjectEvent.CREATED, Collections.emptyMap()));
+            ocb.sendBestMatching(msgs);
+            received = processed.get().get();
+            assertEquals(new ObjectScope("SCOPE"), received.scope);
+
+            // multi events, should send best matching.
+            processed.set(new CompletableFuture<>());
+            msgs = new ArrayList<>();
+            msgs.add(new ObjectChangeDto("X", ObjectScope.EMPTY, ObjectEvent.CREATED, Collections.emptyMap()));
+            msgs.add(new ObjectChangeDto("X", new ObjectScope("SCOPE"), ObjectEvent.CREATED, Collections.emptyMap()));
+            msgs.add(new ObjectChangeDto("X", new ObjectScope("SCOPE", "SUB"), ObjectEvent.CREATED, Collections.emptyMap()));
+            ocb.sendBestMatching(msgs);
+            received = processed.get().get();
+            assertEquals(new ObjectScope("SCOPE"), received.scope);
+
+            // multi events in reverse order, should still send best matching.
+            processed.set(new CompletableFuture<>());
+            msgs = new ArrayList<>();
+            msgs.add(new ObjectChangeDto("X", new ObjectScope("SCOPE", "SUB"), ObjectEvent.CREATED, Collections.emptyMap()));
+            msgs.add(new ObjectChangeDto("X", new ObjectScope("SCOPE"), ObjectEvent.CREATED, Collections.emptyMap()));
+            msgs.add(new ObjectChangeDto("X", ObjectScope.EMPTY, ObjectEvent.CREATED, Collections.emptyMap()));
+            ocb.sendBestMatching(msgs);
+            received = processed.get().get();
+            assertEquals(new ObjectScope("SCOPE"), received.scope);
+
+            // re-subscribe to global scope.
+            barrier.set(new CompletableFuture<>());
+            occws.unsubscribe("X", new ObjectScope("SCOPE"));
+            barrier.get().get();
+            barrier.set(new CompletableFuture<>());
+            occws.subscribe("X", ObjectScope.EMPTY);
+            barrier.get().get();
+
+            // test multiple events with differing scope, the one with the *shortest* scope should win.
+            processed.set(new CompletableFuture<>());
+            msgs = new ArrayList<>();
+            msgs.add(new ObjectChangeDto("X", new ObjectScope("SCOPE", "SUB"), ObjectEvent.CREATED, Collections.emptyMap()));
+            msgs.add(new ObjectChangeDto("X", ObjectScope.EMPTY, ObjectEvent.CREATED, Collections.emptyMap()));
+            msgs.add(new ObjectChangeDto("X", new ObjectScope("SCOPE"), ObjectEvent.CREATED, Collections.emptyMap()));
+            ocb.sendBestMatching(msgs);
+            received = processed.get().get();
+            assertEquals(ObjectScope.EMPTY, received.scope);
         }
     }
 

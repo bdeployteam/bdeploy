@@ -2,11 +2,11 @@ package io.bdeploy.jersey.activity;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
@@ -56,7 +56,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
      */
     private static final List<JerseyRemoteActivity> globalActivities = new CopyOnWriteArrayList<>();
     private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
-    private static final Set<List<String>> activeScopes = new TreeSet<>(JerseyBroadcastingActivityReporter::compareScopes);
+    private static final Set<ObjectScope> activeScopes = new TreeSet<>();
 
     private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
@@ -66,22 +66,6 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
     @Inject
     @Optional
     private ObjectChangeBroadcaster bc;
-
-    private static int compareScopes(List<String> a, List<String> b) {
-        if (a.size() > b.size()) {
-            return 1;
-        }
-        if (b.size() > a.size()) {
-            return -1;
-        }
-        for (int i = 0; i < a.size(); ++i) {
-            int r = a.get(i).compareTo(b.get(i));
-            if (r != 0) {
-                return r;
-            }
-        }
-        return 0;
-    }
 
     @Inject
     public JerseyBroadcastingActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
@@ -97,39 +81,58 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
             List<ActivitySnapshot> list = getGlobalActivities().stream().filter(Objects::nonNull)
                     .map(JerseyRemoteActivity::snapshot).collect(Collectors.toList());
 
-            // split to distinct lists per scope name
-            Map<List<String>, List<ActivitySnapshot>> perScope = new TreeMap<>(JerseyBroadcastingActivityReporter::compareScopes);
-            for (ActivitySnapshot snapshot : list) {
-                List<ActivitySnapshot> forScope = perScope.computeIfAbsent(snapshot.scope, k -> new ArrayList<>());
+            // figure out all different scopes which are there.
+            List<ObjectScope> scopes = list.stream().map(a -> new ObjectScope(a.scope)).distinct().collect(Collectors.toList());
 
-                forScope.add(snapshot);
+            Map<ObjectScope, List<ActivitySnapshot>> perScope = new HashMap<>();
 
-                while (addChildren(forScope, list) != 0) {
-                    // intentionally left blank :)
+            for (ObjectScope scope : scopes) {
+                List<ActivitySnapshot> forScope = new ArrayList<>();
+                for (ActivitySnapshot snapshot : list) {
+                    if (snapshot.parentUuid != null) {
+                        // this is a child, not a root - skip
+                        continue;
+                    }
+
+                    if (scope.matches(new ObjectScope(snapshot.scope))) {
+                        forScope.add(snapshot);
+
+                        while (addChildren(forScope, list) != 0) {
+                            // intentionally left blank :)
+                        }
+                    }
+                }
+                if (!forScope.isEmpty()) {
+                    perScope.put(scope, forScope);
                 }
             }
             activeScopes.addAll(perScope.keySet());
 
-            // TODO: somebody in an "outer" scope will receive multiple messages for each scope which matches - this is not good :)
-            // also splitting activities might have one loose its parent if it has a finer scope than its parent...
-
-            for (Map.Entry<List<String>, List<ActivitySnapshot>> e : perScope.entrySet()) {
-                bc.send(new ObjectChangeDto(OCT_ACTIVIES, new ObjectScope(e.getKey()), ObjectEvent.CHANGED,
-                        Collections.singletonMap(OCT_ACTIVIES, serialize(e.getValue()))));
-            }
-
-            List<List<String>> scopesToRemove = new ArrayList<>();
-            for (List<String> active : activeScopes) {
+            List<ObjectScope> scopesToRemove = new ArrayList<>();
+            for (ObjectScope active : activeScopes) {
                 if (!perScope.containsKey(active)) {
                     scopesToRemove.add(active);
                 }
             }
 
-            for (List<String> toRemove : scopesToRemove) {
+            // This will send an empty list to all the consumers that match this scope.
+            // This will in some cases result in a reset of activities to empty, even though
+            // this client will receive events from *another* scope. we cannot determine
+            // it here, since we don't know about the actual registrations. Thus we send
+            // the "update to empty" first and *right* after that the updates which may
+            // contain activities for that clients as well.
+            for (ObjectScope toRemove : scopesToRemove) {
                 activeScopes.remove(toRemove);
-                bc.send(new ObjectChangeDto(OCT_ACTIVIES, new ObjectScope(toRemove), ObjectEvent.CHANGED,
+                bc.send(new ObjectChangeDto(OCT_ACTIVIES, toRemove, ObjectEvent.CHANGED,
                         Collections.singletonMap(OCT_ACTIVIES, "[]")));
             }
+
+            List<ObjectChangeDto> allMessages = new ArrayList<>();
+            for (Map.Entry<ObjectScope, List<ActivitySnapshot>> e : perScope.entrySet()) {
+                allMessages.add(new ObjectChangeDto(OCT_ACTIVIES, e.getKey(), ObjectEvent.CHANGED,
+                        Collections.singletonMap(OCT_ACTIVIES, serialize(e.getValue()))));
+            }
+            bc.sendBestMatching(allMessages);
         } catch (Exception e) {
             log.error("Error while broadcasting activities", e);
         }

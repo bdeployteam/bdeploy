@@ -1,35 +1,37 @@
-<div *ngFor="let act of activities.activities$ | async; trackBy: doTrack" fxLayout="column" fxLayoutGap="5px">
-  <app-bd-notification-card
-    *ngIf="squashActivity(act) as squashed"
-    icon="hourglass_bottom"
-    [dismissable]="!squashed?.current?.snapshot?.cancel"
-    (dismiss)="onDismiss(squashed)"
-    [header]="squashed.header"
-  >
-    <div fxLayout="column" fxLayoutGap="5px">
-      <ng-container *ngIf="squashed.current.snapshot.max <= 0">
-        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-        <div fxLayout="row">
-          <div fxFlex="1 0 auto"></div>
-          <span>{{ formatDuration(squashed) }}</span>
-        </div>
-      </ng-container>
+<div fxLayout="column" fxLayoutGap="5px">
+  <div *ngFor="let act of activities.activities$ | async; trackBy: doTrack">
+    <app-bd-notification-card
+      *ngIf="squashActivity(act) as squashed"
+      icon="hourglass_bottom"
+      [dismissable]="!squashed?.current?.snapshot?.cancel"
+      (dismiss)="onDismiss(squashed)"
+      [header]="squashed.header"
+    >
+      <div fxLayout="column" fxLayoutGap="5px">
+        <ng-container *ngIf="squashed.current.snapshot.max <= 0">
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          <div fxLayout="row">
+            <div fxFlex="1 0 auto"></div>
+            <span>{{ formatDuration(squashed) }}</span>
+          </div>
+        </ng-container>
 
-      <ng-container *ngIf="squashed.current.snapshot.max > 0">
-        <mat-progress-bar mode="determinate" [value]="calculatePercentDone(squashed)"></mat-progress-bar>
-        <div fxLayout="row">
-          <span>{{ squashed.current.snapshot.current }} of {{ squashed.current.snapshot.max }}</span>
-          <div fxFlex="1 0 auto"></div>
-          <span>{{ formatDuration(squashed) }}</span>
-        </div>
-      </ng-container>
+        <ng-container *ngIf="squashed.current.snapshot.max > 0">
+          <mat-progress-bar mode="determinate" [value]="calculatePercentDone(squashed)"></mat-progress-bar>
+          <div fxLayout="row">
+            <span>{{ squashed.current.snapshot.current }} of {{ squashed.current.snapshot.max }}</span>
+            <div fxFlex="1 0 auto"></div>
+            <span>{{ formatDuration(squashed) }}</span>
+          </div>
+        </ng-container>
 
-      <div fxLayout="row" class="local-user-hint">
-        <div fxFlex="1 0 auto"></div>
-        <div class="bd-hint-text">{{ squashed.current.snapshot.uuid }}, ~{{ squashed.current.snapshot.user }}.</div>
+        <div fxLayout="row" class="local-user-hint">
+          <div fxFlex="1 0 auto"></div>
+          <div class="bd-hint-text">{{ squashed.current.snapshot.uuid }}, ~{{ squashed.current.snapshot.user }}.</div>
+        </div>
       </div>
-    </div>
-  </app-bd-notification-card>
+    </app-bd-notification-card>
+  </div>
 </div>
 
 <app-bd-no-data *ngIf="!(activities.activities$ | async)?.length">

@@ -2,7 +2,9 @@ package io.bdeploy.jersey.ws.change;
 
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import jakarta.ws.rs.core.Response.Status;
 
 public class ObjectChangeWebSocket extends WebSocketApplication implements ObjectChangeBroadcaster {
@@ -63,6 +66,42 @@ public class ObjectChangeWebSocket extends WebSocketApplication implements Objec
         try {
             Set<WebSocket> targets = getWebSockets(change);
             this.broadcaster.broadcast(targets, serializer.writeValueAsString(change));
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Cannot write JSON to WebSocket", e);
+        }
+    }
+
+    @Override
+    public void sendBestMatching(List<ObjectChangeDto> changes) {
+        try {
+            Map<ObjectChangeDto, List<WebSocket>> targets = new HashMap<>();
+            for (Map.Entry<WebSocket, ObjectChangeRegistration> entry : webSockets.entrySet()) {
+                ObjectChangeDto best = null;
+                int bestScore = 0;
+
+                for (ObjectChangeDto change : changes) {
+                    // for each websocket, find the change DTO which has the highest score.
+                    ObjectScope match = entry.getValue().getBestScoring(change.type, change.scope);
+                    if (match != null) {
+                        int score = match.score(change.scope);
+
+                        if (score > bestScore || (score == bestScore && best.scope.length() > match.length())) {
+                            // this websocket has a match, choose the best score.
+                            bestScore = score;
+                            best = change;
+                        }
+                    }
+                }
+
+                // if we found a match, record it.
+                if (best != null) {
+                    targets.computeIfAbsent(best, (k) -> new ArrayList<>()).add(entry.getKey());
+                }
+            }
+
+            for (Map.Entry<ObjectChangeDto, List<WebSocket>> target : targets.entrySet()) {
+                this.broadcaster.broadcast(target.getValue(), serializer.writeValueAsString(target.getKey()));
+            }
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Cannot write JSON to WebSocket", e);
         }
