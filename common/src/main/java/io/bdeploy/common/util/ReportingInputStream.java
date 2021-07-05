@@ -73,8 +73,6 @@ public class ReportingInputStream extends FilterInputStream {
             bytesToReport = 0;
             lastUpdate = now;
         }
-
-        // Report progress as we read the bytes
         return result;
     }
 
@@ -87,7 +85,7 @@ public class ReportingInputStream extends FilterInputStream {
 
     private void notifyWorked(long now, long elapsedTime, long bytesRemaining) {
         long remainingTimeMs = (elapsedTime * bytesRemaining) / bytesRead;
-        String transferRate = FormatHelper.formatTransferRate(bytesTotal, elapsedTime);
+        String transferRate = FormatHelper.formatTransferRate(bytesRead, elapsedTime);
         String fSizeRead = FormatHelper.formatFileSize(bytesRead);
         String fTotalSize = FormatHelper.formatFileSize(bytesTotal);
         String fRemaining = FormatHelper.formatRemainingTime(remainingTimeMs).trim() + " remaining";
