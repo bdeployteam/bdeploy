@@ -1,3 +1,9 @@
+<ng-template #activitiesPopup>
+  <mat-card [style.padding.px]="10" class="mat-typography local-activity-popup-sizing" fxLayout="column" fxLayoutGap="5px">
+    <app-bd-activities></app-bd-activities>
+  </mat-card>
+</ng-template>
+
 <div #navRoot class="local-sizing" fxLayout="row">
   <app-main-nav-menu fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-menu>
   <div fxLayout="column" fxFlex="1 1 auto">
@@ -9,5 +15,20 @@
       <app-main-nav-flyin fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-flyin>
     </div>
   </div>
-  <div class="local-watermark">{{ cfg.config.version | formatVersion }}</div>
+  <div class="local-watermark">
+    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="center center">
+      <span>{{ cfg.config.version | formatVersion }}</span>
+      <div [style.width.px]="96" fxLayout="row" fxLayoutAlign="center center">
+        <mat-progress-bar
+          matTooltip="Click to view background operations"
+          [appBdPopup]="activitiesPopup"
+          appBdPopupPosition="above-left"
+          [style.cursor]="'pointer'"
+          [style.width.px]="54"
+          [mode]="!!(activities.activities$ | async)?.length ? 'indeterminate' : 'determinate'"
+          value="50"
+        ></mat-progress-bar>
+      </div>
+    </div>
+  </div>
 </div>

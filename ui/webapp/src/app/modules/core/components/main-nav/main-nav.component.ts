@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ActivitiesService } from '../../services/activities.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { ThemeService } from '../../services/theme.service';
@@ -13,7 +14,7 @@ import { ThemeService } from '../../services/theme.service';
 export class MainNavComponent implements OnInit {
   isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map((s) => s !== null));
 
-  constructor(public cfg: ConfigService, private authService: AuthenticationService, public themeService: ThemeService) {}
+  constructor(public cfg: ConfigService, private authService: AuthenticationService, public themeService: ThemeService, public activities: ActivitiesService) {}
 
   ngOnInit(): void {}
 }

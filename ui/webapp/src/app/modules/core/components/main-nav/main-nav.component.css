@@ -31,3 +31,8 @@
   padding: 0px !important;
   margin: 0px !important;
 }
+
+.local-activity-popup-sizing {
+  max-width: calc(100% - 10px);
+  width: 700px;
+}
