@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.op;
 
+import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,6 +57,7 @@ public class ObjectWriteOperation extends BHive.Operation<Long> {
         try (Activity activity = getActivityReporter().start("Writing objects...", totalSize);
                 CountingOutputStream countingOut = new CountingOutputStream(output);
                 GZIPOutputStream zipOut = new GZIPOutputStream(countingOut, BUFFER_SIZE);
+                BufferedOutputStream buffOut = new BufferedOutputStream(zipOut, BUFFER_SIZE * 2);
                 DataOutputStream dataOut = new DataOutputStream(zipOut)) {
 
             // First we send the total size so that the client can display a progress bar
