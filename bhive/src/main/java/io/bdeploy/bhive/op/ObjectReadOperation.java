@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.op;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.time.Duration;
@@ -38,7 +39,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
         Instant start = Instant.now();
         RuntimeAssert.assertNotNull(input);
         try (CountingInputStream countingIn = new CountingInputStream(input);
-                GZIPInputStream zipIn = new GZIPInputStream(countingIn, ObjectWriteOperation.BUFFER_SIZE);
+                BufferedInputStream buffIn = new BufferedInputStream(countingIn, ObjectWriteOperation.BUFFER_SIZE * 2);
+                GZIPInputStream zipIn = new GZIPInputStream(buffIn, ObjectWriteOperation.BUFFER_SIZE);
                 DataInputStream dataIn = new DataInputStream(zipIn)) {
             long totalSize = dataIn.readLong();
 

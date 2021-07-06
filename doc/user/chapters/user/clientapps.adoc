@@ -50,9 +50,28 @@ The *Installer* stores the *Launcher* and all *Client Applications* in _$HOME/.b
 [NOTE]
 The *Launcher* can also be manually deployed using the provided ZIP file. After downloading and unpacking the *Launcher* must be associated with *.bdeploy* files using the FileAssoc.exe on Windows or file-assoc.sh on Linux contained in the launcher.
 
-
 Clicking on a _Click & Start_ link in the *Browser* will download a *.bdeploy* file that can be directly executed. A more elegant way is to configure the *Browser* to directly open the *.bdeploy* file type. Firefox as well as Chrome allows to configure this after the file has been downloaded.
 
+==== Application Browser
+
+The *Launcher* (_BDeploy.exe_) can also be launched directly without any arguments. In this case a dialog is shown that lists all locally installed applications.
+
+image::images/BDeploy_Client_Browser_App.png[Client Application Browser,align=center,width=480,link="images/BDeploy_Client_Browser_App.png"]
+
+The *Customize & Launch* context menu entry allows the user to to modify the command line argumements that is used to start the application. A new dialog is opened that lists the existing command line arguments as currently defined by the *Active Instance version*. 
+
+Additional arguments can be added or existing ones can be modified or deleted as desired. This option is especially useful for testing. Arguments can be modified locally without the need to change the global *Instance Configuration*. The modified arguments are not saved and they need to be re-done the next time the application is launched.
+
+==== Additional Command Line Arguments
+
+When launching an application using a *.bdeploy* file then additional command line arguments can be defined which are passed to the target application. 
+
+    ./myApp.bdeploy -- "arg1=value1" "arg2=value2"
+
+All arguments after the *--* switch are passed to the launched application. They are added _AFTER_ all existing arguments that are currently defined in the *Active Instance Configuration*. Individual arguments need to be separated using a single space. Quotation marks are required when the argument or its value contains spaces. 
+
+[NOTE]
+A shortcut can be saved that includes the customized parameters. Doing that it is possible to save the customized arguments so that they do not need to be entered all the time. Executing the shortcut then launches the application with the customized arguments. 
 
 ==== Multi-User Installations
 

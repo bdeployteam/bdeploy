@@ -229,6 +229,17 @@ java configuration Launcher {
 //	vm-argument "-Dsun.awt.fontconfig=/tmp/markus.properties";
 }
 
+java configuration Browser {
+	project launcher;
+	main-class io.bdeploy.launcher.cli.LauncherCli;
+	
+	working-dir "${workspace_loc}/runtime";
+	
+	argument "-v";
+	argument "browser";
+	argument "--homeDir=${workspace_loc}/runtime/launcher";
+}
+
 java configuration VerifyLauncher : minion-base {
 	argument "verify-launcher";
 	argument "--executable=${file_prompt:binary to check}";
