@@ -29,7 +29,7 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
   constructor(private logging: LoggingService, private areas: NavAreasService, private router: Router) {}
 
   canDeactivate(
-    component: DirtyableDialog,
+    component: any,
     currentRoute: ActivatedRouteSnapshot,
     currentState: RouterStateSnapshot,
     nextState?: RouterStateSnapshot
@@ -56,6 +56,12 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
             // to be able to see the prompt when the panel was maximised, we need to hide the panel.
             this.areas.panelVisible$.next(false);
 
+            // if the primary dialog is not dirtyable, continue.
+            if (!this.areas.getDirtyableType(component)) {
+              this.areas.forcePanelClose$.next(true);
+              return of(true);
+            }
+
             // ask confirmation on the actual component (the primary one in this case).
             return this.confirm(component).pipe(
               tap((x) => {
@@ -74,11 +80,15 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
       );
     }
 
-    if (!component.isDirty()) {
+    if (!!this.areas.getDirtyableType(component)) {
+      if (!component.isDirty()) {
+        return true;
+      }
+
+      return this.confirm(component);
+    } else {
       return true;
     }
-
-    return this.confirm(component);
   }
 
   private confirm(component: DirtyableDialog) {
