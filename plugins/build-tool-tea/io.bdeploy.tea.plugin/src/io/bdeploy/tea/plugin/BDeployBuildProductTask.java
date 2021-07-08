@@ -11,20 +11,14 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.egit.core.project.RepositoryMapping;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.e4.core.di.extensions.Service;
 import org.eclipse.tea.core.services.TaskingLog;
 import org.eclipse.tea.library.build.config.BuildDirectories;
 import org.eclipse.tea.library.build.services.TeaBuildVersionService;
@@ -46,6 +40,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
+import io.bdeploy.tea.plugin.services.BDeployProductBuild;
 import jakarta.ws.rs.core.UriBuilder;
 
 @SuppressWarnings("restriction")
@@ -54,13 +49,14 @@ public class BDeployBuildProductTask {
     private static final String PRODUCT_INFO_YAML = "product-info.yaml";
     private static final String PRODUCT_VERSIONS_YAML = "product-versions.yaml";
 
-    private final ProductDesc desc;
+    private final BDeployProductBuild desc;
     private Manifest.Key key;
     private final File target;
     private final BDeployTargetSpec pushTarget;
     private final BDeployTargetSpec sourceServer;
 
-    public BDeployBuildProductTask(ProductDesc desc, File target, BDeployTargetSpec pushTarget, BDeployTargetSpec sourceServer) {
+    public BDeployBuildProductTask(BDeployProductBuild desc, File target, BDeployTargetSpec pushTarget,
+            BDeployTargetSpec sourceServer) {
         this.desc = desc;
         this.target = target;
         this.pushTarget = pushTarget;
@@ -73,7 +69,8 @@ public class BDeployBuildProductTask {
     }
 
     @Execute
-    public void build(BuildDirectories dirs, TaskingLog log, BDeployConfig cfg, TeaBuildVersionService bvs) throws Exception {
+    public void build(BuildDirectories dirs, TaskingLog log, BDeployConfig cfg, TeaBuildVersionService bvs,
+            @Service List<BDeployLabelProvider> labelProviders) throws Exception {
         File prodInfoDir = new File(dirs.getProductDirectory(), "prod-info");
 
         if (cfg.clearBHive) {
@@ -100,11 +97,13 @@ public class BDeployBuildProductTask {
             pvd.labels.put("X-Built-by", System.getProperty("user.name"));
             pvd.labels.put("X-Built-on", InetAddress.getLocalHost().getHostName());
 
-            // try to find project for product info
-            Repository repo = findRepoForProduct(desc.productInfo);
-            if (repo != null) {
-                pvd.labels.put("X-GIT-LocalBranch", repo.getFullBranch());
-                pvd.labels.put("X-GIT-CommitId", repo.getRefDatabase().exactRef(repo.getFullBranch()).getObjectId().name());
+            // consult external providers.
+            for (BDeployLabelProvider provider : labelProviders) {
+                try {
+                    pvd.labels.putAll(provider.getLabels(desc));
+                } catch (Exception e) {
+                    log.warn("Cannot get labels from " + provider.getClass() + ": " + e.toString());
+                }
             }
 
             FileUtils.deleteDirectory(prodInfoDir);
@@ -216,27 +215,6 @@ public class BDeployBuildProductTask {
         return target;
     }
 
-    private Repository findRepoForProduct(Path productInfo) {
-        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-        IContainer[] containers = root.findContainersForLocationURI(productInfo.toAbsolutePath().toUri());
-
-        if (containers == null || containers.length == 0) {
-            return null;
-        }
-
-        IProject prj = containers[0].getProject();
-        if (prj == null) {
-            return null;
-        }
-
-        RepositoryMapping mapping = RepositoryMapping.getMapping(prj);
-        if (mapping == null) {
-            return null;
-        }
-
-        return mapping.getRepository();
-    }
-
     static String calculateVersion(TeaBuildVersionService bvs, BDeployConfig config, String tag) {
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmm");
@@ -256,13 +234,6 @@ public class BDeployBuildProductTask {
         }
 
         return displayVersion.replace("qualifier", q.replace("%D", format.format(date)));
-    }
-
-    static class ProductDesc {
-
-        Path productInfo;
-        String productTag;
-        List<BDeployApplicationBuild> apps = new ArrayList<>();
     }
 
 }
