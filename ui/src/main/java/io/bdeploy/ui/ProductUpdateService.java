@@ -101,7 +101,7 @@ public class ProductUpdateService {
             }
         }
 
-        if (currentProduct.getConfigTemplateTreeId() != targetProduct.getConfigTemplateTreeId()) {
+        if (!currentProduct.getConfigTemplateTreeId().equals(targetProduct.getConfigTemplateTreeId())) {
             // there have been changes in the configuration templates of the product
             validationIssues.add(0, new ApplicationValidationDto(null, null,
                     "Product version has updated configuration files. Please make sure to synchronize configuration files."));
