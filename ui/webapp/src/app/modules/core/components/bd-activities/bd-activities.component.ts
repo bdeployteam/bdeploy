@@ -3,6 +3,7 @@ import { ActivitiesService, ActivitySnapshotTreeNode } from '../../services/acti
 
 interface SquashedActivity {
   current: ActivitySnapshotTreeNode;
+  parent: ActivitySnapshotTreeNode;
   parentInfo: string[];
   header: string;
 }
@@ -18,7 +19,7 @@ export class BdActivitiesComponent implements OnInit {
   ngOnInit(): void {}
 
   /* template */ squashActivity(act: ActivitySnapshotTreeNode): SquashedActivity {
-    const result = { current: act, parentInfo: [], header: null };
+    const result = { current: act, parent: act, parentInfo: [], header: null };
 
     result.current = this.doSquash(act, result);
     result.header = !result.parentInfo?.length ? result.current?.snapshot?.name : result.parentInfo.join(' / ');
@@ -38,8 +39,8 @@ export class BdActivitiesComponent implements OnInit {
     return Math.round((100 * squashed.current.snapshot.current) / squashed.current.snapshot.max);
   }
 
-  /* template */ formatDuration(squashed: SquashedActivity) {
-    const ms = squashed?.current?.snapshot?.duration;
+  /* template */ formatDuration(node: ActivitySnapshotTreeNode) {
+    const ms = node?.snapshot?.duration;
     const sec = Math.floor(ms / 1000) % 60;
     const min = Math.floor(ms / 60000) % 60;
     const hours = Math.floor(ms / 3600000) % 24;

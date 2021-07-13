@@ -34,6 +34,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
@@ -585,14 +586,16 @@ public class InstanceResourceImpl implements InstanceResource {
             // 1. push config to remote (small'ish).
             hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
 
-            // 2. push product to remote in case it is not yet there.
-            TransferStatistics stats = hive.execute(
-                    new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
+            // 2. push product to remote in case it is not yet there, and we have it.
+            if (hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product))) {
+                TransferStatistics stats = hive.execute(
+                        new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
-            log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
-                    svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects, FormatHelper.formatFileSize(stats.transferSize),
-                    FormatHelper.formatDuration(stats.duration),
-                    FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+                log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
+                        svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects,
+                        FormatHelper.formatFileSize(stats.transferSize), FormatHelper.formatDuration(stats.duration),
+                        FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+            }
 
             // 3: tell master to deploy
             MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);

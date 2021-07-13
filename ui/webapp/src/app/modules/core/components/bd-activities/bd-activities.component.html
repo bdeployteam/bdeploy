@@ -12,7 +12,10 @@
           <mat-progress-bar mode="indeterminate"></mat-progress-bar>
           <div fxLayout="row">
             <div fxFlex="1 0 auto"></div>
-            <span>{{ formatDuration(squashed) }}</span>
+            <span
+              ><em>{{ formatDuration(squashed.parent) }}</em></span
+            >
+            <span>&nbsp;({{ formatDuration(squashed.current) }})</span>
           </div>
         </ng-container>
 
@@ -21,7 +24,10 @@
           <div fxLayout="row">
             <span>{{ squashed.current.snapshot.current }} of {{ squashed.current.snapshot.max }}</span>
             <div fxFlex="1 0 auto"></div>
-            <span>{{ formatDuration(squashed) }}</span>
+            <span
+              ><em>{{ formatDuration(squashed.parent) }}</em></span
+            >
+            <span>&nbsp;({{ formatDuration(squashed.current) }})</span>
           </div>
         </ng-container>
 
