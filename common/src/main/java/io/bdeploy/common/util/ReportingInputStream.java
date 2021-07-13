@@ -11,7 +11,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  */
 public class ReportingInputStream extends FilterInputStream {
 
-    private final static String ACTIVITY_TEMPLATE = "%1$s %2$10s - %3$8s of %4$-8s - %5$s";
+    private static final String ACTIVITY_TEMPLATE = "%1$s %2$10s - %3$8s of %4$-8s - %5$s";
 
     private final long start = System.currentTimeMillis();
 
@@ -66,7 +66,7 @@ public class ReportingInputStream extends FilterInputStream {
             if (bytesRemaining < 0) {
                 activity.activity(activityName);
             } else {
-                notifyWorked(now, elapsedTime, bytesRemaining);
+                notifyWorked(elapsedTime, bytesRemaining);
             }
 
             // Reset counters for the next update
@@ -83,7 +83,7 @@ public class ReportingInputStream extends FilterInputStream {
         return result;
     }
 
-    private void notifyWorked(long now, long elapsedTime, long bytesRemaining) {
+    private void notifyWorked(long elapsedTime, long bytesRemaining) {
         long remainingTimeMs = (elapsedTime * bytesRemaining) / bytesRead;
         String transferRate = FormatHelper.formatTransferRate(bytesRead, elapsedTime);
         String fSizeRead = FormatHelper.formatFileSize(bytesRead);

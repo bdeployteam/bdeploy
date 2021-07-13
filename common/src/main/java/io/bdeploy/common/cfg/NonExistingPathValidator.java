@@ -18,10 +18,7 @@ public class NonExistingPathValidator implements ConfigValidator<String> {
         if (Files.isDirectory(p)) {
             // Empty directories are OK.
             try (Stream<Path> list = Files.list(p)) {
-                if (list.findAny().isPresent()) {
-                    return false;
-                }
-                return true;
+                return !list.findAny().isPresent();
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot determine directory contents: " + p, e);
             }

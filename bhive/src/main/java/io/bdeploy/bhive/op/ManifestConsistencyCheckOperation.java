@@ -41,7 +41,7 @@ public class ManifestConsistencyCheckOperation extends BHive.Operation<Set<Eleme
                 List<ElementView> broken = new ArrayList<>();
 
                 // it is OK if it no longer exists.
-                if (!execute(new ManifestExistsOperation().setManifest(key))) {
+                if (!Boolean.TRUE.equals(execute(new ManifestExistsOperation().setManifest(key)))) {
                     continue;
                 }
 
