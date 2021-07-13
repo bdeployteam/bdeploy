@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -49,6 +50,7 @@ import io.bdeploy.bhive.objects.view.ManifestRefView;
 import io.bdeploy.bhive.objects.view.MissingObjectView;
 import io.bdeploy.bhive.objects.view.SkippedElementView;
 import io.bdeploy.bhive.objects.view.TreeView;
+import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -172,7 +174,6 @@ public class ObjectManager {
         if (handler == null) {
             handler = new DefaultReferenceHandler(this);
         }
-
         try {
             if (Files.exists(location)) {
                 try (Stream<Path> list = Files.list(location)) {
@@ -194,7 +195,14 @@ public class ObjectManager {
                 PathHelper.deleteRecursive(tempLocation);
             }
 
-            Activity exporting = reporter.start("Exporting Files", 0);
+            AtomicLong fileCount = new AtomicLong(0);
+            TreeView view = scan(tree, Integer.MAX_VALUE, true);
+            view.visit(new TreeVisitor.Builder().onTree(x -> {
+                fileCount.addAndGet(x.getChildren().size());
+                return true;
+            }).build());
+
+            Activity exporting = reporter.start("Exporting Files", fileCount.get());
             try {
                 internalExportTree(tree, tempLocation, tree, tempLocation, exporting, handler);
                 internalMoveRetrying(location, tempLocation);
@@ -270,9 +278,11 @@ public class ObjectManager {
                     break;
                 case MANIFEST:
                     handler.onReference(location, key, lookupManifestRef(obj));
+                    exporting.workAndCancelIfRequested(1);
                     break;
                 case TREE:
                     internalExportTree(obj, topLevel, topLevelTree, child, exporting, handler);
+                    exporting.workAndCancelIfRequested(1);
                     break;
                 default:
                     break;

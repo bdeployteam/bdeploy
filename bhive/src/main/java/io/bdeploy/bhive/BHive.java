@@ -178,7 +178,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
             }
             return op.call();
         } catch (Exception ex) {
-            onOperationFailed(op, attempt, ex);
+            onOperationFailed(op, ex);
             if (attempt >= op.retryCount) {
                 throw new IllegalStateException("Operation on hive " + op.hive + " failed", ex);
             }
@@ -193,7 +193,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
         auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName()).setSeverity(Severity.NORMAL)
                 .setMessage("Retrying operation due to previous failure. Attempt " + retryString).build());
 
-        log.warn("Operation failed. Attempt " + retryString, ex);
+        log.warn("Operation failed. Attempt {}", retryString, ex);
         try (Activity activity = reporter.start("Operation failed (" + retryString + "). Waiting before next retry...",
                 attempt)) {
             for (int sleep = 0; sleep <= attempt; sleep++) {
@@ -204,7 +204,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
     }
 
     /** Audits the failed operation. */
-    private <T> void onOperationFailed(Operation<T> op, int attempt, Exception e) {
+    private <T> void onOperationFailed(Operation<T> op, Exception e) {
         auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName()).setSeverity(Severity.ERROR)
                 .addParameters(new AuditParameterExtractor().extract(op))
                 .setMessage(ExceptionHelper.mapExceptionCausesToReason(e)).build());

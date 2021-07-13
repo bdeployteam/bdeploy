@@ -59,12 +59,12 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.tea.plugin.BDeployBuildProductTask.ProductDesc;
 import io.bdeploy.tea.plugin.server.BDeployLoginDialog;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 import io.bdeploy.tea.plugin.services.BDeployApplicationDescriptor;
 import io.bdeploy.tea.plugin.services.BDeployApplicationService;
+import io.bdeploy.tea.plugin.services.BDeployProductBuild;
 import io.bdeploy.tea.plugin.services.BDeployApplicationService.CreateApplicationTasks;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
@@ -291,7 +291,7 @@ public class BDeployProductTaskChain implements TaskChain {
 
         BDeployProductDescriptor desc = readProductDescriptor();
 
-        ProductDesc pd = new ProductDesc();
+        BDeployProductBuild pd = new BDeployProductBuild();
         pd.productInfo = bdeployProductFile.getParent().resolve(desc.productInfoYaml);
         pd.productTag = desc.productTag;
 
