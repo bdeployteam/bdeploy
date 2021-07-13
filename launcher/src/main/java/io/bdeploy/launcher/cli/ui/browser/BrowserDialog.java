@@ -471,7 +471,7 @@ public class BrowserDialog extends BaseDialog {
                 continue;
             }
             Version version = VersionHelper.tryParse(launcher.getTag());
-            if (version.compareTo(minVersion) == -1) {
+            if (version.compareTo(minVersion) < 0) {
                 return false;
             }
         }

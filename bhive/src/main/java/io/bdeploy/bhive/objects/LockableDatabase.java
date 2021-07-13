@@ -60,12 +60,15 @@ public abstract class LockableDatabase {
                     // especially not if we do not want to dramatically increase lock contention in the whole process. This means
                     // we go for a quick'n'dirty approach and simply retry in this case.
                     if (ioe.getMessage().equals("Resource deadlock avoided") && xctpCount++ <= 10) {
-                        Thread.sleep(5);
+                        wait(5);
                         continue;
                     }
                     throw ioe;
                 }
             } while (true);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("locked execution interrupted", e);
         } catch (Exception e) {
             throw new IllegalStateException("locked execution failed", e);
         }

@@ -62,7 +62,7 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
                 try {
                     trees.add(execute(new ManifestLoadOperation().setManifest(m)).getRoot());
                 } catch (Exception e) {
-                    if (!execute(new ManifestExistsOperation().setManifest(m)) && ignoreMissingManifest) {
+                    if (!Boolean.TRUE.equals(execute(new ManifestExistsOperation().setManifest(m)) && ignoreMissingManifest)) {
                         // no longer exists, and we want to ignore this - just go on.
                         continue;
                     }

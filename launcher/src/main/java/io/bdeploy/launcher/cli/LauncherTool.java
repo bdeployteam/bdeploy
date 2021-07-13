@@ -266,7 +266,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Application cannot be started with this launcher: Server is running an older version.");
                 log.info("Delegating to launcher {}", requiredVersion);
                 doExecuteLocked(hive, reporter, () -> {
-                    doInstallLauncherSideBySide(hive, reporter, requiredLauncher);
+                    doInstallLauncherSideBySide(hive, requiredLauncher);
                     doInstallAppSideBySide(hive, reporter, requiredLauncher);
                     return null;
                 });
@@ -758,7 +758,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     /**
      * Installs the launcher side-by-side to this launcher. Does nothing if the launcher is already installed
      */
-    private void doInstallLauncherSideBySide(BHive hive, LauncherSplashReporter reporter, Entry<Version, Key> requiredLauncher) {
+    private void doInstallLauncherSideBySide(BHive hive, Entry<Version, Key> requiredLauncher) {
         Version version = requiredLauncher.getKey();
         Path homeDir = ClientPathHelper.getHome(rootDir, version);
         Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
@@ -789,9 +789,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // If so then we can continue. There is nothing that we need to do
         Version version = requiredLauncher.getKey();
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration config = manifest.readNewest(clickAndStart.applicationId, true);
+        ClientSoftwareConfiguration cscfg = manifest.readNewest(clickAndStart.applicationId, true);
         Key launcher = requiredLauncher.getValue();
-        if (config.launcher != null && config.launcher.equals(launcher)) {
+        if (cscfg.launcher != null && cscfg.launcher.equals(launcher)) {
             log.info("Client software manifest is up-2-date.");
             return;
         }
@@ -806,12 +806,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // As a result the software will be retained in our hive
         // If the server hosting this application is upgraded the user do not need
         // to download everything again. Thus start times remain fast.
-        config.launcher = launcher;
-        config.clickAndStart = clickAndStart;
-        manifest.update(clickAndStart.applicationId, config);
+        cscfg.launcher = launcher;
+        cscfg.clickAndStart = clickAndStart;
+        manifest.update(clickAndStart.applicationId, cscfg);
 
         // We never started this application so we do not know which software it is using
-        if (config.requiredSoftware.isEmpty()) {
+        if (cscfg.requiredSoftware.isEmpty()) {
             log.info("Skip copying required software: Application has never been started with this launcher.");
             return;
         }
@@ -823,9 +823,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             otherHive.setLockContentSupplier(LOCK_CONTENT);
             otherHive.setLockContentValidator(LOCK_VALIDATOR);
 
-            Set<ObjectId> requiredObjects = hive.execute(new ObjectListOperation().addManifest(config.requiredSoftware));
+            Set<ObjectId> requiredObjects = hive.execute(new ObjectListOperation().addManifest(cscfg.requiredSoftware));
             TransferStatistics stats = hive.execute(new CopyOperation().setDestinationHive(otherHive).addObject(requiredObjects)
-                    .addManifest(config.requiredSoftware));
+                    .addManifest(cscfg.requiredSoftware));
             if (stats.sumManifests == 0) {
                 log.info("Hive already contains all required files.");
             } else {
