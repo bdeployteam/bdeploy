@@ -62,6 +62,7 @@ import { EditProcessNameValidatorDirective } from './validators/edit-process-nam
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
+import { PortShiftComponent } from './components/instance-settings/ports/port-shift/port-shift.component';
 
 @NgModule({
   declarations: [
@@ -118,6 +119,7 @@ import { ConfigureEndpointsComponent } from './components/edit-process-overview/
     DataFileViewerComponent,
     PortsComponent,
     ConfigureEndpointsComponent,
+    PortShiftComponent,
   ],
   imports: [
     CommonModule,

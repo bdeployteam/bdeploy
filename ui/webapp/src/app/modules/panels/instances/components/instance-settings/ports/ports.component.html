@@ -1,4 +1,34 @@
+<ng-template #shiftDlg>
+  <div fxLayout="column" fxLayoutGap="10px">
+    <div>Specify the amount to shift all selected port values. The number can be negative.</div>
+    <app-bd-form-input type="number" [(ngModel)]="amount" name="amount" label="Shift Amount"></app-bd-form-input>
+  </div>
+</ng-template>
+
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Ports of {{ (edit.state$ | async)?.config?.config?.name }}" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
-  <app-bd-dialog-content> TODO: show ports, shift ports, export port list. </app-bd-dialog-content>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="portEdit.ports$ | async as ports">
+      <div>
+        This instance contains <strong>{{ ports.length }}</strong> distinct port parameters. You can use this panel to manipulate or view them all together.
+      </div>
+
+      <app-bd-button
+        text="Shift Selected Ports..."
+        icon="electrical_services"
+        color="primary"
+        [collapsed]="false"
+        (click)="shiftSelectedPorts(shiftDlg)"
+      ></app-bd-button>
+      <app-bd-button text="Export Port List as CSV" icon="grid_on" [collapsed]="false" (click)="exportCsv()"></app-bd-button>
+
+      <app-bd-data-table
+        [records]="portEdit.ports$ | async"
+        [columns]="columns"
+        [sort]="{ active: 'port', direction: 'asc' }"
+        [checkMode]="true"
+        [(checked)]="checked"
+      ></app-bd-data-table>
+    </div>
+  </app-bd-dialog-content>
 </app-bd-dialog>

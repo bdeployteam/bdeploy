@@ -418,6 +418,12 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
+  /* template */ toggleCheckAll(cb: MatCheckbox) {
+    const isChecked = this.isAnyChecked();
+    isChecked ? this.checkSelection.deselect(...this.treeControl.dataNodes) : this.checkSelection.select(...this.treeControl.dataNodes);
+    this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
+  }
+
   /* template */ isChecked(node: FlatNode<T>) {
     if (!node.expandable) {
       return this.checkSelection.isSelected(node);
@@ -425,6 +431,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
     const children = this.treeControl.getDescendants(node);
     return children.every((child) => this.checkSelection.isSelected(child));
+  }
+
+  /* template */ isAllChecked() {
+    return this.checkSelection.selected.length === this.records.length;
+  }
+
+  /* template */ isAnyChecked() {
+    return this.checkSelection.selected.length > 0;
   }
 
   /* template */ isPartiallyChecked(node: FlatNode<T>) {

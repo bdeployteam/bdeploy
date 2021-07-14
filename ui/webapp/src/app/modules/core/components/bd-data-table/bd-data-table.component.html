@@ -59,9 +59,19 @@
         mat-sort-header
         [disabled]="!sortData"
       >
-        <div [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null" class="bd-text-ellipsis">
+        <div [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null" class="bd-text-ellipsis" *ngIf="!checkMode || i !== 0">
           {{ col.name }}
         </div>
+
+        <mat-checkbox
+          #cb
+          *ngIf="checkMode && i === 0"
+          [checked]="isAllChecked()"
+          [indeterminate]="!isAllChecked() && isAnyChecked()"
+          (change)="toggleCheckAll(cb)"
+          appClickStopPropagation
+          >{{ col.name }}</mat-checkbox
+        >
       </th>
 
       <ng-container *matCellDef="let row">
