@@ -28,7 +28,7 @@
       text="Instance Settings"
       icon="settings"
       [route]="['panels', 'instances', 'settings']"
-      [disabled]="!servers.isSynchronized((edit.current$ | async)?.managedServer)"
+      [disabled]="!servers.isSynchronized((edit.current$ | async)?.managedServer) || !(edit.current$ | async)?.productDto"
       tooltip="below"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
@@ -77,7 +77,7 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="2">
       <ng-container *ngIf="edit.current$ | async as instance">
-        <ng-container *ngIf="servers.isSynchronized(instance?.managedServer)">
+        <ng-container *ngIf="servers.isSynchronized(instance?.managedServer) && !!(edit.current$ | async)?.productDto">
           <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
             <div fxLayout="column">
               <div class="bd-default-padding bd-warning-text">
@@ -143,7 +143,7 @@
         </ng-container>
       </ng-container>
 
-      <app-bd-no-data *ngIf="!servers.isSynchronized((edit.current$ | async)?.managedServer)">
+      <app-bd-no-data *ngIf="!!(edit.current$ | async)?.productDto && !servers.isSynchronized((edit.current$ | async)?.managedServer)">
         <p [style.text-align]="'center'">
           <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
           <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
@@ -151,6 +151,19 @@
         <p>Synchronize the instance to (re-)enable editing.</p>
         <app-bd-server-sync-button [collapsed]="false" [server]="(edit.current$ | async).managedServer"></app-bd-server-sync-button>
       </app-bd-no-data>
+
+      <ng-container *ngIf="!(edit.current$ | async)?.productDto">
+        <app-bd-no-data>
+          <p>The product version configured is not available on this server. The dashboard is not available.</p>
+          <ng-container *ngIf="cfg.isCentral()">
+            <p>You can transfer product versions from the managed server from the product overview.</p>
+          </ng-container>
+          <ng-container *ngIf="cfg.isManaged()">
+            <p>You can transfer products from the central server, or upload them directly.</p>
+          </ng-container>
+          <app-bd-button text="Products" icon="apps" [collapsed]="false" [routerLink]="['/products', 'browser', areas.groupContext$ | async]"></app-bd-button>
+        </app-bd-no-data>
+      </ng-container>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

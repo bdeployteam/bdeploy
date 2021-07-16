@@ -449,9 +449,15 @@ export class InstanceEditService {
   }
 
   private validate() {
-    if (!this.state$.value?.config || !this.groups.current$.value?.name) {
+    if (!this.state$.value?.config || !this.groups.current$.value?.name || !this.current$.value) {
       // re-request validation once loading is done...
       this.requestValidation();
+      return;
+    }
+
+    // if the current product is not available, there is no way (currently) we can validate that...
+    if (!this.current$.value.productDto) {
+      this.validating$.next(false);
       return;
     }
 
