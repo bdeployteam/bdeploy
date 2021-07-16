@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
-import { debounceTime, finalize } from 'rxjs/operators';
+import { debounceTime, finalize, tap } from 'rxjs/operators';
 import { ManagedMasterDto, ObjectChangeType, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
@@ -67,7 +67,19 @@ export class ServersService {
 
   public synchronize(server: ManagedMasterDto): Observable<ManagedMasterDto> {
     if (this.cfg.isCentral()) {
-      return this.http.get<ManagedMasterDto>(`${this.apiPath}/synchronize/${this.group}/${server.hostName}`);
+      return this.http.get<ManagedMasterDto>(`${this.apiPath}/synchronize/${this.group}/${server.hostName}`).pipe(
+        tap((s) => {
+          if (!!this.servers$.value?.length) {
+            this.servers$.value.splice(
+              this.servers$.value.findIndex((o) => o.hostName === s.hostName),
+              1,
+              s
+            );
+
+            this.servers$.next(this.servers$.value);
+          }
+        })
+      );
     }
     return of(null);
   }

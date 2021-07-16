@@ -54,7 +54,11 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     }
 
     this.noPerm$.next(false);
-    if (!this.servers.isSynchronized(this.server)) {
+    if (!this.servers.isSynchronized(this.server) && this.server.update.forceUpdate) {
+      this.sync$.next(false);
+      this.tooltip$.next('The server requires a mandatory update before synchronization is possible.');
+      this.badge$.next(null);
+    } else if (!this.servers.isSynchronized(this.server)) {
       this.sync$.next(false);
       this.tooltip$.next('The server is not synchronized. Click to synchronize now');
       this.badge$.next(null);

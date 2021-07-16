@@ -1,7 +1,6 @@
 import { animate, animateChild, group, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnInit } from '@angular/core';
-import { isString } from 'lodash-es';
 import { routerAnimation } from '../../animations/special';
 import { NavAreasService } from '../../services/nav-areas.service';
 
@@ -49,7 +48,7 @@ export class MainNavContentComponent implements OnInit {
       if (!route) {
         this.animationState = '';
       } else {
-        this.animationState = isString(route.component) ? route.component : route.component.name;
+        this.animationState = this.areas.getRouteId(route);
       }
     });
   }

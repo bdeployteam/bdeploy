@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, NavigationExtras, Router } from '@angular/router';
-import { isString } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DirtyableDialog } from '../guards/dirty-dialog.guard';
@@ -60,8 +59,9 @@ export class NavAreasService {
         this.panelVisible$.next(panelSnapshot ? true : false);
         this.panelMaximized$.next(!!panelSnapshot && !!panelSnapshot.data && !!panelSnapshot.data['max']);
 
-        // if the component (name) in the primary outlet changed, we want to leave the panel navigation.
-        const newPrimaryState = isString(primarySnapshot.component) ? primarySnapshot.component : primarySnapshot.component.name;
+        // we compare the full route from the root of the primary snapshot to determine whether
+        // or not we need to close an open panel. if it changes, we close the panel.
+        const newPrimaryState = this.getRouteId(primarySnapshot);
 
         // trigger updates of component names for those interested.
         this.primaryRoute$.next(primarySnapshot);
@@ -95,6 +95,14 @@ export class NavAreasService {
         // collapse the menu whenever something changed.
         this.menuMaximized$.next(false);
       });
+  }
+
+  public getRouteId(snapshot: ActivatedRouteSnapshot) {
+    return snapshot.pathFromRoot
+      .map((r) => r.url)
+      .reduce((a, v) => a.concat(v), [])
+      .map((s) => s.path)
+      .toString();
   }
 
   public closePanel(force: boolean = false) {

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, finalize, map } from 'rxjs/operators';
 import {
@@ -69,13 +69,30 @@ export class InstancesService {
     areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
 
-    combineLatest([this.active$, this.servers.servers$]).subscribe(([act, _]) => {
+    combineLatest([this.current$, this.active$, this.servers.servers$]).subscribe(([cur, act, servers]) => {
       clearInterval(this.activeLoadInterval);
       clearInterval(this.activeCheckInterval);
 
       // we'll refresh node states every 60 seconds as long as nothing else causes a reload.
       this.activeLoadInterval = setInterval(() => this.reloadActiveStates(act), 60000);
       this.activeCheckInterval = setInterval(() => this.checkActiveReloadState(act), 1000);
+
+      // update in case the server has changed (e.g. synchronized update state).
+      if (!!servers?.length && !!cur?.managedServer?.hostName) {
+        const s = servers.find((s) => cur.managedServer.hostName === s.hostName);
+        if (!!s && !isEqual(cur.managedServer, s)) {
+          cur.managedServer = s;
+          this.current$.next(cur);
+        }
+      }
+
+      if (!!servers?.length && !!act?.managedServer?.hostName) {
+        const s = servers.find((s) => act.managedServer.hostName === s.hostName);
+        if (!!s && !isEqual(act.managedServer, s)) {
+          act.managedServer = s;
+          this.active$.next(act);
+        }
+      }
 
       this.reloadActiveStates(act);
     });
@@ -194,6 +211,7 @@ export class InstancesService {
           // update banner in active version if it changes on the server.
           this.http.get<InstanceBannerRecord>(`${this.apiPath(this.group)}/${this.active$.value.instanceConfiguration.uuid}/banner`).subscribe((banner) => {
             this.active$.value.banner = banner;
+            this.active$.next(this.active$.value);
           });
         }
       }
