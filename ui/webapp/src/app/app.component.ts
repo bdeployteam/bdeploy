@@ -22,6 +22,10 @@ export class AppComponent implements OnInit {
     this.log.info('----------------------------------------');
     this.log.info(this.title + ' started...');
     this.log.info('----------------------------------------');
+
+    // potential official fix for broken history on cancelled navigation, see https://github.com/angular/angular/issues/13586
+    // @ts-ignore: private option not yet exposed for public use
+    router.canceledNavigationResolution = 'computed';
   }
 
   ngOnInit() {
