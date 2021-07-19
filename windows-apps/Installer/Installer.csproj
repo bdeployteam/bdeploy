@@ -204,7 +204,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>signtool sign /n "BDeploy Development" /fd SHA256  "$(TargetPath)"
+    <PostBuildEvent>if "$(ConfigurationName)" == "Release" (
+   signtool sign /n "IT Solutions GmbH" /tr http://rfc3161timestamp.globalsign.com/advanced /td SHA256  "$(TargetPath)"
+)
 copy "$(TargetPath)" "$(SolutionDir)\..\launcher\src\win64\dist\bin\$(ProjectName).bin" /Y</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
