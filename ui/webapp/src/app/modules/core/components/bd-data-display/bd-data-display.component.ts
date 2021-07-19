@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
+import { BehaviorSubject } from 'rxjs';
 import { BdDataColumn, bdDataDefaultSearch, bdDataDefaultSort, BdDataGrouping } from 'src/app/models/data';
 import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
@@ -80,6 +81,11 @@ export class BdDataDisplayComponent<T> implements OnInit {
    * Elements which should be checked.
    */
   @Input() checked: T[] = [];
+
+  /**
+   * If given, disables *all* checkboxes in check mode (including the header checkboxes) in case the value is true.
+   */
+  @Input() checkedFrozenWhen$: BehaviorSubject<boolean>;
 
   /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link

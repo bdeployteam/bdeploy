@@ -6,6 +6,8 @@ import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { AddInstanceComponent } from './components/add-instance/add-instance.component';
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
+import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
+import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
@@ -38,7 +40,9 @@ import { ProcessStatusComponent } from './components/process-status/process-stat
 
 const INSTANCES_ROUTES: Route[] = [
   { path: 'add', component: AddInstanceComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'bulk', component: BulkControlComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'bulk-control', component: BulkControlComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'bulk-manip', component: BulkManipulationComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'bulk-manip/update', component: UpdateProductComponent, canActivate: [ScopedWriteGuard] },
   { path: 'changes', component: LocalChangesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'changes/diff', component: LocalDiffComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
   { path: 'settings', component: InstanceSettingsComponent, canActivate: [ScopedWriteGuard] },

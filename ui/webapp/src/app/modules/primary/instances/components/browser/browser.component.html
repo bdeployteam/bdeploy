@@ -9,7 +9,22 @@
       [records]="instances.instances$ | async"
       presetKey="instances"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="dataTable.grid"
+      tooltip="below"
+      [disabled]="bulkMode.isActive()"
+    ></app-bd-button>
+    <app-bd-panel-button
+      #bulkMode
+      icon="dynamic_feed"
+      text="Bulk Manipulation"
+      [route]="['panels', 'instances', 'bulk-manip']"
+      tooltip="below"
+      [disabled]="!authService.isCurrentScopeWrite() || dataTable.grid"
+    ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       icon="add"
@@ -27,6 +42,10 @@
       [records]="instances.instances$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
+      [checkMode]="bulkMode.isActive()"
+      [checked]="bulk.selection$ | async"
+      (checkedChange)="bulk.selection$.next($event)"
+      [checkedFrozenWhen$]="bulk.frozen$"
     >
       <app-bd-no-data>
         <p>No instances have been created yet.</p>

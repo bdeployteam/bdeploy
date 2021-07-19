@@ -64,7 +64,9 @@ export class NavAreasService {
         const newPrimaryState = this.getRouteId(primarySnapshot);
 
         // trigger updates of component names for those interested.
-        this.primaryRoute$.next(primarySnapshot);
+        if (this.primaryState && newPrimaryState !== this.primaryState) {
+          this.primaryRoute$.next(primarySnapshot);
+        }
         this.panelRoute$.next(panelSnapshot);
 
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link

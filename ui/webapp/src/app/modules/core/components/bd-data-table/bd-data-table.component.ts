@@ -7,7 +7,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
-import { Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
@@ -128,6 +128,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * This is not supported for multi-select/deselect on group nodes.
    */
   @Input() checkChangeAllowed: (row: T, target: boolean) => Observable<boolean>;
+
+  /**
+   * If given, disables *all* checkboxes in check mode (including the header checkboxes) in case the value is true.
+   */
+  @Input() checkedFrozenWhen$: BehaviorSubject<boolean>;
 
   /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
@@ -434,11 +439,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   /* template */ isAllChecked() {
-    return this.checkSelection.selected.length === this.records.length;
+    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length === this.records.length;
   }
 
   /* template */ isAnyChecked() {
-    return this.checkSelection.selected.length > 0;
+    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length > 0;
   }
 
   /* template */ isPartiallyChecked(node: FlatNode<T>) {

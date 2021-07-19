@@ -1,0 +1,47 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Bulk Instance Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="bulk.selection$ | async as selected">
+      <div>
+        <strong>{{ selected.length }}</strong> instances selected.
+      </div>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selected.length || (starting$ | async)"
+        [loadingWhen$]="starting$"
+        text="Start Selected Instances"
+        icon="play_arrow"
+        (click)="onStart()"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selected.length || (stopping$ | async)"
+        [loadingWhen$]="stopping$"
+        text="Stop Selected Instances"
+        icon="stop"
+        (click)="onStop()"
+      ></app-bd-button>
+      <mat-divider></mat-divider>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [disabled]="!selected.length || !isAllSameProduct()"
+        text="Set Product Version"
+        icon="security_update_good"
+        [toggle]="false"
+        [relative]="true"
+        [route]="['update']"
+      ></app-bd-panel-button>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selected.length || (deleting$ | async)"
+        [loadingWhen$]="deleting$"
+        text="Delete Selected Instances"
+        icon="delete"
+        color="primary"
+        (click)="onDelete()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

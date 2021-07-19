@@ -70,6 +70,8 @@
           [indeterminate]="!isAllChecked() && isAnyChecked()"
           (change)="toggleCheckAll(cb)"
           appClickStopPropagation
+          [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
+          class="bd-text-ellipsis"
           >{{ col.name }}</mat-checkbox
         >
       </th>
@@ -124,9 +126,17 @@
                   [column]="col"
                 ></app-bd-data-component-cell>
               </ng-container>
-              <mat-checkbox #cb *ngIf="checkMode" [checked]="isChecked(row)" [indeterminate]="isPartiallyChecked(row)" (change)="toggleCheck(row, cb)">{{
-                row.node.groupOrFirstColumn
-              }}</mat-checkbox>
+              <mat-checkbox
+                #cb
+                *ngIf="checkMode"
+                [checked]="isChecked(row)"
+                [indeterminate]="isPartiallyChecked(row)"
+                (change)="toggleCheck(row, cb)"
+                appClickStopPropagation
+                [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
+                class="bd-text-ellipsis"
+                >{{ row.node.groupOrFirstColumn }}</mat-checkbox
+              >
             </div>
           </td>
         </ng-container>

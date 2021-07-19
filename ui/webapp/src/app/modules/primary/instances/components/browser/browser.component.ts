@@ -5,6 +5,7 @@ import { InstanceDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { InstanceBulkService } from 'src/app/modules/panels/instances/services/instance-bulk.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { GroupsService } from '../../../groups/services/groups.service';
 import { InstancesColumnsService } from '../../services/instances-columns.service';
@@ -37,6 +38,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     public groups: GroupsService,
     public areas: NavAreasService,
     public authService: AuthenticationService,
+    public bulk: InstanceBulkService,
     config: ConfigService
   ) {
     if (config.isCentral()) {

@@ -55,6 +55,10 @@ export class BdPanelButtonComponent implements OnInit {
     }
   }
 
+  public isActive(): boolean {
+    return this.toggle && (!!this.rla?.isActive ? true : false);
+  }
+
   /** Manually trigger the configured navigation */
   public onClick(): boolean {
     return this.rl.onClick();

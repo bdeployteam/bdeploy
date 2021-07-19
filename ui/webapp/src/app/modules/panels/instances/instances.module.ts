@@ -63,6 +63,8 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { PortShiftComponent } from './components/instance-settings/ports/port-shift/port-shift.component';
+import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
+import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
 
 @NgModule({
   declarations: [
@@ -120,6 +122,8 @@ import { PortShiftComponent } from './components/instance-settings/ports/port-sh
     PortsComponent,
     ConfigureEndpointsComponent,
     PortShiftComponent,
+    BulkManipulationComponent,
+    UpdateProductComponent,
   ],
   imports: [
     CommonModule,
