@@ -70,7 +70,7 @@
       "
       [matTooltip]="(edit.incompatible$ | async) ? 'Saving is not possible due to a conflict on the server' : 'Save all changes'"
       matTooltipPosition="below"
-      (click)="edit.save()"
+      (click)="onSave()"
     ></app-bd-button>
   </app-bd-dialog-toolbar>
 

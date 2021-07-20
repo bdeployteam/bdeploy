@@ -45,17 +45,16 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription.unsubscribe();
   }
 
-  /* template */ isDirty() {
+  public isDirty() {
     return isDirty(this.server, this.orig);
   }
 
   /* template */ onSave() {
+    this.doSave().subscribe((_) => this.tb.closePanel());
+  }
+
+  public doSave() {
     this.saving$.next(true);
-    this.details
-      .update(this.server)
-      .pipe(finalize(() => this.saving$.next(false)))
-      .subscribe((_) => {
-        this.tb.closePanel();
-      });
+    return this.details.update(this.server).pipe(finalize(() => this.saving$.next(false)));
   }
 }

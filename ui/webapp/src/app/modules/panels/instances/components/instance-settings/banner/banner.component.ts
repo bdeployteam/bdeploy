@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, of, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceBannerRecord } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -70,19 +70,18 @@ export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription.unsubscribe();
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     return !!this.orig && !isEqual(this.banner, this.orig);
   }
 
-  /* template */ doApply() {
+  /* template */ onSave() {
+    this.doSave().subscribe((_) => this.tb.closePanel());
+  }
+
+  public doSave(): Observable<any> {
     this.saving$.next(true);
     this.orig = null; // make sure we're no longer dirty.
-    this.instances
-      .updateBanner(this.banner)
-      .pipe(finalize(() => this.saving$.next(false)))
-      .subscribe((_) => {
-        this.tb.closePanel();
-      });
+    return this.instances.updateBanner(this.banner).pipe(finalize(() => this.saving$.next(false)));
   }
 
   /* template */ doRemove() {

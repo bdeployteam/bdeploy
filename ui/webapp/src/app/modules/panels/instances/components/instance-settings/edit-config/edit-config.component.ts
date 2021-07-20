@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { InstancePurpose } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -38,8 +39,15 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog {
     return [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
   }
 
-  /* template */ doApply() {
-    this.edit.conceal('Change Instance Configuration');
-    this.tb.closePanel();
+  /* template */ onSave() {
+    this.doSave().subscribe((_) => this.tb.closePanel());
+  }
+
+  public doSave(): Observable<any> {
+    return of(true).pipe(
+      tap((x) => {
+        this.edit.conceal('Change Instance Configuration');
+      })
+    );
   }
 }

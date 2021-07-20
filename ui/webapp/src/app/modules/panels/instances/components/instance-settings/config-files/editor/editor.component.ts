@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
+import { finalize, tap } from 'rxjs/operators';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -50,15 +50,22 @@ export class EditorComponent implements OnInit, DirtyableDialog {
     this.subscription.unsubscribe();
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     return this.content !== this.originalContent;
   }
 
-  doApply() {
-    this.cfgFiles.edit(this.file$.value, Base64.encode(this.content));
+  /* template */ onSave() {
+    this.doSave().subscribe((_) => this.tb.closePanel());
+  }
 
-    this.content = '';
-    this.originalContent = '';
-    this.tb.closePanel();
+  public doSave() {
+    return of(true).pipe(
+      tap((_) => {
+        this.cfgFiles.edit(this.file$.value, Base64.encode(this.content));
+
+        this.content = '';
+        this.originalContent = '';
+      })
+    );
   }
 }

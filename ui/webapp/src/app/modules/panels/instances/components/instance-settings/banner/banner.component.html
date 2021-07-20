@@ -19,7 +19,7 @@
         [collapsed]="false"
         color="primary"
         [disabled]="!isDirty()"
-        (click)="doApply()"
+        (click)="onSave()"
         [disabled]="saving$ | async"
         [loadingWhen$]="saving$"
       ></app-bd-button>

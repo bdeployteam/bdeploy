@@ -17,7 +17,7 @@
         [collapsed]="false"
         color="toolbar"
         [disabled]="!isDirty() || !servers.isSynchronized(edit.current$.value?.managedServer)"
-        (click)="doApply()"
+        (click)="onSave()"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

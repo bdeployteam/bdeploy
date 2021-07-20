@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { applyChangeset, Changeset, diff } from 'json-diff-ts';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, forkJoin, Observable, Subject } from 'rxjs';
-import { debounceTime, finalize, first } from 'rxjs/operators';
+import { debounceTime, finalize, first, tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   ApplicationDescriptor,
@@ -326,12 +326,9 @@ export class InstanceEditService {
       .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.config.uuid}/update`, update, { params: { managedServer, expect } })
       .pipe(
         finalize(() => this.saving$.next(false)),
-        measure('Save Instance')
-      )
-      .subscribe((_) => {
-        // success :) lets reset.
-        this.reset();
-      });
+        measure('Save Instance'),
+        tap((_) => this.reset()) // success :) lets reset.
+      );
   }
 
   /** Removes the last edit from the edit stack, effectively undoing it */

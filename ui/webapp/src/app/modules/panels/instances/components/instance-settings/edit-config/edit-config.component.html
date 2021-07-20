@@ -14,7 +14,7 @@
           The managed server responsible for this instance is not synchronized, details are unavailable. Please synchronize the server to enable editing.
         </div>
       </app-bd-notification-card>
-      <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="doApply()" *ngIf="edit.state$ | async as state">
+      <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="onSave()" *ngIf="edit.state$ | async as state">
         <div>
           Edit instance: <strong>{{ state.config.config.uuid }}</strong>
         </div>

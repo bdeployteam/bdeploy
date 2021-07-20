@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -47,21 +47,20 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription.unsubscribe();
   }
 
-  /* template */ isDirty(): boolean {
+  public isDirty(): boolean {
     return isDirty(this.user, this.orig);
+  }
+
+  /* template */ onSave() {
+    this.doSave().subscribe((_) => this.tb.closePanel());
+  }
+
+  public doSave(): Observable<any> {
+    this.loading$.next(true);
+    return this.auth.updateUserInfo(this.user).pipe(finalize(() => this.loading$.next(false)));
   }
 
   /* template */ updateMail(): void {
     this.mailChanged.next(this.user.email);
-  }
-
-  /* template */ onSave(): void {
-    this.loading$.next(true);
-    this.auth
-      .updateUserInfo(this.user)
-      .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe((_) => {
-        this.tb.closePanel();
-      });
   }
 }

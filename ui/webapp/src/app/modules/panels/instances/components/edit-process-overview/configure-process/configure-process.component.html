@@ -9,7 +9,7 @@
       text="APPLY"
       [collapsed]="false"
       color="primary"
-      (click)="doApply()"
+      (click)="onSave()"
       [disabled]="!instanceEdit.hasPendingChanges() || isInvalid()"
     ></app-bd-button>
   </app-bd-dialog-toolbar>

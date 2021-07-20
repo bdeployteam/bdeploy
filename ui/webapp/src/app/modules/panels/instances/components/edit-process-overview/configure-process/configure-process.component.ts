@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -37,10 +38,17 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
     return this.instanceEdit.hasPendingChanges();
   }
 
-  /* template */ doApply() {
-    this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);
-    this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
-    this.tb.closePanel();
+  /* template */ onSave() {
+    this.doSave().subscribe((_) => this.tb.closePanel());
+  }
+
+  public doSave(): Observable<any> {
+    return of(true).pipe(
+      tap((_) => {
+        this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);
+        this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
+      })
+    );
   }
 
   /* template */ isInvalid(): boolean {

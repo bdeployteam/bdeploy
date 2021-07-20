@@ -1,6 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import { ApplicationValidationDto, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceTemplateDescriptor } from 'src/app/models/gen.dtos';
@@ -111,6 +111,14 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     // if pending unconcealed changes are present we ignore them. otherwise a "unsaved changes" dialog will pop up
     // in the main dialog instead of the panel containing the changes.
     return this.edit.hasSaveableChanges();
+  }
+
+  /* template */ onSave() {
+    this.doSave().subscribe();
+  }
+
+  public doSave(): Observable<any> {
+    return this.edit.save();
   }
 
   private isClientNode(node: InstanceNodeConfigurationDto) {

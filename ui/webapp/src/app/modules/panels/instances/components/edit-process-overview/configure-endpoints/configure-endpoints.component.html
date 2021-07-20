@@ -1,7 +1,7 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Configure Endpoints of {{ (edit.process$ | async)?.name }}{{ isDirty() ? '*' : '' }}" [panel]="true" [route]="['..']">
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button text="APPLY" [collapsed]="false" color="primary" (click)="doApply()" [disabled]="!isDirty() || isInvalid()"></app-bd-button>
+    <app-bd-button text="APPLY" [collapsed]="false" color="primary" (click)="onSave()" [disabled]="!isDirty() || isInvalid()"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="edit.process$.value?.endpoints?.http?.length" [style.padding-top.px]="2" fxLayout="column" fxLayoutGap="10px">

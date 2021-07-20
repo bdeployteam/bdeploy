@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, Subject, Subscription } from 'rxjs';
+import { concatMap, finalize } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -67,7 +67,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription.unsubscribe();
   }
 
-  /* template */ isDirty(): boolean {
+  public isDirty(): boolean {
     return isDirty(this.group, this.origGroup) || this.imageChanged;
   }
 
@@ -80,20 +80,23 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.dialog.info('Unsupported File Type', `${file.name} has an unsupported file type.`, 'warning');
   }
 
-  /* template */ onSave(): void {
+  /* template */ onSave() {
     this.saving$.next(true);
-    this.details.update(this.group).subscribe(
-      (_) => {
+    this.doSave()
+      .pipe(finalize(() => this.saving$.next(false)))
+      .subscribe((_) => this.reset());
+  }
+
+  public doSave(): Observable<any> {
+    this.saving$.next(true);
+    return this.details.update(this.group).pipe(
+      concatMap((_) => {
         if (this.imageChanged) {
-          this.groups
-            .updateImage(this.group.name, this.image)
-            .pipe(finalize(() => this.reset()))
-            .subscribe();
+          return this.groups.updateImage(this.group.name, this.image);
         } else {
-          this.reset();
+          of(true);
         }
-      },
-      (err) => this.saving$.next(false)
+      })
     );
   }
 
