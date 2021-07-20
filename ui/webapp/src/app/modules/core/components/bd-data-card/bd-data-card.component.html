@@ -14,7 +14,7 @@
         *ngIf="!!colTitle"
         class="bd-title-text bd-text-ellipsis"
         [ngClass]="colTitle.classes ? colTitle.classes(record) : []"
-        [matTooltip]="colTitle.data(record)"
+        [matTooltip]="!!colTitle.tooltip ? colTitle.tooltip(record) : colTitle.data(record)"
         [matTooltipShowDelay]="1000"
       >
         <ng-container *ngIf="!colTitle.component" class="bd-text-ellipsis">{{ colTitle.data(record) }}</ng-container>
@@ -29,7 +29,7 @@
         *ngIf="!!colDescription"
         class="bd-description-text local-card-description bd-text-ellipsis"
         [ngClass]="colDescription.classes ? colDescription.classes(record) : []"
-        [matTooltip]="colDescription.data(record)"
+        [matTooltip]="!!colDescription.tooltip ? colDescription.tooltip(record) : colDescription.data(record)"
         [matTooltipShowDelay]="1000"
       >
         <ng-container *ngIf="!colDescription.component" class="bd-text-ellipsis">{{ colDescription.data(record) }}</ng-container>
@@ -101,7 +101,7 @@
     *ngIf="!!colFooter"
     class="local-card-footer bd-text-ellipsis"
     [ngClass]="colFooter.classes ? colFooter.classes(record) : []"
-    [matTooltip]="colFooter.data(record)"
+    [matTooltip]="!!colFooter.tooltip ? colFooter.tooltip(record) : colFooter.data(record)"
     [matTooltipShowDelay]="1000"
   >
     <ng-container *ngIf="!colFooter.component" class="bd-text-ellipsis">{{ colFooter.data(record) }}</ng-container>

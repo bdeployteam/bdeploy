@@ -11,6 +11,8 @@ const colName: BdDataColumn<PortParmGroup> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.desc.name,
+  tooltip: (r) => `Used in ${r.apps[0].name}${r.apps.length > 1 ? ` and ${r.apps.length - 1} other application${r.apps.length > 2 ? 's' : ''}` : ''}`,
+  tooltipDelay: 50,
 };
 
 const colOccurances: BdDataColumn<PortParmGroup> = {

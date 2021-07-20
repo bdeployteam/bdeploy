@@ -26,7 +26,7 @@
         *matRowDef="let row; columns: _visibleColumns"
         [routerLink]="!!row.node.item ? recordRoute(row.node.item) : []"
         [routerLinkActive]="!!row.node.item ? 'mat-row-route-active' : []"
-        [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
+        [style.cursor]="!!row.node.item ? 'pointer' : 'auto'"
         class="local-row"
         cdkDrag
       ></tr>
@@ -38,7 +38,7 @@
         mat-row
         *matRowDef="let row; columns: _visibleColumns"
         (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
-        [style.cursor]="!checkMode && !!row.node.item ? 'pointer' : 'auto'"
+        [style.cursor]="!!row.node.item ? 'pointer' : 'auto'"
         cdkDrag
       ></tr>
     </ng-container>
@@ -91,7 +91,7 @@
               class="local-first-column"
               [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
               [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
-              [matTooltip]="!row.expandable ? row.node.groupOrFirstColumn : null"
+              [matTooltip]="!row.expandable ? (!!col.tooltip ? col.tooltip(row.node.item) : row.node.groupOrFirstColumn) : null"
               [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
               fxLayout="row"
               fxLayoutAlign="start center"
@@ -154,7 +154,7 @@
                 <div
                   *ngIf="!col.component"
                   class="bd-text-ellipsis"
-                  [matTooltip]="!!row.node.item ? col.data(row.node.item) : null"
+                  [matTooltip]="!!row.node.item ? (!!col.tooltip ? col.tooltip(row.node.item) : col.data(row.node.item)) : null"
                   [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
                 >
                   {{ col.data(row.node.item) }}

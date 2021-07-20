@@ -44,6 +44,9 @@ export interface BdDataColumn<T> {
   /** Receives a record, extracts the data to display for this column. Provides data for searching even if custom rendering component is used. */
   data: (record: T) => any;
 
+  /** Additional tooltip callback which will be queried if given instead of displaying the data as tooltip */
+  tooltip?: (record: T) => string;
+
   /** Provides a alternative rendering component for the cell, which has an Input named 'record', and an optional Input named 'column' */
   component?: Type<any>;
 
