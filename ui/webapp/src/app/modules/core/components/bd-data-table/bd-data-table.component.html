@@ -53,7 +53,7 @@
       <th
         mat-header-cell
         *matHeaderCellDef
-        [style.width]="col.width ? col.width : null"
+        [style.width]="col.width ? col.width : 'auto'"
         [matTooltip]="col.description"
         [matTooltipShowDelay]="1000"
         mat-sort-header
@@ -82,7 +82,7 @@
           <td
             mat-cell
             [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-            [style.width]="col.width ? col.width : 0"
+            [style.width]="col.width ? col.width : 'auto'"
             [style.maxWidth]="0"
             [attr.colspan]="row.expandable ? _columns.length : 1"
           >
@@ -146,7 +146,7 @@
           <td
             mat-cell
             [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
-            [style.width]="col.width ? col.width : 0"
+            [style.width]="col.width ? col.width : 'auto'"
             [style.maxWidth]="0"
           >
             <ng-container *ngIf="!row.expandable">
@@ -177,7 +177,7 @@
 
         <!-- Items with an action (collapsed button), this may not occur on the first column -->
         <ng-container *ngIf="col.action && !row.expandable">
-          <td mat-cell [style.width]="col.width ? col.width : 0" [style.maxWidth]="0">
+          <td mat-cell [style.width]="col.width ? col.width : 'auto'" [style.maxWidth]="0">
             <div fxLayout="row" fxLayoutAlign="start center">
               <app-bd-button
                 *ngIf="row.node.item"

@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <div fxLayout="row" class="local-graph" fxFlex="1 0 auto" *ngIf="showGraph$ | async">
+  <div fxLayout="row" class="local-graph" fxFlex="1 0 100px" *ngIf="showGraph$ | async">
     <app-client-usage-graph fxFlex="1 0 auto" [appUid]="selected?.uid"></app-client-usage-graph>
   </div>
 </div>
