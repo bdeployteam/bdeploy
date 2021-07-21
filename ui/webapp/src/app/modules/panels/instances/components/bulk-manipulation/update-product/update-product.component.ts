@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceUpdateDto, ProductDto } from 'src/app/models/gen.dtos';
@@ -98,7 +98,18 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
               .pipe(
                 finalize(() => {
                   this.processing$.next(false);
-                  this.tb.closePanel();
+
+                  // in case of errors - DISPLAY them :)
+                  let msg = of(true);
+                  if (!!errors?.length) {
+                    msg = this.dialog.info(
+                      `Errors while saving`,
+                      `<strong>${errors.length}</strong> errors have occured during saving. Please verify the correctness of all affected instances.`,
+                      'warning'
+                    );
+                  }
+
+                  msg.subscribe((_) => this.tb.closePanel());
                 })
               )
               .subscribe({

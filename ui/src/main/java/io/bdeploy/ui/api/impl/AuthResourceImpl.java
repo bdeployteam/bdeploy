@@ -1,5 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
+import java.util.Collections;
+
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.UserChangePasswordDto;
@@ -8,6 +10,8 @@ import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -26,6 +30,9 @@ public class AuthResourceImpl implements AuthResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private ChangeEventManager cem;
 
     @Context
     private ResourceContext rc;
@@ -71,6 +78,7 @@ public class AuthResourceImpl implements AuthResource {
     @Override
     public void updateCurrentUser(UserInfo info) {
         auth.updateUserInfo(info);
+        cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, info.name));
     }
 
     @Override

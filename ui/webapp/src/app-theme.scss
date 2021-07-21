@@ -88,6 +88,7 @@
     --bd-bg-dialog: #{mat.get-color-from-palette($bg, 'dialog')};
     --bd-bg-toolbar: #{mat.get-color-from-palette($bg, 'app-bar')};
     --bd-bg-disabled: #{mat.get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
+    --bd-bg-grey: #{mat.get-color-from-palette($fg, base, if($dark, 0.2, 0.4))};
 
     --bd-primary-darker: #{mat.get-color-from-palette($primary, 'darker')};
     --bd-accent-darker: #{mat.get-color-from-palette($accent, 'darker')};

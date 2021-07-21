@@ -28,7 +28,7 @@
           [text]="action.name"
           [collapsed]="false"
           (click)="complete(action.result)"
-          [disabled]="action.confirm && (!(confirmed$ | async) || (msg.validation && !msg.validation()))"
+          [disabled]="(action.confirm && (!(confirmed$ | async) || (msg.validation && !msg.validation()))) || (!!action.disabled && action.disabled())"
         ></app-bd-button>
       </app-bd-action-row>
     </div>

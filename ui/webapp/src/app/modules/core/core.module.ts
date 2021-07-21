@@ -91,6 +91,8 @@ import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { GroupIdValidator } from './validators/group-id';
 import { PasswordVerificationValidator } from './validators/password-verification';
+import { BdDataUserAvatarCellComponent } from './components/bd-data-user-avatar-cell/bd-data-user-avatar-cell.component';
+import { BdFormSelectComponentOptionComponent } from './components/bd-form-select-component-option/bd-form-select-component-option.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -153,6 +155,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdEditorComponent,
     BdEditorDiffComponent,
     BdActivitiesComponent,
+    BdDataUserAvatarCellComponent,
+    BdFormSelectComponentOptionComponent,
   ],
   providers: [
     httpInterceptorProviders,

@@ -23,7 +23,6 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
-import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -141,8 +140,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
     public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
         auth.updatePermissions(group, permissions);
         Manifest.Key key = new SoftwareRepositoryManifest(registry.get(group)).getKey();
-        changes.change(ObjectChangeType.SOFTWARE_REPO, key,
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.PERMISSIONS));
+        for (var perm : permissions) {
+            changes.change(ObjectChangeType.USER, key, Map.of(ObjectChangeDetails.USER_NAME, perm.user));
+        }
     }
 
 }

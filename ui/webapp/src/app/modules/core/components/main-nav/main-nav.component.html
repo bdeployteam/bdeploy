@@ -20,13 +20,13 @@
       <span>{{ cfg.config.version | formatVersion }}</span>
       <div [style.width.px]="96" fxLayout="row" fxLayoutAlign="center center">
         <mat-progress-bar
+          *ngIf="!!(activities.activities$ | async)?.length"
           matTooltip="Click to view background operations"
           [appBdPopup]="activitiesPopup"
           appBdPopupPosition="above-left"
           [style.cursor]="'pointer'"
           [style.width.px]="54"
-          [mode]="!!(activities.activities$ | async)?.length ? 'indeterminate' : 'determinate'"
-          value="50"
+          mode="indeterminate"
         ></mat-progress-bar>
       </div>
     </div>

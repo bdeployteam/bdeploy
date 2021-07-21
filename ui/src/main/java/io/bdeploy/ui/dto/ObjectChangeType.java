@@ -11,5 +11,6 @@ public enum ObjectChangeType {
     PRODUCT,
     SOFTWARE_REPO,
     INSTANCE,
-    MANAGED_MASTER_ATTACH
+    MANAGED_MASTER_ATTACH,
+    USER
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Optional, Self, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, Optional, Self, Type, ViewEncapsulation } from '@angular/core';
 import { ControlValueAccessor, FormControl, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
@@ -18,6 +18,7 @@ export class BdFormSelectComponent implements OnInit, ControlValueAccessor, Erro
   @Input() disabled: any;
   @Input() allowNone = false;
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
+  @Input() component: Type<any>;
 
   /* template */ get value() {
     return this.internalValue;

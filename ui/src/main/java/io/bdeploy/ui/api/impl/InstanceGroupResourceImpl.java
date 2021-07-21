@@ -183,8 +183,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
         auth.updatePermissions(group, permissions);
         Manifest.Key key = new InstanceGroupManifest(registry.get(group)).getKey();
-        changes.change(ObjectChangeType.SOFTWARE_REPO, key,
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.PERMISSIONS));
+        for (var perm : permissions) {
+            changes.change(ObjectChangeType.USER, key, Map.of(ObjectChangeDetails.USER_NAME, perm.user));
+        }
     }
 
     @Override

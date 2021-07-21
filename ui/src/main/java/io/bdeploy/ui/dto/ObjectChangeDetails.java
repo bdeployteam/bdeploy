@@ -9,5 +9,6 @@ public enum ObjectChangeDetails {
     KEY_NAME,
     KEY_TAG,
     CHANGE_HINT,
-    ACTIVITIES
+    ACTIVITIES,
+    USER_NAME
 }

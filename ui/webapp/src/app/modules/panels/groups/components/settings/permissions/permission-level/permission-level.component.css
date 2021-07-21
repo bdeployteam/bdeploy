@@ -1,0 +1,26 @@
+.local-chip {
+  text-transform: uppercase;
+  font-size: smaller;
+  border-radius: 3px;
+  padding: 0px 5px;
+}
+
+.local-CLIENT-chip {
+  background-color: var(--bd-text-success);
+  color: var(--bd-primary-contrast);
+}
+
+.local-READ-chip {
+  background-color: var(--bd-bg-grey);
+  color: var(--bd-primary-contrast);
+}
+
+.local-WRITE-chip {
+  background-color: var(--bd-bg-grey);
+  color: var(--bd-primary-contrast);
+}
+
+.local-ADMIN-chip {
+  background-color: var(--bd-primary);
+  color: var(--bd-primary-contrast);
+}

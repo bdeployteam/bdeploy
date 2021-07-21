@@ -12,6 +12,9 @@ export interface BdDialogMessageAction<T> {
 
   /** Whether the action is a confirmation action, meaning it must be disabled if a confirmation value is given until the user correctly entered it */
   confirm: boolean;
+
+  /** Whether the action is currently disabled or not */
+  disabled?: () => boolean;
 }
 
 export interface BdDialogMessage<T> {

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, concat, Observable } from 'rxjs';
+import { BehaviorSubject, concat, Observable, of } from 'rxjs';
 import { concatAll, filter, map, mergeMap } from 'rxjs/operators';
 import { ApplicationValidationDto, InstanceDto, InstanceUpdateDto, ProductDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -71,14 +71,13 @@ export class InstanceBulkService {
   }
 
   public saveUpdate(updates: InstanceUpdateDto[]): Observable<any> {
-    return concat(updates).pipe(
-      map((u) => {
+    return of(...updates).pipe(
+      mergeMap((u) => {
         const dto = this.selection$.value.find((i) => i.instanceConfiguration.uuid === u.config.config.uuid);
-        const managedServer = dto.managedServer.hostName;
+        const managedServer = dto.managedServer?.hostName;
         const expect = dto.instance.tag;
         return this.http.post(`${this.apiPath(this.groups.current$.value.name, u.config.config.uuid)}/update`, u, { params: { managedServer, expect } });
-      }),
-      concatAll()
+      })
     );
   }
 

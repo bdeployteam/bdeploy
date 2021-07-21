@@ -1,5 +1,5 @@
-<app-bd-dialog [loadingWhen$]="instances.loading$">
-  <app-bd-dialog-toolbar header="Instances of {{ (groups.current$ | async)?.title }}">
+<app-bd-dialog [loadingWhen$]="instances.loading$" *ngIf="groups.current$ | async as group">
+  <app-bd-dialog-toolbar header="Instances of {{ group.title }}">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
       [multiple]="!dataTable.grid"

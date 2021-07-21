@@ -110,7 +110,7 @@
                   >drag_indicator</mat-icon
                 >
                 <div
-                  *ngIf="!col.component"
+                  *ngIf="!col.component || row.expandable"
                   [matBadge]="row.node.children.length"
                   [matBadgeHidden]="!row.expandable"
                   matBadgeSize="small"
@@ -120,7 +120,7 @@
                   {{ row.node.groupOrFirstColumn }}
                 </div>
                 <app-bd-data-component-cell
-                  *ngIf="!!col.component"
+                  *ngIf="!!col.component && !row.expandable"
                   [componentType]="col.component"
                   [record]="row.node.item"
                   [column]="col"
