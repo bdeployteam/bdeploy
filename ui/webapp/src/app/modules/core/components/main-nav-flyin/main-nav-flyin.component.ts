@@ -19,7 +19,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
     trigger('flyInWidth', [
       state('normal', style({ width: '350px' })),
       state('max-lg', style({ width: 'calc(100% - 174px)' })),
-      state('max-lg-menu', style({ width: 'calc(100% - 370px)' })),
+      state('max-lg-menu', style({ width: 'calc(100% - 174px)' })),
       state('max-sm', style({ width: 'calc(100% - 74px)' })),
       state('max-sm-menu', style({ width: 'calc(100% - 220px)' })),
       transition('* => *', group([animateChild(), animate('0.2s ease')])),
