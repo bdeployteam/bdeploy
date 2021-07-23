@@ -4,7 +4,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DirtyableDialog } from '../guards/dirty-dialog.guard';
 
-export type DirtyableKey = 'primary' | 'panel';
+export type DirtyableKey = 'primary' | 'panel' | 'admin';
 @Injectable({
   providedIn: 'root',
 })
@@ -15,6 +15,7 @@ export class NavAreasService {
 
   primaryRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
   panelRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+  adminRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
 
   /** should ONLY be used by GroupsService. Subscribe to GroupsService.current$ instead */
   groupContext$ = new BehaviorSubject<string>(null);
@@ -28,6 +29,7 @@ export class NavAreasService {
   private dirtyables: { [P in DirtyableKey]: DirtyableDialog } = {
     panel: null,
     primary: null,
+    admin: null,
   };
 
   private primaryState: string;
@@ -49,11 +51,13 @@ export class NavAreasService {
         // the two potential activated routes are *direct* childs of the main route. no need to recurse.
         const primary = this.findChildRouteForOutlet(route, 'primary');
         const panel = this.findChildRouteForOutlet(route, 'panel');
+        const admin = this.findChildRouteForOutlet(route, 'admin');
 
         // the *actual* component route which is displayed in the according outlet may *not* have the outlet
         // property set to the requested outlet - only the first child needs to have that.
         const primarySnapshot = this.findRouteLeaf(primary)?.snapshot;
         const panelSnapshot = this.findRouteLeaf(panel)?.snapshot;
+        const adminSnapshot = this.findRouteLeaf(admin)?.snapshot;
 
         // update the states visible to the flyin part of the main nav.
         this.panelVisible$.next(panelSnapshot ? true : false);
@@ -68,6 +72,7 @@ export class NavAreasService {
           this.primaryRoute$.next(primarySnapshot);
         }
         this.panelRoute$.next(panelSnapshot);
+        this.adminRoute$.next(adminSnapshot);
 
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link
         // which includes a panel navigation.
@@ -145,6 +150,8 @@ export class NavAreasService {
       return 'panel';
     } else if (this.dirtyables['primary'] === dirtyable) {
       return 'primary';
+    } else if (this.dirtyables['admin'] === dirtyable) {
+      return 'admin';
     }
   }
 
@@ -179,6 +186,13 @@ export class NavAreasService {
     for (const child of route.children) {
       if (child.outlet === outlet) {
         return child;
+      }
+
+      if (!!child.children?.length) {
+        const result = this.findChildRouteForOutlet(child, outlet);
+        if (result) {
+          return result;
+        }
       }
     }
   }

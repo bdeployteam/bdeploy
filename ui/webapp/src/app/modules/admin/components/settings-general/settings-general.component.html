@@ -1,31 +1,19 @@
-<mat-toolbar class="mat-elevation-z1">
-  <div class="spacer"></div>
-  <button mat-raised-button [disabled]="settings.isLoading() || !settings.isDirty()" (click)="settings.revert()">
-    DISCARD
-  </button>
-  <button
-    mat-raised-button
-    color="primary"
-    [disabled]="settings.isLoading() || !settings.isDirty()"
-    (click)="settings.save()"
-  >
-    SAVE
-  </button>
-</mat-toolbar>
-<div class="content centered">
-  <mat-tab-group class="tab-container" dynamicHeight="true">
-    <mat-tab label="Look & Feel">
-      <div class="content centered" *ngIf="settings.isLoading()">
-        <mat-spinner [diameter]="48"></mat-spinner>
-      </div>
-      <div class="content" *ngIf="!settings.isLoading()">
-        <p>
-          Control the appearence of the Web Application with the following settings.
-        </p>
-        <mat-slide-toggle [(ngModel)]="settings.getSettings().general.enableGravatar"
-          >Enable Gravatar User Avatars</mat-slide-toggle
-        >
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-</div>
+<app-bd-dialog [loadingWhen$]="settings.loading$">
+  <app-bd-dialog-toolbar>
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button text="DISCARD" [collapsed]="false" [disabled]="!settings.isDirty()" (click)="settings.discard()"></app-bd-button>
+    <app-bd-button text="SAVE" [collapsed]="false" color="primary" [disabled]="!settings.isDirty()" (click)="doSave().subscribe()"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutAlign="start center">
+      <mat-tab-group class="tab-container" dynamicHeight="true">
+        <mat-tab label="Look & Feel" fxLayout="column">
+          <div class="bd-default-padding">
+            <p>Control the appearence of the Web Application with the following settings.</p>
+            <app-bd-form-toggle [(ngModel)]="settings.settings$.value.general.enableGravatar" label="Enable Gravatar User Avatars"></app-bd-form-toggle>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

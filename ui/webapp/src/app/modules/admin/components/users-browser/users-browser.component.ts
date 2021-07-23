@@ -119,7 +119,7 @@ export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, A
   public getAuthenticatedBy(userInfo: UserInfo): string {
     if (userInfo.externalSystem) {
       if (userInfo.externalSystem === 'LDAP') {
-        const dto: LDAPSettingsDto = this.settings.getSettings().auth.ldapSettings.find((s) => s.id === userInfo.externalTag);
+        const dto: LDAPSettingsDto = this.settings.settings$.value.auth.ldapSettings.find((s) => s.id === userInfo.externalTag);
         return dto ? dto.description : userInfo.externalTag + ' (not found)';
       } else {
         return userInfo.externalTag; // should not happen
@@ -141,7 +141,7 @@ export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, A
   }
 
   isLoading() {
-    return this.loading || this.settings.isLoading();
+    return this.loading || this.settings.loading$.value;
   }
 
   public onAdd(): void {

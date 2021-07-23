@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
 import { CanDeactivateGuard } from '../core/guards/can-deactivate.guard';
+import { DirtyDialogGuard } from '../core/guards/dirty-dialog.guard';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { AuditLogsBrowserComponent } from './components/audit-logs-browser/audit-logs-browser.component';
 import { HiveAuditLogsBrowserComponent } from './components/hive-audit-logs-browser/hive-audit-logs-browser.component';
@@ -26,7 +27,7 @@ const ADMIN_ROUTES: Route[] = [
     component: AdminShellComponent,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'admin' },
-      { path: 'general', component: SettingsGeneralComponent, canDeactivate: [CanDeactivateGuard], outlet: 'admin' },
+      { path: 'general', component: SettingsGeneralComponent, canDeactivate: [DirtyDialogGuard], outlet: 'admin' },
       { path: 'plugins', component: PluginsBrowserComponent, outlet: 'admin' },
       {
         path: 'instancegroup',

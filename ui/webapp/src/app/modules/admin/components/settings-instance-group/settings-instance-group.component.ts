@@ -78,16 +78,18 @@ export class SettingsInstanceGroupComponent implements OnInit {
   }
 
   getAttributes(): CustomAttributeDescriptor[] {
-    return this.settings.getSettings().instanceGroup.attributes;
+    return this.settings.settings$.value?.instanceGroup.attributes;
   }
 
   hasAttributes(): boolean {
-    return this.settings?.getSettings()?.instanceGroup?.attributes.length > 0;
+    return this.settings?.settings$.value?.instanceGroup?.attributes.length > 0;
   }
 
   private sortAttributes() {
     if (this.hasAttributes()) {
-      this.settings.getSettings().instanceGroup.attributes = this.settings.getSettings().instanceGroup.attributes.sort((a, b) => a.name.localeCompare(b.name));
+      this.settings.settings$.value.instanceGroup.attributes = this.settings.settings$.value?.instanceGroup.attributes.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
     }
   }
 }

@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Observable } from 'rxjs';
 import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from '../../../core/services/settings.service';
 
 @Component({
@@ -9,19 +11,20 @@ import { SettingsService } from '../../../core/services/settings.service';
   templateUrl: './settings-general.component.html',
   styleUrls: ['./settings-general.component.css'],
 })
-export class SettingsGeneralComponent implements OnInit {
-  constructor(public settings: SettingsService, private messageBoxService: MessageboxService) {}
+export class SettingsGeneralComponent implements OnInit, DirtyableDialog {
+  @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
+
+  constructor(public settings: SettingsService, private messageBoxService: MessageboxService, areas: NavAreasService) {
+    areas.registerDirtyable(this, 'admin');
+  }
 
   ngOnInit() {}
 
-  canDeactivate(): Observable<boolean> {
-    if (!this.settings.isDirty()) {
-      return of(true);
-    }
-    return this.messageBoxService.open({
-      title: 'Unsaved changes',
-      message: 'Settings were modified. Close without saving?',
-      mode: MessageBoxMode.CONFIRM_WARNING,
-    });
+  public isDirty(): boolean {
+    return this.settings.isDirty();
+  }
+
+  public doSave(): Observable<any> {
+    return this.settings.save();
   }
 }

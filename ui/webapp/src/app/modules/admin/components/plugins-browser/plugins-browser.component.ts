@@ -92,7 +92,7 @@ export class PluginsBrowserComponent implements OnInit, OnDestroy, BdSearchable,
   }
 
   isLoading() {
-    return this.loading || this.settings.isLoading();
+    return this.loading || this.settings.loading$.value;
   }
 
   public formatEditors(dto: PluginInfoDto): string {

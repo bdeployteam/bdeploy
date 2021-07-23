@@ -1,47 +1,33 @@
 <mat-toolbar class="mat-elevation-z1">
   <div class="spacer"></div>
-  <button mat-raised-button [disabled]="settings.isLoading() || !settings.isDirty()" (click)="settings.revert()">
-    DISCARD
-  </button>
-  <button
-    mat-raised-button
-    color="primary"
-    [disabled]="settings.isLoading() || !settings.isDirty()"
-    (click)="settings.save()"
-  >
-    SAVE
-  </button>
+  <button mat-raised-button [disabled]="(settings.loading$ | async) || !settings.isDirty()" (click)="settings.discard()">DISCARD</button>
+  <button mat-raised-button color="primary" [disabled]="(settings.loading$ | async) || !settings.isDirty()" (click)="settings.save()">SAVE</button>
 </mat-toolbar>
 <div class="content centered">
   <mat-tab-group class="tab-container" dynamicHeight="true">
     <mat-tab label="Local Users">
-      <div class="content centered" *ngIf="settings.isLoading()">
+      <div class="content centered" *ngIf="settings.loading$ | async">
         <mat-spinner [diameter]="48"></mat-spinner>
       </div>
-      <div class="content" *ngIf="!settings.isLoading()">
+      <div class="content" *ngIf="!(settings.loading$ | async)">
         <p>
-          You may disable local user login. Be aware that logging in will be impossible if no other authentication
-          mechanism (e.g. LDAP) is able to authenticate users.
+          You may disable local user login. Be aware that logging in will be impossible if no other authentication mechanism (e.g. LDAP) is able to authenticate
+          users.
         </p>
-        <mat-slide-toggle [(ngModel)]="settings.getSettings().auth.disableBasic"
-          >Disable Local User Login</mat-slide-toggle
-        >
+        <mat-slide-toggle [(ngModel)]="settings.settings$.value.auth.disableBasic">Disable Local User Login</mat-slide-toggle>
       </div>
     </mat-tab>
     <mat-tab label="LDAP">
-      <div class="content centered" *ngIf="settings.isLoading()">
+      <div class="content centered" *ngIf="settings.loading$ | async">
         <mat-spinner [diameter]="48"></mat-spinner>
       </div>
-      <div class="content" *ngIf="!settings.isLoading()">
+      <div class="content" *ngIf="!(settings.loading$ | async)">
         <p>
-          Configure one or more LDAP servers to enable LDAP authentication. Users will be created on first login. The
-          order of the servers in the configuration determines the order in which they are queried. Once a user is
-          associated with a server, it will always authenticate against that server.
+          Configure one or more LDAP servers to enable LDAP authentication. Users will be created on first login. The order of the servers in the configuration
+          determines the order in which they are queried. Once a user is associated with a server, it will always authenticate against that server.
         </p>
-        <div class="servers-grid" *ngIf="settings.getSettings().auth.ldapSettings.length">
-          <ng-container
-            *ngFor="let s of settings.getSettings().auth.ldapSettings; let f = first; let l = last; let i = index"
-          >
+        <div class="servers-grid" *ngIf="settings.settings$.value.auth.ldapSettings.length">
+          <ng-container *ngFor="let s of settings.settings$.value.auth.ldapSettings; let f = first; let l = last; let i = index">
             <div>{{ s.server }}</div>
             <div>{{ s.description }}</div>
             <div>
@@ -63,7 +49,7 @@
             </div>
           </ng-container>
         </div>
-        <div *ngIf="!settings.getSettings().auth.ldapSettings.length">No Servers have been configured yet.</div>
+        <div *ngIf="!settings.settings$.value?.auth.ldapSettings.length">No Servers have been configured yet.</div>
         <button mat-mini-fab style="align-self: flex-end" (click)="add()"><mat-icon>add</mat-icon></button>
       </div>
     </mat-tab>

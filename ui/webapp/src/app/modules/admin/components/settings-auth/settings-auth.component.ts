@@ -38,7 +38,7 @@ export class SettingsAuthComponent implements OnInit, CanComponentDeactivate {
   }
 
   private getLdapSettings() {
-    return this.settings.getSettings().auth.ldapSettings;
+    return this.settings.settings$.value.auth.ldapSettings;
   }
 
   add() {

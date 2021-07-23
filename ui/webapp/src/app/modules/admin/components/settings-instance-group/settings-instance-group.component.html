@@ -1,27 +1,16 @@
 <mat-toolbar class="mat-elevation-z1">
   <div class="spacer"></div>
-  <button mat-raised-button [disabled]="settings.isLoading() || !settings.isDirty()" (click)="settings.revert()">
-    DISCARD
-  </button>
-  <button
-    mat-raised-button
-    color="primary"
-    [disabled]="settings.isLoading() || !settings.isDirty()"
-    (click)="settings.save()"
-  >
-    SAVE
-  </button>
+  <button mat-raised-button [disabled]="(settings.loading$ | async) || !settings.isDirty()" (click)="settings.discard()">DISCARD</button>
+  <button mat-raised-button color="primary" [disabled]="(settings.loading$ | async) || !settings.isDirty()" (click)="settings.save()">SAVE</button>
 </mat-toolbar>
 <div class="content centered">
   <mat-tab-group class="tab-container" dynamicHeight="true">
     <mat-tab label="Global Attributes">
-      <div class="content centered" *ngIf="settings.isLoading()">
+      <div class="content centered" *ngIf="settings.loading$ | async">
         <mat-spinner [diameter]="48"></mat-spinner>
       </div>
-      <div class="content" *ngIf="!settings.isLoading()">
-        <p>
-          Configure global attributes that are available for all Instance Groups on this server.
-        </p>
+      <div class="content" *ngIf="!(settings.loading$ | async)">
+        <p>Configure global attributes that are available for all Instance Groups on this server.</p>
         <div class="attributes-grid" *ngIf="hasAttributes()">
           <ng-container *ngFor="let p of getAttributes(); let i = index">
             <div>{{ p.name }}</div>
@@ -38,10 +27,8 @@
             </div>
           </ng-container>
         </div>
-        <div *ngIf="!hasAttributes()">
-          No Attributes have been configured yet.
-        </div>
-        <button mat-mini-fab style="align-self: flex-end;" [disabled]="!isAttributesEditable()" (click)="add()">
+        <div *ngIf="!hasAttributes()">No Attributes have been configured yet.</div>
+        <button mat-mini-fab style="align-self: flex-end" [disabled]="!isAttributesEditable()" (click)="add()">
           <mat-icon>add</mat-icon>
         </button>
       </div>

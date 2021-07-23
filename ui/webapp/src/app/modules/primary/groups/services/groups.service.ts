@@ -112,7 +112,7 @@ export class GroupsService {
         // set the attribute values before the definitions - consumers will react when definitions change and try to extract values from records
         this.attributeValues$.next(result.attributes);
 
-        const attrDefs = this.settings.getSettings().instanceGroup?.attributes;
+        const attrDefs = result.settings.instanceGroup?.attributes;
         this.attributeDefinitions$.next(!!attrDefs ? attrDefs : []);
 
         // last update the current$ subject to inform about changes
