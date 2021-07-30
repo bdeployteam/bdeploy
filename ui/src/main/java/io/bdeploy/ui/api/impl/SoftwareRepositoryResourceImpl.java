@@ -61,7 +61,7 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Override
     public SoftwareResource getSoftwareResource(String softwareRepository) {
-        return rc.initResource(new SoftwareResourceImpl(getSoftwareRepositoryHive(softwareRepository)));
+        return rc.initResource(new SoftwareResourceImpl(getSoftwareRepositoryHive(softwareRepository), softwareRepository));
     }
 
     @Override

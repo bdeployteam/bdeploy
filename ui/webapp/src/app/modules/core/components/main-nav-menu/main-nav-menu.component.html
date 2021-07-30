@@ -26,10 +26,20 @@
     *ngIf="!authService.isGlobalExclusiveReadClient()"
     text="Software Repositories"
     [collapsed]="!expanded"
-    [route]="['/l/softwarerepo/browser']"
+    [route]="['/repositories/browser']"
   ></app-main-nav-button>
 
   <mat-divider [style.position]="'relative'"></mat-divider>
+
+  <app-main-nav-button
+    *ngIf="authService.isGlobalAdmin()"
+    [visible]="!!(areas.repositoryContext$ | async)"
+    svgIcon="repository-settings"
+    text="Repository Settings"
+    [collapsed]="!expanded"
+    [panel]="true"
+    [route]="['panels', 'repositories', 'settings']"
+  ></app-main-nav-button>
 
   <app-main-nav-button
     *ngIf="!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"

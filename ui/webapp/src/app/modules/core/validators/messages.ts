@@ -14,8 +14,6 @@ export function bdValidationRegisterMessageExtractor(extractor: BdValidationMess
     return;
   }
 
-  console.log(`Register message extractor: ${extractor.id}`);
-
   msgExtractors.push(extractor);
 }
 

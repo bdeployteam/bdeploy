@@ -1,0 +1,51 @@
+<app-bd-dialog [loadingWhen$]="repository.loading$">
+  <app-bd-dialog-toolbar header="Software Packages of {{ (repositories.current$ | async)?.name }}">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-data-grouping
+      [multiple]="!dataTable.grid"
+      (groupingChange)="dataTable.grouping = $event"
+      [definitions]="grouping"
+      [defaultGrouping]="defaultGrouping"
+      [records]="repository.data$ | async"
+      presetKey="software-repository"
+    ></app-bd-data-grouping>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button
+      icon="cloud_upload"
+      text="Upload Product"
+      [route]="['panels', 'repositories', 'upload']"
+      [disabled]="!auth.isGlobalAdmin()"
+      tooltip="below"
+    ></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-display
+      #dataTable
+      [columns]="repositoryColumns.defaultRepositoryColumns"
+      [records]="repository.data$ | async"
+      [recordRoute]="getRecordRoute"
+      [searchable]="true"
+    >
+      <app-bd-no-data>
+        <p>No products or external software packages have been uploaded yet.</p>
+        <!--
+        <ng-container *ngIf="isAddAllowed() && (hasProducts$ | async)">
+          <p>Start by creating a new one.</p>
+          <app-bd-panel-button icon="add" text="Add Instance" [collapsed]="false" [route]="['panels', 'instances', 'add']"></app-bd-panel-button>
+        </ng-container>
+        <ng-container *ngIf="!(hasProducts$ | async)">
+          <p>No product is available yet to create one.</p>
+          <app-bd-button
+            icon="apps"
+            text="Manage Products"
+            [collapsed]="false"
+            [routerLink]="['/products', 'browser', areas.groupContext$.value]"
+          ></app-bd-button>
+        </ng-container>
+        -->
+      </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

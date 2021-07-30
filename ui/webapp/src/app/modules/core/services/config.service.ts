@@ -48,6 +48,7 @@ export class ConfigService {
     iconRegistry.addSvgIcon('star', sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg'));
     iconRegistry.addSvgIcon('group-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/group-settings.svg'));
     iconRegistry.addSvgIcon('instance-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg'));
+    iconRegistry.addSvgIcon('repository-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/repository-settings.svg'));
 
     iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
     iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));

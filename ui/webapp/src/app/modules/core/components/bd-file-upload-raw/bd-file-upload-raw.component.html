@@ -1,0 +1,39 @@
+<app-bd-notification-card
+  [header]="getHeader()"
+  [icon]="getIcon()"
+  [disabled]="isUploadProcessing() || isImporting()"
+  [warning]="isUploadFailed() || isImportFailed()"
+  (dismiss)="onDismiss()"
+>
+  <mat-progress-bar
+    *ngIf="isUploadProcessing() || isUploading() || isImporting()"
+    [mode]="isUploading() ? 'determinate' : 'indeterminate'"
+    [value]="uploadStatus.progressObservable | async"
+  ></mat-progress-bar>
+  <div *ngIf="isUploading() || isUploadProcessing() || isImporting()" class="local-hint-text bd-description-text">
+    {{ processingHint$ | async }}
+  </div>
+  <div *ngIf="isUploadFailed()" class="local-hint-text bd-description-text">
+    {{ uploadStatus.detail }}
+  </div>
+  <div *ngIf="isUploadFinished()" class="local-hint-text bd-description-text">
+    {{ this.uploadStatus?.detail?.details }}
+  </div>
+  <div *ngIf="isImportFailed()" class="local-hint-text bd-description-text">
+    {{ importStatus?.detail }}
+  </div>
+  <div *ngIf="isImportFinished()" class="local-hint-text bd-description-text">
+    {{ importStatus?.detail }}
+  </div>
+  <div *ngIf="isUserInputRequired()">
+    <app-bd-form-input label="Name" name="name" [(ngModel)]="uploadStatus.detail.name" required></app-bd-form-input>
+    <app-bd-form-input label="Version" name="tag" [(ngModel)]="uploadStatus.detail.tag" required></app-bd-form-input>
+    <div class="package-os-buttons">
+      <app-bd-form-toggle label="Operating System Independent" name="allOs" [(ngModel)]="supportAllOs"></app-bd-form-toggle>
+      <app-bd-form-toggle label="Windows" name="windows" [(ngModel)]="supportWindows"></app-bd-form-toggle>
+      <app-bd-form-toggle label="Linux" name="linux" [(ngModel)]="supportLinux"></app-bd-form-toggle>
+    </div>
+
+    <app-bd-button color="primary" [collapsed]="false" text="Import" [disabled]="!isUserInputValid()" (click)="import()"></app-bd-button>
+  </div>
+</app-bd-notification-card>

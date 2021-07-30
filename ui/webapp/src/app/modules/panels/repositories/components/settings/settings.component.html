@@ -1,0 +1,27 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Software Repository Settings" [panel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-panel-button
+        text="Edit Software Repository"
+        icon="edit"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['edit']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-panel-button>
+
+      <app-bd-panel-button
+        text="Maintenance"
+        icon="build"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['maintenance']"
+        [relative]="true"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-panel-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

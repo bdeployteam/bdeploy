@@ -1,0 +1,55 @@
+<app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="detailsService.softwarePackage$">
+  <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="detailsService.softwarePackage$ | async as software">
+      <ng-container *ngIf="software?.type === 'Product'">
+        <div><strong>ID:</strong>&nbsp;{{ software.product }}</div>
+        <div><strong>Name:</strong>&nbsp;{{ software.name }}</div>
+        <div><strong>Version:</strong>&nbsp;{{ software.key.tag }}</div>
+        <div><strong>Vendor:</strong>&nbsp;{{ software.vendor }}</div>
+
+        <app-bd-panel-button [collapsed]="false" text="Labels" icon="label" [toggle]="false" [route]="['labels']" [relative]="true"></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Application Templates"
+          icon="bookmark"
+          [toggle]="false"
+          [route]="['templates', 'application']"
+          [relative]="true"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
+          [collapsed]="false"
+          text="Instance Templates"
+          icon="bookmarks"
+          [toggle]="false"
+          [route]="['templates', 'instance']"
+          [relative]="true"
+        ></app-bd-panel-button>
+        <app-bd-panel-button [collapsed]="false" text="Plugins" icon="extension" [toggle]="false" [route]="['plugins']" [relative]="true"></app-bd-panel-button>
+      </ng-container>
+
+      <ng-container *ngIf="software?.type === 'External Software'">
+        <div><strong>ID:</strong>&nbsp;{{ software.key.name }}</div>
+        <div><strong>Version:</strong>&nbsp;{{ software.key.tag }}</div>
+      </ng-container>
+
+      <app-bd-button
+        [collapsed]="false"
+        text="Download"
+        icon="cloud_download"
+        (click)="doDownload()"
+        [loadingWhen$]="preparing$"
+        [disabled]="preparing$ | async"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        text="Delete"
+        icon="delete"
+        color="toolbar"
+        (click)="doDelete(software)"
+        [disabled]="!auth.isCurrentScopeAdmin()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

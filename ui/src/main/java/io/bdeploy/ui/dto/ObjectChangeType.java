@@ -10,6 +10,7 @@ public enum ObjectChangeType {
     INSTANCE_GROUP,
     PRODUCT,
     SOFTWARE_REPO,
+    SOFTWARE_PACKAGE,
     INSTANCE,
     MANAGED_MASTER_ATTACH,
     USER

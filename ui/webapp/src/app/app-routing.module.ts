@@ -37,6 +37,17 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'repositories',
+    loadChildren: () => import('./modules/primary/repositories/repositories.module').then((x) => x.RepositoriesModule),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'panels/repositories',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/repositories/repositories.module').then((x) => x.RepositoriesModule),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'instances',
     loadChildren: () => import('./modules/primary/instances/instances.module').then((x) => x.InstancesModule),
     canActivate: [AuthGuard, ScopedReadGuard],

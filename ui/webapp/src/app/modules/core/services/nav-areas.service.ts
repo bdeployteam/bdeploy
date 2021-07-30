@@ -23,6 +23,8 @@ export class NavAreasService {
   /** should ONLY be used by InstancesService. Subscribe to InstancesService.current$ instead */
   instanceContext$ = new BehaviorSubject<string>(null);
 
+  repositoryContext$ = new BehaviorSubject<string>(null);
+
   /** should ONLY be used by DirtyDialogGuard. */
   forcePanelClose$ = new BehaviorSubject<boolean>(false);
 
@@ -91,12 +93,19 @@ export class NavAreasService {
         // with special names.
         const group = primarySnapshot.paramMap.get('group');
         if (this.groupContext$.value !== group) {
+          this.repositoryContext$.next(null);
           this.groupContext$.next(group);
           this.instanceContext$.next(null);
         }
         const instance = primarySnapshot.paramMap.get('instance');
         if (this.instanceContext$.value !== instance) {
           this.instanceContext$.next(instance);
+        }
+        const repository = primarySnapshot.paramMap.get('repository');
+        if (this.repositoryContext$.value !== repository) {
+          this.repositoryContext$.next(repository);
+          this.groupContext$.next(null);
+          this.instanceContext$.next(null);
         }
 
         // collapse the menu whenever something changed.

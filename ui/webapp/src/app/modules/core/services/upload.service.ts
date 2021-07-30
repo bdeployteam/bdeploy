@@ -1,6 +1,7 @@
 import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import { UploadInfoDto } from 'src/app/models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { Logger, LoggingService } from './logging.service';
 
@@ -53,6 +54,30 @@ export interface UrlParameter {
   name: string;
   type: string;
   value: any;
+}
+
+export enum ImportState {
+  /** Import in progress */
+  IMPORTING,
+
+  /** Import finished. No errors reported  */
+  FINISHED,
+
+  /** Import failed. */
+  FAILED,
+}
+
+export class ImportStatus {
+  filename: string;
+
+  /** Current state */
+  state: ImportState;
+
+  /** Notification when the state changes */
+  stateObservable: Observable<ImportState>;
+
+  /** The error message if failed */
+  detail: any;
 }
 
 @Injectable({
@@ -159,6 +184,33 @@ export class UploadService {
     );
     uploadStatus.cancel = () => sub.unsubscribe();
     return uploadStatus;
+  }
+
+  public importFile(url: string, dto: UploadInfoDto): ImportStatus {
+    const importStatus = new ImportStatus();
+    const stateSubject = new Subject<ImportState>();
+    importStatus.filename = dto.filename;
+    importStatus.stateObservable = stateSubject.asObservable();
+    importStatus.stateObservable.subscribe((state) => {
+      importStatus.state = state;
+    });
+    stateSubject.next(ImportState.IMPORTING);
+
+    this.http
+      .post<UploadInfoDto>(url, dto, { headers: suppressGlobalErrorHandling(new HttpHeaders()) })
+      .subscribe(
+        (d) => {
+          importStatus.detail = d.details;
+          stateSubject.next(ImportState.FINISHED);
+          stateSubject.complete();
+        },
+        (error) => {
+          importStatus.detail = error.statusText + ' (Status ' + error.status + ')';
+          stateSubject.next(ImportState.FAILED);
+          stateSubject.complete();
+        }
+      );
+    return importStatus;
   }
 
   uuidv4() {

@@ -58,6 +58,7 @@ import { BdDynamicComponent, DYNAMIC_BASE_MODULES as DYNAMIC_BASE_MODULES } from
 import { BdEditorDiffComponent } from './components/bd-editor-diff/bd-editor-diff.component';
 import { BdEditorComponent } from './components/bd-editor/bd-editor.component';
 import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.component';
+import { BdFileUploadRawComponent } from './components/bd-file-upload-raw/bd-file-upload-raw.component';
 import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-upload.component';
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
 import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
@@ -139,6 +140,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDynamicComponent,
     BdFileDropComponent,
     BdFileUploadComponent,
+    BdFileUploadRawComponent,
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
     BdDialogMessageComponent,
@@ -249,6 +251,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFormSelectComponent,
     BdFileDropComponent,
     BdFileUploadComponent,
+    BdFileUploadRawComponent,
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
     BdDataBooleanCellComponent,

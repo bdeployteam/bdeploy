@@ -1,0 +1,16 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Upload Software" [panel]="true"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-file-drop (fileAdded)="fileAdded($event)" [types]="['.zip', '.jar']"></app-bd-file-drop>
+      <app-bd-file-upload-raw
+        *ngFor="let file of files; let i = index"
+        [file]="file"
+        [uploadUrl]="repositoryService.getUploadURL()"
+        [importUrl]="repositoryService.getImportURL()"
+        (dismiss)="onDismiss(i)"
+      ></app-bd-file-upload-raw>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

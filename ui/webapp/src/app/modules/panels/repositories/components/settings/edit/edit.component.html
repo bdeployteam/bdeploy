@@ -1,0 +1,15 @@
+<app-bd-dialog [loadingWhen$]="saving$">
+  <app-bd-dialog-toolbar header="Edit Software Repository" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <form #repositoryForm="ngForm" (ngSubmit)="onSave()" *ngIf="repository">
+        <div fxLayout="column" fxLayoutGap="10px">
+          <app-bd-form-input label="Description" name="description" [(ngModel)]="repository.description"></app-bd-form-input>
+
+          <app-bd-button color="toolbar" [collapsed]="false" text="SAVE" [disabled]="repositoryForm.invalid || !isDirty()"></app-bd-button>
+        </div>
+      </form>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

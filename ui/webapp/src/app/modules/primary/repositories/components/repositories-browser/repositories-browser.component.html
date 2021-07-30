@@ -1,0 +1,20 @@
+<app-bd-dialog [loadingWhen$]="repositories.loading$">
+  <app-bd-dialog-toolbar header="Software Repositories">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button icon="add" text="Add Software Repository" [route]="['panels', 'repositories', 'add']" tooltip="below"></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <app-bd-data-display
+      #dataTable
+      [columns]="repositoriesColumns.defaultRepositoryColumns"
+      [records]="repositories.repositories$ | async"
+      [recordRoute]="getRecordRoute"
+      [searchable]="true"
+    >
+      <app-bd-no-data header="No Repositories have been created yet"> </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>

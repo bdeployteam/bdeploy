@@ -134,24 +134,27 @@ export class AuthenticationService {
   }
 
   isCurrentScopeAdmin(): boolean {
-    if (!this.areas.groupContext$.value) {
+    const scope = !!this.areas.groupContext$.value ? this.areas.groupContext$.value : this.areas.repositoryContext$.value;
+    if (!scope) {
       throw new Error('No scope currently active');
     }
-    return this.isScopedAdmin(this.areas.groupContext$.value);
+    return this.isScopedAdmin(scope);
   }
 
   isCurrentScopeWrite(): boolean {
-    if (!this.areas.groupContext$.value) {
+    const scope = !!this.areas.groupContext$.value ? this.areas.groupContext$.value : this.areas.repositoryContext$.value;
+    if (!scope) {
       throw new Error('No scope currently active');
     }
-    return this.isScopedWrite(this.areas.groupContext$.value);
+    return this.isScopedWrite(scope);
   }
 
   isCurrentScopeRead(): boolean {
-    if (!this.areas.groupContext$.value) {
+    const scope = !!this.areas.groupContext$.value ? this.areas.groupContext$.value : this.areas.repositoryContext$.value;
+    if (!scope) {
       throw new Error('No scope currently active');
     }
-    return this.isScopedRead(this.areas.groupContext$.value);
+    return this.isScopedRead(scope);
   }
 
   isCurrentScopeExclusiveReadClient(): boolean {

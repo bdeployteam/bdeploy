@@ -49,6 +49,8 @@ import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareResource;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.UploadInfoDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -71,10 +73,16 @@ public class SoftwareResourceImpl implements SoftwareResource {
     @Inject
     private VersionSorterService vss;
 
+    @Inject
+    private ChangeEventManager changes;
+
     private final BHive hive;
 
-    public SoftwareResourceImpl(BHive hive) {
+    private final String repository;
+
+    public SoftwareResourceImpl(BHive hive, String repository) {
         this.hive = hive;
+        this.repository = repository;
     }
 
     @Override
@@ -118,6 +126,8 @@ public class SoftwareResourceImpl implements SoftwareResource {
         }
 
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
+
+        changes.change(ObjectChangeType.SOFTWARE_PACKAGE, key);
     }
 
     @Override
@@ -244,6 +254,9 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 doImport(dto, targetFile);
             }
             PathHelper.deleteRecursive(targetFile);
+
+            changes.create(ObjectChangeType.SOFTWARE_PACKAGE, Map.of(ObjectChangeDetails.CHANGE_HINT, this.repository));
+
             return dto;
         } catch (IOException e) {
             throw new WebApplicationException("Failed to import file: " + e.getMessage(), Status.BAD_REQUEST);
