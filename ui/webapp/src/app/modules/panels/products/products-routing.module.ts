@@ -3,6 +3,7 @@ import { Route, RouterModule } from '@angular/router';
 import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { ServerCentralGuard } from '../../core/guards/server-central.guard';
+import { ProductBulkComponent } from './components/product-bulk/product-bulk.component';
 import { LabelsComponent } from './components/product-details/labels/labels.component';
 import { PluginsComponent } from './components/product-details/plugins/plugins.component';
 import { ProductDetailsComponent } from './components/product-details/product-details.component';
@@ -23,6 +24,7 @@ const PPRODUCTS_ROUTES: Route[] = [
   { path: 'sync', component: ProductSyncComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
   { path: 'sync/:target/select', component: SelectManagedServerComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
   { path: 'sync/:target/:server', component: ManagedTransferComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
+  { path: 'bulk-manip', component: ProductBulkComponent, canActivate: [ScopedWriteGuard] },
 ];
 
 @NgModule({

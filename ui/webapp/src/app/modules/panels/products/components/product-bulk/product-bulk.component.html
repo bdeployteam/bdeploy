@@ -1,0 +1,20 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Bulk Manipulate Products" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="bulk.selection$ | async as selected">
+      <div>
+        <strong>{{ selected.length }}</strong> products selected.
+      </div>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selected.length || (deleting$ | async)"
+        [loadingWhen$]="deleting$"
+        text="Delete Selected Product Versions"
+        icon="delete"
+        color="primary"
+        (click)="onDelete()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

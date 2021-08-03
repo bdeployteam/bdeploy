@@ -11,6 +11,7 @@ import { ProductSyncComponent } from './components/product-sync/product-sync.com
 import { SelectManagedServerComponent } from './components/product-sync/select-managed-server/select-managed-server.component';
 import { ProductUploadComponent } from './components/product-upload/product-upload.component';
 import { ProductsRoutingModule } from './products-routing.module';
+import { ProductBulkComponent } from './components/product-bulk/product-bulk.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { ProductsRoutingModule } from './products-routing.module';
     ProductSyncComponent,
     SelectManagedServerComponent,
     ManagedTransferComponent,
+    ProductBulkComponent,
   ],
   imports: [CommonModule, CoreModule, ProductsRoutingModule],
 })

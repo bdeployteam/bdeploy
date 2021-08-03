@@ -9,7 +9,22 @@
       [defaultGrouping]="defaultGrouping"
       presetKey="products"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="dataTable.grid"
+      tooltip="below"
+      [disabled]="bulkMode.isActive()"
+    ></app-bd-button>
+    <app-bd-panel-button
+      #bulkMode
+      icon="dynamic_feed"
+      text="Bulk Manipulation"
+      [route]="['panels', 'products', 'bulk-manip']"
+      tooltip="below"
+      [disabled]="!auth.isCurrentScopeWrite() || dataTable.grid"
+    ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       *ngIf="cfg.isCentral()"
@@ -35,6 +50,9 @@
       [records]="products.products$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
+      [checkMode]="bulkMode.isActive()"
+      [checked]="bulk.selection$ | async"
+      (checkedChange)="bulk.selection$.next($event)"
     >
       <app-bd-no-data>
         <p>No products have been uploaded yet.</p>
