@@ -30,21 +30,6 @@
     >
       <app-bd-no-data>
         <p>No products or external software packages have been uploaded yet.</p>
-        <!--
-        <ng-container *ngIf="isAddAllowed() && (hasProducts$ | async)">
-          <p>Start by creating a new one.</p>
-          <app-bd-panel-button icon="add" text="Add Instance" [collapsed]="false" [route]="['panels', 'instances', 'add']"></app-bd-panel-button>
-        </ng-container>
-        <ng-container *ngIf="!(hasProducts$ | async)">
-          <p>No product is available yet to create one.</p>
-          <app-bd-button
-            icon="apps"
-            text="Manage Products"
-            [collapsed]="false"
-            [routerLink]="['/products', 'browser', areas.groupContext$.value]"
-          ></app-bd-button>
-        </ng-container>
-        -->
       </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>
