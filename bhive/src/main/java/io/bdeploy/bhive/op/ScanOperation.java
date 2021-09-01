@@ -12,7 +12,6 @@ import io.bdeploy.bhive.model.Tree.EntryType;
 import io.bdeploy.bhive.objects.view.DamagedObjectView;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.objects.view.TreeView;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -28,30 +27,27 @@ public class ScanOperation extends BHive.Operation<TreeView> {
 
     @Override
     public TreeView call() throws Exception {
-        try (Activity activity = getActivityReporter().start("Scanning", -1)) {
-            if (manifest != null) {
-                Manifest mf = execute(new ManifestLoadOperation().setManifest(manifest));
-                RuntimeAssert.assertNotNull(mf, "Given manifest not found");
-                treeId = mf.getRoot();
-            }
-
-            RuntimeAssert.assertNotNull(treeId, "No tree to scan");
-
-            TreeView result = getObjectManager().scan(treeId, maxDepth, followReferences);
-            if (result.getChildren().size() == 1) {
-                Entry<String, ElementView> entry = result.getChildren().entrySet().iterator().next();
-
-                if (manifest != null && entry.getValue() instanceof DamagedObjectView
-                        && entry.getValue().getElementId().equals(treeId)) {
-                    // the root tree is damaged, this is... bad. for better visibility put the manifest ID in there.
-                    result = new TreeView(result.getElementId(), result.getPath());
-                    result.addChild(
-                            new DamagedObjectView(treeId, EntryType.MANIFEST, Collections.singleton(manifest.toString())));
-                }
-            }
-
-            return result;
+        if (manifest != null) {
+            Manifest mf = execute(new ManifestLoadOperation().setManifest(manifest));
+            RuntimeAssert.assertNotNull(mf, "Given manifest not found");
+            treeId = mf.getRoot();
         }
+
+        RuntimeAssert.assertNotNull(treeId, "No tree to scan");
+
+        TreeView result = getObjectManager().scan(treeId, maxDepth, followReferences);
+        if (result.getChildren().size() == 1) {
+            Entry<String, ElementView> entry = result.getChildren().entrySet().iterator().next();
+
+            if (manifest != null && entry.getValue() instanceof DamagedObjectView
+                    && entry.getValue().getElementId().equals(treeId)) {
+                // the root tree is damaged, this is... bad. for better visibility put the manifest ID in there.
+                result = new TreeView(result.getElementId(), result.getPath());
+                result.addChild(new DamagedObjectView(treeId, EntryType.MANIFEST, Collections.singleton(manifest.toString())));
+            }
+        }
+
+        return result;
     }
 
     /**
