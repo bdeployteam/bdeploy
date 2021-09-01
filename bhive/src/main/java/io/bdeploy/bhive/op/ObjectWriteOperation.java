@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -45,9 +45,10 @@ public class ObjectWriteOperation extends BHive.Operation<Long> {
             manifests.addAll(refs);
         }
 
-        // Collect the entire size that we are going to transfer
+        // Collect the entire size that we are going to transfer.
+        // ATTENTION: insertion order is important.
         long totalSize = 0;
-        Map<ObjectId, Long> object2FileSize = new HashMap<>();
+        Map<ObjectId, Long> object2FileSize = new LinkedHashMap<>();
         for (ObjectId object : objects) {
             long size = getObjectManager().db(db -> db.getObjectSize(object));
             object2FileSize.put(object, size);
