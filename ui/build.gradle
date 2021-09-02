@@ -23,7 +23,7 @@ dependencies {
         project(":jersey"),
         project(":bhive"),
         project(":interfaces"),
-        'net.jsign:jsign-core:3.1'
+        'net.jsign:jsign-core:4.0'
     )
     commonTestDeps(testFixtures(project(":jersey")))
 }

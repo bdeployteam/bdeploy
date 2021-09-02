@@ -40,10 +40,10 @@ dependencies {
     implementation 'com.google.guava:guava:30.1.1-jre'
 
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.0-RC1'
 
     // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.0-RC1'
 }
 
 application {
