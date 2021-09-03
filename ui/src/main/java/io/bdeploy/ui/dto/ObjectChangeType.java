@@ -13,5 +13,6 @@ public enum ObjectChangeType {
     SOFTWARE_PACKAGE,
     INSTANCE,
     MANAGED_MASTER_ATTACH,
-    USER
+    USER,
+    PLUGIN
 }

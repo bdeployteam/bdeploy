@@ -26,6 +26,12 @@ const routes: Routes = [
     canActivate: [AdminGuard],
   },
   {
+    path: 'panels/admin',
+    outlet: 'panel',
+    loadChildren: () => import('./modules/panels/admin/admin.module').then((m) => m.AdminModule),
+    canActivate: [AdminGuard],
+  },
+  {
     path: 'groups',
     loadChildren: () => import('./modules/primary/groups/groups.module').then((x) => x.GroupsModule),
     canActivate: [AuthGuard], // Permission is granted to all users to view the things in here.

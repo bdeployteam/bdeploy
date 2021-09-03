@@ -1,50 +1,53 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
+import { BehaviorSubject } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { ObjectChangeType, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../core/services/config.service';
-import { Logger, LoggingService } from '../../core/services/logging.service';
+import { ObjectChangesService } from '../../core/services/object-changes.service';
+import { measure } from '../../core/utils/performance.utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PluginAdminService {
-  private static BASEPATH = '/plugin-admin';
-  private log: Logger = this.loggingService.getLogger('PluginService');
+  public loading$ = new BehaviorSubject<boolean>(true);
+  public plugins$ = new BehaviorSubject<PluginInfoDto[]>([]);
 
-  constructor(private http: HttpClient, private cfg: ConfigService, private loggingService: LoggingService) {}
+  private apiPath = () => `${this.cfg.config.api}/plugin-admin`;
 
-  public getAll(): Observable<PluginInfoDto[]> {
-    const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/list';
-    this.log.debug('getAll: ' + url);
-    return this.http.get<PluginInfoDto[]>(url);
+  constructor(private http: HttpClient, private cfg: ConfigService, changes: ObjectChangesService) {
+    changes.subscribe(ObjectChangeType.PLUGIN, { scope: [] }, (change) => {
+      this.reload();
+    });
+
+    this.reload();
   }
 
-  public getProductPlugins(group: string, product: ManifestKey): Observable<PluginInfoDto[]> {
-    const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/list-product-plugins/' + group;
-    this.log.debug('getProductPlugins: ' + url);
-    return this.http.post<PluginInfoDto[]>(url, product);
+  private reload() {
+    this.loading$.next(true);
+    this.http
+      .get<PluginInfoDto[]>(`${this.apiPath()}/list`)
+      .pipe(
+        measure('Load Plugins'),
+        finalize(() => this.loading$.next(false))
+      )
+      .subscribe((p) => this.plugins$.next(p));
   }
 
   public loadGlobalPlugin(dto: PluginInfoDto) {
-    const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/load-global';
-    this.log.debug('loadGlobalPlugin: ' + url);
-    return this.http.post(url, dto.id);
+    this.http.post(`${this.apiPath()}/load-global`, dto.id).subscribe();
   }
 
   public unloadPlugin(dto: PluginInfoDto) {
-    const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/unload';
-    this.log.debug('unloadPlugin: ' + url);
-    return this.http.post(url, dto.id);
+    this.http.post(`${this.apiPath()}/unload`, dto.id).subscribe();
   }
 
   public getGlobalUploadUrl(): string {
-    return this.cfg.config.api + PluginAdminService.BASEPATH + '/upload-global';
+    return `${this.apiPath()}/upload-global`;
   }
 
   public deleteGlobalPlugin(dto: PluginInfoDto) {
-    const url: string = this.cfg.config.api + PluginAdminService.BASEPATH + '/delete-global';
-    this.log.debug('deleteGlobalPlugin: ' + url);
-    return this.http.post(url, dto.id);
+    this.http.post(`${this.apiPath()}/delete-global`, dto.id).subscribe();
   }
 }

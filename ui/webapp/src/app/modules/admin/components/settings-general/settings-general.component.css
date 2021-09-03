@@ -1,5 +1,10 @@
 .tab-container {
-  width: 80%;
+  width: 90%;
   max-width: 800px;
   margin-top: 20px;
+}
+
+.mat-tab-label {
+  padding: 0 14px !important;
+  min-width: 100px !important;
 }

@@ -1,0 +1,3 @@
+<app-bd-loading-overlay [show]="plugins.loading$ | async">
+  <app-bd-data-table [records]="plugins$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
+</app-bd-loading-overlay>

@@ -26,6 +26,8 @@ import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.PluginManifest;
 import io.bdeploy.ui.api.PluginResource;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
@@ -39,6 +41,9 @@ public class PluginResourceImpl implements PluginResource {
 
     @Inject
     private BHiveRegistry reg;
+
+    @Inject
+    private ChangeEventManager changes;
 
     @Override
     public List<PluginInfoDto> getPlugins() {
@@ -101,6 +106,7 @@ public class PluginResourceImpl implements PluginResource {
         for (ObjectId plugin : pm.getPlugins()) {
             try {
                 PluginInfoDto info = manager.load(hive, plugin, product);
+                changes.change(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, plugin.toString()));
                 if (info.editors.stream().anyMatch(e -> e.getTypeName().equals(type))) {
                     return info;
                 }
@@ -159,11 +165,13 @@ public class PluginResourceImpl implements PluginResource {
     @Override
     public void unloadPlugin(ObjectId id) {
         manager.unload(id);
+        changes.change(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, id.toString()));
     }
 
     @Override
     public void loadGlobalPlugin(ObjectId id) {
         manager.loadGlobalPlugin(id);
+        changes.change(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, id.toString()));
     }
 
     private BHive getDefaultHive() {
@@ -201,7 +209,9 @@ public class PluginResourceImpl implements PluginResource {
             builder.setData(bytes);
             Manifest.Key key = builder.insert(hive);
 
-            return manager.loadGlobalPlugin(PluginManifest.of(hive, key).getPlugin());
+            PluginInfoDto result = manager.loadGlobalPlugin(PluginManifest.of(hive, key).getPlugin());
+            changes.create(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, result.id.toString()));
+            return result;
         } catch (IOException e) {
             throw new WebApplicationException("Cannot load plugin", e, Status.BAD_REQUEST);
         }
@@ -219,6 +229,8 @@ public class PluginResourceImpl implements PluginResource {
                 hive.execute(new ManifestDeleteOperation().setToDelete(key));
             }
         }
+
+        changes.remove(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, id.toString()));
     }
 
 }

@@ -1,17 +1,39 @@
 <app-bd-dialog [loadingWhen$]="settings.loading$">
   <app-bd-dialog-toolbar>
     <div fxFlex="1 0 auto"></div>
+    <ng-container *ngIf="attributeTab.isActive">
+      <app-bd-button icon="add" text="New Attribute" color="primary" [collapsed]="false" (click)="attributes.addAttribute()"></app-bd-button>
+      <mat-divider [vertical]="true"></mat-divider>
+    </ng-container>
+    <ng-container *ngIf="pluginTab.isActive">
+      <app-bd-panel-button
+        [collapsed]="false"
+        color="primary"
+        text="Upload Plugin"
+        icon="cloud_upload"
+        [route]="['panels', 'admin', 'add-plugin']"
+      ></app-bd-panel-button>
+      <mat-divider [vertical]="true"></mat-divider>
+    </ng-container>
     <app-bd-button text="DISCARD" [collapsed]="false" [disabled]="!settings.isDirty()" (click)="settings.discard()"></app-bd-button>
     <app-bd-button text="SAVE" [collapsed]="false" color="primary" [disabled]="!settings.isDirty()" (click)="doSave().subscribe()"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutAlign="start center">
-      <mat-tab-group class="tab-container" dynamicHeight="true">
-        <mat-tab label="Look & Feel" fxLayout="column">
-          <div class="bd-default-padding">
-            <p>Control the appearence of the Web Application with the following settings.</p>
-            <app-bd-form-toggle [(ngModel)]="settings.settings$.value.general.enableGravatar" label="Enable Gravatar User Avatars"></app-bd-form-toggle>
-          </div>
+      <mat-tab-group class="tab-container" mat-align-tabs="start" dynamicHeight>
+        <mat-tab fxLayout="column">
+          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">palette</mat-icon>Look & Feel</ng-template>
+          <app-look-feel-tab></app-look-feel-tab>
+        </mat-tab>
+        <mat-tab #attributeTab fxLayout="column">
+          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">more</mat-icon>Global Attributes</ng-template>
+          <app-attributes-tab #attributes [dialog]="dialog"></app-attributes-tab>
+        </mat-tab>
+        <mat-tab #pluginTab fxLayout="column">
+          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">extension</mat-icon>Plugins</ng-template>
+          <ng-template matTabContent>
+            <app-plugins-tab [dialog]="dialog"></app-plugins-tab>
+          </ng-template>
         </mat-tab>
       </mat-tab-group>
     </div>
