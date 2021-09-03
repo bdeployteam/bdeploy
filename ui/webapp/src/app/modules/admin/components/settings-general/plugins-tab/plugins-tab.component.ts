@@ -1,9 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
-import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { PluginAdminService } from '../../../services/plugin-admin.service';
 import { PluginDeleteActionComponent } from './plugin-delete-action/plugin-delete-action.component';
 import { PluginLoadActionComponent } from './plugin-load-action/plugin-load-action.component';
@@ -78,8 +77,6 @@ export class PluginsTabComponent implements OnInit {
   ];
 
   /* template */ plugins$ = this.plugins.plugins$.pipe(map((data) => this.sortPlugins(data)));
-
-  @Input() dialog: BdDialogComponent;
 
   constructor(public plugins: PluginAdminService) {}
 

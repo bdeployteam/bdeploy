@@ -185,4 +185,9 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
   private getInputLineCount() {
     return this.stdinBuffer ? Math.ceil((this.stdinStartX + this.stdinBuffer.length) / this.getTermCols()) : 1;
   }
+
+  /** Clears all existing content in the terminal */
+  public clear() {
+    this.term.underlying.clear();
+  }
 }

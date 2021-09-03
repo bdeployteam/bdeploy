@@ -9,7 +9,6 @@ import { HiveBrowserComponent } from './components/hive-browser/hive-browser.com
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
-import { SettingsAuthComponent } from './components/settings-auth/settings-auth.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
@@ -26,12 +25,6 @@ const ADMIN_ROUTES: Route[] = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'admin' },
       { path: 'general', component: SettingsGeneralComponent, canDeactivate: [DirtyDialogGuard], outlet: 'admin' },
-      {
-        path: 'authentication',
-        component: SettingsAuthComponent,
-        canDeactivate: [CanDeactivateGuard],
-        outlet: 'admin',
-      },
       { path: 'users', component: UsersBrowserComponent, canDeactivate: [CanDeactivateGuard], outlet: 'admin' },
       { path: 'hive', component: HiveBrowserComponent, outlet: 'admin' },
       { path: 'hiveauditlogs', component: HiveAuditLogsBrowserComponent, outlet: 'admin' },

@@ -1,0 +1,9 @@
+<div class="bd-default-padding">
+  <p>Enable Gravatar support to display per-user avatars instead of the generic user icon.</p>
+  <app-bd-form-toggle [(ngModel)]="settings.settings$.value.general.enableGravatar" label="Enable Gravatar User Avatars"></app-bd-form-toggle>
+  <p>
+    You may disable local user login. Be aware that logging in will be impossible if no other authentication mechanism (e.g. LDAP) is able to authenticate
+    users.
+  </p>
+  <app-bd-form-toggle [(ngModel)]="settings.settings$.value.auth.disableBasic" label="Disable Local User Login"></app-bd-form-toggle>
+</div>

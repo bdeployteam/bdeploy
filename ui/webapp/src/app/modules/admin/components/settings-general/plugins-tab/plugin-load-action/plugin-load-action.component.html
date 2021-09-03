@@ -1,3 +1,7 @@
 <div fxLayout="row" fxLayoutAlign="start center">
-  <app-bd-button [icon]="record.loaded ? 'pause' : 'play_arrow'" (click)="doLoadUnload()"></app-bd-button>
+  <app-bd-button
+    [icon]="record.loaded ? (record.global ? 'pause' : 'stop') : 'play_arrow'"
+    (click)="doLoadUnload()"
+    [matTooltip]="record.loaded ? 'Unload plugin' : 'Load plugin'"
+  ></app-bd-button>
 </div>

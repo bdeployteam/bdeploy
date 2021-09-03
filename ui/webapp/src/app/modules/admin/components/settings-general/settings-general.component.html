@@ -1,6 +1,17 @@
+<ng-template #testUserAuthTemplate>
+  <app-auth-test></app-auth-test>
+</ng-template>
+
 <app-bd-dialog [loadingWhen$]="settings.loading$">
   <app-bd-dialog-toolbar>
     <div fxFlex="1 0 auto"></div>
+    <ng-container *ngIf="ldapTab.isActive">
+      <app-bd-button icon="add" text="New Server" color="primary" [collapsed]="false" (click)="ldap.addServer()"></app-bd-button>
+    </ng-container>
+    <ng-container *ngIf="generalTab.isActive || ldapTab.isActive">
+      <app-bd-button icon="person" text="Test Auth." [collapsed]="false" (click)="testUserAuth()"></app-bd-button>
+      <mat-divider [vertical]="true"></mat-divider>
+    </ng-container>
     <ng-container *ngIf="attributeTab.isActive">
       <app-bd-button icon="add" text="New Attribute" color="primary" [collapsed]="false" (click)="attributes.addAttribute()"></app-bd-button>
       <mat-divider [vertical]="true"></mat-divider>
@@ -21,18 +32,22 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutAlign="start center">
       <mat-tab-group class="tab-container" mat-align-tabs="start" dynamicHeight>
-        <mat-tab fxLayout="column">
-          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">palette</mat-icon>Look & Feel</ng-template>
-          <app-look-feel-tab></app-look-feel-tab>
+        <mat-tab #generalTab fxLayout="column">
+          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">settings</mat-icon>General</ng-template>
+          <app-general-tab></app-general-tab>
+        </mat-tab>
+        <mat-tab #ldapTab fxLayout="column">
+          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">security</mat-icon>LDAP Auth.</ng-template>
+          <app-ldap-tab #ldap></app-ldap-tab>
         </mat-tab>
         <mat-tab #attributeTab fxLayout="column">
           <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">more</mat-icon>Global Attributes</ng-template>
-          <app-attributes-tab #attributes [dialog]="dialog"></app-attributes-tab>
+          <app-attributes-tab #attributes></app-attributes-tab>
         </mat-tab>
         <mat-tab #pluginTab fxLayout="column">
           <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">extension</mat-icon>Plugins</ng-template>
           <ng-template matTabContent>
-            <app-plugins-tab [dialog]="dialog"></app-plugins-tab>
+            <app-plugins-tab></app-plugins-tab>
           </ng-template>
         </mat-tab>
       </mat-tab-group>

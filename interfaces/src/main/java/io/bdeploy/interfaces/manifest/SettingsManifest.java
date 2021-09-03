@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -23,6 +24,7 @@ import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 
@@ -56,6 +58,15 @@ public class SettingsManifest {
             Long tag = hive.execute(new ManifestMaxIdOperation().setManifestName(SETTINGS_MANIFEST)).orElse(1l);
             Manifest.Builder builder = new Manifest.Builder(new Manifest.Key(SETTINGS_MANIFEST, Long.toString(tag + 1)));
             Tree.Builder tree = new Tree.Builder();
+
+            // apply IDs where required. this removes the requirement for the webapp to generate IDs on the server.
+            if (config.auth != null && config.auth.ldapSettings != null && !config.auth.ldapSettings.isEmpty()) {
+                for (var cfg : config.auth.ldapSettings) {
+                    if (cfg.id == null) {
+                        cfg.id = UuidHelper.randomId();
+                    }
+                }
+            }
 
             tree.add(new Tree.Key(CONFIG_FILE, EntryType.BLOB), hive
                     .execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(encryptPasswords(hive, config, key)))));
@@ -102,7 +113,8 @@ public class SettingsManifest {
     }
 
     private static void reApplyOldPassword(SecretKeySpec key, SettingsConfiguration oldConfig, LDAPSettingsDto lds) {
-        LDAPSettingsDto oldLds = oldConfig.auth.ldapSettings.stream().filter(l -> l.id.equals(lds.id)).findAny().orElse(null);
+        LDAPSettingsDto oldLds = oldConfig.auth.ldapSettings.stream().filter(l -> Objects.equals(l.id, lds.id)).findAny()
+                .orElse(null);
         if (oldLds != null) {
             try {
                 lds.pass = SecurityHelper.encrypt(oldLds.pass, key);

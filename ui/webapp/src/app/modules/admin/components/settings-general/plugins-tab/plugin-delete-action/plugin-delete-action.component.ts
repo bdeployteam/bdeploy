@@ -1,7 +1,7 @@
 import { Component, forwardRef, Inject, Input, OnInit } from '@angular/core';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
 import { PluginAdminService } from 'src/app/modules/admin/services/plugin-admin.service';
-import { PluginsTabComponent } from '../plugins-tab.component';
+import { SettingsGeneralComponent } from '../../settings-general.component';
 
 @Component({
   selector: 'app-plugin-delete-action',
@@ -11,7 +11,7 @@ import { PluginsTabComponent } from '../plugins-tab.component';
 export class PluginDeleteActionComponent implements OnInit {
   @Input() record: PluginInfoDto;
 
-  constructor(@Inject(forwardRef(() => PluginsTabComponent)) private parent: PluginsTabComponent, private plugins: PluginAdminService) {}
+  constructor(@Inject(forwardRef(() => SettingsGeneralComponent)) private parent: SettingsGeneralComponent, private plugins: PluginAdminService) {}
 
   ngOnInit(): void {}
 

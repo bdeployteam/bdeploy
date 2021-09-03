@@ -1,0 +1,38 @@
+<ng-template #addEditServer>
+  <form #addEditForm="ngForm" fxLayout="column" fxLayoutGap="5px" [style.min-width.px]="300">
+    <app-bd-form-input label="Server URL" name="server" [(ngModel)]="tempServer.server" required></app-bd-form-input>
+    <app-bd-form-input label="Description" name="description" [(ngModel)]="tempServer.description" required></app-bd-form-input>
+    <div fxLayout="row" fxLayoutGap="5px">
+      <app-bd-form-input label="User" name="user" [(ngModel)]="tempServer.user" required></app-bd-form-input>
+      <app-bd-form-input label="Password" name="pass" [(ngModel)]="tempServer.pass" type="password"></app-bd-form-input>
+    </div>
+    <app-bd-form-input label="Account Base" name="base" [(ngModel)]="tempServer.accountBase" required></app-bd-form-input>
+    <app-bd-form-input label="Account Pattern" name="pattern" [(ngModel)]="tempServer.accountPattern" required></app-bd-form-input>
+    <app-bd-form-input label="Account User Field" name="userField" [(ngModel)]="tempServer.accountUserName" required></app-bd-form-input>
+    <div fxLayout="row" fxLayoutGap="5px">
+      <app-bd-form-input label="Account Name Field" name="nameField" [(ngModel)]="tempServer.accountFullName" required></app-bd-form-input>
+      <app-bd-form-input label="Account E-Mail Field" name="mailField" [(ngModel)]="tempServer.accountEmail" required></app-bd-form-input>
+    </div>
+    <app-bd-form-toggle label="Follow Referrals" name="referrals" [(ngModel)]="tempServer.followReferrals"></app-bd-form-toggle>
+  </form>
+</ng-template>
+
+<ng-template #checkServer>
+  <div fxLayout="column" fxLayoutGap="5px" [style.width.px]="700">
+    <app-bd-terminal [content$]="checkResult$"></app-bd-terminal>
+  </div>
+</ng-template>
+
+<div class="bd-default-padding">
+  <p>
+    Configure one or more LDAP servers to enable LDAP authentication. Users will be created on first login. The order of the servers in the configuration
+    determines the order in which they are queried. Once a user is associated with a server, it will always prefer to authenticate against that server.
+  </p>
+  <app-bd-data-table
+    [records]="(settings.settings$ | async).auth.ldapSettings"
+    [columns]="columns"
+    [sortData]="null"
+    [dragReorderMode]="true"
+    (dragReorder)="onReorder($event)"
+  ></app-bd-data-table>
+</div>

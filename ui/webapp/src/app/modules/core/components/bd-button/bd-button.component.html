@@ -10,7 +10,7 @@
   [disabled]="disabled"
   [type]="isSubmit ? 'submit' : 'button'"
 >
-  <div fxLayout="row" fxLayoutGap="5px" [class.local-wrapper-expanded]="!collapsed" [class.local-wrapper-collapsed]="collapsed">
+  <div fxLayout="row" [class.local-wrapper-expanded]="!collapsed" [class.local-wrapper-collapsed]="collapsed">
     <mat-icon
       *ngIf="icon && !svgIcon && !(loadingWhen$ | async)"
       class="local-icon-position"

@@ -29,7 +29,7 @@
 }
 
 .local-label-position {
-  padding-left: 30px;
+  padding-left: 26px;
 }
 
 .local-button-collapsed {
@@ -41,7 +41,7 @@
 
 .local-button-expanded {
   cursor: auto;
-  padding: 0 6px;
+  padding: 0 10px;
 }
 
 .local-wrapper-collapsed {
