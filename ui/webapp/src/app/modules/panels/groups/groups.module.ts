@@ -7,7 +7,6 @@ import { AttributeDefinitionsComponent } from './components/settings/attribute-d
 import { AttributeValuesComponent } from './components/settings/attribute-values/attribute-values.component';
 import { EditComponent } from './components/settings/edit/edit.component';
 import { MaintenanceComponent } from './components/settings/maintenance/maintenance.component';
-import { PermissionLevelComponent } from './components/settings/permissions/permission-level/permission-level.component';
 import { PermissionsComponent } from './components/settings/permissions/permissions.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { GroupsRoutingModule } from './groups-routing.module';
@@ -22,7 +21,6 @@ import { GroupsRoutingModule } from './groups-routing.module';
     MaintenanceComponent,
     ClientDetailComponent,
     PermissionsComponent,
-    PermissionLevelComponent,
   ],
   imports: [CommonModule, CoreModule, GroupsRoutingModule],
 })

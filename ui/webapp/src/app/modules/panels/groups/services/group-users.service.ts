@@ -11,7 +11,7 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 @Injectable({
   providedIn: 'root',
 })
-export class UsersService {
+export class GroupUsersService {
   public loading$ = new BehaviorSubject<boolean>(false);
   public users$ = new BehaviorSubject<UserInfo[]>(null);
 

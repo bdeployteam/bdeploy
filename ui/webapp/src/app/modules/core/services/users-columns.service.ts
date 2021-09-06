@@ -22,13 +22,14 @@ const colFullName: BdDataColumn<UserInfo> = {
   id: 'fullName',
   name: 'Full Name',
   data: (r) => r.fullName,
-  width: '150px',
+  showWhen: '(min-width: 1300px)',
 };
 
 const colEmail: BdDataColumn<UserInfo> = {
   id: 'email',
   name: 'E-Mail',
   data: (r) => r.email,
+  showWhen: '(min-width: 1400px)',
 };
 
 @Injectable({

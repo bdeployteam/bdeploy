@@ -3,10 +3,10 @@ import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK, BdDialogMessageAction } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { GroupUsersService } from 'src/app/modules/panels/groups/services/group-users.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
-import { UsersColumnsService } from '../../../services/users-columns.service';
-import { UsersService } from '../../../services/users.service';
-import { PermissionLevelComponent } from './permission-level/permission-level.component';
+import { BdDataPermissionLevelCellComponent } from '../../../../../core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
+import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
 
 @Component({
   selector: 'app-permissions',
@@ -19,7 +19,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
     name: 'Global Perm.',
     data: (r) => this.getGlobalPermissionLevel(r),
     width: '100px',
-    component: PermissionLevelComponent,
+    component: BdDataPermissionLevelCellComponent,
   };
 
   private readonly colLocalPerm: BdDataColumn<UserInfo> = {
@@ -27,7 +27,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
     name: 'Local Perm.',
     data: (r) => this.getLocalPermissionLevel(r),
     width: '100px',
-    component: PermissionLevelComponent,
+    component: BdDataPermissionLevelCellComponent,
   };
 
   private readonly colModPerm: BdDataColumn<UserInfo> = {
@@ -66,7 +66,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
 
-  constructor(public groups: GroupsService, public users: UsersService, public userCols: UsersColumnsService) {}
+  constructor(public groups: GroupsService, public users: GroupUsersService, public userCols: UsersColumnsService) {}
 
   ngOnInit(): void {}
 

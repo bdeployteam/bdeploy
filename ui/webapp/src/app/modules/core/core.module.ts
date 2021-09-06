@@ -47,9 +47,11 @@ import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.comp
 import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
 import { BdDataGroupingComponent } from './components/bd-data-grouping/bd-data-grouping.component';
 import { BdDataIconCellComponent } from './components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { BdDataPermissionLevelCellComponent } from './components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { BdDataSvgIconCellComponent } from './components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { BdDataSyncCellComponent } from './components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
+import { BdDataUserAvatarCellComponent } from './components/bd-data-user-avatar-cell/bd-data-user-avatar-cell.component';
 import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dialog-content.component';
 import { BdDialogMessageComponent } from './components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -61,6 +63,7 @@ import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.comp
 import { BdFileUploadRawComponent } from './components/bd-file-upload-raw/bd-file-upload-raw.component';
 import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-upload.component';
 import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.component';
+import { BdFormSelectComponentOptionComponent } from './components/bd-form-select-component-option/bd-form-select-component-option.component';
 import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
 import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
 import { BdImageUploadComponent } from './components/bd-image-upload/bd-image-upload.component';
@@ -90,10 +93,9 @@ import { httpInterceptorProviders } from './interceptors';
 import { SafeHtmlPipe } from './pipes/safeHtml.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
+import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { GroupIdValidator } from './validators/group-id';
 import { PasswordVerificationValidator } from './validators/password-verification';
-import { BdDataUserAvatarCellComponent } from './components/bd-data-user-avatar-cell/bd-data-user-avatar-cell.component';
-import { BdFormSelectComponentOptionComponent } from './components/bd-form-select-component-option/bd-form-select-component-option.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -159,6 +161,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdActivitiesComponent,
     BdDataUserAvatarCellComponent,
     BdFormSelectComponentOptionComponent,
+    BdDataPermissionLevelCellComponent,
+    EditUniqueValueValidatorDirective,
   ],
   providers: [
     httpInterceptorProviders,
@@ -263,10 +267,12 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataSyncCellComponent,
     BdEditorComponent,
     BdEditorDiffComponent,
+    BdDataPermissionLevelCellComponent,
 
     // validators
     GroupIdValidator,
     PasswordVerificationValidator,
+    EditUniqueValueValidatorDirective,
   ],
 })
 export class CoreModule {}

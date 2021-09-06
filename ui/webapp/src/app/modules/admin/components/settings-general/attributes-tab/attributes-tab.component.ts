@@ -49,6 +49,8 @@ export class AttributesTabComponent implements OnInit {
 
   /* template */ attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [this.defIdCol, this.defDescCol, this.defEditCol, this.defDelCol];
   /* template */ tempAttribute: CustomAttributeDescriptor;
+  /* template */ tempIsEdit: boolean;
+  /* template */ tempUsedIds: string[];
 
   constructor(public settings: SettingsService, @Inject(forwardRef(() => SettingsGeneralComponent)) private parent: SettingsGeneralComponent) {}
 
@@ -61,6 +63,8 @@ export class AttributesTabComponent implements OnInit {
 
   /* template */ addAttribute(): void {
     this.tempAttribute = { name: '', description: '' };
+    this.tempIsEdit = false;
+    this.tempUsedIds = this.settings.settings$.value.instanceGroup.attributes.map((a) => a.name);
     this.parent.dialog
       .message({
         header: 'Add Attribute',
@@ -78,6 +82,8 @@ export class AttributesTabComponent implements OnInit {
 
   private editAttribute(attr: CustomAttributeDescriptor): void {
     this.tempAttribute = { ...attr };
+    this.tempIsEdit = true;
+    this.tempUsedIds = this.settings.settings$.value.instanceGroup.attributes.map((a) => a.name).filter((a) => a !== attr.name);
     this.parent.dialog
       .message({
         header: 'Edit Attribute',

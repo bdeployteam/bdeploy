@@ -1,120 +1,84 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, SortDirection } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
-import { cloneDeep } from 'lodash-es';
-import { Subscription } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { Sort } from '@angular/material/sort';
+import { format } from 'date-fns';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
+import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
-import { MessageBoxMode } from 'src/app/modules/admin/components/messagebox/messagebox.component';
-import { UserEditComponent } from 'src/app/modules/admin/components/user-edit/user-edit.component';
-import { UserPasswordComponent } from 'src/app/modules/admin/components/user-password/user-password.component';
-import { MessageboxService } from 'src/app/modules/admin/services/messagebox.service';
-import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
-import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
+import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
+import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { UsersColumnsService } from 'src/app/modules/core/services/users-columns.service';
 import { AuthAdminService } from '../../services/auth-admin.service';
-import { UserGlobalPermissionsComponent } from '../user-global-permissions/user-global-permissions.component';
 
 @Component({
   selector: 'app-users-browser',
   templateUrl: './users-browser.component.html',
   styleUrls: ['./users-browser.component.css'],
 })
-export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, AfterViewInit {
-  private log: Logger = this.loggingService.getLogger('UsersBrowserComponent');
-  private subscription: Subscription;
+export class UsersBrowserComponent implements OnInit {
+  private colPermLevel: BdDataColumn<UserInfo> = {
+    id: 'permLevel',
+    name: 'Global Permission',
+    data: (r) => this.getGlobalPermission(r),
+    component: BdDataPermissionLevelCellComponent,
+    width: '100px',
+  };
 
-  public INITIAL_SORT_COLUMN = 'name';
-  public INITIAL_SORT_DIRECTION: SortDirection = 'asc';
+  private colInact: BdDataColumn<UserInfo> = {
+    id: 'inactive',
+    name: 'Inact.',
+    data: (r) => (r.inactive ? 'check_box' : 'check_box_outline_blank'),
+    component: BdDataIconCellComponent,
+    width: '40px',
+  };
 
-  public dataSource: MatTableDataSource<UserInfo> = new MatTableDataSource<UserInfo>([]);
-  private filterPredicate: (d, f) => boolean;
+  private colAuthBy: BdDataColumn<UserInfo> = {
+    id: 'authBy',
+    name: 'Authenticated By',
+    data: (r) => this.getAuthenticatedBy(r),
+    showWhen: '(min-width: 1500px)',
+  };
 
-  public displayedColumns: string[] = [
-    'gravatar',
-    'name',
-    'fullName',
-    'email',
-    'globalPermissions',
-    'inactive',
-    'authenticatedBy',
-    'lastActiveLogin',
-    'actions',
+  private colLastLogin: BdDataColumn<UserInfo> = {
+    id: 'lastLogin',
+    name: 'Last active login',
+    data: (r) => (r.lastActiveLogin ? format(r.lastActiveLogin, 'dd.MM.yyyy HH:mm:ss') : 'Never'),
+    showWhen: '(min-width: 1600px)',
+  };
+
+  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild('addDialog') private addDialog: TemplateRef<any>;
+  @ViewChild('addForm', { static: false }) private addForm: NgForm;
+
+  /* template */ creating$ = new BehaviorSubject<boolean>(false);
+  /* template */ loading$ = combineLatest([this.settings.loading$, this.authAdmin.loading$, this.creating$]).pipe(map(([s, a, c]) => s || a || c));
+  /* template */ columns: BdDataColumn<UserInfo>[] = [
+    ...this.userColumns.defaultUsersColumns,
+    this.colPermLevel,
+    this.colInact,
+    this.colAuthBy,
+    this.colLastLogin,
   ];
+  /* template */ grouping: BdDataGroupingDefinition<UserInfo>[] = [
+    { name: 'Authenticated By', group: (r) => this.getAuthenticatedBy(r) },
+    { name: 'Global Permission', group: (r) => this.getGlobalPermission(r) },
+  ];
+  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
 
-  @ViewChild(MatPaginator)
-  paginator: MatPaginator;
+  /* template */ getRecordRoute = (row: UserInfo) => {
+    return ['', { outlets: { panel: ['panels', 'admin', 'user-detail', row.name] } }];
+  };
 
-  @ViewChild(MatSort)
-  sort: MatSort;
+  /* template */ addUser: Partial<UserInfo>;
+  /* template */ addConfirm: string;
 
-  private currentUser: UserInfo;
+  constructor(public authAdmin: AuthAdminService, private userColumns: UsersColumnsService, public settings: SettingsService) {}
 
-  loading = true;
-
-  constructor(
-    private dialog: MatDialog,
-    private messageBoxService: MessageboxService,
-    private loggingService: LoggingService,
-    private authService: AuthenticationService,
-    private authAdminService: AuthAdminService,
-    public settings: SettingsService,
-    private search: SearchService
-  ) {}
-
-  ngOnInit() {
-    this.subscription = this.search.register(this);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-    this.dataSource.filterPredicate = (data, filter) => {
-      return (
-        this.filterPredicate(data.name, filter) ||
-        this.filterPredicate(data.fullName, filter) ||
-        this.filterPredicate(data.email, filter) ||
-        this.filterPredicate(this.getGlobalPermission(data), filter)
-      );
-    };
-
-    this.authService.getUserInfo().subscribe((r) => {
-      this.currentUser = r;
-    });
-
-    this.loadUsers();
-  }
-
-  loadUsers() {
-    this.loading = true;
-    this.authAdminService
-      .getAll()
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe((users) => {
-        this.dataSource.data = users;
-      });
-  }
-
-  public bdOnSearch(filterValue: string): void {
-    try {
-      new RegExp(filterValue.trim().toLowerCase()).compile();
-      this.filterPredicate = (d, f) => d && d.toLowerCase().match(f);
-    } catch (e) {
-      this.filterPredicate = (d, f) => d && d.toLowerCase().includes(f);
-    }
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
-  }
+  ngOnInit() {}
 
   public getAuthenticatedBy(userInfo: UserInfo): string {
     if (userInfo.externalSystem) {
@@ -136,165 +100,24 @@ export class UsersBrowserComponent implements OnInit, OnDestroy, BdSearchable, A
     return p ? p.permission : null;
   }
 
-  public isCurrentUser(userInfo: UserInfo): boolean {
-    return this.currentUser && userInfo.name === this.currentUser.name;
-  }
-
-  isLoading() {
-    return this.loading || this.settings.loading$.value;
-  }
-
   public onAdd(): void {
+    this.addUser = {};
+    this.addConfirm = '';
     this.dialog
-      .open(UserEditComponent, {
-        width: '500px',
-        data: {
-          isCreate: true,
-          knownUser: this.dataSource.data.map((u) => u.name),
-        },
-      })
-      .afterClosed()
-      .subscribe((r) => {
-        if (r) {
-          this.loading = true;
-          this.authAdminService
-            .createLocalUser(r)
-            .pipe(
-              catchError((e) => {
-                this.loading = false;
-                throw e;
-              })
-            )
-            .subscribe((result) => {
-              this.loadUsers();
-            });
-        }
-      });
-  }
-
-  public onEdit(userInfo: UserInfo): void {
-    this.dialog
-      .open(UserEditComponent, {
-        width: '500px',
-        data: {
-          isCreate: false,
-          user: cloneDeep(userInfo),
-        },
-      })
-      .afterClosed()
-      .subscribe((r) => {
-        if (r) {
-          this.loading = true;
-          this.authAdminService
-            .updateUser(r)
-            .pipe(
-              catchError((e) => {
-                this.loading = false;
-                throw e;
-              })
-            )
-            .subscribe((result) => {
-              this.loadUsers();
-            });
-        }
-      });
-  }
-
-  public onSetPassword(userInfo: UserInfo): void {
-    this.dialog
-      .open(UserPasswordComponent, {
-        width: '500px',
-        data: {
-          isAdmin: true,
-          user: userInfo.name,
-        },
-      })
-      .afterClosed()
-      .subscribe((r) => {
-        if (r) {
-          this.loading = true;
-          this.authAdminService
-            .updateLocalUserPassword(r.user, r.newPassword)
-            .pipe(
-              catchError((e) => {
-                this.loading = false;
-                throw e;
-              })
-            )
-            .subscribe((result) => {
-              this.loadUsers();
-            });
-        }
-      });
-  }
-
-  public onGlobalPermissions(userInfo: UserInfo): void {
-    this.dialog
-      .open(UserGlobalPermissionsComponent, {
-        width: '500px',
-        data: cloneDeep(userInfo),
-      })
-      .afterClosed()
-      .subscribe((r) => {
-        if (r) {
-          this.loading = true;
-          this.authAdminService
-            .updateUser(r)
-            .pipe(
-              catchError((e) => {
-                this.loading = false;
-                throw e;
-              })
-            )
-            .subscribe((result) => {
-              this.loadUsers();
-            });
-        }
-      });
-  }
-
-  public onSetInactive(userInfo: UserInfo, newValue: boolean): void {
-    if (userInfo.inactive === newValue) {
-      this.log.warn('user ' + userInfo.name + ' is already ' + (newValue ? 'active' : 'inactive') + '!');
-      this.loadUsers();
-      return;
-    }
-    userInfo.inactive = newValue;
-    this.loading = true;
-    this.authAdminService
-      .updateUser(userInfo)
-      .pipe(
-        catchError((e) => {
-          this.loading = false;
-          throw e;
-        })
-      )
-      .subscribe((result) => {
-        this.loadUsers();
-      });
-  }
-
-  public onDelete(userInfo: UserInfo): void {
-    this.messageBoxService
-      .open({
-        title: 'Delete',
-        message: 'Do you really want to delete user ' + userInfo.name + '?',
-        mode: MessageBoxMode.CONFIRM,
+      .message({
+        header: 'Add user',
+        icon: 'add',
+        template: this.addDialog,
+        validation: () => !this.addForm || this.addForm.valid,
+        actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
         if (r) {
-          this.loading = true;
-          this.authAdminService
-            .deleteUser(userInfo.name)
-            .pipe(
-              catchError((e) => {
-                this.loading = false;
-                throw e;
-              })
-            )
-            .subscribe((result) => {
-              this.loadUsers();
-            });
+          this.creating$.next(true);
+          this.authAdmin
+            .createLocalUser(this.addUser as UserInfo)
+            .pipe(finalize(() => this.creating$.next(false)))
+            .subscribe();
         }
       });
   }

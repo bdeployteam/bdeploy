@@ -1,7 +1,14 @@
 <ng-template #addEditDialog>
   <form #addEditForm="ngForm" fxLayout="column" [style.min-width.px]="250">
-    <!-- TODO: validate unique ID -->
-    <app-bd-form-input label="Name/ID" name="name" [(ngModel)]="tempAttribute.name" required></app-bd-form-input>
+    <app-bd-form-input
+      [disabled]="tempIsEdit"
+      label="Name/ID"
+      name="name"
+      [(ngModel)]="tempAttribute.name"
+      required
+      appEditUniqueValueValidator
+      [disallowedValues]="tempUsedIds"
+    ></app-bd-form-input>
     <app-bd-form-input label="Description" name="description" [(ngModel)]="tempAttribute.description" required></app-bd-form-input>
   </form>
 </ng-template>

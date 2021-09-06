@@ -42,12 +42,14 @@ export class AttributeDefinitionsComponent implements OnInit {
 
   /* template */ newId: string;
   /* template */ newDesc: string;
+  /* template */ newUsedIds: string[];
 
   constructor(public groups: GroupsService, public details: GroupDetailsService) {}
 
   ngOnInit(): void {}
 
   /* template */ showAddDialog(group: InstanceGroupConfiguration, templ: TemplateRef<any>) {
+    this.newUsedIds = group.instanceAttributes.map((r) => r.name);
     this.dialog
       .message({
         header: 'Add Definition',

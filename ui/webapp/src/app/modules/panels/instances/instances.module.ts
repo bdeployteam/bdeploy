@@ -12,9 +12,12 @@ import { AddInstanceComponent } from './components/add-instance/add-instance.com
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { AppTemplateNameComponent } from './components/add-process/app-template-name/app-template-name.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
+import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
+import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
 import { ConfigDescCardsComponent } from './components/config-desc-cards/config-desc-cards.component';
 import { ConfigDescElementComponent } from './components/config-desc-element/config-desc-element.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
+import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigProcessHeaderComponent } from './components/edit-process-overview/configure-process/config-process-header/config-process-header.component';
 import { ConfigProcessParamGroupComponent } from './components/edit-process-overview/configure-process/config-process-param-group/config-process-param-group.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
@@ -44,6 +47,7 @@ import { InstanceTemplatesComponent } from './components/instance-settings/insta
 import { TemplateMessageDetailsComponent } from './components/instance-settings/instance-templates/template-message-details/template-message-details.component';
 import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
+import { PortShiftComponent } from './components/instance-settings/ports/port-shift/port-shift.component';
 import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
 import { UpdateActionComponent } from './components/instance-settings/product-update/update-action/update-action.component';
@@ -60,11 +64,6 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
-import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
-import { PortShiftComponent } from './components/instance-settings/ports/port-shift/port-shift.component';
-import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
-import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
 
 @NgModule({
   declarations: [
@@ -99,7 +98,6 @@ import { UpdateProductComponent } from './components/bulk-manipulation/update-pr
     ConfigProcessHeaderComponent,
     EditProcessNameValidatorDirective,
     EditCustomUidValidatorDirective,
-    EditUniqueValueValidatorDirective,
     EditServerIssuesValidatorDirective,
     CfgFileNameValidatorDirective,
     ConfigDescElementComponent,
