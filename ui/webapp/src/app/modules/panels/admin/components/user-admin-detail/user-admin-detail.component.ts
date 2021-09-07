@@ -4,12 +4,12 @@ import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, switchMap } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
-import { AuthAdminService } from 'src/app/modules/admin/services/auth-admin.service';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 
 const COL_SCOPE: BdDataColumn<ScopedPermission> = {

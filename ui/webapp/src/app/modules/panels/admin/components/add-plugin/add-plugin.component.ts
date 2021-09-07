@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PluginAdminService } from 'src/app/modules/admin/services/plugin-admin.service';
+import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugin-admin.service';
 
 @Component({
   selector: 'app-add-plugin',

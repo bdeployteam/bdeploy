@@ -12,12 +12,12 @@
 @import 'app/modules/core/components/bd-image-upload/bd-image-upload-theme.scss';
 @import 'app/modules/core/components/bd-form-toggle/bd-form-toggle-theme.scss';
 
-@import 'app/modules/admin/components/hive/hive-theme.scss';
-@import 'app/modules/admin/components/admin-shell/admin-shell.theme.scss';
-@import 'app/modules/admin/components/audit-log/audit-log-theme.scss';
+@import 'app/modules/primary/admin/components/hive/hive-theme.scss';
+@import 'app/modules/primary/admin/components/admin-shell/admin-shell.theme.scss';
+@import 'app/modules/primary/admin/components/audit-log/audit-log-theme.scss';
 
 // TODO: remove legacy
-@import 'app/modules/admin/components/file-upload/file-upload-theme.scss';
+@import 'app/modules/primary/admin/components/file-upload/file-upload-theme.scss';
 
 @mixin all-themes($theme) {
   @include mat.all-component-themes($theme);
