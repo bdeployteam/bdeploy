@@ -1,8 +1,0 @@
-.field-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.field-container > * {
-  width: 100%;
-}

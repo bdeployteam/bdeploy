@@ -10,11 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.SecurityContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +22,10 @@ import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuditResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.AuditLogDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class AuditResourceImpl implements AuditResource {
 
@@ -50,12 +49,6 @@ public class AuditResourceImpl implements AuditResource {
         } else {
             throw new WebApplicationException("Cannot read auditor of hive " + hiveParam);
         }
-    }
-
-    @Override
-    public List<AuditLogDto> auditLog(long lastInstant, int lineLimit) {
-        log.debug("auditLog({},{})", lastInstant, lineLimit);
-        return scanFiles((RollingFileAuditor) minion.getAuditor(), lastInstant, lineLimit);
     }
 
     private List<AuditLogDto> scanFiles(RollingFileAuditor auditor, long lastInstant, int lineLimit) {

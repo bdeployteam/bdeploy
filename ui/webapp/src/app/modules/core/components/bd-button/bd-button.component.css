@@ -53,3 +53,8 @@
 .local-wrapper-expanded {
   align-items: center;
 }
+
+.local-spinner {
+  position: relative;
+  left: -4px;
+}

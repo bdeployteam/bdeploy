@@ -3,16 +3,15 @@ package io.bdeploy.ui.api;
 import java.util.List;
 import java.util.Map;
 
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.ui.dto.HiveEntryDto;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
-
-import io.bdeploy.common.security.RequiredPermission;
-import io.bdeploy.common.security.ScopedPermission.Permission;
-import io.bdeploy.jersey.ActivityScope;
-import io.bdeploy.ui.dto.HiveEntryDto;
 
 @Path("/hive")
 @RequiredPermission(permission = Permission.ADMIN)
@@ -34,11 +33,6 @@ public interface HiveResource {
     @GET
     @Path("/list")
     public List<HiveEntryDto> list(@ActivityScope @QueryParam("hive") String hiveParam, @QueryParam("id") String id);
-
-    @GET
-    @Path("/downloadManifest")
-    public Response downloadManifest(@ActivityScope @QueryParam("hive") String hiveParam, @QueryParam("name") String name,
-            @QueryParam("tag") String tag);
 
     @GET
     @Path("/download")

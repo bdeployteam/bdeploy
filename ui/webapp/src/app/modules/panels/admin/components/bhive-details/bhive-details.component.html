@@ -1,0 +1,27 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar [header]="'BHive ' + (bhive$ | async)" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="5px">
+      <app-bd-panel-button icon="message" text="Audit Logs" [collapsed]="false" [relative]="true" [route]="['audit']"></app-bd-panel-button>
+      <app-bd-panel-button icon="folder_special" text="Browse Contents" [collapsed]="false" [relative]="true" [route]="['browse']"></app-bd-panel-button>
+      <app-bd-button
+        icon="construction"
+        text="Repair"
+        color="warn"
+        [collapsed]="false"
+        (click)="doRepair()"
+        [loadingWhen$]="repairing$"
+        [disabled]="repairing$ | async"
+      ></app-bd-button>
+      <app-bd-button
+        icon="cleaning_services"
+        text="Prune Unused Objects"
+        color="primary"
+        [collapsed]="false"
+        (click)="doPrune()"
+        [loadingWhen$]="pruning$"
+        [disabled]="pruning$ | async"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

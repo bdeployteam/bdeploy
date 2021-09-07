@@ -22,13 +22,12 @@ export class BdEditorComponent implements OnInit, OnDestroy {
     this.onPathChange();
   }
 
+  @Input() readonly: boolean;
+
   @Output() contentChange = new EventEmitter<string>();
 
   /* template */ editorContent = '';
-  /* template */ editorOptions = {
-    theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
-    language: 'plaintext',
-  };
+  /* template */ editorOptions;
 
   constructor(private themeService: ThemeService) {}
 
@@ -38,6 +37,13 @@ export class BdEditorComponent implements OnInit, OnDestroy {
         this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
       }
     });
+
+    this.editorOptions = {
+      theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
+      language: 'plaintext',
+      readOnly: this.readonly,
+      minimap: { enabled: false },
+    };
   }
 
   ngOnDestroy(): void {

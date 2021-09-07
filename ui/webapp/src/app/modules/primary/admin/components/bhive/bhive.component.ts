@@ -1,0 +1,45 @@
+import { Component, OnInit } from '@angular/core';
+import { Sort } from '@angular/material/sort';
+import { BehaviorSubject } from 'rxjs';
+import { BdDataColumn } from 'src/app/models/data';
+import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { HiveService } from '../../services/hive.service';
+
+const COL_AVATAR: BdDataColumn<string> = {
+  id: 'avatar',
+  name: '',
+  data: (r) => 'sd_storage',
+  component: BdDataIconCellComponent,
+  width: '30px',
+};
+
+const COL_ID: BdDataColumn<string> = {
+  id: 'id',
+  name: 'BHive',
+  data: (r) => r,
+};
+
+@Component({
+  selector: 'app-bhive',
+  templateUrl: './bhive.component.html',
+  styleUrls: ['./bhive.component.css'],
+})
+export class BHiveComponent implements OnInit {
+  /* template */ records$ = new BehaviorSubject<string[]>(null);
+  /* template */ columns: BdDataColumn<string>[] = [COL_AVATAR, COL_ID];
+  /* template */ sort: Sort = { active: 'id', direction: 'asc' };
+
+  /* template */ getRecordRoute = (row: string) => {
+    return ['', { outlets: { panel: ['panels', 'admin', 'bhive', row] } }];
+  };
+
+  constructor(public hives: HiveService) {
+    this.load();
+  }
+
+  ngOnInit(): void {}
+
+  /* template */ load() {
+    this.hives.listHives().subscribe((hives) => this.records$.next(hives));
+  }
+}

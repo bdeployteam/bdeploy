@@ -32,7 +32,6 @@ import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.FormatHelper;
@@ -100,23 +99,6 @@ public class HiveResourceImpl implements HiveResource {
             throw new WebApplicationException("Invalid object ID " + id);
         }
         return list(hive, treeId);
-    }
-
-    @Override
-    public Response downloadManifest(String hiveParam, String name, String tag) {
-        log.debug("downloadManifest(\"{}\",\"{}\",\"{}\")", hiveParam, name, tag);
-        BHive hive = registry.get(hiveParam);
-        Manifest.Key key = new Manifest.Key(name, tag);
-        Manifest manifest = hive.execute(new ManifestLoadOperation().setManifest(key));
-        StreamingOutput fileStream = new StreamingOutput() {
-
-            @Override
-            public void write(OutputStream output) throws IOException {
-                output.write(StorageHelper.toRawBytes(manifest));
-                output.flush();
-            }
-        };
-        return Response.ok(fileStream, MediaType.APPLICATION_OCTET_STREAM).build();
     }
 
     @Override

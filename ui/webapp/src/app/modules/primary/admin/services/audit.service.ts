@@ -1,33 +1,29 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { AuditLogDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { LoggingService } from '../../../core/services/logging.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuditService {
-  private log = this.loggingService.getLogger('AuditService');
+  public loading$ = new BehaviorSubject<boolean>(false);
+  private apiPath = () => `${this.cfg.config.api}/audit`;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
+  constructor(private cfg: ConfigService, private http: HttpClient) {}
 
   public hiveAuditLog(hive: string, lastInstant: number, lineLimit: number): Observable<AuditLogDto[]> {
-    const url: string = this.cfg.config.api + '/audit/hiveAuditLog';
+    this.loading$.next(true);
     let params: HttpParams = new HttpParams().set('hive', hive).set('lineLimit', '' + lineLimit);
     if (lastInstant) {
       params = params.set('lastInstant', '' + lastInstant);
     }
-    return this.http.get<AuditLogDto[]>(url, { params: params });
-  }
-
-  public auditLog(lastInstant: number, lineLimit: number): Observable<AuditLogDto[]> {
-    const url: string = this.cfg.config.api + '/audit/auditLog';
-    let params: HttpParams = new HttpParams().set('lineLimit', '' + lineLimit);
-    if (lastInstant) {
-      params = params.set('lastInstant', '' + lastInstant);
-    }
-    return this.http.get<AuditLogDto[]>(url, { params: params });
+    return this.http.get<AuditLogDto[]>(`${this.apiPath()}/hiveAuditLog`, { params: params }).pipe(
+      measure('Load BHive Audit Logs'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 }

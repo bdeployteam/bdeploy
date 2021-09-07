@@ -3,9 +3,7 @@ import { Route, RouterModule } from '@angular/router';
 import { CanDeactivateGuard } from '../../core/guards/can-deactivate.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
-import { AuditLogsBrowserComponent } from './components/audit-logs-browser/audit-logs-browser.component';
-import { HiveAuditLogsBrowserComponent } from './components/hive-audit-logs-browser/hive-audit-logs-browser.component';
-import { HiveBrowserComponent } from './components/hive-browser/hive-browser.component';
+import { BHiveComponent } from './components/bhive/bhive.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
@@ -26,12 +24,10 @@ const ADMIN_ROUTES: Route[] = [
       { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'admin' },
       { path: 'general', component: SettingsGeneralComponent, canDeactivate: [DirtyDialogGuard], outlet: 'admin' },
       { path: 'users', component: UsersBrowserComponent, canDeactivate: [CanDeactivateGuard], outlet: 'admin' },
-      { path: 'hive', component: HiveBrowserComponent, outlet: 'admin' },
-      { path: 'hiveauditlogs', component: HiveAuditLogsBrowserComponent, outlet: 'admin' },
+      { path: 'hive', component: BHiveComponent, outlet: 'admin' },
       { path: 'systemsoftware', component: UpdateBrowserComponent, outlet: 'admin' },
       { path: 'manualcleanup', component: MasterCleanupComponent, outlet: 'admin' },
       { path: 'metrics', component: MetricsOverviewComponent, outlet: 'admin' },
-      { path: 'auditlogs', component: AuditLogsBrowserComponent, outlet: 'admin' },
       { path: 'logFiles', component: LogFilesBrowserComponent, outlet: 'admin' },
     ],
   },

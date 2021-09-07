@@ -1,8 +1,0 @@
-.content {
-  display: flex;
-  flex-direction: column;
-}
-
-.mat-dialog-actions {
-  justify-content: flex-end;
-}

@@ -1,88 +1,82 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { HiveEntryDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { LoggingService } from '../../../core/services/logging.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HiveService {
-  private log = this.loggingService.getLogger('HiveService');
+  public loading$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
+  private apiPath = () => `${this.cfg.config.api}/hive`;
+
+  constructor(private cfg: ConfigService, private http: HttpClient) {}
 
   public listHives(): Observable<string[]> {
-    const url: string = this.cfg.config.api + '/hive/listHives';
-    return this.http.get<string[]>(url);
+    this.loading$.next(true);
+    return this.http.get<string[]>(`${this.apiPath()}/listHives`).pipe(
+      measure('List BHives'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 
   public listManifests(hive: string): Observable<HiveEntryDto[]> {
-    const url: string = this.cfg.config.api + '/hive/listManifests';
+    this.loading$.next(true);
     const options = { params: new HttpParams().set('hive', hive) };
-    return this.http.get<HiveEntryDto[]>(url, options);
+    return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/listManifests`, options).pipe(
+      measure('List BHive Manifests'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 
   public listManifest(hive: string, name: string, tag: string): Observable<HiveEntryDto[]> {
-    const url: string = this.cfg.config.api + '/hive/listManifest';
+    this.loading$.next(true);
     const options = {
       params: new HttpParams().set('hive', hive).set('name', name).set('tag', tag),
     };
-    return this.http.get<HiveEntryDto[]>(url, options);
+    return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/listManifest`, options).pipe(
+      measure('List BHive Manifest Content'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 
   public list(hive: string, id: string): Observable<HiveEntryDto[]> {
-    const url: string = this.cfg.config.api + '/hive/list';
+    this.loading$.next(true);
     const options = {
       params: new HttpParams().set('hive', hive).set('id', id),
     };
-    return this.http.get<HiveEntryDto[]>(url, options);
-  }
-
-  public downloadManifest(hive: string, name: string, tag: string) {
-    this.log.debug('downloadManifest(' + hive + ', ' + name + ', ' + tag + ')');
-    const url: string = this.cfg.config.api + '/hive/downloadManifest';
-    const params: HttpParams = new HttpParams().set('hive', hive).set('name', name).set('tag', tag);
-    return this.http.get(url, { params: params, responseType: 'blob' });
-  }
-
-  public downloadAscii(hive: string, id: string) {
-    this.log.debug('download(' + hive + ', ' + id + ')');
-    const url: string = this.cfg.config.api + '/hive/download';
-    const params: HttpParams = new HttpParams().set('hive', hive).set('id', id);
-    return this.http.get(url, { params: params, responseType: 'text' });
+    return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/list`, options).pipe(
+      measure('List BHive Tree'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 
   public download(hive: string, id: string) {
-    this.log.debug('download(' + hive + ', ' + id + ')');
-    const url: string = this.cfg.config.api + '/hive/download';
+    this.loading$.next(true);
     const params: HttpParams = new HttpParams().set('hive', hive).set('id', id);
-    return this.http.get(url, { params: params, responseType: 'blob' });
+    return this.http.get(`${this.apiPath()}/download`, { params: params, responseType: 'blob' }).pipe(finalize(() => this.loading$.next(false)));
   }
 
-  public prune(hive: string) {
-    this.log.debug(`prune(${hive})`);
-    const url: string = this.cfg.config.api + '/hive/prune';
+  public prune(hive: string): Observable<string> {
     const params: HttpParams = new HttpParams().set('hive', hive);
-    return this.http.get(url, {
+    return this.http.get(`${this.apiPath()}/prune`, {
       params: params,
       responseType: 'text',
     });
   }
 
   public delete(hive: string, name: string, tag: string) {
-    this.log.debug(`delete(${hive}, ${name}, ${tag})`);
-    const url: string = this.cfg.config.api + '/hive/delete';
     const params: HttpParams = new HttpParams().set('hive', hive).set('name', name).set('tag', tag);
-    return this.http.delete(url, { params: params });
+    return this.http.delete(`${this.apiPath()}/delete`, { params: params });
   }
 
-  public fsck(hive: string, fix: boolean) {
-    this.log.debug(`fsck(${hive})`);
-    const url: string = this.cfg.config.api + '/hive/fsck';
+  public fsck(hive: string, fix: boolean): Observable<Map<string, string>> {
     const params: HttpParams = new HttpParams().set('hive', hive).set('fix', fix.toString());
-    return this.http.get<Map<string, string>>(url, {
+    return this.http.get<Map<string, string>>(`${this.apiPath()}/fsck`, {
       params: params,
     });
   }
