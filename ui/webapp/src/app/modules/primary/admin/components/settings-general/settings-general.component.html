@@ -3,7 +3,7 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="settings.loading$">
-  <app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Settings">
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="ldapTab.isActive">
       <app-bd-button icon="add" text="New Server" color="primary" [collapsed]="false" (click)="ldap.addServer()"></app-bd-button>

@@ -108,7 +108,7 @@ public class CleanupHelper {
                 NodeCleanupResource scr = ResourceProvider.getVersionedResource(remote, NodeCleanupResource.class, null);
                 try {
                     List<CleanupAction> actions = scr.cleanup(instanceNodeManifestsToKeep);
-                    groups.add(new CleanupGroup("Perform cleanup on " + node.getKey(), node.getKey(), null, actions));
+                    groups.add(new CleanupGroup("Node " + node.getKey(), node.getKey(), null, actions));
                 } catch (Exception e) {
                     log.warn("Cannot perform cleanup on minion {}", node.getKey());
                     log.debug("Error details", e);
@@ -195,7 +195,7 @@ public class CleanupHelper {
         // cleanup of meta manifests
         instanceGroupActions.addAll(calculateMetaManifests(context));
 
-        return new CleanupGroup("Perform Cleanup on Instance Group " + context.getInstanceGroupConfiguration().name, null,
+        return new CleanupGroup("Group " + context.getInstanceGroupConfiguration().name, null,
                 context.getInstanceGroupConfiguration().name, instanceGroupActions);
     }
 

@@ -18,7 +18,7 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="User Accounts">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
       (groupingChange)="dataDisplay.grouping = $event; dataDisplay.update()"

@@ -1,49 +1,41 @@
-<div class="page-container">
-  <h1>Manual Cleanup</h1>
-
-  <p>
-    This page allows to perform manual cleanup on a local master. Note that this does not work on a
-    <strong>remote</strong> master.
-  </p>
-  <p *ngIf="!cleanupModel && !loadingCleanupModel">
-    Note that this can be an expensive operation. Click 'Calculate Cleanup Actions' once ready.
-  </p>
-
-  <ng-container *ngIf="!loadingCleanupModel">
-    <button mat-raised-button [color]="cleanupModel ? 'primary' : 'warn'" (click)="onCalculate()">
-      {{ (cleanupModel ? 'Re-' : '') + 'Calculate Cleanup Actions' }}
-    </button>
-  </ng-container>
-
-  <ng-container *ngIf="cleanupModel">
-    <button
-      mat-raised-button
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Cleanup">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button *ngIf="cleanup.cleanup$ | async" [collapsed]="false" icon="clear" text="Abort Cleanup" (click)="cleanup.cancelCleanup()"></app-bd-button>
+    <app-bd-button
+      *ngIf="cleanup.cleanup$ | async as clean"
+      [collapsed]="false"
       color="warn"
-      (click)="onPerform()"
-      [disabled]="!hasAction() || performingCleanupModel"
-      class="margin-button"
-    >
-      Execute all Actions
-    </button>
-    <button mat-raised-button color="primary" (click)="onClear()" class="margin-button">
-      Reset (Auto. in {{ clearCounter }} s)
-    </button>
-  </ng-container>
+      icon="cleaning_services"
+      [text]="(cleanup.performing$ | async) ? 'Performing...' : 'Perform (' + (cleanup.countdown$ | async) + 's.)'"
+      (click)="cleanup.performCleanup(clean)"
+      [loadingWhen$]="cleanup.performing$"
+      [disabled]="cleanup.performing$ | async"
+    ></app-bd-button>
+    <app-bd-button
+      [collapsed]="false"
+      color="primary"
+      icon="cleaning_services"
+      text="Calculate"
+      (click)="cleanup.calculateCleanup()"
+      [loadingWhen$]="cleanup.loading$"
+      [disabled]="cleanup.loading$ | async"
+    ></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="bd-default-padding">
+      <mat-tab-group dynamicHeight *ngIf="cleanup.cleanup$ | async as groups">
+        <mat-tab *ngFor="let group of groups">
+          <ng-template mat-tab-label>{{ group.name }}</ng-template>
+          <ng-template matTabContent>
+            <app-bd-data-table [records]="group.actions" [columns]="columns"></app-bd-data-table>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
 
-  <ng-container *ngIf="loadingCleanupModel">
-    <div class="spinner-container">
-      <mat-spinner [diameter]="48"></mat-spinner>
-      <div>Calculating Actions...</div>
+      <app-bd-no-data *ngIf="!(cleanup.cleanup$ | async)">
+        <p class="bd-hint-text">No actions to be performed.</p>
+      </app-bd-no-data>
     </div>
-  </ng-container>
-
-  <ng-container *ngIf="cleanupModel && hasAction()">
-    <ng-container *ngFor="let group of cleanupModel">
-      <app-master-cleanup-group [group]="group"></app-master-cleanup-group>
-    </ng-container>
-  </ng-container>
-
-  <ng-container *ngIf="cleanupModel && !hasAction()">
-    <p>No actions to be performed...</p>
-  </ng-container>
-</div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

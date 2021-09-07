@@ -1,85 +1,37 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { finalize } from 'rxjs/operators';
-import { CleanupGroup } from '../../../../../models/gen.dtos';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { BdDataColumn } from 'src/app/models/data';
+import { CleanupAction } from 'src/app/models/gen.dtos';
 import { CleanupService } from '../../services/cleanup.service';
+
+const COL_TYPE: BdDataColumn<CleanupAction> = {
+  id: 'type',
+  name: 'Action',
+  data: (r) => r.type,
+  width: '150px',
+};
+
+const COL_WHAT: BdDataColumn<CleanupAction> = {
+  id: 'what',
+  name: 'Target',
+  data: (r) => r.what,
+};
+
+const COL_DESC: BdDataColumn<CleanupAction> = {
+  id: 'description',
+  name: 'Description',
+  data: (r) => r.description,
+};
 
 @Component({
   selector: 'app-master-cleanup',
   templateUrl: './master-cleanup.component.html',
   styleUrls: ['./master-cleanup.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
-export class MasterCleanupComponent implements OnInit, OnDestroy {
-  loadingCleanupModel = false;
-  cleanupModel: CleanupGroup[];
-  clearCounter = 0;
-  clearCountDownHandle: any;
+export class MasterCleanupComponent implements OnInit {
+  /* template */ columns: BdDataColumn<CleanupAction>[] = [COL_TYPE, COL_WHAT, COL_DESC];
 
-  performingCleanupModel = false;
-
-  constructor(private cleanupService: CleanupService) {}
+  constructor(public cleanup: CleanupService) {}
 
   ngOnInit() {}
-
-  ngOnDestroy() {
-    if (this.clearCountDownHandle) {
-      clearInterval(this.clearCountDownHandle);
-    }
-  }
-
-  onCalculate() {
-    this.loadingCleanupModel = true;
-    this.cleanupModel = null;
-    this.cleanupService
-      .calculateCleanup()
-      .pipe(finalize(() => (this.loadingCleanupModel = false)))
-      .subscribe((r) => {
-        this.cleanupModel = r.filter((g) => g.actions.length > 0);
-        this.clearCounter = 600;
-        this.clearCountDownHandle = setInterval(() => this.clearCountDown(), 1000);
-      });
-  }
-
-  public getNonemptyGroups(): CleanupGroup[] {
-    return this.cleanupModel;
-  }
-
-  clearCountDown() {
-    if (this.clearCounter <= 0 || !this.cleanupModel) {
-      if (this.clearCountDownHandle) {
-        clearInterval(this.clearCountDownHandle);
-      }
-      return;
-    }
-
-    this.clearCounter--;
-    if (this.clearCounter === 0) {
-      this.onClear();
-    }
-  }
-
-  onClear() {
-    this.cleanupModel = null;
-  }
-
-  onPerform() {
-    this.performingCleanupModel = true;
-    this.cleanupService
-      .performCleanup(this.cleanupModel)
-      .pipe(
-        finalize(() => {
-          this.performingCleanupModel = false;
-          this.cleanupModel = null;
-        })
-      )
-      .subscribe((r) => {});
-  }
-
-  hasAction(): boolean {
-    for (const g of this.cleanupModel) {
-      if (g.actions && g.actions.length) {
-        return true;
-      }
-    }
-    return false;
-  }
 }

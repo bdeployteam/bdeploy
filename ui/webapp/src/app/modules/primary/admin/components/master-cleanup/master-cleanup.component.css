@@ -1,20 +1,4 @@
-.page-container {
-  margin: 20px;
-}
-
-.spinner-container {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5px;
-}
-
-.spinner-container > div {
-  margin: 15px;
-}
-
-.margin-button {
-  margin-left: 10px;
+.mat-tab-label {
+  padding: 0 14px !important;
+  min-width: 100px !important;
 }
