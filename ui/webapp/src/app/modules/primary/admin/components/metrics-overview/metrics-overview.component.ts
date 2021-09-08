@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatOptionSelectionChange } from '@angular/material/core';
 import { BarHorizontalComponent } from '@swimlane/ngx-charts';
+import { BehaviorSubject } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { JerseyServerMonitoringDto, MetricBundle, MetricGroup, TimerMetric } from '../../../../../models/gen.dtos';
 import { MetricsService } from '../../services/metrics.service';
@@ -16,9 +17,12 @@ export interface SeriesElement {
   styleUrls: ['./metrics-overview.component.css'],
 })
 export class MetricsOverviewComponent implements OnInit {
+  /* template */ loading$ = new BehaviorSubject<boolean>(true);
+  /* template */ keys$ = new BehaviorSubject<string[]>(['SERVER']);
+
   private readonly log: Logger = this.loggingService.getLogger('MetricsOverviewComponent');
 
-  loading = true;
+  selection: string;
   allMetrics: Map<MetricGroup, MetricBundle>;
   selectedGroup: MetricGroup;
   groupCounts: SeriesElement[];
@@ -52,21 +56,20 @@ export class MetricsOverviewComponent implements OnInit {
   constructor(private metrics: MetricsService, private loggingService: LoggingService) {}
 
   ngOnInit() {
-    this.metrics.getAllMetrics().subscribe((r) => {
-      // result is an object with a property per MetricGroup
-      this.allMetrics = new Map<MetricGroup, MetricBundle>();
-      for (const prop of Object.keys(r)) {
-        const group = prop as MetricGroup;
-        const item = r[prop] as MetricBundle;
+    this.metrics
+      .getAllMetrics()
+      .pipe(finalize(() => this.loading$.next(false)))
+      .subscribe((r) => {
+        // result is an object with a property per MetricGroup
+        this.allMetrics = new Map<MetricGroup, MetricBundle>();
+        for (const prop of Object.keys(r)) {
+          const group = prop as MetricGroup;
+          const item = r[prop] as MetricBundle;
 
-        this.allMetrics.set(group, item);
-      }
-      this.loading = false;
-    });
-  }
-
-  getKeys(): MetricGroup[] {
-    return Array.from(this.allMetrics.keys());
+          this.allMetrics.set(group, item);
+        }
+        this.keys$.next([...Array.from(this.allMetrics.keys()), 'SERVER']);
+      });
   }
 
   getGroup(group: MetricGroup): MetricBundle {
@@ -81,11 +84,15 @@ export class MetricsOverviewComponent implements OnInit {
     return this.allMetrics.get(group).timers[name];
   }
 
-  selectServer(event: MatOptionSelectionChange) {
-    if (!event.isUserInput) {
-      return;
+  doSelect() {
+    if (this.selection === 'SERVER') {
+      this.selectServer();
+    } else {
+      this.select();
     }
+  }
 
+  private selectServer() {
     this.selectedTimer = null;
     this.timerSeries = null;
     this.referenceLines = null;
@@ -253,17 +260,13 @@ export class MetricsOverviewComponent implements OnInit {
     });
   }
 
-  select(event: MatOptionSelectionChange) {
-    if (!event.isUserInput) {
-      return;
-    }
-
+  private select() {
     this.serverStats = null;
     this.selectedTimer = null;
     this.timerSeries = null;
     this.referenceLines = null;
 
-    this.selectedGroup = event.source.value;
+    this.selectedGroup = MetricGroup[this.selection];
 
     const x: SeriesElement[] = [];
 

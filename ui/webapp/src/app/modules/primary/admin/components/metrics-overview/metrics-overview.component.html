@@ -1,208 +1,197 @@
-<div *ngIf="!loading" class="root-container">
-  <mat-form-field>
-    <mat-label>Metrics Group</mat-label>
-    <mat-select>
-      <mat-option (onSelectionChange)="selectServer($event)" value="SERVER">SERVER</mat-option>
-      <mat-option *ngFor="let k of getKeys()" (onSelectionChange)="select($event)" [value]="k">{{ k }}</mat-option>
-    </mat-select>
-  </mat-form-field>
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Local Server Metrics"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-form-select label="Select Metric Group" [values]="keys$ | async" [(ngModel)]="selection" (ngModelChange)="doSelect()"></app-bd-form-select>
+    <!-- General server metrics -->
+    <ng-container *ngIf="!selectedGroup && serverStats">
+      <h2>Java VM</h2>
+      <div class="charts-area">
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [referenceLines]="vmCpuRef"
+              [showRefLines]="true"
+              [results]="vmCpu"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Threads'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
+        </div>
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [referenceLines]="vmMemRef"
+              [showRefLines]="true"
+              [results]="vmMem"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Memory [MB]'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
+        </div>
+      </div>
 
-  <!-- General server metrics -->
-  <ng-container *ngIf="!selectedGroup && serverStats">
-    <h2>Java VM</h2>
-    <div class="charts-area">
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [referenceLines]="vmCpuRef"
-            [showRefLines]="true"
-            [results]="vmCpu"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Threads'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
+      <h2>Requests</h2>
+      <div class="charts-area">
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [results]="req"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Requests [Delta]'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
+        </div>
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [results]="reqAbs"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Requests [Abs]'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
         </div>
       </div>
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [referenceLines]="vmMemRef"
-            [showRefLines]="true"
-            [results]="vmMem"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Memory [MB]'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
-        </div>
-      </div>
-    </div>
 
-    <h2>Requests</h2>
-    <div class="charts-area">
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [results]="req"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Requests [Delta]'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
+      <h2>Thread Pool</h2>
+      <div class="charts-area">
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [referenceLines]="poolSizeRef"
+              [showRefLines]="true"
+              [results]="poolSize"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Pool Threads'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
+        </div>
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [results]="poolTasks"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Task Queue [Delta]'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
         </div>
       </div>
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [results]="reqAbs"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Requests [Abs]'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
-        </div>
-      </div>
-    </div>
 
-    <h2>Thread Pool</h2>
-    <div class="charts-area">
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [referenceLines]="poolSizeRef"
-            [showRefLines]="true"
-            [results]="poolSize"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Pool Threads'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
+      <h2>Connections</h2>
+      <div class="charts-area">
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [results]="conBytes"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Transfer [Delta, Bytes]'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
+        </div>
+        <div class="flex-chart-2">
+          <div class="chart-wrapper">
+            <ngx-charts-line-chart
+              [results]="conBytesAbs"
+              [xAxis]="true"
+              [yAxis]="true"
+              [xAxisLabel]="'Time'"
+              [yAxisLabel]="'Transfer [Abs, MB]'"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
         </div>
       </div>
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [results]="poolTasks"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Task Queue [Delta]'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
-        </div>
-      </div>
-    </div>
+    </ng-container>
 
-    <h2>Connections</h2>
-    <div class="charts-area">
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [results]="conBytes"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Transfer [Delta, Bytes]'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
-        </div>
+    <!-- Metrics of selected group -->
+    <div *ngIf="selectedGroup" class="charts-area">
+      <div class="count-chart" [style.height.px]="countGraphHeight">
+        <ngx-charts-bar-horizontal [results]="groupCounts" [maxYAxisTickLength]="40" [xAxis]="true" [yAxis]="true" (select)="selectTimer($event)" #countChart>
+        </ngx-charts-bar-horizontal>
       </div>
-      <div class="flex-chart-2">
-        <div class="chart-wrapper">
-          <ngx-charts-line-chart
-            [results]="conBytesAbs"
-            [xAxis]="true"
-            [yAxis]="true"
-            [xAxisLabel]="'Time'"
-            [yAxisLabel]="'Transfer [Abs, MB]'"
-            [legend]="false"
-            [showXAxisLabel]="true"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
-        </div>
-      </div>
-    </div>
-  </ng-container>
 
-  <!-- Metrics of selected group -->
-  <div *ngIf="selectedGroup" class="charts-area">
-    <div class="count-chart" [style.height.px]="countGraphHeight">
-      <ngx-charts-bar-horizontal
-        [results]="groupCounts"
-        [maxYAxisTickLength]="40"
-        [xAxis]="true"
-        [yAxis]="true"
-        (select)="selectTimer($event)"
-        #countChart
-      >
-      </ngx-charts-bar-horizontal>
-    </div>
-
-    <div class="details-group">
-      <ng-container *ngIf="selectedTimer">
-        Details of selected element:
-        <div class="details-element-group">
-          <span
-            >Count: <strong>{{ selectedTimer.counter.value }}</strong></span
-          >
-          <span
-            >Rate [mean]: <strong>{{ selectedTimer.meter.meanRate }}</strong></span
-          >
-          <span
-            >Rate [1min]: <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span
-          >
+      <div class="details-group">
+        <ng-container *ngIf="selectedTimer">
+          Details of selected element:
+          <div class="details-element-group">
+            <span
+              >Count: <strong>{{ selectedTimer.counter.value }}</strong></span
+            >
+            <span
+              >Rate [mean]: <strong>{{ selectedTimer.meter.meanRate }}</strong></span
+            >
+            <span
+              >Rate [1min]: <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span
+            >
+            <mat-divider></mat-divider>
+            <span
+              >Time [75th]: <strong>{{ toMillis(selectedTimer.histogram.p75th) }} ms</strong></span
+            >
+            <span
+              >Time [99th]: <strong>{{ toMillis(selectedTimer.histogram.p99th) }} ms</strong></span
+            >
+            <span
+              >Time [min]: <strong>{{ toMillis(selectedTimer.histogram.min) }} ms</strong></span
+            >
+            <span
+              >Time [max]: <strong>{{ toMillis(selectedTimer.histogram.max) }} ms</strong></span
+            >
+          </div>
           <mat-divider></mat-divider>
-          <span
-            >Time [75th]: <strong>{{ toMillis(selectedTimer.histogram.p75th) }} ms</strong></span
-          >
-          <span
-            >Time [99th]: <strong>{{ toMillis(selectedTimer.histogram.p99th) }} ms</strong></span
-          >
-          <span
-            >Time [min]: <strong>{{ toMillis(selectedTimer.histogram.min) }} ms</strong></span
-          >
-          <span
-            >Time [max]: <strong>{{ toMillis(selectedTimer.histogram.max) }} ms</strong></span
-          >
-        </div>
-        <mat-divider></mat-divider>
-        Histogram weighted values:
-        <div *ngIf="timerSeries" [style.height.px]="300" class="timer-chart">
-          <ngx-charts-line-chart
-            [referenceLines]="referenceLines"
-            [showRefLines]="true"
-            [results]="timerSeries"
-            [xAxis]="false"
-            [yAxis]="true"
-            [xAxisLabel]="'Calls'"
-            [yAxisLabel]="'Timing [ms]'"
-            [legend]="false"
-            [showXAxisLabel]="false"
-            [showYAxisLabel]="true"
-          ></ngx-charts-line-chart>
-        </div>
-        Note: histogram values are sorted by value, not time.
-      </ng-container>
+          Histogram weighted values:
+          <div *ngIf="timerSeries" [style.height.px]="300" class="timer-chart">
+            <ngx-charts-line-chart
+              [referenceLines]="referenceLines"
+              [showRefLines]="true"
+              [results]="timerSeries"
+              [xAxis]="false"
+              [yAxis]="true"
+              [xAxisLabel]="'Calls'"
+              [yAxisLabel]="'Timing [ms]'"
+              [legend]="false"
+              [showXAxisLabel]="false"
+              [showYAxisLabel]="true"
+            ></ngx-charts-line-chart>
+          </div>
+          Note: histogram values are sorted by value, not time.
+        </ng-container>
+      </div>
     </div>
-  </div>
-</div>
+  </app-bd-dialog-content>
+</app-bd-dialog>
