@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 
@@ -12,6 +12,10 @@ export class BdEditorComponent implements OnInit, OnDestroy {
   private monaco;
   private subscription: Subscription;
   private editorPath = '';
+  private relayoutInterval;
+
+  private cachedX = 0;
+  private cachedY = 0;
 
   @Input() set content(v: string) {
     this.editorContent = v;
@@ -29,7 +33,7 @@ export class BdEditorComponent implements OnInit, OnDestroy {
   /* template */ editorContent = '';
   /* template */ editorOptions;
 
-  constructor(private themeService: ThemeService) {}
+  constructor(private themeService: ThemeService, private host: ElementRef) {}
 
   ngOnInit(): void {
     this.subscription = this.themeService.getThemeSubject().subscribe((theme) => {
@@ -48,6 +52,7 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    clearInterval(this.relayoutInterval);
   }
 
   /* template */ onMonacoInit(monaco) {
@@ -56,10 +61,24 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
     // wait for init to complete, otherwise we leak models.
     setTimeout(() => this.onPathChange(), 0);
+
+    // this is required sind monaco does not play well inside flex (changing) layouts.
+    setInterval(() => this.layoutCheck(), 100);
   }
 
   /* template */ onModelChange(event: string) {
     this.contentChange.emit(event);
+  }
+
+  private layoutCheck() {
+    const x = this.host.nativeElement.offsetWidth;
+    const y = this.host.nativeElement.offsetHeight;
+
+    if (x !== this.cachedX || y != this.cachedY) {
+      this.cachedX = x;
+      this.cachedY = y;
+      this.monaco.layout();
+    }
   }
 
   private onPathChange() {

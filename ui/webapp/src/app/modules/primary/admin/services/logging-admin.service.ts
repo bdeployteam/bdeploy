@@ -1,40 +1,53 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
+import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { DownloadService } from '../../../core/services/download.service';
-import { Logger, LoggingService } from '../../../core/services/logging.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoggingAdminService {
-  private readonly log: Logger = this.loggingService.getLogger('LoggingAdminService');
+  public loading$ = new BehaviorSubject<boolean>(false);
+  public directories$ = new BehaviorSubject<RemoteDirectory[]>([]);
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService, private downloadService: DownloadService) {}
+  private apiPath = () => `${this.cfg.config.api}/logging-admin`;
 
-  private buildLoggingAdminUrl() {
-    return this.cfg.config.api + '/logging-admin';
-  }
+  constructor(private cfg: ConfigService, private http: HttpClient, private downloadService: DownloadService) {}
 
-  public listLogDirs(): Observable<RemoteDirectory[]> {
-    const url: string = this.buildLoggingAdminUrl() + '/logDirs';
-    this.log.debug('listLogDirs: ' + url);
-    return this.http.get<RemoteDirectory[]>(url);
+  public reload() {
+    this.loading$.next(true);
+    this.http
+      .get<RemoteDirectory[]>(`${this.apiPath()}/logDirs`)
+      .pipe(
+        finalize(() => this.loading$.next(false)),
+        measure('List Server Logs')
+      )
+      .subscribe((dirs) =>
+        this.directories$.next(
+          dirs.sort((a, b) => {
+            if (a.minion === 'master') {
+              return -1;
+            } else if (b.minion === 'master') {
+              return 1;
+            } else {
+              return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
+            }
+          })
+        )
+      );
   }
 
   public downloadLogFileContent(rd, rde) {
-    const url: string = this.buildLoggingAdminUrl() + '/request/' + rd.minion;
-    this.log.debug('downloadLogFileContent');
-    this.http.post(url, rde, { responseType: 'text' }).subscribe((token) => {
-      this.downloadService.download(this.buildLoggingAdminUrl() + '/stream/' + token);
+    this.http.post(`${this.apiPath()}/request/${rd.minion}`, rde, { responseType: 'text' }).subscribe((token) => {
+      this.downloadService.download(`${this.apiPath()}/stream/${token}`);
     });
   }
 
   public getLogContentChunk(rd: RemoteDirectory, rde: RemoteDirectoryEntry, offset: number, limit: number, silent: boolean): Observable<StringEntryChunkDto> {
-    const url: string = this.buildLoggingAdminUrl() + '/content/' + rd.minion;
-    this.log.debug('getLogContentChunk: ' + url);
     const options = {
       headers: null,
       params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
@@ -42,18 +55,14 @@ export class LoggingAdminService {
     if (silent) {
       options.headers = { ignoreLoadingBar: '' };
     }
-    return this.http.post<StringEntryChunkDto>(url, rde, options);
+    return this.http.post<StringEntryChunkDto>(`${this.apiPath()}/content/${rd.minion}`, rde, options);
   }
 
   public getLogConfig(): Observable<string> {
-    const url: string = this.buildLoggingAdminUrl() + '/config';
-    this.log.debug('getLogConfig: ' + url);
-    return this.http.get(url, { responseType: 'text' });
+    return this.http.get(`${this.apiPath()}/config`, { responseType: 'text' });
   }
 
   public setLogConfig(encoded: string): Observable<any> {
-    const url: string = this.buildLoggingAdminUrl() + '/config';
-    this.log.debug('setLogConfig: ' + url);
-    return this.http.post(url, encoded);
+    return this.http.post(`${this.apiPath()}/config`, encoded);
   }
 }

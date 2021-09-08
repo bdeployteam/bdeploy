@@ -27,9 +27,7 @@ import { CoreModule } from '../../core/core.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { BHiveComponent } from './components/bhive/bhive.component';
-import { FileEditorComponent } from './components/file-editor/file-editor.component';
 import { FileUploadComponent } from './components/file-upload/file-upload.component';
-import { FileViewerComponent } from './components/file-viewer/file-viewer.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MessageboxComponent } from './components/messagebox/messagebox.component';
@@ -62,8 +60,6 @@ import { MessageboxService } from './services/messagebox.service';
     UsersBrowserComponent,
     MessageboxComponent,
     FileUploadComponent,
-    FileEditorComponent,
-    FileViewerComponent,
     GeneralTabComponent,
     AttributesTabComponent,
     PluginsTabComponent,

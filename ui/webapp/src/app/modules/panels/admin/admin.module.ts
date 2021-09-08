@@ -8,6 +8,8 @@ import { BHiveBrowserComponent } from './components/bhive-details/bhive-browser/
 import { ManifestDeleteActionComponent } from './components/bhive-details/bhive-browser/manifest-delete-action/manifest-delete-action.component';
 import { BhiveDetailsComponent } from './components/bhive-details/bhive-details.component';
 import { UserAdminDetailComponent } from './components/user-admin-detail/user-admin-detail.component';
+import { LogFileViewerComponent } from './components/log-file-viewer/log-file-viewer.component';
+import { LogConfigEditorComponent } from './components/log-config-editor/log-config-editor.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +19,8 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
     BhiveAuditComponent,
     BHiveBrowserComponent,
     ManifestDeleteActionComponent,
+    LogFileViewerComponent,
+    LogConfigEditorComponent,
   ],
   imports: [CommonModule, CoreModule, AdminRoutingModule],
 })

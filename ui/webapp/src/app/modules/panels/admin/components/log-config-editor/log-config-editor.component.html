@@ -1,0 +1,11 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Edit Logging Configuration" [panel]="true">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button text="APPLY" color="primary" [collapsed]="false" [disabled]="!isDirty()" (click)="onSave()"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div *ngIf="!(loading$ | async)" [style.height]="'100%'" fxLayout="column">
+      <app-bd-editor fxFlex="1 0 0" [(content)]="config" path="log4j2.xml"></app-bd-editor>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>
