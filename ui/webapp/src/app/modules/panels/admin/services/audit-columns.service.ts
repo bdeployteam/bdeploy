@@ -7,7 +7,7 @@ const COL_TIME: BdDataColumn<AuditLogDto> = {
   id: 'time',
   name: 'Time',
   data: (r) => r.instant,
-  width: '100px',
+  width: '120px',
   component: BdDataDateCellComponent,
 };
 

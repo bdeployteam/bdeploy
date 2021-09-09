@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
@@ -40,6 +42,7 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.UpdateHelper;
+import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.LauncherDto;
@@ -89,6 +92,28 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Override
     public void updateSelf(List<Key> target) {
+        // check if all minions are online.
+        BackendInfoResource bi = rc.initResource(new BackendInfoResourceImpl());
+        Set<OperatingSystem> required = new TreeSet<>();
+        for (var entry : bi.getNodeStatus().entrySet()) {
+            if (entry.getValue().offline) {
+                // a node is offline, not good.
+                throw new WebApplicationException("Node offline, cannot update: " + entry.getKey(), Status.PRECONDITION_FAILED);
+            }
+            required.add(entry.getValue().config.os);
+        }
+
+        // check if we have all required update packages for each OS.
+        Set<OperatingSystem> provided = target.stream().map(x -> ScopedManifestKey.parse(x).getOperatingSystem())
+                .collect(Collectors.toSet());
+        for (var reqOs : required) {
+            if (!provided.contains(reqOs)) {
+                throw new WebApplicationException(
+                        "Missing update package for required operating system " + reqOs + ", cannot update",
+                        Status.PRECONDITION_FAILED);
+            }
+        }
+
         UpdateHelper.update(minion.getSelf(), target, false, context);
     }
 

@@ -17,6 +17,7 @@ export class BdFileUploadComponent implements OnInit, OnDestroy {
   @Input() formDataParam = 'file';
   @Input() resultEvaluator: (status: UploadStatus) => string = this.defaultResultDetailsEvaluation;
 
+  @Output() success = new EventEmitter<any>();
   @Output() dismiss = new EventEmitter<File>();
 
   /* template */ status: UploadStatus;
@@ -24,11 +25,7 @@ export class BdFileUploadComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(
-    private uploads: UploadService,
-    private changes: ObjectChangesService,
-    private activities: ActivitiesService
-  ) {}
+  constructor(private uploads: UploadService, private changes: ObjectChangesService, private activities: ActivitiesService) {}
 
   ngOnInit(): void {
     this.status = this.uploads.uploadFile(this.url, this.file, this.parameters, this.formDataParam);
@@ -36,6 +33,14 @@ export class BdFileUploadComponent implements OnInit, OnDestroy {
     this.subscription = this.changes.subscribe(ObjectChangeType.ACTIVITIES, { scope: [this.status.scope] }, (e) => {
       this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES]);
     });
+
+    this.subscription.add(
+      this.status.stateObservable.subscribe((state) => {
+        if (state === UploadState.FINISHED) {
+          this.success.emit(true);
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {

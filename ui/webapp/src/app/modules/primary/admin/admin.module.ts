@@ -27,10 +27,8 @@ import { CoreModule } from '../../core/core.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { BHiveComponent } from './components/bhive/bhive.component';
-import { FileUploadComponent } from './components/file-upload/file-upload.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
-import { MessageboxComponent } from './components/messagebox/messagebox.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { AttributesTabComponent } from './components/settings-general/attributes-tab/attributes-tab.component';
 import { AuthTestComponent } from './components/settings-general/auth-test/auth-test.component';
@@ -41,25 +39,18 @@ import { PluginLoadActionComponent } from './components/settings-general/plugins
 import { PluginsTabComponent } from './components/settings-general/plugins-tab/plugins-tab.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
-import { UpdateCardComponent } from './components/update-card/update-card.component';
-import { UpdateDialogComponent } from './components/update-dialog/update-dialog.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
-import { MessageboxService } from './services/messagebox.service';
 
 @NgModule({
   declarations: [
     LogFilesBrowserComponent,
     UpdateBrowserComponent,
-    UpdateCardComponent,
-    UpdateDialogComponent,
     MasterCleanupComponent,
     MetricsOverviewComponent,
     AdminShellComponent,
     SettingsGeneralComponent,
     UsersBrowserComponent,
     UsersBrowserComponent,
-    MessageboxComponent,
-    FileUploadComponent,
     GeneralTabComponent,
     AttributesTabComponent,
     PluginsTabComponent,
@@ -102,6 +93,5 @@ import { MessageboxService } from './services/messagebox.service';
     NgTerminalModule,
     MonacoEditorModule.forRoot(),
   ],
-  providers: [MessageboxService],
 })
 export class AdminModule {}

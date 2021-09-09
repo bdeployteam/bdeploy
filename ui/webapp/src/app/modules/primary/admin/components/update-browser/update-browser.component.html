@@ -1,53 +1,10 @@
-<mat-card class="sw-card instance-node-card-theme">
-  <mat-card-header class="sw-card-header instance-node-card-header-theme">
-    <div mat-card-avatar class="sw-avatar-container">
-      <mat-icon class="sw-avatar" svgIcon="bdeploy"></mat-icon>
-    </div>
-    <mat-card-title>BDeploy Versions</mat-card-title>
-    <mat-card-subtitle class="sw-card-subtitle">Available versions of the BDeploy base software.</mat-card-subtitle>
-  </mat-card-header>
-
-  <mat-card-content class="sw-card-content">
-    <div *ngIf="systemLoading" class="loading-spinner-container">
-      <mat-spinner [diameter]="48"></mat-spinner>
-    </div>
-    <div *ngIf="systemVersions">
-      <ng-container *ngFor="let version of systemVersions">
-        <app-update-card
-          [version]="version"
-          (delete)="deleteSystemVersion($event)"
-          (update)="updateSystemVersion($event)"
-        ></app-update-card>
-      </ng-container>
-    </div>
-  </mat-card-content>
-</mat-card>
-
-<mat-card class="sw-card instance-node-card-theme">
-  <mat-card-header class="sw-card-header instance-node-card-header-theme">
-    <div mat-card-avatar class="sw-avatar-container">
-      <mat-icon class="sw-avatar">computer</mat-icon>
-    </div>
-    <mat-card-title>Launcher Versions</mat-card-title>
-    <mat-card-subtitle class="sw-card-subtitle"
-      >Available versions of the BDeploy client launcher software.</mat-card-subtitle
-    >
-  </mat-card-header>
-
-  <mat-card-content class="sw-card-content">
-    <div *ngIf="launcherLoading" class="loading-spinner-container">
-      <mat-spinner [diameter]="48"></mat-spinner>
-    </div>
-    <div *ngIf="launcherVersions">
-      <ng-container *ngFor="let version of launcherVersions">
-        <app-update-card
-          [version]="version"
-          [allowUpdate]="false"
-          (delete)="deleteLauncherVersion($event)"
-        ></app-update-card>
-      </ng-container>
-    </div>
-  </mat-card-content>
-</mat-card>
-
-<button mat-fab (click)="openUploadDialog()" class="add-button"><mat-icon>cloud_upload</mat-icon></button>
+<app-bd-dialog [loadingWhen$]="software.loading$">
+  <app-bd-dialog-toolbar header="System Software">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-panel-button icon="cloud_upload" text="Upload Software" color="primary" [route]="['panels', 'admin', 'software', 'upload']"></app-bd-panel-button>
+    <app-bd-button icon="refresh" text="Refresh" (click)="software.load()"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-data-table [records]="software.software$ | async" [columns]="columns" [recordRoute]="getRecordRoute"></app-bd-data-table>
+  </app-bd-dialog-content>
+</app-bd-dialog>

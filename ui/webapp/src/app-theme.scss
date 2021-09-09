@@ -14,9 +14,6 @@
 
 @import 'app/modules/primary/admin/components/admin-shell/admin-shell.theme.scss';
 
-// TODO: remove legacy
-@import 'app/modules/primary/admin/components/file-upload/file-upload-theme.scss';
-
 @mixin all-themes($theme) {
   @include mat.all-component-themes($theme);
   @include common-classes($theme);
@@ -25,9 +22,6 @@
   @include bd-form-toggle-theme($theme);
 
   @include settings-shell-theme($theme);
-
-  // TODO: remove legacy
-  @include file-upload-theme($theme);
 
   $dark: map-get($theme, 'is-dark');
 

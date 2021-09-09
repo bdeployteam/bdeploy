@@ -1,0 +1,44 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar [header]="'Details for ' + (software$ | async)?.version" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="5px">
+      <div fxLayout="row" fxLayoutGap="5px">
+        <strong>Version:</strong>
+        <span>{{ (software$ | async)?.version }}</span>
+      </div>
+      <div fxLayout="row" fxLayoutGap="5px">
+        <strong>System Software Supported OS:</strong>
+        <span *ngIf="systemOs$ | async as os">
+          <ng-container *ngIf="!!os?.length">{{ os.join(', ') }}</ng-container>
+          <ng-container *ngIf="!os?.length">None</ng-container>
+        </span>
+      </div>
+      <div fxLayout="row" fxLayoutGap="5px">
+        <strong>Launcher Supported OS:</strong>
+        <span *ngIf="launcherOs$ | async as os">
+          <ng-container *ngIf="!!os?.length">{{ os.join(', ') }}</ng-container>
+          <ng-container *ngIf="!os?.length">None</ng-container>
+        </span>
+      </div>
+
+      <app-bd-button
+        color="warn"
+        icon="system_update"
+        text="Install Update"
+        [collapsed]="false"
+        (click)="doInstall()"
+        [loadingWhen$]="installing$"
+        [disabled]="!(software$ | async)?.system?.length || (software$ | async)?.current || (installing$ | async)"
+      ></app-bd-button>
+      <app-bd-button
+        color="primary"
+        icon="delete"
+        text="Delete"
+        [collapsed]="false"
+        (click)="doDelete()"
+        [loadingWhen$]="deleting$"
+        [disabled]="(deleting$ | async) || (software$ | async)?.current"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

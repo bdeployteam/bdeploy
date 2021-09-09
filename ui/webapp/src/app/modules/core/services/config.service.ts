@@ -8,7 +8,7 @@ import { isEqual } from 'lodash-es';
 import { Observable } from 'rxjs';
 import { delay, retryWhen } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { BackendInfoDto, MinionMode, MinionStatusDto, PluginInfoDto, Version } from '../../../models/gen.dtos';
+import { BackendInfoDto, MinionMode, PluginInfoDto, Version } from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import { ConnectionVersionComponent, VERSION_DATA } from '../components/connection-version/connection-version.component';
 import { NO_LOADING_BAR_HDRS } from '../utils/loading-bar.util';
@@ -171,11 +171,6 @@ export class ConfigService {
     return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
       headers: errorHandling ? NO_LOADING_BAR_HDRS : suppressGlobalErrorHandling(new HttpHeaders(NO_LOADING_BAR_HDRS)),
     });
-  }
-
-  /** Fetches node states - use when applying updates. */
-  public getNodeStates() {
-    return this.http.get<{ [minionName: string]: MinionStatusDto }[]>(environment.apiUrl + '/backend-info/minion-status');
   }
 
   /** Determines whether the server is a 'CENTRAL' mode server */

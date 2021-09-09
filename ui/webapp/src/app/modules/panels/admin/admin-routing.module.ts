@@ -7,6 +7,8 @@ import { BHiveBrowserComponent as BHiveBrowserComponent } from './components/bhi
 import { BhiveDetailsComponent as BHiveDetailsComponent } from './components/bhive-details/bhive-details.component';
 import { LogConfigEditorComponent } from './components/log-config-editor/log-config-editor.component';
 import { LogFileViewerComponent } from './components/log-file-viewer/log-file-viewer.component';
+import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
+import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 import { UserAdminDetailComponent } from './components/user-admin-detail/user-admin-detail.component';
 
 const routes: Routes = [
@@ -17,6 +19,8 @@ const routes: Routes = [
   { path: 'bhive/:bhive/browse', component: BHiveBrowserComponent, canActivate: [AdminGuard], data: { max: true } },
   { path: 'logging/view/:node/:file', component: LogFileViewerComponent, canActivate: [AdminGuard], data: { max: true } },
   { path: 'logging/config', component: LogConfigEditorComponent, canActivate: [AdminGuard], data: { max: true } },
+  { path: 'software/upload', component: SoftwareUploadComponent, canActivate: [AdminGuard] },
+  { path: 'software/details/:version', component: SoftwareDetailsComponent, canActivate: [AdminGuard] },
 ];
 
 @NgModule({

@@ -1,60 +1,97 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { measure } from 'src/app/modules/core/utils/performance.utils';
+import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { LauncherDto, ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { Logger, LoggingService } from '../../../core/services/logging.service';
+
+export interface SoftwareVersion {
+  version: string;
+
+  system: ManifestKey[];
+  launcher: ManifestKey[];
+
+  current: boolean;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class SoftwareUpdateService {
-  private static BASEPATH = '/swup';
-  private readonly log: Logger = this.loggingService.getLogger('SoftwareUpdateService');
+  public loading$ = new BehaviorSubject<boolean>(false);
+  public software$ = new BehaviorSubject<SoftwareVersion[]>(null);
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private loggingService: LoggingService) {}
+  private apiPath = () => `${this.cfg.config.api}/swup`;
+
+  constructor(private cfg: ConfigService, private http: HttpClient) {}
+
+  public load() {
+    this.loading$.next(true);
+    forkJoin([this.listBDeployVersions(), this.listLauncherVersions()])
+      .pipe(
+        finalize(() => this.loading$.next(false)),
+        measure('Load Available Software')
+      )
+      .subscribe(([b, l]) => {
+        const tags: { [key: string]: SoftwareVersion } = {};
+        b.forEach((key) => {
+          const k = tags[key.tag] || { version: key.tag, system: [], launcher: [], current: convert2String(this.cfg.config.version) === key.tag };
+          k.system.push(key);
+          tags[key.tag] = k;
+        });
+
+        l.forEach((key) => {
+          const k = tags[key.tag] || { version: key.tag, system: [], launcher: [], current: convert2String(this.cfg.config.version) === key.tag };
+          k.launcher.push(key);
+          tags[key.tag] = k;
+        });
+
+        this.software$.next(
+          Object.values(tags).sort((a, b) => {
+            if (a.version > b.version) {
+              return -1;
+            }
+            if (a.version < b.version) {
+              return 1;
+            }
+            return 0;
+          })
+        );
+      });
+  }
 
   public listBDeployVersions(): Observable<ManifestKey[]> {
-    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/bdeploy';
-    this.log.debug('listBDeployVersions: ' + url);
-    return this.http.get<ManifestKey[]>(url);
+    return this.http.get<ManifestKey[]>(`${this.apiPath()}/bdeploy`);
   }
 
   public listLauncherVersions(): Observable<ManifestKey[]> {
-    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/launcher';
-    this.log.debug('listLauncherVersions: ' + url);
-    return this.http.get<ManifestKey[]>(url);
+    return this.http.get<ManifestKey[]>(`${this.apiPath()}/launcher`);
   }
 
   public getLatestLaunchers(): Observable<LauncherDto> {
-    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/launcherLatest';
-    this.log.debug('getLatestLaunchers: ' + url);
-    return this.http.get<LauncherDto>(url);
+    return this.http.get<LauncherDto>(`${this.apiPath()}/launcherLatest`);
   }
 
   public deleteVersion(keys: ManifestKey[]) {
-    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH;
-    this.log.debug('deleteVersion: ' + url);
-    return this.http.post(url, keys);
+    return this.http.post(`${this.apiPath()}`, keys);
   }
 
   public updateBdeploy(keys: ManifestKey[]) {
-    const url: string = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/selfUpdate';
-    this.log.debug('updateBdeploy: ' + url);
-    return this.http.post(url, keys);
+    return this.http.post(`${this.apiPath()}/selfUpdate`, keys);
   }
 
   public getUploadUrl() {
-    return this.cfg.config.api + SoftwareUpdateService.BASEPATH;
+    return this.apiPath();
   }
 
   public getDownloadUrl(key: ManifestKey) {
-    return this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/download/' + key.name + '/' + key.tag;
+    return `${this.apiPath()}/download/${key.name}/${key.tag}`;
   }
 
   public createLauncherInstaller(os: OperatingSystem): Observable<string> {
-    const url = this.cfg.config.api + SoftwareUpdateService.BASEPATH + '/createLauncherInstaller';
-    return this.http.get(url, {
+    return this.http.get(`${this.apiPath()}/createLauncherInstaller`, {
       params: new HttpParams().set('os', os.toLowerCase()),
       responseType: 'text',
     });
