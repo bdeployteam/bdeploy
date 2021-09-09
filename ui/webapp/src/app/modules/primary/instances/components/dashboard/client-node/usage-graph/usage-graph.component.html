@@ -31,7 +31,7 @@
       [attr.cy]="point.y + '%'"
       r="3"
       class="local-graph-point"
-      [matTooltip]="'Launches : ' + curve[i] + ' on ' + dayLabels[i]"
+      [matTooltip]="'Launches : ' + curve[i] + ' on ' + (days[i] | date: 'dd.MM.yyyy')"
       [matTooltipPosition]="point.y > 50 ? 'above' : 'below'"
       [matTooltipShowDelay]="300"
     ></circle>

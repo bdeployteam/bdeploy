@@ -1,5 +1,4 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
-import { format } from 'date-fns';
 import { Subscription } from 'rxjs';
 import { ClientsUsageService, ClientUsagePerApp } from '../../../../services/clients-usage.service';
 
@@ -17,7 +16,7 @@ export class ClientUsageGraphComponent implements OnInit, OnDestroy, OnChanges {
   private usage: ClientUsagePerApp[];
 
   /* template */ curve: number[] = [];
-  /* template */ dayLabels: string[] = [];
+  /* template */ days: Date[] = [];
   /* template */ pathPoints: { x: number; y: number }[];
   /* template */ pathInfo: string;
   /* template */ hasVisiblePoint = false;
@@ -50,7 +49,7 @@ export class ClientUsageGraphComponent implements OnInit, OnDestroy, OnChanges {
     } else {
       const reverseDailyUsage = [...usageOfApp.usage].reverse();
       this.curve = reverseDailyUsage.map((u) => u.usage.reduce((p, c) => p + c.usage, 0));
-      this.dayLabels = reverseDailyUsage.map((u) => format(u.day, 'dd.MM.yyyy'));
+      this.days = reverseDailyUsage.map((u) => u.day);
     }
 
     if (!this.curve) {

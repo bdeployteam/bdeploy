@@ -1,11 +1,11 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
-import { format } from 'date-fns';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
+import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
@@ -46,8 +46,9 @@ export class UsersBrowserComponent implements OnInit {
   private colLastLogin: BdDataColumn<UserInfo> = {
     id: 'lastLogin',
     name: 'Last active login',
-    data: (r) => (r.lastActiveLogin ? format(r.lastActiveLogin, 'dd.MM.yyyy HH:mm:ss') : 'Never'),
+    data: (r) => r.lastActiveLogin,
     showWhen: '(min-width: 1600px)',
+    component: BdDataDateCellComponent,
   };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;

@@ -41,7 +41,8 @@
           <ng-container *ngIf="detail.stopTime > 0">
             <mat-icon>timer</mat-icon>
             <div>Stopped At:</div>
-            <div>{{ getStopTime(detail) }}</div>
+            <div *ngIf="!!detail.stopTime">{{ detail.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
+            <div *ngIf="!detail.stopTime">-</div>
           </ng-container>
         </ng-container>
         <ng-container *ngIf="isRunning(detail)">
@@ -51,12 +52,13 @@
 
           <mat-icon>timer</mat-icon>
           <div>Started At:</div>
-          <div>{{ getStartTime(detail) }}</div>
+          <div>{{ detail.handle.startTime | date: 'dd.MM.yyyy HH:mm' }}</div>
         </ng-container>
         <ng-container *ngIf="isCrashedWaiting(detail)">
           <mat-icon>report</mat-icon>
           <div>Stopped At:</div>
-          <div>{{ getStopTime(detail) }}</div>
+          <div *ngIf="!!detail.stopTime">{{ detail.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
+          <div *ngIf="!detail.stopTime">-</div>
 
           <mat-progress-spinner [value]="restartProgress$ | async" color="primary" [diameter]="24"></mat-progress-spinner>
           <div>Restart In:</div>

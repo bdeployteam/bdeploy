@@ -12,7 +12,7 @@
           <div>{{ state.config.master ? 'yes' : 'no' }}</div>
           <ng-container *ngIf="!state.offline">
             <div>Up Since:</div>
-            <div>{{ formatDate(state.startup) }}</div>
+            <div>{{ state.startup | date: 'dd.MM.yyyy HH:mm' }}</div>
           </ng-container>
           <ng-container *ngIf="state.offline">
             <div>Status:</div>

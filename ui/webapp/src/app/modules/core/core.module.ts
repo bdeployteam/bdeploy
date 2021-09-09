@@ -96,6 +96,7 @@ import { ConfigService } from './services/config.service';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { GroupIdValidator } from './validators/group-id';
 import { PasswordVerificationValidator } from './validators/password-verification';
+import { BdDataDateCellComponent } from './components/bd-data-date-cell/bd-data-date-cell.component';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -163,6 +164,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFormSelectComponentOptionComponent,
     BdDataPermissionLevelCellComponent,
     EditUniqueValueValidatorDirective,
+    BdDataDateCellComponent,
   ],
   providers: [
     httpInterceptorProviders,

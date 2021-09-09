@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { format } from 'date-fns';
 import { BdDataColumn } from 'src/app/models/data';
 import { HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { InstanceStateService } from './instance-state.service';
 import { InstancesService } from './instances.service';
@@ -9,9 +9,10 @@ import { InstancesService } from './instances.service';
 const historyTimestampColumn: BdDataColumn<HistoryEntryDto> = {
   id: 'timestamp',
   name: 'Date/Time',
-  data: (r) => format(r.timestamp, 'dd.MM.yyy HH:mm:ss'),
+  data: (r) => r.timestamp,
   width: '135px',
   showWhen: '(min-width: 900px)',
+  component: BdDataDateCellComponent,
 };
 
 const historyUserColumn: BdDataColumn<HistoryEntryDto> = {

@@ -1,6 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { format } from 'date-fns';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
@@ -68,10 +67,6 @@ export class ServerDetailsComponent implements OnInit {
   constructor(public servers: ServersService, public serverDetails: ServerDetailsService, public auth: AuthenticationService, public areas: NavAreasService) {}
 
   ngOnInit(): void {}
-
-  /* template */ formatDate(x: number) {
-    return format(new Date(x), 'dd.MM.yyyy HH:mm');
-  }
 
   /* template */ formatVersion(x: Version) {
     return convert2String(x);

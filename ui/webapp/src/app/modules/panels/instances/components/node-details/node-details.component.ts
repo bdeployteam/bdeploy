@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { format } from 'date-fns';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { InstanceNodeConfigurationDto, MinionStatusDto, Version } from 'src/app/models/gen.dtos';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
@@ -46,9 +45,5 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
 
   /* template */ formatVersion(v: Version) {
     return convert2String(v);
-  }
-
-  /* template */ formatDate(d: number) {
-    return format(d, 'dd.MM.yyyy HH:mm');
   }
 }

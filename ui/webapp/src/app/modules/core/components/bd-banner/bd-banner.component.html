@@ -8,5 +8,5 @@
   <div class="local-banner-text">
     <pre>{{ banner.text }}</pre>
   </div>
-  <div class="local-banner-info" fxFlexAlign="end">{{ banner.user }}, {{ format(banner.timestamp) }}</div>
+  <div class="local-banner-info" fxFlexAlign="end">{{ banner.user }}, {{ banner.timestamp | date: 'dd.MM.yyyy HH:mm:ss' }}</div>
 </div>

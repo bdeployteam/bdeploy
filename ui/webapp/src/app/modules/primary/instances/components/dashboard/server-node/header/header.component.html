@@ -34,7 +34,7 @@
         [ngClass]="getMaxLineY() > 45 || !hasAction ? [] : 'local-max-label-padded'"
       >
         <tspan x="100%" dy="0">{{ maxLabel }}</tspan>
-        <tspan x="100%" dy="1.2em">Data From: {{ formatRenderTime() }}</tspan>
+        <tspan x="100%" dy="1.2em">Data From: {{ renderTime | date: 'dd.MM HH:mm:ss' }}</tspan>
       </text>
     </g>
 
@@ -62,7 +62,7 @@
           [attr.x1]="X + '%'"
           [attr.x2]="X + '%'"
           [ngClass]="['local-event', 'local-event-' + event.type]"
-          [matTooltip]="event.description + ' @ ' + formatEventTime(event)"
+          [matTooltip]="event.description + ' @ ' + (event.time | date: 'dd.MM HH:mm:ss')"
           [matTooltipPosition]="X > 50 ? 'left' : 'right'"
           [matTooltipShowDelay]="300"
           vector-effect="non-scaling-stroke"

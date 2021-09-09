@@ -13,7 +13,7 @@
       </div>
       <div gdColumns="100px auto" gdGap="5px" gdAlignColumns="start center">
         <div>Occured at:</div>
-        <div>{{ formatTimestamp(entry.timestamp) }}</div>
+        <div>{{ entry.timestamp | date: 'dd.MM.yyy HH:mm:ss' }}</div>
         <div>Type:</div>
         <div>{{ entry.type }}</div>
         <div>Version:</div>

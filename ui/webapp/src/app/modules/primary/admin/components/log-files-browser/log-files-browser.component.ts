@@ -1,9 +1,9 @@
 import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { format } from 'date-fns';
 import { BehaviorSubject } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
+import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { formatSize } from 'src/app/modules/core/utils/object.utils';
@@ -34,8 +34,9 @@ const COL_SIZE: BdDataColumn<RemoteDirectoryEntry> = {
 const COL_MODIFIED: BdDataColumn<RemoteDirectoryEntry> = {
   id: 'modified',
   name: 'Last Modified',
-  data: (r) => format(r.lastModified, 'dd.MM HH:mm:ss'),
+  data: (r) => r.lastModified,
   width: '130px',
+  component: BdDataDateCellComponent,
 };
 
 @Component({

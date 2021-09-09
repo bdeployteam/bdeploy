@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { format } from 'date-fns';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { ApplicationStartType, ProcessDetailDto, ProcessState } from 'src/app/models/gen.dtos';
@@ -96,17 +95,6 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
 
   /* template */ isCrashedWaiting(detail: ProcessDetailDto) {
     return detail.status.processState === ProcessState.CRASHED_WAITING;
-  }
-
-  /* template */ getStartTime(detail: ProcessDetailDto) {
-    return format(detail.handle.startTime, 'dd.MM.yyyy HH:mm');
-  }
-
-  /* template */ getStopTime(detail: ProcessDetailDto) {
-    if (detail.stopTime === -1) {
-      return '-';
-    }
-    return format(detail.stopTime, 'dd.MM.yyyy HH:mm');
   }
 
   /* template */ formatStartType(type: ApplicationStartType) {

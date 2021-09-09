@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { format } from 'date-fns';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -57,10 +56,6 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ formatTimestamp(x: number) {
-    return format(x, 'dd.MM.yyy HH:mm:ss');
   }
 
   /* template */ isCreate(entry: HistoryEntryDto) {

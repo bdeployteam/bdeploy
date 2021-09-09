@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { format } from 'date-fns';
 import { BehaviorSubject } from 'rxjs';
 import { first, skipWhile } from 'rxjs/operators';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { formatSize } from 'src/app/modules/core/utils/object.utils';
@@ -33,9 +33,10 @@ const colSize: BdDataColumn<FileListEntry> = {
 const colModTime: BdDataColumn<FileListEntry> = {
   id: 'lastMod',
   name: 'Last Modification',
-  data: (r) => format(r.entry.lastModified, 'dd.MM.yyyy HH:mm'),
+  data: (r) => r.entry.lastModified,
   width: '150px',
   showWhen: '(min-width: 800px)',
+  component: BdDataDateCellComponent,
 };
 
 @Component({

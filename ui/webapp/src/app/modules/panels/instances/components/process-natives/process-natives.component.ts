@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { format } from 'date-fns';
 import { Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { ProcessHandleDto } from 'src/app/models/gen.dtos';
+import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { ProcessDetailsService } from '../../services/process-details.service';
 
 const nativePidColumn: BdDataColumn<ProcessHandleDto> = {
@@ -46,8 +46,9 @@ const nativeUserColumn: BdDataColumn<ProcessHandleDto> = {
 const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
   id: 'startTime',
   name: 'Started At',
-  data: (r) => format(r.startTime, 'dd.MM.yyyy HH:mm:ss'),
+  data: (r) => r.startTime,
   width: '130px',
+  component: BdDataDateCellComponent,
 };
 
 @Component({

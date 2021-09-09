@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { format } from 'date-fns';
 import { InstanceBannerRecord } from 'src/app/models/gen.dtos';
 
 @Component({
@@ -13,8 +12,4 @@ export class BdBannerComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {}
-
-  /* template */ format(time: number) {
-    return format(time, 'dd.MM.yyyy HH:mm:ss');
-  }
 }

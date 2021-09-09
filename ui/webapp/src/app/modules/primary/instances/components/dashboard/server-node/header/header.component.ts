@@ -1,5 +1,4 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { format } from 'date-fns';
 import { Subscription } from 'rxjs';
 import { HistoryEntryType, InstanceNodeConfigurationDto, OperatingSystem, ProcessState } from 'src/app/models/gen.dtos';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
@@ -218,14 +217,6 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
       return 100 - perc; // from the right side.
     }
     return 0; // outside, don't render
-  }
-
-  /* template */ formatRenderTime() {
-    return format(this.renderTime, 'dd.MM HH:mm:ss');
-  }
-
-  /* template */ formatEventTime(event: MarkedEvent) {
-    return format(event.time, 'dd.MM HH:mm:ss');
   }
 
   /* template */ isSynchronized() {

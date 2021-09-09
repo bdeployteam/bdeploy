@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { format } from 'date-fns';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
 
 @Injectable({
@@ -33,9 +33,10 @@ export class ServersColumnsService {
   serverSyncTimeColumn: BdDataColumn<ManagedMasterDto> = {
     id: 'syncTime',
     name: 'Last Sync.',
-    data: (r) => format(new Date(r.lastSync), 'dd.MM.yyyy HH:mm'),
+    data: (r) => r.lastSync,
     icon: (r) => 'history',
     hint: BdDataColumnTypeHint.DETAILS,
+    component: BdDataDateCellComponent,
   };
 
   serverSyncColumn: BdDataColumn<ManagedMasterDto> = {

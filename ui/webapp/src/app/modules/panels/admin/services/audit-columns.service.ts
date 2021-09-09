@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { format } from 'date-fns';
 import { BdDataColumn } from 'src/app/models/data';
 import { AuditLogDto } from 'src/app/models/gen.dtos';
+import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 
 const COL_TIME: BdDataColumn<AuditLogDto> = {
   id: 'time',
   name: 'Time',
-  data: (r) => format(r.instant, 'dd.MM HH:mm:ss'),
+  data: (r) => r.instant,
   width: '100px',
+  component: BdDataDateCellComponent,
 };
 
 const COL_THREAD: BdDataColumn<AuditLogDto> = {
