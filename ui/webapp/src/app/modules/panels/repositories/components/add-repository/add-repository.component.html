@@ -4,7 +4,7 @@
   <app-bd-dialog-content>
     <form #repositoryForm="ngForm" (ngSubmit)="onSave()">
       <div fxLayout="column" fxLayoutGap="10px">
-        <app-bd-form-input label="Name" name="name" [(ngModel)]="repository.name" required appGroupId></app-bd-form-input>
+        <app-bd-form-input label="Name" name="name" [(ngModel)]="repository.name" required appIdentifier></app-bd-form-input>
         <app-bd-form-input label="Description" name="description" [(ngModel)]="repository.description"></app-bd-form-input>
 
         <app-bd-button color="toolbar" [collapsed]="false" text="SAVE" [disabled]="repositoryForm.invalid"></app-bd-button>

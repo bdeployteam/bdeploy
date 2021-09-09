@@ -42,6 +42,7 @@ import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdDataBooleanCellComponent } from './components/bd-data-boolean-cell/bd-data-boolean-cell.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataComponentCellComponent } from './components/bd-data-component-cell/bd-data-component-cell.component';
+import { BdDataDateCellComponent } from './components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataDisplayComponent } from './components/bd-data-display/bd-data-display.component';
 import { BdDataGridComponent } from './components/bd-data-grid/bd-data-grid.component';
 import { BdDataGroupingPanelComponent } from './components/bd-data-grouping-panel/bd-data-grouping-panel.component';
@@ -90,13 +91,11 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
-import { SafeHtmlPipe } from './pipes/safeHtml.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
-import { GroupIdValidator } from './validators/group-id';
-import { PasswordVerificationValidator } from './validators/password-verification';
-import { BdDataDateCellComponent } from './components/bd-data-date-cell/bd-data-date-cell.component';
+import { IdentifierValidator } from './validators/identifier.directive';
+import { PasswordVerificationValidator } from './validators/password-verification.directive';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -112,7 +111,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     LoginComponent,
     UserAvatarComponent,
     VersionPipe,
-    SafeHtmlPipe,
     MainNavTopComponent,
     MainNavFlyinComponent,
     MainNavMenuComponent,
@@ -136,7 +134,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdImageUploadComponent,
     BdActionRowComponent,
     BdFormInputComponent,
-    GroupIdValidator,
+    IdentifierValidator,
     BdFormToggleComponent,
     BdFormSelectComponent,
     BdDataComponentCellComponent,
@@ -272,7 +270,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataPermissionLevelCellComponent,
 
     // validators
-    GroupIdValidator,
+    IdentifierValidator,
     PasswordVerificationValidator,
     EditUniqueValueValidatorDirective,
   ],

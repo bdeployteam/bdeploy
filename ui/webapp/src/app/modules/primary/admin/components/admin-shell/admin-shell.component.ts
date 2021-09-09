@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-admin-shell',
@@ -7,10 +6,7 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./admin-shell.component.css'],
 })
 export class AdminShellComponent implements OnInit {
-  constructor(private title: Title) {}
+  constructor() {}
 
-  ngOnInit() {
-    // need to do manual, due to sub-routes, etc.
-    this.title.setTitle('Administration');
-  }
+  ngOnInit() {}
 }

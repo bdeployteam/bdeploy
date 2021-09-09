@@ -1,6 +1,6 @@
 import { ValidationErrors } from '@angular/forms';
-import { GROUP_ID_VALIDATION } from './group-id';
-import { PASSWORD_VALIDATION } from './password-verification';
+import { ID_VALIDATION } from './identifier.directive';
+import { PASSWORD_VALIDATION } from './password-verification.directive';
 
 export interface BdValidationMessageExtractor {
   id: string;
@@ -37,7 +37,7 @@ export function bdValidationMessage(label: string, errors: ValidationErrors): st
   }
 
   // our own validators
-  if (!!errors[GROUP_ID_VALIDATION]) {
+  if (!!errors[ID_VALIDATION]) {
     return `${label} contains invalid characters`;
   }
 

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { LoggingService } from './logging.service';
 
 export interface BdSearchable {
   bdOnSearch(value: string): void;
@@ -13,9 +12,8 @@ export class SearchService {
   private currentSearch = '';
   private registrations: BdSearchable[] = [];
   private enableSearch$ = new BehaviorSubject<boolean>(false);
-  private log = this.logging.getLogger('SearchService');
 
-  constructor(private logging: LoggingService) {}
+  constructor() {}
 
   set search(value: string) {
     this.registrations.forEach((r) => r.bdOnSearch(value));

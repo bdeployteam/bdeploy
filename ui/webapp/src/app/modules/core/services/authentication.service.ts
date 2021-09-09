@@ -6,30 +6,19 @@ import { map, tap } from 'rxjs/operators';
 import { ApiAccessToken, CredentialsApi, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
-import { Logger, LoggingService } from './logging.service';
 import { NavAreasService } from './nav-areas.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthenticationService {
-  private log: Logger = this.loggingService.getLogger('AuthenticationService');
-
   private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(this.cookies.check('st') ? this.cookies.get('st') : null);
 
   public userInfoSubject: BehaviorSubject<UserInfo> = new BehaviorSubject(null);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private loggingService: LoggingService,
-    private cookies: CookieService,
-    private areas: NavAreasService
-  ) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private cookies: CookieService, private areas: NavAreasService) {}
 
   authenticate(username: string, password: string): Observable<any> {
-    this.log.debug('authenticate("' + username + '", <...>)');
-
     return this.http
       .post(this.cfg.config.api + '/auth', { user: username, password: password } as CredentialsApi, {
         responseType: 'text',
@@ -50,7 +39,6 @@ export class AuthenticationService {
         ),
         map(
           (result) => {
-            this.log.debug('Fetching current user info...');
             this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').pipe(tap((userInfo) => this.userInfoSubject.next(userInfo)));
           },
           (error) => {
@@ -86,7 +74,6 @@ export class AuthenticationService {
   }
 
   logout(): void {
-    this.log.info('destroying session for user "' + this.getUsername() + '"');
     this.tokenSubject.next(null);
     this.cookies.delete('st', '/');
     window.location.reload();
@@ -212,19 +199,16 @@ export class AuthenticationService {
   }
 
   getUserInfo(): Observable<UserInfo> {
-    this.log.debug('Fetching current user info...');
     this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').subscribe((userInfo) => this.userInfoSubject.next(userInfo));
     return this.userInfoSubject.asObservable();
   }
 
   updateUserInfo(info: UserInfo): Observable<any> {
-    this.log.debug('Updating current user info...');
     this.userInfoSubject.next(info);
     return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
   }
 
   changePassword(dto: UserChangePasswordDto): Observable<any> {
-    this.log.debug('Changing password for current user...');
     return this.http.post(this.cfg.config.api + '/auth/change-password', dto, {
       responseType: 'text',
       headers: suppressGlobalErrorHandling(new HttpHeaders()),
@@ -232,7 +216,6 @@ export class AuthenticationService {
   }
 
   getAuthPackForUser(genFull: boolean): Observable<string> {
-    this.log.debug('Retrieve auth pack for user');
     return this.http.get(this.cfg.config.api + '/auth/auth-pack', {
       responseType: 'text',
       params: new HttpParams().append('full', genFull ? 'true' : 'false'),
