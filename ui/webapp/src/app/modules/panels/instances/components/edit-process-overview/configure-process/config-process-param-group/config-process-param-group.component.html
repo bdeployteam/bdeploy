@@ -81,7 +81,11 @@
 
               <!-- Single parameter -->
               <ng-container *ngFor="let p of group.pairs">
-                <div fxLayout="row" *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)">
+                <div
+                  [attr.data-cy]="p.descriptor ? p.descriptor.uid : p.value.uid"
+                  fxLayout="row"
+                  *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)"
+                >
                   <ng-template #popup>
                     <app-param-desc-card [descriptor]="p.descriptor"></app-param-desc-card>
                   </ng-template>

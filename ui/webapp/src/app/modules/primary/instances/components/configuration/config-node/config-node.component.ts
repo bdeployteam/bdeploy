@@ -1,5 +1,5 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { ApplicationConfiguration, InstanceNodeConfigurationDto, MinionDto } from 'src/app/models/gen.dtos';
@@ -13,7 +13,7 @@ import { ProcessesColumnsService } from '../../../services/processes-columns.ser
   styleUrls: ['./config-node.component.css'],
 })
 export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
-  @Input() nodeName: string;
+  @HostBinding('attr.data-cy') @Input() nodeName: string;
 
   /* template */ node$ = new BehaviorSubject<MinionDto>(null);
   /* template */ config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);

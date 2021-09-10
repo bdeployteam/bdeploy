@@ -41,7 +41,7 @@ Cypress.Commands.add('pressToolbarPanelButton', function (text) {
 
 Cypress.Commands.add('pressToolbarButton', function (text) {
   cy.get('app-bd-dialog-toolbar').within(() => {
-    cy.get(`button[data-cy="${text}"]`).click();
+    cy.get(`button[data-cy^="${text}"]`).click();
   });
 });
 
@@ -110,7 +110,7 @@ Cypress.Commands.add('downloadObjectUrl', function (link) {
 
 Cypress.Commands.add('downloadBlobFile', { prevSubject: true }, function (subject, filename) {
   cy.window().then((win) => {
-    const stubbed = cy.stub(win.downloadLocation, 'click', (link) => {});
+    const stubbed = cy.stub(win.downloadLocation, 'click').callsFake((link) => {});
     cy.wrap(subject)
       .click()
       .should(() => {

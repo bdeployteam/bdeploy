@@ -40,7 +40,8 @@ export class MainNavFlyinComponent implements OnInit {
       return 'normal';
     }
 
-    const large = this.media.isMatched('(min-width: 1280px)');
+    // check max-width to check the same as content - otherwise *exactly* 1280px (UI test) behave differently.
+    const large = !this.media.isMatched('(max-width: 1280px)');
     if (this.areas.menuMaximized$.value) {
       return large ? 'max-lg-menu' : 'max-sm-menu';
     }
