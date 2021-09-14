@@ -7,7 +7,7 @@ Cypress.Commands.add('createInstance', function (groupName, instanceName, produc
 
   cy.enterGroup(groupName);
   cy.inMainNavContent(() => {
-    cy.pressToolbarPanelButton('Add Instance');
+    cy.pressToolbarButton('Add Instance');
   });
 
   cy.inMainNavFlyin('app-add-instance', () => {
@@ -46,7 +46,7 @@ Cypress.Commands.add('deleteInstance', function (groupName, instanceName, mode =
 
   cy.pressMainNavButton('Instance Configuration');
   cy.inMainNavContent(() => {
-    cy.pressToolbarPanelButton('Instance Settings');
+    cy.pressToolbarButton('Instance Settings');
   });
 
   cy.inMainNavFlyin('app-instance-settings', () => {

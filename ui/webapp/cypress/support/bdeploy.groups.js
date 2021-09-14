@@ -7,7 +7,7 @@ Cypress.Commands.add('createGroup', function (groupName, mode = 'STANDALONE') {
 
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('not.exist');
-    cy.pressToolbarPanelButton('Add Instance Group');
+    cy.pressToolbarButton('Add Instance Group');
   });
 
   cy.inMainNavFlyin('app-add-group', () => {
@@ -68,7 +68,7 @@ Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, mo
   cy.pressMainNavButton('Products');
   cy.get('app-products-browser').should('exist');
 
-  cy.pressToolbarPanelButton('Upload Product');
+  cy.pressToolbarButton('Upload Product');
   cy.inMainNavFlyin('app-product-upload', () => {
     cy.fillFileDrop(fileName);
     cy.contains('app-bd-file-upload', `Uploading: ${fileName}`).should('not.exist');
@@ -114,9 +114,11 @@ Cypress.Commands.add('attachManaged', function (groupName) {
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('not.exist');
   });
-  cy.pressToolbarPanelButton('Link Instance Group');
+  cy.pressToolbarButton('Link Instance Group');
   cy.inMainNavFlyin('app-link-central', () => {
-    cy.pressExpansionPanel('Manual and Offline Linking');
+    cy.contains('mat-expansion-panel', 'Manual and Offline Linking').within(() => {
+      cy.get('mat-panel-title').click();
+    });
 
     cy.get(`app-bd-button[text="Download Link Information"]`).within(() => {
       cy.get('button').should('exist').and('be.enabled').downloadBlobFile('managed-ident.txt');
@@ -133,7 +135,7 @@ Cypress.Commands.add('attachManaged', function (groupName) {
   cy.enterGroup(groupName);
   cy.pressMainNavButton('Managed Servers');
   cy.get('app-servers-browser').should('exist');
-  cy.pressToolbarPanelButton('Link Managed Server');
+  cy.pressToolbarButton('Link Managed Server');
   cy.inMainNavFlyin('app-link-managed', () => {
     cy.contains('div', 'Details for server to link').should('not.exist');
     cy.contains('mat-card', 'Drop managed server information here!')

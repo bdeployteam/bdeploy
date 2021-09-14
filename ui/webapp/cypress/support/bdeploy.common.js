@@ -33,20 +33,10 @@ Cypress.Commands.add('checkMainNavFlyinClosed', function () {
   cy.get('app-main-nav-flyin[data-cy="closed"]').should('exist');
 });
 
-Cypress.Commands.add('pressToolbarPanelButton', function (text) {
-  cy.get('app-bd-dialog-toolbar').within(() => {
-    cy.get(`app-bd-panel-button[text="${text}"]`).click();
-  });
-});
-
 Cypress.Commands.add('pressToolbarButton', function (text) {
   cy.get('app-bd-dialog-toolbar').within(() => {
     cy.get(`button[data-cy^="${text}"]`).click();
   });
-});
-
-Cypress.Commands.add('pressExpansionPanel', function (text) {
-  cy.contains('mat-expansion-panel', text).click();
 });
 
 Cypress.Commands.add('fillFormInput', function (name, data) {
@@ -88,7 +78,7 @@ Cypress.Commands.add('fillFileDrop', function (name, mimeType) {
   });
 });
 
-Cypress.Commands.add('checkFileUpload', function (name, mimeType) {
+Cypress.Commands.add('checkFileUpload', function (name) {
   cy.get('app-bd-file-upload').within(() => {
     cy.contains('div', `Success: ${name}`);
   });
