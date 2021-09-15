@@ -65,7 +65,10 @@ public class InstanceNodeController {
 
     private static final Logger log = LoggerFactory.getLogger(InstanceNodeController.class);
 
-    /** Name of the file stored in the runtime directory containing the serialized process configuration */
+    /**
+     * Name of the file stored in the runtime directory containing the serialized
+     * process configuration
+     */
     private static final String PCU_JSON = "pcu.json";
 
     private final BHive hive;
@@ -109,28 +112,28 @@ public class InstanceNodeController {
     }
 
     /**
-     * Install this manifest. It will create (or assume) the following
-     * structure in the given root:
+     * Install this manifest. It will create (or assume) the following structure in
+     * the given root:
      *
      * <pre>
      *  + root
-     *  +-- &lt;deployment-uuid&gt;/data (shared data directory - only created if missing)
-     *  +-- &lt;deployment-uuid&gt;/deploy/&lt;id-of-this-update&gt;/&lt;content-of-manifest&gt;
-     *  +-- &lt;deployment-uuid&gt;/deploy/&lt;id-of-this-update&gt;/runtime/pcu.json (PCU configuration)
-     *  +-- &lt;deployment-uuid&gt;/deploy/&lt;id-of-this-update&gt;/runtime/* (runtime dir (stdout log, ...) for each app).
+     *  +-- {@literal <deployment-uuid>/data} (shared data directory - only created if missing)
+     *  +-- {@literal <deployment-uuid>/deploy/<id-of-this-update>/<content-of-manifest>}
+     *  +-- {@literal <deployment-uuid>/deploy/<id-of-this-update>/runtime/pcu.json} (PCU configuration)
+     *  +-- {@literal <deployment-uuid>/deploy/<id-of-this-update>/runtime/*} (runtime dir (stdout log, ...) for each app).
      * </pre>
      *
      * The manifest is expected to have this content structure:
      *
      * <pre>
-     *  + &lt;content-of-manifest&gt;
+     *  + {@literal <content-of-manifest>}
      *  +-- config/* (configuration files as configured centrally)
      *  +-- manifests/* (manifestations of applications, additional manifests (e.g. JDK), ...)
      *  +-- deployment.json (information about processes, parameters, ...)
      * </pre>
      *
-     * In case of any error during installation, the created directories and files are
-     * cleaned up.
+     * In case of any error during installation, the created directories and files
+     * are cleaned up.
      *
      * @return the UUID of the just installed manifest.
      */
@@ -199,14 +202,16 @@ public class InstanceNodeController {
     }
 
     /**
-     * Returns the resolver that is capable to resolve variables for the given instance.
+     * Returns the resolver that is capable to resolve variables for the given
+     * instance.
      */
     public VariableResolver getResolver() {
         return resolvers;
     }
 
     /**
-     * Reads the persisted process group configuration from the file-system. Can only be done if the node is fully deployed.
+     * Reads the persisted process group configuration from the file-system. Can
+     * only be done if the node is fully deployed.
      */
     public ProcessGroupConfiguration getProcessGroupConfiguration() {
         Path deploymentRoot = root.resolve(manifest.getUUID());
@@ -273,7 +278,8 @@ public class InstanceNodeController {
             // applications /must/ follow the ScopedManifestKey rules.
             ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
 
-            // the dependency must be here. it has been pushed here with the configuration. all dependencies go to the global pool
+            // the dependency must be here. it has been pushed here with the configuration.
+            // all dependencies go to the global pool
             pools.computeIfAbsent(poolRoot, k -> new TreeSet<>())
                     .addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
         }
@@ -319,7 +325,8 @@ public class InstanceNodeController {
             Files.write(file, processed.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
         } catch (Exception e) {
-            // might have missing variable references, since we only 'see' what is on our node. Applications from other nodes are not available.
+            // might have missing variable references, since we only 'see' what is on our
+            // node. Applications from other nodes are not available.
             log.warn("Cannot process configuration file: {}", file);
             if (log.isDebugEnabled()) {
                 log.debug("Error details", e);
@@ -328,10 +335,12 @@ public class InstanceNodeController {
     }
 
     /**
-     * Scans the given {@link BHive} and the given deployment root {@link Path} and deletes any deployment from the deployment
-     * root {@link Path} which are no longer available in the {@link BHive}.
+     * Scans the given {@link BHive} and the given deployment root {@link Path} and
+     * deletes any deployment from the deployment root {@link Path} which are no
+     * longer available in the {@link BHive}.
      *
-     * @param source the source {@link BHive} to scan for available {@link InstanceNodeController}s.
+     * @param source the source {@link BHive} to scan for available
+     *            {@link InstanceNodeController}s.
      * @param root the {@link Path} where all deployments reside.
      */
     public static List<CleanupAction> cleanup(BHive source, Path root, SortedSet<Manifest.Key> toBeRemoved) {
@@ -425,7 +434,8 @@ public class InstanceNodeController {
             throws IOException {
         Path binDir = dir.resolve(SpecialDirectory.BIN.getDirName());
 
-        // if there is no bin-dir in there, remove it all together as spurious directory.
+        // if there is no bin-dir in there, remove it all together as spurious
+        // directory.
         if (!Files.isDirectory(binDir)) {
             toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, dir.toAbsolutePath().toString(),
                     "Remove spurious directory (no binary directory found)"));
@@ -448,7 +458,8 @@ public class InstanceNodeController {
         }
 
         if (!hasChild) {
-            // remove the whole deployment, no active version anymore. ATTENTION: deletes logs, etc.
+            // remove the whole deployment, no active version anymore. ATTENTION: deletes
+            // logs, etc.
             toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, dir.toAbsolutePath().toString(),
                     "Delete instance data (no more instance versions available)"));
         }

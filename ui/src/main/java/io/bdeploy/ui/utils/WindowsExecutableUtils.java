@@ -42,10 +42,13 @@ import net.jsign.pe.DataDirectoryType;
 import net.jsign.pe.PEFile;
 
 /**
- * Provides helpers for embedding a payload into an signed PE/COFF executable and for verifying if a given PE/COFF executable is
- * properly signed. The digital signature of the executable remains valid despite that we are modifying it.
+ * Provides helpers for embedding a payload into an signed PE/COFF executable
+ * and for verifying if a given PE/COFF executable is properly signed. The
+ * digital signature of the executable remains valid despite that we are
+ * modifying it.
  * <p>
- * See https://blog.barthe.ph/2009/02/22/change-signed-executable/ for more details.
+ * See https://blog.barthe.ph/2009/02/22/change-signed-executable/ for more
+ * details.
  * </p>
  */
 public class WindowsExecutableUtils {
@@ -77,15 +80,16 @@ public class WindowsExecutableUtils {
     }
 
     /**
-     * A verification method for verifying signed signatures
-     * Apart from the authenticode_pe.docx microsoft provides https://www.ietf.org/rfc/rfc2315.txt was used to
-     * implement this method
+     * A verification method for verifying signed signatures Apart from the
+     * authenticode_pe.docx microsoft provides https://www.ietf.org/rfc/rfc2315.txt
+     * was used to implement this method
      * <p>
-     * This is a proposed implementation in JSign, but it has not yet made it into the library, see:
-     * https://github.com/ebourg/jsign/pull/59 and associated issues.
+     * This is a proposed implementation in JSign, but it has not yet made it into
+     * the library, see: https://github.com/ebourg/jsign/pull/59 and associated
+     * issues.
      * <p>
-     * In addition to the proposed code, we add a check for whether the certificate used to sign the
-     * binary is self-signed and reject the signature if so.
+     * In addition to the proposed code, we add a check for whether the certificate
+     * used to sign the binary is self-signed and reject the signature if so.
      */
     public static void verify(Path executable) throws IOException {
         try (PEFile file = new PEFile(executable.toFile())) {
@@ -101,26 +105,27 @@ public class WindowsExecutableUtils {
                             .of(signedData.getDigestAlgorithmIDs().iterator().next().getAlgorithm());
                     SignerInformation signerInformation;
 
-                    //get SpcIndirectContent structure from signed data, see pefile documentation
+                    // get SpcIndirectContent structure from signed data, see pefile documentation
                     ContentInfo contentInfo = signedData.toASN1Structure();
                     SignedData signedData1 = SignedData.getInstance(contentInfo.getContent());
                     ContentInfo contentInfo1 = signedData1.getEncapContentInfo();
 
-                    //Study ASN1Dump.dumpAsString() to implement getSpcIndirectDataContent(...) or any other ASN.1 parser
+                    // Study ASN1Dump.dumpAsString() to implement getSpcIndirectDataContent(...) or
+                    // any other ASN.1 parser
                     DigestInfo digestInfo = getSpcIndirectDataContent(contentInfo1);
                     DigestAlgorithm spcDigestAlgorithm = DigestAlgorithm.of((digestInfo.getAlgorithmId().getAlgorithm()));
 
-                    //#1 Check that the digest algorithms match
+                    // #1 Check that the digest algorithms match
                     if (signedData.getDigestAlgorithmIDs().size() != 1) {
                         throw new IllegalStateException("Signed Data must contain exactly one DigestAlgorithm");
                     }
 
-                    //Check that SpcIndirectContent DigestAlgorithm equals CMSSignedData algorithm
+                    // Check that SpcIndirectContent DigestAlgorithm equals CMSSignedData algorithm
                     if (!(spcDigestAlgorithm.oid.getId()).equals(signedDataAlgorithm.oid.getId())) {
                         throw new IllegalStateException("Signed Data algorithm doesn't match with spcDigestAlgorithm");
                     }
 
-                    //Check that SignerInfo DigestAlgorithm equals CMSSignedData algorithm
+                    // Check that SignerInfo DigestAlgorithm equals CMSSignedData algorithm
                     if (signedData.getSignerInfos().size() != 1) {
                         throw new IllegalStateException("Signed Data must contain exactly one SignerInfo");
                     }
@@ -131,13 +136,16 @@ public class WindowsExecutableUtils {
                         throw new IllegalStateException("Signed Data algorithm doesn't match with SignerInformation algorithm");
                     }
 
-                    //#2 Check the embedded hash in spcIndirectContent matches with the computed hash of the pefile
+                    // #2 Check the embedded hash in spcIndirectContent matches with the computed
+                    // hash of the pefile
                     if (!Arrays.equals(file.computeDigest(signedDataAlgorithm), digestInfo.getDigest())) {
                         throw new IllegalStateException("The embedded hash in the SignedData is not equal to the computed hash");
                     }
 
-                    //#3 The hash of the spc blob should be equal to message digest in authenticated attributes of signed data
-                    //Get the message digest from authenticated attributes, see authenticode_pe documentation
+                    // #3 The hash of the spc blob should be equal to message digest in
+                    // authenticated attributes of signed data
+                    // Get the message digest from authenticated attributes, see authenticode_pe
+                    // documentation
                     byte messageDigestInAuthenticatedAttr[];
                     Attribute attribute = (Attribute) signerInformation.getSignedAttributes().toHashtable()
                             .get(CMSAttributes.messageDigest);
@@ -150,10 +158,10 @@ public class WindowsExecutableUtils {
                         throw new IllegalStateException("No message digest was found in authenticated attributes");
                     }
 
-                    //Get the spc blob
+                    // Get the spc blob
                     byte[] spcBlob = getSpcBlob(contentInfo1.getContent().toASN1Primitive());
 
-                    //Now calculate the digest of the spcblob
+                    // Now calculate the digest of the spcblob
                     try {
                         md = MessageDigest
                                 .getInstance(signedData.getDigestAlgorithmIDs().iterator().next().getAlgorithm().toString());
@@ -164,13 +172,13 @@ public class WindowsExecutableUtils {
                     md.update(spcBlob);
                     byte[] spcDigest = md.digest();
 
-                    //Compare both and throw exception if not equal
+                    // Compare both and throw exception if not equal
                     if (!Arrays.equals(messageDigestInAuthenticatedAttr, spcDigest)) {
                         throw new IllegalStateException(
                                 "The hash of stripped content of SpcInfo does not match digest found in authenticated attributes");
                     }
 
-                    //#4 Check the hash in Authenticated Attributes with Encrypted Hash
+                    // #4 Check the hash in Authenticated Attributes with Encrypted Hash
                     @SuppressWarnings("unchecked")
                     X509CertificateHolder h = (X509CertificateHolder) signedData.getCertificates()
                             .getMatches(signerInformation.getSID()).iterator().next();
@@ -209,12 +217,13 @@ public class WindowsExecutableUtils {
                             throw new IllegalStateException(
                                     "The hash in the the authenticated attributes doesn't match the encrypted hash(getSignature())");
                         }
-                        //Note that the getSignature() method returns the encrypted hash in the SignerInformation
+                        // Note that the getSignature() method returns the encrypted hash in the
+                        // SignerInformation
                     } catch (SignatureException e) {
                         throw new IllegalStateException(e);
                     }
 
-                    //#4 Check the countersigner hash
+                    // #4 Check the countersigner hash
                     if (signerInformation.getCounterSignatures().size() != 0) {
                         SignerInformation counterSignerInformation = signerInformation.getCounterSignatures().iterator().next();
                         try {
@@ -241,7 +250,7 @@ public class WindowsExecutableUtils {
                                     "No message digest was found in authenticated attributes of counter signature");
                         }
 
-                        //Compare both and throw exception if not equal
+                        // Compare both and throw exception if not equal
                         if (!Arrays.equals(messageDigestInCounterSignature, authAttrHash)) {
                             throw new IllegalStateException(
                                     "The digest of encrypted hash in the signerInformation does not match with digest found in counter signature");
@@ -258,14 +267,15 @@ public class WindowsExecutableUtils {
      * Taken from AuthenticodeSigner, which also checks this.
      */
     private static boolean isSelfSigned(X509Certificate certificate) {
-        return certificate.getSubjectDN().equals(certificate.getIssuerDN());
+        return certificate.getSubjectX500Principal().equals(certificate.getIssuerX500Principal());
     }
 
     /**
-     * This method returns the SpcIndirectDataContent data structure which is described in authenticode_pe.docx
-     * This structure consists of the digest of the contents of the EXE which was calculated at the time of signing
-     * This will be retrieved and compared to check if the digest calculated now matches with this digest
-     * That's how we verify the integrity of the EXE
+     * This method returns the SpcIndirectDataContent data structure which is
+     * described in authenticode_pe.docx This structure consists of the digest of
+     * the contents of the EXE which was calculated at the time of signing This will
+     * be retrieved and compared to check if the digest calculated now matches with
+     * this digest That's how we verify the integrity of the EXE
      *
      * @param contentInfo
      * @return
@@ -315,9 +325,10 @@ public class WindowsExecutableUtils {
     }
 
     /**
-     * This method returns the constituents of the spcIndirectDataContent minus the some data
-     * Refer RFC2315, 9.3 to find what have been omitted and the remaining is returned as bytes
-     * This will be digested and compared to the digest in the AuthenticatedAttributes in the certificate
+     * This method returns the constituents of the spcIndirectDataContent minus the
+     * some data Refer RFC2315, 9.3 to find what have been omitted and the remaining
+     * is returned as bytes This will be digested and compared to the digest in the
+     * AuthenticatedAttributes in the certificate
      */
     private static byte[] getSpcBlob(ASN1Primitive primitive) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

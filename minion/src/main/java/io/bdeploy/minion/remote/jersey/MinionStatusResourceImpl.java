@@ -109,7 +109,8 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
                 minion.monitoring.cpuUsage = new ArrayList<>();
             }
 
-            // if existing data is older than 5min, assume that it's old data and start a new list
+            // if existing data is older than 5min, assume that it's old data and start a
+            // new list
             if ((now - minion.monitoring.timestamp > 1000 * 60 * 5)) {
                 minion.monitoring.loadAvg = new ArrayList<>();
                 minion.monitoring.cpuUsage = new ArrayList<>();
@@ -117,7 +118,7 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
             minion.monitoring.timestamp = now;
             minion.monitoring.availableProcessors = osMBean.getAvailableProcessors();
             minion.monitoring.loadAvg.add(0, osMBean.getSystemLoadAverage());
-            minion.monitoring.cpuUsage.add(0, extOsMBean.getSystemCpuLoad());
+            minion.monitoring.cpuUsage.add(0, extOsMBean.getCpuLoad());
 
             // keep values for 15min
             while (minion.monitoring.loadAvg.size() > 15) {

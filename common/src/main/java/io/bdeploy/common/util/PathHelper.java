@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -224,6 +225,22 @@ public class PathHelper {
 
     public static ContentInfoUtil getContentInfoUtil() {
         return CIU;
+    }
+
+    /**
+     * Wrapper around Files.getFileAttributeView as it behaves differently than documented on JDK 17.
+     *
+     * @param path the path to get the view for.
+     * @return a {@link PosixFileAttributeView} or <code>null</code> if not available.
+     * @see "https://github.com/adoptium/adoptium-support/issues/363"
+     */
+    public static PosixFileAttributeView getPosixView(Path path) {
+        try {
+            return Files.getFileAttributeView(path, PosixFileAttributeView.class);
+        } catch (Exception e) {
+            // JDK 17 throws *undeclared* UnsupportedOperationException.
+            return null;
+        }
     }
 
 }

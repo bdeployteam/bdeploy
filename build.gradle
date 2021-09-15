@@ -20,7 +20,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.adarshr:gradle-test-logger-plugin:3.0.0'
-        classpath 'ru.vyarus:gradle-quality-plugin:4.6.0'
         classpath 'gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11'
         classpath 'org.cyclonedx:cyclonedx-gradle-plugin:1.4.0'
     }
@@ -94,7 +93,6 @@ configure(actualSubprojects) {
     apply plugin: 'java-test-fixtures'
     apply plugin: 'jacoco'
     apply plugin: 'com.adarshr.test-logger'
-    apply plugin: 'ru.vyarus.quality'
     apply plugin: 'eclipse'
     apply plugin: "net.ossindex.audit"
 
@@ -118,8 +116,8 @@ configure(actualSubprojects) {
         buildCommand 'org.eclipse.xtext.ui.shared.xtextBuilder'
     }
 
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 
     configurations {
         commonTestDeps
@@ -132,10 +130,10 @@ configure(actualSubprojects) {
     }
 
     dependencies {
-        commonTestDeps 'org.junit.jupiter:junit-jupiter-api:5.7.2',
-                       'org.junit.jupiter:junit-jupiter-params:5.7.2',
+        commonTestDeps 'org.junit.jupiter:junit-jupiter-api:5.8.0',
+                       'org.junit.jupiter:junit-jupiter-params:5.8.0',
                        'org.hamcrest:hamcrest-core:2.2'
-        testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+        testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.8.0'
     }
 
     eclipseJdt.doLast {
@@ -150,15 +148,6 @@ configure(actualSubprojects) {
         ignore = [
             'org.dom4j:dom4j:2.1.0' // introduced by spotbugs, which is not part of the distribution
         ]
-    }
-
-    quality {
-        consoleReporting = false
-        checkstyle = false
-        pmd = false
-        strict = false
-
-        lintOptions = [ 'all', '-try' ]
     }
 
     jacocoTestReport {

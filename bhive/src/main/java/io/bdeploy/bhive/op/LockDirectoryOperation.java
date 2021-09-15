@@ -21,7 +21,7 @@ import io.bdeploy.common.util.Threads;
 
 /**
  * Lock a directory. The operations waits for an already existing lock to disappear before proceeding (max 1000 seconds, ~16
- * minutes). This means only a single lock can exist (intra- & inter-VM).
+ * minutes). This means only a single lock can exist (intra- and inter-VM).
  *
  * @see ReleaseDirectoryLockOperation
  * @see AwaitDirectoryLockOperation

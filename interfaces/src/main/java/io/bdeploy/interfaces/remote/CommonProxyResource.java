@@ -21,8 +21,8 @@ import jakarta.ws.rs.core.Response;
  * Example how to use this using cURL on the command line:
  *
  * <pre>
- * $ curl -v 'https://localhost:7705/api/master/common/endpoints?BDeploy_group=[GROUP]&BDeploy_instance=[INSTANCE]' -H 'Accept: application/json, text/plain' -H 'Authorization: Bearer [TOKEN]' --insecure
- * $ curl -v 'https://localhost:7705/api/master/common/proxy/[ENDPOINTID]?BDeploy_group=[GROUP]&BDeploy_instance=[INSTANCE]&BDeploy_application=[APPLICATION]' -H 'Accept: application/json, text/plain' -H 'X-BDeploy-Authorization: Bearer [TOKEN]' --insecure -u [USER]:[PASS]
+ * {@literal $ curl -v 'https://localhost:7705/api/master/common/endpoints?BDeploy_group=[GROUP]&BDeploy_instance=[INSTANCE]' -H 'Accept: application/json, text/plain' -H 'Authorization: Bearer [TOKEN]' --insecure}
+ * {@literal $ curl -v 'https://localhost:7705/api/master/common/proxy/[ENDPOINTID]?BDeploy_group=[GROUP]&BDeploy_instance=[INSTANCE]&BDeploy_application=[APPLICATION]' -H 'Accept: application/json, text/plain' -H 'X-BDeploy-Authorization: Bearer [TOKEN]' --insecure -u [USER]:[PASS]}
  * </pre>
  *
  * @see ProxiedRequestWrapper Forwarded request details (headers, parameters, body, ...).

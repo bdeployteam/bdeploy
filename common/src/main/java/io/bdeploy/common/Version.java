@@ -8,7 +8,7 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 
 /**
- * A Version in the format &ltmajor&gt.&ltminor&gt.&ltmicro&gt[-qualifier]|[.qualifier]
+ * A Version in the format {@literal <major>.<minor>.<micro>[-qualifier]|[.qualifier]}
  */
 public class Version implements Comparable<Version> {
 

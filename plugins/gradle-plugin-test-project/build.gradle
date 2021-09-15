@@ -19,12 +19,6 @@ plugins {
     id "com.github.ben-manes.versions" version "0.39.0"
 }
 
-repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
-}
-
 version = "1.0.1-SNAPSHOT"
 
 sourceCompatibility = JavaVersion.VERSION_1_8

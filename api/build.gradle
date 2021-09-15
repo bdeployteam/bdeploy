@@ -3,7 +3,7 @@ plugins {
   id 'java-library'
   id 'maven-publish'
   id 'signing'
-  id 'com.github.johnrengelman.shadow' version '6.1.0'
+  id 'com.github.johnrengelman.shadow' version '7.0.0'
   id "io.swagger.core.v3.swagger-gradle-plugin" version "2.1.10"
 }
 

@@ -34,7 +34,7 @@ public class TestAppFactory {
 
         sleepScriptContent.put(OperatingSystem.WINDOWS, //
                 "@echo off\n" + //
-                        "echo Hello script\n" +//
+                        "echo Hello script\n" + //
                         "powershell -command \"sleep %1\"" //
         );
 
@@ -52,12 +52,11 @@ public class TestAppFactory {
     }
 
     /**
-     * Generates script that takes a single argument how long it should block before terminating the application
+     * Generates script that takes a single argument how long it should block before
+     * terminating the application
      *
-     * @param prefix
-     *            the name of the script
-     * @param target
-     *            the target path
+     * @param prefix the name of the script
+     * @param target the target path
      * @return the generated script
      */
     public static Path genSleepScript(String prefix, Path target) {
@@ -76,7 +75,7 @@ public class TestAppFactory {
      * Sets required attributes to make a file executable
      */
     private static void setExecutable(Path child) throws IOException {
-        PosixFileAttributeView view = Files.getFileAttributeView(child, PosixFileAttributeView.class);
+        PosixFileAttributeView view = PathHelper.getPosixView(child);
         if (view != null) {
             Set<PosixFilePermission> perms = view.readAttributes().permissions();
             perms.add(PosixFilePermission.OWNER_EXECUTE);

@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -112,7 +111,7 @@ public class ZipHelper {
     }
 
     private static boolean isPosixFileStore(Path path) {
-        return Files.getFileAttributeView(path, PosixFileAttributeView.class) != null;
+        return PathHelper.getPosixView(path) != null;
     }
 
     private static Set<PosixFilePermission> getPosixPermissionsAsSet(int mode) {

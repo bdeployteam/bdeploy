@@ -3,11 +3,11 @@ package io.bdeploy.interfaces.descriptor.client;
 import io.bdeploy.common.security.RemoteService;
 
 /**
- * Describes the content of the Click&Start file.
+ * Describes the content of the {@literal Click & Start} file.
  * <p>
- * The file only contains immutable data which is required to uniquely
- * identify the application on the hosting system. All other information might be
- * changed later by configuration and thus must be loaded every time (human readable
+ * The file only contains immutable data which is required to uniquely identify
+ * the application on the hosting system. All other information might be changed
+ * later by configuration and thus must be loaded every time (human readable
  * name, icon, ...).
  */
 public class ClickAndStartDescriptor {

@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
     }
     dependencies {
@@ -9,7 +8,7 @@ buildscript {
 }
 
 plugins {
-    id "com.github.psxpaul.execfork" version "0.1.13"
+    id "com.github.psxpaul.execfork" version "0.1.15"
 }
 
 apply plugin: 'cz.habarta.typescript-generator'
@@ -52,13 +51,17 @@ ext.sharedCoverageServeLogic = { task, List<String> target ->
     configure(task) {
         workingDir "$webappDir"
         group = BasePlugin.BUILD_GROUP
+        // the scripts (run.sh, run.bat) are required due to a dumb change in the execfork plugin
+        // which now expects a File instead of a String, which will automatically expand any given
+        // string to an absolute path using the current directory. Since we don't know where npm
+        // resides, we need to fix that by wrapping it in something we *do* know.
         if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            executable "npm"
+            executable "${projectDir}/.scripts/run.sh"
         } else {
-            executable "npm.cmd"
+            executable "${projectDir}/.scripts/run.bat"
         }
 
-        args = ["run", "--", "ng", "serve", "--no-watch", "--no-live-reload"] + target
+        args = ["npm", "run", "--", "ng", "serve", "--no-watch", "--no-live-reload"] + target
     }
 }
 
