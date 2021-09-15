@@ -35,7 +35,7 @@ public interface MinionStatusResource {
 
     /**
      * @return a list of {@link RemoteDirectoryEntry}, can be used with
-     *         {@link NodeDeploymentResource#getEntryContent(RemoteDirectoryEntry, long, long)}.
+     *         {@link CommonDirectoryEntryResource#getEntryContent(RemoteDirectoryEntry, long, long)}.
      */
     @GET
     @Path("/logs")

@@ -92,19 +92,6 @@ public interface MasterNamedResource {
     public void deleteVersion(@QueryParam("u") String instanceUuid, @QueryParam("t") String tag);
 
     /**
-     * Create a new instance version by updating the underlying product to the given
-     * tag.
-     *
-     * @param uuid the UUID of the instance to update
-     * @param productTag the tag of the product to update to.
-     * @deprecated happens all in the UI backend in 4.0.
-     */
-    @Deprecated
-    @POST
-    @Path("/updateTo")
-    public void updateTo(@QueryParam("u") String uuid, @QueryParam("t") String productTag);
-
-    /**
      * Fetches the persistent state of a single instance.
      *
      * @param instance the instance to query state for.
@@ -126,7 +113,7 @@ public interface MasterNamedResource {
     /**
      * Delegates to the specified minion to receive a file.
      *
-     * @see NodeDeploymentResource#getEntryContent(RemoteDirectoryEntry, long, long)
+     * @see CommonDirectoryEntryResource#getEntryContent(RemoteDirectoryEntry, long, long)
      */
     @POST
     @Path("/dataDir/entry")

@@ -8,30 +8,29 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 public enum MinionMode {
 
     /**
-     * Standalone means that all operations are regarded 'local', meaning the running process is the master.
+     * Standalone means that all operations are regarded 'local', meaning the
+     * running process is the master.
      */
     @JsonEnumDefaultValue
     STANDALONE,
 
     /**
-     * In managed mode, a minion requires to be connected to a central minion. All operations are regarded 'local', same as
-     * standalone, but certain operations are not allowed.
+     * In managed mode, a minion requires to be connected to a central minion. All
+     * operations are regarded 'local', same as standalone, but certain operations
+     * are not allowed.
      */
     MANAGED,
 
     /**
-     * In central mode, a minion will not host node services, but can only remotely control 'managed' master nodes.
+     * In central mode, a minion will not host node services, but can only remotely
+     * control 'managed' master nodes.
      */
     CENTRAL,
 
     /**
-     * The minion is a non-master node - the node must be attached and is controlled by a master node (managed or standalone).
+     * The minion is a non-master node - the node must be attached and is controlled
+     * by a master node (managed or standalone).
      */
     NODE,
-
-    /**
-     * @deprecated no longer supported, use NODE instead
-     */
-    SLAVE
 
 }

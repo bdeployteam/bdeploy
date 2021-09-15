@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -108,8 +107,6 @@ import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.ApplicationDto;
-import io.bdeploy.ui.dto.HistoryCompareDto;
-import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -299,7 +296,8 @@ public class InstanceResourceImpl implements InstanceResource {
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
 
-        // immediately fetch back so we have it to create the association. don't use #syncInstance here,
+        // immediately fetch back so we have it to create the association. don't use
+        // #syncInstance here,
         // it requires the association to already exist.
         rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
 
@@ -388,29 +386,6 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void update_old(String instance, InstanceConfigurationDto dto, String managedServer, String expectedTag) {
-        InstanceManifest oldConfig = InstanceManifest.load(hive, instance, null);
-
-        if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
-            throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag + ", current="
-                    + oldConfig.getManifest().getTag(), Status.CONFLICT);
-        }
-
-        if (dto.config == null) {
-            // no new config - load existing one.
-            dto.config = oldConfig.getConfiguration();
-        }
-
-        MasterRootResource root = getManagingRootResource(managedServer);
-        Manifest.Key key = root.getNamedMaster(group).update(new InstanceUpdateDto(dto, Collections.emptyList()), expectedTag);
-
-        // immediately fetch back so we have it to create the association
-        syncInstance(minion, rc, group, instance);
-
-        changes.create(ObjectChangeType.INSTANCE, key);
-    }
-
-    @Override
     public void update(String instanceId, InstanceUpdateDto config, String managedServer, String expectedTag) {
         InstanceManifest oldConfig = InstanceManifest.load(hive, instanceId, null);
 
@@ -445,7 +420,8 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
             }
 
-            // cleanup is done periodically in background, still uninstall installed versions to prevent re-start of processes later
+            // cleanup is done periodically in background, still uninstall installed
+            // versions to prevent re-start of processes later
             for (InstanceVersionDto dto : versions) {
                 root.getNamedMaster(group).uninstall(dto.key);
             }
@@ -553,13 +529,17 @@ public class InstanceResourceImpl implements InstanceResource {
         return result;
     }
 
-    /** Create a new node configuration for each configured instance node configuration */
+    /**
+     * Create a new node configuration for each configured instance node
+     * configuration
+     */
     private void gatherNodeConfigurations(InstanceNodeConfigurationListDto result, InstanceManifest im) {
         // Build a map of configurations indexed by the node name
         Map<String, InstanceNodeConfigurationDto> node2Config = new TreeMap<>();
         result.nodeConfigDtos.forEach(dto -> node2Config.put(dto.nodeName, dto));
 
-        // Update the node configuration. Create entries for nodes that are configured but missing
+        // Update the node configuration. Create entries for nodes that are configured
+        // but missing
         for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
             String nodeName = entry.getKey();
             Manifest.Key manifestKey = entry.getValue();
@@ -651,19 +631,6 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void updateTo(String instanceId, String productTag) {
-        InstanceManifest instance = InstanceManifest.load(hive, instanceId, null);
-        RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-
-        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        master.getNamedMaster(group).updateTo(instanceId, productTag);
-
-        syncInstance(minion, rc, group, instanceId);
-        changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
-    }
-
-    @Override
     public InstanceUpdateDto updateProductVersion(String instanceId, String productTag, InstanceUpdateDto state) {
         ProductManifest current = ProductManifest.of(hive, state.config.config.product);
         List<ApplicationManifest> currentApps = current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
@@ -709,7 +676,8 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
 
         if (minion.getMode() == MinionMode.CENTRAL) {
-            // delegate to the actual master, so it will return a descriptor which has the "local" URI.
+            // delegate to the actual master, so it will return a descriptor which has the
+            // "local" URI.
             return ResourceProvider.getResource(svc, InstanceGroupResource.class, context).getInstanceResource(group)
                     .getClickAndStartDescriptor(instanceId, applicationId);
         }
@@ -761,8 +729,10 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         // The URI for the installer will use the URI from the target server
-        // We intentionally do not optimize the installer to use the URI from the central server
-        // so that installers can be shared and used regardless from where they have been downloaded from
+        // We intentionally do not optimize the installer to use the URI from the
+        // central server
+        // so that installers can be shared and used regardless from where they have
+        // been downloaded from
         ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
         URI baseUri = clickAndStart.host.getUri();
 
@@ -1070,31 +1040,6 @@ public class InstanceResourceImpl implements InstanceResource {
     public HistoryResultDto getInstanceHistory(String instanceId, HistoryFilterDto filterDto) {
         InstanceHistoryManager manager = new InstanceHistoryManager(auth, context, mp, hive);
         return manager.getInstanceHistory(group, instanceId, filterDto);
-    }
-
-    @Override
-    public HistoryEntryVersionDto compareVersions(String instanceId, int versionA, int versionB) {
-        InstanceManifest mfA = InstanceManifest.load(hive, instanceId, String.valueOf(versionA));
-        InstanceManifest mfB = InstanceManifest.load(hive, instanceId, String.valueOf(versionB));
-
-        InstanceHistoryManager manager = new InstanceHistoryManager(auth, context, mp, hive);
-        return manager.compareManifests(mfA, mfB);
-    }
-
-    @Override
-    public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto) {
-        InstanceHistoryManager manager = new InstanceHistoryManager(auth, context, mp, hive);
-        return manager.compare(dto.configA, dto.configB);
-    }
-
-    @Override
-    public Map<String, CustomAttributesRecord> listAttributes() {
-        Map<String, CustomAttributesRecord> result = new HashMap<>();
-        for (Key imKey : InstanceManifest.scan(hive, true)) {
-            InstanceManifest im = InstanceManifest.of(hive, imKey);
-            result.put(im.getConfiguration().uuid, im.getAttributes(hive).read());
-        }
-        return result;
     }
 
     @Override

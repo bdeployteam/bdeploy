@@ -302,7 +302,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.HistoryResultDto',
         'io.bdeploy.ui.dto.HistoryEntryDto',
         'io.bdeploy.ui.dto.HistoryFilterDto',
-        'io.bdeploy.ui.dto.HistoryCompareDto',
         'io.bdeploy.ui.dto.UploadInfoDto',
         'io.bdeploy.ui.dto.ObjectChangeType',
         'io.bdeploy.ui.dto.ObjectChangeHint',

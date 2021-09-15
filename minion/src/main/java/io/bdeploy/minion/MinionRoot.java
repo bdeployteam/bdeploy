@@ -67,10 +67,8 @@ import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.minion.job.NodeMonitorJob;
-import io.bdeploy.minion.migration.MinionStateMigration;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
-import io.bdeploy.minion.migration.UpdatePackagingMigration;
 import io.bdeploy.minion.plugin.PluginManagerImpl;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
@@ -171,7 +169,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * Called once when starting the minion root. Can be used for additional initialization
+     * Called once when starting the minion root. Can be used for additional
+     * initialization
      */
     public void onStartup(boolean consoleLog) {
         this.consoleLog = consoleLog;
@@ -194,7 +193,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         if (!exists || baseline == null || !current.equals(baseline)) {
             log.info("Updating logging configuration, lastKnown={}, current={}, exists={}", baseline, current, exists);
 
-            // give a warning if the current version has been locally modified, replace it nevertheless
+            // give a warning if the current version has been locally modified, replace it
+            // nevertheless
             if (exists && baseline != null) {
                 createLogBackup(baseline, cfgPath);
             }
@@ -215,7 +215,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         Configuration cfg = ConfigurationFactory.getInstance().getConfiguration(LoggerContext.getContext(false), source);
         Configurator.reconfigure(cfg);
 
-        // set the root's log directory property in the MDC, this is inherited by all threads.
+        // set the root's log directory property in the MDC, this is inherited by all
+        // threads.
         if (!consoleLog) {
             log.info("Logging into {}", logDir);
             MinionLoggingContextDataProvider.setLogDir(logDir.toAbsolutePath().toString());
@@ -259,7 +260,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
     }
 
-    /** Ensures that the master flag and the version is correctly set in the minion manifest */
+    /**
+     * Ensures that the master flag and the version is correctly set in the minion
+     * manifest
+     */
     private void updateMinionConfiguration() {
         MinionManifest manifest = new MinionManifest(hive);
         MinionConfiguration minionConfig = manifest.read();
@@ -279,12 +283,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * Synchronizes the given configuration with the real values provided by the minion.
+     * Synchronizes the given configuration with the real values provided by the
+     * minion.
      *
-     * @param minionName
-     *            name of the minion
-     * @param config
-     *            current minion configuration
+     * @param minionName name of the minion
+     * @param config current minion configuration
      * @return {@code true} if the configuration changed
      */
     private boolean doUpdateMinionConfiguration(String minionName, MinionDto config) {
@@ -328,7 +331,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return changed;
     }
 
-    /** Does whatever is required to migrate an older version to the current version */
+    /**
+     * Does whatever is required to migrate an older version to the current version
+     */
     private void doMigrate() {
         if (VersionHelper.isRunningUndefined()) {
             log.debug("Skipping migration as the running version is undefined.");
@@ -344,15 +349,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         try {
-            // first step is to backup state.json (long-term backup) in case something is fishy during migration, or even later on.
+            // first step is to backup state.json (long-term backup) in case something is
+            // fishy during migration, or even later on.
             Path cfgPath = config.resolve(STATE_FILE);
             Path cfgBakPath = config.resolve(STATE_FILE + ".pre-mig-bak");
             if (Files.exists(cfgPath)) {
                 Files.copy(cfgPath, cfgBakPath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            UpdatePackagingMigration.run(this);
-            MinionStateMigration.run(this);
             SystemUserMigration.run(this);
             SettingsConfigurationMigration.run(this);
         } catch (Exception e) {
@@ -479,8 +483,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * Read the minions state.json with a non-default class. This can be used to read the state.json file
-     * with a custom class for state migration, which contains fields that are no longer in state.json.
+     * Read the minions state.json with a non-default class. This can be used to
+     * read the state.json file with a custom class for state migration, which
+     * contains fields that are no longer in state.json.
      */
     public <T> T getPartialStateForMigration(Class<T> clazz) {
         return readConfig(STATE_FILE, clazz);
@@ -587,8 +592,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * @return The internal minion hive. This hive is used to hold anything which is deployed/deployable on the node. The master
-     *         uses named hives (per instance group) to store higher level (node-spanning) deployment information.
+     * @return The internal minion hive. This hive is used to hold anything which is
+     *         deployed/deployable on the node. The master uses named hives (per
+     *         instance group) to store higher level (node-spanning) deployment
+     *         information.
      */
     public BHive getHive() {
         return hive;
@@ -606,14 +613,16 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * @return the {@link UserDatabase} used for simple (local) authentication of users.
+     * @return the {@link UserDatabase} used for simple (local) authentication of
+     *         users.
      */
     public UserDatabase getUsers() {
         return users;
     }
 
     /**
-     * Determines what is currently deployed and passes this information to the process controller.
+     * Determines what is currently deployed and passes this information to the
+     * process controller.
      */
     private void initProcessController() {
         log.info("Initializing process controller.");
@@ -672,8 +681,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * Checks whether a given {@link Path} is under control of this {@link MinionRoot}, including managed directories, storage
-     * locations, etc.
+     * Checks whether a given {@link Path} is under control of this
+     * {@link MinionRoot}, including managed directories, storage locations, etc.
      *
      * @param toCheck a {@link Path} to check
      * @return whether the given {@link Path} "belongs" to the minion.

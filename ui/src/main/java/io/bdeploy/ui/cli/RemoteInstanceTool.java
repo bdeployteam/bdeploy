@@ -146,7 +146,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         } else if (config.importFrom() != null) {
             return doImport(remote, config);
         } else if (config.updateTo() != null) {
-            ir.updateTo(config.uuid(), config.updateTo());
+            // TODO: use new update mechanism.
             return createSuccess();
         } else {
             return createNoOp();

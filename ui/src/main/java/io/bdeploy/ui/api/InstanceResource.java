@@ -13,7 +13,6 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
@@ -26,8 +25,6 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.HistoryCompareDto;
-import io.bdeploy.ui.dto.HistoryEntryVersionDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -74,16 +71,6 @@ public interface InstanceResource {
     @Path("/{instance}/{versionTag}")
     public InstanceConfiguration readVersion(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("versionTag") String versionTag);
-
-    /**
-     * @deprecated use #update
-     */
-    @Deprecated
-    @POST
-    @Path("/{instance}")
-    @RequiredPermission(permission = Permission.WRITE)
-    public void update_old(@ActivityScope @PathParam("instance") String instanceId, InstanceConfigurationDto config,
-            @QueryParam("managedServer") String managedServer, @QueryParam("expect") String expectedTag);
 
     @POST
     @Path("/{instance}/update")
@@ -133,15 +120,6 @@ public interface InstanceResource {
     @Path("/{instance}/{tag}/activate")
     @RequiredPermission(permission = Permission.WRITE)
     public void activate(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
-
-    /**
-     * @deprecated no longer used in 4.0
-     */
-    @Deprecated
-    @GET
-    @Path("/{instance}/updateTo")
-    @RequiredPermission(permission = Permission.WRITE)
-    public void updateTo(@ActivityScope @PathParam("instance") String instanceId, @QueryParam("productTag") String productTag);
 
     @POST
     @Path("/{instance}/updateProductVersion/{target}")
@@ -265,27 +243,6 @@ public interface InstanceResource {
     @Path("/{instance}/history")
     @RequiredPermission(permission = Permission.READ)
     public HistoryResultDto getInstanceHistory(@ActivityScope @PathParam("instance") String instanceId, HistoryFilterDto filter);
-
-    /** @deprecated no longer required with new UI, done on client */
-    @Deprecated
-    @GET
-    @Path("/{instance}/history-compare-versions")
-    @RequiredPermission(permission = Permission.READ)
-    public HistoryEntryVersionDto compareVersions(@ActivityScope @PathParam("instance") String instanceId,
-            @QueryParam("a") int versionA, @QueryParam("b") int versionB);
-
-    /** @deprecated no longer required with new UI, done on client */
-    @Deprecated
-    @POST
-    @Path("/{instance}/history-compare-config")
-    @RequiredPermission(permission = Permission.READ)
-    public HistoryEntryVersionDto compareConfig(HistoryCompareDto dto);
-
-    /** @deprecated no longer required with new UI, contained in InstanceDto */
-    @Deprecated
-    @GET
-    @Path("/list-attributes")
-    public Map<String, CustomAttributesRecord> listAttributes();
 
     @GET
     @Path("/{instance}/attributes")

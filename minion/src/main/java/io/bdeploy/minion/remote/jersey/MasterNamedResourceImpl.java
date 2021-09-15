@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -42,8 +41,6 @@ import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.TaskExecutor;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
-import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
-import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -55,9 +52,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -65,7 +59,6 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
-import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
@@ -76,6 +69,7 @@ import io.bdeploy.interfaces.manifest.statistics.ClientUsage;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.NodeDeploymentResource;
 import io.bdeploy.interfaces.remote.NodeProcessResource;
@@ -159,7 +153,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             // Make sure the node has the manifest
             pushOp.addManifest(toDeploy);
 
-            // Create the task that pushes all manifests and then installs them on the remote
+            // Create the task that pushes all manifests and then installs them on the
+            // remote
             NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(minion, NodeDeploymentResource.class,
                     context);
             executor.add(() -> {
@@ -213,7 +208,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             .deactivate(oldNode.getValue());
                 }
             } catch (Exception e) {
-                // in case the old version disappeared (manual deletion, automatic migration, ...) we do not
+                // in case the old version disappeared (manual deletion, automatic migration,
+                // ...) we do not
                 // want to fail to activate the new version...
                 log.debug("Cannot set old version to de-activated", e);
             }
@@ -249,8 +245,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     /**
      * @param imf the {@link InstanceManifest} to check.
-     * @param ignoreOffline whether to regard an instance as deployed even if a participating node is offline.
-     * @return whether the given {@link InstanceManifest} is fully deployed to all required minions.
+     * @param ignoreOffline whether to regard an instance as deployed even if a
+     *            participating node is offline.
+     * @return whether the given {@link InstanceManifest} is fully deployed to all
+     *         required minions.
      */
     private boolean isFullyDeployed(InstanceManifest imf) {
         SortedMap<String, Key> imfs = imf.getInstanceNodeManifests();
@@ -330,131 +328,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         imf.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
     }
 
-    @WriteLock
-    @Override
-    public void updateTo(String uuid, String productTag) {
-        InstanceManifest latest = InstanceManifest.load(hive, uuid, null);
-        Manifest.Key pkCurrent = latest.getConfiguration().product;
-        Manifest.Key pkUpdate = new Manifest.Key(pkCurrent.getName(), productTag);
-
-        // validate that the product is there.
-        if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(pkUpdate)))) {
-            throw new WebApplicationException("Cannot find product tag " + productTag, Status.NOT_FOUND);
-        }
-
-        ProductManifest pmUpdate = ProductManifest.of(hive, pkUpdate);
-        ProductManifest pmCurrent = ProductManifest.of(hive, pkCurrent);
-
-        // update product on manifest
-        InstanceConfiguration icCurrent = latest.getConfiguration();
-        icCurrent.product = pmUpdate.getKey();
-
-        SortedMap<String, InstanceNodeConfiguration> incs = new TreeMap<>();
-        for (Entry<String, Key> nodeEntry : latest.getInstanceNodeManifests().entrySet()) {
-            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, nodeEntry.getValue());
-            InstanceNodeConfiguration cfg = inm.getConfiguration();
-
-            updateNodeTo(cfg, pmCurrent, pmUpdate);
-
-            incs.put(nodeEntry.getKey(), cfg);
-        }
-
-        // update config tree if the instance does not yet have a config tree.
-        if (icCurrent.configTree == null) {
-            icCurrent.configTree = pmUpdate.getConfigTemplateTreeId();
-        }
-
-        // actually persist, calculate a new key.
-        String name = InstanceManifest.getRootName(uuid);
-        Long next = hive.execute(new ManifestNextIdOperation().setManifestName(name));
-        Manifest.Key target = new Manifest.Key(name, next.toString());
-
-        createInstanceVersion(target, icCurrent, incs);
-    }
-
-    @Deprecated
-    private void updateNodeTo(InstanceNodeConfiguration cfg, ProductManifest pmCurrent, ProductManifest pmUpdate) {
-        cfg.product = pmUpdate.getKey();
-
-        // verify all applications are still there & update their version
-        for (ApplicationConfiguration appCfg : cfg.applications) {
-            String appName = appCfg.application.getName();
-            Manifest.Key appKeyCurrent = pmCurrent.getApplication(appName);
-            Manifest.Key appKeyUpdate = pmUpdate.getApplication(appName);
-            if (appKeyUpdate == null) {
-                throw new WebApplicationException("Application " + appName
-                        + " used in instance configuration, but no longer available in " + pmUpdate.getKey(),
-                        Status.PRECONDITION_FAILED);
-            }
-            ApplicationManifest amUpdate = ApplicationManifest.of(hive, appKeyUpdate);
-            ApplicationManifest amCurrent = ApplicationManifest.of(hive, appKeyCurrent);
-
-            updateApplicationTo(appCfg, amCurrent, amUpdate);
-        }
-    }
-
-    @Deprecated
-    private void updateApplicationTo(ApplicationConfiguration appCfg, ApplicationManifest amCurrent,
-            ApplicationManifest amUpdate) {
-        appCfg.application = amUpdate.getKey();
-
-        // verify that all parameters which are currently configured are still there, update fixed parameter values
-        ApplicationDescriptor adCurrent = amCurrent.getDescriptor();
-        ApplicationDescriptor adUpdate = amUpdate.getDescriptor();
-        appCfg.start = updateApplicationCommandTo(appCfg, appCfg.start, adCurrent.startCommand, adUpdate.startCommand);
-        appCfg.stop = updateApplicationCommandTo(appCfg, appCfg.stop, adCurrent.stopCommand, adUpdate.stopCommand);
-    }
-
-    @Deprecated
-    private CommandConfiguration updateApplicationCommandTo(ApplicationConfiguration appCfg, CommandConfiguration command,
-            ExecutableDescriptor descCurrent, ExecutableDescriptor descUpdate) {
-        // command was removed, remove as well.
-        if (descUpdate == null) {
-            return null;
-        }
-        if (command == null) {
-            throw new WebApplicationException(
-                    "Headless update of application (" + appCfg.name + ") not possible, command has been added",
-                    Status.PRECONDITION_FAILED);
-        }
-
-        command.executable = descUpdate.launcherPath;
-
-        Map<String, ParameterConfiguration> byUid = new TreeMap<>();
-        for (ParameterConfiguration cfg : command.parameters) {
-            Optional<ParameterDescriptor> matchUpdate = descUpdate.parameters.stream().filter(p -> p.uid.equals(cfg.uid))
-                    .findAny();
-            Optional<ParameterDescriptor> matchCurrent = descCurrent.parameters.stream().filter(p -> p.uid.equals(cfg.uid))
-                    .findAny();
-
-            // Parameter is not there in current and old version: Custom parameter. Nothing to do
-            if (!matchUpdate.isPresent() && !matchCurrent.isPresent()) {
-                continue;
-            }
-
-            // Parameter has been removed
-            if (!matchUpdate.isPresent()) {
-                throw new WebApplicationException("Headless update of application (" + appCfg.name
-                        + ") not possible, parameter has been removed (" + cfg.uid + ")", Status.PRECONDITION_FAILED);
-            }
-
-            if (matchUpdate.get().fixed) {
-                cfg.value = matchUpdate.get().defaultValue;
-                cfg.preRender(matchUpdate.get());
-            }
-            byUid.put(cfg.uid, cfg);
-        }
-
-        for (ParameterDescriptor pd : descUpdate.parameters) {
-            if (pd.mandatory && !byUid.containsKey(pd.uid)) {
-                throw new WebApplicationException("Headless update of application (" + appCfg.name
-                        + ") not possible, missing mandatory parameter (" + pd.uid + ")", Status.PRECONDITION_FAILED);
-            }
-        }
-
-        return command;
-    }
-
     private Manifest.Key createInstanceVersion(Manifest.Key target, InstanceConfiguration config,
             SortedMap<String, InstanceNodeConfiguration> nodes) {
 
@@ -476,7 +349,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             inc.copyRedundantFields(config);
 
-            // make sure every application has an ID. NEW applications might have a null ID to be filled out.
+            // make sure every application has an ID. NEW applications might have a null ID
+            // to be filled out.
             for (ApplicationConfiguration cfg : inc.applications) {
                 if (cfg.uid == null) {
                     cfg.uid = UuidHelper.randomId();
@@ -532,11 +406,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
 
             if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
-                // no new node config - re-apply existing one with new tag, align redundant fields.
+                // no new node config - re-apply existing one with new tag, align redundant
+                // fields.
                 state.nodeDtos = readExistingNodeConfigs(oldConfig);
             }
 
-            // does NOT validate that the product exists, as it might still reside on the central server, not this one.
+            // does NOT validate that the product exists, as it might still reside on the
+            // central server, not this one.
 
             SortedMap<String, InstanceNodeConfiguration> nodes = new TreeMap<>();
             if (state.nodeDtos != null) {
@@ -675,8 +551,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
         }
-        // TODO: Use CommonDirectoryEntryResource - but not yet, keep compat with servers using old API for a while
-        NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, context);
+        CommonDirectoryEntryResource sdr = ResourceProvider.getVersionedResource(svc, CommonDirectoryEntryResource.class,
+                context);
         return sdr.getEntryContent(entry, offset, limit);
     }
 
@@ -686,8 +562,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (svc == null) {
             throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
         }
-        // TODO: Use CommonDirectoryEntryResource - but not yet, keep compat with servers using old API for a while
-        NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, context);
+        CommonDirectoryEntryResource sdr = ResourceProvider.getVersionedResource(svc, CommonDirectoryEntryResource.class,
+                context);
         return sdr.getEntryStream(entry);
     }
 

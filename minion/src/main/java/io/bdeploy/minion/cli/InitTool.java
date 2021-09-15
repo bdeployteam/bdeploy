@@ -9,8 +9,6 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
 
-import jakarta.ws.rs.core.UriBuilder;
-
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
@@ -40,6 +38,7 @@ import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteMasterTool;
+import jakarta.ws.rs.core.UriBuilder;
 
 @Help("Initialize a minion root directory")
 @ToolCategory(MinionServerCli.MGMT_TOOLS)
@@ -90,7 +89,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         super(InitConfig.class);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected RenderableResult run(InitConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
@@ -100,10 +98,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         if (config.mode() != MinionMode.NODE) {
             helpAndFailIfMissing(config.initUser(), "Missing --initUser");
             helpAndFailIfMissing(config.initPassword(), "Missing --initPassword");
-        }
-
-        if (config.mode() == MinionMode.SLAVE) {
-            helpAndFail("Mode SLAVE no longer supported, use NODE instead.");
         }
 
         Path root = Paths.get(config.root());
@@ -135,7 +129,8 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             String dist = config.dist();
 
             if (dist == null && config.updateDir() != null) {
-                // use the installation directory of the application as source for the initial import.
+                // use the installation directory of the application as source for the initial
+                // import.
                 Path updRoot = Paths.get(config.updateDir()).getParent();
                 if (Files.exists(updRoot) && Files.exists(updRoot.resolve("version.properties"))) {
                     dist = updRoot.toString();
@@ -144,7 +139,8 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
             // import original version of minion into new bhive for future updates.
             if (!"ignore".equals(dist)) {
-                // same logic as remote update: push the content of the ZIP as new manifest to the local hive.
+                // same logic as remote update: push the content of the ZIP as new manifest to
+                // the local hive.
                 Collection<Key> keys = RemoteMasterTool.importAndPushUpdate(new RemoteService(mr.getHiveDir().toUri()),
                         Paths.get(dist), getActivityReporter());
 

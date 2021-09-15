@@ -1,5 +1,9 @@
 package io.bdeploy.interfaces.remote;
 
+import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
+import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -7,11 +11,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
-import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
-import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
 
 @Path("/processes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -89,7 +88,7 @@ public interface NodeProcessResource {
      * @param tag the tag for which to retrieve the output file entry.
      * @param applicationId the application ID for which to retrieve the output file entry.
      * @return an {@link RemoteDirectoryEntry}, can be used with
-     *         {@link NodeDeploymentResource#getEntryContent(RemoteDirectoryEntry, long, long)}.
+     *         {@link CommonDirectoryEntryResource#getEntryContent(RemoteDirectoryEntry, long, long)}.
      */
     @GET
     @Path("/output")
