@@ -2,8 +2,8 @@
 
 BDeploy uses the *Eclipse IDE* for backend- and *VSCode* for frontend-development. You will need:
 
-* https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot[OpenJDK 11]
-* https://www.eclipse.org/downloads/[Eclipse IDE]
+* Get the latest https://adoptium.net/[OpenJDK 17].
+* Get the latest https://www.eclipse.org/downloads/[Eclipse IDE] including Java 17 support.
 ** You need to have the https://marketplace.eclipse.org/content/launch-configuration-dsl[Launch Configuration DSL (LcDsl)] extension installed.
 * https://code.visualstudio.com/download[VSCode]
 ** You need to have the https://marketplace.visualstudio.com/items?itemName=johnpapa.angular-essentials[Angular Essentials] extension installed.
@@ -13,7 +13,7 @@ BDeploy uses the *Eclipse IDE* for backend- and *VSCode* for frontend-developmen
 
 === Environment Setup
 
-* You will want to set the `JAVA_HOME` environment variable to point to the path where you extracted the *OpenJDK 11* package to assure that the build picks up the correct Java.
+* You will want to set the `JAVA_HOME` environment variable to point to the path where you extracted the *OpenJDK 17* package to assure that the build picks up the correct Java.
 * Make sure that the `npm` command works from the command line where you will run `gradle` builds (`cmd.exe` on Windows, `bash` on Linux).
 * Install the *Angular CLI* globally for easier working by running `npm install -g @angular/cli`.
 

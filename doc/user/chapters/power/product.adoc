@@ -104,7 +104,7 @@ endpoints: <10>
       secure: false
 
 runtimeDependencies: <13>
-  - "adoptopenjdk/jre:1.8.0_202-b08"
+  - "adoptium/jre:1.8.0_202-b08"
 ----
 
 <1> A human readable name of the *Application*. Will be displayed in the *Configure Application* pane, and is also used as _default_ name for any process _instantiated_ from this *Application*.
@@ -119,7 +119,7 @@ runtimeDependencies: <13>
 <10> Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. *BDeploy* can later on call these endpoints when instructed to do so by a third-party application.
 <11> The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of *BDeploy* servers.
 <12> <<Variable Expansion>> can be used on most of the endpoint properties.
-<13> Optional runtime dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptopenjdk/jre:1.8.0_202-b08}}` <<Variable Expansion>>, e.g. `launcherPath: {{M:adoptopenjdk/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptopenjdk/jre/linux:1.8.0_202-b08` on `LINUX`.
+<13> Optional runtime dependencies. These dependencies are included in the *Product* when building it. Dependencies are fetched from *<<Software Repositories>>*. `launcherPath` and parameter `defaultValue` (and of course the final configuration values) can access paths within each of the dependencies by using the `{{M:adoptium/jre:1.8.0_202-b08}}` <<Variable Expansion>>, e.g. `launcherPath: {{M:adoptium/jre:1.8.0_202-b08}}/bin/java`. Also note that the declared dependency does not specify an operating system. This will be resolved by *BDeploy* to either an exact match, e.g. `adoptium/jre/linux:1.8.0_202-b08` on `LINUX`.
 
 ===== Supported `processControl` attributes
 
