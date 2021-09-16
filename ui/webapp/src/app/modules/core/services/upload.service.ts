@@ -196,20 +196,18 @@ export class UploadService {
     });
     stateSubject.next(ImportState.IMPORTING);
 
-    this.http
-      .post<UploadInfoDto>(url, dto, { headers: suppressGlobalErrorHandling(new HttpHeaders()) })
-      .subscribe(
-        (d) => {
-          importStatus.detail = d.details;
-          stateSubject.next(ImportState.FINISHED);
-          stateSubject.complete();
-        },
-        (error) => {
-          importStatus.detail = error.statusText + ' (Status ' + error.status + ')';
-          stateSubject.next(ImportState.FAILED);
-          stateSubject.complete();
-        }
-      );
+    this.http.post<UploadInfoDto>(url, dto, { headers: suppressGlobalErrorHandling(new HttpHeaders()) }).subscribe(
+      (d) => {
+        importStatus.detail = d.details;
+        stateSubject.next(ImportState.FINISHED);
+        stateSubject.complete();
+      },
+      (error) => {
+        importStatus.detail = error.statusText + ' (Status ' + error.status + ')';
+        stateSubject.next(ImportState.FAILED);
+        stateSubject.complete();
+      }
+    );
     return importStatus;
   }
 

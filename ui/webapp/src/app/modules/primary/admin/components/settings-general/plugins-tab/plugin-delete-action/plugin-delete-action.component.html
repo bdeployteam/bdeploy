@@ -1,6 +1,7 @@
 <div fxLayout="row" fxLayoutAlign="start center">
   <app-bd-button
     icon="delete"
+    text="Delete"
     [disabled]="!record.global"
     (click)="doDelete()"
     [matTooltip]="record.global ? 'Delete/Uninstall plugin' : 'Product-bound plugins are ephemeral and will be removed when unloaded.'"

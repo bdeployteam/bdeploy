@@ -125,7 +125,7 @@ export class LdapTabComponent implements OnInit {
 
   private checkServer(server: LDAPSettingsDto): void {
     this.parent.dialog
-      .message({ header: 'Checking server', icon: 'bolt', template: this.checkServerTemplate, actions: [{ name: 'CLOSE', result: null, confirm: true }] })
+      .message({ header: 'Checking Server', icon: 'bolt', template: this.checkServerTemplate, actions: [{ name: 'CLOSE', result: null, confirm: true }] })
       .subscribe();
     this.checkResult$.next(`Checking ...`);
     this.auth.testLdapServer(server).subscribe((r) => {

@@ -2,6 +2,7 @@
   <app-bd-button
     [icon]="record.loaded ? (record.global ? 'pause' : 'stop') : 'play_arrow'"
     (click)="doLoadUnload()"
+    [text]="record.loaded ? 'Unload plugin' : 'Load plugin'"
     [matTooltip]="record.loaded ? 'Unload plugin' : 'Load plugin'"
   ></app-bd-button>
 </div>

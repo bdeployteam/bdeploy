@@ -74,7 +74,7 @@ export class AttributeValuesComponent implements OnInit {
   /* template */ showAddDialog(template: TemplateRef<any>) {
     this.dialog
       .message({
-        header: 'Add/Edit Attribute Value',
+        header: 'Set Attribute Value',
         icon: 'edit',
         template: template,
         validation: () => !!this.newAttr && !!this.newValue?.length,

@@ -70,8 +70,13 @@ public class PluginResourceImpl implements PluginResource {
         List<PluginInfoDto> result = new ArrayList<>();
 
         for (ObjectId id : pm.getPlugins()) {
-            PluginHeader hdr = manager.loadHeader(hive, id);
-            result.add(new PluginInfoDto(id, hdr.name, hdr.version, false, manager.isLoaded(id), Collections.emptyList(), null));
+            try {
+                PluginHeader hdr = manager.loadHeader(hive, id);
+                result.add(
+                        new PluginInfoDto(id, hdr.name, hdr.version, false, manager.isLoaded(id), Collections.emptyList(), null));
+            } catch (Exception e) {
+                log.error("Cannot load plugin header for {}", id, e);
+            }
         }
 
         return result;
@@ -86,9 +91,13 @@ public class PluginResourceImpl implements PluginResource {
                 PluginManifest mf = PluginManifest.of(hive, key);
 
                 if (!manager.isLoaded(mf.getPlugin())) {
-                    PluginHeader hdr = manager.loadHeader(hive, mf.getPlugin());
-                    result.add(
-                            new PluginInfoDto(mf.getPlugin(), hdr.name, hdr.version, true, false, Collections.emptyList(), null));
+                    try {
+                        PluginHeader hdr = manager.loadHeader(hive, mf.getPlugin());
+                        result.add(new PluginInfoDto(mf.getPlugin(), hdr.name, hdr.version, true, false, Collections.emptyList(),
+                                null));
+                    } catch (Exception e) {
+                        log.error("Cannot load plugin header of {}", mf.getPlugin(), e);
+                    }
                 }
             }
         }
@@ -210,7 +219,9 @@ public class PluginResourceImpl implements PluginResource {
             Manifest.Key key = builder.insert(hive);
 
             PluginInfoDto result = manager.loadGlobalPlugin(PluginManifest.of(hive, key).getPlugin());
-            changes.create(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, result.id.toString()));
+            if (result != null) {
+                changes.create(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, result.id.toString()));
+            }
             return result;
         } catch (IOException e) {
             throw new WebApplicationException("Cannot load plugin", e, Status.BAD_REQUEST);

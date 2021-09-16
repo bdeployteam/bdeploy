@@ -9,6 +9,7 @@
         formDataParam="plugin"
         [url]="plugins.getGlobalUploadUrl()"
         (dismiss)="onDismiss(i)"
+        [resultEvaluator]="resultEvaluator"
       ></app-bd-file-upload>
     </div>
   </app-bd-dialog-content>
