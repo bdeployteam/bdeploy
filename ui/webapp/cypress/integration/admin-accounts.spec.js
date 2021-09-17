@@ -3,7 +3,7 @@ describe('Admin UI Tests (Accounts)', () => {
     cy.login();
   });
 
-  it('Tests General Settings', () => {
+  it('Tests Account Settings', () => {
     cy.visit('/');
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').click();
