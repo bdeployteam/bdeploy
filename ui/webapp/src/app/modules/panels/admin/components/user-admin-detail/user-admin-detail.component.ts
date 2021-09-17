@@ -35,7 +35,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
     id: 'delete',
     name: 'Delete',
-    data: (r) => `Delete permission`,
+    data: (r) => `Delete Permission`,
     action: (r) => this.onRemovePermission(r),
     icon: (r) => 'delete',
     width: '40px',
@@ -113,7 +113,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
     this.assignScope = null;
     this.assignPerm = null;
     this.dialog
-      .message({ header: 'Assign permission', template: this.assignTemplate, validation: () => !!this.assignPerm, actions: [ACTION_CANCEL, ACTION_OK] })
+      .message({ header: 'Assign Permission', template: this.assignTemplate, validation: () => !!this.assignPerm, actions: [ACTION_CANCEL, ACTION_OK] })
       .subscribe((r) => {
         if (!r) {
           return;
@@ -143,7 +143,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
     this.passConfirm = null;
     this.dialog
       .message({
-        header: 'Edit user',
+        header: 'Edit User',
         template: this.editTemplate,
         validation: () => !this.editForm || this.editForm.valid,
         actions: [ACTION_CANCEL, ACTION_OK],
@@ -184,7 +184,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   }
 
   public onDelete(userInfo: UserInfo): void {
-    this.dialog.confirm('Delete user', `Are you sure you want to delete user ${userInfo.name}?`).subscribe((r) => {
+    this.dialog.confirm('Delete User', `Are you sure you want to delete user ${userInfo.name}?`).subscribe((r) => {
       if (!r) {
         return;
       }

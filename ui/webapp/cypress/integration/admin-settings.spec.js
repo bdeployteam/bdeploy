@@ -1,4 +1,4 @@
-describe('Admin UI Tests', () => {
+describe('Admin UI Tests (Settings)', () => {
   beforeEach(() => {
     cy.login();
   });

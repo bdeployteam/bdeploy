@@ -106,7 +106,7 @@ export class UsersBrowserComponent implements OnInit {
     this.addConfirm = '';
     this.dialog
       .message({
-        header: 'Add user',
+        header: 'Add User',
         icon: 'add',
         template: this.addDialog,
         validation: () => !this.addForm || this.addForm.valid,

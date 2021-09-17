@@ -1,8 +1,14 @@
 <ng-template #assignTemplate>
   <div fxLayout="column" fxLayoutGap="5px">
     <p>An existing permission on the selected scope will be replaced.</p>
-    <app-bd-form-select [values]="scopes$ | async" [labels]="labels$ | async" [(ngModel)]="assignScope" label="Select Permission Scope"></app-bd-form-select>
-    <app-bd-form-select [values]="allPerms" label="Permission" [(ngModel)]="assignPerm"></app-bd-form-select>
+    <app-bd-form-select
+      [values]="scopes$ | async"
+      name="scope"
+      [labels]="labels$ | async"
+      [(ngModel)]="assignScope"
+      label="Select Permission Scope"
+    ></app-bd-form-select>
+    <app-bd-form-select [values]="allPerms" label="Permission" name="permission" [(ngModel)]="assignPerm"></app-bd-form-select>
   </div>
 </ng-template>
 
