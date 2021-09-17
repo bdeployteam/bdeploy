@@ -127,11 +127,35 @@ describe('Groups Tests', () => {
       cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
       cy.get('app-bd-no-data').should('exist');
       cy.pressToolbarButton('Back to Overview');
+    });
 
       // TODO: "Download" button ?
 
-      // TODO: "Create new Instance" button ?
+    cy.inMainNavFlyin('app-product-details', () => {
+      // "Create new Instance" button
+      cy.get(`app-bd-button[text="Create new Instance"]`).click();
+    });
 
+    // "Create new Instance" switches back to the Instance Group dialog...
+    cy.inMainNavContent(() => {
+      cy.contains('mat-toolbar', `Instances of ${groupName}`).should('exist');
+    });
+    // ...with opened "Add Instance" flyin
+    cy.inMainNavFlyin('app-add-instance', () => {
+      cy.contains('app-bd-form-select[name="product"]', 'Demo Product').should('exist');
+      cy.contains('app-bd-form-select[name="version"]', '2.0.0').should('exist');
+    });
+
+    // ...go on checking product details stuff
+    cy.pressMainNavButton('Products');
+    cy.get('app-products-browser').should('exist');
+    cy.inMainNavContent(() => {
+      cy.contains('tr', /Demo Product.*2.0.0/)
+        .should('exist')
+        .click();
+    });
+
+    cy.inMainNavFlyin('app-product-details', () => {
       // "Delete" button
       cy.get(`app-bd-button[text="Delete"]`).click();
 
