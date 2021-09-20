@@ -1,0 +1,146 @@
+describe('Software Repository Tests', () => {
+  beforeEach(() => {
+    cy.login();
+  });
+
+  it('Tests Software Repos', () => {
+    cy.visit('/');
+    cy.pressMainNavButton('Software Repositories');
+
+    cy.inMainNavContent(() => {
+      cy.contains('No Repositories').should('exist');
+
+      cy.pressToolbarButton('Add Software Repository');
+    });
+
+    // create repo and enter it
+    cy.inMainNavFlyin('app-add-repository', () => {
+      cy.fillFormInput('name', 'Test-Repo');
+      cy.fillFormInput('description', 'Test Repository');
+
+      cy.get('button[data-cy^="SAVE"]').click();
+    });
+
+    cy.checkMainNavFlyinClosed();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Test-Repo').should('exist').click();
+      cy.contains('No products or external software').should('exist');
+
+      cy.pressToolbarButton('Upload Software');
+    });
+
+    // upload software and product.
+    cy.inMainNavFlyin('app-software-upload', () => {
+      cy.fillFileDrop('external-software-hive.zip');
+      cy.contains('app-bd-file-upload-raw', 'Success: external-software-hive.zip').should('exist');
+
+      cy.fillFileDrop('external-software-2-raw-direct.zip');
+      cy.contains('app-bd-file-upload-raw', 'Success: external-software-2-raw-direct.zip')
+        .should('exist')
+        .within(() => {
+          cy.contains('Generic').should('exist');
+          cy.fillFormInput('name', 'external/software/two');
+          cy.fillFormInput('tag', '2.0.1');
+          cy.fillFormToggle('allOs');
+
+          cy.get('button[data-cy^="Import"]').should('be.enabled').click();
+          cy.contains('Import of external/software/two:2.0.1').should('exist');
+        });
+
+      cy.fillFileDrop('test-product-1-direct.zip');
+      cy.contains('app-bd-file-upload-raw', 'Success: test-product-1-direct.zip').should('exist');
+    });
+
+    // check presence of software and product
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'External Software').should('exist');
+      cy.contains('tr', 'Product').should('exist');
+
+      cy.contains('tr', 'external/software/linux').should('exist');
+      cy.contains('tr', 'external/software/windows').should('exist');
+
+      cy.contains('tr', 'external/software/two')
+        .should('exist')
+        .within(() => {
+          cy.contains('2.0.1').should('exist');
+        });
+
+      cy.contains('tr', 'io.bdeploy/demo/product')
+        .should('exist')
+        .within(() => {
+          cy.contains('Demo Product').should('exist');
+          cy.contains('1.0.0').should('exist');
+        })
+        .click();
+    });
+
+    // check product details
+    cy.inMainNavFlyin('app-software-details', () => {
+      cy.contains('BDeploy Team').should('exist');
+
+      cy.get('button[data-cy^="Labels"]').click();
+      cy.contains('tr', 'io.bdeploy/demo').should('exist');
+      cy.pressToolbarButton('Back');
+
+      cy.get('button[data-cy^="Application Templates"]').click();
+      cy.contains('no application templates').should('exist');
+      cy.pressToolbarButton('Back');
+
+      cy.get('button[data-cy^="Instance Templates"]').click();
+      cy.contains('no instance templates').should('exist');
+      cy.pressToolbarButton('Back');
+
+      cy.get('button[data-cy^="Plugins"]').click();
+      cy.contains('no plugins').should('exist');
+      cy.pressToolbarButton('Back');
+
+      // TODO: download?
+
+      cy.get('button[data-cy^="Delete"]').click();
+      cy.contains('app-bd-notification-card', 'Delete 1.0.0').within(() => {
+        cy.get('button[data-cy^="YES"]').click();
+      });
+    });
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Demo Product').should('not.exist');
+    });
+
+    // check external sw details.
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'external/software/two').click();
+    });
+
+    cy.inMainNavFlyin('app-software-details', () => {
+      cy.contains('2.0.1').should('exist');
+      cy.get('button[data-cy^="Delete"]').click();
+      cy.contains('app-bd-notification-card', 'Delete 2.0.1').within(() => {
+        cy.get('button[data-cy^="YES"]').click();
+      });
+    });
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'external/software/two').should('not.exist');
+    });
+
+    // delete repo and check
+    cy.pressMainNavButton('Repository Settings');
+
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy^="Maintenance"]').click();
+      cy.get('button[data-cy^="Delete"]').click();
+
+      cy.contains('app-bd-notification-card', 'Delete').within(() => {
+        cy.fillFormInput('confirm', 'Test-Repo');
+        cy.get('button[data-cy^="YES"]').should('be.enabled').click();
+      });
+    });
+
+    cy.checkMainNavFlyinClosed();
+
+    cy.inMainNavContent(() => {
+      cy.contains('No Repositories').should('exist');
+    });
+  });
+});

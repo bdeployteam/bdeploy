@@ -20,7 +20,11 @@
       </ng-container>
       <app-bd-dynamic *ngIf="!msg.template" [html]="msg.message"></app-bd-dynamic>
       <ng-container *ngIf="!!msg.confirmation">
-        <app-bd-form-input [label]="msg.confirmationHint ? msg.confirmationHint : 'Enter confirmation'" [(ngModel)]="userConfirmation"></app-bd-form-input>
+        <app-bd-form-input
+          name="confirm"
+          [label]="msg.confirmationHint ? msg.confirmationHint : 'Enter confirmation'"
+          [(ngModel)]="userConfirmation"
+        ></app-bd-form-input>
       </ng-container>
       <app-bd-action-row *ngIf="!!msg.actions?.length">
         <app-bd-button
