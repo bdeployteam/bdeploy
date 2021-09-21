@@ -38,13 +38,7 @@ Cypress.Commands.add('createInstance', function (groupName, instanceName, produc
  * Command: deleteInstance
  */
 Cypress.Commands.add('deleteInstance', function (groupName, instanceName, mode = 'STANDALONE') {
-  cy.visitBDeploy('/', mode);
-  cy.waitUntilContentLoaded();
-
-  cy.enterGroup(groupName);
-  cy.inMainNavContent(() => {
-    cy.contains('tr', instanceName).should('exist').click();
-  });
+  cy.enterInstance(groupName, instanceName, mode);
 
   cy.pressMainNavButton('Instance Configuration');
   cy.inMainNavContent(() => {
@@ -64,5 +58,16 @@ Cypress.Commands.add('deleteInstance', function (groupName, instanceName, mode =
   cy.checkMainNavFlyinClosed();
   cy.inMainNavContent(() => {
     cy.contains('tr', instanceName).should('not.exist');
+  });
+});
+
+Cypress.Commands.add('enterInstance', function (groupName, instanceName, mode = 'STANDALONE') {
+  cy.visitBDeploy('/', mode);
+  cy.waitUntilContentLoaded();
+
+  cy.enterGroup(groupName);
+  cy.inMainNavContent(() => {
+    cy.contains('tr', instanceName).should('exist').click();
+    cy.contains('mat-toolbar', `Dashboard - ${instanceName}`).should('exist');
   });
 });

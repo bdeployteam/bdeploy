@@ -1,6 +1,6 @@
 //@ts-check
 
-const { validateZip } = require('../support/utils');
+const { validateZip, deleteDownloadsFolder } = require('../support/utils');
 
 describe('Groups Tests', () => {
   var groupName = 'Demo';
@@ -8,6 +8,7 @@ describe('Groups Tests', () => {
 
   beforeEach(() => {
     cy.login();
+    deleteDownloadsFolder();
   });
 
   it('Creates a group', () => {

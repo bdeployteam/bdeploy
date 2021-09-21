@@ -15,5 +15,12 @@ declare namespace Cypress {
      * @param mode the mode of BDeploy to use.
      */
     deleteInstance(groupName: string, instanceName: string, mode?: string);
+
+    /**
+     * @param groupName the name of the instance group hosting the instance.
+     * @param instanceName the name of the instance to enter
+     * @param mode the server mode.
+     */
+    enterInstance(groupName: string, instanceName: string, mode?: string);
   }
 }

@@ -6,7 +6,7 @@ describe('Software Repository Tests', () => {
     deleteDownloadsFolder();
   });
 
-  it('Tests Software Repos', () => {
+  it('Prepares Repository', () => {
     cy.visit('/');
     cy.pressMainNavButton('Software Repositories');
 
@@ -25,6 +25,11 @@ describe('Software Repository Tests', () => {
     });
 
     cy.checkMainNavFlyinClosed();
+  });
+
+  it('Tests Software Repos', () => {
+    cy.visit('/');
+    cy.pressMainNavButton('Software Repositories');
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Test-Repo').should('exist').click();
@@ -126,6 +131,15 @@ describe('Software Repository Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'external/software/two').should('not.exist');
+    });
+  });
+
+  it('Cleans up', () => {
+    cy.visit('/');
+    cy.pressMainNavButton('Software Repositories');
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Test-Repo').should('exist').click();
     });
 
     // delete repo and check

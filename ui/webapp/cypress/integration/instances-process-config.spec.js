@@ -16,15 +16,7 @@ describe('Instance Process Config Tests', () => {
   });
 
   it('Configures Processes', () => {
-    cy.visit('/');
-    cy.waitUntilContentLoaded();
-    cy.enterGroup(groupName);
-
-    cy.inMainNavContent(() => {
-      cy.contains('tr', instanceName).click();
-      cy.contains('mat-toolbar', `Dashboard - ${instanceName}`).should('exist');
-    });
-
+    cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
     // Add Server Process
