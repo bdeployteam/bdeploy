@@ -1,3 +1,5 @@
+//@ts-check
+
 /**
  * Command: createInstance
  */

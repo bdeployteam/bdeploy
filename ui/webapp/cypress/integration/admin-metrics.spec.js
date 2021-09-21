@@ -1,3 +1,5 @@
+//@ts-check
+
 describe('Admin UI Tests (Metrics)', () => {
   beforeEach(() => {
     cy.login();

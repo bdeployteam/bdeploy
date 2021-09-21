@@ -1,3 +1,5 @@
+//@ts-check
+
 describe('Login to Web UI', function () {
   const currentUserFullName = 'John Doe';
   const currentUserEmail = 'John Doe@example.com';

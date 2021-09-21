@@ -1,9 +1,8 @@
+//@ts-check
+
 describe('Tests related to the current user', function () {
   const currentUserFullName = 'John Doe';
   const currentUserEmail = 'John Doe@example.com';
-
-  const currentUser = 'admin'; // original user as created on setup
-  const currentUserPassword = 'admin'; // original password as created on setup
 
   beforeEach(() => {
     cy.login();
@@ -63,34 +62,38 @@ describe('Tests related to the current user', function () {
     cy.inMainNavFlyin('app-settings', () => {
       cy.contains('button', 'Logout').should('exist');
 
-      // two edit cycles below to restore the original password!
-      // (in case of repeated execution on the same data during development)
-      const newPassword = currentUserPassword + '_CHANGED';
+      cy.fixture('login.json').then((user) => {
+        const currentUserPassword = user.pass;
 
-      // 1st change
-      cy.get(`app-bd-panel-button[text="Change Password"]`).click();
-      cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
-      cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+        // two edit cycles below to restore the original password!
+        // (in case of repeated execution on the same data during development)
+        const newPassword = currentUserPassword + '_CHANGED';
 
-      cy.fillFormInput('passOrig', currentUserPassword);
-      cy.fillFormInput('passNew', newPassword);
-      cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-      cy.fillFormInput('passVerify', newPassword);
-      cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+        // 1st change
+        cy.get(`app-bd-panel-button[text="Change Password"]`).click();
+        cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
+        cy.contains('button', 'SAVE').should('exist').and('be.disabled');
 
-      // 2nd change
-      cy.get(`app-bd-panel-button[text="Change Password"]`).click();
-      cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
-      cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+        cy.fillFormInput('passOrig', currentUserPassword);
+        cy.fillFormInput('passNew', newPassword);
+        cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+        cy.fillFormInput('passVerify', newPassword);
+        cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
 
-      cy.fillFormInput('passOrig', newPassword);
-      cy.fillFormInput('passNew', currentUserPassword);
-      cy.contains('button', 'SAVE').should('exist').and('be.disabled');
-      cy.fillFormInput('passVerify', currentUserPassword);
-      cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+        // 2nd change
+        cy.get(`app-bd-panel-button[text="Change Password"]`).click();
+        cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
+        cy.contains('button', 'SAVE').should('exist').and('be.disabled');
 
-      cy.get('app-bd-dialog-toolbar[header="User Settings"]').should('exist');
-      cy.pressToolbarButton('Close');
+        cy.fillFormInput('passOrig', newPassword);
+        cy.fillFormInput('passNew', currentUserPassword);
+        cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+        cy.fillFormInput('passVerify', currentUserPassword);
+        cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+
+        cy.get('app-bd-dialog-toolbar[header="User Settings"]').should('exist');
+        cy.pressToolbarButton('Close');
+      });
     });
 
     cy.checkMainNavFlyinClosed();
@@ -111,6 +114,7 @@ describe('Tests related to the current user', function () {
       cy.get('textarea')
         .invoke('val')
         .then((text) => {
+          // @ts-ignore
           expect(text.length > 500 && text.length < 1000);
         });
 
@@ -119,6 +123,7 @@ describe('Tests related to the current user', function () {
       cy.get('textarea')
         .invoke('val')
         .then((text) => {
+          // @ts-ignore
           expect(text.length > 2000);
         });
       cy.pressToolbarButton('Back to Overview');

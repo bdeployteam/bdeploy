@@ -1,3 +1,5 @@
+//@ts-check
+
 /**
  * Command: createGroup
  */
@@ -121,7 +123,7 @@ Cypress.Commands.add('attachManaged', function (groupName) {
     });
 
     cy.get(`app-bd-button[text="Download Link Information"]`).within(() => {
-      cy.get('button').should('exist').and('be.enabled').downloadBlobFile('managed-ident.txt');
+      cy.get('button').should('exist').and('be.enabled').downloadByLinkClick('managed-ident.txt', true);
     });
   });
 

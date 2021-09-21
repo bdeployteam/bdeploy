@@ -1,3 +1,5 @@
+//@ts-check
+
 Cypress.Commands.add('waitUntilContentLoaded', function () {
   cy.document()
     .its('body')
@@ -72,7 +74,7 @@ Cypress.Commands.add('fillImageUpload', function (filePath, mimeType, checkEmpty
   });
 });
 
-Cypress.Commands.add('fillFileDrop', function (name, mimeType, encoding = 'base64') {
+Cypress.Commands.add('fillFileDrop', function (name, mimeType = null, encoding = 'base64') {
   // base64 encoding is suitable and default for ZIP files. JAR unfortunately is not recognized by
   // the attachFile extension, so we explicitly set it.
   cy.get('app-bd-file-drop').within(() => {
@@ -86,7 +88,19 @@ Cypress.Commands.add('checkFileUpload', function (name) {
   });
 });
 
-Cypress.Commands.add('downloadObjectUrl', function (link) {
+Cypress.Commands.add('checkAndConfirmSnackbar', function (message) {
+  cy.document()
+    .its('body')
+    .find('snack-bar-container')
+    .within(() => {
+      cy.contains('simple-snack-bar', message).should('exist');
+      cy.contains('button', 'DISMISS').should('exist').click();
+      cy.contains('simple-snack-bar', message).should('not.exist');
+    });
+});
+
+// INTERNAL
+Cypress.Commands.add('downloadFromLinkHref', function (link) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', link.href);
@@ -100,29 +114,68 @@ Cypress.Commands.add('downloadObjectUrl', function (link) {
   });
 });
 
-Cypress.Commands.add('downloadBlobFile', { prevSubject: true }, function (subject, filename) {
+Cypress.Commands.add('downloadByLinkClick', { prevSubject: true }, function (subject, filename, fixture = false) {
   cy.window().then((win) => {
-    const stubbed = cy.stub(win.downloadLocation, 'click').callsFake((link) => {});
+    let url = null;
+    const stubbed = cy
+      // @ts-ignore
+      .stub(win.downloadLocation, 'click')
+      .onFirstCall()
+      .callsFake((link) => {
+        url = link;
+      });
+
     cy.wrap(subject)
       .click()
       .should(() => {
         expect(stubbed).to.be.calledOnce;
-        const link = stubbed.args[0][0];
-        cy.downloadObjectUrl(link).then((rq) => {
+        expect(url).to.be.not.null;
+      })
+      .then(() => {
+        // @ts-ignore
+        cy.downloadFromLinkHref(url).then((rq) => {
           expect(rq.status).to.equal(200);
-          cy.writeFile('cypress/fixtures/' + filename, rq.response);
+          cy.writeFile(Cypress.config('downloadsFolder') + '/' + filename, rq.response).then(() => {
+            if (fixture) {
+              cy.task('moveFile', { from: Cypress.config('downloadsFolder') + '/' + filename, to: Cypress.config('fixturesFolder') + '/' + filename });
+            }
+          });
         });
       });
   });
 });
 
-Cypress.Commands.add('checkAndConfirmSnackbar', function (message) {
-  cy.document()
-    .its('body')
-    .find('snack-bar-container')
-    .within(() => {
-      cy.contains('simple-snack-bar', message).should('exist');
-      cy.contains('button', 'DISMISS').should('exist').click();
-      cy.contains('simple-snack-bar', message).should('not.exist');
-    });
+Cypress.Commands.add('downloadByLocationAssign', { prevSubject: true }, (subject, filename, fixture = false) => {
+  cy.window().then((win) => {
+    let url = null;
+    const stubbed = cy
+      // @ts-ignore
+      .stub(win.downloadLocation, 'assign')
+      .onFirstCall()
+      .callsFake((link) => {
+        url = link;
+      });
+
+    cy.wrap(subject)
+      .click()
+      .should(() => {
+        expect(stubbed).to.be.calledOnce;
+        expect(url).to.be.not.null;
+      })
+      .then(() => {
+        if (url.startsWith('/api')) {
+          url = url.substring(4);
+        }
+        if (url.startsWith('/')) {
+          // URL argument is relative in production, see application config.json
+          url = Cypress.env('backendBaseUrl') + url;
+        }
+
+        cy.task('downloadFileFromUrl', { url: url, fileName: Cypress.config('downloadsFolder') + '/' + filename }).then(() => {
+          if (fixture) {
+            cy.task('moveFile', { from: Cypress.config('downloadsFolder') + '/' + filename, to: Cypress.config('fixturesFolder') + '/' + filename });
+          }
+        });
+      });
+  });
 });

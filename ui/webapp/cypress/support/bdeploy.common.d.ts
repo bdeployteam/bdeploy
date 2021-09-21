@@ -59,7 +59,7 @@ declare namespace Cypress {
      * @param filePath path of the file in the fixtures directory
      * @param mimeType the mime type of the file
      */
-    fillFileDrop(filePath: string, mimeType: string);
+    fillFileDrop(filePath: string, mimeType?: string);
 
     /**
      * @param filePath check whether the file was uploaded successfully
@@ -67,17 +67,18 @@ declare namespace Cypress {
     checkFileUpload(filePath: string);
 
     /**
-     * Creates a request to download a file from a link.
-     *
-     * @param link the object URL to download.
-     */
-    downloadObjectUrl(link: string): Promise<any>;
-
-    /**
      * Chain off a clickable element which will trigger downloadLocation.click in the application.
      * @param filename the filename to store the file as - in the cypress/fixtures directory
+     * @param fixture whether the file should be downloaded to the fixture directory instead of the downloads directory.
      */
-    downloadBlobFile(filename: string);
+    downloadByLinkClick(filename: string, fixture?: boolean);
+
+    /**
+     * Chain off a clickable element which will trigger downloadLocation.assign in the application.
+     * @param filename the filename to store the file as.
+     * @param fixture whether the file should be downloaded to the fixture directory instead of the downloads directory.
+     */
+    downloadByLocationAssign(filename: string, fixture?: boolean);
 
     /**
      * @param message the message to expect in the snackbar.

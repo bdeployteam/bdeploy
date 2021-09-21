@@ -1,3 +1,5 @@
+//@ts-check
+
 describe('Central/Managed Basic Test', function () {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';

@@ -14,5 +14,13 @@ declare namespace Cypress {
     visitCentral(url: string);
     visitManaged(url: string);
     visitBDeploy(url: string, mode: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
+
+    /**
+     * Forces (re-)visit of the given URL by adding a random timestamp query parameter to the URL
+     *
+     * This effectively disables the detection that we're already on that URL which can be wrong, e.g. when switching
+     * from managed to central and vice versa.
+     */
+    forceVisit(url: string);
   }
 }

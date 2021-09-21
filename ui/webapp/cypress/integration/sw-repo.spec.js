@@ -1,6 +1,9 @@
+const { deleteDownloadsFolder, validateZip } = require('../support/utils');
+
 describe('Software Repository Tests', () => {
   beforeEach(() => {
     cy.login();
+    deleteDownloadsFolder();
   });
 
   it('Tests Software Repos', () => {
@@ -95,7 +98,8 @@ describe('Software Repository Tests', () => {
       cy.contains('no plugins').should('exist');
       cy.pressToolbarButton('Back');
 
-      // TODO: download?
+      cy.get('button[data-cy^="Download"]').downloadByLocationAssign('product-1.0.0.zip');
+      validateZip('product-1.0.0.zip', 'manifests/io.bdeploy/demo/product/1.0.0');
 
       cy.get('button[data-cy^="Delete"]').click();
       cy.contains('app-bd-notification-card', 'Delete 1.0.0').within(() => {

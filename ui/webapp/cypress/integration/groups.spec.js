@@ -1,3 +1,7 @@
+//@ts-check
+
+const { validateZip } = require('../support/utils');
+
 describe('Groups Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
@@ -127,9 +131,10 @@ describe('Groups Tests', () => {
       cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
       cy.get('app-bd-no-data').should('exist');
       cy.pressToolbarButton('Back to Overview');
-    });
 
-      // TODO: "Download" button ?
+      cy.get('button[data-cy^="Download"]').downloadByLocationAssign('product-2.0.0.zip');
+      validateZip('product-2.0.0.zip', 'manifests/io.bdeploy/demo/product/2.0.0');
+    });
 
     cy.inMainNavFlyin('app-product-details', () => {
       // "Create new Instance" button

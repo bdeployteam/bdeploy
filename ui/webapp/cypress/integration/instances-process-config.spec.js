@@ -1,3 +1,5 @@
+//@ts-check
+
 describe('Instance Process Config Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';

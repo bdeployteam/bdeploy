@@ -1,3 +1,5 @@
+//@ts-check
+
 Cypress.Commands.add('login', function () {
   cy.fixture('login.json').then((user) => {
     cy.request({
