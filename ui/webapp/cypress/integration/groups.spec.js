@@ -187,9 +187,6 @@ describe('Groups Tests', () => {
   // TODO create user with global permissions / ensure that these user exist
   // TODO check global permissions on instance group
   // TODO grant/revoke admin and write permissions to globalRead user
-  // TODO add a user
-  // TODO remove a user
-  // TODO cleanup users
 
   it('Deletes the instance', () => {
     cy.deleteInstance(groupName, instanceName);

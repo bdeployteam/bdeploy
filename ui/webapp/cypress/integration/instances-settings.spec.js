@@ -61,7 +61,6 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Cleans up', () => {
-    cy.deleteInstance(groupName, instanceName);
     cy.deleteGroup(groupName);
   });
 });

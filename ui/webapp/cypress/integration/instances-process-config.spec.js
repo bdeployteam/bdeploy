@@ -12,6 +12,7 @@ describe('Instance Process Config Tests', () => {
     cy.visit('/');
     cy.createGroup(groupName);
     cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip');
+    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
   });
 
@@ -222,8 +223,70 @@ describe('Instance Process Config Tests', () => {
     });
   });
 
+  // this test is in here since we have some processes configured already.
+  it('Tests product update', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Instance Configuration');
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Instance Settings');
+    });
+
+    cy.inMainNavFlyin('app-instance-settings', () => {
+      cy.get('button[data-cy^="Update Product"]').click();
+    });
+
+    cy.inMainNavFlyin('app-product-update', () => {
+      cy.contains('tr', '2.0.0').within(() => {
+        cy.get('button[data-cy^="Use"]').click();
+      });
+    });
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Instance Settings');
+    });
+
+    cy.checkMainNavFlyinClosed();
+
+    cy.contains('app-bd-notification-card', 'Product Update')
+      .should('exist')
+      .within(() => {
+        cy.contains('tr', 'updated configuration files')
+          .should('exist')
+          .within(() => {
+            cy.get('button[data-cy^="Dismiss"]').click();
+          });
+      });
+
+    cy.contains('app-bd-notification-card', 'Product Update').should('not.exist');
+    cy.pressToolbarButton('Undo');
+
+    cy.contains('app-bd-notification-card', 'Product Update')
+      .should('exist')
+      .within(() => {
+        cy.get('[data-cy="notification-dismiss"]').click();
+      });
+
+    cy.contains('app-bd-notification-card', 'Product Update').should('not.exist');
+
+    cy.waitUntilContentLoaded(); // validation may be running.
+    cy.get('app-bd-notification-card[header^="Validation"]').should('not.exist');
+
+    cy.get('app-config-node[data-cy="master"]').within((node) => {
+      cy.contains('tr', 'Server Application A').find('.bd-status-border-changed').should('exist');
+    });
+
+    cy.get('button[data-cy^="Save"]').should('be.enabled').click(); // disables button on click.
+    cy.waitUntilContentLoaded();
+    cy.get('button[data-cy^="Save"]').should('be.disabled').find('mat-spinner').should('not.exist'); // wait until spinner is gone.
+
+    // "changed" border should be gone, we're in sync now.
+    cy.get('app-config-node[data-cy="master"]').within((node) => {
+      cy.contains('tr', 'Server Application A').find('.bd-status-border-none').should('exist');
+    });
+  });
+
   it('Cleans up', () => {
-    cy.deleteInstance(groupName, instanceName);
     cy.deleteGroup(groupName);
   });
 });
