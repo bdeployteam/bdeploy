@@ -99,6 +99,7 @@ Cypress.Commands.add('verifyProductVersion', function (groupName, productName, p
  * Command: enterGroup
  */
 Cypress.Commands.add('enterGroup', function (groupName) {
+  cy.waitUntilContentLoaded();
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('exist').click();
     cy.contains('mat-toolbar', `Instances of ${groupName}`).should('exist');

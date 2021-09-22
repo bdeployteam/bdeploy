@@ -179,7 +179,6 @@ describe('Instance Process Config Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('button[data-cy^="Save"]').should('be.enabled').click(); // disables button on click.
       cy.waitUntilContentLoaded();
-      cy.get('button[data-cy^="Save"]').should('be.disabled').find('mat-spinner').should('not.exist'); // wait until spinner is gone.
 
       // "added" border should be gone, we're in sync now.
       cy.get('app-config-node[data-cy="master"]').within((node) => {
@@ -278,7 +277,6 @@ describe('Instance Process Config Tests', () => {
 
     cy.get('button[data-cy^="Save"]').should('be.enabled').click(); // disables button on click.
     cy.waitUntilContentLoaded();
-    cy.get('button[data-cy^="Save"]').should('be.disabled').find('mat-spinner').should('not.exist'); // wait until spinner is gone.
 
     // "changed" border should be gone, we're in sync now.
     cy.get('app-config-node[data-cy="master"]').within((node) => {
