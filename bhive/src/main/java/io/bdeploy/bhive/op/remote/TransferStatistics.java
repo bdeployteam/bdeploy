@@ -31,9 +31,9 @@ public class TransferStatistics {
         result.addField("Number of Manifests", sumManifests);
         result.addField("Number of reused Trees", sumTrees - sumMissingTrees);
         result.addField("Number of Objects", sumMissingObjects);
-        result.addField("Transfer size", FormatHelper.formatFileSize(transferSize));
+        result.addField("Transfer size (compr.)", FormatHelper.formatFileSize(transferSize));
         result.addField("Duration", FormatHelper.formatDuration(duration));
-        result.addField("Transfer speed", FormatHelper.formatTransferRate(duration, transferSize));
+        result.addField("Transfer speed", FormatHelper.formatTransferRate(transferSize, duration));
         return result;
     }
 
