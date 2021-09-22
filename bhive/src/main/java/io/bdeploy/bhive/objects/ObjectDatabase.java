@@ -247,13 +247,19 @@ public class ObjectDatabase extends LockableDatabase {
         try {
             long xctpCount = 0;
             do {
-                try (Stream<Path> walk = Files.walk(root)) {
-                    return walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
-                            .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1))
-                            .collect(Collectors.toCollection(TreeSet::new));
-                } catch (UncheckedIOException | NoSuchFileException e) {
-                    // something was removed in the middle of the walk... retry.
-                    if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 10) {
+                try {
+                    try (Stream<Path> walk = Files.walk(root)) {
+                        return walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
+                                .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1))
+                                .collect(Collectors.toCollection(TreeSet::new));
+                    } catch (UncheckedIOException e) {
+                        // something was removed in the middle of the walk... retry.
+                        if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 10) {
+                            throw e;
+                        }
+                    }
+                } catch (NoSuchFileException e) {
+                    if (xctpCount++ > 10) {
                         throw e;
                     }
                 }

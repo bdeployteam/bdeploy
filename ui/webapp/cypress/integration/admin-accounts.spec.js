@@ -11,6 +11,7 @@ describe('Admin UI Tests (Accounts)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.contains('a', 'User Accounts').click();
+    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.fixture('login.json').then((user) => {
@@ -76,6 +77,7 @@ describe('Admin UI Tests (Accounts)', () => {
     });
 
     // check deactivation
+    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', 'test')
         .should('exist')
@@ -91,6 +93,7 @@ describe('Admin UI Tests (Accounts)', () => {
     });
 
     // check activation
+    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', 'test')
         .should('exist')
@@ -110,6 +113,7 @@ describe('Admin UI Tests (Accounts)', () => {
     });
 
     // check READ perm.
+    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', 'test')
         .should('exist')

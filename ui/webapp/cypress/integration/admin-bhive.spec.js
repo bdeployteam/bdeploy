@@ -11,6 +11,7 @@ describe('Admin UI Tests (BHive)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.contains('a', 'BHives').click();
+    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'default').click();
@@ -21,6 +22,7 @@ describe('Admin UI Tests (BHive)', () => {
     });
 
     cy.inMainNavFlyin('app-bhive-audit', () => {
+      cy.waitUntilContentLoaded();
       cy.get('tr').should('have.length.above', 1);
 
       cy.pressToolbarButton('Back');
@@ -31,8 +33,10 @@ describe('Admin UI Tests (BHive)', () => {
     });
 
     cy.inMainNavFlyin('app-bhive-browser', () => {
+      cy.waitUntilContentLoaded();
       cy.contains('tr', 'meta/minions').click();
 
+      cy.waitUntilContentLoaded();
       cy.get('app-bd-dialog-toolbar').within(() => {
         cy.get('button[data-cy^="Back to Parent"]').should('exist').and('be.enabled');
       });
