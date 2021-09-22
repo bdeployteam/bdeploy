@@ -187,8 +187,6 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                     this.ws.subscribe(JerseyBroadcastingActivityReporter.OCT_ACTIVIES, ObjectScope.EMPTY);
                 } catch (Exception e) {
                     out().println("Cannot initialize Acitivities WebSocket");
-                    e.printStackTrace(out());
-                    Thread.currentThread().interrupt();
                 }
             }
 

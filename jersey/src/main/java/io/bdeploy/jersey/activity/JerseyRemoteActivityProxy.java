@@ -38,7 +38,7 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
     private final Map<String, ActivityNode> proxiedActivities = new TreeMap<>();
     private final Map<String, String> uuidMapping = new TreeMap<>();
     private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
-    private final ObjectChangeClientWebSocket ws;
+    private ObjectChangeClientWebSocket ws;
 
     public JerseyRemoteActivityProxy(RemoteService service, JerseyBroadcastingActivityReporter reporter) {
         if (service.getKeyStore() == null) {
@@ -49,10 +49,18 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
         parent = reporter.getCurrentActivity();
         remote = service;
 
-        ws = JerseyClientFactory.get(service).getObjectChangeWebSocket(this::onMessage);
-        ws.subscribe(JerseyBroadcastingActivityReporter.OCT_ACTIVIES, new ObjectScope(proxyUuid));
+        try {
+            ws = JerseyClientFactory.get(service).getObjectChangeWebSocket(this::onMessage);
+            ws.subscribe(JerseyBroadcastingActivityReporter.OCT_ACTIVIES, new ObjectScope(proxyUuid));
 
-        JerseyClientFactory.setProxyUuid(proxyUuid);
+            JerseyClientFactory.setProxyUuid(proxyUuid);
+        } catch (Exception e) {
+            ws = null;
+            log.warn("Cannot proxy remote activities: {}", e.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Exception", e);
+            }
+        }
     }
 
     private synchronized void onMessage(ObjectChangeDto change) {
