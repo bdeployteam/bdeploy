@@ -10,8 +10,8 @@ describe('Login to Web UI', function () {
     cy.url().should('include', '/login');
     cy.contains('BDeploy Login');
 
-    cy.get('app-bd-form-input[name="user"]').type('admin');
-    cy.get('app-bd-form-input[name="pass"]').type('admin');
+    cy.fillFormInput('user', 'admin');
+    cy.fillFormInput('pass', 'admin');
 
     cy.get('button[type="submit"]').click();
 

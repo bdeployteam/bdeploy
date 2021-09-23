@@ -19,6 +19,8 @@ describe('Instance Settings Tests', () => {
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
+    cy.waitUntilContentLoaded();
+
     // Add Server Process
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');

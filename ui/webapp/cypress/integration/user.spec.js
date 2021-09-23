@@ -28,7 +28,11 @@ describe('Tests related to the current user', function () {
       cy.fillFormInput('fullName', `${currentUserFullName} (*)`);
       cy.fillFormInput('email', `${currentUserEmail} (*)`);
       cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+    });
 
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavFlyin('app-settings', () => {
       cy.contains('button', 'Logout').should('exist');
       cy.contains('div', 'Full Name:').parent().contains('div', `${currentUserFullName} (*)`).should('exist');
       cy.contains('div', 'E-Mail:').parent().contains('div', `${currentUserEmail} (*)`).should('exist');
@@ -41,7 +45,11 @@ describe('Tests related to the current user', function () {
       cy.fillFormInput('fullName', currentUserFullName);
       cy.fillFormInput('email', currentUserEmail);
       cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+    });
 
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavFlyin('app-settings', () => {
       // finish
       cy.contains('button', 'Logout').should('exist');
       cy.contains('div', 'Full Name:').parent().contains('div', currentUserFullName).should('exist');

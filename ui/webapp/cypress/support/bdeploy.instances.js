@@ -68,6 +68,7 @@ Cypress.Commands.add('enterInstance', function (groupName, instanceName, mode = 
   cy.enterGroup(groupName);
   cy.inMainNavContent(() => {
     cy.contains('tr', instanceName).should('exist').click();
+    cy.waitUntilContentLoaded();
     cy.contains('mat-toolbar', `Dashboard - ${instanceName}`).should('exist');
   });
 });
