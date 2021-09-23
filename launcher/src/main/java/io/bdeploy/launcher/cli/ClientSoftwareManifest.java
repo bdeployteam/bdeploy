@@ -1,12 +1,14 @@
 package io.bdeploy.launcher.cli;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
@@ -31,6 +33,8 @@ import io.bdeploy.bhive.util.StorageHelper;
  */
 public class ClientSoftwareManifest {
 
+    private static final Logger log = LoggerFactory.getLogger(ClientSoftwareManifest.class);
+
     private static final String MANIFEST_PREFIX = "meta/clientSoftware/";
     private static final String FILE_NAME = "software.json";
 
@@ -54,17 +58,18 @@ public class ClientSoftwareManifest {
 
     /**
      * Returns the newest version of the software configuration for the given application and optionally creates a new one if
-     * nothing is stored.
+     * nothing is stored or if the stored entry is broken.
      */
     public ClientSoftwareConfiguration readNewest(String appUid, boolean createNew) {
         Key key = getNewestKey(appUid);
+        ClientSoftwareConfiguration config = null;
         if (key != null) {
-            return read(key);
+            config = read(key);
         }
-        if (createNew) {
-            return new ClientSoftwareConfiguration();
+        if (config == null && createNew) {
+            config = new ClientSoftwareConfiguration();
         }
-        return null;
+        return config;
     }
 
     /**
@@ -74,19 +79,39 @@ public class ClientSoftwareManifest {
         Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
         try (InputStream is = hive.execute(new TreeEntryLoadOperation().setRootTree(mf.getRoot()).setRelativePath(FILE_NAME))) {
             return StorageHelper.fromStream(is, ClientSoftwareConfiguration.class);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot load software configuration from: " + mf.getKey(), e);
+        } catch (Exception e) {
+            log.error("Failed to read software configuration '" + key + "'", e);
+            return null;
         }
     }
 
     /**
-     * Returns the latest version of each client software configuration
+     * Returns the latest version of each client software configuration. Manifest entries that are broken are ignored and will not
+     * be returned.
      */
     public Collection<ClientSoftwareConfiguration> list() {
         Collection<ClientSoftwareConfiguration> result = new ArrayList<>();
         Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(MANIFEST_PREFIX));
         for (Key key : keys) {
-            result.add(read(key));
+            ClientSoftwareConfiguration software = read(key);
+            if (software != null) {
+                result.add(software);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns all client software manifests that are broken and cannot be read.
+     */
+    public Collection<Manifest.Key> listBroken() {
+        Collection<Manifest.Key> result = new ArrayList<>();
+        Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(MANIFEST_PREFIX));
+        for (Key key : keys) {
+            ClientSoftwareConfiguration software = read(key);
+            if (software == null) {
+                result.add(key);
+            }
         }
         return result;
     }
@@ -135,6 +160,13 @@ public class ClientSoftwareManifest {
         }
 
         hive.execute(new ManifestDeleteOldByIdOperation().setToDelete(manifestName).setAmountToKeep(1));
+    }
+
+    /**
+     * Removes the given manifest entry
+     */
+    public void remove(Manifest.Key key) {
+        hive.execute(new ManifestDeleteOperation().setToDelete(key));
     }
 
     /**

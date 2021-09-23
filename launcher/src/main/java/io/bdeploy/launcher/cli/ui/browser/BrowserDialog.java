@@ -54,6 +54,7 @@ import io.bdeploy.common.Version;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
@@ -78,6 +79,8 @@ public class BrowserDialog extends BaseDialog {
     private JButton launchButton;
     private JButton refreshButton;
     private JButton uninstallButton;
+    private JButton pruneButton;
+    private JButton fsckButton;
 
     private JMenuItem launchItem;
     private JMenuItem updateItem;
@@ -149,9 +152,23 @@ public class BrowserDialog extends BaseDialog {
         uninstallButton = new JButton();
         uninstallButton.setText("Uninstall");
         uninstallButton.setToolTipText("Removes the selected application.");
-        uninstallButton.setIcon(WindowHelper.loadIcon("/delete.png", 24, 24));
+        uninstallButton.setIcon(WindowHelper.loadIcon("/uninstall.png", 24, 24));
         uninstallButton.addActionListener(this::onUninstallButtonClicked);
         uninstallButton.setBackground(Color.WHITE);
+
+        pruneButton = new JButton();
+        pruneButton.setText("Prune");
+        pruneButton.setToolTipText("Remove unused elements from the BHive.");
+        pruneButton.setIcon(WindowHelper.loadIcon("/prune.png", 24, 24));
+        pruneButton.addActionListener(this::onPruneButtonClicked);
+        pruneButton.setBackground(Color.WHITE);
+
+        fsckButton = new JButton();
+        fsckButton.setText("Fix Errors");
+        fsckButton.setToolTipText("Fix any errors in the BHive.");
+        fsckButton.setIcon(WindowHelper.loadIcon("/fixErrors.png", 20, 20));
+        fsckButton.addActionListener(this::onFsckButtonClicked);
+        fsckButton.setBackground(Color.WHITE);
 
         // Toolbar on the left side
         JToolBar toolbar = new JToolBar();
@@ -161,6 +178,9 @@ public class BrowserDialog extends BaseDialog {
         toolbar.add(refreshButton);
         toolbar.add(new JToolBar.Separator());
         toolbar.add(uninstallButton);
+        toolbar.add(new JToolBar.Separator());
+        toolbar.add(pruneButton);
+        toolbar.add(fsckButton);
         header.add(toolbar, BorderLayout.WEST);
 
         // Search panel on the right side
@@ -242,11 +262,11 @@ public class BrowserDialog extends BaseDialog {
 
         customizeAndLaunchItem = new JMenuItem("Customize & Launch");
         customizeAndLaunchItem.setToolTipText("Opens a dialog to modify the application arguments before launching.");
-        customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/build.png", 16, 16));
+        customizeAndLaunchItem.setIcon(WindowHelper.loadIcon("/customizeAndLaunch.png", 16, 16));
         customizeAndLaunchItem.addActionListener(this::onLaunchButtonClicked);
 
         uninstallItem = new JMenuItem(uninstallButton.getText());
-        uninstallItem.setIcon(WindowHelper.loadIcon("/delete.png", 16, 16));
+        uninstallItem.setIcon(WindowHelper.loadIcon("/uninstall.png", 16, 16));
         uninstallItem.setToolTipText(uninstallButton.getToolTipText());
         uninstallItem.addActionListener(this::onUninstallButtonClicked);
 
@@ -353,6 +373,8 @@ public class BrowserDialog extends BaseDialog {
 
     /** Notification that the selected apps should be refreshed */
     private void onRefreshButtonClicked(ActionEvent e) {
+        List<ClientSoftwareConfiguration> apps = getSelectedApps();
+
         // Refresh and remember which apps have been added to the hive
         Map<String, ClientSoftwareConfiguration> oldAppMap = model.asMap();
         searchApps();
@@ -362,7 +384,6 @@ public class BrowserDialog extends BaseDialog {
         // If nothing is selected we refresh all apps
         // If there is something selected we refresh the selection
         // AND all apps that have been added to the hive
-        List<ClientSoftwareConfiguration> apps = getSelectedApps();
         if (apps.isEmpty()) {
             apps.addAll(model.getAll());
         } else {
@@ -374,6 +395,46 @@ public class BrowserDialog extends BaseDialog {
     /** Notification that the selected rows have changed */
     private void onSelectionChanged(ListSelectionEvent e) {
         doUpdateButtonState();
+    }
+
+    /** Executes the prune operation on all local hives */
+    private void onPruneButtonClicked(ActionEvent e) {
+        try {
+            List<Path> hives = ClientPathHelper.getHives(rootDir);
+
+            progressBar.setIndeterminate(false);
+            progressBar.setValue(0);
+            progressBar.setMinimum(0);
+            progressBar.setMaximum(hives.size());
+            progressBar.setString("Pruning hives....");
+
+            PruneTask task = new PruneTask(hives, auditor);
+            task.addPropertyChangeListener(this::doUpdateProgessBar);
+            task.execute();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Failed to prune local hives: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Executes the fix operation on all local hives */
+    private void onFsckButtonClicked(ActionEvent e) {
+        try {
+            List<Path> hives = ClientPathHelper.getHives(rootDir);
+
+            progressBar.setIndeterminate(false);
+            progressBar.setValue(0);
+            progressBar.setMinimum(0);
+            progressBar.setMaximum(hives.size());
+            progressBar.setString("Check manifest and object consistency....");
+
+            FsckTask task = new FsckTask(hives, auditor);
+            task.addPropertyChangeListener(this::doUpdateProgessBar);
+            task.execute();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Failed to fix errors in local hives: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /** Launches the given application */
@@ -429,6 +490,9 @@ public class BrowserDialog extends BaseDialog {
         if (e.getPropertyName().equals("progress")) {
             progressBar.setValue((int) e.getNewValue());
         }
+        if (e.getPropertyName().equals(PropertyChangeActivityReporter.ACTIVITY_NAME)) {
+            progressBar.setString((String) e.getNewValue());
+        }
         doUpdateButtonState();
     }
 
@@ -436,6 +500,8 @@ public class BrowserDialog extends BaseDialog {
     private void doUpdateButtonState() {
         if (progressBar.isVisible()) {
             launchItem.setEnabled(false);
+            customizeAndLaunchItem.setEnabled(false);
+            updateItem.setEnabled(false);
             refreshButton.setEnabled(false);
 
             uninstallItem.setEnabled(false);
@@ -443,6 +509,9 @@ public class BrowserDialog extends BaseDialog {
 
             refreshItem.setEnabled(false);
             refreshButton.setEnabled(false);
+
+            fsckButton.setEnabled(false);
+            pruneButton.setEnabled(false);
             return;
         }
 
@@ -461,6 +530,12 @@ public class BrowserDialog extends BaseDialog {
 
         // --updateOnly flag needs at least version 3.6.5
         updateItem.setEnabled(!readonlyRoot && checkVersion(apps, new Version(3, 6, 5, null)));
+
+        // FSCK and PRUNE requires write permissions
+        if (!readonlyRoot) {
+            fsckButton.setEnabled(true);
+            pruneButton.setEnabled(true);
+        }
     }
 
     /** Returns if the selected applications have at least the given version */
@@ -485,7 +560,7 @@ public class BrowserDialog extends BaseDialog {
             try {
                 Desktop.getDesktop().browse(rootDir.toUri());
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(null, "Failed to open home directory: " + ex.getMessage(), "Error",
+                JOptionPane.showMessageDialog(BrowserDialog.this, "Failed to open home directory: " + ex.getMessage(), "Error",
                         JOptionPane.ERROR_MESSAGE);
             }
         }

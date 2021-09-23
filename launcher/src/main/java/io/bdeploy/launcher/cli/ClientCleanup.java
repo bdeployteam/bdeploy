@@ -1,6 +1,7 @@
 package io.bdeploy.launcher.cli;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -14,6 +15,9 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.objects.view.DamagedObjectView;
+import io.bdeploy.bhive.objects.view.ElementView;
+import io.bdeploy.bhive.op.FsckOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
@@ -51,9 +55,16 @@ public class ClientCleanup {
      * Removes software that is not used anymore.
      */
     public void run() {
-        doCleanApps();
-        doCleanLaunchers();
-        doCleanup();
+        try {
+            doCleanApps();
+            doCleanLaunchers();
+            doCleanup();
+        } catch (Exception ex) {
+            doResolveErrors(ex);
+        }
+
+        // Delete unreferenced elements
+        doPrune();
     }
 
     /** Removes all launchers that are not required any more */
@@ -154,8 +165,39 @@ public class ClientCleanup {
             PathHelper.deleteRecursive(appsDir);
             log.info("Removed apps folder {}", appsDir);
         }
+    }
 
-        // Delete unreferenced elements
+    /** Removes broken software manifest entries */
+    private void doResolveErrors(Exception ex) {
+        log.error("Failed to cleanup unused software.", ex);
+
+        ClientSoftwareManifest mf = new ClientSoftwareManifest(hive);
+        Collection<Key> broken = mf.listBroken();
+        if (broken.isEmpty()) {
+            log.info("No damanged software manifests found.");
+        }
+        for (Key key : broken) {
+            log.info("Removing broken software manifest '" + key + "'");
+            mf.remove(key);
+        }
+
+        // Remove damaged elements
+        Set<ElementView> result = hive.execute(new FsckOperation().setRepair(true));
+        if (result.isEmpty()) {
+            log.info("No damaged elements found.");
+        } else {
+            log.warn("Found %1 damanged elements.", result.size());
+            for (ElementView ele : result) {
+                String name = ele.getElementId().toString();
+                String value = (ele instanceof DamagedObjectView ? (((DamagedObjectView) ele).getType() + " ") : "")
+                        + ele.getPathString();
+                log.warn("%1 - %2", name, value);
+            }
+        }
+    }
+
+    /** Executes the prune operation to remove unused objects */
+    private void doPrune() {
         SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
         long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
         if (sum > 0) {
