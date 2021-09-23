@@ -160,7 +160,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
             for (ApplicationConfiguration config : node.nodeConfiguration.applications) {
 
                 var desc = nodeConfigs.applications.stream().filter(a -> a.name.equals(config.application.getName())).findFirst()
-                        .orElseGet(null);
+                        .orElse(null);
                 if (desc == null) {
                     throw new IllegalStateException("Cannot find application descriptor " + config.application.getName()
                             + " for configuration " + config.name);

@@ -243,8 +243,7 @@ public class ObjectDatabase extends LockableDatabase {
      * @throws IOException in case of an error.
      */
     public SortedSet<ObjectId> getAllObjects() throws IOException {
-        Activity scan = reporter.start("Listing Objects", 0);
-        try {
+        try (Activity scan = reporter.start("Listing Objects", 0)) {
             long xctpCount = 0;
             do {
                 try {
@@ -259,13 +258,12 @@ public class ObjectDatabase extends LockableDatabase {
                         }
                     }
                 } catch (NoSuchFileException e) {
+                    // this catch needs to be outside in case Files.walk throws.
                     if (xctpCount++ > 10) {
                         throw e;
                     }
                 }
             } while (true);
-        } finally {
-            scan.done();
         }
     }
 

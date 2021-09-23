@@ -85,7 +85,8 @@ public class ObjectChangeWebSocket extends WebSocketApplication implements Objec
                     if (match != null) {
                         int score = match.score(change.scope);
 
-                        if (score > bestScore || (score == bestScore && best.scope.length() > match.length())) {
+                        if (score > bestScore
+                                || (score == bestScore && (best == null || (best.scope.length() > match.length())))) {
                             // this websocket has a match, choose the best score.
                             bestScore = score;
                             best = change;
@@ -95,7 +96,7 @@ public class ObjectChangeWebSocket extends WebSocketApplication implements Objec
 
                 // if we found a match, record it.
                 if (best != null) {
-                    targets.computeIfAbsent(best, (k) -> new ArrayList<>()).add(entry.getKey());
+                    targets.computeIfAbsent(best, k -> new ArrayList<>()).add(entry.getKey());
                 }
             }
 

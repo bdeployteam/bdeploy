@@ -10,7 +10,7 @@ enum Theme {
   DARK_YELLOW = 'app-dark-yellow-theme',
 }
 
-const THEME_DESC = [];
+const THEME_DESC = {};
 THEME_DESC[Theme.DEFAULT] = 'Light / Blue (default)';
 THEME_DESC[Theme.LIGHT_YELLOW] = 'Light / Yellow';
 THEME_DESC[Theme.DARK] = 'Dark / Blue';
