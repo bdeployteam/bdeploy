@@ -123,6 +123,7 @@ Cypress.Commands.add('attachManaged', function (groupName) {
       cy.get('mat-panel-title').click();
     });
 
+    cy.waitUntilContentLoaded();
     cy.get(`app-bd-button[text="Download Link Information"]`).within(() => {
       cy.get('button').should('exist').and('be.enabled').downloadByLinkClick('managed-ident.txt', true);
     });
