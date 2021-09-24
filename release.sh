@@ -89,7 +89,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
 
     if [[ ! -d "${r}/linux64" ]]; then
         mkdir -p "${r}/linux64"
-        curl -L "https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=latest&heap_size=normal&type=jdk" --output "${r}/jdk-linux64.tar.gz"
+        curl -L "https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=linux&arch=x64&release=jdk-11.0.11%2b9&heap_size=normal&type=jdk" --output "${r}/jdk-linux64.tar.gz"
         (
             cd "${r}/linux64"
             tar xfz "${r}/jdk-linux64.tar.gz" > /dev/null
@@ -100,7 +100,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
 
     if [[ ! -d "${r}/win64" ]]; then
         mkdir -p "${r}/win64"
-        curl -L "https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=windows&arch=x64&release=latest&heap_size=normal&type=jdk" --output "${r}/jdk-win64.zip"
+        curl -L "https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?openjdk_impl=hotspot&os=windows&arch=x64&release=jdk-11.0.11%2b9&heap_size=normal&type=jdk" --output "${r}/jdk-win64.zip"
         (
             cd "${r}/win64"
             unzip "${r}/jdk-win64.zip" > /dev/null
