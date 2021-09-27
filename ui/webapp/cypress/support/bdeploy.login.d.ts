@@ -22,5 +22,8 @@ declare namespace Cypress {
      * from managed to central and vice versa.
      */
     forceVisit(url: string);
+
+    /** performs an authenticated request */
+    authenticatedRequest(req: Partial<RequestOptions>): Chainable<Cypress.Response<any>>;
   }
 }

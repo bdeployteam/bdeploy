@@ -32,6 +32,7 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
   /* template */ editorContent = '';
   /* template */ editorOptions;
+  /* template */ inited = false;
 
   constructor(private themeService: ThemeService, private host: ElementRef) {}
 
@@ -90,5 +91,7 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
     const model = this.globalMonaco.editor.createModel(this.editorContent, undefined, this.globalMonaco.Uri.parse(this.editorPath));
     this.monaco.setModel(model);
+
+    this.inited = true;
   }
 }

@@ -22,6 +22,8 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     language: 'plaintext',
   };
 
+  /* template */ inited = false;
+
   constructor(private themeService: ThemeService) {}
 
   ngOnInit(): void {
@@ -50,6 +52,8 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     this.monaco.getModifiedEditor().onDidChangeModelContent((e) => {
       this.modifiedContentChange.emit(this.monaco.getModifiedEditor().getValue());
     });
+
+    this.inited = true;
   }
 
   ngOnDestroy(): void {

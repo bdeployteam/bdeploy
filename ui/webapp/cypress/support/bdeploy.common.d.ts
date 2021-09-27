@@ -86,10 +86,25 @@ declare namespace Cypress {
     checkAndConfirmSnackbar(message: string);
 
     /**
+     * @param text the text to type into the selected editor.
+     */
+    typeInMonacoEditor(text: string, clear?: boolean);
+
+    /**
+     * Returns the next monaco editor in the current scope.
+     */
+    monacoEditor(): Chainable<Subject>;
+
+    /**
      * Waits until the content of the page is loaded.
      * <p>
      * NOTE: Don't use with 'within', as elements would not be found in narrowed scope.
      */
     waitUntilContentLoaded();
+
+    /**
+     * @param callback a callback which triggers at least one api call.
+     */
+    waitForApi(callback: () => void);
   }
 }

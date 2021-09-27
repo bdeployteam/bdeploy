@@ -11,6 +11,17 @@ Cypress.Commands.add('waitUntilContentLoaded', function () {
     });
 });
 
+Cypress.Commands.add('waitForApi', function (callback) {
+  cy.intercept({ url: '/api/**' }).as('apiCall');
+  callback();
+  // a little tricky; REST calls can trigger a WebSocket message back to the client which in turn can
+  // then trigger another REST call (e.g. reloading).
+  cy.wait('@apiCall');
+
+  // might trigger an update of the UI, want to wait for that as well.
+  cy.waitUntilContentLoaded();
+});
+
 Cypress.Commands.add('pressMainNavTopButton', function (text) {
   cy.get('app-main-nav-top').within(() => {
     cy.get(`app-bd-panel-button[text="${text}"]`).click();
@@ -179,4 +190,16 @@ Cypress.Commands.add('downloadByLocationAssign', { prevSubject: true }, (subject
         });
       });
   });
+});
+
+Cypress.Commands.add('typeInMonacoEditor', function (text, clear = false) {
+  if (clear) {
+    const selectAllKeys = Cypress.platform == 'darwin' ? '{cmd}a' : '{ctrl}a';
+    cy.monacoEditor().click().focused().type(selectAllKeys).clear();
+  }
+  cy.monacoEditor().click().focused().type(text);
+});
+
+Cypress.Commands.add('monacoEditor', function () {
+  return cy.get('.bd-editor-inited textarea:first');
 });

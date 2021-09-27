@@ -94,6 +94,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
@@ -895,6 +896,9 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
+        // cannot use scope service, as the upload will add a virtual scope.
+        ObjectScope actualScope = new ObjectScope(this.group, instanceId);
+
         if (minion.getMode() == MinionMode.CENTRAL) {
             // MUST delegate this 1:1 to managed
             RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
@@ -917,7 +921,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
                 List<Key> keys = response.readEntity(new GenericType<List<Key>>() {
                 });
-                keys.forEach(k -> changes.create(ObjectChangeType.INSTANCE, k));
+                keys.forEach(k -> changes.create(ObjectChangeType.INSTANCE, k, actualScope));
                 return keys;
             } catch (IOException e) {
                 throw new WebApplicationException("Cannot delegate import to managed server", e);
@@ -933,7 +937,7 @@ public class InstanceResourceImpl implements InstanceResource {
             nodes.forEach(config::addMinion);
 
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config, context);
-            changes.create(ObjectChangeType.INSTANCE, newKey);
+            changes.create(ObjectChangeType.INSTANCE, newKey, actualScope);
             return Collections.singletonList(newKey);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);

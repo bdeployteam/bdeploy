@@ -1,6 +1,7 @@
 <div fxLayout="row" fxLayoutAlign="start center">
   <app-bd-panel-button
     icon="edit"
+    text="Edit"
     [disabled]="!canEdit() || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
     [route]="[cfgFiles.getPath(record)]"
     [relative]="true"

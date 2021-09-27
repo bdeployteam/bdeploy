@@ -1,7 +1,14 @@
 <ng-template #addTemplate>
   <div>Provide an ID and a description for the new definition.</div>
-  <app-bd-form-input [(ngModel)]="newId" label="Definition ID" required appEditUniqueValueValidator [disallowedValues]="newUsedIds"></app-bd-form-input>
-  <app-bd-form-input [(ngModel)]="newDesc" label="Definition Description" required></app-bd-form-input>
+  <app-bd-form-input
+    [(ngModel)]="newId"
+    name="id"
+    label="Definition ID"
+    required
+    appEditUniqueValueValidator
+    [disallowedValues]="newUsedIds"
+  ></app-bd-form-input>
+  <app-bd-form-input [(ngModel)]="newDesc" name="description" label="Definition Description" required></app-bd-form-input>
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">

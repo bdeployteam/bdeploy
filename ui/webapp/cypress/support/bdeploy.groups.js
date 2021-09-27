@@ -160,3 +160,16 @@ Cypress.Commands.add('attachManaged', function (groupName) {
     cy.contains('tr', 'Description of managed server').should('exist');
   });
 });
+
+Cypress.Commands.add('cleanAllGroups', function () {
+  cy.authenticatedRequest({ method: 'GET', url: `${Cypress.env('backendBaseUrl')}/group` }).then((resp) => {
+    if (!Array.isArray(resp.body)) {
+      return;
+    }
+    for (const x of resp.body) {
+      const group = x.name;
+
+      cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/group/${group}` });
+    }
+  });
+});

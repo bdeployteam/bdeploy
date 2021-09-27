@@ -42,5 +42,10 @@ declare namespace Cypress {
      * @param groupName the name of the group to attach.
      */
     attachManaged(groupName: string);
+
+    /**
+     * Quickly gets rid of all instance groups via REST API.
+     */
+    cleanAllGroups();
   }
 }

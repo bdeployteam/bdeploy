@@ -4,6 +4,10 @@ describe('Instance Process Config Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
+  before(() => {
+    cy.cleanAllGroups();
+  });
+
   beforeEach(() => {
     cy.login();
   });

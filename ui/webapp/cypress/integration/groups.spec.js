@@ -6,6 +6,10 @@ describe('Groups Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
+  before(() => {
+    cy.cleanAllGroups();
+  });
+
   beforeEach(() => {
     cy.login();
     deleteDownloadsFolder();

@@ -10,8 +10,8 @@ export const deleteDownloadsFolder = () => {
   cy.task('deleteFolder', downloadsFolder);
 };
 
-export const validateZip = (zip, expectedEntry) => {
-  const downloadsFolder = Cypress.config('downloadsFolder');
+export const validateZip = (zip, expectedEntry, fixture = false) => {
+  const downloadsFolder = fixture ? Cypress.config('fixturesFolder') : Cypress.config('downloadsFolder');
   const downloadedFilename = downloadsFolder + '/' + zip;
 
   // wait for the file to be fully downloaded by reading it (as binary)

@@ -75,3 +75,16 @@ Cypress.Commands.add('visitBDeploy', function (url, mode) {
     throw new Error('Unsupported mode: ' + mode);
   }
 });
+
+Cypress.Commands.add('authenticatedRequest', function (opts) {
+  cy.getCookie('st').then((cookie) => {
+    if (!cookie) {
+      cy.login();
+    }
+  });
+
+  return cy.getCookie('st').then((cookie) => {
+    opts.headers = { Authorization: 'Bearer ' + cookie.value };
+    return cy.request(opts);
+  });
+});

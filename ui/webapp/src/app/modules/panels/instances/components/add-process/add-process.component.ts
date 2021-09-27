@@ -237,12 +237,12 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       this.selectedTemplate = row.template;
 
       vars = this.dialog.message({
-        header: 'Template Variables',
+        header: 'Assign Variable Values',
         template: this.template,
         validation: () => this.validateHasAllVariables(row.template, this.response),
         actions: [
           { name: 'CANCEL', confirm: false, result: null },
-          { name: 'APPLY', confirm: true, result: this.response },
+          { name: 'CONFIRM', confirm: true, result: this.response },
         ],
       });
     }
