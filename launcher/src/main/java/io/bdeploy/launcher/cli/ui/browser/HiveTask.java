@@ -62,6 +62,9 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
         String result;
         try {
             result = get();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            result = ExceptionHelper.mapExceptionCausesToReason(ie);
         } catch (Exception e) {
             result = ExceptionHelper.mapExceptionCausesToReason(e);
         }
