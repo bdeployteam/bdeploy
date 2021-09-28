@@ -8,19 +8,17 @@
 
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
-    id "com.gradle.plugin-publish" version "0.12.0"
+    id "com.gradle.plugin-publish" version "0.16.0"
     id 'java-gradle-plugin'
     id 'eclipse'
-    id "com.github.ben-manes.versions" version "0.36.0"
+    id "com.github.ben-manes.versions" version "0.39.0"
 }
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
 }
 
-version = "3.6.4"
+version = "3.6.7"
 group = "io.bdeploy"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -28,11 +26,11 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     // Use JUnit test framework for unit tests
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation gradleTestKit()
 
     implementation (
-        'io.bdeploy:api:3.6.4'
+        'io.bdeploy:api:3.6.7'
     )
 }
 
