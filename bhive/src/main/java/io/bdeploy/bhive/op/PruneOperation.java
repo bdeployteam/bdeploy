@@ -65,7 +65,14 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                     referenced = new TreeSet<>();
                 }
 
-                SortedSet<ObjectId> orig = getObjectManager().db(ObjectDatabase::getAllObjects);
+                SortedSet<ObjectId> orig = getObjectManager().db(db -> {
+                    try {
+                        return db.getAllObjects();
+                    } catch (InterruptedException e1) {
+                        Thread.currentThread().interrupt();
+                        throw new IllegalStateException("Interrupted", e1);
+                    }
+                });
                 all = new TreeSet<>(orig);
                 all.removeAll(referenced);
 

@@ -241,8 +241,9 @@ public class ObjectDatabase extends LockableDatabase {
      * expensive operation, as object presence is not cached.
      *
      * @throws IOException in case of an error.
+     * @throws InterruptedException when interrupted.
      */
-    public SortedSet<ObjectId> getAllObjects() throws IOException {
+    public SortedSet<ObjectId> getAllObjects() throws IOException, InterruptedException {
         try (Activity scan = reporter.start("Listing Objects", 0)) {
             long xctpCount = 0;
             do {
@@ -263,6 +264,9 @@ public class ObjectDatabase extends LockableDatabase {
                         throw e;
                     }
                 }
+
+                // Delay the loop a little
+                Thread.sleep(10);
             } while (true);
         }
     }

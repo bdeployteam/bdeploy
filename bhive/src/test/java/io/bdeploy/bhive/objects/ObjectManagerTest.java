@@ -49,7 +49,7 @@ import io.bdeploy.common.util.PathHelper;
 public class ObjectManagerTest extends DbTestBase {
 
     @Test
-    public void testImportExport(@TempDir Path tmp, ActivityReporter r) throws IOException {
+    public void testImportExport(@TempDir Path tmp, ActivityReporter r) throws IOException, InterruptedException {
         Path mySource = ContentHelper.genSimpleTestTree(tmp, "source");
         Path myTarget = tmp.resolve("target");
 
