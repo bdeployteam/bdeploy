@@ -187,11 +187,6 @@ describe('Groups Tests', () => {
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
   });
 
-  // Permission tests:
-  // TODO create user with global permissions / ensure that these user exist
-  // TODO check global permissions on instance group
-  // TODO grant/revoke admin and write permissions to globalRead user
-
   it('Deletes the instance', () => {
     cy.deleteInstance(groupName, instanceName);
   });
