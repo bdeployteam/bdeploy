@@ -608,11 +608,11 @@ public class ProcessController {
         File tmpFile = processDir.resolve(OUT_TMP).toFile();
         File outFile = processDir.resolve(OUT_TXT).toFile();
 
-        // Lock is typically held for up to 150ms
+        // Lock is typically held for up to 150ms, but *sometimes* a lot longer.
         int retry = 1;
-        while (!outFile.renameTo(tmpFile) && retry <= 20) {
+        while (!outFile.renameTo(tmpFile) && retry <= 100) {
             logger.log(l -> l.info("Waiting for file-lock to be released"));
-            Threads.sleep(50);
+            Threads.sleep(100);
             retry++;
         }
 

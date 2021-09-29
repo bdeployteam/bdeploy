@@ -14,6 +14,7 @@ import java.util.SortedMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
@@ -31,8 +32,6 @@ import io.bdeploy.bhive.remote.jersey.BHiveLocator;
 import io.bdeploy.bhive.remote.jersey.BHiveResource;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
@@ -50,7 +49,6 @@ import io.bdeploy.pcu.TestAppFactory;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestActivityReporter.class)
-@ExtendWith(TempDirectory.class)
 public class ProductCliTest {
 
     @RegisterExtension

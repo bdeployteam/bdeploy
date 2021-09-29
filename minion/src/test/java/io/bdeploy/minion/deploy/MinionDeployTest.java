@@ -16,6 +16,7 @@ import java.util.SortedMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.api.deploy.v1.InstanceDeploymentInformationApi;
 import io.bdeploy.bhive.BHive;
@@ -30,8 +31,6 @@ import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.SlowTest;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
@@ -64,7 +63,6 @@ import io.bdeploy.ui.api.Minion;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class MinionDeployTest {
 

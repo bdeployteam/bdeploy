@@ -8,13 +8,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 
-@ExtendWith(TempDirectory.class)
 public class AuditorLoadTest {
 
     @Test

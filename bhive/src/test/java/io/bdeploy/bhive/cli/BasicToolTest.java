@@ -16,6 +16,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -25,8 +26,6 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.SkipSubTreeVisitor;
 import io.bdeploy.common.SlowTest;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.cli.ToolBase;
@@ -34,7 +33,6 @@ import io.bdeploy.common.cli.ToolBase;
 /**
  * Tests a few of the basic tools.
  */
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class BasicToolTest {
 

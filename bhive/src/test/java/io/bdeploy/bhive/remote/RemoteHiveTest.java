@@ -17,6 +17,7 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
@@ -40,13 +41,10 @@ import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class RemoteHiveTest extends RemoteHiveTestBase {
 

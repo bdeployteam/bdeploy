@@ -13,12 +13,11 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
@@ -38,7 +37,6 @@ import jakarta.ws.rs.InternalServerErrorException;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 public class ConfigFileResourceTest {
 
     @Test

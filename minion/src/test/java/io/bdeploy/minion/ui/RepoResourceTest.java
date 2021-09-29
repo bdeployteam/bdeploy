@@ -16,6 +16,7 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
@@ -24,8 +25,6 @@ import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
@@ -42,7 +41,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class RepoResourceTest {
 

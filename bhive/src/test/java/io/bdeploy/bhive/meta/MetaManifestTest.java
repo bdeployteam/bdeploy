@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
@@ -22,11 +23,8 @@ import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 public class MetaManifestTest {
 
     private static final class MyMeta {

@@ -10,17 +10,15 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 
 /**
  * Runs all tests from {@link ObjectDatabaseTest} but with a ZIP compressed DB.
  */
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class ZipObjectDatabaseTest extends ObjectDatabaseTest {
 

@@ -18,14 +18,13 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -52,7 +51,6 @@ import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import jakarta.ws.rs.NotFoundException;
 
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestMinion.class)
 public class InstanceResourceTest {
 

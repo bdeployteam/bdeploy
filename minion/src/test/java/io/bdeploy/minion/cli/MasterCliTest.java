@@ -15,13 +15,12 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.bhive.cli.BHiveCli;
 import io.bdeploy.bhive.cli.TokenTool;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.cli.ToolBase;
@@ -36,7 +35,6 @@ import io.bdeploy.minion.cli.shutdown.RemoteShutdown;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.cli.RemoteUserTool;
 
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class MasterCliTest {
 

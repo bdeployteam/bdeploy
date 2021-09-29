@@ -12,6 +12,7 @@ import java.util.SortedMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
@@ -33,8 +34,6 @@ import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
@@ -56,7 +55,6 @@ import jakarta.ws.rs.NotFoundException;
  */
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class PublicApiTestV1 {
 

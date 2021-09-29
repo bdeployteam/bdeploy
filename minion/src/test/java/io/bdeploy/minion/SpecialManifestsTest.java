@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
@@ -22,8 +23,6 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -44,7 +43,6 @@ import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
 
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 public class SpecialManifestsTest {
 
     @Test

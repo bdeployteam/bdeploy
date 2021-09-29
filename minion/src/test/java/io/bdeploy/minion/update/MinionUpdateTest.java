@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
@@ -24,8 +25,6 @@ import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
@@ -42,7 +41,6 @@ import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.cli.RemoteMasterTool;
 
 @ExtendWith(TestMinion.class)
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestHive.class)
 public class MinionUpdateTest {
 

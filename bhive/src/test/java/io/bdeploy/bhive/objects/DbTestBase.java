@@ -9,15 +9,13 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 
 @ExtendWith(TestActivityReporter.class)
-@ExtendWith(TempDirectory.class)
 public class DbTestBase {
 
     private Path dbPath;

@@ -11,18 +11,15 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 
-@ExtendWith(TempDirectory.class)
 public class StreamTest {
 
     private static Path src;

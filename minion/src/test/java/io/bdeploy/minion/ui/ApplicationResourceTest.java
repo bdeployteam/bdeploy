@@ -8,9 +8,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -22,7 +21,6 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ApplicationDto;
 
 @ExtendWith(TestMinion.class)
-@ExtendWith(TempDirectory.class)
 public class ApplicationResourceTest {
 
     @Test

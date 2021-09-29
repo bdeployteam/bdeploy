@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
@@ -23,12 +24,9 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.jersey.audit.RollingFileAuditor;
 
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 public class HiveAuditTest {
 
     @Test

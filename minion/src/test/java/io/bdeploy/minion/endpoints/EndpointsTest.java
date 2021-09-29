@@ -11,15 +11,10 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 
-import jakarta.ws.rs.ClientErrorException;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,8 +22,6 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.dcu.EndpointsConfiguration;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
@@ -41,10 +34,14 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.endpoints.HelloEndpoint.HelloResult;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestHive.class)
 @ExtendWith(TestMinion.class)
-@ExtendWith(TempDirectory.class)
 public class EndpointsTest {
 
     private static final Logger log = LoggerFactory.getLogger(EndpointsTest.class);

@@ -12,9 +12,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.remote.CommonRootResource;
@@ -23,7 +22,6 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestMinion.class)
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class LoggingConfigTest {
 

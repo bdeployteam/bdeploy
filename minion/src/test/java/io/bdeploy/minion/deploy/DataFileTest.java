@@ -16,13 +16,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -37,7 +36,6 @@ import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-@ExtendWith(TempDirectory.class)
 public class DataFileTest {
 
     @Test

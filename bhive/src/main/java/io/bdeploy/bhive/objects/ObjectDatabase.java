@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -259,10 +260,8 @@ public class ObjectDatabase extends LockableDatabase {
                         }
                     }
                 } catch (NoSuchFileException e) {
-                    // this catch needs to be outside in case Files.walk throws.
-                    if (xctpCount++ > 10) {
-                        throw e;
-                    }
+                    // this happens if the path does not exist at all anymore, so there are zero objects.
+                    return Collections.emptySortedSet();
                 }
 
                 // Delay the loop a little

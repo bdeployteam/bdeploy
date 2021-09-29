@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
@@ -39,12 +40,9 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.SlowTest;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 
-@ExtendWith(TempDirectory.class)
 @ExtendWith(TestActivityReporter.class)
 public class ObjectManagerTest extends DbTestBase {
 

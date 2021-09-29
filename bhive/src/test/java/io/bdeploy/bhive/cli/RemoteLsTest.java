@@ -6,15 +6,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 import io.bdeploy.common.TestCliTool;
 
-@ExtendWith(TempDirectory.class)
 public class RemoteLsTest {
 
     @RegisterExtension

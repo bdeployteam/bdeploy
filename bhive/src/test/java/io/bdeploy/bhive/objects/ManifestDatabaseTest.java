@@ -14,13 +14,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.TempDirectory;
-import io.bdeploy.common.TempDirectory.TempDir;
 
-@ExtendWith(TempDirectory.class)
 public class ManifestDatabaseTest extends DbTestBase {
 
     @Test
