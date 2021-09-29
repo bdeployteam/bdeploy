@@ -144,6 +144,8 @@ Cypress.Commands.add('downloadByLinkClick', { prevSubject: true }, function (sub
         expect(url).to.be.not.null;
       })
       .then(() => {
+        stubbed.restore();
+
         // @ts-ignore
         cy.downloadFromLinkHref(url).then((rq) => {
           expect(rq.status).to.equal(200);
@@ -175,6 +177,8 @@ Cypress.Commands.add('downloadByLocationAssign', { prevSubject: true }, (subject
         expect(url).to.be.not.null;
       })
       .then(() => {
+        stubbed.restore();
+
         if (url.startsWith('/api')) {
           url = url.substring(4);
         }

@@ -99,7 +99,7 @@ export class ProcessEditService {
     const process: ApplicationConfiguration = {
       uid: null, // calculated later
       application: application.key,
-      name: !!template?.name ? template.name : application.name,
+      name: !!template?.name ? this.performVariableSubst(template.name, variableValues, status) : application.name,
       pooling: application.descriptor.pooling,
       endpoints: cloneDeep(application.descriptor.endpoints),
       processControl: {

@@ -1,7 +1,10 @@
 //@ts-check
 
+const { validateZip } = require('../support/utils');
+
 describe('Groups Tests', () => {
   var groupName = 'Demo';
+  var instanceName = 'TestInstance';
 
   before(() => {
     cy.cleanAllGroups();
@@ -14,9 +17,103 @@ describe('Groups Tests', () => {
   it('Creates a group', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+    cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
-  // TODO client applications page
+  it('Prepares the instance', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Instance Configuration');
+
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
+        cy.get('button[data-cy^="Apply Instance Template"]').click();
+      });
+    });
+
+    cy.inMainNavFlyin('app-instance-templates', () => {
+      cy.contains('tr', 'Default Configuration')
+        .should('exist')
+        .within(() => {
+          cy.get('button').click();
+        });
+
+      cy.contains('app-bd-notification-card', 'Assign Template').within(() => {
+        cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
+
+        cy.get('button[data-cy="CONFIRM"]').click();
+      });
+
+      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
+        cy.fillFormInput('Text Value', 'Test');
+        cy.fillFormInput('Sleep Timeout', '5');
+
+        cy.get('button[data-cy="CONFIRM"]').click();
+      });
+    });
+
+    cy.inMainNavContent(() => {
+      cy.contains('app-config-node', 'Client Applications').within(() => {
+        cy.get('tr:contains("Client Test")').should('have.length', 2);
+      });
+
+      cy.pressToolbarButton('Save');
+      cy.waitUntilContentLoaded();
+    });
+
+    cy.pressMainNavButton('Instance Dashboard');
+    cy.inMainNavContent(() => {
+      cy.contains('.bd-rect-card', 'has no active version')
+        .should('exist')
+        .within(() => {
+          cy.waitForApi(() => {
+            cy.get('button[data-cy="Install"]').should('be.enabled').click();
+          });
+
+          cy.waitForApi(() => {
+            cy.get('button[data-cy="Activate"]').should('be.enabled').click();
+          });
+        });
+    });
+  });
+
+  it('Tests client applications page', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Client Applications');
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', instanceName).should('exist');
+      cy.get('tr:contains("Client Test")').should('have.length', 1); // only one shown due to OS!
+
+      cy.pressToolbarButton('Data Grouping');
+    });
+
+    // remove the second (OS) grouping level.
+    cy.contains('mat-card', 'Grouping Level').within(() => {
+      cy.get('button[data-cy="Remove"]').click();
+    });
+
+    cy.get('.cdk-overlay-backdrop-showing').click('top');
+
+    cy.get('tr:contains("Client Test")')
+      .should('have.length', 2)
+      .each((el) => {
+        cy.wrap(el).click();
+
+        cy.inMainNavFlyin('app-client-detail', () => {
+          cy.get('button[data-cy="Download Installer"]').should('be.enabled').downloadByLocationAssign('test-installer.bin');
+          cy.get('button[data-cy^="Click"]').should('be.enabled').downloadByLinkClick('test-click-start.json');
+          cy.readFile(Cypress.config('downloadsFolder') + '/' + 'test-click-start.json')
+            .its('groupId')
+            .should('eq', groupName);
+
+          cy.get('button[data-cy="Download Launcher Installer"]').should('be.enabled').downloadByLocationAssign('test-launcher-installer.bin');
+          // intentionally NOT downloading launcher as it is quite huge and downloading is slow even locally.
+        });
+      });
+  });
 
   it('Deletes the group', () => {
     cy.deleteGroup(groupName);
