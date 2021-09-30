@@ -439,7 +439,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   /* template */ isAllChecked() {
-    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length === this.records.length;
+    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length === this.records?.length;
   }
 
   /* template */ isAnyChecked() {

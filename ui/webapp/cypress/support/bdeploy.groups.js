@@ -161,15 +161,17 @@ Cypress.Commands.add('attachManaged', function (groupName) {
   });
 });
 
-Cypress.Commands.add('cleanAllGroups', function () {
-  cy.authenticatedRequest({ method: 'GET', url: `${Cypress.env('backendBaseUrl')}/group` }).then((resp) => {
+Cypress.Commands.add('cleanAllGroups', function (mode = 'STANDALONE') {
+  const backend = mode === 'STANDALONE' ? 'backendBaseUrl' : mode === 'MANAGED' ? 'backendBaseUrlManaged' : 'backendBaseUrlCentral';
+
+  cy.authenticatedRequest({ method: 'GET', url: `${Cypress.env(backend)}/group` }, mode).then((resp) => {
     if (!Array.isArray(resp.body)) {
       return;
     }
     for (const x of resp.body) {
       const group = x.name;
 
-      cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/group/${group}` });
+      cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env(backend)}/group/${group}` }, mode);
     }
   });
 });

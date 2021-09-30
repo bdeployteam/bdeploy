@@ -26,6 +26,7 @@ import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
 import { GroupsService } from '../../groups/services/groups.service';
+import { ProductsService } from '../../products/services/products.service';
 import { ServersService } from '../../servers/services/servers.service';
 
 @Injectable({
@@ -63,9 +64,10 @@ export class InstancesService {
     private areas: NavAreasService,
     private servers: ServersService,
     private downloads: DownloadService,
+    private products: ProductsService,
     groups: GroupsService
   ) {
-    groups.current$.subscribe((group) => this.update$.next(group?.name));
+    combineLatest([groups.current$, products.products$]).subscribe(([group, prods]) => this.update$.next(group?.name));
     areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
 

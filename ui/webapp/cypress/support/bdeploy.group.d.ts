@@ -4,20 +4,20 @@ declare namespace Cypress {
      * @param groupName the name of the group.
      * @param mode the BDeploy mode to visit when creating.
      */
-    createGroup(groupName: string, mode?: string);
+    createGroup(groupName: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
 
     /**
      * @param groupName the name of the group.
      * @param mode the BDeploy mode to visit when deleting.
      */
-    deleteGroup(groupName: string, mode?: string);
+    deleteGroup(groupName: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
 
     /**
      * @param groupName the name of the group.
      * @param fileName the file within the fixtures directory to use.
      * @param mode the BDeploy mode to visit when uploading.
      */
-    uploadProductIntoGroup(groupName: string, fileName: string, mode?: string);
+    uploadProductIntoGroup(groupName: string, fileName: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
 
     /**
      * @param groupName the name of the group.
@@ -25,7 +25,7 @@ declare namespace Cypress {
      * @param version the version which is expected to exist.
      * @param mode the BDeploy mode to visit when checking.
      */
-    verifyProductVersion(groupName: string, productName: string, version: string, mode?: string);
+    verifyProductVersion(groupName: string, productName: string, version: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
 
     /**
      * Enters an instance group. This expects the web app to be on the group browser.
@@ -46,6 +46,6 @@ declare namespace Cypress {
     /**
      * Quickly gets rid of all instance groups via REST API.
      */
-    cleanAllGroups();
+    cleanAllGroups(mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
   }
 }

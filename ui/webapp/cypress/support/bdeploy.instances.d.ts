@@ -7,20 +7,20 @@ declare namespace Cypress {
      * @param prodVersion the product version to use.
      * @param mode the mode of BDeploy to use.
      */
-    createInstance(groupName: string, instanceName: string, prodName: string, prodVersion: string, mode?: string);
+    createInstance(groupName: string, instanceName: string, prodName: string, prodVersion: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
 
     /**
      * @param groupName the name of the instance group to search the instance in.
      * @param instanceName the name of the instance to delete
      * @param mode the mode of BDeploy to use.
      */
-    deleteInstance(groupName: string, instanceName: string, mode?: string);
+    deleteInstance(groupName: string, instanceName: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
 
     /**
      * @param groupName the name of the instance group hosting the instance.
      * @param instanceName the name of the instance to enter
      * @param mode the server mode.
      */
-    enterInstance(groupName: string, instanceName: string, mode?: string);
+    enterInstance(groupName: string, instanceName: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
   }
 }

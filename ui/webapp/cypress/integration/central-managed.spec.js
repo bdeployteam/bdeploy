@@ -5,6 +5,11 @@ describe('Central/Managed Basic Test', function () {
   var instanceName = 'TestInstance';
   var instanceName2 = 'TestInstance2';
 
+  before(() => {
+    cy.cleanAllGroups('MANAGED');
+    cy.cleanAllGroups('CENTRAL');
+  });
+
   it('Creates a group on the central server', () => {
     cy.visitBDeploy('/', 'CENTRAL');
     cy.createGroup(groupName, 'CENTRAL');
@@ -65,13 +70,51 @@ describe('Central/Managed Basic Test', function () {
 
     cy.pressMainNavButton('Instances');
     cy.inMainNavContent(() => {
-      cy.contains('tr', instanceName).should('exist');
+      cy.contains('tr', instanceName)
+        .should('exist')
+        .within(() => {
+          cy.get('.local-na-chip').should('exist');
+        });
     });
-
-    // TODO: Product is now missing on Central -> check N/A (currently missing on UI)
   });
 
-  // TODO sync product von managed to central
+  it('Synchronizes product from managed', () => {
+    cy.pressMainNavButton('Products');
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Synchronize');
+    });
+
+    cy.inMainNavFlyin('app-product-sync', () => {
+      cy.get('button[data-cy^="Download to central"]').click();
+    });
+
+    cy.inMainNavFlyin('app-select-managed-server', () => {
+      cy.contains('tr', 'localhost').click();
+    });
+
+    cy.inMainNavFlyin('app-managed-transfer', () => {
+      cy.contains('tr', '1.0.0').within(() => {
+        cy.get('input[type="checkbox"]').check({ force: true });
+      });
+
+      cy.get('button[data-cy="TRANSFER"]').should('be.enabled').click();
+    });
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', '1.0.0').should('exist');
+    });
+
+    cy.pressMainNavButton('Instances');
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', instanceName)
+        .should('exist')
+        .within(() => {
+          cy.get('.local-na-chip').should('not.exist');
+        });
+    });
+  });
 
   it('Creates an instance on central server', () => {
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', 'CENTRAL');

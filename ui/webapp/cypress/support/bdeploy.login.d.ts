@@ -24,6 +24,6 @@ declare namespace Cypress {
     forceVisit(url: string);
 
     /** performs an authenticated request */
-    authenticatedRequest(req: Partial<RequestOptions>): Chainable<Cypress.Response<any>>;
+    authenticatedRequest(req: Partial<RequestOptions>, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL'): Chainable<Cypress.Response<any>>;
   }
 }
