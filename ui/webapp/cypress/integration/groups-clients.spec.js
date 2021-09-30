@@ -8,6 +8,7 @@ describe('Groups Tests', () => {
 
   before(() => {
     cy.cleanAllGroups();
+    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client`, failOnStatusCode: false });
   });
 
   beforeEach(() => {
@@ -115,7 +116,83 @@ describe('Groups Tests', () => {
       });
   });
 
+  it('Creates a local user', () => {
+    cy.authenticatedRequest({ method: 'PUT', url: `${Cypress.env('backendBaseUrl')}/auth/admin/local`, body: { name: 'client', password: 'client' } });
+  });
+
+  it('Tests no group visible', () => {
+    cy.pressMainNavTopButton('User Settings');
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy="Logout"]').click();
+    });
+    cy.waitUntilContentLoaded();
+    cy.fillFormInput('user', 'client');
+    cy.fillFormInput('pass', 'client');
+
+    cy.get('button[type="submit"]').click();
+
+    cy.inMainNavContent(() => {
+      cy.contains('Welcome to BDeploy').should('exist');
+    });
+  });
+
+  it('Assigns Client permissions', () => {
+    cy.visit('/');
+    cy.enterGroup(groupName);
+    cy.pressMainNavButton('Group Settings');
+
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy^="Instance Group Permissions"]').click();
+      cy.contains('tr', 'client')
+        .should('exist')
+        .within(() => {
+          cy.get('button[data-cy^="Modify permissions"]').click();
+        });
+
+      cy.intercept({ method: 'GET', url: `/api/group/${groupName}/users` }).as('getUsers');
+
+      cy.contains('app-bd-notification-card', 'Modify').within(() => {
+        cy.fillFormSelect('modPerm', 'CLIENT');
+        cy.get('button[data-cy="OK"]').click();
+      });
+
+      cy.wait('@getUsers');
+
+      cy.contains('tr', 'client').within(() => {
+        cy.contains('.local-CLIENT-chip', 'CLIENT').should('exist');
+      });
+    });
+  });
+
+  it('Tests clients visible', () => {
+    cy.pressMainNavTopButton('User Settings');
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy="Logout"]').click();
+    });
+    cy.waitUntilContentLoaded();
+    cy.fillFormInput('user', 'client');
+    cy.fillFormInput('pass', 'client');
+
+    cy.get('button[type="submit"]').click();
+
+    cy.inMainNavContent(() => {
+      cy.contains('Welcome to BDeploy').should('not.exist');
+    });
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', groupName).should('exist').click();
+      cy.contains('mat-toolbar', 'Client Applications').should('exist');
+    });
+    cy.pressMainNavButton('Client Applications');
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', instanceName).should('exist');
+      cy.get('tr:contains("Client Test")').should('have.length', 1); // only one shown due to OS!
+    });
+  });
+
   it('Deletes the group', () => {
     cy.deleteGroup(groupName);
+    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client` });
   });
 });
