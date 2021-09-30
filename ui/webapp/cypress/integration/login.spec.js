@@ -1,9 +1,6 @@
 //@ts-check
 
-describe('Login to Web UI', function () {
-  const currentUserFullName = 'John Doe';
-  const currentUserEmail = 'John Doe@example.com';
-
+describe('Login Tests', function () {
   it('Visits start page and logs in', function () {
     cy.visit('/');
 

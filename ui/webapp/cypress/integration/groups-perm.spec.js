@@ -1,6 +1,6 @@
 //@ts-check
 
-describe('Groups Tests', () => {
+describe('Groups Tests (Permissions)', () => {
   var groupName = 'Demo';
 
   before(() => {

@@ -2,7 +2,7 @@
 
 const { validateZip } = require('../support/utils');
 
-describe('Groups Tests', () => {
+describe('Groups Tests (Clients)', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
@@ -151,12 +151,15 @@ describe('Groups Tests', () => {
 
       cy.intercept({ method: 'GET', url: `/api/group/${groupName}/users` }).as('getUsers');
 
-      cy.contains('app-bd-notification-card', 'Modify').within(() => {
-        cy.fillFormSelect('modPerm', 'CLIENT');
-        cy.get('button[data-cy="OK"]').click();
+      cy.waitForApi(() => {
+        cy.contains('app-bd-notification-card', 'Modify').within(() => {
+          cy.fillFormSelect('modPerm', 'CLIENT');
+          cy.get('button[data-cy="OK"]').click();
+        });
       });
 
       cy.wait('@getUsers');
+      cy.waitUntilContentLoaded();
 
       cy.contains('tr', 'client').within(() => {
         cy.contains('.local-CLIENT-chip', 'CLIENT').should('exist');

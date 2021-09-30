@@ -1,6 +1,6 @@
 //@ts-check
 
-describe('Tests related to the current user', function () {
+describe('Current User Tests', function () {
   const currentUserFullName = 'John Doe';
   const currentUserEmail = 'John Doe@example.com';
 

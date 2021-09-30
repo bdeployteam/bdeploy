@@ -26,7 +26,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /* template */ gridMode$ = new BehaviorSubject<boolean>(false);
   /* template */ grouping$ = new BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>([]);
 
-  /* template */ groupingDefinitions: BdDataGroupingDefinition<ApplicationConfiguration>[] = [];
+  /* template */ groupingDefinitions: BdDataGroupingDefinition<ApplicationConfiguration>[] = [
+    { name: 'Start Type', group: (a) => a?.processControl?.startType },
+    { name: 'Application', group: (a) => a?.application?.name },
+  ];
 
   /* template */ collapsed$ = new BehaviorSubject<boolean>(false);
 
