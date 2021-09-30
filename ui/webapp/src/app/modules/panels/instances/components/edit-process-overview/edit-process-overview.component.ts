@@ -1,5 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
+import { InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -38,5 +40,9 @@ export class EditProcessOverviewComponent implements OnInit {
       () => this.snackbar.open('Copied to clipboard successfully', null, { duration: 1000 }),
       () => this.snackbar.open('Unable to write to clipboard.', null, { duration: 1000 })
     );
+  }
+
+  /* template */ isClientNode(node: InstanceNodeConfigurationDto) {
+    return node.nodeName === CLIENT_NODE_NAME;
   }
 }
