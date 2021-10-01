@@ -86,8 +86,22 @@ describe('Groups Tests (Clients)', () => {
 
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName).should('exist');
-      cy.get('tr:contains("Client Test")').should('have.length', 1); // only one shown due to OS!
+      cy.get('tr:contains("Client Test")').should('have.length', 1).click(); // only one shown due to OS!
+    });
 
+    // current OS
+    cy.inMainNavFlyin('app-client-detail', () => {
+      cy.get('button[data-cy="Download Installer"]').should('be.enabled').downloadByLocationAssign('test-installer.bin');
+      cy.get('button[data-cy^="Click"]').should('be.enabled').downloadByLinkClick('test-click-start.json');
+      cy.readFile(Cypress.config('downloadsFolder') + '/' + 'test-click-start.json')
+        .its('groupId')
+        .should('eq', groupName);
+
+      cy.get('button[data-cy="Download Launcher Installer"]').should('be.enabled').downloadByLocationAssign('test-launcher-installer.bin');
+      // intentionally NOT downloading launcher as it is quite huge and downloading is slow even locally.
+    });
+
+    cy.inMainNavContent(() => {
       cy.pressToolbarButton('Data Grouping');
     });
 
@@ -98,22 +112,7 @@ describe('Groups Tests (Clients)', () => {
 
     cy.get('.cdk-overlay-backdrop-showing').click('top');
 
-    cy.get('tr:contains("Client Test")')
-      .should('have.length', 2)
-      .each((el) => {
-        cy.wrap(el).click();
-
-        cy.inMainNavFlyin('app-client-detail', () => {
-          cy.get('button[data-cy="Download Installer"]').should('be.enabled').downloadByLocationAssign('test-installer.bin');
-          cy.get('button[data-cy^="Click"]').should('be.enabled').downloadByLinkClick('test-click-start.json');
-          cy.readFile(Cypress.config('downloadsFolder') + '/' + 'test-click-start.json')
-            .its('groupId')
-            .should('eq', groupName);
-
-          cy.get('button[data-cy="Download Launcher Installer"]').should('be.enabled').downloadByLocationAssign('test-launcher-installer.bin');
-          // intentionally NOT downloading launcher as it is quite huge and downloading is slow even locally.
-        });
-      });
+    cy.get('tr:contains("Client Test")').should('have.length', 2);
   });
 
   it('Creates a local user', () => {
