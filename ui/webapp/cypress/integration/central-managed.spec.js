@@ -11,7 +11,7 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Creates a group on the central server', () => {
-    cy.visitBDeploy('/', 'CENTRAL');
+    cy.visitCentral('/');
     cy.createGroup(groupName, 'CENTRAL');
   });
 
@@ -22,7 +22,7 @@ describe('Central/Managed Basic Test', function () {
   it('Deletes and re-attaches the managed server to the central server', () => {
     cy.deleteGroup(groupName, 'MANAGED');
 
-    cy.visitBDeploy('/', 'CENTRAL');
+    cy.visitCentral('/');
     // go to managed servers and sync -> fails
     cy.enterGroup(groupName);
     cy.pressMainNavButton('Managed Servers');
@@ -55,7 +55,7 @@ describe('Central/Managed Basic Test', function () {
 
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0', 'MANAGED');
 
-    cy.visitBDeploy('/', 'CENTRAL');
+    cy.visitCentral('/');
     cy.waitUntilContentLoaded();
     cy.enterGroup(groupName);
     cy.inMainNavContent(() => {
@@ -120,7 +120,7 @@ describe('Central/Managed Basic Test', function () {
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', 'CENTRAL');
     cy.createInstance(groupName, instanceName2, 'Demo Product', '2.0.0', 'CENTRAL');
 
-    cy.visitBDeploy('/', 'MANAGED');
+    cy.visitManaged('/');
     cy.waitUntilContentLoaded();
     cy.enterGroup(groupName);
     cy.inMainNavContent(() => {
@@ -128,18 +128,144 @@ describe('Central/Managed Basic Test', function () {
     });
   });
 
-  // TODO config instance on managed and sync to central
+  it('Configures instance on central server', () => {
+    cy.enterInstance(groupName, instanceName2, 'CENTRAL');
+    cy.pressToolbarButton('Synchronize');
+    cy.pressMainNavButton('Instance Configuration');
 
-  // TODO install, activate on central (requires instance configuration)
+    cy.waitUntilContentLoaded();
 
-  // TODO check product synced to managed
+    // create some from a template
+    cy.inMainNavContent(() => {
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
+        cy.get('button[data-cy^="Apply Instance Template"]').click();
+      });
+    });
 
-  // TODO process control from central and managed (requires instance configuration)
+    cy.inMainNavFlyin('app-instance-templates', () => {
+      cy.contains('tr', 'Default Configuration')
+        .should('exist')
+        .within(() => {
+          cy.get('button').click();
+        });
+
+      cy.contains('app-bd-notification-card', 'Assign Template').within(() => {
+        cy.fillFormSelect('Server Apps', 'Apply to master');
+        cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
+
+        cy.get('button[data-cy="CONFIRM"]').click();
+      });
+
+      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
+        cy.fillFormInput('Text Value', 'Test');
+        cy.fillFormInput('Sleep Timeout', '30');
+
+        cy.get('button[data-cy="CONFIRM"]').click();
+      });
+    });
+
+    cy.inMainNavContent(() => {
+      cy.waitForApi(() => {
+        cy.pressToolbarButton('Save');
+      });
+
+      cy.waitUntilContentLoaded();
+    });
+  });
+
+  it('Checks product not available on managed', () => {
+    cy.visitManaged('/');
+    cy.enterGroup(groupName);
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', instanceName2)
+        .should('exist')
+        .within(() => {
+          cy.get('.local-na-chip').should('exist');
+        });
+    });
+  });
+
+  it('Synchronizes, installs, activates on central', () => {
+    cy.enterInstance(groupName, instanceName2, 'CENTRAL');
+    cy.pressToolbarButton('Synchronize');
+
+    cy.contains('.bd-rect-card', 'no active version')
+      .should('exist')
+      .within(() => {
+        cy.waitForApi(() => {
+          cy.get('button[data-cy="Install"]').should('be.enabled').click();
+        });
+
+        cy.waitForApi(() => {
+          cy.get('button[data-cy="Activate"]').should('be.enabled').click();
+        });
+      });
+
+    cy.waitUntilContentLoaded();
+    cy.contains('app-instance-server-node', 'master').within(() => {
+      cy.contains('tr', 'Server No Sleep').should('exist');
+      cy.contains('tr', 'Server With Sleep').should('exist');
+    });
+  });
+
+  it('Checks product implicitly available on managed', () => {
+    cy.visitManaged('/');
+    cy.enterGroup(groupName);
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', instanceName2)
+        .should('exist')
+        .within(() => {
+          cy.get('.local-na-chip').should('not.exist');
+        });
+    });
+  });
+
+  it('Starts process on central', () => {
+    cy.enterInstance(groupName, instanceName2, 'CENTRAL');
+    cy.pressToolbarButton('Synchronize');
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Another Server With Sleep').click();
+    });
+
+    cy.inMainNavFlyin('app-process-status', () => {
+      cy.contains('button', 'play_arrow').click();
+      cy.contains('button', 'stop').should('be.enabled');
+    });
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Another Server With Sleep').within(() => {
+        cy.get('app-process-status-icon[data-cy="RUNNING"]').should('exist');
+      });
+    });
+  });
+
+  it('Stops process on managed', () => {
+    cy.enterInstance(groupName, instanceName2, 'MANAGED');
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Another Server With Sleep')
+        .within(() => {
+          cy.get('app-process-status-icon[data-cy="RUNNING"]').should('exist');
+        })
+        .click();
+    });
+
+    cy.inMainNavFlyin('app-process-status', () => {
+      cy.contains('button', 'stop').should('be.enabled').click();
+    });
+  });
 
   it('Deletes the group on central and managed server', () => {
     cy.deleteGroup(groupName, 'CENTRAL');
 
-    cy.visitBDeploy('/', 'MANAGED');
+    cy.visitManaged('/');
     cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {

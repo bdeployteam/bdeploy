@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, HostBinding, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { ApplicationConfiguration, ProcessState, ProcessStatusDto } from 'src/app/models/gen.dtos';
 import { ProcessesService } from '../../../services/processes.service';
@@ -10,6 +10,8 @@ import { ProcessesService } from '../../../services/processes.service';
 })
 export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
   @Input() record: ApplicationConfiguration;
+
+  @HostBinding('attr.data-cy') dataCy: string;
 
   /* template */ icon$ = new BehaviorSubject<string>('help');
   /* template */ hint$ = new BehaviorSubject<string>('Unknown');
@@ -42,6 +44,8 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
       this.next('help', 'Unknown', 'local-unknown');
       return;
     }
+
+    this.dataCy = state.processState;
 
     switch (state.processState) {
       case ProcessState.STOPPED:
