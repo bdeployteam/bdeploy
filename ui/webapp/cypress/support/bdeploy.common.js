@@ -57,7 +57,7 @@ Cypress.Commands.add('fillFormInput', function (name, data) {
   const s = 'app-bd-form-input' + (name === undefined ? '' : `[name="${name}"]`);
   cy.get(s).within(() => {
     cy.get('mat-form-field').should('exist').click();
-    cy.get('input').should('exist').and('have.focus').type(`{selectall}${data}`);
+    cy.get('input').should('exist').and('have.focus').clear().type(data);
   });
 });
 
