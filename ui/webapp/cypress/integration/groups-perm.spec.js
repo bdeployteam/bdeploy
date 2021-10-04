@@ -19,7 +19,6 @@ describe('Groups Tests (Permissions)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
-    cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
   it('Creates Test Users', () => {
@@ -83,8 +82,53 @@ describe('Groups Tests (Permissions)', () => {
     });
   });
 
-  // Permission tests:
-  // TODO check global permissions on instance group
+  it('Tests write user can create instance', () => {
+    cy.pressMainNavTopButton('User Settings');
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy="Logout"]').click();
+    });
+    cy.waitUntilContentLoaded();
+    cy.fillFormInput('user', 'write');
+    cy.fillFormInput('pass', 'write');
+
+    cy.get('button[type="submit"]').click();
+
+    cy.waitUntilContentLoaded();
+    cy.contains('tr', groupName).should('exist');
+
+    cy.inMainNavContent(() => {
+      // adding instance group requires admin permissions.
+      cy.get('button[data-cy^="Add Instance Group"]').should('be.disabled');
+    });
+
+    cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
+  });
+
+  it('Tests read user can not create instance', () => {
+    cy.pressMainNavTopButton('User Settings');
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy="Logout"]').click();
+    });
+    cy.waitUntilContentLoaded();
+    cy.fillFormInput('user', 'read');
+    cy.fillFormInput('pass', 'read');
+
+    cy.get('button[type="submit"]').click();
+
+    cy.waitUntilContentLoaded();
+    cy.contains('tr', groupName).should('exist');
+
+    cy.inMainNavContent(() => {
+      // adding instance group requires admin permissions.
+      cy.get('button[data-cy^="Add Instance Group"]').should('be.disabled');
+    });
+
+    cy.enterGroup(groupName);
+
+    cy.inMainNavContent(() => {
+      cy.get('button[data-cy="Add Instance"]').should('be.disabled');
+    });
+  });
 
   it('Cleans up', () => {
     cy.deleteGroup(groupName);
