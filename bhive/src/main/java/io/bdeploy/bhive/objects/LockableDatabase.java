@@ -59,7 +59,7 @@ public abstract class LockableDatabase {
                     // deadlock, even though the locks are fine on a thread level. There is no easy way to work around this here,
                     // especially not if we do not want to dramatically increase lock contention in the whole process. This means
                     // we go for a quick'n'dirty approach and simply retry in this case.
-                    if (ioe.getMessage().equals("Resource deadlock avoided") && xctpCount++ <= 10) {
+                    if ("Resource deadlock avoided".equals(ioe.getMessage()) && xctpCount++ <= 10) {
                         wait(5);
                         continue;
                     }
