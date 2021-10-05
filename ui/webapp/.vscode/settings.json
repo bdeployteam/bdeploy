@@ -14,5 +14,6 @@
   "prettier.jsxSingleQuote": true,
   "javascript.preferences.quoteStyle": "single",
   "typescript.preferences.quoteStyle": "single",
-  "prettier.useEditorConfig": false
+  "prettier.useEditorConfig": false,
+  "files.eol": "\n"
 }
