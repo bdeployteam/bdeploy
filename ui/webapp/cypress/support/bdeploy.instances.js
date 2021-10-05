@@ -66,6 +66,7 @@ Cypress.Commands.add('enterInstance', function (groupName, instanceName, mode = 
   cy.waitUntilContentLoaded();
 
   cy.enterGroup(groupName);
+
   cy.inMainNavContent(() => {
     cy.contains('tr', instanceName).should('exist').click();
     cy.waitUntilContentLoaded();

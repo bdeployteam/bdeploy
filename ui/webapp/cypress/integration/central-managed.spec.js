@@ -142,6 +142,8 @@ describe('Central/Managed Basic Test', function () {
       });
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.contains('tr', 'Default Configuration')
         .should('exist')

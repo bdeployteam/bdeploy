@@ -46,6 +46,8 @@ describe('Instance Settings Tests', () => {
       cy.get('button[data-cy^="Instance Templates"]').click();
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.contains('tr', 'Default Configuration')
         .should('exist')
