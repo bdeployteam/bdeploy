@@ -34,6 +34,8 @@ describe('Groups Tests (Clients)', () => {
       });
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.contains('tr', 'Default Configuration')
         .should('exist')

@@ -102,6 +102,7 @@ Cypress.Commands.add('enterGroup', function (groupName) {
   cy.waitUntilContentLoaded();
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('exist').click();
+    cy.waitUntilContentLoaded();
     cy.contains('mat-toolbar', `Instances of ${groupName}`).should('exist');
   });
 });

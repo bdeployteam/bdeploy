@@ -32,6 +32,8 @@ describe('Instance Dashboard Tests', () => {
       });
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.contains('tr', 'Default Configuration')
         .should('exist')
