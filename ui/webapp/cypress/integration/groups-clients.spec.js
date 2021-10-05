@@ -86,6 +86,8 @@ describe('Groups Tests (Clients)', () => {
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Client Applications');
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName).should('exist');
       cy.get('tr:contains("Client Test")').should('have.length', 1).click(); // only one shown due to OS!
@@ -178,6 +180,8 @@ describe('Groups Tests (Clients)', () => {
     cy.fillFormInput('pass', 'client');
 
     cy.get('button[type="submit"]').click();
+
+    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('Welcome to BDeploy').should('not.exist');
