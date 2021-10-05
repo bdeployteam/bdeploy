@@ -141,6 +141,7 @@ void createServerTasks(String name, String root, int port) {
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
         args = [ "start", "--allowCors", "--consoleLog" ]
+        jvmArgs = [ '-Xmx128M' ] // all tests must fit :)
         waitForPort = port
         stopAfter = triggerStopBDeploy
     }
