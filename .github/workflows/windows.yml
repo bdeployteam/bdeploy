@@ -42,4 +42,8 @@ jobs:
         node-version: '14'
 
     - name: Build and Test
+      env:
+        DEBUG: 'cypress:server:util:process_profiler'
+        CYPRESS_PROCESS_PROFILER_INTERVAL: 60000
+        NODE_OPTIONS: '--max_old_space_size=1200'
       run: ./gradlew --stacktrace clean build releaseTest -PrecordCypress -PcypressBrowser=electron -PcypressNoCoverage=yes '-Dtestlogger.theme=plain-parallel'
