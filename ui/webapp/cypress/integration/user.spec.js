@@ -20,6 +20,8 @@ describe('Current User Tests', function () {
       // two edit cycles below to ensure that there really ARE changes and SAVE enables
       // (in case of repeated execution on the same data during development)
 
+      cy.waitUntilContentLoaded();
+
       // 1st change
       cy.get(`app-bd-panel-button[text="Edit User"]`).click();
       cy.get('app-bd-dialog-toolbar[header="Edit User"]').should('exist');
