@@ -118,11 +118,6 @@ public class ProcessControllerTest {
         listener.expect(ProcessState.CRASHED_WAITING);
         listener.await(TIMEOUT);
 
-        // Check if properties are set
-        ProcessDetailDto details = process.getDetails();
-        assertEquals(1, details.retryCount);
-        assertEquals(10, details.recoverDelay);
-
         // Recover task must be scheduled
         assertNotNull(process.getRecoverTask());
 
@@ -270,10 +265,6 @@ public class ProcessControllerTest {
         ProcessHandles.destroy(handle);
         listener.await(TIMEOUT);
 
-        // Check if properties are set and that the recover task is scheduled
-        ProcessDetailDto details = process.getDetails();
-        assertEquals(1, details.retryCount);
-        assertEquals(10, details.recoverDelay);
         assertNotNull(process.getRecoverTask());
 
         // Now execute start command
@@ -283,7 +274,7 @@ public class ProcessControllerTest {
 
         // Recover task must be canceled and counter must be reset due to the manual start
         assertTrue(process.getRecoverTask() == null);
-        details = process.getDetails();
+        ProcessDetailDto details = process.getDetails();
         assertEquals(0, details.retryCount);
 
         // Now execute stop command

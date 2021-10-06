@@ -365,7 +365,7 @@ public class InstanceProcessController {
         try {
             readLock.lock();
             for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(SET_RUNNING_SCHEDULED);
+                Map<String, ProcessController> running = list.getWithState(SET_RUNNING);
                 if (running.containsKey(applicationId)) {
                     ProcessStatusDto dto = running.get(applicationId).getStatus();
                     throw new PcuRuntimeException(

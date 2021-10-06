@@ -649,10 +649,10 @@ public class ProcessController {
 
         // Schedule uptime monitor if launched from crashed waiting
         if (processState == ProcessState.CRASHED_WAITING) {
+            recoverCount++;
+
             processState = ProcessState.RUNNING_UNSTABLE;
-            if (recoverCount > 0) {
-                logger.log(l -> l.info("Application successfully recovered. Attempts: {}/{}", recoverCount, recoverAttempts));
-            }
+            logger.log(l -> l.info("Application successfully recovered. Attempts: {}/{}", recoverCount, recoverAttempts));
             logger.log(l -> l.info("Application status is now RUNNING_UNSTABLE."));
 
             // Periodically watch if the process remains alive
@@ -718,7 +718,6 @@ public class ProcessController {
         }
         Duration delay = recoverDelays[Math.min(recoverCount, recoverDelays.length - 1)];
         processState = ProcessState.CRASHED_WAITING;
-        recoverCount++;
 
         // Schedule restarting of application
         if (executorService == null) {
