@@ -31,6 +31,7 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
@@ -146,8 +147,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         } else if (config.importFrom() != null) {
             return doImport(remote, config);
         } else if (config.updateTo() != null) {
-            // TODO: use new update mechanism.
-            return createSuccess();
+            return doUpdateProduct(remote, ir, config);
         } else {
             return createNoOp();
         }
@@ -274,6 +274,60 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             throw new IllegalStateException("Cannot download instance", e);
         }
         return createSuccess().addField("Export File", config.exportTo());
+    }
+
+    private DataResult doUpdateProduct(RemoteService remote, InstanceResource ir, InstanceConfig config) {
+        String target = config.updateTo();
+        String instance = config.uuid();
+
+        List<InstanceVersionDto> v = ir.listVersions(instance);
+        Integer max = v.stream().map(d -> Integer.valueOf(d.key.getTag())).sorted(Collections.reverseOrder()).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Cannot determine current version of instance " + instance));
+        String currentTag = max.toString();
+
+        BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
+        ManagedMasterDto server = null;
+        if (bir.getVersion().mode == MinionMode.CENTRAL) {
+            ManagedServersResource msr = ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext());
+
+            server = msr.getServerForInstance(config.instanceGroup(), instance, currentTag);
+        }
+
+        DataResult result = createSuccess();
+        InstanceConfiguration cfg = ir.readVersion(instance, currentTag);
+        InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
+                ir.getNodeConfigurations(instance, currentTag).nodeConfigDtos);
+        InstanceUpdateDto update = new InstanceUpdateDto(dto, null);
+
+        // perform actual product update
+        update = ir.updateProductVersion(instance, target, update);
+
+        // perform validation of update
+        List<ApplicationValidationDto> issues = ir.validate(instance, update);
+
+        if (issues.isEmpty()) {
+            ir.update(instance, update, server != null ? server.hostName : null, currentTag);
+
+            if (update.validation != null && !update.validation.isEmpty()) {
+                result.addField("Update Warnings", "There have been update warnings.");
+
+                update.validation.forEach(val -> result.addField(" - "
+                        + (val.appUid == null ? "Global" : (val.appUid + (val.paramUid == null ? "" : (" - " + val.paramUid)))),
+                        val.message));
+            }
+
+            result.addField("Updated To", target);
+        } else {
+            result.setMessage("Validation Issues");
+
+            issues.forEach(val -> result.addField(
+                    " - " + (val.appUid == null ? "Global" : (val.appUid + (val.paramUid == null ? "" : (" - " + val.paramUid)))),
+                    val.message));
+
+            result.addField("Update Aborted", "Cannot perform update due to validation issues");
+        }
+
+        return result;
     }
 
     private DataTable list(RemoteService remote, InstanceConfig config) {
