@@ -166,6 +166,8 @@ describe('Instance Settings Tests', () => {
         cy.get('button[data-cy="OK"]').click();
       });
 
+      cy.waitUntilContentLoaded();
+
       cy.contains('tr', 'test.json')
         .should('exist')
         .within(() => {

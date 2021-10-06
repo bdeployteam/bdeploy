@@ -159,15 +159,21 @@ describe('Groups Tests', () => {
     // ...go on checking product details stuff
     cy.pressMainNavButton('Products');
     cy.get('app-products-browser').should('exist');
+
+    cy.intercept({ method: 'GET', url: `/api/group/${groupName}/product/io.bdeploy/demo/product/2.0.0/usedIn` }).as('getUsage');
+
     cy.inMainNavContent(() => {
       cy.contains('tr', /Demo Product.*2.0.0/)
         .should('exist')
         .click();
     });
 
+    cy.wait('@getUsage');
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-product-details', () => {
       // "Delete" button
-      cy.get(`app-bd-button[text="Delete"]`).click();
+      cy.get('button[data-cy="Delete"]').should('be.enabled').click();
 
       cy.get('app-bd-notification-card').within(() => {
         cy.get('button[data-cy="YES"]').should('exist').and('be.enabled').click();
