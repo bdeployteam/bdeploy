@@ -14,13 +14,13 @@ describe('Current User Tests', function () {
 
     cy.pressMainNavTopButton('User Settings');
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-settings', () => {
       cy.contains('button', 'Logout').should('exist');
 
       // two edit cycles below to ensure that there really ARE changes and SAVE enables
       // (in case of repeated execution on the same data during development)
-
-      cy.waitUntilContentLoaded();
 
       // 1st change
       cy.get(`app-bd-panel-button[text="Edit User"]`).click();

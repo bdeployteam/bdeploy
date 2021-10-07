@@ -35,10 +35,11 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   ngOnInit(): void {
     this.auth.getUserInfo().subscribe((u) => {
       if (!!u) {
-        this.loading$.next(false);
         this.user = cloneDeep(u);
         this.orig = cloneDeep(u);
         this.mail$.next(this.user.email);
+
+        this.loading$.next(false);
       }
     });
   }

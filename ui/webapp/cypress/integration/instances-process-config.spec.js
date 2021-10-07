@@ -49,6 +49,8 @@ describe('Instance Process Config Tests', () => {
       });
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-add-process', () => {
       cy.contains('tr', 'Client Application').find('button[data-cy^="Add Client"]').click();
       cy.pressToolbarButton('Close');

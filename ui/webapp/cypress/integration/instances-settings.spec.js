@@ -384,6 +384,7 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-attributes', () => {
+      cy.waitUntilContentLoaded();
       cy.get('button[data-cy^="Add/Edit"]').click();
       cy.contains('app-bd-notification-card', 'Add/Edit').within(() => {
         cy.fillFormSelect('id', 'Demo Attribute');
