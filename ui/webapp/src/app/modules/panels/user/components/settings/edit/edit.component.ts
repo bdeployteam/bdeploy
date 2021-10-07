@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { debounceTime, finalize } from 'rxjs/operators';
+import { debounceTime, finalize, first, skipWhile } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -33,15 +33,20 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   ngOnInit(): void {
-    this.auth.getUserInfo().subscribe((u) => {
-      if (!!u) {
-        this.user = cloneDeep(u);
-        this.orig = cloneDeep(u);
-        this.mail$.next(this.user.email);
-
-        this.loading$.next(false);
-      }
-    });
+    this.auth
+      .getUserInfo()
+      .pipe(
+        skipWhile((u) => !u),
+        first(),
+        finalize(() => this.loading$.next(false))
+      )
+      .subscribe((u) => {
+        if (!!u) {
+          this.user = cloneDeep(u);
+          this.orig = cloneDeep(u);
+          this.mail$.next(this.user.email);
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -58,6 +63,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   public doSave(): Observable<any> {
     this.loading$.next(true);
+    this.orig = cloneDeep(this.user);
     return this.auth.updateUserInfo(this.user).pipe(finalize(() => this.loading$.next(false)));
   }
 

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, first, skipWhile } from 'rxjs/operators';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
@@ -20,7 +20,11 @@ export class SettingsComponent implements OnInit {
   ngOnInit(): void {
     this.authService
       .getUserInfo()
-      .pipe(finalize(() => this.loading$.next(false)))
+      .pipe(
+        skipWhile((u) => !u),
+        first(),
+        finalize(() => this.loading$.next(false))
+      )
       .subscribe((r) => {
         this.user = r;
       });
