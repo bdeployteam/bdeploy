@@ -1,10 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { first, skipWhile } from 'rxjs/operators';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { BehaviorSubject, of } from 'rxjs';
+import { finalize, first, skipWhile, tap } from 'rxjs/operators';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
-import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import { FileStatusDto, FileStatusType, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
+import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { ServersService } from '../../../servers/services/servers.service';
@@ -72,7 +74,14 @@ export class DataFilesComponent implements OnInit {
     return ['', { outlets: { panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path] } }];
   };
 
+  /* template */ tempFilePath: string;
+  /* template */ tempFileMinion: string;
+  /* template */ tempFileError: string;
+  /* template */ tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
+  private tempFileContent = '';
+
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild('tempFileInput', { static: false }) private tempFileInput: BdFormInputComponent;
 
   constructor(public cfg: ConfigService, public instances: InstancesService, public servers: ServersService, private df: DataFilesService) {}
 
@@ -141,5 +150,78 @@ export class DataFilesComponent implements OnInit {
 
   private doDownload(r: FileListEntry) {
     this.instances.download(r.directory, r.entry);
+  }
+
+  /* template */ getMinions(): string[] {
+    return this.df.directories$.value.map((d) => d.minion);
+  }
+
+  /* template */ doAddFile(tpl: TemplateRef<any>): void {
+    this.tempFilePath = '';
+    this.tempFileContent = '';
+    this.tempFileMinion = null;
+
+    this.dialog
+      .message({
+        header: 'Add Configuration File',
+        icon: 'add',
+        template: tpl,
+        validation: () =>
+          !this.tempFileInput ? false : !this.tempFileInput.isInvalid() && !!this.tempFileMinion?.length && !this.tempFileContentLoading$.value,
+        actions: [ACTION_CANCEL, ACTION_OK],
+      })
+      .subscribe((r) => {
+        if (!r) {
+          return;
+        }
+        const f: FileStatusDto = {
+          file: this.tempFilePath,
+          type: FileStatusType.ADD,
+          content: this.tempFileContent,
+        };
+        const dir = this.df.directories$.value.find((d) => d.minion === this.tempFileMinion);
+        let confirmation = of(true);
+
+        if (!!dir.entries.find((e) => e.path === this.tempFilePath)) {
+          confirmation = this.dialog.confirm('File Exists', 'A file with the given name exists - replace?', 'warning').pipe(
+            tap((r) => {
+              if (r) f.type = FileStatusType.EDIT;
+            })
+          );
+        }
+
+        confirmation.subscribe((confirm) => {
+          if (!confirm) return;
+
+          this.df
+            .updateFile(dir, f)
+            .pipe(finalize(() => this.load()))
+            .subscribe();
+        });
+      });
+  }
+
+  /* template */ doAddFileContent(file: File) {
+    this.tempFileError = null;
+    this.tempFileContentLoading$.next(true);
+
+    if (file.size > 1024 * 1024 * 20) {
+      this.tempFileContentLoading$.next(false);
+      this.tempFileError = 'Selected File is too large, size limit 20MB';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = reader.result.toString();
+
+      // always set the file name/path to the original dropped file name.
+      this.tempFilePath = file.name;
+
+      // extract the base64 part of the data URL...
+      this.tempFileContent = result.substr(result.indexOf(',') + 1);
+      this.tempFileContentLoading$.next(false);
+    };
+    reader.readAsDataURL(file);
   }
 }
