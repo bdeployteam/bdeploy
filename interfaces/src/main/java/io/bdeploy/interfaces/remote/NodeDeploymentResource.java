@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import jakarta.ws.rs.Consumes;
@@ -65,6 +66,13 @@ public interface NodeDeploymentResource {
     @GET
     @Path("/dataDir")
     public List<RemoteDirectoryEntry> getDataDirectoryEntries(@QueryParam("u") String instanceId);
+
+    /**
+     * Add/edit/delete files in the DATA directory.
+     */
+    @PUT
+    @Path("/dataDir/updateEntries")
+    public void updateDataEntries(@QueryParam("u") String instanceId, List<FileStatusDto> updates);
 
     /**
      * @param entry the entry to delete from the data directory.

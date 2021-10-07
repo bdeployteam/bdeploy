@@ -7,6 +7,7 @@ import java.util.Map;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
@@ -129,6 +130,14 @@ public interface MasterNamedResource {
     @POST
     @Path("/dataDir/streamEntry")
     public Response getEntryStream(@QueryParam("m") String minion, RemoteDirectoryEntry entry);
+
+    /**
+     * Add/edit/delete files in the DATA directory.
+     */
+    @PUT
+    @Path("/dataDir/updateEntries")
+    public void updateDataEntries(@QueryParam("u") String instanceId, @QueryParam("m") String minion,
+            List<FileStatusDto> updates);
 
     /**
      * @param minion the minion the entry refers to.

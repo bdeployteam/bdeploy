@@ -568,6 +568,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public void updateDataEntries(String uuid, String minion, List<FileStatusDto> updates) {
+        RemoteService svc = root.getMinions().getRemote(minion);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
+        }
+        NodeDeploymentResource ndr = ResourceProvider.getVersionedResource(svc, NodeDeploymentResource.class, context);
+        ndr.updateDataEntries(uuid, updates);
+    }
+
+    @Override
     public void deleteDataEntry(String minion, RemoteDirectoryEntry entry) {
         RemoteService svc = root.getMinions().getRemote(minion);
         if (svc == null) {

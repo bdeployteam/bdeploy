@@ -14,6 +14,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -264,6 +266,37 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
             throw new WebApplicationException("Cannot find " + actual, Status.NOT_FOUND);
         }
         return actual;
+    }
+
+    @Override
+    public void updateDataEntries(String uuid, List<FileStatusDto> updates) {
+        Path dataDir = new DeploymentPathProvider(root.getDeploymentDir().resolve(uuid), null).get(SpecialDirectory.DATA);
+
+        for (FileStatusDto update : updates) {
+            Path actual = dataDir.resolve(update.file);
+            if (!actual.startsWith(dataDir)) {
+                throw new WebApplicationException("Trying to escape " + dataDir, Status.BAD_REQUEST);
+            }
+
+            try {
+                switch (update.type) {
+                    case ADD:
+                        PathHelper.mkdirs(actual.getParent());
+                        Files.write(actual, Base64.decodeBase64(update.content), StandardOpenOption.CREATE_NEW,
+                                StandardOpenOption.SYNC);
+                        break;
+                    case DELETE:
+                        Files.delete(actual);
+                        break;
+                    case EDIT:
+                        Files.write(actual, Base64.decodeBase64(update.content), StandardOpenOption.CREATE,
+                                StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
+                        break;
+                }
+            } catch (IOException e) {
+                throw new WebApplicationException("Cannot update " + update.file + " in " + uuid, e, Status.BAD_REQUEST);
+            }
+        }
     }
 
     @Override

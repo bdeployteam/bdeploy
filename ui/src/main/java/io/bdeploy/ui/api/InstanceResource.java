@@ -11,6 +11,7 @@ import io.bdeploy.common.security.NoScopeInheritance;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
+import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
@@ -211,6 +212,12 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.READ)
     public String getContentStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, RemoteDirectoryEntry entry);
+
+    @POST
+    @Path("/{instance}/data/update/{minion}")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void updateDataFiles(@ActivityScope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
+            List<FileStatusDto> updates);
 
     @POST
     @Path("/{instance}/delete/{minion}")

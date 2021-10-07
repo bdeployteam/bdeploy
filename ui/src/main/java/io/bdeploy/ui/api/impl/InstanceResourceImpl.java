@@ -981,6 +981,18 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
+    public void updateDataFiles(String instanceId, String minion, List<FileStatusDto> updates) {
+        InstanceManifest im = readInstance(instanceId);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
+        }
+
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        root.getNamedMaster(group).updateDataEntries(instanceId, minion, updates);
+    }
+
+    @Override
     public void deleteDataFile(String instanceId, String minion, RemoteDirectoryEntry entry) {
         InstanceManifest im = readInstance(instanceId, entry.tag);
         if (im == null) {
