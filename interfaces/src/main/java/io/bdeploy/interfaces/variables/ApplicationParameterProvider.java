@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.MoreCollectors;
 
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
@@ -76,7 +77,22 @@ public class ApplicationParameterProvider {
             throw new IllegalArgumentException(
                     "Cannot find unique parameter " + paramId + " for application " + app.name + ", found " + params.size());
         }
-        return params.get(0).value;
+
+        // IF the value is a parameter reference, we need to make sure it is scoped to the current application!
+        return TemplateHelper.updateReferences(params.get(0).value, r -> updateReference(app, r));
+    }
+
+    private String updateReference(ApplicationConfiguration app, String templateRef) {
+        if (templateRef != null && templateRef.startsWith(Variables.PARAMETER_VALUE.getPrefix())) {
+            String actualRef = templateRef.substring(Variables.PARAMETER_VALUE.getPrefix().length());
+
+            if (!actualRef.contains(":")) {
+                // unscoped, scope
+                return Variables.PARAMETER_VALUE.getPrefix() + app.name + ':' + actualRef;
+            }
+        }
+
+        return templateRef; // leave unmodified.
     }
 
 }

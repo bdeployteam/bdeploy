@@ -1,6 +1,7 @@
 package io.bdeploy.common.util;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -99,6 +100,39 @@ public class TemplateHelper {
                 // Keep pattern for the unresolved intact so that we can resolve it later
                 resolved = PATTERN_START + resolved + PATTERN_END;
             }
+
+            // append string from beginning or previous end to start of variable match
+            // not using appendReplacement and appendTail since they are slow.
+            builder.append(value.substring(currentStart, m.start()));
+            builder.append(resolved);
+
+            // Update indices for next round
+            currentStart = m.end();
+        }
+
+        // Append remaining content of the input
+        builder.append(value.substring(currentStart, value.length()));
+        return builder.toString();
+    }
+
+    /**
+     * Processes each template reference in the given input by calling the given processor.
+     * <p>
+     * Whatever result is returned by the processor will be re-inserted *as template variable* (including
+     * the pattern start and end markers!) in the string.
+     */
+    public static String updateReferences(String value, Function<String, String> processor) {
+        StringBuilder builder = new StringBuilder();
+        int currentStart = 0;
+
+        Matcher m = PATTERN.matcher(value);
+        while (m.find()) {
+            // Resolve next variable if desired
+            String nextMatch = m.group(1);
+            String resolved = nextMatch;
+
+            // Keep pattern for whatever the processor returned
+            resolved = PATTERN_START + processor.apply(resolved) + PATTERN_END;
 
             // append string from beginning or previous end to start of variable match
             // not using appendReplacement and appendTail since they are slow.

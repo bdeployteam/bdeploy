@@ -83,7 +83,8 @@ public class ValueResolverTest {
         assertThat(list.apply(Variables.DEPLOYMENT_PATH.format("CONFIG")), is(dpp.get(SpecialDirectory.CONFIG).toString()));
 
         // resolver does not expand recursively - ParameterConfiguration does.
-        assertThat(list.apply(Variables.PARAMETER_VALUE.format("Application Number One:a1p2")), is("{{V:a1p1}}"));
+        assertThat(list.apply(Variables.PARAMETER_VALUE.format("Application Number One:a1p2")),
+                is("{{V:Application Number One:a1p1}}"));
 
         // but the descriptor expand recursively.
         boolean found = false;
