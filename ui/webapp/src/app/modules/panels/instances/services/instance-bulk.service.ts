@@ -86,4 +86,20 @@ export class InstanceBulkService {
       this.selection$.value.map((inst) => this.http.delete(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/delete`))
     ).pipe(concatAll());
   }
+
+  public install(): Observable<any> {
+    return concat(
+      this.selection$.value.map((inst) =>
+        this.http.get(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/${inst.instance.tag}/install`)
+      )
+    ).pipe(concatAll());
+  }
+
+  public activate(): Observable<any> {
+    return concat(
+      this.selection$.value.map((inst) =>
+        this.http.get(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/${inst.instance.tag}/activate`)
+      )
+    ).pipe(concatAll());
+  }
 }

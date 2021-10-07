@@ -13,6 +13,8 @@ export class BulkManipulationComponent implements OnInit {
   /* template */ starting$ = new BehaviorSubject<boolean>(false);
   /* template */ stopping$ = new BehaviorSubject<boolean>(false);
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
+  /* template */ installing$ = new BehaviorSubject<boolean>(false);
+  /* template */ activating$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -60,5 +62,33 @@ export class BulkManipulationComponent implements OnInit {
 
   /* template */ isAllSameProduct() {
     return this.bulk.selection$.value.every((i) => !!i.productDto?.key?.name && i.productDto.key.name === this.bulk.selection$.value[0].productDto.key.name);
+  }
+
+  /* template */ onInstall() {
+    this.installing$.next(true);
+    this.bulk
+      .install()
+      .pipe(finalize(() => this.installing$.next(false)))
+      .subscribe();
+  }
+
+  /* template */ onActivate() {
+    this.dialog
+      .confirm(
+        'Activate',
+        'This will activate the latest versions of each selected instance. Are you sure?',
+        'warning',
+        'I UNDERSTAND',
+        'Confirm using I UNDERSTAND'
+      )
+      .subscribe((r) => {
+        if (!r) return;
+
+        this.activating$.next(true);
+        this.bulk
+          .activate()
+          .pipe(finalize(() => this.activating$.next(false)))
+          .subscribe();
+      });
   }
 }

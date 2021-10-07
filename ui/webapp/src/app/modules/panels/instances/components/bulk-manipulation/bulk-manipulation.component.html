@@ -35,6 +35,23 @@
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"
+        [disabled]="!selected.length || (installing$ | async)"
+        [loadingWhen$]="installing$"
+        text="Install Latest Version"
+        icon="layers"
+        (click)="onInstall()"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selected.length || (activating$ | async)"
+        [loadingWhen$]="activating$"
+        text="Activate Latest Version"
+        icon="star"
+        (click)="onActivate()"
+      ></app-bd-button>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
         [disabled]="!selected.length || (deleting$ | async)"
         [loadingWhen$]="deleting$"
         text="Delete Selected Instances"
