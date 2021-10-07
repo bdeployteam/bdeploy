@@ -172,7 +172,7 @@ export class DataFilesComponent implements OnInit {
 
     this.dialog
       .message({
-        header: 'Add Configuration File',
+        header: 'Add Data File',
         icon: 'add',
         template: tpl,
         validation: () =>
