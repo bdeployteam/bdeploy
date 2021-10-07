@@ -8,6 +8,7 @@ import { AddProcessComponent } from './components/add-process/add-process.compon
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
 import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
 import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
+import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
@@ -91,6 +92,7 @@ const INSTANCES_ROUTES: Route[] = [
     data: { max: true },
   },
   { path: 'data-files/:node/:file', component: DataFileViewerComponent, canActivate: [ScopedReadGuard], data: { max: true } },
+  { path: 'data-edit/:node/:file', component: DataFileEditorComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
 ];
 
 @NgModule({

@@ -1,0 +1,10 @@
+<div fxLayout="row" fxLayoutAlign="start center">
+  <app-bd-panel-button
+    icon="edit"
+    text="Edit"
+    [disabled]="isOversized()"
+    [route]="['panels', 'instances', 'data-edit', record.directory.minion, record.entry.path]"
+    appClickStopPropagation
+    [matTooltip]="isOversized() ? 'The file is too large for online editing.' : null"
+  ></app-bd-panel-button>
+</div>

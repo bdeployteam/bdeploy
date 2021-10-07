@@ -22,6 +22,7 @@ import { NodeStatePanelComponent } from './components/dashboard/server-node/stat
 import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryComponent } from './components/history/history.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { DataEditComponent } from './components/data-files/data-edit/data-edit.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     HistoryComponent,
     ConfigNodeComponent,
     DataFilesComponent,
+    DataEditComponent,
   ],
   exports: [
     // for panels.

@@ -12,8 +12,9 @@ import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { DataFilesService } from '../../services/data-files.service';
 import { InstancesService } from '../../services/instances.service';
+import { DataEditComponent } from './data-edit/data-edit.component';
 
-interface FileListEntry {
+export interface FileListEntry {
   directory: RemoteDirectory;
   entry: RemoteDirectoryEntry;
 }
@@ -53,7 +54,7 @@ export class DataFilesComponent implements OnInit {
     data: (r) => 'Delete File',
     action: (r) => this.doDelete(r),
     icon: (r) => 'delete',
-    width: '40px',
+    width: '50px',
   };
 
   private readonly colDownload: BdDataColumn<FileListEntry> = {
@@ -62,13 +63,21 @@ export class DataFilesComponent implements OnInit {
     data: (r) => 'Download File',
     action: (r) => this.doDownload(r),
     icon: (r) => 'cloud_download',
-    width: '40px',
+    width: '50px',
+  };
+
+  private readonly colEdit: BdDataColumn<FileListEntry> = {
+    id: 'edit',
+    name: 'Edit',
+    data: (r) => 'Edit File',
+    component: DataEditComponent,
+    width: '50px',
   };
 
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ records$ = new BehaviorSubject<FileListEntry[]>(null);
   /* template */ noactive$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDelete, this.colDownload];
+  /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDelete, this.colEdit, this.colDownload];
   /* template */ grouping: BdDataGrouping<FileListEntry>[] = [{ definition: { group: (r) => r.directory.minion, name: 'Node Name' }, selected: [] }];
   /* template */ getRecordRoute = (row: FileListEntry) => {
     return ['', { outlets: { panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path] } }];
