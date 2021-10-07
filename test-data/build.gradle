@@ -426,6 +426,7 @@ void setupBinServerTasks(String version) {
             println "waiting for migration to proceed: " + System.currentTimeMillis();
             def ok = false;
             def rqFound = false;
+            def search = "Started Version " + project.version.replaceAll('SNAPSHOT', rootProject.buildDate)
             for(int i = 0; i < 1000; ++i) {
                 String check = file("${buildDir}/out_${key}.txt").text
 
@@ -443,7 +444,6 @@ void setupBinServerTasks(String version) {
                 }
 
                 if(rqFound) {
-                    def search = "Started Version " + project.version.replaceAll('SNAPSHOT', rootProject.buildDate)
                     def match = (check =~ search)
                     if(match.find()) {
                         println "Server successfully restarted after update"
@@ -458,7 +458,7 @@ void setupBinServerTasks(String version) {
             if(!ok) {
                 println "Could not await update: " + System.currentTimeMillis();
                 String check = file("${buildDir}/out_${key}.txt").text
-                throw new RuntimeException("Upgrade to current version failed. Output: " + check);
+                throw new RuntimeException("Upgrade to current version failed, could not find '" + search + "'. Output: " + check);
             }
         }
     }
