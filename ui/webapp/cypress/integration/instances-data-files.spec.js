@@ -172,7 +172,7 @@ describe('Instance Data Files Tests', () => {
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.typeInMonacoEditor('This is a test');
-      cy.pressToolbarButton('APPLY');
+      cy.pressToolbarButton('SAVE');
     });
 
     cy.waitUntilContentLoaded();

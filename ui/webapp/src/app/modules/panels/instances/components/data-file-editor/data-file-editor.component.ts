@@ -18,6 +18,7 @@ export class DataFileEditorComponent implements OnInit {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
   /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
+  /* template */ binary$ = new BehaviorSubject<boolean>(false);
   /* template */ content = '';
   /* template */ originalContent = '';
 
@@ -49,6 +50,7 @@ export class DataFileEditorComponent implements OnInit {
               .getContentChunk(dir, f, 0, 0) // no limit, load all
               .pipe(finalize(() => this.loading$.next(false)))
               .subscribe((chunk) => {
+                this.binary$.next(chunk.binary);
                 this.content = chunk?.content;
                 this.originalContent = chunk?.content;
               });

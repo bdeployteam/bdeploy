@@ -176,7 +176,7 @@ export class BHiveBrowserComponent implements OnInit {
       path.push(r.id);
     } else {
       // limit for inline viewing of files.
-      if (r.size <= 4096) {
+      if (r.size <= 1024 * 1024 * 1024) {
         this.hives.download(this.bhive$.value, r.id).subscribe((data) => {
           this.showPreviewIfText(data, r.name);
         });
