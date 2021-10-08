@@ -57,7 +57,6 @@ import { BdDialogContentComponent } from './components/bd-dialog-content/bd-dial
 import { BdDialogMessageComponent } from './components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
-import { BdDynamicComponent, DYNAMIC_BASE_MODULES as DYNAMIC_BASE_MODULES } from './components/bd-dynamic/bd-dynamic.component';
 import { BdEditorDiffComponent } from './components/bd-editor-diff/bd-editor-diff.component';
 import { BdEditorComponent } from './components/bd-editor/bd-editor.component';
 import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.component';
@@ -138,7 +137,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFormToggleComponent,
     BdFormSelectComponent,
     BdDataComponentCellComponent,
-    BdDynamicComponent,
     BdFileDropComponent,
     BdFileUploadComponent,
     BdFileUploadRawComponent,
@@ -170,7 +168,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     /* make sure that ConfigService and HistoryService are initialize always on startup */
     { provide: APP_INITIALIZER, useFactory: loadAppConfig, deps: [ConfigService], multi: true },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
-    { provide: DYNAMIC_BASE_MODULES, useValue: [CoreModule] },
   ],
   imports: [
     CommonModule,
@@ -235,7 +232,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     UserAvatarComponent,
     VersionPipe,
     BdPopupDirective,
-    BdDynamicComponent,
     BdButtonComponent,
     BdDataTableComponent,
     BdDataGridComponent,

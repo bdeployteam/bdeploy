@@ -18,7 +18,7 @@
       <ng-container *ngIf="msg.template">
         <ng-container *ngTemplateOutlet="msg.template"></ng-container>
       </ng-container>
-      <app-bd-dynamic *ngIf="!msg.template" [html]="msg.message"></app-bd-dynamic>
+      <div *ngIf="!msg.template" [innerHtml]="msg.message"></div>
       <ng-container *ngIf="!!msg.confirmation">
         <app-bd-form-input
           name="confirm"

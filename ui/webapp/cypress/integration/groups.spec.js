@@ -209,14 +209,14 @@ describe('Groups Tests', () => {
       cy.get(`app-bd-button[text="Repair BHive Problems"]`).click();
 
       cy.get('app-bd-dialog-message').within(() => {
-        cy.contains('app-bd-dynamic', 'No damaged objects were found.').should('exist');
+        cy.contains('No damaged objects were found.').should('exist');
         cy.contains('button', 'OK').should('exist').and('be.enabled').click();
       });
 
       cy.get(`app-bd-button[text="Prune unused data in BHive"]`).click();
 
       cy.get('app-bd-dialog-message').within(() => {
-        cy.contains('app-bd-dynamic', 'Prune').should('exist');
+        cy.contains('Prune').should('exist');
         cy.contains('button', 'OK').should('exist').and('be.enabled').click();
       });
 
