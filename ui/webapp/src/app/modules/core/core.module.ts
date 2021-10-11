@@ -90,6 +90,7 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
 import { httpInterceptorProviders } from './interceptors';
+import { VersionShortPipe } from './pipes/version-short.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
@@ -110,6 +111,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     LoginComponent,
     UserAvatarComponent,
     VersionPipe,
+    VersionShortPipe,
     MainNavTopComponent,
     MainNavFlyinComponent,
     MainNavMenuComponent,
@@ -231,6 +233,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     LoginComponent,
     UserAvatarComponent,
     VersionPipe,
+    VersionShortPipe,
     BdPopupDirective,
     BdButtonComponent,
     BdDataTableComponent,

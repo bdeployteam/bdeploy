@@ -21,7 +21,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
     trigger('menuOpenClose', [
       state('closed', style({ width: '64px' })),
       state('open', style({ width: '220px' })),
-      transition('open => closed', [animate('0.2s ease', style({ width: '64px' }))]),
+      transition('open => closed', [group([animate('0.2s ease', style({ width: '64px' })), query('@*', [animateChild()])])]),
       transition('closed => open', [group([animate('0.2s ease', style({ width: '220px' })), query('@*', [animateChild()])])]),
     ]),
     trigger('headerOpenClose', [

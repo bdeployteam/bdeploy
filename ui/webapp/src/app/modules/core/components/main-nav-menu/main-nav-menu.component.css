@@ -8,6 +8,9 @@
 .local-sizing {
   height: 100%;
   padding: 14px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .local-footer {
@@ -19,17 +22,46 @@
   padding-bottom: 3px;
 }
 
-.local-server-type-wrapper {
-  transform: rotate(-90deg);
+.local-server-type-wrapper-expanded {
+  transform: rotate(0deg);
+  padding: 10px 0px;
+}
+
+.local-short-version {
+  font-size: smaller;
+  text-align: center;
+
+  padding-top: 5px;
+}
+
+.local-divider {
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .local-server-type {
   position: relative;
-  left: 20px; /* attention: rotated coordinates! */
   color: var(--bd-text-secondary);
 }
 
 .local-action-hidden {
   /* required for animations to work properly */
   display: none;
+}
+
+.local-activity-popup-sizing {
+  max-width: calc(100% - 10px);
+  width: 700px;
+
+  position: relative;
+}
+
+.local-activity-collapsed {
+  top: 5px;
+  left: 5px;
+}
+
+.local-activity-expanded {
+  top: -5px;
+  left: -30px;
 }

@@ -15,20 +15,4 @@
       <app-main-nav-flyin fxFlex="0 0 auto" *ngIf="isAuth$ | async"></app-main-nav-flyin>
     </div>
   </div>
-  <div class="local-watermark">
-    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="center center">
-      <span>{{ cfg.config.version | formatVersion }}</span>
-      <div [style.width.px]="96" fxLayout="row" fxLayoutAlign="center center">
-        <mat-progress-bar
-          *ngIf="!!(activities.activities$ | async)?.length"
-          matTooltip="Click to view background operations"
-          [appBdPopup]="activitiesPopup"
-          appBdPopupPosition="above-left"
-          [style.cursor]="'pointer'"
-          [style.width.px]="54"
-          mode="indeterminate"
-        ></mat-progress-bar>
-      </div>
-    </div>
-  </div>
 </div>

@@ -1,6 +1,19 @@
+<ng-template #activitiesPopup>
+  <mat-card
+    [style.padding.px]="10"
+    [class.local-activity-collapsed]="!expanded"
+    [class.local-activity-expanded]="expanded"
+    class="mat-typography local-activity-popup-sizing"
+    fxLayout="column"
+    fxLayoutGap="5px"
+  >
+    <app-bd-activities></app-bd-activities>
+  </mat-card>
+</ng-template>
+
 <div class="bd-rect-card local-sizing" fxLayout="column" fxLayoutGap="5px">
   <!-- Logo & Expand Button -->
-  <div fxLayout="row" [style.height.px]="100" [style.padding-bottom.px]="14" fxLayoutAlign="center center">
+  <div fxLayout="row" [style.min-height.px]="100" [style.height.px]="100" [style.padding-bottom.px]="14" fxLayoutAlign="center center">
     <div class="local-hamburger-button">
       <div class="hamburger hamburger--arrow" [ngClass]="{ 'is-active': expanded }" (click)="expanded = !expanded">
         <span class="hamburger-box">
@@ -29,7 +42,7 @@
     [route]="['/repositories/browser']"
   ></app-main-nav-button>
 
-  <mat-divider [style.position]="'relative'"></mat-divider>
+  <mat-divider class="local-divider"></mat-divider>
 
   <app-main-nav-button
     *ngIf="authService.isGlobalAdmin()"
@@ -92,13 +105,14 @@
   <!-- Instance -->
 
   <mat-divider
+    class="local-divider"
     *ngIf="areas.groupContext$ | async"
-    [style.position]="'relative'"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
     [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
   ></mat-divider>
 
   <app-main-nav-button
+    [style.padding-top.px]="5"
     [visible]="!!(areas.instanceContext$ | async)"
     icon="dashboard"
     text="Instance Dashboard"
@@ -135,31 +149,57 @@
 
   <!-- Footer -->
   <div fxFlex="1 0 auto"></div>
-  <div class="local-server-type-wrapper">
-    <div *ngIf="!expanded" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.5s' } }">
-      <span class="local-server-type">{{ cfgService.config.mode }}</span>
+
+  <div class="local-server-type-wrapper-expanded" *ngIf="expanded">
+    <span class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">{{ cfgService.config.mode }}</span>
+  </div>
+
+  <div
+    *ngIf="expanded"
+    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+    fxLayout="row"
+    fxLayoutAlign="start center"
+    [appBdPopup]="activitiesPopup"
+    appBdPopupPosition="right-above"
+    [style.padding-bottom.px]="10"
+    [class.bd-disabled-text]="!(activities.activities$ | async)?.length"
+    [class.bd-accent-text]="!!(activities.activities$ | async)?.length"
+    [style.cursor]="'pointer'"
+  >
+    <mat-spinner
+      class="bd-inherited-spinner"
+      [mode]="!!(activities.activities$ | async)?.length ? 'indeterminate' : 'determinate'"
+      [value]="!(activities.activities$ | async)?.length ? 100 : 0"
+      [diameter]="24"
+    ></mat-spinner>
+    <div *ngIf="!!(activities.activities$ | async)?.length" [style.padding-left.px]="10" class="bd-text">
+      {{ (activities.activities$ | async)?.length }} Activities.
+    </div>
+    <div *ngIf="!(activities.activities$ | async)?.length" [style.padding-left.px]="10" class="bd-disabled-text">No Activities.</div>
+  </div>
+
+  <div
+    *ngIf="!expanded && !!(activities.activities$ | async)?.length"
+    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+    fxLayout="row"
+    [style.padding-left.px]="6"
+    [appBdPopup]="activitiesPopup"
+    appBdPopupPosition="right-above"
+    class="bd-accent-text"
+    [style.cursor]="'pointer'"
+  >
+    <mat-spinner class="bd-inherited-spinner" [diameter]="24"></mat-spinner>
+  </div>
+
+  <div *ngIf="!expanded" class="local-short-version">
+    <div [style.width.px]="36" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
+      {{ cfgService.config.version | formatVersionShort }}
     </div>
   </div>
   <div fxLayout="column" fxLayoutGap="5px" *ngIf="expanded" class="local-footer" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
-    <app-bd-button
-      *ngIf="authService.isGlobalAdmin()"
-      fxFlexAlign="center center"
-      icon="settings"
-      text="Administration"
-      color="toolbar"
-      [collapsed]="!expanded"
-      [routerLink]="['/admin/']"
-    ></app-bd-button>
-    <a href="/assets/doc/index.html" target="_blank" class="bd-button-link">
-      <app-bd-button fxFlexAlign="center center" icon="help_outline" text="Help" color="toolbar" [collapsed]="!expanded"></app-bd-button>
-    </a>
-    <mat-divider class="local-footer-divider"></mat-divider>
     <div gdColumns="auto auto" gdGap="5px">
       <span>Version:</span>
       <span>{{ cfgService?.config?.version | formatVersion }}</span>
-
-      <span>Mode:</span>
-      <span>{{ cfgService?.config?.mode }}</span>
 
       <span>Log Level:</span>
       <mat-select [value]="getLogLevel()" (selectionChange)="setLogLevel($event)">
@@ -171,4 +211,18 @@
       </mat-select>
     </div>
   </div>
+  <mat-divider class="local-divider"></mat-divider>
+  <app-bd-button
+    [style.padding-top.px]="5"
+    *ngIf="authService.isGlobalAdmin()"
+    fxFlexAlign="center center"
+    icon="settings"
+    text="Administration"
+    color="toolbar"
+    [collapsed]="!expanded"
+    [routerLink]="['/admin/']"
+  ></app-bd-button>
+  <a href="/assets/doc/index.html" target="_blank" class="bd-button-link">
+    <app-bd-button fxFlexAlign="center center" icon="help_outline" text="Help" color="toolbar" [collapsed]="!expanded"></app-bd-button>
+  </a>
 </div>

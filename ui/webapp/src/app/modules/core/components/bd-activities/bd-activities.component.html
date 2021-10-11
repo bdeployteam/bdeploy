@@ -10,7 +10,7 @@
     >
       <div fxLayout="column" fxLayoutGap="5px">
         <ng-container *ngIf="squashed.current.snapshot.max <= 0">
-          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
           <div fxLayout="row">
             <div fxFlex="1 0 auto"></div>
             <span
@@ -21,7 +21,7 @@
         </ng-container>
 
         <ng-container *ngIf="squashed.current.snapshot.max > 0">
-          <mat-progress-bar mode="determinate" [value]="calculatePercentDone(squashed)"></mat-progress-bar>
+          <mat-progress-bar mode="determinate" color="accent" [value]="calculatePercentDone(squashed)"></mat-progress-bar>
           <div fxLayout="row">
             <span>{{ squashed.current.snapshot.current }} of {{ squashed.current.snapshot.max }}</span>
             <div fxFlex="1 0 auto"></div>

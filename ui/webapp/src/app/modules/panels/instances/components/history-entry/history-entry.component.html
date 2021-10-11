@@ -102,21 +102,20 @@
           ></app-bd-button>
           <app-bd-button
             [collapsed]="false"
-            text="Uninstall"
-            icon="layers_clear"
-            color="primary"
-            [disabled]="(uninstalling$ | async) || !isInstalled() || isActive() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
-            (click)="doUninstall()"
-            [loadingWhen$]="uninstalling$"
-          ></app-bd-button>
-          <app-bd-button
-            [collapsed]="false"
             text="Activate"
             icon="star"
-            color="accent"
+            color="primary"
             [disabled]="(activating$ | async) || !isInstalled() || isActive() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
             (click)="doActivate()"
             [loadingWhen$]="activating$"
+          ></app-bd-button>
+          <app-bd-button
+            [collapsed]="false"
+            text="Uninstall"
+            icon="layers_clear"
+            [disabled]="(uninstalling$ | async) || !isInstalled() || isActive() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
+            (click)="doUninstall()"
+            [loadingWhen$]="uninstalling$"
           ></app-bd-button>
         </ng-container>
       </ng-container>

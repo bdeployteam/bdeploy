@@ -6,7 +6,7 @@ import { convert2String } from '../utils/version.utils';
   name: 'formatVersion',
 })
 export class VersionPipe implements PipeTransform {
-  transform(value: Version): unknown {
+  transform(value: Version): string {
     return convert2String(value);
   }
 }

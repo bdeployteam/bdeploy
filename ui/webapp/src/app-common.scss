@@ -126,6 +126,14 @@
     color: var(--bd-accent);
   }
 
+  .bd-primary-text {
+    color: var(--bd-primary);
+  }
+
+  .bd-text {
+    color: var(--bd-text);
+  }
+
   .bd-status-border-added {
     border-left: solid 4px var(--bd-text-success);
   }
