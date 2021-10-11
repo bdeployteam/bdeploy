@@ -15,7 +15,12 @@
   width: 64px;
 }
 
-.local-content {
+.local-content-collapsed {
+  padding: 20px;
+  min-width: 0;
+}
+
+.local-content-expanded {
   padding: 10px;
   min-width: 0;
 }

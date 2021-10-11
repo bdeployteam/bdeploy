@@ -5,12 +5,23 @@
   fxLayout="row"
   fxFlex="1 0 auto"
 >
-  <div class="bd-glow-bg local-icon-area" fxFlex="0 0 auto" fxLayout="column" fxLayoutAlign="center center">
+  <div class="bd-glow-bg local-icon-area" *ngIf="!collapsed" fxFlex="0 0 auto" fxLayout="column" fxLayoutAlign="center center">
     <mat-icon *ngIf="!!icon" [ngClass]="warning ? 'bd-warning-text' : []">{{ icon }}</mat-icon>
     <mat-icon *ngIf="!!svgIcon" [ngClass]="warning ? 'bd-warning-text' : []" [svgIcon]="svgIcon"></mat-icon>
   </div>
-  <div fxFlex="2 0 0" fxLayout="column" fxLayoutGap="5px" fxLayoutAlign="center stretch" class="local-content">
+  <div
+    fxFlex="2 0 0"
+    fxLayout="column"
+    fxLayoutGap="10px"
+    fxLayoutAlign="center stretch"
+    [class.local-content-collapsed]="collapsed"
+    [class.local-content-expanded]="!collapsed"
+  >
     <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
+      <ng-container *ngIf="collapsed">
+        <mat-icon *ngIf="!!icon" [ngClass]="warning ? 'bd-warning-text' : []">{{ icon }}</mat-icon>
+        <mat-icon *ngIf="!!svgIcon" [ngClass]="warning ? 'bd-warning-text' : []" [svgIcon]="svgIcon"></mat-icon>
+      </ng-container>
       <div class="bd-text-ellipsis">
         <strong>{{ header }}</strong>
       </div>

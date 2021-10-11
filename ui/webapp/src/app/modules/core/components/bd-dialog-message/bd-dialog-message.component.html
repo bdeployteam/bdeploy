@@ -6,6 +6,7 @@
   [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
 >
   <app-bd-notification-card
+    [collapsed]="true"
     class="mat-typography mat-elevation-z3"
     [dismissable]="msg.dismissResult !== undefined"
     (dismiss)="complete(msg.dismissResult)"

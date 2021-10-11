@@ -1,6 +1,7 @@
 <div fxLayout="column" fxLayoutGap="5px">
   <div *ngFor="let act of activities.activities$ | async; trackBy: doTrack">
     <app-bd-notification-card
+      [collapsed]="true"
       *ngIf="squashActivity(act) as squashed"
       icon="hourglass_bottom"
       [dismissable]="!squashed?.current?.snapshot?.cancel"
