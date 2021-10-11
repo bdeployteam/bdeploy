@@ -40,7 +40,7 @@ describe('Instance Settings Tests', () => {
       cy.fillFormInput('name', `${instanceName} (*)`);
       cy.fillFormInput('description', `${instanceName} (*)`);
       cy.fillFormSelect('purpose', 'DEVELOPMENT');
-      cy.get('button[data-cy="APPLY"]').click();
+      cy.get('button[data-cy="Apply"]').click();
     });
 
     cy.inMainNavContent(() => {
@@ -51,7 +51,7 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavFlyin('app-local-changes', () => {
       cy.get('button[data-cy^="Discard"]').click();
       cy.contains('app-bd-notification-card', 'Discard').within(() => {
-        cy.get('button[data-cy="YES"]').click();
+        cy.get('button[data-cy="Yes"]').click();
       });
 
       cy.get('button[data-cy="Close"]').click();
@@ -93,7 +93,7 @@ describe('Instance Settings Tests', () => {
       });
 
       cy.contains('app-bd-notification-card', 'Delete dummy2.cfg').within(() => {
-        cy.get('button[data-cy="YES"]').click();
+        cy.get('button[data-cy="Yes"]').click();
       });
 
       cy.waitUntilContentLoaded();
@@ -107,7 +107,7 @@ describe('Instance Settings Tests', () => {
 
       cy.contains('app-bd-notification-card', 'Rename binary.cfg').within(() => {
         cy.fillFormInput('newName', 'binary2.cfg');
-        cy.get('button[data-cy="CONFIRM"]').should('be.enabled').click();
+        cy.get('button[data-cy="Confirm"]').should('be.enabled').click();
       });
 
       cy.pressToolbarButton('Back to Overview');
@@ -156,7 +156,7 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavFlyin('app-editor', () => {
       cy.monacoEditor().should('contain.value', 'dummy configuration');
       cy.typeInMonacoEditor('Configuration File Content', true);
-      cy.pressToolbarButton('APPLY');
+      cy.pressToolbarButton('Apply');
     });
 
     cy.inMainNavFlyin('app-config-files', () => {
@@ -178,7 +178,7 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavFlyin('app-editor', () => {
       cy.monacoEditor().should('exist');
       cy.typeInMonacoEditor('{{}{enter}"json" : "content"');
-      cy.pressToolbarButton('APPLY');
+      cy.pressToolbarButton('Apply');
     });
 
     cy.inMainNavFlyin('app-config-files', () => {
@@ -221,7 +221,7 @@ describe('Instance Settings Tests', () => {
         cy.contains('This is a banner text').should('exist');
       });
 
-      cy.get('button[data-cy="APPLY"]').should('be.enabled').click();
+      cy.get('button[data-cy="Apply"]').should('be.enabled').click();
     });
 
     cy.inMainNavContent(() => {
@@ -270,14 +270,6 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-ports', () => {
-      // TODO: there is not port test data available to assert on - we're just shifting
-      // to go through the code path once.
-      cy.get('button[data-cy^="Shift"]').should('be.enabled').click();
-      cy.contains('app-bd-notification-card', 'Shift ports').within(() => {
-        cy.fillFormInput('amount', '10');
-        cy.get('button[data-cy="CONFIRM"]').click();
-      });
-
       cy.get('button[data-cy^="Export"]').downloadByLinkClick('ports.csv');
       cy.readFile(Cypress.config('downloadsFolder') + '/ports.csv').then((content) => {
         expect(content).to.contain('Application,Name,Description,Port');
@@ -311,13 +303,13 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-nodes', () => {
-      cy.get('button[data-cy="APPLY"]').should('be.disabled');
+      cy.get('button[data-cy="Apply"]').should('be.disabled');
       cy.contains('tr', 'master')
         .should('exist')
         .within(() => {
           cy.get('input[type="checkbox"]').uncheck({ force: true });
         });
-      cy.get('button[data-cy="APPLY"]').should('be.enabled').click();
+      cy.get('button[data-cy="Apply"]').should('be.enabled').click();
     });
 
     cy.inMainNavContent(() => {
@@ -329,13 +321,13 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-nodes', () => {
-      cy.get('button[data-cy="APPLY"]').should('be.disabled');
+      cy.get('button[data-cy="Apply"]').should('be.disabled');
       cy.contains('tr', 'master')
         .should('exist')
         .within(() => {
           cy.get('input[type="checkbox"]').check({ force: true });
         });
-      cy.get('button[data-cy="APPLY"]').should('be.enabled').click();
+      cy.get('button[data-cy="Apply"]').should('be.enabled').click();
     });
 
     cy.inMainNavContent(() => {
@@ -365,7 +357,7 @@ describe('Instance Settings Tests', () => {
       cy.contains('app-bd-notification-card', 'Add Definition').within(() => {
         cy.fillFormInput('id', 'DemoAttr');
         cy.fillFormInput('description', 'Demo Attribute');
-        cy.get('button[data-cy="APPLY"]').click();
+        cy.get('button[data-cy="Apply"]').click();
       });
 
       cy.contains('tr', 'DemoAttr').should('exist');
@@ -389,7 +381,7 @@ describe('Instance Settings Tests', () => {
       cy.contains('app-bd-notification-card', 'Add/Edit').within(() => {
         cy.fillFormSelect('id', 'Demo Attribute');
         cy.fillFormInput('value', 'Instance Value');
-        cy.get('button[data-cy="APPLY"]').click();
+        cy.get('button[data-cy="Apply"]').click();
       });
 
       cy.contains('tr', 'Instance Value').should('exist');

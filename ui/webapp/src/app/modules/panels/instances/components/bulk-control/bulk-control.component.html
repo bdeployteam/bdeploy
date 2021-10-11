@@ -20,7 +20,6 @@
         icon="play_arrow"
         text="Start Instance"
         (click)="doStart(instance)"
-        color="primary"
         [loadingWhen$]="starting$"
         [disabled]="starting$ | async"
       ></app-bd-button>

@@ -19,7 +19,7 @@ describe('Admin UI Tests (Settings)', () => {
         cy.get('input[type="checkbox"]').should('be.checked');
       });
 
-      cy.pressToolbarButton('SAVE');
+      cy.pressToolbarButton('Save');
 
       cy.contains('app-bd-form-toggle', 'Local User Login').within((toggle) => {
         cy.get('input[type="checkbox"]').should('not.be.checked');
@@ -27,7 +27,7 @@ describe('Admin UI Tests (Settings)', () => {
         cy.get('input[type="checkbox"]').should('be.checked');
       });
 
-      cy.pressToolbarButton('DISCARD');
+      cy.pressToolbarButton('Discard');
 
       cy.contains('app-bd-form-toggle', 'Local User Login').within((toggle) => {
         cy.get('input[type="checkbox"]').should('not.be.checked');
@@ -40,7 +40,7 @@ describe('Admin UI Tests (Settings)', () => {
         cy.get('input[type="checkbox"]').should('not.be.checked');
       });
 
-      cy.pressToolbarButton('SAVE');
+      cy.pressToolbarButton('Save');
     });
   });
 
@@ -66,7 +66,7 @@ describe('Admin UI Tests (Settings)', () => {
           expect(JSON.stringify(intercept.response.body)).to.contain('SUCCESS');
         });
 
-        cy.get('button[data-cy="CLOSE"]').click();
+        cy.get('button[data-cy="Close"]').click();
       });
     });
   });
@@ -103,7 +103,7 @@ describe('Admin UI Tests (Settings)', () => {
           expect(intercept.response.body).to.contain('connection failed');
         });
 
-        cy.get('button[data-cy="CLOSE"]').click();
+        cy.get('button[data-cy="Close"]').click();
       });
 
       cy.contains('tr', 'Test Server')
@@ -132,7 +132,7 @@ describe('Admin UI Tests (Settings)', () => {
       });
 
       cy.contains('tr', 'Attr1').should('exist');
-      cy.pressToolbarButton('SAVE');
+      cy.pressToolbarButton('Save');
     });
 
     cy.createGroup('Attr-Test-1');
@@ -152,7 +152,7 @@ describe('Admin UI Tests (Settings)', () => {
         cy.fillFormSelect('attribute', 'Test Attribute');
         cy.fillFormInput('value', 'Test Value');
 
-        cy.get('button[data-cy="APPLY"]').should('be.enabled').click();
+        cy.get('button[data-cy="Apply"]').should('be.enabled').click();
       });
     });
 
@@ -191,7 +191,7 @@ describe('Admin UI Tests (Settings)', () => {
         cy.get('button[data-cy^="Remove"]').click();
       });
       cy.contains('tr', 'Attr1').should('not.exist');
-      cy.pressToolbarButton('SAVE');
+      cy.pressToolbarButton('Save');
     });
 
     cy.deleteGroup('Attr-Test-1');
@@ -249,7 +249,7 @@ describe('Admin UI Tests (Settings)', () => {
         });
 
       cy.contains('app-bd-notification-card', 'Delete').within(() => {
-        cy.get('button[data-cy=YES]').click();
+        cy.get('button[data-cy=Yes]').click();
       });
 
       cy.contains('tr', 'bdeploy-demo-plugin').should('not.exist');

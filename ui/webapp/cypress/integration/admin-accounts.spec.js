@@ -183,7 +183,7 @@ describe('Admin UI Tests (Accounts)', () => {
     });
 
     cy.contains('app-bd-notification-card', 'Delete User').within(() => {
-      cy.get('button[data-cy^=YES]').click();
+      cy.get('button[data-cy^=Yes]').click();
     });
   });
 });

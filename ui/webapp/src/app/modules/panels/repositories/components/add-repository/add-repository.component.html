@@ -7,7 +7,7 @@
         <app-bd-form-input label="Name" name="name" [(ngModel)]="repository.name" required appIdentifier></app-bd-form-input>
         <app-bd-form-input label="Description" name="description" [(ngModel)]="repository.description"></app-bd-form-input>
 
-        <app-bd-button color="toolbar" [collapsed]="false" text="SAVE" [disabled]="repositoryForm.invalid"></app-bd-button>
+        <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="repositoryForm.invalid"></app-bd-button>
       </div>
     </form>
   </app-bd-dialog-content>

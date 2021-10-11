@@ -26,8 +26,8 @@
       ></app-bd-panel-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
-    <app-bd-button text="DISCARD" [collapsed]="false" [disabled]="!settings.isDirty()" (click)="settings.discard()"></app-bd-button>
-    <app-bd-button text="SAVE" [collapsed]="false" color="primary" [disabled]="!settings.isDirty()" (click)="doSave().subscribe()"></app-bd-button>
+    <app-bd-button text="Discard" [collapsed]="false" [disabled]="!settings.isDirty()" (click)="settings.discard()"></app-bd-button>
+    <app-bd-button text="Save" [collapsed]="false" color="primary" icon="save" [disabled]="!settings.isDirty()" (click)="doSave().subscribe()"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutAlign="start center">

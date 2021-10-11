@@ -27,7 +27,6 @@ import { EditConfigComponent } from './components/instance-settings/edit-config/
 import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
-import { MaintenanceComponent } from './components/instance-settings/maintenance/maintenance.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
 import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
@@ -48,7 +47,6 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'changes/diff', component: LocalDiffComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
   { path: 'settings', component: InstanceSettingsComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/config', component: EditConfigComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/attributes', component: AttributesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/nodes', component: NodesComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/templates', component: InstanceTemplatesComponent, canActivate: [ScopedWriteGuard] },

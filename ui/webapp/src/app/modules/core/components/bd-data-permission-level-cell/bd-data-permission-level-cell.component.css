@@ -6,21 +6,21 @@
 }
 
 .local-CLIENT-chip {
-  background-color: var(--bd-text-success);
-  color: var(--bd-primary-contrast);
+  background-color: #8a007c;
+  color: white;
 }
 
 .local-READ-chip {
-  background-color: var(--bd-bg-grey);
-  color: var(--bd-primary-contrast);
+  background-color: #303f9f;
+  color: white;
 }
 
 .local-WRITE-chip {
-  background-color: var(--bd-bg-grey);
-  color: var(--bd-primary-contrast);
+  background-color: #2f729e;
+  color: white;
 }
 
 .local-ADMIN-chip {
-  background-color: var(--bd-primary);
-  color: var(--bd-primary-contrast);
+  background-color: #c2185b;
+  color: white;
 }

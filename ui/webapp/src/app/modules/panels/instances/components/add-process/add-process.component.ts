@@ -242,7 +242,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         validation: () => this.validateHasAllVariables(row.template, this.response),
         actions: [
           { name: 'CANCEL', confirm: false, result: null },
-          { name: 'CONFIRM', confirm: true, result: this.response },
+          { name: 'Confirm', confirm: true, result: this.response },
         ],
       });
     }

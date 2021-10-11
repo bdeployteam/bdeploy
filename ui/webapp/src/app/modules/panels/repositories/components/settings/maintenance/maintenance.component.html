@@ -11,7 +11,6 @@
         (click)="onDelete(repository)"
         [disabled]="!auth.isGlobalAdmin() || (deleting$ | async)"
         [loadingWhen$]="deleting$"
-        color="toolbar"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

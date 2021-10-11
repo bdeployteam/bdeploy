@@ -43,7 +43,7 @@ describe('Admin UI Tests (BHive)', () => {
 
       cy.contains('tr', 'minion.json').click();
       cy.contains('app-bd-notification-card', 'Preview').within(() => {
-        cy.get('button[data-cy^="CLOSE"]').click();
+        cy.get('button[data-cy^="Close"]').click();
       });
 
       cy.pressToolbarButton('Back to Overview');
@@ -53,7 +53,7 @@ describe('Admin UI Tests (BHive)', () => {
       cy.intercept({ method: 'GET', url: '/api/hive/fsck?hive=default&fix=true' }).as('fsck');
       cy.get('button[data-cy^="Repair"]').click();
       cy.contains('app-bd-notification-card', 'Repair').within(() => {
-        cy.get('button[data-cy^="YES"]').click();
+        cy.get('button[data-cy^="Yes"]').click();
       });
       cy.wait('@fsck');
 

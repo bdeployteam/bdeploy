@@ -13,7 +13,7 @@ Cypress.Commands.add('createInstance', function (groupName, instanceName, produc
   });
 
   cy.inMainNavFlyin('app-add-instance', () => {
-    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+    cy.contains('button', 'Save').should('exist').and('be.disabled');
 
     cy.fillFormInput('name', instanceName);
     cy.fillFormInput('description', `Description of ${instanceName}`);
@@ -25,7 +25,7 @@ Cypress.Commands.add('createInstance', function (groupName, instanceName, produc
       cy.fillFormSelect('server', 'localhost');
     }
 
-    cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+    cy.contains('button', 'Save').should('exist').and('be.enabled').click();
   });
   cy.checkMainNavFlyinClosed();
 
@@ -46,13 +46,10 @@ Cypress.Commands.add('deleteInstance', function (groupName, instanceName, mode =
   });
 
   cy.inMainNavFlyin('app-instance-settings', () => {
-    cy.get(`app-bd-panel-button[text="Maintenance"]`).click();
-
-    cy.get('app-bd-dialog-toolbar[header="Instance Maintenance"]').should('exist');
     cy.get(`app-bd-button[text="Delete Instance"]`).click();
 
     cy.contains('app-bd-dialog-message', `Delete ${instanceName}`).within(() => {
-      cy.contains('button', 'YES').should('exist').and('be.enabled').click();
+      cy.contains('button', 'Yes').should('exist').and('be.enabled').click();
     });
   });
   cy.checkMainNavFlyinClosed();

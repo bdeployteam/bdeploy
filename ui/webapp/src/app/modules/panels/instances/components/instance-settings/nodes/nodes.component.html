@@ -13,9 +13,10 @@
         [checkChangeAllowed]="checkChangeAllowed"
       ></app-bd-data-table>
       <app-bd-button
-        text="APPLY"
+        text="Apply"
+        icon="done"
         [collapsed]="false"
-        color="toolbar"
+        color="primary"
         [disabled]="!isDirty() || !servers.isSynchronized(edit.current$.value?.managedServer)"
         (click)="onSave()"
       ></app-bd-button>

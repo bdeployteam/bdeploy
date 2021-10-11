@@ -26,9 +26,10 @@
 
         <app-bd-button
           type="submit"
-          text="APPLY"
+          text="Apply"
+          icon="done"
           [collapsed]="false"
-          color="toolbar"
+          color="primary"
           [disabled]="!edit.hasPendingChanges() || !servers.isSynchronized(edit.current$.value?.managedServer)"
         ></app-bd-button>
       </form>

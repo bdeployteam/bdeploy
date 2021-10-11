@@ -59,14 +59,14 @@ describe('Instance Settings Tests', () => {
         cy.fillFormSelect('Server Apps', 'Apply to master');
         cy.fillFormSelect('Client Apps', '(skip)');
 
-        cy.get('button[data-cy="CONFIRM"]').click();
+        cy.get('button[data-cy="Confirm"]').click();
       });
 
       cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
         cy.fillFormInput('Text Value', 'Test Text');
         cy.fillFormInput('Sleep Timeout', '5');
 
-        cy.get('button[data-cy="CONFIRM"]').click();
+        cy.get('button[data-cy="Confirm"]').click();
       });
     });
 
@@ -103,8 +103,8 @@ describe('Instance Settings Tests', () => {
       // intentionally not using apply, should prompt to save on leave
       cy.pressToolbarButton('Back to Overview');
 
-      cy.contains('app-bd-notification-card', 'Unsaved Changes').within(() => {
-        cy.get('button[data-cy="SAVE"]').click();
+      cy.contains('app-bd-notification-card', 'Save Changes').within(() => {
+        cy.get('button[data-cy="Save"]').click();
       });
     });
 
@@ -150,7 +150,7 @@ describe('Instance Settings Tests', () => {
 
       cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
         cy.fillFormInput('Sleep Timeout', '7');
-        cy.get('button[data-cy="CONFIRM"]').click();
+        cy.get('button[data-cy="Confirm"]').click();
       });
     });
 
@@ -243,7 +243,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavFlyin('app-edit-config', () => {
       cy.fillFormInput('description', 'Modified Description');
-      cy.get('button[data-cy="APPLY"]').click();
+      cy.get('button[data-cy="Apply"]').click();
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {

@@ -9,7 +9,7 @@
         <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
         <app-bd-form-input name="token" label="Authorization Token" [(ngModel)]="server.auth"></app-bd-form-input>
 
-        <app-bd-button text="SAVE" [collapsed]="false" color="toolbar" [disabled]="!isDirty() || form.invalid"></app-bd-button>
+        <app-bd-button text="Save" icon="save" [collapsed]="false" color="primary" [disabled]="!isDirty() || form.invalid"></app-bd-button>
       </form>
     </div>
   </app-bd-dialog-content>

@@ -10,7 +10,7 @@
         <app-bd-form-input [(ngModel)]="user.name" name="name" label="Username" [disabled]="true"></app-bd-form-input>
         <app-bd-form-input [(ngModel)]="user.fullName" name="fullName" label="Full Name"></app-bd-form-input>
         <app-bd-form-input [(ngModel)]="user.email" (ngModelChange)="updateMail()" name="email" label="E-Mail Address"></app-bd-form-input>
-        <app-bd-button color="toolbar" type="submit" text="SAVE" [disabled]="!isDirty() || editForm.invalid" [collapsed]="false"></app-bd-button>
+        <app-bd-button color="primary" type="submit" text="Save" icon="save" [disabled]="!isDirty() || editForm.invalid" [collapsed]="false"></app-bd-button>
       </form>
     </div>
   </app-bd-dialog-content>

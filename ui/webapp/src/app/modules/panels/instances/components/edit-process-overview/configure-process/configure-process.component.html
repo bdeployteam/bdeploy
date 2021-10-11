@@ -6,8 +6,9 @@
   >
     <div fxFlex="1 0 auto"></div>
     <app-bd-button
-      text="APPLY"
+      text="Apply"
       [collapsed]="false"
+      icon="done"
       color="primary"
       (click)="onSave()"
       [disabled]="!instanceEdit.hasPendingChanges() || isInvalid()"

@@ -22,7 +22,7 @@ describe('Admin UI Tests (Logging)', () => {
     });
 
     cy.inMainNavFlyin('app-log-config-editor', () => {
-      cy.get('button[data-cy^="APPLY"]').should('exist').and('be.disabled');
+      cy.get('button[data-cy^="Apply"]').should('exist').and('be.disabled');
       cy.wait('@config');
       cy.pressToolbarButton('Close');
     });

@@ -176,7 +176,7 @@ describe('Groups Tests', () => {
       cy.get('button[data-cy="Delete"]').should('be.enabled').click();
 
       cy.get('app-bd-notification-card').within(() => {
-        cy.get('button[data-cy="YES"]').should('exist').and('be.enabled').click();
+        cy.get('button[data-cy="Yes"]').should('exist').and('be.enabled').click();
       });
     });
     cy.checkMainNavFlyinClosed();

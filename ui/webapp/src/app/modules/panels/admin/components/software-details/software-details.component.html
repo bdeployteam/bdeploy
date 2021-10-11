@@ -31,7 +31,6 @@
         [disabled]="!(software$ | async)?.system?.length || (software$ | async)?.current || (installing$ | async)"
       ></app-bd-button>
       <app-bd-button
-        color="primary"
         icon="delete"
         text="Delete"
         [collapsed]="false"
