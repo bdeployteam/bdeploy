@@ -57,7 +57,6 @@
         [collapsed]="false"
         text="Delete"
         icon="delete"
-        color="toolbar"
         (click)="doDelete(prod)"
         [disabled]="!auth.isCurrentScopeAdmin() || (singleProduct.usedInLoading$ | async) || !!(singleProduct.getUsedIn() | async).length"
       ></app-bd-button>

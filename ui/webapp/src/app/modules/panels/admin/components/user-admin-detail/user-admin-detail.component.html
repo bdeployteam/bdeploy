@@ -79,14 +79,7 @@
         [matTooltip]="user.external ? 'Editing is only possible for local users.' : null"
       ></app-bd-button>
 
-      <app-bd-button
-        [disabled]="isCurrentUser(user)"
-        icon="delete"
-        text="Delete User"
-        color="primary"
-        [collapsed]="false"
-        (click)="onDelete(user)"
-      ></app-bd-button>
+      <app-bd-button [disabled]="isCurrentUser(user)" icon="delete" text="Delete User" [collapsed]="false" (click)="onDelete(user)"></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

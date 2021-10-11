@@ -13,14 +13,14 @@ Cypress.Commands.add('createGroup', function (groupName, mode = 'STANDALONE') {
   });
 
   cy.inMainNavFlyin('app-add-group', () => {
-    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+    cy.contains('button', 'Save').should('exist').and('be.disabled');
 
     cy.fillFormInput('name', groupName);
     cy.fillFormInput('title', groupName);
     cy.fillFormInput('description', `Description of ${groupName}`);
     cy.fillImageUpload('bdeploy.png', 'image/png');
 
-    cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+    cy.contains('button', 'Save').should('exist').and('be.enabled').click();
   });
   cy.checkMainNavFlyinClosed();
 
@@ -48,7 +48,7 @@ Cypress.Commands.add('deleteGroup', function (groupName, mode = 'STANDALONE') {
 
     cy.get('app-bd-dialog-message').within(() => {
       cy.fillFormInput(undefined, groupName);
-      cy.contains('button', 'YES').should('exist').and('be.enabled').click();
+      cy.contains('button', 'Yes').should('exist').and('be.enabled').click();
     });
   });
   cy.checkMainNavFlyinClosed();
@@ -152,9 +152,9 @@ Cypress.Commands.add('attachManaged', function (groupName) {
         });
       });
     cy.contains('div', 'Details for server to link').should('exist');
-    cy.contains('button', 'SAVE').should('exist').and('be.disabled');
+    cy.contains('button', 'Save').should('exist').and('be.disabled');
     cy.fillFormInput('description', 'Description of managed server');
-    cy.contains('button', 'SAVE').should('exist').and('be.enabled').click();
+    cy.contains('button', 'Save').should('exist').and('be.enabled').click();
   });
 
   cy.inMainNavContent(() => {

@@ -21,7 +21,7 @@ describe('Software Repository Tests', () => {
       cy.fillFormInput('name', 'Test-Repo');
       cy.fillFormInput('description', 'Test Repository');
 
-      cy.get('button[data-cy^="SAVE"]').click();
+      cy.get('button[data-cy^="Save"]').click();
     });
 
     cy.checkMainNavFlyinClosed();
@@ -108,7 +108,7 @@ describe('Software Repository Tests', () => {
 
       cy.get('button[data-cy^="Delete"]').click();
       cy.contains('app-bd-notification-card', 'Delete 1.0.0').within(() => {
-        cy.get('button[data-cy^="YES"]').click();
+        cy.get('button[data-cy^="Yes"]').click();
       });
     });
 
@@ -125,7 +125,7 @@ describe('Software Repository Tests', () => {
       cy.contains('2.0.1').should('exist');
       cy.get('button[data-cy^="Delete"]').click();
       cy.contains('app-bd-notification-card', 'Delete 2.0.1').within(() => {
-        cy.get('button[data-cy^="YES"]').click();
+        cy.get('button[data-cy^="Yes"]').click();
       });
     });
 
@@ -151,7 +151,7 @@ describe('Software Repository Tests', () => {
 
       cy.contains('app-bd-notification-card', 'Delete').within(() => {
         cy.fillFormInput('confirm', 'Test-Repo');
-        cy.get('button[data-cy^="YES"]').should('be.enabled').click();
+        cy.get('button[data-cy^="Yes"]').should('be.enabled').click();
       });
     });
 

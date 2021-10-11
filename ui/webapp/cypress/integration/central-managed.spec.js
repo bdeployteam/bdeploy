@@ -43,7 +43,7 @@ describe('Central/Managed Basic Test', function () {
       cy.get(`app-bd-button[text="Delete"]`).click();
 
       cy.get('app-bd-dialog-message').within(() => {
-        cy.contains('button', 'YES').should('exist').and('be.enabled').click();
+        cy.contains('button', 'Yes').should('exist').and('be.enabled').click();
       });
     });
 
@@ -98,7 +98,7 @@ describe('Central/Managed Basic Test', function () {
         cy.get('input[type="checkbox"]').check({ force: true });
       });
 
-      cy.get('button[data-cy="TRANSFER"]').should('be.enabled').click();
+      cy.get('button[data-cy="Transfer"]').should('be.enabled').click();
     });
 
     cy.inMainNavContent(() => {
@@ -155,14 +155,14 @@ describe('Central/Managed Basic Test', function () {
         cy.fillFormSelect('Server Apps', 'Apply to master');
         cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
 
-        cy.get('button[data-cy="CONFIRM"]').click();
+        cy.get('button[data-cy="Confirm"]').click();
       });
 
       cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
         cy.fillFormInput('Text Value', 'Test');
         cy.fillFormInput('Sleep Timeout', '30');
 
-        cy.get('button[data-cy="CONFIRM"]').click();
+        cy.get('button[data-cy="Confirm"]').click();
       });
     });
 

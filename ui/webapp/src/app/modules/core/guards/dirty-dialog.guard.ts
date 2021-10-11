@@ -14,19 +14,19 @@ enum DirtyActionType {
 }
 
 const actCancel: BdDialogMessageAction<DirtyActionType> = {
-  name: 'CANCEL',
+  name: 'Stay',
   result: DirtyActionType.CANCEL,
   confirm: false,
 };
 
 const actDiscard: BdDialogMessageAction<DirtyActionType> = {
-  name: 'DISCARD',
+  name: 'Discard',
   result: DirtyActionType.DISCARD,
   confirm: false,
 };
 
 const actSave: BdDialogMessageAction<DirtyActionType> = {
-  name: 'SAVE',
+  name: 'Save',
   result: DirtyActionType.SAVE,
   confirm: false,
 };
@@ -151,8 +151,8 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
   private confirm(component: DirtyableDialog) {
     return component.dialog
       .message({
-        header: 'Unsaved Changes',
-        message: 'The dialog contains unsaved changes. Leaving the dialog will discard unsaved changes.',
+        header: 'Save Changes?',
+        message: 'The dialog contains unsaved changes. Save the changes before leaving? You may also stay and continue editing.',
         icon: 'save',
         actions: [actCancel, actDiscard, actSave],
       })

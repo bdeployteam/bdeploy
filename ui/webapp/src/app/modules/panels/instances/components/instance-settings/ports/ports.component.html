@@ -19,6 +19,7 @@
         color="primary"
         [collapsed]="false"
         (click)="shiftSelectedPorts(shiftDlg)"
+        [disabled]="!checked?.length"
       ></app-bd-button>
       <app-bd-button text="Export Port List as CSV" icon="grid_on" [collapsed]="false" (click)="exportCsv()"></app-bd-button>
 

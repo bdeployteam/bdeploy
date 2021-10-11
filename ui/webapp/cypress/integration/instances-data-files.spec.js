@@ -68,7 +68,7 @@ describe('Instance Data Files Tests', () => {
         cy.get('button[data-cy^="Confirm"]').click();
       });
 
-      cy.get('button[data-cy="APPLY"]').click();
+      cy.get('button[data-cy="Apply"]').click();
     });
 
     cy.inMainNavContent(() => {
@@ -172,7 +172,7 @@ describe('Instance Data Files Tests', () => {
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.typeInMonacoEditor('This is a test');
-      cy.pressToolbarButton('SAVE');
+      cy.pressToolbarButton('Save');
     });
 
     cy.waitUntilContentLoaded();
@@ -214,7 +214,7 @@ describe('Instance Data Files Tests', () => {
       cy.contains('app-bd-notification-card', 'File Exists')
         .should('exist')
         .within(() => {
-          cy.get('button[data-cy="YES"]').click();
+          cy.get('button[data-cy="Yes"]').click();
         });
 
       cy.waitUntilContentLoaded();

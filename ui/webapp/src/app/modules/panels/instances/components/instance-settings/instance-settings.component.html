@@ -85,16 +85,14 @@
         [disabled]="!auth.isCurrentScopeWrite()"
         [color]="(edit.current$ | async)?.newerVersionAvailable ? 'accent' : null"
       ></app-bd-panel-button>
-      <app-bd-panel-button
-        text="Maintenance"
-        icon="build"
+      <app-bd-button
+        [loadingWhen$]="deleting$"
+        [disabled]="!auth.isCurrentScopeAdmin() || (deleting$ | async)"
+        text="Delete Instance"
+        icon="delete"
         [collapsed]="false"
-        [toggle]="false"
-        [route]="['maintenance']"
-        [relative]="true"
-        [disabled]="!auth.isCurrentScopeAdmin()"
-        color="primary"
-      ></app-bd-panel-button>
+        (click)="doDelete()"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

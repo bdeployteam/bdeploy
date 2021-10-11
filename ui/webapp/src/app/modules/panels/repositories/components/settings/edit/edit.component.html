@@ -7,7 +7,7 @@
         <div fxLayout="column" fxLayoutGap="10px">
           <app-bd-form-input label="Description" name="description" [(ngModel)]="repository.description"></app-bd-form-input>
 
-          <app-bd-button color="toolbar" [collapsed]="false" text="SAVE" [disabled]="repositoryForm.invalid || !isDirty()"></app-bd-button>
+          <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="repositoryForm.invalid || !isDirty()"></app-bd-button>
         </div>
       </form>
     </div>

@@ -9,7 +9,14 @@
         [checkMode]="true"
         [(checked)]="selected"
       ></app-bd-data-table>
-      <app-bd-button text="TRANSFER" [disabled]="!selected?.length" [collapsed]="false" color="primary" (click)="doTransfer()"></app-bd-button>
+      <app-bd-button
+        text="Transfer"
+        [disabled]="!selected?.length"
+        [collapsed]="false"
+        icon="local_shipping"
+        color="primary"
+        (click)="doTransfer()"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

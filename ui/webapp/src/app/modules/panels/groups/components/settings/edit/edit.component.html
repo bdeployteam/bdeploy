@@ -14,7 +14,7 @@
           <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
           <app-bd-form-toggle label="Automatic Cleanup" name="autoDelete" [(ngModel)]="group.autoDelete"></app-bd-form-toggle>
 
-          <app-bd-button color="toolbar" [collapsed]="false" text="SAVE" [disabled]="groupForm.invalid || !isDirty()"></app-bd-button>
+          <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="groupForm.invalid || !isDirty()"></app-bd-button>
         </div>
       </form>
     </div>

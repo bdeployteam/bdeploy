@@ -15,7 +15,7 @@
         <app-bd-form-input label="Server Name" name="hostName" [(ngModel)]="payload.hostName" required></app-bd-form-input>
         <app-bd-form-input label="Description" name="description" [(ngModel)]="payload.description" required></app-bd-form-input>
         <app-bd-form-input label="URI" name="uri" [(ngModel)]="payload.uri" required></app-bd-form-input>
-        <app-bd-button text="SAVE" color="toolbar" [collapsed]="false" [disabled]="form.invalid || form.submitted"></app-bd-button>
+        <app-bd-button text="Save" color="primary" icon="save" [collapsed]="false" [disabled]="form.invalid || form.submitted"></app-bd-button>
         <div fxLayout="column" fxLayoutGap="10px" *ngIf="manual">
           <div>The managed server has been added, but unfortunately the managed server could not be informed about this fact.</div>
           <div>Please download the <em>authorization file</em> below which instructs the managed server on what to do.</div>

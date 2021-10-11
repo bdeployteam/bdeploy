@@ -33,7 +33,7 @@ export class SettingsGeneralComponent implements OnInit, DirtyableDialog {
 
   /* template */ testUserAuth() {
     this.dialog
-      .message({ header: 'Authentication Test', template: this.testUserAuthTemplate, actions: [{ name: 'CLOSE', result: null, confirm: true }] })
+      .message({ header: 'Authentication Test', template: this.testUserAuthTemplate, actions: [{ name: 'Close', result: null, confirm: true }] })
       .subscribe();
   }
 }

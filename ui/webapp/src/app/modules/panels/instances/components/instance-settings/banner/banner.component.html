@@ -15,8 +15,9 @@
       <app-bd-form-input type="color" label="Background Color" name="bgColor" [(ngModel)]="banner.backgroundColor"></app-bd-form-input>
 
       <app-bd-button
-        text="APPLY"
+        text="Apply"
         [collapsed]="false"
+        icon="done"
         color="primary"
         [disabled]="!isDirty()"
         (click)="onSave()"

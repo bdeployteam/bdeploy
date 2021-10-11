@@ -181,7 +181,7 @@ describe('Instance Process Config Tests', () => {
         cy.contains('app-history-diff-field', '--sleep=5').should('exist');
       });
 
-      cy.get('button[data-cy="APPLY"]').click();
+      cy.get('button[data-cy="Apply"]').click();
     });
 
     cy.inMainNavContent(() => {
@@ -218,7 +218,7 @@ describe('Instance Process Config Tests', () => {
 
       cy.get('app-bd-dialog-message').within(() => {
         cy.contains('Discard unsaved changes').should('exist');
-        cy.get('button[data-cy="YES"]').click();
+        cy.get('button[data-cy="Yes"]').click();
       });
 
       cy.get('button[data-cy^="Compare"]').should('be.disabled');

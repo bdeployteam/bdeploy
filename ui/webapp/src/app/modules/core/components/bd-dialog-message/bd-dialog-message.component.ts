@@ -46,16 +46,16 @@ export interface BdDialogMessage<T> {
   dismissResult?: T;
 }
 
-export const ACTION_CONFIRM: BdDialogMessageAction<boolean> = { name: 'CONFIRM', result: true, confirm: true };
-export const ACTION_APPLY: BdDialogMessageAction<boolean> = { name: 'APPLY', result: true, confirm: true };
+export const ACTION_CONFIRM: BdDialogMessageAction<boolean> = { name: 'Confirm', result: true, confirm: true };
+export const ACTION_APPLY: BdDialogMessageAction<boolean> = { name: 'Apply', result: true, confirm: true };
 
 export const ACTION_OK: BdDialogMessageAction<boolean> = { name: 'OK', result: true, confirm: true };
-export const ACTION_DISCARD: BdDialogMessageAction<boolean> = { name: 'DISCARD', result: true, confirm: true };
-export const ACTION_CANCEL: BdDialogMessageAction<boolean> = { name: 'CANCEL', result: false, confirm: false };
-export const ACTION_CLOSE: BdDialogMessageAction<boolean> = { name: 'CLOSE', result: false, confirm: false };
+export const ACTION_DISCARD: BdDialogMessageAction<boolean> = { name: 'Discard', result: true, confirm: true };
+export const ACTION_CANCEL: BdDialogMessageAction<boolean> = { name: 'Cancel', result: false, confirm: false };
+export const ACTION_CLOSE: BdDialogMessageAction<boolean> = { name: 'Close', result: false, confirm: false };
 
-export const ACTION_YES: BdDialogMessageAction<boolean> = { name: 'YES', result: true, confirm: true };
-export const ACTION_NO: BdDialogMessageAction<boolean> = { name: 'NO', result: false, confirm: false };
+export const ACTION_YES: BdDialogMessageAction<boolean> = { name: 'Yes', result: true, confirm: true };
+export const ACTION_NO: BdDialogMessageAction<boolean> = { name: 'No', result: false, confirm: false };
 
 @Component({
   selector: 'app-bd-dialog-message',

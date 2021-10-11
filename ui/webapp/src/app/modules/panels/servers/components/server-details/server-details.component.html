@@ -36,7 +36,7 @@
           [text]="!server.update.packagesToTransfer?.length ? 'Install Update' : 'Transfer & Install Update'"
           icon="system_update"
           [collapsed]="false"
-          color="toolbar"
+          color="primary"
           [disabled]="(installing$ | async) || !(servers.isSynchronized(server) || server.update.forceUpdate)"
           [loadingWhen$]="installing$"
           (click)="doUpdateInstall(server)"
@@ -61,7 +61,6 @@
         [collapsed]="false"
         text="Delete"
         icon="delete"
-        color="toolbar"
         (click)="doDelete(server)"
         [disabled]="!auth.isCurrentScopeAdmin() || (loading$ | async)"
       ></app-bd-button>
