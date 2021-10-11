@@ -12,7 +12,7 @@
     <app-bd-button icon="refresh" text="Refresh" (click)="loggingAdmin.reload()"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <mat-tab-group #tabGroup [(selectedIndex)]="selectedIndex">
+    <mat-tab-group #tabGroup [(selectedIndex)]="selectedIndex" animationDuration="0ms">
       <mat-tab *ngFor="let logDirectory of loggingAdmin.directories$ | async" label="{{ logDirectory.minion }}">
         <app-bd-data-table [records]="logDirectory.entries" [columns]="columns" [sort]="sort" [recordRoute]="getRecordRoute"></app-bd-data-table>
       </mat-tab>

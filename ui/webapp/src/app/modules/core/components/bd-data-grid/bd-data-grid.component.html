@@ -20,7 +20,7 @@
   No data to show.
 </div>
 
-<mat-tab-group *ngIf="grouping" [style.width]="'100%'">
+<mat-tab-group *ngIf="grouping" [style.width]="'100%'" animationDuration="0ms">
   <ng-container *ngFor="let group of getGroupValues()">
     <mat-tab *ngIf="!grouping.selected?.length || grouping.selected.includes(group)" [label]="group">
       <div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start">
