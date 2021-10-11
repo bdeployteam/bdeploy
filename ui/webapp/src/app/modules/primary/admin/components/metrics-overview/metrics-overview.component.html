@@ -143,7 +143,16 @@
       <!-- Metrics of selected group -->
       <div *ngIf="selectedGroup" class="charts-area">
         <div class="count-chart" [style.height.px]="countGraphHeight">
-          <ngx-charts-bar-horizontal [results]="groupCounts" [maxYAxisTickLength]="40" [xAxis]="true" [yAxis]="true" (select)="selectTimer($event)" #countChart>
+          <ngx-charts-bar-horizontal
+            [results]="groupCounts"
+            [maxYAxisTickLength]="40"
+            xAxisLabel="Count"
+            [showXAxisLabel]="true"
+            [xAxis]="true"
+            [yAxis]="true"
+            (select)="selectTimer($event)"
+            #countChart
+          >
           </ngx-charts-bar-horizontal>
         </div>
 
