@@ -98,6 +98,7 @@ export class UsersBrowserComponent implements OnInit {
     let p = userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.ADMIN);
     p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.WRITE);
     p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.READ);
+    p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.CLIENT);
     return p ? p.permission : null;
   }
 
