@@ -153,13 +153,13 @@ export class ProcessEditService {
       return [strValue];
     }
 
-    if (desc.type === ParameterType.BOOLEAN) {
-      return strValue === 'true' ? [desc.parameter] : [];
-    } else if (desc.hasValue) {
+    if (desc.hasValue) {
       if (desc.valueAsSeparateArg) {
         return [desc.parameter, strValue];
       }
       return [desc.parameter + desc.valueSeparator + strValue];
+    } else if (desc.type === ParameterType.BOOLEAN && strValue === 'false') {
+      return [];
     }
     return [desc.parameter];
   }
