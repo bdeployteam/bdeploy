@@ -142,7 +142,10 @@ describe('Groups Tests (Clients)', () => {
   it('Assigns Client permissions', () => {
     cy.visit('/');
     cy.enterGroup(groupName);
-    cy.pressMainNavButton('Group Settings');
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Group Settings');
+    });
 
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy^="Instance Group Permissions"]').click();

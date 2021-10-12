@@ -25,6 +25,16 @@
       tooltip="below"
       [disabled]="!authService.isCurrentScopeWrite() || dataTable.grid"
     ></app-bd-panel-button>
+
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button
+      svgIcon="group-settings"
+      text="Group Settings"
+      [route]="['panels', 'groups', 'settings']"
+      tooltip="below"
+      [disabled]="!!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
+    ></app-bd-panel-button>
+
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       icon="add"

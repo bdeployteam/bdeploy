@@ -1,5 +1,7 @@
 //@ts-check
 
+const { group } = require('console');
+
 describe('Instance Settings Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
@@ -342,13 +344,14 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Attributes', () => {
-    cy.enterInstance(groupName, instanceName);
-    cy.pressMainNavButton('Instance Configuration');
+    cy.visit('/');
+    cy.enterGroup(groupName);
 
-    cy.waitUntilContentLoaded();
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Group Settings');
+    });
 
     // add definition
-    cy.pressMainNavButton('Group Settings');
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy^="Instance Attribute"]').click();
     });
@@ -364,6 +367,10 @@ describe('Instance Settings Tests', () => {
     });
 
     // now use definition in instance
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Instance Configuration');
+
+    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should('exist');

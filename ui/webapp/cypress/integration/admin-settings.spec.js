@@ -139,7 +139,10 @@ describe('Admin UI Tests (Settings)', () => {
     cy.createGroup('Attr-Test-2');
 
     cy.enterGroup('Attr-Test-1');
-    cy.pressMainNavButton('Group Settings');
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Group Settings');
+    });
 
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy^="Group Attribute Values"]').click();

@@ -38,7 +38,9 @@ Cypress.Commands.add('deleteGroup', function (groupName, mode = 'STANDALONE') {
 
   cy.enterGroup(groupName);
 
-  cy.pressMainNavButton('Group Settings');
+  cy.inMainNavContent(() => {
+    cy.pressToolbarButton('Group Settings');
+  });
 
   cy.inMainNavFlyin('app-settings', () => {
     cy.get(`app-bd-panel-button[text="Maintenance"]`).click();
