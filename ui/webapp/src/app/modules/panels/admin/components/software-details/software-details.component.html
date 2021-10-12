@@ -1,19 +1,15 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [header]="'Details for ' + (software$ | async)?.version" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="5px">
-      <div fxLayout="row" fxLayoutGap="5px">
+    <div fxLayout="column" fxLayoutGap="10px">
+      <div gdColumns="auto auto" gdGap="5px">
         <strong>Version:</strong>
         <span>{{ (software$ | async)?.version }}</span>
-      </div>
-      <div fxLayout="row" fxLayoutGap="5px">
-        <strong>System Software Supported OS:</strong>
+        <strong>System Supported OS:</strong>
         <span *ngIf="systemOs$ | async as os">
           <ng-container *ngIf="!!os?.length">{{ os.join(', ') }}</ng-container>
           <ng-container *ngIf="!os?.length">None</ng-container>
         </span>
-      </div>
-      <div fxLayout="row" fxLayoutGap="5px">
         <strong>Launcher Supported OS:</strong>
         <span *ngIf="launcherOs$ | async as os">
           <ng-container *ngIf="!!os?.length">{{ os.join(', ') }}</ng-container>

@@ -5,9 +5,14 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="app$ | async as app">
-      <div><strong>ID:</strong>&nbsp;{{ app.client.uuid }}</div>
-      <div><strong>Name:</strong>&nbsp;{{ app.client.description }}</div>
-      <div><strong>Instance:</strong>&nbsp;{{ app.instance.name }}</div>
+      <div gdColumns="80px auto" gdGap="5px">
+        <strong>ID:</strong>
+        <div>{{ app.client.uuid }}</div>
+        <strong>Name:</strong>
+        <div>{{ app.client.description }}</div>
+        <strong>Instance:</strong>
+        <div>{{ app.instance.name }}</div>
+      </div>
       <app-bd-button
         color="primary"
         icon="cloud_download"

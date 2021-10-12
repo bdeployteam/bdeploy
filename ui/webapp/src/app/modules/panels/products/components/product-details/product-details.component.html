@@ -3,11 +3,17 @@
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="singleProduct.product$ | async as prod">
-      <div><strong>ID:</strong>&nbsp;{{ prod.product }}</div>
-      <div><strong>Name:</strong>&nbsp;{{ prod.name }}</div>
-      <div><strong>Version:</strong>&nbsp;{{ prod.key.tag }}</div>
-      <div><strong>Vendor:</strong>&nbsp;{{ prod.vendor }}</div>
-      <div><strong>Used in:</strong></div>
+      <div gdColumns="70px auto" gdGap="5px">
+        <strong>ID:</strong>
+        <div>{{ prod.product }}</div>
+        <strong>Name:</strong>
+        <div>{{ prod.name }}</div>
+        <strong>Version:</strong>
+        <div>{{ prod.key.tag }}</div>
+        <strong>Vendor:</strong>
+        <div>{{ prod.vendor }}</div>
+        <strong>Used in:</strong>
+      </div>
       <app-bd-data-display [records]="singleProduct.getUsedIn() | async" [columns]="columns">
         <app-bd-no-data>
           <strong>This version is not used in any instance.</strong>

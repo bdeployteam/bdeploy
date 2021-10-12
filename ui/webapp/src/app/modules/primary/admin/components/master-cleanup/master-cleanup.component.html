@@ -5,7 +5,6 @@
     <app-bd-button
       *ngIf="cleanup.cleanup$ | async as clean"
       [collapsed]="false"
-      color="warn"
       icon="cleaning_services"
       [text]="(cleanup.performing$ | async) ? 'Performing...' : 'Perform (' + (cleanup.countdown$ | async) + 's.)'"
       (click)="cleanup.performCleanup(clean)"

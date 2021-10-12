@@ -4,10 +4,16 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="detailsService.softwarePackage$ | async as software">
       <ng-container *ngIf="software?.type === 'Product'">
-        <div><strong>ID:</strong>&nbsp;{{ software.product }}</div>
-        <div><strong>Name:</strong>&nbsp;{{ software.name }}</div>
-        <div><strong>Version:</strong>&nbsp;{{ software.key.tag }}</div>
-        <div><strong>Vendor:</strong>&nbsp;{{ software.vendor }}</div>
+        <div gdColumns="70px auto" gdGap="5px">
+          <strong>ID:</strong>
+          <div>{{ software.product }}</div>
+          <strong>Name:</strong>
+          <div>{{ software.name }}</div>
+          <strong>Version:</strong>
+          <div>{{ software.key.tag }}</div>
+          <strong>Vendor:</strong>
+          <div>{{ software.vendor }}</div>
+        </div>
 
         <app-bd-panel-button [collapsed]="false" text="Labels" icon="label" [toggle]="false" [route]="['labels']" [relative]="true"></app-bd-panel-button>
         <app-bd-panel-button
