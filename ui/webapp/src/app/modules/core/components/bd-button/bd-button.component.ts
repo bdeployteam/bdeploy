@@ -64,7 +64,7 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
     }
 
     if (!this.color) {
-      return []; // no color class, but we want to inherit text color
+      return 'local-button-no-color'; // no color class, but we want to inherit text color
     }
 
     switch (this.color) {
@@ -79,7 +79,5 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
       case 'primary':
         return 'local-button-color-primary';
     }
-
-    return [];
   }
 }

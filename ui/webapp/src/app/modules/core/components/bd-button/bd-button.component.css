@@ -2,6 +2,10 @@
   color: inherit !important;
 }
 
+.local-button-no-color:hover {
+  background-color: var(--bd-bg-hover) !important;
+}
+
 .local-button-color-toolbar {
   background-color: var(--bd-main-bar);
   color: var(--bd-main-bar-contrast);

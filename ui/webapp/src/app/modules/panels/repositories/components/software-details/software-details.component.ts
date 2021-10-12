@@ -2,24 +2,79 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { InstanceUsageDto } from 'src/app/models/gen.dtos';
+import { ApplicationTemplateDescriptor, InstanceTemplateDescriptor, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { RepositoryService } from 'src/app/modules/primary/repositories/services/repository.service';
 import { SoftwareDetailsService } from '../../services/software-details.service';
 
-const instanceNameColumn: BdDataColumn<InstanceUsageDto> = {
+interface LabelRecord {
+  key: string;
+  value: string;
+}
+
+const labelKeyColumn: BdDataColumn<LabelRecord> = {
+  id: 'key',
+  name: 'Label',
+  data: (r) => r.key,
+  width: '90px',
+};
+
+const labelValueColumn: BdDataColumn<LabelRecord> = {
+  id: 'value',
+  name: 'Value',
+  data: (r) => r.value,
+  width: '190px',
+};
+
+const appTemplateNameColumn: BdDataColumn<ApplicationTemplateDescriptor> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
+  width: '140px',
 };
 
-const instanceTagColumn: BdDataColumn<InstanceUsageDto> = {
-  id: 'tag',
-  name: 'Ver.',
-  data: (r) => r.tag,
-  width: '30px',
+const appTemplateDescriptionColumn: BdDataColumn<ApplicationTemplateDescriptor> = {
+  id: 'description',
+  name: 'Description',
+  data: (r) => r.description,
+  width: '140px',
+};
+
+const instTemplateNameColumn: BdDataColumn<InstanceTemplateDescriptor> = {
+  id: 'name',
+  name: 'Name',
+  data: (r) => r.name,
+  width: '140px',
+};
+
+const instTemplateDescriptionColumn: BdDataColumn<InstanceTemplateDescriptor> = {
+  id: 'description',
+  name: 'Description',
+  data: (r) => r.description,
+  width: '140px',
+};
+
+const pluginNameColumn: BdDataColumn<PluginInfoDto> = {
+  id: 'name',
+  name: 'Name',
+  data: (r) => r.name,
+  width: '130px',
+};
+
+const pluginVersionColumn: BdDataColumn<PluginInfoDto> = {
+  id: 'description',
+  name: 'Description',
+  data: (r) => r.version,
+  width: '100px',
+};
+
+const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
+  id: 'oid',
+  name: 'OID',
+  data: (r) => r.id.id,
+  width: '50px',
 };
 
 @Component({
@@ -30,7 +85,10 @@ const instanceTagColumn: BdDataColumn<InstanceUsageDto> = {
 })
 export class SoftwareDetailsComponent implements OnInit {
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns: BdDataColumn<InstanceUsageDto>[] = [instanceNameColumn, instanceTagColumn];
+  /* template */ labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
+  /* template */ appTemplColumns: BdDataColumn<ApplicationTemplateDescriptor>[] = [appTemplateNameColumn, appTemplateDescriptionColumn];
+  /* template */ instTemplColumns: BdDataColumn<InstanceTemplateDescriptor>[] = [instTemplateNameColumn, instTemplateDescriptionColumn];
+  /* template */ pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
 
   /* template */ loading$ = combineLatest([this.deleting$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
   /* template */ preparing$ = new BehaviorSubject<boolean>(false);
@@ -66,5 +124,15 @@ export class SoftwareDetailsComponent implements OnInit {
       .download()
       .pipe(finalize(() => this.preparing$.next(false)))
       .subscribe();
+  }
+
+  /* template */ mapLabels(software: any) {
+    const labels: LabelRecord[] = [];
+    if (!!software.labels) {
+      for (const k of Object.keys(software.labels)) {
+        labels.push({ key: k, value: software.labels[k] });
+      }
+    }
+    return labels;
   }
 }

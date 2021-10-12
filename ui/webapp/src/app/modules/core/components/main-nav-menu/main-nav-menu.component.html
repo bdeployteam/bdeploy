@@ -45,16 +45,6 @@
   <mat-divider class="local-divider"></mat-divider>
 
   <app-main-nav-button
-    *ngIf="authService.isGlobalAdmin()"
-    [visible]="!!(areas.repositoryContext$ | async)"
-    svgIcon="repository-settings"
-    text="Repository Settings"
-    [collapsed]="!expanded"
-    [panel]="true"
-    [route]="['panels', 'repositories', 'settings']"
-  ></app-main-nav-button>
-
-  <app-main-nav-button
     *ngIf="!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="settings_system_daydream"

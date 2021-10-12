@@ -1,0 +1,14 @@
+app-bd-expand-button mat-expansion-panel-header {
+  padding: 0 16px 0 6px !important;
+  height: 36px !important;
+  font-weight: 500 !important;
+}
+
+app-bd-expand-button mat-expansion-panel-header .mat-expansion-indicator {
+  position: relative;
+  top: -2px;
+}
+
+app-bd-expand-button mat-expansion-panel .mat-expansion-panel-body {
+  padding: 0 10px 10px !important;
+}
