@@ -45,6 +45,7 @@
   <mat-divider class="local-divider"></mat-divider>
 
   <app-main-nav-button
+    [style.padding-top.px]="5"
     *ngIf="!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="settings_system_daydream"

@@ -1,6 +1,5 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ClientsUsageService, ClientUsagePerApp } from '../../../../services/clients-usage.service';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { ClientsUsageService, ClientUsagePerApp } from '../../../services/clients-usage.service';
 
 const PERC_PER_DAY = 100 / 29;
 
@@ -9,10 +8,10 @@ const PERC_PER_DAY = 100 / 29;
   templateUrl: './usage-graph.component.html',
   styleUrls: ['./usage-graph.component.css'],
 })
-export class ClientUsageGraphComponent implements OnInit, OnDestroy, OnChanges {
+export class ClientUsageGraphComponent implements OnInit, OnChanges {
+  @Input() instanceUid: string;
   @Input() appUid: string;
 
-  private subscription: Subscription;
   private usage: ClientUsagePerApp[];
 
   /* template */ curve: number[] = [];
@@ -24,19 +23,13 @@ export class ClientUsageGraphComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(private clients: ClientsUsageService) {}
 
-  ngOnInit(): void {
-    this.subscription = this.clients.clientUsage$.subscribe((usage) => {
+  ngOnInit(): void {}
+
+  ngOnChanges(): void {
+    this.clients.load(this.instanceUid).subscribe((usage) => {
       this.usage = usage;
       this.update();
     });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  ngOnChanges() {
-    this.update();
   }
 
   private update() {

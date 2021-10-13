@@ -11,7 +11,6 @@ import { InstanceProductVersionComponent } from './components/browser/instance-p
 import { ConfigNodeComponent } from './components/configuration/config-node/config-node.component';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
 import { ClientNodeComponent } from './components/dashboard/client-node/client-node.component';
-import { ClientUsageGraphComponent } from './components/dashboard/client-node/usage-graph/usage-graph.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ProcessOutdatedComponent } from './components/dashboard/process-outdated/process-outdated.component';
 import { ProcessStatusIconComponent } from './components/dashboard/process-status-icon/process-status-icon.component';
@@ -19,10 +18,10 @@ import { NodeHeaderComponent } from './components/dashboard/server-node/header/h
 import { NodeProcessListComponent } from './components/dashboard/server-node/process-list/process-list.component';
 import { ServerNodeComponent } from './components/dashboard/server-node/server-node.component';
 import { NodeStatePanelComponent } from './components/dashboard/server-node/state-panel/state-panel.component';
+import { DataEditComponent } from './components/data-files/data-edit/data-edit.component';
 import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryComponent } from './components/history/history.component';
 import { InstancesRoutingModule } from './instances-routing.module';
-import { DataEditComponent } from './components/data-files/data-edit/data-edit.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +36,6 @@ import { DataEditComponent } from './components/data-files/data-edit/data-edit.c
     NodeProcessListComponent,
     ProcessOutdatedComponent,
     ProcessStatusIconComponent,
-    ClientUsageGraphComponent,
     ConfigurationComponent,
     HistoryComponent,
     ConfigNodeComponent,

@@ -1,0 +1,10 @@
+.local-graph {
+  position: relative;
+  overflow: hidden;
+
+  min-width: 100px;
+
+  opacity: 0.5;
+
+  background-color: var(--bd-bg-toolbar);
+}

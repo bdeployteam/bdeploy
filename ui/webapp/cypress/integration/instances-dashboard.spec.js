@@ -95,11 +95,21 @@ describe('Instance Dashboard Tests', () => {
     cy.get('app-instance-client-node')
       .should('exist')
       .within(() => {
-        // TODO: find a way to check the current OS in cypress and select the *correct* client app which
-        // has an installer available even on CI machines (which only build for their own OS).
-        // cy.get('button[data-cy="Installer"]').downloadByLocationAssign('dashboard-installer.bin');
-        cy.get('button[data-cy^="Click"]').downloadByLinkClick('dashboard-click-start.json');
+        cy.get('tr:contains("Client Test")').should('have.length', 2);
+
+        cy.contains('tr', 'Client Test').click(); // the first one, no idea which OS.
       });
+
+    cy.inMainNavFlyin('app-client-detail', () => {
+      cy.get('app-bd-expand-button[data-cy="Usage Statistics"]')
+        .click()
+        .within(() => {
+          cy.contains('No data to show').should('exist');
+        })
+        .click('top');
+
+      cy.get('button[data-cy^="Click"]').downloadByLinkClick('dashboard-click-start.json');
+    });
   });
 
   it('Test Process Control', () => {
