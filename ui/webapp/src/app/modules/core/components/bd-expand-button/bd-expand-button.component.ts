@@ -9,6 +9,7 @@ import { Component, HostBinding, Input, OnInit, ViewEncapsulation } from '@angul
 export class BdExpandButtonComponent implements OnInit {
   @Input() icon: string;
   @HostBinding('attr.data-cy') @Input() text: string;
+  @Input() expanded = false;
 
   constructor() {}
 

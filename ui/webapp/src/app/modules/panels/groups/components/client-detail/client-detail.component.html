@@ -13,7 +13,7 @@
         <strong>Instance:</strong>
         <div>{{ app.instance.name }}</div>
       </div>
-      <app-bd-expand-button text="Usage Statistics" icon="insights">
+      <app-bd-expand-button text="Usage Statistics" icon="insights" [expanded]="true">
         <div fxLayout="row" class="local-graph" fxFlex="1 0 100px">
           <app-client-usage-graph fxFlex="1 0 auto" [appUid]="app.client.uuid" [instanceUid]="app.instance.uuid"></app-client-usage-graph>
         </div>
