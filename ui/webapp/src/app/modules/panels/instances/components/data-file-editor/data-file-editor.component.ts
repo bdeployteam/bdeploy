@@ -84,7 +84,7 @@ export class DataFileEditorComponent implements OnInit {
           content: Base64.encode(this.content),
         };
 
-        this.df.updateFile(this.directory$.value, f).subscribe();
+        this.df.updateFile(this.directory$.value, f).subscribe(() => this.df.load());
 
         this.content = '';
         this.originalContent = '';
