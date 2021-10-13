@@ -5,12 +5,11 @@
         <div class="bd-type-text">{{ getNodeType() }}</div>
         <div class="bd-title-text">{{ getNodeName() }}</div>
       </div>
+      <ng-container *ngIf="node$ | async as node">
+        <mat-icon [style.padding-left.px]="20" fxFlexAlign="center" [svgIcon]="node.os"></mat-icon>
+      </ng-container>
       <div fxFlex="1 0 auto"></div>
       <div fxLayout="row" fxLayoutGap="5px">
-        <ng-container *ngIf="node$ | async as node">
-          <mat-icon fxFlexAlign="center" [svgIcon]="node.os"></mat-icon>
-          <mat-divider [vertical]="true"></mat-divider>
-        </ng-container>
         <app-bd-panel-button text="Add Application..." icon="add" [route]="['panels', 'instances', 'config', 'add-process', nodeName]"></app-bd-panel-button>
       </div>
     </div>

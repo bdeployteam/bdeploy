@@ -57,7 +57,7 @@
       (toggleChange)="collapsed$.next($event)"
       tooltip="below"
     ></app-bd-button>
-    <app-bd-panel-button text="Bulk Control" icon="dynamic_feed" [route]="['panels', 'instances', 'bulk-control']"></app-bd-panel-button>
+    <app-bd-panel-button text="Bulk Control" icon="library_add_check" [route]="['panels', 'instances', 'bulk-control']"></app-bd-panel-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <ng-container *ngIf="instances.current$ | async as current">
