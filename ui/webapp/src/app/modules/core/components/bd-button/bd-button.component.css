@@ -2,7 +2,7 @@
   color: inherit !important;
 }
 
-.local-button-no-color:hover {
+.local-button-no-color:hover:enabled {
   background-color: var(--bd-bg-hover) !important;
 }
 

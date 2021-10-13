@@ -1,7 +1,6 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [panel]="true">
-    <mat-divider [vertical]="true"></mat-divider>
-    <mat-icon *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
+    <mat-icon [style.padding-left.px]="10" *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="app$ | async as app">
