@@ -69,4 +69,22 @@ startCommand:
       mandatory: true
       defaultValue: false
       type: BOOLEAN
+    - uid: "param.boolean.with.value"
+      name: "Boolean with value"
+      longDescription: "A boolean parameter with value"
+      groupName: "Tested by Cypress"
+      parameter: "--boolean-with-value"
+      hasValue: true
+      type: BOOLEAN
+      mandatory: true
+      defaultValue: false
+    - uid: "param.boolean.without.value"
+      name: "Boolean without value"
+      longDescription: "A boolean parameter without value"
+      groupName: "Tested by Cypress"
+      parameter: "--boolean-without-value"
+      hasValue: false
+      type: BOOLEAN
+      mandatory: true
+      defaultValue: false
 

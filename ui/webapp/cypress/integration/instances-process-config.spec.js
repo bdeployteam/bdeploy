@@ -179,7 +179,29 @@ describe('Instance Process Config Tests', () => {
       cy.contains('mat-expansion-panel', 'Command Line Preview').within(() => {
         cy.get('mat-panel-title').click();
         cy.contains('app-history-diff-field', '--sleep=5').should('exist');
+        // check the boolean parameter that are changed in the next step
+        cy.contains('app-history-diff-field', '--boolean-with-value=false').should('exist');
+        cy.contains('app-history-diff-field', '--boolean-without-value').should('not.exist');
       });
+
+      // toggle boolean parameter in panel 'Tested by Cypress'
+      cy.contains('mat-expansion-panel', 'Tested by Cypress').within(() => {
+        cy.get('mat-panel-title').click();
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+        cy.get('[data-cy="param.boolean.with.value"]').within(() => {
+          cy.get('mat-checkbox').click({ force: true });
+        });
+        cy.get('[data-cy="param.boolean.without.value"]').within(() => {
+          cy.get('mat-checkbox').click({ force: true });
+        });
+      });
+
+      // check preview again.
+      cy.contains('mat-expansion-panel', 'Command Line Preview').within(() => {
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+        cy.contains('app-history-diff-field', '--boolean-with-value=true').should('exist');
+        cy.contains('app-history-diff-field', '--boolean-without-value').should('exist');
+        });
 
       cy.get('button[data-cy="Apply"]').click();
     });
