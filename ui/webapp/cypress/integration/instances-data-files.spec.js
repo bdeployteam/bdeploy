@@ -122,7 +122,7 @@ describe('Instance Data Files Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'out.txt').within(() => {
-        cy.get('button[data-cy="Edit"]').click();
+        cy.get('button[data-cy^="Edit"]').click();
       });
     });
 
@@ -164,7 +164,7 @@ describe('Instance Data Files Tests', () => {
       cy.contains('tr', 'test.txt')
         .should('exist')
         .within(() => {
-          cy.get('button[data-cy="Edit"]').click();
+          cy.get('button[data-cy^="Edit"]').click();
         });
     });
 
@@ -181,7 +181,7 @@ describe('Instance Data Files Tests', () => {
       cy.contains('tr', 'test.txt')
         .should('exist')
         .within(() => {
-          cy.get('button[data-cy="Edit"]').click();
+          cy.get('button[data-cy^="Edit"]').click();
         });
     });
 

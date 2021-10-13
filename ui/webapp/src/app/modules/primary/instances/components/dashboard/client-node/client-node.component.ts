@@ -16,6 +16,7 @@ export class ClientNodeComponent implements OnInit {
 
   @Input() gridWhen$: BehaviorSubject<boolean>;
   @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>;
+  @Input() collapsedWhen$: BehaviorSubject<boolean>;
 
   /* template */ columns = this.appCols.defaultProcessClientColumns;
 

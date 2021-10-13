@@ -1,8 +1,14 @@
 <app-bd-dialog [loadingWhen$]="software.loading$">
   <app-bd-dialog-toolbar header="System Software">
     <div fxFlex="1 0 auto"></div>
-    <app-bd-panel-button icon="cloud_upload" text="Upload Software" color="primary" [route]="['panels', 'admin', 'software', 'upload']"></app-bd-panel-button>
-    <app-bd-button icon="refresh" text="Refresh" (click)="software.load()"></app-bd-button>
+    <app-bd-panel-button
+      icon="cloud_upload"
+      text="Upload Software"
+      color="primary"
+      [route]="['panels', 'admin', 'software', 'upload']"
+      tooltip="below"
+    ></app-bd-panel-button>
+    <app-bd-button icon="refresh" text="Refresh" (click)="software.load()" tooltip="below"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <app-bd-data-table [records]="software.software$ | async" [columns]="columns" [recordRoute]="getRecordRoute"></app-bd-data-table>

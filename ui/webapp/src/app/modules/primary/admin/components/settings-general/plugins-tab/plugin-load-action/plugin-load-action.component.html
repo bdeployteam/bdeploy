@@ -1,5 +1,6 @@
 <div fxLayout="row" fxLayoutAlign="start center">
   <app-bd-button
+    fontSet="material-icons-filled"
     [icon]="record.loaded ? (record.global ? 'pause' : 'stop') : 'play_arrow'"
     (click)="doLoadUnload()"
     [text]="record.loaded ? 'Unload plugin' : 'Load plugin'"

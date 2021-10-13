@@ -15,6 +15,7 @@ export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inh
 export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() icon: string;
   @Input() svgIcon: string;
+  @Input() fontSet: string;
   @Input() text: string;
   @Input() tooltip: TooltipPosition;
   @Input() badge: string | number;

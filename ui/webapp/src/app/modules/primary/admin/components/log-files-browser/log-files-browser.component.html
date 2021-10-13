@@ -9,7 +9,7 @@
       [route]="['panels', 'admin', 'logging', 'config']"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-button icon="refresh" text="Refresh" (click)="loggingAdmin.reload()"></app-bd-button>
+    <app-bd-button icon="refresh" text="Refresh" (click)="loggingAdmin.reload()" tooltip="below"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <mat-tab-group #tabGroup [(selectedIndex)]="selectedIndex" animationDuration="0ms">

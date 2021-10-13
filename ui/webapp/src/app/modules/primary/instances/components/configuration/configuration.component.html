@@ -52,8 +52,8 @@
     <app-bd-panel-button
       text="Local Changes"
       icon="settings_backup_restore"
+      matTooltip="Local Changes"
       [route]="['panels', 'instances', 'changes']"
-      tooltip="below"
       [disabled]="!edit.hasSaveableChanges()"
     ></app-bd-panel-button>
     <app-bd-button

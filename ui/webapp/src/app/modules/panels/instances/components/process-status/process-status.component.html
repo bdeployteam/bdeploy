@@ -69,20 +69,39 @@
     <mat-divider></mat-divider>
     <ng-container *ngIf="details.processDetail$ | async as detail">
       <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="10px" [style.padding.px]="10">
-        <app-bd-button class="local-control-button" [collapsed]="false" color="primary" [disabled]="!isStartAllowed(detail)" (click)="start(detail)">
-          <mat-icon fxFlex="1 0 auto" *ngIf="!(starting$ | async)">play_arrow</mat-icon>
+        <app-bd-button
+          class="local-control-button"
+          [collapsed]="false"
+          color="primary"
+          [disabled]="!isStartAllowed(detail)"
+          (click)="start(detail)"
+          matTooltip="Start Application"
+        >
+          <mat-icon fxFlex="1 0 auto" fontSet="material-icons-filled" *ngIf="!(starting$ | async)">play_arrow</mat-icon>
           <div fxLayout="row" fxLayoutAlign="center center" fxFlex="1 0 auto" *ngIf="starting$ | async">
             <mat-spinner [diameter]="24"></mat-spinner>
           </div>
         </app-bd-button>
-        <app-bd-button class="local-control-button" [collapsed]="false" [disabled]="!isStopAllowed(detail)" (click)="stop(detail)">
-          <mat-icon fxFlex="1 0 auto" *ngIf="!(stopping$ | async)">stop</mat-icon>
+        <app-bd-button
+          class="local-control-button"
+          [collapsed]="false"
+          [disabled]="!isStopAllowed(detail)"
+          (click)="stop(detail)"
+          matTooltip="Stop Application"
+        >
+          <mat-icon fxFlex="1 0 auto" fontSet="material-icons-filled" *ngIf="!(stopping$ | async)">stop</mat-icon>
           <div fxLayout="row" fxLayoutAlign="center center" fxFlex="1 0 auto" *ngIf="stopping$ | async">
             <mat-spinner [diameter]="24"></mat-spinner>
           </div>
         </app-bd-button>
-        <app-bd-button class="local-control-button" [collapsed]="false" [disabled]="!isRestartAllowed(detail)" (click)="restart(detail)">
-          <mat-icon fxFlex="1 0 auto" *ngIf="!(restarting$ | async)">replay</mat-icon>
+        <app-bd-button
+          class="local-control-button"
+          [collapsed]="false"
+          [disabled]="!isRestartAllowed(detail)"
+          (click)="restart(detail)"
+          matTooltip="Restart Application"
+        >
+          <mat-icon fxFlex="1 0 auto" fontSet="material-icons-filled" *ngIf="!(restarting$ | async)">replay</mat-icon>
           <div fxLayout="row" fxLayoutAlign="center center" fxFlex="1 0 auto" *ngIf="restarting$ | async">
             <mat-spinner [diameter]="24"></mat-spinner>
           </div>

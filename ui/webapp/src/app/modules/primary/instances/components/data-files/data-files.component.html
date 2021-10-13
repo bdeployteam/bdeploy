@@ -28,6 +28,7 @@
     <app-bd-button
       text="Refresh"
       icon="refresh"
+      tooltip="below"
       (click)="load()"
       [loadingWhen$]="loading$"
       [disabled]="(loading$ | async) || (noactive$ | async)"

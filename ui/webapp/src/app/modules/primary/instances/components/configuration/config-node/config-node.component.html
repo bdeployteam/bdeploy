@@ -10,7 +10,12 @@
       </ng-container>
       <div fxFlex="1 0 auto"></div>
       <div fxLayout="row" fxLayoutGap="5px">
-        <app-bd-panel-button text="Add Application..." icon="add" [route]="['panels', 'instances', 'config', 'add-process', nodeName]"></app-bd-panel-button>
+        <app-bd-panel-button
+          text="Add Application..."
+          icon="add"
+          [route]="['panels', 'instances', 'config', 'add-process', nodeName]"
+          tooltip="below"
+        ></app-bd-panel-button>
       </div>
     </div>
   </div>

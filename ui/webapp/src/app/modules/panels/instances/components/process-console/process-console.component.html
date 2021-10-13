@@ -17,7 +17,7 @@
       </div>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
-    <app-bd-button icon="cloud_download" text="Download Full Content" (click)="doDownload()" [disabled]="!(available$ | async)"></app-bd-button>
+    <app-bd-button icon="cloud_download" text="Download Full Content" (click)="doDownload()" [disabled]="!(available$ | async)" tooltip="below"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>

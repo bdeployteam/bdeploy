@@ -14,6 +14,7 @@
   <div fxLayout="row" [class.local-wrapper-expanded]="!collapsed" [class.local-wrapper-collapsed]="collapsed">
     <mat-icon
       *ngIf="icon && !svgIcon && !(loadingWhen$ | async)"
+      [fontSet]="fontSet"
       class="local-icon-position"
       [matBadge]="badge"
       [matBadgeHidden]="!badge"

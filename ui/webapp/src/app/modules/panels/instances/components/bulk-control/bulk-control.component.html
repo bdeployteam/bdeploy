@@ -17,6 +17,7 @@
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized(instance.managedServer)">
       <app-bd-button
         [collapsed]="false"
+        fontSet="material-icons-filled"
         icon="play_arrow"
         text="Start Instance"
         (click)="doStart(instance)"
@@ -25,6 +26,7 @@
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
+        fontSet="material-icons-filled"
         icon="stop"
         text="Stop Instance"
         (click)="doStop(instance)"
@@ -33,6 +35,7 @@
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
+        fontSet="material-icons-filled"
         icon="replay"
         text="Restart Instance"
         (click)="doRestart(instance)"

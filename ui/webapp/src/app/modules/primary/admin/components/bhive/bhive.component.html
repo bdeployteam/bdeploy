@@ -1,7 +1,7 @@
 <app-bd-dialog [loadingWhen$]="hives.loading$">
   <app-bd-dialog-toolbar header="BHive Administration">
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button icon="refresh" text="Reload" color="primary" (click)="load()"></app-bd-button>
+    <app-bd-button icon="refresh" text="Reload" color="primary" (click)="load()" tooltip="below"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <app-bd-data-table [records]="records$ | async" [columns]="columns" [sort]="sort" [recordRoute]="getRecordRoute"></app-bd-data-table>

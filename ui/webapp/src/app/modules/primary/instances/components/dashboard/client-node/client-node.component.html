@@ -1,9 +1,9 @@
 <div class="bd-rect-card" fxLayout="column">
   <div class="bd-default-padding local-header" fxLayout="column">
-    <div class="bd-type-text">Usage Statistics</div>
+    <div class="bd-type-text">Virtual Node</div>
     <div class="bd-title-text">Client Applications</div>
   </div>
-  <div class="bd-default-padding">
+  <div class="bd-default-padding" *ngIf="!(collapsedWhen$ | async)">
     <app-bd-data-display
       [records]="node.nodeConfiguration.applications"
       [columns]="columns"

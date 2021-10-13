@@ -1,7 +1,8 @@
 <div fxLayout="row" fxLayoutAlign="start center">
   <app-bd-panel-button
     icon="edit"
-    text="Edit"
+    text="Edit File"
+    tooltip="below"
     [disabled]="isOversized()"
     [route]="['panels', 'instances', 'data-edit', record.directory.minion, record.entry.path]"
     appClickStopPropagation
