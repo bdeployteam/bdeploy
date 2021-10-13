@@ -27,6 +27,7 @@ export class MetricsOverviewComponent implements OnInit {
   selectedGroup: MetricGroup;
   groupCounts: SeriesElement[];
   selectedTimer: TimerMetric;
+  selectedTimerName: string;
   serverStats: JerseyServerMonitoringDto;
 
   // converted data for serverstats
@@ -94,6 +95,7 @@ export class MetricsOverviewComponent implements OnInit {
 
   private selectServer() {
     this.selectedTimer = null;
+    this.selectedTimerName = null;
     this.timerSeries = null;
     this.referenceLines = null;
     this.selectedGroup = null;
@@ -263,6 +265,7 @@ export class MetricsOverviewComponent implements OnInit {
   private select() {
     this.serverStats = null;
     this.selectedTimer = null;
+    this.selectedTimerName = null;
     this.timerSeries = null;
     this.referenceLines = null;
 
@@ -309,6 +312,7 @@ export class MetricsOverviewComponent implements OnInit {
     ];
 
     this.selectedTimer = timer;
+    this.selectedTimerName = t.name;
   }
 
   toMillis(nanos: number): number {

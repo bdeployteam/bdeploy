@@ -141,6 +141,7 @@
       </ng-container>
 
       <!-- Metrics of selected group -->
+      <h3 *ngIf="selectedGroup" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px"><mat-icon>lightbulb</mat-icon>Click a metric to view details</h3>
       <div *ngIf="selectedGroup" class="charts-area">
         <div class="count-chart" [style.height.px]="countGraphHeight">
           <ngx-charts-bar-horizontal
@@ -158,7 +159,7 @@
 
         <div class="details-group">
           <ng-container *ngIf="selectedTimer">
-            Details of selected element:
+            <h3>{{ selectedTimerName }}</h3>
             <div class="details-element-group">
               <span
                 >Count: <strong>{{ selectedTimer.counter.value }}</strong></span
@@ -199,7 +200,7 @@
                 [showYAxisLabel]="true"
               ></ngx-charts-line-chart>
             </div>
-            Note: histogram values are sorted by value, not time.
+            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px"><mat-icon>lightbulb</mat-icon>Histogram values are sorted by value, not time.</h3>
           </ng-container>
         </div>
       </div>
