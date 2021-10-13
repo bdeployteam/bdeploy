@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRippleModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -59,6 +60,7 @@ import { BdDialogToolbarComponent } from './components/bd-dialog-toolbar/bd-dial
 import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
 import { BdEditorDiffComponent } from './components/bd-editor-diff/bd-editor-diff.component';
 import { BdEditorComponent } from './components/bd-editor/bd-editor.component';
+import { BdExpandButtonComponent } from './components/bd-expand-button/bd-expand-button.component';
 import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.component';
 import { BdFileUploadRawComponent } from './components/bd-file-upload-raw/bd-file-upload-raw.component';
 import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-upload.component';
@@ -163,6 +165,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataPermissionLevelCellComponent,
     EditUniqueValueValidatorDirective,
     BdDataDateCellComponent,
+    BdExpandButtonComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -198,6 +201,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatTreeModule,
     MatSortModule,
     MatTabsModule,
+    MatExpansionModule,
 
     // angular base infrastructure used throughout the application.
     HttpClientModule,
@@ -272,6 +276,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     IdentifierValidator,
     PasswordVerificationValidator,
     EditUniqueValueValidatorDirective,
+    BdExpandButtonComponent,
   ],
 })
 export class CoreModule {}

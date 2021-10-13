@@ -87,21 +87,37 @@ describe('Software Repository Tests', () => {
     cy.inMainNavFlyin('app-software-details', () => {
       cy.contains('BDeploy Team').should('exist');
 
-      cy.get('button[data-cy^="Labels"]').click();
-      cy.contains('tr', 'io.bdeploy/demo').should('exist');
-      cy.pressToolbarButton('Back');
+      // "Labels" panel
+      cy.get(`app-bd-expand-button[data-cy="Labels"]`)
+        .click()
+        .within(() => {
+          cy.contains('tr', /X-Product.*io.bdeploy\/demo/).should('exist');
+        })
+        .click('top');
 
-      cy.get('button[data-cy^="Application Templates"]').click();
-      cy.contains('no application templates').should('exist');
-      cy.pressToolbarButton('Back');
+      // "Application Templates" panel
+      cy.get(`app-bd-expand-button[data-cy="Application Templates"]`)
+        .click()
+        .within(() => {
+          cy.contains('no application templates').should('exist');
+        })
+        .click('top');
 
-      cy.get('button[data-cy^="Instance Templates"]').click();
-      cy.contains('no instance templates').should('exist');
-      cy.pressToolbarButton('Back');
+      // "Instance Templates" panel
+      cy.get(`app-bd-expand-button[data-cy="Instance Templates"]`)
+        .click()
+        .within(() => {
+          cy.contains('no instance templates').should('exist');
+        })
+        .click('top');
 
-      cy.get('button[data-cy^="Plugins"]').click();
-      cy.contains('no plugins').should('exist');
-      cy.pressToolbarButton('Back');
+      // "Plugins" panel
+      cy.get(`app-bd-expand-button[data-cy="Plugins"]`)
+        .click()
+        .within(() => {
+          cy.get('app-bd-no-data').should('exist');
+        })
+        .click('top');
 
       cy.get('button[data-cy^="Download"]').downloadByLocationAssign('product-1.0.0.zip');
       validateZip('product-1.0.0.zip', 'manifests/io.bdeploy/demo/product/1.0.0');
@@ -143,7 +159,9 @@ describe('Software Repository Tests', () => {
     });
 
     // delete repo and check
-    cy.pressMainNavButton('Repository Settings');
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Repository Settings');
+    });
 
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy^="Maintenance"]').click();

@@ -12,31 +12,48 @@
         <div>{{ prod.key.tag }}</div>
         <strong>Vendor:</strong>
         <div>{{ prod.vendor }}</div>
-        <strong>Used in:</strong>
       </div>
-      <app-bd-data-display [records]="singleProduct.getUsedIn() | async" [columns]="columns">
-        <app-bd-no-data>
-          <strong>This version is not used in any instance.</strong>
-        </app-bd-no-data>
-      </app-bd-data-display>
-      <app-bd-panel-button [collapsed]="false" text="Labels" icon="label" [toggle]="false" [route]="['labels']" [relative]="true"></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Application Templates"
-        icon="bookmark"
-        [toggle]="false"
-        [route]="['templates', 'application']"
-        [relative]="true"
-      ></app-bd-panel-button>
-      <app-bd-panel-button
-        [collapsed]="false"
-        text="Instance Templates"
-        icon="bookmarks"
-        [toggle]="false"
-        [route]="['templates', 'instance']"
-        [relative]="true"
-      ></app-bd-panel-button>
-      <app-bd-panel-button [collapsed]="false" text="Plugins" icon="extension" [toggle]="false" [route]="['plugins']" [relative]="true"></app-bd-panel-button>
+      <app-bd-expand-button [text]="'Used In'" icon="settings_system_daydream">
+        <app-bd-data-display [records]="singleProduct.getUsedIn() | async" [columns]="instanceColumns">
+          <app-bd-no-data>
+            <div>This version is not used in any instance.</div>
+          </app-bd-no-data>
+        </app-bd-data-display>
+      </app-bd-expand-button>
+      <ng-container *ngIf="singleProduct.product$ | async as prod">
+        <app-bd-expand-button [text]="'Labels'" icon="label">
+          <app-bd-data-display [records]="mapLabels(prod)" [columns]="labelColumns">
+            <app-bd-no-data>
+              <div>This product has no labels.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
+
+        <app-bd-expand-button text="Application Templates" icon="bookmark">
+          <app-bd-data-display [records]="prod.applicationTemplates" [columns]="appTemplColumns">
+            <app-bd-no-data>
+              <div>This product has no application templates.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
+
+        <app-bd-expand-button text="Instance Templates" icon="bookmarks">
+          <app-bd-data-display [records]="prod.instanceTemplates" [columns]="instTemplColumns">
+            <app-bd-no-data>
+              <div>This product has no instance templates.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
+
+        <app-bd-expand-button text="Plugins" icon="extension">
+          <app-bd-data-display [records]="singleProduct.getPlugins() | async" [columns]="pluginColumns">
+            <app-bd-no-data>
+              <div>This product has no plugins.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
+      </ng-container>
+
       <app-bd-button
         [collapsed]="false"
         text="Download"

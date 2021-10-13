@@ -117,28 +117,36 @@ describe('Groups Tests', () => {
       cy.get('app-bd-no-data').should('exist');
 
       // "Labels" panel
-      cy.get(`app-bd-panel-button[text="Labels"]`).click();
-      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
-      cy.contains('tr', /X-Product.*io.bdeploy\/demo/).should('exist');
-      cy.pressToolbarButton('Back to Overview');
+      cy.get(`app-bd-expand-button[data-cy="Labels"]`)
+        .click()
+        .within(() => {
+          cy.contains('tr', /X-Product.*io.bdeploy\/demo/).should('exist');
+        })
+        .click('top');
 
       // "Application Templates" panel
-      cy.get(`app-bd-panel-button[text="Application Templates"]`).click();
-      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
-      cy.contains('tr', 'Server With Sleep').should('exist');
-      cy.pressToolbarButton('Back to Overview');
+      cy.get(`app-bd-expand-button[data-cy="Application Templates"]`)
+        .click()
+        .within(() => {
+          cy.contains('tr', 'Server With Sleep').should('exist');
+        })
+        .click('top');
 
       // "Instance Templates" panel
-      cy.get(`app-bd-panel-button[text="Instance Templates"]`).click();
-      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
-      cy.contains('tr', 'Default Configuration').should('exist');
-      cy.pressToolbarButton('Back to Overview');
+      cy.get(`app-bd-expand-button[data-cy="Instance Templates"]`)
+        .click()
+        .within(() => {
+          cy.contains('tr', 'Default Configuration').should('exist');
+        })
+        .click('top');
 
       // "Plugins" panel
-      cy.get(`app-bd-panel-button[text="Plugins"]`).click();
-      cy.get('app-bd-dialog-toolbar[header="Details"]').should('exist');
-      cy.get('app-bd-no-data').should('exist');
-      cy.pressToolbarButton('Back to Overview');
+      cy.get(`app-bd-expand-button[data-cy="Plugins"]`)
+        .click()
+        .within(() => {
+          cy.get('app-bd-no-data').should('exist');
+        })
+        .click('top');
 
       cy.get('button[data-cy^="Download"]').downloadByLocationAssign('product-2.0.0.zip');
       validateZip('product-2.0.0.zip', 'manifests/io.bdeploy/demo/product/2.0.0');

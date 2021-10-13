@@ -1,0 +1,12 @@
+<mat-expansion-panel [expanded]="false">
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+        <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+        <div>{{ text }}</div>
+      </div>
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <ng-content></ng-content>
+</mat-expansion-panel>

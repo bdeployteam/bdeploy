@@ -76,7 +76,7 @@ export class DataFilesComponent implements OnInit {
 
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ records$ = new BehaviorSubject<FileListEntry[]>(null);
-  /* template */ noactive$ = new BehaviorSubject<boolean>(false);
+  /* template */ noactive$ = new BehaviorSubject<boolean>(true);
   /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDelete, this.colEdit, this.colDownload];
   /* template */ grouping: BdDataGrouping<FileListEntry>[] = [{ definition: { group: (r) => r.directory.minion, name: 'Node Name' }, selected: [] }];
   /* template */ getRecordRoute = (row: FileListEntry) => {
@@ -162,7 +162,7 @@ export class DataFilesComponent implements OnInit {
   }
 
   /* template */ getMinions(): string[] {
-    return this.df.directories$.value.map((d) => d.minion);
+    return this.df.directories$.value?.map((d) => d.minion);
   }
 
   /* template */ doAddFile(tpl: TemplateRef<any>): void {

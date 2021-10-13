@@ -10,6 +10,16 @@
       presetKey="software-repository"
     ></app-bd-data-grouping>
     <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button
+      svgIcon="repository-settings"
+      text="Repository Settings"
+      [route]="['panels', 'repositories', 'settings']"
+      tooltip="below"
+      [disabled]="!auth.isGlobalAdmin()"
+    ></app-bd-panel-button>
+
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       icon="cloud_upload"
