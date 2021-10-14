@@ -34,7 +34,6 @@
         [ngClass]="getMaxLineY() > 45 || !hasAction ? [] : 'local-max-label-padded'"
       >
         <tspan x="100%" dy="0">{{ maxLabel }}</tspan>
-        <tspan x="100%" dy="1.2em">Data From: {{ renderTime | date: 'dd.MM HH:mm:ss' }}</tspan>
       </text>
     </g>
 

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostBinding, Input, OnInit } from '@angular/core';
 import { fromEvent } from 'rxjs';
 
 @Component({
@@ -8,6 +8,8 @@ import { fromEvent } from 'rxjs';
 })
 export class BdMicroIconButtonComponent implements OnInit, AfterViewInit {
   @Input() disabled = false;
+
+  @HostBinding('style.max-width.px') @HostBinding('style.max-height.px') @Input() size = 24;
 
   constructor(public _elementRef: ElementRef) {}
 

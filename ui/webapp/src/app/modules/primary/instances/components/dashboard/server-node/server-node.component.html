@@ -10,14 +10,15 @@
         <app-bd-panel-button text="Details" icon="info" [route]="['panels', 'instances', 'node', node.nodeName]" tooltip="below"></app-bd-panel-button>
       </div>
     </div>
-    <div fxFlex="1 0 auto"></div>
-    <app-node-state-panel fxFlexAlign="center" [items]="nodeStateItems$ | async" [narrowWhen$]="narrowWhen$"></app-node-state-panel>
   </app-node-header>
-  <app-node-process-list
-    *ngIf="!(collapsedWhen$ | async)"
-    class="bd-default-padding"
-    [node]="node"
-    [gridWhen$]="gridWhen$"
-    [groupingWhen$]="groupingWhen$"
-  ></app-node-process-list>
+  <app-node-state-panel
+    [items]="nodeStateItems$ | async"
+    [narrowWhen$]="narrowWhen$"
+    [lastRefreshAt$]="processes.processStatesLoadTime$"
+    (manualRefresh)="processes.reload()"
+  ></app-node-state-panel>
+  <ng-container *ngIf="!(collapsedWhen$ | async)">
+    <mat-divider></mat-divider>
+    <app-node-process-list class="bd-default-padding" [node]="node" [gridWhen$]="gridWhen$" [groupingWhen$]="groupingWhen$"></app-node-process-list>
+  </ng-container>
 </div>
