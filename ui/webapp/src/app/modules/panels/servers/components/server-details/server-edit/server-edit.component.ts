@@ -35,7 +35,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   ngOnInit(): void {
     this.subscription.add(
       this.details.server$.subscribe((s) => {
-        this.server = s;
+        this.server = cloneDeep(s);
         this.orig = cloneDeep(s);
       })
     );
@@ -50,7 +50,10 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe((_) => {
+      this.orig = cloneDeep(this.server);
+      this.tb.closePanel();
+    });
   }
 
   public doSave() {

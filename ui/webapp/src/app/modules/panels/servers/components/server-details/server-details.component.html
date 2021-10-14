@@ -3,21 +3,23 @@
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="serverDetails.server$ | async as server">
-      <div gdColumns="90px auto" gdGap="5px">
+      <div gdColumns="110px auto" gdGap="5px">
         <strong>Name:</strong>
-        <div>{{ server.hostName }}</div>
+        <div class="bd-text-ellipsis">{{ server.hostName }}</div>
         <strong>Description:</strong>
-        <div>{{ server.description }}</div>
+        <div class="bd-text-ellipsis">{{ server.description }}</div>
         <strong>URI:</strong>
-        <div>{{ server.uri }}</div>
+        <div class="bd-text-ellipsis">{{ server.uri }}</div>
         <strong>Last Sync.:</strong>
         <div>{{ server.lastSync | date: 'dd.MM.yyyy HH:mm' }}</div>
+        <ng-container *ngIf="server.update?.updateAvailable">
+          <strong>Update available:</strong>
+          <div fxLayout="row" fxLayoutAlign="start center">
+            {{ formatVersion(server.update.updateVersion) }}<mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
+          </div>
+        </ng-container>
       </div>
       <ng-container *ngIf="server.update?.updateAvailable">
-        <div fxLayout="row" fxLayoutAlign="start center">
-          <strong>Update available:</strong>&nbsp;{{ formatVersion(server.update.updateVersion)
-          }}<mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
-        </div>
         <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server) && !server.update.forceUpdate">
           <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize to enable update related actions.
         </div>
@@ -48,12 +50,13 @@
           (click)="doUpdateInstall(server)"
         ></app-bd-button>
       </ng-container>
-      <div><strong>Nodes:</strong></div>
-      <app-bd-data-display [records]="getMinionRecords(server)" [columns]="columns">
-        <app-bd-no-data>
-          <strong>This version is not used in any instance.</strong>
-        </app-bd-no-data>
-      </app-bd-data-display>
+      <app-bd-expand-button text="Nodes" icon="dns">
+        <app-bd-data-display [records]="getMinionRecords(server)" [columns]="columns">
+          <app-bd-no-data>
+            <strong>This version is not used in any instance.</strong>
+          </app-bd-no-data>
+        </app-bd-data-display>
+      </app-bd-expand-button>
       <app-bd-server-sync-button [collapsed]="false" [server]="server"></app-bd-server-sync-button>
       <app-bd-panel-button
         text="Edit Server Details"
