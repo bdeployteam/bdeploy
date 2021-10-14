@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import { ObjectChangeDetails, ObjectChangeHint, ObjectChangeType, SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { LoggingService } from 'src/app/modules/core/services/logging.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -13,8 +12,6 @@ import { measure } from 'src/app/modules/core/utils/performance.utils';
   providedIn: 'root',
 })
 export class RepositoriesService {
-  private log = this.logging.getLogger('RepositoriesService');
-
   private apiPath = `${this.cfg.config.api}/softwarerepository`;
   private update$ = new BehaviorSubject<any>(null);
 
@@ -26,13 +23,7 @@ export class RepositoriesService {
   /** The *current* repository based on the current route context */
   current$ = new BehaviorSubject<SoftwareRepositoryConfiguration>(null);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private areas: NavAreasService,
-    private logging: LoggingService
-  ) {
+  constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, private areas: NavAreasService) {
     this.areas.repositoryContext$.subscribe((r) => this.setCurrent(r));
     this.update$.pipe(debounceTime(100)).subscribe((_) => this.reload());
     this.changes.subscribe(ObjectChangeType.SOFTWARE_REPO, EMPTY_SCOPE, (change) => {

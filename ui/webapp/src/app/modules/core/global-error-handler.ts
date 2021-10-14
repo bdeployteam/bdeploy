@@ -1,21 +1,10 @@
-import { LocationStrategy } from '@angular/common';
-import { ErrorHandler, Injectable, Injector } from '@angular/core';
-import { ErrorMessage, Logger, LoggingService } from './services/logging.service';
+import { ErrorHandler, Injectable } from '@angular/core';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  constructor(private injector: Injector) {}
+  constructor() {}
 
   handleError(error: any): void {
-    const location: LocationStrategy = this.injector.get(LocationStrategy);
-    const log: Logger = this.injector.get(LoggingService).getLogger('GlobalErrorHandler');
-
-    const message = error.message ? error.message : error.toString();
-
-    if (error instanceof Error) {
-      log.error(new ErrorMessage('UNHANDLED ERROR', error));
-    } else {
-      log.error('UNHANDLED ERROR: ' + message + ' (path="' + location.path(true) + '")');
-    }
+    console.log('UNHANDLED ERROR', error);
   }
 }

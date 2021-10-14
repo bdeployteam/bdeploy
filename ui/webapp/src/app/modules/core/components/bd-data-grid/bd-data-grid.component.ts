@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { max } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataColumnDisplay, bdDataDefaultSearch, BdDataGrouping, bdExtractGroups, UNMATCHED_GROUP } from 'src/app/models/data';
-import { LoggingService } from '../../services/logging.service';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
@@ -12,8 +11,6 @@ import { BdSearchable, SearchService } from '../../services/search.service';
   styleUrls: ['./bd-data-grid.component.css'],
 })
 export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable {
-  private log = this.logging.getLogger('BdDataTableComponent');
-
   /**
    * The columns to display
    */
@@ -60,7 +57,7 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable {
 
   private subscription: Subscription;
 
-  constructor(private logging: LoggingService, private searchService: SearchService, private areas: NavAreasService) {}
+  constructor(private searchService: SearchService, private areas: NavAreasService) {}
 
   ngOnInit(): void {
     if (this.searchable) {

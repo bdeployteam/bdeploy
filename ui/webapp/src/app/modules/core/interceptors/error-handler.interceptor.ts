@@ -6,20 +6,11 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NO_ERROR_HANDLING_HDR } from 'src/app/models/consts';
 import { ConfigService } from '../services/config.service';
-import { ErrorMessage, Logger, LoggingService } from '../services/logging.service';
 import { NavAreasService } from '../services/nav-areas.service';
 
 @Injectable()
 export class HttpErrorHandlerInterceptor implements HttpInterceptor {
-  private log: Logger = this.loggingService.getLogger('HttpErrorHandlerInterceptor');
-
-  constructor(
-    private loggingService: LoggingService,
-    private config: ConfigService,
-    private snackbar: MatSnackBar,
-    private router: Router,
-    private areas: NavAreasService
-  ) {}
+  constructor(private config: ConfigService, private snackbar: MatSnackBar, private router: Router, private areas: NavAreasService) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -42,16 +33,16 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
               return of(null);
             case 499:
               // special version mismatch code.
-              this.log.errorWithGuiMessage(new ErrorMessage(e.statusText, e));
+              this.snackbar.open(e.statusText, 'DISMISS', { panelClass: 'error-snackbar' });
               break;
             default:
               let displayPath = request.url;
               try {
                 displayPath = new URL(request.url).pathname;
               } catch (error) {
-                this.log.warn(new ErrorMessage('Cannot parse request URL', error));
+                console.warn('Cannot parse request URL', error);
               }
-              this.log.errorWithGuiMessage(new ErrorMessage(e.status + ': ' + e.statusText + ': ' + displayPath, e));
+              this.snackbar.open(e.status + ': ' + e.statusText + ': ' + displayPath, 'DISMISS', { panelClass: 'error-snackbar' });
               return of(null);
           }
         }

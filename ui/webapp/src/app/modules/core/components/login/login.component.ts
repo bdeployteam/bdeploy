@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { AuthenticationService } from '../../services/authentication.service';
-import { ErrorMessage, Logger, LoggingService } from '../../services/logging.service';
 
 @Component({
   selector: 'app-login',
@@ -11,8 +11,6 @@ import { ErrorMessage, Logger, LoggingService } from '../../services/logging.ser
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private log: Logger = this.loggingService.getLogger('LoginComponent');
-
   private tokenSubscription: Subscription;
 
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
@@ -24,7 +22,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   public loginFailed = false;
   public loginFailedMessage;
 
-  constructor(private loggingService: LoggingService, private route: ActivatedRoute, private router: Router, public auth: AuthenticationService) {}
+  constructor(private route: ActivatedRoute, private router: Router, public auth: AuthenticationService, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
     this.tokenSubscription = this.auth.getTokenSubject().subscribe((token) => {
@@ -42,25 +40,23 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /* template */ onSubmit(): void {
-    this.log.info(`Login attempt for user "${this.user}"`);
-
     this.loading$.next(true);
     this.auth
       .authenticate(this.user, this.pass)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe(
         (_) => {
-          this.log.info(`User "${this.user}" successfully logged in`);
-          this.loggingService.dismissOpenMessage(); // close any open "error" popup.
+          console.log(`User "${this.user}" successfully logged in`);
+          this.snackBar.dismiss(); // potentially open snackbar by error handler(s).
         },
         (error) => {
           if (error.status === 401) {
             this.loginFailedMessage = `User "${this.user}" failed to authenticate`;
           } else {
-            this.loginFailedMessage = new ErrorMessage(`Error authenticating "${this.user}"`, error);
+            this.loginFailedMessage = `Error authenticating "${this.user}"`;
           }
 
-          this.log.error(this.loginFailedMessage);
+          console.error(this.loginFailedMessage, error);
           this.loginFailed = true;
         }
       );

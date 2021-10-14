@@ -18,7 +18,6 @@ import {
   bdSortGroups,
   UNMATCHED_GROUP,
 } from 'src/app/models/data';
-import { ErrorMessage, LoggingService } from '../../services/logging.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
 // member ordering due to default implementation for callbacks.
@@ -61,8 +60,6 @@ export interface DragReorderEvent<T> {
   styleUrls: ['./bd-data-table.component.css'],
 })
 export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
-  private log = this.logging.getLogger('BdDataTableComponent');
-
   /**
    * Aria caption for the table, mainly for screen readers.
    */
@@ -192,7 +189,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-  constructor(private logging: LoggingService, private searchService: SearchService, private media: BreakpointObserver, private sanitizer: DomSanitizer) {}
+  constructor(private searchService: SearchService, private media: BreakpointObserver, private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
     if (this.searchable) {
@@ -369,7 +366,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     if (!!this.sortData && !!sort && !!sort.active && !!sort.direction) {
       const col = this._columns.find((c) => c.id === sort.active);
       if (!col) {
-        this.log.error('Cannot find active sort column ' + sort.active);
+        console.error('Cannot find active sort column ' + sort.active);
       } else {
         sortedData = this.sortData(data, col, sort.direction);
       }
@@ -388,7 +385,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   /* template */ getUnknownIcon(col: BdDataColumn<T>) {
-    this.log.warn(new ErrorMessage('No icon callback registered for column definition with action', col));
+    console.warn('No icon callback registered for column definition with action', col);
     return 'help'; // default fallback.
   }
 

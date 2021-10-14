@@ -11,7 +11,6 @@ import {
   ObjectChangeType,
   ObjectId,
 } from 'src/app/models/gen.dtos';
-import { LoggingService } from 'src/app/modules/core/services/logging.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
@@ -22,8 +21,6 @@ import { SettingsService } from '../../../core/services/settings.service';
   providedIn: 'root',
 })
 export class GroupsService {
-  private log = this.logging.getLogger('GroupsService');
-
   private apiPath = `${this.cfg.config.api}/group`;
   private update$ = new BehaviorSubject<any>(null);
 
@@ -49,8 +46,7 @@ export class GroupsService {
     private http: HttpClient,
     private changes: ObjectChangesService,
     private areas: NavAreasService,
-    private settings: SettingsService,
-    private logging: LoggingService
+    private settings: SettingsService
   ) {
     this.areas.groupContext$.subscribe((r) => this.setCurrent(r));
     this.update$.pipe(debounceTime(100)).subscribe((_) => this.reload());

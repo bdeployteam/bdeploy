@@ -4,7 +4,6 @@ import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { ObjectChangeDto, ObjectChangeInitDto, ObjectChangeRegistrationDto, ObjectChangeType, ObjectScope, RegistrationAction } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
-import { ErrorMessage, LoggingService } from './logging.service';
 
 export const EMPTY_SCOPE: ObjectScope = { scope: [] };
 
@@ -18,14 +17,13 @@ interface RemoteRegistration {
   providedIn: 'root',
 })
 export class ObjectChangesService {
-  private log = this.logging.getLogger('ObjectChangesService');
   private ws: ReconnectingWebSocket;
   private _change$ = new Subject<ObjectChangeDto>();
   private _error$ = new Subject<ErrorEvent>();
   private _open$ = new BehaviorSubject<boolean>(false);
   private _refs: { [index: string]: RemoteRegistration } = {};
 
-  constructor(private cfg: ConfigService, private auth: AuthenticationService, private logging: LoggingService) {
+  constructor(private cfg: ConfigService, private auth: AuthenticationService) {
     this.ws = this.createWebSocket();
   }
 
@@ -54,7 +52,7 @@ export class ObjectChangesService {
       this.cfg.checkServerVersion();
     });
     _socket.addEventListener('error', (err) => {
-      this.log.error(new ErrorMessage('Error on WebSocket', err));
+      console.error('Error on WebSocket', err);
       this.cfg.checkServerReachable();
       this._error$.next(err);
     });

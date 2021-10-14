@@ -5,7 +5,6 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { ActivitySnapshot, ObjectChangeDetails, ObjectChangeType, ObjectScope } from '../../../models/gen.dtos';
 import { ConfigService } from './config.service';
-import { LoggingService } from './logging.service';
 import { NavAreasService } from './nav-areas.service';
 import { ObjectChangesService } from './object-changes.service';
 
@@ -19,17 +18,9 @@ export class ActivitySnapshotTreeNode {
 export class ActivitiesService {
   public activities$ = new BehaviorSubject<ActivitySnapshotTreeNode[]>(null);
 
-  private log = this.loggingService.getLogger('ActivitiesService');
-
   private changesSubscription: Subscription;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private loggingService: LoggingService,
-    areas: NavAreasService,
-    changes: ObjectChangesService
-  ) {
+  constructor(private cfg: ConfigService, private http: HttpClient, areas: NavAreasService, changes: ObjectChangesService) {
     combineLatest([areas.groupContext$, areas.instanceContext$])
       .pipe(debounceTime(500))
       .subscribe(([group, instance]) => {
@@ -77,7 +68,7 @@ export class ActivitiesService {
       if (n.snapshot.parentUuid) {
         const parentNode = allTreeNodes.get(n.snapshot.parentUuid);
         if (!parentNode) {
-          this.log.warn('Cannot find referenced parent activity for: ' + JSON.stringify(n.snapshot));
+          console.warn('Cannot find referenced parent activity for: ' + JSON.stringify(n.snapshot));
         } else {
           parentNode.children.push(n);
         }

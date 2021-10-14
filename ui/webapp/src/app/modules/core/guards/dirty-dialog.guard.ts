@@ -4,7 +4,6 @@ import { Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import { BdDialogMessageAction } from '../components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from '../components/bd-dialog/bd-dialog.component';
-import { LoggingService } from '../services/logging.service';
 import { NavAreasService } from '../services/nav-areas.service';
 
 enum DirtyActionType {
@@ -54,9 +53,7 @@ export interface DirtyableDialog {
   providedIn: 'root',
 })
 export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
-  private log = this.logging.getLogger('DirtyDialogGuard');
-
-  constructor(private logging: LoggingService, private areas: NavAreasService, private router: Router) {}
+  constructor(private areas: NavAreasService, private router: Router) {}
 
   canDeactivate(
     component: DirtyableDialog,
@@ -159,7 +156,7 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
       .pipe(
         tap((result) => {
           if (result === DirtyActionType.DISCARD) {
-            this.log.info('User confirmed discarding pending changes.');
+            console.warn('User confirmed discarding pending changes.');
           }
         })
       );

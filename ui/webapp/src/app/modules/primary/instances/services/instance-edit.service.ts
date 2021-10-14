@@ -21,7 +21,6 @@ import {
   ProductDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { ErrorMessage, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { mapObjToArray } from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -91,8 +90,6 @@ export class InstanceApplicationMoveEdit implements Edit {
   providedIn: 'root',
 })
 export class InstanceEditService {
-  private log = this.logging.getLogger('InstanceEditService');
-
   public loading$ = new BehaviorSubject<boolean>(true);
   public saving$ = new BehaviorSubject<boolean>(false);
 
@@ -122,7 +119,6 @@ export class InstanceEditService {
   constructor(
     private http: HttpClient,
     private cfg: ConfigService,
-    private logging: LoggingService,
     private groups: GroupsService,
     private instances: InstancesService,
     private products: ProductsService,
@@ -136,7 +132,7 @@ export class InstanceEditService {
       if (instance?.instance?.name !== cur?.instance?.name || instance?.instance?.tag !== cur?.instance?.tag) {
         if (!!this.undos?.length || !!this.redos?.length) {
           // instance (version?) changes, but we have edits... this means we're basically doomed.
-          this.log.warn('Instance update with pending changes.');
+          console.warn('Instance update with pending changes.');
           this.incompatible$.next(true);
         } else {
           // either nothing loaded yet, or we do not have any changes, in this case we can reset as well.
@@ -147,7 +143,7 @@ export class InstanceEditService {
 
     this.areas.panelRoute$.subscribe((route) => {
       if (this.isAllowEdit() && this.hasPendingChanges()) {
-        this.log.warn('Unconcealed changes on route change, discarding.');
+        console.warn('Unconcealed changes on route change, discarding.');
         this.discard();
       }
     });
@@ -178,7 +174,7 @@ export class InstanceEditService {
    */
   public conceal(description: string, factory?: EditFactory): void {
     if (!this.isAllowEdit()) {
-      this.log.error(new ErrorMessage('Trying to edit with no current state', new Error()));
+      console.error('Trying to edit with no current state');
       return;
     }
 
@@ -302,7 +298,7 @@ export class InstanceEditService {
   /** Applies all current InstanceEdits and saves the result to the server. */
   public save() {
     if (!this.isAllowEdit()) {
-      this.log.error(new ErrorMessage('Trying to save with no state', new Error()));
+      console.error('Trying to save with no state');
       return;
     }
 
@@ -312,7 +308,7 @@ export class InstanceEditService {
 
     if (!this.hasChanges(state, this.base$.value)) {
       // we have literally undone all changes, so no need to save, we just reset.
-      this.log.warn('No changes detected, you have logically undone all changes, not saving');
+      console.warn('No changes detected, you have logically undone all changes, not saving');
       this.reset();
       return;
     }

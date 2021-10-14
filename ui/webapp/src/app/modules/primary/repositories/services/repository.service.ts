@@ -4,10 +4,7 @@ import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { debounceTime, finalize, map } from 'rxjs/operators';
 import { ManifestKey, ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { LoggingService } from 'src/app/modules/core/services/logging.service';
-import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
-import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { RepositoriesService } from './repositories.service';
 
@@ -15,8 +12,6 @@ import { RepositoriesService } from './repositories.service';
   providedIn: 'root',
 })
 export class RepositoryService {
-  private log = this.logging.getLogger('RepositoryService');
-
   private repository: string;
   private subscription: Subscription;
 
@@ -45,15 +40,7 @@ export class RepositoryService {
   /** the current selection */
   current$ = new BehaviorSubject<any>(null);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private areas: NavAreasService,
-    private settings: SettingsService,
-    private logging: LoggingService,
-    repositories: RepositoriesService
-  ) {
+  constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, repositories: RepositoriesService) {
     repositories.current$.subscribe((repository) => this.update$.next(repository?.name));
     this.update$.pipe(debounceTime(100)).subscribe((r) => this.reload(r));
   }

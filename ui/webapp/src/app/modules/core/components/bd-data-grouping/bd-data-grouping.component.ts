@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-import { ErrorMessage, LoggingService } from '../../services/logging.service';
 
 interface BdDataGroupingStorage {
   name: string;
@@ -14,8 +13,6 @@ interface BdDataGroupingStorage {
   styleUrls: ['./bd-data-grouping.component.css'],
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
-  private log = this.logging.getLogger('BdDataGroupingComponent');
-
   /** whether mutiple groupings are supported */
   @Input() multiple = true;
 
@@ -36,7 +33,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   groupings: BdDataGrouping<T>[] = [];
 
-  constructor(private logging: LoggingService, private snackBar: MatSnackBar) {}
+  constructor(private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
     this.loadPreset();
@@ -91,7 +88,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
         for (const item of parsed) {
           const def = this.definitions.find((d) => d.name === item.name);
           if (!def) {
-            this.log.warn('Grouping definition not (any longer?) available: ' + item.name);
+            console.warn('Grouping definition not (any longer?) available: ' + item.name);
             continue;
           }
           restored.push({ definition: def, selected: item.selected });
@@ -102,7 +99,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
         this.groupings = restored;
       }
     } catch (e) {
-      this.log.error(new ErrorMessage('Cannot load grouping preset', e));
+      console.error('Cannot load grouping preset', e);
     }
   }
 

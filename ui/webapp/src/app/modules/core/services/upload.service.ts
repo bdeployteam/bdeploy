@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { UploadInfoDto } from 'src/app/models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
-import { Logger, LoggingService } from './logging.service';
 
 /** Enumeration of the possible states of an upload */
 export enum UploadState {
@@ -84,9 +83,7 @@ export class ImportStatus {
   providedIn: 'root',
 })
 export class UploadService {
-  private readonly log: Logger = this.loggingService.getLogger('UploadService');
-
-  constructor(private http: HttpClient, private loggingService: LoggingService) {}
+  constructor(private http: HttpClient) {}
 
   /**
    * Uploads the given files to the given URL and returns an observable result to track the upload status. For

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Logger, LoggingService } from './modules/core/services/logging.service';
 import { NavAreasService } from './modules/core/services/nav-areas.service';
 
 @Component({
@@ -11,17 +10,13 @@ import { NavAreasService } from './modules/core/services/nav-areas.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  log: Logger = this.loggingService.getLogger('AppComponent');
-
-  title = 'BDeploy';
-
   subscription: Subscription;
   loadCount = 0;
 
-  constructor(private loggingService: LoggingService, private router: Router, private areas: NavAreasService) {
-    this.log.info('----------------------------------------');
-    this.log.info(this.title + ' started...');
-    this.log.info('----------------------------------------');
+  constructor(private router: Router, private areas: NavAreasService) {
+    console.log('----------------------------------------');
+    console.log('BDeploy started...');
+    console.log('----------------------------------------');
 
     // potential official fix for broken history on cancelled navigation, see https://github.com/angular/angular/issues/13586
     // @ts-ignore: private option not yet exposed for public use

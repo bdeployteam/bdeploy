@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BarHorizontalComponent } from '@swimlane/ngx-charts';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { Logger, LoggingService } from 'src/app/modules/core/services/logging.service';
 import { JerseyServerMonitoringDto, MetricBundle, MetricGroup, TimerMetric } from '../../../../../models/gen.dtos';
 import { MetricsService } from '../../services/metrics.service';
 
@@ -19,8 +18,6 @@ export interface SeriesElement {
 export class MetricsOverviewComponent implements OnInit {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ keys$ = new BehaviorSubject<string[]>(['SERVER']);
-
-  private readonly log: Logger = this.loggingService.getLogger('MetricsOverviewComponent');
 
   selection: string;
   allMetrics: Map<MetricGroup, MetricBundle>;
@@ -54,7 +51,7 @@ export class MetricsOverviewComponent implements OnInit {
 
   countGraphHeight = 100;
 
-  constructor(private metrics: MetricsService, private loggingService: LoggingService) {}
+  constructor(private metrics: MetricsService) {}
 
   ngOnInit() {
     this.metrics
@@ -171,11 +168,11 @@ export class MetricsOverviewComponent implements OnInit {
         }
         if (snap.vmCpus !== vmCpuCount) {
           vmCpuCount = snap.vmCpus;
-          this.log.warn('Server CPU count changed!');
+          console.warn('Server CPU count changed!');
         }
         if (snap.vmMaxMem !== vmMemMax) {
           vmMemMax = snap.vmMaxMem;
-          this.log.warn('Server Maximum Memory changed!');
+          console.warn('Server Maximum Memory changed!');
         }
 
         const label = new Date(snap.snapshotTime);

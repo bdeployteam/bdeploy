@@ -13,13 +13,11 @@ import { ConnectionLostComponent } from '../components/connection-lost/connectio
 import { ConnectionVersionComponent, VERSION_DATA } from '../components/connection-version/connection-version.component';
 import { NO_LOADING_BAR_HDRS } from '../utils/loading-bar.util';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
-import { LoggingService, LogLevel } from './logging.service';
 import { ThemeService } from './theme.service';
 
 export interface AppConfig {
   version: Version;
   api: string;
-  logLevel: LogLevel;
   mode: MinionMode;
 }
 
@@ -36,7 +34,6 @@ export class ConfigService {
   constructor(
     private themes: ThemeService /* dummy: required to bootstrap theming early! */,
     private http: HttpClient,
-    private loggingService: LoggingService,
     private overlay: Overlay,
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer
@@ -68,16 +65,14 @@ export class ConfigService {
           this.config = {
             version: bv.version,
             api: environment.apiUrl,
-            logLevel: environment.logLevel,
             mode: bv.mode,
           };
-          this.loggingService.getLogger(null).setLogLevel(this.config.logLevel);
-          this.loggingService.getLogger(null).info('API URL set to ' + this.config.api);
-          this.loggingService.getLogger(null).info('Remote reports mode ' + this.config.mode);
+          console.log('API URL set to ' + this.config.api);
+          console.log('Remote reports mode ' + this.config.mode);
           resolve(this.config);
         },
         (err) => {
-          this.loggingService.getLogger(null).errorWithGuiMessage(err);
+          console.error('Cannot load configuration', err);
         }
       );
     });

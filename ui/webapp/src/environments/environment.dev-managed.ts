@@ -5,7 +5,6 @@
 export const environment = {
   production: false,
   apiUrl: 'https://localhost:7706/api',
-  logLevel: 4,
   animations: true,
 };
 
