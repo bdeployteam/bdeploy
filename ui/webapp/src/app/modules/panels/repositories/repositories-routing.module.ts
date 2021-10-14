@@ -7,7 +7,6 @@ import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { AddRepositoryComponent } from './components/add-repository/add-repository.component';
 import { EditComponent } from './components/settings/edit/edit.component';
-import { MaintenanceComponent } from './components/settings/maintenance/maintenance.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
@@ -16,7 +15,6 @@ const REPOSITORIES_ROUTES: Route[] = [
   { path: 'add', component: AddRepositoryComponent, canActivate: [AdminGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [ScopedAdminGuard] },
   { path: 'settings/edit', component: EditComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [ScopedAdminGuard] },
   { path: 'upload', component: SoftwareUploadComponent, canActivate: [ScopedWriteGuard] },
   { path: 'details/:key/:tag', component: SoftwareDetailsComponent, canActivate: [ScopedReadGuard] },
 ];

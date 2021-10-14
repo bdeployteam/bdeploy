@@ -164,7 +164,6 @@ describe('Software Repository Tests', () => {
     });
 
     cy.inMainNavFlyin('app-settings', () => {
-      cy.get('button[data-cy^="Maintenance"]').click();
       cy.get('button[data-cy^="Delete"]').click();
 
       cy.contains('app-bd-notification-card', 'Delete').within(() => {

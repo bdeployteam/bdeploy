@@ -43,9 +43,6 @@ Cypress.Commands.add('deleteGroup', function (groupName, mode = 'STANDALONE') {
   });
 
   cy.inMainNavFlyin('app-settings', () => {
-    cy.get(`app-bd-panel-button[text="Maintenance"]`).click();
-
-    cy.get('app-bd-dialog-toolbar[header="Instance Group Maintenance"]').should('exist');
     cy.get(`app-bd-button[text="Delete Instance Group"]`).click();
 
     cy.get('app-bd-dialog-message').within(() => {

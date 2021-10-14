@@ -9,7 +9,6 @@ import { ClientDetailComponent } from './components/client-detail/client-detail.
 import { AttributeDefinitionsComponent } from './components/settings/attribute-definitions/attribute-definitions.component';
 import { AttributeValuesComponent } from './components/settings/attribute-values/attribute-values.component';
 import { EditComponent } from './components/settings/edit/edit.component';
-import { MaintenanceComponent } from './components/settings/maintenance/maintenance.component';
 import { PermissionsComponent } from './components/settings/permissions/permissions.component';
 import { SettingsComponent } from './components/settings/settings.component';
 
@@ -20,7 +19,6 @@ const GROUPS_ROUTES: Route[] = [
   { path: 'settings/attributes/values', component: AttributeValuesComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/attributes/definitions', component: AttributeDefinitionsComponent, canActivate: [ScopedAdminGuard] },
   { path: 'settings/permissions', component: PermissionsComponent, canActivate: [ScopedAdminGuard], data: { max: true } },
-  { path: 'settings/maintenance', component: MaintenanceComponent, canActivate: [ScopedWriteGuard] },
   { path: 'client/:app', component: ClientDetailComponent },
 ];
 

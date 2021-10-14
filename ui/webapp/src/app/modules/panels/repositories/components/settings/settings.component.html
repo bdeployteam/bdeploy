@@ -13,15 +13,15 @@
         [disabled]="!auth.isCurrentScopeAdmin()"
       ></app-bd-panel-button>
 
-      <app-bd-panel-button
-        text="Maintenance"
-        icon="build"
+      <app-bd-button
+        *ngIf="repositories.current$ | async as repository"
+        text="Delete Software Repository"
+        icon="delete"
         [collapsed]="false"
-        [toggle]="false"
-        [route]="['maintenance']"
-        [relative]="true"
-        [disabled]="!auth.isCurrentScopeAdmin()"
-      ></app-bd-panel-button>
+        (click)="onDelete(repository)"
+        [disabled]="!auth.isGlobalAdmin() || (deleting$ | async)"
+        [loadingWhen$]="deleting$"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

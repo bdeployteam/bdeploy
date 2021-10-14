@@ -42,15 +42,34 @@
         [disabled]="!auth.isCurrentScopeAdmin()"
       ></app-bd-panel-button>
 
-      <app-bd-panel-button
-        text="Maintenance"
-        icon="build"
-        [collapsed]="false"
-        [toggle]="false"
-        [route]="['maintenance']"
-        [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite()"
-      ></app-bd-panel-button>
+      <ng-container *ngIf="groups.current$ | async as group">
+        <mat-divider></mat-divider>
+
+        <app-bd-button
+          text="Repair BHive Problems"
+          icon="build"
+          [collapsed]="false"
+          (click)="onRepair(group)"
+          [loadingWhen$]="repairing$"
+          [disabled]="!auth.isCurrentScopeAdmin() || (repairing$ | async)"
+        ></app-bd-button>
+        <app-bd-button
+          text="Prune unused data in BHive"
+          icon="delete_sweep"
+          [collapsed]="false"
+          (click)="onPrune(group)"
+          [loadingWhen$]="pruning$"
+          [disabled]="!auth.isCurrentScopeWrite() || (pruning$ | async)"
+        ></app-bd-button>
+        <app-bd-button
+          text="Delete Instance Group"
+          icon="delete"
+          [collapsed]="false"
+          (click)="onDelete(group)"
+          [disabled]="!auth.isCurrentScopeAdmin() || (deleting$ | async)"
+          [loadingWhen$]="deleting$"
+        ></app-bd-button>
+      </ng-container>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

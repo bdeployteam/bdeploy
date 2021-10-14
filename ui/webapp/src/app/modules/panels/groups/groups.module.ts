@@ -7,7 +7,6 @@ import { ClientUsageGraphComponent } from './components/client-detail/usage-grap
 import { AttributeDefinitionsComponent } from './components/settings/attribute-definitions/attribute-definitions.component';
 import { AttributeValuesComponent } from './components/settings/attribute-values/attribute-values.component';
 import { EditComponent } from './components/settings/edit/edit.component';
-import { MaintenanceComponent } from './components/settings/maintenance/maintenance.component';
 import { PermissionsComponent } from './components/settings/permissions/permissions.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { GroupsRoutingModule } from './groups-routing.module';
@@ -19,7 +18,6 @@ import { GroupsRoutingModule } from './groups-routing.module';
     EditComponent,
     AttributeValuesComponent,
     AttributeDefinitionsComponent,
-    MaintenanceComponent,
     ClientDetailComponent,
     PermissionsComponent,
     ClientUsageGraphComponent,

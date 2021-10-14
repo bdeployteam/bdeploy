@@ -218,9 +218,10 @@ describe('Groups Tests', () => {
     });
 
     cy.inMainNavFlyin('app-settings', () => {
-      cy.get(`app-bd-panel-button[text="Maintenance"]`).click();
-
       cy.get(`app-bd-button[text="Repair BHive Problems"]`).click();
+      cy.contains('app-bd-notification-card', 'Repair').within(() => {
+        cy.get('button[data-cy^="Yes"]').click();
+      });
 
       cy.get('app-bd-dialog-message').within(() => {
         cy.contains('No damaged objects were found.').should('exist');
@@ -234,7 +235,6 @@ describe('Groups Tests', () => {
         cy.contains('button', 'OK').should('exist').and('be.enabled').click();
       });
 
-      cy.pressToolbarButton('Back to Overview');
       cy.pressToolbarButton('Close');
     });
   });
