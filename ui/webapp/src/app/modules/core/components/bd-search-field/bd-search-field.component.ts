@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -12,6 +12,8 @@ export class BdSearchFieldComponent implements OnInit, OnDestroy {
 
   @Input() value = '';
   @Output() valueChange = new EventEmitter<string>();
+
+  @ViewChild('searchField') searchField: ElementRef;
 
   private searchChanged = new Subject<string>();
   private subscription: Subscription;
@@ -28,5 +30,14 @@ export class BdSearchFieldComponent implements OnInit, OnDestroy {
 
   queueChange() {
     this.searchChanged.next(this.value);
+  }
+
+  @HostListener('window:keydown.control.f', ['$event'])
+  setFocus(event: KeyboardEvent) {
+    if (this.disabled) {
+      return;
+    }
+    this.searchField.nativeElement.focus();
+    event.preventDefault();
   }
 }
