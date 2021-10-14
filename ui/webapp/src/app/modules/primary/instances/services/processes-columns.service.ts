@@ -114,6 +114,14 @@ export class ProcessesColumnsService {
     this.processActualityColumn,
   ];
 
+  defaultProcessClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
+    this.processNameColumn,
+    this.processOsColumn,
+    this.processIdColumn,
+    this.processAvatarColumn,
+    this.applicationVersionColumn,
+  ];
+
   defaultProcessesConfigColumns: BdDataColumn<ApplicationConfiguration>[] = [
     this.processNameAndEditStatusColumn,
     this.processIdColumn,

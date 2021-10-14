@@ -1,13 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { differenceInDays, parse } from 'date-fns';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
 import { ClientUsageData } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
-import { GroupsService } from '../../groups/services/groups.service';
-import { InstancesService } from './instances.service';
+import { GroupsService } from '../../../primary/groups/services/groups.service';
 
 export interface ClientUsagePerHost {
   hostname: string;
@@ -36,25 +35,15 @@ export class ClientsUsageService {
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
-  constructor(private http: HttpClient, private cfg: ConfigService, private groups: GroupsService, private instances: InstancesService) {
-    // we're using the node states purely as a trigger to reload client usage, as they should share the reload cycle (and node states only when synchyronized)
-    combineLatest([this.instances.active$, this.instances.activeNodeStates$]).subscribe(([active, states]) => {
-      if (!active || !states) {
-        this.clientUsage$.next(null);
-        return;
-      }
+  constructor(private http: HttpClient, private cfg: ConfigService, private groups: GroupsService) {}
 
-      this.loading$.next(true);
-      this.http
-        .get<ClientUsageData>(`${this.apiPath(this.groups.current$.value.name)}/${active.instanceConfiguration.uuid}/clientUsage`)
-        .pipe(
-          finalize(() => this.loading$.next(false)),
-          measure('Load Client Usage')
-        )
-        .subscribe((usage) => {
-          this.clientUsage$.next(this.transform(usage));
-        });
-    });
+  public load(uuid: string): Observable<ClientUsagePerApp[]> {
+    this.loading$.next(true);
+    return this.http.get<ClientUsageData>(`${this.apiPath(this.groups.current$.value.name)}/${uuid}/clientUsage`).pipe(
+      finalize(() => this.loading$.next(false)),
+      measure('Load Client Usage'),
+      map((usage) => this.transform(usage))
+    );
   }
 
   /**
