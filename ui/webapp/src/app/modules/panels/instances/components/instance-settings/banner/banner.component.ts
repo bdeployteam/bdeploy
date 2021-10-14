@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -10,18 +10,19 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { ColorDef, ColorSelectGroupComponent } from './color-select-group/color-select-group.component';
 
 @Component({
   selector: 'app-banner',
   templateUrl: './banner.component.html',
   styleUrls: ['./banner.component.css'],
 })
-export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
   private readonly DEFAULT_BANNER = {
     text: 'Banner information goes here.',
     user: this.auth.getUsername(),
     foregroundColor: '#000000',
-    backgroundColor: '#ffffc8',
+    backgroundColor: '#ffffff',
     timestamp: Date.now(),
   };
 
@@ -32,39 +33,49 @@ export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(ColorSelectGroupComponent) private colorSelect: ColorSelectGroupComponent;
 
   private subscription: Subscription;
 
   constructor(public servers: ServersService, public instances: InstancesService, private auth: AuthenticationService, areas: NavAreasService) {
-    this.subscription = this.instances.current$.subscribe((s) => {
-      let confirm = of(true);
-      if (this.isDirty()) {
-        if (!!s && !isEqual(this.orig, s.banner)) {
-          // original banner changed *elsewhere*, *and* we have changes, confirm reset
-          confirm = this.dialog.confirm(
-            'Banner Changed',
-            'The banner has been changed in another session. You can update to those changes but will loose local modifications.',
-            'merge_type'
-          );
-        }
-      }
-
-      confirm.subscribe((r) => {
-        if (r) {
-          if (!!s?.banner?.text) {
-            this.banner = s.banner;
-          } else {
-            this.banner = this.DEFAULT_BANNER;
-          }
-          this.orig = cloneDeep(this.banner);
-        }
-      });
-    });
-
-    this.subscription.add(areas.registerDirtyable(this, 'panel'));
+    this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnInit(): void {}
+
+  ngAfterViewInit(): void {
+    this.subscription.add(
+      this.instances.current$.subscribe((s) => {
+        let confirm = of(true);
+        if (this.isDirty()) {
+          if (!!s && !isEqual(this.orig, s.banner)) {
+            // original banner changed *elsewhere*, *and* we have changes, confirm reset
+            confirm = this.dialog.confirm(
+              'Banner Changed',
+              'The banner has been changed in another session. You can update to those changes but will loose local modifications.',
+              'merge_type'
+            );
+          }
+        }
+
+        confirm.subscribe((r) => {
+          if (r) {
+            if (!!s?.banner?.text) {
+              this.banner = s.banner;
+
+              // this tries to find a matching preset, which will not work if the banner has been
+              // set prior to 4.0, which only has presets allowed, no freely defined colors.
+              this.colorSelect.trySetSelected(s.banner.foregroundColor, s.banner.backgroundColor);
+            } else {
+              this.banner = this.DEFAULT_BANNER;
+              this.colorSelect.setDefault();
+            }
+            this.orig = cloneDeep(this.banner);
+          }
+        });
+      })
+    );
+  }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -92,5 +103,10 @@ export class BannerComponent implements OnInit, OnDestroy, DirtyableDialog {
       .updateBanner(this.banner)
       .pipe(finalize(() => this.removing$.next(false)))
       .subscribe();
+  }
+
+  /* template */ doChangeColor(sel: ColorDef) {
+    this.banner.foregroundColor = sel.fg;
+    this.banner.backgroundColor = sel.bg;
   }
 }

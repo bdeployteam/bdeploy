@@ -1,0 +1,12 @@
+<app-bd-expand-button text="Color Scheme" icon="palette">
+  <div fxLayout="column" fxLayoutGap="5px">
+    <app-color-select
+      *ngFor="let col of colors"
+      [name]="col.name"
+      [fg]="col.fg"
+      [bg]="col.bg"
+      (selectedChanged)="onChange($event)"
+      [selected]="selected === col.name"
+    ></app-color-select>
+  </div>
+</app-bd-expand-button>

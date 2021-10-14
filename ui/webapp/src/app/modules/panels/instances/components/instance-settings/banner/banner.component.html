@@ -11,8 +11,9 @@
         <textarea matInput [(ngModel)]="banner.text" [style.height.px]="100"></textarea>
       </mat-form-field>
 
-      <app-bd-form-input type="color" label="Foreground Color" name="fgColor" [(ngModel)]="banner.foregroundColor"></app-bd-form-input>
-      <app-bd-form-input type="color" label="Background Color" name="bgColor" [(ngModel)]="banner.backgroundColor"></app-bd-form-input>
+      <app-color-select-group (colorChanged)="doChangeColor($event)"></app-color-select-group>
+
+      <mat-divider></mat-divider>
 
       <app-bd-button
         text="Apply"

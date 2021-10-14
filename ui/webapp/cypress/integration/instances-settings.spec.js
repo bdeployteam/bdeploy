@@ -214,11 +214,15 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavFlyin('app-banner', () => {
       cy.get('textarea').clear().type('This is a banner text');
-      cy.get('input[id="fgColor"]').invoke('val', '#FFFFFF').trigger('input');
-      cy.get('input[id="bgColor"]').invoke('val', '#FF0000').trigger('input');
+      cy.contains('app-bd-expand-button', 'Color')
+        .click()
+        .within(() => {
+          cy.contains('app-color-select', 'Positive').click();
+        })
+        .click('top');
 
       cy.get('app-bd-banner').within(() => {
-        cy.get('.local-banner').should('have.css', 'background-color', 'rgb(255, 0, 0)');
+        cy.get('.local-banner').should('have.css', 'background-color', 'rgb(46, 125, 50)');
         cy.get('.local-banner').should('have.css', 'color', 'rgb(255, 255, 255)');
         cy.contains('This is a banner text').should('exist');
       });
@@ -228,7 +232,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-bd-banner').within(() => {
-        cy.get('.local-banner').should('have.css', 'background-color', 'rgb(255, 0, 0)');
+        cy.get('.local-banner').should('have.css', 'background-color', 'rgb(46, 125, 50)');
         cy.get('.local-banner').should('have.css', 'color', 'rgb(255, 255, 255)');
         cy.contains('This is a banner text').should('exist');
       });
@@ -243,8 +247,7 @@ describe('Instance Settings Tests', () => {
       cy.get('button[data-cy^="Remove"]').should('be.disabled');
 
       cy.get('app-bd-banner').within(() => {
-        cy.get('.local-banner').should('not.have.css', 'background-color', 'rgb(255, 0, 0)');
-        cy.get('.local-banner').should('not.have.css', 'color', 'rgb(255, 255, 255)');
+        cy.get('.local-banner').should('not.have.css', 'background-color', 'rgb(46, 125, 50)');
         cy.contains('This is a banner text').should('not.exist');
       });
     });

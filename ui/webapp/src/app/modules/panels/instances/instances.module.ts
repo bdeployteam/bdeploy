@@ -64,6 +64,8 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
+import { ColorSelectComponent } from './components/instance-settings/banner/color-select/color-select.component';
+import { ColorSelectGroupComponent } from './components/instance-settings/banner/color-select-group/color-select-group.component';
 
 @NgModule({
   declarations: [
@@ -122,6 +124,8 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
     BulkManipulationComponent,
     UpdateProductComponent,
     DataFileEditorComponent,
+    ColorSelectComponent,
+    ColorSelectGroupComponent,
   ],
   imports: [
     CommonModule,

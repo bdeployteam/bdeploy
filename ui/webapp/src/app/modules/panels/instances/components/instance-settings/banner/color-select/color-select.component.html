@@ -1,0 +1,13 @@
+<div
+  class="local-sizing"
+  [style.color]="fg"
+  [style.background-color]="bg"
+  fxLayout="row"
+  fxLayoutAlign="start center"
+  [style.cursor]="'pointer'"
+  (click)="onClick()"
+>
+  <div>{{ name }}</div>
+  <div fxFlex="1 0 auto"></div>
+  <mat-icon *ngIf="selected">check_circle_outline</mat-icon>
+</div>
