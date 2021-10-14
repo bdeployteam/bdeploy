@@ -3,7 +3,6 @@
     <div
       fxLayout="row"
       fxLayoutGap="5px"
-      fxLayoutAlign="start center"
       [matTooltip]="makeObservable(item.tooltip ? item.tooltip : item.name) | async"
       [matTooltipShowDelay]="300"
       matTooltipPosition="above"
@@ -17,4 +16,9 @@
       <div *ngIf="!(narrowWhen$ | async)">{{ makeObservable(item.name) | async }}</div>
     </div>
   </ng-container>
+  <div fxFlex="1 0 auto"></div>
+  <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px" class="bd-secondary-text">
+    <div>Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}</div>
+    <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)">refresh</app-bd-micro-icon-button>
+  </div>
 </div>

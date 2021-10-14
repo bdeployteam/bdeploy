@@ -32,7 +32,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   private processesTooltip = new BehaviorSubject<string>('State of all server processes');
   private processesItem: StateItem = { name: 'Instance Processes', type: this.processesState, tooltip: this.processesTooltip };
 
-  constructor(private instances: InstancesService, private ports: PortsService, private processes: ProcessesService) {}
+  constructor(private instances: InstancesService, private ports: PortsService, public processes: ProcessesService) {}
 
   ngOnInit(): void {
     this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
@@ -65,7 +65,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   }
 
   private updateAllProcesses(states: { [key: string]: ProcessStatusDto }) {
-    if (!states) {
+    if (!states || Object.keys(states).length === 0) {
       this.processesState.next('unknown');
       this.processesTooltip.next('No information available');
       return;

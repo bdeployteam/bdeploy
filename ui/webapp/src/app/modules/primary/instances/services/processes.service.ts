@@ -16,6 +16,7 @@ import { InstancesService } from './instances.service';
 export class ProcessesService {
   loading$ = new BehaviorSubject<boolean>(true);
   processStates$ = new BehaviorSubject<{ [key: string]: ProcessStatusDto }>(null);
+  processStatesLoadTime$ = new BehaviorSubject<number>(null);
 
   private instance: InstanceDto;
   private loadInterval;
@@ -89,6 +90,7 @@ export class ProcessesService {
       )
       .subscribe((p) => {
         this.processStates$.next(p);
+        this.processStatesLoadTime$.next(Date.now());
       });
   }
 

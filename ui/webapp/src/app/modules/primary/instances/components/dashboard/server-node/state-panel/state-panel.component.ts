@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BehaviorSubject, isObservable, Observable, of } from 'rxjs';
 
 export type StateType = 'ok' | 'info' | 'warning' | 'unknown';
@@ -16,6 +16,9 @@ export interface StateItem {
 export class NodeStatePanelComponent implements OnInit {
   @Input() items: StateItem[];
   @Input() narrowWhen$: BehaviorSubject<boolean>;
+  @Input() lastRefreshAt$: BehaviorSubject<number>;
+
+  @Output() manualRefresh = new EventEmitter<any>();
 
   constructor() {}
 

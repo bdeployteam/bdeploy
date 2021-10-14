@@ -1,3 +1,11 @@
-<button [disabled]="disabled" class="local-button" [style.cursor]="'pointer'" matRipple>
-  <mat-icon><ng-content></ng-content></mat-icon>
+<button
+  [style.color]="'inherit'"
+  [style.max-width.px]="size"
+  [style.max-height.px]="size"
+  [disabled]="disabled"
+  class="local-button"
+  [style.cursor]="'pointer'"
+  matRipple
+>
+  <mat-icon [style.width.px]="size" [style.height.px]="size" [style.font-size.px]="size"><ng-content></ng-content></mat-icon>
 </button>
