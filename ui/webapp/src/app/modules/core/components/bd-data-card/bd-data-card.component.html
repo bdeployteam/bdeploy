@@ -61,7 +61,7 @@
     [style.backgroundImage]="getImageUrl()"
     [style.backgroundBlendMode]="!!colActions?.length || !!colDetails?.length ? 'overlay' : undefined"
   >
-    <div fxFlex="1 0 auto" fxLayout="column" fxLayoutAlign="center start">
+    <div fxFlex="1 0 0" fxLayout="column" fxLayoutAlign="center start">
       <div *ngIf="!!colDetails?.length" gdColumns="16px auto" gdGap="2px" gdAlignColumns="center center" class="local-card-detail-text">
         <ng-container *ngFor="let detail of colDetails">
           <ng-container *ngIf="!!detail.data(record)">

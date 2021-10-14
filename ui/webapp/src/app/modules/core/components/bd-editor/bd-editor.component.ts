@@ -64,7 +64,7 @@ export class BdEditorComponent implements OnInit, OnDestroy {
     setTimeout(() => this.onPathChange(), 0);
 
     // this is required sind monaco does not play well inside flex (changing) layouts.
-    setInterval(() => this.layoutCheck(), 100);
+    this.relayoutInterval = setInterval(() => this.layoutCheck(), 100);
   }
 
   /* template */ onModelChange(event: string) {

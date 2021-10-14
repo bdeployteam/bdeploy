@@ -1,8 +1,11 @@
-<ngx-monaco-diff-editor
-  name="content"
-  [class.bd-editor-inited]="inited"
-  [originalModel]="{ code: undefined, language: undefined }"
-  [modifiedModel]="{ code: undefined, language: undefined }"
-  [options]="editorOptions"
-  (onInit)="onMonacoInit($event)"
-></ngx-monaco-diff-editor>
+<div fxFill fxLayout="column">
+  <ngx-monaco-diff-editor
+    name="content"
+    [class.bd-editor-inited]="inited"
+    [style.height]="'100%'"
+    [originalModel]="{ code: undefined, language: undefined }"
+    [modifiedModel]="{ code: undefined, language: undefined }"
+    [options]="editorOptions"
+    (onInit)="onMonacoInit($event)"
+  ></ngx-monaco-diff-editor>
+</div>
