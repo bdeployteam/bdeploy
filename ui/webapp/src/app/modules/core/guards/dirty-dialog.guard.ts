@@ -124,6 +124,11 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
       );
     }
 
+    // panel exists, is dirtyable, is NOT dirty, and main component is not the panel - we want to force the panel to close.
+    if (!!this.areas.getDirtyable('panel') && this.areas.getDirtyableType(component) !== 'panel') {
+      this.areas.forcePanelClose$.next(true);
+    }
+
     if (!!this.areas.getDirtyableType(component)) {
       if (!component.isDirty()) {
         return of(true);
@@ -132,9 +137,11 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
       return this.confirm(component).pipe(
         switchMap((x) => {
           if (x === DirtyActionType.CANCEL) {
+            this.areas.forcePanelClose$.next(false);
             return of(false);
           }
           if (x === DirtyActionType.SAVE) {
+            this.areas.forcePanelClose$.next(true);
             return component.doSave().pipe(switchMap((_) => of(true)));
           }
           return of(true);

@@ -71,7 +71,7 @@
 
     --bd-text: #{mat.get-color-from-palette($fg, 'text')};
     --bd-text-secondary: #{mat.get-color-from-palette($fg, 'secondary-text')};
-    --bd-text-success: #{if($dark, mat.get-color-from-palette(mat.$green-palette, 300), mat.get-color-from-palette(mat.$green-palette, 700))};
+    --bd-text-success: #{if($dark, mat.get-color-from-palette(mat.$green-palette, 300), mat.get-color-from-palette(mat.$green-palette, 800))};
     --bd-text-very-light: rgb(116, 116, 116);
     --bd-text-disabled: #{mat.get-color-from-palette($fg, 'disabled-text')};
 
@@ -81,9 +81,6 @@
     --bd-bg-disabled: #{mat.get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
     --bd-bg-grey: #{mat.get-color-from-palette($fg, base, if($dark, 0.2, 0.4))};
 
-    --bd-primary-darker: #{mat.get-color-from-palette($primary, 'darker')};
-    --bd-accent-darker: #{mat.get-color-from-palette($accent, 'darker')};
-    --bd-warn-darker: #{mat.get-color-from-palette($warn, 'darker')};
     --bd-main-bar-darker: #{mat.get-color-from-palette($maintb, 900)};
 
     --bd-primary-contrast: #{mat.get-color-from-palette($primary, 'default-contrast')};
@@ -214,7 +211,7 @@ $app-yellow-palette: mat.define-palette($app-yellow-def);
 
 /* light theme - default */
 $app-light-primary: mat.define-palette(mat.$indigo-palette, 500);
-$app-light-accent: mat.define-palette(mat.$pink-palette, A200);
+$app-light-accent: mat.define-palette(mat.$pink-palette, 700);
 $app-light-warning: mat.define-palette(mat.$orange-palette, A700);
 $app-light-theme: add-toolbar-color(mat.define-light-theme($app-light-primary, $app-light-accent, $app-light-warning), $app-light-primary);
 .app-light-theme {

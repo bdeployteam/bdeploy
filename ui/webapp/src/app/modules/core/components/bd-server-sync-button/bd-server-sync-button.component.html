@@ -5,7 +5,7 @@
   [loadingWhen$]="synchronizing$"
   [disabled]="(synchronizing$ | async) || (noPerm$ | async)"
   [matTooltip]="tooltip$ | async"
-  [ngClass]="!(sync$ | async) ? 'bd-warning-text' : []"
+  [ngClass]="!(sync$ | async) ? 'local-color' : []"
   [badge]="badge$ | async"
   badgeColor="primary"
   color="inherit"
