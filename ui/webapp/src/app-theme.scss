@@ -38,12 +38,12 @@
 
   .mat-row-route-active,
   .mat-card-route-active {
-    background-color: if($dark, #525252, #dfdfdf);
+    background-color: if($dark, #494949, #f1f1f1);
   }
 
   .mat-row-route-active:hover,
   .mat-card-route-active:hover {
-    background-color: if($dark, #575757, #d8d8d8);
+    background-color: if($dark, #494949, #f1f1f1);
   }
 
   a {
