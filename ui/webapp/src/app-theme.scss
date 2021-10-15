@@ -24,6 +24,12 @@
   @include settings-shell-theme($theme);
 
   $dark: map-get($theme, 'is-dark');
+  $primary: map-get($theme, 'primary');
+  $accent: map-get($theme, 'accent');
+  $warn: map-get($theme, 'warn');
+  $bg: map-get($theme, 'background');
+  $fg: map-get($theme, 'foreground');
+  $maintb: map-get($theme, 'main-toolbar');
 
   // general element themings
   .mat-badge-content {
@@ -37,13 +43,10 @@
   }
 
   .mat-row-route-active,
-  .mat-card-route-active {
-    background-color: if($dark, #494949, #f1f1f1);
-  }
-
+  .mat-card-route-active,
   .mat-row-route-active:hover,
   .mat-card-route-active:hover {
-    background-color: if($dark, #494949, #f1f1f1);
+    background-color: mat.get-color-from-palette($maintb, 900, 0.1);
   }
 
   a {
@@ -57,13 +60,6 @@
 
   // Pseudo selector to define variables on the main theme class.
   & {
-    $primary: map-get($theme, 'primary');
-    $accent: map-get($theme, 'accent');
-    $warn: map-get($theme, 'warn');
-    $bg: map-get($theme, 'background');
-    $fg: map-get($theme, 'foreground');
-    $maintb: map-get($theme, 'main-toolbar');
-
     --bd-primary: #{mat.get-color-from-palette($primary)};
     --bd-accent: #{mat.get-color-from-palette($accent)};
     --bd-warn: #{mat.get-color-from-palette($warn)};
