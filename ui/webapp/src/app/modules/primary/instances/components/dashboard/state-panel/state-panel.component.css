@@ -17,6 +17,6 @@
   color: var(--bd-primary);
 }
 
-.local-unknown {
+.local-hint {
   color: var(--bd-text-secondary);
 }

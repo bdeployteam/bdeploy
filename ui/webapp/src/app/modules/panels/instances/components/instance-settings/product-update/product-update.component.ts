@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { BdDataColumn } from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
-import { ProductsColumnsService } from 'src/app/modules/primary/products/services/products-columns.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { UpdateActionComponent } from './update-action/update-action.component';
 
@@ -13,6 +12,13 @@ import { UpdateActionComponent } from './update-action/update-action.component';
   styleUrls: ['./product-update.component.css'],
 })
 export class ProductUpdateComponent implements OnInit, OnDestroy {
+  private readonly productVersionColumn: BdDataColumn<ProductDto> = {
+    id: 'version',
+    name: 'Version',
+    hint: BdDataColumnTypeHint.DESCRIPTION,
+    data: (r) => `${r.key.tag}${this.edit.state$.value.config.config.product.tag === r.key.tag ? ' - current' : ''}`,
+  };
+
   private readonly productUpdateAction: BdDataColumn<ProductDto> = {
     id: 'update',
     name: 'Upd.',
@@ -22,11 +28,11 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
   };
 
   /* template */ records$ = new BehaviorSubject<ProductDto[]>(null);
-  /* template */ columns: BdDataColumn<ProductDto>[] = [this.productCols.productVersionColumn, this.productUpdateAction];
+  /* template */ columns: BdDataColumn<ProductDto>[] = [this.productVersionColumn, this.productUpdateAction];
 
   private subscription: Subscription;
 
-  constructor(private products: ProductsService, private productCols: ProductsColumnsService, private edit: InstanceEditService) {
+  constructor(private products: ProductsService, private edit: InstanceEditService) {
     this.subscription = combineLatest([this.edit.state$, this.products.products$]).subscribe(([state, prods]) => {
       if (!state || !prods?.length) {
         this.records$.next(null);

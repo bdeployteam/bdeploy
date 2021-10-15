@@ -2,10 +2,12 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
 import { ApplicationConfiguration, ApplicationStartType, InstanceNodeConfigurationDto, MinionStatusDto, ProcessStatusDto } from 'src/app/models/gen.dtos';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from '../../../services/instances.service';
 import { NodeApplicationPort, PortsService } from '../../../services/ports.service';
 import { ProcessesService } from '../../../services/processes.service';
-import { StateItem, StateType } from './state-panel/state-panel.component';
+import { StateItem, StateType } from '../state-panel/state-panel.component';
 
 @Component({
   selector: 'app-instance-server-node',
@@ -32,7 +34,13 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   private processesTooltip = new BehaviorSubject<string>('State of all server processes');
   private processesItem: StateItem = { name: 'Instance Processes', type: this.processesState, tooltip: this.processesTooltip };
 
-  constructor(private instances: InstancesService, private ports: PortsService, public processes: ProcessesService) {}
+  constructor(
+    private instances: InstancesService,
+    private ports: PortsService,
+    public processes: ProcessesService,
+    private auth: AuthenticationService,
+    private areas: NavAreasService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
@@ -44,7 +52,23 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       const state = states[this.node.nodeName];
       this.nodeState$.next(state);
 
+      const updAvail = !!this.instances.current$.value?.newerVersionAvailable;
+
       const items: StateItem[] = [];
+      items.push({
+        name: this.node.nodeConfiguration.product.tag,
+        type: updAvail ? 'update' : 'product',
+        tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${updAvail ? ' - Newer version available' : ''}`,
+        click:
+          updAvail && this.auth.isCurrentScopeWrite()
+            ? () => {
+                this.areas.navigateBoth(
+                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.uuid],
+                  ['panels', 'instances', 'settings', 'product']
+                );
+              }
+            : null,
+      });
       items.push({ name: state.offline ? 'Offline' : 'Online', type: state.offline ? 'warning' : 'ok' });
       items.push(this.processesItem);
       items.push(this.portsItem);

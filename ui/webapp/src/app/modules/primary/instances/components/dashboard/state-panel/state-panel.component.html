@@ -6,18 +6,22 @@
       [matTooltip]="makeObservable(item.tooltip ? item.tooltip : item.name) | async"
       [matTooltipShowDelay]="300"
       matTooltipPosition="above"
+      [style.cursor]="item.click ? 'pointer' : null"
+      (click)="item.click ? item.click() : null"
     >
       <ng-container *ngIf="makeObservable(item.type) | async as type">
         <mat-icon class="bd-warning-text" *ngIf="type === 'warning'">warning</mat-icon>
         <mat-icon class="local-ok" *ngIf="type === 'ok'">done</mat-icon>
         <mat-icon class="local-info" *ngIf="type === 'info'">info</mat-icon>
-        <mat-icon class="local-unknown" *ngIf="type === 'unknown'">help</mat-icon>
+        <mat-icon class="local-hint" *ngIf="type === 'product'">apps</mat-icon>
+        <mat-icon class="local-hint" *ngIf="type === 'update'">system_update</mat-icon>
+        <mat-icon class="local-hint" *ngIf="type === 'unknown'">help</mat-icon>
       </ng-container>
       <div *ngIf="!(narrowWhen$ | async)">{{ makeObservable(item.name) | async }}</div>
     </div>
   </ng-container>
   <div fxFlex="1 0 auto"></div>
-  <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px" class="bd-secondary-text">
+  <div fxLayout="row" *ngIf="lastRefreshAt$" fxLayoutAlign="start center" fxLayoutGap="5px" class="bd-secondary-text">
     <div>Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}</div>
     <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)">refresh</app-bd-micro-icon-button>
   </div>

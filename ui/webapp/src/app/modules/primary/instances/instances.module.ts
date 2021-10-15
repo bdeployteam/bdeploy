@@ -17,10 +17,11 @@ import { ProcessStatusIconComponent } from './components/dashboard/process-statu
 import { NodeHeaderComponent } from './components/dashboard/server-node/header/header.component';
 import { NodeProcessListComponent } from './components/dashboard/server-node/process-list/process-list.component';
 import { ServerNodeComponent } from './components/dashboard/server-node/server-node.component';
-import { NodeStatePanelComponent } from './components/dashboard/server-node/state-panel/state-panel.component';
+import { NodeStatePanelComponent } from './components/dashboard/state-panel/state-panel.component';
 import { DataEditComponent } from './components/data-files/data-edit/data-edit.component';
 import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryComponent } from './components/history/history.component';
+import { ProcessNameAndOsComponent } from './components/process-name-and-os/process-name-and-os.component';
 import { InstancesRoutingModule } from './instances-routing.module';
 
 @NgModule({
@@ -41,6 +42,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     ConfigNodeComponent,
     DataFilesComponent,
     DataEditComponent,
+    ProcessNameAndOsComponent,
   ],
   exports: [
     // for panels.

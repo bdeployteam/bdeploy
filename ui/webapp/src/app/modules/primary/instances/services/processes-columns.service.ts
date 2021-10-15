@@ -6,6 +6,7 @@ import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-d
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { ProcessOutdatedComponent } from '../components/dashboard/process-outdated/process-outdated.component';
 import { ProcessStatusIconComponent } from '../components/dashboard/process-status-icon/process-status-icon.component';
+import { ProcessNameAndOsComponent } from '../components/process-name-and-os/process-name-and-os.component';
 import { InstanceEditService, ProcessEditState } from './instance-edit.service';
 import { InstancesService } from './instances.service';
 import { PortsService } from './ports.service';
@@ -22,12 +23,20 @@ export class ProcessesColumnsService {
     data: (r) => r.name,
   };
 
+  processNameAndOsColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'nameAndOs',
+    name: 'Configuration Name and OS',
+    hint: BdDataColumnTypeHint.TITLE,
+    data: (r) => r.name,
+    component: ProcessNameAndOsComponent,
+  };
+
   processIdColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => (!!r.uid ? r.uid : 'New Process'),
-    width: '100px',
+    width: '120px',
     showWhen: '(min-width:1000px)',
     classes: (r) => (!!r.uid ? [] : ['bd-description-text']),
   };
@@ -48,6 +57,15 @@ export class ProcessesColumnsService {
     classes: (r) => this.getStateClass(r),
   };
 
+  processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'name',
+    name: 'Configuration Name and OS',
+    hint: BdDataColumnTypeHint.TITLE,
+    data: (r) => r.name,
+    classes: (r) => this.getStateClass(r),
+    component: ProcessNameAndOsComponent,
+  };
+
   processOsColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'os',
     name: 'OS',
@@ -60,15 +78,8 @@ export class ProcessesColumnsService {
     id: 'appName',
     name: 'Application Type',
     data: (r) => this.edit.getApplicationDescriptor(r.application.name)?.name,
-  };
-
-  applicationVersionColumn: BdDataColumn<ApplicationConfiguration> = {
-    id: 'version',
-    name: 'Version',
-    hint: BdDataColumnTypeHint.DETAILS,
-    data: (r) => r.application.tag,
-    icon: (r) => 'system_update',
-    showWhen: '(min-width:750px)',
+    width: '200px',
+    showWhen: '(min-width: 700px)',
   };
 
   processActualityColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -108,18 +119,17 @@ export class ProcessesColumnsService {
     this.processNameColumn,
     this.processIdColumn,
     this.processAvatarColumn,
-    this.applicationVersionColumn,
+    this.applicationNameColumn,
     this.processStatusColumn,
     this.processPortRatingColumn,
     this.processActualityColumn,
   ];
 
   defaultProcessClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
-    this.processNameColumn,
-    this.processOsColumn,
+    this.processNameAndOsColumn,
     this.processIdColumn,
     this.processAvatarColumn,
-    this.applicationVersionColumn,
+    this.applicationNameColumn,
   ];
 
   defaultProcessesConfigColumns: BdDataColumn<ApplicationConfiguration>[] = [
@@ -127,16 +137,13 @@ export class ProcessesColumnsService {
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
-    this.applicationVersionColumn,
   ];
 
   defaultProcessesConfigClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
-    this.processNameAndEditStatusColumn,
-    this.processOsColumn,
+    this.processNameAndOsAndEditStatusColumn,
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
-    this.applicationVersionColumn,
   ];
 
   constructor(private processes: ProcessesService, private instances: InstancesService, private ports: PortsService, private edit: InstanceEditService) {}

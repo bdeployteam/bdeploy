@@ -25,6 +25,17 @@
       </ng-container>
     </ng-container>
     <app-bd-panel-button
+      *ngIf="
+        (edit.current$ | async)?.newerVersionAvailable &&
+        (edit.current$ | async)?.instanceConfiguration.product.tag === (edit.state$ | async)?.config.config.product.tag
+      "
+      text="Product Update Available"
+      icon="system_update"
+      [collapsed]="narrow$ | async"
+      color="accent"
+      [route]="['panels', 'instances', 'settings', 'product']"
+    ></app-bd-panel-button>
+    <app-bd-panel-button
       text="Instance Settings"
       icon="settings"
       [route]="['panels', 'instances', 'settings']"

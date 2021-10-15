@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BehaviorSubject, isObservable, Observable, of } from 'rxjs';
 
-export type StateType = 'ok' | 'info' | 'warning' | 'unknown';
+export type StateType = 'ok' | 'info' | 'warning' | 'product' | 'update' | 'unknown';
 
 export interface StateItem {
   name: string | Observable<string>;
   type: StateType | Observable<StateType>;
   tooltip?: string | Observable<string>;
+  click?: () => void;
 }
 @Component({
   selector: 'app-node-state-panel',
