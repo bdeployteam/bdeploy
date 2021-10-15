@@ -5,6 +5,7 @@ import { ApplicationStartType, ProcessDetailDto, ProcessState } from 'src/app/mo
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
@@ -37,7 +38,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     private auth: AuthenticationService,
     public details: ProcessDetailsService,
     public processes: ProcessesService,
-    public instances: InstancesService
+    public instances: InstancesService,
+    private cfg: ConfigService
   ) {}
 
   ngOnInit(): void {
@@ -184,8 +186,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   private doCalculateUptimeString(detail) {
     this.uptimeCalculateHandle = null;
     if (this.isRunning(detail)) {
-      const now = Date.now();
-      const ms = now - detail.handle.startTime;
+      const now = this.cfg.getCorrectedNow(); // server's 'now'
+      const ms = now - detail.handle.startTime; // this comes from the node. node and master are assumed to have the same time.
       const sec = Math.floor(ms / 1000) % 60;
       const min = Math.floor(ms / 60000) % 60;
       const hours = Math.floor(ms / 3600000) % 24;
@@ -218,7 +220,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   }
 
   private doUpdateRestartProgress(detail: ProcessDetailDto) {
-    const diff = detail.recoverAt - Date.now();
+    const diff = detail.recoverAt - this.cfg.getCorrectedNow();
     if (diff < 100) {
       this.processes.reload();
     } else {

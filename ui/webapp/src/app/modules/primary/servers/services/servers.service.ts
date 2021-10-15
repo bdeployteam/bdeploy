@@ -99,7 +99,7 @@ export class ServersService {
     if (this.cfg.isCentral()) {
       // prefer current information if loaded.
       const currentS = this.servers$.value?.find((s) => s.hostName === server.hostName);
-      const currentTime = new Date().getTime();
+      const currentTime = this.cfg.getCorrectedNow(); // use server time to compare.
       return currentTime - (!!currentS ? currentS : server).lastSync;
     }
     return 0;

@@ -52,7 +52,7 @@ export class ClientsUsageService {
    * TODO: This might better be done on the server already.
    */
   private transform(usage: ClientUsageData): ClientUsagePerApp[] {
-    const now = Date.now();
+    const now = Date.now(); // don't care about time drift
     const result: ClientUsagePerApp[] = [];
     for (const day of Object.keys(usage.clientUsage)) {
       const date = parse(day, DATE_FORMAT, new Date());

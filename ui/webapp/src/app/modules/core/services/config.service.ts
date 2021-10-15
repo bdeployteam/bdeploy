@@ -6,7 +6,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { isEqual } from 'lodash-es';
 import { Observable } from 'rxjs';
-import { delay, retryWhen } from 'rxjs/operators';
+import { delay, retryWhen, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, PluginInfoDto, Version } from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
@@ -30,6 +30,8 @@ export class ConfigService {
   private checkInterval;
   private isUnreachable = false;
   private overlayRef: OverlayRef;
+
+  private backendTimeOffset = 0;
 
   constructor(
     private themes: ThemeService /* dummy: required to bootstrap theming early! */,
@@ -163,9 +165,24 @@ export class ConfigService {
 
   /** Tries to fetch the current server version, suppresses global error handling */
   public getBackendInfo(errorHandling = false): Observable<BackendInfoDto> {
-    return this.http.get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
-      headers: errorHandling ? NO_LOADING_BAR_HDRS : suppressGlobalErrorHandling(new HttpHeaders(NO_LOADING_BAR_HDRS)),
-    });
+    return this.http
+      .get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
+        headers: errorHandling ? NO_LOADING_BAR_HDRS : suppressGlobalErrorHandling(new HttpHeaders(NO_LOADING_BAR_HDRS)),
+      })
+      .pipe(
+        tap((v) => {
+          const serverTime = v.time;
+          const clientTime = Date.now();
+
+          // calculate the time offset between the client and the server
+          this.backendTimeOffset = serverTime - clientTime;
+          console.log('Server time offset', this.backendTimeOffset, 'ms');
+        })
+      );
+  }
+
+  public getCorrectedNow(): number {
+    return Date.now() + this.backendTimeOffset;
   }
 
   /** Determines whether the server is a 'CENTRAL' mode server */

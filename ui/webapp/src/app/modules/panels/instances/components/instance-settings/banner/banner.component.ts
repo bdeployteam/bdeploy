@@ -23,7 +23,7 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
     user: this.auth.getUsername(),
     foregroundColor: '#000000',
     backgroundColor: '#ffffff',
-    timestamp: Date.now(),
+    timestamp: Date.now(), // local time ok.
   };
 
   /* template */ saving$ = new BehaviorSubject<boolean>(false);

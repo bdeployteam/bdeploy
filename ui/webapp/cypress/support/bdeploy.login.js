@@ -59,7 +59,7 @@ Cypress.Commands.add('forceVisit', (url) => {
       };
 
       // append a dummy get parameter so the iframe is forced to reload on hash change.
-      appWindow.location.assign(url.replace('/#/', '/?d=' + new Date().getTime() + '#/'));
+      appWindow.location.assign(url.replace('/#/', '/?d=' + Date.now() + '#/'));
     });
   });
 });

@@ -36,7 +36,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
   /* template */ curveLabel: string;
   /* template */ maxValue: number;
   /* template */ maxLabel: string;
-  /* template */ renderTime: number = Date.now();
+  /* template */ renderTime: number = Date.now(); // local time.
 
   /* template */ pathInfo;
   /* template */ pathPoints;

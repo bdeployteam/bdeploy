@@ -90,7 +90,7 @@ export class ProcessesService {
       )
       .subscribe((p) => {
         this.processStates$.next(p);
-        this.processStatesLoadTime$.next(Date.now());
+        this.processStatesLoadTime$.next(Date.now()); // local time wanted.
       });
   }
 
