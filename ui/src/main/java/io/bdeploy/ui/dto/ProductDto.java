@@ -9,7 +9,7 @@ import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 
-public class ProductDto {
+public class ProductDto implements Comparable<ProductDto> {
 
     public String name;
     public String vendor;
@@ -31,6 +31,11 @@ public class ProductDto {
         dto.instanceTemplates = manifest.getInstanceTemplates();
         dto.applicationTemplates = manifest.getApplicationTemplates();
         return dto;
+    }
+
+    @Override
+    public int compareTo(ProductDto o) {
+        return key.compareTo(o.key);
     }
 
 }
