@@ -125,14 +125,4 @@ export class SoftwareDetailsComponent implements OnInit {
       .pipe(finalize(() => this.preparing$.next(false)))
       .subscribe();
   }
-
-  /* template */ mapLabels(software: any) {
-    const labels: LabelRecord[] = [];
-    if (!!software.labels) {
-      for (const k of Object.keys(software.labels)) {
-        labels.push({ key: k, value: software.labels[k] });
-      }
-    }
-    return labels;
-  }
 }

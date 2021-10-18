@@ -7,12 +7,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
-import { ProductDetailsService } from '../../services/product-details.service';
-
-interface LabelRecord {
-  key: string;
-  value: string;
-}
+import { LabelRecord, ProductDetailsService } from '../../services/product-details.service';
 
 const instanceNameColumn: BdDataColumn<InstanceUsageDto> = {
   id: 'name',
@@ -138,13 +133,5 @@ export class ProductDetailsComponent implements OnInit {
       .download()
       .pipe(finalize(() => this.preparing$.next(false)))
       .subscribe();
-  }
-
-  /* template */ mapLabels(prod: ProductDto) {
-    const labels: LabelRecord[] = [];
-    for (const k of Object.keys(prod.labels)) {
-      labels.push({ key: k, value: prod.labels[k] });
-    }
-    return labels;
   }
 }

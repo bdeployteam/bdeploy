@@ -9,6 +9,11 @@ import { DownloadService } from 'src/app/modules/core/services/download.service'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 
+export interface LabelRecord {
+  key: string;
+  value: string;
+}
+
 /**
  * A service which extracts a single product denoted by route parameters. This requires the active route to have
  * a 'key' and a 'tag' route parameter. The service will listen to product data from the products service.
@@ -21,6 +26,7 @@ export class ProductDetailsService implements OnDestroy {
   public productKey$ = new BehaviorSubject<string>(null);
   public productTag$ = new BehaviorSubject<string>(null);
   public product$ = new BehaviorSubject<ProductDto>(null);
+  public labels$ = new BehaviorSubject<LabelRecord[]>(null);
 
   private usedIn$ = new BehaviorSubject<InstanceUsageDto[]>(null);
   public usedInLoading$ = new BehaviorSubject<boolean>(false);
@@ -54,6 +60,7 @@ export class ProductDetailsService implements OnDestroy {
         .subscribe((prod) => {
           this.usedIn$.next(null);
           this.product$.next(prod);
+          this.labels$.next(!!prod ? this.mapLabels(prod) : null);
         });
     });
   }
@@ -98,5 +105,13 @@ export class ProductDetailsService implements OnDestroy {
         s.complete();
       });
     });
+  }
+
+  private mapLabels(prod: ProductDto) {
+    const labels: LabelRecord[] = [];
+    for (const k of Object.keys(prod.labels)) {
+      labels.push({ key: k, value: prod.labels[k] });
+    }
+    return labels;
   }
 }

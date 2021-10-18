@@ -8,6 +8,7 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { RepositoryService } from 'src/app/modules/primary/repositories/services/repository.service';
+import { LabelRecord } from '../../products/services/product-details.service';
 
 /**
  * A service which extracts a single product denoted by route parameters. This requires the active route to have
@@ -21,6 +22,7 @@ export class SoftwareDetailsService implements OnDestroy {
   public manifestKey$ = new BehaviorSubject<string>(null);
   public manifestTag$ = new BehaviorSubject<string>(null);
   public softwarePackage$ = new BehaviorSubject<any>(null);
+  public labels$ = new BehaviorSubject<LabelRecord[]>(null);
 
   private plugins$ = new BehaviorSubject<PluginInfoDto[]>(null);
   public pluginsLoading$ = new BehaviorSubject<boolean>(false);
@@ -53,6 +55,7 @@ export class SoftwareDetailsService implements OnDestroy {
         .pipe(map((data) => data.find((e) => e.key.name === this.manifestKey$.value && e.key.tag === this.manifestTag$.value)))
         .subscribe((data) => {
           this.softwarePackage$.next(data);
+          this.labels$.next(this.mapLabels(data));
         });
     });
   }
@@ -93,5 +96,15 @@ export class SoftwareDetailsService implements OnDestroy {
     } else if (this.softwarePackage$.value?.type === 'External Software') {
       return this.softwareApiPath();
     }
+  }
+
+  /* template */ mapLabels(software: any) {
+    const labels: LabelRecord[] = [];
+    if (!!software?.labels) {
+      for (const k of Object.keys(software.labels)) {
+        labels.push({ key: k, value: software.labels[k] });
+      }
+    }
+    return labels;
   }
 }

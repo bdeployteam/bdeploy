@@ -17,7 +17,7 @@
 
         <ng-container *ngIf="detailsService.softwarePackage$ | async as prod">
           <app-bd-expand-button [text]="'Labels'" icon="label">
-            <app-bd-data-display [records]="mapLabels(prod)" [columns]="labelColumns">
+            <app-bd-data-display [records]="detailsService.labels$ | async" [columns]="labelColumns">
               <app-bd-no-data>
                 <div>This product has no labels.</div>
               </app-bd-no-data>
