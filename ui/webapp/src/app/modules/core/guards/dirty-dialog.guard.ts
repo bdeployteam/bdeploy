@@ -126,6 +126,8 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
 
     // panel exists, is dirtyable, is NOT dirty, and main component is not the panel - we want to force the panel to close.
     if (!!this.areas.getDirtyable('panel') && this.areas.getDirtyableType(component) !== 'panel') {
+      // hide the panel right away to be out of the way for a potential dirty check on the main component.
+      this.areas.panelVisible$.next(false);
       this.areas.forcePanelClose$.next(true);
     }
 
