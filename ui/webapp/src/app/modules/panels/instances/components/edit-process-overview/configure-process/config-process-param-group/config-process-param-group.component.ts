@@ -363,4 +363,17 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       return of(true);
     }
   }
+
+  /* template */ sortPairs(pairs: ParameterPair[]) {
+    return pairs.sort((a, b) => {
+      if (!!a.descriptor && !!b.descriptor) {
+        return a.descriptor.name.localeCompare(b.descriptor.name);
+      }
+
+      const ida = !!a.descriptor?.uid ? a.descriptor.uid : a.value.uid;
+      const idb = !!b.descriptor?.uid ? b.descriptor.uid : b.value.uid;
+
+      return ida.localeCompare(idb);
+    });
+  }
 }
