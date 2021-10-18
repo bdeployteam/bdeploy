@@ -219,6 +219,7 @@ describe('Admin UI Tests (Settings)', () => {
 
     cy.inMainNavContent(() => {
       cy.intercept({ method: 'GET', url: '/api/plugin-admin/list' }).as('pluginList');
+      cy.contains('tr', 'pause').should('exist');
       cy.contains('tr', 'bdeploy-demo-plugin')
         .should('exist')
         .within(() => {
