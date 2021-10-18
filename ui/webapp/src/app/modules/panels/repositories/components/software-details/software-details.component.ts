@@ -32,28 +32,14 @@ const appTemplateNameColumn: BdDataColumn<ApplicationTemplateDescriptor> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
-  width: '140px',
-};
-
-const appTemplateDescriptionColumn: BdDataColumn<ApplicationTemplateDescriptor> = {
-  id: 'description',
-  name: 'Description',
-  data: (r) => r.description,
-  width: '140px',
+  tooltip: (r) => r.description,
 };
 
 const instTemplateNameColumn: BdDataColumn<InstanceTemplateDescriptor> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
-  width: '140px',
-};
-
-const instTemplateDescriptionColumn: BdDataColumn<InstanceTemplateDescriptor> = {
-  id: 'description',
-  name: 'Description',
-  data: (r) => r.description,
-  width: '140px',
+  tooltip: (r) => r.description,
 };
 
 const pluginNameColumn: BdDataColumn<PluginInfoDto> = {
@@ -86,8 +72,8 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
 export class SoftwareDetailsComponent implements OnInit {
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
   /* template */ labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
-  /* template */ appTemplColumns: BdDataColumn<ApplicationTemplateDescriptor>[] = [appTemplateNameColumn, appTemplateDescriptionColumn];
-  /* template */ instTemplColumns: BdDataColumn<InstanceTemplateDescriptor>[] = [instTemplateNameColumn, instTemplateDescriptionColumn];
+  /* template */ appTemplColumns: BdDataColumn<ApplicationTemplateDescriptor>[] = [appTemplateNameColumn];
+  /* template */ instTemplColumns: BdDataColumn<InstanceTemplateDescriptor>[] = [instTemplateNameColumn];
   /* template */ pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
 
   /* template */ loading$ = combineLatest([this.deleting$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
