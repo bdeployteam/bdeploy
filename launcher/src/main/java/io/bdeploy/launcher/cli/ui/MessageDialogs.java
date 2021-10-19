@@ -1,10 +1,15 @@
 package io.bdeploy.launcher.cli.ui;
 
+import java.awt.Dimension;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper;
@@ -63,6 +68,18 @@ public class MessageDialogs {
                 "If the problem persists, contact the system administrator.</html>");
         dialog.setDetails(getDetailedErrorMessage(config, ex));
         dialog.setVisible(true);
+    }
+
+    /**
+     * Opens a dialog to show the given multi-line result.
+     */
+    public static void showDetailedMessage(String message) {
+        JTextArea textArea = new JTextArea(message);
+        textArea.setEditable(false);
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(480, 320));
+        JOptionPane.showMessageDialog(null, scrollPane, "Result", JOptionPane.INFORMATION_MESSAGE);
     }
 
     /** Returns the detailed error message to be displayed */

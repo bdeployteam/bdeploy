@@ -51,9 +51,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         Path rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         Path bhiveDir = rootDir.resolve("bhive");
         try (BHive hive = new BHive(bhiveDir.toUri(), new ActivityReporter.Null())) {
-
             doUninstall(rootDir, hive, config.app());
-
         }
         return createSuccess();
     }

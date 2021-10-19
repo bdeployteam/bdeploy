@@ -9,14 +9,17 @@ https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/versions-and-d
 
 Code Signing
 ----------------------------------------
-Executables are signed for development purpose with a self-signed certificate. 
 Signing requires:
-	- A self signed certificate
+	- SafeNet drivers
+	- Hardware token with the certificate
 	- The SignTool.exe 
 
+SafeNet:
+	Download and install the SafeNet drivers:
+	https://support.globalsign.com/ssl/ssl-certificates-installation/safenet-drivers#Windows
+
 Certificate:
-  A new certificate can be created with the following command:
-  New-SelfSignedCertificate -Subject "BDeploy Development" -Type CodeSigningCert -CertStoreLocation Cert:\CurrentUser\My
+  The hardware token needs to be connected
 
 SignTool.exe 
   The tool ships with the Windows SDK that can be installed with the Visual Studio Installer.

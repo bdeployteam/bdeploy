@@ -571,17 +571,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Check if the application directory is already present
         String appName = appCfg.name;
-        Collection<String> missing = Collections.emptyList();
-        try {
-            missing = getMissingArtifacts(hive, clientAppCfg);
-            if (missing.isEmpty()) {
-                log.info("Application is already installed. Nothing to install/update.");
-                return;
-            }
-            log.info("Application needs to be installed/updated: {}", missing);
-        } catch (Exception e) {
-            log.warn("Failed to verify that application is installed, re-installing", e);
+        Collection<String> missing = getMissingArtifacts(hive, clientAppCfg);
+        if (missing.isEmpty()) {
+            log.info("Application is already installed. Nothing to install/update.");
+            return;
         }
+        log.info("Application needs to be installed/updated: {}", missing);
 
         // Throw an exception if we do not have write permissions in the directory
         if (readOnlyRootDir) {

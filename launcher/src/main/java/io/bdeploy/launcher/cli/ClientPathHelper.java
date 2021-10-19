@@ -1,9 +1,13 @@
 package io.bdeploy.launcher.cli;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.Version;
@@ -54,6 +58,27 @@ public class ClientPathHelper {
     public static Path getHome(Path root, Version version) {
         String name = "bdeploy-" + version.toString();
         return root.resolve(name);
+    }
+
+    /**
+     * Returns a list of all hives in the given directory.
+     */
+    public static List<Path> getHives(Path rootDir) throws IOException {
+        List<Path> hives = new ArrayList<>();
+        hives.add(rootDir.resolve("bhive"));
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir,
+                (p) -> p.getFileName().toString().toLowerCase().startsWith("bdeploy-"))) {
+            Iterator<Path> dirs = stream.iterator();
+            while (dirs.hasNext()) {
+                Path nestedRoot = dirs.next();
+                Path nestedHive = nestedRoot.resolve("bhive");
+                if (!nestedHive.toFile().isDirectory()) {
+                    continue;
+                }
+                hives.add(nestedHive);
+            }
+        }
+        return hives;
     }
 
     /**
