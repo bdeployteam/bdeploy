@@ -162,7 +162,7 @@ describe('Admin UI Tests (Settings)', () => {
       });
     });
 
-    cy.visit('/');
+    cy.pressMainNavButton('Instance Groups');
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Data Grouping');
     });
