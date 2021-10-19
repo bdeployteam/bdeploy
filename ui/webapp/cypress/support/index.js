@@ -20,3 +20,5 @@ if (Cypress.env('DISABLE_COVERAGE') !== 'yes') {
   // Import cypress code-coverage collector plugin
   require('@cypress/code-coverage/support');
 }
+
+Cypress.Screenshot.defaults({ overwrite: true });

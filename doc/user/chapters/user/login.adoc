@@ -2,17 +2,17 @@
 
 Each user needs to authenticate with a username and password in order to get access to all parts of the system. An anonymous access is not available.
 
-image::images/BDeploy_Login.png[BDeploy Login, align=center, width=480, link="images/BDeploy_Login.png"]
+image::images/Doc_Login.png[BDeploy Login, align=center, width=480, link="images/Doc_Login.png"]
 
-After a successful login the main page is shown with all *Instance Groups* that the user is permitted to see.
+After a successful login the main page is shown with all *Instance Groups* that the user is permitted to see, either through global or scoped permission.
 
-Clicking on the hamburger menu in the top-left corner provides access to the various other parts of the system.
+The main menu - which is always present on the left side of the screen - can be expanded using the _hamburger_ button. This will provide a more readable version of the main menu. The content of the main menu depends on the current application context. This means that items will be added whenever more context is available, e.g. when clicking on an instance group, and removed when leaving this context.
 
-image::images/BDeploy_Main_Menu.png[BDeploy Main Menu, align=center, width=480, link="images/BDeploy_Main_Menu.png"]
+image::images/Doc_MainMenu.png[BDeploy Main Menu, align=center, width=480, link="images/Doc_MainMenu.png"]
 
 Clicking on the user menu in the top-right corner provides access to various user related actions and information.
 
-image::images/BDeploy_User_Menu.png[BDeploy User Menu, align=center, width=480, link="images/BDeploy_User_Menu.png"]
+image::images/Doc_UserSettings.png[BDeploy User Settings, align=center, width=480, link="images/Doc_UserSettings.png"]
 
 [NOTE]
 Users which are authenticated against an external system (e.g. LDAP) are not able to edit their user information (including password) through the user menu. Updates have to be performed on the controlling system (e.g. LDAP server) in this case.

@@ -51,6 +51,8 @@ describe('Current User Tests', function () {
 
     cy.waitUntilContentLoaded();
 
+    cy.screenshot('Doc_UserSettings');
+
     cy.inMainNavFlyin('app-settings', () => {
       // finish
       cy.contains('button', 'Logout').should('exist');

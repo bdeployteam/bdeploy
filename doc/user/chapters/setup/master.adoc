@@ -27,7 +27,7 @@ See <<Central/Managed Specific Configuration>> for more details.
 To start using BDeploy you will at least need a single *master*. The *master* needs to be initialized before it can be started.
 
 The *root directory* contains all the runtime data. Best to select an empty directory in the data area of your system 
-(e.g. /var/bdeploy on Unix) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy
+(e.g. /var/bdeploy on Linux) that is intended exclusively for this purpose. Keep the root directory separate from the BDeploy
 binary installation. Make sure that there is enough space available. 
 
  bdeploy init --root=/path/to/storage --hostname=<hostname> --mode=STANDALONE --port=7701 --initUser=username --initPassword=usersPassword
@@ -37,7 +37,7 @@ The `init` command will create the initial administrator user from the `--initUs
 [WARNING]
 Don't use the depicted user and password, these are just samples.
 
-The `init` command will write an administrator access token to a file if given with `--tokenFile`. This tokens main purpose is automation (scripting) and testing.
+The `init` command will write an access token to a file if given with `--tokenFile`. This tokens main purpose is automation (scripting) and testing. The token is a _system_ token which is not associated with any actual user. This token is important when initializing a root for a `NODE`, as it will be required when attaching the `NODE` to a `STANDALONE` or `MANAGED` master. On the master you can generate a token for any user from the *BDeploy* UI anytime later on.
 
 The `--mode` parameter of the `init` command is used to determine the future purpose of the *BDeploy* root. The mode can be `STANDALONE`, `MANAGED`, `CENTRAL` (or `NODE` - see <<Node>>).
 
@@ -47,7 +47,7 @@ It is not recommended (<<Migrating between Modes,but possible>>) to change the m
 The result of the `init` command is a *root directory* which can be used by the *start* command.
 
 [WARNING]
-Be aware that the user running the *start* command later on *must* be the owner of the root directory. Otherwise *BDeploy* will refuse to start. If you configure *BDeploy* as a service make sure to either run the service as the same user who initialized the root directory, or pass ownership of the root directory to the user running the service before starting it.
+Be aware that the user running the *start* command later on *must* be the owner of the root directory. Otherwise *BDeploy* will run into problems when accessing files. If you configure *BDeploy* as a service make sure to either run the service as the same user who initialized the root directory, or pass ownership of the root directory to the user running the service before starting it.
 
 ==== Launch
 After the initialization - which needs to be done only once - the *master* can be started with the following command:

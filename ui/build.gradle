@@ -180,13 +180,17 @@ task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
 }
 
 task updateDocuScreenshots(type: Copy, dependsOn: runCypressHeadless) {
-    from fileTree(dir: "${webappDir}/cypress/screenshots/docu.spec.js").matching { include "*.png" }
-    from fileTree(dir: "${webappDir}/cypress/screenshots/instance-group.spec.js").matching { include "*.png" }
-    from fileTree(dir: "${webappDir}/cypress/screenshots/instance.spec.js").matching { include "*.png" }
-    from fileTree(dir: "${webappDir}/cypress/screenshots/user.spec.js").matching { include "*.png" }
-    from fileTree(dir: "${webappDir}/cypress/screenshots/template.spec.js").matching { include "*.png" }
-    from fileTree(dir: "${webappDir}/cypress/screenshots/sw-repo.spec.js").matching { include "*.png" }
+    from file("${webappDir}/cypress/screenshots/")
     into new File(project(":doc").projectDir, "user/images")
+
+    include "**/*.png"
+
+    // flatten by using filename as relative path
+    eachFile {
+        path = name
+    }
+
+    includeEmptyDirs = false
 
     doLast {  
         println('Updating screenshots of user documentation done.')

@@ -13,11 +13,11 @@ This will provide output like this:
  ├──────────────────────┬──────────┬───────────────────────────┬────────────┬─────────────────┤
  │ Name                 │ Status   │ Start                     │ OS         │ Version         │
  ├──────────────────────┼──────────┼───────────────────────────┼────────────┼─────────────────┤
- │ master               │ ONLINE   │ 11/6/20, 11:36 AM         │ WINDOWS    │ 3.3.0           │
- │ node                 │ OFFLINE  │ -                         │ WINDOWS    │ 3.3.0           │
+ │ master               │ ONLINE   │ 19/10/21, 11:36 AM        │ WINDOWS    │ 4.0.0           │
+ │ node                 │ OFFLINE  │ -                         │ WINDOWS    │ 4.0.0           │
  └──────────────────────┴──────────┴───────────────────────────┴────────────┴─────────────────┘
 
 If any of the nodes is marked offline, the according minion on the respective node is not reachable from the master node.
 
 [NOTE]
-`bdeploy login` will prompt for user and password, create a local session, and use that session on subsequent commands. This login session will keep validity until removed using e.g. `bdeploy login --remove=MyServer`.
+`bdeploy login` will prompt for user and password, create a local session, and use that session on subsequent commands. This login session will keep validity until removed using e.g. `bdeploy login --remove=MyServer`. The _active_ login can be set using `bdeploy login --use=<loginName>` (to set the default permanently) or individually/temporary per command using the `--useLogin=<loginName>` option.

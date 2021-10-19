@@ -8,6 +8,9 @@ describe('Admin UI Tests (Settings)', () => {
   it('Tests General Settings', () => {
     cy.visit('/');
     cy.get('.local-hamburger-button').click();
+
+    cy.screenshot('Doc_MainMenu');
+
     cy.get('button[data-cy=Administration]').click();
 
     cy.inMainNavContent(() => {

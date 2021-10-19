@@ -8,10 +8,9 @@ The command is the same as the one used to initialize the *master*. Pass (for ex
 default port to some other value to avoid conflicts. Running multiple *BDeploy* minions on the same machine is
 supported for testing, but not recommended for productive setups (as the *master* can be deployed to directly anyway - no need for an explicit *node*).
 
- bdeploy init --root=/path/to/node/storage --hostname=<hostname> --tokenFile=token.txt --port=7702
+ bdeploy init --root=/path/to/node/storage --hostname=<hostname> --tokenFile=node-token.txt --port=7702
 
-Again, the `init` command will output the root access token for this *node*. You need it to register the *node* with the
-*master*, so keep it around or use `--tokenFile=node-token.txt` to store the token into a file.
+Again, the `init` command will output the _system_ access token for this *node* (if `--tokenFile` is not used). You need it to register the *node* with the *master*, so keep it around or use `--tokenFile=node-token.txt` to store the token into a file.
 
 ==== Launch
 After the initialization - which needs to be done only once - the *node* can be started with the following command:
@@ -24,7 +23,7 @@ To register a *node* with the *master* use this command on the *master* root:
  bdeploy node --add=node-name --root=/path/to/master/storage --remote=https://node-host:7702/api --tokenFile=node-token.txt
 
 [NOTE]
-Both the `https` (beware the `s`) and the `/api` suffix are required!
+Both the `https` (beware the `s`) prefix and the `/api` suffix are required!
 
 The *node* is now registered as 'node-name'. This is the name which is reported when querying *nodes* from the *master*.
 This is also the name displayed when configuring applications to run on certain *nodes* later on.

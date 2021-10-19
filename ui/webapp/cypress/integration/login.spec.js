@@ -3,9 +3,12 @@
 describe('Login Tests', function () {
   it('Visits start page and logs in', function () {
     cy.visit('/');
+    cy.waitUntilContentLoaded();
 
     cy.url().should('include', '/login');
-    cy.contains('BDeploy Login');
+    cy.contains('BDeploy Login').should('exist');
+
+    cy.screenshot('Doc_Login');
 
     cy.fillFormInput('user', 'admin');
     cy.fillFormInput('pass', 'admin');
