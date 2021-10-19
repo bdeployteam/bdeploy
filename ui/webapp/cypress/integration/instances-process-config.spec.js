@@ -37,6 +37,7 @@ describe('Instance Process Config Tests', () => {
 
     cy.inMainNavFlyin('app-add-process', () => {
       cy.contains('tr', 'Server Application').find('button[data-cy^="Add Server"]').click();
+      cy.waitUntilContentLoaded();
       cy.pressToolbarButton('Close');
     });
 
@@ -53,6 +54,7 @@ describe('Instance Process Config Tests', () => {
 
     cy.inMainNavFlyin('app-add-process', () => {
       cy.contains('tr', 'Client Application').find('button[data-cy^="Add Client"]').click();
+      cy.waitUntilContentLoaded();
       cy.pressToolbarButton('Close');
     });
 
@@ -119,6 +121,7 @@ describe('Instance Process Config Tests', () => {
 
     cy.inMainNavFlyin('app-add-process', () => {
       cy.contains('tr', 'Server Application').find('button[data-cy^="Add Server"]').click();
+      cy.waitUntilContentLoaded();
       cy.pressToolbarButton('Close');
     });
 
@@ -201,7 +204,7 @@ describe('Instance Process Config Tests', () => {
         cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
         cy.contains('app-history-diff-field', '--boolean-with-value=true').should('exist');
         cy.contains('app-history-diff-field', '--boolean-without-value').should('exist');
-        });
+      });
 
       cy.get('button[data-cy="Apply"]').click();
     });

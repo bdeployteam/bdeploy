@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -263,9 +263,12 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         allCreations.push(this.edit.addProcess(row.node, row.app.applications[0], row.template, v, []));
       }
 
-      combineLatest(allCreations).subscribe((_) => {
-        this.instanceEdit.conceal('Add ' + (!!row.template ? row.template.name : row.app.appDisplayName));
-      });
+      this.loading$.next(true);
+      combineLatest(allCreations)
+        .pipe(finalize(() => this.loading$.next(false)))
+        .subscribe((_) => {
+          this.instanceEdit.conceal('Add ' + (!!row.template ? row.template.name : row.app.appDisplayName));
+        });
     });
   }
 
