@@ -1,5 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
@@ -70,7 +71,8 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     public servers: ServersService,
     public edit: InstanceEditService,
     private media: BreakpointObserver,
-    private products: ProductsService
+    private products: ProductsService,
+    private router: Router
   ) {
     this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
     this.subscription.add(this.areas.registerDirtyable(this, 'primary'));
@@ -114,7 +116,11 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe();
+    this.doSave().subscribe((_) => {
+      // after save navigate back to the dashboard - this will take the user where he will likely want to continue
+      // anyway (install, activate, start processes, etc.)
+      this.router.navigate(['instances', 'dashboard', this.areas.groupContext$.value, this.areas.instanceContext$.value]);
+    });
   }
 
   public doSave(): Observable<any> {

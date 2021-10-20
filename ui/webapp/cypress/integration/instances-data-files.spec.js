@@ -74,7 +74,13 @@ describe('Instance Data Files Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('button[data-cy^="Save"]').should('be.enabled').click(); // disables button on click.
       cy.waitUntilContentLoaded();
+    });
 
+    // save navigates to dashboard, navigate back
+    cy.pressMainNavButton('Instance Configuration');
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
       // "added" border should be gone, we're in sync now.
       cy.get('app-config-node[data-cy="master"]').within((node) => {
         cy.contains('tr', 'Server Application').find('.bd-status-border-none').should('exist');

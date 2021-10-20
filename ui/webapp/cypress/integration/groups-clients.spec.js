@@ -63,10 +63,10 @@ describe('Groups Tests (Clients)', () => {
       });
 
       cy.pressToolbarButton('Save');
-      cy.waitUntilContentLoaded();
     });
 
-    cy.pressMainNavButton('Instance Dashboard');
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavContent(() => {
       cy.contains('.bd-rect-card', 'has no active version')
         .should('exist')

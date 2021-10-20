@@ -123,6 +123,12 @@ describe('Instance Settings Tests', () => {
       cy.waitUntilContentLoaded();
     });
 
+    // save navigates to dashboard, navigate back
+    cy.pressMainNavButton('Instance Configuration');
+    cy.waitUntilContentLoaded();
+
+    cy.pressToolbarButton('Instance Settings');
+
     cy.inMainNavFlyin('app-instance-settings', () => {
       cy.get('button[data-cy^="Configuration Files"]').click();
     });
