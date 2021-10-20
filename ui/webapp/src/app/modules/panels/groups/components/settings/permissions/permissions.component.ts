@@ -40,7 +40,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
   };
 
   private readonly actRemoveLocal: BdDialogMessageAction<any> = {
-    name: 'REMOVE',
+    name: 'Remove',
     result: 'REMOVE',
     confirm: false,
     disabled: () => !this.getLocalPermissionLevel(this.modUser),

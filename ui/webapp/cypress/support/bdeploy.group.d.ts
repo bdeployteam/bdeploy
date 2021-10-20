@@ -17,7 +17,7 @@ declare namespace Cypress {
      * @param fileName the file within the fixtures directory to use.
      * @param mode the BDeploy mode to visit when uploading.
      */
-    uploadProductIntoGroup(groupName: string, fileName: string, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
+    uploadProductIntoGroup(groupName: string, fileName: string, screenshots?: boolean, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL');
 
     /**
      * @param groupName the name of the group.

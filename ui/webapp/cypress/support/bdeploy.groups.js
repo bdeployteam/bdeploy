@@ -12,6 +12,8 @@ Cypress.Commands.add('createGroup', function (groupName, mode = 'STANDALONE') {
     cy.pressToolbarButton('Add Instance Group');
   });
 
+  cy.screenshot('Doc_AddGroupPanelEmpty');
+
   cy.inMainNavFlyin('app-add-group', () => {
     cy.contains('button', 'Save').should('exist').and('be.disabled');
 
@@ -19,7 +21,10 @@ Cypress.Commands.add('createGroup', function (groupName, mode = 'STANDALONE') {
     cy.fillFormInput('title', groupName);
     cy.fillFormInput('description', `Description of ${groupName}`);
     cy.fillImageUpload('bdeploy.png', 'image/png');
+  });
+  cy.screenshot('Doc_AddGroupPanelFilled');
 
+  cy.inMainNavFlyin('app-add-group', () => {
     cy.contains('button', 'Save').should('exist').and('be.enabled').click();
   });
   cy.checkMainNavFlyinClosed();
@@ -60,7 +65,7 @@ Cypress.Commands.add('deleteGroup', function (groupName, mode = 'STANDALONE') {
 /**
  * Command: uploadProductIntoGroup
  */
-Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, mode = 'STANDALONE') {
+Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, screenshots = false, mode = 'STANDALONE') {
   cy.visitBDeploy('/', mode);
   cy.waitUntilContentLoaded();
 
@@ -69,11 +74,28 @@ Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, mo
   cy.pressMainNavButton('Products');
   cy.get('app-products-browser').should('exist');
 
+  if (screenshots) {
+    cy.screenshot('Doc_ProductsEmpty');
+  }
+
   cy.pressToolbarButton('Upload Product');
+
+  if (screenshots) {
+    cy.screenshot('Doc_ProductsUploadPanel');
+  }
+
   cy.inMainNavFlyin('app-product-upload', () => {
     cy.fillFileDrop(fileName);
     cy.contains('app-bd-file-upload', `Uploading: ${fileName}`).should('not.exist');
   });
+
+  if (screenshots) {
+    cy.inMainNavContent(() => {
+      // TODO: demo product name hardcoded in case of screenshots - maybe not perfect.
+      cy.contains('tr', 'Demo Product').should('exist');
+    });
+    cy.screenshot('Doc_ProductsUploadSuccess');
+  }
 });
 
 /**

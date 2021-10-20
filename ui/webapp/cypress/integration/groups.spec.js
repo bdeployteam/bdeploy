@@ -18,6 +18,13 @@ describe('Groups Tests', () => {
   it('Creates a group', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.screenshot('Doc_SearchBarEnabled', { clip: { x: 0, y: 0, height: 80, width: 1280 } });
+    cy.screenshot('Doc_DemoGroup');
+
+    cy.enterGroup(groupName);
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_DemoInstancesEmpty');
   });
 
   it('Switches to card mode', () => {
@@ -26,12 +33,18 @@ describe('Groups Tests', () => {
     cy.inMainNavContent(() => {
       cy.contains('tr', groupName).should('exist');
       cy.contains('app-bd-data-card', groupName).should('not.exist');
+    });
 
+    cy.screenshot('Doc_ModeTable');
+    cy.inMainNavContent(() => {
       cy.pressToolbarButton('Toggle Card Mode');
 
       cy.contains('tr', groupName).should('not.exist');
       cy.contains('app-bd-data-card', groupName).should('exist');
+    });
 
+    cy.screenshot('Doc_ModeCards');
+    cy.inMainNavContent(() => {
       cy.pressToolbarButton('Toggle Card Mode');
 
       cy.contains('tr', groupName).should('exist');
@@ -90,8 +103,8 @@ describe('Groups Tests', () => {
   });
 
   it('Upload products to the instance group', function () {
+    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', true); // this first for accurate screenshots :)
     cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip');
-    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
     cy.verifyProductVersion(groupName, 'Demo Product', '1.0.0');
     cy.verifyProductVersion(groupName, 'Demo Product', '2.0.0');
   });
@@ -111,6 +124,9 @@ describe('Groups Tests', () => {
         .should('exist')
         .click();
     });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_ProductDetailsPanel');
 
     cy.inMainNavFlyin('app-product-details', () => {
       // check product is unused
@@ -167,6 +183,8 @@ describe('Groups Tests', () => {
       cy.contains('app-bd-form-select[name="version"]', '2.0.0').should('exist');
     });
 
+    cy.screenshot('Doc_InstanceAdd');
+
     // ...go on checking product details stuff
     cy.pressMainNavButton('Products');
     cy.get('app-products-browser').should('exist');
@@ -201,7 +219,14 @@ describe('Groups Tests', () => {
   });
 
   it('Creates an instance', () => {
+    cy.visit('/');
+    cy.enterGroup(groupName);
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_DemoInstancesNoInstance');
+
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
+
+    cy.screenshot('Doc_DemoInstance');
   });
 
   it('Deletes the instance', () => {

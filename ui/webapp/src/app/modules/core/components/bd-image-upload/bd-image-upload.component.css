@@ -14,11 +14,11 @@
 .logo {
   object-fit: contain;
   width: 100%;
-  max-width: 200px;
-  max-height: 200px;
+  max-width: 220px;
+  max-height: 120px;
 }
 
 .logo-dummy {
-  width: 120px;
-  height: 120px;
+  width: 70px;
+  height: 70px;
 }

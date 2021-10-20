@@ -1,79 +1,85 @@
 === Instance Group
 
-An *Instance Group* acts as logical container for actual *Instances*. It typically contains several *Instances* for different purposes (productive, test, development). Adding them to the same group provides a better overview which of them are belonging together. An empty page is displayed if no instance has been created. 
+An *Instance Group* acts as logical container for *Instances*. It typically contains several *Instances* for different purposes (productive, test, development). Adding them to the same group provides a better overview which of them are belonging together. An empty page is displayed if no instance group has been created. 
 
-image::images/BDeploy_Empty_IG.png[Empty Instance Group Overview, align=center, width=480, link="images/BDeploy_Empty_IG.png"]
+image::images/Doc_EmptyGroups.png[Empty Instance Group Overview, align=center, width=480, link="images/Doc_EmptyGroups.png"]
 
-Use the btn:[+] button to create a new *Instance Group*.
+Use the btn:[+] button in the toolbar to create a new *Instance Group*.
 
-image::images/BDeploy_Create_IG.png[Create Instance Group, align=center, width=480, link="images/BDeploy_Create_IG.png"]
+image::images/Doc_AddGroupPanelFilled.png[Create Instance Group, align=center, width=480, link="images/Doc_AddGroupPanelFilled.png"]
 
 [NOTE]
-The name of an instance group cannot be changed. Be carful when choosing the name.
+The name of an instance group cannot be changed, and is used internally as a name in the file system on the server. Be careful when choosing the name.
 
 The _Automatic Cleanup_ option helps to reduce the amount of consumed hard disk space. During the lifetime of an *Instance Group*, probably many new versions of a *Product* are deployed. To avoid that the hard disk is filled up with *Product Versions* that are not used anymore, there is an option to activate an automatic cleanup job. If the option _Automatic Cleanup_ is enabled, old *Product Versions* that are no longer in use by *Instances* of this *Instance Group* are deleted automatically. To avoid that a *Product* vanishes completely, the very latest *Product Version* always remains.
 
-==== Instance Group Access
-
-A new *Instance Group* is initially only visible to users with global read permission (or higher).
-
-image::images/BDeploy_Demo_Permissions_Global.png[Global Instance Group Permissions, align=center, width=480, link="images/BDeploy_Demo_Permissions_Global.png"]
-
-Use the btn:[+] button to add a user to the list. The input field suggests matching users from the list of all users.
-
-image::images/BDeploy_Demo_Permissions_AddUser1.png[Grant Read Access to an Instance Group, align=center, width=480, link="images/BDeploy_Demo_Permissions_AddUser1.png"]
-
-Adding a user grants read access to the *Instance Group*. The bin icon in the last column removes the user from the list. Users with global read permission cannot be removed.
-
-image::images/BDeploy_Demo_Permissions_AddUser2.png[Grant Read Access to an Instance Group, align=center, width=480, link="images/BDeploy_Demo_Permissions_AddUser2.png"]
-
-Write access and administration permissions for an *Instance Group* can be granted and revoked using the checkbox in the respective column.
-
 ==== Instance Group Dialog
 
-All *Instance Groups* that are visible to the user are shown in the *Instance Groups* dialog. This page shows a list of _recently used_ *Instance Groups* in the first row. It will always contain the most recently used *Instance Groups* for the logged in user. This allows allows a quick return to previously/frequently visited *Instance Groups*.
+All *Instance Groups* that are visible to the user (as per the assigned permissions) are shown in the *Instance Groups* dialog.
 
-image::images/BDeploy_Demo_IG.png[Demo Instance Group, align=center, width=480, link="images/BDeploy_Demo_IG.png"]
+image::images/Doc_DemoGroup.png[Demo Instance Group, align=center, width=480, link="images/Doc_DemoGroup.png"]
 
-[NOTE]
-Of course you can also bookmark the location of an *Instance Group* in your browser.
+==== Instance Group Access
+
+A new *Instance Group* is initially only visible to users with global read permission (or higher). You can assign permissions to users either globally, or per *Instance Group*. To assign local permissions, click the *Instance Group* to get to its *Instance Overview* and then click the btn:[Group Settings] toolbar button. The Group Settings panel is shown.
+
+image::images/Doc_GroupSettings.png[Instance Group Settings, align=center, width=480, link="images/Doc_GroupSettings.png"]
+
+Click the btn:[Instance Group Permissions] button to navigate to the permission panel.
+
+image::images/Doc_GroupPermGlobalOnly.png[Instance Group Permissions, align=center, width=480, link="images/Doc_GroupPermGlobalOnly.png"]
+
+To assign a local permission to a given user, click the btn:[Modify] button in the according table row. A dialog will pop up asking for the permission to assign. Choose an apropriate one and click btn:[OK].
+
+image::images/Doc_GroupPermSetWrite.png[Instance Group Permission Assignment, align=center, width=480, link="images/Doc_GroupPermSetWrite.png"]
+
+The local permission will be shown next to the global permission. The highest available permission level is taken into account for any permission checks.
+
+image::images/Doc_GroupPermAssigned.png[Instance Group Local Permission, align=center, width=480, link="images/Doc_GroupPermAssigned.png"]
+
+The user table is grouped by permission assignment, either global, local or unassigned.
 
 ==== Initial Steps
 
-Click on an *Instance Group* to open the *Instance Browser* of this group. Here you can see all *Instances* grouped by their _purpose_ (can be `DEVELOPMENT`, `TEST`, `PRODUCTIVE`)
+Click on an *Instance Group* to open the *Instance Browser* of this group. Here you can see all *Instances* grouped by their _purpose_ (can be `Development`, `Test` or `Productive`).
 
-image::images/BDeploy_Empty_Instances.png[Empty Instance Browser, align=center, width=480, link="images/BDeploy_Empty_Instances.png"]
+image::images/Doc_DemoInstancesEmpty.png[Empty Instance Browser, align=center, width=480, link="images/Doc_DemoInstancesEmpty.png"]
 
-Since an *Instance* requires a *Product*, an empty *Instance Group* will display a shortcut to the <<Manage Products>> dialog. If there is at least one *Instance* already, the shortcut disappears. The menu:Context Menu[Products] menu opens the <<Manage Products>> dialog, too.
+Since an *Instance* requires a *Product*, an empty *Instance Group* will initially display a shortcut to the <<Manage Products,products>> page. If there is at least one *Product* available already, the shortcut changes to the help you to <<Create New Instances,create a new instance>>.
+
+image::images/Doc_DemoInstancesNoInstance.png[Empty Instance Browser with Product available, align=center, width=480, link="images/Doc_DemoInstancesNoInstance.png"]
 
 ==== Manage Products
 
-Click the btn:[+] button to upload new *Products*. *Products* can be obtained by <<_building_a_product,building a *Product*>> or by downloading an existing version from another *Instance Group* on the same or another *BDeploy* server, using the btn:[Download] button on the *Product* details panel.
+*Products* can be obtained by <<_building_a_product,building a *Product*>> or by downloading an existing version from another *Instance Group* on the same or another *BDeploy* server, using the btn:[Download] button on the *Product* details panel.
 
 [NOTE]
-On the BDeploy Releases page you will find some sample products for each release, see https://github.com/bdeployteam/bdeploy/releases
+On the BDeploy Releases page you will find some sample products to experiment with for each release, see https://github.com/bdeployteam/bdeploy/releases
 
-image::images/BDeploy_Empty_Products.png[Empty Products Page, align=center, width=480, link="images/BDeploy_Empty_Products.png"]
-image::images/BDeploy_Product_Upload_Before.png[Upload Product(s), align=center, width=480, link="images/BDeploy_Product_Upload_Before.png"]
-image::images/BDeploy_Product_Upload_Success.png[Upload Product(s) (success), align=center, width=480, link="images/BDeploy_Product_Upload_Success.png"]
+image::images/Doc_ProductsEmpty.png[Empty Products Page, align=center, width=480, link="images/Doc_ProductsEmpty.png"]
 
-Once a *Product* is available, you can click it to open the *Product* details panel. This panel allows you to btn:[Download] a *Product* version as _ZIP_, or btn:[Delete] individual versions of the *Product* as long as it is not currently required by an *Instance* version. The btn:[Info] popup provides a list of all tags on that *Product* version.
+On the *Products* page, click the btn:[Upload Product] button to upload new *Products*.
 
-image::images/BDeploy_Products.png[Products Page, align=center, width=480, link="images/BDeploy_Products.png"]
-image::images/BDeploy_Products_Details.png[Product Details, align=center, width=480, link="images/BDeploy_Products_Details.png"]
+image::images/Doc_ProductsUploadPanel.png[Upload Product, align=center, width=480, link="images/Doc_ProductsUploadPanel.png"]
+
+Click browse and choose a *Product* _ZIP_ file to upload, or simply drop on on the highlighted drop zone. The *Product* will be uploaded immediately.
+
+image::images/Doc_ProductsUploadSuccess.png[Upload Product (success), align=center, width=480, link="images/Doc_ProductsUploadSuccess.png"]
+
+Once a *Product* is available, you can click it to open the *Product* details panel. This panel allows you to btn:[Download] a *Product* version as _ZIP_, or btn:[Delete] individual versions of the *Product* as long as it is not currently in use by an *Instance* version. There rest of the panel provides additional information about the *Product*.
+
+image::images/Doc_ProductDetailsPanel.png[Product Details Panel, align=center, width=480, link="images/Doc_ProductDetailsPanel.png"]
 
 ==== Create New Instances
 
 To create a new *Instance*, click the btn:[+] button at the bottom of the page. After giving the new *Instance* a name, purpose and description, the most important thing is to select the *Product* you want to deploy. Additionally, The initial *Product Version* has to be chosen. It can be changed later at anytime (_up-_ and _downgrade_). 
 
+image::images/Doc_InstanceAdd.png[Create a new Instance, align=center, width=480, link="images/Doc_InstanceAdd.png"]
+
 It is a common requirement that certain *Processes* of an *Instance* should be automatically started whenever the *BDeploy* server itself is started. To accomplish that, the _Automatic Startup_ flag of the *Instance* must be set. 
 
 The *Instance* determines whether it is included in the automatic cleanup job. If the option _Automatic Uninstallation_ is enabled, the cleanup job will uninstall all *Instance Versions* that are older than the activated and the previously activated *Instance Version*. Due to this automatic uninstallation some of the old *Product Versions* might become unused. If the option _Automatic Cleanup_ is activated on the instance group, these unused *Product Versions* are deleted too (see <<_instance_group,Instance Group>>).
 
-image::images/BDeploy_Instance_Create.png[Create a new Instance, align=center, width=480, link="images/BDeploy_Instance_Create.png"]
-
 Click an *Instance* to proceed to the <<Instance Overview>>.
 
-image::images/BDeploy_Instance_List.png[Instance Browser, align=center, width=480,link="images/BDeploy_Instance_List.png"]
-
-
+image::images/Doc_DemoInstance.png[Instance Browser, align=center, width=480,link="images/Doc_DemoInstance.png"]

@@ -24,4 +24,5 @@ jobs:
     - name: Build and Test
       env:
         NODE_OPTIONS: '--max_old_space_size=1200'
-      run: ./gradlew --stacktrace clean build releaseTest -PrecordCypress -PcypressBrowser=electron -PcypressNoCoverage=yes '-Dtestlogger.theme=plain-parallel'
+      run: ./gradlew --stacktrace clean build releaseTest -PrecordCypress -PcypressBrowser=electron -PcypressNoCoverage=yes -PcypressTimeout=120000 '-Dtestlogger.theme=plain-parallel'
+

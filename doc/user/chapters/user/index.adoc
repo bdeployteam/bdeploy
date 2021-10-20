@@ -4,9 +4,11 @@ This chapter provides an overview of all parts of the BDeploy user interface.
 
 include::login.adoc[]
 
-//// REWORK MARKER
+include::common-ui.adoc[]
 
 include::instancegroup.adoc[]
+
+//// REWORK MARKER MDU
 
 include::instance.adoc[]
 

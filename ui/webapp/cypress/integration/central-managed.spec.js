@@ -51,7 +51,7 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Creates an instance on managed server', () => {
-    cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip', 'MANAGED');
+    cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip', false, 'MANAGED');
 
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0', 'MANAGED');
 
@@ -117,7 +117,7 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Creates an instance on central server', () => {
-    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', 'CENTRAL');
+    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', false, 'CENTRAL');
     cy.createInstance(groupName, instanceName2, 'Demo Product', '2.0.0', 'CENTRAL');
 
     cy.visitManaged('/');

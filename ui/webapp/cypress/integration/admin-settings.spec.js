@@ -181,6 +181,8 @@ describe('Admin UI Tests (Settings)', () => {
       });
     });
 
+    cy.screenshot('Doc_GroupingPanel');
+
     cy.get('.cdk-overlay-backdrop-showing').click('top');
 
     cy.inMainNavContent(() => {

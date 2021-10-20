@@ -130,6 +130,64 @@ describe('Groups Tests (Permissions)', () => {
     });
   });
 
+  it('Tests assigning local write permissions', () => {
+    cy.visit('/');
+    cy.enterGroup(groupName);
+    cy.pressToolbarButton('Group Settings');
+
+    cy.screenshot('Doc_GroupSettings');
+
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy="Instance Group Permissions"]').click();
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_GroupPermGlobalOnly');
+
+    cy.inMainNavFlyin('app-permissions', () => {
+      cy.contains('tr', 'read')
+        .should('exist')
+        .within(() => {
+          cy.get('button[data-cy^="Modify"]').click();
+        });
+
+      cy.contains('app-bd-notification-card', 'Modify')
+        .should('exist')
+        .within(() => {
+          cy.fillFormSelect('modPerm', 'WRITE');
+        });
+    });
+
+    cy.screenshot('Doc_GroupPermSetWrite');
+
+    cy.inMainNavFlyin('app-permissions', () => {
+      cy.contains('app-bd-notification-card', 'Modify')
+        .should('exist')
+        .within(() => {
+          cy.get('button[data-cy^="OK"]').click();
+        });
+    });
+
+    cy.screenshot('Doc_GroupPermAssigned');
+  });
+
+  it('Tests read user with local permission can create instance', () => {
+    cy.pressMainNavTopButton('User Settings');
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy="Logout"]').click();
+    });
+    cy.waitUntilContentLoaded();
+    cy.fillFormInput('user', 'read');
+    cy.fillFormInput('pass', 'read');
+
+    cy.get('button[type="submit"]').click();
+
+    cy.waitUntilContentLoaded();
+    cy.contains('tr', groupName).should('exist');
+
+    cy.createInstance(groupName, instanceName + '2', 'Demo Product', '2.0.0');
+  });
+
   it('Cleans up', () => {
     cy.deleteGroup(groupName);
     cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=read`, failOnStatusCode: false });

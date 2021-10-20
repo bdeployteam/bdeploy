@@ -19,5 +19,8 @@ describe('Login Tests', function () {
     cy.contains('Instance Groups');
 
     cy.getCookie('st').should('exist');
+
+    cy.screenshot('Doc_SearchBarDisabled', { clip: { x: 0, y: 0, height: 80, width: 1280 } });
+    cy.screenshot('Doc_EmptyGroups');
   });
 });
