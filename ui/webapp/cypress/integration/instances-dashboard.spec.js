@@ -138,13 +138,12 @@ describe('Instance Dashboard Tests', () => {
       // crash back off after second start
       cy.contains('Stopped At').should('exist');
       cy.contains('Restart In').should('exist');
-      cy.contains('button', 'play_arrow').should('be.enabled');
-      cy.contains('button', 'stop').should('be.enabled');
 
       // permanent crash
+      cy.contains('mat-icon', 'error').should('exist');
+      cy.contains('Stopped At').should('exist');
       cy.contains('button', 'stop').should('be.disabled');
       cy.contains('button', 'play_arrow').should('be.enabled');
-      cy.contains('Stopped At').should('exist');
     });
 
     cy.inMainNavContent(() => {
