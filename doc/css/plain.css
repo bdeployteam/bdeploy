@@ -46,6 +46,11 @@ td{background-color: var(--maincolor);color: var(--black) !important}
 #footer{background-color: var(--sidebarbackground);}
 #footer-text{color: var(--primarycolor);}
 
+/* image style */
+.image {
+  border: 3px solid var(--tertiarycolor);
+}
+
 /* Responsiveness fixes */
 video {
   max-width: 100%;

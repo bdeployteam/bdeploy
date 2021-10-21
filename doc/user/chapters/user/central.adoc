@@ -6,8 +6,8 @@ On the `CENTRAL` server side:
 
 * Each *Instance Group* has a list of `MANAGED` servers attached to it.
 * Each *Instance* is associated with exactly *one* of those `MANAGED` servers.
-* Synchonization to the `CENTRAL` servers data store is done on demand (through a button in the Web UI). When synchonizing from a `MANAGED` to a `CENTRAL` server, only _configuration_ data is synchronized. Actual *product* and *application* data is only synchronized when explicitly requested through the <<Product Synchronization>> page on the `CENTRAL` server.
-* It is possible to create a new *Instance Version* on the `CENTRAL` server from a *Product Version* which has been pushed only to the `CENTRAL` server (but not to the `MANAGED`). In this case, the required product data is sent to the `MANAGED` server once *Install* is performed on this *Instance Version*.
+* Synchonization to the `CENTRAL` servers data store is done on demand (through a button in the Web UI). When synchonizing from a `MANAGED` to a `CENTRAL` server, only _configuration_ data is synchronized. Actual *Product* and *Application* data is only synchronized when explicitly requested through the <<Product Synchronization>> page on the `CENTRAL` server.
+* It is possible to create a new *instance version* on the `CENTRAL` server from a *product version* which has been pushed only to the `CENTRAL` server (but not to the `MANAGED`). In this case, the required product data is sent to the `MANAGED` server once *install* is performed on this *instance version*. In this scenarion *install* *has to be* performed on the `CENTRAL` server.
 
 On The `MANAGED` server side:
 
@@ -15,7 +15,9 @@ On The `MANAGED` server side:
 * Creation and editing of *Instances* (applications, parameters, etc.) is possible just the same as with a `STANDALONE` server. New data will be synchronized to the `CENTRAL` server the next time the `CENTRAL` server requests such a synchronization.
 
 [NOTE]
-*BDeploy* is built for restrictive networks. The assumption is that the `CENTRAL` server can contact all its `MANAGED` servers, but never the other way around.
+*BDeploy* is built for restrictive networks. The assumption is that the `CENTRAL` server can contact `MANAGED` servers, but never the other way around.
+
+//// REWORK MARKER MDU
 
 ==== Attaching an Instance Group to a Central Server
 

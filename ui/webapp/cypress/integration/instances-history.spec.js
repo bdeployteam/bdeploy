@@ -71,6 +71,8 @@ describe('Instance History Tests', () => {
 
     cy.waitUntilContentLoaded();
 
+    cy.screenshot('Doc_History');
+
     cy.inMainNavContent(() => {
       cy.get('tr:contains("Created")').should('have.length', 2);
       cy.contains('tr', 'Version 1: Created').click();
@@ -85,6 +87,8 @@ describe('Instance History Tests', () => {
       cy.pressToolbarButton('Back to Overview');
     });
 
+    cy.screenshot('Doc_HistoryEntry');
+
     cy.inMainNavFlyin('app-history-entry', () => {
       cy.get('button[data-cy="Compare with Current"]').click();
     });
@@ -94,6 +98,9 @@ describe('Instance History Tests', () => {
       cy.contains('app-history-diff-field', 'Server No Sleep').should('exist');
       cy.contains('app-history-diff-field', 'Server With Sleep').should('exist');
       cy.contains('app-history-diff-field', 'Client Test Text').should('exist');
+    });
+    cy.screenshot('Doc_HistoryCompare');
+    cy.inMainNavFlyin('app-history-compare', () => {
       cy.pressToolbarButton('Back to Overview');
     });
 
@@ -127,6 +134,8 @@ describe('Instance History Tests', () => {
       cy.contains('tr', 'Version 2: Installed').should('exist');
       cy.contains('tr', 'Version 2: Activated').should('exist');
     });
+
+    cy.screenshot('Doc_HistoryDeployment');
   });
 
   it('Starts and stops a process', () => {
@@ -167,6 +176,8 @@ describe('Instance History Tests', () => {
 
       cy.contains('tr', 'Another Server With Sleep stopped').should('exist');
     });
+
+    cy.screenshot('Doc_HistoryRuntime');
   });
 
   it('Cleans up', () => {

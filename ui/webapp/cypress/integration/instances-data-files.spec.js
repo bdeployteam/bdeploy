@@ -126,6 +126,8 @@ describe('Instance Data Files Tests', () => {
 
     cy.waitUntilContentLoaded();
 
+    cy.screenshot('Doc_DataFiles');
+
     cy.inMainNavContent(() => {
       cy.contains('tr', 'out.txt').within(() => {
         cy.get('button[data-cy^="Edit"]').click();
@@ -136,6 +138,11 @@ describe('Instance Data Files Tests', () => {
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.monacoEditor().should('contain.value', 'TEST');
+    });
+
+    cy.screenshot('Doc_DataFilesEdit');
+
+    cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.pressToolbarButton('Close');
     });
 
@@ -145,6 +152,8 @@ describe('Instance Data Files Tests', () => {
     });
 
     cy.waitUntilContentLoaded();
+
+    cy.screenshot('Doc_DataFilesView');
 
     cy.inMainNavFlyin('app-data-file-viewer', () => {
       cy.pressToolbarButton('Close');

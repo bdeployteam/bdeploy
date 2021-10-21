@@ -93,6 +93,9 @@ describe('Groups Tests (Clients)', () => {
       cy.get('tr:contains("Client Test")').should('have.length', 1).click(); // only one shown due to OS!
     });
 
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_ClientApps');
+
     // current OS
     cy.inMainNavFlyin('app-client-detail', () => {
       cy.get('button[data-cy="Download Installer"]').should('be.enabled').downloadByLocationAssign('test-installer.bin');

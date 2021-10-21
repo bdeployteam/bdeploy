@@ -161,11 +161,14 @@ describe('Instance Settings Tests', () => {
       });
     });
 
+    cy.monacoEditor().should('contain.value', 'dummy configuration');
+    cy.typeInMonacoEditor('Configuration File Content', true);
+
     cy.inMainNavFlyin('app-editor', () => {
-      cy.monacoEditor().should('contain.value', 'dummy configuration');
-      cy.typeInMonacoEditor('Configuration File Content', true);
       cy.pressToolbarButton('Apply');
     });
+
+    cy.screenshot('Doc_InstanceConfigFiles');
 
     cy.inMainNavFlyin('app-config-files', () => {
       cy.pressToolbarButton('Add File');
@@ -183,9 +186,11 @@ describe('Instance Settings Tests', () => {
         });
     });
 
+    cy.typeInMonacoEditor('{{}{enter}"json" : "content"');
+
+    cy.screenshot('Doc_InstanceConfigFilesEdit');
+
     cy.inMainNavFlyin('app-editor', () => {
-      cy.monacoEditor().should('exist');
-      cy.typeInMonacoEditor('{{}{enter}"json" : "content"');
       cy.pressToolbarButton('Apply');
     });
 
@@ -232,7 +237,11 @@ describe('Instance Settings Tests', () => {
         cy.get('.local-banner').should('have.css', 'color', 'rgb(255, 255, 255)');
         cy.contains('This is a banner text').should('exist');
       });
+    });
 
+    cy.screenshot('Doc_InstanceBannerConfig');
+
+    cy.inMainNavFlyin('app-banner', () => {
       cy.get('button[data-cy="Apply"]').should('be.enabled').click();
     });
 
@@ -243,6 +252,8 @@ describe('Instance Settings Tests', () => {
         cy.contains('This is a banner text').should('exist');
       });
     });
+
+    cy.screenshot('Doc_InstanceBanner');
 
     cy.inMainNavFlyin('app-instance-settings', () => {
       cy.get('button[data-cy^="Banner"]').click();
@@ -304,6 +315,8 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavFlyin('app-instance-settings', () => {
       cy.get('button[data-cy^="Manage Nodes"]').click();
     });
+
+    cy.screenshot('Doc_InstanceManageNodes');
 
     cy.inMainNavContent(() => {
       cy.contains('app-config-node', 'master')

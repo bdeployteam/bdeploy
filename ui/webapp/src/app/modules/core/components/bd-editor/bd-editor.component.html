@@ -1,7 +1,6 @@
-<div fxFlex="1 0 auto" fxLayout="column">
+<div fxFlex="1 0 auto" fxLayout="column" [class.bd-editor-inited]="inited$ | async">
   <ngx-monaco-editor
     name="content"
-    [class.bd-editor-inited]="inited"
     [style.height]="'100%'"
     [(ngModel)]="editorContent"
     (ngModelChange)="onModelChange($event)"

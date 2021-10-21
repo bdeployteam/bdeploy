@@ -205,5 +205,5 @@ Cypress.Commands.add('typeInMonacoEditor', function (text, clear = false) {
 });
 
 Cypress.Commands.add('monacoEditor', function () {
-  return cy.get('.bd-editor-inited textarea:first');
+  return cy.get('.bd-editor-inited textarea:first').should('exist');
 });

@@ -1,7 +1,6 @@
-<div fxFill fxLayout="column">
+<div fxFill fxLayout="column" [class.bd-editor-inited]="inited$ | async">
   <ngx-monaco-diff-editor
     name="content"
-    [class.bd-editor-inited]="inited"
     [style.height]="'100%'"
     [originalModel]="{ code: undefined, language: undefined }"
     [modifiedModel]="{ code: undefined, language: undefined }"

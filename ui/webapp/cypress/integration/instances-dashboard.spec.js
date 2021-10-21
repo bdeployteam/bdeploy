@@ -21,6 +21,8 @@ describe('Instance Dashboard Tests', () => {
 
   it('Prepares Instance Version', () => {
     cy.enterInstance(groupName, instanceName);
+    cy.screenshot('Doc_InstanceEmpty');
+
     cy.pressMainNavButton('Instance Configuration');
 
     cy.waitUntilContentLoaded();
@@ -92,6 +94,8 @@ describe('Instance Dashboard Tests', () => {
         cy.contains('tr', 'Server With Sleep').should('exist');
       });
 
+    cy.screenshot('Doc_InstanceDashboardActive');
+
     cy.get('app-instance-client-node')
       .should('exist')
       .within(() => {
@@ -112,6 +116,24 @@ describe('Instance Dashboard Tests', () => {
     });
   });
 
+  it('Test Manual Confirm', () => {
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Server No Sleep').click();
+    });
+
+    cy.inMainNavFlyin('app-process-status', () => {
+      cy.contains('button', 'play_arrow').click();
+    });
+
+    cy.screenshot('Doc_DashboardProcessManualConfirm');
+
+    cy.inMainNavFlyin('app-process-status', () => {
+      cy.contains('app-bd-notification-card', 'Confirm').within(() => {
+        cy.get('button[data-cy="Cancel"]').click();
+      });
+    });
+  });
+
   it('Test Process Control', () => {
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Another Server With Sleep').click();
@@ -126,6 +148,8 @@ describe('Instance Dashboard Tests', () => {
       cy.pressToolbarButton('Back to Overview');
     });
 
+    cy.screenshot('Doc_DashboardProcessControl');
+
     cy.inMainNavFlyin('app-process-status', () => {
       cy.contains('button', 'play_arrow').click();
       cy.contains('button', 'stop').should('be.enabled');
@@ -138,13 +162,19 @@ describe('Instance Dashboard Tests', () => {
       // crash back off after second start
       cy.contains('Stopped At').should('exist');
       cy.contains('Restart In').should('exist');
+    });
 
+    cy.screenshot('Doc_DashboardProcessCrash');
+
+    cy.inMainNavFlyin('app-process-status', () => {
       // permanent crash
       cy.contains('mat-icon', 'error').should('exist');
       cy.contains('Stopped At').should('exist');
       cy.contains('button', 'stop').should('be.disabled');
       cy.contains('button', 'play_arrow').should('be.enabled');
     });
+
+    cy.screenshot('Doc_DashboardProcessCrashPermanent');
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Another Server With Sleep').within(() => {
@@ -154,6 +184,11 @@ describe('Instance Dashboard Tests', () => {
 
     cy.inMainNavFlyin('app-process-status', () => {
       cy.get('button[data-cy="Process Console"]').click();
+    });
+
+    cy.screenshot('Doc_DashboardProcessConsole');
+
+    cy.inMainNavFlyin('app-process-console', () => {
       cy.pressToolbarButton('Back to Overview');
     });
   });

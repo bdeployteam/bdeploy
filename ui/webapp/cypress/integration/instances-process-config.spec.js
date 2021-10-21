@@ -80,6 +80,8 @@ describe('Instance Process Config Tests', () => {
       cy.get('button[data-cy^="Compare"]').click();
     });
 
+    cy.screenshot('Doc_InstanceConfigCompareChanges');
+
     // Check diff view
     cy.inMainNavFlyin('app-local-diff', () => {
       cy.contains('app-history-diff-field', 'Server Application').find('.local-added-bg').should('exist');
@@ -125,6 +127,8 @@ describe('Instance Process Config Tests', () => {
       cy.pressToolbarButton('Close');
     });
 
+    cy.screenshot('Doc_InstanceConfigValidation');
+
     cy.inMainNavContent(() => {
       cy.get('app-bd-notification-card[header^="Validation"]')
         .should('exist')
@@ -144,9 +148,13 @@ describe('Instance Process Config Tests', () => {
       });
     });
 
+    cy.screenshot('Doc_InstanceConfigProcessSettings');
+
     cy.inMainNavFlyin('app-edit-process-overview', () => {
       cy.get('button[data-cy^="Configure Parameters"]').click();
     });
+
+    cy.screenshot('Doc_InstanceConfigParams');
 
     cy.inMainNavFlyin('app-configure-process', () => {
       cy.get('app-bd-form-input[name="name"]').within(() => {
@@ -162,7 +170,13 @@ describe('Instance Process Config Tests', () => {
         cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
 
         cy.get('button[data-cy^="Select Parameters"]').click();
+      });
+    });
 
+    cy.screenshot('Doc_InstanceConfigOptionalParams');
+
+    cy.inMainNavFlyin('app-configure-process', () => {
+      cy.contains('mat-expansion-panel', 'Sleep Configuration').within(() => {
         cy.get('[data-cy="param.sleep"]').within(() => {
           cy.get('input').should('be.disabled');
           cy.contains('mat-icon', 'add').click();
@@ -178,6 +192,36 @@ describe('Instance Process Config Tests', () => {
         });
       });
 
+      // add a custom parameter
+      cy.contains('mat-expansion-panel', 'Custom Parameters').within(() => {
+        cy.get('mat-panel-title').click();
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+
+        cy.get('button[data-cy^="Add Custom"]').click();
+      });
+
+      cy.contains('app-bd-notification-card', 'Add Custom Parameter')
+        .should('exist')
+        .within(() => {
+          cy.fillFormInput('id', 'custom.param');
+          cy.fillFormSelect('predecessor', 'Sleep Timeout');
+          cy.fillFormInput('value', '--text=Custom');
+        });
+    });
+
+    cy.screenshot('Doc_InstanceConfigAddCustomParam');
+
+    cy.inMainNavFlyin('app-configure-process', () => {
+      // confirm the dialog and collapse custom parameters
+      cy.contains('app-bd-notification-card', 'Add Custom Parameter').within(() => {
+        cy.get('button[data-cy^="OK"]').should('be.enabled').click();
+      });
+
+      cy.contains('mat-expansion-panel', 'Custom Parameters').within(() => {
+        cy.get('mat-panel-title').click('top');
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'false');
+      });
+
       // check preview.
       cy.contains('mat-expansion-panel', 'Command Line Preview').within(() => {
         cy.get('mat-panel-title').click();
@@ -186,7 +230,11 @@ describe('Instance Process Config Tests', () => {
         cy.contains('app-history-diff-field', '--boolean-with-value=false').should('exist');
         cy.contains('app-history-diff-field', '--boolean-without-value').should('not.exist');
       });
+    });
 
+    cy.screenshot('Doc_InstanceConfigPreview');
+
+    cy.inMainNavFlyin('app-configure-process', () => {
       // toggle boolean parameter in panel 'Tested by Cypress'
       cy.contains('mat-expansion-panel', 'Tested by Cypress').within(() => {
         cy.get('mat-panel-title').click();
@@ -241,6 +289,8 @@ describe('Instance Process Config Tests', () => {
       cy.pressToolbarButton('Local Changes');
     });
 
+    cy.screenshot('Doc_InstanceConfigLocalChanges');
+
     // Check if local changes have been recorded
     cy.inMainNavFlyin('app-local-changes', () => {
       cy.contains('tr', 'Add Client Application').contains('mat-icon', 'arrow_back').should('exist');
@@ -270,9 +320,13 @@ describe('Instance Process Config Tests', () => {
       cy.pressToolbarButton('Instance Settings');
     });
 
+    cy.screenshot('Doc_InstanceProductUpdateAvail');
+
     cy.inMainNavFlyin('app-instance-settings', () => {
       cy.get('button[data-cy^="Update Product"]').click();
     });
+
+    cy.screenshot('Doc_InstanceProductUpdate');
 
     cy.inMainNavFlyin('app-product-update', () => {
       cy.contains('tr', '2.0.0').within(() => {
@@ -285,6 +339,9 @@ describe('Instance Process Config Tests', () => {
     });
 
     cy.checkMainNavFlyinClosed();
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_InstanceProductUpdateHints');
 
     cy.contains('app-bd-notification-card', 'Product Update')
       .should('exist')

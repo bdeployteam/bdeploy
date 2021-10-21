@@ -3,6 +3,7 @@
     <div>Provide a unique ID for the custom parameter.</div>
     <app-bd-form-input
       #validateCustom
+      name="id"
       label="Unique ID"
       appEditCustomUidValidator
       appEditUniqueValueValidator
@@ -16,6 +17,7 @@
     </div>
     <app-bd-form-select
       label="Predecessor"
+      name="predecessor"
       [values]="getAllValueUids()"
       [labels]="getAllValueUidLabels()"
       [allowNone]="true"
@@ -25,7 +27,7 @@
       You may also provide a value right away, or edit the value later on. The value is put on the final command line <strong>as is</strong>, so make sure to
       give a propper command line argument.
     </div>
-    <app-bd-form-input label="Custom Parameter Value" [(ngModel)]="customTemp.value"></app-bd-form-input>
+    <app-bd-form-input name="value" label="Custom Parameter Value" [(ngModel)]="customTemp.value"></app-bd-form-input>
   </div>
 </ng-template>
 

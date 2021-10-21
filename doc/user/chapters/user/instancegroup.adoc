@@ -11,7 +11,7 @@ image::images/Doc_AddGroupPanelFilled.png[Create Instance Group, align=center, w
 [NOTE]
 The name of an instance group cannot be changed, and is used internally as a name in the file system on the server. Be careful when choosing the name.
 
-The _Automatic Cleanup_ option helps to reduce the amount of consumed hard disk space. During the lifetime of an *Instance Group*, probably many new versions of a *Product* are deployed. To avoid that the hard disk is filled up with *Product Versions* that are not used anymore, there is an option to activate an automatic cleanup job. If the option _Automatic Cleanup_ is enabled, old *Product Versions* that are no longer in use by *Instances* of this *Instance Group* are deleted automatically. To avoid that a *Product* vanishes completely, the very latest *Product Version* always remains.
+The _Automatic Cleanup_ option helps to reduce the amount of consumed hard disk space. During the lifetime of an *Instance Group*, probably many new versions of a *Product* are deployed. To avoid that the hard disk is filled up with *product versions* that are not used anymore, there is an option to activate an automatic cleanup job. If the option _Automatic Cleanup_ is enabled, old *product versions* that are no longer in use by *Instances* of this *Instance Group* are deleted automatically. To avoid that a *Product* vanishes completely, the very latest *product version* always remains.
 
 ==== Instance Group Dialog
 
@@ -21,7 +21,7 @@ image::images/Doc_DemoGroup.png[Demo Instance Group, align=center, width=480, li
 
 ==== Instance Group Access
 
-A new *Instance Group* is initially only visible to users with global read permission (or higher). You can assign permissions to users either globally, or per *Instance Group*. To assign local permissions, click the *Instance Group* to get to its *Instance Overview* and then click the btn:[Group Settings] toolbar button. The Group Settings panel is shown.
+A new *Instance Group* is initially only visible to users with global read permission (or higher). You can assign permissions to users either globally, or per *Instance Group*. To assign local permissions, click the *Instance Group* to get to its *instance overview* and then click the btn:[Group Settings] toolbar button. The Group Settings panel is shown.
 
 image::images/Doc_GroupSettings.png[Instance Group Settings, align=center, width=480, link="images/Doc_GroupSettings.png"]
 
@@ -41,7 +41,7 @@ The user table is grouped by permission assignment, either global, local or unas
 
 ==== Initial Steps
 
-Click on an *Instance Group* to open the *Instance Browser* of this group. Here you can see all *Instances* grouped by their _purpose_ (can be `Development`, `Test` or `Productive`).
+Click on an *Instance Group* to open the *instance browser* of this group. Here you can see all *Instances* grouped by their _purpose_ (can be `Development`, `Test` or `Productive`).
 
 image::images/Doc_DemoInstancesEmpty.png[Empty Instance Browser, align=center, width=480, link="images/Doc_DemoInstancesEmpty.png"]
 
@@ -72,14 +72,14 @@ image::images/Doc_ProductDetailsPanel.png[Product Details Panel, align=center, w
 
 ==== Create New Instances
 
-To create a new *Instance*, click the btn:[+] button at the bottom of the page. After giving the new *Instance* a name, purpose and description, the most important thing is to select the *Product* you want to deploy. Additionally, The initial *Product Version* has to be chosen. It can be changed later at anytime (_up-_ and _downgrade_). 
+To create a new *Instance*, click the btn:[+] button at the bottom of the page. After giving the new *Instance* a name, purpose and description, the most important thing is to select the *Product* you want to deploy. Additionally, The initial *product version* has to be chosen. It can be changed later at anytime (_up-_ and _downgrade_). 
 
 image::images/Doc_InstanceAdd.png[Create a new Instance, align=center, width=480, link="images/Doc_InstanceAdd.png"]
 
-It is a common requirement that certain *Processes* of an *Instance* should be automatically started whenever the *BDeploy* server itself is started. To accomplish that, the _Automatic Startup_ flag of the *Instance* must be set. 
+It is a common requirement that certain *processes* of an *Instance* should be automatically started whenever the *BDeploy* server itself is started. To accomplish that, the _Automatic Startup_ flag of the *Instance* must be set. 
 
-The *Instance* determines whether it is included in the automatic cleanup job. If the option _Automatic Uninstallation_ is enabled, the cleanup job will uninstall all *Instance Versions* that are older than the activated and the previously activated *Instance Version*. Due to this automatic uninstallation some of the old *Product Versions* might become unused. If the option _Automatic Cleanup_ is activated on the instance group, these unused *Product Versions* are deleted too (see <<_instance_group,Instance Group>>).
+The *Instance* determines whether it is included in the automatic cleanup job. If the option _Automatic Uninstallation_ is enabled, the cleanup job will uninstall all *instance versions* that are older than the activated and the previously activated *instance version*. Due to this automatic uninstallation some of the old *product versions* might become unused. If the option _Automatic Cleanup_ is activated on the instance group, these unused *product versions* are deleted too (see <<_instance_group,Instance Group>>).
 
-Click an *Instance* to proceed to the <<Instance Overview>>.
+Click an *Instance* to proceed to the <<Instance Dashboard>>.
 
 image::images/Doc_DemoInstance.png[Instance Browser, align=center, width=480,link="images/Doc_DemoInstance.png"]

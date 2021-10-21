@@ -17,6 +17,8 @@ groups:
   - application: server-app
     name: "Server No Sleep"
     description: "Server application which immediately exits"
+    processControl:
+      startType: "MANUAL_CONFIRM"
     startParameters:
     - uid: param.text
       value: "{{T:text-param}}"

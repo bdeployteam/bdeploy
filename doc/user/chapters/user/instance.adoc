@@ -1,61 +1,104 @@
-=== Instance Overview
+=== Instance Dashboard
 
-The *Instance Overview* is the central dialog for configuring and managing instances. It provides an overview about all configured *Applications* and on which nodes they are running. Each *Application* is represented by a *Process Card*. Colored markings on the card indicate whether a process still lacks mandatory configurations or whether there are still unsaved changes.
+The <<Instance Dashboard>> is the central location for managing an instance. It provides an overview about all configured *Processes* and on which nodes they are running. Each *Process* is represented by an entry on the according node.
 
-The first step is to select the desired applications from the *Configure Applications* panel distribute them to the *Nodes* in the *Instance* using drag and drop. The panel is called up via the pull-down menu of the dialog. The applications that are shown in this panel are defined by the *Product*. 
+If the instance has no active version yet, the dashboard is empty and shows a shortcut to the <<Instance Configuration>> instead.
 
-image::images/BDeploy_Instance_Menu.png[Instance Menu,align=center, width=480, link="images/BDeploy_Instance_Menu.png"]
+Instances in *BDeploy* need to be configured, installed and activated. Once <<Instance Configuration,configured>>, the instance can be installed and activated either directly from the dashboard or by using the <<Instance History>> page.
 
-The *Configure Applications* panel contains all server applications and all client applications of the product. Server applications can be dragged to *Server Nodes* (e.g. _master_), client applications can only be dragged to the (virtual) *Client Applications Node*. Clients that are available for more than one operating system expand to single cards per operating system on the *Client Node*. 
+image::images/Doc_InstanceEmpty.png[Empty Instance Dashboard,align=center, width=480, link="images/Doc_InstanceEmpty.png"]
+
+Once the instance has been <<Instance Configuration,configured>>, installed and activated, the dashboard shows an overview of all available nodes, their respective state (CPU Usage, Load Average where available) and the *Processes* configured on them.
+
+image::images/Doc_InstanceDashboardActive.png[Instance Dashboard,align=center, width=480, link="images/Doc_InstanceDashboardActive.png"]
+
+=== Instance Configuration
+
+The first step is to select the desired and required nodes used in the instance. The *master* node is enabled by default, the virtual *Client Applications* node is always present if client applications exist in the *product*. Additional nodes can be selected from the *Instance Settings*'s *Manage Nodes* section.
+
+image::images/Doc_InstanceManageNodes.png[Manage Nodes,align=center, width=480, link="images/Doc_InstanceManageNodes.png"]
+
+Next up, you can assign *processes* to *nodes* by selecting *applications* from the *node*'s btn:[Add Application...] toolbar button.
+
+image::images/Doc_InstanceAddProcessPanel.png[Add Processes,align=center, width=480, link="images/Doc_InstanceAddProcessPanel.png"]
+
+The panel will display all *applications* along with their *process templates* if available. You can click the btn:[Add] button to add a new, unconfigured *process* to the *node*. Using the btn:[Add template] button, you can add a new *process* from a *template*, which typically includes a complete configuration of the selected *application*, see <<Application Templates>> for more information.
+
+In any case, the *process* will appear in the selected *node*. You can use drag & drop to re-order *processes* within a *node*. This has currently mostly cosmetic impact, but can be important in a single scenario: when stopping processes, *BDeploy* will stop them in *reverse* order as configured on the *node*. It will stop one process after another, starting from the bottom of the list.
+
+image::images/Doc_InstanceNewProcess.png[New Process,align=center, width=480, link="images/Doc_InstanceNewProcess.png"]
 
 [NOTE]
-The *Client Application Node* is not available if the product does not contain any client applications.
+The virtual *Client Application Node* is not available if the product does not contain any client applications.
+
+When changing configuration of processes, you will note a colored border next to new or modified processes, which indicate the current state the process is in. A newly added process receives a *green* border, a modified process receives a border in the current themes *accent* color, a process which has validation issues receives a border in the current themes *warning* color. Additionally, validation issues are displayed above any *node*.
+
+image::images/Doc_InstanceConfigValidation.png[Configuration Validation,align=center, width=480, link="images/Doc_InstanceConfigValidation.png"]
+
+==== Local Changes
+
+*BDeploy* keeps track of any changes performed on any of the <<Instance Configuration>> pages panels. These changes can be viewed by pressing the btn:[Local Changes] toolbar button.
+
+image::images/Doc_InstanceConfigLocalChanges.png[Local Changes,align=center, width=480, link="images/Doc_InstanceConfigLocalChanges.png"]
+
+You can btn:[Undo] and btn:[Redo] changes. Even dismissable messages (on product update) can be brought back by btn:[Undo] and btn:[Redo]. To view the current changes compared to the state you started from, use the btn:[Compare Local with Base] button.
+
+image::images/Doc_InstanceConfigCompareChanges.png[Local Changes,align=center, width=480, link="images/Doc_InstanceConfigCompareChanges.png"]
 
 ==== Process Settings
 
-A *Process* is started by executing the *Start* command that is defined by the *Application*. The parameters that are passed to the *Process* are configured in the *Process Settings* dialog. This dialog can be accessed via the pull-down menu on the respective *Process Card*.
+A *process* is started by executing the *start* command that is defined by the *application*. The parameters that are passed to the *process* are configured on the *Process Setting* panel. Click a *process* to access its settings panel.
 
-image::images/BDeploy_DnD_Applications.png[Drag & Drop Applications,align=center, width=480, link="images/BDeploy_DnD_Applications.png"]
+image::images/Doc_InstanceConfigProcessSettings.png[Process Settings,align=center, width=480, link="images/Doc_InstanceConfigProcessSettings.png"]
 
-The available parameters, their type and whether or not they are mandatory or optional are defined by the *Application*. The dialog groups the available parameters into categories, between which you can jump back and forth via btn:[Previous] and btn:[Next]. 
+From there, use the btn:[Configure Parameters...] button to access the *parameter configuration*.
 
-image::images/BDeploy_Process_Config.png[Process Parameter Configuration,align=center, width=480, link="images/BDeploy_Process_Config.png"]
+The available parameters, their type and whether or not they are mandatory or optional are defined by the *Application*. The dialog groups the available parameters into categories, which can be expanded by clicking them.
+
+image::images/Doc_InstanceConfigParams.png[Parameter Configuration,align=center, width=480, link="images/Doc_InstanceConfigParams.png"]
 
 [NOTE]
 The *Application* defines in which order the parameters are passed to the *Process* this order cannot be changed for predefined parameters.
 
-Behind each parameter there is a small popup that can contain a short description, a *Default Value* and a button for resetting the parameter to the *Default Value*.
+Hovering the mouse over a parameter will show a small popup that contains a thorough description of the selected parameter. This also works in the *command line preview* section, as well as in any *compare* views throughout *BDeploy*.
 
-*Validation Issues* are displayed per group in the respective title. Only complete configurations can be accepted.
+*Validation issues* are displayed per group in the respective title and next to the affected parameter.
 
 [TIP]
-You can use the _Search Bar_ in the _Parameter Settings_ header to search for and filter parameters. When searching only matching parameters are shown, groups without matches are hidden, and the _Manage Optional Parameters_ button will receive a badge indicating the number of matching _unconfigured_ parameters.
+You can use the _Search Bar_ to search for and filter parameters even though they are not shown as table. Groups will be hidden from the page unless a parameter matches - this includes optional (not yet configured) parameters.
 
-The context menu on an application card allows you to copy an application definition. This can be pasted on any node of the correct type using the context menu on the according node when in *Configure Applications* mode.
+===== Copy & Paste
 
-image::images/BDeploy_Paste_Application.png[Paste Application,align=center, width=480, link="images/BDeploy_Paste_Application.png"]
+You can copy a *process* configuration by accessing its *process settings* panel. Use the btn:[Copy to Clipboard] button to copy the configuration to the clipboard. You can paste the configuration by accessing the btn:[Add Application...] button of the desired *node*. Use the btn:[Paste] button to paste the configuration from the clipboard.
+
+image::images/Doc_InstanceConfigProcessSettings.png[Process Settings,align=center, width=480, link="images/Doc_InstanceConfigProcessSettings.png"]
+
+[NOTE]
+You need to grant *BDeploy* access to the PCs Clipboard for the btn:[Paste] button to appear in the *node*'s *application* panel.
 
 ===== Optional Parameters
 
-*Optional Parameters* can be selected for each group using the btn:[Manage Optional Parameters] dialog (available only if *Optional Parameters* are available) and then configured like other parameters.
+*Optional parameters* can be selected for each group using the btn:[Select Parameters...] button present on the header of each parameter group.
 
-image::images/BDeploy_Process_Optional_Parameters.png[Manage Optional Parameter(s),align=center, width=480, link="images/BDeploy_Process_Optional_Parameters.png"]
-image::images/BDeploy_Process_Optional_Configured.png[Configuring Optional Parameter(s), align=center, width=480, link="images/BDeploy_Process_Optional_Configured.png"]
+image::images/Doc_InstanceConfigOptionalParams.png[Optional Parameters,align=center, width=480, link="images/Doc_InstanceConfigOptionalParams.png"]
+
+Add an optional parameter by clicking the btn:[Add] button in front of it. You can also remove an optional parameter by clicking the btn:[Remove] button in front of it.
 
 ===== Custom Parameters
 
-*Custom Parameters* can be maintained in the last parameter group. Because all *Parameters* must have a determined sequence, *Custom Parameters* must define a predecessor parameter after which they are put on the command line.
+*Custom parameters* can be maintained in a dedicated parameter group which is always present. Because all *parameters* must have a determined sequence, *custom parameters* must define a *predecessor* parameter after which they are put on the command line. If no *predecessor* is defined, the parameter will end up *first* on the command line.
 
-image::images/BDeploy_Process_Custom_Create.png[Create Custom Parameter,align=center, width=480, link="images/BDeploy_Process_Custom_Create.png"]
-image::images/BDeploy_Process_Custom_Value.png[Configure Custom Parameter,align=center, width=480, link="images/BDeploy_Process_Custom_Value.png"]
+Click the btn:[Add] button in the *Custom Parameters* group to add a new *custom parameter*.
+
+image::images/Doc_InstanceConfigAddCustomParam.png[Add Custom Parameter,align=center, width=480, link="images/Doc_InstanceConfigAddCustomParam.png"]
 
 ===== Global Parameters
 
-*Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global Parameters* are matched by their parameter UID, and marked with a small globe in the *Process Configuration* dialog.
+*Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global parameters* are matched by their parameter UID, and marked with a globe icon in the *parameter configuration* panel.
 
 ===== Conditional Parameters
 
-*Conditional Parameters* are parameters which are only configurable if a specific dependent parameter has a certain value. These parameters are hidden until the dependent parameter meets the conditions requirements.
+*Conditional parameters* are parameters which are only configurable if a specific dependent parameter exists or has a certain value. These parameters are hidden until the dependent parameter meets the conditions requirements.
 
 ===== Variables
 
@@ -63,149 +106,112 @@ image::images/BDeploy_Process_Custom_Value.png[Configure Custom Parameter,align=
 
 ===== Command Line Preview
 
-A preview of the command that is executed to launch this process can be viewed by clicking on the btn:[Show Command Line Preview] button that is displayed at the right side of the *Parameter Settings* header. The preview is especially useful in case of custom parameters to ensure that they are added as expected in the correct order.
+A preview of the command that is executed to launch this process can be viewed by expanding the *Command Line Preview* section. The preview is especially useful in case of custom parameters to ensure that they are added as expected in the correct order.
 
-image::images/BDeploy_Process_Custom_Preview.png[Preview Command Line with Custom Parameter,align=center, width=480, link="images/BDeploy_Process_Custom_Preview.png"]
+image::images/Doc_InstanceConfigPreview.png[Preview Command Line with Custom Parameter,align=center, width=480, link="images/Doc_InstanceConfigPreview.png"]
 
 ==== Configuration Files
 
-The *Configuration Files* of all *Processes* of an *Instance* are maintained together in one dialog. It can be opened by clicking on the btn:[Configuration Files] button in the pull-down menu of the *Instance*. The initial set of *Configuration Files* is derived from the default set delivered with the product, see <<_product_info_yaml,`product-info.yaml`>>.
+The *configuration files* of all *Processes* of an *Instance* are maintained together in one place. It can be opened by clicking on the btn:[Configuration Files] button in the *Instance Settings* panel. The initial set of *configuration files* is derived from the default set delivered with the product, see <<_product_info_yaml,`product-info.yaml`>>.
 
-image::images/BDeploy_CfgFiles_Browser.png[Configuration File Browser,align=center,width=480,link="images/BDeploy_CfgFiles_Browser.png"]
+image::images/Doc_InstanceConfigFiles.png[Instance Configuration Files,align=center,width=480,link="images/Doc_InstanceConfigFiles.png"]
 
-The *Configuration Files* of an *Instance* can be compared with the original *Configuration Files* of the *Product* at any time. The btn:[Synchronize with Product] button starts the comparison, whereupon the files in the table are marked as new, original, changed or unknown. Changed files have to be synchronized via the edit dialog. There the original product file or the changed file can be adopted. After all changed files are processed, the btn:[Finish Synchronization] button finishes the synchronization.
+The *configuration files* of an *Instance* can be compared with the original *configuration file templates* of the *Product* at any time, an according up to date hint is shown next to each configuration file if applicable. The btn:[Compare with product template] button starts the comparison. Files which are present in the *product* but not in the *instance configuration* are marked, same is true the other way round.
 
-New configuration files can be be created using the btn:[+] button. This will open the integrated editor. 
-Additionally to that existing files can be uploaded using the provided btn:[Upload] button.
+New configuration files can be be created using the btn:[+] button. Prompt for a file name and an optional initial content to upload. When dropping a file onto the drop zone, the filename is updated automatically to match the dropped file.
 
-===== File types
+The btn:[Edit] button on each file can be used to edt the content of the file using an online rich editor.
 
-The type of a configuration file is automatically detected and visualized in the dialog. The following table shows the supported file types and how they are treated:
+image::images/Doc_InstanceConfigFilesEdit.png[Edit Instance Configuration Files,align=center,width=480,link="images/Doc_InstanceConfigFilesEdit.png"]
 
-[%header,cols="^a,3,3,3,2"]
-|===
-| Type
-| Online Editing
-| Variable Expansion
-| Encoding
-| Samples
-
-| image::images/BDeploy_CfgFiles_Text.png[width=32,align=center]
-Text
-| *Can* be edited online using the integrated editor.
-| Variables used in the file content are replaced. See <<_variable_expansion,Variable Expansion>> for more details. 
-| Files are always written using UTF-8 encoding. 
-| txt, log, xml, csv
-
-| image::images/BDeploy_CfgFiles_Binary.png[align=center,width=32]
-Binary 
-| *Cannot* be edited online.
-| Not available.
-| Files are written as they are without any modifications.
-| zip, pdf
-
-|===
-
-===== Editor
-The integrated editor provides syntax highlighting and rudimentary syntax checking for some basic file types (yaml, json, xml). Displayed problems are only to be seen as help and never interfere with the process, e.g. by preventing the saving of a file. Only files of type *Text* can be edited with the provided editor. *Binary* files can only be changed by uploading a new file with the same name.
-
-image::images/BDeploy_CfgFile_New.png[Create New Configuration File,align=center,width=480,link="images/BDeploy_CfgFile_New.png"]
-image::images/BDeploy_CfgFiles_Save.png[Modified Configuration Files,align=center,width=480,link="images/BDeploy_CfgFiles_Save.png"]
+Online editing is only possible for text files. Binary files like ZIP, PDF, etc. can not be edited online. Instead, you can download and later on replace them.
 
 [NOTE]
-Changes done in configuration files must be *Saved* and they result in a new *Instance Version* that must be *Installed* and *Activated* so that the changes have an impact. 
+Changes done in configuration files must be *saved* and they result in a new *instance version* that must be *installed* and *activated* so that the changes have an impact, much the same as *any* other change in the <<Instance Configuration>>.
 
 ==== Change Product Version
 
-*Instances* are based on a *Product Version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* can be chosen from the available *Product Versions* (upgrade to a newer version / downgrade to an older version). 
+*Instances* are based on a *product version*. While the *Product* of the *Instance* cannot be changed afterwards, the *Version* can be chosen from the available *product versions* (upgrade to a newer version / downgrade to an older version). 
 
+If there's a newer *product version* available (newer than the one that is configured for the latest *instance version*), a notification is shown in the <<Instance Configuration>> pages toolbar.
 
-If there's a newer *Product Version* available (newer than the one that is configured for the latest *Instance Version*), a notification is shown in the notification area.
+image::images/Doc_InstanceProductUpdateAvail.png[Update Notification,align=center, width=480, link="images/Doc_InstanceProductUpdateAvail.png"]
 
-image::images/BDeploy_Product_Notification.png[Notification about new Product Version,align=center,width=480,link="images/BDeploy_Product_Notification.png"]
+Clicking on the notification opens the *product version* sidebar. The same sidebar can also be opened opened by clicking on the btn:[Update Product Version] button in the *Instance Settings* panel.
 
-Clicking on the notification opens the *Product Version* sidebar. The same sidebar can also be opened opened by clicking on the btn:[Change Product Version] button in the pull-down menu of the *Instance*. If the menu entry is disabled verify that the latest *Instance Version* is selected.
+image::images/Doc_InstanceProductUpdate.png[Change Current Product Version,align=center,width=480,link="images/Doc_InstanceProductUpdate.png"]
 
-image::images/BDeploy_Product_Change.png[Change Current Product Version,align=center,width=480,link="images/BDeploy_Product_Change.png"]
+Changing the version can be done by clicking on the btn:[Upgrade] or btn:[Downgrade] button displayed at the right side of the product version. Changing the product version will trigger an automated migration. This migration will also validate changes. It gives *hints* about potentially relevant (but not blocking) changes, and additionally validation issues in case the migration could not be performed fully automatically. You then have the chance to fix issues manually before saving the resulting *instance version*.
 
-The btn:[Info] Popup provides a list of all Labels on that *Product* version.
-
-Changing the version can be done by clicking on the btn:[Upgrade] or btn:[Downgrade] button displayed at the right side of the product version card. Selecting another product version will automatically close the *Product Version* sidebar. The *Instance Version* sidebar is displayed and a new locally modified version has been created. 
-
-image::images/BDeploy_Product_Upgrade_Local_Changes.png[Successful Product Tag Change,align=center,width=480,link="images/BDeploy_Product_Upgrade_Local_Changes.png"]
+image::images/Doc_InstanceProductUpdateHints.png[Product Update Hints,align=center,width=480,link="images/Doc_InstanceProductUpdateHints.png"]
 
 [NOTE]
-All *Applications* are marked as modified as they are now based on a different *Product Version*.
-
-Changing the *Product Version* can result in validation issues and automated adjustment of parameters. *Product Versions* can contain different *Applications*, so that with the change of the *Product Version* e.g. a previously configured *Application* must be deleted because it has been removed from the product. If parameters definitions are changed, validation errors may occur which must be corrected before saving (e.g. new mandatory parameters, parameters no longer supported, etc.). These errors will cause a visual indicator on affected applications, as well as a textual description of the problem in the notifications area.
-
-image::images/BDeploy_Product_Downgrade_Validation.png[Validation Issues After Product Version Change,align=center,width=480,link="images/BDeploy_Product_Downgrade_Validation.png"]
-
-[NOTE]
-Changing the *Product Version* will never change the *Configuration Files* of the *Instance*. It just opens a popup dialog to tell the user if there are changes between the source and target product version configuration files. In order to align the *Instance* configuration with the shipped *Product* configuration files, the configuration files dialog can assist, see chapter <<Configuration Files>>
+Changing the *product version* will never change the *Configuration Files* of the *Instance*. In case configuration file templates change from one product version to the other, an update hint will be shown. You can then manully update configuration files as needed, see chapter <<Configuration Files>>.
 
 ==== Banner Message
 
-A banner message can be created for an *Instance*, which is displayed very clearly at the top of the overview dialog. The foreground and background colors are freely definable, so that depending on the urgency or content of the message a suitable color, possibly a clear signal color, can be selected.
-Banner messages are maintained on instance level and are not versioned, i.e. they are independent of instance versions. Therefore they outlast configuration changes of an instance. 
+A banner message can be created for an *Instance*, which is displayed very clearly at the top of the overview dialog. You can choose from a series of predefined colors, so that depending on the urgency or content of the message a suitable color can be selected.
+
+image::images/Doc_InstanceBannerConfig.png[Instance Banner Configuration,align=center,width=480,link="images/Doc_InstanceBannerConfig.png"]
+
+Banner messages are maintained on instance level and are not versioned, i.e. they are independent of instance versions. Therefore they outlast configuration changes of an instance and can be configured without saving the <<Instance Configuration>>.
+
+image::images/Doc_InstanceBanner.png[Instance Banner Configuration,align=center,width=480,link="images/Doc_InstanceBanner.png"]
+
+The banner is shown in the <<Create New Instances,Instance Overview>> (as tooltip on the instance), in the <<Instance Dashboard>> and in the <<Instance Configuration>> pages.
 
 ==== Import/Export
 
-Instance versions can be exported and downloaded from the *Instance Version* card's context menu. This will download this specific instance version's raw data as a _ZIP_. This _ZIP_ will contain the complete instance configuration as well as all configuration files currently stored with the instance.
-
-The content of the _ZIP_ can be edited offline, and re-imported using the *Instance*'s (not *Instance Version*) context menu to create a new *Instance Version*. The file structure inside the _ZIP_ must be exactly the same as when exporting.
+Instance versions can be exported and downloaded from the <<Instance History>>. This will download this specific instance version's raw data as a _ZIP_. The _ZIP_ can be re-imported using the *Instance Settings* panel to create a new *instance version* which has that exported instances content.
 
 [WARNING]
-This mechanism allows access to the most internal data structures of *BDeploy*. Great care has to be taken to not damage any of the data on import.
+This mechanism allows access to the most internal data structures of *BDeploy*. Great care has to be taken to not damage any of the data when manipulating the _ZIP_ files content manually.
 
 ==== Application Templates
 
-A product may contain *Application Templates*. These are pre-defined configurations for applications, resulting in a more complete process configuration when dragged to the target node. If an application has an attached *Application Template*, it's application card will contain a drop down (_Choose Application Template_), which - when clicked - will show all available templates to choose from. 
+A product may contain *Application Templates*. These are pre-defined configurations for applications, resulting in a more complete process configuration when added to the target node.
 
-image::images/BDeploy_Application_Template_Choose.png[Application Template Drop Down,align=center,width=480,link="images/BDeploy_Application_Template_Choose.png"]
+We saw earlier how to <<Instance Configuration,add applications using templates>>. Depending on the selected template, you may be prompted to enter the required template variable values.
 
-After choosing a template, dragging the card to the target node as usual will create the process configuration from this template instead of starting from scratch. In case the template requires user input (i.e. it defines mandatory template variables), the user is prompted to fill them out before the process is created.
+image::images/Doc_InstanceAddProcessTemplVars.png[Add Process Template,align=center, width=480, link="images/Doc_InstanceAddProcessTemplVars.png"]
 
-image::images/BDeploy_Application_Template_Variables.png[Application Template Variables,align=center,width=480,link="images/BDeploy_Application_Template_Variables.png"]
-
-Finally, the process configuration is created from the application template using the given variable values.
+The process configuration is created from the application template using the given variable values.
 
 [NOTE]
 You will notice that the name of the process now matches the name of the template, not the name of the underlying application.
 
-image::images/BDeploy_Application_Template_Process.png[Application Template Process,align=center,width=480,link="images/BDeploy_Application_Template_Process.png"]
-
 ==== Instance Templates
 
-A product can define and include *Instance Templates*. These templates can be applied on an empty instance (e.g. after creating one). They can define processes just like *Application Templates*, in fact they can even include existing *Application Templates*.
+A product can define and include *Instance Templates*. These templates can be applied on an instance (e.g. after creating a new instance). They can define processes just like *Application Templates*, in fact they typically include existing *Application Templates*.
 
-[INFO]
+[NOTE]
 The advantage of an *Instance Template* is that it can contain more knowledge of how processes need to be set up to work together, wheras *Application Templates* define configuration for a single application.
 
-image::images/BDeploy_Instance_Template_Empty.png[Instance Template on empty instance,align=center,width=480,link="images/BDeploy_Instance_Template_Empty.png"]
+image::images/Doc_InstanceTemplates.png[Instance Templates,align=center,width=480,link="images/Doc_InstanceTemplates.png"]
 
-The *Instance Template* link is only available if the product contains templates to start from. Clicking it will open up the *Instance Template* wizard.
+[NOTE]
+*Instance Templates* can also be applied to instances which already have configured processes.
 
-image::images/BDeploy_Instance_Template_Dialog_Groups.png[Instance Template Dialog Group Selection,align=center,width=480,link="images/BDeploy_Instance_Template_Dialog_Groups.png"]
+Selecting a template (here: _Default Configuration_) will show a list of _groups_ defined in the template. These _groups_ can be assigned to compatible nodes - groups containing server applications to server nodes, and groups containing client applications to the virtual _Client Applications_ node. Selecting _(skip)_ as target node will skip the processes in this group.
 
-Selecting a template (here: _Default Configuration_) will show a list of _groups_ defined in the template. These _groups_ can be assigned to compatible nodes - groups containing server applications to server nodes, and groups containing client applications to the special _Client Applications_ node. Selecting _None_ as target node will skip the processes in this group. Click the (i) info icon to display details about a group, including all processes configured in the template group.
+image::images/Doc_InstanceTemplatesNodes.png[Instance Templates Node Assignment,align=center,width=480,link="images/Doc_InstanceTemplatesNodes.png"]
 
-When creating configurations on a `SERVER` node, applications will be added matching the nodes OS. If a server application is included in a group which is not available for the target OS, it is ignored.
+When creating configurations on a `SERVER` node, applications will be added matching the nodes OS. If a server application is included in a group which is not available for the target OS, you will receive an according message.
 
 When creating configurations for a `CLIENT` group, applications are added to the _Client Applications_ virtual node, one for each OS supported by the application.
 
-Clicking btn:[Next] will show a list of template variables to fill out. Template variables can be used by templates to query required user input, so all template variables are mandatory.
+Next you will be presented with the template variables which need to be provided.
 
-image::images/BDeploy_Instance_Template_Dialog_Variables.png[Instance Template Dialog Variables,align=center,width=480,link="images/BDeploy_Instance_Template_Dialog_Variables.png"]
+image::images/Doc_InstanceTemplatesVars.png[Instance Templates Variable Assignment,align=center,width=480,link="images/Doc_InstanceTemplatesVars.png"]
 
-Clicking btn:[Next] and then btn:[Close] once the template has been applied will create the processes defined in the template. The configuration will *not* be saved automatically, to allow further tuning of the configuration before doing so.
+Clicking btn:[Confirm] will create the processes defined in the template. The configuration will *not* be saved automatically, to allow further tuning of the configuration before doing so. Applying *templates* can be undone by clicking btn:[Undo] like any other change.
 
-image::images/BDeploy_Instance_Template_Processes.png[Instance Template Dialog Variables,align=center,width=480,link="images/BDeploy_Instance_Template_Processes.png"]
+image::images/Doc_InstanceTemplatesDone.png[Applied Instance Templates,align=center,width=480,link="images/Doc_InstanceTemplatesDone.png"]
 
-==== Configure Ports
+==== Network Ports
 
-The *Configure Ports* page can be reached from the *Instance* context menu. This page provides a concise overview of all ports (`CLIENT_PORT` and `SERVER_PORT` parameters) used in the *Instance*.
+The *Manage Network Ports* panel can be reached from the *Instance Settings* panel. This panel provides a concise overview of all ports (`CLIENT_PORT`, `SERVER_PORT` and `URL` parameters) used in the *Instance*.
 
-You can edit port assignments directly from this dialog. The *Shift Ports* action allows to bulk edit port parameters and shift them upwards or downwards by a given offset.
+The btn:[Shift Ports] action allows to bulk edit selected port parameters and shift them upwards or downwards by a given offset.
 
-The *Export CSV* action allows to export a CSV list of all ports configured in the system. This can be used to pass on information to external partners, for instance for further firewall configuration, etc.
+The btn:[Export CSV] action allows to export a CSV list of all ports configured in the system. This can be used to pass on information to external partners, for instance for further firewall configuration, etc.

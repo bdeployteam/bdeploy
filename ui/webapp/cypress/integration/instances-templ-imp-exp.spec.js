@@ -36,6 +36,8 @@ describe('Instance Settings Tests', () => {
         });
     });
 
+    cy.screenshot('Doc_InstanceTemplates');
+
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.contains('tr', 'Default Configuration').should('exist');
       cy.pressToolbarButton('Back to Overview');
@@ -54,14 +56,22 @@ describe('Instance Settings Tests', () => {
         .within(() => {
           cy.get('button').click();
         });
+    });
 
+    cy.screenshot('Doc_InstanceTemplatesNodes');
+
+    cy.inMainNavFlyin('app-instance-templates', () => {
       cy.contains('app-bd-notification-card', 'Assign Template').within(() => {
         cy.fillFormSelect('Server Apps', 'Apply to master');
         cy.fillFormSelect('Client Apps', '(skip)');
 
         cy.get('button[data-cy="Confirm"]').click();
       });
+    });
 
+    cy.screenshot('Doc_InstanceTemplatesVars');
+
+    cy.inMainNavFlyin('app-instance-templates', () => {
       cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
         cy.fillFormInput('Text Value', 'Test Text');
         cy.fillFormInput('Sleep Timeout', '5');
@@ -76,8 +86,15 @@ describe('Instance Settings Tests', () => {
         .within(() => {
           cy.contains('tr', 'Server No Sleep').should('exist');
           cy.contains('tr', 'Server With Sleep').should('exist');
-          cy.contains('tr', 'Another Server With Sleep').should('exist').click();
         });
+    });
+
+    cy.screenshot('Doc_InstanceTemplatesDone');
+
+    cy.inMainNavContent(() => {
+      cy.contains('app-config-node', 'master').within(() => {
+        cy.contains('tr', 'Another Server With Sleep').should('exist').click();
+      });
     });
 
     cy.inMainNavFlyin('app-edit-process-overview', () => {
@@ -141,13 +158,19 @@ describe('Instance Settings Tests', () => {
       });
     });
 
+    cy.screenshot('Doc_InstanceAddProcessPanel');
+
     cy.inMainNavFlyin('app-add-process', () => {
       cy.contains('tr', 'Server With Sleep')
         .should('exist')
         .within(() => {
           cy.get('button[data-cy^="Add template"]').click();
         });
+    });
 
+    cy.screenshot('Doc_InstanceAddProcessTemplVars');
+
+    cy.inMainNavFlyin('app-add-process', () => {
       cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
         cy.fillFormInput('Sleep Timeout', '7');
         cy.get('button[data-cy="Confirm"]').click();
@@ -159,6 +182,9 @@ describe('Instance Settings Tests', () => {
         cy.contains('tr', 'Server With Sleep').should('exist').click();
       });
     });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_InstanceNewProcess');
 
     cy.inMainNavFlyin('app-edit-process-overview', () => {
       cy.get('button[data-cy^="Configure Parameters"]').click();

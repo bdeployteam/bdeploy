@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
@@ -32,7 +32,7 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
   /* template */ editorContent = '';
   /* template */ editorOptions;
-  /* template */ inited = false;
+  /* template */ inited$ = new BehaviorSubject<boolean>(false);
 
   constructor(private themeService: ThemeService, private host: ElementRef) {}
 
@@ -65,6 +65,11 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
     // this is required sind monaco does not play well inside flex (changing) layouts.
     this.relayoutInterval = setInterval(() => this.layoutCheck(), 100);
+
+    // async init of monaco editor when the model changes - this is only for testing purposes.
+    setTimeout(() => {
+      this.inited$.next(true);
+    }, 1000);
   }
 
   /* template */ onModelChange(event: string) {
@@ -91,7 +96,5 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
     const model = this.globalMonaco.editor.createModel(this.editorContent, undefined, this.globalMonaco.Uri.parse(this.editorPath));
     this.monaco.setModel(model);
-
-    this.inited = true;
   }
 }

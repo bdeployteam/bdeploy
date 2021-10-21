@@ -8,8 +8,6 @@ include::common-ui.adoc[]
 
 include::instancegroup.adoc[]
 
-//// REWORK MARKER MDU
-
 include::instance.adoc[]
 
 include::deployment.adoc[]
