@@ -384,6 +384,28 @@ describe('Instance Process Config Tests', () => {
     });
   });
 
+  it('Tests endpoints', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Instance Configuration');
+
+    cy.inMainNavContent(() => {
+      cy.get('app-config-node[data-cy="master"]').within((node) => {
+        cy.contains('tr', 'Server Application').click();
+      });
+    });
+    
+    cy.screenshot('Doc_InstanceConfig_Endpoints');
+
+    cy.inMainNavFlyin('app-edit-process-overview', () => {
+      cy.get('button[data-cy^="Configure Endpoints"]').click();
+    });
+
+    cy.screenshot('Doc_InstanceConfig_EndpointsConfig');
+
+    // TODO: check endpoint after DCS-1428 is fixed
+    //cy.contains('div', 'myVersion - public/version').should('exist');
+  });
+  
   it('Cleans up', () => {
     cy.deleteGroup(groupName);
   });

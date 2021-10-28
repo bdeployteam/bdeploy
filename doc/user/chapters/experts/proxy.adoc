@@ -4,7 +4,7 @@
 
 The application hosting the endpoint to call can be hosted on any node in the system. As long as this node is attached to a master you can reach (directly in `STANDALONE` or `MANAGED` mode, or indirectly in `CENTRAL` mode), you can tunnel there using *BDeploy*.
 
-You will need these to be able to call an Endpoint of a remote application through the *BDeploy* public API:
+You will need these information to be able to call an Endpoint of a remote application through the *BDeploy* public API:
 
 * A *BDeploy* _slim_ token to be supplied for an authorization header in the form of `X-BDeploy-Authorization: Bearer <TOKEN>`. You can obtain this token from the Web UI for the logged in user.
 * The `id` of the instance group hosting the application you want to tunnel to.
@@ -33,18 +33,18 @@ curl -k -H "Accept: */*" \
 There are two ways to obtain required IDs. You can use a pure manual approach and for instance deduce ID's from URLs and the Web UI itself. Or you can use the public API to query *BDeploy* for available objects.
 
 ----
-http://my-server/#/instance/overview/MyGroup/xxxx-111-xxxx
+http://my-server/#/instances/dashboard/MyGroup/xxxx-111-xxxx
 ----
 
-From the above URL, you can find the instance group `id` (*MyGroup*) as well as the instance `uuid` (*xxxx-111-xxxx*). When on the instance overview page, click the server application you want to tunnel to. The process control panel for that application opens up, and you will see the applications `id` displayed right beneath its name.
+From the above URL, you can find the instance group `id` (*MyGroup*) as well as the instance `uuid` (*xxxx-111-xxxx*). When on the instance dashboard, click the server application you want to tunnel to. The process control panel for that application opens up, and you will see the applications ` Process ID` displayed.
 
-Last thing to manually lookup is the endpoint `id`. Endpoints can be accessed in the process' context menu by choosing menu:Context Menu[Endpoints]
+Last thing to manually lookup is the endpoint `id`. Endpoints can be accessed on the instance configuration page by clicking on to application you want to tunnel to and then clicking on btn:[Configure Endpoints]
 
-image::images/BDeploy_DnD_Applications.png[Process Context Menu,align=center,width=480,link="images/BDeploy_DnD_Applications.png"]
+image::images/Doc_InstanceConfig_Endpoints.png[Application Edit Panel,align=center,width=480,link="images/Doc_InstanceConfig_Endpoints.png"]
 
 You will be able to read the endpoint `id` and configure properties of the endpoint on this page. The configuration will be used by *BDeploy* when instructed remotely to call that endpoint. *BDeploy* will take care of things like authentication, security, etc. The actual caller will only require access (and permissions) on the master server he is calling into, not to the actual application. Instead, *BDeploy* itself is configured to be authorized to perform the call.
 
-image::images/BDeploy_Endpoints_Config.png[Process Endpoints Configuration,align=center,width=480,link="images/BDeploy_Endpoints_Config.png"]
+image::images/Doc_InstanceConfig_EndpointsConfig.png[Application Endpoints Configuration,align=center,width=480,link="images/Doc_InstanceConfig_EndpointsConfig.png"]
 
 For automatic lookup, you can use the following *BDeploy* public API endpoints. Those are provided by the master server, same as the actual proxy endpoint:
 
@@ -68,4 +68,4 @@ curl -k -H "Accept: application/json" \
 
 <1> *<X>* in all the following *cURL* calls is the bearer token as obtained from the Web UI.
 <2> *MyGroup* is the name of one of the instance groups as obtained by the first API. You can fetch the `uuid` of each instance from the returned JSON.
-<3> *xxxx-111-xxxx* is the instance `uuid` as obtained by the last API. The returned JSON will include the application `uuid` hosting the endpoint along with the actual specific configuration of that endpoint (including its `id`).
+<3> *xxxx-111-xxxx* is the instance `uuid` as obtained by the second API. The returned JSON will include the application `uuid` hosting the endpoint along with the actual specific configuration of that endpoint (including its `id`).

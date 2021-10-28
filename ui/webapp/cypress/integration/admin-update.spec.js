@@ -16,6 +16,8 @@ describe('Admin UI Tests (Update)', () => {
       cy.contains('tr', 'installed').click();
     });
 
+    cy.screenshot('Doc_System_BDeploy_Update')
+
     cy.inMainNavFlyin('app-software-details', () => {
       cy.get('button[data-cy^="Install"]').should('exist').and('be.disabled');
       cy.get('button[data-cy^="Delete"]').should('exist').and('be.disabled');
