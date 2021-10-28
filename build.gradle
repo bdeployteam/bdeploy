@@ -336,7 +336,12 @@ def void addMultiPlatformDistBuild(Project prj) {
         win64 {
             contents {
                 with prj.distributions.main.getContents()
-                from rootProject.jlinkWin64.outputs
+                from ("${rootProject.projectDir}/templates/jdk/win64/jre") {
+                    into "jre"
+                }
+                from (rootProject.jlinkWin64.outputs) {
+                    duplicatesStrategy 'exclude'
+                }
                 from prj.genWin64VersionProperties.outputs
             }
         }
@@ -542,6 +547,31 @@ task jlinkAny() {
 
 actualSubprojects*.test {
     dependsOn rootProject.tasks["jlinkAny"]
+}
+
+task signWin64Jre (type: Copy, dependsOn: jlinkWin64) {
+    from("$buildDir/jlink/win64/jre") {
+        include '**/*.exe'
+    }
+    from("$buildDir/jlink/win64/jre/release")
+
+    into "${rootProject.projectDir}/templates/jdk/win64/jre"
+    includeEmptyDirs false
+
+    eachFile { fileCopyDetail -> 
+        if(!"$fileCopyDetail.file".endsWith(".exe")) {
+            return;
+        }
+        exec {
+            executable "signtool.exe"
+            args = [ "sign", 
+                "/n", "IT Solutions GmbH", 
+                "/tr", "http://rfc3161timestamp.globalsign.com/advanced",
+                "/td", "SHA256",
+                "$fileCopyDetail.file"
+            ]
+        }
+    }
 }
 
 task release() {
