@@ -8,7 +8,6 @@
   "viewportWidth": 1280,
   "viewportHeight": 720,
   "videoCompression": 0,
-  "videoUploadOnPasses": false,
   "numTestsKeptInMemory": 10,
   "env": {
     "backendBaseUrl": "https://localhost:7707/api"
