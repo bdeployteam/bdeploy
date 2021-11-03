@@ -142,7 +142,10 @@ public class ObjectDatabase extends LockableDatabase {
      */
     public ObjectId addObject(byte[] bytes) throws IOException {
         return internalAddObject(p -> {
-            Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
+            // due to the heavy performance impact we do NOT sync the output
+            // here. We can later on detect problems easily as long as the meta-data
+            // is written sync (manifests, etc.).
+            Files.write(p, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             return ObjectId.create(bytes, 0, bytes.length);
         });
 
