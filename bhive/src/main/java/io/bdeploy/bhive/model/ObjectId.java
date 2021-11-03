@@ -90,8 +90,10 @@ public class ObjectId implements Serializable, Comparable<ObjectId> {
                 fc.write(ByteBuffer.wrap(buf, 0, read));
             }
 
-            // channel is not SYNC - force changes after all of them have been performed.
-            fc.force(true);
+            // channel is not SYNC - changes are not 100% guaranteed on disc.
+            // due to the heavy performance impact we do NOT sync the output
+            // here. We can later on detect problems easily as long as the meta-data
+            // is written sync (manifests, etc.).
         }
         return new ObjectId(Hex.bytesToHex(digest.digest()));
     }
