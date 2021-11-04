@@ -131,15 +131,18 @@ Cypress.Commands.add('enterGroup', function (groupName) {
 /**
  * Command: attachManaged
  */
-Cypress.Commands.add('attachManaged', function (groupName) {
+Cypress.Commands.add('attachManaged', function (groupName, screenshot = false) {
   // prepare MANAGED
   cy.visitBDeploy('/', 'MANAGED');
   cy.waitUntilContentLoaded();
+  cy.screenshot('Doc_ManagedEmpty');
   cy.get('app-groups-browser').should('exist');
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('not.exist');
   });
   cy.pressToolbarButton('Link Instance Group');
+  cy.waitUntilContentLoaded();
+  cy.screenshot('Doc_ManagedLinkGroup');
   cy.inMainNavFlyin('app-link-central', () => {
     cy.contains('mat-expansion-panel', 'Manual and Offline Linking').within(() => {
       cy.get('mat-panel-title').click();
@@ -161,7 +164,10 @@ Cypress.Commands.add('attachManaged', function (groupName) {
   cy.enterGroup(groupName);
   cy.pressMainNavButton('Managed Servers');
   cy.get('app-servers-browser').should('exist');
+  cy.screenshot('Doc_CentralEmptyServers');
   cy.pressToolbarButton('Link Managed Server');
+  cy.waitUntilContentLoaded();
+  cy.screenshot('Doc_CentralLinkServer');
   cy.inMainNavFlyin('app-link-managed', () => {
     cy.contains('div', 'Details for server to link').should('not.exist');
     cy.contains('mat-card', 'Drop managed server information here!')
@@ -175,12 +181,17 @@ Cypress.Commands.add('attachManaged', function (groupName) {
     cy.contains('div', 'Details for server to link').should('exist');
     cy.contains('button', 'Save').should('exist').and('be.disabled');
     cy.fillFormInput('description', 'Description of managed server');
+  });
+  cy.screenshot('Doc_CentralLinkServerFilled');
+  cy.inMainNavFlyin('app-link-managed', () => {
     cy.contains('button', 'Save').should('exist').and('be.enabled').click();
   });
 
   cy.inMainNavContent(() => {
     cy.contains('tr', 'Description of managed server').should('exist');
   });
+
+  cy.screenshot('Doc_CentralLinkDone');
 });
 
 Cypress.Commands.add('cleanAllGroups', function (mode = 'STANDALONE') {

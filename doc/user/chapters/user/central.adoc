@@ -17,13 +17,11 @@ On The `MANAGED` server side:
 [NOTE]
 *BDeploy* is built for restrictive networks. The assumption is that the `CENTRAL` server can contact `MANAGED` servers, but never the other way around.
 
-//// REWORK MARKER MDU
-
 ==== Attaching an Instance Group to a Central Server
 
-You will notice that a `MANAGED` server will greet slightly different on the welcome page. Instead of a _create instance group_ button, there is an _attach instance group_ button, and the text reads accordingly.
+You will notice that a `MANAGED` server will greet slightly different on the welcome page. Instead of a btn:[Add Instance Group] button, there is a btn:[Link Instance Group] button, and the text reads accordingly.
 
-image::images/BDeploy_Welcome_Managed.png[Managed Server Welcome Page, align=center, width=480, link="images/BDeploy_Welcome_Managed.png"]
+image::images/Doc_ManagedEmpty.png[Managed Server Welcome Page, align=center, width=480, link="images/Doc_ManagedEmpty.png"]
 
 Attaching an *Instance Group* is a two way operation.
 
@@ -36,48 +34,48 @@ Attaching an *Instance Group* is a two way operation.
 To attach in *Instance Group*, you need both Web UIs of `CENTRAL` and `MANAGED` server. Make sure you have both available and open in browsers next to each other (on the same machine, so drag & drop will work).
 
 [NOTE]
-You can easily distiguish `CENTRAL` and `MANAGED` servers by the according banner in the upper right corner of the Web UI.
+You can distiguish `CENTRAL` and `MANAGED` servers by the according banner in the expanded main menu in the Web UI.
 
-On the `CENTRAL` server, choose menu:Context Menu[Managed Servers] on the *Instance Group* you want to attach. This will take you to the *Managed Servers* page for this *Instance Group*. Initially, this page will be empty.
+On the `CENTRAL` server, choose btn:[Managed Servers] on the main menu after selecting an *Instance Group* you want to attach. This will take you to the *Managed Servers* page for that *Instance Group*. Initially, this page will be empty.
 
-image::images/BDeploy_Central_Managed_Servers.png[Managed Servers Page on Central, align=center, width=480, link="images/BDeploy_Central_Managed_Servers.png"]
+image::images/Doc_CentralEmptyServers.png[Managed Servers Page on Central, align=center, width=480, link="images/Doc_CentralEmptyServers.png"]
 
-Click the btn:[Attach Managed Server] button to initiate attaching a `MANAGED` server to this *Instance Group*.
+Click the btn:[Link Managed Server] button to initiate attaching a `MANAGED` server to this *Instance Group*.
 
-image::images/BDeploy_Central_Attach_Drop.png[Attach Managed Server Wizard, align=center, width=480, link="images/BDeploy_Central_Attach_Drop.png"]
+image::images/Doc_CentralLinkServer.png[Link Managed Server Panel, align=center, width=480, link="images/Doc_CentralLinkServer.png"]
 
-After the introductionary text, you will be prompted to drop `MANAGED` server information on a drop-zone. You can find the counterpiece on the `MANAGED` server. To initiate attaching on the `MANAGED` server, click the btn:[Attach Instance Group] button on the main *Instance Group* page (which is the initial start page of the Web UI). This will launch the _Attach to Central Server_ wizard.
+You will be prompted to drop `MANAGED` server information on a drop-zone. You can find the counterpiece on the `MANAGED` server. To initiate attaching on the `MANAGED` server, click the btn:[Link Instance Group] button on the main *Instance Group* page (which is the initial start page of the Web UI). This will open the _Link Instance Group_ panel.
 
-image::images/BDeploy_Managed_Attach_Intro.png[Attach to Central Server, align=center, width=480, link="images/BDeploy_Managed_Attach_Intro.png"]
+image::images/Doc_ManagedLinkGroup.png[Link Instance Group, align=center, width=480, link="images/Doc_ManagedLinkGroup.png"]
 
-The next step in the wizard on the `MANAGED` server will provide the dragable card which needs to be dragged to the `CENTRAL` servers drop zone. Meanwhile, the `MANAGED` server will wait for an incoming connection from the `CENTRAL` server, once the information has been digested properly.
-
-image::images/BDeploy_Managed_Attach_Waiting.png[Attach to Central Server, align=center, width=480, link="images/BDeploy_Managed_Attach_Waiting.png"]
+The `MANAGED` server provides the card to drag to the counterpiece on the `CENTRAL` server. Drag it over to fill out information on the `CENTRAL` server automatically. 
 
 [NOTE]
-Alternatively (e.g. if you cannot open both Web UIs on the same machine) you can click btn:[Continue Manually] to download the information as a file. This file can be copied to a machine where access to the `CENTRAL` server is possible. There you can drop the file to the drop-zone, instead of the dragable card.
+Alternatively, use the _Manual and Offline Linking_ panel to download the information in an encrypted form. This can be uploaded on the `CENTRAL` by dropping the file on the very same drop-zone.
 
-Once the information is dropped on the according drop zone on the `CENTRAL` server, it will confirm a successful read of the information. Click btn:[Next].
+Once the information is dropped on the according drop zone on the `CENTRAL` server, it will fill out the information. Adapt the URL if required and fill in a human readable description of the `MANAGED` server. The URL should be reachable from the `CENTRAL` server and accomodate for any hostname mapping required (NAT, VPN, DNS, ...).
 
-image::images/BDeploy_Central_Attach_Read_Success.png[Successful read of Managed Server Information, align=center, width=480, link="images/BDeploy_Central_Attach_Read_Success.png"]
+image::images/Doc_CentralLinkServerFilled.png[Filled out Link panel, align=center, width=480, link="images/Doc_CentralLinkServerFilled.png"]
 
-On the next step, you have the chance to provide an alternative URL as well as a description of the `MANAGED` server. The alternate URL should be reachable from the `CENTRAL` server and accomodate for any hostname mapping required (NAT, VPN, DNS, ...).
+Clicking btn:[Save] will initiate the actual attachment process. The `CENTRAL` server will contact the `MANAGED` server using the provided URL. It will then perform the initial synchronization of data. Once this is done, the panels close on both servers. The attached server appears on the `CENTRAL`, and the attached *Instance Group* appears on the `MANAGED` server. In case attaching is not possible automatically, you will be provided with the possibility to download synchronization information from the `CENTRAL` server. You can drop this in the _Manual and Offline Linking_ panel on the `MANAGED` server to complete linking without actual contact to the server.
 
-image::images/BDeploy_Central_Attach_Info.png[Additional Managed Server Information, align=center, width=480, link="images/BDeploy_Central_Attach_Info.png"]
+[NOTE]
+Servers which do not have an actual connection to each other, but are linked manually, will not be able to synchronize instance information. The link is purely _informational_, to hint that the server _exists_. More possibilities for synchronization may be added in the future.
 
-Clicking btn:[Next] will initiate the actual attachment process. The `CENTRAL` server will contact the `MANAGED` server using the provided URL. It will then perform the initial synchronization of data. Once this is done, you will see a success notice which you can dismiss using the btn:[Done] button.
-
-image::images/BDeploy_Central_Attach_Done.png[Additional Managed Server Information, align=center, width=480, link="images/BDeploy_Central_Attach_Done.png"]
-
-You will be taken back to the *Managed Servers* page, which shows the newly attached `MANAGED` server and its state.
-
-image::images/BDeploy_Central_Managed_Servers_Sync.png[Additional Managed Server Information, align=center, width=480, link="images/BDeploy_Central_Managed_Servers_Sync.png"]
+image::images/Doc_CentralLinkDone.png[Link Success (Central), align=center, width=480, link="images/Doc_CentralLinkDone.png"]
 
 ==== Instance Synchronization
 
-Once a `MANAGED` server is attached to the `CENTRAL` server, *Instance* data can be synchronized from the `MANAGED` server on demand by the `CENTRAL` server. This can happen either from the *Managed Servers* page you saw before, by pressing btn:[Synchronize], or directly from the *Instance*. It is possible to synchronize both from the *Instance Browser* and from the *Instance Overview* page by pressing on the name of the `MANAGED` server. This element only exists on the `CENTRAL` server.
+Once a `MANAGED` server is attached to the `CENTRAL` server, *Instance* data can be synchronized from the `MANAGED` server on demand by the `CENTRAL` server. This can happen either from the *Managed Servers* page you saw before, by pressing btn:[Synchronize] on the according server or directly from the *Instance Overview* and *Instance Dashboard*/*Instance Configuration* pages.
 
-image::images/BDeploy_Central_Instance_With_Sync.png[Synchronize Managed Server, align=center, width=480, link="images/BDeploy_Central_Instance_With_Sync.png"]
+[NOTE]
+The btn:[Synchronize] *only* exists on the `CENTRAL` server.
+
+image::images/Doc_CentralInstanceList.png[Instance Browser (Central), align=center, width=480, link="images/Doc_CentralInstanceList.png"]
+
+image::images/Doc_CentralInstanceDashboard.png[Instance Dashboard (Central), align=center, width=480, link="images/Doc_CentralInstanceDashboard.png"]
+
+image::images/Doc_CentralInstanceConfiguration.png[Instance Configuration (Central), align=center, width=480, link="images/Doc_CentralInstanceConfiguration.png"]
 
 [NOTE]
 It is not required to synchronize the other way (`CENTRAL` to `MANAGED`) as this happens implicitly when performing changes to an *Instance*. Changes are actually performed *always* on the _controlling_ master, which is *always* the `MANAGED` server.
@@ -98,29 +96,22 @@ The value for mode may be `MANAGED` or `STANDALONE`. The actual migration of dat
 
 ==== Product Synchronization
 
-When working with `CENTRAL` and `MANAGED` servers, products can be uploaded to either of the servers. However, a product version must be available on the server which is used to update an *Instance* to that version.
+When working with `CENTRAL` and `MANAGED` servers, products can be uploaded to either of the servers. However, a product version must be available on the server which is used to update and configure an *Instance* using that version.
 
 The recommended way of working is to exclusively use the `CENTRAL` server for all tasks, e.g. pushing new product versions, changing configuration, etc. When _installing_ an *Instance* version to the target server, the required product data is automatically transferred as part of the process.
 
-Sometimes it might still be necessary to transfer product versions from one server to another. For instance, a product version was directly pushed to `MANAGED` server _A_, but is required as well on `MANAGED` server _B_. In this case you can use the *Product Synchronization* wizard to copy product versions from one server to another.
+Sometimes it might still be necessary to transfer product versions from one server to another. For instance, a product version was directly pushed to `MANAGED` server _A_, but is required as well on `MANAGED` server _B_. In this case you can use the *Product Synchronization* wizard to copy product versions from one server to another from the `CENTRAL` server.
 
-You can find the wizard on the *Manage Products* page on the `CENTRAL` server. The additional btn:[Synchronize] button is only available on the `CENTRAL` server.
+You can find the _Product Synchronization_ panel on the *Products* page on the `CENTRAL` server inside a given *Instance Group*. The additional btn:[Synchronize Product Versions] button is only available on the `CENTRAL` server.
 
-image::images/BDeploy_Product_Sync_Button.png[Synchronize Product Versions Button, align=center, width=480, link="images/BDeploy_Product_Sync_Button.png"]
+image::images/Doc_CentralProdSync.png[Synchronize Product Versions, align=center, width=480, link="images/Doc_CentralProdSync.png"]
 
-Clicking it will launch the synchronization wizard. It allows to choose a _source_ as well as a _target_ server. You can choose both from all available `MANAGED` servers and the `CENTRAL` server.
+Clicking it will open the _Product Synchronization_ panel. First you need to choose a _direction_ of transfer. Either transfer products _to_ or _from_ the `CENTRAL` server. After selecting a direction, you will have to choose the `MANAGED` server to transfer from or to.
 
-image::images/BDeploy_Product_Sync_Wizard.png[Choose Source and Target, align=center, width=480, link="images/BDeploy_Product_Sync_Wizard.png"]
+image::images/Doc_CentralProdSyncServer.png[Choose Server, align=center, width=480, link="images/Doc_CentralProdSyncServer.png"]
 
-Clicking btn:[Next] will fetch available products from the _source_ server. Once you choose a product from the drop-down, all available product versions are fetch from _both_ servers. You will be presented a list of versions which are not yet available on the _target_ server.
+Clicking a server will fetch available products from that server. The list will contain product versions which are not yet present on the target server. Check all you want to transfer and click btn:[Transfer].
 
-image::images/BDeploy_Product_Sync_Version.png[Choose Product Versions, align=center, width=480, link="images/BDeploy_Product_Sync_Version.png"]
+image::images/Doc_CentralProdSyncVersion.png[Choose Product Versions, align=center, width=480, link="images/Doc_CentralProdSyncVersion.png"]
 
-Clicking the _arrow_ button on a product version, or dragging the version to the target list will mark this version as _to-be-synchronized_. Once satisfied with the selection, click btn:[Next] to initiate the transfer of the product versions from _source_ to _target_.
-
-[NOTE]
-If both _source_ and _target_ are `MANAGED` servers, the `CENTRAL` server will also receive the product version as a side-effect.
-
-The wizard will show progress information while the transfer is active. Once the transfer is done, the wizard will tell accordingly.
-
-image::images/BDeploy_Product_Sync_Done.png[Product Transfer Done, align=center, width=480, link="images/BDeploy_Product_Sync_Done.png"]
+The panel will initialize the transfer of the product version(s) in the background. You can keep track of transfers using the global activity report available from the main menu. Once a product version is transferred, it will appear in the list of available products on the target server.

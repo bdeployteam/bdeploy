@@ -40,8 +40,9 @@ declare namespace Cypress {
      * to the managed server.
      *
      * @param groupName the name of the group to attach.
+     * @param screenshot whether to create screenshots or not.
      */
-    attachManaged(groupName: string);
+    attachManaged(groupName: string, screenshot?: boolean);
 
     /**
      * Quickly gets rid of all instance groups via REST API.

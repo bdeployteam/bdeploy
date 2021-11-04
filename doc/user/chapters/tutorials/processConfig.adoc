@@ -1,28 +1,32 @@
 === How can I change a process configuration?
 
-Changing the configuration of a *Process* is done in the *Process Configuration Dialog*:
+Changing the configuration of a *Process* is done in the *Process Configuration Panel*:
 
- . Click on the desired *Instance Group*
- . Click in the desired *Instance*
- . Ensure that the latest version is selected in the *Instance Version* sidebar.
- . Open the menu of the desired *Process* by clicking the three dots in the top right corner of the *Process Card*
- . Click on *Configure*. If *View* is shown then you are not on the latest *Instance Version*
+ . Start from the *Instance Group Overview* page, which is the first page right after logging in.
+ . Click on the desired *Instance Group*.
+ . Click in the desired *Instance*.
+ . Click on the btn:[Instance Configuration] button in the main menu.
+ . Click on the *Process* you wish to configure.
+ . Click on *Configure Parameters...* in the process edit panel.
  . Modify the *Process* as desired: Rename, Change Parameters, Add / Remove Parameters
  . Click on *Apply* in the top right corner if you are finished with this *Process*
- . A new _Locally Modified_ *Instance Version* has been created.
- . Repeat the steps 4-7 with every *Process* that should be adopted.
+ . You can undo/redo changes to multiple processes and/or instance configurations. You can also view any local changes using the btn:[Local Changes] button.
+ . Repeat the steps 5-8 with every *Process* that should be adopted.
  . Click on *Save* in the top right corner.
  
-The changes are now saved but they are not yet active. The new version must now be *Deployed* and all *Processes* must be restarted so that the changes have an effect.
+The changes are now saved but they are not yet *active*. The new version must now be *Deployed* and all *Processes* must be restarted so that the changes have an effect.
 
- . Open the menu of the desired *Instance Version* by clicking the three dots on the *Instance Version Card*
- . Click on *Install* and wait for the operation to complete.
- . Click on *Activate*
- . A hint (`Outdated`) will be displayed if a *Process* is running in an older version.
- . Stop the process by clicking on the *Process Card*. Click on the btn:[Stop] button.
+ . Saving *Instance Configuration* will automatically redirect you to the *Instance Dashboard*. You can also access the dashboard from the *Instance Overview* page by clicking an *Instance*.
+ . If the current *Instance Version* is _not_ the currently active one, a banner will show a hint and the required buttons to *install* and *activate* the current version.
+ .. Access to _older_ *Instance Versions* is provided from the btn:[Instance History] button in the main menu.
+ . Click on *install* and wait for the operation to complete.
+ . Click on *activate*, this operation is typically very fast.
+ . A hint (`OUTDATED`) will be displayed if a *Process* is running in an older version, for instance the version which was active until moments ago.
+ . Stop the process you want to update by clicking on the *Process*. Click on the btn:[Stop] button.
  . Start the processes by click on the btn:[Start] button.
- . Repeat the steps 5-6 with each process that should be running
- . The hint (`Outdated`) disappears once all processes are running in the active version.
+ . Repeat the steps 5-6 with each process that should be running from the new, now active version.
+ . The hint (`OUTDATED`) disappears once all processes are running in the active version.
+ . It can be desirable and OK to *not* restart certain processes, and leave them in the `OUTDATED` state. This highly depends on the software being deployed.
 
 The configuration changes are now live and all *Processes* are running again. The <<_process_settings,Process Settings>> and the <<_process_control,Process Control>> chapters provide more details about the step outlined in this tutorial.
  

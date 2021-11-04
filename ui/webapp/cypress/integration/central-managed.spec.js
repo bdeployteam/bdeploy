@@ -16,7 +16,7 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Attaches a managed server to the central server', () => {
-    cy.attachManaged(groupName);
+    cy.attachManaged(groupName, true);
   });
 
   it('Deletes and re-attaches the managed server to the central server', () => {
@@ -85,13 +85,19 @@ describe('Central/Managed Basic Test', function () {
       cy.pressToolbarButton('Synchronize');
     });
 
+    cy.screenshot('Doc_CentralProdSync');
+
     cy.inMainNavFlyin('app-product-sync', () => {
       cy.get('button[data-cy^="Download to central"]').click();
     });
 
+    cy.screenshot('Doc_CentralProdSyncServer');
+
     cy.inMainNavFlyin('app-select-managed-server', () => {
       cy.contains('tr', 'localhost').click();
     });
+
+    cy.screenshot('Doc_CentralProdSyncVersion');
 
     cy.inMainNavFlyin('app-managed-transfer', () => {
       cy.contains('tr', '1.0.0').within(() => {
@@ -126,14 +132,21 @@ describe('Central/Managed Basic Test', function () {
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName2).should('exist');
     });
+
+    cy.screenshot('Doc_CentralInstanceList');
   });
 
   it('Configures instance on central server', () => {
     cy.enterInstance(groupName, instanceName2, 'CENTRAL');
+
+    cy.screenshot('Doc_CentralInstanceDashboard');
+
     cy.pressToolbarButton('Synchronize');
     cy.pressMainNavButton('Instance Configuration');
 
     cy.waitUntilContentLoaded();
+
+    cy.screenshot('Doc_CentralInstanceConfiguration');
 
     // create some from a template
     cy.inMainNavContent(() => {
