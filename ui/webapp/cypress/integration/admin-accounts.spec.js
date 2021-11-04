@@ -37,6 +37,8 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.contains('app-bd-notification-card', 'Cannot remove').within(() => {
         cy.get('button[data-cy^=OK]').click();
       });
+
+      cy.pressToolbarButton('Close');
     });
 
     // create a test user
@@ -50,13 +52,23 @@ describe('Admin UI Tests (Accounts)', () => {
         cy.fillFormInput('email', 'example@example.org');
         cy.fillFormInput('pass', 'pass');
         cy.fillFormInput('passConfirm', 'pass');
+      });
+    });
 
+    cy.screenshot('Doc_Admin_User_Accounts_Add');
+
+    cy.inMainNavContent(() => {
+      cy.contains('app-bd-notification-card', 'Add User').within(() => {
         cy.get('button[data-cy="OK"]').should('be.enabled').click();
       });
 
       cy.wait('@createUser');
       cy.waitUntilContentLoaded();
+    });
 
+    cy.screenshot('Doc_Admin_User_Accounts');
+
+    cy.inMainNavContent(() => {
       cy.contains('tr', 'test')
         .should('exist')
         .within(() => {
@@ -85,6 +97,8 @@ describe('Admin UI Tests (Accounts)', () => {
           cy.contains('mat-icon', 'check_box').should('exist');
         });
     });
+
+    cy.screenshot('Doc_Admin_User_Accounts_Inactive');
 
     // activate test user
     cy.inMainNavFlyin('app-user-admin-detail', () => {
@@ -138,6 +152,13 @@ describe('Admin UI Tests (Accounts)', () => {
 
       cy.contains('app-bd-notification-card', 'Assign Permission').within(() => {
         cy.fillFormSelect('permission', 'ADMIN');
+      });
+    });
+
+    cy.screenshot('Doc_Admin_User_Accounts_Permissions_Add');
+
+    cy.inMainNavFlyin('app-user-admin-detail', () => {
+      cy.contains('app-bd-notification-card', 'Assign Permission').within(() => {
         cy.get('button[data-cy^="OK"]').click();
       });
     });
@@ -169,7 +190,13 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.contains('app-bd-notification-card', 'Edit User').within(() => {
         cy.fillFormInput('fullName', 'Different User');
         cy.fillFormInput('email', 'new@example.org');
+      });
+    });
 
+    cy.screenshot('Doc_Admin_User_Accounts_Edit');
+
+    cy.inMainNavFlyin('app-user-admin-detail', () => {
+      cy.contains('app-bd-notification-card', 'Edit User').within(() => {
         cy.get('button[data-cy^="OK"]').click();
       });
 

@@ -22,6 +22,11 @@ describe('Admin UI Tests (Settings)', () => {
         cy.get('input[type="checkbox"]').should('be.checked');
       });
 
+    });
+
+    cy.screenshot('Doc_Admin_Settings');
+
+    cy.inMainNavContent(() => {
       cy.pressToolbarButton('Save');
 
       cy.contains('app-bd-form-toggle', 'Local User Login').within((toggle) => {
@@ -89,9 +94,20 @@ describe('Admin UI Tests (Settings)', () => {
         cy.fillFormInput('user', 'user');
         cy.fillFormInput('pass', 'pass');
         cy.fillFormInput('base', 'dc=test,dc=server');
+      });
+    });
+
+    cy.screenshot('Doc_Admin_Ldap_Server_Config');  
+
+    cy.inMainNavContent(() => {
+      cy.contains('app-bd-notification-card', 'Add Server').within(() => {
         cy.get('button[data-cy="OK"]').should('be.enabled').click();
       });
+    });
 
+    cy.screenshot('Doc_Admin_Ldap_Servers');
+
+    cy.inMainNavContent(() => {
       cy.intercept({ method: 'POST', url: '/api/auth/admin/testLdapServer' }).as('ldapCheck');
 
       cy.contains('tr', 'Test Server')
@@ -137,6 +153,8 @@ describe('Admin UI Tests (Settings)', () => {
       cy.contains('tr', 'Attr1').should('exist');
       cy.pressToolbarButton('Save');
     });
+
+    cy.screenshot('Doc_Admin_Global_Attributes');
 
     cy.createGroup('Attr-Test-1');
     cy.createGroup('Attr-Test-2');
@@ -236,7 +254,11 @@ describe('Admin UI Tests (Settings)', () => {
 
       cy.wait('@pluginList'); // should be called after unload, required to query the *correct* tr now.
       cy.waitUntilContentLoaded();
+    });
+    
+    cy.screenshot('Doc_Admin_Plugins');
 
+    cy.inMainNavContent(() => {
       // re-fetch the row as it is re-created.
       cy.contains('tr', 'bdeploy-demo-plugin')
         .should('exist')
