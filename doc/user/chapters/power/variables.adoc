@@ -22,8 +22,8 @@ Used whenever it is required to get the absolute installation path to another ma
 | Variable
 | Description
 
-| {{M:openjdk/jre8}}
-| Expands to the absolute path where the OpenJDK manifest is installed on the server.
+| {{M:adoptium/jre8}}
+| Expands to the absolute path where the the manifest named 'adoptium/jre8' is installed on the server. The exact version is specified through a _runtime dependency_ in the <<_app_info_yaml,`app-info.yaml`>>.
 
 | {{M:SELF}}
 | Expands to the absolute path where the manifest is installed on the server which contains the `app-info.yaml` for this application. This substitution shortcut is only supported in `app-info.yaml` files.
