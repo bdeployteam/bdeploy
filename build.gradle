@@ -505,6 +505,21 @@ task jlinkWin64(type:Exec) { t ->
             throw new InvalidUserDataException("$win64jdk does not seem to be a windows JDK, please set -Pwin64jdk=/path/to/jdk")
         }
     }
+
+    doLast {
+        String base = new File("$buildDir/jlink/win64/jre").getPath();
+        fileTree("$buildDir/jlink/win64/jre").matching {
+            include "**/*.exe"
+            include "**/*.dll"
+        }.each {
+            String rel = it.getPath().substring(base.length() + 1);
+            File src = new File("$win64jdk", rel);
+            
+            if(src.exists()) {
+                java.nio.file.Files.copy(src.toPath(), it.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+    }
 }
 
 task jlinkMac64(type:Exec) { t ->
