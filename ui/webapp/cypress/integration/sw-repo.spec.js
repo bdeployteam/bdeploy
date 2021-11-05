@@ -25,6 +25,9 @@ describe('Software Repository Tests', () => {
     });
 
     cy.checkMainNavFlyinClosed();
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_SoftwareRepo');
   });
 
   it('Tests Software Repos', () => {
@@ -51,11 +54,20 @@ describe('Software Repository Tests', () => {
           cy.fillFormInput('name', 'external/software/two');
           cy.fillFormInput('tag', '2.0.1');
           cy.fillFormToggle('allOs');
-
-          cy.get('button[data-cy^="Import"]').should('be.enabled').click();
-          cy.contains('Import of external/software/two:2.0.1').should('exist');
         });
+    });
 
+    cy.screenshot('Doc_SoftwareRepoFillInfo');
+
+    cy.inMainNavFlyin('app-software-upload', () => {
+      cy.get('button[data-cy^="Import"]').should('be.enabled').click();
+      cy.contains('Import of external/software/two:2.0.1').should('exist');
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_SoftwareRepoUploadSuccess');
+
+    cy.inMainNavFlyin('app-software-upload', () => {
       cy.fillFileDrop('test-product-1-direct.zip');
       cy.contains('app-bd-file-upload-raw', 'Success: test-product-1-direct.zip').should('exist');
     });
@@ -82,6 +94,8 @@ describe('Software Repository Tests', () => {
         })
         .click();
     });
+
+    cy.screenshot('Doc_SoftwareRepoDetails');
 
     // check product details
     cy.inMainNavFlyin('app-software-details', () => {

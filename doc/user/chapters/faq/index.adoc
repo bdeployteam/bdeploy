@@ -1,10 +1,6 @@
 == FAQ
 
 [discrete]
-=== Q: When uploading an update, why are some servers not updated?
+=== Q: Dummy Question
 
-There are a few reasons why an update could not be performed.
-
-First, *BDeploy* packages are available for multiple operating systems. Since *BDeploy* fully supports multi-OS setups, you might have uploaded an update package only for one OS, and the servers which did not update correct run another OS. Please make sure to always upload all available OS packages of *BDeploy* to assure smooth updating.
-
-Second, *BDeploy* packages might have a minimum required source server version. Since multi-node setups could in theory have heterogenous versions installed, this minimum server version is checked right before applying the update on this particular server, not centrally. This means that a server can refuse installing the update. You will find a hint in the logs of that server. The *BDeploy* release notes should contain further instructions in this case - most likely instructions to update to another version of *BDeploy* first.
+Dummy Answer

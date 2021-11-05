@@ -6,6 +6,4 @@ include::product.adoc[]
 
 include::variables.adoc[]
 
-//// REWORK MARKER MDU ////
-
 include::runtimeDependencies.adoc[]

@@ -7,6 +7,8 @@ To make them available on the server, you need to:
 * Use `bhive import` to import the directory containing the third-party software into a local *BHive*.
 * Use `bhive push` to push the created *Manifest* to the *Software Repository* of your choice.
 
+Alternatively the Web UI provides a mechanism to upload arbitrary software to *Software Repositories*.
+
 ==== Manifest Naming
 
 Third party software *Manifests* can have basically any name. If you want to provide different *Manifests* per target operating system though, you will have to follow a simple naming rule: append the operating system name to the *Manifest* name part, e.g.:
@@ -27,28 +29,28 @@ Included runtime dependencies will not show up on the target server's Web UI any
 
 *Software Repositories* are a storage location for any external software required by products. In addition, BDeploy products can be stored and managed in *Software Repositories*, from where they can be transferred (imported) to *Instance Groups*. A *Software Repository* shares its namespace with *Instance Groups*, which means that the unique name of a *Software Repository* must not collide with any name of a *Software Repository* or *Instance Group*.
 
-image::images/BDeploy_SWRepos.png[Software Repositories,align=center,width=480,link="images/BDeploy_SWRepos.png"]
+image::images/Doc_SoftwareRepo.png[Software Repositories,align=center,width=480,link="images/Doc_SoftwareRepo.png"]
 
 ==== Upload software
 
-To upload external software, open a software repository and click on the upload button on the bottom right. Then click on *browse* or *drop files*. You can upload zip packages. Once you are finished, click *Upload*.
+To upload external software, open a software repository and click on the btn:[Upload Software] button in the toolbar. Then click on *browse* or *drop files*. You can upload zip packages.
 
-After uploading files, specify the shown *name* of the software, the *version* and the supported *operating systems*. +
-If you already have a package in a hive structure or a package including a product descriptor containing all of this metadata, these information will be used.  
+After uploading arbitraty content, you need to specify the *name* of the software, the *version* and the supported *operating systems*.
+If you already have a package in a BHive format or a package including a product descriptor containing all of this metadata, the available information will be used automatically.
 
-image::images/BDeploy_SWRepo_Upload.png[External Software Upload,align=center,width=480,link="images/BDeploy_SWRepo_Upload.png"]
+image::images/Doc_SoftwareRepoFillInfo.png[External Software Upload,align=center,width=480,link="images/Doc_SoftwareRepoFillInfo.png"]
 
 After all requested information is entered, click *Import* to finally import the files to the *Software Repository*.
 
-image::images/BDeploy_SWRepo_Import.png[External Software Import,align=center,width=480,link="images/BDeploy_SWRepo_Import.png"]
+image::images/Doc_SoftwareRepoUploadSuccess.png[External Software Import,align=center,width=480,link="images/Doc_SoftwareRepoUploadSuccess.png"]
 
-If the upload was succesful, you can *close* the upload dialog and the software for each operating system will show up.
+If the upload was succesful, the software for each operating system will show up.
 
-image::images/BDeploy_SWRepo_Ext_Software.png[Software Repository with External Software,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software.png"]
+The available software packages and products can be viewed and *downloaded* if required. 
 
-The available software packages can be viewed and *downloaded* if required. 
+image::images/Doc_SoftwareRepoDetails.png[Software Details,align=center,width=480,link="images/Doc_SoftwareRepoDetails.png"]
 
-image::images/BDeploy_SWRepo_Ext_Software_Details.png[Software Details,align=center,width=480,link="images/BDeploy_SWRepo_Ext_Software_Details.png"]
+// REWORK MARKER MDU
 
 ==== Software Repositories Access
 
