@@ -10,6 +10,16 @@
         [toggle]="false"
         [route]="['edit']"
         [relative]="true"
+        [disabled]="!auth.isCurrentScopeWrite()"
+      ></app-bd-panel-button>
+
+      <app-bd-panel-button
+        text="Software Repository Permissions"
+        icon="security"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['permissions']"
+        [relative]="true"
         [disabled]="!auth.isCurrentScopeAdmin()"
       ></app-bd-panel-button>
 

@@ -62,6 +62,9 @@ export interface BdDataColumn<T> {
   /** If set, render the contents of the column as button, which will trigger the given action when clicked. The data passed is the record object. */
   action?: (record: T) => void;
 
+  /** If set, determines whether the action is disabled. */
+  actionDisabled?: (record: T) => boolean;
+
   /** A callback to determine an icon for the cell - action or detail item. The data passed is the record object. */
   icon?: (record: T) => string;
 

@@ -87,6 +87,7 @@
             [text]="action.data(record)"
             tooltip="below"
             (click)="action.action(record)"
+            [disabled]="!action.actionDisabled ? false : action.actionDisabled(record)"
             color="inherit"
             appClickStopPropagation
           ></app-bd-button>

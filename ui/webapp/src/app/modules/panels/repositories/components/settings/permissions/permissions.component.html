@@ -1,0 +1,13 @@
+<ng-template #modDialog>
+  <div fxLayout="column" fxLayoutGap="10px">
+    <div>Choose the level of permission on {{ repos.current$.value.name }}.</div>
+    <app-bd-form-select name="modPerm" label="Modify Permission" [values]="getAvailablePermissionsFor(modUser)" [(ngModel)]="modPerm"></app-bd-form-select>
+  </div>
+</ng-template>
+
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Permissions - {{ (repos.current$ | async)?.name }}" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-data-table #dataTable [records]="users.users$ | async" [columns]="columns" [grouping]="grouping"></app-bd-data-table>
+  </app-bd-dialog-content>
+</app-bd-dialog>

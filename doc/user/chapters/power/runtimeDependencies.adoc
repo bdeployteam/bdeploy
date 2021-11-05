@@ -50,18 +50,10 @@ The available software packages and products can be viewed and *downloaded* if r
 
 image::images/Doc_SoftwareRepoDetails.png[Software Details,align=center,width=480,link="images/Doc_SoftwareRepoDetails.png"]
 
-// REWORK MARKER MDU
-
 ==== Software Repositories Access
 
-*Software Repositories* are created and managed by global administrators. A *Software Repository* is always visible and readable for all users. Write permissions are required to manage the software packages in the repository. To be able to upload software, a user therefore requires global administration or write permissions or must have write permissions assigned directly to the repository.
+*Software Repositories* are created and managed by global administrators. A *Software Repository* is always visible and readable for all users (exception: `CLIENT` permission users). `WRITE` permissions are required to manage the software packages in the repository. To be able to upload software, a user therefore requires `ADMIN` or `WRITE` permissions either globally, or assigned in the *Software Repository Permissions* panel.
 
-image::images/BDeploy_Demo-Repository_Permissions_Global.png[Global Software Repository Permissions, align=center, width=480, link="images/BDeploy_Demo-Repository_Permissions_Global.png"]
+image::images/Doc_SoftwareRepoPermissions.png[Software Repository Permissions, align=center, width=480, link="images/Doc_SoftwareRepoPermissions.png"]
 
-Use the btn:[+] button to add a user to the list. The input field suggests matching users from the list of all users.
-
-image::images/BDeploy_Demo-Repository_Permissions_AddUser1.png[Grant Write Access to the Software Repository, align=center, width=480, link="images/BDeploy_Demo-Repository_Permissions_AddUser1.png"]
-
-Adding a user grants write access to the *Software Repository*. The bin icon in the last column removes the user from the list. Users with global administration or write permission cannot be removed.
-
-image::images/BDeploy_Demo-Repository_Permissions_AddUser2.png[Grant Write Access to the Software Repository, align=center, width=480, link="images/BDeploy_Demo-Repository_Permissions_AddUser2.png"]
+The *Software Repository Permissions* panel works very similar to the <<Instance Group Access,*Instance Group Permissions*>>.

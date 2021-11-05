@@ -172,11 +172,23 @@ describe('Software Repository Tests', () => {
       cy.contains('tr', 'Test-Repo').should('exist').click();
     });
 
-    // delete repo and check
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Repository Settings');
     });
 
+    // open permission dialog just for a screenshot.
+    cy.inMainNavFlyin('app-settings', () => {
+      cy.get('button[data-cy~="Permissions"]').click();
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_SoftwareRepoPermissions');
+
+    cy.inMainNavFlyin('app-permissions', () => {
+      cy.pressToolbarButton('Back');
+    });
+
+    // delete repo and check
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy^="Delete"]').click();
 

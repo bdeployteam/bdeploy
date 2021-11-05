@@ -3,10 +3,10 @@ import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK, BdDialogMessageAction } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { GroupUsersService } from 'src/app/modules/panels/groups/services/group-users.service';
-import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
+import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { BdDataPermissionLevelCellComponent } from '../../../../../core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
+import { RepositoryUsersService } from '../../../services/repository-users.service';
 
 @Component({
   selector: 'app-permissions',
@@ -67,18 +67,22 @@ export class PermissionsComponent implements OnInit, OnDestroy {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
 
-  constructor(public groups: GroupsService, public users: GroupUsersService, public userCols: UsersColumnsService) {}
+  constructor(public repos: RepositoriesService, public users: RepositoryUsersService, public userCols: UsersColumnsService) {}
 
   ngOnInit(): void {}
 
   ngOnDestroy(): void {}
 
   private getLocalPermissionLevel(user: UserInfo): Permission {
-    return user.permissions.find((p) => p.scope === this.groups.current$.value.name)?.permission;
+    return user.permissions.find((p) => p.scope === this.repos.current$.value.name)?.permission;
   }
 
   private getGlobalPermissionLevel(user: UserInfo): Permission {
-    return user.permissions.find((p) => !p.scope)?.permission;
+    const p = user.permissions.find((p) => !p.scope)?.permission;
+    if (!p) {
+      return Permission.READ; // implicit READ permission on repos for everybody.
+    }
+    return p;
   }
 
   private doModify(tpl: TemplateRef<any>, user: UserInfo) {
@@ -102,12 +106,11 @@ export class PermissionsComponent implements OnInit, OnDestroy {
 
     // only permissions HIGHER than the current global permission are avilable.
     const glob = this.getGlobalPermissionLevel(user);
-    const allPerms = [Permission.CLIENT, Permission.READ, Permission.WRITE, Permission.ADMIN];
+    const allPerms = [Permission.WRITE, Permission.ADMIN];
 
     if (!glob) return allPerms;
-    if (glob === Permission.CLIENT) return allPerms.slice(1);
-    if (glob === Permission.READ) return allPerms.slice(2);
-    if (glob === Permission.WRITE) return allPerms.slice(3);
+    if (glob === Permission.READ) return allPerms;
+    if (glob === Permission.WRITE) return allPerms.slice(1);
 
     return [];
   }
