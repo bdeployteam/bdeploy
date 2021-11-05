@@ -148,8 +148,10 @@ void createServerTasks(String name, String root, int port) {
 }
 
 createServerTasks("", testServerRoot, testServerPort);
-createServerTasks("Central", testServerRootCentral, testServerPortCentral);
-createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
+if(!project.hasProperty('cypressNoCentral')) {
+    createServerTasks("Central", testServerRootCentral, testServerPortCentral);
+    createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
+}
 
 task checkTestBDeploy(type: JavaExec, dependsOn: startTestBDeploy) {
     setupBDeployJavaExec(it, testServerRoot, testServerPort);
@@ -506,24 +508,28 @@ jacoco {
     applyTo initTestBDeploy
     applyTo checkTestBDeploy
     applyTo startTestBDeploy
-    applyTo startTestBDeployCentral
-    applyTo startTestBDeployManaged
+    if(!project.hasProperty('cypressNoCentral')) {
+        applyTo startTestBDeployCentral
+        applyTo startTestBDeployManaged
+    }
 }
 
 // now all tasks that depend on any of the generated tasks
 task setupDemoServer() {
-    dependsOn(
-        checkTestBDeploy,
-        startTestBDeployCentral,
-        startTestBDeployManaged
-    )
+    dependsOn checkTestBDeploy
+    if(!project.hasProperty('cypressNoCentral')) {
+        dependsOn startTestBDeployCentral
+        dependsOn startTestBDeployManaged
+    }
 
     doFirst() {
         println("----------------------------------------------------------------------------------------")
         println("Successfully started demo server. Point your browser to:")
         println("  https://localhost:${testServerPort} - STANDALONE Demo Server")
-        println("  https://localhost:${testServerPortCentral} - CENTRAL Demo Server")
-        println("  https://localhost:${testServerPortManaged} - MANAGED Demo Server")
+        if(!project.hasProperty('cypressNoCentral')) {
+            println("  https://localhost:${testServerPortCentral} - CENTRAL Demo Server")
+            println("  https://localhost:${testServerPortManaged} - MANAGED Demo Server")
+        }
         println("User and password for the demo server(s) are 'admin' and 'admin'.")
         println("NOTE: that cookies are hostname based, so logging in to one will log out on any other");
         println("      server running on the same hostname.");

@@ -120,8 +120,15 @@ task runCoverageServerManaged(type: com.github.psxpaul.task.ExecFork) {
     stopAfter = triggerStopCoverageManaged
 }
 
-task updateFixtures(dependsOn: [':test-data:setupDemoServer', 'updateFixtureProducts', runCoverageServerStandalone, runCoverageServerCentral, runCoverageServerManaged]) {
-    // currently nothing...
+task updateFixtures() {
+    // currently nothing except dependencies...
+    dependsOn ':test-data:setupDemoServer'
+    dependsOn 'updateFixtureProducts'
+    dependsOn runCoverageServerStandalone
+    if(!project.hasProperty('cypressNoCentral')) {
+        dependsOn runCoverageServerCentral
+        dependsOn runCoverageServerManaged
+    }
 }
 
 List<String> getCypressConfig() {
@@ -133,7 +140,8 @@ List<String> getCypressConfig() {
         timeout = project.property('cypressTimeout')
     }
     return [
-        "--config", "baseUrl=http://localhost:4210,defaultCommandTimeout=${timeout},requestTimeout=${timeout},responseTimeout=${timeout},taskTimeout=${timeout},execTimeout=${timeout},pageLoadTimeout=${timeout}",
+        "--config", "baseUrl=http://localhost:4210,defaultCommandTimeout=${timeout},requestTimeout=${timeout},responseTimeout=${timeout},taskTimeout=${timeout},execTimeout=${timeout},pageLoadTimeout=${timeout}"
+        + (project.hasProperty('cypressNoCentral') ? ",ignoreTestFiles=central-managed.spec.js" : ""),
         "--env", "backendBaseUrl=https://localhost:${standalonePort}/api"
         + ",baseUrlCentral=http://localhost:4211"
         + ",backendBaseUrlCentral=https://localhost:${centralPort}/api"
@@ -221,12 +229,16 @@ task runDevCypress(type: Exec) {
 }
 
 // this one is required to stop the server and accumulate coverage data
-task doneWithCypressHeadless(dependsOn: [':test-data:triggerStopBDeploy', triggerStopCoverageStandalone, triggerStopCoverageCentral, triggerStopCoverageManaged]) {
+task doneWithCypressHeadless(dependsOn: [':test-data:triggerStopBDeploy', triggerStopCoverageStandalone]) {
     doLast {
         println('Cypress Testing done...')
     }
 
     dependsOn runCypressHeadless
+    if(!project.hasProperty('cypressNoCentral')) {
+        dependsOn triggerStopCoverageCentral
+        dependsOn triggerStopCoverageManaged
+    }
 }
 
 project(':test-data').tasks['triggerStopBDeploy'].mustRunAfter runCypressHeadless
