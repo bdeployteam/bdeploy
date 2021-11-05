@@ -16,4 +16,6 @@ a| A *Software Repository* is a named *BHive* which is dedicated to storing *Man
 
 When building a *Product*, it's declared dependencies are resolved by querying all *Software Repositories* on the target *BDeploy* server.
 
+In addition to arbitrary software, *Software Repositories* can also host *Products*, just like *Instance Groups*. The purpose of this feature is to provide a shared place which can be used to provide *Products* to multiple *Instance Groups*.
+
 |===
