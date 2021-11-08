@@ -161,6 +161,8 @@ describe('Instance Settings Tests', () => {
       });
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.monacoEditor().should('contain.value', 'dummy configuration');
     cy.typeInMonacoEditor('Configuration File Content', true);
 
