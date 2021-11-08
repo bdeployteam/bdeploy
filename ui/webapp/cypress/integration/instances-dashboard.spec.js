@@ -52,7 +52,7 @@ describe('Instance Dashboard Tests', () => {
 
       cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
         cy.fillFormInput('Text Value', 'Test');
-        cy.fillFormInput('Sleep Timeout', '5');
+        cy.fillFormInput('Sleep Timeout', '10');
 
         cy.get('button[data-cy="Confirm"]').click();
       });
@@ -152,7 +152,6 @@ describe('Instance Dashboard Tests', () => {
 
     cy.inMainNavFlyin('app-process-status', () => {
       cy.contains('button', 'play_arrow').click();
-      cy.contains('button', 'stop').should('be.enabled');
 
       // first start
       cy.contains('Up Time').should('exist');
@@ -160,7 +159,6 @@ describe('Instance Dashboard Tests', () => {
       cy.contains('button', 'play_arrow').should('be.disabled');
 
       // crash back off after second start
-      cy.contains('Stopped At').should('exist');
       cy.contains('Restart In').should('exist');
     });
 
@@ -169,7 +167,6 @@ describe('Instance Dashboard Tests', () => {
     cy.inMainNavFlyin('app-process-status', () => {
       // permanent crash
       cy.contains('mat-icon', 'error').should('exist');
-      cy.contains('Stopped At').should('exist');
       cy.contains('button', 'stop').should('be.disabled');
       cy.contains('button', 'play_arrow').should('be.enabled');
     });
