@@ -72,6 +72,7 @@ public class InstanceNodeController {
     private static final String PCU_JSON = "pcu.json";
 
     private final BHive hive;
+    private final InstanceNodeOperationSynchronizer syncOps;
     private final InstanceNodeManifest manifest;
     private final CompositeResolver resolvers = new CompositeResolver();
     private final Path root;
@@ -82,8 +83,10 @@ public class InstanceNodeController {
      * @param root the root directory used for deployment/runtime
      * @param manifest the instance node manifest
      */
-    public InstanceNodeController(BHive hive, Path root, InstanceNodeManifest manifest) {
+    public InstanceNodeController(BHive hive, Path root, InstanceNodeManifest manifest,
+            InstanceNodeOperationSynchronizer syncOps) {
         this.hive = hive;
+        this.syncOps = syncOps;
         this.root = root;
         this.manifest = manifest;
         this.paths = new DeploymentPathProvider(root.resolve(manifest.getUUID()), manifest.getKey().getTag());
@@ -177,14 +180,20 @@ public class InstanceNodeController {
     }
 
     private boolean isApplicationInstalled(ApplicationConfiguration config) {
+        Path target;
         if (config.pooling == ApplicationPoolType.GLOBAL || config.pooling == null) {
-            return Files
-                    .isDirectory(paths.get(SpecialDirectory.MANIFEST_POOL).resolve(config.application.directoryFriendlyName()));
+            target = paths.get(SpecialDirectory.MANIFEST_POOL).resolve(config.application.directoryFriendlyName());
         } else if (config.pooling == ApplicationPoolType.LOCAL) {
-            return Files.isDirectory(
-                    paths.get(SpecialDirectory.INSTANCE_MANIFEST_POOL).resolve(config.application.directoryFriendlyName()));
+            target = paths.get(SpecialDirectory.INSTANCE_MANIFEST_POOL).resolve(config.application.directoryFriendlyName());
+        } else {
+            target = paths.get(SpecialDirectory.BIN).resolve(config.application.directoryFriendlyName());
         }
-        return Files.isDirectory(paths.get(SpecialDirectory.BIN).resolve(config.application.directoryFriendlyName()));
+
+        if (syncOps.isPerforming(target)) {
+            return false;
+        }
+
+        return Files.isDirectory(target);
     }
 
     /**
@@ -229,7 +238,7 @@ public class InstanceNodeController {
         PathHelper.deleteRecursive(targetDir);
 
         // write all the manifest content (config only) to the according target location
-        hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
+        syncOps.perform(targetDir, hive, new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
 
         // write all required applications to the pool
         SortedMap<Manifest.Key, Path> exportedPaths = installPooledApplicationsFor(dc);
@@ -290,7 +299,7 @@ public class InstanceNodeController {
                 result.put(key, target);
 
                 if (!Files.isDirectory(target)) {
-                    hive.execute(new ExportOperation().setTarget(target).setManifest(key));
+                    syncOps.perform(target, hive, new ExportOperation().setTarget(target).setManifest(key));
                 }
             }
         }
@@ -354,7 +363,7 @@ public class InstanceNodeController {
         List<InstanceNodeController> toKeep = new ArrayList<>();
         for (Manifest.Key key : inHive) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(source, key);
-            InstanceNodeController inc = new InstanceNodeController(source, root, inmf);
+            InstanceNodeController inc = new InstanceNodeController(source, root, inmf, new InstanceNodeOperationSynchronizer());
 
             if (inc.isInstalled()) {
                 toKeep.add(inc);

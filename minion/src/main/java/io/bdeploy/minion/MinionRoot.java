@@ -52,6 +52,7 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.dcu.InstanceNodeOperationSynchronizer;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -649,7 +650,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private void initProcessControllerForInstance(SortedMap<String, Manifest.Key> activeVersions, Key key) {
         try {
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-            InstanceNodeController inc = new InstanceNodeController(hive, getDeploymentDir(), inm);
+            InstanceNodeController inc = new InstanceNodeController(hive, getDeploymentDir(), inm,
+                    new InstanceNodeOperationSynchronizer());
             if (!inc.isInstalled()) {
                 return;
             }

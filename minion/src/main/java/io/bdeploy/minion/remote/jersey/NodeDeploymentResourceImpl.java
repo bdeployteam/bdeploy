@@ -31,6 +31,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.dcu.InstanceNodeOperationSynchronizer;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
@@ -64,6 +65,9 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     @Inject
     private FileSystemSpaceService fsss;
 
+    @Inject
+    private InstanceNodeOperationSynchronizer inos;
+
     /**
      * @param inm the {@link InstanceNodeManifest} to read state from.
      * @return the {@link InstanceState}, potentially migrated from "old" information in {@link MinionState}.
@@ -80,7 +84,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         }
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
         try (Activity deploying = reporter.start("Deploying Ver. " + key.getTag() + " of " + inm.getConfiguration().name)) {
-            InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
+            InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, inos);
             inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
             inc.install();
             getState(inm, hive).install(key.getTag());
@@ -98,7 +102,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         BHive hive = root.getHive();
 
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController toActivate = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
+        InstanceNodeController toActivate = new InstanceNodeController(hive, root.getDeploymentDir(), inm, inos);
         if (!toActivate.isInstalled()) {
             throw new WebApplicationException("Key " + key + " is not deployed", Status.NOT_FOUND);
         }
@@ -165,7 +169,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         }
 
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, inos);
 
         // check currently active deployment
         MinionProcessController processController = root.getProcessController();
@@ -223,7 +227,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         Key activeKey = new Manifest.Key(newest.getKey().getName(), activeTag);
 
         InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(),
-                InstanceNodeManifest.of(hive, activeKey));
+                InstanceNodeManifest.of(hive, activeKey), inos);
 
         Path dataRoot = inc.getDeploymentPathProvider().get(SpecialDirectory.DATA);
 

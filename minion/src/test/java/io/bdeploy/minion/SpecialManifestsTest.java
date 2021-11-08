@@ -27,6 +27,7 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.dcu.InstanceNodeOperationSynchronizer;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -171,7 +172,8 @@ public class SpecialManifestsTest {
 
             Manifest.Key ifmRoot = im.getInstanceNodeManifests().values().iterator().next();
             InstanceNodeManifest inm = InstanceNodeManifest.of(hive, ifmRoot);
-            InstanceNodeController inmf = new InstanceNodeController(hive, tmp.resolve("d"), inm);
+            InstanceNodeController inmf = new InstanceNodeController(hive, tmp.resolve("d"), inm,
+                    new InstanceNodeOperationSynchronizer());
             assertEquals("Test", inm.getConfiguration().name);
             assertEquals(1, inm.getConfiguration().applications.size());
             assertEquals("My Dummy", inm.getConfiguration().applications.iterator().next().name);
