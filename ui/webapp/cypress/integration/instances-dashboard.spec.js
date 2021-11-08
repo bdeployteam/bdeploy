@@ -69,8 +69,6 @@ describe('Instance Dashboard Tests', () => {
 
   it('Test Dashboard', () => {
     cy.enterInstance(groupName, instanceName);
-    cy.pressMainNavButton('Instance Dashboard');
-
     cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
@@ -135,11 +133,20 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Test Process Control', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.waitUntilContentLoaded();
+
+    cy.checkMainNavFlyinClosed();
+
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Another Server With Sleep').click();
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-process-status', () => {
+      cy.contains('Another Server').should('exist');
+      cy.contains('button', 'play_arrow').should('be.enabled');
       cy.get('button[data-cy="Process Port Status"]').click();
     });
 
