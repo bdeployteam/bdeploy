@@ -93,7 +93,7 @@ public class ProductUpdateService {
                     : app.endpoints.http;
 
             // add/remove endpoints.
-            updateEndpoints(epValues, epDescs);
+            app.endpoints.http = updateEndpoints(epValues, epDescs);
 
             if (targetDesc.stopCommand == null) {
                 app.stop = null;
