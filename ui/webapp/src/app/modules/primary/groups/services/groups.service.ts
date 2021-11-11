@@ -96,7 +96,6 @@ export class GroupsService {
     forkJoin({
       groups: this.http.get<InstanceGroupConfiguration[]>(this.apiPath),
       attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(`${this.apiPath}/list-attributes`),
-      settings: this.settings.waitUntilLoaded(),
     })
       .pipe(
         finalize(() => this.loading$.next(false)),
@@ -108,14 +107,17 @@ export class GroupsService {
         // set the attribute values before the definitions - consumers will react when definitions change and try to extract values from records
         this.attributeValues$.next(result.attributes);
 
-        const attrDefs = result.settings.instanceGroup?.attributes;
-        this.attributeDefinitions$.next(!!attrDefs ? attrDefs : []);
-
         // last update the current$ subject to inform about changes
         if (!!this.areas.groupContext$.value) {
           this.setCurrent(this.areas.groupContext$.value);
         }
       });
+
+    this.settings.settings$.subscribe((s) => {
+      if (!!s) {
+        this.attributeDefinitions$.next(s?.instanceGroup?.attributes);
+      }
+    });
   }
 
   private setCurrent(group: string) {
