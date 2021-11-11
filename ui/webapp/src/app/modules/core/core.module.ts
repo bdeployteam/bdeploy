@@ -98,6 +98,7 @@ import { ConfigService } from './services/config.service';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { IdentifierValidator } from './validators/identifier.directive';
 import { PasswordVerificationValidator } from './validators/password-verification.directive';
+import { TrimmedValidator } from './validators/trimmed.directive';
 
 export function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -138,6 +139,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdActionRowComponent,
     BdFormInputComponent,
     IdentifierValidator,
+    TrimmedValidator,
     BdFormToggleComponent,
     BdFormSelectComponent,
     BdDataComponentCellComponent,
@@ -274,6 +276,7 @@ export function loadAppConfig(cfgService: ConfigService) {
 
     // validators
     IdentifierValidator,
+    TrimmedValidator,
     PasswordVerificationValidator,
     EditUniqueValueValidatorDirective,
     BdExpandButtonComponent,

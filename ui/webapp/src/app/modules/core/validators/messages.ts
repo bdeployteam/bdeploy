@@ -1,6 +1,7 @@
 import { ValidationErrors } from '@angular/forms';
 import { ID_VALIDATION } from './identifier.directive';
 import { PASSWORD_VALIDATION } from './password-verification.directive';
+import { TRIM_VALIDATION } from './trimmed.directive';
 
 export interface BdValidationMessageExtractor {
   id: string;
@@ -39,6 +40,10 @@ export function bdValidationMessage(label: string, errors: ValidationErrors): st
   // our own validators
   if (!!errors[ID_VALIDATION]) {
     return `${label} contains invalid characters`;
+  }
+
+  if (!!errors[TRIM_VALIDATION]) {
+    return `${label} contains leading or trailing spaces`;
   }
 
   if (!!errors[PASSWORD_VALIDATION]) {

@@ -1,6 +1,6 @@
 <ng-template #addEditServer>
   <form #addEditForm="ngForm" fxLayout="column" fxLayoutGap="5px" [style.min-width.px]="300">
-    <app-bd-form-input label="Server URL" name="server" [(ngModel)]="tempServer.server" required></app-bd-form-input>
+    <app-bd-form-input label="Server URL" name="server" [(ngModel)]="tempServer.server" required appTrimmed></app-bd-form-input>
     <app-bd-form-input label="Description" name="description" [(ngModel)]="tempServer.description" required></app-bd-form-input>
     <div fxLayout="row" fxLayoutGap="5px">
       <app-bd-form-input label="User" name="user" [(ngModel)]="tempServer.user" required></app-bd-form-input>

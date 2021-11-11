@@ -18,7 +18,7 @@
         <div>
           Edit instance: <strong>{{ state.config.config.uuid }}</strong>
         </div>
-        <app-bd-form-input label="Name" name="name" [(ngModel)]="state.config.config.name" required></app-bd-form-input>
+        <app-bd-form-input label="Name" name="name" [(ngModel)]="state.config.config.name" required appTrimmed></app-bd-form-input>
         <app-bd-form-input label="Description" name="description" [(ngModel)]="state.config.config.description" required></app-bd-form-input>
         <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="state.config.config.purpose" [values]="getPurposes()" required></app-bd-form-select>
         <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="state.config.config.autoStart"></app-bd-form-toggle>

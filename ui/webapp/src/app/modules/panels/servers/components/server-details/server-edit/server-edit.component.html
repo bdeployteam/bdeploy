@@ -5,9 +5,9 @@
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="server">
       <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="onSave()">
         <app-bd-form-input name="description" label="Description" [(ngModel)]="server.description"></app-bd-form-input>
-        <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri"></app-bd-form-input>
+        <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri" appTrimmed></app-bd-form-input>
         <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
-        <app-bd-form-input name="token" label="Authorization Token" [(ngModel)]="server.auth"></app-bd-form-input>
+        <app-bd-form-input name="token" label="Authorization Token" [(ngModel)]="server.auth" appTrimmed></app-bd-form-input>
 
         <app-bd-button text="Save" icon="save" [collapsed]="false" color="primary" [disabled]="!isDirty() || form.invalid"></app-bd-button>
       </form>

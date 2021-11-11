@@ -9,6 +9,7 @@
             [(ngModel)]="process.name"
             errorDisplay="immediate"
             required
+            appTrimmed
             [appEditProcessNameValidator]="process.uid"
           ></app-bd-form-input>
         </app-config-desc-element>
