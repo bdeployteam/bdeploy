@@ -62,17 +62,17 @@
           [collapsed]="false"
           [toggle]="false"
           icon="compare"
-          text="Compare with Version..."
+          text="Compare with Version"
           [relative]="true"
           [route]="['select', entry.instanceTag]"
         ></app-bd-panel-button>
-        <app-bd-button [collapsed]="false" [toggle]="false" icon="file_download" text="Export..." (click)="doExport()"></app-bd-button>
+        <app-bd-button [collapsed]="false" [toggle]="false" icon="file_download" text="Export" (click)="doExport()"></app-bd-button>
         <app-bd-button
           *ngIf="auth.isCurrentScopeAdmin()"
           [collapsed]="false"
           [toggle]="false"
           icon="delete"
-          text="Delete Version"
+          text="Delete"
           (click)="doDelete()"
           [disabled]="deleting$ | async"
           [loadingWhen$]="deleting$"

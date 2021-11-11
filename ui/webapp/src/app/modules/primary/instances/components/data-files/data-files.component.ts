@@ -21,13 +21,13 @@ export interface FileListEntry {
 
 const colPath: BdDataColumn<FileListEntry> = {
   id: 'path',
-  name: 'File Path',
+  name: 'Name',
   data: (r) => r.entry.path,
 };
 
 const colSize: BdDataColumn<FileListEntry> = {
   id: 'size',
-  name: 'File Size',
+  name: 'Size',
   data: (r) => formatSize(r.entry.size),
   width: '100px',
   showWhen: '(min-width: 700px)',

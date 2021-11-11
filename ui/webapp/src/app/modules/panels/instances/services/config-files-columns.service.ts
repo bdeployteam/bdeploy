@@ -23,7 +23,7 @@ export class ConfigFilesColumnsService {
 
   private readonly colFileName: BdDataColumn<ConfigFile> = {
     id: 'name',
-    name: 'File Path',
+    name: 'Name',
     data: (r) => (!!r.persistent?.path ? r.persistent.path : r.modification.file),
   };
 
@@ -40,15 +40,15 @@ export class ConfigFilesColumnsService {
     name: 'Delete',
     data: (r) => r,
     component: DeleteActionComponent,
-    width: '40px',
+    width: '65px',
   };
 
   private readonly colRename: BdDataColumn<ConfigFile> = {
     id: 'rename',
-    name: 'Move',
+    name: 'Rename',
     data: (r) => r,
     component: RenameActionComponent,
-    width: '40px',
+    width: '65px',
     showWhen: '(min-width: 600px)',
   };
 
@@ -57,7 +57,7 @@ export class ConfigFilesColumnsService {
     name: 'Edit',
     data: (r) => r,
     component: EditActionComponent,
-    width: '40px',
+    width: '65px',
   };
 
   public defaultColumns: BdDataColumn<ConfigFile>[] = [this.colFileName, this.colStatus, this.colProductState, this.colDelete, this.colRename, this.colEdit];

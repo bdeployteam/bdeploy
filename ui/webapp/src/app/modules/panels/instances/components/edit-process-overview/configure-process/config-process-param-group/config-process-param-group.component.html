@@ -49,13 +49,13 @@
               <div *ngIf="panel.expanded" fxLayout="row" fxLayoutGap="5px">
                 <app-bd-button
                   *ngIf="group.isCustom"
-                  text="Add Custom Parameter..."
+                  text="Add Custom Parameter"
                   icon="add"
                   (click)="onAddCustomParameter(addCustom)"
                   appClickStopPropagation
                 ></app-bd-button>
                 <app-bd-button
-                  [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters...'"
+                  [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
                   [icon]="group.isSelectMode ? 'check' : 'tune'"
                   tooltip="below"
                   [disabled]="!hasOptionals(group)"

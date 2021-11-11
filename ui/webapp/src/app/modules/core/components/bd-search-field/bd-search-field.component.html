@@ -1,27 +1,16 @@
 <div fxFlex="1 0 auto" fxLayout="row" fxLayoutAlign="center center">
-  <div
-    class="local-search-group"
-    [class.local-search-group-disabled]="disabled"
-    fxFlex="1 0 auto"
-    fxLayout="row"
-    fxLayoutAlign="start center"
-  >
+  <div class="local-search-group" [class.local-search-group-disabled]="disabled" fxFlex="1 0 auto" fxLayout="row" fxLayoutAlign="start center">
     <mat-icon>search</mat-icon>
     <input
       #searchField
       fxFlex="1 0 auto"
       class="local-search"
       type="text"
-      [placeholder]="disabled ? 'Search not possible here' : 'Search current page...'"
+      [placeholder]="disabled ? 'Search not possible here' : 'Search current page'"
       [(ngModel)]="value"
       (ngModelChange)="queueChange()"
       [disabled]="disabled"
     />
-    <mat-icon
-      class="local-search-clear"
-      *ngIf="searchField.value"
-      (click)="searchField.value = ''; value = ''; valueChange.emit(value)"
-      >clear</mat-icon
-    >
+    <mat-icon class="local-search-clear" *ngIf="searchField.value" (click)="searchField.value = ''; value = ''; valueChange.emit(value)">clear</mat-icon>
   </div>
 </div>

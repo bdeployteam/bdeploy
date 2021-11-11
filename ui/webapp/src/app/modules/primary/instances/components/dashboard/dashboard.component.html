@@ -69,9 +69,7 @@
                 This instance has a newer configuration version available to be activated ({{ current.instance.tag }}). You can
                 <strong>install and activate</strong> this version now.
               </div>
-              <div *ngIf="!current.activeVersion?.tag">
-                This instance has no active version. You can <strong>install and activate</strong> the current version now.
-              </div>
+              <div *ngIf="!current.activeVersion?.tag">This instance has no active version. You can install and activate the current version now.</div>
               <div class="bd-description-text">
                 To <strong>install, uninstall or activate</strong> other versions, please go to the
                 <a [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]">instance history</a>.
