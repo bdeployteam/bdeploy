@@ -165,6 +165,8 @@ describe('Instance Dashboard Tests', () => {
       cy.contains('Started At').should('exist');
       cy.contains('button', 'play_arrow').should('be.disabled');
 
+      cy.waitUntilContentLoaded();
+
       // crash back off after second start
       cy.contains('Restart In').should('exist');
     });
