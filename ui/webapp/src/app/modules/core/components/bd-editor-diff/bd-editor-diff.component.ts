@@ -39,6 +39,10 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     });
   }
 
+  public update() {
+    this.monaco.getModifiedEditor().getModel().setValue(this.modifiedContent);
+  }
+
   onMonacoInit(monaco) {
     this.monaco = monaco;
     this.globalMonaco = window['monaco'];

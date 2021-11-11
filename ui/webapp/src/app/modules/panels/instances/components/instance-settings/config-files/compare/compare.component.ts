@@ -4,6 +4,7 @@ import { BehaviorSubject, combineLatest, forkJoin, of, Subscription } from 'rxjs
 import { finalize, tap } from 'rxjs/operators';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { BdEditorDiffComponent } from 'src/app/modules/core/components/bd-editor-diff/bd-editor-diff.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -23,6 +24,7 @@ export class CompareComponent implements OnInit, DirtyableDialog {
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild(BdEditorDiffComponent) private editor: BdEditorDiffComponent;
 
   private subscription: Subscription;
 
@@ -54,6 +56,11 @@ export class CompareComponent implements OnInit, DirtyableDialog {
 
   public isDirty(): boolean {
     return this.content !== this.originalContent;
+  }
+
+  /* template */ onApplyChanges() {
+    this.content = this.contentTemplate;
+    setTimeout(() => this.editor.update());
   }
 
   /* template */ onSave() {
