@@ -174,6 +174,13 @@ describe('Instance Dashboard Tests', () => {
     cy.screenshot('Doc_DashboardProcessCrash');
 
     cy.inMainNavFlyin('app-process-status', () => {
+      // wait for restart to actually happen
+      cy.contains('Restart In').should('not.exist');
+      cy.contains('Started At').should('exist');
+
+      // wait for process to stop
+      cy.contains('Stopped At').should('exist');
+
       // permanent crash
       cy.contains('mat-icon', 'error').should('exist');
       cy.contains('button', 'stop').should('be.disabled');
