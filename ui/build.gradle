@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.32.889'
+        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.33.956'
     }
 }
 
@@ -135,7 +135,7 @@ List<String> getCypressConfig() {
     def standalonePort = project(":test-data").testServerPort
     def centralPort = project(":test-data").testServerPortCentral
     def managedPort = project(":test-data").testServerPortManaged
-    def timeout = '30000'
+    def timeout = '60000'
     if(project.hasProperty('cypressTimeout')) {
         timeout = project.property('cypressTimeout')
     }
