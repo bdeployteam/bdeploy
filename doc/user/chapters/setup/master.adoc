@@ -2,7 +2,7 @@
 
 ==== Modes of Operation
 
-*BDeploy* may be set up in different modes, makeing a few different overal usage scenarios possible:
+*BDeploy* may be set up in different modes, making a few different overall usage scenarios possible:
 
 * `STANDALONE` mode: A standalone *BDeploy* master which is responsible for itself, its nodes, and every application deployed theron.
 * `MANAGED` mode: A *BDeploy* master which is controlled by a `CENTRAL` *BDeploy* master. The `MANAGED` master can still be used nearly the same as the `STANDALONE` master, with very few restrictions. A `MANAGED` master can *additionally* be controlled indirectly through the attached `CENTRAL` master
