@@ -6,6 +6,14 @@
  * User Manual available at https://docs.gradle.org/6.6.1/userguide/tutorial_java_projects.html
  */
 
+buildscript {
+    repositories {
+        maven {
+            url 'https://oss.sonatype.org/content/groups/public/'
+        }
+    }
+}
+
 plugins {
     // Apply the java plugin to add support for Java
     id 'java'
@@ -23,10 +31,10 @@ repositories {
     mavenCentral()
 }
 
-version = "1.0.1-SNAPSHOT"
+version = "1.0.2-SNAPSHOT"
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 ext {
     buildDate = new Date().format('yyyyMMddHHmmss')
@@ -38,10 +46,10 @@ dependencies {
     implementation 'com.google.guava:guava:31.0.1-jre'
 
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1-RC1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
 
     // Use JUnit Jupiter Engine for testing.
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1-RC1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 application {
