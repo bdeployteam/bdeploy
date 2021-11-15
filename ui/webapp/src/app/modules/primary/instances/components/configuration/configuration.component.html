@@ -39,7 +39,7 @@
       text="Instance Settings"
       icon="settings"
       [route]="['panels', 'instances', 'settings']"
-      [disabled]="!servers.isSynchronized((edit.current$ | async)?.managedServer) || !(edit.current$ | async)?.productDto"
+      [disabled]="!servers.isSynchronized((edit.current$ | async)?.managedServer)"
       tooltip="below"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
@@ -165,7 +165,7 @@
 
       <ng-container *ngIf="!(edit.current$ | async)?.productDto">
         <app-bd-no-data>
-          <p>The product version configured is not available on this server. The dashboard is not available.</p>
+          <p>The product version configured is not available on this server. The configuration is not available.</p>
           <ng-container *ngIf="cfg.isCentral()">
             <p>You can transfer product versions from the managed server from the product overview.</p>
           </ng-container>
