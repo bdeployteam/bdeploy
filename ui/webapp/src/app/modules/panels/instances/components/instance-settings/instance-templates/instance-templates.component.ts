@@ -25,7 +25,7 @@ export interface TemplateMessage {
 const tplColName: BdDataColumn<TemplateMessage> = {
   id: 'name',
   name: 'Name',
-  data: (r) => (!!r.template?.name ? r.template.name : r.template.application),
+  data: (r) => (!!r.template?.name ? r.template.name : !!r.template?.template ? r.template.template : r.template.application),
 };
 
 const tplColDetails: BdDataColumn<TemplateMessage> = {
@@ -293,6 +293,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
         if (!!this.messages.length) {
+          console.log(this.messages);
           applyResult = this.dialog.message({
             header: 'Template Messages',
             template: this.tplMessages,
