@@ -526,6 +526,12 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         updateDto.updateAvailable = VersionHelper.compare(runningVersion, managedVersion) > 0;
         updateDto.forceUpdate = runningVersion.getMajor() > managedVersion.getMajor();
 
+        if (runningVersion.getMajor() == 4 && runningVersion.getMinor() == 0 && managedVersion.getMajor() == 3
+                && managedVersion.getMinor() == 6) {
+            // special case - 3.6.x -> 4.0.x - we do not force this update.
+            updateDto.forceUpdate = false;
+        }
+
         // Contact the remote service to find out all installed versions
         Set<ScopedManifestKey> remoteVersions = new HashSet<>();
         try (RemoteBHive rbh = RemoteBHive.forService(svc, null, reporter)) {
