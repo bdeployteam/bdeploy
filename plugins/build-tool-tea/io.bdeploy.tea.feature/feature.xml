@@ -2,7 +2,7 @@
 <feature
       id="io.bdeploy.tea.feature"
       label="%featureName"
-      version="3.6.4.qualifier"
+      version="4.0.0.qualifier"
       provider-name="%providerName">
 
    <description url="http://www.example.com/description">
