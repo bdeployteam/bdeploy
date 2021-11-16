@@ -39,6 +39,7 @@ export class ClientsService {
 
   private reload(group: string) {
     if (!group) {
+      this.apps$.next([]);
       return;
     }
 
@@ -67,9 +68,11 @@ export class ClientsService {
       this.subscription.unsubscribe();
     }
 
-    this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [group] }, (change) => {
-      this.reload(group);
-    });
+    if (!!group) {
+      this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [group] }, (change) => {
+        this.reload(group);
+      });
+    }
 
     this.reload(group);
   }

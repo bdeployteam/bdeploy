@@ -37,6 +37,7 @@ export class ProductsService {
   private reload(group: string) {
     if (!group) {
       this.products$.next([]);
+      this.updateChangeSubscription(null);
       return;
     }
 
@@ -62,8 +63,10 @@ export class ProductsService {
       this.subscription.unsubscribe();
     }
 
-    this.subscription = this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [group] }, () => {
-      this.reload(group);
-    });
+    if (!!group) {
+      this.subscription = this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [group] }, () => {
+        this.reload(group);
+      });
+    }
   }
 }

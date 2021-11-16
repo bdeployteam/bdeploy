@@ -57,6 +57,7 @@ export class RepositoryService {
     if (!repository) {
       this.products$.next([]);
       this.softwarePackages$.next([]);
+      this.updateChangeSubscription(null);
       return;
     }
 
@@ -103,14 +104,16 @@ export class RepositoryService {
       this.subscription.unsubscribe();
     }
 
-    this.subscription = this.changes.subscribe(ObjectChangeType.SOFTWARE_PACKAGE, { scope: [repository] }, (change) => {
-      this.update$.next(this.repository);
-    });
-
-    this.subscription.add(
-      this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [repository] }, (change) => {
+    if (!!repository) {
+      this.subscription = this.changes.subscribe(ObjectChangeType.SOFTWARE_PACKAGE, { scope: [repository] }, (change) => {
         this.update$.next(this.repository);
-      })
-    );
+      });
+
+      this.subscription.add(
+        this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [repository] }, (change) => {
+          this.update$.next(this.repository);
+        })
+      );
+    }
   }
 }

@@ -6,7 +6,7 @@ import { debounceTime } from 'rxjs/operators';
 import { ActivitySnapshot, ObjectChangeDetails, ObjectChangeType, ObjectScope } from '../../../models/gen.dtos';
 import { ConfigService } from './config.service';
 import { NavAreasService } from './nav-areas.service';
-import { ObjectChangesService } from './object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from './object-changes.service';
 
 export class ActivitySnapshotTreeNode {
   constructor(public snapshot: ActivitySnapshot, public children: ActivitySnapshotTreeNode[]) {}
@@ -24,7 +24,7 @@ export class ActivitiesService {
     combineLatest([areas.groupContext$, areas.instanceContext$])
       .pipe(debounceTime(500))
       .subscribe(([group, instance]) => {
-        const scope: ObjectScope = { scope: [] };
+        const scope: ObjectScope = EMPTY_SCOPE;
         if (!!group) {
           scope.scope.push(group);
 

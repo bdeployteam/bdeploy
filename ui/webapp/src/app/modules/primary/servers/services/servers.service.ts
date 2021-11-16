@@ -39,14 +39,17 @@ export class ServersService {
       this.subscription.unsubscribe();
     }
 
-    this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, { scope: [group] }, (change) => {
-      this.update$.next(group);
-    });
+    if (!!group) {
+      this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, { scope: [group] }, (change) => {
+        this.update$.next(group);
+      });
+    }
   }
 
   private reload(group: string) {
     if (!group || !this.cfg.isCentral()) {
       this.servers$.next([]);
+      this.updateChangeSubscription(null);
       return;
     }
 

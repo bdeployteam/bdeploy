@@ -3,6 +3,7 @@ package io.bdeploy.jersey.ws.change.msg;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Generated;
 
@@ -48,7 +49,7 @@ public class ObjectScope implements Comparable<ObjectScope> {
         // compare all scope parts. all scope parts we have must be present on the other scope.
         // the other scope is allowed to be more detailed.
         for (int i = 0; i < scope.size(); ++i) {
-            if (!scope.get(i).equals(other.scope.get(i))) {
+            if (!Objects.equals(scope.get(i), other.scope.get(i))) {
                 return false;
             }
         }
