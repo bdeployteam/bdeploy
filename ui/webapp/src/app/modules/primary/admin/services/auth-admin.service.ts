@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CredentialsApi, LDAPSettingsDto, ObjectChangeType, UserInfo } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { ObjectChangesService } from '../../../core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from '../../../core/services/object-changes.service';
 import { measure } from '../../../core/utils/performance.utils';
 import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 
@@ -18,7 +18,7 @@ export class AuthAdminService {
   public users$ = new BehaviorSubject<UserInfo[]>(null);
 
   constructor(private cfg: ConfigService, private http: HttpClient, changes: ObjectChangesService) {
-    changes.subscribe(ObjectChangeType.USER, { scope: [] }, (change) => this.load());
+    changes.subscribe(ObjectChangeType.USER, EMPTY_SCOPE, (change) => this.load());
     this.load();
   }
 

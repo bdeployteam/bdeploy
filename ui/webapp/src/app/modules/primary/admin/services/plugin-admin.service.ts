@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ObjectChangeType, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { ObjectChangesService } from '../../../core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from '../../../core/services/object-changes.service';
 import { measure } from '../../../core/utils/performance.utils';
 
 @Injectable({
@@ -17,7 +17,7 @@ export class PluginAdminService {
   private apiPath = () => `${this.cfg.config.api}/plugin-admin`;
 
   constructor(private http: HttpClient, private cfg: ConfigService, changes: ObjectChangesService) {
-    changes.subscribe(ObjectChangeType.PLUGIN, { scope: [] }, (change) => {
+    changes.subscribe(ObjectChangeType.PLUGIN, EMPTY_SCOPE, (change) => {
       this.reload();
     });
 

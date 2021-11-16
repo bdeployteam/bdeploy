@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ObjectChangeType, Permission, SoftwareRepositoryConfiguration, UserInfo, UserPermissionUpdateDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
@@ -23,7 +23,7 @@ export class RepositoryUsersService {
       this.repo = r;
       this.loadUsers();
     });
-    this.changes.subscribe(ObjectChangeType.USER, { scope: [] }, (ch) => {
+    this.changes.subscribe(ObjectChangeType.USER, EMPTY_SCOPE, (ch) => {
       this.loadUsers();
     });
   }
