@@ -100,6 +100,10 @@ public class BDeployProductTask extends DefaultTask {
 			if (!desc.isFile()) {
 				throw new IllegalArgumentException("Cannot find application descriptor at " + desc);
 			}
+			
+			if(!desc.getName().equals("app-info.yaml")) {
+				throw new IllegalArgumentException("Application description must be named 'app-info.yaml', but is: " + desc);
+			}
 
 			Map<OperatingSystem, String> oss = new TreeMap<>();
 			if (!app.getOs().isPresent() || app.getOs().get().isEmpty()) {
