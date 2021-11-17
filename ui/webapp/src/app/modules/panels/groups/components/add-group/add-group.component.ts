@@ -33,21 +33,21 @@ export class AddGroupComponent implements OnInit {
 
   /* template */ onSave() {
     this.saving$.next(true);
-    this.groups.create(this.group).subscribe((_) => {
-      if (!!this.image) {
-        this.groups
-          .updateImage(this.group.name, this.image)
-          .pipe(
-            finalize(() => {
-              this.saving$.next(false);
-              this.areas.closePanel();
-            })
-          )
-          .subscribe((__) => {});
-      } else {
-        this.saving$.next(false);
-        this.areas.closePanel();
-      }
-    });
+    this.groups
+      .create(this.group)
+      .pipe(
+        finalize(() => {
+          this.saving$.next(false);
+        })
+      )
+      .subscribe((_) => {
+        if (!!this.image) {
+          this.groups.updateImage(this.group.name, this.image).subscribe((__) => {
+            this.areas.closePanel();
+          });
+        } else {
+          this.areas.closePanel();
+        }
+      });
   }
 }
