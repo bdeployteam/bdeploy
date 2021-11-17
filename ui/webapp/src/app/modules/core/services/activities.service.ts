@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { isEqual } from 'lodash-es';
+import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { ActivitySnapshot, ObjectChangeDetails, ObjectChangeType, ObjectScope } from '../../../models/gen.dtos';
@@ -24,7 +24,7 @@ export class ActivitiesService {
     combineLatest([areas.groupContext$, areas.instanceContext$])
       .pipe(debounceTime(500))
       .subscribe(([group, instance]) => {
-        const scope: ObjectScope = EMPTY_SCOPE;
+        const scope: ObjectScope = cloneDeep(EMPTY_SCOPE);
         if (!!group) {
           scope.scope.push(group);
 
