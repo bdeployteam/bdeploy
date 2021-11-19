@@ -1,10 +1,13 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import java.util.Collection;
+
 import javax.annotation.processing.Generated;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 
 /**
  * Top level element defining an application. The serialized form of this DTO
@@ -91,6 +94,30 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
      * All endpoints which are provided by the application.
      */
     public EndpointsDescriptor endpoints = new EndpointsDescriptor();
+
+    /**
+     * Some combinations of settings are invalid. Fix them up, so defaults change depending in the settings.
+     * <p>
+     * The first and currently only expample is a parameter with 'hasValue = false'. This should implicitly
+     * make the parameter BOOLEAN (present or not present). Another type is not allowed.
+     */
+    public void fixupDefaults() {
+        if (startCommand != null) {
+            fixupParameterDefaults(startCommand.parameters);
+        }
+
+        if (stopCommand != null) {
+            fixupParameterDefaults(stopCommand.parameters);
+        }
+    }
+
+    private void fixupParameterDefaults(Collection<ParameterDescriptor> params) {
+        for (var param : params) {
+            if (!param.hasValue) {
+                param.type = ParameterType.BOOLEAN;
+            }
+        }
+    }
 
     @Override
     public int compareTo(ApplicationDescriptor o) {
