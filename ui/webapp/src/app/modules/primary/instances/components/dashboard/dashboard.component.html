@@ -108,6 +108,19 @@
 
         <!-- Each node in the instance (the ones containing applications only) -->
         <ng-container *ngIf="instances.activeNodeCfgs$ | async as nodes">
+          <app-bd-no-data *ngIf="!nodes?.nodeConfigDtos?.length">
+            <p [style.text-align]="'center'">
+              <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> does not have any configured applications in the current instance
+              version. Dashboard not available.
+            </p>
+            <p [style.text-align]="'center'">Configure, install and activate instance version first.</p>
+            <app-bd-button
+              text="Configure Instance"
+              icon="settings"
+              [collapsed]="false"
+              [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
+            ></app-bd-button>
+          </app-bd-no-data>
           <app-instance-server-node
             *ngFor="let node of serverNodes$ | async"
             [node]="node"
