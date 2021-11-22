@@ -28,6 +28,9 @@ export class NavAreasService {
   /** should ONLY be used by DirtyDialogGuard. */
   forcePanelClose$ = new BehaviorSubject<boolean>(false);
 
+  _tempNavGroupContext$ = new BehaviorSubject<string>(null);
+  _tempNavRepoContext$ = new BehaviorSubject<string>(null);
+
   private dirtyables: { [P in DirtyableKey]: DirtyableDialog } = {
     panel: null,
     primary: null,
@@ -49,6 +52,10 @@ export class NavAreasService {
         // 3. if a panel route is active, set the expanded state according to its data.
         // 4. if the primary outlet changed, navigate the panel outlet to 'null' to hide it.
         // 5. in any case, if the main menu is expanded, collapse it.
+
+        // navigation done, clear temporary buffers.
+        this._tempNavGroupContext$.next(null);
+        this._tempNavRepoContext$.next(null);
 
         // the two potential activated routes are *direct* childs of the main route. no need to recurse.
         const primary = this.findChildRouteForOutlet(route, 'primary');

@@ -184,7 +184,7 @@
     </div>
   </div>
   <mat-divider class="local-divider"></mat-divider>
-  <app-main-nav-button [style.padding-top.px]="5" icon="settings" text="Administration" [collapsed]="!expanded" [route]="['/admin/']"></app-main-nav-button>
+  <app-main-nav-button [style.padding-top.px]="5" icon="settings" text="Administration" [collapsed]="!expanded" [route]="['/admin/']" [disabled]="!authService.isGlobalAdmin()"></app-main-nav-button>
   <a href="/assets/doc/index.html" target="_blank" class="bd-button-link">
     <app-bd-button fxFlexAlign="center center" icon="help_outline" text="Help" color="toolbar" [collapsed]="!expanded"></app-bd-button>
   </a>
