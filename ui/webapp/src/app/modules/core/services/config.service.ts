@@ -30,6 +30,7 @@ export class ConfigService {
   private checkInterval;
   private isUnreachable = false;
   private overlayRef: OverlayRef;
+  private versionLock = false;
 
   private backendTimeOffset = 0;
 
@@ -99,7 +100,7 @@ export class ConfigService {
       }
 
       // there is no return from here anyway. The user must reload the application.
-      this.stopCheckServerVersion();
+      this.stopCheckAndLockVersion();
 
       this.overlayRef = this.overlay.create({
         positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
@@ -117,8 +118,9 @@ export class ConfigService {
   }
 
   /** Stops the server version check. This should be used if we *expect* (and handle) a changing server version, e.g. update. */
-  public stopCheckServerVersion() {
+  private stopCheckAndLockVersion() {
     clearInterval(this.checkInterval);
+    this.versionLock = true;
   }
 
   /** Call in case of suspected problems with the backend connection, will show a dialog until server connection is restored. */
@@ -137,6 +139,10 @@ export class ConfigService {
       this.getBackendInfo()
         .pipe(retryWhen((errors) => errors.pipe(delay(2000))))
         .subscribe((r) => {
+          if (this.versionLock) {
+            return;
+          }
+
           if (!this.config) {
             window.location.reload();
           } else {
