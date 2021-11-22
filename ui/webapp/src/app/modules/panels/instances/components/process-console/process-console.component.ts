@@ -65,6 +65,10 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
 
   private nextChunk() {
     this.details.getOutputEntry().subscribe(([dir, entry]) => {
+      if (!entry) {
+        return;
+      }
+
       if (!this.offset && entry.size > MAX_TAIL) {
         this.offset = entry.size - MAX_TAIL;
       }
