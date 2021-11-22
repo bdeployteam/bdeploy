@@ -29,7 +29,7 @@
 
 Welcome to the BDeploy project!
 
-![BDeploy](https://bdeploy.io/user/images/BDeploy_DnD_Applications.png)
+![BDeploy](https://bdeploy.io/user/images/Doc_DashboardProcessControl.png)
 
 BDeploy is a fast, reliable & configurable deployment solution for everyone and any type of application.
 
