@@ -29,6 +29,9 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
                 .setRelativePath(ApplicationDescriptorApi.FILE_NAME))) {
             am.desc = StorageHelper.fromYamlStream(is, ApplicationDescriptor.class);
             am.key = key;
+
+            // make sure configuration is consistent.
+            am.desc.fixupDefaults();
         } catch (IOException e) {
             throw new IllegalStateException("Cannot load application descriptor from " + key, e);
         }
