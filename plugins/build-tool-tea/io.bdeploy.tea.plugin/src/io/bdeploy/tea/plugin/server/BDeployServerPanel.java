@@ -120,7 +120,7 @@ public class BDeployServerPanel extends Composite {
         remove.setEnabled(false);
         edit.setEnabled(false);
 
-        tv = new TableViewer(this, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        tv = new TableViewer(this, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
         GridDataFactory.fillDefaults().grab(true, true).applyTo(tv.getControl());
 
         tv.getTable().setHeaderVisible(true);

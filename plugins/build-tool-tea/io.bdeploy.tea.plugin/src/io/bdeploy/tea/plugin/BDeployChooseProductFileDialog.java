@@ -60,7 +60,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         GridLayoutFactory.fillDefaults().margins(20, 20).applyTo(comp);
 
         TableViewer tv;
-        tv = new TableViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+        tv = new TableViewer(comp, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
         GridDataFactory.fillDefaults().grab(true, true).hint(300, 150).applyTo(tv.getControl());
         tv.setContentProvider(ArrayContentProvider.getInstance());
         tv.getTable().setHeaderVisible(true);
