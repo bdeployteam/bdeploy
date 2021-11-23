@@ -43,7 +43,6 @@ import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 import io.bdeploy.tea.plugin.services.BDeployProductBuild;
 import jakarta.ws.rs.core.UriBuilder;
 
-@SuppressWarnings("restriction")
 public class BDeployBuildProductTask {
 
     private static final String PRODUCT_INFO_YAML = "product-info.yaml";
