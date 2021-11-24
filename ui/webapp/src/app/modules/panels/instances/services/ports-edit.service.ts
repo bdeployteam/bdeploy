@@ -3,6 +3,7 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import { ApplicationConfiguration, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
 import { URLish } from 'src/app/modules/core/utils/url.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { ProcessEditService } from './process-edit.service';
 
 export interface PortParmGroup {
   apps: ApplicationConfiguration[];
@@ -17,7 +18,7 @@ export interface PortParmGroup {
 export class PortsEditService {
   public ports$ = new BehaviorSubject<PortParmGroup[]>(null);
 
-  constructor(public edit: InstanceEditService) {
+  constructor(public edit: InstanceEditService, private procEdit: ProcessEditService) {
     combineLatest([this.edit.state$, this.edit.stateApplications$]).subscribe(([s, a]) => {
       if (!s || !a) {
         this.ports$.next(null);
@@ -95,6 +96,8 @@ export class PortsEditService {
       } else {
         param.value = value;
       }
+
+      param.preRendered = this.procEdit.preRenderParameter(group.desc, param.value);
     }
     group.port = value;
   }
