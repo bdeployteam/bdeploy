@@ -255,7 +255,7 @@ public class ObjectManager {
         try {
             t = loadObject(tree, is -> StorageHelper.fromStream(is, Tree.class));
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot load tree for path " + location);
+            throw new IllegalStateException("Cannot load tree for path " + location, e);
         }
 
         List<Future<?>> filesOnLevel = new ArrayList<>();
