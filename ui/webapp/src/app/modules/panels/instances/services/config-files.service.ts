@@ -1,10 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { ConfigFileDto, FileStatusDto, FileStatusType, InstanceDto, ManifestKey } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
+import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { GlobalEditState, InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
@@ -41,6 +42,7 @@ export class ConfigFilesService {
       }
     });
 
+    // TODO: this one is triggered way too often when saving an instance (after visiting the config files page once).
     combineLatest([this.groups.current$, this.editSvc.current$, this.editSvc.state$]).subscribe(([group, instance, state]) => {
       if (!group || !instance || !state || !state.config) {
         return;
@@ -57,11 +59,19 @@ export class ConfigFilesService {
   }
 
   private loadFiles(group: string, instance: InstanceDto, state: GlobalEditState): Observable<ConfigFileDto[]> {
-    return this.http.get<ConfigFileDto[]>(
-      `${this.apiPath(group, instance.instanceConfiguration.uuid)}/${instance.instance.tag}/${state.config.config.product.name}/${
-        state.config.config.product.tag
-      }`
-    );
+    return this.http
+      .get<ConfigFileDto[]>(
+        `${this.apiPath(group, instance.instanceConfiguration.uuid)}/${instance.instance.tag}/${state.config.config.product.name}/${
+          state.config.config.product.tag
+        }`,
+        { headers: suppressGlobalErrorHandling(new HttpHeaders()) }
+      )
+      .pipe(
+        catchError((err) => {
+          console.log(`Cannot load configuration files for ${instance.instance.name}:${instance.instance.tag} (${state.config.config.product.tag})`, err);
+          return of([]);
+        })
+      );
   }
 
   public getPath(f: ConfigFile) {

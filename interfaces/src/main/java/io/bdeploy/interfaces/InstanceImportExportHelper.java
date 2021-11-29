@@ -155,11 +155,6 @@ public class InstanceImportExportHelper {
             }
         }
 
-        Manifest.Key requiredProduct = icfg.product;
-        if (!Boolean.TRUE.equals(target.execute(new ManifestExistsOperation().setManifest(requiredProduct)))) {
-            throw new IllegalStateException("Required product does not exist: " + requiredProduct);
-        }
-
         InstanceManifest.Builder imfb = new InstanceManifest.Builder().setInstanceConfiguration(icfg);
         for (Map.Entry<String, InstanceNodeConfiguration> node : dto.minions.entrySet()) {
             InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();

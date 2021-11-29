@@ -52,12 +52,18 @@ public class ProductUpdateService {
             }
         }
 
+        if (currentApplications == null) {
+            validationIssues.add(new ApplicationValidationDto(null, null,
+                    "Source product not available, command line cannot be migrated. Please check parameters manually."));
+        }
+
         for (var app : allApps) {
-            var current = currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
+            var current = currentApplications == null ? null
+                    : currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
             var target = targetApplications.stream().filter(a -> a.getKey().getName().equals(app.application.getName()))
                     .findFirst();
 
-            if (current.isEmpty()) {
+            if (current != null && current.isEmpty()) {
                 throw new IllegalStateException("Cannot find current application: " + app.application);
             }
 
@@ -81,9 +87,12 @@ public class ProductUpdateService {
             if (targetDesc.startCommand.parameters != null && !targetDesc.startCommand.parameters.isEmpty()) {
                 app.start.executable = targetDesc.startCommand.launcherPath;
 
-                // update parameters, add missing, add validation notice for removed parameters
-                app.start.parameters = updateParameters(app, targetDesc, app.start.parameters, targetDesc.startCommand.parameters,
-                        current.get().getDescriptor().startCommand.parameters, allApps, validationIssues);
+                if (current != null) {
+                    // update parameters, add missing, add validation notice for removed parameters
+                    app.start.parameters = updateParameters(app, targetDesc, app.start.parameters,
+                            targetDesc.startCommand.parameters, current.get().getDescriptor().startCommand.parameters, allApps,
+                            validationIssues);
+                }
             }
 
             List<HttpEndpoint> epDescs = targetDesc.endpoints == null || targetDesc.endpoints.http == null
@@ -102,7 +111,10 @@ public class ProductUpdateService {
             }
         }
 
-        if (!Objects.equals(currentProduct.getConfigTemplateTreeId(), targetProduct.getConfigTemplateTreeId())) {
+        if (currentProduct == null) {
+            validationIssues.add(0, new ApplicationValidationDto(null, null,
+                    "Cannot check for updated configuration files since source product is not avilable. Please check manually."));
+        } else if (!Objects.equals(currentProduct.getConfigTemplateTreeId(), targetProduct.getConfigTemplateTreeId())) {
             // there have been changes in the configuration templates of the product
             validationIssues.add(0, new ApplicationValidationDto(null, null,
                     "Product version has updated configuration files. Please make sure to synchronize configuration files."));

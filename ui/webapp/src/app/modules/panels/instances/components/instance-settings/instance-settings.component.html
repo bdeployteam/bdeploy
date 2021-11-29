@@ -10,7 +10,7 @@
         [toggle]="false"
         [route]="['config']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeWrite() || !edit.hasCurrentProduct()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Configuration Files"
@@ -19,7 +19,7 @@
         [toggle]="false"
         [route]="['config-files']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeWrite() || !edit.hasCurrentProduct()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Banner"
@@ -28,7 +28,7 @@
         [toggle]="false"
         [route]="['banner']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeWrite() || !edit.hasCurrentProduct()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Manage Network Ports"
@@ -37,7 +37,7 @@
         [toggle]="false"
         [route]="['ports']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeWrite() || !edit.hasCurrentProduct()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Manage Nodes"
@@ -46,7 +46,7 @@
         [toggle]="false"
         [route]="['nodes']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeAdmin() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeAdmin() || !edit.hasCurrentProduct()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Instance Attribute Values"
@@ -55,7 +55,7 @@
         [toggle]="false"
         [route]="['attributes']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeWrite() || !edit.hasCurrentProduct()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Instance Templates"
@@ -64,7 +64,7 @@
         [toggle]="false"
         [route]="['templates']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeWrite() || !edit.hasCurrentProduct()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Import Instance Version"
@@ -73,7 +73,7 @@
         [toggle]="false"
         [route]="['import']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
+        [disabled]="!auth.isCurrentScopeWrite()"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Update Product Version"
@@ -82,8 +82,8 @@
         [toggle]="false"
         [route]="['product']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite() || !(edit.current$ | async)?.productDto"
-        [color]="(edit.current$ | async)?.newerVersionAvailable ? 'accent' : null"
+        [disabled]="!auth.isCurrentScopeWrite()"
+        [color]="(edit.current$ | async)?.newerVersionAvailable || !edit.hasCurrentProduct() ? 'accent' : null"
       ></app-bd-panel-button>
       <app-bd-button
         [loadingWhen$]="deleting$"

@@ -633,9 +633,14 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceUpdateDto updateProductVersion(String instanceId, String productTag, InstanceUpdateDto state) {
-        ProductManifest current = ProductManifest.of(hive, state.config.config.product);
-        List<ApplicationManifest> currentApps = current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
-                .collect(Collectors.toList());
+        ProductManifest current = null;
+        try {
+            current = ProductManifest.of(hive, state.config.config.product);
+        } catch (Exception e) {
+            log.info("Missing source product on product update: " + state.config.config.product);
+        }
+        List<ApplicationManifest> currentApps = current == null ? null
+                : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).collect(Collectors.toList());
 
         ProductManifest target = ProductManifest.of(hive, new Manifest.Key(state.config.config.product.getName(), productTag));
         List<ApplicationManifest> targetApps = target.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))

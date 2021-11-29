@@ -7,6 +7,7 @@ import { BdDataColumn } from 'src/app/models/data';
 import { ApplicationValidationDto, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceTemplateDescriptor } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsService } from '../../../products/services/products.service';
@@ -72,7 +73,8 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     public edit: InstanceEditService,
     private media: BreakpointObserver,
     private products: ProductsService,
-    private router: Router
+    private router: Router,
+    public auth: AuthenticationService
   ) {
     this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
     this.subscription.add(this.areas.registerDirtyable(this, 'primary'));

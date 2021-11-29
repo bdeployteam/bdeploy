@@ -10,7 +10,8 @@
       <app-bd-file-drop (fileAdded)="fileAdded($event)" [types]="['.zip', '.jar']"></app-bd-file-drop>
       <app-bd-file-upload
         *ngFor="let file of files; let i = index"
-        [file]="file"
+        [file]="file.file"
+        [parameters]="file.parameters"
         [url]="instances.getImportURL()"
         (dismiss)="onDismiss(i)"
         [resultEvaluator]="resultEval"

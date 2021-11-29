@@ -88,7 +88,7 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="2">
       <ng-container *ngIf="edit.current$ | async as instance">
-        <ng-container *ngIf="servers.isSynchronized(instance?.managedServer) && !!(edit.current$ | async)?.productDto">
+        <ng-container *ngIf="servers.isSynchronized(instance?.managedServer) && !!edit.hasCurrentProduct()">
           <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
             <div fxLayout="column">
               <div class="bd-default-padding bd-warning-text">
@@ -154,7 +154,7 @@
         </ng-container>
       </ng-container>
 
-      <app-bd-no-data *ngIf="!!(edit.current$ | async)?.productDto && !servers.isSynchronized((edit.current$ | async)?.managedServer)">
+      <app-bd-no-data *ngIf="!!edit.hasCurrentProduct() && !servers.isSynchronized((edit.current$ | async)?.managedServer)">
         <p [style.text-align]="'center'">
           <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
           <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
@@ -163,7 +163,7 @@
         <app-bd-server-sync-button [collapsed]="false" [server]="(edit.current$ | async).managedServer"></app-bd-server-sync-button>
       </app-bd-no-data>
 
-      <ng-container *ngIf="!(edit.current$ | async)?.productDto">
+      <ng-container *ngIf="!edit.hasCurrentProduct()">
         <app-bd-no-data>
           <p>The product version configured is not available on this server. The configuration is not available.</p>
           <ng-container *ngIf="cfg.isCentral()">
@@ -172,7 +172,18 @@
           <ng-container *ngIf="cfg.isManaged()">
             <p>You can transfer products from the central server, or upload them directly.</p>
           </ng-container>
-          <app-bd-button text="Products" icon="apps" [collapsed]="false" [routerLink]="['/products', 'browser', areas.groupContext$ | async]"></app-bd-button>
+          <div fxLayout="row" fxLayoutGap="5px">
+            <app-bd-button text="Products" icon="apps" [collapsed]="false" [routerLink]="['/products', 'browser', areas.groupContext$ | async]"></app-bd-button>
+            <app-bd-panel-button
+              text="Update Product Version"
+              icon="security_update_good"
+              [collapsed]="false"
+              [toggle]="false"
+              [route]="['panels', 'instances', 'settings', 'product']"
+              [disabled]="!auth.isCurrentScopeWrite()"
+              [color]="(edit.current$ | async)?.newerVersionAvailable || !edit.hasCurrentProduct() ? 'accent' : null"
+            ></app-bd-panel-button>
+          </div>
         </app-bd-no-data>
       </ng-container>
     </div>

@@ -1,7 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ManifestKey } from 'src/app/models/gen.dtos';
-import { UploadStatus } from 'src/app/modules/core/services/upload.service';
+import { UploadStatus, UrlParameter } from 'src/app/modules/core/services/upload.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+
+interface ImportFile {
+  file: File;
+  parameters: UrlParameter[];
+}
 
 @Component({
   selector: 'app-import-instance',
@@ -9,7 +14,7 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
   styleUrls: ['./import-instance.component.css'],
 })
 export class ImportInstanceComponent implements OnInit {
-  /* template */ files: File[] = [];
+  /* template */ files: ImportFile[] = [];
 
   /* template */ resultEval = (s: UploadStatus) => {
     if (s.detail.length === 0) {
@@ -24,7 +29,7 @@ export class ImportInstanceComponent implements OnInit {
   ngOnInit(): void {}
 
   fileAdded(file: File) {
-    this.files.push(file);
+    this.files.push({ file: file, parameters: [] });
   }
 
   onDismiss(index: number) {
