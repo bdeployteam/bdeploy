@@ -21,6 +21,7 @@ import { NodeStatePanelComponent } from './components/dashboard/state-panel/stat
 import { DataEditComponent } from './components/data-files/data-edit/data-edit.component';
 import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryComponent } from './components/history/history.component';
+import { PortStateColumnComponent } from './components/port-state-column/port-state-column.component';
 import { ProcessNameAndOsComponent } from './components/process-name-and-os/process-name-and-os.component';
 import { InstancesRoutingModule } from './instances-routing.module';
 
@@ -43,6 +44,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     DataFilesComponent,
     DataEditComponent,
     ProcessNameAndOsComponent,
+    PortStateColumnComponent,
   ],
   exports: [
     // for panels.

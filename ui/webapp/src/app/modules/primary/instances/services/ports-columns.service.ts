@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
-import { BdDataBooleanCellComponent } from 'src/app/modules/core/components/bd-data-boolean-cell/bd-data-boolean-cell.component';
+import { PortStateColumnComponent } from '../components/port-state-column/port-state-column.component';
 import { NodeApplicationPort } from './ports.service';
 import { ProcessesService } from './processes.service';
 
@@ -26,7 +26,7 @@ const portStateCol: BdDataColumn<NodeApplicationPort> = {
   id: 'state',
   name: 'State',
   data: (r) => r.state,
-  component: BdDataBooleanCellComponent,
+  component: PortStateColumnComponent,
   width: '40px',
 };
 
@@ -38,7 +38,7 @@ export class PortsColumnsService {
     id: 'rating',
     name: 'Rating',
     data: (r) => this.getRating(r),
-    component: BdDataBooleanCellComponent,
+    component: PortStateColumnComponent,
     width: '40px',
   };
 

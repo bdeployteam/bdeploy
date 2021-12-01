@@ -2,11 +2,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
-  selector: 'app-bd-data-boolean-cell',
-  templateUrl: './bd-data-boolean-cell.component.html',
-  styleUrls: ['./bd-data-boolean-cell.component.css'],
+  selector: 'app-port-state-column',
+  templateUrl: './port-state-column.component.html',
+  styleUrls: ['./port-state-column.component.css'],
 })
-export class BdDataBooleanCellComponent<T> implements OnInit {
+export class PortStateColumnComponent<T> implements OnInit {
   @Input() record: T;
   @Input() column: BdDataColumn<T>;
 

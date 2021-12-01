@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
-import { BdDataBooleanCellComponent } from 'src/app/modules/core/components/bd-data-boolean-cell/bd-data-boolean-cell.component';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { ProcessOutdatedComponent } from '../components/dashboard/process-outdated/process-outdated.component';
 import { ProcessStatusIconComponent } from '../components/dashboard/process-status-icon/process-status-icon.component';
+import { PortStateColumnComponent } from '../components/port-state-column/port-state-column.component';
 import { ProcessNameAndOsComponent } from '../components/process-name-and-os/process-name-and-os.component';
 import { InstanceEditService, ProcessEditState } from './instance-edit.service';
 import { InstancesService } from './instances.service';
@@ -110,7 +110,7 @@ export class ProcessesColumnsService {
     id: 'portStates',
     name: 'Ports',
     hint: BdDataColumnTypeHint.STATUS,
-    component: BdDataBooleanCellComponent,
+    component: PortStateColumnComponent,
     data: (r) => this.getAllPortsRating(r),
     width: '64px',
   };

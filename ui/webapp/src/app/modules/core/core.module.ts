@@ -40,7 +40,6 @@ import { BdActivitiesComponent } from './components/bd-activities/bd-activities.
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
-import { BdDataBooleanCellComponent } from './components/bd-data-boolean-cell/bd-data-boolean-cell.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataComponentCellComponent } from './components/bd-data-component-cell/bd-data-component-cell.component';
 import { BdDataDateCellComponent } from './components/bd-data-date-cell/bd-data-date-cell.component';
@@ -151,7 +150,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDialogMessageComponent,
     PasswordVerificationValidator,
     ConnectionVersionComponent,
-    BdDataBooleanCellComponent,
     BdServerSyncButtonComponent,
     BdTerminalComponent,
     BdBannerComponent,
@@ -263,7 +261,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdFileUploadRawComponent,
     BdMicroIconButtonComponent,
     BdNotificationCardComponent,
-    BdDataBooleanCellComponent,
     BdServerSyncButtonComponent,
     BdTerminalComponent,
     BdBannerComponent,
