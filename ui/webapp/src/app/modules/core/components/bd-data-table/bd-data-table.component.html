@@ -171,7 +171,13 @@
               </ng-container>
               <ng-container *ngIf="isImageColumn(col)">
                 <div fxLayout="row" fxLayoutAlign="start center">
-                  <img class="local-row-image" *ngIf="!!col.data(row.node.item)" [alt]="col.data(row.node.item)" [src]="getImageUrl(col, row.node.item)" />
+                  <img
+                    class="local-row-image"
+                    [style.maxWidth]="col.width ? col.width : null"
+                    *ngIf="!!col.data(row.node.item)"
+                    [alt]="col.data(row.node.item)"
+                    [src]="getImageUrl(col, row.node.item)"
+                  />
                 </div>
               </ng-container>
             </ng-container>
