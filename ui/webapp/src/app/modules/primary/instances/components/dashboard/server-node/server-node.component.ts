@@ -59,15 +59,14 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         name: this.node.nodeConfiguration.product.tag,
         type: updAvail ? 'update' : 'product',
         tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${updAvail ? ' - Newer version available' : ''}`,
-        click:
-          updAvail && this.auth.isCurrentScopeWrite()
-            ? () => {
-                this.areas.navigateBoth(
-                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.uuid],
-                  ['panels', 'instances', 'settings', 'product']
-                );
-              }
-            : null,
+        click: this.auth.isCurrentScopeWrite()
+          ? () => {
+              this.areas.navigateBoth(
+                ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.uuid],
+                ['panels', 'instances', 'settings', 'product']
+              );
+            }
+          : null,
       });
       items.push({ name: state.offline ? 'Offline' : 'Online', type: state.offline ? 'warning' : 'ok' });
       items.push(this.processesItem);
