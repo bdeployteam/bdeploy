@@ -32,7 +32,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(private products: ProductsService, private edit: InstanceEditService) {
+  constructor(public products: ProductsService, private edit: InstanceEditService) {
     this.subscription = combineLatest([this.edit.state$, this.products.products$]).subscribe(([state, prods]) => {
       if (!state || !prods?.length) {
         this.records$.next(null);

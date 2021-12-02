@@ -21,7 +21,7 @@ export class ProductsService {
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
 
   constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, groups: GroupsService) {
-    groups.current$.subscribe((group) => this.reload(group?.name));
+    groups.current$.subscribe((group) => this.load(group?.name));
   }
 
   public getUploadURL() {
@@ -34,7 +34,11 @@ export class ProductsService {
       .pipe(measure('Load Applications of Product'));
   }
 
-  private reload(group: string) {
+  public reload() {
+    this.load(this.group);
+  }
+
+  private load(group: string) {
     if (!group) {
       this.products$.next([]);
       this.updateChangeSubscription(null);
@@ -65,7 +69,7 @@ export class ProductsService {
 
     if (!!group) {
       this.subscription = this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [group] }, () => {
-        this.reload(group);
+        this.load(group);
       });
     }
   }
