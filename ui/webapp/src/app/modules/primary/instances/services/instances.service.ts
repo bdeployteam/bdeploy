@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
-import { debounceTime, finalize, map } from 'rxjs/operators';
+import { debounceTime, finalize, first, map, skipWhile } from 'rxjs/operators';
 import {
   CustomAttributesRecord,
   HistoryFilterDto,
@@ -38,6 +38,7 @@ export class InstancesService {
   loading$ = combineLatest([this.listLoading$, this.activeLoading$]).pipe(map(([a, b]) => a || b));
 
   instances$ = new BehaviorSubject<InstanceDto[]>([]);
+  othersNeedReload$ = new BehaviorSubject<boolean>(false);
 
   /** the current instance version */
   current$ = new BehaviorSubject<InstanceDto>(null);
@@ -75,28 +76,42 @@ export class InstancesService {
       clearInterval(this.activeLoadInterval);
       clearInterval(this.activeCheckInterval);
 
-      // we'll refresh node states every 60 seconds as long as nothing else causes a reload.
-      this.activeLoadInterval = setInterval(() => this.reloadActiveStates(act), 60000);
-      this.activeCheckInterval = setInterval(() => this.checkActiveReloadState(act), 1000);
+      let update = of(null);
 
-      // update in case the server has changed (e.g. synchronized update state).
-      if (!!servers?.length && !!cur?.managedServer?.hostName) {
-        const s = servers.find((s) => cur.managedServer.hostName === s.hostName);
-        if (!!s && !isEqual(cur.managedServer, s)) {
-          cur.managedServer = s;
-          this.current$.next(cur);
-        }
+      if (!!this.othersNeedReload$.value) {
+        this.othersNeedReload$.next(false);
+        this.reload(this.group);
+        this.instances$.next(null);
+        update = this.instances$.pipe(
+          skipWhile((x) => !x),
+          first()
+        );
       }
 
-      if (!!servers?.length && !!act?.managedServer?.hostName) {
-        const s = servers.find((s) => act.managedServer.hostName === s.hostName);
-        if (!!s && !isEqual(act.managedServer, s)) {
-          act.managedServer = s;
-          this.active$.next(act);
-        }
-      }
+      update.subscribe((_) => {
+        // we'll refresh node states every 60 seconds as long as nothing else causes a reload.
+        this.activeLoadInterval = setInterval(() => this.reloadActiveStates(act), 60000);
+        this.activeCheckInterval = setInterval(() => this.checkActiveReloadState(act), 1000);
 
-      this.reloadActiveStates(act);
+        // update in case the server has changed (e.g. synchronized update state).
+        if (!!servers?.length && !!cur?.managedServer?.hostName) {
+          const s = servers.find((s) => cur.managedServer.hostName === s.hostName);
+          if (!!s && !isEqual(cur.managedServer, s)) {
+            cur.managedServer = s;
+            this.current$.next(cur);
+          }
+        }
+
+        if (!!servers?.length && !!act?.managedServer?.hostName) {
+          const s = servers.find((s) => act.managedServer.hostName === s.hostName);
+          if (!!s && !isEqual(act.managedServer, s)) {
+            act.managedServer = s;
+            this.active$.next(act);
+          }
+        }
+
+        this.reloadActiveStates(act);
+      });
     });
   }
 
@@ -209,6 +224,11 @@ export class InstancesService {
 
     if (!!group) {
       this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [group] }, (change) => {
+        if (!!this.current$.value?.instanceConfiguration?.uuid && !change.scope.scope.includes(this.current$.value.instanceConfiguration.uuid)) {
+          this.othersNeedReload$.next(true); // when switching to another instance, we need to reload all.
+          return;
+        }
+
         this.update$.next(group);
         if (!!change.details[ObjectChangeDetails.CHANGE_HINT]) {
           if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.BANNER && !!this.active$.value) {

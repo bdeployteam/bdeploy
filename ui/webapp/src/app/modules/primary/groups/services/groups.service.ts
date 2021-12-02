@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { isEqual } from 'lodash-es';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import {
@@ -122,6 +123,14 @@ export class GroupsService {
 
   private setCurrent(group: string) {
     this.currentAttributeValues$.next(this.attributeValues$.value[group]);
-    this.current$.next(this.groups$.value.find((g) => g.name === group));
+
+    const current = this.current$.value;
+    const updated = this.groups$.value.find((g) => g.name === group);
+
+    if (isEqual(current, updated)) {
+      return;
+    }
+
+    this.current$.next(updated);
   }
 }
