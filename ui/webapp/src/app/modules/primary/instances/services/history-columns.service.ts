@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
-import { HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import { HistoryEntryDto, HistoryEntryType } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
-import { InstanceStateService } from './instance-state.service';
+import { HistoryStateColumnComponent } from '../components/history-state-column/history-state-column.component';
 import { InstancesService } from './instances.service';
 
 const historyTimestampColumn: BdDataColumn<HistoryEntryDto> = {
@@ -70,17 +70,16 @@ export class HistoryColumnsService {
   public historyStateColumn: BdDataColumn<HistoryEntryDto> = {
     id: 'state',
     name: 'State',
-    data: (r) => this.getStateIcon(r),
+    data: (r) => r.instanceTag,
     width: '64px',
-    component: BdDataIconCellComponent,
-    classes: (r) => this.getStateClass(r),
+    component: HistoryStateColumnComponent,
   };
 
   public historyVersionColumn: BdDataColumn<HistoryEntryDto> = {
     id: 'version',
     name: 'Version',
     data: (r) => this.getVersionText(r),
-    width: '64px',
+    width: '100px',
   };
 
   public defaultHistoryColumns: BdDataColumn<HistoryEntryDto>[] = [
@@ -93,11 +92,7 @@ export class HistoryColumnsService {
     this.historyVersionColumn,
   ];
 
-  private states: InstanceStateRecord;
-
-  constructor(private instances: InstancesService, private state: InstanceStateService) {
-    this.state.state$.subscribe((s) => (this.states = s));
-  }
+  constructor(private instances: InstancesService) {}
 
   private getVersionText(row: HistoryEntryDto) {
     if (row.instanceTag === this.instances.current$.value?.activeVersion?.tag) {
@@ -109,31 +104,5 @@ export class HistoryColumnsService {
     }
 
     return row.instanceTag;
-  }
-
-  private getStateIcon(row: HistoryEntryDto) {
-    if (this.states?.activeTag === row.instanceTag) {
-      return 'check_circle'; // active
-    } else if (!!this.states?.installedTags?.find((v) => v === row.instanceTag)) {
-      return 'check_circle_outline'; // installed
-    }
-
-    return null;
-  }
-
-  private getStateClass(row: HistoryEntryDto): string[] {
-    if (this.states?.activeTag === row.instanceTag) {
-      return [];
-    }
-
-    if (!!this.states?.installedTags?.find((v) => v === row.instanceTag)) {
-      // if the version is older than the last-active tag, we'll uninstall it later on.
-      if (!!this.states?.lastActiveTag) {
-        if (Number(this.states.lastActiveTag) > Number(row.instanceTag)) {
-          return ['bd-description-text'];
-        }
-      }
-    }
-    return [];
   }
 }
