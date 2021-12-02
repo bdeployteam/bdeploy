@@ -33,7 +33,7 @@ export class ScopedReadGuard implements CanActivate {
     this.areas._tempNavGroupContext$.next(group);
     this.areas._tempNavRepoContext$.next(group);
 
-    if (!this.authService.isScopedRead(ctx)) {
+    if (this.authService.isAuthenticated() && !this.authService.isScopedRead(ctx)) {
       this.snackbar.open(
         `Unfortunately, ${route.url.join('/')} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
         'DISMISS',
