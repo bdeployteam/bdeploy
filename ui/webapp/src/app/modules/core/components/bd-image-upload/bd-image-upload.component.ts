@@ -34,8 +34,8 @@ export class BdImageUploadComponent implements OnInit {
         if (
           selLogoUrl.startsWith('data:image/jpeg') ||
           selLogoUrl.startsWith('data:image/png') ||
-          selLogoUrl.startsWith('data:image/gif') ||
-          selLogoUrl.startsWith('data:image/svg+xml')
+          selLogoUrl.startsWith('data:image/gif') /*||
+          selLogoUrl.startsWith('data:image/svg+xml')*/
         ) {
           this.image = this.sanitizer.bypassSecurityTrustUrl(selLogoUrl);
           this.imageSelected.emit(selLogoFile);
