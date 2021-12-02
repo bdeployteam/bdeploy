@@ -18,7 +18,7 @@ const colName: BdDataColumn<PortParmGroup> = {
 const colOccurances: BdDataColumn<PortParmGroup> = {
   id: 'occurances',
   name: 'Occ.',
-  description: 'Number of occurences',
+  description: 'Number of occurrences',
   data: (r) => r.params.length,
   width: '20px',
 };
