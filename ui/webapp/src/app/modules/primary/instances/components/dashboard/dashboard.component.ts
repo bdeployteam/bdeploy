@@ -5,6 +5,7 @@ import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { ApplicationConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ServersService } from '../../../servers/services/servers.service';
@@ -45,6 +46,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public areas: NavAreasService,
     public cfg: ConfigService,
     public servers: ServersService,
+    public auth: AuthenticationService,
     private states: InstanceStateService
   ) {}
 
