@@ -1,4 +1,4 @@
-<app-bd-dialog>
+<app-bd-dialog [loadingWhen$]="edit.saving$">
   <app-bd-dialog-toolbar header="Configuration - {{ headerName$ | async }}">
     <div fxFlex="1 0 auto"></div>
     <div class="local-version-text" *ngIf="edit.current$ | async as inst">
