@@ -59,7 +59,7 @@ const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
   id: 'pid',
   name: 'PID',
   data: (r) => (!!r.runtimeEvent && !!r.runtimeEvent.pid ? r.runtimeEvent.pid : null),
-  width: '64px',
+  width: '80px',
   showWhen: '(min-width: 1200px)',
 };
 

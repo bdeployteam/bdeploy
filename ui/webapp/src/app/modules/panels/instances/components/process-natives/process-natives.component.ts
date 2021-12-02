@@ -9,7 +9,7 @@ const nativePidColumn: BdDataColumn<ProcessHandleDto> = {
   id: 'pid',
   name: 'PID',
   data: (r) => r.pid,
-  width: '40px',
+  width: '80px',
 };
 
 const nativeCmdColumn: BdDataColumn<ProcessHandleDto> = {
