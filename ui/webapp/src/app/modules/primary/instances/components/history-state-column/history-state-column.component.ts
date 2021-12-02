@@ -51,7 +51,7 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
       // if the version is older than the last-active tag, we'll uninstall it later on.
       if (!!this.states?.lastActiveTag) {
         if (Number(this.states.lastActiveTag) > Number(this.record.instanceTag)) {
-          return ['bd-description-text'];
+          return ['local-greyed'];
         }
       }
     }
