@@ -19,7 +19,7 @@ export class ScopedWriteGuard implements CanActivate {
     this.areas._tempNavGroupContext$.next(group);
     this.areas._tempNavRepoContext$.next(group);
 
-    if (!this.authService.isScopedWrite(ctx)) {
+    if (this.authService.isAuthenticated() && !this.authService.isScopedWrite(ctx)) {
       this.snackbar.open(
         `Unfortunately, ${route.url.join('/')} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
         'DISMISS',
