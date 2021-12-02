@@ -83,7 +83,7 @@
                 icon="layers"
                 (click)="doInstall(current.instance.tag)"
                 [collapsed]="isInstalled(current.instance.tag)"
-                [disabled]="(installing$ | async) || isInstalled(current.instance.tag)"
+                [disabled]="(installing$ | async) || isInstalled(current.instance.tag) || !auth.isCurrentScopeWrite()"
                 [loadingWhen$]="installing$"
                 tooltip="below"
               ></app-bd-button>
@@ -94,7 +94,7 @@
                 icon="star"
                 (click)="doActivate(current.instance.tag)"
                 [collapsed]="!isInstalled(current.instance.tag)"
-                [disabled]="(activating$ | async) || !isInstalled(current.instance.tag)"
+                [disabled]="(activating$ | async) || !isInstalled(current.instance.tag) || !auth.isCurrentScopeWrite()"
                 [loadingWhen$]="activating$"
                 tooltip="below"
               ></app-bd-button>

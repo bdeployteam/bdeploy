@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { FileListEntry } from '../data-files.component';
 
 const MAX_FILE_SIZE = 1048576; // 1 MB
@@ -11,7 +12,7 @@ const MAX_FILE_SIZE = 1048576; // 1 MB
 export class DataEditComponent implements OnInit {
   @Input() record: FileListEntry;
 
-  constructor() {}
+  constructor(public authService: AuthenticationService) {}
 
   ngOnInit(): void {}
 
