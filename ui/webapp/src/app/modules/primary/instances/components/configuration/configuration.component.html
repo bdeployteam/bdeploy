@@ -6,7 +6,7 @@
         >Current Version: {{ inst.instance.tag }}, Active: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None' }}</ng-container
       >
     </div>
-    <ng-container *ngIf="(edit.current$ | async)?.managedServer?.update?.updateAvailable">
+    <ng-container *ngIf="(edit.current$ | async)?.managedServer?.update?.updateAvailable && auth.isCurrentScopeAdmin()">
       <app-bd-button
         text="Server Update Available"
         icon="system_update"
