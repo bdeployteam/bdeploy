@@ -162,6 +162,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         InstanceGroupManifest igm = new InstanceGroupManifest(getGroupHive(group));
         Manifest.Key key = igm.update(config);
 
+        changes.change(ObjectChangeType.INSTANCE_GROUP, key);
+
+        // the rest may run a while in the background and propagate changes to each server where possible.
         if (minion.getMode() == MinionMode.CENTRAL) {
             // update all managed servers, user had to confirm this in web UI.
             ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
@@ -175,8 +178,6 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 }
             }
         }
-
-        changes.change(ObjectChangeType.INSTANCE_GROUP, key);
     }
 
     @Override
