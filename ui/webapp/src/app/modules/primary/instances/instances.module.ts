@@ -24,6 +24,7 @@ import { HistoryComponent } from './components/history/history.component';
 import { PortStateColumnComponent } from './components/port-state-column/port-state-column.component';
 import { ProcessNameAndOsComponent } from './components/process-name-and-os/process-name-and-os.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { HistoryStateColumnComponent } from './components/history-state-column/history-state-column.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     DataEditComponent,
     ProcessNameAndOsComponent,
     PortStateColumnComponent,
+    HistoryStateColumnComponent,
   ],
   exports: [
     // for panels.
