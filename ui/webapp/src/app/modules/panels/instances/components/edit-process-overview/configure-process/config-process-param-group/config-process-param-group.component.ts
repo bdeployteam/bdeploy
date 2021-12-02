@@ -160,8 +160,17 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     if (!p.value) {
       const descriptors = this.edit.application$.value.descriptor.startCommand.parameters;
 
+      let initialValue = p.descriptor?.defaultValue;
+      if (p.descriptor.global) {
+        // need to lookup a potential already existing global value.
+        const global = this.edit.getGlobalParameter(p.descriptor.uid);
+        if (!!global) {
+          initialValue = this.edit.getGlobalParameter(p.descriptor.uid).value;
+        }
+      }
+
       // create the new parameter.
-      p.value = { uid: p.descriptor.uid, value: p.descriptor?.defaultValue, preRendered: [] };
+      p.value = { uid: p.descriptor.uid, value: initialValue, preRendered: [] };
       this.doPreRender(p);
 
       // the correct insertion point is *before* the *succeeding* parameter definition, as custom parameters may succedd the *preceeding* one.
