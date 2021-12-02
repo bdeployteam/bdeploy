@@ -194,7 +194,7 @@ export class ProcessEditService {
     }
   }
 
-  private getGlobalParameter(uid: string): ParameterConfiguration {
+  public getGlobalParameter(uid: string): ParameterConfiguration {
     for (const node of this.edit.state$.value?.config.nodeDtos) {
       for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
         const p = app.start?.parameters?.find((x) => x.uid === uid);
