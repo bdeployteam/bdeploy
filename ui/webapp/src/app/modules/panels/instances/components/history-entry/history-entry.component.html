@@ -96,7 +96,9 @@
             text="Install"
             icon="layers"
             color="primary"
-            [disabled]="(installing$ | async) || isInstalled() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
+            [disabled]="
+              (installing$ | async) || isInstalled() || !servers.isSynchronized((instances.current$ | async)?.managedServer) || !auth.isCurrentScopeWrite()
+            "
             (click)="doInstall()"
             [loadingWhen$]="installing$"
           ></app-bd-button>
@@ -105,7 +107,13 @@
             text="Activate"
             icon="star"
             color="primary"
-            [disabled]="(activating$ | async) || !isInstalled() || isActive() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
+            [disabled]="
+              (activating$ | async) ||
+              !isInstalled() ||
+              isActive() ||
+              !servers.isSynchronized((instances.current$ | async)?.managedServer) ||
+              !auth.isCurrentScopeWrite()
+            "
             (click)="doActivate()"
             [loadingWhen$]="activating$"
           ></app-bd-button>
@@ -113,7 +121,13 @@
             [collapsed]="false"
             text="Uninstall"
             icon="layers_clear"
-            [disabled]="(uninstalling$ | async) || !isInstalled() || isActive() || !servers.isSynchronized((instances.current$ | async)?.managedServer)"
+            [disabled]="
+              (uninstalling$ | async) ||
+              !isInstalled() ||
+              isActive() ||
+              !servers.isSynchronized((instances.current$ | async)?.managedServer) ||
+              !auth.isCurrentScopeWrite()
+            "
             (click)="doUninstall()"
             [loadingWhen$]="uninstalling$"
           ></app-bd-button>

@@ -23,7 +23,7 @@
       color="primary"
       icon="add"
       (click)="doAddFile(addDialog)"
-      [disabled]="(loading$ | async) || (noactive$ | async)"
+      [disabled]="(loading$ | async) || (noactive$ | async) || !authService.isCurrentScopeWrite()"
     ></app-bd-button>
     <app-bd-button
       text="Refresh"

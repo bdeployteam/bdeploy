@@ -7,6 +7,7 @@ import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { ServersService } from '../../../servers/services/servers.service';
@@ -55,6 +56,7 @@ export class DataFilesComponent implements OnInit {
     action: (r) => this.doDelete(r),
     icon: (r) => 'delete',
     width: '50px',
+    actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
   };
 
   private readonly colDownload: BdDataColumn<FileListEntry> = {
@@ -64,6 +66,7 @@ export class DataFilesComponent implements OnInit {
     action: (r) => this.doDownload(r),
     icon: (r) => 'cloud_download',
     width: '50px',
+    actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
   };
 
   private readonly colEdit: BdDataColumn<FileListEntry> = {
@@ -92,7 +95,13 @@ export class DataFilesComponent implements OnInit {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('tempFileInput', { static: false }) private tempFileInput: BdFormInputComponent;
 
-  constructor(public cfg: ConfigService, public instances: InstancesService, public servers: ServersService, private df: DataFilesService) {}
+  constructor(
+    public cfg: ConfigService,
+    public instances: InstancesService,
+    public servers: ServersService,
+    private df: DataFilesService,
+    public authService: AuthenticationService
+  ) {}
 
   ngOnInit(): void {
     this.load();
