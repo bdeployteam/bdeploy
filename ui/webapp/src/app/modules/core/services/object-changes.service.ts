@@ -22,6 +22,7 @@ export class ObjectChangesService {
   private _error$ = new Subject<ErrorEvent>();
   private _open$ = new BehaviorSubject<boolean>(false);
   private _refs: { [index: string]: RemoteRegistration } = {};
+  public errorCount$ = new BehaviorSubject<number>(0);
 
   constructor(private cfg: ConfigService, private auth: AuthenticationService) {
     this.ws = this.createWebSocket();
@@ -55,6 +56,11 @@ export class ObjectChangesService {
       console.error('Error on WebSocket', err);
       this.cfg.checkServerReachable();
       this._error$.next(err);
+      this.errorCount$.next(this.errorCount$.value + 1);
+    });
+    _socket.addEventListener('close', (e) => {
+      // "close" is essentially an error, as we NEVER want to close the websocket as long as the application is alive.
+      this.errorCount$.next(this.errorCount$.value + 1);
     });
     _socket.addEventListener('message', (e) => this.onMessage(e));
     return _socket;
