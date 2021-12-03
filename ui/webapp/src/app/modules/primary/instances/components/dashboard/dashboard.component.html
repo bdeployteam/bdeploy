@@ -7,8 +7,15 @@
     }}"
   >
     <div fxFlex="1 0 auto"></div>
-    <div class="local-version-text" *ngIf="instances.active$ | async as inst">
-      <ng-container *ngIf="!(narrow$ | async)">Showing Active Version: {{ inst.activeVersion.tag }}</ng-container>
+    <div
+      class="local-version-text"
+      *ngIf="instances.active$ | async as inst"
+      [matTooltip]="!inst.managedServer?.hostName ? null : 'On ' + inst.managedServer.hostName"
+    >
+      <ng-container *ngIf="!(narrow$ | async)"
+        >Showing Active Version: {{ inst.activeVersion.tag
+        }}<span *ngIf="!!inst.managedServer?.hostName"> on {{ inst.managedServer.hostName }}</span></ng-container
+      >
       <ng-container *ngIf="narrow$ | async">Ver.: {{ inst.activeVersion.tag }}</ng-container>
     </div>
     <ng-container *ngIf="(instances.active$ | async)?.managedServer?.update?.updateAvailable && auth.isCurrentScopeAdmin()">

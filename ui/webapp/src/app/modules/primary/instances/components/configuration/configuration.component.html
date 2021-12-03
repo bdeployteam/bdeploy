@@ -1,10 +1,16 @@
 <app-bd-dialog [loadingWhen$]="edit.saving$">
   <app-bd-dialog-toolbar header="Configuration - {{ headerName$ | async }}">
     <div fxFlex="1 0 auto"></div>
-    <div class="local-version-text" *ngIf="edit.current$ | async as inst">
+    <div
+      class="local-version-text"
+      *ngIf="edit.current$ | async as inst"
+      [matTooltip]="!inst.managedServer?.hostName ? null : 'On ' + inst.managedServer.hostName"
+    >
       <ng-container *ngIf="!(narrow$ | async)"
-        >Current Version: {{ inst.instance.tag }}, Active: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None' }}</ng-container
-      >
+        >Current Version: {{ inst.instance.tag }}, Active: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None'
+        }}<span *ngIf="!!inst.managedServer?.hostName"> on {{ inst.managedServer.hostName }}</span>
+      </ng-container>
+      <ng-container *ngIf="narrow$ | async"> C: {{ inst.instance.tag }}, A: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None' }} </ng-container>
     </div>
     <ng-container *ngIf="(edit.current$ | async)?.managedServer?.update?.updateAvailable && auth.isCurrentScopeAdmin()">
       <app-bd-button
