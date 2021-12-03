@@ -196,7 +196,6 @@
                 [icon]="col.icon ? col.icon(row.node.item) : getUnknownIcon(col)"
                 (click)="col.action(row.node.item)"
                 [disabled]="!col.actionDisabled ? false : col.actionDisabled(row.node.item)"
-                color="inherit"
                 appClickStopPropagation
               ></app-bd-button>
             </div>
