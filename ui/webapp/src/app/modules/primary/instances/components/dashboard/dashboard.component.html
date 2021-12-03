@@ -1,4 +1,4 @@
-<app-bd-dialog [loadingWhen$]="instances.activeLoading$">
+<app-bd-dialog [loadingWhen$]="instances.loading$">
   <app-bd-dialog-toolbar *ngIf="instances.activeLoading$ | async" header="Dashboard - loading"></app-bd-dialog-toolbar>
   <app-bd-dialog-toolbar
     *ngIf="!(instances.activeLoading$ | async)"
