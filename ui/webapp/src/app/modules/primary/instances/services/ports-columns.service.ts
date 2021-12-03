@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
-import { PortStateColumnComponent } from '../components/port-state-column/port-state-column.component';
+import { RatingStatusColumnComponent } from '../components/rating-status-column/rating-status-column.component';
+import { StateStatusColumnComponent } from '../components/state-status-column/state-status-column.component';
 import { NodeApplicationPort } from './ports.service';
 import { ProcessesService } from './processes.service';
 
@@ -26,7 +27,7 @@ const portStateCol: BdDataColumn<NodeApplicationPort> = {
   id: 'state',
   name: 'State',
   data: (r) => r.state,
-  component: PortStateColumnComponent,
+  component: StateStatusColumnComponent,
   width: '40px',
 };
 
@@ -38,7 +39,7 @@ export class PortsColumnsService {
     id: 'rating',
     name: 'Rating',
     data: (r) => this.getRating(r),
-    component: PortStateColumnComponent,
+    component: RatingStatusColumnComponent,
     width: '40px',
   };
 
@@ -50,15 +51,46 @@ export class PortsColumnsService {
   private getRating(r: NodeApplicationPort) {
     const currentStates = this.processes.processStates$.value;
     const ps = ProcessesService.get(currentStates, r.appUid);
+    const isRunning = ProcessesService.isRunning(ps.processState);
 
     if (!ps) {
-      return false; // never OK, don't know process state
+      return {
+        status: false,
+        message: 'Process state is unknown.',
+      };
     }
 
-    if (ProcessesService.isRunning(ps.processState) === r.state) {
-      return true; // running and open, or not running and not open - yay!
+    if (isRunning && r.state === true) {
+      return {
+        status: true,
+        message: `Port is in open state and process is running.`,
+      };
     }
 
-    return false; // either not running, or not open.
+    if (!isRunning && r.state === false) {
+      return {
+        status: true,
+        message: `Port is not in open state and process is not running.`,
+      };
+    }
+
+    if (!isRunning && r.state === true) {
+      return {
+        status: false,
+        message: `Port is in open state and process is not running.`,
+      };
+    }
+
+    if (isRunning && r.state === false) {
+      return {
+        status: false,
+        message: `Port is not in open state and process is running.`,
+      };
+    }
+
+    return {
+      status: undefined,
+      message: null,
+    };
   }
 }

@@ -104,7 +104,9 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     });
 
     this.processesState.next(!badApps ? 'ok' : 'warning');
-    this.processesTooltip.next(!badApps ? 'All applications OK' : `${badApps} 'Instance' type applications are not running.`);
+    this.processesTooltip.next(
+      !badApps ? 'All applications OK' : `${badApps} 'Instance' type ${badApps === 1 ? 'application is' : 'applications are'} not running.`
+    );
   }
 
   private updateAllPortsRating(ports: NodeApplicationPort[], states: { [key: string]: ProcessStatusDto }) {

@@ -20,11 +20,13 @@ import { ServerNodeComponent } from './components/dashboard/server-node/server-n
 import { NodeStatePanelComponent } from './components/dashboard/state-panel/state-panel.component';
 import { DataEditComponent } from './components/data-files/data-edit/data-edit.component';
 import { DataFilesComponent } from './components/data-files/data-files.component';
-import { HistoryComponent } from './components/history/history.component';
-import { PortStateColumnComponent } from './components/port-state-column/port-state-column.component';
-import { ProcessNameAndOsComponent } from './components/process-name-and-os/process-name-and-os.component';
-import { InstancesRoutingModule } from './instances-routing.module';
 import { HistoryStateColumnComponent } from './components/history-state-column/history-state-column.component';
+import { HistoryComponent } from './components/history/history.component';
+import { PortStatusColumnComponent } from './components/port-status-column/port-status-column.component';
+import { ProcessNameAndOsComponent } from './components/process-name-and-os/process-name-and-os.component';
+import { RatingStatusColumnComponent } from './components/rating-status-column/rating-status-column.component';
+import { StateStatusColumnComponent } from './components/state-status-column/state-status-column.component';
+import { InstancesRoutingModule } from './instances-routing.module';
 
 @NgModule({
   declarations: [
@@ -45,8 +47,10 @@ import { HistoryStateColumnComponent } from './components/history-state-column/h
     DataFilesComponent,
     DataEditComponent,
     ProcessNameAndOsComponent,
-    PortStateColumnComponent,
+    PortStatusColumnComponent,
     HistoryStateColumnComponent,
+    RatingStatusColumnComponent,
+    StateStatusColumnComponent,
   ],
   exports: [
     // for panels.

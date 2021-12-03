@@ -126,6 +126,7 @@
               icon="settings"
               [collapsed]="false"
               [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
+              [disabled]="!auth.isCurrentScopeWrite()"
             ></app-bd-button>
           </app-bd-no-data>
           <app-instance-server-node
@@ -158,6 +159,7 @@
           icon="settings"
           [collapsed]="false"
           [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
+          [disabled]="!auth.isCurrentScopeWrite()"
         ></app-bd-button>
       </app-bd-no-data>
     </ng-container>
