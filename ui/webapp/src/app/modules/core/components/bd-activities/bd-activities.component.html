@@ -4,7 +4,7 @@
       [collapsed]="true"
       *ngIf="squashActivity(act) as squashed"
       icon="hourglass_bottom"
-      [dismissable]="!squashed?.current?.snapshot?.cancel"
+      [dismissable]="!squashed?.current?.snapshot?.cancel && auth.isCurrentScopeWrite()"
       (dismiss)="onDismiss(squashed)"
       [header]="squashed.header"
     >

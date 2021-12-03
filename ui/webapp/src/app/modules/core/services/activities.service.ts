@@ -4,6 +4,7 @@ import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { ActivitySnapshot, ObjectChangeDetails, ObjectChangeType, ObjectScope } from '../../../models/gen.dtos';
+import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
 import { NavAreasService } from './nav-areas.service';
 import { EMPTY_SCOPE, ObjectChangesService } from './object-changes.service';
@@ -20,7 +21,7 @@ export class ActivitiesService {
 
   private changesSubscription: Subscription;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, areas: NavAreasService, changes: ObjectChangesService) {
+  constructor(private cfg: ConfigService, private http: HttpClient, areas: NavAreasService, changes: ObjectChangesService, auth: AuthenticationService) {
     combineLatest([areas.groupContext$, areas.instanceContext$])
       .pipe(debounceTime(500))
       .subscribe(([group, instance]) => {
@@ -39,6 +40,12 @@ export class ActivitiesService {
 
         // reset in case there are no more matching activities in the new scope.
         this.activities$.next([]);
+
+        if (scope.scope.length === 0 || auth.isCurrentScopeExclusiveReadClient()) {
+          // in this case we would see *all* activities from *all* scopes. this is not only a performance
+          // but also a permission-wise problem, as permissions are granted on group level (first level of scope).
+          return;
+        }
 
         this.changesSubscription = changes.subscribe(ObjectChangeType.ACTIVITIES, scope, (c) => {
           this.activities$.next(this.getActivitiesFromEvent(c.details[ObjectChangeDetails.ACTIVITIES], scope.scope));

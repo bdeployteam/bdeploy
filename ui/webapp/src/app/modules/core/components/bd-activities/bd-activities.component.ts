@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivitiesService, ActivitySnapshotTreeNode } from '../../services/activities.service';
+import { AuthenticationService } from '../../services/authentication.service';
 
 interface SquashedActivity {
   current: ActivitySnapshotTreeNode;
@@ -14,7 +15,7 @@ interface SquashedActivity {
   styleUrls: ['./bd-activities.component.css'],
 })
 export class BdActivitiesComponent implements OnInit {
-  constructor(public activities: ActivitiesService) {}
+  constructor(public activities: ActivitiesService, public auth: AuthenticationService) {}
 
   ngOnInit(): void {}
 
