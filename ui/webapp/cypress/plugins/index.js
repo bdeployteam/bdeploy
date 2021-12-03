@@ -40,7 +40,7 @@ module.exports = (on, config) => {
 
       return new Promise((resolve, reject) => {
         rmdir(folderName, { maxRetries: 10, recursive: true }, (err) => {
-          if (err) {
+          if (err && err.code !== 'ENOENT') {
             console.error(err);
 
             return reject(err);
