@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { HistoryEntryDto, HistoryFilterDto } from 'src/app/models/gen.dtos';
 import { InstancesService } from './instances.service';
@@ -23,15 +23,17 @@ export class HistoryService {
 
   /** Begins publishing history on the history$ subject */
   public begin() {
-    this.subscription = combineLatest([this.filter$, this.instances.current$]).subscribe(([filter, inst]) => {
+    this.subscription = this.filter$.subscribe((filter) => {
       this.history$.next(null);
 
-      if (!inst) {
+      if (!this.instances.current$.value) {
         return;
       }
 
       this.update(filter);
     });
+
+    this.subscription.add(this.instances.current$.subscribe(() => this.reset()));
   }
 
   /** Stops reading and publishing history and resets all internal state */
@@ -48,8 +50,8 @@ export class HistoryService {
   }
 
   private reset() {
-    this.filter$.next({ ...this.filter$.value, startTag: null }); // reset, start over
     this.history$.next(null);
+    this.filter$.next({ ...this.filter$.value, startTag: null }); // reset, start over
   }
 
   private update(filter: Partial<HistoryFilterDto>) {
@@ -58,12 +60,18 @@ export class HistoryService {
       .loadHistory(filter)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((result) => {
+        const oldStart = filter.startTag;
+
         // will continue loading next time.
         filter.startTag = result.next;
-        const arr = !!this.history$.value ? [...this.history$.value] : [];
-        arr.push(...result.events);
 
-        this.history$.next(arr);
+        if (!!oldStart) {
+          const arr = !!this.history$.value ? [...this.history$.value] : [];
+          arr.push(...result.events);
+          this.history$.next(arr);
+        } else {
+          this.history$.next(result.events);
+        }
       });
   }
 }
