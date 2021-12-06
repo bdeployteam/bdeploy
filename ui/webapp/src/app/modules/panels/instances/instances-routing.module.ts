@@ -89,8 +89,14 @@ const INSTANCES_ROUTES: Route[] = [
     canDeactivate: [DirtyDialogGuard],
     data: { max: true },
   },
-  { path: 'data-files/:node/:file', component: DataFileViewerComponent, canActivate: [ScopedReadGuard], data: { max: true } },
-  { path: 'data-edit/:node/:file', component: DataFileEditorComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
+  { path: 'data-files/:node/:file/view', component: DataFileViewerComponent, canActivate: [ScopedReadGuard], data: { max: true } },
+  {
+    path: 'data-files/:node/:file/edit',
+    component: DataFileEditorComponent,
+    canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard],
+    data: { max: true },
+  },
 ];
 
 @NgModule({

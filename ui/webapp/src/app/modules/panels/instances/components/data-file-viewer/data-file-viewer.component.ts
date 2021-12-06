@@ -1,10 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
+const MAX_FILE_SIZE = 1048576; // 1 MB
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 
 @Component({
@@ -18,15 +20,20 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
   /* template */ content$ = new Subject<string>();
   /* template */ follow$ = new BehaviorSubject<boolean>(false);
 
+  /* template */ oversized = false;
+  /* template */ canEdit = false;
+
   private followInterval;
   private offset = 0;
   private subscription: Subscription;
 
-  constructor(private instances: InstancesService, areas: NavAreasService, df: DataFilesService) {
+  constructor(private instances: InstancesService, areas: NavAreasService, df: DataFilesService, auth: AuthenticationService) {
     this.subscription = combineLatest([areas.panelRoute$, df.directories$]).subscribe(([r, d]) => {
       if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
         return;
       }
+
+      this.canEdit = auth.isCurrentScopeWrite();
 
       const nodeName = r.params['node'];
       const fileName = r.params['file'];
@@ -46,6 +53,9 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
           if (f.path === fileName) {
             this.directory$.next(dir);
             this.file$.next(f);
+
+            this.oversized = f?.size > MAX_FILE_SIZE;
+
             this.nextChunk(); // initial
             break;
           }
@@ -68,6 +78,10 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     clearInterval(this.followInterval);
+  }
+
+  /* template */ doDownload() {
+    this.instances.download(this.directory$.value, this.file$.value);
   }
 
   private nextChunk() {

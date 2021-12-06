@@ -1,6 +1,6 @@
 <ng-template #addDialog>
   <div fxLayout="column" fxLayoutGap="10px" [style.min-width.px]="400">
-    <app-bd-form-select name="minion" label="Target Node" [(ngModel)]="tempFileMinion" [values]="getMinions()" required></app-bd-form-select>
+    <app-bd-form-select name="minion" label="Target Node" [(ngModel)]="tempFileMinion" [values]="minions$ | async" required></app-bd-form-select>
     <app-bd-form-input #tempFileInput name="path" label="File Name" [(ngModel)]="tempFilePath" required appCfgFileNameValidator></app-bd-form-input>
     <app-bd-file-drop (fileAdded)="doAddFileContent($event)" hintText="Optionally drop file to add initial content"></app-bd-file-drop>
     <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
@@ -8,7 +8,7 @@
   </div>
 </ng-template>
 
-<app-bd-dialog>
+<app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Data Files - {{ (instances.current$ | async)?.instanceConfiguration?.name }}">
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="cfg.isCentral()">
@@ -29,7 +29,7 @@
       text="Refresh"
       icon="refresh"
       tooltip="below"
-      (click)="load()"
+      (click)="load(instance)"
       [loadingWhen$]="loading$"
       [disabled]="(loading$ | async) || (noactive$ | async)"
     ></app-bd-button>
@@ -53,7 +53,7 @@
             <app-bd-button
               text="Refresh"
               icon="refresh"
-              (click)="load()"
+              (click)="load(this.instance)"
               [collapsed]="false"
               [loadingWhen$]="loading$"
               [disabled]="loading$ | async"

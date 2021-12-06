@@ -1,8 +1,8 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { BehaviorSubject, of } from 'rxjs';
-import { finalize, first, skipWhile, tap } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
+import { finalize, tap } from 'rxjs/operators';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
-import { FileStatusDto, FileStatusType, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import { FileStatusDto, FileStatusType, InstanceDto, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -13,7 +13,6 @@ import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { DataFilesService } from '../../services/data-files.service';
 import { InstancesService } from '../../services/instances.service';
-import { DataEditComponent } from './data-edit/data-edit.component';
 
 export interface FileListEntry {
   directory: RemoteDirectory;
@@ -48,7 +47,7 @@ const colModTime: BdDataColumn<FileListEntry> = {
   templateUrl: './data-files.component.html',
   styleUrls: ['./data-files.component.css'],
 })
-export class DataFilesComponent implements OnInit {
+export class DataFilesComponent implements OnInit, OnDestroy {
   private readonly colDelete: BdDataColumn<FileListEntry> = {
     id: 'delete',
     name: 'Delete',
@@ -59,38 +58,25 @@ export class DataFilesComponent implements OnInit {
     actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
   };
 
-  private readonly colDownload: BdDataColumn<FileListEntry> = {
-    id: 'download',
-    name: 'Downl.',
-    data: (r) => 'Download File',
-    action: (r) => this.doDownload(r),
-    icon: (r) => 'cloud_download',
-    width: '50px',
-    actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
-  };
-
-  private readonly colEdit: BdDataColumn<FileListEntry> = {
-    id: 'edit',
-    name: 'Edit',
-    data: (r) => 'Edit File',
-    component: DataEditComponent,
-    width: '50px',
-  };
-
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ records$ = new BehaviorSubject<FileListEntry[]>(null);
   /* template */ noactive$ = new BehaviorSubject<boolean>(true);
-  /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDelete, this.colEdit, this.colDownload];
+  /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDelete];
   /* template */ grouping: BdDataGrouping<FileListEntry>[] = [{ definition: { group: (r) => r.directory.minion, name: 'Node Name' }, selected: [] }];
   /* template */ getRecordRoute = (row: FileListEntry) => {
-    return ['', { outlets: { panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path] } }];
+    return ['', { outlets: { panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path, 'view'] } }];
   };
+
+  /* template */ minions$ = new BehaviorSubject<string[]>([]);
 
   /* template */ tempFilePath: string;
   /* template */ tempFileMinion: string;
   /* template */ tempFileError: string;
   /* template */ tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
   private tempFileContent = '';
+
+  /* template */ instance: InstanceDto;
+  private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('tempFileInput', { static: false }) private tempFileInput: BdFormInputComponent;
@@ -104,50 +90,53 @@ export class DataFilesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.load();
-
-    this.servers.servers$.subscribe((_) => {
-      this.load();
-    });
-
-    this.df.directories$.subscribe((dd) => {
-      if (!dd) {
-        this.records$.next(null);
+    this.subscription = combineLatest([this.instances.current$, this.servers.servers$]).subscribe(([inst, srvs]) => {
+      if (this.cfg.isCentral() && !srvs?.length) {
         return;
       }
 
-      const entries: FileListEntry[] = [];
-      for (const dir of dd) {
-        if (!!dir.problem) {
-          console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
-          continue;
-        }
-        for (const entry of dir.entries) {
-          entries.push({ directory: dir, entry: entry });
-        }
-      }
-      this.records$.next(entries);
-      this.loading$.next(false);
+      this.load(inst);
     });
-  }
 
-  /* template */ load() {
-    this.instances.current$
-      .pipe(
-        skipWhile((i) => !i),
-        first()
-      )
-      .subscribe((i) => {
-        this.noactive$.next(!i?.activeVersion?.tag);
-
-        if (this.noactive$.value || !this.servers.isSynchronized(i.managedServer)) {
-          this.loading$.next(false);
+    this.subscription.add(
+      this.df.directories$.subscribe((dd) => {
+        if (!dd) {
+          this.records$.next(null);
           return;
         }
 
-        this.loading$.next(true);
-        this.df.load();
-      });
+        const entries: FileListEntry[] = [];
+        for (const dir of dd) {
+          if (!!dir.problem) {
+            console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
+            continue;
+          }
+          for (const entry of dir.entries) {
+            entries.push({ directory: dir, entry: entry });
+          }
+        }
+        this.minions$.next(dd.map((d) => d.minion));
+        this.records$.next(entries);
+        this.loading$.next(false);
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  /* template */ load(inst: InstanceDto) {
+    this.instance = inst;
+    this.noactive$.next(!inst?.activeVersion?.tag);
+
+    if (this.noactive$.value || !this.servers.isSynchronized(inst?.managedServer)) {
+      this.loading$.next(false);
+      return;
+    }
+
+    this.loading$.next(true);
+    this.df.load();
   }
 
   private doDelete(r: FileListEntry) {
@@ -160,18 +149,10 @@ export class DataFilesComponent implements OnInit {
       .subscribe((confirm) => {
         if (confirm) {
           this.df.deleteFile(r.directory, r.entry).subscribe((_) => {
-            this.load();
+            this.load(this.instance);
           });
         }
       });
-  }
-
-  private doDownload(r: FileListEntry) {
-    this.instances.download(r.directory, r.entry);
-  }
-
-  /* template */ getMinions(): string[] {
-    return this.df.directories$.value?.map((d) => d.minion);
   }
 
   /* template */ doAddFile(tpl: TemplateRef<any>): void {
@@ -213,7 +194,7 @@ export class DataFilesComponent implements OnInit {
 
           this.df
             .updateFile(dir, f)
-            .pipe(finalize(() => this.load()))
+            .pipe(finalize(() => this.load(this.instance)))
             .subscribe();
         });
       });

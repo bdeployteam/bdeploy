@@ -18,7 +18,6 @@ import { NodeHeaderComponent } from './components/dashboard/server-node/header/h
 import { NodeProcessListComponent } from './components/dashboard/server-node/process-list/process-list.component';
 import { ServerNodeComponent } from './components/dashboard/server-node/server-node.component';
 import { NodeStatePanelComponent } from './components/dashboard/state-panel/state-panel.component';
-import { DataEditComponent } from './components/data-files/data-edit/data-edit.component';
 import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryStateColumnComponent } from './components/history-state-column/history-state-column.component';
 import { HistoryComponent } from './components/history/history.component';
@@ -45,7 +44,6 @@ import { InstancesRoutingModule } from './instances-routing.module';
     HistoryComponent,
     ConfigNodeComponent,
     DataFilesComponent,
-    DataEditComponent,
     ProcessNameAndOsComponent,
     PortStatusColumnComponent,
     HistoryStateColumnComponent,

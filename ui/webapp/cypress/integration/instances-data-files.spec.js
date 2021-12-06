@@ -128,10 +128,17 @@ describe('Instance Data Files Tests', () => {
 
     cy.screenshot('Doc_DataFiles');
 
+    // additionally open preview once.
     cy.inMainNavContent(() => {
-      cy.contains('tr', 'out.txt').within(() => {
-        cy.get('button[data-cy^="Edit"]').click();
-      });
+      cy.contains('tr', 'out.txt').click();
+    });
+
+    cy.waitUntilContentLoaded();
+
+    cy.screenshot('Doc_DataFilesView');
+
+    cy.inMainNavFlyin('app-data-file-viewer', () => {
+      cy.pressToolbarButton('Edit');
     });
 
     cy.waitUntilContentLoaded();
@@ -143,17 +150,8 @@ describe('Instance Data Files Tests', () => {
     cy.screenshot('Doc_DataFilesEdit');
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
-      cy.pressToolbarButton('Close');
+      cy.pressToolbarButton('Back');
     });
-
-    // additionally open preview once.
-    cy.inMainNavContent(() => {
-      cy.contains('tr', 'out.txt').click();
-    });
-
-    cy.waitUntilContentLoaded();
-
-    cy.screenshot('Doc_DataFilesView');
 
     cy.inMainNavFlyin('app-data-file-viewer', () => {
       cy.pressToolbarButton('Close');
@@ -176,11 +174,13 @@ describe('Instance Data Files Tests', () => {
 
       cy.waitUntilContentLoaded();
 
-      cy.contains('tr', 'test.txt')
-        .should('exist')
-        .within(() => {
-          cy.get('button[data-cy^="Edit"]').click();
-        });
+      cy.contains('tr', 'test.txt').should('exist').click();
+    });
+
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavFlyin('app-data-file-viewer', () => {
+      cy.pressToolbarButton('Edit');
     });
 
     cy.waitUntilContentLoaded();
@@ -192,17 +192,15 @@ describe('Instance Data Files Tests', () => {
 
     cy.waitUntilContentLoaded();
 
-    cy.inMainNavContent(() => {
-      cy.contains('tr', 'test.txt')
-        .should('exist')
-        .within(() => {
-          cy.get('button[data-cy^="Edit"]').click();
-        });
+    cy.inMainNavFlyin('app-data-file-viewer', () => {
+      cy.pressToolbarButton('Edit');
     });
+
+    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.monacoEditor().should('have.value', 'This is a test');
-      cy.pressToolbarButton('Close');
+      cy.pressToolbarButton('Back');
     });
   });
 
