@@ -56,12 +56,22 @@ export class ObjectChangesService {
       console.error('Error on WebSocket', err);
       this.cfg.checkServerReachable();
       this._error$.next(err);
-      this.errorCount$.next(this.errorCount$.value + 1);
+      if (this.auth.isAuthenticated()) {
+        this.errorCount$.next(this.errorCount$.value + 1);
+      }
     });
     _socket.addEventListener('close', (e) => {
       // "close" is essentially an error, as we NEVER want to close the websocket as long as the application is alive.
-      this.errorCount$.next(this.errorCount$.value + 1);
+      if (this.auth.isAuthenticated()) {
+        this.errorCount$.next(this.errorCount$.value + 1);
+      }
     });
+
+    // each 15 minutes, the websocket needs to reconnect in normal operation.
+    setTimeout(() => {
+      this.errorCount$.next(this.errorCount$.value - 1);
+    }, 15 * 60 * 1000);
+
     _socket.addEventListener('message', (e) => this.onMessage(e));
     return _socket;
   }
