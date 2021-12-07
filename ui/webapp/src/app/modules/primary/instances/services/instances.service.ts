@@ -195,7 +195,7 @@ export class InstancesService {
       return;
     }
 
-    if (this.group !== group) {
+    if (this.group !== group || !this.subscription) {
       this.updateChangeSubscription(group);
     }
 
@@ -220,6 +220,7 @@ export class InstancesService {
   private updateChangeSubscription(group: string) {
     if (!!this.subscription) {
       this.subscription.unsubscribe();
+      this.subscription = null;
     }
 
     if (!!group) {
