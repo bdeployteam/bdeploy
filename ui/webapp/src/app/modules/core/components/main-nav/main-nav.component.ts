@@ -24,7 +24,7 @@ export class MainNavComponent implements OnInit {
   ) {
     this.changes.errorCount$.subscribe((count) => {
       // in case we exceed a certain threshold, we will show a warning to the user. the error count is reset, and we start over again in case the user dismisses this message.
-      if (count === 5) {
+      if (count === 3) {
         // we check for the exact number to avout repeated messages.
         // this is a number that should not happen in a typical session, *except* when there is a systemic problem with websockets. also
         // this number of errors should occur "rather" quickly in case there is a websocket issue.

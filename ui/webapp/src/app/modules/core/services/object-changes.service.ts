@@ -22,6 +22,7 @@ export class ObjectChangesService {
   private _error$ = new Subject<ErrorEvent>();
   private _open$ = new BehaviorSubject<boolean>(false);
   private _refs: { [index: string]: RemoteRegistration } = {};
+  private _lastError = 0;
   public errorCount$ = new BehaviorSubject<number>(0);
 
   constructor(private cfg: ConfigService, private auth: AuthenticationService) {
@@ -56,24 +57,27 @@ export class ObjectChangesService {
       console.error('Error on WebSocket', err);
       this.cfg.checkServerReachable();
       this._error$.next(err);
-      if (this.auth.isAuthenticated()) {
-        this.errorCount$.next(this.errorCount$.value + 1);
-      }
+      this.onErrorIncrease();
     });
     _socket.addEventListener('close', (e) => {
       // "close" is essentially an error, as we NEVER want to close the websocket as long as the application is alive.
-      if (this.auth.isAuthenticated()) {
-        this.errorCount$.next(this.errorCount$.value + 1);
-      }
+      this.onErrorIncrease();
     });
-
-    // each 15 minutes, the websocket needs to reconnect in normal operation.
-    setTimeout(() => {
-      this.errorCount$.next(this.errorCount$.value - 1);
-    }, 15 * 60 * 1000);
 
     _socket.addEventListener('message', (e) => this.onMessage(e));
     return _socket;
+  }
+
+  private onErrorIncrease() {
+    // if websockets are alive less than thirty seconds, count as error towards error count.
+    if (this.auth.isAuthenticated()) {
+      if (this._lastError + 60_000 > Date.now()) {
+        this.errorCount$.next(this.errorCount$.value + 1);
+      } else {
+        this.errorCount$.next(0);
+      }
+      this._lastError = Date.now();
+    }
   }
 
   private getWebsocketUrl(): string {
