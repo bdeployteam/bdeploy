@@ -22,9 +22,9 @@
           areas.navigateBoth(['/servers', 'browser', areas.groupContext$.value], ['panels', 'servers', 'details', edit.current$.value?.managedServer?.hostName])
         "
       ></app-bd-button>
-      <mat-divider *ngIf="cfg.isCentral()" [vertical]="true"></mat-divider>
+      <mat-divider *ngIf="isCentral" [vertical]="true"></mat-divider>
     </ng-container>
-    <ng-container *ngIf="cfg.isCentral()">
+    <ng-container *ngIf="isCentral">
       <ng-container *ngIf="edit.current$ | async as instance">
         <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
@@ -172,10 +172,10 @@
       <ng-container *ngIf="!edit.hasCurrentProduct()">
         <app-bd-no-data>
           <p>The product version configured is not available on this server. The configuration is not available.</p>
-          <ng-container *ngIf="cfg.isCentral()">
+          <ng-container *ngIf="isCentral">
             <p>You can transfer product versions from the managed server from the product overview.</p>
           </ng-container>
-          <ng-container *ngIf="cfg.isManaged()">
+          <ng-container *ngIf="cfg.isManaged$ | async">
             <p>You can transfer products from the central server, or upload them directly.</p>
           </ng-container>
           <div fxLayout="row" fxLayoutGap="5px">

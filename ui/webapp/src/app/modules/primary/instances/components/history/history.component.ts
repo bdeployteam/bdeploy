@@ -21,6 +21,7 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
   /* template */ showRuntime$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
+  /* template */ public isCentral: boolean = false;
 
   /* template */ getRecordRoute = (row: HistoryEntryDto) => {
     return ['', { outlets: { panel: ['panels', 'instances', 'history', histKeyEncode(histKey(row))] } }];
@@ -45,6 +46,11 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
     });
 
     this.subscription.add(this.search.register(this));
+    this.subscription.add(
+      this.cfg.isCentral$.subscribe((value) => {
+        this.isCentral = value;
+      })
+    );
   }
 
   ngOnInit(): void {

@@ -26,12 +26,16 @@ export class ServersService {
   private apiPath = `${this.cfg.config.api}/managed-servers`;
   private group: string;
   private subscription: Subscription;
+  private isCentral: boolean = false;
 
   private update$ = new BehaviorSubject<string>(null);
 
   constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, private groups: GroupsService) {
     this.groups.current$.subscribe((g) => this.update$.next(g?.name));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
+    this.cfg.isCentral$.subscribe((value) => {
+      this.isCentral = value;
+    });
   }
 
   private updateChangeSubscription(group: string) {
@@ -47,7 +51,7 @@ export class ServersService {
   }
 
   private reload(group: string) {
-    if (!group || !this.cfg.isCentral()) {
+    if (!group || !this.isCentral) {
       this.servers$.next([]);
       this.updateChangeSubscription(null);
       return;
@@ -69,7 +73,7 @@ export class ServersService {
   }
 
   public synchronize(server: ManagedMasterDto): Observable<ManagedMasterDto> {
-    if (this.cfg.isCentral()) {
+    if (this.isCentral) {
       return this.http.get<ManagedMasterDto>(`${this.apiPath}/synchronize/${this.group}/${server.hostName}`).pipe(
         tap((s) => {
           if (!!this.servers$.value?.length) {
@@ -88,7 +92,7 @@ export class ServersService {
   }
 
   public isSynchronized(server: ManagedMasterDto): boolean {
-    if (this.cfg.isCentral() && !!server) {
+    if (this.isCentral && !!server) {
       return this.getSynchronizedOffset(server) <= SYNC_TIMEOUT;
     }
     return true;
@@ -99,7 +103,7 @@ export class ServersService {
   }
 
   private getSynchronizedOffset(server: ManagedMasterDto): number {
-    if (this.cfg.isCentral()) {
+    if (this.isCentral) {
       // prefer current information if loaded.
       const currentS = this.servers$.value?.find((s) => s.hostName === server.hostName);
       const currentTime = this.cfg.getCorrectedNow(); // use server time to compare.

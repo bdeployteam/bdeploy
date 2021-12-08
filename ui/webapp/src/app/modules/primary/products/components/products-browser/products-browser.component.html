@@ -27,7 +27,7 @@
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
-      *ngIf="cfg.isCentral()"
+      *ngIf="cfg.isCentral$ | async"
       icon="sync_alt"
       text="Synchronize Product Versions"
       [route]="['panels', 'products', 'sync']"

@@ -90,8 +90,8 @@ export class DataFilesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.instances.current$, this.servers.servers$]).subscribe(([inst, srvs]) => {
-      if (this.cfg.isCentral() && !srvs?.length) {
+    this.subscription = combineLatest([this.instances.current$, this.servers.servers$, this.cfg.isCentral$]).subscribe(([inst, srvs, isCentral]) => {
+      if (isCentral && !srvs?.length) {
         return;
       }
 

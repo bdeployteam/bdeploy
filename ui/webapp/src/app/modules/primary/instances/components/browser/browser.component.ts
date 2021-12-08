@@ -41,14 +41,16 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     public bulk: InstanceBulkService,
     config: ConfigService
   ) {
-    if (config.isCentral()) {
-      this.initGrouping.push({ name: 'Managed Server', group: (r) => r.managedServer.hostName });
-    }
-    this.grouping = [...this.initGrouping];
+    this.subscription = config.isCentral$.subscribe((value) => {
+      if (value) {
+        this.initGrouping.push({ name: 'Managed Server', group: (r) => r.managedServer.hostName });
+      }
+      this.grouping = [...this.initGrouping];
+    });
   }
 
   ngOnInit(): void {
-    this.subscription = this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length));
+    this.subscription.add(this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length)));
     this.subscription.add(
       this.groups.current$.subscribe((g) => {
         if (!g) {

@@ -31,9 +31,9 @@
           )
         "
       ></app-bd-button>
-      <mat-divider *ngIf="cfg.isCentral()" [vertical]="true"></mat-divider>
+      <mat-divider *ngIf="isCentral" [vertical]="true"></mat-divider>
     </ng-container>
-    <ng-container *ngIf="cfg.isCentral()">
+    <ng-container *ngIf="isCentral">
       <ng-container *ngIf="instances.current$ | async as instance">
         <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>

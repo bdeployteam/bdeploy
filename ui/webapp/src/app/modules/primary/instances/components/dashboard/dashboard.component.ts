@@ -39,12 +39,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /* template */ activating$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
+  /* template */ public isCentral: boolean = false;
 
   constructor(
     private media: BreakpointObserver,
     public instances: InstancesService,
     public areas: NavAreasService,
-    public cfg: ConfigService,
+    private cfg: ConfigService,
     public servers: ServersService,
     public auth: AuthenticationService,
     private states: InstanceStateService
@@ -52,6 +53,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
+    this.subscription.add(
+      this.cfg.isCentral$.subscribe((value) => {
+        this.isCentral = value;
+      })
+    );
     this.subscription.add(
       this.instances.activeNodeCfgs$.subscribe((nodes) => {
         if (!nodes?.nodeConfigDtos?.length) {
