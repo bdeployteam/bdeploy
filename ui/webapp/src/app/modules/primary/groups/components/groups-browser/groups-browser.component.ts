@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { BdDataGroupingDefinition } from 'src/app/models/data';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -16,6 +16,11 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   grouping: BdDataGroupingDefinition<InstanceGroupConfiguration>[] = [];
 
   private subscription: Subscription;
+  private isCentral: boolean = false;
+  /* template */ public isManaged: boolean = false;
+  private isStandalone: boolean = false;
+  /* template */ public isAddAllowed: boolean = false;
+  /* template */ public isAttachAllowed: boolean = false;
 
   /* template */ getRecordRoute = (row: InstanceGroupConfiguration) => {
     if (this.authService.isScopedExclusiveReadClient(row.name)) {
@@ -40,17 +45,18 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
         };
       });
     });
+    this.subscription.add(
+      combineLatest([this.config.isCentral$, this.config.isManaged$, this.config.isStandalone$]).subscribe(([isCentral, isManaged, isStandalone]) => {
+        this.isCentral = isCentral;
+        this.isManaged = isManaged;
+        this.isStandalone = isStandalone;
+      })
+    );
+    this.isAddAllowed = this.authService.isGlobalAdmin() && (this.isCentral || this.isStandalone);
+    this.isAttachAllowed = this.authService.isGlobalAdmin() && this.isManaged;
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ isAddAllowed(): boolean {
-    return this.authService.isGlobalAdmin() && (this.config.isCentral() || this.config.isStandalone());
-  }
-
-  /* template */ isAttachAllowed(): boolean {
-    return this.authService.isGlobalAdmin() && this.config.isManaged();
   }
 }

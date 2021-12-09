@@ -42,6 +42,7 @@ export class ProcessesService {
   }
 
   private apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}/processes`;
+  private isCentral: boolean = false;
 
   constructor(
     private cfg: ConfigService,
@@ -50,6 +51,9 @@ export class ProcessesService {
     private servers: ServersService,
     private instances: InstancesService
   ) {
+    this.cfg.isCentral$.subscribe((value) => {
+      this.isCentral = value;
+    });
     // whenever the active instance or servers change, we want to setup things.
     combineLatest([this.servers.servers$, this.instances.active$]).subscribe(([_, instance]) => {
       clearInterval(this.loadInterval);
@@ -58,7 +62,7 @@ export class ProcessesService {
       this.instance = instance;
 
       // we'll refresh every 30 seconds in case of central & synced, and every 5 seconds in case we're local.
-      this.loadInterval = setInterval(() => this.reload(), this.cfg.isCentral() ? 30000 : 5000);
+      this.loadInterval = setInterval(() => this.reload(), this.isCentral ? 30000 : 5000);
       this.checkInterval = setInterval(() => this.checkState(), 1000);
 
       this.reload();

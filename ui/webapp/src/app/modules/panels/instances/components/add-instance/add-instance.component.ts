@@ -30,6 +30,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
   /* template */ serverList: ManagedMasterDto[] = [];
 
   private subscription: Subscription;
+  /* template */ public isCentral: boolean = false;
 
   constructor(
     private groups: GroupsService,
@@ -45,6 +46,11 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
       .newUuid()
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((r) => (this.config.uuid = r));
+    this.subscription.add(
+      this.cfg.isCentral$.subscribe((value) => {
+        this.isCentral = value;
+      })
+    );
 
     this.subscription.add(
       this.products.products$.subscribe((r) => {

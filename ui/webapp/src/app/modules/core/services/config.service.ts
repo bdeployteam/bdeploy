@@ -5,7 +5,7 @@ import { Injectable, Injector } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { isEqual } from 'lodash-es';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, retryWhen, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, PluginInfoDto, Version } from '../../../models/gen.dtos';
@@ -33,6 +33,10 @@ export class ConfigService {
   private versionLock = false;
 
   private backendTimeOffset = 0;
+
+  isCentral$ = new BehaviorSubject<boolean>(false);
+  isManaged$ = new BehaviorSubject<boolean>(false);
+  isStandalone$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     private themes: ThemeService /* dummy: required to bootstrap theming early! */,
@@ -72,6 +76,9 @@ export class ConfigService {
           };
           console.log('API URL set to ' + this.config.api);
           console.log('Remote reports mode ' + this.config.mode);
+          this.isCentral$.next(this.config.mode === MinionMode.CENTRAL);
+          this.isManaged$.next(this.config.mode === MinionMode.MANAGED);
+          this.isStandalone$.next(this.config.mode === MinionMode.STANDALONE);
           resolve(this.config);
         },
         (err) => {
@@ -189,20 +196,5 @@ export class ConfigService {
 
   public getCorrectedNow(): number {
     return Date.now() + this.backendTimeOffset;
-  }
-
-  /** Determines whether the server is a 'CENTRAL' mode server */
-  public isCentral(): boolean {
-    return this.config.mode === MinionMode.CENTRAL;
-  }
-
-  /** Determines whether the server is a 'MANAGED' mode server */
-  public isManaged(): boolean {
-    return this.config.mode === MinionMode.MANAGED;
-  }
-
-  /** Determines whether the server is a 'STANDALONE' mode server */
-  public isStandalone(): boolean {
-    return this.config.mode === MinionMode.STANDALONE;
   }
 }

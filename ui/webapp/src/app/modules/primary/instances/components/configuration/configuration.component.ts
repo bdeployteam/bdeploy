@@ -65,6 +65,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   private subscription: Subscription;
+  public isCentral: boolean = false;
 
   constructor(
     public cfg: ConfigService,
@@ -78,6 +79,11 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   ) {
     this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
     this.subscription.add(this.areas.registerDirtyable(this, 'primary'));
+    this.subscription.add(
+      this.cfg.isCentral$.subscribe((value) => {
+        this.isCentral = value;
+      })
+    );
   }
 
   ngOnInit(): void {

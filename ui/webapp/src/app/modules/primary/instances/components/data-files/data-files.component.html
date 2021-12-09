@@ -11,7 +11,7 @@
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Data Files - {{ (instances.current$ | async)?.instanceConfiguration?.name }}">
     <div fxFlex="1 0 auto"></div>
-    <ng-container *ngIf="cfg.isCentral()">
+    <ng-container *ngIf="cfg.isCentral$ | async">
       <ng-container *ngIf="instances.current$ | async as instance">
         <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
