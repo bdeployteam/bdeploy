@@ -164,6 +164,15 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     this.clipBoardCfg$.next(null);
     this.clipBoardError$.next(null);
 
+    if (!navigator.clipboard.readText) {
+      // must be firefox. firefox allows reading the clipboard *only* from browser
+      // extensions but never from web pages itself. it is rumored that there is a config
+      // which can be enabled ("Dom.Events.Testing.AsynClipBoard"), however that did not
+      // change browser behaviour in tests.
+      this.clipBoardError$.next('Clipboard access is not supported in this browser. Pasting applications is not possible.');
+      return;
+    }
+
     // check clipboard content on init.
     const perm = 'clipboard-read' as PermissionName; // required due to TS bug.
     navigator.permissions.query({ name: perm }).then(
