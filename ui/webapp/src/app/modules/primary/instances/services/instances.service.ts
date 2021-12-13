@@ -76,7 +76,7 @@ export class InstancesService {
       clearInterval(this.activeLoadInterval);
       clearInterval(this.activeCheckInterval);
 
-      let update = of(null);
+      let update: Observable<InstanceDto[]> = of(null);
 
       if (!!this.othersNeedReload$.value) {
         this.othersNeedReload$.next(false);

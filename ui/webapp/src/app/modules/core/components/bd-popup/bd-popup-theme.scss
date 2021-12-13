@@ -1,5 +1,5 @@
-@use '~@angular/material' as mat;
-@import '~@angular/material/theming';
+@use '@angular/material' as mat;
+@import '@angular/material/theming';
 
 @mixin _bd-popup-theme-colored($name, $card-color) {
   .bd-popup-panel-below-left-#{$name} > *::after {

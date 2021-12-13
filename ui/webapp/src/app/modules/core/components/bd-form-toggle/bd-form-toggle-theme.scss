@@ -1,5 +1,5 @@
-@use '~@angular/material' as mat;
-@import '~@angular/material/theming';
+@use '@angular/material' as mat;
+@import '@angular/material/theming';
 
 @mixin bd-form-toggle-theme($theme) {
   // This is straight from angular materials mat-form-field styles.
