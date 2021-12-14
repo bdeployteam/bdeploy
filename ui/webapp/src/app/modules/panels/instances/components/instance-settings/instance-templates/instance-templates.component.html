@@ -40,22 +40,18 @@
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Instance Templates" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized">
       <div>
         You can apply instance templates to the current instance by choosing below. An instance template will create and configure all required processes.
       </div>
       <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
     </div>
-    <app-bd-notification-card
-      icon="history"
-      *ngIf="!servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)"
-      [warning]="true"
-      [dismissable]="false"
-      header="Server Not Synchronized"
-    >
-      <div [style.text-align]="'justify'">
-        The managed server responsible for the selected node is not synchronized. Please synchronize the server to continue editing.
-      </div>
-    </app-bd-notification-card>
+    <ng-template #currentInstanceIsNotSynchronized>
+      <app-bd-notification-card icon="history" [warning]="true" [dismissable]="false" header="Server Not Synchronized">
+        <div [style.text-align]="'justify'">
+          The managed server responsible for the selected node is not synchronized. Please synchronize the server to continue editing.
+        </div>
+      </app-bd-notification-card>
+    </ng-template>
   </app-bd-dialog-content>
 </app-bd-dialog>

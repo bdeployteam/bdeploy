@@ -36,17 +36,16 @@
 
   <app-main-nav-button
     icon="storage"
-    *ngIf="!authService.isGlobalExclusiveReadClient()"
+    *ngIf="!(authService.isGlobalExclusiveReadClient$ | async)"
     text="Software Repositories"
     [collapsed]="!expanded"
     [route]="['/repositories/browser']"
   ></app-main-nav-button>
 
   <mat-divider class="local-divider"></mat-divider>
-
   <app-main-nav-button
     [style.padding-top.px]="5"
-    *ngIf="!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
+    *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="settings_system_daydream"
     text="Instances"
@@ -55,7 +54,7 @@
   ></app-main-nav-button>
 
   <app-main-nav-button
-    *ngIf="!authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
+    *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="apps"
     text="Products"
@@ -71,14 +70,14 @@
     [route]="['/groups', 'clients', areas.groupContext$.value]"
   ></app-main-nav-button>
   <app-main-nav-button
-    *ngIf="(cfgService.isCentral$ | async) && !authService.isScopedExclusiveReadClient(areas.groupContext$ | async)"
+    *ngIf="(cfgService.isCentral$ | async) && !(authService.isCurrentScopedExclusiveReadClient$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="dns"
     text="Managed Servers"
     [collapsed]="!expanded"
     [route]="['/servers', 'browser', areas.groupContext$.value]"
-    [disabled]="!authService.isScopedAdmin(areas.groupContext$ | async)"
-    [matTooltip]="authService.isScopedAdmin(areas.groupContext$ | async) ? null : 'Only administrators can maintain managed server configuration'"
+    [disabled]="!(authService.isCurrentScopeAdmin$ | async)"
+    [matTooltip]="(authService.isCurrentScopeAdmin$ | async) ? null : 'Only administrators can maintain managed server configuration'"
     matTooltipPosition="right"
   ></app-main-nav-button>
 
@@ -106,8 +105,8 @@
     text="Instance Configuration"
     [collapsed]="!expanded"
     [route]="['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value]"
-    [disabled]="!authService.isScopedWrite(areas.groupContext$ | async)"
-    [matTooltip]="authService.isScopedWrite(areas.groupContext$ | async) ? null : 'Insufficient permissions to change configuration'"
+    [disabled]="!(authService.isCurrentScopeWrite$ | async)"
+    [matTooltip]="(authService.isCurrentScopeWrite$ | async) ? null : 'Insufficient permissions to change configuration'"
     matTooltipPosition="right"
   ></app-main-nav-button>
 
@@ -129,11 +128,9 @@
 
   <!-- Footer -->
   <div fxFlex="1 0 auto"></div>
-
   <div class="local-server-type-wrapper-expanded" *ngIf="expanded">
     <span class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">{{ cfgService.config.mode }}</span>
   </div>
-
   <div
     *ngIf="expanded"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
@@ -189,7 +186,7 @@
     text="Administration"
     [collapsed]="!expanded"
     [route]="['/admin/']"
-    [disabled]="!authService.isGlobalAdmin()"
+    [disabled]="!(authService.isGlobalAdmin$ | async)"
   ></app-main-nav-button>
   <a href="/assets/doc/index.html" target="_blank" class="bd-button-link">
     <app-bd-button fxFlexAlign="center center" icon="help_outline" text="Help" color="toolbar" [collapsed]="!expanded"></app-bd-button>

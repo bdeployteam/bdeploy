@@ -11,7 +11,7 @@ export interface BdSearchable {
 export class SearchService {
   private currentSearch = '';
   private registrations: BdSearchable[] = [];
-  private enableSearch$ = new BehaviorSubject<boolean>(false);
+  public enableSearch$ = new BehaviorSubject<boolean>(false);
 
   constructor() {}
 
@@ -22,10 +22,6 @@ export class SearchService {
 
   get search() {
     return this.currentSearch;
-  }
-
-  enabled() {
-    return this.enableSearch$;
   }
 
   register(searchable: BdSearchable): Subscription {

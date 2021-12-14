@@ -67,8 +67,4 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-
-  /* template */ isAddAllowed(): boolean {
-    return this.authService.isCurrentScopeWrite();
-  }
 }

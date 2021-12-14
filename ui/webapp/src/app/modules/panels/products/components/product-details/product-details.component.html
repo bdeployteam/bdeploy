@@ -74,14 +74,14 @@
             { queryParams: { productKey: prod.key.name, productTag: prod.key.tag } }
           )
         "
-        [disabled]="!auth.isCurrentScopeAdmin()"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
         text="Delete"
         icon="delete"
         (click)="doDelete(prod)"
-        [disabled]="!auth.isCurrentScopeAdmin() || (singleProduct.usedInLoading$ | async) || !!(singleProduct.getUsedIn() | async).length"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (singleProduct.usedInLoading$ | async) || !!(singleProduct.getUsedIn() | async).length"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>
