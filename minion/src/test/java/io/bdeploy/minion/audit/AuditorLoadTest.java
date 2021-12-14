@@ -1,4 +1,4 @@
-package io.bdeploy.jersey.audit;
+package io.bdeploy.minion.audit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,12 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.common.ContentHelper;
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 
 public class AuditorLoadTest {
 
     @Test
     void testAuditorLoad(@TempDir Path tmp) {
-        try (RollingFileAuditor a = new RollingFileAuditor(tmp)) {
+        try (Auditor a = RollingFileAuditor.getInstance(tmp)) {
             // with the current default log config, ~10_000 entries of the size generated below fit into
             // a single audit.log/audit.json file. 30_000 is well enough to rotate at least once :)
             for (int i = 0; i < 30_000; ++i) {

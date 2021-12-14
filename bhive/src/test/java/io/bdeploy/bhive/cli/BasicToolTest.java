@@ -56,7 +56,7 @@ public class BasicToolTest {
         tools.execute(ImportTool.class, hiveArg, "--source=" + srcDir, "--manifest=test:v1", "--label=x:y");
 
         // check programmatically whether this looks ok.
-        try (BHive h = new BHive(hiveDir.toUri(), reporter)) {
+        try (BHive h = new BHive(hiveDir.toUri(), null, reporter)) {
             Set<Manifest.Key> manifests = h.execute(new ManifestListOperation());
             assertThat(manifests.size(), is(1));
             assertTrue(manifests.contains(Manifest.Key.parse("test:v1")));
@@ -99,7 +99,7 @@ public class BasicToolTest {
         tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=another:v2");
 
         // check programmatically whether this looks ok.
-        try (BHive h = new BHive(hiveDir.toUri(), reporter)) {
+        try (BHive h = new BHive(hiveDir.toUri(), null, reporter)) {
             Set<Manifest.Key> manifests = h.execute(new ManifestListOperation());
             assertThat(manifests.size(), is(1));
             assertTrue(manifests.contains(Manifest.Key.parse("another:v1")));

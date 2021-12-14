@@ -97,7 +97,7 @@ public interface RemoteBHive extends AutoCloseable {
         switch (svc.getUri().getScheme().toLowerCase()) {
             case "file":
             case "jar":
-                return new LocalBHiveAdapter(new BHive(svc.getUri(), reporter), reporter);
+                return new LocalBHiveAdapter(new BHive(svc.getUri(), null, reporter), reporter);
             case "https":
                 return new JerseyRemoteBHive(svc, name, reporter);
             default:

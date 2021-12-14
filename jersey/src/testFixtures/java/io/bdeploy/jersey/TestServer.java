@@ -39,11 +39,11 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.UuidHelper;
-import io.bdeploy.jersey.audit.Auditor;
 
 /**
  * {@link TestServer} provides an embedded Grizzly/Jersey server with the

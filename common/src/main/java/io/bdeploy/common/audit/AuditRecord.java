@@ -1,4 +1,4 @@
-package io.bdeploy.jersey.audit;
+package io.bdeploy.common.audit;
 
 import java.security.Principal;
 import java.util.Map;

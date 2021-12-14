@@ -12,6 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,12 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.codahale.metrics.Timer;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.common.audit.NullAuditor;
 import io.bdeploy.common.cfg.ConfigValidationException;
 import io.bdeploy.common.cfg.Configuration;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -63,6 +67,7 @@ public abstract class ToolBase {
     private static boolean testModeLLM = false;
     private static boolean failWithException = false;
     private final Map<String, Class<? extends CliTool>> tools = new TreeMap<>();
+    private Function<Path, Auditor> auditorFactory;
 
     /**
      * Indicate that the tools are executed in the context of a JUNIT test. In this mode the tools
@@ -92,7 +97,7 @@ public abstract class ToolBase {
         return testMode;
     }
 
-    public static boolean istTestModeLLM() {
+    public static boolean isTestModeLLM() {
         return testModeLLM;
     }
 
@@ -302,6 +307,9 @@ public abstract class ToolBase {
         Class<? extends CliTool> tool = tools.get(args[0]);
         CliTool instance = tool.getDeclaredConstructor().newInstance();
 
+        // make sure we pass on any auditor factory which is set.
+        instance.setAuditorFactory(auditorFactory);
+
         if (instance instanceof ConfiguredCliTool) {
             Configuration cfg = new Configuration();
             if (args.length > 1) {
@@ -339,6 +347,13 @@ public abstract class ToolBase {
     }
 
     /**
+     * Sets a factory for proper auditors to be used by the tool.
+     */
+    public void setAuditorFactory(Function<Path, Auditor> auditorFactory) {
+        this.auditorFactory = auditorFactory;
+    }
+
+    /**
      * Base class for all CLI tools.
      */
     public abstract static class CliTool {
@@ -353,6 +368,7 @@ public abstract class ToolBase {
         }
 
         private ActivityReporter reporter;
+        private Function<Path, Auditor> auditorFactory = p -> new NullAuditor();
         private PrintStream output = System.out;
         private boolean verbose;
         private DataFormat dataFormat = DataFormat.TEXT;
@@ -369,6 +385,14 @@ public abstract class ToolBase {
          */
         protected ActivityReporter getActivityReporter() {
             return reporter;
+        }
+
+        public void setAuditorFactory(Function<Path, Auditor> auditorFactory) {
+            this.auditorFactory = auditorFactory == null ? (p -> new NullAuditor()) : auditorFactory;
+        }
+
+        protected Function<Path, Auditor> getAuditorFactory() {
+            return this.auditorFactory;
         }
 
         /**

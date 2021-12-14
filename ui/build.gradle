@@ -19,6 +19,7 @@ def webappDir = "$projectDir/webapp"
 dependencies {
     implementation(
         project(":common"),
+        project(":logging"),
         project(":jersey"),
         project(":bhive"),
         project(":interfaces"),
@@ -248,7 +249,7 @@ triggerStopCoverageManaged.mustRunAfter runCypressHeadless
 test.dependsOn doneWithCypressHeadless
 
 task release(type: Copy, dependsOn: runCypressHeadless) {
-    from "${webappDir}/cypress/fixtures/export-test.zip"
+    from "${webappDir}/cypress/fixtures/instance-export.zip"
     into new File(project(':test-data').projectDir, "bin-test-data")
     rename {
         version + ".zip"

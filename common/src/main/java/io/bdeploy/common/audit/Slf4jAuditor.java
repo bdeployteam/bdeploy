@@ -1,4 +1,4 @@
-package io.bdeploy.jersey.audit;
+package io.bdeploy.common.audit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,9 +7,9 @@ import org.slf4j.MDC;
 /**
  * A {@linkplain Auditor auditor} implementation that is using a logger to write the audit records.
  */
-public class Log4jAuditor implements Auditor {
+public class Slf4jAuditor implements Auditor {
 
-    private static final Logger log = LoggerFactory.getLogger(Log4jAuditor.class);
+    private static final Logger log = LoggerFactory.getLogger(Slf4jAuditor.class);
 
     @Override
     public void close() {

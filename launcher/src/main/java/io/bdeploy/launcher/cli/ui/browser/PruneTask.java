@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.PruneOperation;
-import io.bdeploy.jersey.audit.Auditor;
+import io.bdeploy.common.audit.Auditor;
 
 /**
  * Executes the prune operation on all local hives.

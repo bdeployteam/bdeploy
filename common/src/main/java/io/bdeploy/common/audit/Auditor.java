@@ -1,4 +1,4 @@
-package io.bdeploy.jersey.audit;
+package io.bdeploy.common.audit;
 
 /**
  * A {@link Auditor} is responsible for persisting {@link AuditRecord}s.

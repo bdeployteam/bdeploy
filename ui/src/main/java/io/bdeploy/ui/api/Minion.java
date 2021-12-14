@@ -4,13 +4,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
 
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
-import io.bdeploy.jersey.audit.Auditor;
 
 /**
  * Represents a node.

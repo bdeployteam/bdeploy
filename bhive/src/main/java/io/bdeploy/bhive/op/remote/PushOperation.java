@@ -183,7 +183,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
         try {
             TransferStatistics s;
-            try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), getActivityReporter())) {
+            try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), null, getActivityReporter())) {
                 CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);
                 objects.forEach(op::addObject);
                 manifests.forEach(op::addManifest);

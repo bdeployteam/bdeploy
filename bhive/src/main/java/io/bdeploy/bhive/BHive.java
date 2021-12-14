@@ -29,6 +29,10 @@ import io.bdeploy.bhive.objects.ObjectManager;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.AuditRecord.Severity;
+import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.common.audit.NullAuditor;
 import io.bdeploy.common.metrics.Metrics;
 import io.bdeploy.common.metrics.Metrics.MetricGroup;
 import io.bdeploy.common.util.ExceptionHelper;
@@ -37,11 +41,7 @@ import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.Threads;
-import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.audit.AuditRecord.Severity;
-import io.bdeploy.jersey.audit.Auditor;
-import io.bdeploy.jersey.audit.NullAuditor;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.common.util.ZipHelper;
 
 /**
  * A high level management layer for storage repositories.
@@ -73,20 +73,10 @@ public class BHive implements AutoCloseable, BHiveExecution {
      * To connect to a remote hive instead, use
      * {@link RemoteBHive#forService(io.bdeploy.common.security.RemoteService, String, ActivityReporter)}
      */
-    public BHive(URI uri, ActivityReporter reporter) {
-        this(uri, null, reporter);
-    }
-
-    /**
-     * Creates a new hive instance. Supports ZIP and directory hives.
-     * <p>
-     * To connect to a remote hive instead, use
-     * {@link RemoteBHive#forService(io.bdeploy.common.security.RemoteService, String, ActivityReporter)}
-     */
     public BHive(URI uri, Auditor auditor, ActivityReporter reporter) {
         this.uri = uri;
         Path relRoot;
-        if (uri.getScheme().equals("jar") || (uri.getScheme().equals("file") && uri.toString().toLowerCase().endsWith(".zip"))) {
+        if (ZipHelper.isZipUri(uri)) {
             try {
                 if (!uri.getScheme().equals("jar")) {
                     uri = URI.create("jar:" + uri);
@@ -100,11 +90,9 @@ public class BHive implements AutoCloseable, BHiveExecution {
                 throw new IllegalStateException("cannot open or create ZIP BHive " + uri, e);
             }
             relRoot = zipFs.getPath("/");
-            this.auditor = auditor == null ? new NullAuditor() : auditor;
         } else {
             relRoot = Paths.get(uri);
             this.zipFs = null;
-            this.auditor = auditor == null ? new RollingFileAuditor(relRoot.resolve("logs")) : auditor;
         }
 
         Path objRoot = relRoot.resolve("objects");
@@ -116,6 +104,8 @@ public class BHive implements AutoCloseable, BHiveExecution {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create temporary directory for zipped BHive", e);
         }
+
+        this.auditor = auditor == null ? new NullAuditor() : auditor;
         this.transactions = new BHiveTransactions(this, markerTmp, reporter);
         this.objects = new ObjectDatabase(objRoot, objTmp, reporter, transactions);
         this.manifests = new ManifestDatabase(relRoot.resolve("manifests"));

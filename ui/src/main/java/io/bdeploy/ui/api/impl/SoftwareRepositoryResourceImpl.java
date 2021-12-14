@@ -18,6 +18,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
@@ -87,7 +88,7 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
             throw new WebApplicationException("Hive path already exists: ", Status.NOT_ACCEPTABLE);
         }
 
-        BHive h = new BHive(hive.toUri(), reporter);
+        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
         SoftwareRepositoryManifest srm = new SoftwareRepositoryManifest(h);
         Manifest.Key key = srm.update(config);
         registry.register(config.name, h);

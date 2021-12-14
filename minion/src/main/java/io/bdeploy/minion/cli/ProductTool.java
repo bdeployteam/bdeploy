@@ -1,5 +1,6 @@
 package io.bdeploy.minion.cli;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.SortedSet;
 
@@ -27,6 +28,7 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.cli.ProductTool.ProductConfig;
 
 /**
@@ -68,7 +70,8 @@ public class ProductTool extends RemoteServiceTool<ProductConfig> {
     protected RenderableResult run(ProductConfig config, @RemoteOptional RemoteService svc) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path hivePath = Paths.get(config.hive());
+        try (BHive hive = new BHive(hivePath.toUri(), RollingFileAuditor.getFactory().apply(hivePath), getActivityReporter())) {
             if (config.list()) {
                 return listProducts(hive);
             } else if (config.imp() != null) {

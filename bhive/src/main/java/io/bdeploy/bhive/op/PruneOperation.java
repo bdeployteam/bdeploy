@@ -23,8 +23,8 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.MarkerDatabase;
 import io.bdeploy.bhive.objects.ObjectDatabase;
 import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.audit.AuditRecord.Severity;
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.AuditRecord.Severity;
 
 /**
  * Removes dangling (unreferenced) objects from the {@link ObjectDatabase}.

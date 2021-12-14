@@ -7,8 +7,6 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.SortedMap;
 
-import jakarta.ws.rs.core.UriBuilder;
-
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.cli.ManifestTool.ManifestConfig;
 import io.bdeploy.bhive.model.Manifest;
@@ -36,6 +34,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * A tool to list and manage (delete, export) manifests in a hive.
@@ -116,7 +115,8 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
     }
 
     private RenderableResult runOnLocalHive(ManifestConfig config) {
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path path = Paths.get(config.hive());
+        try (BHive hive = new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter())) {
 
             if (config.list()) {
                 Set<Manifest.Key> manifests = hive.execute(new ManifestListOperation());
@@ -162,7 +162,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
 
             // Copy objects into the target hive
             URI targetUri = UriBuilder.fromUri("jar:" + Paths.get(config.saveTo()).toUri()).build();
-            try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+            try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
                 CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
                 op.addManifest(manifest);
                 objectIds.forEach(op::addObject);

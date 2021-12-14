@@ -47,6 +47,7 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -131,7 +132,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         }
 
         try {
-            BHive h = new BHive(hive.toUri(), reporter);
+            BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
             InstanceGroupManifest igm = new InstanceGroupManifest(h);
             Manifest.Key key = igm.update(config);
             registry.register(config.name, h);

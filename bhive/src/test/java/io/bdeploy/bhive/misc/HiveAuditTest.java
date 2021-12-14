@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,13 +17,15 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
+import io.bdeploy.bhive.TestAuditor;
 import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ImportOperation;
 import io.bdeploy.common.ContentHelper;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.AuditRecord.Severity;
 
 @ExtendWith(TestHive.class)
 public class HiveAuditTest {
@@ -54,11 +55,11 @@ public class HiveAuditTest {
             hive.execute(new ExportOperation().setManifest(key).setTarget(tmp.resolve("export")));
         });
 
-        RollingFileAuditor auditor = (RollingFileAuditor) hive.getAuditor();
-        List<String> lines = Files.readAllLines(auditor.getLogFile());
+        TestAuditor auditor = (TestAuditor) hive.getAuditor();
+        List<AuditRecord> lines = auditor.audits;
         assertEquals(6, lines.size());
-        assertTrue(lines.get(5).contains("ERROR"));
-        assertTrue(lines.get(5).contains("Asynchronous operation(s) failed"));
+        assertEquals(Severity.ERROR, lines.get(5).severity);
+        assertEquals("Asynchronous operation(s) failed", lines.get(5).message);
     }
 
 }

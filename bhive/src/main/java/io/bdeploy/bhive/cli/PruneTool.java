@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.cli;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
@@ -48,7 +49,9 @@ public class PruneTool extends ConfiguredCliTool<PruneConfig> {
     protected RenderableResult run(PruneConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path path = Paths.get(config.hive());
+
+        try (BHive hive = new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter())) {
             SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
 
             DataResult r = createSuccess();

@@ -73,7 +73,7 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
                     continue;
                 }
 
-                hives.put(path, new BHive(hPath.toUri(), getActivityReporter()));
+                hives.put(path, new BHive(hPath.toUri(), getAuditorFactory().apply(hPath), getActivityReporter()));
             }
             Path storePath = Paths.get(config.keystore());
 

@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import jakarta.inject.Named;
-
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
@@ -18,10 +16,11 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
+import jakarta.inject.Named;
 
 public class TestHive implements ParameterResolver, BeforeEachCallback {
 
-    private String name;
+    private final String name;
 
     public TestHive() {
         this(JerseyRemoteBHive.DEFAULT_NAME);
@@ -60,12 +59,12 @@ public class TestHive implements ParameterResolver, BeforeEachCallback {
 
     private static class CloseableTestHive implements CloseableResource {
 
-        private BHive hive;
-        private Path path;
+        private final BHive hive;
+        private final Path path;
 
         public CloseableTestHive() throws IOException {
             path = Files.createTempDirectory("hive-");
-            hive = new BHive(path.toUri(), new ActivityReporter.Null());
+            hive = new BHive(path.toUri(), new TestAuditor(), new ActivityReporter.Null());
         }
 
         @Override

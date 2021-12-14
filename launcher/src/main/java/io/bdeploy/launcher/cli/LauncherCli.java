@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.bdeploy.common.cli.ToolBase;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 
 public class LauncherCli extends ToolBase {
 
@@ -12,6 +13,8 @@ public class LauncherCli extends ToolBase {
         register(BrowserTool.class);
         register(LauncherTool.class);
         register(UninstallerTool.class);
+
+        setAuditorFactory(RollingFileAuditor.getFactory());
     }
 
     @Override

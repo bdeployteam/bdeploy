@@ -18,6 +18,7 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.launcher.cli.UninstallerTool.UninstallerConfig;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 
 @CliName("uninstaller")
 @Help("A tool which uninstalls a client application.")
@@ -50,7 +51,8 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
 
         Path rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         Path bhiveDir = rootDir.resolve("bhive");
-        try (BHive hive = new BHive(bhiveDir.toUri(), new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(bhiveDir.toUri(), RollingFileAuditor.getFactory().apply(bhiveDir),
+                new ActivityReporter.Null())) {
             doUninstall(rootDir, hive, config.app());
         }
         return createSuccess();

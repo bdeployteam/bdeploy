@@ -36,6 +36,7 @@ import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseySecurityContext;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.MinionMode;
@@ -107,7 +108,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
             throw new WebApplicationException("Hive path already exists", Status.NOT_ACCEPTABLE);
         }
 
-        BHive h = new BHive(hive.toUri(), reporter);
+        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
         new SoftwareRepositoryManifest(h).update(config);
         registry.register(config.name, h);
     }
@@ -163,7 +164,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
         meta.managed = (minion.getMode() != MinionMode.STANDALONE);
 
-        BHive h = new BHive(hive.toUri(), reporter);
+        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
         new InstanceGroupManifest(h).update(meta);
         registry.register(meta.name, h);
     }

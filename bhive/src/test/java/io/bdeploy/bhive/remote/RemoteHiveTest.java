@@ -93,7 +93,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
 
         Path tmpHive = tmp.resolve("tmphive");
         Path tmpSrc = tmp.resolve("tmpsrc");
-        try (BHive other = new BHive(tmpHive.toUri(), r)) {
+        try (BHive other = new BHive(tmpHive.toUri(), null, r)) {
             ContentHelper.genTestFile(tmpSrc, 1024 * 1024 * 40);
 
             Manifest.Key tmpKey = new Manifest.Key("other", "v1");
@@ -154,7 +154,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         Path tmpRemote = tmp.resolve("push");
         hive.execute(new PushOperation().addManifest(keyD).setRemote(new RemoteService(tmpRemote.toUri())));
 
-        try (BHive h = new BHive(tmpRemote.toUri(), r)) {
+        try (BHive h = new BHive(tmpRemote.toUri(), null, r)) {
             Set<Key> mfs = h.execute(new ManifestListOperation());
             assertThat(mfs.size(), is(3));
             assertTrue(mfs.contains(keyD));
@@ -163,7 +163,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
         }
 
         tmpRemote = tmp.resolve("fetch");
-        try (BHive h = new BHive(tmpRemote.toUri(), r); Transaction t = h.getTransactions().begin()) {
+        try (BHive h = new BHive(tmpRemote.toUri(), null, r); Transaction t = h.getTransactions().begin()) {
             h.execute(new FetchOperation().addManifest(keyD).setRemote(svc));
             Set<Key> mfs = h.execute(new ManifestListOperation());
             assertThat(mfs.size(), is(3));

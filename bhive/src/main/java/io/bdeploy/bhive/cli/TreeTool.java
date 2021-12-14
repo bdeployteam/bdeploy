@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.cli;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.SortedSet;
@@ -65,7 +66,8 @@ public class TreeTool extends ConfiguredCliTool<TreeConfig> {
     protected RenderableResult run(TreeConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path path = Paths.get(config.hive());
+        try (BHive hive = new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter())) {
             if (config.list() != null) {
                 TreeView snap = hive.execute(new ScanOperation().setManifest(Manifest.Key.parse(config.list())));
                 format(snap);

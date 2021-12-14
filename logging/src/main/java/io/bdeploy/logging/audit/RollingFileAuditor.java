@@ -1,8 +1,9 @@
-package io.bdeploy.jersey.audit;
+package io.bdeploy.logging.audit;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.zip.Deflater;
 
 import org.apache.logging.log4j.Level;
@@ -19,6 +20,11 @@ import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.util.StringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.common.audit.NullAuditor;
+import io.bdeploy.common.util.ZipHelper;
 
 /**
  * The {@link RollingFileAuditor} logs audit records to a human readable log and to a programmatically readable JSON file. It must
@@ -40,10 +46,34 @@ public class RollingFileAuditor implements Auditor {
     private final RollingFileAppender logAppender;
     private final RollingFileAppender jsonAppender;
 
-    public RollingFileAuditor(Path logDir) {
+    private RollingFileAuditor(Path logDir) {
         this.logDir = logDir;
         this.logAppender = createFileAppender(logDir);
         this.jsonAppender = createJsonAppender(logDir);
+    }
+
+    /**
+     * Returns a {@link RollingFileAuditor} if the given path can be written to. The auditor will audit in the "logs"
+     * subdirectory.
+     * <p>
+     * If the path is not writable (e.g. inside a ZIP file), a {@link NullAuditor} is returned instead.
+     */
+    public static Function<Path, Auditor> getFactory() {
+        return p -> {
+            if (ZipHelper.isZipUri(p.toUri())) {
+                return new NullAuditor();
+            } else {
+                return getInstance(p.resolve("logs"));
+            }
+        };
+    }
+
+    /**
+     * Returns a {@link RollingFileAuditor} for the given {@link Path}. The path is assumed to be writable. Logs will be written
+     * directly into this path.
+     */
+    public static RollingFileAuditor getInstance(Path p) {
+        return new RollingFileAuditor(p);
     }
 
     @Override

@@ -2,6 +2,7 @@ package io.bdeploy.common.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -23,6 +24,11 @@ public class ZipHelper {
     private static final int DEFAULT_EXEC_MODE = 0755;
 
     private ZipHelper() {
+    }
+
+    /** Determines wheter a given URI points to a ZIP file. */
+    public static boolean isZipUri(URI uri) {
+        return uri.getScheme().equals("jar") || (uri.getScheme().equals("file") && uri.toString().toLowerCase().endsWith(".zip"));
     }
 
     /**

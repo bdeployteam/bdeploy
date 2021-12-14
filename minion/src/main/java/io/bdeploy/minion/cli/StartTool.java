@@ -15,6 +15,8 @@ import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -35,10 +37,9 @@ import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
-import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -153,14 +154,14 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         });
         srv.setCorsEnabled(config.allowCors());
 
-        registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv));
+        registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv), getAuditorFactory());
     }
 
     private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv,
             MasterConfig config) {
         r.onStartup(config.consoleLog());
 
-        srv.setAuditor(new RollingFileAuditor(r.getLogDir()));
+        srv.setAuditor(RollingFileAuditor.getInstance(r.getLogDir()));
         r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
         r.setupServerTasks(r.getMode());
         delegate.setDelegate(srv.getRemoteActivityReporter());
@@ -169,7 +170,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     }
 
     public static void registerMasterResources(RegistrationTarget srv, BHiveRegistry reg, boolean webapp, MinionRoot minionRoot,
-            PluginManager pluginManager) {
+            PluginManager pluginManager, Function<Path, Auditor> auditorFactory) {
 
         if (minionRoot.getMode() == MinionMode.CENTRAL) {
             srv.register(CentralUpdateResourceImpl.class);
@@ -200,7 +201,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         }
 
         // scan storage locations, register hives
-        minionRoot.getStorageLocations().forEach(reg::scanLocation);
+        minionRoot.getStorageLocations().forEach(s -> reg.scanLocation(s, auditorFactory));
     }
 
     public static BHiveRegistry registerCommonResources(RegistrationTarget srv, MinionRoot root, ActivityReporter reporter) {

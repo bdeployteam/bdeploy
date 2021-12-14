@@ -130,7 +130,7 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
 
     private TransferStatistics fetchAsZip(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) throws IOException {
         Path z = rh.fetch(objects, manifests);
-        try (BHive zHive = new BHive(UriBuilder.fromUri("jar:" + z.toUri()).build(), getActivityReporter())) {
+        try (BHive zHive = new BHive(UriBuilder.fromUri("jar:" + z.toUri()).build(), null, getActivityReporter())) {
             TransferStatistics t = zHive.execute(new CopyOperation().setDestinationHive(this).setPartialAllowed(false));
             t.transferSize = Files.size(z); // transferred size != actual size.
             return t;

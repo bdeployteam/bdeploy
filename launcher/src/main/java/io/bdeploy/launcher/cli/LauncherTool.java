@@ -49,6 +49,7 @@ import io.bdeploy.bhive.util.VersionComparator;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
@@ -88,13 +89,12 @@ import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
-import io.bdeploy.jersey.audit.Auditor;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.launcher.cli.LauncherTool.LauncherConfig;
 import io.bdeploy.launcher.cli.branding.LauncherSplash;
 import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
 import io.bdeploy.launcher.cli.ui.TextAreaDialog;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 
 @CliName("launcher")
 @Help("A tool which launches an application described by a '.bdeploy' file")
@@ -207,7 +207,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Write audit logs to the user area if set
             if (userArea != null) {
-                auditor = new RollingFileAuditor(userArea.resolve("logs"));
+                auditor = RollingFileAuditor.getFactory().apply(userArea);
             }
 
             // Update and launch
@@ -247,7 +247,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
-        try (BHive hive = new BHive(bhiveDir.toUri(), auditor, reporter)) {
+        try (BHive hive = new BHive(bhiveDir.toUri(), auditor != null ? auditor : RollingFileAuditor.getFactory().apply(bhiveDir),
+                reporter)) {
             // Provide callback to detect stale locks
             hive.setLockContentSupplier(LOCK_CONTENT);
             hive.setLockContentValidator(LOCK_VALIDATOR);
@@ -814,7 +815,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Copy the required software from our hive to the target hive
         log.info("Copy required software ...");
         Path hiveDir = homeDir.resolve("bhive");
-        try (BHive otherHive = new BHive(hiveDir.toUri(), reporter)) {
+        try (BHive otherHive = new BHive(hiveDir.toUri(), RollingFileAuditor.getFactory().apply(hiveDir), reporter)) {
             otherHive.setLockContentSupplier(LOCK_CONTENT);
             otherHive.setLockContentValidator(LOCK_VALIDATOR);
 

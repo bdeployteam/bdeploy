@@ -25,7 +25,7 @@ public class BareTreeTest {
         Path mySource = ContentHelper.genSimpleTestTree(tmp, "source");
         Path myTarget = tmp.resolve("target");
 
-        try (BHive hive = new BHive(hiveDir.toUri(), reporter); Transaction t = hive.getTransactions().begin()) {
+        try (BHive hive = new BHive(hiveDir.toUri(), null, reporter); Transaction t = hive.getTransactions().begin()) {
             ObjectId oid = hive.execute(new ImportTreeOperation().setSourcePath(mySource));
             hive.execute(new ExportTreeOperation().setSourceTree(oid).setTargetPath(myTarget));
         }

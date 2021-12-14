@@ -181,7 +181,7 @@ public class InstanceResourceTest {
             String... nodeNames) {
 
         InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig(instanceName, product);
-        try (BHive hive = new BHive(tmp.resolve("hive").toUri(), new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(tmp.resolve("hive").toUri(), null, new ActivityReporter.Null())) {
             PushOperation pushOperation = new PushOperation();
             Builder instanceManifest = new InstanceManifest.Builder().setInstanceConfiguration(instanceConfig);
 

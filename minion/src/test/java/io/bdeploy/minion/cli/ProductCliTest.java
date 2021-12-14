@@ -68,7 +68,7 @@ public class ProductCliTest {
 
         // create/push external software from temp hive.
         ScopedManifestKey smk = new ScopedManifestKey("external-dep", OsHelper.getRunningOs(), "1.0.0");
-        try (BHive tmpHive = new BHive(temp.resolve("src-hive").toUri(), reporter)) {
+        try (BHive tmpHive = new BHive(temp.resolve("src-hive").toUri(), null, reporter)) {
             Path src = temp.resolve("src");
             PathHelper.mkdirs(src);
 
@@ -128,7 +128,7 @@ public class ProductCliTest {
         Manifest.Key prodKey = new Manifest.Key("prod/product", "1.0.0");
 
         // check whether things went well...
-        try (BHive hive = new BHive(impHive.toUri(), reporter)) {
+        try (BHive hive = new BHive(impHive.toUri(), null, reporter)) {
             Set<Key> mfs = hive.execute(new ManifestListOperation());
 
             ScopedManifestKey appSmk = new ScopedManifestKey("prod/app", OsHelper.getRunningOs(), "1.0.0");

@@ -1,4 +1,4 @@
-package io.bdeploy.jersey.audit;
+package io.bdeploy.common.audit;
 
 public class NullAuditor implements Auditor {
 

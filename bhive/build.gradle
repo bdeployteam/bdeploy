@@ -10,6 +10,7 @@ dependencies {
 
     commonTestDeps(testFixtures(project(":common")))
     commonTestDeps(testFixtures(project(":jersey")))
+    commonTestDeps(project(":logging"))
 }
 
 if(project.hasProperty("test.hive.override")) {

@@ -1,4 +1,4 @@
-package io.bdeploy.jersey.audit;
+package io.bdeploy.minion.audit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.jersey.TestServer;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
@@ -71,7 +72,7 @@ public class AuditTest {
 
     @BeforeEach
     void setAuditor(@TempDir java.nio.file.Path tmp) {
-        srv.setAuditor(new RollingFileAuditor(tmp));
+        srv.setAuditor(RollingFileAuditor.getFactory().apply(tmp));
     }
 
     @Test

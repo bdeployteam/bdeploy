@@ -12,5 +12,6 @@ dependencies {
 
     commonTestDeps(project(":interfaces"))
     commonTestDeps(testFixtures(project(":common")))
+    commonTestDeps(testFixtures(project(":jersey")))
 }
 

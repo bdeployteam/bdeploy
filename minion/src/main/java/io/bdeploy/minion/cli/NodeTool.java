@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -23,7 +24,6 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.audit.AuditRecord;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.NodeTool.NodeConfig;

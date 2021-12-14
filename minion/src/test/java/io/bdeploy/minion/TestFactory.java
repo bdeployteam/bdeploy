@@ -212,7 +212,7 @@ public class TestFactory {
         Files.write(appPath.resolve(ApplicationDescriptor.FILE_NAME),
                 JacksonHelper.createObjectMapper(MapperType.YAML).writeValueAsBytes(cfg));
 
-        try (BHive hive = new BHive(tmp.resolve("hive").toUri(), new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(tmp.resolve("hive").toUri(), null, new ActivityReporter.Null())) {
             try (Transaction t = hive.getTransactions().begin()) {
                 hive.execute(new ImportOperation().setManifest(appKey).setSourcePath(appPath));
             }

@@ -15,7 +15,9 @@ public class BHiveWrapperTool extends NativeCliTool {
     @Override
     protected RenderableResult run(String[] args) {
         try {
-            new BHiveCli().toolMain(args);
+            BHiveCli cli = new BHiveCli();
+            cli.setAuditorFactory(getAuditorFactory());
+            cli.toolMain(args);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot run BHive CLI", e);
         }

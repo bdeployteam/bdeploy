@@ -9,6 +9,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditStrategy;
+import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ElementView;
@@ -28,6 +30,7 @@ import io.bdeploy.common.ActivityReporter.Activity;
  */
 public class ManifestConsistencyCheckOperation extends BHive.Operation<Set<ElementView>> {
 
+    @AuditWith(AuditStrategy.COLLECTION_PEEK)
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
     private boolean dryRun = true;
 

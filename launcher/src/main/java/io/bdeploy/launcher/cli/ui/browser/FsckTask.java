@@ -8,7 +8,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.objects.view.DamagedObjectView;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.FsckOperation;
-import io.bdeploy.jersey.audit.Auditor;
+import io.bdeploy.common.audit.Auditor;
 
 /**
  * Executes the Fsck operation the given hives

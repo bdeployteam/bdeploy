@@ -25,6 +25,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.ui.cleanup.CleanupHelper;
@@ -117,7 +118,7 @@ public class MasterCleanupJob implements Job {
 
         // no activity reporting on local hives right now (outside request scope, could only use Stream instead).
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null(), null)) {
-            mr.getStorageLocations().forEach(registry::scanLocation);
+            mr.getStorageLocations().forEach(s -> registry.scanLocation(s, RollingFileAuditor.getFactory()));
 
             CleanupHelper ch = new CleanupHelper(null, mr, registry, (h, i) -> mr.getSelf(),
                     new VersionSorterServiceImpl(mr.getPluginManager(), registry));

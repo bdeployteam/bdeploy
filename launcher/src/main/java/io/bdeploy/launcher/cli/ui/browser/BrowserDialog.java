@@ -51,14 +51,14 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.VersionHelper;
-import io.bdeploy.jersey.audit.Auditor;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ClientSoftwareManifest;
 import io.bdeploy.launcher.cli.ui.BaseDialog;
 import io.bdeploy.launcher.cli.ui.WindowHelper;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 
 /**
  * A dialog that lists all locally available applications
@@ -94,7 +94,7 @@ public class BrowserDialog extends BaseDialog {
         super(new Dimension(1024, 768));
         this.rootDir = rootDir;
         this.readonlyRoot = userArea != null;
-        this.auditor = userArea != null ? new RollingFileAuditor(userArea.resolve("logs")) : null;
+        this.auditor = userArea != null ? RollingFileAuditor.getFactory().apply(userArea) : null;
         setTitle("Client Applications");
 
         // Header area displaying a search field
@@ -121,7 +121,8 @@ public class BrowserDialog extends BaseDialog {
         }
         model.clear();
 
-        try (BHive hive = new BHive(hivePath.toUri(), auditor, new ActivityReporter.Null())) {
+        try (BHive hive = new BHive(hivePath.toUri(), auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hivePath),
+                new ActivityReporter.Null())) {
             ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
             model.addAll(manifest.list().stream().filter(mf -> mf.clickAndStart != null).collect(Collectors.toList()));
         }

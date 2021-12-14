@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.cli;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Set;
@@ -54,7 +55,9 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
     protected RenderableResult run(FsckConfig config) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path path = Paths.get(config.hive());
+
+        try (BHive hive = new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter())) {
             FsckOperation op = new FsckOperation().setRepair(config.repair());
             Arrays.stream(config.manifest()).map(Manifest.Key::parse).forEach(op::addManifest);
 

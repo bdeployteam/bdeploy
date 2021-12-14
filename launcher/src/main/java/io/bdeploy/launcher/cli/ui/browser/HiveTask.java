@@ -12,9 +12,10 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.op.LockDirectoryOperation;
 import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.util.ExceptionHelper;
-import io.bdeploy.jersey.audit.Auditor;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 
 /**
  * Base class that performs some work on one or more hives.
@@ -39,7 +40,8 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
         for (Path hiveDir : hives) {
             Path rootDir = hiveDir.getParent();
             builder.append(hiveDir.toString()).append("\n");
-            try (BHive hive = new BHive(hiveDir.toUri(), auditor, getActivityReporter())) {
+            try (BHive hive = new BHive(hiveDir.toUri(),
+                    auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hiveDir), getActivityReporter())) {
                 try {
                     setProgress(i++);
                     hive.execute(new LockDirectoryOperation().setDirectory(rootDir));

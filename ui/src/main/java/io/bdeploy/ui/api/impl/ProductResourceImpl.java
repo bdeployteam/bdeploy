@@ -240,7 +240,7 @@ public class ProductResourceImpl implements ProductResource {
         String token = ds.createNewToken();
         Path targetFile = ds.getStoragePath(token);
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+        try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
             CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
             op.addManifest(key);
             objectIds.forEach(op::addObject);
@@ -346,7 +346,7 @@ public class ProductResourceImpl implements ProductResource {
         // Read all product manifests
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
 
-        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+        try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
             SortedSet<Key> productKeys = ProductManifest.scan(zipHive);
             if (productKeys.isEmpty()) {
                 throw new WebApplicationException("ZIP file does not contain a product.", Status.BAD_REQUEST);

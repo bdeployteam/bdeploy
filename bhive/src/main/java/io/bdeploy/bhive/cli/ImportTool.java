@@ -80,7 +80,8 @@ public class ImportTool extends ConfiguredCliTool<ImportConfig> {
             labels.put(k, v);
         }
 
-        try (BHive hive = new BHive(target.toUri(), getActivityReporter()); Transaction t = hive.getTransactions().begin()) {
+        try (BHive hive = new BHive(target.toUri(), getAuditorFactory().apply(target), getActivityReporter());
+                Transaction t = hive.getTransactions().begin()) {
             hive.setParallelism(config.jobs());
 
             ImportOperation op = new ImportOperation().setSourcePath(source).setManifest(Manifest.Key.parse(config.manifest()));

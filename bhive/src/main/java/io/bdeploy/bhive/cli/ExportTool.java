@@ -54,8 +54,9 @@ public class ExportTool extends ConfiguredCliTool<ExportConfig> {
         helpAndFailIfMissing(config.manifest(), "Missing --manifest");
 
         Path targetPath = Paths.get(config.target());
+        Path path = Paths.get(config.hive());
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        try (BHive hive = new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter())) {
             hive.setParallelism(config.jobs());
 
             ExportOperation export = new ExportOperation().setManifest(Manifest.Key.parse(config.manifest()))

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuditResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.AuditLogDto;

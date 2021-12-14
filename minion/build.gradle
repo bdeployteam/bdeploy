@@ -11,6 +11,7 @@ mainClassName = 'io.bdeploy.minion.cli.MinionServerCli'
 dependencies {
     implementation(
         project(":common"),
+        project(":logging"),
         project(":jersey"),
         project(":bhive"),
         project(":dcu"),

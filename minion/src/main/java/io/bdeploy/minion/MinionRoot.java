@@ -45,6 +45,7 @@ import io.bdeploy.bhive.objects.LockableDatabase;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
@@ -63,8 +64,7 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.JerseyServer;
-import io.bdeploy.jersey.audit.Auditor;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.minion.job.NodeMonitorJob;
@@ -117,12 +117,12 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.config = create(root.resolve("etc"));
         this.updates = root.resolve("update");
         this.hiveDir = root.resolve("hive");
-        this.hive = new BHive(hiveDir.toUri(), reporter);
+        this.hive = new BHive(hiveDir.toUri(), RollingFileAuditor.getFactory().apply(hiveDir), reporter);
         this.users = new UserDatabase(this);
         this.tmpDir = root.resolve("tmp");
 
         this.logDir = create(root.resolve("log"));
-        this.auditor = new RollingFileAuditor(logDir);
+        this.auditor = RollingFileAuditor.getInstance(logDir);
         this.downloadDir = create(root.resolve("downloads"));
 
         this.processController = new MinionProcessController();

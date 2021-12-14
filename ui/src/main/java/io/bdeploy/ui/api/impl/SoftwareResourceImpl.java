@@ -142,7 +142,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
         String token = ds.createNewToken();
         Path targetFile = ds.getStoragePath(token);
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+        try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
             CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
             op.addManifest(key);
             objectIds.forEach(op::addObject);
@@ -167,7 +167,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
         // Read all product manifests
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+        try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
             Set<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
             if (manifestKeys.isEmpty()) {
                 throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);
@@ -225,7 +225,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             }
 
             if (dto.isHive) {
-                try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+                try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
                     SortedSet<Key> pscan = ProductManifest.scan(zipHive);
                     Set<Key> mscan = zipHive.execute(new ManifestListOperation());
                     dto.details = "Hive with " + mscan.size() + " manifest(s) "
@@ -339,7 +339,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
     private void doImportHive(UploadInfoDto dto, Path targetFile) {
         // import full hive
         URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-        try (BHive zipHive = new BHive(targetUri, new ActivityReporter.Null())) {
+        try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
             Set<Key> manifestKeys = zipHive.execute(new ManifestListOperation());
             if (manifestKeys.isEmpty()) {
                 throw new WebApplicationException("ZIP file does not contain a manifest.", Status.BAD_REQUEST);

@@ -62,7 +62,7 @@ public class InsertPruneLoadTest {
         BHive hive;
         String override = System.getProperty("test.hive.override");
         if (override != null) {
-            hive = new BHive(Paths.get(override).toUri(), new ActivityReporter.Null());
+            hive = new BHive(Paths.get(override).toUri(), null, new ActivityReporter.Null());
         } else {
             hive = tstHive;
         }

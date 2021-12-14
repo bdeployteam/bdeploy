@@ -134,7 +134,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         Path tmpDir = Files.createTempDirectory("update-");
         try {
             Path hive = tmpDir.resolve("hive");
-            try (BHive tmpHive = new BHive(hive.toUri(), reporter)) {
+            try (BHive tmpHive = new BHive(hive.toUri(), null, reporter)) {
                 List<Manifest.Key> keys = UpdateHelper.importUpdate(updateZipFile, tmpDir.resolve("import"), tmpHive);
                 PushOperation pushOp = new PushOperation().setRemote(remote);
                 keys.forEach(pushOp::addManifest);

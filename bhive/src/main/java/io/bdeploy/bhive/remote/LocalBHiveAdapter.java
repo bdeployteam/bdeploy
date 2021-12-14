@@ -115,7 +115,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
             throw new IllegalArgumentException("File does not exist: " + zipedHive);
         }
 
-        try (BHive packed = new BHive(UriBuilder.fromUri("jar:" + zipedHive.toUri()).build(), reporter)) {
+        try (BHive packed = new BHive(UriBuilder.fromUri("jar:" + zipedHive.toUri()).build(), null, reporter)) {
             packed.execute(new CopyOperation().setDestinationHive(hive).setPartialAllowed(false));
         } catch (Exception e) {
             throw new IllegalStateException("Cannot push to local repository", e);
@@ -137,7 +137,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
             Path tmpHive = Files.createTempFile("fetch-", ".zip");
             Files.delete(tmpHive); // need to delete to re-create with ZipFileSystem
 
-            try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), reporter)) {
+            try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), null, reporter)) {
                 CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);
                 requiredObjects.forEach(op::addObject);
                 manifestsToFetch.forEach(op::addManifest);

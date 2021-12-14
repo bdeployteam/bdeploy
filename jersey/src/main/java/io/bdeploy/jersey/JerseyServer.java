@@ -51,6 +51,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.audit.Auditor;
+import io.bdeploy.common.audit.Slf4jAuditor;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VersionHelper;
@@ -60,8 +62,6 @@ import io.bdeploy.jersey.JerseyAuthenticationProvider.UserValidator;
 import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityResourceImpl;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeServerFilter;
-import io.bdeploy.jersey.audit.Auditor;
-import io.bdeploy.jersey.audit.Log4jAuditor;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitor;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringResourceImpl;
@@ -116,7 +116,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
     private final Map<HttpHandlerRegistration, HttpHandler> preRegistrations = new HashMap<>();
     private HttpServer server;
-    private Auditor auditor = new Log4jAuditor();
+    private Auditor auditor = new Slf4jAuditor();
     private final JerseyServerMonitor monitor = new JerseyServerMonitor();
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 

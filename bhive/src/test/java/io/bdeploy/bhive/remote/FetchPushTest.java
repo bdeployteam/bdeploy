@@ -40,7 +40,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
     @Test
     void rePushWithExistingRemoteRoot(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
+                BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
             try (Transaction t = local.getTransactions().begin()) {
@@ -72,7 +73,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
     @Test
     void reFetchWithExistingLocalRoot(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
+                BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
             try (Transaction t = local.getTransactions().begin()) {
@@ -109,7 +111,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
     @Test
     void pushWithExistingRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
+                BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
             try (Transaction t = local.getTransactions().begin()) {
@@ -141,7 +144,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
     @Test
     void fetchWithExistingRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
+                BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
             try (Transaction t = local.getTransactions().begin()) {
@@ -181,7 +185,7 @@ public class FetchPushTest extends RemoteHiveTestBase {
     @Test
     void pushWithPrunedRemoteLeafTree(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
         // note: the TestHive.class provided hive is used in the base class, don't use.
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r)) {
             Path src = ContentHelper.genSimpleTestTree(tmp, "app");
             Manifest.Key key = new Manifest.Key("app", "v1");
             try (Transaction t = local.getTransactions().begin()) {
@@ -213,7 +217,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
 
     @Test
     void pushFetchWithRefsClean(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
+                BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Manifest.Key root = createManifestWithRefs(tmp, local);
 
             // push the manifest to the remote.
@@ -266,7 +271,8 @@ public class FetchPushTest extends RemoteHiveTestBase {
 
     @Test
     void pushFetchWithRefsPartial(BHive target, @TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {
-        try (BHive local = new BHive(tmp.resolve("h1").toUri(), r); BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), r)) {
+        try (BHive local = new BHive(tmp.resolve("h1").toUri(), null, r);
+                BHive fetchHive = new BHive(tmp.resolve("h2").toUri(), null, r)) {
             Manifest.Key root = createManifestWithRefs(tmp, local);
 
             // first push one of the leaves

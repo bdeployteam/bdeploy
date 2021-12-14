@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.cli;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import io.bdeploy.bhive.BHive;
@@ -54,7 +55,9 @@ public class FetchTool extends RemoteServiceTool<FetchConfig> {
     protected RenderableResult run(FetchConfig config, RemoteService svc) {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter());
+        Path path = Paths.get(config.hive());
+
+        try (BHive hive = new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter());
                 Transaction t = hive.getTransactions().begin()) {
             FetchOperation op = new FetchOperation().setRemote(svc).setHiveName(config.source());
 

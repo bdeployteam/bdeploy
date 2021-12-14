@@ -569,7 +569,7 @@ task jacocoFullReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     getClassDirectories().from(files(actualSubprojects.sourceSets.main.output))
 
     rootProject.getAllTasks(true).each { p, tasks ->
-        if(p.name == 'interfaces' || p.name == 'launcher' || p.name == 'ui' || p.name == 'api') {
+        if(p.name == 'interfaces' || p.name == 'launcher' || p.name == 'ui' || p.name == 'api' || p.name == 'logging') {
             return; // no tests run in there right now.
         }
 

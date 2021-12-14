@@ -2,9 +2,9 @@ package io.bdeploy.jersey;
 
 import java.io.IOException;
 
-import io.bdeploy.jersey.audit.AuditRecord;
-import io.bdeploy.jersey.audit.AuditRecord.Severity;
-import io.bdeploy.jersey.audit.Auditor;
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.AuditRecord.Severity;
+import io.bdeploy.common.audit.Auditor;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;

@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.cli;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import io.bdeploy.bhive.BHive;
@@ -57,7 +58,8 @@ public class PushTool extends RemoteServiceTool<PushConfig> {
         helpAndFailIfMissing(config.hive(), "Missing --hive");
         helpAndFailIfMissing(config.target(), "Missing --target");
 
-        try (BHive hive = new BHive(Paths.get(config.hive()).toUri(), getActivityReporter())) {
+        Path path = Paths.get(config.hive());
+        try (BHive hive = new BHive(path.toUri(), getAuditorFactory().apply(path), getActivityReporter())) {
             PushOperation op = new PushOperation().setRemote(svc).setHiveName(config.target());
 
             for (String m : config.manifest()) {

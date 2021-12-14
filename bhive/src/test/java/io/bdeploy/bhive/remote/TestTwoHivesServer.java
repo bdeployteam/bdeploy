@@ -40,8 +40,8 @@ public class TestTwoHivesServer {
 
     @BeforeEach
     void prepare(@TempDir Path tmp, ActivityReporter r) throws Exception {
-        BHive h1 = new BHive(tmp.resolve("1").toUri(), r);
-        BHive h2 = new BHive(tmp.resolve("2").toUri(), r);
+        BHive h1 = new BHive(tmp.resolve("1").toUri(), null, r);
+        BHive h2 = new BHive(tmp.resolve("2").toUri(), null, r);
 
         registry = new BHiveRegistry(r, null);
 
@@ -85,7 +85,7 @@ public class TestTwoHivesServer {
             assertThat(r2.getManifestInventory().size(), is(1));
 
             Path testHiveDir = tmp.resolve("hive");
-            try (BHive testHive = new BHive(testHiveDir.toUri(), r); Transaction t = testHive.getTransactions().begin()) {
+            try (BHive testHive = new BHive(testHiveDir.toUri(), null, r); Transaction t = testHive.getTransactions().begin()) {
                 testHive.execute(new FetchOperation().setRemote(svc).setHiveName("h1").addManifest(key));
                 assertThat(testHive.execute(new ManifestListOperation()).size(), is(1));
             }

@@ -102,7 +102,7 @@ public class RepoResourceTest {
 
         // create zipped hive
         Path zip = tmp.resolve("tmp.zip");
-        try (BHive hive = new BHive(zip.toUri(), reporter); Transaction t = hive.getTransactions().begin()) {
+        try (BHive hive = new BHive(zip.toUri(), null, reporter); Transaction t = hive.getTransactions().begin()) {
             hive.execute(new ImportOperation().setSourcePath(sw).setManifest(swKey));
         }
 
@@ -129,7 +129,7 @@ public class RepoResourceTest {
         }
 
         Path sw2 = tmp.resolve("sw2");
-        try (BHive hive = new BHive(zip2.toUri(), reporter)) {
+        try (BHive hive = new BHive(zip2.toUri(), null, reporter)) {
             hive.execute(new ExportOperation().setManifest(swKey).setTarget(sw2));
         }
 

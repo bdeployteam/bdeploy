@@ -24,7 +24,7 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.TestServer;
-import io.bdeploy.jersey.audit.RollingFileAuditor;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.cli.InitTool;
 import io.bdeploy.minion.cli.StartTool;
 import io.bdeploy.minion.user.UserDatabase;
@@ -76,7 +76,7 @@ public class TestMinion extends TestServer {
         Builder builder = new ApiAccessToken.Builder().setIssuedTo(userName).addPermission(ApiAccessToken.ADMIN_PERMISSION);
         authPack = SecurityHelper.getInstance().createSignaturePack(builder.build(), serverStore, state.keystorePass);
 
-        setAuditor(new RollingFileAuditor(cmr.mr.getLogDir()));
+        setAuditor(RollingFileAuditor.getInstance(cmr.mr.getLogDir()));
 
         // create the server.
         super.beforeEach(context);
@@ -84,7 +84,7 @@ public class TestMinion extends TestServer {
         PluginManager pm = cmr.mr
                 .createPluginManager(getExtensionStore(context).get(CloseableServer.class, CloseableServer.class).getServer());
         BHiveRegistry reg = StartTool.registerCommonResources(this, cmr.mr, new ActivityReporter.Null());
-        StartTool.registerMasterResources(this, reg, true, cmr.mr, pm);
+        StartTool.registerMasterResources(this, reg, true, cmr.mr, pm, RollingFileAuditor.getFactory());
     }
 
     @Override

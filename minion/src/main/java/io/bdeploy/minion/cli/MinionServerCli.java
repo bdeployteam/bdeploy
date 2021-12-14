@@ -2,6 +2,7 @@ package io.bdeploy.minion.cli;
 
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.jersey.cli.LocalLoginTool;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.cli.TextUIResources;
 
 public class MinionServerCli extends ToolBase {
@@ -38,6 +39,8 @@ public class MinionServerCli extends ToolBase {
 
         // remote text UI
         TextUIResources.registerTextUi(this);
+
+        setAuditorFactory(RollingFileAuditor.getFactory());
     }
 
     public static void main(String... args) throws Exception {

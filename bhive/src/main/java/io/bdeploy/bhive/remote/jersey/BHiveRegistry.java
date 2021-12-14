@@ -19,6 +19,7 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.RuntimeAssert;
 
@@ -100,7 +101,7 @@ public class BHiveRegistry implements AutoCloseable {
     /**
      * @param location the location to scan for available {@link BHive}s (recursively).
      */
-    public void scanLocation(Path location) {
+    public void scanLocation(Path location, Function<Path, Auditor> auditorFactory) {
         locations.add(location);
 
         // find hives and register.
@@ -110,7 +111,8 @@ public class BHiveRegistry implements AutoCloseable {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot scan location: " + location, e);
         }
-        finder.hives.forEach(dir -> register(dir.getFileName().toString(), new BHive(dir.toUri(), reporter)));
+        finder.hives.forEach(
+                dir -> register(dir.getFileName().toString(), new BHive(dir.toUri(), auditorFactory.apply(dir), reporter)));
     }
 
     /**
