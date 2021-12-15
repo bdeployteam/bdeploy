@@ -64,8 +64,8 @@ import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import io.bdeploy.tea.plugin.services.BDeployApplicationBuild;
 import io.bdeploy.tea.plugin.services.BDeployApplicationDescriptor;
 import io.bdeploy.tea.plugin.services.BDeployApplicationService;
-import io.bdeploy.tea.plugin.services.BDeployProductBuild;
 import io.bdeploy.tea.plugin.services.BDeployApplicationService.CreateApplicationTasks;
+import io.bdeploy.tea.plugin.services.BDeployProductBuild;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.UriBuilder;
@@ -154,7 +154,7 @@ public class BDeployProductTaskChain implements TaskChain {
     private boolean checkProductVersion(Shell parent, BDeployTargetSpec server, BDeployConfig cfg, TaskingLog log,
             TeaBuildVersionService bvs, File hive) throws IOException {
         ActivityReporter.Stream reporter = new ActivityReporter.Stream(log.info());
-        try (BHive local = new BHive(hive.toURI(), reporter)) {
+        try (BHive local = new BHive(hive.toURI(), null, reporter)) {
             BDeployProductDescriptor desc = readProductDescriptor();
             String fullVersion = BDeployBuildProductTask.calculateVersion(bvs, cfg, desc.productTag);
 

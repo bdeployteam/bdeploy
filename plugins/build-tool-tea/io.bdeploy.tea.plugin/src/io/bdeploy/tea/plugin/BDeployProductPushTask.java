@@ -42,7 +42,7 @@ public class BDeployProductPushTask {
             throw new IllegalStateException("Server or instance group not configured, see preferences.");
         }
 
-        try (BHive bhive = new BHive(hive.toURI(), reporter)) {
+        try (BHive bhive = new BHive(hive.toURI(), null, reporter)) {
             // 1: optionally push
             log.info("Pushing result to " + svc.getUri() + " | " + target.instanceGroup);
             try (NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
