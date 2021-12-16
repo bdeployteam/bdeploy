@@ -1,4 +1,4 @@
-import { animate, animateChild, group, state, style, transition, trigger } from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { routerAnimation } from '../../animations/special';
@@ -24,7 +24,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
       state('panelVisible-lg', style({ 'margin-left': '174px', 'margin-right': '360px', 'max-width': 'calc(100% - 110px - 360px)' })),
       state('panelHidden-sm', style({ 'margin-left': '74px', 'margin-right': '10px', 'max-width': 'calc(100% - 10px - 10px)' })),
       state('panelHidden-lg', style({ 'margin-left': '174px', 'margin-right': '110px', 'max-width': 'calc(100% - 110px - 110px)' })),
-      transition('* => *', group([animate('0.2s ease'), animateChild()])),
+      transition('* => *', animate('0.2s ease')),
     ]),
   ],
 })

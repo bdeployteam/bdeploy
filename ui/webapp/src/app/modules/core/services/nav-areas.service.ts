@@ -77,7 +77,7 @@ export class NavAreasService {
         const newPrimaryState = this.getRouteId(primarySnapshot);
 
         // trigger updates of component names for those interested.
-        if (this.primaryState && newPrimaryState !== this.primaryState) {
+        if (newPrimaryState !== this.primaryState) {
           this.primaryRoute$.next(primarySnapshot);
         }
         this.panelRoute$.next(panelSnapshot);
