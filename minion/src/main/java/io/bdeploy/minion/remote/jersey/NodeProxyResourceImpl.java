@@ -7,25 +7,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.function.UnaryOperator;
 
-import jakarta.inject.Inject;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -53,6 +43,17 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import io.bdeploy.minion.MinionRoot;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 public class NodeProxyResourceImpl implements NodeProxyResource {
 
@@ -92,6 +93,14 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
             }
 
             Invocation.Builder request = target.request();
+
+            // Always replace the "host" header with "localhost". the request is *always* made on the local
+            // machine. Avoid forwarding the original host (e.g. the hostname of the original BDeploy server).
+            // Otherwise a potential SNI check will fail on the target due to hostname mismatch with certificates.
+            if (wrapper.headers.containsKey("host")) {
+                wrapper.headers.put("host", Collections.singletonList("localhost"));
+            }
+
             for (Map.Entry<String, List<String>> entry : wrapper.headers.entrySet()) {
                 for (String value : entry.getValue()) {
                     request.header(entry.getKey(), value);
