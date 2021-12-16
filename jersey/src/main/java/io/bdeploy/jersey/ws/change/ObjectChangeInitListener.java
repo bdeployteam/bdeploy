@@ -57,13 +57,17 @@ final class ObjectChangeInitListener extends WebSocketAdapter {
         try {
             token = JerseyAuthenticationProvider.validateToken(init.token, authStore);
         } catch (Exception e) {
-            log.error("Cannot parse authentication token: {}", e.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot parse authentication token: {}", e.toString());
+            }
         }
 
         kicker.cancel(false);
 
         if (token == null) {
-            log.warn("Invalid authentication from client, closing");
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid authentication from client, closing");
+            }
             s.close(Status.UNAUTHORIZED.getStatusCode(), "Invalid Authentication Token");
         } else {
             socket.remove(this); // make sure we're not called on every message received.
