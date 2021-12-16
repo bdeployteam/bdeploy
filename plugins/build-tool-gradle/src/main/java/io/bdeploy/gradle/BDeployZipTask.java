@@ -52,7 +52,7 @@ public class BDeployZipTask extends DefaultTask {
 		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
 				: new ActivityReporter.Null();
 		URI targetUri = UriBuilder.fromUri("jar:" + output.getAsFile().get().toURI()).build();
-		try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), reporter)) {
+		try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
 			local.execute(new PushOperation().setRemote(new RemoteService(targetUri)).addManifest(key.get()));
 		}
 	}

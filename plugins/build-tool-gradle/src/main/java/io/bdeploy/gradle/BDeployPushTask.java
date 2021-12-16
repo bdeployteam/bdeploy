@@ -62,7 +62,7 @@ public class BDeployPushTask extends DefaultTask {
 
 			System.out.println(" >> Pushing " + key.get() + " to " + target.getName());
 
-			try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), reporter)) {
+			try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
 				local.execute(new PushOperation().setRemote(svc).setHiveName(target.getInstanceGroup().get())
 						.addManifest(key.get()));
 			}
