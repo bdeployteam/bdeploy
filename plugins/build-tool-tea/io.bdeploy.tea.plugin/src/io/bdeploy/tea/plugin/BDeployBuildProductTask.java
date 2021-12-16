@@ -82,7 +82,7 @@ public class BDeployBuildProductTask {
         String fullVersion = calculateVersion(bvs, cfg, desc.productTag);
 
         ActivityReporter.Stream reporter = new ActivityReporter.Stream(log.info());
-        try (BHive bhive = new BHive(target.toURI(), reporter)) {
+        try (BHive bhive = new BHive(target.toURI(), null, reporter)) {
             // 1: generate product version file.
             ProductVersionDescriptor pvd = new ProductVersionDescriptor();
             pvd.version = fullVersion;

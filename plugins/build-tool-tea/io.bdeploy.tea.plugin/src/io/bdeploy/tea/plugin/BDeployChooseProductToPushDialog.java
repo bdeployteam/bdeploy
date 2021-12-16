@@ -143,7 +143,7 @@ public class BDeployChooseProductToPushDialog extends TitleAreaDialog {
         });
 
         ActivityReporter reporter = new ActivityReporter.Null();
-        try (BHive bhive = new BHive(hive.toURI(), reporter)) {
+        try (BHive bhive = new BHive(hive.toURI(), null, reporter)) {
             Set<Key> keys = bhive.execute(new ManifestListOperation());
             List<Manifest> pms = keys.stream().map(x -> bhive.execute(new ManifestLoadOperation().setManifest(x)))
                     .filter(x -> x.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)).collect(Collectors.toList());

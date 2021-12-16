@@ -33,7 +33,7 @@ public class BDeployPackageProductTask {
     void packItOrPushIt(TaskingLog log, BuildDirectories dirs) {
         ActivityReporter.Stream reporter = new ActivityReporter.Stream(log.info());
 
-        try (BHive bhive = new BHive(build.getTarget().toURI(), reporter)) {
+        try (BHive bhive = new BHive(build.getTarget().toURI(), null, reporter)) {
             // export to ZIP.
             File targetFile = new File(dirs.getProductDirectory(), build.getKey().directoryFriendlyName() + ".zip");
 
@@ -45,7 +45,7 @@ public class BDeployPackageProductTask {
             // Copy objects into the target hive
             FileUtils.delete(targetFile);
             URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toURI()).build();
-            try (BHive zipHive = new BHive(targetUri, reporter)) {
+            try (BHive zipHive = new BHive(targetUri, null, reporter)) {
                 CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
                 op.addManifest(build.getKey());
                 objectIds.forEach(op::addObject);
