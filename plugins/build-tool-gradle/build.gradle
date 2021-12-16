@@ -33,7 +33,7 @@ dependencies {
     testImplementation gradleTestKit()
 
     implementation (
-        'io.bdeploy:api:4.0.2'
+        'io.bdeploy:api:4.0.3'
     )
 }
 
