@@ -9,7 +9,7 @@
         icon="compare"
         [collapsed]="false"
         [toggle]="false"
-        [disabled]="!edit.hasSaveableChanges()"
+        [disabled]="!(edit.hasSaveableChanges$ | async)"
         [relative]="true"
         [route]="['diff']"
       ></app-bd-panel-button>
@@ -18,7 +18,7 @@
         text="Discard All Changes"
         icon="settings_backup_restore"
         (click)="doDiscard()"
-        [disabled]="!edit.hasSaveableChanges()"
+        [disabled]="!(edit.hasSaveableChanges$ | async)"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

@@ -17,6 +17,9 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /* template */ node$ = new BehaviorSubject<MinionDto>(null);
   /* template */ config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
+  /* template */ isClientNode: boolean;
+  /* template */ nodeType: string;
+  /* template */ node: string;
 
   @ViewChild('data') data: BdDataTableComponent<any>;
 
@@ -35,6 +38,9 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         this.node$.next(nodes[this.nodeName]);
       }
+      this.isClientNode = this.nodeName === CLIENT_NODE_NAME;
+      this.nodeType = this.isClientNode ? 'Virtual Node' : 'Node';
+      this.node = this.isClientNode ? 'Client Applications' : this.nodeName;
     });
   }
 
@@ -51,18 +57,6 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ isClientNode() {
-    return this.nodeName === CLIENT_NODE_NAME;
-  }
-
-  /* template */ getNodeType() {
-    return this.isClientNode() ? 'Virtual Node' : 'Node';
-  }
-
-  /* template */ getNodeName() {
-    return this.isClientNode() ? 'Client Applications' : this.nodeName;
   }
 
   /* template */ onReorder(order: DragReorderEvent<ApplicationConfiguration>) {

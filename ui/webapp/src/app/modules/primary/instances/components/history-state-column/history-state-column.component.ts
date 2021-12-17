@@ -13,18 +13,25 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
 
   private states: InstanceStateRecord;
   private subscription: Subscription;
+  /* template */ public stateTooltipText: string;
+  /* template */ public stateClass: string[];
+  /* template */ public stateIcon: string;
 
   constructor(private state: InstanceStateService) {
     this.subscription = this.state.state$.subscribe((s) => (this.states = s));
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.stateTooltipText = this.getStateTooltip();
+    this.stateClass = this.getStateClass();
+    this.stateIcon = this.getStateIcon();
+  }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  /* template */ getStateIcon() {
+  private getStateIcon() {
     if (this.states?.activeTag === this.record.instanceTag) {
       return 'check_circle'; // active
     } else if (!!this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
@@ -34,7 +41,7 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  /* template */ getStateTooltip(): string {
+  private getStateTooltip(): string {
     if (this.states?.activeTag === this.record.instanceTag) {
       return 'This version is active.'; // active
     } else if (!!this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
@@ -42,7 +49,7 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ getStateClass(): string[] {
+  private getStateClass(): string[] {
     if (this.states?.activeTag === this.record.instanceTag) {
       return [];
     }

@@ -31,7 +31,7 @@
           <div>{{ entry.runtimeEvent.exitCode }}</div>
         </ng-container>
       </div>
-      <ng-container *ngIf="isCreate(entry)">
+      <ng-container *ngIf="isCreate">
         <app-bd-panel-button
           [collapsed]="false"
           [toggle]="false"
@@ -96,7 +96,7 @@
             text="Install"
             icon="layers"
             color="primary"
-            [disabled]="(installing$ | async) || isInstalled() || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)"
+            [disabled]="(installing$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)"
             (click)="doInstall()"
             [loadingWhen$]="installing$"
           ></app-bd-button>
@@ -106,7 +106,7 @@
             icon="star"
             color="primary"
             [disabled]="
-              (activating$ | async) || !isInstalled() || isActive() || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
+              (activating$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
             (click)="doActivate()"
             [loadingWhen$]="activating$"
@@ -116,11 +116,7 @@
             text="Uninstall"
             icon="layers_clear"
             [disabled]="
-              (uninstalling$ | async) ||
-              !isInstalled() ||
-              isActive() ||
-              !(servers.isCurrentInstanceSynchronized$ | async) ||
-              !(auth.isCurrentScopeWrite$ | async)
+              (uninstalling$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
             (click)="doUninstall()"
             [loadingWhen$]="uninstalling$"

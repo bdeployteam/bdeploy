@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { applyChangeset, Changeset, diff } from 'json-diff-ts';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, forkJoin, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, forkJoin, Observable, Subject } from 'rxjs';
 import { debounceTime, finalize, first, tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
@@ -113,6 +113,8 @@ export class InstanceEditService {
   private issuesSubject$ = new Subject<ApplicationValidationDto[]>();
 
   public current$ = new BehaviorSubject<InstanceDto>(null);
+  public hasSaveableChanges$ = new BehaviorSubject<boolean>(false);
+  public hasCurrentProduct$ = new BehaviorSubject<boolean>(false);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
@@ -139,6 +141,14 @@ export class InstanceEditService {
           this.reset();
         }
       }
+
+      combineLatest([this.undo$, this.redo$]).subscribe(() => {
+        this.hasSaveableChanges$.next(this.hasSaveableChanges());
+      });
+
+      this.state$.subscribe(() => {
+        this.hasCurrentProduct$.next(this.hasCurrentProduct());
+      });
     });
 
     this.areas.panelRoute$.subscribe((route) => {
@@ -291,7 +301,7 @@ export class InstanceEditService {
    *
    * @returns  whether there is one or more concealed changes.
    */
-  public hasSaveableChanges(): boolean {
+  private hasSaveableChanges(): boolean {
     return this.undos.length > 0;
   }
 
@@ -488,7 +498,7 @@ export class InstanceEditService {
       });
   }
 
-  public hasCurrentProduct() {
+  private hasCurrentProduct() {
     return !this.state$.value?.config?.config?.product?.name
       ? false
       : !!this.products.products$.value.find(

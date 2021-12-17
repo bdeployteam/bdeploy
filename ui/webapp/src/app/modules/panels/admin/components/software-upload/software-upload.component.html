@@ -6,7 +6,7 @@
       <app-bd-file-upload
         *ngFor="let file of files; let i = index"
         [file]="file"
-        [url]="software.getUploadUrl()"
+        [url]="software.uploadUrl$ | async"
         (dismiss)="onDismiss(i)"
         (success)="software.load()"
       ></app-bd-file-upload>

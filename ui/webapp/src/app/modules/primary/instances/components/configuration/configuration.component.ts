@@ -95,7 +95,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
           this.clientNode$.next(null);
         } else {
           this.config$.next(state.config.config);
-          this.headerName$.next(this.edit.hasPendingChanges() || this.edit.hasSaveableChanges() ? `${state.config.config.name}*` : state.config.config.name);
+          this.headerName$.next(
+            this.edit.hasPendingChanges() || this.edit.hasSaveableChanges$.value ? `${state.config.config.name}*` : state.config.config.name
+          );
 
           this.serverNodes$.next(state.config.nodeDtos.filter((p) => !this.isClientNode(p)).sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)));
           this.clientNode$.next(state.config.nodeDtos.find((n) => this.isClientNode(n)));
@@ -120,7 +122,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     // don't check pending changes - those have to be handled in panels, or concealed directly (e.g. process move).
     // if pending unconcealed changes are present we ignore them. otherwise a "unsaved changes" dialog will pop up
     // in the main dialog instead of the panel containing the changes.
-    return this.edit.hasSaveableChanges();
+    return this.edit.hasSaveableChanges$.value;
   }
 
   /* template */ onSave() {

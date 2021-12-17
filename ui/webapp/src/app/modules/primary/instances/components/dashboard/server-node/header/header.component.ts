@@ -46,7 +46,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(private instances: InstancesService, private servers: ServersService) {}
+  constructor(private instances: InstancesService, public servers: ServersService) {}
 
   ngOnInit(): void {
     this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
@@ -217,14 +217,5 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
       return 100 - perc; // from the right side.
     }
     return 0; // outside, don't render
-  }
-
-  /* template */ isSynchronized() {
-    const active = this.instances.active$.value;
-    if (!active) {
-      return false;
-    }
-
-    return this.servers.isSynchronized(active.managedServer);
   }
 }

@@ -7,8 +7,8 @@
       <app-bd-file-upload-raw
         *ngFor="let file of files; let i = index"
         [file]="file"
-        [uploadUrl]="repositoryService.getUploadURL()"
-        [importUrl]="repositoryService.getImportURL()"
+        [uploadUrl]="repositoryService.uploadUrl$ | async"
+        [importUrl]="repositoryService.importUrl$ | async"
         (dismiss)="onDismiss(i)"
       ></app-bd-file-upload-raw>
     </div>

@@ -19,13 +19,10 @@ export class ProductsService {
   private subscription: Subscription;
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
+  public uploadUrl$ = new BehaviorSubject<string>(null);
 
   constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, groups: GroupsService) {
     groups.current$.subscribe((group) => this.load(group?.name));
-  }
-
-  public getUploadURL() {
-    return `${this.apiPath(this.group)}/upload`;
   }
 
   public loadApplications(prod: ProductDto): Observable<ApplicationDto[]> {
@@ -50,6 +47,7 @@ export class ProductsService {
     }
 
     this.group = group;
+    this.uploadUrl$.next(`${this.apiPath(this.group)}/upload`);
     this.loading$.next(true);
     this.http
       .get<ProductDto[]>(`${this.apiPath(group)}/list`)

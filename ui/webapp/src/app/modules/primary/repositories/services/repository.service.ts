@@ -17,6 +17,8 @@ export class RepositoryService {
 
   private productsApiPath = (r) => `${this.cfg.config.api}/group/${r}/product`;
   private softwareRepositoryApiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}/content`;
+  public uploadUrl$ = new BehaviorSubject<string>(null);
+  public importUrl$ = new BehaviorSubject<string>(null);
 
   private update$ = new BehaviorSubject<any>(null);
 
@@ -45,14 +47,6 @@ export class RepositoryService {
     this.update$.pipe(debounceTime(100)).subscribe((r) => this.reload(r));
   }
 
-  public getUploadURL() {
-    return `${this.softwareRepositoryApiPath(this.repository)}/upload-raw-content`;
-  }
-
-  public getImportURL() {
-    return `${this.softwareRepositoryApiPath(this.repository)}/import-raw-content`;
-  }
-
   private reload(repository: string) {
     if (!repository) {
       this.products$.next([]);
@@ -66,6 +60,8 @@ export class RepositoryService {
     }
 
     this.repository = repository;
+    this.uploadUrl$.next(`${this.softwareRepositoryApiPath(this.repository)}/upload-raw-content`);
+    this.importUrl$.next(`${this.softwareRepositoryApiPath(this.repository)}/import-raw-content`);
 
     this.reloadProducts();
     this.reloadSoftwarePackages();

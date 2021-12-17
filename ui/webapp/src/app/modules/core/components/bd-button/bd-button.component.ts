@@ -56,29 +56,4 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
-  /* template */ getColorClass(): string | string[] {
-    if (this.isToggle) {
-      if (this.toggle) {
-        return 'bd-toggle-highlight';
-      }
-    }
-
-    if (!this.color) {
-      return 'local-button-no-color'; // no color class, but we want to inherit text color
-    }
-
-    switch (this.color) {
-      case 'toolbar':
-        return 'local-button-color-toolbar';
-      case 'inherit':
-        return 'local-button-color-inherit';
-      case 'warn':
-        return 'local-button-color-warn';
-      case 'accent':
-        return 'local-button-color-accent';
-      case 'primary':
-        return 'local-button-color-primary';
-    }
-  }
 }
