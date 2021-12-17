@@ -120,9 +120,8 @@ public class PluginResourceImpl implements PluginResource {
                     return info;
                 }
             } catch (Throwable e) {
-                log.warn("Cannot load plugin from {}: {}: {}", product, plugin, e.toString());
                 if (log.isDebugEnabled()) {
-                    log.debug("Exception", e);
+                    log.debug("Cannot load plugin from {}: {}", product, plugin, e);
                 }
             }
         }

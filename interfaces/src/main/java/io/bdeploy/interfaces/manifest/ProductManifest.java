@@ -185,7 +185,9 @@ public class ProductManifest {
         if (app.template != null) {
             var parent = appTemplates.stream().filter(t -> app.template.equals(t.id)).findFirst();
             if (!parent.isPresent()) {
-                log.error("Template error. Cannot find template {}", app.template);
+                if (log.isDebugEnabled()) {
+                    log.debug("Template error. Cannot find template {}", app.template);
+                }
                 return;
             }
             var parentDesc = parent.get();
