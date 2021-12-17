@@ -15,7 +15,7 @@ enum DirtyActionType {
 const actCancel: BdDialogMessageAction<DirtyActionType> = {
   name: 'Stay',
   result: DirtyActionType.CANCEL,
-  confirm: false,
+  confirm: true,
 };
 
 const actDiscard: BdDialogMessageAction<DirtyActionType> = {

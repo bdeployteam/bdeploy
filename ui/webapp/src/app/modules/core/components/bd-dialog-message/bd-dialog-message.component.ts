@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
@@ -10,7 +10,11 @@ export interface BdDialogMessageAction<T> {
   /** The value emitted as dialog result in case this action is chosen */
   result: T;
 
-  /** Whether the action is a confirmation action, meaning it must be disabled if a confirmation value is given until the user correctly entered it */
+  /**
+   * Whether the action is a confirmation action, meaning it must be disabled if a confirmation value is given
+   * until the user correctly entered it. Additionally this action can be triggered using the Enter key if (and
+   * only if) this action is the sole confirmation action given.
+   */
   confirm: boolean;
 
   /** Whether the action is currently disabled or not */
@@ -101,6 +105,17 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
       this.message$.next(null);
       this._userConfirmation = '';
     }
+  }
+
+  @HostListener('window:keyup.Enter', ['$event'])
+  private onEnterPress(event: KeyboardEvent): void {
+    // find single confirm action.
+    const x = this.message$.value?.actions?.filter((a) => a.confirm);
+    if (x?.length !== 1) {
+      return; // do nothing, none or multiple confirming actions, don't know which to press :)
+    }
+
+    this.complete(x[0].result);
   }
 
   public complete(result: any) {

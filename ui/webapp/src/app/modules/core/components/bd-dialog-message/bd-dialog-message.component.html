@@ -32,6 +32,7 @@
           *ngFor="let action of msg.actions"
           [text]="action.name"
           [collapsed]="false"
+          [color]="action.confirm ? 'primary' : null"
           (click)="complete(action.result)"
           [disabled]="(action.confirm && (!(confirmed$ | async) || (msg.validation && !msg.validation()))) || (!!action.disabled && action.disabled())"
         ></app-bd-button>
