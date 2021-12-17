@@ -150,6 +150,9 @@ export class ProcessEditService {
 
     if (!desc) {
       // custom parameter;
+      if (!strValue?.length) {
+        return [];
+      }
       return [strValue];
     }
 
