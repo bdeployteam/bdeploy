@@ -1,7 +1,7 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Instance Banner" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instances.current$ | async)?.managedServer)">
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isCurrentInstanceSynchronized$ | async">
       <div>A banner provides a version independent way of bringing information to other users attention.</div>
 
       <app-bd-banner [banner]="banner"></app-bd-banner>
@@ -36,7 +36,7 @@
     </div>
     <app-bd-notification-card
       icon="history"
-      *ngIf="!servers.isSynchronized((instances.current$ | async)?.managedServer)"
+      *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
       [warning]="true"
       [dismissable]="false"
       header="Server Not Synchronized"

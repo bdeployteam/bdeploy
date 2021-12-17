@@ -488,13 +488,12 @@ export class InstanceEditService {
       });
   }
 
-  public hasCurrentProduct(): boolean {
-    if (!this.state$.value?.config?.config?.product?.name) {
-      return false;
-    }
-    return !!this.products.products$.value.find(
-      (p) => p.key.name === this.state$.value.config.config.product.name && p.key.tag === this.state$.value.config.config.product.tag
-    );
+  public hasCurrentProduct() {
+    return !this.state$.value?.config?.config?.product?.name
+      ? false
+      : !!this.products.products$.value.find(
+          (p) => p.key.name === this.state$.value.config.config.product.name && p.key.tag === this.state$.value.config.config.product.tag
+        );
   }
 
   public getApplicationConfiguration(uid: string) {

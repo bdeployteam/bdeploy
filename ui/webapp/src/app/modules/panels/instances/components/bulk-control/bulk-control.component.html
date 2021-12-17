@@ -7,41 +7,43 @@
       [warning]="true"
       [dismissable]="false"
       header="Server Not Synchronized"
-      *ngIf="!servers.isSynchronized(instance.managedServer)"
+      *ngIf="!(servers.isCurrentInstanceSynchronized$ | async); else currentInstanceSynchronized"
     >
       <div [style.text-align]="'justify'">
         The managed server responsible for this instance is not synchronized, bulk controls are unavailable. Please synchronize the server to use these
         controls.
       </div>
     </app-bd-notification-card>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized(instance.managedServer)">
-      <app-bd-button
-        [collapsed]="false"
-        fontSet="material-icons-filled"
-        icon="play_arrow"
-        text="Start Instance"
-        (click)="doStart(instance)"
-        [loadingWhen$]="starting$"
-        [disabled]="starting$ | async"
-      ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        fontSet="material-icons-filled"
-        icon="stop"
-        text="Stop Instance"
-        (click)="doStop(instance)"
-        [loadingWhen$]="stopping$"
-        [disabled]="stopping$ | async"
-      ></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        fontSet="material-icons-filled"
-        icon="replay"
-        text="Restart Instance"
-        (click)="doRestart(instance)"
-        [loadingWhen$]="restarting$"
-        [disabled]="restarting$ | async"
-      ></app-bd-button>
-    </div>
+    <ng-template #currentInstanceSynchronized>
+      <div fxLayout="column" fxLayoutGap="10px">
+        <app-bd-button
+          [collapsed]="false"
+          fontSet="material-icons-filled"
+          icon="play_arrow"
+          text="Start Instance"
+          (click)="doStart(instance)"
+          [loadingWhen$]="starting$"
+          [disabled]="starting$ | async"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          fontSet="material-icons-filled"
+          icon="stop"
+          text="Stop Instance"
+          (click)="doStop(instance)"
+          [loadingWhen$]="stopping$"
+          [disabled]="stopping$ | async"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          fontSet="material-icons-filled"
+          icon="replay"
+          text="Restart Instance"
+          (click)="doRestart(instance)"
+          [loadingWhen$]="restarting$"
+          [disabled]="restarting$ | async"
+        ></app-bd-button>
+      </div>
+    </ng-template>
   </app-bd-dialog-content>
 </app-bd-dialog>

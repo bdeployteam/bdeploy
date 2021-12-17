@@ -10,7 +10,7 @@
         [toggle]="false"
         [route]="['edit']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeAdmin()"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-panel-button>
 
       <app-bd-panel-button
@@ -20,7 +20,7 @@
         [toggle]="false"
         [route]="['attributes', 'values']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite()"
+        [disabled]="!(auth.isCurrentScopeWrite$ | async)"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Instance Attribute Definitions"
@@ -29,7 +29,7 @@
         [toggle]="false"
         [route]="['attributes', 'definitions']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeAdmin()"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-panel-button>
 
       <app-bd-panel-button
@@ -39,7 +39,7 @@
         [toggle]="false"
         [route]="['permissions']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeAdmin()"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-panel-button>
 
       <ng-container *ngIf="groups.current$ | async as group">
@@ -51,7 +51,7 @@
           [collapsed]="false"
           (click)="onRepair(group)"
           [loadingWhen$]="repairing$"
-          [disabled]="!auth.isCurrentScopeAdmin() || (repairing$ | async)"
+          [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (repairing$ | async)"
         ></app-bd-button>
         <app-bd-button
           text="Prune unused data in BHive"
@@ -59,14 +59,14 @@
           [collapsed]="false"
           (click)="onPrune(group)"
           [loadingWhen$]="pruning$"
-          [disabled]="!auth.isCurrentScopeWrite() || (pruning$ | async)"
+          [disabled]="!(auth.isCurrentScopeWrite$ | async) || (pruning$ | async)"
         ></app-bd-button>
         <app-bd-button
           text="Delete Instance Group"
           icon="delete"
           [collapsed]="false"
           (click)="onDelete(group)"
-          [disabled]="!auth.isCurrentScopeAdmin() || (deleting$ | async)"
+          [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (deleting$ | async)"
           [loadingWhen$]="deleting$"
         ></app-bd-button>
       </ng-container>

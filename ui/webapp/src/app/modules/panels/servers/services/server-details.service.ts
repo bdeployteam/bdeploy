@@ -14,7 +14,9 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 // inter-browser support only works with text/plain...
 export const ATTACH_MIME_TYPE = 'text/plain';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class ServerDetailsService implements OnDestroy {
   private apiPath = `${this.cfg.config.api}/managed-servers`;
   private serverName$ = new BehaviorSubject<string>(null);

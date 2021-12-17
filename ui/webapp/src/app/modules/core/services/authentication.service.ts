@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiAccessToken, CredentialsApi, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
@@ -15,8 +15,28 @@ export class AuthenticationService {
   private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(this.cookies.check('st') ? this.cookies.get('st') : null);
 
   public userInfoSubject: BehaviorSubject<UserInfo> = new BehaviorSubject(null);
+  public isCurrentScopedExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isCurrentScopeWrite$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isCurrentScopeAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isGlobalAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isGlobalExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private cookies: CookieService, private areas: NavAreasService) {}
+  constructor(private cfg: ConfigService, private http: HttpClient, private cookies: CookieService, private areas: NavAreasService) {
+    combineLatest([areas.groupContext$, areas.repositoryContext$]).subscribe(([groupContext, repositoryContext]) => {
+      if (groupContext || repositoryContext) {
+        this.isCurrentScopeAdmin$.next(this.isCurrentScopeAdmin());
+        this.isCurrentScopeWrite$.next(this.isCurrentScopeWrite());
+      }
+      if (groupContext) {
+        this.isCurrentScopedExclusiveReadClient$.next(this.isCurrentScopeExclusiveReadClient());
+      }
+    });
+
+    this.tokenSubject.subscribe(() => {
+      this.isGlobalAdmin$.next(this.isGlobalAdmin());
+      this.isGlobalExclusiveReadClient$.next(this.isGlobalExclusiveReadClient());
+    });
+  }
 
   authenticate(username: string, password: string): Observable<any> {
     return this.http
@@ -120,7 +140,7 @@ export class AuthenticationService {
     return false;
   }
 
-  isCurrentScopeAdmin(): boolean {
+  private isCurrentScopeAdmin(): boolean {
     const scope = !!this.areas.groupContext$.value ? this.areas.groupContext$.value : this.areas.repositoryContext$.value;
     if (!scope) {
       throw new Error('No scope currently active');

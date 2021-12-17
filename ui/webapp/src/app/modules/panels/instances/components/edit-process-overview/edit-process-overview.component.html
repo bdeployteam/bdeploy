@@ -1,7 +1,7 @@
 <app-bd-dialog [loadingWhen$]="instanceEdit.loading$">
   <app-bd-dialog-toolbar header="Edit {{ (edit.process$ | async)?.name }}" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)">
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized">
       <app-bd-panel-button
         text="Configure Parameters"
         icon="settings"
@@ -29,16 +29,12 @@
       <app-bd-button text="Copy to Clipboard" icon="content_copy" [collapsed]="false" (click)="doCopy()" [disabled]="!(edit.process$ | async)"></app-bd-button>
       <app-bd-button text="Delete" icon="delete" [collapsed]="false" (click)="doDelete()" [disabled]="!(edit.process$ | async)"></app-bd-button>
     </div>
-    <app-bd-notification-card
-      icon="history"
-      *ngIf="!servers.isSynchronized((instanceEdit.current$ | async)?.managedServer)"
-      [warning]="true"
-      [dismissable]="false"
-      header="Server Not Synchronized"
-    >
-      <div [style.text-align]="'justify'">
-        The managed server responsible for the selected node is not synchronized. Please synchronize the server to continue editing.
-      </div>
-    </app-bd-notification-card>
+    <ng-template #currentInstanceIsNotSynchronized>
+      <app-bd-notification-card icon="history" [warning]="true" [dismissable]="false" header="Server Not Synchronized">
+        <div [style.text-align]="'justify'">
+          The managed server responsible for the selected node is not synchronized. Please synchronize the server to continue editing.
+        </div>
+      </app-bd-notification-card>
+    </ng-template>
   </app-bd-dialog-content>
 </app-bd-dialog>

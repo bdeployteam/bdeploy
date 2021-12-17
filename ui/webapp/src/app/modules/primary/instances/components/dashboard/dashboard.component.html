@@ -18,7 +18,7 @@
       >
       <ng-container *ngIf="narrow$ | async">Ver.: {{ inst.activeVersion.tag }}</ng-container>
     </div>
-    <ng-container *ngIf="(instances.active$ | async)?.managedServer?.update?.updateAvailable && auth.isCurrentScopeAdmin()">
+    <ng-container *ngIf="(instances.active$ | async)?.managedServer?.update?.updateAvailable && (auth.isCurrentScopeAdmin$ | async)">
       <app-bd-button
         text="Server Update Available"
         icon="system_update"
@@ -64,7 +64,13 @@
       (toggleChange)="collapsed$.next($event)"
       tooltip="below"
     ></app-bd-button>
-    <app-bd-panel-button text="Bulk Control" icon="library_add_check" [route]="['panels', 'instances', 'bulk-control']" tooltip="below"></app-bd-panel-button>
+    <app-bd-panel-button
+      text="Bulk Control"
+      icon="library_add_check"
+      [route]="['panels', 'instances', 'bulk-control']"
+      tooltip="below"
+      [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
+    ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <ng-container *ngIf="instances.current$ | async as current">
@@ -90,7 +96,7 @@
                 icon="layers"
                 (click)="doInstall(current.instance.tag)"
                 [collapsed]="isInstalled(current.instance.tag)"
-                [disabled]="(installing$ | async) || isInstalled(current.instance.tag) || !auth.isCurrentScopeWrite()"
+                [disabled]="(installing$ | async) || isInstalled(current.instance.tag) || !(auth.isCurrentScopeWrite$ | async)"
                 [loadingWhen$]="installing$"
                 tooltip="below"
               ></app-bd-button>
@@ -101,7 +107,7 @@
                 icon="star"
                 (click)="doActivate(current.instance.tag)"
                 [collapsed]="!isInstalled(current.instance.tag)"
-                [disabled]="(activating$ | async) || !isInstalled(current.instance.tag) || !auth.isCurrentScopeWrite()"
+                [disabled]="(activating$ | async) || !isInstalled(current.instance.tag) || !(auth.isCurrentScopeWrite$ | async)"
                 [loadingWhen$]="activating$"
                 tooltip="below"
               ></app-bd-button>
@@ -126,7 +132,7 @@
               icon="settings"
               [collapsed]="false"
               [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
-              [disabled]="!auth.isCurrentScopeWrite()"
+              [disabled]="!(auth.isCurrentScopeWrite$ | async)"
             ></app-bd-button>
           </app-bd-no-data>
           <app-instance-server-node
@@ -159,7 +165,7 @@
           icon="settings"
           [collapsed]="false"
           [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
-          [disabled]="!auth.isCurrentScopeWrite()"
+          [disabled]="!(auth.isCurrentScopeWrite$ | async)"
         ></app-bd-button>
       </app-bd-no-data>
     </ng-container>

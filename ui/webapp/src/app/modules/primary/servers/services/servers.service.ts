@@ -27,6 +27,8 @@ export class ServersService {
   private group: string;
   private subscription: Subscription;
   private isCentral: boolean = false;
+  public isCurrentInstanceSynchronized$ = new BehaviorSubject<boolean>(true);
+  public isServerDetailsSynchronized$ = new BehaviorSubject<boolean>(true);
 
   private update$ = new BehaviorSubject<string>(null);
 
@@ -69,7 +71,9 @@ export class ServersService {
         finalize(() => this.loading$.next(false)),
         measure('Managed Server Load')
       )
-      .subscribe((s) => this.servers$.next(s));
+      .subscribe((s) => {
+        this.servers$.next(s);
+      });
   }
 
   public synchronize(server: ManagedMasterDto): Observable<ManagedMasterDto> {
@@ -96,6 +100,14 @@ export class ServersService {
       return this.getSynchronizedOffset(server) <= SYNC_TIMEOUT;
     }
     return true;
+  }
+
+  public updateInstanceSyncState(server: ManagedMasterDto) {
+    this.isCurrentInstanceSynchronized$.next(this.isSynchronized(server));
+  }
+
+  public updateServerSyncState(server: ManagedMasterDto) {
+    this.isServerDetailsSynchronized$.next(this.isSynchronized(server));
   }
 
   public getRemainingSynchronizedTime(server: ManagedMasterDto): number {

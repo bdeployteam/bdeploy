@@ -9,13 +9,11 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Data Files - {{ (instances.current$ | async)?.instanceConfiguration?.name }}">
+  <app-bd-dialog-toolbar header="Data Files - {{ instance?.instanceConfiguration?.name }}">
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="cfg.isCentral$ | async">
-      <ng-container *ngIf="instances.current$ | async as instance">
-        <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
-        <mat-divider [vertical]="true"></mat-divider>
-      </ng-container>
+      <app-bd-server-sync-button [server]="instance?.managedServer"></app-bd-server-sync-button>
+      <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <app-bd-button
       text="Add File"
@@ -23,7 +21,7 @@
       color="primary"
       icon="add"
       (click)="doAddFile(addDialog)"
-      [disabled]="(loading$ | async) || (noactive$ | async) || !authService.isCurrentScopeWrite()"
+      [disabled]="(loading$ | async) || (noactive$ | async) || !(authService.isCurrentScopeWrite$ | async)"
     ></app-bd-button>
     <app-bd-button
       text="Refresh"
@@ -35,11 +33,11 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <ng-container *ngIf="noactive$ | async">
+    <ng-container *ngIf="noactive$ | async; else active">
       <app-bd-no-data>The current instance does not have an active version yet. Data Files not yet available.</app-bd-no-data>
     </ng-container>
-    <ng-container *ngIf="!(noactive$ | async)">
-      <ng-container *ngIf="servers.isSynchronized((instances.current$ | async)?.managedServer)">
+    <ng-template #active>
+      <ng-container *ngIf="servers.isCurrentInstanceSynchronized$ | async; else isNotSynchronized">
         <app-bd-data-table
           [records]="records$ | async"
           [columns]="columns"
@@ -53,7 +51,7 @@
             <app-bd-button
               text="Refresh"
               icon="refresh"
-              (click)="load(this.instance)"
+              (click)="load(instance)"
               [collapsed]="false"
               [loadingWhen$]="loading$"
               [disabled]="loading$ | async"
@@ -61,15 +59,16 @@
           </app-bd-no-data>
         </app-bd-data-table>
       </ng-container>
-    </ng-container>
-
-    <app-bd-no-data *ngIf="!servers.isSynchronized((instances.current$ | async)?.managedServer)">
-      <p [style.text-align]="'center'">
-        <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
-        <strong>{{ (instances.current$ | async).managedServer.hostName }}</strong>
-      </p>
-      <p>Synchronize the instance to view data files.</p>
-      <app-bd-server-sync-button [collapsed]="false" [server]="(instances.current$ | async).managedServer"></app-bd-server-sync-button>
-    </app-bd-no-data>
+    </ng-template>
+    <ng-template #isNotSynchronized>
+      <app-bd-no-data>
+        <p [style.text-align]="'center'">
+          <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
+          <strong>{{ instance?.managedServer?.hostName }}</strong>
+        </p>
+        <p>Synchronize the instance to view data files.</p>
+        <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
+      </app-bd-no-data>
+    </ng-template>
   </app-bd-dialog-content>
 </app-bd-dialog>

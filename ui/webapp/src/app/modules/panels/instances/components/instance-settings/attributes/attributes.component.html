@@ -10,7 +10,7 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <app-bd-notification-card
-        *ngIf="!servers.isSynchronized(instance?.managedServer)"
+        *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
         icon="history"
         [warning]="true"
         [dismissable]="false"
@@ -31,7 +31,7 @@
         icon="edit"
         [collapsed]="false"
         (click)="showAddDialog(addTemplate)"
-        [disabled]="!servers.isSynchronized(instance?.managedServer)"
+        [disabled]="!(servers.isCurrentInstanceSynchronized$ | async)"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

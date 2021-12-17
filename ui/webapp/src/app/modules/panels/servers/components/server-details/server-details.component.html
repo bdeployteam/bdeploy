@@ -20,10 +20,20 @@
         </ng-container>
       </div>
       <ng-container *ngIf="server.update?.updateAvailable">
-        <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server) && !server.update.forceUpdate">
+        <div
+          gdGap="10px"
+          gdColumns="24px auto"
+          gdAlignColumns="start center"
+          *ngIf="!(servers.isServerDetailsSynchronized$ | async) && !server.update.forceUpdate"
+        >
           <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize to enable update related actions.
         </div>
-        <div gdGap="10px" gdColumns="24px auto" gdAlignColumns="start center" *ngIf="!servers.isSynchronized(server) && server.update.forceUpdate">
+        <div
+          gdGap="10px"
+          gdColumns="24px auto"
+          gdAlignColumns="start center"
+          *ngIf="!(servers.isServerDetailsSynchronized$ | async) && server.update.forceUpdate"
+        >
           <mat-icon class="bd-warning-text">warning</mat-icon>A major version update must be installed to re-enable synchronizing.
         </div>
         <div class="bd-description-text" [style.text-align]="'justify'">
@@ -34,7 +44,11 @@
           text="Transfer Update Package"
           icon="cloud_upload"
           [collapsed]="false"
-          [disabled]="(transfering$ | async) || !server.update.packagesToTransfer?.length || !(servers.isSynchronized(server) || server.update.forceUpdate)"
+          [disabled]="
+            (transfering$ | async) ||
+            !server.update.packagesToTransfer?.length ||
+            !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)
+          "
           [loadingWhen$]="transfering$"
           (click)="doUpdateTransfer(server)"
           [matTooltip]="!server.update.packagesToTransfer?.length ? 'All packages have already been transfered' : null"
@@ -45,7 +59,7 @@
           icon="system_update"
           [collapsed]="false"
           color="primary"
-          [disabled]="(installing$ | async) || !(servers.isSynchronized(server) || server.update.forceUpdate)"
+          [disabled]="(installing$ | async) || !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)"
           [loadingWhen$]="installing$"
           (click)="doUpdateInstall(server)"
         ></app-bd-button>
@@ -71,7 +85,7 @@
         text="Delete"
         icon="delete"
         (click)="doDelete(server)"
-        [disabled]="!auth.isCurrentScopeAdmin() || (loading$ | async)"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (loading$ | async)"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

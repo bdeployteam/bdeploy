@@ -10,7 +10,7 @@
         [toggle]="false"
         [route]="['edit']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeWrite()"
+        [disabled]="!(auth.isCurrentScopeWrite$ | async)"
       ></app-bd-panel-button>
 
       <app-bd-panel-button
@@ -20,7 +20,7 @@
         [toggle]="false"
         [route]="['permissions']"
         [relative]="true"
-        [disabled]="!auth.isCurrentScopeAdmin()"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-panel-button>
 
       <app-bd-button
@@ -29,7 +29,7 @@
         icon="delete"
         [collapsed]="false"
         (click)="onDelete(repository)"
-        [disabled]="!auth.isGlobalAdmin() || (deleting$ | async)"
+        [disabled]="!(auth.isGlobalAdmin$ | async) || (deleting$ | async)"
         [loadingWhen$]="deleting$"
       ></app-bd-button>
     </div>

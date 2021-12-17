@@ -57,7 +57,6 @@ export class DataFilesComponent implements OnInit, OnDestroy {
     width: '50px',
     actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
   };
-
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ records$ = new BehaviorSubject<FileListEntry[]>(null);
   /* template */ noactive$ = new BehaviorSubject<boolean>(true);
@@ -94,7 +93,6 @@ export class DataFilesComponent implements OnInit, OnDestroy {
       if (isCentral && !srvs?.length) {
         return;
       }
-
       this.load(inst);
     });
 

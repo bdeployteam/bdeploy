@@ -2,6 +2,8 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { ServerDetailsService } from 'src/app/modules/panels/servers/services/server-details.service';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { AuthenticationService } from '../../services/authentication.service';
 
@@ -23,7 +25,12 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   private interval;
   private sub: Subscription;
 
-  constructor(private servers: ServersService, private auth: AuthenticationService) {}
+  constructor(
+    private serverDetailsService: ServerDetailsService,
+    private servers: ServersService,
+    private auth: AuthenticationService,
+    private instancesService: InstancesService
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.servers.servers$.subscribe((_) => {
@@ -40,11 +47,25 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     this.sub.unsubscribe();
   }
 
+  updateSyncState() {
+    const instance = this.instancesService.current$?.value?.managedServer || this.instancesService.active$?.value?.managedServer;
+    if (instance) {
+      this.servers.updateInstanceSyncState(instance);
+    }
+    if (this.serverDetailsService.server$?.value) {
+      this.servers.updateServerSyncState(this.serverDetailsService.server$?.value);
+    }
+  }
+
   /* template */ doSynchronize(server: ManagedMasterDto) {
     this.synchronizing$.next(true);
     this.servers
       .synchronize(server)
-      .pipe(finalize(() => this.synchronizing$.next(false)))
+      .pipe(
+        finalize(() => {
+          this.synchronizing$.next(false);
+        })
+      )
       .subscribe();
   }
 
@@ -52,13 +73,13 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     if (!this.server) {
       return;
     }
-
+    const isSynchronized = this.servers.isSynchronized(this.server);
     this.noPerm$.next(false);
-    if (!this.servers.isSynchronized(this.server) && this.server?.update?.forceUpdate) {
+    if (!isSynchronized && this.server?.update?.forceUpdate) {
       this.sync$.next(false);
       this.tooltip$.next('The server requires a mandatory update before synchronization is possible.');
       this.badge$.next(null);
-    } else if (!this.servers.isSynchronized(this.server)) {
+    } else if (!isSynchronized) {
       this.sync$.next(false);
       this.tooltip$.next('The server is not synchronized. Click to synchronize now');
       this.badge$.next(null);
@@ -81,5 +102,6 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
       this.tooltip$.next('Insufficient permissions to synchronize.');
       this.noPerm$.next(true);
     }
+    this.updateSyncState();
   }
 }

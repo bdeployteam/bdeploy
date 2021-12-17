@@ -4,7 +4,7 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <app-bd-notification-card
-        *ngIf="!servers.isSynchronized(edit.current$.value?.managedServer)"
+        *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
         icon="history"
         [warning]="true"
         [dismissable]="false"
@@ -30,7 +30,7 @@
           icon="done"
           [collapsed]="false"
           color="primary"
-          [disabled]="!edit.hasPendingChanges() || !servers.isSynchronized(edit.current$.value?.managedServer)"
+          [disabled]="!edit.hasPendingChanges() || !(servers.isCurrentInstanceSynchronized$ | async)"
         ></app-bd-button>
       </form>
     </div>

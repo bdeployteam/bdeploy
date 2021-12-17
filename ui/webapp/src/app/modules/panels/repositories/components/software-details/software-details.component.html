@@ -63,7 +63,13 @@
         [loadingWhen$]="preparing$"
         [disabled]="preparing$ | async"
       ></app-bd-button>
-      <app-bd-button [collapsed]="false" text="Delete" icon="delete" (click)="doDelete(software)" [disabled]="!auth.isCurrentScopeAdmin()"></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        text="Delete"
+        icon="delete"
+        (click)="doDelete(software)"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -17,7 +17,7 @@
         icon="done"
         [collapsed]="false"
         color="primary"
-        [disabled]="!isDirty() || !servers.isSynchronized(edit.current$.value?.managedServer)"
+        [disabled]="!isDirty() || !(servers.isCurrentInstanceSynchronized$ | async)"
         (click)="onSave()"
       ></app-bd-button>
     </div>

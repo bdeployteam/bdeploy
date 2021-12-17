@@ -68,7 +68,7 @@
         ></app-bd-panel-button>
         <app-bd-button [collapsed]="false" [toggle]="false" icon="file_download" text="Export" (click)="doExport()"></app-bd-button>
         <app-bd-button
-          *ngIf="auth.isCurrentScopeAdmin()"
+          *ngIf="auth.isCurrentScopeAdmin$ | async"
           [collapsed]="false"
           [toggle]="false"
           icon="delete"
@@ -84,7 +84,7 @@
             [warning]="true"
             [dismissable]="false"
             header="Server Not Synchronized"
-            *ngIf="!servers.isSynchronized((instances.current$ | async)?.managedServer)"
+            *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
           >
             <div [style.text-align]="'justify'">
               The managed server responsible for this instance is not synchronized, version controls are unavailable. Please synchronize the server to use these
@@ -96,9 +96,7 @@
             text="Install"
             icon="layers"
             color="primary"
-            [disabled]="
-              (installing$ | async) || isInstalled() || !servers.isSynchronized((instances.current$ | async)?.managedServer) || !auth.isCurrentScopeWrite()
-            "
+            [disabled]="(installing$ | async) || isInstalled() || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)"
             (click)="doInstall()"
             [loadingWhen$]="installing$"
           ></app-bd-button>
@@ -108,11 +106,7 @@
             icon="star"
             color="primary"
             [disabled]="
-              (activating$ | async) ||
-              !isInstalled() ||
-              isActive() ||
-              !servers.isSynchronized((instances.current$ | async)?.managedServer) ||
-              !auth.isCurrentScopeWrite()
+              (activating$ | async) || !isInstalled() || isActive() || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
             (click)="doActivate()"
             [loadingWhen$]="activating$"
@@ -125,8 +119,8 @@
               (uninstalling$ | async) ||
               !isInstalled() ||
               isActive() ||
-              !servers.isSynchronized((instances.current$ | async)?.managedServer) ||
-              !auth.isCurrentScopeWrite()
+              !(servers.isCurrentInstanceSynchronized$ | async) ||
+              !(auth.isCurrentScopeWrite$ | async)
             "
             (click)="doUninstall()"
             [loadingWhen$]="uninstalling$"

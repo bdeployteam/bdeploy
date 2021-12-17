@@ -23,7 +23,7 @@
       text="Bulk Manipulation"
       [route]="['panels', 'products', 'bulk-manip']"
       tooltip="below"
-      [disabled]="!auth.isCurrentScopeWrite() || dataTable.grid"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async) || dataTable.grid"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
@@ -31,14 +31,14 @@
       icon="sync_alt"
       text="Synchronize Product Versions"
       [route]="['panels', 'products', 'sync']"
-      [disabled]="!auth.isCurrentScopeWrite()"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
       tooltip="below"
     ></app-bd-panel-button>
     <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Product"
       [route]="['panels', 'products', 'upload']"
-      [disabled]="!auth.isCurrentScopeWrite()"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
       tooltip="below"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
