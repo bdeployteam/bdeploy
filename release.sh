@@ -114,7 +114,7 @@ fi
 [[ -n "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x test -x releaseTest -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew clean build release updateDocuScreenshots -x releaseTest "${GRADLE_ARG_ARR[@]}"
 
-./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN -Psigning.keyId=$GPG_ID -Psigning.password=$GPG_PASS -Psigning.secretKeyRingFile=$GPG_FILE "${GRADLE_ARG_ARR[@]}"
+[[ -z "${NO_MAVEN}" ]] && ./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN -Psigning.keyId=$GPG_ID -Psigning.password=$GPG_PASS -Psigning.secretKeyRingFile=$GPG_FILE "${GRADLE_ARG_ARR[@]}"
 
 git add bdeploy.version doc test-data
 git commit -m "Release $REL_VER"
