@@ -69,7 +69,7 @@
       icon="library_add_check"
       [route]="['panels', 'instances', 'bulk-control']"
       tooltip="below"
-      [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
