@@ -4,7 +4,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-import { ApplicationConfiguration, InstanceNodeConfigurationDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, InstanceDto, InstanceNodeConfigurationDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -37,6 +37,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /* template */ states$ = new BehaviorSubject<InstanceStateRecord>(null);
   /* template */ installing$ = new BehaviorSubject<boolean>(false);
   /* template */ activating$ = new BehaviorSubject<boolean>(false);
+  /* template */ currentInstance: InstanceDto;
+  /* template */ activeInstance: InstanceDto;
+  /* template */ isInstalled: boolean;
 
   private subscription: Subscription;
   /* template */ public isCentral: boolean = false;
@@ -77,15 +80,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.clientNode$.next(nodes.nodeConfigDtos.find((p) => p.nodeName === CLIENT_NODE_NAME && p.nodeConfiguration?.applications?.length));
       })
     );
-    this.subscription.add(this.states.state$.subscribe((s) => this.states$.next(s)));
+    this.subscription.add(
+      this.states.state$.subscribe((s) => {
+        this.states$.next(s);
+        this.isInstalled = !!s?.installedTags?.find((s) => s === this.currentInstance?.instance.tag);
+      })
+    );
+    this.subscription.add(
+      this.instances.current$.subscribe((currentInstance) => {
+        this.currentInstance = currentInstance;
+      })
+    );
+    this.subscription.add(
+      this.instances.active$.subscribe((activeInstance) => {
+        this.activeInstance = activeInstance;
+      })
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ isInstalled(version: string) {
-    return !!this.states$.value?.installedTags?.find((s) => s === version);
   }
 
   /* template */ doInstall(version: string) {

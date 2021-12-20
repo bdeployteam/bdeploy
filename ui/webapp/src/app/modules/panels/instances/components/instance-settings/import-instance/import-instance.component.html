@@ -12,7 +12,7 @@
         *ngFor="let file of files; let i = index"
         [file]="file.file"
         [parameters]="file.parameters"
-        [url]="instances.getImportURL()"
+        [url]="instances.importURL$ | async"
         (dismiss)="onDismiss(i)"
         [resultEvaluator]="resultEval"
       ></app-bd-file-upload>

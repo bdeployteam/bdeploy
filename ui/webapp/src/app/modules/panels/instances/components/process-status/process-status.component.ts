@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ApplicationStartType, ProcessDetailDto, ProcessState } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, ProcessDetailDto, ProcessState } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -24,8 +24,12 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ starting$ = new BehaviorSubject<boolean>(false);
   /* template */ stopping$ = new BehaviorSubject<boolean>(false);
   /* template */ restarting$ = new BehaviorSubject<boolean>(false);
+  /* template */ isCrashedWaiting: boolean;
+  /* template */ isRunning: boolean;
+  /* template */ processDetail: ProcessDetailDto;
+  /* template */ processConfig: ApplicationConfiguration;
 
-  private performing$ = new BehaviorSubject<boolean>(false);
+  public performing$ = new BehaviorSubject<boolean>(false);
 
   private restartProgressHandle: any;
   private uptimeCalculateHandle: any;
@@ -35,7 +39,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   constructor(
-    private auth: AuthenticationService,
+    public auth: AuthenticationService,
     public details: ProcessDetailsService,
     public processes: ProcessesService,
     public instances: InstancesService,
@@ -43,30 +47,35 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.details.processDetail$, this.instances.active$]).subscribe(([detail, active]) => {
-      this.clearIntervals();
-      this.outdated$.next(false);
+    this.subscription = combineLatest([this.details.processDetail$, this.details.processConfig$, this.instances.active$]).subscribe(
+      ([detail, config, active]) => {
+        this.clearIntervals();
+        this.outdated$.next(false);
+        if (!detail) {
+          return;
+        }
+        this.processDetail = detail;
+        this.processConfig = config;
+        this.isCrashedWaiting = detail.status.processState === ProcessState.CRASHED_WAITING;
+        this.isRunning = ProcessesService.isRunning(detail.status.processState);
 
-      if (!detail) {
-        return;
+        // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
+        this.starting$.next(false);
+        this.stopping$.next(false);
+        this.restarting$.next(false);
+
+        this.outdated$.next(detail.status.instanceTag !== active.activeVersion.tag);
+
+        if (this.isCrashedWaiting) {
+          this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(detail), 1000);
+          this.doUpdateRestartProgress(detail);
+        }
+
+        if (this.isRunning) {
+          this.uptimeCalculateHandle = setTimeout(() => this.doCalculateUptimeString(detail), 1);
+        }
       }
-
-      // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
-      this.starting$.next(false);
-      this.stopping$.next(false);
-      this.restarting$.next(false);
-
-      this.outdated$.next(detail.status.instanceTag !== active.activeVersion.tag);
-
-      if (this.isCrashedWaiting(detail)) {
-        this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(detail), 1000);
-        this.doUpdateRestartProgress(detail);
-      }
-
-      if (this.isRunning(detail)) {
-        this.uptimeCalculateHandle = setTimeout(() => this.doCalculateUptimeString(detail), 1);
-      }
-    });
+    );
 
     this.subscription.add(
       combineLatest([this.starting$, this.stopping$, this.restarting$])
@@ -91,14 +100,6 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ isRunning(detail: ProcessDetailDto) {
-    return ProcessesService.isRunning(detail.status.processState);
-  }
-
-  /* template */ isCrashedWaiting(detail: ProcessDetailDto) {
-    return detail.status.processState === ProcessState.CRASHED_WAITING;
-  }
-
   /* template */ formatStartType(type: ApplicationStartType) {
     switch (type) {
       case ApplicationStartType.INSTANCE:
@@ -110,46 +111,21 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ isStartAllowed(detail: ProcessDetailDto) {
-    if (!this.auth.isCurrentScopeWrite() || this.outdated$.value || this.performing$.value) {
-      return false;
-    }
-
-    return !this.isRunning(detail);
-  }
-
-  /* template */ isStopAllowed(detail: ProcessDetailDto) {
-    if (!this.auth.isCurrentScopeWrite() || this.performing$.value) {
-      return false;
-    }
-
-    return this.isRunning(detail) || this.isCrashedWaiting(detail);
-  }
-
-  /* template */ isRestartAllowed(detail: ProcessDetailDto) {
-    if (!this.auth.isCurrentScopeWrite() || this.outdated$.value || this.performing$.value) {
-      return false;
-    }
-
-    return this.isRunning(detail) || this.isCrashedWaiting(detail);
-  }
-
-  /* template */ start(detail: ProcessDetailDto) {
+  /* template */ start() {
     this.starting$.next(true);
     let confirmation = of(true);
 
     // rather die than "mistakingly" start a manual confirm application.
-    const config = this.details.processConfig$.value;
-    if (!config) {
+    if (!this.processConfig) {
       throw new Error('Process config not available?!');
     }
 
-    if (config.processControl.startType === ApplicationStartType.MANUAL_CONFIRM) {
+    if (this.processConfig.processControl.startType === ApplicationStartType.MANUAL_CONFIRM) {
       confirmation = this.dialog.message({
         header: 'Confirm Process Start',
-        message: `Please confirm the start of <strong>${config.name}</strong>.`,
+        message: `Please confirm the start of <strong>${this.processConfig.name}</strong>.`,
         icon: 'play_arrow',
-        confirmation: config.name,
+        confirmation: this.processConfig.name,
         confirmationHint: 'Confirm using process name',
         actions: [ACTION_CANCEL, ACTION_OK],
       });
@@ -161,31 +137,31 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         return;
       }
       this.processes
-        .start(detail.status.appUid)
+        .start(this.processDetail.status.appUid)
         .pipe(finalize(() => this.starting$.next(false)))
         .subscribe();
     });
   }
 
-  /* template */ stop(detail: ProcessDetailDto) {
+  /* template */ stop() {
     this.stopping$.next(true);
     this.processes
-      .stop(detail.status.appUid)
+      .stop(this.processDetail.status.appUid)
       .pipe(finalize(() => this.stopping$.next(false)))
       .subscribe();
   }
 
-  /* template */ restart(detail: ProcessDetailDto) {
+  /* template */ restart() {
     this.restarting$.next(true);
     this.processes
-      .restart(detail.status.appUid)
+      .restart(this.processDetail.status.appUid)
       .pipe(finalize(() => this.restarting$.next(false)))
       .subscribe();
   }
 
   private doCalculateUptimeString(detail) {
     this.uptimeCalculateHandle = null;
-    if (this.isRunning(detail)) {
+    if (this.isRunning) {
       const now = this.cfg.getCorrectedNow(); // server's 'now'
       const ms = now - detail.handle.startTime; // this comes from the node. node and master are assumed to have the same time.
       const sec = Math.floor(ms / 1000) % 60;
