@@ -97,6 +97,7 @@ describe('Central/Managed Basic Test', function () {
       cy.contains('tr', 'localhost').click();
     });
 
+    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_CentralProdSyncVersion');
 
     cy.inMainNavFlyin('app-managed-transfer', () => {

@@ -21,7 +21,6 @@ describe('Admin UI Tests (Settings)', () => {
         cy.wrap(toggle).click();
         cy.get('input[type="checkbox"]').should('be.checked');
       });
-
     });
 
     cy.screenshot('Doc_Admin_Settings');
@@ -97,7 +96,7 @@ describe('Admin UI Tests (Settings)', () => {
       });
     });
 
-    cy.screenshot('Doc_Admin_Ldap_Server_Config');  
+    cy.screenshot('Doc_Admin_Ldap_Server_Config');
 
     cy.inMainNavContent(() => {
       cy.contains('app-bd-notification-card', 'Add Server').within(() => {
@@ -154,6 +153,7 @@ describe('Admin UI Tests (Settings)', () => {
       cy.pressToolbarButton('Save');
     });
 
+    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_Global_Attributes');
 
     cy.createGroup('Attr-Test-1');
@@ -255,7 +255,7 @@ describe('Admin UI Tests (Settings)', () => {
       cy.wait('@pluginList'); // should be called after unload, required to query the *correct* tr now.
       cy.waitUntilContentLoaded();
     });
-    
+
     cy.screenshot('Doc_Admin_Plugins');
 
     cy.inMainNavContent(() => {
