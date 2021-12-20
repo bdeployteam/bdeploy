@@ -4,7 +4,12 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <app-bd-file-drop (fileAdded)="fileAdded($event)" [types]="['.zip', '.jar']"></app-bd-file-drop>
-      <app-bd-file-upload *ngFor="let file of files; let i = index" [file]="file" [url]="products.getUploadURL()" (dismiss)="onDismiss(i)"></app-bd-file-upload>
+      <app-bd-file-upload
+        *ngFor="let file of files; let i = index"
+        [file]="file"
+        [url]="products.uploadUrl$ | async"
+        (dismiss)="onDismiss(i)"
+      ></app-bd-file-upload>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -2,8 +2,8 @@
   <div fxLayout="column" class="local-header">
     <div fxLayout="row" class="bd-default-padding" fxLayoutAlign="start center">
       <div fxLayout="column">
-        <div class="bd-type-text">{{ getNodeType() }}</div>
-        <div class="bd-title-text">{{ getNodeName() }}</div>
+        <div class="bd-type-text">{{ nodeType }}</div>
+        <div class="bd-title-text">{{ node }}</div>
       </div>
       <ng-container *ngIf="node$ | async as node">
         <mat-icon [style.padding-left.px]="20" fxFlexAlign="center" [svgIcon]="node.os"></mat-icon>
@@ -23,7 +23,7 @@
     <app-bd-data-table
       #data
       [records]="(config$ | async)?.nodeConfiguration?.applications"
-      [columns]="isClientNode() ? columns.defaultProcessesConfigClientColumns : columns.defaultProcessesConfigColumns"
+      [columns]="isClientNode ? columns.defaultProcessesConfigClientColumns : columns.defaultProcessesConfigColumns"
       [sortData]="null"
       [recordRoute]="getRecordRoute"
       [dragReorderMode]="true"

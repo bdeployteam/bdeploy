@@ -24,6 +24,7 @@ export class SoftwareUpdateService {
   public software$ = new BehaviorSubject<SoftwareVersion[]>(null);
 
   private apiPath = () => `${this.cfg.config.api}/swup`;
+  public uploadUrl$ = new BehaviorSubject<string>(this.apiPath());
 
   constructor(private cfg: ConfigService, private http: HttpClient) {}
 
@@ -80,10 +81,6 @@ export class SoftwareUpdateService {
 
   public updateBdeploy(keys: ManifestKey[]) {
     return this.http.post(`${this.apiPath()}/selfUpdate`, keys);
-  }
-
-  public getUploadUrl() {
-    return this.apiPath();
   }
 
   public getDownloadUrl(key: ManifestKey) {

@@ -25,6 +25,9 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   /* template */ uninstalling$ = new BehaviorSubject<boolean>(false);
   /* template */ activating$ = new BehaviorSubject<boolean>(false);
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
+  /* template */ isCreate: boolean;
+  /* template */ isInstalled: boolean;
+  /* template */ isActive: boolean;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -38,36 +41,26 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
     public servers: ServersService,
     public auth: AuthenticationService
   ) {
-    this.subscription = combineLatest([this.areas.panelRoute$, this.history.history$]).subscribe(([route, entries]) => {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.history.history$, this.states.state$]).subscribe(([route, entries, state]) => {
       // Note: basing the selection on an index in the service has some drawbacks, but we can do that now without needing to change a lot in the backend.
       const key = route?.paramMap?.get('key');
+      this.state$.next(state);
       if (!key || !entries) {
         this.entry$.next(null);
       } else {
         const entry = entries.find((e) => isEqual(histKey(e), histKeyDecode(key)));
         this.entry$.next(entry);
+        this.isCreate = entry.type === HistoryEntryType.CREATE;
+        this.isInstalled = !!state?.installedTags?.find((s) => s === entry?.instanceTag);
+        this.isActive = state?.activeTag === entry?.instanceTag;
       }
     });
-
-    this.subscription.add(this.states.state$.subscribe((s) => this.state$.next(s)));
   }
 
   ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ isCreate(entry: HistoryEntryDto) {
-    return entry.type === HistoryEntryType.CREATE;
-  }
-
-  /* template */ isInstalled() {
-    return !!this.state$.value?.installedTags?.find((s) => s === this.entry$.value?.instanceTag);
-  }
-
-  /* template */ isActive() {
-    return this.state$.value?.activeTag === this.entry$.value?.instanceTag;
   }
 
   /* template */ doInstall() {

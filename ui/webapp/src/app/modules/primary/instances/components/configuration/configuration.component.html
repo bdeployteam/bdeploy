@@ -72,7 +72,7 @@
       icon="settings_backup_restore"
       matTooltip="Local Changes"
       [route]="['panels', 'instances', 'changes']"
-      [disabled]="!edit.hasSaveableChanges()"
+      [disabled]="!(edit.hasSaveableChanges$ | async)"
     ></app-bd-panel-button>
     <app-bd-button
       text="Save Changes"
@@ -81,7 +81,7 @@
       [loadingWhen$]="edit.validating$"
       [disabled]="
         !(servers.isCurrentInstanceSynchronized$ | async) ||
-        !edit.hasSaveableChanges() ||
+        !(edit.hasSaveableChanges$ | async) ||
         (edit.incompatible$ | async) ||
         (edit.validating$ | async) ||
         !!(edit.issues$ | async)?.length
@@ -95,7 +95,7 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="2">
       <ng-container *ngIf="edit.current$ | async as instance">
-        <ng-container *ngIf="(servers.isCurrentInstanceSynchronized$ | async) && !!edit.hasCurrentProduct()">
+        <ng-container *ngIf="(servers.isCurrentInstanceSynchronized$ | async) && !!(edit.hasCurrentProduct$ | async)">
           <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
             <div fxLayout="column">
               <div class="bd-default-padding bd-warning-text">
@@ -161,7 +161,7 @@
         </ng-container>
       </ng-container>
 
-      <app-bd-no-data *ngIf="!!edit.hasCurrentProduct() && !(servers.isCurrentInstanceSynchronized$ | async)">
+      <app-bd-no-data *ngIf="!!(edit.hasCurrentProduct$ | async) && !(servers.isCurrentInstanceSynchronized$ | async)">
         <p [style.text-align]="'center'">
           <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong> is not synchronized with the controlling server
           <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
@@ -170,7 +170,7 @@
         <app-bd-server-sync-button [collapsed]="false" [server]="(edit.current$ | async).managedServer"></app-bd-server-sync-button>
       </app-bd-no-data>
 
-      <ng-container *ngIf="!edit.hasCurrentProduct()">
+      <ng-container *ngIf="!(edit.hasCurrentProduct$ | async)">
         <app-bd-no-data>
           <p>The product version configured is not available on this server. The configuration is not available.</p>
           <ng-container *ngIf="isCentral">
@@ -188,7 +188,7 @@
               [toggle]="false"
               [route]="['panels', 'instances', 'settings', 'product']"
               [disabled]="!(auth.isCurrentScopeWrite$ | async)"
-              [color]="(edit.current$ | async)?.newerVersionAvailable || !edit.hasCurrentProduct() ? 'accent' : null"
+              [color]="(edit.current$ | async)?.newerVersionAvailable || !(edit.hasCurrentProduct$ | async) ? 'accent' : null"
             ></app-bd-panel-button>
           </div>
         </app-bd-no-data>

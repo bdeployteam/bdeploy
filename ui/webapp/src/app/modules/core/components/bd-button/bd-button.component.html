@@ -3,7 +3,7 @@
   mat-raised-button
   [attr.data-cy]="text"
   fxFlex="1 0 auto"
-  [ngClass]="getColorClass()"
+  [ngClass]="isToggle && toggle ? 'bd-toggle-highlight' : color ? 'local-button-color-' + color : 'local-button-no-color'"
   [class.local-button-expanded]="!collapsed"
   [class.local-button-collapsed]="collapsed"
   [matTooltip]="tooltip ? text : ''"
