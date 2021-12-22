@@ -48,6 +48,9 @@
       <td class="mat-cell" [attr.colspan]="_visibleColumns.length" class="bd-hint-text">No data to show.</td>
     </tr>
 
+    <!-- static ellipsis footer in case more data is available -->
+    <tr mat-footer-row *matFooterRowDef="[_visibleColumns[0]]" [style.display]="hasMoreData ? 'table-row' : 'none'"></tr>
+
     <ng-container *ngFor="let col of _columns; let i = index" [matColumnDef]="col.id">
       <!-- Column headers -->
       <th
@@ -76,6 +79,10 @@
           >{{ col.name }}</mat-checkbox
         >
       </th>
+
+      <td mat-footer-cell *matFooterCellDef [style.width]="'auto'" [style.maxWidth]="0" [attr.colspan]="_visibleColumns.length" class="bd-hint-text">
+        Some data is hidden. Use the search and/or sort to find it.
+      </td>
 
       <ng-container *matCellDef="let row">
         <!-- First column, can not be an action. -->
