@@ -2,7 +2,19 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild,
+  ViewEncapsulation,
+} from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
@@ -60,6 +72,7 @@ const MAX_ROWS_PER_GROUP = 500;
   selector: 'app-bd-data-table',
   templateUrl: './bd-data-table.component.html',
   styleUrls: ['./bd-data-table.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
   /**

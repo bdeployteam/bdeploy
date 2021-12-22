@@ -75,7 +75,7 @@
           (change)="toggleCheckAll(cb)"
           appClickStopPropagation
           [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
-          class="bd-text-ellipsis"
+          class="bd-text-ellipsis local-table-checkbox"
           >{{ col.name }}</mat-checkbox
         >
       </th>
@@ -144,7 +144,7 @@
                 (change)="toggleCheck(row, cb)"
                 appClickStopPropagation
                 [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
-                class="bd-text-ellipsis"
+                class="bd-text-ellipsis local-table-checkbox"
                 >{{ row.node.groupOrFirstColumn }}</mat-checkbox
               >
             </div>
