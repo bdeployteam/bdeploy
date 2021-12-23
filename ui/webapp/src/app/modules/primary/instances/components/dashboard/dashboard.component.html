@@ -2,40 +2,35 @@
   <app-bd-dialog-toolbar *ngIf="instances.activeLoading$ | async" header="Dashboard - loading"></app-bd-dialog-toolbar>
   <app-bd-dialog-toolbar
     *ngIf="!(instances.activeLoading$ | async)"
-    header="Dashboard - {{
-      !!(instances.active$ | async) ? (instances.active$ | async).instanceConfiguration.name : (instances.current$ | async)?.instanceConfiguration.name
-    }}"
+    header="Dashboard - {{ !!activeInstance ? activeInstance.instanceConfiguration.name : currentInstance?.instanceConfiguration.name }}"
   >
     <div fxFlex="1 0 auto"></div>
     <div
       class="local-version-text"
-      *ngIf="instances.active$ | async as inst"
-      [matTooltip]="!inst.managedServer?.hostName ? null : 'On ' + inst.managedServer.hostName"
+      *ngIf="activeInstance"
+      [matTooltip]="!activeInstance.managedServer?.hostName ? null : 'On ' + activeInstance.managedServer.hostName"
     >
       <ng-container *ngIf="!(narrow$ | async)"
-        >Showing Active Version: {{ inst.activeVersion.tag
-        }}<span *ngIf="!!inst.managedServer?.hostName"> on {{ inst.managedServer.hostName }}</span></ng-container
+        >Showing Active Version: {{ activeInstance.activeVersion.tag
+        }}<span *ngIf="!!activeInstance.managedServer?.hostName"> on {{ activeInstance.managedServer.hostName }}</span></ng-container
       >
-      <ng-container *ngIf="narrow$ | async">Ver.: {{ inst.activeVersion.tag }}</ng-container>
+      <ng-container *ngIf="narrow$ | async">Ver.: {{ activeInstance.activeVersion.tag }}</ng-container>
     </div>
-    <ng-container *ngIf="(instances.active$ | async)?.managedServer?.update?.updateAvailable && (auth.isCurrentScopeAdmin$ | async)">
+    <ng-container *ngIf="activeInstance?.managedServer?.update?.updateAvailable && (auth.isCurrentScopeAdmin$ | async)">
       <app-bd-button
         text="Server Update Available"
         icon="system_update"
         [collapsed]="narrow$ | async"
         color="accent"
         (click)="
-          areas.navigateBoth(
-            ['/servers', 'browser', areas.groupContext$.value],
-            ['panels', 'servers', 'details', instances.active$.value?.managedServer?.hostName]
-          )
+          areas.navigateBoth(['/servers', 'browser', areas.groupContext$.value], ['panels', 'servers', 'details', activeInstance?.managedServer?.hostName])
         "
       ></app-bd-button>
       <mat-divider *ngIf="isCentral" [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="isCentral">
-      <ng-container *ngIf="instances.current$ | async as instance">
-        <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
+      <ng-container *ngIf="currentInstance">
+        <app-bd-server-sync-button [server]="currentInstance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
       </ng-container>
     </ng-container>
@@ -73,16 +68,16 @@
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <ng-container *ngIf="instances.current$ | async as current">
-      <ng-container *ngIf="!!(instances.current$ | async)?.productDto">
-        <div *ngIf="current.instance.tag !== current.activeVersion?.tag" class="bd-rect-card" fxLayout="column" [style.margin-bottom.px]="10">
+    <ng-container>
+      <ng-container *ngIf="!!currentInstance?.productDto">
+        <div *ngIf="currentInstance?.instance.tag !== currentInstance?.activeVersion?.tag" class="bd-rect-card" fxLayout="column" [style.margin-bottom.px]="10">
           <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
             <div fxLayout="column" fxFlex="1 0 0">
-              <div *ngIf="!!current.activeVersion?.tag">
-                This instance has a newer configuration version available to be activated ({{ current.instance.tag }}). You can
+              <div *ngIf="!!currentInstance?.activeVersion?.tag">
+                This instance has a newer configuration version available to be activated ({{ currentInstance?.instance.tag }}). You can
                 <strong>install and activate</strong> this version now.
               </div>
-              <div *ngIf="!current.activeVersion?.tag">This instance has no active version. You can install and activate the current version now.</div>
+              <div *ngIf="!currentInstance?.activeVersion?.tag">This instance has no active version. You can install and activate the current version now.</div>
               <div class="bd-description-text">
                 To <strong>install, uninstall or activate</strong> other versions, please go to the
                 <a [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]">instance history</a>.
@@ -94,9 +89,9 @@
                 color="primary"
                 text="Install"
                 icon="layers"
-                (click)="doInstall(current.instance.tag)"
-                [collapsed]="isInstalled(current.instance.tag)"
-                [disabled]="(installing$ | async) || isInstalled(current.instance.tag) || !(auth.isCurrentScopeWrite$ | async)"
+                (click)="doInstall(currentInstance?.instance.tag)"
+                [collapsed]="isInstalled"
+                [disabled]="(installing$ | async) || isInstalled || !(auth.isCurrentScopeWrite$ | async)"
                 [loadingWhen$]="installing$"
                 tooltip="below"
               ></app-bd-button>
@@ -105,9 +100,9 @@
                 color="primary"
                 text="Activate"
                 icon="star"
-                (click)="doActivate(current.instance.tag)"
-                [collapsed]="!isInstalled(current.instance.tag)"
-                [disabled]="(activating$ | async) || !isInstalled(current.instance.tag) || !(auth.isCurrentScopeWrite$ | async)"
+                (click)="doActivate(currentInstance?.instance.tag)"
+                [collapsed]="!isInstalled"
+                [disabled]="(activating$ | async) || !isInstalled || !(auth.isCurrentScopeWrite$ | async)"
                 [loadingWhen$]="activating$"
                 tooltip="below"
               ></app-bd-button>
@@ -116,15 +111,15 @@
         </div>
       </ng-container>
 
-      <div fxLayout="column" fxLayoutGap="10px" *ngIf="instances.active$ | async as instance">
-        <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
+      <div fxLayout="column" fxLayoutGap="10px" *ngIf="activeInstance">
+        <app-bd-banner *ngIf="activeInstance.banner && activeInstance.banner.text" [banner]="activeInstance.banner"></app-bd-banner>
 
         <!-- Each node in the instance (the ones containing applications only) -->
         <ng-container *ngIf="instances.activeNodeCfgs$ | async as nodes">
           <app-bd-no-data *ngIf="!nodes?.nodeConfigDtos?.length">
             <p [style.text-align]="'center'">
-              <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> does not have any configured applications in the current instance
-              version. Dashboard not available.
+              <strong>{{ currentInstance?.instanceConfiguration.name }}</strong> does not have any configured applications in the current instance version.
+              Dashboard not available.
             </p>
             <p [style.text-align]="'center'">Configure, install and activate instance version first.</p>
             <app-bd-button
@@ -155,9 +150,9 @@
       </div>
 
       <!-- Show hint if there is no active version. -->
-      <app-bd-no-data *ngIf="!(instances.active$ | async)">
+      <app-bd-no-data *ngIf="!activeInstance">
         <p [style.text-align]="'center'">
-          <strong>{{ (instances.current$ | async)?.instanceConfiguration.name }}</strong> does not have an active version. Dashboard not yet available.
+          <strong>{{ currentInstance?.instanceConfiguration.name }}</strong> does not have an active version. Dashboard not yet available.
         </p>
         <p [style.text-align]="'center'">Configure, install and activate instance version first.</p>
         <app-bd-button

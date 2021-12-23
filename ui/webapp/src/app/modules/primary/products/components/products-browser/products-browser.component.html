@@ -15,7 +15,7 @@
       text="Toggle Card Mode"
       [(toggle)]="dataTable.grid"
       tooltip="below"
-      [disabled]="bulkMode.isActive()"
+      [disabled]="bulkMode.toggle && !!bulkMode.rla?.isActive"
     ></app-bd-button>
     <app-bd-panel-button
       #bulkMode
@@ -50,7 +50,7 @@
       [records]="products.products$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
-      [checkMode]="bulkMode.isActive()"
+      [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
       [checked]="bulk.selection$ | async"
       (checkedChange)="bulk.selection$.next($event)"
     >

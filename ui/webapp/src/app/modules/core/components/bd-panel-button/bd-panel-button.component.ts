@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdButtonColorMode } from '../bd-button/bd-button.component';
 
@@ -24,11 +25,17 @@ export class BdPanelButtonComponent implements OnInit {
   @ViewChild(RouterLink) private rl: RouterLink;
   @ViewChild(RouterLinkActive) /* template */ rla: RouterLinkActive;
 
+  private subscription: Subscription;
+
+  /* template */ generatedRoute;
+
   constructor(private areas: NavAreasService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.generatedRoute = this.getRoute();
+  }
 
-  /* template */ getRoute() {
+  private getRoute() {
     if (this.relative) {
       const url = this.getFullPanelUrl(this.areas.panelRoute$.value);
       const rel = [...this.route];
@@ -53,10 +60,6 @@ export class BdPanelButtonComponent implements OnInit {
     if (this.toggle && this.rla.isActive) {
       this.areas.closePanel();
     }
-  }
-
-  public isActive(): boolean {
-    return this.toggle && (!!this.rla?.isActive ? true : false);
   }
 
   /** Manually trigger the configured navigation */

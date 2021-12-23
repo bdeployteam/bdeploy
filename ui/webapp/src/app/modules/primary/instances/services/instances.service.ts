@@ -55,6 +55,7 @@ export class InstancesService {
   private group: string;
   private subscription: Subscription;
   private update$ = new BehaviorSubject<string>(null);
+  public importURL$ = new BehaviorSubject<string>(null);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
@@ -73,6 +74,7 @@ export class InstancesService {
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
 
     combineLatest([this.current$, this.active$, this.servers.servers$]).subscribe(([cur, act, servers]) => {
+      this.importURL$.next(`${this.apiPath(this.group)}/${cur?.instanceConfiguration?.uuid}/import`);
       clearInterval(this.activeLoadInterval);
       clearInterval(this.activeCheckInterval);
 
@@ -181,10 +183,6 @@ export class InstancesService {
   public export(tag: string) {
     const url = `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/export/${tag}`;
     this.downloads.download(url);
-  }
-
-  public getImportURL() {
-    return `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/import`;
   }
 
   private reload(group: string) {
