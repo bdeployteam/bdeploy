@@ -44,6 +44,8 @@ export interface DragReorderEvent<T> {
   currentIndex: number;
 }
 
+const MAX_ROWS_PER_GROUP = 500;
+
 /**
  * A table which renders generic data based on column descriptions. Supports:
  *  * Sorting
@@ -182,12 +184,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   );
   private subscription: Subscription;
   private mediaSubscription: Subscription;
+  /* template */ hasMoreData = false;
+  /* template */ hasMoreDataText = '...';
 
   /** The model holding the current checkbox selection state */
-  checkSelection = new SelectionModel<FlatNode<T>>(true);
+  /* template */ checkSelection = new SelectionModel<FlatNode<T>>(true);
 
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
-  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+  /* tempalte */ dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
   constructor(private searchService: SearchService, private media: BreakpointObserver, private sanitizer: DomSanitizer) {}
 
@@ -277,6 +281,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // recreate the dataSource, applying sorting, filtering, grouping, etc.
     // benchmarks show that this method is quite fast, event with a lot of data.
     // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
+    this.hasMoreData = false;
     this.dataSource.data = this.generateModel(this.searchData(this.search, !!this.records ? [...this.records] : [], this._columns), this.grouping, this.sort);
 
     // TODO: Saving of expansion state on update. To achieve this, every BdDataGrouping must
@@ -374,7 +379,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
     // last step is to transform the raw input data into Node<T> which is then further processed
     // by the transformer callback of treeControl.
-    return sortedData.map((i) => ({ item: i, groupOrFirstColumn: this._columns[0].data(i), children: [] }));
+    this.hasMoreData = sortedData.length > MAX_ROWS_PER_GROUP;
+    return sortedData.slice(0, MAX_ROWS_PER_GROUP).map((i) => ({ item: i, groupOrFirstColumn: this._columns[0].data(i), children: [] }));
   }
 
   /* template */ getNoExpandIndent(level: number) {
