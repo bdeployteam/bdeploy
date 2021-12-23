@@ -21,6 +21,10 @@
   background-color: var(--bd-bg-dialog);
 }
 
+.local-table-checkbox .mat-checkbox-ripple {
+  display: none;
+}
+
 .cdk-drag-preview {
   display: inline-table;
   vertical-align: middle;
