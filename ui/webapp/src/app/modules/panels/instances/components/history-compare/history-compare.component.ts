@@ -5,7 +5,7 @@ import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
-import { ConfigPair, NodePair } from '../../utils/diff-utils';
+import { ConfigPair } from '../../utils/diff-utils';
 import { InstanceConfigCache } from '../../utils/instance-utils';
 
 @Component({
@@ -20,6 +20,7 @@ export class HistoryCompareComponent implements OnInit, OnDestroy {
   /* template */ compare$ = new BehaviorSubject<string>(null);
 
   /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
+  /* template */ clientNodeName = CLIENT_NODE_NAME;
 
   private baseConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
@@ -72,13 +73,5 @@ export class HistoryCompareComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ getNodeName(node: NodePair) {
-    return node.name === CLIENT_NODE_NAME ? 'Client Applications' : node.name;
-  }
-
-  /* template */ hasProcessControl(node: NodePair) {
-    return node.name !== CLIENT_NODE_NAME;
   }
 }

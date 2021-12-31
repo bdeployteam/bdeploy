@@ -15,7 +15,7 @@ export class ManifestDeleteActionComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onDelete(): void {
+  /* template */ onDelete(): void {
     this.parent.dialog.confirm(`Delete ${this.record.name}?`, `This will remove the manifest permanently from the enclosing BHive.`).subscribe((r) => {
       if (r) {
         this.hives.delete(this.parent.bhive$.value, this.record.mName, this.record.mTag).subscribe((_) => this.parent.load());

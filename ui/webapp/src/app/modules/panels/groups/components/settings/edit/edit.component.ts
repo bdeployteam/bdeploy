@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, of, Subject, Subscription } from 'rxjs';
-import { concatMap, finalize } from 'rxjs/operators';
+import { concatMap, debounceTime, finalize } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -18,17 +19,19 @@ import { GroupDetailsService } from '../../../services/group-details.service';
   templateUrl: './edit.component.html',
   styleUrls: ['./edit.component.css'],
 })
-export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ group: InstanceGroupConfiguration;
   /* template */ origGroup: InstanceGroupConfiguration;
   /* template */ origImage$ = new Subject<SafeUrl>();
+  /* template */ disableSave: boolean;
   private image: File;
   private imageChanged = false;
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild('form') public form: NgForm;
 
   constructor(
     public groups: GroupsService,
@@ -41,26 +44,39 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   ngOnInit(): void {
-    this.groups.current$.subscribe((g) => {
-      if (!g) {
-        this.group = null;
-        return;
-      }
+    this.subscription.add(
+      this.groups.current$.subscribe((g) => {
+        if (!g) {
+          this.group = null;
+          return;
+        }
 
-      this.group = cloneDeep(g);
-      this.origGroup = cloneDeep(g);
+        this.group = cloneDeep(g);
+        this.origGroup = cloneDeep(g);
 
-      if (!!g.logo) {
-        const url = this.groups.getLogoUrlOrDefault(g.name, g.logo, null);
-        this.http.get(url, { responseType: 'blob' }).subscribe((data) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            this.origImage$.next(this.sanitizer.bypassSecurityTrustUrl(reader.result.toString()));
-          };
-          reader.readAsDataURL(data);
-        });
-      }
-    });
+        if (!!g.logo) {
+          const url = this.groups.getLogoUrlOrDefault(g.name, g.logo, null);
+          this.http.get(url, { responseType: 'blob' }).subscribe((data) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              this.origImage$.next(this.sanitizer.bypassSecurityTrustUrl(reader.result.toString()));
+            };
+            reader.readAsDataURL(data);
+          });
+        }
+      })
+    );
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.form) {
+      return;
+    }
+    this.subscription.add(
+      this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
+        this.disableSave = this.isDirty();
+      })
+    );
   }
 
   ngOnDestroy(): void {

@@ -23,7 +23,7 @@ export class PasswordComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onSave(): void {
+  /* template */ onSave(): void {
     this.loading$.next(true);
     this.auth
       .changePassword({ user: this.auth.getUsername(), currentPassword: this.passOrig, newPassword: this.passNew })

@@ -25,6 +25,7 @@ export class MetricsOverviewComponent implements OnInit {
   groupCounts: SeriesElement[];
   selectedTimer: TimerMetric;
   selectedTimerName: string;
+  histogramDetails;
   serverStats: JerseyServerMonitoringDto;
 
   // converted data for serverstats
@@ -93,6 +94,7 @@ export class MetricsOverviewComponent implements OnInit {
   private selectServer() {
     this.selectedTimer = null;
     this.selectedTimerName = null;
+    this.histogramDetails = null;
     this.timerSeries = null;
     this.referenceLines = null;
     this.selectedGroup = null;
@@ -263,6 +265,7 @@ export class MetricsOverviewComponent implements OnInit {
     this.serverStats = null;
     this.selectedTimer = null;
     this.selectedTimerName = null;
+    this.histogramDetails = null;
     this.timerSeries = null;
     this.referenceLines = null;
 
@@ -310,9 +313,15 @@ export class MetricsOverviewComponent implements OnInit {
 
     this.selectedTimer = timer;
     this.selectedTimerName = t.name;
+    this.histogramDetails = {
+      p75th: this.toMillis(this.selectedTimer.histogram.p75th),
+      p99th: this.toMillis(this.selectedTimer.histogram.p99th),
+      min: this.toMillis(this.selectedTimer.histogram.min),
+      max: this.toMillis(this.selectedTimer.histogram.max),
+    };
   }
 
-  toMillis(nanos: number): number {
+  private toMillis(nanos: number): number {
     // nanos to millis and round to 2 decimal places
     return Math.round(nanos / 10000) / 100;
   }

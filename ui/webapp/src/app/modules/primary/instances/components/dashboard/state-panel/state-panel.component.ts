@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, isObservable, Observable, of } from 'rxjs';
 
 export type StateType = 'ok' | 'info' | 'warning' | 'product' | 'update' | 'unknown';
@@ -9,26 +9,46 @@ export interface StateItem {
   tooltip?: string | Observable<string>;
   click?: () => void;
 }
+
+export interface StateItemToDisplay {
+  name: Observable<string>;
+  type: Observable<StateType>;
+  tooltip?: Observable<string>;
+  click?: () => void;
+}
 @Component({
   selector: 'app-node-state-panel',
   templateUrl: './state-panel.component.html',
   styleUrls: ['./state-panel.component.css'],
 })
-export class NodeStatePanelComponent implements OnInit {
+export class NodeStatePanelComponent implements OnInit, OnChanges {
   @Input() items: StateItem[];
   @Input() narrowWhen$: BehaviorSubject<boolean>;
   @Input() lastRefreshAt$: BehaviorSubject<number>;
 
   @Output() manualRefresh = new EventEmitter<any>();
 
+  /* template */ itemsToDisplay: StateItemToDisplay[];
+
   constructor() {}
 
   ngOnInit(): void {}
 
-  /* template */ makeObservable<T>(value: T | Observable<T>): Observable<T> {
-    if (isObservable(value)) {
-      return value;
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.items) {
+      this.itemsToDisplay = [];
+      changes.items.currentValue.forEach((item) => {
+        this.itemsToDisplay.push({
+          name: this.makeObservable(item.name),
+          type: this.makeObservable(item.type),
+          tooltip: item.tooltip ? this.makeObservable(item.tooltip) : null,
+          click: item.click ? item.click : null,
+        });
+      });
     }
-    return of(value);
+  }
+
+  private makeObservable<T>(value: T | Observable<T>): Observable<T> {
+    return isObservable(value) ? value : of(value);
   }
 }

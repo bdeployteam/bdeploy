@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { InstanceBulkService } from '../../services/instance-bulk.service';
 
@@ -9,18 +10,25 @@ import { InstanceBulkService } from '../../services/instance-bulk.service';
   templateUrl: './bulk-manipulation.component.html',
   styleUrls: ['./bulk-manipulation.component.css'],
 })
-export class BulkManipulationComponent implements OnInit {
+export class BulkManipulationComponent implements OnInit, OnDestroy {
   /* template */ starting$ = new BehaviorSubject<boolean>(false);
   /* template */ stopping$ = new BehaviorSubject<boolean>(false);
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
   /* template */ installing$ = new BehaviorSubject<boolean>(false);
   /* template */ activating$ = new BehaviorSubject<boolean>(false);
-
+  /* template */ isAllSameProduct: boolean;
+  /* template */ selections: InstanceDto[];
+  private subscription: Subscription;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   constructor(public bulk: InstanceBulkService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.subscription = this.bulk.selection$.subscribe((selections) => {
+      this.selections = selections;
+      this.isAllSameProduct = selections.every((i) => !!i.productDto?.key?.name && i.productDto.key.name === selections[0].productDto.key.name);
+    });
+  }
 
   /* template */ onStart() {
     this.starting$.next(true);
@@ -60,10 +68,6 @@ export class BulkManipulationComponent implements OnInit {
       });
   }
 
-  /* template */ isAllSameProduct() {
-    return this.bulk.selection$.value.every((i) => !!i.productDto?.key?.name && i.productDto.key.name === this.bulk.selection$.value[0].productDto.key.name);
-  }
-
   /* template */ onInstall() {
     this.installing$.next(true);
     this.bulk
@@ -90,5 +94,9 @@ export class BulkManipulationComponent implements OnInit {
           .pipe(finalize(() => this.activating$.next(false)))
           .subscribe();
       });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

@@ -15,7 +15,7 @@
   <app-bd-button
     text="Rename"
     icon="drive_file_rename_outline"
-    [disabled]="!canRename() || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
+    [disabled]="!renameAllowed || (!!record.persistent && !record.persistent.instanceId && !record.modification?.file)"
     (click)="onRename(renameDialog)"
   ></app-bd-button>
 </div>

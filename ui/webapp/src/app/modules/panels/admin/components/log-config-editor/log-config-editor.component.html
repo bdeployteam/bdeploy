@@ -1,7 +1,7 @@
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Edit Logging Configuration" [panel]="true">
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button text="Apply" color="primary" icon="done" [collapsed]="false" [disabled]="!isDirty()" (click)="onSave()"></app-bd-button>
+    <app-bd-button text="Apply" color="primary" icon="done" [collapsed]="false" [disabled]="!(config !== origConfig)" (click)="onSave()"></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="!(loading$ | async)" [style.height]="'100%'" fxLayout="column">

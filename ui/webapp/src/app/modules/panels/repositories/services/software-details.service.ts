@@ -98,7 +98,7 @@ export class SoftwareDetailsService implements OnDestroy {
     }
   }
 
-  /* template */ mapLabels(software: any) {
+  mapLabels(software: any) {
     const labels: LabelRecord[] = [];
     if (!!software?.labels) {
       for (const k of Object.keys(software.labels)) {

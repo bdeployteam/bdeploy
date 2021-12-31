@@ -10,7 +10,7 @@
       <div class="bd-warning-text" *ngIf="isCentral && !serverList?.length">No managed server available. Link a managed server first.</div>
       <app-bd-form-input label="Name" name="name" [(ngModel)]="config.name" required appTrimmed></app-bd-form-input>
       <app-bd-form-input label="Description" name="description" [(ngModel)]="config.description" required></app-bd-form-input>
-      <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="config.purpose" [values]="getPurposes()" required></app-bd-form-select>
+      <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="config.purpose" [values]="purposes" required></app-bd-form-select>
       <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="config.autoStart"></app-bd-form-toggle>
       <app-bd-form-toggle label="Automatic Uninstallation" name="autoUninstall" [(ngModel)]="config.autoUninstall"></app-bd-form-toggle>
       <app-bd-form-select
@@ -19,7 +19,7 @@
         [(ngModel)]="selectedProduct"
         (ngModelChange)="updateProduct()"
         [values]="prodList"
-        [labels]="getProductNames()"
+        [labels]="productNames"
         required
       ></app-bd-form-select>
       <app-bd-form-select
@@ -36,7 +36,7 @@
         name="server"
         [(ngModel)]="server"
         [values]="serverList"
-        [labels]="getServerNames()"
+        [labels]="serverNames"
         required
       ></app-bd-form-select>
 

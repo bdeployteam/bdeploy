@@ -61,6 +61,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   /* template */ clientNode$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
 
   /* template */ templates$ = new BehaviorSubject<InstanceTemplateDescriptor[]>(null);
+  /* template */ isEmptyInstance$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
@@ -109,6 +110,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
 
           this.edit.requestValidation();
         }
+        this.isEmptyInstance$.next(this.isEmptyInstance());
       })
     );
   }
@@ -141,7 +143,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     return node.nodeName === CLIENT_NODE_NAME;
   }
 
-  /* template */ isEmptyInstance() {
+  private isEmptyInstance() {
     if (!this.edit.state$.value?.config?.nodeDtos?.length) {
       return true;
     }

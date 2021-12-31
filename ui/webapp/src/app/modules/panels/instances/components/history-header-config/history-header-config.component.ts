@@ -16,14 +16,16 @@ export class HistoryHeaderConfigComponent implements OnInit {
   @Input() diffSide: 'left' | 'right' | 'none' = 'none';
 
   /* template */ diff$ = new BehaviorSubject<InstanceConfigurationDiff>(null);
+  /* template */ borderClass: string | string[];
 
   constructor(private diffService: HistoryDiffService) {}
 
   ngOnInit(): void {
     this.diff$.next(this.diffService.diffInstanceConfig(this.baseConfig, this.compareConfig));
+    this.borderClass = this.getBorderClass();
   }
 
-  /* template */ getBorderClass(): string | string[] {
+  private getBorderClass(): string | string[] {
     if (this.diffSide === 'none' || this.diff$.value?.type === DiffType.UNCHANGED) {
       return 'local-border-unchanged';
     }

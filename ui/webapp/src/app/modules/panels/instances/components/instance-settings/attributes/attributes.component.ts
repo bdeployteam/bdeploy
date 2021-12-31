@@ -52,6 +52,7 @@ export class AttributesComponent implements OnInit {
   /* template */ newAttr: CustomAttributeDescriptor;
   /* template */ newValue: string;
   /* template */ instance: InstanceDto;
+  /* template */ defLabels: string[];
 
   private attributes: CustomAttributesRecord;
 
@@ -66,14 +67,11 @@ export class AttributesComponent implements OnInit {
       this.instance = instance;
       this.defs = group.instanceAttributes;
       this.attributes = instance.attributes;
+      this.defLabels = this.defs?.map((d) => d.description);
 
       // if we have values for both
       this.createRows();
     });
-  }
-
-  /* template */ getDefLabels() {
-    return this.defs?.map((d) => d.description);
   }
 
   /* template */ showAddDialog(template: TemplateRef<any>) {

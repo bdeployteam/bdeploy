@@ -22,7 +22,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onDelete(repository: SoftwareRepositoryConfiguration): void {
+  /* template */ onDelete(repository: SoftwareRepositoryConfiguration): void {
     this.dialog
       .confirm(
         `Delete ${repository.name}`,

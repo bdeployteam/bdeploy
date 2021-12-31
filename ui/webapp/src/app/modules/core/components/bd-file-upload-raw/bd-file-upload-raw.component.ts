@@ -23,6 +23,15 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
   /* template */ uploadStatus: UploadStatus;
   /* template */ importStatus: ImportStatus;
   /* template */ processingHint$ = new BehaviorSubject<string>('Working on it...');
+  /* template */ isUploadFinished$ = new BehaviorSubject<boolean>(false);
+  /* template */ isUploadFailed$ = new BehaviorSubject<boolean>(false);
+  /* template */ isUploading$ = new BehaviorSubject<boolean>(false);
+  /* template */ isUploadProcessing$ = new BehaviorSubject<boolean>(false);
+  /* template */ isImporting$ = new BehaviorSubject<boolean>(false);
+  /* template */ isImportFinished$ = new BehaviorSubject<boolean>(false);
+  /* template */ isImportFailed$ = new BehaviorSubject<boolean>(false);
+  /* template */ icon$ = new BehaviorSubject<string>(this.getIcon());
+  /* template */ header$ = new BehaviorSubject<string>(this.getHeader());
 
   /* template */ set supportAllOs(b: boolean) {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
@@ -90,24 +99,23 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.uploadStatus = this.uploads.uploadFile(this.uploadUrl, this.file, this.parameters, this.formDataParam);
-    this.uploadStatus.stateObservable.pipe(finalize(() => this.uploadDone())).subscribe();
-
     this.subscription = this.changes.subscribe(ObjectChangeType.ACTIVITIES, { scope: [this.uploadStatus.scope] }, (e) => {
       this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES]);
     });
-  }
-
-  isUserInputRequired(): boolean {
-    return !!this.uploadStatus.detail && !(!!this.uploadStatus?.detail?.isHive || !!this.uploadStatus?.detail?.isProduct) && !!!this.importStatus;
-  }
-
-  isUserInputValid(): boolean {
-    return (
-      !!this.uploadStatus.detail &&
-      this.uploadStatus?.detail?.name?.length > 0 &&
-      this.uploadStatus?.detail?.tag?.length > 0 &&
-      (this.uploadStatus?.detail?.supportedOperatingSystems === undefined || this.uploadStatus?.detail?.supportedOperatingSystems.length > 0)
+    this.subscription.add(
+      this.uploadStatus.stateObservable.pipe(finalize(() => this.uploadDone())).subscribe(() => {
+        this.setProcessDetails();
+      })
     );
+    this.subscription.add(
+      this.uploadStatus.progressObservable.subscribe(() => {
+        this.setProcessDetails();
+      })
+    );
+  }
+
+  private isUserInputRequired(): boolean {
+    return !!this.uploadStatus.detail && !(!!this.uploadStatus?.detail?.isHive || !!this.uploadStatus?.detail?.isProduct) && !!!this.importStatus;
   }
 
   uploadDone() {
@@ -123,6 +131,11 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   import() {
     this.importStatus = this.uploads.importFile(this.importUrl, this.uploadStatus.detail);
+    this.subscription.add(
+      this.importStatus.stateObservable.subscribe((state) => {
+        this.setProcessDetails();
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -141,26 +154,38 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ getIcon() {
-    if (this.isUploading() || this.isUploadProcessing()) {
+  private setProcessDetails() {
+    this.isUploadFinished$.next(this.uploadStatus?.state === UploadState.FINISHED);
+    this.isUploadFailed$.next(this.uploadStatus?.state === UploadState.FAILED);
+    this.isUploading$.next(this.uploadStatus?.state === UploadState.UPLOADING);
+    this.isUploadProcessing$.next(this.uploadStatus?.state === UploadState.PROCESSING);
+    this.isImporting$.next(this.importStatus?.state === ImportState.IMPORTING);
+    this.isImportFinished$.next(this.importStatus?.state === ImportState.FINISHED);
+    this.isImportFailed$.next(this.importStatus?.state === ImportState.FAILED);
+    this.icon$.next(this.getIcon());
+    this.header$.next(this.getHeader());
+  }
+
+  private getIcon() {
+    if (this.isUploading$.value || this.isUploadProcessing$.value) {
       return 'cloud_upload';
-    } else if (this.isUploadFinished()) {
+    } else if (this.isUploadFinished$.value) {
       return 'cloud_done';
-    } else if (this.isUploadFailed()) {
+    } else if (this.isUploadFailed$.value) {
       return 'cloud_off';
     } else {
       return 'help';
     }
   }
 
-  /* template */ getHeader() {
-    if (this.isUploading() || this.isUploadProcessing()) {
+  private getHeader() {
+    if (this.isUploading$.value || this.isUploadProcessing$.value) {
       return `Uploading: ${this.file.name}`;
-    } else if (this.isImporting()) {
+    } else if (this.isImporting$.value) {
       return `Importing: ${this.file.name}`;
-    } else if (this.isUploadFinished()) {
+    } else if (this.isUploadFinished$.value) {
       return `Success: ${this.file.name}`;
-    } else if (this.isUploadFailed()) {
+    } else if (this.isUploadFailed$.value) {
       return `Failed: ${this.file.name}`;
     } else {
       return 'Unknown State';
@@ -168,39 +193,9 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
   }
 
   /* template */ onDismiss() {
-    if (this.isUploading()) {
+    if (this.isUploading$.value) {
       this.uploadStatus.cancel();
     }
     this.dismiss.emit(this.file);
-  }
-
-  /* template */ isUploadFinished() {
-    return this.uploadStatus?.state === UploadState.FINISHED;
-  }
-
-  /* template */ isUploadFailed() {
-    return this.uploadStatus?.state === UploadState.FAILED;
-  }
-
-  /* template */ isUploading() {
-    return this.uploadStatus?.state === UploadState.UPLOADING;
-  }
-
-  /* template */ isUploadProcessing() {
-    return this.uploadStatus?.state === UploadState.PROCESSING;
-  }
-
-  //
-
-  /* template */ isImporting() {
-    return this.importStatus?.state === ImportState.IMPORTING;
-  }
-
-  /* template */ isImportFinished() {
-    return this.importStatus?.state === ImportState.FINISHED;
-  }
-
-  /* template */ isImportFailed() {
-    return this.importStatus?.state === ImportState.FAILED;
   }
 }

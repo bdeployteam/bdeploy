@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { debounceTime, Subscription } from 'rxjs';
 import { ApplicationDto, ApplicationStartType } from 'src/app/models/gen.dtos';
-import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
 
 @Component({
@@ -9,18 +9,39 @@ import { ProcessEditService } from '../../../../services/process-edit.service';
   templateUrl: './config-process-header.component.html',
   styleUrls: ['./config-process-header.component.css'],
 })
-export class ConfigProcessHeaderComponent implements OnInit {
-  @ViewChild('form') private form: NgForm;
+export class ConfigProcessHeaderComponent implements OnInit, OnDestroy {
+  @ViewChild('form') public form: NgForm;
+  @Output() checkIsInvalid = new EventEmitter<boolean>();
 
-  constructor(public edit: ProcessEditService, public instanceEdit: InstanceEditService) {}
+  /* template */ app: ApplicationDto;
+  /* template */ startTypes: ApplicationStartType[];
+  /* template */ startTypeLabels: string[];
+  /* template */ hasPendingChanges: boolean = false;
 
-  ngOnInit(): void {}
+  private subscription: Subscription;
 
-  public isInvalid(): boolean {
-    return this.form.invalid;
+  constructor(public edit: ProcessEditService) {}
+
+  ngOnInit(): void {
+    this.subscription = this.edit.application$.subscribe((application) => {
+      this.app = application;
+      this.startTypes = this.getStartTypes(this.app);
+      this.startTypeLabels = this.getStartTypeLabels(this.app);
+    });
   }
 
-  public getStartTypes(app: ApplicationDto): ApplicationStartType[] {
+  ngAfterViewInit(): void {
+    if (!this.form) {
+      return;
+    }
+    this.subscription.add(
+      this.form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
+        this.checkIsInvalid.emit(status === 'INVALID');
+      })
+    );
+  }
+
+  private getStartTypes(app: ApplicationDto): ApplicationStartType[] {
     const supported = app?.descriptor?.processControl?.supportedStartTypes;
     if (!supported?.length || !!supported.find((s) => s === ApplicationStartType.INSTANCE)) {
       return [ApplicationStartType.INSTANCE, ApplicationStartType.MANUAL, ApplicationStartType.MANUAL_CONFIRM];
@@ -31,7 +52,7 @@ export class ConfigProcessHeaderComponent implements OnInit {
     }
   }
 
-  public getStartTypeLabels(app: ApplicationDto): string[] {
+  private getStartTypeLabels(app: ApplicationDto): string[] {
     return this.getStartTypes(app).map((t) => {
       switch (t) {
         case ApplicationStartType.INSTANCE:
@@ -42,5 +63,9 @@ export class ConfigProcessHeaderComponent implements OnInit {
           return 'Manual (with confirmation)';
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

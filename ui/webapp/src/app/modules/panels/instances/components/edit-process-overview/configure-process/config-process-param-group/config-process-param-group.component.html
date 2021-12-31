@@ -32,8 +32,8 @@
   </div>
 </ng-template>
 
-<ng-container *ngIf="this.edit.process$ | async as process">
-  <div class="bd-default-padding" *ngIf="this.edit.application$ | async as app" fxLayout="column" fxLayoutGap="10px">
+<form #groupForm="ngForm">
+  <div class="bd-default-padding" *ngIf="process && app" fxLayout="column" fxLayoutGap="10px">
     <!-- Single parameter group -->
     <mat-accordion [multi]="true" class="local-headers-align">
       <ng-container *ngFor="let group of groups$ | async; let i = index">
@@ -43,8 +43,8 @@
               {{ group.name }}
             </mat-panel-title>
             <mat-panel-description *ngIf="!(narrow$ | async)">
-              <span *ngIf="!this.search">{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
-              <span *ngIf="!!this.search">Configured or optional parameters match search.</span>
+              <span *ngIf="!search">{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
+              <span *ngIf="!!search">Configured or optional parameters match search.</span>
               <span *ngIf="groupForm.invalid && !panel.expanded" class="bd-warning-text" [style.font-size]="'smaller'">Validation Failed</span>
               <div *ngIf="panel.expanded" fxLayout="row" fxLayoutGap="5px">
                 <app-bd-button
@@ -66,7 +66,7 @@
               </div>
             </mat-panel-description>
           </mat-expansion-panel-header>
-          <form #groupForm="ngForm" fxLayout="column">
+          <div fxLayout="column">
             <div fxFlexAlign="center" *ngIf="group.isSelectMode" fxLayout="row" fxLayoutAlign="start center" class="bd-hint-text" [style.padding-top.px]="20">
               <span class="local-edit-desc">
                 Use the <mat-icon>add</mat-icon> and <mat-icon>delete</mat-icon> buttons in front of each optional parameter to add or remove them. Mandatory
@@ -191,7 +191,7 @@
                 </div>
               </ng-container>
             </div>
-          </form>
+          </div>
         </mat-expansion-panel>
       </ng-container>
     </mat-accordion>
@@ -212,4 +212,4 @@
       </div>
     </mat-expansion-panel>
   </div>
-</ng-container>
+</form>

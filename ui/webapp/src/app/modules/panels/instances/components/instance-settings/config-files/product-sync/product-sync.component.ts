@@ -13,11 +13,19 @@ export type ConfigFileStatusType = 'new' | 'modified' | 'local' | 'sync' | 'unsy
 export class ProductSyncComponent implements OnInit {
   @Input() record: ConfigFile;
 
-  constructor(public cfgFiles: ConfigFilesService, private edit: InstanceEditService) {}
+  /* template */ path: string;
+  /* template */ isText: boolean;
+  /* template */ status: ConfigFileStatusType;
 
-  ngOnInit(): void {}
+  constructor(private cfgFiles: ConfigFilesService, private edit: InstanceEditService) {}
 
-  /* template */ getStatus(): ConfigFileStatusType {
+  ngOnInit(): void {
+    this.isText = this.cfgFiles.isText(this.record);
+    this.path = this.cfgFiles.getPath(this.record);
+    this.status = this.getStatus();
+  }
+
+  private getStatus(): ConfigFileStatusType {
     if (!this.record.persistent) {
       return 'new';
     }

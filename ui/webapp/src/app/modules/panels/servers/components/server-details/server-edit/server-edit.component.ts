@@ -1,7 +1,8 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { debounceTime, finalize, map } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -17,15 +18,17 @@ import { ServerDetailsService } from '../../../services/server-details.service';
   styleUrls: ['./server-edit.component.css'],
   providers: [ServerDetailsService],
 })
-export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   /* tepmlate */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ loading$ = combineLatest([this.saving$, this.servers.loading$, this.details.loading$]).pipe(map(([a, b, c]) => a || b || c));
 
   /* template */ server: ManagedMasterDto;
   /* template */ orig: ManagedMasterDto;
+  /* template */ disableSave: boolean;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild('form') public form: NgForm;
   private subscription: Subscription;
 
   constructor(private servers: ServersService, public details: ServerDetailsService, areas: NavAreasService) {
@@ -37,6 +40,17 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog {
       this.details.server$.subscribe((s) => {
         this.server = cloneDeep(s);
         this.orig = cloneDeep(s);
+      })
+    );
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.form) {
+      return;
+    }
+    this.subscription.add(
+      this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
+        this.disableSave = this.isDirty();
       })
     );
   }

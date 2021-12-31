@@ -1,5 +1,5 @@
 <ng-container *ngIf="diff$ | async as diff">
-  <div [ngClass]="getBorderClass()" *ngIf="diff.type !== 'not-in-base'">
+  <div [ngClass]="borderClass" *ngIf="diff.type !== 'not-in-base'">
     <div class="local-padding local-header" fxLayout="column">
       <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
         <div fxLayout="row" fxLayoutAlign="start center">

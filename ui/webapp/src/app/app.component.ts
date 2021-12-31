@@ -53,9 +53,4 @@ export class AppComponent implements OnInit {
       this.loadCount = 0;
     }
   }
-
-  showLoadIndicator(): boolean {
-    // at least one pending lazy load operation...
-    return !!this.loadCount;
-  }
 }

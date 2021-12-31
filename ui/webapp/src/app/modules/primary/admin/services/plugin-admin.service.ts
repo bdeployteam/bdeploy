@@ -15,6 +15,7 @@ export class PluginAdminService {
   public plugins$ = new BehaviorSubject<PluginInfoDto[]>([]);
 
   private apiPath = () => `${this.cfg.config.api}/plugin-admin`;
+  public globalUploadUrl$ = new BehaviorSubject<string>(`${this.apiPath()}/upload-global`);
 
   constructor(private http: HttpClient, private cfg: ConfigService, changes: ObjectChangesService) {
     changes.subscribe(ObjectChangeType.PLUGIN, EMPTY_SCOPE, (change) => {
@@ -41,10 +42,6 @@ export class PluginAdminService {
 
   public unloadPlugin(dto: PluginInfoDto) {
     this.http.post(`${this.apiPath()}/unload`, dto.id).subscribe();
-  }
-
-  public getGlobalUploadUrl(): string {
-    return `${this.apiPath()}/upload-global`;
   }
 
   public deleteGlobalPlugin(dto: PluginInfoDto) {

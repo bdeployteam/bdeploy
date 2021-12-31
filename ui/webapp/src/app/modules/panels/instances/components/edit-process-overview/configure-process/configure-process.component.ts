@@ -7,8 +7,6 @@ import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
-import { ConfigProcessHeaderComponent } from './config-process-header/config-process-header.component';
-import { ConfigProcessParamGroupComponent } from './config-process-param-group/config-process-param-group.component';
 
 @Component({
   selector: 'app-configure-process',
@@ -19,12 +17,12 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
-  @ViewChild(ConfigProcessHeaderComponent) private cfgHeader: ConfigProcessHeaderComponent;
-  @ViewChild(ConfigProcessParamGroupComponent) private cfgParams: ConfigProcessParamGroupComponent;
+  /* template */ hasPendingChanges: boolean;
+  /* template */ isInvalid: boolean;
 
   private subscription: Subscription;
 
-  constructor(public edit: ProcessEditService, public instanceEdit: InstanceEditService, areas: NavAreasService) {
+  constructor(public edit: ProcessEditService, private instanceEdit: InstanceEditService, areas: NavAreasService) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
@@ -51,7 +49,8 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
     );
   }
 
-  /* template */ isInvalid(): boolean {
-    return this.cfgHeader.isInvalid() || this.cfgParams.isInvalid();
+  /* template */ checkIsInvalid(event) {
+    this.isInvalid = event;
+    this.hasPendingChanges = this.isDirty();
   }
 }

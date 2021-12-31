@@ -54,6 +54,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   /* template */ passConfirm: string;
 
   /* template */ allPerms: Permission[] = Object.keys(Permission).map((k) => Permission[k]);
+  /* template */ isCurrentUser: boolean;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('assignTemplate') private assignTemplate: TemplateRef<any>;
@@ -68,8 +69,9 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
         this.user$.next(null);
         return;
       }
-
-      this.user$.next(users.find((u) => u.name === route.params['user']));
+      const user = users.find((u) => u.name === route.params['user']);
+      this.user$.next(user);
+      this.isCurrentUser = user.name === this.auth.getUsername();
     });
 
     this.subscription.add(
@@ -95,7 +97,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   private onRemovePermission(perm: ScopedPermission): void {
     const user = this.user$.value;
 
-    if (this.isCurrentUser(user) && perm.scope === null) {
+    if (this.isCurrentUser && perm.scope === null) {
       // refuse to remove global permissions from current user
       this.dialog.info('Cannot remove global permission', 'You cannot remove global permissions from yourself.', 'warning').subscribe();
       return;
@@ -134,10 +136,6 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
       });
   }
 
-  /* template */ isCurrentUser(userInfo: UserInfo): boolean {
-    return userInfo.name === this.auth.getUsername();
-  }
-
   /* template */ onEdit(userInfo: UserInfo): void {
     this.editUser = { ...userInfo };
     this.passConfirm = null;
@@ -170,6 +168,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
       });
   }
 
+  // TODO: Remove if it's unused
   /* template */ hasAnyPermission(scope: string): boolean {
     return !!this.user$.value?.permissions.find((p) => p.scope === scope);
   }
@@ -183,7 +182,7 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  public onDelete(userInfo: UserInfo): void {
+  /* template */ onDelete(userInfo: UserInfo): void {
     this.dialog.confirm('Delete User', `Are you sure you want to delete user ${userInfo.name}?`).subscribe((r) => {
       if (!r) {
         return;

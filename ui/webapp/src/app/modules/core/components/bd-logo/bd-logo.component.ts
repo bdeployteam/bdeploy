@@ -13,10 +13,4 @@ export class BdLogoComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {}
-
-  toolbarClass(): string {
-    if (this.color === 'main-toolbar') {
-      return 'local-toolbar-color';
-    }
-  }
 }

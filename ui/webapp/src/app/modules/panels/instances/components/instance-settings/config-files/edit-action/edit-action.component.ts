@@ -10,11 +10,19 @@ import { ConfigFile, ConfigFilesService } from '../../../../services/config-file
 export class EditActionComponent implements OnInit {
   @Input() record: ConfigFile;
 
-  constructor(public cfgFiles: ConfigFilesService) {}
+  /* template */ isEditAllowed: boolean;
+  /* template */ path: string;
+  /* template */ isText: boolean;
 
-  ngOnInit(): void {}
+  constructor(private cfgFiles: ConfigFilesService) {}
 
-  canEdit(): boolean {
+  ngOnInit(): void {
+    this.isEditAllowed = this.canEdit();
+    this.isText = this.cfgFiles.isText(this.record);
+    this.path = this.cfgFiles.getPath(this.record);
+  }
+
+  private canEdit(): boolean {
     if (!this.cfgFiles.isText(this.record)) {
       return false; // freshly added (not persistent yet) or not text file.
     }

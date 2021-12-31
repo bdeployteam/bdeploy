@@ -13,11 +13,11 @@ export class SoftwareUploadComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  fileAdded(file: File) {
+  /* template */ fileAdded(file: File) {
     this.files.push(file);
   }
 
-  onDismiss(index: number) {
+  /* template */ onDismiss(index: number) {
     this.files.splice(index, 1);
   }
 }

@@ -28,7 +28,7 @@ export class BdSearchFieldComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  queueChange() {
+  /* template */ queueChange() {
     this.searchChanged.next(this.value);
   }
 

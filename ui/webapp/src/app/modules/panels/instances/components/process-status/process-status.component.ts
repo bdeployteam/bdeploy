@@ -28,6 +28,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ isRunning: boolean;
   /* template */ processDetail: ProcessDetailDto;
   /* template */ processConfig: ApplicationConfiguration;
+  /* template */ startType: 'Instance' | 'Manual' | 'Confirmed Manual';
 
   public performing$ = new BehaviorSubject<boolean>(false);
 
@@ -56,6 +57,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         }
         this.processDetail = detail;
         this.processConfig = config;
+        this.startType = this.formatStartType(this.processConfig?.processControl.startType);
         this.isCrashedWaiting = detail.status.processState === ProcessState.CRASHED_WAITING;
         this.isRunning = ProcessesService.isRunning(detail.status.processState);
 
@@ -100,7 +102,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ formatStartType(type: ApplicationStartType) {
+  private formatStartType(type: ApplicationStartType) {
     switch (type) {
       case ApplicationStartType.INSTANCE:
         return 'Instance';

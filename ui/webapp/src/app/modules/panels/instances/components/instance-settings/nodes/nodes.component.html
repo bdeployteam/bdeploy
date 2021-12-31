@@ -17,7 +17,7 @@
         icon="done"
         [collapsed]="false"
         color="primary"
-        [disabled]="!isDirty() || !(servers.isCurrentInstanceSynchronized$ | async)"
+        [disabled]="!hasPendingChanges || !(servers.isCurrentInstanceSynchronized$ | async)"
         (click)="onSave()"
       ></app-bd-button>
     </div>

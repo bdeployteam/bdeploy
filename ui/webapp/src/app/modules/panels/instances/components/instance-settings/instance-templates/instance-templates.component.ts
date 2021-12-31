@@ -62,7 +62,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   /* template */ records$ = new BehaviorSubject<InstanceTemplateDescriptor[]>([]);
   /* template */ columns: BdDataColumn<InstanceTemplateDescriptor>[] = [colName, this.colApply];
 
-  /* template */ template: InstanceTemplateDescriptor;
+  /* template */ template;
   /* template */ variables: { [key: string]: string }; // key is var name, value is value.
   /* template */ groups: { [key: string]: string }; // key is group name, value is target node name.
   /* template */ messages: TemplateMessage[];
@@ -96,7 +96,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  /* template */ getNodesFor(group: InstanceTemplateGroup): string[] {
+  private getNodesFor(group: InstanceTemplateGroup): string[] {
     if (group.type === ApplicationType.CLIENT) {
       return [null, CLIENT_NODE_NAME];
     } else {
@@ -104,7 +104,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ getLabelsFor(group: InstanceTemplateGroup): string[] {
+  private getLabelsFor(group: InstanceTemplateGroup): string[] {
     const nodeValues = this.getNodesFor(group);
 
     return nodeValues.map((n) => {
@@ -117,8 +117,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  /* template */ getMessages() {}
 
   private validateAnyGroupSelected(): boolean {
     for (const k of Object.keys(this.groups)) {
@@ -143,6 +141,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   private apply(template: InstanceTemplateDescriptor) {
     // setup things required by the templates.
     this.template = template;
+    this.template.groups.map((group) => {
+      group.nodes = this.getNodesFor(group);
+      group.labels = this.getLabelsFor(group);
+    });
     this.groups = {};
     this.variables = {};
 
@@ -293,7 +295,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
         if (!!this.messages.length) {
-          console.log(this.messages);
           applyResult = this.dialog.message({
             header: 'Template Messages',
             template: this.tplMessages,

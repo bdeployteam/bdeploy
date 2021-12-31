@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="serverDetails.server$ | async as server">
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="server">
       <div gdColumns="110px auto" gdGap="5px">
         <strong>Name:</strong>
         <div class="bd-text-ellipsis">{{ server.hostName }}</div>
@@ -15,7 +15,8 @@
         <ng-container *ngIf="server.update?.updateAvailable">
           <strong>Update available:</strong>
           <div fxLayout="row" fxLayoutAlign="start center">
-            {{ formatVersion(server.update.updateVersion) }}<mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
+            {{ version }}
+            <mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
           </div>
         </ng-container>
       </div>
@@ -65,7 +66,7 @@
         ></app-bd-button>
       </ng-container>
       <app-bd-expand-button text="Nodes" icon="dns">
-        <app-bd-data-display [records]="getMinionRecords(server)" [columns]="columns">
+        <app-bd-data-display [records]="minions" [columns]="columns">
           <app-bd-no-data>
             <strong>This version is not used in any instance.</strong>
           </app-bd-no-data>

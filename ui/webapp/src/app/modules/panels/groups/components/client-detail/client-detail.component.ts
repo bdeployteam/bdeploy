@@ -18,20 +18,25 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
 
   /* template */ downloadingLauncher$ = new BehaviorSubject<boolean>(false);
   /* template */ downloadingLauncherZip$ = new BehaviorSubject<boolean>(false);
+  /* template */ hasLauncher: boolean;
 
   private subscription: Subscription;
 
   constructor(private areas: NavAreasService, public clients: ClientsService) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.clients.apps$, this.areas.panelRoute$]).subscribe(([apps, route]) => {
+    this.subscription = combineLatest([this.clients.apps$, this.areas.panelRoute$, this.clients.launcher$]).subscribe(([apps, route, launcher]) => {
       if (!route || !apps || !route.paramMap.has('app')) {
         this.app$.next(null);
         return;
       }
 
       const appUid = route.paramMap.get('app');
-      this.app$.next(apps.find((a) => a.client.uuid === appUid));
+      const app = apps.find((a) => a.client.uuid === appUid);
+      this.app$.next(app);
+      if (app && launcher) {
+        this.hasLauncher = this.clients.hasLauncher(app.client.os);
+      }
     });
   }
 

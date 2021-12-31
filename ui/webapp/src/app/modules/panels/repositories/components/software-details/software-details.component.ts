@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { ApplicationTemplateDescriptor, InstanceTemplateDescriptor, PluginInfoDto } from 'src/app/models/gen.dtos';
@@ -78,6 +78,7 @@ export class SoftwareDetailsComponent implements OnInit {
 
   /* template */ loading$ = combineLatest([this.deleting$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
   /* template */ preparing$ = new BehaviorSubject<boolean>(false);
+  /* template */ softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
@@ -88,7 +89,9 @@ export class SoftwareDetailsComponent implements OnInit {
     public auth: AuthenticationService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.softwareDetailsPlugins$ = this.detailsService.getPlugins();
+  }
 
   /* template */ doDelete(software: any) {
     this.dialog.confirm(`Delete ${software.key.tag}`, `Are you sure you want to delete version ${software.key.tag}?`, 'delete').subscribe((r) => {

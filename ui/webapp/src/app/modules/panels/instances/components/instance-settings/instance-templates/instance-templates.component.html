@@ -7,8 +7,8 @@
       [matTooltip]="group.description"
       [attr.name]="group.name"
       [(ngModel)]="groups[group.name]"
-      [values]="getNodesFor(group)"
-      [labels]="getLabelsFor(group)"
+      [values]="group.nodes"
+      [labels]="group.labels"
     ></app-bd-form-select>
   </ng-container>
 </ng-template>

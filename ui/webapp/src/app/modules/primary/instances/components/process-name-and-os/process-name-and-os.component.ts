@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, OperatingSystem } from 'src/app/models/gen.dtos';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 
 @Component({
@@ -10,11 +10,11 @@ import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 export class ProcessNameAndOsComponent implements OnInit {
   @Input() record: ApplicationConfiguration;
 
+  /* template */ appOs: OperatingSystem;
+
   constructor() {}
 
-  ngOnInit(): void {}
-
-  /* template */ getAppOs() {
-    return getAppOs(this.record.application);
+  ngOnInit(): void {
+    this.appOs = getAppOs(this.record.application);
   }
 }
