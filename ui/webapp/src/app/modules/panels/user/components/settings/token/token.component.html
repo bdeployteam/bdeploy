@@ -24,14 +24,7 @@
       <div fxLayout="column">
         <textarea #inputTarget readonly class="local-large-text" fxFlex="1 0 auto">{{ pack$ | async }}</textarea>
       </div>
-      <app-bd-button
-        [ngxClipboard]="inputTarget"
-        (cbOnSuccess)="copied()"
-        color="toolbar"
-        text="Copy To Clipboard"
-        icon="content_copy"
-        [collapsed]="false"
-      ></app-bd-button>
+      <app-bd-button color="toolbar" text="Copy To Clipboard" icon="content_copy" [collapsed]="false" (click)="doCopy(inputTarget.value)"></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

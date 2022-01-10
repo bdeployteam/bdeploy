@@ -33,7 +33,10 @@ export class TokenComponent implements OnInit {
       .subscribe((r) => this.pack$.next(r));
   }
 
-  copied() {
-    this.snackbarService.open('Token copied to clipboard.', null, { duration: 2000 });
+  /* template */ doCopy(value: string) {
+    navigator.clipboard.writeText(value).then(
+      () => this.snackbarService.open('Copied to clipboard successfully', null, { duration: 1000 }),
+      () => this.snackbarService.open('Unable to write to clipboard.', null, { duration: 1000 })
+    );
   }
 }

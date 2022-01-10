@@ -11,7 +11,7 @@ import { environment } from 'src/environments/environment';
 import { BackendInfoDto, MinionMode, PluginInfoDto, Version } from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import { ConnectionVersionComponent, VERSION_DATA } from '../components/connection-version/connection-version.component';
-import { NO_LOADING_BAR_HDRS } from '../utils/loading-bar.util';
+import { NO_LOADING_BAR_CONTEXT } from '../utils/loading-bar.util';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ThemeService } from './theme.service';
 
@@ -180,7 +180,8 @@ export class ConfigService {
   public getBackendInfo(errorHandling = false): Observable<BackendInfoDto> {
     return this.http
       .get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
-        headers: errorHandling ? NO_LOADING_BAR_HDRS : suppressGlobalErrorHandling(new HttpHeaders(NO_LOADING_BAR_HDRS)),
+        headers: errorHandling ? {} : suppressGlobalErrorHandling(new HttpHeaders()),
+        context: NO_LOADING_BAR_CONTEXT,
       })
       .pipe(
         tap((v) => {

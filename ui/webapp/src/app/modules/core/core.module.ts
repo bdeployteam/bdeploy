@@ -30,7 +30,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
 import { NgTerminalModule } from 'ng-terminal';
-import { ClipboardModule } from 'ngx-clipboard';
 import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
@@ -212,7 +211,6 @@ export function loadAppConfig(cfgService: ConfigService) {
 
     // additional libraries used to provide cool UI :)
     GravatarModule,
-    ClipboardModule,
     NgTerminalModule,
     MonacoEditorModule.forRoot(),
   ],
@@ -223,7 +221,6 @@ export function loadAppConfig(cfgService: ConfigService) {
     ReactiveFormsModule,
     FlexLayoutModule,
     LayoutModule,
-    ClipboardModule,
 
     // angular material things we don't want to re-import in *every* module
     MatIconModule,

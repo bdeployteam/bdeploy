@@ -21,7 +21,7 @@ import {
 } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { NO_LOADING_BAR_HDRS } from 'src/app/modules/core/utils/loading-bar.util';
+import { NO_LOADING_BAR_CONTEXT } from 'src/app/modules/core/utils/loading-bar.util';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
@@ -160,7 +160,7 @@ export class InstancesService {
 
     return this.http.post<StringEntryChunkDto>(`${this.apiPath(this.group)}/${origin.instanceConfiguration.uuid}/content/${dir.minion}`, entry, {
       params: { offset: offset.toString(), length: length.toString() },
-      headers: NO_LOADING_BAR_HDRS,
+      context: NO_LOADING_BAR_CONTEXT,
     });
   }
 

@@ -22,3 +22,17 @@ if (Cypress.env('DISABLE_COVERAGE') !== 'yes') {
 }
 
 Cypress.Screenshot.defaults({ overwrite: true });
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // returning false here prevents Cypress from failing the test.
+
+  // current ng-terminal uses ResizeObserver, which in *some* cases can cause
+  // unhandled exceptions in the browser, which are not even detected/handled
+  // by Angular, so the global error handler will not see them. This specific
+  // error has not influence on functionality and does not cause any problems
+  // in real world use.
+  if (err.message.includes('ResizeObserver loop')) {
+    console.log('IGNORING ERROR', err);
+    return false;
+  }
+});

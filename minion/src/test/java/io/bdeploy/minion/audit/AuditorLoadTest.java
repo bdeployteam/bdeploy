@@ -30,7 +30,7 @@ public class AuditorLoadTest {
                 for (int y = 0; y < 10; ++y) {
                     params.put(ContentHelper.randomString(10), Long.toString(System.currentTimeMillis()));
                 }
-                a.audit(AuditRecord.Builder.fromSystem().addParameters(params).setMessage(ContentHelper.randomString(20))
+                a.audit(AuditRecord.Builder.fromSystem().addParameters(params).setMessage(ContentHelper.randomString(100))
                         .build());
             }
         }
