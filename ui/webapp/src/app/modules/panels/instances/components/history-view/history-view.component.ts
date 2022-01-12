@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
-import { InstanceNodeConfigurationDto, InstanceNodeConfigurationListDto } from 'src/app/models/gen.dtos';
+import { InstanceNodeConfigurationListDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
@@ -15,6 +15,7 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
 export class HistoryViewComponent implements OnInit, OnDestroy {
   /* template */ base$ = new BehaviorSubject<string>(null);
   /* template */ config$ = new BehaviorSubject<InstanceConfigCache>(null);
+  /* template */ clientNodeName = CLIENT_NODE_NAME;
 
   private subscription: Subscription;
 
@@ -36,14 +37,6 @@ export class HistoryViewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ getNodeName(node: InstanceNodeConfigurationDto) {
-    return node?.nodeName === CLIENT_NODE_NAME ? 'Client Applications' : node?.nodeName;
-  }
-
-  /* template */ hasProcessControl(node: InstanceNodeConfigurationDto) {
-    return node?.nodeName !== CLIENT_NODE_NAME;
   }
 
   /* template */ getAppDesc(nodes: InstanceNodeConfigurationListDto, name: string) {

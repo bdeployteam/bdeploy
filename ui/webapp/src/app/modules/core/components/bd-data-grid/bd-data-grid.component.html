@@ -1,14 +1,14 @@
-<div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start" *ngIf="!grouping && !isEmpty(null)">
+<div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start" *ngIf="!grouping && recordsToDisplay$.value?.length">
   <app-bd-data-card
     fxLayout="column"
     fxLayoutAlign="stretch stretch"
     [style.padding.px]="5"
     *ngFor="let record of recordsToDisplay$ | async"
-    [fxFlex.lt-sm]="getFlexAmount(1)"
-    [fxFlex.sm]="getFlexAmount(2)"
-    [fxFlex.md]="getFlexAmount(3)"
-    [fxFlex.lg]="getFlexAmount(4)"
-    [fxFlex.gt-lg]="getFlexAmount(5)"
+    [fxFlex.lt-sm]="ltSm"
+    [fxFlex.sm]="sm"
+    [fxFlex.md]="md"
+    [fxFlex.lg]="lg"
+    [fxFlex.gt-lg]="gtLg"
     [record]="record"
     [columns]="_columns"
     [recordRoute]="recordRoute"
@@ -16,24 +16,30 @@
   >
   </app-bd-data-card>
 </div>
-<div *ngIf="!grouping && isEmpty(null)" fxFlex="1 0 auto" class="bd-hint-text local-hint-text" fxLayout="column" fxLayoutAlign="center center">
+<div
+  *ngIf="!grouping && !recordsToDisplay$.value?.length"
+  fxFlex="1 0 auto"
+  class="bd-hint-text local-hint-text"
+  fxLayout="column"
+  fxLayoutAlign="center center"
+>
   No data to show.
 </div>
 
-<mat-tab-group *ngIf="grouping" [style.width]="'100%'" animationDuration="0ms">
-  <ng-container *ngFor="let group of getGroupValues()">
+<mat-tab-group *ngIf="grouping" [style.width]="'100%'" animationDuration="0ms" (selectedTabChange)="onTabChange($event)">
+  <ng-container *ngFor="let group of groupValues">
     <mat-tab *ngIf="!grouping.selected?.length || grouping.selected.includes(group)" [label]="group">
       <div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start">
         <app-bd-data-card
           fxLayout="column"
           fxLayoutAlign="stretch stretch"
           [style.padding.px]="5"
-          *ngFor="let record of getGroupRecords(group)"
-          fxFlex.lt-sm="0 0 100%"
-          fxFlex.sm="0 0 50%"
-          fxFlex.md="0 0 33.33%"
-          fxFlex.lg="0 0 25%"
-          fxFlex.gt-lg="0 0 20%"
+          *ngFor="let record of groupRecords"
+          [fxFlex.lt-sm]="ltSm"
+          [fxFlex.sm]="sm"
+          [fxFlex.md]="md"
+          [fxFlex.lg]="lg"
+          [fxFlex.gt-lg]="gtLg"
           [record]="record"
           [columns]="_columns"
           [recordRoute]="recordRoute"
@@ -41,7 +47,7 @@
         >
         </app-bd-data-card>
       </div>
-      <div *ngIf="isEmpty(group)" class="bd-hint-text local-hint-text" fxLayout="column" fxLayoutAlign="center center">No data to show.</div>
+      <div *ngIf="!groupRecords.length" class="bd-hint-text local-hint-text" fxLayout="column" fxLayoutAlign="center center">No data to show.</div>
     </mat-tab>
   </ng-container>
 </mat-tab-group>

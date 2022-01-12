@@ -31,6 +31,9 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
   /* template */ public isCentral: boolean = false;
+  /* template */ purposes: InstancePurpose[] = [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
+  /* template */ productNames: string[] = [];
+  /* template */ serverNames: string[] = [];
 
   constructor(
     private groups: GroupsService,
@@ -42,51 +45,58 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscription = this.groups
-      .newUuid()
-      .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe((r) => (this.config.uuid = r));
+    this.subscription = this.cfg.isCentral$.subscribe((value) => {
+      this.isCentral = value;
+    });
     this.subscription.add(
-      this.cfg.isCentral$.subscribe((value) => {
-        this.isCentral = value;
-      })
-    );
+      this.groups
+        .newUuid()
+        .pipe(finalize(() => this.loading$.next(false)))
+        .subscribe((r) => {
+          this.config.uuid = r;
+          this.subscription.add(
+            this.products.products$.subscribe((products) => {
+              products.forEach((p) => {
+                let item = this.prodList.find((x) => x.id === p.key.name);
+                if (!item) {
+                  item = { id: p.key.name, name: p.name, versions: [] };
+                  this.prodList.push(item);
+                }
+                item.versions.push(p.key.tag);
+              });
+              this.productNames = this.prodList.map((p) => p.name);
+            })
+          );
 
-    this.subscription.add(
-      this.products.products$.subscribe((r) => {
-        r.forEach((p) => {
-          let item = this.prodList.find((x) => x.id === p.key.name);
-          if (!item) {
-            item = { id: p.key.name, name: p.name, versions: [] };
-            this.prodList.push(item);
-          }
-          item.versions.push(p.key.tag);
-        });
-
-        const snap = this.areas.panelRoute$.value;
-        const prodKey = snap.queryParamMap.get('productKey');
-        const prodTag = snap.queryParamMap.get('productTag');
-        if (!!prodKey && !!prodTag) {
-          const prod = this.prodList.find((p) => p.id === prodKey);
-          if (!!prod) {
-            if (!!prod.versions.find((v) => v === prodTag)) {
-              this.selectedProduct = prod;
-              this.config.product.name = prodKey;
-              this.config.product.tag = prodTag;
+          const snap = this.areas.panelRoute$.value;
+          const prodKey = snap.queryParamMap.get('productKey');
+          const prodTag = snap.queryParamMap.get('productTag');
+          if (!!prodKey && !!prodTag) {
+            const prod = this.prodList.find((p) => p.id === prodKey);
+            if (!!prod) {
+              if (!!prod.versions.find((v) => v === prodTag)) {
+                this.selectedProduct = prod;
+                this.config.product.name = prodKey;
+                this.config.product.tag = prodTag;
+              }
             }
           }
-        }
-      })
+        })
     );
 
-    this.subscription.add(this.servers.servers$.subscribe((s) => (this.serverList = s)));
+    this.subscription.add(
+      this.servers.servers$.subscribe((s) => {
+        this.serverList = s;
+        this.serverNames = this.serverList.map((s) => `${s.hostName} - ${s.description}`);
+      })
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  onSave(): void {
+  /* template */ onSave(): void {
     this.loading$.next(true);
     this.instances
       .create(this.config, this.server?.hostName)
@@ -96,20 +106,8 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
       });
   }
 
-  /* template */ getPurposes(): InstancePurpose[] {
-    return [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
-  }
-
   /* template */ updateProduct() {
     this.config.product.name = this.selectedProduct.id;
     this.config.product.tag = null;
-  }
-
-  /* template */ getProductNames() {
-    return this.prodList.map((p) => p.name);
-  }
-
-  /* template */ getServerNames() {
-    return this.serverList.map((s) => `${s.hostName} - ${s.description}`);
   }
 }

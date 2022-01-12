@@ -30,7 +30,7 @@ export class SettingsComponent implements OnInit {
       });
   }
 
-  logout(): void {
+  /* template */ logout(): void {
     this.router.navigate(['/login']).then((result) => {
       if (result) {
         this.authService.logout();

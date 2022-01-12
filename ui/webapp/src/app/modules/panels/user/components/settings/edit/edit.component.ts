@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize, first, skipWhile } from 'rxjs/operators';
@@ -21,9 +22,11 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ mail$ = new BehaviorSubject<string>(null);
   /* template */ user: UserInfo;
   /* template */ orig: UserInfo;
+  /* template */ disableSave: boolean;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild('form') public form: NgForm;
   private subscription: Subscription;
   private mailChanged = new Subject<string>();
 
@@ -47,6 +50,17 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
           this.mail$.next(this.user.email);
         }
       });
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.form) {
+      return;
+    }
+    this.subscription.add(
+      this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
+        this.disableSave = this.isDirty();
+      })
+    );
   }
 
   ngOnDestroy(): void {

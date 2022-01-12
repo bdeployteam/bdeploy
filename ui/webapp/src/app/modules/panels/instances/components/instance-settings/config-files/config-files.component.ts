@@ -58,7 +58,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
     }
   }
 
-  doAddFile(tpl: TemplateRef<any>): void {
+  /* template */ doAddFile(tpl: TemplateRef<any>): void {
     this.tempFilePath = '';
     this.tempFileContent = '';
 
@@ -78,7 +78,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
       });
   }
 
-  doAddFileContent(file: File) {
+  /* template */ doAddFileContent(file: File) {
     this.tempFileError = null;
     this.tempFileContentLoading$.next(true);
 

@@ -14,14 +14,17 @@ export class RenameActionComponent implements OnInit {
   @Input() record: ConfigFile;
 
   /* template */ newName: string;
+  /* template */ renameAllowed: boolean;
 
   @ViewChild('renameInput', { static: false }) private renameInput: BdFormInputComponent;
 
   constructor(private cfgFiles: ConfigFilesService, @Inject(forwardRef(() => ConfigFilesComponent)) private parent: ConfigFilesComponent) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.renameAllowed = this.canRename();
+  }
 
-  onRename(tpl: TemplateRef<any>): void {
+  /* template */ onRename(tpl: TemplateRef<any>): void {
     const oldName = this.cfgFiles.getPath(this.record);
     this.newName = oldName;
 
@@ -47,7 +50,7 @@ export class RenameActionComponent implements OnInit {
       });
   }
 
-  canRename(): boolean {
+  private canRename(): boolean {
     if (this.record.modification?.type === FileStatusType.DELETE) {
       return false;
     }

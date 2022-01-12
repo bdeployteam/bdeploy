@@ -13,6 +13,6 @@
         </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error *ngIf="isInvalid()">{{ getErrorMessage() }}</mat-error>
+    <mat-error *ngIf="ngControl && ngControl.invalid">{{ getErrorMessage() }}</mat-error>
   </mat-form-field>
 </div>

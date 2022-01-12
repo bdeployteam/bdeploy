@@ -47,12 +47,12 @@
       </div>
 
       <div class="local-chip local-inactive-chip" *ngIf="user.inactive">INACTIVE</div>
-      <div class="local-chip local-inactive-chip" *ngIf="isCurrentUser(user)">Current user - editing restricted.</div>
+      <div class="local-chip local-inactive-chip" *ngIf="isCurrentUser">Current user - editing restricted.</div>
 
       <app-bd-data-table [records]="user.permissions" [columns]="permColumns"></app-bd-data-table>
 
       <app-bd-button
-        [disabled]="isCurrentUser(user)"
+        [disabled]="isCurrentUser"
         *ngIf="!user.inactive"
         [collapsed]="false"
         icon="person_off"
@@ -60,7 +60,7 @@
         (click)="onSetInactive(user, true)"
       ></app-bd-button>
       <app-bd-button
-        [disabled]="isCurrentUser(user)"
+        [disabled]="isCurrentUser"
         *ngIf="user.inactive"
         [collapsed]="false"
         icon="person"
@@ -74,12 +74,12 @@
         [collapsed]="false"
         icon="edit"
         text="Edit User"
-        [disabled]="user.external || isCurrentUser(user)"
+        [disabled]="user.external || isCurrentUser"
         (click)="onEdit(user)"
         [matTooltip]="user.external ? 'Editing is only possible for local users.' : null"
       ></app-bd-button>
 
-      <app-bd-button [disabled]="isCurrentUser(user)" icon="delete" text="Delete User" [collapsed]="false" (click)="onDelete(user)"></app-bd-button>
+      <app-bd-button [disabled]="isCurrentUser" icon="delete" text="Delete User" [collapsed]="false" (click)="onDelete(user)"></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

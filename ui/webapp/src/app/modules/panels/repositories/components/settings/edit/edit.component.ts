@@ -20,6 +20,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ repository: SoftwareRepositoryConfiguration;
   /* template */ origRepository: SoftwareRepositoryConfiguration;
+  /* template */ disableSave: boolean;
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
@@ -44,7 +45,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription.unsubscribe();
   }
 
-  /* template */ isDirty(): boolean {
+  isDirty(): boolean {
     return isDirty(this.repository, this.origRepository);
   }
 
@@ -58,7 +59,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     );
   }
 
-  public doSave(): Observable<any> {
+  /* template */ public doSave(): Observable<any> {
     return this.details.update(this.repository);
   }
 
@@ -66,5 +67,9 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.saving$.next(false);
     this.repository = this.origRepository;
     this.tb.closePanel();
+  }
+
+  /* template */ onChange() {
+    this.disableSave = this.isDirty();
   }
 }

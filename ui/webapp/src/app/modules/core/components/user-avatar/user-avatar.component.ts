@@ -1,6 +1,12 @@
 import { Component, HostBinding, Input, OnInit } from '@angular/core';
 import { SettingsService } from '../../services/settings.service';
 
+export interface StyleDef {
+  width: string;
+  height: string;
+  fontSize: string;
+}
+
 @Component({
   selector: 'app-user-avatar',
   templateUrl: './user-avatar.component.html',
@@ -17,15 +23,21 @@ export class UserAvatarComponent implements OnInit {
   @Input()
   public mail;
 
+  /* template */ hostStyle: StyleDef;
+  /* template */ avatarStyle: StyleDef;
+
   constructor(public settings: SettingsService) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.hostStyle = this.getStyle(this.hostSize);
+    this.avatarStyle = this.getStyle(this.avatarSize);
+  }
 
-  getStyle(s: number) {
+  private getStyle(s: number): StyleDef {
     return {
       width: `${s}px`,
       height: `${s}px`,
-      'font-size': `${s}px`,
+      fontSize: `${s}px`,
     };
   }
 }

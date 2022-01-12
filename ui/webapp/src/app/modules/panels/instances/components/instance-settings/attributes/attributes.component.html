@@ -1,6 +1,6 @@
 <ng-template #addTemplate>
   <div>Select an attribute and assign a value.</div>
-  <app-bd-form-select [(ngModel)]="newAttr" name="id" label="Instance Attribute" [values]="defs" [labels]="getDefLabels()" required></app-bd-form-select>
+  <app-bd-form-select [(ngModel)]="newAttr" name="id" label="Instance Attribute" [values]="defs" [labels]="defLabels" required></app-bd-form-select>
   <app-bd-form-input [(ngModel)]="newValue" name="value" label="Attribute Value" required></app-bd-form-input>
 </ng-template>
 

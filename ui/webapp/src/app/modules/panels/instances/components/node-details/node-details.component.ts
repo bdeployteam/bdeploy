@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { InstanceNodeConfigurationDto, MinionStatusDto, Version } from 'src/app/models/gen.dtos';
+import { InstanceNodeConfigurationDto, MinionStatusDto } from 'src/app/models/gen.dtos';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
@@ -14,6 +14,7 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
   /* template */ nodeName$ = new BehaviorSubject<string>(null);
   /* template */ nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
   /* template */ nodeCfg$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
+  /* template */ nodeVersion: string;
   private subscription: Subscription;
 
   constructor(private instances: InstancesService, route: ActivatedRoute) {
@@ -34,6 +35,7 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
           if (!!cfgs?.nodeConfigDtos?.length) {
             this.nodeCfg$.next(cfgs.nodeConfigDtos.find((d) => d.nodeName === node));
           }
+          this.nodeVersion = convert2String(this.nodeState$.value?.config.version);
         }
       })
     );
@@ -41,9 +43,5 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ formatVersion(v: Version) {
-    return convert2String(v);
   }
 }

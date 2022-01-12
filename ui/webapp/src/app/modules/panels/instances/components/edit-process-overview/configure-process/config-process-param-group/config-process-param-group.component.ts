@@ -1,9 +1,22 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  QueryList,
+  TemplateRef,
+  ViewChild,
+  ViewChildren,
+  ViewEncapsulation,
+} from '@angular/core';
 import { NgControl, NgForm } from '@angular/forms';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, skipWhile } from 'rxjs/operators';
-import { CustomEditor, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, ApplicationDto, CustomEditor, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
@@ -36,16 +49,19 @@ interface ParameterGroup {
   styleUrls: ['./config-process-param-group.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable {
+export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable, AfterViewInit {
   /* template */ groups$ = new BehaviorSubject<ParameterGroup[]>(null);
   /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ search: string;
+  /* template */ process: ApplicationConfiguration;
+  /* template */ app: ApplicationDto;
 
   @Input() dialog: BdDialogComponent;
 
   @ViewChild(HistoryProcessConfigComponent) preview: HistoryProcessConfigComponent;
-  @ViewChildren('groupForm') private forms: QueryList<NgForm>;
+  @ViewChildren('groupForm') public forms: QueryList<NgForm>;
   @ViewChildren('validateCustom', { read: NgControl }) private validateCustomFields: QueryList<NgControl>;
+  @Output() checkIsInvalid = new EventEmitter<boolean>();
 
   private custom: ParameterGroup;
   /* template */ customTemp: { predecessor: string; uid: string; value: string };
@@ -59,7 +75,8 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         this.groups$.next(null);
         return;
       }
-
+      this.process = process;
+      this.app = app;
       // group all parameter descriptors and configurations together for simple iteration in the template.
       const r: ParameterGroup[] = [];
       for (const pd of app.descriptor.startCommand.parameters) {
@@ -139,16 +156,25 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
   ngOnInit(): void {}
 
+  ngAfterViewInit(): void {
+    if (!this.forms) {
+      return;
+    }
+    this.forms.forEach((form) => {
+      this.subscription.add(
+        form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
+          this.checkIsInvalid.emit(status === 'INVALID');
+        })
+      );
+    });
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
   bdOnSearch(s: string) {
     this.search = !s?.length ? null : s;
-  }
-
-  public isInvalid(): boolean {
-    return this.forms.filter((f) => f.invalid).length !== 0;
   }
 
   /* template */ getValueCount(g: ParameterGroup) {

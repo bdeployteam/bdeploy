@@ -35,7 +35,7 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
   private onTouchedCb: () => void = () => {};
   private onChangedCb: (_: any) => void = () => {};
 
-  constructor(@Optional() @Self() private ngControl: NgControl) {
+  constructor(@Optional() @Self() public ngControl: NgControl) {
     if (!!ngControl) {
       ngControl.valueAccessor = this;
     }
@@ -72,12 +72,8 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
     return this.errorDisplay === 'immediate' || !!(control && (control.dirty || control.touched));
   }
 
-  /* template */ isInvalid() {
-    if (!this.ngControl) {
-      return false;
-    }
-
-    return this.ngControl.invalid;
+  public isInvalid() {
+    return this.ngControl && this.ngControl.invalid;
   }
 
   /* template */ getErrorMessage() {

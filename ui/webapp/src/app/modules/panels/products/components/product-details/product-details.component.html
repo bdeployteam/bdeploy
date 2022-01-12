@@ -46,7 +46,7 @@
         </app-bd-expand-button>
 
         <app-bd-expand-button text="Plugins" icon="extension">
-          <app-bd-data-display [records]="singleProduct.getPlugins() | async" [columns]="pluginColumns">
+          <app-bd-data-display [records]="singleProductPlugins$ | async" [columns]="pluginColumns">
             <app-bd-no-data>
               <div>This product has no plugins.</div>
             </app-bd-no-data>

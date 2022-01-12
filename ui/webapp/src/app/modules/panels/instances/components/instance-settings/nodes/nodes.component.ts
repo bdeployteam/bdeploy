@@ -32,6 +32,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ records: NodeRow[] = [];
   /* template */ columns: BdDataColumn<NodeRow>[] = [colNodeName];
   /* template */ checked: NodeRow[] = [];
+  /* template */ hasPendingChanges: boolean;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -91,6 +92,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
         this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration));
       }
     }
+    this.hasPendingChanges = this.edit.hasPendingChanges();
   }
 
   /* template */ checkChangeAllowed: (row: NodeRow, target: boolean) => Observable<boolean> = (row, target) => {

@@ -2,15 +2,15 @@
   <app-bd-dialog-toolbar header="Edit Details" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="server">
-      <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="onSave()">
+    <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="10px">
+      <div *ngIf="server" fxLayout="column" fxLayoutGap="10px">
         <app-bd-form-input name="description" label="Description" [(ngModel)]="server.description"></app-bd-form-input>
         <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri" appTrimmed></app-bd-form-input>
         <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
         <app-bd-form-input name="token" label="Authorization Token" [(ngModel)]="server.auth" appTrimmed></app-bd-form-input>
 
-        <app-bd-button text="Save" icon="save" [collapsed]="false" color="primary" [disabled]="!isDirty() || form.invalid"></app-bd-button>
-      </form>
-    </div>
+        <app-bd-button text="Save" icon="save" [collapsed]="false" color="primary" [disabled]="form.invalid || !disableSave"></app-bd-button>
+      </div>
+    </form>
   </app-bd-dialog-content>
 </app-bd-dialog>

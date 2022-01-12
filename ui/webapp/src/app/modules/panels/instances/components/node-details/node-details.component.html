@@ -5,7 +5,7 @@
       <app-bd-notification-card [svgIcon]="state.config.os" [dismissable]="false" header="{{ nodeName$ | async }} - {{ state.config.os }}">
         <div gdColumns="120px auto" gdRows="repeat(4, 24px)" gdGap="5px" gdAlignColumns="start center">
           <div>BDeploy Version:</div>
-          <div class="bd-text-ellipsis">{{ formatVersion(state.config.version) }}</div>
+          <div class="bd-text-ellipsis">{{ nodeVersion }}</div>
           <div>Number of CPUs:</div>
           <div>{{ state.config.monitoring.availableProcessors }}</div>
           <div>Master:</div>

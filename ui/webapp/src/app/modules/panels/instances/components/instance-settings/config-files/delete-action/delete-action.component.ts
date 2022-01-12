@@ -14,7 +14,7 @@ export class DeleteActionComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onDelete(): void {
+  /* template */ onDelete(): void {
     const name = this.cfgFiles.getPath(this.record);
     this.parent.dialog.confirm(`Delete ${name}?`, `This will remove the file ${name} from the current set of configuration files.`).subscribe((r) => {
       if (r) {

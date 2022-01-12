@@ -13,6 +13,8 @@ export class UpdateActionComponent implements OnInit {
 
   private index: number;
   private curIndex: number;
+  /* template */ isUpgrade: boolean;
+  /* template */ isCurrent: boolean;
 
   constructor(private products: ProductsService, private edit: InstanceEditService) {}
 
@@ -21,14 +23,8 @@ export class UpdateActionComponent implements OnInit {
     this.curIndex = this.products.products$.value.findIndex(
       (r) => this.edit.state$.value?.config.config.product.name === r.key.name && this.edit.state$.value?.config.config.product.tag === r.key.tag
     );
-  }
-
-  /* template */ isUpgrade(): boolean {
-    return this.index < this.curIndex;
-  }
-
-  /* template */ isCurrent(): boolean {
-    return this.index === this.curIndex;
+    this.isUpgrade = this.index < this.curIndex;
+    this.isCurrent = this.index === this.curIndex;
   }
 
   /* template */ doUpdate() {

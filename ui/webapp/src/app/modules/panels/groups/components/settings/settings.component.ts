@@ -31,7 +31,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onRepair(group: InstanceGroupConfiguration): void {
+  /* template */ onRepair(group: InstanceGroupConfiguration): void {
     this.dialog.confirm('Repair', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive').subscribe((confirmed) => {
       if (confirmed) {
         this.repairing$.next(true);
@@ -54,7 +54,7 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  onPrune(group: InstanceGroupConfiguration): void {
+  /* template */ onPrune(group: InstanceGroupConfiguration): void {
     this.pruning$.next(true);
     this.details
       .prune(group.name)
@@ -64,7 +64,7 @@ export class SettingsComponent implements OnInit {
       });
   }
 
-  onDelete(group: InstanceGroupConfiguration): void {
+  /* template */ onDelete(group: InstanceGroupConfiguration): void {
     this.dialog
       .confirm(
         `Delete ${group.name}`,

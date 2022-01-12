@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Observable, of, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { debounceTime, tap } from 'rxjs/operators';
 import { InstancePurpose } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -15,11 +16,15 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './edit-config.component.html',
   styleUrls: ['./edit-config.component.css'],
 })
-export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
+  @ViewChild('form') public form: NgForm;
 
   private subscription: Subscription;
+
+  /* template */ purposes = [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
+  /* template */ hasPendingChanges: boolean;
 
   constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, areas: NavAreasService) {
     this.subscription = areas.registerDirtyable(this, 'panel');
@@ -27,16 +32,23 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   ngOnInit(): void {}
 
+  ngAfterViewInit(): void {
+    if (!this.form) {
+      return;
+    }
+    this.subscription.add(
+      this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
+        this.hasPendingChanges = this.isDirty();
+      })
+    );
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
   public isDirty(): boolean {
     return this.edit.hasPendingChanges();
-  }
-
-  /* template */ getPurposes(): InstancePurpose[] {
-    return [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
   }
 
   /* template */ onSave() {

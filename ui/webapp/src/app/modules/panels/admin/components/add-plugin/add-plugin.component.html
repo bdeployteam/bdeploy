@@ -7,7 +7,7 @@
         *ngFor="let file of files; let i = index"
         [file]="file"
         formDataParam="plugin"
-        [url]="plugins.getGlobalUploadUrl()"
+        [url]="plugins.globalUploadUrl$ | async"
         (dismiss)="onDismiss(i)"
         [resultEvaluator]="resultEvaluator"
       ></app-bd-file-upload>

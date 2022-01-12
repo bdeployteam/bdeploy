@@ -8,7 +8,7 @@
 
       <mat-form-field appearance="fill">
         <mat-label>Banner Text</mat-label>
-        <textarea matInput [(ngModel)]="banner.text" [style.height.px]="100"></textarea>
+        <textarea matInput [(ngModel)]="banner.text" [style.height.px]="100" (ngModelChange)="onChange()"></textarea>
       </mat-form-field>
 
       <app-color-select-group (colorChanged)="doChangeColor($event)"></app-color-select-group>
@@ -20,7 +20,7 @@
         [collapsed]="false"
         icon="done"
         color="primary"
-        [disabled]="!isDirty()"
+        [disabled]="!disableApply"
         (click)="onSave()"
         [disabled]="saving$ | async"
         [loadingWhen$]="saving$"

@@ -79,7 +79,7 @@ export class ManagedTransferComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  doTransfer(): void {
+  /* template */ doTransfer(): void {
     this.transfer.versionsToTransfer = this.selected;
     this.servers.transferProducts(this.transfer).subscribe((_) => {
       this.tb.closePanel();

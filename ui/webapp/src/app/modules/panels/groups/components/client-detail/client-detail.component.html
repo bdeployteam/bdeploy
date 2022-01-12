@@ -23,10 +23,10 @@
         icon="cloud_download"
         text="Download Installer"
         [collapsed]="false"
-        [disabled]="!clients.hasLauncher(app.client.os) || (downloadingInstaller$ | async)"
+        [disabled]="!hasLauncher || (downloadingInstaller$ | async)"
         (click)="downloadInstaller(app)"
         [loadingWhen$]="downloadingInstaller$"
-        [matTooltip]="!clients.hasLauncher(app.client.os) ? 'No Launcher available for the selected operating system' : null"
+        [matTooltip]="!hasLauncher ? 'No Launcher available for the selected operating system' : null"
       ></app-bd-button>
       <app-bd-button
         icon="play_arrow"
@@ -46,19 +46,19 @@
         [svgIcon]="app.client.os"
         text="Download Launcher Installer"
         [collapsed]="false"
-        [disabled]="!clients.hasLauncher(app.client.os) || (downloadingLauncher$ | async)"
+        [disabled]="!hasLauncher || (downloadingLauncher$ | async)"
         (click)="downloadLauncher(app.client.os)"
         [loadingWhen$]="downloadingLauncher$"
-        [matTooltip]="!(clients.loading$ | async) && !clients.hasLauncher(app.client.os) ? 'No Launcher available for the selected operating system' : null"
+        [matTooltip]="!(clients.loading$ | async) && !hasLauncher ? 'No Launcher available for the selected operating system' : null"
       ></app-bd-button>
       <app-bd-button
         icon="archive"
         text="Download Portable Launcher"
         [collapsed]="false"
-        [disabled]="!clients.hasLauncher(app.client.os) || (downloadingLauncherZip$ | async)"
+        [disabled]="!hasLauncher || (downloadingLauncherZip$ | async)"
         (click)="downloadLauncherZip(app.client.os)"
         [loadingWhen$]="downloadingLauncherZip$"
-        [matTooltip]="!(clients.loading$ | async) && !clients.hasLauncher(app.client.os) ? 'No Launcher available for the selected operating system' : null"
+        [matTooltip]="!(clients.loading$ | async) && !hasLauncher ? 'No Launcher available for the selected operating system' : null"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

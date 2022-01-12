@@ -15,7 +15,7 @@ import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logg
 export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ config: string;
-  private origConfig: string;
+  public origConfig: string;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;

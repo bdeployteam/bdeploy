@@ -6,7 +6,7 @@
         <div>
           Update <strong>{{ selection.length }}</strong> selected instances' product version.
         </div>
-        <div>This operation requires successfull validation of each instance after applying the update to succeed.</div>
+        <div>This operation requires successful validation of each instance after applying the update to succeed.</div>
         <app-bd-data-table [records]="products$ | async" [columns]="columns" *ngIf="!(processing$ | async)"></app-bd-data-table>
         <ng-container *ngIf="processing$ | async">
           <mat-divider></mat-divider>

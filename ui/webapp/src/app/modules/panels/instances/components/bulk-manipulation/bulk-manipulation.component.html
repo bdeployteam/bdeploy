@@ -1,14 +1,14 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Bulk Instance Manipulation" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="bulk.selection$ | async as selected">
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="selections">
       <div>
-        <strong>{{ selected.length }}</strong> instances selected.
+        <strong>{{ selections.length }}</strong> instances selected.
       </div>
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"
-        [disabled]="!selected.length || (starting$ | async)"
+        [disabled]="!selections.length || (starting$ | async)"
         [loadingWhen$]="starting$"
         text="Start Selected Instances"
         icon="play_arrow"
@@ -17,7 +17,7 @@
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
-        [disabled]="!selected.length || (stopping$ | async)"
+        [disabled]="!selections.length || (stopping$ | async)"
         [loadingWhen$]="stopping$"
         text="Stop Selected Instances"
         icon="stop"
@@ -27,7 +27,7 @@
       <mat-divider></mat-divider>
       <app-bd-panel-button
         [collapsed]="false"
-        [disabled]="!selected.length || !isAllSameProduct()"
+        [disabled]="!selections.length || !isAllSameProduct"
         text="Set Product Version"
         icon="security_update_good"
         [toggle]="false"
@@ -37,7 +37,7 @@
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"
-        [disabled]="!selected.length || (installing$ | async)"
+        [disabled]="!selections.length || (installing$ | async)"
         [loadingWhen$]="installing$"
         text="Install Latest Version"
         icon="layers"
@@ -45,7 +45,7 @@
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
-        [disabled]="!selected.length || (activating$ | async)"
+        [disabled]="!selections.length || (activating$ | async)"
         [loadingWhen$]="activating$"
         text="Activate Latest Version"
         icon="star"
@@ -54,7 +54,7 @@
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"
-        [disabled]="!selected.length || (deleting$ | async)"
+        [disabled]="!selections.length || (deleting$ | async)"
         [loadingWhen$]="deleting$"
         text="Delete Selected Instances"
         icon="delete"

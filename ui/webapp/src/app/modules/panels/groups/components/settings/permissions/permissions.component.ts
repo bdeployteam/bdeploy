@@ -35,7 +35,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
     name: 'Modify',
     data: (r) => `Modify permissions for ${r.name}`,
     action: (r) => this.doModify(this.modDialog, r),
-    actionDisabled: (r) => this.getAvailablePermissionsFor(r).length === 0,
+    actionDisabled: (r) => this.getAvailablePermissionsForUser(r).length === 0,
     icon: (r) => (!this.getLocalPermissionLevel(r) && !this.getGlobalPermissionLevel(r) ? 'add' : 'edit'),
     width: '40px',
   };
@@ -63,6 +63,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
 
   /* template */ modPerm: Permission;
   /* template */ modUser: UserInfo;
+  /* template */ availablePermissionsForUser: Permission[];
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
@@ -83,6 +84,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
 
   private doModify(tpl: TemplateRef<any>, user: UserInfo) {
     this.modUser = user;
+    this.availablePermissionsForUser = this.getAvailablePermissionsForUser(this.modUser);
     this.modPerm = this.getLocalPermissionLevel(user);
     this.dialog
       .message({ header: `Modify ${user.name} permissions`, template: tpl, actions: [this.actRemoveLocal, ACTION_CANCEL, ACTION_OK] })
@@ -95,7 +97,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
       });
   }
 
-  /* template */ getAvailablePermissionsFor(user: UserInfo): Permission[] {
+  private getAvailablePermissionsForUser(user: UserInfo): Permission[] {
     if (!user) {
       return [];
     }

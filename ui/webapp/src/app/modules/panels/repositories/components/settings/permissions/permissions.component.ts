@@ -63,6 +63,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
 
   /* template */ modPerm: Permission;
   /* template */ modUser: UserInfo;
+  /* template */ availablePermissions: Permission[];
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
@@ -97,9 +98,10 @@ export class PermissionsComponent implements OnInit, OnDestroy {
           this.users.updatePermission(user, this.modPerm).subscribe();
         }
       });
+    this.availablePermissions = this.getAvailablePermissionsFor(user);
   }
 
-  /* template */ getAvailablePermissionsFor(user: UserInfo): Permission[] {
+  private getAvailablePermissionsFor(user: UserInfo): Permission[] {
     if (!user) {
       return [];
     }

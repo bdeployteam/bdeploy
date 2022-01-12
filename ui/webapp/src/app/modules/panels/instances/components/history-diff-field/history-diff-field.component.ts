@@ -16,11 +16,19 @@ export class HistoryDiffFieldComponent implements OnInit {
   /** Which side of the diff is this field on. */
   @Input() diffSide: 'left' | 'right' | 'none' = 'none';
 
+  /* template */ borderClass: string;
+  /* template */ bgClass: string;
+  /* template */ value: string;
+
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.borderClass = this.getBorderClass();
+    this.bgClass = this.getBgClass();
+    this.value = this.getValue();
+  }
 
-  /* template */ getBorderClass(): string {
+  private getBorderClass(): string {
     if (this.diffSide === 'none' || this.diff.type === DiffType.UNCHANGED) {
       return 'local-unchanged';
     }
@@ -35,11 +43,11 @@ export class HistoryDiffFieldComponent implements OnInit {
     }
   }
 
-  /* template */ getBgClass(): string {
+  private getBgClass(): string {
     return this.getBorderClass() + '-bg';
   }
 
-  /* template */ getValue(): string {
+  private getValue(): string {
     if (this.diff.value === null || this.diff.value === undefined) {
       return '-';
     }

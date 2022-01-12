@@ -31,7 +31,8 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /** Emitted when the grouping changes. This may be emitted once after creating the component if a preset is loaded. */
   @Output() groupingChange = new EventEmitter<BdDataGrouping<T>[]>();
 
-  groupings: BdDataGrouping<T>[] = [];
+  /* template */ groupings: BdDataGrouping<T>[] = [];
+  /* template */ filteredGroups: BdDataGrouping<T>[];
 
   constructor(private snackBar: MatSnackBar) {}
 
@@ -101,6 +102,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     } catch (e) {
       console.error('Cannot load grouping preset', e);
     }
+    this.filteredGroups = this.getFilteredGroups();
   }
 
   /* template */ savePreset() {
@@ -114,6 +116,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   /* template */ addGrouping() {
     this.groupings.push({ definition: null, selected: [] });
+    this.filteredGroups = this.getFilteredGroups();
   }
 
   /* template */ removeGrouping() {
@@ -128,10 +131,11 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   /* template */ fireUpdate() {
-    this.groupingChange.emit(this.getFilteredGroups());
+    this.filteredGroups = this.getFilteredGroups();
+    this.groupingChange.emit(this.filteredGroups);
   }
 
-  /* template */ getFilteredGroups(): BdDataGrouping<T>[] {
+  private getFilteredGroups(): BdDataGrouping<T>[] {
     return this.groupings.filter((g) => !!g.definition);
   }
 }

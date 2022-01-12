@@ -1,5 +1,5 @@
 <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
-  <ng-container [ngSwitch]="getStatus()">
+  <ng-container [ngSwitch]="status">
     <ng-container *ngSwitchCase="'local'">
       <div class="bd-secondary-text">File not in selected product version.</div>
     </ng-container>
@@ -7,7 +7,7 @@
       <div>File differs from product.</div>
       <div fxFlex="1 0 auto"></div>
       <app-bd-button
-        *ngIf="!cfgFiles.isText(record)"
+        *ngIf="!isText"
         text="Update from product template"
         icon="file_upload"
         (click)="doRestoreFromTemplate()"
@@ -17,8 +17,8 @@
       <app-bd-panel-button
         text="Compare with product template."
         icon="compare"
-        *ngIf="cfgFiles.isText(record)"
-        [route]="['compare', cfgFiles.getPath(record)]"
+        *ngIf="isText"
+        [route]="['compare', path]"
         [relative]="true"
         [style.padding-right.px]="30"
         tooltip="below"

@@ -137,7 +137,7 @@
           <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
 
           <!-- empty instance hint and actions. -->
-          <div *ngIf="isEmptyInstance() && !!(templates$ | async)?.length" class="bd-rect-card">
+          <div *ngIf="(isEmptyInstance$ | async) && !!(templates$ | async)?.length" class="bd-rect-card">
             <div fxLayout="row" [style.padding.px]="20">
               <div fxLayout="row" fxFlex="1 0 auto" fxLayoutAlign="center center" fxLayoutGap="5px">
                 <div>The instance is currently empty. You can use templates to quickly get started. Access the templates here:</div>

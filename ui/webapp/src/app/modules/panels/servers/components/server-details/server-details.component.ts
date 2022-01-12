@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { ManagedMasterDto, OperatingSystem, Version } from 'src/app/models/gen.dtos';
+import { ManagedMasterDto, OperatingSystem } from 'src/app/models/gen.dtos';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -61,18 +61,26 @@ export class ServerDetailsComponent implements OnInit {
   /* template */ installing$ = new BehaviorSubject<boolean>(false);
   /* template */ columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
   /* template */ synchronizing$ = new BehaviorSubject<boolean>(false);
+  /* template */ version: string;
+  /* template */ minions: MinionRow[];
+  /* template */ server: ManagedMasterDto;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   constructor(public servers: ServersService, public serverDetails: ServerDetailsService, public auth: AuthenticationService, public areas: NavAreasService) {}
 
-  ngOnInit(): void {}
-
-  /* template */ formatVersion(x: Version) {
-    return convert2String(x);
+  ngOnInit(): void {
+    this.serverDetails.server$.subscribe((server) => {
+      if (!server) {
+        return;
+      }
+      this.server = server;
+      this.version = convert2String(server.update.updateVersion);
+      this.minions = this.getMinionRecords(server);
+    });
   }
 
-  /* template */ getMinionRecords(server: ManagedMasterDto): MinionRow[] {
+  private getMinionRecords(server: ManagedMasterDto): MinionRow[] {
     return Object.keys(server.minions.minions).map((k) => {
       const dto = server.minions.minions[k];
       return {
@@ -128,9 +136,7 @@ export class ServerDetailsComponent implements OnInit {
       .pipe(finalize(() => this.installing$.next(false)))
       .subscribe(
         (v) => {
-          this.dialog
-            .info('Update complete', `The server has come back online after updating, the current server version is ${this.formatVersion(v)}`)
-            .subscribe();
+          this.dialog.info('Update complete', `The server has come back online after updating, the current server version is ${this.version}`).subscribe();
         },
         (err) => {
           let msg = err;

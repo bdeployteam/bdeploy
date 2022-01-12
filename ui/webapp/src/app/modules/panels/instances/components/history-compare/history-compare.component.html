@@ -44,7 +44,9 @@
             <div fxLayout="row" class="bd-default-padding" [style.padding-bottom.px]="0">
               <div fxLayout="column">
                 <div class="bd-type-text">NODE</div>
-                <div class="bd-title-text">{{ getNodeName(nodePair) }}</div>
+                <div class="bd-title-text">
+                  {{ nodePair.name === clientNodeName ? 'Client Applications' : nodePair.name }}
+                </div>
               </div>
             </div>
           </div>
@@ -65,7 +67,7 @@
                 [baseConfig]="appPair.base"
                 [compareConfig]="appPair.compare"
                 [baseDescriptor]="appPair.baseDesc"
-                [hasProcessControl]="hasProcessControl(nodePair)"
+                [hasProcessControl]="nodePair.name !== clientNodeName"
                 diffSide="left"
               ></app-history-process-config>
               <app-history-process-config
@@ -73,7 +75,7 @@
                 [baseConfig]="appPair.compare"
                 [compareConfig]="appPair.base"
                 [baseDescriptor]="appPair.compareDesc"
-                [hasProcessControl]="hasProcessControl(nodePair)"
+                [hasProcessControl]="nodePair.name !== clientNodeName"
                 diffSide="right"
               ></app-history-process-config>
             </div>

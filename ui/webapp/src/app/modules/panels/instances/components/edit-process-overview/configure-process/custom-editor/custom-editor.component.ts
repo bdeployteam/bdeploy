@@ -77,7 +77,7 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription.unsubscribe();
   }
 
-  showEditor(popup: TemplateRef<any>) {
+  /* template */ showEditor(popup: TemplateRef<any>) {
     if (!this.plugin) {
       return;
     }

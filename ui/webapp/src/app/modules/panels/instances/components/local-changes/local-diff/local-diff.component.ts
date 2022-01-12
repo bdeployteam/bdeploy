@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
-import { ConfigPair, NodePair } from '../../../utils/diff-utils';
+import { ConfigPair } from '../../../utils/diff-utils';
 
 @Component({
   selector: 'app-local-diff',
@@ -11,6 +11,7 @@ import { ConfigPair, NodePair } from '../../../utils/diff-utils';
 })
 export class LocalDiffComponent implements OnInit, OnDestroy {
   /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
+  /* template */ clientNodeName = CLIENT_NODE_NAME;
 
   private subscription: Subscription;
 
@@ -49,13 +50,5 @@ export class LocalDiffComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /* template */ getNodeName(node: NodePair) {
-    return node.name === CLIENT_NODE_NAME ? 'Client Applications' : node.name;
-  }
-
-  /* template */ hasProcessControl(node: NodePair) {
-    return node.name !== CLIENT_NODE_NAME;
   }
 }
