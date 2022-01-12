@@ -5,8 +5,8 @@ import { BehaviorSubject } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { RemoteDirectory, RemoteDirectoryEntry } from '../../../../../models/gen.dtos';
 import { LoggingAdminService } from '../../services/logging-admin.service';
 
@@ -27,8 +27,9 @@ const COL_PATH: BdDataColumn<RemoteDirectoryEntry> = {
 const COL_SIZE: BdDataColumn<RemoteDirectoryEntry> = {
   id: 'size',
   name: 'Size',
-  data: (r) => formatSize(r.size),
+  data: (r) => r.size,
   width: '80px',
+  component: BdDataSizeCellComponent,
 };
 
 const COL_MODIFIED: BdDataColumn<RemoteDirectoryEntry> = {

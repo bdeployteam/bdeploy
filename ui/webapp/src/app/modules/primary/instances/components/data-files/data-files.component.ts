@@ -4,12 +4,12 @@ import { finalize, tap } from 'rxjs/operators';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { FileStatusDto, FileStatusType, InstanceDto, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
+import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { DataFilesService } from '../../services/data-files.service';
 import { InstancesService } from '../../services/instances.service';
@@ -28,9 +28,10 @@ const colPath: BdDataColumn<FileListEntry> = {
 const colSize: BdDataColumn<FileListEntry> = {
   id: 'size',
   name: 'Size',
-  data: (r) => formatSize(r.entry.size),
+  data: (r) => r.entry.size,
   width: '100px',
   showWhen: '(min-width: 700px)',
+  component: BdDataSizeCellComponent,
 };
 
 const colModTime: BdDataColumn<FileListEntry> = {
