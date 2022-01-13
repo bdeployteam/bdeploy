@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { ApplicationDto, ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
@@ -17,12 +17,14 @@ export class ProductsService {
 
   private group: string;
   private subscription: Subscription;
+  private delayLoad$ = new Subject<string>();
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
   public uploadUrl$ = new BehaviorSubject<string>(null);
 
   constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, groups: GroupsService) {
     groups.current$.subscribe((group) => this.load(group?.name));
+    this.delayLoad$.pipe(debounceTime(100)).subscribe((group) => this.load(group));
   }
 
   public loadApplications(prod: ProductDto): Observable<ApplicationDto[]> {
@@ -67,7 +69,7 @@ export class ProductsService {
 
     if (!!group) {
       this.subscription = this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [group] }, () => {
-        this.load(group);
+        this.delayLoad$.next(group);
       });
     }
   }
