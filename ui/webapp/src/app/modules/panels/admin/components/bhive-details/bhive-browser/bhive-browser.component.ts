@@ -6,10 +6,10 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { HiveEntryDto, ManifestKey, TreeEntryType } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { ACTION_CLOSE } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { HiveService } from 'src/app/modules/primary/admin/services/hive.service';
 import { ManifestDeleteActionComponent } from './manifest-delete-action/manifest-delete-action.component';
 
@@ -38,8 +38,9 @@ export class BHiveBrowserComponent implements OnInit {
   private readonly colSize: BdDataColumn<HiveEntryDto> = {
     id: 'size',
     name: 'Size',
-    data: (r) => (r.size > 0 ? formatSize(r.size) : ''),
+    data: (r) => (r.size > 0 ? r.size : null),
     width: '80px',
+    component: BdDataSizeCellComponent,
   };
 
   private readonly colDelete: BdDataColumn<HiveEntryDto> = {
