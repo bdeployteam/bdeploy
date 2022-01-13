@@ -13,7 +13,7 @@
     <app-bd-panel-button
       *ngIf="!isManaged; else managed"
       icon="add"
-      text="Add Instance Group"
+      text="Add Instance Group..."
       [route]="['panels', 'groups', 'add']"
       [disabled]="!isAddAllowed"
       tooltip="below"
@@ -21,7 +21,7 @@
     <ng-template #managed>
       <app-bd-panel-button
         icon="link"
-        text="Link Instance Group"
+        text="Link Instance Group..."
         [route]="['panels', 'servers', 'link', 'central']"
         [disabled]="!isAttachAllowed"
         tooltip="below"
@@ -44,13 +44,13 @@
         </p>
         <ng-container *ngIf="isAddAllowed">
           <p [style.text-align]="'center'">No instance groups have been created yet. Start by creating a new one.</p>
-          <app-bd-panel-button icon="add" text="Add Instance Group" [collapsed]="false" [route]="['panels', 'groups', 'add']"></app-bd-panel-button>
+          <app-bd-panel-button icon="add" text="Add Instance Group..." [collapsed]="false" [route]="['panels', 'groups', 'add']"></app-bd-panel-button>
         </ng-container>
         <ng-container *ngIf="isAttachAllowed">
           <p [style.text-align]="'center'">No instance groups have been linked yet. Start by linking one from a central server.</p>
           <app-bd-panel-button
             icon="link"
-            text="Link Instance Group"
+            text="Link Instance Group..."
             [collapsed]="false"
             [route]="['panels', 'servers', 'link', 'central']"
           ></app-bd-panel-button>

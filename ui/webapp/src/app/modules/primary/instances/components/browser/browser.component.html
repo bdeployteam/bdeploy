@@ -37,7 +37,7 @@
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       icon="add"
-      text="Add Instance"
+      text="Add Instance..."
       [route]="['panels', 'instances', 'add']"
       tooltip="below"
       [disabled]="!(authService.isCurrentScopeWrite$ | async)"
@@ -60,7 +60,7 @@
         <p>No instances have been created yet.</p>
         <ng-container *ngIf="(authService.isCurrentScopeWrite$ | async) && (hasProducts$ | async)">
           <p>Start by creating a new one.</p>
-          <app-bd-panel-button icon="add" text="Add Instance" [collapsed]="false" [route]="['panels', 'instances', 'add']"></app-bd-panel-button>
+          <app-bd-panel-button icon="add" text="Add Instance..." [collapsed]="false" [route]="['panels', 'instances', 'add']"></app-bd-panel-button>
         </ng-container>
         <ng-container *ngIf="!(hasProducts$ | async)">
           <p>No product is available yet to create one.</p>
