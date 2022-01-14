@@ -6,10 +6,10 @@
   <app-bd-dialog-toolbar header="Settings">
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="ldapTab.isActive">
-      <app-bd-button icon="add" text="New Server" color="primary" [collapsed]="false" (click)="ldap.addServer()"></app-bd-button>
+      <app-bd-button icon="add" text="New Server..." color="primary" [collapsed]="false" (click)="ldap.addServer()"></app-bd-button>
     </ng-container>
     <ng-container *ngIf="generalTab.isActive || ldapTab.isActive">
-      <app-bd-button icon="person" text="Test Auth." [collapsed]="false" (click)="testUserAuth()"></app-bd-button>
+      <app-bd-button icon="person" text="Test Auth..." [collapsed]="false" (click)="testUserAuth()"></app-bd-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="attributeTab.isActive">
@@ -20,7 +20,7 @@
       <app-bd-panel-button
         [collapsed]="false"
         color="primary"
-        text="Upload Plugin"
+        text="Upload Plugin..."
         icon="cloud_upload"
         [route]="['panels', 'admin', 'add-plugin']"
       ></app-bd-panel-button>

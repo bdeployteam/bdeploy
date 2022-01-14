@@ -4,7 +4,7 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <app-bd-panel-button
-        text="Base Configuration"
+        text="Base Configuration..."
         icon="edit"
         [collapsed]="false"
         [toggle]="false"
@@ -22,7 +22,7 @@
         [disabled]="!(auth.isCurrentScopeWrite$ | async) || !(edit.hasCurrentProduct$ | async)"
       ></app-bd-panel-button>
       <app-bd-panel-button
-        text="Banner"
+        text="Banner..."
         icon="lightbulb"
         [collapsed]="false"
         [toggle]="false"
@@ -40,7 +40,7 @@
         [disabled]="!(auth.isCurrentScopeWrite$ | async) || !(edit.hasCurrentProduct$ | async)"
       ></app-bd-panel-button>
       <app-bd-panel-button
-        text="Manage Nodes"
+        text="Manage Nodes..."
         icon="dns"
         [collapsed]="false"
         [toggle]="false"

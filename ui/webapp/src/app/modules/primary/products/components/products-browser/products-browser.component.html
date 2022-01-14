@@ -36,7 +36,7 @@
     ></app-bd-panel-button>
     <app-bd-panel-button
       icon="cloud_upload"
-      text="Upload Product"
+      text="Upload Product..."
       [route]="['panels', 'products', 'upload']"
       [disabled]="!(auth.isCurrentScopeWrite$ | async)"
       tooltip="below"
@@ -57,7 +57,7 @@
       <app-bd-no-data>
         <p>No products have been uploaded yet.</p>
         <p>Start by uploading a new one.</p>
-        <app-bd-panel-button icon="cloud_upload" text="Upload Product" [collapsed]="false" [route]="['panels', 'products', 'upload']"></app-bd-panel-button>
+        <app-bd-panel-button icon="cloud_upload" text="Upload Product..." [collapsed]="false" [route]="['panels', 'products', 'upload']"></app-bd-panel-button>
       </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>

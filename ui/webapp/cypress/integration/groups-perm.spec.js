@@ -126,7 +126,7 @@ describe('Groups Tests (Permissions)', () => {
     cy.enterGroup(groupName);
 
     cy.inMainNavContent(() => {
-      cy.get('button[data-cy="Add Instance"]').should('be.disabled');
+      cy.get('button[data-cy="Add Instance..."]').should('be.disabled');
     });
   });
 

@@ -35,7 +35,7 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
-      cy.get('button[data-cy="Base Configuration"]').click();
+      cy.get('button[data-cy="Base Configuration..."]').click();
     });
 
     cy.inMainNavFlyin('app-edit-config', () => {

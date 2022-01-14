@@ -62,7 +62,7 @@ describe('Groups Tests', () => {
     });
 
     cy.inMainNavFlyin('app-settings', () => {
-      cy.get(`app-bd-panel-button[text="Edit Instance Group"]`).click();
+      cy.get(`app-bd-panel-button[text="Edit Instance Group..."]`).click();
       cy.get('app-bd-dialog-toolbar[header="Edit Instance Group"]').should('exist');
 
       cy.fillFormInput('description', `Description of ${instanceName}`);
@@ -170,7 +170,7 @@ describe('Groups Tests', () => {
 
     cy.inMainNavFlyin('app-product-details', () => {
       // "Create new Instance" button
-      cy.get(`app-bd-button[text="Create new Instance"]`).click();
+      cy.get(`app-bd-button[text="Create new Instance..."]`).click();
     });
 
     // "Create new Instance" switches back to the Instance Group dialog...

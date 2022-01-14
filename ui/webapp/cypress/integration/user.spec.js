@@ -23,7 +23,7 @@ describe('Current User Tests', function () {
       // (in case of repeated execution on the same data during development)
 
       // 1st change
-      cy.get(`app-bd-panel-button[text="Edit User"]`).click();
+      cy.get(`app-bd-panel-button[text="Edit User..."]`).click();
       cy.get('app-bd-dialog-toolbar[header="Edit User"]').should('exist');
       cy.contains('button', 'Save').should('exist').and('be.disabled');
 
@@ -40,7 +40,7 @@ describe('Current User Tests', function () {
       cy.contains('div', 'E-Mail:').parent().contains('div', `${currentUserEmail} (*)`).should('exist');
 
       // 2nd change
-      cy.get(`app-bd-panel-button[text="Edit User"]`).click();
+      cy.get(`app-bd-panel-button[text="Edit User..."]`).click();
       cy.get('app-bd-dialog-toolbar[header="Edit User"]').should('exist');
       cy.contains('button', 'Save').should('exist').and('be.disabled');
 
@@ -82,7 +82,7 @@ describe('Current User Tests', function () {
         const newPassword = currentUserPassword + '_CHANGED';
 
         // 1st change
-        cy.get(`app-bd-panel-button[text="Change Password"]`).click();
+        cy.get(`app-bd-panel-button[text="Change Password..."]`).click();
         cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
         cy.contains('button', 'Save').should('exist').and('be.disabled');
 
@@ -93,7 +93,7 @@ describe('Current User Tests', function () {
         cy.contains('button', 'Save').should('exist').and('be.enabled').click();
 
         // 2nd change
-        cy.get(`app-bd-panel-button[text="Change Password"]`).click();
+        cy.get(`app-bd-panel-button[text="Change Password..."]`).click();
         cy.get('app-bd-dialog-toolbar[header="Change Password"]').should('exist');
         cy.contains('button', 'Save').should('exist').and('be.disabled');
 
@@ -120,7 +120,7 @@ describe('Current User Tests', function () {
     cy.inMainNavFlyin('app-settings', () => {
       cy.contains('button', 'Logout').should('exist');
 
-      cy.get('app-bd-panel-button[text="Create Token(s)"]').click();
+      cy.get('app-bd-panel-button[text="Create Token(s)..."]').click();
       cy.get('app-token').should('exist');
 
       cy.get('textarea')
