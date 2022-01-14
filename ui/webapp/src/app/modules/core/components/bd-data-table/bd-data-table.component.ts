@@ -31,6 +31,7 @@ import {
   UNMATCHED_GROUP,
 } from 'src/app/models/data';
 import { BdSearchable, SearchService } from '../../services/search.service';
+import { SettingsService } from '../../services/settings.service';
 
 // member ordering due to default implementation for callbacks.
 // tslint:disable: member-ordering
@@ -206,13 +207,20 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
   /* tempalte */ dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-  constructor(private searchService: SearchService, private media: BreakpointObserver, private sanitizer: DomSanitizer) {}
+  constructor(private searchService: SearchService, private media: BreakpointObserver, private sanitizer: DomSanitizer, private settings: SettingsService) {}
 
   ngOnInit(): void {
     if (this.searchable) {
       // register this table as "searchable" in the global search service if requested.
       this.subscription = this.searchService.register(this);
     }
+    this.subscription.add(
+      this.settings.ldapServersUpdated$.subscribe((update) => {
+        if (update) {
+          this.update();
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {

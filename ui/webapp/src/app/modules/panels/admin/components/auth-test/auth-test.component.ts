@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { BdTerminalComponent } from 'src/app/modules/core/components/bd-terminal/bd-terminal.component';
-import { AuthAdminService } from '../../../services/auth-admin.service';
+import { AuthAdminService } from '../../../../primary/admin/services/auth-admin.service';
 
 @Component({
   selector: 'app-auth-test',

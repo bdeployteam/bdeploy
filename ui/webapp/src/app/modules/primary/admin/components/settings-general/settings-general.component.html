@@ -1,15 +1,17 @@
-<ng-template #testUserAuthTemplate>
-  <app-auth-test></app-auth-test>
-</ng-template>
-
 <app-bd-dialog [loadingWhen$]="settings.loading$">
   <app-bd-dialog-toolbar header="Settings">
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="ldapTab.isActive">
-      <app-bd-button icon="add" text="New Server..." color="primary" [collapsed]="false" (click)="ldap.addServer()"></app-bd-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        color="primary"
+        text="New Server..."
+        icon="add"
+        [route]="['panels', 'admin', 'add-ldap-server']"
+      ></app-bd-panel-button>
     </ng-container>
     <ng-container *ngIf="generalTab.isActive || ldapTab.isActive">
-      <app-bd-button icon="person" text="Test Auth..." [collapsed]="false" (click)="testUserAuth()"></app-bd-button>
+      <app-bd-panel-button [collapsed]="false" color="primary" text="Test Auth..." icon="add" [route]="['panels', 'admin', 'auth-test']"></app-bd-panel-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="attributeTab.isActive">

@@ -30,7 +30,7 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
   /* template */ removing$ = new BehaviorSubject<boolean>(false);
   /* template */ banner: InstanceBannerRecord = this.DEFAULT_BANNER;
   /* template */ orig: InstanceBannerRecord = cloneDeep(this.banner);
-  /* template */ disableApply: boolean;
+  /* template */ disableApply: boolean = true;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -42,9 +42,7 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
-  ngOnInit(): void {
-    this.disableApply = this.isDirty();
-  }
+  ngOnInit(): void {}
 
   ngAfterViewInit(): void {
     this.subscription.add(
@@ -74,6 +72,7 @@ export class BannerComponent implements OnInit, OnDestroy, AfterViewInit, Dirtya
               this.colorSelect.setDefault();
             }
             this.orig = cloneDeep(this.banner);
+            this.disableApply = this.isDirty();
           }
         });
       })

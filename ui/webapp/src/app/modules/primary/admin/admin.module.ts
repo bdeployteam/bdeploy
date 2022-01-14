@@ -31,7 +31,6 @@ import { LogFilesBrowserComponent } from './components/log-files-browser/log-fil
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { AttributesTabComponent } from './components/settings-general/attributes-tab/attributes-tab.component';
-import { AuthTestComponent } from './components/settings-general/auth-test/auth-test.component';
 import { GeneralTabComponent } from './components/settings-general/general-tab/general-tab.component';
 import { LdapTabComponent } from './components/settings-general/ldap-tab/ldap-tab.component';
 import { PluginDeleteActionComponent } from './components/settings-general/plugins-tab/plugin-delete-action/plugin-delete-action.component';
@@ -57,7 +56,6 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     PluginLoadActionComponent,
     PluginDeleteActionComponent,
     LdapTabComponent,
-    AuthTestComponent,
     BHiveComponent,
   ],
   imports: [

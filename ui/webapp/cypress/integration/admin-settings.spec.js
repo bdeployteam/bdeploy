@@ -58,23 +58,23 @@ describe('Admin UI Tests (Settings)', () => {
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Test Auth.');
+    });
 
-      cy.contains('app-bd-notification-card', 'Authentication Test').within(() => {
-        cy.fixture('login.json').then((user) => {
-          cy.fillFormInput('user', user.user);
-          cy.fillFormInput('pass', user.pass);
-        });
-
-        cy.intercept({ method: 'POST', url: '/api/auth/admin/traceAuthentication' }).as('authCheck');
-        cy.get('button[data-cy="Perform Test"]').should('be.enabled').click();
-        cy.wait('@authCheck').then((intercept) => {
-          expect(intercept.response.statusCode).to.equal(200);
-          // stringify - the response is a JSON array;
-          expect(JSON.stringify(intercept.response.body)).to.contain('SUCCESS');
-        });
-
-        cy.get('button[data-cy="Close"]').click();
+    cy.inMainNavFlyin('app-auth-test', () => {
+      cy.fixture('login.json').then((user) => {
+        cy.fillFormInput('user', user.user);
+        cy.fillFormInput('pass', user.pass);
       });
+
+      cy.intercept({ method: 'POST', url: '/api/auth/admin/traceAuthentication' }).as('authCheck');
+      cy.get('button[data-cy="Perform Test"]').should('be.enabled').click();
+      cy.wait('@authCheck').then((intercept) => {
+        expect(intercept.response.statusCode).to.equal(200);
+        // stringify - the response is a JSON array;
+        expect(JSON.stringify(intercept.response.body)).to.contain('SUCCESS');
+      });
+
+      cy.get('button[data-cy="Close"]').click();
     });
   });
 
@@ -86,25 +86,15 @@ describe('Admin UI Tests (Settings)', () => {
     cy.inMainNavContent(() => {
       cy.contains('.mat-tab-label', 'LDAP Auth.').click();
       cy.pressToolbarButton('New Server');
-
-      cy.contains('app-bd-notification-card', 'Add Server').within(() => {
-        cy.fillFormInput('server', 'ldap://ldap.test.server');
-        cy.fillFormInput('description', 'Test Server');
-        cy.fillFormInput('user', 'user');
-        cy.fillFormInput('pass', 'pass');
-        cy.fillFormInput('base', 'dc=test,dc=server');
-      });
     });
-
-    cy.screenshot('Doc_Admin_Ldap_Server_Config');
-
-    cy.inMainNavContent(() => {
-      cy.contains('app-bd-notification-card', 'Add Server').within(() => {
-        cy.get('button[data-cy="OK"]').should('be.enabled').click();
-      });
+    cy.inMainNavFlyin('add-ldap-server', () => {
+      cy.fillFormInput('server', 'ldap://ldap.test.server');
+      cy.fillFormInput('description', 'Test Server');
+      cy.fillFormInput('user', 'user');
+      cy.fillFormInput('pass', 'pass');
+      cy.fillFormInput('base', 'dc=test,dc=server');
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
-
-    cy.screenshot('Doc_Admin_Ldap_Servers');
 
     cy.inMainNavContent(() => {
       cy.intercept({ method: 'POST', url: '/api/auth/admin/testLdapServer' }).as('ldapCheck');
@@ -114,24 +104,23 @@ describe('Admin UI Tests (Settings)', () => {
         .within(() => {
           cy.get('button[data-cy^="Check connection"]').click();
         });
-
-      cy.contains('app-bd-notification-card', 'Checking Server').within(() => {
-        cy.wait('@ldapCheck').then((intercept) => {
-          expect(intercept.response.statusCode).to.equal(200);
-          expect(intercept.response.body).to.contain('connection failed');
-        });
-
-        cy.get('button[data-cy="Close"]').click();
+    });
+    cy.inMainNavFlyin('check-ldap-server', () => {
+      cy.wait('@ldapCheck').then((intercept) => {
+        expect(intercept.response.statusCode).to.equal(200);
+        expect(intercept.response.body).to.contain('connection failed');
       });
 
-      cy.contains('tr', 'Test Server')
-        .should('exist')
-        .within(() => {
-          cy.get('button[data-cy^="Remove"]').click();
-        });
-
-      cy.contains('tr', 'Test Server').should('not.exist');
+      cy.get('button[data-cy="Close"]').click();
     });
+
+    cy.contains('tr', 'Test Server')
+      .should('exist')
+      .within(() => {
+        cy.get('button[data-cy^="Remove"]').click();
+      });
+
+    cy.contains('tr', 'Test Server').should('not.exist');
   });
 
   it('Tests Global Attributes', () => {
