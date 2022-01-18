@@ -215,7 +215,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       this.subscription = this.searchService.register(this);
     }
     this.subscription.add(
-      this.settings.ldapServersUpdated$.subscribe((update) => {
+      this.settings.settingsUpdated$.subscribe((update) => {
         if (update) {
           this.update();
         }

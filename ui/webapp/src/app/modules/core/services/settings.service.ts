@@ -14,7 +14,7 @@ import { NavAreasService } from './nav-areas.service';
 export class SettingsService {
   public loading$ = new BehaviorSubject<boolean>(true);
   public settings$ = new BehaviorSubject<SettingsConfiguration>(null);
-  public ldapServersUpdated$ = new BehaviorSubject<boolean>(false);
+  public settingsUpdated$ = new BehaviorSubject<boolean>(false);
   public selectedServer$ = new BehaviorSubject<LDAPSettingsDto>(null);
 
   private origSettings: SettingsConfiguration;
@@ -57,7 +57,7 @@ export class SettingsService {
 
   public discard() {
     this.settings$.next(cloneDeep(this.origSettings));
-    this.ldapServersUpdated$.next(false);
+    this.settingsUpdated$.next(false);
     this.setSelectedServer(null);
   }
 
@@ -75,17 +75,43 @@ export class SettingsService {
 
   public addLdapServer(server) {
     this.settings$.value.auth.ldapSettings.push(server);
-    this.ldapServersUpdated$.next(true);
+    this.settingsUpdated$.next(true);
     this.areas.closePanel();
   }
 
   public editLdapServer(server) {
     this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(this.selectedServer$.value), 1, server);
-    this.ldapServersUpdated$.next(true);
+    this.settingsUpdated$.next(true);
     this.areas.closePanel();
+  }
+
+  public removeLdapServer(server) {
+    this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(server), 1);
+    this.settingsUpdated$.next(true);
   }
 
   public setSelectedServer(server) {
     this.selectedServer$.next(server);
+  }
+
+  public addGlobalAttribute(attribute) {
+    this.settings$.value.instanceGroup.attributes.push(attribute);
+    this.settingsUpdated$.next(true);
+    this.areas.closePanel();
+  }
+
+  public editGlobalAttribute(attribute, initialAttribute) {
+    this.settings$.value.instanceGroup.attributes.splice(this.settings$.value.instanceGroup.attributes.indexOf(initialAttribute), 1, attribute);
+    this.settingsUpdated$.next(true);
+    this.areas.closePanel();
+  }
+
+  public removeAttribute(attribute) {
+    this.settings$.value.instanceGroup.attributes.splice(this.settings$.value.instanceGroup.attributes.indexOf(attribute), 1);
+    this.settingsUpdated$.next(true);
+  }
+
+  public serversReordered() {
+    this.settingsUpdated$.next(true);
   }
 }

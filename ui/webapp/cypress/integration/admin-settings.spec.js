@@ -131,16 +131,15 @@ describe('Admin UI Tests (Settings)', () => {
     cy.inMainNavContent(() => {
       cy.contains('.mat-tab-label', 'Global Attributes').click();
       cy.pressToolbarButton('New Attribute');
-
-      cy.contains('app-bd-notification-card', 'Add Attribute').within(() => {
-        cy.fillFormInput('name', 'Attr1');
-        cy.fillFormInput('description', 'Test Attribute');
-        cy.get('button[data-cy="OK"]').should('be.enabled').click();
-      });
-
-      cy.contains('tr', 'Attr1').should('exist');
-      cy.pressToolbarButton('Save');
     });
+
+    cy.inMainNavFlyin('add-global-attribute', () => {
+      cy.fillFormInput('name', 'Attr1');
+      cy.fillFormInput('description', 'Test Attribute');
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
+    });
+    cy.contains('tr', 'Attr1').should('exist');
+    cy.pressToolbarButton('Save');
 
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_Global_Attributes');
