@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -34,6 +35,8 @@ import { HistoryProcessConfigComponent } from './components/history-process-conf
 import { HistoryViewComponent } from './components/history-view/history-view.component';
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { BannerComponent } from './components/instance-settings/banner/banner.component';
+import { ColorSelectGroupComponent } from './components/instance-settings/banner/color-select-group/color-select-group.component';
+import { ColorSelectComponent } from './components/instance-settings/banner/color-select/color-select.component';
 import { CompareComponent } from './components/instance-settings/config-files/compare/compare.component';
 import { ConfigFilesComponent } from './components/instance-settings/config-files/config-files.component';
 import { DeleteActionComponent } from './components/instance-settings/config-files/delete-action/delete-action.component';
@@ -50,6 +53,7 @@ import { NodesComponent } from './components/instance-settings/nodes/nodes.compo
 import { PortShiftComponent } from './components/instance-settings/ports/port-shift/port-shift.component';
 import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
+import { ProductVersionDetailsComponent } from './components/instance-settings/product-update/product-version-details/product-version-details.component';
 import { UpdateActionComponent } from './components/instance-settings/product-update/update-action/update-action.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
@@ -64,8 +68,6 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { ColorSelectComponent } from './components/instance-settings/banner/color-select/color-select.component';
-import { ColorSelectGroupComponent } from './components/instance-settings/banner/color-select-group/color-select-group.component';
 
 @NgModule({
   declarations: [
@@ -126,6 +128,7 @@ import { ColorSelectGroupComponent } from './components/instance-settings/banner
     DataFileEditorComponent,
     ColorSelectComponent,
     ColorSelectGroupComponent,
+    ProductVersionDetailsComponent,
   ],
   imports: [
     CommonModule,
@@ -138,6 +141,7 @@ import { ColorSelectGroupComponent } from './components/instance-settings/banner
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
+    MatChipsModule,
   ],
 })
 export class InstancesModule {}
