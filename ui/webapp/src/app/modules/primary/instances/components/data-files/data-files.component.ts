@@ -49,6 +49,16 @@ const colModTime: BdDataColumn<FileListEntry> = {
   styleUrls: ['./data-files.component.css'],
 })
 export class DataFilesComponent implements OnInit, OnDestroy {
+  private readonly colDownload: BdDataColumn<FileListEntry> = {
+    id: 'download',
+    name: 'Downl.',
+    data: (r) => 'Download File',
+    action: (r) => this.doDownload(r),
+    icon: (r) => 'cloud_download',
+    width: '50px',
+    actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
+  };
+
   private readonly colDelete: BdDataColumn<FileListEntry> = {
     id: 'delete',
     name: 'Delete',
@@ -61,7 +71,7 @@ export class DataFilesComponent implements OnInit, OnDestroy {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ records$ = new BehaviorSubject<FileListEntry[]>(null);
   /* template */ noactive$ = new BehaviorSubject<boolean>(true);
-  /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDelete];
+  /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDownload, this.colDelete];
   /* template */ grouping: BdDataGrouping<FileListEntry>[] = [{ definition: { group: (r) => r.directory.minion, name: 'Node Name' }, selected: [] }];
   /* template */ getRecordRoute = (row: FileListEntry) => {
     return ['', { outlets: { panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path, 'view'] } }];
@@ -152,6 +162,10 @@ export class DataFilesComponent implements OnInit, OnDestroy {
           });
         }
       });
+  }
+
+  private doDownload(r: FileListEntry) {
+    this.instances.download(r.directory, r.entry);
   }
 
   /* template */ doAddFile(tpl: TemplateRef<any>): void {
