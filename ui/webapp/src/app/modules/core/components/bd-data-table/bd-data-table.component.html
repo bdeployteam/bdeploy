@@ -17,7 +17,9 @@
       }}
     </caption>
 
-    <tr mat-header-row *matHeaderRowDef="_visibleColumns; sticky: true"></tr>
+    <ng-container *ngIf="!headerHidden">
+      <tr mat-header-row *matHeaderRowDef="_visibleColumns; sticky: true"></tr>
+    </ng-container>
 
     <!-- each record is a router link -->
     <ng-container *ngIf="!!recordRoute">

@@ -179,6 +179,9 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** The current sort dicdated by the sortHeader */
   @Input() sort: Sort;
 
+  /** Hide the headers, shows only the contents area */
+  @Input() headerHidden = false;
+
   /** The current search/filter string given by onBdSearch */
   private search: string;
 

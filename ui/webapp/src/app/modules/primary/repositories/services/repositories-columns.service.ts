@@ -21,7 +21,6 @@ export class RepositoriesColumnsService {
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.name,
     width: '200px',
-    showWhen: '(min-width: 700px)',
   };
 
   repositoryDescriptionColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {

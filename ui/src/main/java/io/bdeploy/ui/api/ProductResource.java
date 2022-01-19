@@ -69,7 +69,7 @@ public interface ProductResource {
     @RequiredPermission(permission = Permission.WRITE)
     public List<Manifest.Key> upload(@FormDataParam("file") InputStream inputStream);
 
-    @GET
+    @POST
     @Path("/copy")
     @RequiredPermission(permission = Permission.WRITE)
     public void copyProduct(@QueryParam("repo") String softwareRepository, @QueryParam("name") String productName,

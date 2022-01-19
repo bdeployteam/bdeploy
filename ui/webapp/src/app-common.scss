@@ -198,7 +198,7 @@
 
 /**
  * The root spacing classes provide generic spacing, margin, padding classes to be used for all spacing...
- * The need to be global for overlays (menus, etc.).
+ * They need to be global for overlays (menus, etc.).
  */
 @mixin root-spacing-classes($theme) {
   .bd-offset-top5px {
@@ -230,6 +230,18 @@
   td.mat-cell:first-of-type,
   td.mat-footer-cell:first-of-type {
     padding-left: 10px !important;
+  }
+
+  mat-stepper .mat-vertical-stepper-header {
+    padding: 12px 12px !important;
+  }
+
+  mat-stepper .mat-vertical-content-container {
+    margin-left: 24px !important;
+  }
+
+  mat-stepper .mat-vertical-content {
+    padding: 0px 12px 12px 12px !important;
   }
 }
 

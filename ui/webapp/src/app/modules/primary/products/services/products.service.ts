@@ -37,6 +37,15 @@ export class ProductsService {
     this.load(this.group);
   }
 
+  public importProduct(prod: ProductDto, repo: string) {
+    const params = {
+      repo: repo,
+      name: prod.key.name,
+      tag: prod.key.tag,
+    };
+    return this.http.post(`${this.apiPath(this.group)}/copy`, null, { params }).pipe(measure('Import Product'));
+  }
+
   private load(group: string) {
     if (!group) {
       this.products$.next([]);

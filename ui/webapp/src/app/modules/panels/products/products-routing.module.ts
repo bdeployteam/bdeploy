@@ -8,6 +8,7 @@ import { ProductDetailsComponent } from './components/product-details/product-de
 import { ManagedTransferComponent } from './components/product-sync/managed-transfer/managed-transfer.component';
 import { ProductSyncComponent } from './components/product-sync/product-sync.component';
 import { SelectManagedServerComponent } from './components/product-sync/select-managed-server/select-managed-server.component';
+import { ProductTransferRepoComponent } from './components/product-transfer-repo/product-transfer-repo.component';
 import { ProductUploadComponent } from './components/product-upload/product-upload.component';
 
 const PPRODUCTS_ROUTES: Route[] = [
@@ -17,6 +18,7 @@ const PPRODUCTS_ROUTES: Route[] = [
   { path: 'sync/:target/select', component: SelectManagedServerComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
   { path: 'sync/:target/:server', component: ManagedTransferComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
   { path: 'bulk-manip', component: ProductBulkComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'transfer', component: ProductTransferRepoComponent, canActivate: [ScopedWriteGuard] },
 ];
 
 @NgModule({

@@ -1,10 +1,11 @@
-<ng-content></ng-content>
+<ng-content *ngIf="!(show && mode === 'hide')"></ng-content>
 
 <div
   *ngIf="show"
   [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
   [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
-  class="local-sizing bd-normal-backdrop"
+  class="local-sizing"
+  [class.bd-normal-backdrop]="show && mode === 'dim'"
   fxLayout="column"
   fxLayoutAlign="center center"
 >

@@ -47,6 +47,10 @@ export class RepositoryService {
     this.update$.pipe(debounceTime(100)).subscribe((r) => this.reload(r));
   }
 
+  public loadProductsOf(repository: string): Observable<ProductDto[]> {
+    return this.http.get<ProductDto[]>(`${this.productsApiPath(repository)}/list`).pipe(measure('Products Load'));
+  }
+
   private reload(repository: string) {
     if (!repository) {
       this.products$.next([]);
@@ -69,12 +73,8 @@ export class RepositoryService {
 
   private reloadProducts() {
     this.productsLoading$.next(true);
-    this.http
-      .get<ProductDto[]>(`${this.productsApiPath(this.repository)}/list`)
-      .pipe(
-        finalize(() => this.productsLoading$.next(false)),
-        measure('Products Load')
-      )
+    this.loadProductsOf(this.repository)
+      .pipe(finalize(() => this.productsLoading$.next(false)))
       .subscribe((result) => {
         this.products$.next(result);
       });

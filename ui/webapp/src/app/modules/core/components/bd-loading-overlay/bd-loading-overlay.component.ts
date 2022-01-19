@@ -9,6 +9,7 @@ import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 })
 export class BdLoadingOverlayComponent implements OnInit {
   @Input() show: boolean;
+  @Input() mode: 'dim' | 'hide' = 'dim';
 
   @HostBinding('attr.data-cy') get dataCy() {
     return this.show ? 'loading' : 'loaded';

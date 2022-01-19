@@ -35,6 +35,13 @@
       tooltip="below"
     ></app-bd-panel-button>
     <app-bd-panel-button
+      icon="drive_file_move"
+      text="Import Product..."
+      [route]="['panels', 'products', 'transfer']"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
+      tooltip="below"
+    ></app-bd-panel-button>
+    <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Product..."
       [route]="['panels', 'products', 'upload']"

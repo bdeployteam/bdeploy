@@ -1,0 +1,63 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Import Product" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <mat-stepper #stepper [linear]="true" orientation="vertical" (selectionChange)="onStepSelectionChange($event)">
+        <mat-step label="Choose Source Repository" [completed]="!!selectedRepo">
+          <div fxLayout="column" fxLayoutGap="5px">
+            <span>Choose the repository to import from.</span>
+            <app-bd-form-select
+              errorDisplay="immediate"
+              [values]="repos"
+              [labels]="repoLabels"
+              label="Repository"
+              [(ngModel)]="selectedRepo"
+              (ngModelChange)="stepper.selected.completed = true; stepper.next()"
+              required
+            ></app-bd-form-select>
+          </div>
+        </mat-step>
+        <mat-step label="Choose Product" [completed]="!!selectedProductId">
+          <div [style.min-height.px]="63">
+            <app-bd-loading-overlay [show]="productsLoading$ | async" mode="hide">
+              <div fxLayout="column" fxLayoutGap="5px">
+                <span>Choose the product to import.</span>
+                <span class="bd-description-text">Only products with importable versions are shown.</span>
+                <app-bd-form-select
+                  errorDisplay="immediate"
+                  [values]="prodIds"
+                  [labels]="prodLabels"
+                  label="Product"
+                  [(ngModel)]="selectedProductId"
+                  (ngModelChange)="stepper.selected.completed = true; stepper.next()"
+                  required
+                ></app-bd-form-select>
+              </div>
+            </app-bd-loading-overlay>
+          </div>
+        </mat-step>
+        <mat-step label="Import Version(s)" [completed]="!!selectedProductId">
+          <div fxLayout="column" fxLayoutGap="5px">
+            <app-bd-data-table
+              #versionTable
+              [records]="prodsById[selectedProductId]"
+              [columns]="prodVersionColumns"
+              [checkMode]="true"
+              [(checked)]="selectedVersions"
+              [headerHidden]="true"
+            ></app-bd-data-table>
+            <app-bd-button
+              text="Import"
+              icon="drive_file_move"
+              color="primary"
+              [collapsed]="false"
+              (click)="importVersions()"
+              [disabled]="!selectedVersions?.length || (importing$ | async)"
+              [loadingWhen$]="importing$"
+            ></app-bd-button>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

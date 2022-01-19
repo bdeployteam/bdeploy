@@ -19,3 +19,10 @@ export function formatSize(size: number): string {
   const i: number = size === 0 ? 0 : Math.min(4, Math.floor(Math.log(size) / Math.log(1024)));
   return (i === 0 ? size : (size / Math.pow(1024, i)).toFixed(2)) + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
+
+export function groupArrayBy<T>(array: T[], key: string): {} {
+  return array.reduce((pv, cv) => {
+    (pv[cv[key]] = pv[cv[key]] || []).push(cv);
+    return pv;
+  }, {});
+}
