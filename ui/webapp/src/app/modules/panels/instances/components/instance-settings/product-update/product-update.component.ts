@@ -4,6 +4,7 @@ import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
+import { ProductVersionDetailsComponent } from './product-version-details/product-version-details.component';
 import { UpdateActionComponent } from './update-action/update-action.component';
 
 @Component({
@@ -17,6 +18,8 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => `${r.key.tag}${this.edit.state$.value.config.config.product.tag === r.key.tag ? ' - current' : ''}`,
+    tooltip: (r) => null,
+    component: ProductVersionDetailsComponent,
   };
 
   private readonly productUpdateAction: BdDataColumn<ProductDto> = {
