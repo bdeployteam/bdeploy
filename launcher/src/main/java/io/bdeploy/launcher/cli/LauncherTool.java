@@ -40,6 +40,7 @@ import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.LockDirectoryOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
+import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.ReleaseDirectoryLockOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
@@ -56,6 +57,7 @@ import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -253,6 +255,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             hive.setLockContentSupplier(LOCK_CONTENT);
             hive.setLockContentValidator(LOCK_VALIDATOR);
 
+            // Clean stale transactions once the content supplier and validator are available.
+            cleanStaleTransactions(hive);
+
             // Check for and install launcher updates
             // We always try to use the launcher matching the server version
             Entry<Version, Key> requiredLauncher = doSelfUpdate(hive, reporter);
@@ -326,6 +331,38 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 doExit(UpdateHelper.CODE_UPDATE);
             }
             log.info("Application terminated with exit code {}.", exitCode);
+        }
+    }
+
+    /**
+     * Cleans up any past transactions which have been aborted for whatever reason.
+     * <p>
+     * A transaction is stale if the process which created the transaction is no longer alive, but the marker database
+     * backing the transaction still exists. This would (worst case) allow damaged objects to exist in the object
+     * database without any means to clean them up.
+     *
+     * @param hive
+     */
+    private void cleanStaleTransactions(BHive hive) {
+        // only possible if not read-only root.
+        if (!readOnlyRootDir) {
+            // Check for stale transactions in the hive.
+            log.debug("Checking for stale transactions.");
+            long stale = hive.getTransactions().cleanStaleTransactions();
+            if (stale > 0) {
+                // Stale transactions might leave damaged objects around, force a prune to get rid of them.
+                // There is no need to perform a full check of all existing manifests though, a stale transaction
+                // can not cause them to break.
+                log.warn("{} stale transactions found, forcing prune of hive", stale);
+
+                SortedMap<ObjectId, Long> result = hive.execute(new PruneOperation());
+                long sum = result.values().stream().collect(Collectors.summarizingLong(x -> x)).getSum();
+                if (sum > 0) {
+                    log.info("Removed {} objects (Size={}).", result.size(), FormatHelper.formatFileSize(sum));
+                }
+            } else {
+                log.debug("No stale transactions found, continue.");
+            }
         }
     }
 

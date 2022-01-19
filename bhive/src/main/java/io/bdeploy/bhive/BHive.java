@@ -144,6 +144,16 @@ public class BHive implements AutoCloseable, BHiveExecution {
         this.lockContentValidator = lockContentValidator;
     }
 
+    /** Get the supplier that provides lock file content */
+    protected Supplier<String> getLockContentSupplier() {
+        return this.lockContentSupplier;
+    }
+
+    /** Get the predicate that is used to validate an existing lock file. */
+    protected Predicate<String> getLockContentValidator() {
+        return this.lockContentValidator;
+    }
+
     /**
      * Execute the given {@link Operation} on this {@link BHive}.
      */
