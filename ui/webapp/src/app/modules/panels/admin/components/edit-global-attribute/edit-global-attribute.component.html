@@ -1,5 +1,8 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Edit Attribute" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Edit Attribute{{ tempAttribute?.description !== initialAttribute?.description ? '*' : '' }}"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="5px">
       <ng-container *ngIf="!(loading$ | async)">
@@ -11,9 +14,16 @@
           appTrimmed
           appEditUniqueValueValidator
           [disallowedValues]="tempUsedIds"
+          disabled
         ></app-bd-form-input>
         <app-bd-form-input label="Description" name="description" [(ngModel)]="tempAttribute.description" required></app-bd-form-input>
-        <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="form.invalid"></app-bd-button>
+        <app-bd-button
+          color="primary"
+          [collapsed]="false"
+          text="Apply"
+          icon="save"
+          [disabled]="form.invalid || tempAttribute.description === initialAttribute.description"
+        ></app-bd-button>
       </ng-container>
     </form>
   </app-bd-dialog-content>

@@ -30,8 +30,11 @@ import { BHiveComponent } from './components/bhive/bhive.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
+import { AttributeEditActionComponent } from './components/settings-general/attributes-tab/attribute-edit-action/attribute-edit-action.component';
 import { AttributesTabComponent } from './components/settings-general/attributes-tab/attributes-tab.component';
 import { GeneralTabComponent } from './components/settings-general/general-tab/general-tab.component';
+import { LdapCheckActionComponent } from './components/settings-general/ldap-tab/ldap-check-action/ldap-check-action.component';
+import { LdapEditActionComponent } from './components/settings-general/ldap-tab/ldap-edit-action/ldap-edit-action.component';
 import { LdapTabComponent } from './components/settings-general/ldap-tab/ldap-tab.component';
 import { PluginDeleteActionComponent } from './components/settings-general/plugins-tab/plugin-delete-action/plugin-delete-action.component';
 import { PluginLoadActionComponent } from './components/settings-general/plugins-tab/plugin-load-action/plugin-load-action.component';
@@ -57,6 +60,9 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     PluginDeleteActionComponent,
     LdapTabComponent,
     BHiveComponent,
+    AttributeEditActionComponent,
+    LdapEditActionComponent,
+    LdapCheckActionComponent,
   ],
   imports: [
     CommonModule,

@@ -1,11 +1,10 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
-import { finalize, switchMap } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { Permission, ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
+import { ScopedPermission, UserInfo } from 'src/app/models/gen.dtos';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
-import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -44,26 +43,19 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
   /* template */ user$ = new BehaviorSubject<UserInfo>(null);
   /* template */ permColumns: BdDataColumn<ScopedPermission>[] = [COL_SCOPE, COL_PERMISSION, this.colDeletePerm];
-  /* template */ scopes$ = new BehaviorSubject<string[]>([null]);
-  /* template */ labels$ = new BehaviorSubject<string[]>(['Global']);
-
-  /* template */ assignScope: string;
-  /* template */ assignPerm: Permission;
-
-  /* template */ editUser: UserInfo;
-  /* template */ passConfirm: string;
-
-  /* template */ allPerms: Permission[] = Object.keys(Permission).map((k) => Permission[k]);
   /* template */ isCurrentUser: boolean;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('assignTemplate') private assignTemplate: TemplateRef<any>;
-  @ViewChild('editTemplate') private editTemplate: TemplateRef<any>;
-  @ViewChild('editForm') private editForm: NgForm;
 
   private subscription: Subscription;
 
-  constructor(private areas: NavAreasService, private authAdmin: AuthAdminService, private auth: AuthenticationService, groups: GroupsService) {
+  constructor(
+    private areas: NavAreasService,
+    private authAdmin: AuthAdminService,
+    private auth: AuthenticationService,
+    groups: GroupsService,
+    private router: Router
+  ) {
     this.subscription = combineLatest([areas.panelRoute$, authAdmin.users$]).subscribe(([route, users]) => {
       if (!users || !route?.params || !route.params['user']) {
         this.user$.next(null);
@@ -73,19 +65,6 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
       this.user$.next(user);
       this.isCurrentUser = user.name === this.auth.getUsername();
     });
-
-    this.subscription.add(
-      groups.groups$.subscribe((groups) => {
-        if (!groups) {
-          return;
-        }
-
-        const sortedNames = groups.map((g) => g.name).sort();
-
-        this.scopes$.next([null, ...sortedNames]);
-        this.labels$.next(['Global', ...sortedNames]);
-      })
-    );
   }
 
   ngOnInit(): void {}
@@ -112,60 +91,11 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   }
 
   /* template */ onAssignPermission(user: UserInfo): void {
-    this.assignScope = null;
-    this.assignPerm = null;
-    this.dialog
-      .message({ header: 'Assign Permission', template: this.assignTemplate, validation: () => !!this.assignPerm, actions: [ACTION_CANCEL, ACTION_OK] })
-      .subscribe((r) => {
-        if (!r) {
-          return;
-        }
-
-        this.loading$.next(true);
-        const existing = user.permissions.find((p) => p.scope === this.assignScope);
-        if (!!existing) {
-          existing.permission = this.assignPerm;
-        } else {
-          user.permissions.push({ scope: this.assignScope, permission: this.assignPerm });
-        }
-
-        this.authAdmin
-          .updateUser(user)
-          .pipe(finalize(() => this.loading$.next(false)))
-          .subscribe();
-      });
+    this.router.navigate([{ outlets: { panel: ['panels', 'admin', 'user-detail', user.name, 'permission'] } }]);
   }
 
-  /* template */ onEdit(userInfo: UserInfo): void {
-    this.editUser = { ...userInfo };
-    this.passConfirm = null;
-    this.dialog
-      .message({
-        header: 'Edit User',
-        template: this.editTemplate,
-        validation: () => !this.editForm || this.editForm.valid,
-        actions: [ACTION_CANCEL, ACTION_OK],
-      })
-      .subscribe((r) => {
-        if (!r) {
-          return;
-        }
-
-        this.loading$.next(true);
-        this.authAdmin
-          .updateUser(this.editUser)
-          .pipe(
-            switchMap((_) => {
-              if (!!this.editUser.password?.length) {
-                return this.authAdmin.updateLocalUserPassword(this.editUser.name, this.editUser.password);
-              }
-
-              return of(null);
-            }),
-            finalize(() => this.loading$.next(false))
-          )
-          .subscribe();
-      });
+  /* template */ onEdit(user: UserInfo): void {
+    this.router.navigate([{ outlets: { panel: ['panels', 'admin', 'user-detail', user.name, 'edit'] } }]);
   }
 
   // TODO: Remove if it's unused

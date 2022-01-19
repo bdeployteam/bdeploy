@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
+import { combineLatest, Subject, Subscription } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
@@ -20,11 +20,12 @@ export class CheckLdapServerComponent implements OnInit {
   constructor(private settings: SettingsService, private auth: AuthAdminService, private areas: NavAreasService) {}
 
   ngOnInit(): void {
-    this.subscription = this.settings.selectedServer$.subscribe((server) => {
-      if (!server) {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.settings.settings$]).subscribe(([route, settings]) => {
+      if (!settings || !route?.params || !route.params['id']) {
         this.areas.closePanel();
         return;
       }
+      const server = settings.auth.ldapSettings.find((a) => a.id === route.params['id']);
       this.checkResult$.next(`Checking ...`);
       this.auth.testLdapServer(server).subscribe((r) => {
         this.checkResult$.next(r);
@@ -33,6 +34,8 @@ export class CheckLdapServerComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 }

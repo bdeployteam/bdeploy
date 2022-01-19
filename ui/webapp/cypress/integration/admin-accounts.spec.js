@@ -45,23 +45,20 @@ describe('Admin UI Tests (Accounts)', () => {
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Create User');
       cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
+    });
 
-      cy.contains('app-bd-notification-card', 'Add User').within(() => {
-        cy.fillFormInput('name', 'test');
-        cy.fillFormInput('fullName', 'Test User');
-        cy.fillFormInput('email', 'example@example.org');
-        cy.fillFormInput('pass', 'pass');
-        cy.fillFormInput('passConfirm', 'pass');
-      });
+    cy.inMainNavFlyin('add-user', () => {
+      cy.fillFormInput('name', 'test');
+      cy.fillFormInput('fullName', 'Test User');
+      cy.fillFormInput('email', 'example@example.org');
+      cy.fillFormInput('pass', 'pass');
+      cy.fillFormInput('passConfirm', 'pass');
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
     cy.screenshot('Doc_Admin_User_Accounts_Add');
 
     cy.inMainNavContent(() => {
-      cy.contains('app-bd-notification-card', 'Add User').within(() => {
-        cy.get('button[data-cy="OK"]').should('be.enabled').click();
-      });
-
       cy.wait('@createUser');
       cy.waitUntilContentLoaded();
     });
@@ -76,7 +73,6 @@ describe('Admin UI Tests (Accounts)', () => {
         })
         .click();
     });
-
     // deactivate test user
     cy.inMainNavFlyin('app-user-admin-detail', () => {
       cy.contains('test').should('exist');
@@ -119,11 +115,11 @@ describe('Admin UI Tests (Accounts)', () => {
     // set global permission.
     cy.inMainNavFlyin('app-user-admin-detail', () => {
       cy.get('button[data-cy^="Assign Permission"]').click();
+    });
 
-      cy.contains('app-bd-notification-card', 'Assign Permission').within(() => {
-        cy.fillFormSelect('permission', 'READ');
-        cy.get('button[data-cy^="OK"]').click();
-      });
+    cy.inMainNavFlyin('assign-permission', () => {
+      cy.fillFormSelect('permission', 'READ');
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
     // check READ perm.
@@ -133,79 +129,71 @@ describe('Admin UI Tests (Accounts)', () => {
         .should('exist')
         .within(() => {
           cy.contains('READ').should('exist');
-        });
+        })
+        .click();
     });
 
+    // set global permission.
     cy.inMainNavFlyin('app-user-admin-detail', () => {
       cy.contains('tr', 'Global')
         .should('exist')
         .within(() => {
           cy.contains('READ').should('exist');
         });
+      cy.get('button[data-cy^="Assign Permission"]').click();
     });
 
-    cy.intercept({ method: 'GET', url: '/api/auth/admin/users' }).as('listUsers');
-
-    // set global permission.
-    cy.inMainNavFlyin('app-user-admin-detail', () => {
-      cy.get('button[data-cy^="Assign Permission"]').click();
-
-      cy.contains('app-bd-notification-card', 'Assign Permission').within(() => {
-        cy.fillFormSelect('permission', 'ADMIN');
-      });
+    cy.inMainNavFlyin('assign-permission', () => {
+      cy.fillFormSelect('permission', 'ADMIN');
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
     cy.screenshot('Doc_Admin_User_Accounts_Permissions_Add');
 
-    cy.inMainNavFlyin('app-user-admin-detail', () => {
-      cy.contains('app-bd-notification-card', 'Assign Permission').within(() => {
-        cy.get('button[data-cy^="OK"]').click();
-      });
-    });
-
-    // need to wait for the update to arrive
-    cy.wait('@listUsers');
-    cy.waitUntilContentLoaded();
-
     // check ADMIN perm.
+    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', 'test')
         .should('exist')
         .within(() => {
           cy.contains('ADMIN').should('exist');
-        });
+        })
+        .click();
     });
 
+    // check edit
+    cy.waitUntilContentLoaded();
     cy.inMainNavFlyin('app-user-admin-detail', () => {
       cy.contains('tr', 'Global')
         .should('exist')
         .within(() => {
-          cy.contains('ADMIN').should('exist');
+          cy.contains('READ').should('exist');
         });
+      cy.get('button[data-cy^="Edit"]').click();
     });
 
-    // check edit
-    cy.inMainNavFlyin('app-user-admin-detail', () => {
-      cy.get('button[data-cy^="Edit"]').click();
-      cy.contains('app-bd-notification-card', 'Edit User').within(() => {
-        cy.fillFormInput('fullName', 'Different User');
-        cy.fillFormInput('email', 'new@example.org');
-      });
+    cy.inMainNavFlyin('edit-user', () => {
+      cy.fillFormInput('fullName', 'Different User');
+      cy.fillFormInput('email', 'new@example.org');
+      cy.get('button[data-cy="Apply"]').should('be.enabled').click();
     });
 
     cy.screenshot('Doc_Admin_User_Accounts_Edit');
 
-    cy.inMainNavFlyin('app-user-admin-detail', () => {
-      cy.contains('app-bd-notification-card', 'Edit User').within(() => {
-        cy.get('button[data-cy^="OK"]').click();
-      });
-
-      cy.contains('Different User').should('exist');
-      cy.contains('new@example.org').should('exist');
+    cy.waitUntilContentLoaded();
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'test')
+        .should('exist')
+        .within(() => {
+          cy.contains('ADMIN').should('exist');
+        })
+        .click();
     });
 
     // clean up test user in the end.
     cy.inMainNavFlyin('app-user-admin-detail', () => {
+      cy.contains('Different User').should('exist');
+      cy.contains('new@example.org').should('exist');
       cy.get('button[data-cy^="Delete User"]').click();
     });
 

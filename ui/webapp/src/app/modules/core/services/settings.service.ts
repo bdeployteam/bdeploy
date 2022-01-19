@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize, first, skipWhile, switchMap, tap } from 'rxjs/operators';
-import { LDAPSettingsDto, SettingsConfiguration } from 'src/app/models/gen.dtos';
+import { SettingsConfiguration } from 'src/app/models/gen.dtos';
 import { measure } from '../utils/performance.utils';
 import { ConfigService } from './config.service';
 import { NavAreasService } from './nav-areas.service';
@@ -15,7 +15,6 @@ export class SettingsService {
   public loading$ = new BehaviorSubject<boolean>(true);
   public settings$ = new BehaviorSubject<SettingsConfiguration>(null);
   public settingsUpdated$ = new BehaviorSubject<boolean>(false);
-  public selectedServer$ = new BehaviorSubject<LDAPSettingsDto>(null);
 
   private origSettings: SettingsConfiguration;
 
@@ -58,7 +57,6 @@ export class SettingsService {
   public discard() {
     this.settings$.next(cloneDeep(this.origSettings));
     this.settingsUpdated$.next(false);
-    this.setSelectedServer(null);
   }
 
   public save() {
@@ -79,19 +77,14 @@ export class SettingsService {
     this.areas.closePanel();
   }
 
-  public editLdapServer(server) {
-    this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(this.selectedServer$.value), 1, server);
+  public editLdapServer(server, initialServer) {
+    this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(initialServer), 1, server);
     this.settingsUpdated$.next(true);
-    this.areas.closePanel();
   }
 
   public removeLdapServer(server) {
     this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(server), 1);
     this.settingsUpdated$.next(true);
-  }
-
-  public setSelectedServer(server) {
-    this.selectedServer$.next(server);
   }
 
   public addGlobalAttribute(attribute) {
@@ -103,7 +96,6 @@ export class SettingsService {
   public editGlobalAttribute(attribute, initialAttribute) {
     this.settings$.value.instanceGroup.attributes.splice(this.settings$.value.instanceGroup.attributes.indexOf(initialAttribute), 1, attribute);
     this.settingsUpdated$.next(true);
-    this.areas.closePanel();
   }
 
   public removeAttribute(attribute) {

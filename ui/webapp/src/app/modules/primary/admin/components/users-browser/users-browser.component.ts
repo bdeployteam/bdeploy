@@ -1,15 +1,12 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
 import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
-import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
-import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { UsersColumnsService } from 'src/app/modules/core/services/users-columns.service';
 import { AuthAdminService } from '../../services/auth-admin.service';
@@ -51,12 +48,7 @@ export class UsersBrowserComponent implements OnInit {
     component: BdDataDateCellComponent,
   };
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('addDialog') private addDialog: TemplateRef<any>;
-  @ViewChild('addForm', { static: false }) private addForm: NgForm;
-
-  /* template */ creating$ = new BehaviorSubject<boolean>(false);
-  /* template */ loading$ = combineLatest([this.settings.loading$, this.authAdmin.loading$, this.creating$]).pipe(map(([s, a, c]) => s || a || c));
+  /* template */ loading$ = combineLatest([this.settings.loading$, this.authAdmin.loading$]).pipe(map(([s, a]) => s || a));
   /* template */ columns: BdDataColumn<UserInfo>[] = [
     ...this.userColumns.defaultUsersColumns,
     this.colPermLevel,
@@ -100,27 +92,5 @@ export class UsersBrowserComponent implements OnInit {
     p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.READ);
     p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.CLIENT);
     return p ? p.permission : null;
-  }
-
-  public onAdd(): void {
-    this.addUser = {};
-    this.addConfirm = '';
-    this.dialog
-      .message({
-        header: 'Add User',
-        icon: 'add',
-        template: this.addDialog,
-        validation: () => !this.addForm || this.addForm.valid,
-        actions: [ACTION_CANCEL, ACTION_OK],
-      })
-      .subscribe((r) => {
-        if (r) {
-          this.creating$.next(true);
-          this.authAdmin
-            .createLocalUser(this.addUser as UserInfo)
-            .pipe(finalize(() => this.creating$.next(false)))
-            .subscribe();
-        }
-      });
   }
 }

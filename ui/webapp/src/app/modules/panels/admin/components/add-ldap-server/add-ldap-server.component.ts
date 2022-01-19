@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
+import { randomString } from 'src/app/modules/core/utils/object.utils';
 
 @Component({
   selector: 'add-ldap-server',
@@ -20,6 +21,7 @@ export class AddLdapServerComponent implements OnInit {
       accountUserName: 'sAMAccountName',
       accountFullName: 'displayName',
       accountEmail: 'mail',
+      id: randomString(10),
     };
   }
 

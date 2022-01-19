@@ -1,34 +1,3 @@
-<ng-template #assignTemplate>
-  <div fxLayout="column" fxLayoutGap="5px">
-    <p>An existing permission on the selected scope will be replaced.</p>
-    <app-bd-form-select
-      [values]="scopes$ | async"
-      name="scope"
-      [labels]="labels$ | async"
-      [(ngModel)]="assignScope"
-      label="Select Permission Scope"
-    ></app-bd-form-select>
-    <app-bd-form-select [values]="allPerms" label="Permission" name="permission" [(ngModel)]="assignPerm"></app-bd-form-select>
-  </div>
-</ng-template>
-
-<ng-template #editTemplate>
-  <form #editForm="ngForm" fxLayout="column" fxLayoutGap="5px">
-    <app-bd-form-input name="fullName" label="Full Name" [(ngModel)]="editUser.fullName"></app-bd-form-input>
-    <app-bd-form-input name="email" label="E-Mail Address" [(ngModel)]="editUser.email"></app-bd-form-input>
-    <app-bd-form-input name="pass" label="New Password" [(ngModel)]="editUser.password" type="password"></app-bd-form-input>
-    <app-bd-form-input
-      name="passConfirm"
-      label="Confirm Password"
-      [(ngModel)]="passConfirm"
-      type="password"
-      [appPasswordVerification]="editUser.password"
-      errorDisplay="immediate"
-      [required]="!!editUser.password?.length"
-    ></app-bd-form-input>
-  </form>
-</ng-template>
-
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="User Details" [panel]="true"> </app-bd-dialog-toolbar>
 
@@ -67,18 +36,30 @@
         text="Activate Account"
         (click)="onSetInactive(user, false)"
       ></app-bd-button>
-
-      <app-bd-button [collapsed]="false" icon="security" text="Assign Permission" (click)="onAssignPermission(user)"></app-bd-button>
-
+      <!-- TODO: Marcus to check why it's not working -->
+      <!-- <app-bd-panel-button
+        [collapsed]="false"
+        text="Assign Permission..."
+        icon="security"
+        [route]="['panels', 'admin', 'user-detail', user.name, 'permission']"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Edit User..."
+        icon="edit"
+        [route]="['panels', 'admin', 'user-detail', user.name, 'edit']"
+        [disabled]="user.external || isCurrentUser"
+        [matTooltip]="user.external ? 'Editing is only possible for local users.' : null"
+      ></app-bd-panel-button> -->
+      <app-bd-button [collapsed]="false" icon="security" text="Assign Permission..." (click)="onAssignPermission(user)"></app-bd-button>
       <app-bd-button
         [collapsed]="false"
         icon="edit"
-        text="Edit User"
+        text="Edit User..."
         [disabled]="user.external || isCurrentUser"
         (click)="onEdit(user)"
         [matTooltip]="user.external ? 'Editing is only possible for local users.' : null"
       ></app-bd-button>
-
       <app-bd-button [disabled]="isCurrentUser" icon="delete" text="Delete User" [collapsed]="false" (click)="onDelete(user)"></app-bd-button>
     </div>
   </app-bd-dialog-content>

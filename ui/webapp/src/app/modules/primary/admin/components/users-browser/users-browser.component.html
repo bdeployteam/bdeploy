@@ -1,22 +1,3 @@
-<ng-template #addDialog>
-  <form #addForm="ngForm" fxLayout="column" fxLayoutGap="5px">
-    <app-bd-form-input name="name" label="Username" [(ngModel)]="addUser.name" required appIdentifier></app-bd-form-input>
-    <app-bd-form-input name="fullName" label="Full Name" [(ngModel)]="addUser.fullName"></app-bd-form-input>
-    <app-bd-form-input name="email" label="E-Mail Address" [(ngModel)]="addUser.email"></app-bd-form-input>
-    <div fxLayout="row" fxLayoutGap="5px">
-      <app-bd-form-input name="pass" label="New Password" [(ngModel)]="addUser.password" type="password" required></app-bd-form-input>
-      <app-bd-form-input
-        name="passConfirm"
-        label="Confirm Password"
-        [(ngModel)]="addConfirm"
-        type="password"
-        required
-        [appPasswordVerification]="addUser.password"
-      ></app-bd-form-input>
-    </div>
-  </form>
-</ng-template>
-
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="User Accounts">
     <div fxFlex="1 0 auto"></div>
@@ -27,15 +8,15 @@
       presetKey="userAdmin"
     ></app-bd-data-grouping>
     <mat-divider [vertical]="true"></mat-divider>
-    <app-bd-button
-      icon="add"
-      text="Create User"
-      color="primary"
+    <app-bd-panel-button
       [collapsed]="false"
+      color="primary"
+      text="Create User..."
+      icon="add"
+      [route]="['panels', 'admin', 'add-user']"
       [disabled]="(settings.settings$ | async)?.auth.disableBasic"
-      (click)="onAdd()"
       [matTooltip]="settings.settings$.value?.auth.disableBasic ? 'Local user management is disabled' : 'Create a local user account'"
-    ></app-bd-button>
+    ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="bd-default-padding">

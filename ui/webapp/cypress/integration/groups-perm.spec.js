@@ -30,28 +30,21 @@ describe('Groups Tests (Permissions)', () => {
     cy.waitUntilContentLoaded();
 
     // create test users - CLIENT permission has its separate test.
-    cy.inMainNavContent(() => {
-      ['read', 'write'].forEach((perm) => {
-        cy.pressToolbarButton('Create User');
-        cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
-
-        cy.contains('app-bd-notification-card', 'Add User').within(() => {
-          cy.fillFormInput('name', perm);
-          cy.fillFormInput('fullName', `${perm} User`);
-          cy.fillFormInput('email', 'example@example.org');
-          cy.fillFormInput('pass', perm);
-          cy.fillFormInput('passConfirm', perm);
-
-          cy.get('button[data-cy="OK"]').should('be.enabled').click();
-        });
-
-        cy.wait('@createUser');
+    ['read', 'write'].forEach((perm) => {
+      cy.pressToolbarButton('Create User');
+      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
+      cy.inMainNavFlyin('add-user', () => {
+        cy.fillFormInput('name', perm);
+        cy.fillFormInput('fullName', `${perm} User`);
+        cy.fillFormInput('email', 'example@example.org');
+        cy.fillFormInput('pass', perm);
+        cy.fillFormInput('passConfirm', perm);
+        cy.get('button[data-cy="Save"]').should('be.enabled').click();
       });
 
+      cy.wait('@createUser');
       cy.waitUntilContentLoaded();
-    });
 
-    ['read', 'write'].forEach((perm) => {
       cy.inMainNavContent(() => {
         cy.contains('tr', perm).should('exist').click();
       });
@@ -59,16 +52,14 @@ describe('Groups Tests (Permissions)', () => {
       // set global permission.
       cy.inMainNavFlyin('app-user-admin-detail', () => {
         cy.get('button[data-cy^="Assign Permission"]').click();
-
-        cy.waitForApi(() => {
-          cy.contains('app-bd-notification-card', 'Assign Permission').within(() => {
-            cy.fillFormSelect('permission', perm.toUpperCase());
-            cy.get('button[data-cy^="OK"]').click();
-          });
-        });
       });
 
-      cy.waitUntilContentLoaded();
+      cy.waitForApi(() => {
+        cy.inMainNavFlyin('assign-permission', () => {
+          cy.fillFormSelect('permission', perm.toUpperCase());
+          cy.get('button[data-cy="Save"]').should('be.enabled').click();
+        });
+      });
 
       // check assigned perm.
       cy.waitUntilContentLoaded();
