@@ -1,10 +1,10 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
-import { BdDataTableComponent, DragReorderEvent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
+import { DragReorderEvent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 @Component({
@@ -47,7 +47,7 @@ export class LdapTabComponent implements OnInit {
     id: 'delete',
     name: 'Rem.',
     data: (r) => `Remove server ${r.server}`,
-    action: (r) => this.removeServer(r),
+    action: (r) => this.settings.removeLdapServer(r),
     icon: (r) => 'delete',
     width: '40px',
   };
@@ -56,7 +56,6 @@ export class LdapTabComponent implements OnInit {
   /* template */ tempServer: Partial<LDAPSettingsDto>;
   /* template */ checkResult$ = new Subject<string>();
 
-  @ViewChild(BdDataTableComponent) table: BdDataTableComponent<LDAPSettingsDto>;
   constructor(public settings: SettingsService, private router: Router) {}
 
   ngOnInit(): void {}
@@ -64,11 +63,6 @@ export class LdapTabComponent implements OnInit {
   private editServer(server: LDAPSettingsDto) {
     this.router.navigate(['', { outlets: { panel: ['panels', 'admin', 'edit-ldap-server'] } }]);
     this.settings.setSelectedServer(server);
-  }
-
-  private removeServer(server: LDAPSettingsDto): void {
-    this.settings.settings$.value.auth.ldapSettings.splice(this.settings.settings$.value.auth.ldapSettings.indexOf(server), 1);
-    this.table.update();
   }
 
   private checkServer(server: LDAPSettingsDto): void {
@@ -82,6 +76,6 @@ export class LdapTabComponent implements OnInit {
     }
 
     moveItemInArray(this.settings.settings$.value.auth.ldapSettings, order.previousIndex, order.currentIndex);
-    this.table.update();
+    this.settings.serversReordered();
   }
 }

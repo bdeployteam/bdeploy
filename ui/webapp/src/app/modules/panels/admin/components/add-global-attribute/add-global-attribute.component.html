@@ -1,0 +1,18 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar header="Add Attribute" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="5px">
+      <app-bd-form-input
+        label="Name/ID"
+        name="name"
+        [(ngModel)]="tempAttribute.name"
+        required
+        appTrimmed
+        appEditUniqueValueValidator
+        [disallowedValues]="tempUsedIds"
+      ></app-bd-form-input>
+      <app-bd-form-input label="Description" name="description" [(ngModel)]="tempAttribute.description" required></app-bd-form-input>
+      <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="form.invalid"></app-bd-button>
+    </form>
+  </app-bd-dialog-content>
+</app-bd-dialog>
