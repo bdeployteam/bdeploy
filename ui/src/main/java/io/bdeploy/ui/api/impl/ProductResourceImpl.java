@@ -40,7 +40,6 @@ import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -50,7 +49,6 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
-import io.bdeploy.ui.ProductDiscUsageService;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
@@ -72,9 +70,6 @@ public class ProductResourceImpl implements ProductResource {
 
     @Inject
     private BHiveRegistry registry;
-
-    @Inject
-    private ProductDiscUsageService pdus;
 
     @Context
     private ResourceContext rc;
@@ -139,7 +134,7 @@ public class ProductResourceImpl implements ProductResource {
             return;
         }
 
-        if (getProductUseCount(name, tag) > 0) {
+        if (!getProductUsedIn(name, tag).isEmpty()) {
             throw new WebApplicationException("Product version is still in use", Status.BAD_REQUEST);
         }
 
@@ -149,9 +144,6 @@ public class ProductResourceImpl implements ProductResource {
         // This assumes that no single application version is used in multiple products.
         ProductManifest pmf = ProductManifest.of(hive, key);
         SortedSet<Key> apps = pmf.getApplications();
-
-        // cancel disc usage calculations and clear cache for this product.
-        pdus.invalidateDiscUsageCalculation(group, name);
 
         hive.execute(new ManifestDeleteOperation().setToDelete(key));
         apps.forEach(a -> hive.execute(new ManifestDeleteOperation().setToDelete(a)));
@@ -163,39 +155,6 @@ public class ProductResourceImpl implements ProductResource {
     public ApplicationResource getApplicationResource(String name, String tag) {
         Manifest.Key key = new Manifest.Key(name, tag);
         return rc.initResource(new ApplicationResourceImpl(hive, key));
-    }
-
-    @Override
-    public String getProductDiskUsage(String name) {
-        try {
-            return FormatHelper.formatFileSize(pdus.getDiscUsage(group, name).get());
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            log.debug("Product disc usage calculation interrupted", ie);
-            return "Unknown";
-        } catch (Exception e) {
-            log.debug("Product disc usage calculation failed", e);
-            return "Unknown";
-        }
-    }
-
-    @Override
-    public Long getProductUseCount(String name, String tag) {
-        Manifest.Key checkKey = new Manifest.Key(name, tag);
-
-        // InstanceManifests using the product version grouped by instance
-        Map<String, Set<InstanceManifest>> uuid2imSet = InstanceManifest.scan(hive, false).stream()
-                .map(k -> InstanceManifest.of(hive, k)).filter(im -> im.getConfiguration().product.equals(checkKey))
-                .collect(Collectors.groupingBy(im -> im.getConfiguration().uuid, Collectors.toSet()));
-
-        // read instance state once per instance and count installed instance versions
-        long count = 0;
-        for (Set<InstanceManifest> mfSet : uuid2imSet.values()) {
-            Set<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
-            count += mfSet.stream().map(mf -> mf.getManifest().getTag()).filter(installedTags::contains).count();
-        }
-
-        return count;
     }
 
     @Override
@@ -280,7 +239,6 @@ public class ProductResourceImpl implements ProductResource {
                 throw new WebApplicationException("Uploaded ZIP is neither a BHive, nor has a product-info.yaml",
                         Status.BAD_REQUEST);
             }
-            result.forEach(k -> pdus.invalidateDiscUsageCalculation(group, k.getName()));
 
             // careful about scope, as uploading induces an extra scope...
             result.forEach(k -> changes.create(ObjectChangeType.PRODUCT, k, new ObjectScope(this.group)));
@@ -395,7 +353,6 @@ public class ProductResourceImpl implements ProductResource {
         objectIds.forEach(copy::addObject);
         repoHive.execute(copy);
 
-        pdus.invalidateDiscUsageCalculation(group, productName);
         changes.create(ObjectChangeType.PRODUCT, key);
     }
 

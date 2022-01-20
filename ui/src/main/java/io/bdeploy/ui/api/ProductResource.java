@@ -48,14 +48,6 @@ public interface ProductResource {
     public ApplicationResource getApplicationResource(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @GET
-    @Path("/{name : .+}/diskUsage")
-    public String getProductDiskUsage(@PathParam("name") String name);
-
-    @GET
-    @Path("/{name : .+}/{tag}/useCount")
-    public Long getProductUseCount(@PathParam("name") String name, @PathParam("tag") String tag);
-
-    @GET
     @Path("/{name : .+}/{tag}/usedIn")
     public List<InstanceUsageDto> getProductUsedIn(@PathParam("name") String name, @PathParam("tag") String tag);
 
