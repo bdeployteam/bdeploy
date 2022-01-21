@@ -1,7 +1,11 @@
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Local Server Metrics"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <app-bd-form-select label="Select Metric Group" [values]="keys$ | async" [(ngModel)]="selection" (ngModelChange)="doSelect()"></app-bd-form-select>
+    <mat-tab-group mat-align-tabs="start" dynamicHeight animationDuration="0ms" (selectedTabChange)="doSelect($event.tab.textLabel)" class="metrics-tabs-group">
+      <mat-tab fxLayout="column" *ngFor="let key of keys$ | async" [label]="key">
+        <ng-template mat-tab-label>{{ key }}</ng-template>
+      </mat-tab>
+    </mat-tab-group>
     <!-- General server metrics -->
     <div class="bd-default-padding">
       <ng-container *ngIf="!selectedGroup && serverStats">
