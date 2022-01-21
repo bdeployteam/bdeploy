@@ -90,19 +90,6 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  /* template */ onAssignPermission(user: UserInfo): void {
-    this.router.navigate([{ outlets: { panel: ['panels', 'admin', 'user-detail', user.name, 'permission'] } }]);
-  }
-
-  /* template */ onEdit(user: UserInfo): void {
-    this.router.navigate([{ outlets: { panel: ['panels', 'admin', 'user-detail', user.name, 'edit'] } }]);
-  }
-
-  // TODO: Remove if it's unused
-  /* template */ hasAnyPermission(scope: string): boolean {
-    return !!this.user$.value?.permissions.find((p) => p.scope === scope);
-  }
-
   /* tepmlate */ onSetInactive(userInfo: UserInfo, newValue: boolean): void {
     this.loading$.next(true);
     userInfo.inactive = newValue;

@@ -36,8 +36,7 @@
         text="Activate Account"
         (click)="onSetInactive(user, false)"
       ></app-bd-button>
-      <!-- TODO: Marcus to check why it's not working -->
-      <!-- <app-bd-panel-button
+      <app-bd-panel-button
         [collapsed]="false"
         text="Assign Permission..."
         icon="security"
@@ -50,16 +49,7 @@
         [route]="['panels', 'admin', 'user-detail', user.name, 'edit']"
         [disabled]="user.external || isCurrentUser"
         [matTooltip]="user.external ? 'Editing is only possible for local users.' : null"
-      ></app-bd-panel-button> -->
-      <app-bd-button [collapsed]="false" icon="security" text="Assign Permission..." (click)="onAssignPermission(user)"></app-bd-button>
-      <app-bd-button
-        [collapsed]="false"
-        icon="edit"
-        text="Edit User..."
-        [disabled]="user.external || isCurrentUser"
-        (click)="onEdit(user)"
-        [matTooltip]="user.external ? 'Editing is only possible for local users.' : null"
-      ></app-bd-button>
+      ></app-bd-panel-button>
       <app-bd-button [disabled]="isCurrentUser" icon="delete" text="Delete User" [collapsed]="false" (click)="onDelete(user)"></app-bd-button>
     </div>
   </app-bd-dialog-content>

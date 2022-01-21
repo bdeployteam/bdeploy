@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -10,7 +10,7 @@ import { BdButtonColorMode } from '../bd-button/bd-button.component';
   templateUrl: './bd-panel-button.component.html',
   styleUrls: ['./bd-panel-button.component.css'],
 })
-export class BdPanelButtonComponent implements OnInit {
+export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() text: string;
@@ -32,12 +32,22 @@ export class BdPanelButtonComponent implements OnInit {
   constructor(private areas: NavAreasService) {}
 
   ngOnInit(): void {
-    this.generatedRoute = this.getRoute();
+    this.subscription = this.areas.panelRoute$.subscribe((snap) => {
+      this.generatedRoute = this.getRoute(snap);
+    });
   }
 
-  private getRoute() {
+  ngOnChanges(changes: SimpleChanges): void {
+    this.generatedRoute = this.getRoute(this.areas.panelRoute$.value);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  private getRoute(snap: ActivatedRouteSnapshot) {
     if (this.relative) {
-      const url = this.getFullPanelUrl(this.areas.panelRoute$.value);
+      const url = this.getFullPanelUrl(snap);
       const rel = [...this.route];
       while (rel[0] === '..') {
         url.pop();
