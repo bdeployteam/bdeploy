@@ -53,10 +53,13 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.fillFormInput('email', 'example@example.org');
       cy.fillFormInput('pass', 'pass');
       cy.fillFormInput('passConfirm', 'pass');
-      cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
     cy.screenshot('Doc_Admin_User_Accounts_Add');
+
+    cy.inMainNavFlyin('add-user', () => {
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
+    });
 
     cy.inMainNavContent(() => {
       cy.wait('@createUser');
@@ -145,10 +148,13 @@ describe('Admin UI Tests (Accounts)', () => {
 
     cy.inMainNavFlyin('assign-permission', () => {
       cy.fillFormSelect('permission', 'ADMIN');
-      cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
     cy.screenshot('Doc_Admin_User_Accounts_Permissions_Add');
+
+    cy.inMainNavFlyin('assign-permission', () => {
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
+    });
 
     // check ADMIN perm.
     cy.waitUntilContentLoaded();
