@@ -1,7 +1,14 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
-import { ApplicationConfiguration, ApplicationStartType, InstanceNodeConfigurationDto, MinionStatusDto, ProcessStatusDto } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ApplicationStartType,
+  InstanceNodeConfigurationDto,
+  MinionStatusDto,
+  ProcessState,
+  ProcessStatusDto,
+} from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from '../../../services/instances.service';
@@ -94,18 +101,33 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let badApps = 0;
+    let runningApps = 0;
+    let stoppedApps = 0;
+    let deadApps = 0;
     this.node.nodeConfiguration.applications.forEach((app) => {
       if (app.processControl.startType === ApplicationStartType.INSTANCE) {
-        if (!ProcessesService.isRunning(ProcessesService.get(states, app.uid)?.processState)) {
-          badApps++;
+        const state = ProcessesService.get(states, app.uid)?.processState;
+        if (!ProcessesService.isRunning(state)) {
+          stoppedApps++;
+        } else {
+          if (state === ProcessState.RUNNING_NOT_ALIVE) {
+            deadApps++;
+          } else {
+            runningApps++;
+          }
         }
       }
     });
 
-    this.processesState.next(!badApps ? 'ok' : 'warning');
+    this.processesState.next(!stoppedApps && !deadApps ? 'ok' : !runningApps ? 'info' : 'warning');
     this.processesTooltip.next(
-      !badApps ? 'All applications OK' : `${badApps} 'Instance' type ${badApps === 1 ? 'application is' : 'applications are'} not running.`
+      !runningApps
+        ? 'The instance is stopped'
+        : !stoppedApps && !deadApps
+        ? 'All applications OK'
+        : `${stoppedApps} 'Instance' type ${stoppedApps === 1 ? 'application is' : 'applications are'} not running.\n${deadApps} 'Instance' type ${
+            deadApps === 1 ? 'application reports' : 'applications are reporting'
+          } problems.`
     );
   }
 

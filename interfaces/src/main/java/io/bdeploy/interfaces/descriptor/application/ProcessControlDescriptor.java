@@ -54,4 +54,13 @@ public class ProcessControlDescriptor {
      */
     public boolean attachStdin = false;
 
+    /**
+     * Optional startup probe which is queried to find out when a process completed startup.
+     */
+    public StartupProbeDescriptor startupProbe;
+
+    /**
+     * Optional lifeness probe which is queried to check on a process whether it is (still) alive.
+     */
+    public LifenessProbeDescriptor lifenessProbe;
 }

@@ -101,9 +101,9 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
             if (port.type == ParameterType.SERVER_PORT) {
                 table.row().cell(port.getNodeName()).cell(port.appUid).cell(port.appName).cell(port.processState)
-                        .cell(port.isRunning() && !activeTag.equals(port.runningTag) ? "*" : "").cell(port.description)
-                        .cell(port.port).cell("SERVER").cell(port.state ? "open" : "closed").cell(port.getRating() ? "OK" : "BAD")
-                        .build();
+                        .cell(port.processState.isRunning() && !activeTag.equals(port.runningTag) ? "*" : "")
+                        .cell(port.description).cell(port.port).cell("SERVER").cell(port.state ? "open" : "closed")
+                        .cell(port.getRating() ? "OK" : "BAD").build();
             } else {
                 table.row().cell(port.getNodeName()).cell(port.appUid).cell(port.appName).cell(port.processState).cell("")
                         .cell(port.description).cell(port.port).cell("CLIENT").cell("").cell("").build();
@@ -227,16 +227,12 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
         private boolean getRating() {
             // if running, it should be open.
-            if (isRunning()) {
+            if (processState.isRunning()) {
                 return state;
             }
 
             // otherwise it should not be open.
             return !state;
-        }
-
-        private boolean isRunning() {
-            return processState == ProcessState.RUNNING || processState == ProcessState.RUNNING_UNSTABLE;
         }
 
         @Override

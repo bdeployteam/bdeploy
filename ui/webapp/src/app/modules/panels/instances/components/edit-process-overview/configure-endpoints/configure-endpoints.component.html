@@ -14,9 +14,13 @@
     <form form #epForm="ngForm">
       <div *ngIf="edit.process$.value?.endpoints?.http?.length" [style.padding-top.px]="2" fxLayout="column" fxLayoutGap="10px">
         <div *ngFor="let endpoint of edit.process$.value?.endpoints?.http; let i = index" class="bd-rect-card" fxLayout="column">
-          <div class="bd-bg-toolbar">
+          <div class="bd-bg-toolbar" fxLayout="row">
             <div class="bd-default-padding">
               Endpoint <strong>{{ endpoint.id }} - {{ endpoint.path }}</strong>
+            </div>
+            <div fxFlex="1 0 auto"></div>
+            <div class="bd-default-padding bd-description-text">
+              {{ endpoint.type }}
             </div>
           </div>
           <div class="bd-default-padding">

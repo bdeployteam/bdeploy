@@ -18,11 +18,17 @@ The process status is visualized using an icon for each process. Hover over the 
 a| image::images/ManualDoc_ProcessStopped.png[width=32,align=center]
 | Process is *stopped*.
 
+a| image::images/ManualDoc_ProcessStarting.png[width=32,align=center]
+| Process is *starting*. If the process defined a _startup probe_ (see `<<_app_info_yaml,app-info.yaml>>`), this status is reached once the startup probe indicates a successful startup of the application.
+
 a| image::images/ManualDoc_ProcessRunning.png[width=32,align=center]
 | Process is *running*.
 
 a| image::images/ManualDoc_ProcessStopPlanned.png[width=32,align=center]
 | Process is *running* but *stopping* has been *requested* by the user.
+
+a| image::images/ManualDoc_ProcessLifenessFailed.png[width=32,align=center]
+| Process is *running*, but a defined _lifeness probe_ (see `<<_app_info_yaml,app-info.yaml>>`) indicates that the process has a problem.
 
 a| image::images/ManualDoc_ProcessCrashed.png[width=32,align=center]
 | Process *crashed* unexpectedly. *Process Control* scheduled an automatic restart. No interaction required.

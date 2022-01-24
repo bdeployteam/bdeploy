@@ -1,27 +1,14 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
-import java.time.Duration;
-
+import io.bdeploy.interfaces.descriptor.application.LifenessProbeDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
+import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
 
 /**
  * Counterpart of {@link ProcessControlDescriptor} defining actual values.
  */
 public class ProcessControlConfiguration {
-
-    /**
-     * Creates and returns a new configuration with reasonable defaults
-     */
-    public static ProcessControlConfiguration createDefault() {
-        ProcessControlConfiguration config = new ProcessControlConfiguration();
-        config.startType = ApplicationStartType.MANUAL;
-        config.keepAlive = false;
-        config.noOfRetries = 3;
-        config.gracePeriod = Duration.ofSeconds(30).toMillis();
-        config.attachStdin = false;
-        return config;
-    }
 
     /**
      * The configured start type of the application.
@@ -48,5 +35,15 @@ public class ProcessControlConfiguration {
      * Specifies if a process expects input on stdin.
      */
     public boolean attachStdin;
+
+    /**
+     * Copy of the original startup probe descriptor.
+     */
+    public StartupProbeDescriptor startupProbe;
+
+    /**
+     * Copy of the original lifeness probe descriptor.
+     */
+    public LifenessProbeDescriptor lifenessProbe;
 
 }

@@ -234,8 +234,8 @@ public class ProcessControllerTest {
         ProcessController process = TestFactory.create(tmp, "App7", false, "1");
         StateListener listener = StateListener.createFor(process);
 
-        // Start and wait until it terminates
-        listener.expect(ProcessState.RUNNING, ProcessState.STOPPED);
+        // Start and wait until it terminates - might not even reach RUNNING state.
+        listener.expect(ProcessState.RUNNING_NOT_STARTED, ProcessState.STOPPED);
         process.start(null);
         listener.await(TIMEOUT);
 

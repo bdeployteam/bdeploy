@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ApplicationConfiguration, ApplicationStartType, ProcessDetailDto, ProcessState } from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, ApplicationStartType, ProcessDetailDto, ProcessProbeResultDto, ProcessState } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -25,6 +25,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ stopping$ = new BehaviorSubject<boolean>(false);
   /* template */ restarting$ = new BehaviorSubject<boolean>(false);
   /* template */ isCrashedWaiting: boolean;
+  /* template */ isStopping: boolean;
   /* template */ isRunning: boolean;
   /* template */ processDetail: ProcessDetailDto;
   /* template */ processConfig: ApplicationConfiguration;
@@ -52,7 +53,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       ([detail, config, active]) => {
         this.clearIntervals();
         this.outdated$.next(false);
-        if (!detail) {
+        if (!detail || detail?.status?.appUid !== config?.uid) {
           return;
         }
         this.processDetail = detail;
@@ -60,6 +61,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         this.startType = this.formatStartType(this.processConfig?.processControl.startType);
         this.isCrashedWaiting = detail.status.processState === ProcessState.CRASHED_WAITING;
         this.isRunning = ProcessesService.isRunning(detail.status.processState);
+        this.isStopping = detail.status.processState === ProcessState.RUNNING_STOP_PLANNED;
 
         // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
         this.starting$.next(false);
@@ -111,6 +113,10 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       case ApplicationStartType.MANUAL_CONFIRM:
         return 'Confirmed Manual';
     }
+  }
+
+  /* template */ trackProbe(index: number, probe: ProcessProbeResultDto) {
+    return probe.type;
   }
 
   /* template */ start() {

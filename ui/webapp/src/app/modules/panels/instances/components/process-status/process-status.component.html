@@ -85,7 +85,7 @@
         <app-bd-button
           class="local-control-button"
           [collapsed]="false"
-          [disabled]="!(!(auth.isCurrentScopeWrite$ | async) || (performing$ | async) ? false : isRunning || isCrashedWaiting)"
+          [disabled]="!(!(auth.isCurrentScopeWrite$ | async) || (performing$ | async) ? false : (isRunning || isCrashedWaiting) && !isStopping)"
           (click)="stop()"
           matTooltip="Stop Application"
         >
@@ -109,6 +109,14 @@
       </div>
       <mat-divider></mat-divider>
       <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="10">
+        <app-bd-expand-button
+          *ngIf="!!processConfig?.processControl?.startupProbe?.endpoint || !!processConfig?.processControl?.startupProbe?.endpoint"
+          text="Process Probes"
+          icon="network_check"
+        >
+          <app-probe-status *ngFor="let probe of processDetail?.lastProbes; trackBy: trackProbe" [probe]="probe"></app-probe-status>
+          <app-bd-no-data *ngIf="!processDetail?.lastProbes?.length"> No Probe Information. </app-bd-no-data>
+        </app-bd-expand-button>
         <app-bd-panel-button
           [collapsed]="false"
           [toggle]="false"

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.processing.Generated;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.interfaces.configuration.dcu.EndpointsConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 
 /**
@@ -50,6 +51,11 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
      * The stop command should only exit once the application has exited.
      */
     public final List<String> stop = new ArrayList<>();
+
+    /**
+     * List of configured endpoints which are relevant for process control.
+     */
+    public EndpointsConfiguration endpoints = new EndpointsConfiguration();
 
     @Override
     public int compareTo(ProcessConfiguration o) {

@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -30,7 +31,10 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryManager;
+import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
@@ -41,12 +45,12 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 public class InstanceProcessController {
 
     /** States that indicate that the process is running */
-    private static final Set<ProcessState> SET_RUNNING = Sets.immutableEnumSet(ProcessState.RUNNING,
-            ProcessState.RUNNING_UNSTABLE);
+    private static final Set<ProcessState> SET_RUNNING = Sets
+            .immutableEnumSet(Arrays.stream(ProcessState.values()).filter(ProcessState::isRunning).toList());
 
-    /** States that indicate that the process is running or scheduled */
-    private static final Set<ProcessState> SET_RUNNING_SCHEDULED = Sets.immutableEnumSet(ProcessState.RUNNING,
-            ProcessState.RUNNING_UNSTABLE, ProcessState.CRASHED_WAITING);
+    /** States that indicate that the process is running or scheduled, sync with */
+    private static final Set<ProcessState> SET_RUNNING_SCHEDULED = Sets
+            .immutableEnumSet(Arrays.stream(ProcessState.values()).filter(ProcessState::isRunningOrScheduled).toList());
 
     private final MdcLogger logger = new MdcLogger(InstanceProcessController.class);
 
@@ -76,12 +80,13 @@ public class InstanceProcessController {
      *
      * @param pathProvider provides access to the special folders
      * @param resolver the resolver for variables
+     * @param inm the instance node manifest used for additional resolver lookups.
      * @param tag version of the configuration
      * @param groupConfig the process configuration
      * @param runtimeHistory optional {@link MinionRuntimeHistoryManager} to write to.
      */
-    public void createProcessControllers(DeploymentPathProvider pathProvider, VariableResolver resolver, String tag,
-            ProcessGroupConfiguration groupConfig, MinionRuntimeHistoryManager runtimeHistory) {
+    public void createProcessControllers(DeploymentPathProvider pathProvider, VariableResolver resolver, InstanceNodeManifest inm,
+            String tag, ProcessGroupConfiguration groupConfig, MinionRuntimeHistoryManager runtimeHistory) {
         try {
             writeLock.lock();
             // Create a new list if not yet existing for this tag
@@ -95,11 +100,16 @@ public class InstanceProcessController {
             for (ProcessConfiguration config : groupConfig.applications) {
                 Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
                 ProcessController controller = new ProcessController(groupConfig.uuid, tag, config, processDir);
-                controller.setVariableResolver(resolver);
+                CompositeResolver resolverWithApp = new CompositeResolver();
+                if (inm != null) {
+                    resolverWithApp.add(new ApplicationParameterValueResolver(config.uid, inm.getConfiguration()));
+                }
+                resolverWithApp.add(resolver);
+                controller.setVariableResolver(resolverWithApp);
 
                 if (runtimeHistory != null) {
                     controller.addStatusListener(event -> {
-                        // Do not record planned events
+                        // Do not record planned events and transitions.
                         if (event.newState == ProcessState.RUNNING_STOP_PLANNED) {
                             return;
                         }

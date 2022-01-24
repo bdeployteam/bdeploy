@@ -109,8 +109,12 @@ public class MinionDeployTest {
         /* STEP 6: run/control processes on the remote */
         master.getNamedMaster("demo").start(uuid, "app");
 
-        InstanceStatusDto status = master.getNamedMaster("demo").getStatus(uuid);
-        System.out.println(status);
+        InstanceStatusDto status;
+        do {
+            Thread.sleep(10);
+            status = master.getNamedMaster("demo").getStatus(uuid);
+        } while (status.getAppStatus("app").processState != ProcessState.RUNNING);
+
         assertTrue(status.isAppRunningOrScheduled("app"));
         assertEquals(ProcessState.RUNNING, status.node2Applications.get("master").getStatus("app").processState);
 

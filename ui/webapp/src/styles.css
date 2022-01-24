@@ -21,3 +21,7 @@ body {
 .error-snackbar {
   max-width: 100% !important;
 }
+
+.tooltip-with-newline {
+  white-space: pre-line;
+}

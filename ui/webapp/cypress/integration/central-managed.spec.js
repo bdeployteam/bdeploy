@@ -243,6 +243,13 @@ describe('Central/Managed Basic Test', function () {
       cy.contains('button', 'stop').should('be.enabled');
     });
 
+    cy.waitUntilContentLoaded();
+    cy.inMainNavContent(() => {
+      cy.contains('app-instance-server-node', 'master').within(() => {
+        cy.contains('app-bd-micro-icon-button', 'refresh').click();
+      });
+    });
+
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Another Server With Sleep').within(() => {
         cy.get('app-process-status-icon[data-cy="RUNNING"]').should('exist');

@@ -135,13 +135,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
     }
 
     private void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {
-        while (!isTerminatedState(stateSupplier.get())) {
+        while (!stateSupplier.get().isStopped()) {
             Threads.sleep(pollIntervalMs);
         }
-    }
-
-    private boolean isTerminatedState(ProcessState state) {
-        return ProcessState.STOPPED.equals(state) || ProcessState.CRASHED_PERMANENTLY.equals(state);
     }
 
     private Optional<ApplicationConfiguration> findAppConfig(ProcessStatusDto processStatusDto,

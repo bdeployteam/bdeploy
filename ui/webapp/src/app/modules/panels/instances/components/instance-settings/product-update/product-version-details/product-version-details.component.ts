@@ -19,8 +19,5 @@ export class ProductVersionDetailsComponent implements OnInit {
     for (const key of Object.keys(this.record.labels)) {
       this.labels.push({ a: key, b: this.record.labels[key] });
     }
-
-    console.log(this.record.labels);
-    console.log(this.labels);
   }
 }

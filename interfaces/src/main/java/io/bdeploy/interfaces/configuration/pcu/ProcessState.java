@@ -26,6 +26,16 @@ public enum ProcessState {
     RUNNING_UNSTABLE,
 
     /**
+     * OS process is running, but process did not report ready.
+     */
+    RUNNING_NOT_STARTED,
+
+    /**
+     * OS process is running, but the process no longer reports itself as alive.
+     */
+    RUNNING_NOT_ALIVE,
+
+    /**
      * Process is running.
      * Indicates that stopping is currently in progress or planned in near future.
      */
@@ -49,7 +59,10 @@ public enum ProcessState {
      * @return {@code true} if it is running
      */
     public boolean isRunning() {
-        return this == RUNNING || this == RUNNING_UNSTABLE || this == RUNNING_STOP_PLANNED;
+        // NOTE: for the back-end, NOT_ALIVE is running. this will be shown in the web UI as a distinct state but is
+        // otherwise CURRENTLY not treated specially.
+        return this == RUNNING || this == RUNNING_UNSTABLE || this == RUNNING_STOP_PLANNED || this == RUNNING_NOT_ALIVE
+                || this == RUNNING_NOT_STARTED;
     }
 
     /**
@@ -69,7 +82,7 @@ public enum ProcessState {
      * @return {@code true} if it is running
      */
     public boolean isRunningOrScheduled() {
-        return this == RUNNING || this == RUNNING_UNSTABLE || this == CRASHED_WAITING || this == RUNNING_STOP_PLANNED;
+        return isRunning() || this == CRASHED_WAITING;
     }
 
 }

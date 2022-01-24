@@ -114,7 +114,7 @@ export class ServerDetailsService implements OnDestroy {
       })
       .pipe(
         tap((v) => {
-          if (!isEqual(v, server.update.updateVersion)) {
+          if (!isEqual(v, server.update?.updateVersion)) {
             throw new Error(`Server is running but reports the wrong version: ${convert2String(v)}`);
           }
         }),

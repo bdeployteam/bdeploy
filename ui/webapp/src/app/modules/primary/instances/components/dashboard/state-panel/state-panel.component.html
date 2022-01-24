@@ -4,6 +4,7 @@
       fxLayout="row"
       fxLayoutGap="5px"
       [matTooltip]="item.tooltip ? (item.tooltip | async) : (item.name | async)"
+      matTooltipClass="tooltip-with-newline"
       [matTooltipShowDelay]="300"
       matTooltipPosition="above"
       [style.cursor]="item.click ? 'pointer' : null"

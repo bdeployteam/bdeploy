@@ -14,6 +14,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
   @HostBinding('attr.data-cy') dataCy: string;
 
   /* template */ icon$ = new BehaviorSubject<string>('help');
+  /* template */ svgIcon$ = new BehaviorSubject<string>(null);
   /* template */ hint$ = new BehaviorSubject<string>('Unknown');
   /* template */ class$ = new BehaviorSubject<string>('local-unknown');
 
@@ -41,7 +42,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
   private update(ps: { [key: string]: ProcessStatusDto }) {
     const state = ProcessesService.get(ps, this.record.uid);
     if (!state) {
-      this.next('help', 'Unknown', 'local-unknown');
+      this.next('help', null, 'Unknown', 'local-unknown');
       return;
     }
 
@@ -49,22 +50,27 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
 
     switch (state.processState) {
       case ProcessState.STOPPED:
-        return this.next('stop', 'Stopped', 'local-stopped');
+        return this.next('stop', null, 'Stopped', 'local-stopped');
+      case ProcessState.RUNNING_NOT_STARTED:
+        return this.next(null, 'start-scheduled', 'Process starting', 'local-running');
       case ProcessState.RUNNING:
-        return this.next('favorite', 'Running', 'local-running');
+        return this.next('favorite', null, 'Running', 'local-running');
       case ProcessState.RUNNING_UNSTABLE:
-        return this.next('favorite', 'Running (Recently Crashed)', 'local-crashed');
+        return this.next('favorite', null, 'Running (Recently Crashed)', 'local-crashed');
+      case ProcessState.RUNNING_NOT_ALIVE:
+        return this.next('heart_broken', null, 'Process lifeness probe reported a problem in the running process', 'local-crashed');
       case ProcessState.RUNNING_STOP_PLANNED:
-        return this.next('schedule', 'Running (Stop Planned)', 'local-running');
+        return this.next(null, 'stop-scheduled', 'Running (Stop Planned)', 'local-running');
       case ProcessState.CRASHED_WAITING:
-        return this.next('report_problem', 'Crashed (Restart pending)', 'local-crashed');
+        return this.next('report_problem', null, 'Crashed (Restart pending)', 'local-crashed');
       case ProcessState.CRASHED_PERMANENTLY:
-        return this.next('error', 'Crashed (Too many retries, stopped)', 'local-crashed');
+        return this.next('error', null, 'Crashed (Too many retries, stopped)', 'local-crashed');
     }
   }
 
-  private next(icon: string, hint: string, cls: string) {
+  private next(icon: string, svgIcon: string, hint: string, cls: string) {
     this.icon$.next(icon);
+    this.svgIcon$.next(svgIcon);
     this.hint$.next(hint);
     this.class$.next(cls);
   }

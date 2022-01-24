@@ -108,6 +108,8 @@ export class ProcessEditService {
         gracePeriod: application.descriptor.processControl.gracePeriod,
         keepAlive: application.descriptor.processControl.supportsKeepAlive,
         noOfRetries: application.descriptor.processControl.noOfRetries,
+        startupProbe: application.descriptor.processControl.startupProbe,
+        lifenessProbe: application.descriptor.processControl.lifenessProbe,
       },
       start: start,
       stop: stop,

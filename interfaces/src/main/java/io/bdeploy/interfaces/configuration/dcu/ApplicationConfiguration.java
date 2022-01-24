@@ -10,6 +10,8 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationPoolType;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointType;
 import io.bdeploy.interfaces.variables.SkipDelayed;
 import io.bdeploy.interfaces.variables.Variables;
 
@@ -74,6 +76,12 @@ public class ApplicationConfiguration {
         processConfig.uid = uid;
         processConfig.name = name;
         processConfig.processControl = processControl;
+
+        for (HttpEndpoint ep : endpoints.http) {
+            if (ep.type == HttpEndpointType.PROBE_ALIVE || ep.type == HttpEndpointType.PROBE_STARTUP) {
+                processConfig.endpoints.http.add(ep);
+            }
+        }
 
         String appManifestPath = Variables.MANIFEST_REFERENCE.format(application.toString());
         String path = valueResolver.apply(appManifestPath);

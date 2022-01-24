@@ -10,7 +10,9 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -36,8 +38,16 @@ import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessProbeResultDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessProbeResultDto.ProcessProbeType;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointType;
+import io.bdeploy.interfaces.descriptor.application.LifenessProbeDescriptor;
+import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
+import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Manages a single process.
@@ -81,13 +91,19 @@ public class ProcessController {
     private String lockTask = null;
 
     /** Executor used to schedule re-launching of application */
-    private ScheduledExecutorService executorService;
+    private final ScheduledExecutorService executorService;
 
     /** Task scheduled to monitor the up-time */
     private Future<?> uptimeTask;
 
     /** Task scheduled to start the application when crashed */
     private Future<?> recoverTask;
+
+    /** Task scheduled to monitor process startup probe */
+    private Future<?> startupTask;
+
+    /** Task scheduled to monitor process lifeness probe */
+    private Future<?> aliveTask;
 
     /** The native process. Only used to evaluate exit code */
     private Process process;
@@ -135,6 +151,9 @@ public class ProcessController {
     /** Replace variables used in the start/stop command and it's arguments */
     private VariableResolver variableResolver;
 
+    /** The results of the last probe calls */
+    private final Map<ProcessProbeType, ProcessProbeResultDto> lastProbeResults = new EnumMap<>(ProcessProbeType.class);
+
     /**
      * Creates a new process controller for the given configuration.
      *
@@ -155,6 +174,8 @@ public class ProcessController {
         this.processConfig = pc;
         this.recoverAttempts = pc.processControl.noOfRetries;
         this.processDir = processDir;
+        this.executorService = Executors.newSingleThreadScheduledExecutor(
+                new ThreadFactoryBuilder().setDaemon(true).setNameFormat(processConfig.uid).build());
     }
 
     @Override
@@ -285,6 +306,7 @@ public class ProcessController {
             dto.hasStdin = processStdin != null;
             dto.handle = ProcessControllerHelper.collectProcessInfo(processHandle);
         }
+        dto.lastProbes = new ArrayList<>(lastProbeResults.values());
         return dto;
     }
 
@@ -404,9 +426,8 @@ public class ProcessController {
         exitCode = null;
         stopTime = null;
         stopRequested = null;
-        if (recoverTask != null) {
-            recoverTask.cancel(false);
-        }
+
+        doCancelProbeTasks();
 
         try {
             process = launch(processConfig.start, false);
@@ -441,6 +462,9 @@ public class ProcessController {
         if (!processState.isRunning()) {
             return;
         }
+
+        doCancelProbeTasks();
+
         processState = ProcessState.RUNNING_STOP_PLANNED;
         logger.log(l -> l.info("Stopping planned for {}", processConfig.name));
     }
@@ -546,7 +570,7 @@ public class ProcessController {
         }
 
         // Cancel restart task and monitoring task
-        shutdownExecutor();
+        doCancelMonitorTasks();
     }
 
     /**
@@ -643,8 +667,8 @@ public class ProcessController {
 
         // Set to running if launched from stopped or crashed
         if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
-            processState = ProcessState.RUNNING;
-            logger.log(l -> l.info("Application status is now RUNNING."));
+            processState = ProcessState.RUNNING_NOT_STARTED;
+            logger.log(l -> l.info("Application status is now RUNNING_NOT_STARTED."));
         }
 
         // Schedule uptime monitor if launched from crashed waiting
@@ -664,6 +688,90 @@ public class ProcessController {
             String requiredUptime = ProcessControllerHelper.formatDuration(stableThreshold);
             logger.log(l -> l.info("Application will be marked as stable after: {}", requiredUptime));
         }
+
+        startupTask = executorService.scheduleWithFixedDelay(this::doCheckStarted, 500, 500, TimeUnit.MILLISECONDS);
+    }
+
+    private void doCheckStarted() {
+        StartupProbeDescriptor probe = processConfig.processControl.startupProbe;
+
+        executeLocked("Probe Startup", DEFAULT_USER, () -> {
+            boolean running = false;
+            if (probe == null) {
+                running = true;
+            } else {
+                Optional<HttpEndpoint> startupEp = processConfig.endpoints.http.stream()
+                        .filter(ep -> ep.id.equals(probe.endpoint)).findFirst();
+                if (startupEp.isEmpty() || startupEp.get().type != HttpEndpointType.PROBE_STARTUP) {
+                    logger.log(l -> l.warn("Application defined startup probe endpoint {} missing or has wrong type.",
+                            probe.endpoint));
+                    running = true; // no way to check.
+                } else {
+                    running = doProbe(ProcessProbeType.STARTUP, startupEp.get());
+                }
+            }
+
+            if (running) {
+                var oldState = processState;
+                processState = oldState == ProcessState.RUNNING_UNSTABLE ? ProcessState.RUNNING_UNSTABLE : ProcessState.RUNNING;
+                logger.log(l -> l.info("Application status is now {}, was {}.", processState, oldState));
+
+                LifenessProbeDescriptor lifeness = processConfig.processControl.lifenessProbe;
+                if (lifeness != null) {
+                    Optional<HttpEndpoint> aliveEp = processConfig.endpoints.http.stream()
+                            .filter(ep -> ep.id.equals(lifeness.endpoint)).findFirst();
+                    if (aliveEp.isEmpty() || aliveEp.get().type != HttpEndpointType.PROBE_ALIVE) {
+                        logger.log(l -> l.warn("Application defined lifeness probe endpoint {} missing or has wrong type.",
+                                lifeness.endpoint));
+                    } else {
+                        aliveTask = executorService.scheduleWithFixedDelay(this::doCheckAlive, lifeness.initialDelaySeconds,
+                                lifeness.periodSeconds, TimeUnit.SECONDS);
+                    }
+                }
+
+                startupTask.cancel(false);
+                startupTask = null;
+            }
+        });
+    }
+
+    private void doCheckAlive() {
+        LifenessProbeDescriptor probe = processConfig.processControl.lifenessProbe;
+        Optional<HttpEndpoint> aliveEp = processConfig.endpoints.http.stream().filter(ep -> ep.id.equals(probe.endpoint))
+                .findFirst();
+
+        executeLocked("Probe Alive", DEFAULT_USER, () -> {
+            boolean alive = doProbe(ProcessProbeType.LIFENESS, aliveEp.get());
+
+            if (processState == ProcessState.RUNNING && !alive) {
+                processState = ProcessState.RUNNING_NOT_ALIVE;
+            } else if (processState == ProcessState.RUNNING_NOT_ALIVE && alive) {
+                processState = ProcessState.RUNNING;
+            }
+        });
+    }
+
+    private boolean doProbe(ProcessProbeType type, HttpEndpoint ep) {
+        if (ep == null) {
+            logger.log(l -> l.error("Null endpoint to probe {}", type));
+            return false;
+        }
+
+        try {
+            HttpEndpoint processed = CommonEndpointHelper.processEndpoint(variableResolver, ep);
+            Response rs = CommonEndpointHelper.initClient(processed).request().get();
+
+            String resp = rs.hasEntity() ? rs.readEntity(String.class) : "Empty Response";
+            int status = rs.getStatus();
+
+            lastProbeResults.put(type, new ProcessProbeResultDto(type, status, resp, System.currentTimeMillis()));
+
+            // defined as "OK" by kubernetes as well.
+            return status >= 200 && status < 400;
+        } catch (Exception e) {
+            lastProbeResults.put(type, new ProcessProbeResultDto(type, 500, e.toString(), System.currentTimeMillis()));
+            return false;
+        }
     }
 
     /** Callback method that is executed when the process terminates */
@@ -671,6 +779,8 @@ public class ProcessController {
         stopTime = Instant.now();
         Duration uptime = Duration.between(startTime, stopTime);
         String uptimeString = ProcessControllerHelper.formatDuration(uptime);
+
+        doCancelProbeTasks();
 
         // Try to evaluate the exit code
         exitCode = ProcessControllerHelper.getExitCode(process);
@@ -719,12 +829,6 @@ public class ProcessController {
         Duration delay = recoverDelays[Math.min(recoverCount, recoverDelays.length - 1)];
         processState = ProcessState.CRASHED_WAITING;
 
-        // Schedule restarting of application
-        if (executorService == null) {
-            executorService = Executors.newSingleThreadScheduledExecutor(
-                    new ThreadFactoryBuilder().setDaemon(true).setNameFormat(processConfig.uid).build());
-        }
-
         // Schedule restarting of application based on configured delay
         Runnable task = () -> executeLocked("Restart", DEFAULT_USER, this::doRestart);
         if (delay.isZero()) {
@@ -743,7 +847,7 @@ public class ProcessController {
         if (processState == ProcessState.STOPPED) {
             logger.log(l -> l.info("Application has been stopped while in crash-back-off. Doing nothing."));
             return;
-        } else if (processState == ProcessState.RUNNING || processState == ProcessState.RUNNING_UNSTABLE) {
+        } else if (processState.isRunning()) {
             logger.log(l -> l.info("Application has been started while in crash-back-off. Doing nothing."));
             return;
         }
@@ -766,13 +870,14 @@ public class ProcessController {
             if (!now.isAfter(stableAfter)) {
                 return;
             }
-            shutdownExecutor();
 
             // Reset counter and set application to stable
             recoverCount = 0;
             processState = ProcessState.RUNNING;
             logger.log(l -> l.info("Uptime threshold reached. Marking as stable again."));
             logger.log(l -> l.info("Application status is now RUNNING."));
+
+            doCancelMonitorTasks();
         });
     }
 
@@ -922,8 +1027,8 @@ public class ProcessController {
         return stopped;
     }
 
-    /** Closes the executor so that the resources are released */
-    private void shutdownExecutor() {
+    /** Cancels potentially running recovery and uptime monitoring tasks */
+    private void doCancelMonitorTasks() {
         if (recoverTask != null) {
             recoverTask.cancel(true);
             recoverTask = null;
@@ -932,9 +1037,19 @@ public class ProcessController {
             uptimeTask.cancel(true);
             uptimeTask = null;
         }
-        if (executorService != null) {
-            executorService.shutdown();
-            executorService = null;
+    }
+
+    /** Cancels potentially running startup and alive probe tasks */
+    private void doCancelProbeTasks() {
+        lastProbeResults.clear();
+
+        if (startupTask != null) {
+            startupTask.cancel(true);
+            startupTask = null;
+        }
+        if (aliveTask != null) {
+            aliveTask.cancel(true);
+            aliveTask = null;
         }
     }
 

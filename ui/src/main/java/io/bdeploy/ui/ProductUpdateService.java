@@ -79,6 +79,10 @@ public class ProductUpdateService {
             app.application = target.get().getKey();
             app.pooling = targetDesc.pooling;
 
+            // update process control data - this is not configurable by user.
+            app.processControl.startupProbe = targetDesc.processControl.startupProbe;
+            app.processControl.lifenessProbe = targetDesc.processControl.lifenessProbe;
+
             if (app.start != null && app.start.parameters != null && !app.start.parameters.isEmpty()) {
                 // update existing parameter order (just the order)
                 app.start.parameters = reorderParameters(app.start.parameters, targetDesc.startCommand.parameters);
@@ -168,7 +172,10 @@ public class ProductUpdateService {
         for (var desc : descriptors) {
             var val = values.stream().filter(e -> e.id.equals(desc.id)).findFirst();
             if (val.isPresent()) {
-                result.add(val.get());
+                HttpEndpoint ep = val.get();
+                ep.path = desc.path;
+                ep.type = desc.type;
+                result.add(ep);
             } else {
                 result.add(desc);
             }

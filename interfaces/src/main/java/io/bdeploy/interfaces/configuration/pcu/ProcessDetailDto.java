@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.configuration.pcu;
 
+import java.util.List;
+
 /**
  * DTO provided by the PCU with detailed information about a given process and its children.
  */
@@ -28,5 +30,8 @@ public class ProcessDetailDto {
 
     /** Details about the process and its children */
     public ProcessHandleDto handle;
+
+    /** Details about the last probes against the process */
+    public List<ProcessProbeResultDto> lastProbes;
 
 }

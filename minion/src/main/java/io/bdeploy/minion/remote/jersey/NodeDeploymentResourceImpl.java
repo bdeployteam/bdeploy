@@ -92,7 +92,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
             // Notify that there is a new deployment
             MinionProcessController processController = root.getProcessController();
             InstanceProcessController controller = processController.getOrCreate(hive, inm);
-            controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm.getKey().getTag(),
+            controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, inm.getKey().getTag(),
                     inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
         }
     }

@@ -75,7 +75,7 @@ export class ServerDetailsComponent implements OnInit {
         return;
       }
       this.server = server;
-      this.version = convert2String(server.update.updateVersion);
+      this.version = convert2String(server.update?.updateVersion);
       this.minions = this.getMinionRecords(server);
     });
   }

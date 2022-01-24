@@ -53,6 +53,8 @@ export class ConfigService {
     iconRegistry.addSvgIcon('group-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/group-settings.svg'));
     iconRegistry.addSvgIcon('instance-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg'));
     iconRegistry.addSvgIcon('repository-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/repository-settings.svg'));
+    iconRegistry.addSvgIcon('start-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg'));
+    iconRegistry.addSvgIcon('stop-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
 
     iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
     iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));

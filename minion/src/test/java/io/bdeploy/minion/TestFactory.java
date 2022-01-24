@@ -3,6 +3,7 @@ package io.bdeploy.minion;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -33,6 +34,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -132,7 +134,15 @@ public class TestFactory {
         cfg.start = new CommandConfiguration();
         cfg.start.executable = amf.getDescriptor().startCommand.launcherPath;
         cfg.application = amf.getKey();
-        cfg.processControl = ProcessControlConfiguration.createDefault();
+
+        ProcessControlConfiguration processControlCfg = new ProcessControlConfiguration();
+        processControlCfg.startType = ApplicationStartType.MANUAL;
+        processControlCfg.keepAlive = false;
+        processControlCfg.noOfRetries = 3;
+        processControlCfg.gracePeriod = Duration.ofSeconds(30).toMillis();
+        processControlCfg.attachStdin = false;
+
+        cfg.processControl = processControlCfg;
         cfg.endpoints.http.addAll(amf.getDescriptor().endpoints.http);
 
         /* STEP 1d: configure parameters, usually in the UI based on information from the application descriptor */
@@ -154,7 +164,7 @@ public class TestFactory {
         clientCfg.start = new CommandConfiguration();
         clientCfg.start.executable = camf.getDescriptor().startCommand.launcherPath;
         clientCfg.application = camf.getKey();
-        clientCfg.processControl = ProcessControlConfiguration.createDefault();
+        clientCfg.processControl = processControlCfg;
 
         /* STEP 1g: reuse parameters for client */
         clientCfg.start.parameters.add(sleepParam);

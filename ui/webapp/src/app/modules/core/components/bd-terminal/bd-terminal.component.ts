@@ -34,7 +34,17 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {}
+
+  ngAfterViewInit() {
+    this.term.underlying.attachCustomKeyEventHandler((event) => {
+      // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
+      // and default Ctrl-C/X has nothing to copy) and Ctrl-V
+      return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
+    });
+
+    this.term.underlying.setOption('fontSize', 12);
+
     this.content$.subscribe((content) => {
       if (this.allowInput) {
         this.clearInput();
@@ -45,16 +55,7 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateInput();
       }
     });
-  }
 
-  ngAfterViewInit() {
-    this.term.underlying.attachCustomKeyEventHandler((event) => {
-      // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
-      // and default Ctrl-C/X has nothing to copy) and Ctrl-V
-      return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
-    });
-
-    this.term.underlying.setOption('fontSize', 12);
     this.setupStdin();
   }
 
@@ -69,6 +70,9 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Make sure that *all* linebreaks are \r\n */
   private prepareLinebreaks(s: string): string {
+    if (!s) {
+      return '';
+    }
     return s.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
   }
 
@@ -188,6 +192,6 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Clears all existing content in the terminal */
   public clear() {
-    this.term.underlying.clear();
+    this.term.underlying.reset();
   }
 }

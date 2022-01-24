@@ -1,0 +1,12 @@
+.local-good {
+  color: var(--bd-text-success);
+}
+
+.local-bad {
+  color: var(--bd-warn);
+}
+
+.local-wrapper {
+  height: 48px;
+  margin: 0px 10px;
+}

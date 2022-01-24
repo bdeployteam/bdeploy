@@ -4,6 +4,13 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 public class HttpEndpoint {
 
+    public enum HttpEndpointType {
+        @JsonEnumDefaultValue
+        DEFAULT,
+        PROBE_STARTUP,
+        PROBE_ALIVE,
+    }
+
     public enum HttpAuthenticationType {
         @JsonEnumDefaultValue
         NONE,
@@ -66,5 +73,10 @@ public class HttpEndpoint {
      * The password to use to perform authentication of any request
      */
     public String authPass;
+
+    /**
+     * The type of the endpoint.
+     */
+    public HttpEndpointType type = HttpEndpointType.DEFAULT;
 
 }

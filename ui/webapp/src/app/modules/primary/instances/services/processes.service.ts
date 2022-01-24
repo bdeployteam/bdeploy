@@ -31,7 +31,13 @@ export class ProcessesService {
   }
 
   public static isRunning(status: ProcessState) {
-    return status === ProcessState.RUNNING || status === ProcessState.RUNNING_STOP_PLANNED || status === ProcessState.RUNNING_UNSTABLE;
+    return (
+      status === ProcessState.RUNNING ||
+      status === ProcessState.RUNNING_NOT_STARTED ||
+      status === ProcessState.RUNNING_STOP_PLANNED ||
+      status === ProcessState.RUNNING_UNSTABLE ||
+      status === ProcessState.RUNNING_NOT_ALIVE
+    );
   }
 
   public static getPort(states: { [key: number]: boolean }, port: number): boolean {
