@@ -61,23 +61,17 @@ describe('Instance Settings Tests', () => {
     cy.screenshot('Doc_InstanceTemplatesNodes');
 
     cy.inMainNavFlyin('app-instance-templates', () => {
-      cy.contains('app-bd-notification-card', 'Assign Template').within(() => {
-        cy.fillFormSelect('Server Apps', 'Apply to master');
-        cy.fillFormSelect('Client Apps', '(skip)');
-
-        cy.get('button[data-cy="Confirm"]').click();
-      });
+      cy.fillFormSelect('Server Apps', 'Apply to master');
+      cy.fillFormSelect('Client Apps', '(skip)');
+      cy.get('button[data-cy="Next"]').click();
     });
 
     cy.screenshot('Doc_InstanceTemplatesVars');
 
     cy.inMainNavFlyin('app-instance-templates', () => {
-      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
-        cy.fillFormInput('Text Value', 'Test Text');
-        cy.fillFormInput('Sleep Timeout', '5');
-
-        cy.get('button[data-cy="Confirm"]').click();
-      });
+      cy.fillFormInput('Text Value', 'Test Text');
+      cy.fillFormInput('Sleep Timeout', '5');
+      cy.get('button[data-cy="Confirm"]').click();
     });
 
     cy.inMainNavContent(() => {

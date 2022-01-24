@@ -1,11 +1,12 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { MatStepper } from '@angular/material/stepper';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import { ApplicationType, InstanceTemplateDescriptor, InstanceTemplateGroup, ProductDto, TemplateApplication } from 'src/app/models/gen.dtos';
-import { ACTION_CANCEL, ACTION_CONFIRM, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -67,11 +68,12 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   /* template */ groups: { [key: string]: string }; // key is group name, value is target node name.
   /* template */ messages: TemplateMessage[];
   /* template */ msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
+  /* template */ isAnyGroupSelected = false;
+  /* template */ hasAllVariables = false;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild('groupTemplate') private tplGroupMapping: TemplateRef<any>;
-  @ViewChild('varTemplate') private tplVariables: TemplateRef<any>;
   @ViewChild('msgTemplate') private tplMessages: TemplateRef<any>;
+  @ViewChild('stepper', { static: false }) private myStepper: MatStepper;
 
   private product: ProductDto;
   private subscription: Subscription;
@@ -118,24 +120,29 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     });
   }
 
-  private validateAnyGroupSelected(): boolean {
+  public validateAnyGroupSelected() {
     for (const k of Object.keys(this.groups)) {
       const v = this.groups[k];
       if (v !== null && v !== undefined) {
-        return true;
+        this.isAnyGroupSelected = true;
+        return;
       }
     }
-    return false;
+    this.isAnyGroupSelected = false;
   }
 
-  private validateHasAllVariables() {
+  public validateHasAllVariables() {
+    if (!this.template) {
+      return;
+    }
     for (const v of this.template.variables) {
       const value = this.variables[v.uid];
-      if (value === null || value === undefined) {
-        return false;
+      if (value === '' || value === null || value === undefined) {
+        this.hasAllVariables = false;
+        return;
       }
     }
-    return true;
+    this.hasAllVariables = true;
   }
 
   private apply(template: InstanceTemplateDescriptor) {
@@ -153,45 +160,21 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         this.variables[v.uid] = v.defaultValue;
       }
     }
-
-    this._applyStageGroups();
+    this.validateAnyGroupSelected();
+    this.goNext();
   }
 
-  private _applyStageGroups() {
-    this.dialog
-      .message({
-        header: 'Assign Template Groups',
-        template: this.tplGroupMapping,
-        actions: [ACTION_CANCEL, ACTION_CONFIRM],
-        validation: () => this.validateAnyGroupSelected(),
-      })
-      .subscribe((c) => {
-        if (!c) {
-          return;
-        }
-
-        this._applyStageVars();
-      });
+  /* template */ goToAssignVariableStep() {
+    this.validateHasAllVariables();
+    this.goNext();
   }
 
-  private _applyStageVars() {
-    this.dialog
-      .message({
-        header: 'Assign Variable Values',
-        template: this.tplVariables,
-        actions: [ACTION_CANCEL, ACTION_CONFIRM],
-        validation: () => this.validateHasAllVariables(),
-      })
-      .subscribe((c) => {
-        if (!c) {
-          return;
-        }
-
-        this._applyStageFinal();
-      });
+  private goNext(isLastStep = false) {
+    this.myStepper.selected.completed = true;
+    isLastStep ? this.myStepper.reset() : this.myStepper.next();
   }
 
-  private _applyStageFinal() {
+  public applyStageFinal() {
     this.loading$.next(true);
     this.messages = [];
     const observables = [];
@@ -301,6 +284,8 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             dismissResult: null,
             actions: [ACTION_CANCEL, ACTION_OK],
           });
+        } else {
+          this.goNext(true);
         }
 
         applyResult.subscribe((r) => {
