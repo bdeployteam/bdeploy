@@ -18,8 +18,8 @@ export interface SeriesElement {
 export class MetricsOverviewComponent implements OnInit {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ keys$ = new BehaviorSubject<string[]>(['SERVER']);
+  /* template */ selectedTabIndex = 0;
 
-  selection: string;
   allMetrics: Map<MetricGroup, MetricBundle>;
   selectedGroup: MetricGroup;
   groupCounts: SeriesElement[];
@@ -67,7 +67,8 @@ export class MetricsOverviewComponent implements OnInit {
 
           this.allMetrics.set(group, item);
         }
-        this.keys$.next([...Array.from(this.allMetrics.keys()), 'SERVER']);
+        this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
+        this.doSelect(this.keys$.value[0]);
       });
   }
 
@@ -83,11 +84,11 @@ export class MetricsOverviewComponent implements OnInit {
     return this.allMetrics.get(group).timers[name];
   }
 
-  doSelect() {
-    if (this.selection === 'SERVER') {
+  doSelect(selection) {
+    if (selection === 'SERVER') {
       this.selectServer();
     } else {
-      this.select();
+      this.select(selection);
     }
   }
 
@@ -261,7 +262,7 @@ export class MetricsOverviewComponent implements OnInit {
     });
   }
 
-  private select() {
+  private select(selection) {
     this.serverStats = null;
     this.selectedTimer = null;
     this.selectedTimerName = null;
@@ -269,7 +270,7 @@ export class MetricsOverviewComponent implements OnInit {
     this.timerSeries = null;
     this.referenceLines = null;
 
-    this.selectedGroup = MetricGroup[this.selection];
+    this.selectedGroup = MetricGroup[selection];
 
     const x: SeriesElement[] = [];
 
