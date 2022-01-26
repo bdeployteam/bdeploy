@@ -1,33 +1,3 @@
-<!-- Dialog to choose group assignment to nodes. -->
-<ng-template #groupTemplate>
-  <div>Instance Templates can contain multiple groups of applications. These groups can be assigned to compatible target nodes.</div>
-  <ng-container *ngFor="let group of template.groups">
-    <app-bd-form-select
-      [label]="'Group \'' + group.name + '\''"
-      [matTooltip]="group.description"
-      [attr.name]="group.name"
-      [(ngModel)]="groups[group.name]"
-      [values]="group.nodes"
-      [labels]="group.labels"
-    ></app-bd-form-select>
-  </ng-container>
-</ng-template>
-
-<!-- Dialog to choose variable values. -->
-<ng-template #varTemplate>
-  <div>Please provide required values for the selected template.</div>
-  <ng-container *ngFor="let v of template?.variables">
-    <app-bd-form-input
-      [(ngModel)]="variables[v.uid]"
-      [attr.name]="v.name"
-      [label]="v.name"
-      [matTooltip]="v.description"
-      [suggested]="v.suggestedValues"
-      required
-    ></app-bd-form-input>
-  </ng-container>
-</ng-template>
-
 <!-- Dialog which shows result messages if there are any. -->
 <ng-template #msgTemplate>
   <div fxLayout="column" fxLayoutGap="5px">
@@ -41,10 +11,57 @@
   <app-bd-dialog-toolbar header="Instance Templates" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized">
-      <div>
-        You can apply instance templates to the current instance by choosing below. An instance template will create and configure all required processes.
-      </div>
-      <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
+      <mat-stepper #stepper [linear]="true" orientation="vertical">
+        <mat-step label="Apply instance templates">
+          <div class="instance-templates-top-space">
+            <div>
+              You can apply instance templates to the current instance by choosing below. An instance template will create and configure all required processes.
+            </div>
+            <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
+          </div>
+        </mat-step>
+        <mat-step label="Assign Template Groups">
+          <div class="instance-templates-top-space">
+            <div>Instance Templates can contain multiple groups of applications. These groups can be assigned to compatible target nodes.</div>
+            <div class="instance-templates-top-space">
+              <ng-container *ngFor="let group of template?.groups">
+                <app-bd-form-select
+                  [label]="'Group \'' + group.name + '\''"
+                  [matTooltip]="group.description"
+                  [attr.name]="group.name"
+                  [(ngModel)]="groups[group.name]"
+                  [values]="group.nodes"
+                  [labels]="group.labels"
+                  (ngModelChange)="validateAnyGroupSelected()"
+                ></app-bd-form-select>
+              </ng-container>
+              <app-bd-button
+                [collapsed]="false"
+                color="primary"
+                text="Next"
+                (click)="goToAssignVariableStep()"
+                [disabled]="!isAnyGroupSelected"
+              ></app-bd-button>
+            </div>
+          </div>
+        </mat-step>
+        <mat-step label="Assign Variable Values">
+          <div class="instance-templates-top-space">
+            <ng-container *ngFor="let v of template?.variables">
+              <app-bd-form-input
+                [(ngModel)]="variables[v.uid]"
+                [attr.name]="v.name"
+                [label]="v.name"
+                [matTooltip]="v.description"
+                [suggested]="v.suggestedValues"
+                required
+                (ngModelChange)="validateHasAllVariables()"
+              ></app-bd-form-input>
+            </ng-container>
+            <app-bd-button [collapsed]="false" color="primary" text="Confirm" (click)="applyStageFinal()" [disabled]="!hasAllVariables"></app-bd-button>
+          </div>
+        </mat-step>
+      </mat-stepper>
     </div>
     <ng-template #currentInstanceIsNotSynchronized>
       <app-bd-notification-card icon="history" [warning]="true" [dismissable]="false" header="Server Not Synchronized">

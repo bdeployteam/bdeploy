@@ -57,7 +57,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.inMainNavContent(() => {
-      cy.pressToolbarButton('Test Auth.');
+      cy.pressToolbarButton('Test Authentication...');
     });
 
     cy.inMainNavFlyin('app-auth-test', () => {

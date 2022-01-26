@@ -11,7 +11,7 @@
       ></app-bd-panel-button>
     </ng-container>
     <ng-container *ngIf="generalTab.isActive || ldapTab.isActive">
-      <app-bd-panel-button [collapsed]="false" color="primary" text="Test Auth..." icon="add" [route]="['panels', 'admin', 'auth-test']"></app-bd-panel-button>
+      <app-bd-panel-button [collapsed]="false" color="primary" text="Test Authentication..." [route]="['panels', 'admin', 'auth-test']"></app-bd-panel-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="attributeTab.isActive">

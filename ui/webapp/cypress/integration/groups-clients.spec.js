@@ -43,18 +43,13 @@ describe('Groups Tests (Clients)', () => {
           cy.get('button').click();
         });
 
-      cy.contains('app-bd-notification-card', 'Assign Template').within(() => {
-        cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
+      cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
+      cy.get('button[data-cy="Next"]').click();
 
-        cy.get('button[data-cy="Confirm"]').click();
-      });
+      cy.fillFormInput('Text Value', 'Test');
+      cy.fillFormInput('Sleep Timeout', '5');
 
-      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
-        cy.fillFormInput('Text Value', 'Test');
-        cy.fillFormInput('Sleep Timeout', '5');
-
-        cy.get('button[data-cy="Confirm"]').click();
-      });
+      cy.get('button[data-cy="Confirm"]').click();
     });
 
     cy.inMainNavContent(() => {
