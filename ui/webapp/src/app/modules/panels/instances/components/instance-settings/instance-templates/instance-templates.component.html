@@ -11,17 +11,24 @@
   <app-bd-dialog-toolbar header="Instance Templates" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized">
-      <mat-stepper #stepper [linear]="true" orientation="vertical">
-        <mat-step label="Apply instance templates">
+      <mat-stepper #stepper [linear]="true" orientation="vertical" (selectionChange)="onStepSelectionChange($event)">
+        <mat-step label="Apply instance templates" [completed]="firstStepCompleted">
           <div class="instance-templates-top-space">
             <div>
               You can apply instance templates to the current instance by choosing below. An instance template will create and configure all required processes.
             </div>
-            <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
+            <app-bd-form-select
+              [values]="records"
+              [labels]="recordsLabel"
+              [(ngModel)]="template"
+              (ngModelChange)="selectTemplate()"
+              label="Template"
+              name="Template"
+            ></app-bd-form-select>
           </div>
         </mat-step>
-        <mat-step label="Assign Template Groups">
-          <div class="instance-templates-top-space">
+        <mat-step label="Assign Template Groups" [completed]="secondStepCompleted">
+          <div class="instance-templates-top-space" *ngIf="firstStepCompleted">
             <div>Instance Templates can contain multiple groups of applications. These groups can be assigned to compatible target nodes.</div>
             <div class="instance-templates-top-space">
               <ng-container *ngFor="let group of template?.groups">
@@ -45,10 +52,11 @@
             </div>
           </div>
         </mat-step>
-        <mat-step label="Assign Variable Values">
+        <mat-step label="Assign Variable Values" [completed]="firstStepCompleted && secondStepCompleted">
           <div class="instance-templates-top-space">
             <ng-container *ngFor="let v of template?.variables">
               <app-bd-form-input
+                *ngIf="firstStepCompleted && secondStepCompleted"
                 [(ngModel)]="variables[v.uid]"
                 [attr.name]="v.name"
                 [label]="v.name"

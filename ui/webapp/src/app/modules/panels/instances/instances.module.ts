@@ -20,6 +20,7 @@ import { ConfigDescCardsComponent } from './components/config-desc-cards/config-
 import { ConfigDescElementComponent } from './components/config-desc-element/config-desc-element.component';
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
+import { DataFilesBulkManipulationComponent } from './components/data-files-buld-maipulation/data-files-bulk-manipulation.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigProcessHeaderComponent } from './components/edit-process-overview/configure-process/config-process-header/config-process-header.component';
 import { ConfigProcessParamGroupComponent } from './components/edit-process-overview/configure-process/config-process-param-group/config-process-param-group.component';
@@ -130,6 +131,7 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
     ColorSelectComponent,
     ColorSelectGroupComponent,
     ProductVersionDetailsComponent,
+    DataFilesBulkManipulationComponent,
   ],
   imports: [
     CommonModule,

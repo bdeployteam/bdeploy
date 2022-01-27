@@ -1,6 +1,5 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
@@ -63,7 +62,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(public settings: SettingsService, private router: Router, private areas: NavAreasService) {}
+  constructor(public settings: SettingsService, private areas: NavAreasService) {}
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {

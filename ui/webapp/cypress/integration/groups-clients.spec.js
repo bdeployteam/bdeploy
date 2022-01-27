@@ -37,11 +37,7 @@ describe('Groups Tests (Clients)', () => {
     cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-instance-templates', () => {
-      cy.contains('tr', 'Default Configuration')
-        .should('exist')
-        .within(() => {
-          cy.get('button').click();
-        });
+      cy.fillFormSelect('Template', 'Default Configuration');
 
       cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
       cy.get('button[data-cy="Next"]').click();

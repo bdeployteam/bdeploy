@@ -10,6 +10,7 @@ import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-m
 import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
+import { DataFilesBulkManipulationComponent } from './components/data-files-buld-maipulation/data-files-bulk-manipulation.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
@@ -56,6 +57,7 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'settings/product', component: ProductUpdateComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/config-files', component: ConfigFilesComponent, canActivate: [ScopedWriteGuard], data: { max: true } },
   { path: 'settings/config-files/:file', component: EditorComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard], data: { max: true } },
+  { path: 'data-files/bulk-manip', component: DataFilesBulkManipulationComponent, canActivate: [ScopedWriteGuard] },
   {
     path: 'settings/config-files/compare/:file',
     component: CompareComponent,

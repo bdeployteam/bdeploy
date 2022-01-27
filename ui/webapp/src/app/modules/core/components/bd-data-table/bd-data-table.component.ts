@@ -239,6 +239,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     if ((!!changes['records'] && !changes['records'].isFirstChange()) || (!!changes['grouping'] && !changes['grouping'].isFirstChange())) {
       this.update();
     }
+
+    if (!!changes['checked'] && changes.checked.currentValue.length === 0) {
+      this.checkSelection.clear();
+    }
   }
 
   ngAfterViewInit(): void {

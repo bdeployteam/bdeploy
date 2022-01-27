@@ -240,6 +240,30 @@ describe('Instance Data Files Tests', () => {
     });
   });
 
+  it('Checks bulk manipulation', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Data Files');
+
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Bulk Manipulation');
+      cy.contains('tr', 'test.txt').within(() => {
+        cy.get('input[type="checkbox"]').check({ force: true });
+      });
+    });
+
+    cy.inMainNavFlyin('app-data-files-bulk-manipulation', () => {
+      cy.get('button[data-cy="Delete Selected Data Files"]').should('be.enabled').click();
+    });
+
+    cy.contains('app-bd-notification-card', 'Delete 1 data files?').within(() => {
+      cy.fillFormInput('confirm', 'I UNDERSTAND');
+      cy.get('button[data-cy="Yes"]').should('be.enabled').click();
+      cy.contains('tr', 'test.txt').should('not.exist');
+    });
+  });
+
   it('Cleans up', () => {
     cy.deleteGroup(groupName);
   });

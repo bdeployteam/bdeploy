@@ -11,6 +11,7 @@ import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-in
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ServersService } from '../../../servers/services/servers.service';
+import { DataFilesBulkService } from '../../services/data-files-bulk.service';
 import { DataFilesService } from '../../services/data-files.service';
 import { InstancesService } from '../../services/instances.service';
 
@@ -95,8 +96,9 @@ export class DataFilesComponent implements OnInit, OnDestroy {
     public cfg: ConfigService,
     public instances: InstancesService,
     public servers: ServersService,
-    private df: DataFilesService,
-    public authService: AuthenticationService
+    public df: DataFilesService,
+    public authService: AuthenticationService,
+    public dataFilesBulkService: DataFilesBulkService
   ) {}
 
   ngOnInit(): void {

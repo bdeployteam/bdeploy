@@ -39,7 +39,6 @@ describe('Instance Settings Tests', () => {
     cy.screenshot('Doc_InstanceTemplates');
 
     cy.inMainNavFlyin('app-instance-templates', () => {
-      cy.contains('tr', 'Default Configuration').should('exist');
       cy.pressToolbarButton('Back to Overview');
     });
 
@@ -51,11 +50,7 @@ describe('Instance Settings Tests', () => {
     cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-instance-templates', () => {
-      cy.contains('tr', 'Default Configuration')
-        .should('exist')
-        .within(() => {
-          cy.get('button').click();
-        });
+      cy.fillFormSelect('Template', 'Default Configuration');
     });
 
     cy.screenshot('Doc_InstanceTemplatesNodes');

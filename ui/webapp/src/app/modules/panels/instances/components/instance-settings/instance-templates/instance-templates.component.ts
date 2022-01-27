@@ -1,3 +1,4 @@
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
@@ -37,31 +38,16 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
   width: '36px',
 };
 
-const colName: BdDataColumn<InstanceTemplateDescriptor> = {
-  id: 'name',
-  name: 'Name',
-  data: (r) => r.name,
-};
-
 @Component({
   selector: 'app-instance-templates',
   templateUrl: './instance-templates.component.html',
   styleUrls: ['./instance-templates.component.css'],
 })
 export class InstanceTemplatesComponent implements OnInit, OnDestroy {
-  private colApply: BdDataColumn<InstanceTemplateDescriptor> = {
-    id: 'apply',
-    name: 'Apply',
-    icon: (r) => 'auto_fix_high',
-    action: (r) => this.apply(r),
-    data: (r) => r.description,
-    width: '36px',
-  };
-
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ records$ = new BehaviorSubject<InstanceTemplateDescriptor[]>([]);
-  /* template */ columns: BdDataColumn<InstanceTemplateDescriptor>[] = [colName, this.colApply];
+  /* template */ records: InstanceTemplateDescriptor[];
+  /* template */ recordsLabel: string[];
 
   /* template */ template;
   /* template */ variables: { [key: string]: string }; // key is var name, value is value.
@@ -70,6 +56,8 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   /* template */ msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
   /* template */ isAnyGroupSelected = false;
   /* template */ hasAllVariables = false;
+  /* template */ firstStepCompleted = false;
+  /* template */ secondStepCompleted = false;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('msgTemplate') private tplMessages: TemplateRef<any>;
@@ -83,12 +71,13 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       const prod = prods?.find((p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag);
 
       if (!prod) {
-        this.records$.next([]);
+        this.records = [];
         return;
       }
 
       this.product = prod;
-      this.records$.next(prod.instanceTemplates ? prod.instanceTemplates : []);
+      this.records = prod.instanceTemplates ? prod.instanceTemplates : [];
+      this.recordsLabel = this.records.map((record) => record.name);
     });
   }
 
@@ -145,33 +134,34 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     this.hasAllVariables = true;
   }
 
-  private apply(template: InstanceTemplateDescriptor) {
+  /* template */ selectTemplate() {
     // setup things required by the templates.
-    this.template = template;
     this.template.groups.map((group) => {
       group.nodes = this.getNodesFor(group);
       group.labels = this.getLabelsFor(group);
     });
     this.groups = {};
-    this.variables = {};
 
-    if (!!template.variables?.length) {
-      for (const v of template.variables) {
-        this.variables[v.uid] = v.defaultValue;
-      }
-    }
     this.validateAnyGroupSelected();
+    this.firstStepCompleted = true;
     this.goNext();
   }
 
   /* template */ goToAssignVariableStep() {
-    this.validateHasAllVariables();
+    this.secondStepCompleted = true;
     this.goNext();
   }
 
   private goNext(isLastStep = false) {
     this.myStepper.selected.completed = true;
-    isLastStep ? this.myStepper.reset() : this.myStepper.next();
+    if (isLastStep) {
+      this.firstStepCompleted = false;
+      this.secondStepCompleted = false;
+      this.template = [];
+      this.myStepper.reset();
+    } else {
+      this.myStepper.next();
+    }
   }
 
   public applyStageFinal() {
@@ -296,5 +286,24 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
           }
         });
       });
+  }
+  /* template */ onStepSelectionChange(event: StepperSelectionEvent) {
+    switch (event.selectedIndex) {
+      case 0:
+        this.groups = {};
+        this.firstStepCompleted = false;
+        this.secondStepCompleted = false;
+        break;
+      case 1:
+        this.secondStepCompleted = false;
+        this.variables = {};
+
+        if (!!this.template.variables?.length) {
+          for (const v of this.template.variables) {
+            this.variables[v.uid] = v.defaultValue;
+          }
+        }
+        break;
+    }
   }
 }
