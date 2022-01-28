@@ -36,7 +36,6 @@ public class AuditorLoadTest {
         }
 
         assertTrue(Files.isRegularFile(tmp.resolve("audit-1.log.gz")));
-        assertTrue(Files.isRegularFile(tmp.resolve("audit-1.json.gz")));
     }
 
 }

@@ -55,7 +55,10 @@ export class EditGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyabl
     });
   }
 
-  isDirty() {
+  isDirty(): boolean {
+    if (!this.tempAttribute) {
+      return false;
+    }
     return isDirty(this.tempAttribute, this.initialAttribute);
   }
 

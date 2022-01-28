@@ -1,8 +1,0 @@
-<app-bd-dialog (scrollTo)="onScroll($event)" [loadingWhen$]="audit.loading$" [hideContentWhenLoading]="false" [restoreScrollAfterLoad]="true">
-  <app-bd-dialog-toolbar [header]="'Audit for ' + (bhive$ | async)" [panel]="true" [relative]="true" [route]="['..']"></app-bd-dialog-toolbar>
-  <app-bd-dialog-content>
-    <div class="bd-default-padding">
-      <app-bd-data-table [records]="logs$ | async" [columns]="columns.defaultColumns" [sortData]="null"></app-bd-data-table>
-    </div>
-  </app-bd-dialog-content>
-</app-bd-dialog>

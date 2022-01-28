@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar [header]="'BHive ' + (bhive$ | async)" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="5px">
-      <app-bd-panel-button icon="message" text="Audit Logs" [collapsed]="false" [relative]="true" [route]="['audit']"></app-bd-panel-button>
+      <app-bd-panel-button icon="message" text="Browse Logs" [collapsed]="false" [relative]="true" [route]="['logs']"></app-bd-panel-button>
       <app-bd-panel-button icon="folder_special" text="Browse Contents" [collapsed]="false" [relative]="true" [route]="['browse']"></app-bd-panel-button>
       <app-bd-button
         icon="construction"

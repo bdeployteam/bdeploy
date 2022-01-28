@@ -1,0 +1,13 @@
+<app-bd-dialog [loadingWhen$]="hiveLogging.loading$">
+  <app-bd-dialog-toolbar [header]="'BHive Logging - ' + (hiveLogging.bhive$ | async)" [panel]="true" [route]="['..']">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button icon="refresh" text="Refresh" (click)="hiveLogging.reload()" tooltip="below"></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <mat-tab-group #tabGroup [(selectedIndex)]="selectedIndex" animationDuration="0ms">
+      <mat-tab *ngFor="let logDirectory of hiveLogging.directories$ | async" label="{{ logDirectory.minion }}">
+        <app-bd-data-table [records]="logDirectory.entries" [columns]="columns" [sort]="sort" [recordRoute]="getRecordRoute"></app-bd-data-table>
+      </mat-tab>
+    </mat-tab-group>
+  </app-bd-dialog-content>
+</app-bd-dialog>

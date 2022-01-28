@@ -8,9 +8,10 @@ import { AddPluginComponent } from './components/add-plugin/add-plugin.component
 import { AddUserComponent } from './components/add-user/add-user.component';
 import { AssignPermissionComponent } from './components/assign-permission/assign-permission.component';
 import { AuthTestComponent } from './components/auth-test/auth-test.component';
-import { BhiveAuditComponent as BHiveAuditComponent } from './components/bhive-details/bhive-audit/bhive-audit.component';
 import { BHiveBrowserComponent as BHiveBrowserComponent } from './components/bhive-details/bhive-browser/bhive-browser.component';
 import { BhiveDetailsComponent as BHiveDetailsComponent } from './components/bhive-details/bhive-details.component';
+import { BhiveLogBrowserComponent } from './components/bhive-details/bhive-log-browser/bhive-log-browser.component';
+import { BhiveLogViewerComponent } from './components/bhive-details/bhive-log-viewer/bhive-log-viewer.component';
 import { CheckLdapServerComponent } from './components/check-ldap-server/check-ldap-server.component';
 import { EditGlobalAttributeComponent } from './components/edit-global-attribute/edit-global-attribute.component';
 import { EditLdapServerComponent } from './components/edit-ldap-server/edit-ldap-server.component';
@@ -25,7 +26,8 @@ const routes: Routes = [
   { path: 'add-plugin', component: AddPluginComponent, canActivate: [AdminGuard] },
   { path: 'user-detail/:user', component: UserAdminDetailComponent, canActivate: [AdminGuard] },
   { path: 'bhive/:bhive', component: BHiveDetailsComponent, canActivate: [AdminGuard] },
-  { path: 'bhive/:bhive/audit', component: BHiveAuditComponent, canActivate: [AdminGuard], data: { max: true } },
+  { path: 'bhive/:bhive/logs', component: BhiveLogBrowserComponent, canActivate: [AdminGuard], data: { max: true } },
+  { path: 'bhive/:bhive/logs/:node/:file', component: BhiveLogViewerComponent, canActivate: [AdminGuard], data: { max: true } },
   { path: 'bhive/:bhive/browse', component: BHiveBrowserComponent, canActivate: [AdminGuard], data: { max: true } },
   { path: 'logging/view/:node/:file', component: LogFileViewerComponent, canActivate: [AdminGuard], data: { max: true } },
   { path: 'logging/config', component: LogConfigEditorComponent, canActivate: [AdminGuard], data: { max: true } },

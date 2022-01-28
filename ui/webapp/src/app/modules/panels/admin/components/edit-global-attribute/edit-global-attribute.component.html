@@ -5,7 +5,7 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="5px">
-      <ng-container *ngIf="!(loading$ | async)">
+      <ng-container *ngIf="!(loading$ | async) && tempAttribute">
         <app-bd-form-input
           label="Name/ID"
           name="name"

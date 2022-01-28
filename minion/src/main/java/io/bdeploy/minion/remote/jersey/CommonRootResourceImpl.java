@@ -216,7 +216,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
     }
 
     @Override
-    public List<RemoteDirectory> getLogDirectories() {
+    public List<RemoteDirectory> getLogDirectories(String hive) {
         List<RemoteDirectory> result = new ArrayList<>();
 
         MinionConfiguration minionConfig = minion.getMinions();
@@ -226,8 +226,9 @@ public class CommonRootResourceImpl implements CommonRootResource {
                 dir.minion = entry.getKey();
 
                 try {
-                    dir.entries.addAll(ResourceProvider
-                            .getVersionedResource(entry.getValue().remote, MinionStatusResource.class, security).getLogEntries());
+                    dir.entries.addAll(
+                            ResourceProvider.getVersionedResource(entry.getValue().remote, MinionStatusResource.class, security)
+                                    .getLogEntries(hive));
                 } catch (Exception e) {
                     log.warn("Problem fetching log directory of {}", entry.getKey(), e);
                     dir.problem = e.toString();

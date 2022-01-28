@@ -36,10 +36,12 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.ui.api.HiveLoggingResource;
 import io.bdeploy.ui.api.HiveResource;
 import io.bdeploy.ui.dto.HiveEntryDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -56,6 +58,9 @@ public class HiveResourceImpl implements HiveResource {
 
     @Inject
     private VersionSorterService vss;
+
+    @Inject
+    private ResourceContext rc;
 
     @Override
     public List<String> listHives() {
@@ -174,4 +179,8 @@ public class HiveResourceImpl implements HiveResource {
         hive.execute(new ManifestDeleteOperation().setToDelete(new Manifest.Key(manifestName, manifestTag)));
     }
 
+    @Override
+    public HiveLoggingResource getLoggingResource(String hive) {
+        return rc.initResource(new HiveLoggingResourceImpl(hive));
+    }
 }

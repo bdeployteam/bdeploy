@@ -10,6 +10,7 @@ import io.bdeploy.ui.dto.HiveEntryDto;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
@@ -50,4 +51,7 @@ public interface HiveResource {
     @Path("/delete")
     public void delete(@ActivityScope @QueryParam("hive") String hive, @QueryParam("name") String manifestName,
             @QueryParam("tag") String manifestTag);
+
+    @Path("/{hive}/logging")
+    public HiveLoggingResource getLoggingResource(@ActivityScope @PathParam("hive") String hive);
 }

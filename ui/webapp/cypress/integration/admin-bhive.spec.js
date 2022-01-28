@@ -18,10 +18,10 @@ describe('Admin UI Tests (BHive)', () => {
     });
 
     cy.inMainNavFlyin('app-bhive-details', () => {
-      cy.get('button[data-cy^="Audit"]').click();
+      cy.get('button[data-cy^="Browse Logs"]').click();
     });
 
-    cy.inMainNavFlyin('app-bhive-audit', () => {
+    cy.inMainNavFlyin('app-bhive-log-browser', () => {
       cy.waitUntilContentLoaded();
       cy.get('tr').should('have.length.above', 1);
 
@@ -29,7 +29,7 @@ describe('Admin UI Tests (BHive)', () => {
     });
 
     cy.inMainNavFlyin('app-bhive-details', () => {
-      cy.get('button[data-cy^="Browse"]').click();
+      cy.get('button[data-cy^="Browse Contents"]').click();
     });
 
     cy.inMainNavFlyin('app-bhive-browser', () => {

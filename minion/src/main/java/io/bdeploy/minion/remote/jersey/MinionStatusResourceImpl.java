@@ -15,7 +15,9 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.MinionManifest;
@@ -25,10 +27,13 @@ import io.bdeploy.interfaces.minion.MinionMonitoringDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.jersey.JerseyServer;
+import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 @Singleton
 public class MinionStatusResourceImpl implements MinionStatusResource {
@@ -37,6 +42,9 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
 
     @Inject
     private MinionRoot root;
+
+    @Inject
+    private BHiveRegistry registry;
 
     @Inject
     @Named(JerseyServer.START_TIME)
@@ -66,11 +74,24 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
     }
 
     @Override
-    public List<RemoteDirectoryEntry> getLogEntries() {
+    public List<RemoteDirectoryEntry> getLogEntries(String hive) {
         Path logDir = root.getLogDir();
         Path rootDir = root.getRootDir();
-
         List<RemoteDirectoryEntry> entries = new ArrayList<>();
+
+        if (hive != null) {
+            try {
+                BHive h = registry.get(hive);
+                if (h == null) {
+                    return entries; // not found = empty. 
+                }
+                RollingFileAuditor a = (RollingFileAuditor) h.getAuditor();
+                logDir = a.getLogDir();
+            } catch (Exception e) {
+                throw new WebApplicationException("Cannot find hive path for: " + hive, e, Status.NOT_ACCEPTABLE);
+            }
+        }
+
         try (Stream<Path> paths = Files.walk(logDir)) {
             paths.filter(Files::isRegularFile).forEach(f -> {
                 File file = f.toFile();

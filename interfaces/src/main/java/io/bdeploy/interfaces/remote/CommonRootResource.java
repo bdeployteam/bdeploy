@@ -3,6 +3,15 @@ package io.bdeploy.interfaces.remote;
 import java.util.List;
 import java.util.Set;
 
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.common.Version;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
+import io.bdeploy.interfaces.directory.EntryChunk;
+import io.bdeploy.interfaces.directory.RemoteDirectory;
+import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
+import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -13,15 +22,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import io.bdeploy.common.Version;
-import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
-import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.interfaces.directory.EntryChunk;
-import io.bdeploy.interfaces.directory.RemoteDirectory;
-import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
-import io.bdeploy.jersey.ActivityScope;
-import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 
 @Path("/master") // compat with older MasterRootResource
 @Consumes(MediaType.APPLICATION_JSON)
@@ -122,11 +122,12 @@ public interface CommonRootResource {
     public void setLoggerConfig(java.nio.file.Path config);
 
     /**
-     * @return the contents of each nodes log directory.
+     * @return the contents of each nodes log directory. Optionally returns the content of a specified {@link BHive}'s log
+     *         directory instead of the server log directory.
      */
     @GET
     @Path("/logFiles")
-    public List<RemoteDirectory> getLogDirectories();
+    public List<RemoteDirectory> getLogDirectories(@QueryParam("h") String hive);
 
     /**
      * Fetches the complete contents of a log file

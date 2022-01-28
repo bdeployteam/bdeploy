@@ -34,12 +34,15 @@ public interface MinionStatusResource {
     public void setLoggerConfig(java.nio.file.Path file);
 
     /**
+     * Returns the contents of the log directory. If the optional 'hive' parameter is given, returns the contents of the named
+     * hive's directory instead of the main server log directory.
+     *
      * @return a list of {@link RemoteDirectoryEntry}, can be used with
      *         {@link CommonDirectoryEntryResource#getEntryContent(RemoteDirectoryEntry, long, long)}.
      */
     @GET
     @Path("/logs")
-    public List<RemoteDirectoryEntry> getLogEntries();
+    public List<RemoteDirectoryEntry> getLogEntries(@QueryParam("h") String hive);
 
     /**
      * Get updated monitoring information based on persisted information in

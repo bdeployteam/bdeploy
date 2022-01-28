@@ -45,13 +45,13 @@ public class LoggingConfigTest {
         Files.write(mr.getLogDir().resolve("server.log"), Collections.singleton("log1"));
         Files.write(mr.getLogDir().resolve("server-1.log"), Collections.singleton("log2"));
 
-        var dirs = crr.getLogDirectories();
+        var dirs = crr.getLogDirectories(null);
 
         assertEquals(1, dirs.size());
         assertEquals("master", dirs.get(0).minion);
         assertNull(dirs.get(0).problem);
         assertNull(dirs.get(0).uuid);
-        assertEquals(4, dirs.get(0).entries.size()); // the two logs, audit.log, audit.json
+        assertEquals(3, dirs.get(0).entries.size()); // the two logs, audit.log, audit.json
 
         var entries = dirs.get(0).entries;
         entries.sort((a, b) -> b.path.compareTo(a.path)); // reverse lexical

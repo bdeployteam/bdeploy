@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatTabsModule } from '@angular/material/tabs';
 import { CoreModule } from '../../core/core.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AddGlobalAttributeComponent } from './components/add-global-attribute/add-global-attribute.component';
@@ -8,10 +9,11 @@ import { AddPluginComponent } from './components/add-plugin/add-plugin.component
 import { AddUserComponent } from './components/add-user/add-user.component';
 import { AssignPermissionComponent } from './components/assign-permission/assign-permission.component';
 import { AuthTestComponent } from './components/auth-test/auth-test.component';
-import { BhiveAuditComponent } from './components/bhive-details/bhive-audit/bhive-audit.component';
 import { BHiveBrowserComponent } from './components/bhive-details/bhive-browser/bhive-browser.component';
 import { ManifestDeleteActionComponent } from './components/bhive-details/bhive-browser/manifest-delete-action/manifest-delete-action.component';
 import { BhiveDetailsComponent } from './components/bhive-details/bhive-details.component';
+import { BhiveLogBrowserComponent } from './components/bhive-details/bhive-log-browser/bhive-log-browser.component';
+import { BhiveLogViewerComponent } from './components/bhive-details/bhive-log-viewer/bhive-log-viewer.component';
 import { CheckLdapServerComponent } from './components/check-ldap-server/check-ldap-server.component';
 import { EditGlobalAttributeComponent } from './components/edit-global-attribute/edit-global-attribute.component';
 import { EditLdapServerComponent } from './components/edit-ldap-server/edit-ldap-server.component';
@@ -27,8 +29,9 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
     AddPluginComponent,
     UserAdminDetailComponent,
     BhiveDetailsComponent,
-    BhiveAuditComponent,
     BHiveBrowserComponent,
+    BhiveLogViewerComponent,
+    BhiveLogBrowserComponent,
     ManifestDeleteActionComponent,
     LogFileViewerComponent,
     LogConfigEditorComponent,
@@ -44,6 +47,6 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
     EditUserComponent,
     AssignPermissionComponent,
   ],
-  imports: [CommonModule, CoreModule, AdminRoutingModule],
+  imports: [CommonModule, CoreModule, AdminRoutingModule, MatTabsModule],
 })
 export class AdminModule {}
