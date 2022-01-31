@@ -156,16 +156,10 @@ describe('Current User Tests', function () {
 
     cy.pressMainNavTopButton('Select Theme');
 
-    cy.contains('div', 'Light / Yellow').should('exist').click();
-    cy.get('body').should('have.class', 'app-light-yellow-theme');
-
-    cy.contains('div', 'Dark / Blue').should('exist').click();
+    cy.contains('div', 'Dark Theme').should('exist').click();
     cy.get('body').should('have.class', 'app-dark-theme');
 
-    cy.contains('div', 'Dark / Yellow').should('exist').click();
-    cy.get('body').should('have.class', 'app-dark-yellow-theme');
-
-    cy.contains('div', 'Light / Blue').should('exist').click();
+    cy.contains('div', 'Light Theme').should('exist').click();
     cy.get('body').should('have.class', 'app-light-theme');
 
     cy.pressMainNavTopButton('Select Theme');

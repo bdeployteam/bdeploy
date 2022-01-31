@@ -5,16 +5,12 @@ import { BehaviorSubject } from 'rxjs';
 // keep in sync with app-theme.scss
 enum Theme {
   DEFAULT = 'app-light-theme',
-  LIGHT_YELLOW = 'app-light-yellow-theme',
   DARK = 'app-dark-theme',
-  DARK_YELLOW = 'app-dark-yellow-theme',
 }
 
 const THEME_DESC = {};
-THEME_DESC[Theme.DEFAULT] = 'Light / Blue (default)';
-THEME_DESC[Theme.LIGHT_YELLOW] = 'Light / Yellow';
-THEME_DESC[Theme.DARK] = 'Dark / Blue';
-THEME_DESC[Theme.DARK_YELLOW] = 'Dark / Yellow';
+THEME_DESC[Theme.DEFAULT] = 'Light Theme (default)';
+THEME_DESC[Theme.DARK] = 'Dark Theme';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +19,8 @@ export class ThemeService {
   activeTheme$: BehaviorSubject<Theme> = new BehaviorSubject(Theme.DEFAULT);
 
   constructor(@Inject(DOCUMENT) private document: Document) {
-    if (localStorage.getItem('theme') === null) {
+    const themeName = localStorage.getItem('theme');
+    if (!themeName || (themeName !== Theme.DARK && themeName !== Theme.DEFAULT)) {
       localStorage.setItem('theme', Theme.DEFAULT);
     }
     this.updateTheme(localStorage.getItem('theme') as Theme);
@@ -59,6 +56,6 @@ export class ThemeService {
 
   public isDarkTheme(): boolean {
     const theme = this.getCurrentTheme();
-    return theme === Theme.DARK || theme === Theme.DARK_YELLOW;
+    return theme === Theme.DARK;
   }
 }

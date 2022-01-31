@@ -7,6 +7,7 @@
 @import 'dragular.scss';
 @import 'app-ngx-charts-dark.scss';
 @import 'app-scrollbars.scss';
+@import 'app-palettes.scss';
 
 @import 'app/modules/core/components/bd-popup/bd-popup-theme.scss';
 @import 'app/modules/core/components/bd-image-upload/bd-image-upload-theme.scss';
@@ -30,6 +31,8 @@
   $bg: map-get($theme, 'background');
   $fg: map-get($theme, 'foreground');
   $maintb: map-get($theme, 'main-toolbar');
+  $maintb-dark: map-get($theme, 'main-toolbar-darker');
+  $success: map-get($theme, 'success');
 
   // general element themings
   .mat-badge-content {
@@ -46,7 +49,7 @@
   .mat-card-route-active,
   .mat-row-route-active:hover,
   .mat-card-route-active:hover {
-    background-color: mat.get-color-from-palette($maintb, 900, 0.1);
+    background-color: mat.get-color-from-palette($maintb-dark, 900, 0.1);
   }
 
   a {
@@ -67,7 +70,7 @@
 
     --bd-text: #{mat.get-color-from-palette($fg, 'text')};
     --bd-text-secondary: #{mat.get-color-from-palette($fg, 'secondary-text')};
-    --bd-text-success: #{if($dark, mat.get-color-from-palette(mat.$green-palette, 300), mat.get-color-from-palette(mat.$green-palette, 800))};
+    --bd-text-success: #{mat.get-color-from-palette($success)};
     --bd-text-very-light: rgb(116, 116, 116);
     --bd-text-disabled: #{mat.get-color-from-palette($fg, 'disabled-text')};
 
@@ -77,11 +80,11 @@
     --bd-bg-disabled: #{mat.get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
     --bd-bg-grey: #{mat.get-color-from-palette($fg, base, if($dark, 0.2, 0.4))};
 
-    --bd-main-bar-darker: #{mat.get-color-from-palette($maintb, 900)};
+    --bd-main-bar-darker: #{mat.get-color-from-palette($maintb-dark)};
 
     --bd-primary-contrast: #{mat.get-color-from-palette($primary, 'default-contrast')};
     --bd-accent-contrast: #{mat.get-color-from-palette($accent, 'default-contrast')};
-    --bd-warn-contrast: #{mat.get-contrast-color-from-palette($warn, 800)}; // intentionally pick the darker color to force a white contrast if available.
+    --bd-warn-contrast: #{mat.get-contrast-color-from-palette($warn, 900)};
     --bd-main-bar-contrast: #{mat.get-color-from-palette($maintb, 'default-contrast')};
 
     --bd-lighten-bg: #{if($dark, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5))};
@@ -145,11 +148,13 @@
 }
 
 /* Theme definitions - keep in sync with ThemeService.Theme */
-@function add-toolbar-color($theme, $toolbar-palette) {
+@function add-custom-colors($theme, $toolbar-palette, $toolbar-darker-palette, $success-palette) {
   @return map-merge(
     $theme,
     (
       'main-toolbar': $toolbar-palette,
+      'main-toolbar-darker': $toolbar-darker-palette,
+      'success': $success-palette,
     )
   );
 }
@@ -170,46 +175,16 @@
   );
 }
 
-/* "proper" yellow */
-$app-yellow-def: (
-  50: #fffee8,
-  100: #fbf315,
-  200: #fbf315,
-  300: #fbf315,
-  400: #fbf315,
-  500: #fbf315,
-  600: #fbf315,
-  700: #cfc912,
-  800: #cfc912,
-  900: #cfc912,
-  A100: #fbf315,
-  A200: #fbf315,
-  A400: #fbf315,
-  A700: #fbf315,
-  contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: rgba(black, 0.87),
-    500: rgba(black, 0.87),
-    600: rgba(black, 0.87),
-    700: rgba(black, 0.87),
-    800: rgba(black, 0.87),
-    900: rgba(black, 0.87),
-    A100: rgba(black, 0.87),
-    A200: rgba(black, 0.87),
-    A400: rgba(black, 0.87),
-    A700: rgba(black, 0.87),
-  ),
-);
-$app-yellow-palette: mat.define-palette($app-yellow-def);
-
 /* light theme - default */
-$app-light-primary: mat.define-palette(mat.$indigo-palette, 500);
-$app-light-accent: mat.define-palette(mat.$pink-palette, 700);
-$app-light-warning: mat.define-palette(mat.$orange-palette, A700);
-$app-light-theme: add-toolbar-color(mat.define-light-theme($app-light-primary, $app-light-accent, $app-light-warning), $app-light-primary);
+$app-light-primary: mat.define-palette($md-bdblue, 500);
+$app-light-accent: mat.define-palette($md-bdblue, 500);
+$app-light-warning: mat.define-palette($md-bdred, 500);
+$app-light-theme: add-custom-colors(
+  mat.define-light-theme($app-light-primary, $app-light-accent, $app-light-warning),
+  $app-light-primary,
+  mat.define-palette($md-bdblue, 700),
+  mat.define-palette($md-bdgreen, 700)
+);
 .app-light-theme {
   @include all-themes($app-light-theme);
 }
@@ -217,26 +192,16 @@ $app-light-theme: add-toolbar-color(mat.define-light-theme($app-light-primary, $
   @include theme-chooser($app-light-theme);
 }
 
-/* light theme with yellow toolbar */
-$app-light-yellow-primary: mat.define-palette(mat.$grey-palette, 700);
-$app-light-yellow-accent: mat.define-palette(mat.$red-palette);
-$app-light-yellow-warning: mat.define-palette(mat.$orange-palette);
-$app-light-yellow-theme: add-toolbar-color(
-  mat.define-light-theme($app-light-yellow-primary, $app-light-yellow-accent, $app-light-yellow-warning),
-  $app-yellow-palette
+/* dark theme */
+$app-dark-primary: mat.define-palette($md-bdorange, 500);
+$app-dark-accent: mat.define-palette($md-bdorange, 500);
+$app-dark-warning: mat.define-palette($md-bdred, 500);
+$app-dark-theme: add-custom-colors(
+  mat.define-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning),
+  mat.define-palette($md-bdgrey, 500),
+  mat.define-palette($md-bdgrey, 700),
+  mat-define-palette($md-bdgreen, 700)
 );
-.app-light-yellow-theme {
-  @include all-themes($app-light-yellow-theme);
-}
-.app-light-yellow-theme-chooser {
-  @include theme-chooser($app-light-yellow-theme);
-}
-
-/* dark blue theme */
-$app-dark-primary: mat.define-palette(mat.$indigo-palette, 200);
-$app-dark-accent: $app-yellow-palette;
-$app-dark-warning: mat.define-palette(mat.$deep-orange-palette);
-$app-dark-theme: add-toolbar-color(mat.define-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning), mat.define-palette(mat.$indigo-palette, 500));
 $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 .app-dark-theme {
   @include all-themes($app-dark-theme);
@@ -244,21 +209,4 @@ $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
 }
 .app-dark-theme-chooser {
   @include theme-chooser($app-dark-theme);
-}
-
-/* dark yellow theme */
-$app-dark-yellow-primary: $app-yellow-palette;
-$app-dark-yellow-accent: mat.define-palette(mat.$blue-palette, 700);
-$app-dark-yellow-warning: mat.define-palette(mat.$deep-orange-palette);
-$app-dark-yellow-theme: add-toolbar-color(
-  mat.define-dark-theme($app-dark-yellow-primary, $app-dark-yellow-accent, $app-dark-yellow-warning),
-  $app-yellow-palette
-);
-$app-dark-yellow-theme: override-theme-background($app-dark-yellow-theme, app-bar, #3d3c3e);
-.app-dark-yellow-theme {
-  @include all-themes($app-dark-yellow-theme);
-  @include ngx-charts-dark();
-}
-.app-dark-yellow-theme-chooser {
-  @include theme-chooser($app-dark-yellow-theme);
 }
