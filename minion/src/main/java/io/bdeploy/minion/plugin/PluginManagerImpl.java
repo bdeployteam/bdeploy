@@ -11,7 +11,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
@@ -25,6 +27,7 @@ import io.bdeploy.api.plugin.v1.CustomProductVersionSorter;
 import io.bdeploy.api.plugin.v1.Plugin;
 import io.bdeploy.api.plugin.v1.PluginAssets;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ReadOnlyOperation;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -42,6 +45,8 @@ public class PluginManagerImpl implements PluginManager {
     private static final Logger log = LoggerFactory.getLogger(PluginManagerImpl.class);
 
     private final BHive globalHive;
+    private final Set<ObjectId> unloadableLocal = new TreeSet<>();
+    private final Set<ObjectId> unloadableGlobal = new TreeSet<>();
     private final Map<ObjectId, PluginInternalHandle> loaded = new TreeMap<>();
     private final JerseyServer server;
 
@@ -57,32 +62,38 @@ public class PluginManagerImpl implements PluginManager {
      */
     private void loadGlobals() {
         for (Manifest.Key key : PluginManifest.scan(globalHive)) {
-            try {
-                loadGlobalPlugin(PluginManifest.of(globalHive, key).getPlugin());
-            } catch (Throwable e) { // can throw Errors if API incompatible
-                log.warn("Cannot load global plugin from {}", key, e);
-            }
+            loadGlobalPlugin(PluginManifest.of(globalHive, key).getPlugin());
         }
     }
 
     @Override
-    public PluginInfoDto loadGlobalPlugin(ObjectId id) {
+    public synchronized PluginInfoDto loadGlobalPlugin(ObjectId id) {
+        if (unloadableGlobal.contains(id)) {
+            return null;
+        }
+
         if (loaded.containsKey(id)) {
             log.warn("Skipping load of {}, already loaded from another location.", id);
             return null;
         }
 
-        PluginInternalHandle handle = loadFile(globalHive.execute(new FindFileOperation().setObject(id)));
-        handle.id = id;
-        handle.global = true;
+        try {
+            PluginInternalHandle handle = loadFile(globalHive.execute(new FindFileOperation().setObject(id)));
+            handle.id = id;
+            handle.global = true;
 
-        register(id, handle);
+            register(id, handle);
 
-        return getInfoFromHandle(handle);
+            return getInfoFromHandle(handle);
+        } catch (Throwable e) {
+            log.warn("Cannot load global plugin from {}", id, e);
+            this.unloadableGlobal.add(id);
+        }
+        return null;
     }
 
     @Override
-    public List<PluginInfoDto> getPlugins() {
+    public synchronized List<PluginInfoDto> getPlugins() {
         List<PluginInfoDto> globs = new ArrayList<>();
         for (Map.Entry<ObjectId, PluginInternalHandle> entry : loaded.entrySet()) {
             globs.add(getInfoFromHandle(entry.getValue()));
@@ -91,39 +102,58 @@ public class PluginManagerImpl implements PluginManager {
     }
 
     @Override
-    public boolean isLoaded(ObjectId id) {
+    public synchronized boolean isLoaded(ObjectId id) {
         return loaded.containsKey(id);
     }
 
     @Override
-    public PluginInfoDto load(BHive source, ObjectId id, Manifest.Key product) {
-        PluginInternalHandle handle = loaded.get(id);
-        if (handle == null) {
-            Path pluginPath = source.execute(new FindFileOperation().setObject(id));
-            handle = loadFile(pluginPath);
-            handle.id = id;
-
-            register(id, handle);
+    public synchronized PluginInfoDto load(BHive source, ObjectId id, Manifest.Key product) {
+        if (unloadableLocal.contains(id)) {
+            return null;
         }
-        handle.requestedFrom.add(product);
-        return getInfoFromHandle(handle);
+
+        try {
+            PluginInternalHandle handle = loaded.get(id);
+            if (handle == null) {
+                Path pluginPath = source.execute(new FindFileOperation().setObject(id));
+                handle = loadFile(pluginPath);
+                handle.id = id;
+
+                register(id, handle);
+            }
+            handle.requestedFrom.add(product);
+            return getInfoFromHandle(handle);
+        } catch (Throwable e) {
+            log.error("Cannot load local plugin from {}", id, e);
+            unloadableLocal.add(id);
+        }
+        return null;
     }
 
     @Override
-    public PluginHeader loadHeader(BHive source, ObjectId id) {
+    public synchronized PluginHeader loadHeader(BHive source, ObjectId id) {
+        if (unloadableLocal.contains(id)) {
+            return null;
+        }
         if (isLoaded(id)) {
             return loaded.get(id).header;
         }
-        Path pluginPath = source.execute(new FindFileOperation().setObject(id));
-        try (InputStream is = Files.newInputStream(pluginPath)) {
-            return PluginHeader.read(is);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot load plugin from " + pluginPath, e);
+        try {
+            Path pluginPath = source.execute(new FindFileOperation().setObject(id));
+            try (InputStream is = Files.newInputStream(pluginPath)) {
+                return PluginHeader.read(is);
+            } catch (IOException e) {
+                throw new IllegalStateException("Cannot load plugin from " + pluginPath, e);
+            }
+        } catch (Throwable e) {
+            unloadableLocal.add(id);
+            log.error("Cannot load local plugin header from {}", id, e);
         }
+        return null;
     }
 
     @Override
-    public void unloadProduct(Key product) {
+    public synchronized void unloadProduct(Key product) {
         List<ObjectId> toUnload = new ArrayList<>();
         for (Map.Entry<ObjectId, PluginInternalHandle> entry : loaded.entrySet()) {
             if (entry.getValue().global) {
@@ -139,7 +169,7 @@ public class PluginManagerImpl implements PluginManager {
         toUnload.forEach(this::unload);
     }
 
-    private synchronized void register(ObjectId id, PluginInternalHandle handle) {
+    private void register(ObjectId id, PluginInternalHandle handle) {
         try {
             resolveConflicts(handle);
         } catch (Exception e) {
@@ -316,6 +346,7 @@ public class PluginManagerImpl implements PluginManager {
         }
     }
 
+    @ReadOnlyOperation
     private static class FindFileOperation extends BHive.Operation<Path> {
 
         private ObjectId object;
