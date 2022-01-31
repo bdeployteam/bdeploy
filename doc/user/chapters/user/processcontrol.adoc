@@ -19,10 +19,10 @@ a| image::images/ManualDoc_ProcessStopped.png[width=32,align=center]
 | Process is *stopped*.
 
 a| image::images/ManualDoc_ProcessStarting.png[width=32,align=center]
-| Process is *starting*. If the process defined a _startup probe_ (see `<<_app_info_yaml,app-info.yaml>>`), this status is reached once the startup probe indicates a successful startup of the application.
+| Process is *starting*.
 
 a| image::images/ManualDoc_ProcessRunning.png[width=32,align=center]
-| Process is *running*.
+| Process is *running*.  If the process defined a _startup probe_ (see `<<_app_info_yaml,app-info.yaml>>`), this status is reached as soon as the startup probe indicates a successful startup of the application. Otherwise - without probe - the process immediatly reaches the *running* state automatically.
 
 a| image::images/ManualDoc_ProcessStopPlanned.png[width=32,align=center]
 | Process is *running* but *stopping* has been *requested* by the user.
