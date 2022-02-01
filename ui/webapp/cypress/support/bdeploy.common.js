@@ -86,9 +86,7 @@ Cypress.Commands.add('fillImageUpload', function (filePath, mimeType, checkEmpty
   });
 });
 
-Cypress.Commands.add('fillFileDrop', function (name, mimeType = undefined, encoding = 'base64') {
-  // base64 encoding is suitable and default for ZIP files. JAR unfortunately is not recognized by
-  // the attachFile extension, so we explicitly set it.
+Cypress.Commands.add('fillFileDrop', function (name, mimeType = undefined) {
   cy.get('app-bd-file-drop').within(() => {
     cy.get('input[type="file"]').selectFile({ contents: Cypress.config('fixturesFolder') + '/' + name, mimeType: mimeType }, { force: true });
   });
