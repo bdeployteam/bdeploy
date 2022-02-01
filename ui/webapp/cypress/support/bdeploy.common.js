@@ -80,17 +80,17 @@ Cypress.Commands.add('fillImageUpload', function (filePath, mimeType, checkEmpty
     if (checkEmpty) {
       cy.get('img[src="/assets/no-image.svg"]').should('exist');
     }
-    cy.get('input[type="file"]').attachFile({ filePath: filePath, mimeType: mimeType });
+    cy.get('input[type="file"]').selectFile({ contents: Cypress.config('fixturesFolder') + '/' + filePath, mimeType: mimeType }, { force: true });
     cy.get('img[src="/assets/no-image.svg"]').should('not.exist');
     cy.get('img[alt="logo"]').should('exist');
   });
 });
 
-Cypress.Commands.add('fillFileDrop', function (name, mimeType = null, encoding = 'base64') {
+Cypress.Commands.add('fillFileDrop', function (name, mimeType = undefined, encoding = 'base64') {
   // base64 encoding is suitable and default for ZIP files. JAR unfortunately is not recognized by
   // the attachFile extension, so we explicitly set it.
   cy.get('app-bd-file-drop').within(() => {
-    cy.get('input[type="file"]').attachFile({ filePath: name, mimeType: mimeType, encoding: encoding });
+    cy.get('input[type="file"]').selectFile({ contents: Cypress.config('fixturesFolder') + '/' + name, mimeType: mimeType }, { force: true });
   });
 });
 

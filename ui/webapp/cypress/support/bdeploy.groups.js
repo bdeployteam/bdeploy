@@ -173,10 +173,7 @@ Cypress.Commands.add('attachManaged', function (groupName, screenshot = false) {
     cy.contains('mat-card', 'Drop managed server information here!')
       .parent()
       .within(() => {
-        cy.get('input[data-cy="managed-ident"]').attachFile({
-          filePath: 'managed-ident.txt',
-          mimeType: 'text/plain',
-        });
+        cy.get('input[data-cy="managed-ident"]').selectFile({ contents: Cypress.config('fixturesFolder') + '/managed-ident.txt' }, { force: true });
       });
     cy.contains('div', 'Details for server to link').should('exist');
     cy.contains('button', 'Save').should('exist').and('be.disabled');

@@ -73,6 +73,9 @@ declare namespace Cypress {
      */
     downloadByLinkClick(filename: string, fixture?: boolean);
 
+    /** internal - definition required for tslint */
+    downloadFromLinkHref(link: HTMLAnchorElement);
+
     /**
      * Chain off a clickable element which will trigger downloadLocation.assign in the application.
      * @param filename the filename to store the file as.
