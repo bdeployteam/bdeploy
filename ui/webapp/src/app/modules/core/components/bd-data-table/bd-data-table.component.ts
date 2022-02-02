@@ -217,13 +217,6 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       // register this table as "searchable" in the global search service if requested.
       this.subscription = this.searchService.register(this);
     }
-    this.subscription.add(
-      this.settings.settingsUpdated$.subscribe((update) => {
-        if (update) {
-          this.update();
-        }
-      })
-    );
   }
 
   ngOnDestroy(): void {

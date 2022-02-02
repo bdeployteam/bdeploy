@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
+import { BdDataTableComponent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { AttributeEditActionComponent } from './attribute-edit-action/attribute-edit-action.component';
@@ -51,6 +52,8 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
+  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<CustomAttributeDescriptor>;
+
   constructor(private router: Router, public settings: SettingsService, private areas: NavAreasService) {}
 
   ngOnInit(): void {
@@ -61,6 +64,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
       }
       this.selectedAttributeName = route.params['attribute'];
     });
+    this.subscription.add(this.settings.settingsUpdated$.subscribe((_) => this.table.update()));
   }
 
   /* template */ addAttribute(): void {

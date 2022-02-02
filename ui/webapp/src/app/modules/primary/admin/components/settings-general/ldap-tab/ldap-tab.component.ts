@@ -1,9 +1,9 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
-import { DragReorderEvent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
+import { BdDataTableComponent, DragReorderEvent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { LdapCheckActionComponent } from './ldap-check-action/ldap-check-action.component';
@@ -62,6 +62,8 @@ export class LdapTabComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
+  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<LDAPSettingsDto>;
+
   constructor(public settings: SettingsService, private areas: NavAreasService) {}
 
   ngOnInit(): void {
@@ -72,6 +74,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
       }
       this.selectedServerId = route.params['id'];
     });
+    this.subscription.add(this.settings.settingsUpdated$.subscribe((_) => this.table.update()));
   }
 
   /* template */ onReorder(order: DragReorderEvent<LDAPSettingsDto>) {
