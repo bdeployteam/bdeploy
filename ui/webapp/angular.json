@@ -109,6 +109,12 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
                 }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cypress.ts"
+                }
               ]
             },
             "cov-central": {
@@ -117,6 +123,12 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
                 }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cypress.ts"
+                }
               ]
             },
             "cov-managed": {
@@ -124,6 +136,12 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cypress.ts"
                 }
               ]
             }

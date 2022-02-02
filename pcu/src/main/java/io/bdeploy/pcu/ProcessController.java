@@ -205,6 +205,10 @@ public class ProcessController {
         this.statusListeners.add(listener);
     }
 
+    public void removeStatusListener(Consumer<ProcessStateChangeDto> listener) {
+        this.statusListeners.remove(listener);
+    }
+
     /**
      * Configures the number of restart attempts that are executed if the application crashed. The delay between
      * two consecutive restart attempts is configured separately. When the restart counter is higher than the given
@@ -336,9 +340,18 @@ public class ProcessController {
     }
 
     /**
-     * Sets the intend that stopping this process is planned in the near future. This does not have any effect on the process
+     * Sets the intent that starting this process is planned in the near future. This does not have any effect on the process
+     * itself. It will still be stopped and starting must be explicitly invoked to really terminate the process. Setting this
+     * intent is typically done when starting multiple processes one after each other to visualize the desired target state.
+     */
+    public void prepareStart(String user) {
+        executeLocked("PrepareStart", user, this::doPrepareStart);
+    }
+
+    /**
+     * Sets the intent that stopping this process is planned in the near future. This does not have any effect on the process
      * itself. It will still be running and stopping must be explicitly invoked to really terminate the process. Setting this
-     * intend is typically done when stopping multiple processes one after each other to visualize the desired target state.
+     * intent is typically done when stopping multiple processes one after each other to visualize the desired target state.
      */
     public void prepareStop(String user) {
         executeLocked("PrepareStop", user, this::doPrepareStop);
@@ -455,6 +468,16 @@ public class ProcessController {
             processState = ProcessState.CRASHED_PERMANENTLY;
             cleanup();
         }
+    }
+
+    /** Updates the state that starting is planned */
+    private void doPrepareStart() {
+        if (!processState.isStopped()) {
+            return;
+        }
+
+        processState = ProcessState.STOPPED_START_PLANNED;
+        logger.log(l -> l.info("Starting planned for {}", processConfig.name));
     }
 
     /** Updates the state that stopping is planned */
@@ -666,7 +689,7 @@ public class ProcessController {
         });
 
         // Set to running if launched from stopped or crashed
-        if (processState == ProcessState.STOPPED || processState == ProcessState.CRASHED_PERMANENTLY) {
+        if (processState.isStopped()) {
             processState = ProcessState.RUNNING_NOT_STARTED;
             logger.log(l -> l.info("Application status is now RUNNING_NOT_STARTED."));
         }

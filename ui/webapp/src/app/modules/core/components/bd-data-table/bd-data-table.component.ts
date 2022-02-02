@@ -55,6 +55,9 @@ export interface DragReorderEvent<T> {
   item: T;
   previousIndex: number;
   currentIndex: number;
+
+  sourceId: string;
+  targetId: string;
 }
 
 const MAX_ROWS_PER_GROUP = 500;
@@ -80,6 +83,9 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * Aria caption for the table, mainly for screen readers.
    */
   @Input() caption = 'Data Table';
+
+  /** An ID which is to be used for the table. This can be used to identify containers in drag-drop events. */
+  @Input() id = 'bd-data-table';
 
   /**
    * The columns to display
@@ -151,6 +157,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * A callback which can provide a route for each row. If given, each row will behave like a router link
    */
   @Input() recordRoute: (r: T) => any[];
+
+  /**
+   * A list of connected drag-drop-enabled tables. Dragging is possible between those lists if given.
+   */
+  @Input() dragConnected: string[];
 
   /**
    * Whether drag & drop re-ordering of rows is allowed.
@@ -364,7 +375,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       const byGroupSorted = new Map(
         [...byGroup.entries()].sort((a, b) => {
           if (!!grouping[0].definition.sort) {
-            return grouping[0].definition.sort(a[0], b[0]);
+            return grouping[0].definition.sort(a[0], b[0], a[1], b[1]);
           }
           return bdSortGroups(a[0], b[0]);
         })
@@ -487,8 +498,14 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  /* template */ onDrop(event: CdkDragDrop<any>) {
+  /* template */ onDrop(event: CdkDragDrop<T[]>) {
     // we made sure during init that indices match (no sorting, no grouping, no checking), so we can be "pretty" sure that just passing indices is a good idea.
-    this.dragReorder.emit({ previousIndex: event.previousIndex, currentIndex: event.currentIndex, item: this.records[event.previousIndex] });
+    this.dragReorder.emit({
+      previousIndex: event.previousIndex,
+      currentIndex: event.currentIndex,
+      item: event.previousContainer.data[event.previousIndex],
+      sourceId: event.previousContainer.id,
+      targetId: event.container.id,
+    });
   }
 }

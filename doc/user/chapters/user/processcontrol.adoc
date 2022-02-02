@@ -78,7 +78,9 @@ image::images/Doc_DashboardProcessManualConfirm.png[Manual Confirmation On Start
 
 ==== Startup and Shutdown Order
 
-The *process control* starts the processes in the order as they are defined in the *process configuration* dialog. That means the order can be influenced by dragging applications around. When btn:[Start Instance] is invoked then all processes with startup type `INSTANCE` are started in the defined order but without waiting for any condition after launching the command. When btn:[Stop Instance] is invoked then all running processes are stopped sequentially. The order is reversed during the stop operation. That means the last process is stopped first and the first process is stopped at last. The next process is stopped only when the previous is terminated.
+The *process control* starts the processes in the order as they are defined in the *process configuration* dialog. *Processes* can be grouped in *Process Control Groups*, which dictate the exact behavior for a group of *Processes*. When btn:[Start Instance] is invoked then all processes with startup type `INSTANCE` are started in the defined order - potentially waiting for a *startup probe* after launching the command. When btn:[Stop Instance] is invoked then all running processes are stopped according to the group strategies. The order is reversed during the stop operation. That means the last process is stopped first and the first process is stopped at last (in `SEQUENTIAL` mode). The next process is stopped only when the previous is terminated. The same holds for *Process Control Groups*; groups are processed one after another when starting, and in reverse order when stopping.
+
+The exact meanings of the different configuration options is described in the <<Process Control Groups>> section.
 
 ==== Keep Alive
 

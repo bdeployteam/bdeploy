@@ -39,6 +39,7 @@
       (groupingChange)="grouping$.next($event)"
       [definitions]="groupingDefinitions"
       [records]="allApplications$ | async"
+      [defaultGrouping]="defaultGrouping"
       presetKey="dashboard"
     ></app-bd-data-grouping>
     <app-bd-button

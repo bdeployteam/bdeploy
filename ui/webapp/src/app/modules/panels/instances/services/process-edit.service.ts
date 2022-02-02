@@ -14,6 +14,7 @@ import {
   ParameterDescriptor,
   ParameterType,
   ProcessControlConfiguration,
+  ProcessControlGroupConfiguration,
   ProductDto,
   TemplateApplication,
   TemplateParameter,
@@ -79,6 +80,14 @@ export class ProcessEditService {
       apps.findIndex((a) => a.uid === this.process$.value.uid),
       1
     );
+
+    // remove from control group(s)
+    for (const grp of this.node$.value.nodeConfiguration.controlGroups) {
+      const idx = grp.processOrder.findIndex((uid) => uid === this.process$.value.uid);
+      if (idx !== -1) {
+        grp.processOrder.splice(idx, 1);
+      }
+    }
   }
 
   public addProcess(
@@ -142,6 +151,17 @@ export class ProcessEditService {
       tap((uuid) => {
         process.uid = uuid;
         node.nodeConfiguration.applications.push(process);
+
+        const reqGrp = template?.preferredProcessControlGroup;
+        let targetGroup: ProcessControlGroupConfiguration;
+        if (!!reqGrp) {
+          targetGroup = node.nodeConfiguration.controlGroups.find((g) => g.name === reqGrp);
+        }
+        if (!targetGroup) {
+          targetGroup = this.edit.getLastControlGroup(node.nodeConfiguration);
+        }
+
+        targetGroup.processOrder.push(uuid);
         this.preliminary.splice(this.preliminary.indexOf(process), 1);
       })
     );

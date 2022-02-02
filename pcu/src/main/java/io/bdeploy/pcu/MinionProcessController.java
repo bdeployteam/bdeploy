@@ -102,7 +102,6 @@ public class MinionProcessController {
             InstanceProcessController controller = instance2Controller.get(instanceId);
             if (controller == null) {
                 controller = new InstanceProcessController(instanceId);
-                controller.setOrderProvider(new InstanceNodeOrderProvider(hive, inm.getKey().getName()));
                 instance2Controller.put(instanceId, controller);
                 logger.log(l -> l.debug("Creating new instance controller."), instanceId);
             }

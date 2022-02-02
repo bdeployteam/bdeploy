@@ -3,6 +3,7 @@ import { Route, RouterModule } from '@angular/router';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
+import { AddControlGroupComponent } from './components/add-control-group/add-control-group.component';
 import { AddInstanceComponent } from './components/add-instance/add-instance.component';
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
@@ -11,6 +12,7 @@ import { UpdateProductComponent } from './components/bulk-manipulation/update-pr
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { DataFilesBulkManipulationComponent } from './components/data-files-buld-maipulation/data-files-bulk-manipulation.component';
+import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
@@ -75,6 +77,8 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'history/:key/compare/:base/:compare', component: HistoryCompareComponent, canActivate: [ScopedReadGuard], data: { max: true } },
   { path: 'history/:key/select/:base', component: HistoryCompareSelectComponent, canActivate: [ScopedReadGuard] },
   { path: 'config/add-process/:node', component: AddProcessComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'config/add-control-group/:node', component: AddControlGroupComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'config/edit-control-group/:node/:group', component: EditControlGroupComponent, canActivate: [ScopedWriteGuard] },
   { path: 'config/process/:node/:process', component: EditProcessOverviewComponent, canActivate: [ScopedWriteGuard] },
   { path: 'config/process/:node/:process/move', component: MoveProcessComponent, canActivate: [ScopedWriteGuard] },
   {

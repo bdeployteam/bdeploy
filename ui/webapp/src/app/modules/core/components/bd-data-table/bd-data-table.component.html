@@ -1,5 +1,6 @@
 <div fxFlex="1 0 auto" fxLayout="column">
   <table
+    [id]="id"
     mat-table
     [dataSource]="dataSource"
     matSort
@@ -8,6 +9,8 @@
     fxFlex="1 0 auto"
     [style.width]="'100%'"
     cdkDropList
+    [cdkDropListData]="records"
+    [cdkDropListConnectedTo]="dragConnected"
     [cdkDropListDisabled]="!dragReorderMode"
     (cdkDropListDropped)="onDrop($event)"
   >

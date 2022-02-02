@@ -117,11 +117,6 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
     }
   }
 
-  // TODO: Remove if it's unused
-  /* template */ getGroupValues() {
-    return bdExtractGroups(this.grouping.definition, this.records);
-  }
-
   private getGroupRecords(group) {
     return this.recordsToDisplay$.value.filter((r) => {
       const grp = this.grouping.definition.group(r);

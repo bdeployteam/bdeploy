@@ -92,7 +92,7 @@ export interface BdDataGroupingDefinition<T> {
   group: (record: T) => string;
 
   /** provides sorting for the selected groups. the callback must be able to handle null, which is used for "No Group" */
-  sort?: (a: string, b: string) => number;
+  sort?: (a: string, b: string, recordsA?: T[], recordsB?: T[]) => number;
 }
 
 export interface BdDataGrouping<T> {

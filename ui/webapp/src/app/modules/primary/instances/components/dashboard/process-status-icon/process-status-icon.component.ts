@@ -51,6 +51,8 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
     switch (state.processState) {
       case ProcessState.STOPPED:
         return this.next('stop', null, 'Stopped', 'local-stopped');
+      case ProcessState.STOPPED_START_PLANNED:
+        return this.next(null, 'start-scheduled', 'Process scheduled to start', 'local-stopped');
       case ProcessState.RUNNING_NOT_STARTED:
         return this.next(null, 'start-scheduled', 'Process starting', 'local-running');
       case ProcessState.RUNNING:

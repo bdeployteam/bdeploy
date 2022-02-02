@@ -8,6 +8,7 @@ import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
@@ -63,6 +64,11 @@ public class InstanceNodeConfiguration {
      * All application configurations.
      */
     public final List<ApplicationConfiguration> applications = new ArrayList<>();
+
+    /**
+     * Process control groups on this node.
+     */
+    public final List<ProcessControlGroupConfiguration> controlGroups = new ArrayList<>();
 
     /**
      * Render this {@link InstanceNodeConfiguration} to a {@link ProcessGroupConfiguration}

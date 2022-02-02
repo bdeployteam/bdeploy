@@ -72,7 +72,7 @@
       icon="settings_backup_restore"
       matTooltip="Local Changes"
       [route]="['panels', 'instances', 'changes']"
-      [disabled]="!(edit.hasSaveableChanges$ | async)"
+      [disabled]="!(edit.hasSaveableChanges$ | async) && !(edit.redo$ | async) && !(edit.undo$ | async)"
     ></app-bd-panel-button>
     <app-bd-button
       text="Save Changes"

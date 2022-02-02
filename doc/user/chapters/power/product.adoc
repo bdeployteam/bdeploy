@@ -483,8 +483,9 @@ id: server-with-sleep <1>
 application: server-app
 name: "Server With Sleep"
 description: "Server application which sleeps before exiting"
+preferredProcessControlGroup: "First Group" <2>
 
-variables: <2>
+variables: <3>
   - uid: sleep-timeout
     name: "Sleep Timeout"
     description: "The amount of time the server application should sleep"
@@ -493,22 +494,23 @@ variables: <2>
     - '60'
     - '120'
 
-processControl: <3>
+processControl: <4>
   startType: MANUAL_CONFIRM
   keepAlive: false
   noOfRetries: 3
   gracePeriod: 30000
   attachStdin: true
 
-startParameters: <4>
+startParameters: <5>
 - uid: param.sleep
   value: "{{T:sleep-timeout}}"
 ----
 
 <1> An *Application Template* must have an ID. This can be used to reference it from an *Instance Template*.
-<2> A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
-<3> A template can define arbitrary process control parameters to further control the default process control settings.
-<4> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+<2> The preferred process control group is used to determine which process control group to use when applying the application template. This is only used if a *Process Control Group* with this name exists in the instance configuration. *Process Control Groups* can be pre-configured in an <<_instance_template_yaml,`instance-template.yaml`>>.
+<3> A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
+<4> A template can define arbitrary process control parameters to further control the default process control settings.
+<5> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
 
 ==== instance-template.yaml
 
@@ -528,7 +530,13 @@ variables: <2>
     description: "The amount of time the server application should sleep"
     defaultValue: 60
 
-groups: <3>
+processControlGroups: <3>
+  - name: "First Group"
+    startType: "PARALLEL"
+    startWait: "WAIT"
+    stopType: "SEQUENTIAL"
+
+groups: <4>
 - name: "Server Apps"
   description: "All server applications"
 
@@ -536,17 +544,17 @@ groups: <3>
   - application: server-app
     name: "Server No Sleep"
     description: "Server application which immediately exits"
-  - template: server-with-sleep <4>
-  - application: server-app <5>
+  - template: server-with-sleep <5>
+  - application: server-app <6>
     name: "Server With Sleep"
     description: "Server application which sleeps before exiting"
     processControl:
       startType: MANUAL_CONFIRM
-    startParameters: <6>
+    startParameters: <7>
     - uid: param.sleep
       value: "{{T:sleep-timeout}}"
 - name: "Client Apps"
-  type: CLIENT <7>
+  type: CLIENT <8>
   description: "All client applications"
   
   applications:
@@ -556,11 +564,12 @@ groups: <3>
 
 <1> Each *Instance Template* has a name and a description, which are shown on the *Instance Template* Wizard.
 <2> A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
-<3> A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
-<4> *Instance Templates* can reference *Application Templates* by their `id`. The *Instance Templates* can further refine an *Application Template* by setting any of the valid application fields in addition to the template reference.
-<5> A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for *Application Tempaltes* - except for the `id` which is not required.
-<6> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
-<7> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
+<3> *Process Control Groups* can be pre-configured for an instance template. If an application template later on wishes to be put into a certain *Process Control Group*, the group is created based on the template provided in the instance template.
+<4> A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
+<5> *Instance Templates* can reference *Application Templates* by their `id`. The *Instance Templates* can further refine an *Application Template* by setting any of the valid application fields in addition to the template reference.
+<6> A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for *Application Tempaltes* - except for the `id` which is not required.
+<7> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+<8> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
 
 An instance template will be presented to the user when visiting an <<Instance Templates,Empty Instance>>.
 

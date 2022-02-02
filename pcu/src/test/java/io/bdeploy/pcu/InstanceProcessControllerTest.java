@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 
 public class InstanceProcessControllerTest {
@@ -149,7 +151,7 @@ public class InstanceProcessControllerTest {
     }
 
     @Test
-    public void testStartStopOrder(@TempDir Path tmp) {
+    public void testStartStopOrder(@TempDir Path tmp) throws Exception {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", true, "600");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
@@ -158,26 +160,52 @@ public class InstanceProcessControllerTest {
         InstanceProcessController controller = new InstanceProcessController(group.uuid);
         controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, null, "1", group, null);
         controller.setActiveTag("1");
-        controller.setOrderProvider(t -> Arrays.asList("App2", "App1"));
+
+        // create a control group and directly assign it - usually this comes from the configuration.
+        ProcessControlGroupConfiguration pcgc = new ProcessControlGroupConfiguration();
+        pcgc.name = "Test Group";
+        pcgc.processOrder.add("App2");
+        pcgc.processOrder.add("App1");
+
+        ProcessList processList = controller.getProcessList("1");
+        processList.setControlGroups(Collections.singletonList(pcgc));
 
         // Add listeners to verify order
         List<String> order = new ArrayList<>();
-        ProcessList processList = controller.getProcessList("1");
         ProcessController pc1 = processList.get("App1");
         ProcessController pc2 = processList.get("App2");
         pc1.addStatusListener((s) -> order.add(pc1.getDescriptor().uid));
         pc2.addStatusListener((s) -> order.add(pc2.getDescriptor().uid));
+
+        StateListener pc1s = StateListener.createFor(pc1);
+        StateListener pc2s = StateListener.createFor(pc2);
+
+        pc1s.expect(ProcessState.RUNNING);
+        pc2s.expect(ProcessState.RUNNING);
 
         // Launch both applications and verify order
         controller.startAll(null);
         assertEquals("App2", order.get(0));
         assertEquals("App1", order.get(1));
 
+        // now wait until it is REALLY (async) set to running.
+        pc1s.await(Duration.ofSeconds(5));
+        pc2s.await(Duration.ofSeconds(5));
+
+        pc1s.expect(ProcessState.RUNNING_STOP_PLANNED, ProcessState.STOPPED);
+        pc2s.expect(ProcessState.RUNNING_STOP_PLANNED, ProcessState.STOPPED);
+
         // Stop both applications and verify order. Must be reversed
         order.clear();
         controller.stopAll(null);
-        assertEquals("App1", order.get(0));
-        assertEquals("App2", order.get(1));
+
+        // await the state changes.
+        pc1s.await(Duration.ofSeconds(5));
+        pc2s.await(Duration.ofSeconds(5));
+
+        assertEquals(4, order.size()); // 2 times STOP_PLANNED, 2 times STOPPED
+        assertEquals("App1", order.get(2));
+        assertEquals("App2", order.get(3));
     }
 
 }

@@ -43,6 +43,20 @@ describe('Instance Process Config Tests', () => {
 
     cy.checkMainNavFlyinClosed();
 
+    // Add/edit process Control Group
+    cy.inMainNavContent(() => {
+      cy.get('app-config-node[data-cy="master"]').within((node) => {
+        cy.get('button[data-cy^="Add Process Control Group"]').click();
+      });
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_InstanceConfigAddProcessControlGroup');
+
+    cy.inMainNavFlyin('app-add-control-group', () => {
+      cy.pressToolbarButton('Close');
+    });
+
     // Add Client Process
     cy.inMainNavContent(() => {
       cy.get('app-config-node[data-cy="__ClientApplications"]').within((node) => {
@@ -393,7 +407,7 @@ describe('Instance Process Config Tests', () => {
         cy.contains('tr', 'Server Application').click();
       });
     });
-    
+
     cy.screenshot('Doc_InstanceConfig_Endpoints');
 
     cy.inMainNavFlyin('app-edit-process-overview', () => {
@@ -405,7 +419,7 @@ describe('Instance Process Config Tests', () => {
     // TODO: check endpoint after DCS-1428 is fixed
     //cy.contains('div', 'myVersion - public/version').should('exist');
   });
-  
+
   it('Cleans up', () => {
     cy.deleteGroup(groupName);
   });

@@ -218,9 +218,20 @@ public class InstanceImportExportHelper {
                 continue;
             }
 
+            var oldUid = app.uid;
+
             // need to re-assign ID, as this might be a copy of an application on the same server.
             // this would create various issues when installing (clash of IDs), especially on the client(s).
             app.uid = UuidHelper.randomId();
+
+            // need to swap the application UID in the control group's process order as well.
+            var controlGroup = nodeCfg.controlGroups.stream().filter(g -> g.processOrder.contains(oldUid)).findAny();
+            if (controlGroup.isPresent()) {
+                var order = controlGroup.get().processOrder;
+                var index = order.indexOf(oldUid);
+
+                order.set(index, app.uid);
+            }
         }
     }
 

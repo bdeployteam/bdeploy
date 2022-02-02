@@ -6,8 +6,17 @@ import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import { ApplicationType, InstanceTemplateDescriptor, InstanceTemplateGroup, ProductDto, TemplateApplication } from 'src/app/models/gen.dtos';
+import {
+  ApplicationType,
+  InstanceNodeConfigurationDto,
+  InstanceTemplateDescriptor,
+  InstanceTemplateGroup,
+  ProcessControlGroupConfiguration,
+  ProductDto,
+  TemplateApplication,
+} from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -49,7 +58,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   /* template */ records: InstanceTemplateDescriptor[];
   /* template */ recordsLabel: string[];
 
-  /* template */ template;
+  /* template */ template: InstanceTemplateDescriptor;
   /* template */ variables: { [key: string]: string }; // key is var name, value is value.
   /* template */ groups: { [key: string]: string }; // key is group name, value is target node name.
   /* template */ messages: TemplateMessage[];
@@ -59,7 +68,11 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   /* template */ firstStepCompleted = false;
   /* template */ secondStepCompleted = false;
 
+  /* template */ groupNodes: { [key: string]: string[] };
+  /* template */ groupLabels: { [key: string]: string[] };
+
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('msgTemplate') private tplMessages: TemplateRef<any>;
   @ViewChild('stepper', { static: false }) private myStepper: MatStepper;
 
@@ -136,9 +149,11 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
   /* template */ selectTemplate() {
     // setup things required by the templates.
+    this.groupNodes = {};
+    this.groupLabels = {};
     this.template.groups.map((group) => {
-      group.nodes = this.getNodesFor(group);
-      group.labels = this.getLabelsFor(group);
+      this.groupNodes[group.name] = this.getNodesFor(group);
+      this.groupLabels[group.name] = this.getLabelsFor(group);
     });
     this.groups = {};
 
@@ -152,22 +167,20 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     this.goNext();
   }
 
-  private goNext(isLastStep = false) {
+  private goNext() {
     this.myStepper.selected.completed = true;
-    if (isLastStep) {
-      this.firstStepCompleted = false;
-      this.secondStepCompleted = false;
-      this.template = [];
-      this.myStepper.reset();
-    } else {
-      this.myStepper.next();
-    }
+    this.myStepper.next();
   }
 
   public applyStageFinal() {
     this.loading$.next(true);
     this.messages = [];
     const observables = [];
+
+    // prepare available process control groups
+    const pcgs = this.template.processControlGroups.map((p) => Object.assign({}, p) as ProcessControlGroupConfiguration);
+    pcgs.forEach((p) => (p.processOrder = []));
+
     for (const groupName of Object.keys(this.groups)) {
       const nodeName = this.groups[groupName];
       if (!nodeName) {
@@ -192,6 +205,9 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       if (group.type !== ApplicationType.CLIENT) {
         // for servers, we need to find the appropriate application with the correct OS.
         for (const app of group.applications) {
+          // need to prepare process control groups synchronously before adding applications.
+          this.prepareProcessControlGroups(app, node, pcgs, groupName, nodeName);
+
           observables.push(
             this.instanceEdit.nodes$.pipe(
               // wait for node information
@@ -261,10 +277,14 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
       return; // nothing to do...?
     }
 
+    const templateName = this.template.name; // will be reset in the process.
+
     // now execute and await all additions.
     combineLatest(observables)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((_) => {
+        this.instanceEdit.state$.value?.config?.nodeDtos.forEach((n) => this.cleanProcessControlGroup(n));
+
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
         if (!!this.messages.length) {
@@ -275,24 +295,68 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             actions: [ACTION_CANCEL, ACTION_OK],
           });
         } else {
-          this.goNext(true);
+          this.tb.closePanel();
         }
 
         applyResult.subscribe((r) => {
           if (r) {
-            this.instanceEdit.conceal(`Apply instance template ${this.template.name}`);
+            this.instanceEdit.conceal(`Apply instance template ${templateName}`);
           } else {
             this.instanceEdit.discard();
           }
         });
       });
   }
+
+  /**
+   * Prepare process control groups for the given application on the node.
+   */
+  private prepareProcessControlGroups(
+    app: TemplateApplication,
+    node: InstanceNodeConfigurationDto,
+    pcgs: ProcessControlGroupConfiguration[],
+    groupName: string,
+    nodeName: string
+  ) {
+    const cg = app.preferredProcessControlGroup;
+    if (!!cg) {
+      const existingCg = node.nodeConfiguration.controlGroups.find((n) => n.name === cg);
+      if (!existingCg) {
+        // need to prepare the group.
+        const pcgTempl = pcgs.find((p) => p.name === cg);
+        if (!pcgTempl) {
+          this.messages.push({
+            group: groupName,
+            node: nodeName,
+            appname: null,
+            template: null,
+            message: { icon: 'warning', message: `Cannot find template for requested process control group ${cg}` },
+          });
+        } else {
+          // TODO: check order of groups...? Which order is relevant? Order of groups in template?
+          node.nodeConfiguration.controlGroups.push(pcgTempl);
+        }
+      }
+    }
+  }
+
+  /**
+   * Removes empty process control groups from the configuration.
+   */
+  private cleanProcessControlGroup(node: InstanceNodeConfigurationDto) {
+    node.nodeConfiguration.controlGroups = node.nodeConfiguration.controlGroups.filter((n) => !!n.processOrder?.length);
+  }
+
   /* template */ onStepSelectionChange(event: StepperSelectionEvent) {
     switch (event.selectedIndex) {
       case 0:
         this.groups = {};
         this.firstStepCompleted = false;
         this.secondStepCompleted = false;
+
+        this.template = null;
+        this.groupLabels = null;
+        this.groupNodes = null;
         break;
       case 1:
         this.secondStepCompleted = false;

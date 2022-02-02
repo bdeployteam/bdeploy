@@ -157,6 +157,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   /* template */ doPaste(cfg: ApplicationConfiguration) {
     this.edit.node$.value.nodeConfiguration.applications.push(cfg);
+    this.instanceEdit.getLastControlGroup(this.edit.node$.value.nodeConfiguration).processOrder.push(cfg.uid);
     this.instanceEdit.conceal(`Paste ${cfg.name}`);
   }
 

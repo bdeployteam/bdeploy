@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { CoreModule } from '../../core/core.module';
@@ -9,6 +10,7 @@ import { InstancesBrowserComponent } from './components/browser/browser.componen
 import { InstanceBannerHintComponent } from './components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from './components/browser/instance-product-version/instance-product-version.component';
 import { ConfigNodeComponent } from './components/configuration/config-node/config-node.component';
+import { ControlGroupComponent } from './components/configuration/config-node/control-group/control-group.component';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
 import { ClientNodeComponent } from './components/dashboard/client-node/client-node.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
@@ -49,12 +51,22 @@ import { InstancesRoutingModule } from './instances-routing.module';
     HistoryStateColumnComponent,
     RatingStatusColumnComponent,
     StateStatusColumnComponent,
+    ControlGroupComponent,
   ],
   exports: [
     // for panels.
     NodeHeaderComponent,
     ProcessStatusIconComponent,
   ],
-  imports: [CommonModule, CoreModule, InstancesRoutingModule, MatCardModule, MatStepperModule, MatButtonToggleModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule,
+    CoreModule,
+    InstancesRoutingModule,
+    MatCardModule,
+    MatStepperModule,
+    MatButtonToggleModule,
+    MatProgressSpinnerModule,
+    MatExpansionModule,
+  ],
 })
 export class InstancesModule {}

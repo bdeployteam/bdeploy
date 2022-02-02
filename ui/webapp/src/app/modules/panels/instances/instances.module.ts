@@ -71,6 +71,8 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
+import { AddControlGroupComponent } from './components/add-control-group/add-control-group.component';
+import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
 
 @NgModule({
   declarations: [
@@ -134,6 +136,8 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
     ProductVersionDetailsComponent,
     DataFilesBulkManipulationComponent,
     ProbeStatusComponent,
+    AddControlGroupComponent,
+    EditControlGroupComponent,
   ],
   imports: [
     CommonModule,

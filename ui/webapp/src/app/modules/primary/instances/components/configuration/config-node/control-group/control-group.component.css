@@ -1,0 +1,52 @@
+.local-border-added {
+  height: 100%;
+  border-left: 5px solid var(--bd-text-success);
+}
+
+.local-border-changed {
+  height: 100%;
+  border-left: 5px solid var(--bd-primary);
+}
+
+.local-border-unchanged {
+  height: 100%;
+  border-left: 5px solid var(--bd-text-secondary);
+}
+
+.local-padding {
+  padding: 10px 0px 10px 0px;
+}
+
+.local-header {
+  background-color: var(--bd-bg-toolbar);
+}
+
+.local-config {
+  background-color: var(--bd-bg-dialog);
+  color: var(--bd-text-very-light);
+  font-size: 10px;
+
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.local-config mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+app-control-group mat-expansion-panel {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+app-control-group mat-expansion-panel-header {
+  padding: 0 0px 0 16px !important;
+  height: 59px !important;
+  background-color: var(--bd-bg-toolbar) !important;
+}
+
+app-control-group mat-expansion-panel .mat-expansion-panel-body {
+  padding: 0px 5px 5px !important;
+}

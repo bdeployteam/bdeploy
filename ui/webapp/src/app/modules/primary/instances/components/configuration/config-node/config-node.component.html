@@ -11,23 +11,52 @@
       <div fxFlex="1 0 auto"></div>
       <div fxLayout="row" fxLayoutGap="5px">
         <app-bd-panel-button
+          *ngIf="!isClientNode"
+          text="Add Process Control Group"
+          icon="more_time"
+          [route]="['panels', 'instances', 'config', 'add-control-group', nodeName]"
+          tooltip="below"
+        ></app-bd-panel-button>
+        <app-bd-panel-button
           text="Add Application"
           icon="add"
           [route]="['panels', 'instances', 'config', 'add-process', nodeName]"
           tooltip="below"
+          [style.padding-right.px]="16"
         ></app-bd-panel-button>
       </div>
     </div>
   </div>
   <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
-    <app-bd-data-table
-      #data
-      [records]="(config$ | async)?.nodeConfiguration?.applications"
-      [columns]="isClientNode ? columns.defaultProcessesConfigClientColumns : columns.defaultProcessesConfigColumns"
-      [sortData]="null"
-      [recordRoute]="getRecordRoute"
-      [dragReorderMode]="true"
-      (dragReorder)="onReorder($event)"
-    ></app-bd-data-table>
+    <ng-container *ngIf="!isClientNode; else clientTable">
+      <app-control-group
+        *ngFor="let group of (config$ | async)?.nodeConfiguration.controlGroups"
+        [group]="group"
+        [node$]="config$"
+        [(expanded)]="groupExpansion[group.name]"
+      >
+        <app-bd-data-table
+          [id]="nodeName + '||' + group.name"
+          [records]="(groupedProcesses$ | async)[group.name]"
+          [columns]="cols"
+          [sortData]="null"
+          [recordRoute]="getRecordRoute"
+          [dragConnected]="allowedSources$ | async"
+          [dragReorderMode]="true"
+          (dragReorder)="onReorder($event)"
+        ></app-bd-data-table>
+      </app-control-group>
+    </ng-container>
+    <ng-template #clientTable>
+      <app-bd-data-table
+        id="client-apps"
+        [records]="(config$ | async)?.nodeConfiguration.applications"
+        [columns]="cols"
+        [sortData]="null"
+        [recordRoute]="getRecordRoute"
+        [dragReorderMode]="true"
+        (dragReorder)="onReorder($event)"
+      ></app-bd-data-table>
+    </ng-template>
   </div>
 </div>

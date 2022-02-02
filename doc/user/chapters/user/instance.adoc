@@ -215,3 +215,27 @@ The *Manage Network Ports* panel can be reached from the *Instance Settings* pan
 The btn:[Shift Ports] action allows to bulk edit selected port parameters and shift them upwards or downwards by a given offset.
 
 The btn:[Export CSV] action allows to export a CSV list of all ports configured in the system. This can be used to pass on information to external partners, for instance for further firewall configuration, etc.
+
+==== Process Control Groups
+
+*Processes* can be grouped into *Process Control Groups*. Those groups dictate the order in which processes are started and stopped, as well as whether process startup is awaited - or not.
+
+Each *Process Control Group* has configurable behavior for contained processes regarding starting and stopping. Groups are processed in the configured order when starting, and the reverse configured order when stopping. Processes *within* each group are processed according to the groups configuration. Each group can have configuration for startup and stop behaviour.
+
+Possible values for the *Start Type* and *Stop Type* handling configuration are:
+
+* `SEQUENTIAL`: Each *Process* in the group is handled (started/stopped) sequentially. Any potential waiting (for startup and or shutdown, depending on the capabilities of the process) is done before proceeding to the next *Process* or *Process Control Group*.
+* `PARALLEL`: Each *Process* in the group is handled (started/stopped) in parallel. Only once all *Process* operations within the group have finished, the group is considered finished and processing continues with the next *Process Control Group*.
+
+Additionally, each *Process Control Group* can be configured to wait for process startup, i.e. startup probes. Each *Process Control Group* has a *Start Wait* con:figure-caption:
+
+* `WAIT`: When starting a *Process* in the group, wait for its startup to be complete. This is either once the *Startup Probe* signals process startup if available and configured, or once the process has been created if no probe is available.
+* `CONTINUE`: When starting a *Process* in the group, do not wait for its startup to be complete, instead move on to the next process immediately. This makes the startup handling types (`SEQUENTIAL`, `PARALLEL`) essentially irrelevant, as processes are typically created so fast that it does not make any difference anymore.
+
+image::images/Doc_InstanceConfigAddProcessControlGroup.png[Edit Process Control Groups,align=center,width=480,link="images/Doc_InstanceConfigAddProcessControlGroup.png"]
+
+Each `SERVER` node automatically uses *Process Control Groups* and is initialized with a 'Default' group. Adding a new *Process* to a *Node* will always add that *Process* to the last *Process Control Group*. It can then be moved by drag and drop to another *Process Control Group* if required.
+
+image::images/Doc_InstanceConfigEditProcessControlGroup.png[Edit Process Control Groups,align=center,width=480,link="images/Doc_InstanceConfigEditProcessControlGroup.png"]
+
+*Process Control Groups* themselves can be re-ordered using the btn:[Move Up] and btn:[Move Down] buttons.

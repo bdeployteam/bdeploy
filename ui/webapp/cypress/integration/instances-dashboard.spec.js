@@ -202,7 +202,6 @@ describe('Instance Dashboard Tests', () => {
 
       cy.contains('app-instance-server-node', 'master').within(() => {
         cy.contains('mat-card', 'Server No Sleep').should('exist');
-        cy.contains('mat-card', 'Server With Sleep').should('exist');
       });
     });
   });

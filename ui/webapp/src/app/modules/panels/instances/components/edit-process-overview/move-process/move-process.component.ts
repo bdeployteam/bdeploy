@@ -3,6 +3,7 @@ import { combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import { ApplicationType, InstanceNodeConfigurationDto, OperatingSystem } from 'src/app/models/gen.dtos';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { updateAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
@@ -34,7 +35,7 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
   private currentNode: InstanceNodeConfigurationDto;
   private subscription: Subscription;
 
-  constructor(public instanceEdit: InstanceEditService, public edit: ProcessEditService) {
+  constructor(public instanceEdit: InstanceEditService, public edit: ProcessEditService, private areas: NavAreasService) {
     this.subscription = combineLatest([this.instanceEdit.state$, this.edit.application$, this.edit.process$, this.instanceEdit.nodes$]).subscribe(
       ([state, app, process, nodes]) => {
         if (!state || !app || !process || !nodes) {
@@ -92,22 +93,25 @@ export class MoveProcessComponent implements OnInit, OnDestroy {
 
     const cfg = this.edit.process$.value;
 
-    const origApps = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === this.currentNode.nodeName)?.nodeConfiguration?.applications;
-    const targetApps = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === node.name)?.nodeConfiguration?.applications;
+    const targetNode = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === node.name)?.nodeConfiguration;
+    const targetApps = targetNode?.applications;
 
-    if (!origApps || !targetApps) {
+    if (!targetNode) {
       return;
     }
 
-    origApps.splice(
-      origApps.findIndex((a) => a.uid === cfg.uid),
-      1
-    );
+    // remove the current process.
+    this.edit.removeProcess();
+
     if (node.type !== ApplicationType.CLIENT) {
       updateAppOs(cfg.application, node.os);
     }
-    targetApps.push(cfg);
 
+    targetApps.push(cfg);
+    this.instanceEdit.getLastControlGroup(targetNode).processOrder.push(cfg.uid);
     this.instanceEdit.conceal(`Move ${cfg.name} from ${this.niceName(this.currentNode.nodeName)} to ${node.name}`);
+
+    // this edit is so severe that none of the panels (edit overview, etc.) will work as data is shifted. close panels completely.
+    this.areas.closePanel();
   }
 }

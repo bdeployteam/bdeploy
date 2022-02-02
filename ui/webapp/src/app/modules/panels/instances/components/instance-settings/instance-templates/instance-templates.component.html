@@ -37,8 +37,8 @@
                   [matTooltip]="group.description"
                   [attr.name]="group.name"
                   [(ngModel)]="groups[group.name]"
-                  [values]="group.nodes"
-                  [labels]="group.labels"
+                  [values]="groupNodes[group.name]"
+                  [labels]="groupLabels[group.name]"
                   (ngModelChange)="validateAnyGroupSelected()"
                 ></app-bd-form-select>
               </ng-container>

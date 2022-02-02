@@ -4,11 +4,19 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-import { ApplicationConfiguration, InstanceDto, InstanceNodeConfigurationDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  InstanceDto,
+  InstanceNodeConfigurationDto,
+  InstanceStateRecord,
+  ProcessControlGroupHandlingType,
+  ProcessControlGroupWaitType,
+} from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { getNodeOfApplication, getProcessControlGroupOfApplication } from 'src/app/modules/panels/instances/utils/instance-utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceStateService } from '../../services/instance-state.service';
 import { InstancesService } from '../../services/instances.service';
@@ -27,11 +35,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /* template */ gridMode$ = new BehaviorSubject<boolean>(false);
   /* template */ grouping$ = new BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>([]);
+  /* template */ defaultGrouping$ = new BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>([]);
 
   /* template */ groupingDefinitions: BdDataGroupingDefinition<ApplicationConfiguration>[] = [
+    { name: 'Process Control Group', group: (a) => this.getControlGroupDesc(a), sort: (a, b, eA) => this.sortControlGroup(a, b, eA) },
     { name: 'Start Type', group: (a) => a?.processControl?.startType },
     { name: 'Application', group: (a) => a?.application?.name },
   ];
+  /* template */ defaultGrouping: BdDataGrouping<ApplicationConfiguration>[] = [{ definition: this.groupingDefinitions[0], selected: [] }];
 
   /* template */ collapsed$ = new BehaviorSubject<boolean>(false);
 
@@ -79,7 +90,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName))
         );
 
-        this.allApplications$.next([].concat(nodes.nodeConfigDtos.map((x) => (!!x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : []))));
+        const allApps = [];
+        nodes.nodeConfigDtos.forEach((x) => allApps.push(...(!!x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : [])));
+        this.allApplications$.next(allApps);
         this.clientNode$.next(nodes.nodeConfigDtos.find((p) => p.nodeName === CLIENT_NODE_NAME && p.nodeConfiguration?.applications?.length));
       })
     );
@@ -124,5 +137,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .activate(version)
       .pipe(finalize(() => this.activating$.next(false)))
       .subscribe();
+  }
+
+  private getControlGroupDesc(app: ApplicationConfiguration): string {
+    const node = getNodeOfApplication(this.serverNodes$.value, app.uid);
+    if (!node) {
+      return null; // client apps
+    }
+    const grp = getProcessControlGroupOfApplication(node.nodeConfiguration?.controlGroups, app.uid);
+    return `${grp?.name} [${grp?.startType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}-${
+      grp?.startWait === ProcessControlGroupWaitType.WAIT ? 'W' : 'C'
+    }/${grp?.stopType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}]`;
+  }
+
+  private sortControlGroup(a: string, b: string, entriesA: ApplicationConfiguration[]): number {
+    // a group can only exist if it has entries, so entriesA cannot be empty. All entries are on the same node, so we calculate the node
+    // (hosting the control groups) from *any* application.
+    if (!entriesA) {
+      // grouping panel, etc.
+      return a.localeCompare(b);
+    }
+    const node = getNodeOfApplication(this.serverNodes$.value, entriesA[0].uid);
+    if (!node) {
+      return a.localeCompare(b); // client apps
+    }
+    return node.nodeConfiguration.controlGroups?.findIndex((g) => g.name === a) - node.nodeConfiguration.controlGroups?.findIndex((g) => g.name === b);
   }
 }

@@ -24,6 +24,13 @@ public class InstanceTemplateDescriptor {
     public List<TemplateVariable> variables = new ArrayList<>();
 
     /**
+     * A list of process control groups which should be created when applying the instance template.
+     * <p>
+     * Each template application can specify the name of a control group it wishes to be put into.
+     */
+    public List<InstanceTemplateControlGroup> processControlGroups = new ArrayList<>();
+
+    /**
      * A list of group definitions
      */
     public List<InstanceTemplateGroup> groups = new ArrayList<>();

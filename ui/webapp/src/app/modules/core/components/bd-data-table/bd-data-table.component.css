@@ -42,7 +42,7 @@
 }
 
 .cdk-drag-placeholder {
-  opacity: 0;
+  opacity: 0.1;
 }
 
 .cdk-drag-animating {

@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -51,6 +52,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
@@ -416,11 +418,41 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             SortedMap<String, InstanceNodeConfiguration> nodes = new TreeMap<>();
             if (state.nodeDtos != null) {
-                state.nodeDtos.forEach(n -> nodes.put(n.nodeName, n.nodeConfiguration));
+                state.nodeDtos.forEach(n -> nodes.put(n.nodeName, updateControlGroups(n.nodeConfiguration)));
             }
 
             return createInstanceVersion(rootKey, state.config, nodes);
         }
+    }
+
+    private InstanceNodeConfiguration updateControlGroups(InstanceNodeConfiguration nodeConfiguration) {
+        if (nodeConfiguration.controlGroups.isEmpty()) {
+            // nothing defined yet, fill it with the default - processes in configuration order.
+            ProcessControlGroupConfiguration defGrp = new ProcessControlGroupConfiguration();
+            defGrp.processOrder.addAll(nodeConfiguration.applications.stream().map(a -> a.uid).toList());
+
+            nodeConfiguration.controlGroups.add(defGrp);
+        } else {
+            // make sure that all processes are in *SOME* group. if not, we try to find or create a default group.
+            for (ApplicationConfiguration app : nodeConfiguration.applications) {
+                Optional<ProcessControlGroupConfiguration> group = nodeConfiguration.controlGroups.stream()
+                        .filter(g -> g.processOrder.contains(app.uid)).findAny();
+                if (group.isEmpty()) {
+                    ProcessControlGroupConfiguration defGrp = nodeConfiguration.controlGroups.stream()
+                            .filter(g -> g.name.equals(ProcessControlGroupConfiguration.DEFAULT_GROUP)).findAny()
+                            .orElseGet(() -> {
+                                ProcessControlGroupConfiguration newDefGrp = new ProcessControlGroupConfiguration();
+                                nodeConfiguration.controlGroups.add(0, newDefGrp); // default should be in front.
+                                return newDefGrp;
+                            });
+
+                    // application not in any group.
+                    defGrp.processOrder.add(app.uid);
+                }
+            }
+        }
+
+        return nodeConfiguration;
     }
 
     private ObjectId applyConfigUpdates(ObjectId configTree, List<FileStatusDto> updates) {

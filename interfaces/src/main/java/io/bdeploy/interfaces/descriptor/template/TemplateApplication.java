@@ -30,6 +30,12 @@ public class TemplateApplication {
     public String description;
 
     /**
+     * The name of a potentially existing process control group. If a group with this name exists, the application is put into
+     * that group. Otherwise it is appended to the last existing group on the node (the default for adding applications).
+     */
+    public String preferredProcessControlGroup;
+
+    /**
      * The process control configuration to apply.
      * <p>
      * This is interpreted as {@link ProcessControlConfiguration}, but defined as Map to allow partial deserialization.

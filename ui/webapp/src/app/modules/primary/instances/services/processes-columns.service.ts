@@ -18,14 +18,14 @@ import { ProcessesService } from './processes.service';
 export class ProcessesColumnsService {
   processNameColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'name',
-    name: 'Configuration Name',
+    name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.name,
   };
 
   processNameAndOsColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'nameAndOs',
-    name: 'Configuration Name and OS',
+    name: 'Name and OS',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.name,
     component: ProcessNameAndOsComponent,
@@ -51,7 +51,7 @@ export class ProcessesColumnsService {
 
   processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'name',
-    name: 'Configuration Name',
+    name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.name,
     classes: (r) => this.getStateClass(r),
@@ -59,7 +59,7 @@ export class ProcessesColumnsService {
 
   processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'name',
-    name: 'Configuration Name and OS',
+    name: 'Name and OS',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.name,
     classes: (r) => this.getStateClass(r),
@@ -79,7 +79,7 @@ export class ProcessesColumnsService {
     name: 'Application Type',
     data: (r) => this.edit.getApplicationDescriptor(r.application.name)?.name,
     width: '200px',
-    showWhen: '(min-width: 700px)',
+    showWhen: '(min-width: 1180px)',
   };
 
   processActualityColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -103,7 +103,7 @@ export class ProcessesColumnsService {
     hint: BdDataColumnTypeHint.STATUS,
     component: ProcessStatusIconComponent,
     data: (r) => ProcessesService.get(this.processes.processStates$.value, r.uid)?.processState,
-    width: '64px',
+    width: '40px',
   };
 
   processPortRatingColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -112,7 +112,7 @@ export class ProcessesColumnsService {
     hint: BdDataColumnTypeHint.STATUS,
     component: PortStatusColumnComponent,
     data: (r) => this.getAllPortsRating(r),
-    width: '64px',
+    width: '40px',
   };
 
   defaultProcessesColumns: BdDataColumn<ApplicationConfiguration>[] = [

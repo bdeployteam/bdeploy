@@ -80,6 +80,23 @@ describe('Instance Settings Tests', () => {
 
     cy.screenshot('Doc_InstanceTemplatesDone');
 
+    // edit control group
+    cy.inMainNavContent(() => {
+      cy.get('app-config-node[data-cy="master"]').within((node) => {
+        cy.contains('app-control-group', 'First Group').within(() => {
+          cy.get('button[data-cy^="Edit Control Group"]').click();
+        });
+      });
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_InstanceConfigEditProcessControlGroup');
+
+    cy.inMainNavFlyin('app-edit-control-group', () => {
+      cy.pressToolbarButton('Close');
+    });
+
+    // continue with parameter configuration.
     cy.inMainNavContent(() => {
       cy.contains('app-config-node', 'master').within(() => {
         cy.contains('tr', 'Another Server With Sleep').should('exist').click();

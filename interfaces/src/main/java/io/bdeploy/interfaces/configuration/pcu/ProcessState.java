@@ -15,6 +15,11 @@ public enum ProcessState {
     STOPPED,
 
     /**
+     * Process is not started yet, but planned to be started.
+     */
+    STOPPED_START_PLANNED,
+
+    /**
      * Process is running.
      */
     RUNNING,
@@ -72,7 +77,7 @@ public enum ProcessState {
      * @return {@code true} if it is stopped
      */
     public boolean isStopped() {
-        return this == STOPPED || this == CRASHED_PERMANENTLY;
+        return this == STOPPED || this == STOPPED_START_PLANNED || this == CRASHED_PERMANENTLY;
     }
 
     /**
