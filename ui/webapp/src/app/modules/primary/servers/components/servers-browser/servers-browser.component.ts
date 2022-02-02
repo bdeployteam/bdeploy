@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BdDataGroupingDefinition } from 'src/app/models/data';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { GroupsService } from '../../../groups/services/groups.service';
 import { ServersColumnsService } from '../../services/servers-columns.service';
 import { ServersService } from '../../services/servers.service';
@@ -17,9 +18,14 @@ export class ServersBrowserComponent implements OnInit, OnDestroy {
     return ['', { outlets: { panel: ['panels', 'servers', 'details', row.hostName] } }];
   };
 
-  constructor(public groups: GroupsService, public servers: ServersService, public columns: ServersColumnsService) {}
+  /* template */ isCardView: boolean;
+  /* template */ presetKeyValue: string = 'managedServers';
 
-  ngOnInit(): void {}
+  constructor(public groups: GroupsService, public servers: ServersService, public columns: ServersColumnsService, private cardViewService: CardViewService) {}
+
+  ngOnInit(): void {
+    this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
+  }
 
   ngOnDestroy(): void {}
 }

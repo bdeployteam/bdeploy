@@ -6,6 +6,7 @@ import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { ApplicationConfiguration, InstanceDto, InstanceNodeConfigurationDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ServersService } from '../../../servers/services/servers.service';
@@ -43,6 +44,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
   /* template */ public isCentral: boolean = false;
+  private isCardView: boolean;
 
   constructor(
     private media: BreakpointObserver,
@@ -51,7 +53,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private cfg: ConfigService,
     public servers: ServersService,
     public auth: AuthenticationService,
-    private states: InstanceStateService
+    private states: InstanceStateService,
+    private cardViewService: CardViewService
   ) {}
 
   ngOnInit(): void {
@@ -96,6 +99,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.activeInstance = activeInstance;
       })
     );
+
+    this.isCardView = this.cardViewService.checkCardView('processList');
+    if (this.isCardView) {
+      this.gridMode$.next(this.isCardView);
+    }
   }
 
   ngOnDestroy(): void {
