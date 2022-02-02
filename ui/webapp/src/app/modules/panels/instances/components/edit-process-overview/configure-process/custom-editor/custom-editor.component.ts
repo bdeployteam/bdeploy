@@ -83,6 +83,7 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.plugins.load(this.plugin, this.findEditor().modulePath).then((m) => {
       this.editor = new m.default(this.plugins.getApi(this.plugin)) as EditorPlugin;
+      this.currentValue = this.value.value;
 
       this.dialog
         .message({
