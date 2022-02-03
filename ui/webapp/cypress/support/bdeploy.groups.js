@@ -178,6 +178,7 @@ Cypress.Commands.add('attachManaged', function (groupName, screenshot = false) {
     cy.contains('div', 'Details for server to link').should('exist');
     cy.contains('button', 'Save').should('exist').and('be.disabled');
     cy.fillFormInput('description', 'Description of managed server');
+    cy.fillFormInput('uri', Cypress.env('backendBaseUrlManaged'));
   });
   cy.screenshot('Doc_CentralLinkServerFilled');
   cy.inMainNavFlyin('app-link-managed', () => {

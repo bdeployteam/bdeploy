@@ -18,6 +18,7 @@ import { ThemeService } from './theme.service';
 export interface AppConfig {
   version: Version;
   api: string;
+  ws: string;
   mode: MinionMode;
 }
 
@@ -74,9 +75,11 @@ export class ConfigService {
           this.config = {
             version: bv.version,
             api: environment.apiUrl,
+            ws: environment.wsUrl,
             mode: bv.mode,
           };
           console.log('API URL set to ' + this.config.api);
+          console.log('WS URL set to ' + this.config.ws);
           console.log('Remote reports mode ' + this.config.mode);
           this.isCentral$.next(this.config.mode === MinionMode.CENTRAL);
           this.isManaged$.next(this.config.mode === MinionMode.MANAGED);

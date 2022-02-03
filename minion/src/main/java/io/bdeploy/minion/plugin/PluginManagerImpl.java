@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.jersey.server.ContainerFactory;
@@ -294,8 +295,7 @@ public class PluginManagerImpl implements PluginManager {
         for (PluginAssets assets : handle.plugin.getAssets()) {
             // create, register, remember file serving handler. plugin requested asset path is added to the context path to assure
             // propper lookups in the handler. The served root in the JAR should be the relative root as well ('/*').
-            HttpHandler files = server.getCorsAwareStaticClassPathHandler(handle.pluginLoader,
-                    withTrailingSlash(assets.getJarPath()));
+            HttpHandler files = new CLStaticHttpHandler(handle.pluginLoader, withTrailingSlash(assets.getJarPath()));
             server.addHandler(files, HttpHandlerRegistration.builder()
                     .contextPath(contextRoot + withLeadingSlash(assets.getUrlPath())).urlPattern("/*").build());
             handle.createdHandlers.add(files);

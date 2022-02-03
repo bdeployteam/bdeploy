@@ -11,7 +11,13 @@ group configuration MasterNode {
 	adopt member Master;
 }
 
-/** Launches the central master with a managed master + node */
+/** Launches the central master with a managed master */
+group configuration CentralMaster {
+	adopt member Managed-Master;
+	adopt member Central-Master;
+}
+
+/** Launches the central master with a managed master  + node  */
 group configuration CentralMasterNode {
 	adopt member Managed-Node regex ".*Started.*";
 	adopt member Managed-Master;

@@ -26,10 +26,6 @@ public class JerseyAuditingFilter implements ContainerResponseFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
-        if (JerseyCorsFilter.isPreflightRequest(requestContext)) {
-            return;
-        }
-
         StatusType status = responseContext.getStatusInfo();
 
         // skip GET reqeusts which are successful

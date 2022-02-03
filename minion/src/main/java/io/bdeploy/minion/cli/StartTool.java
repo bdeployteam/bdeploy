@@ -88,9 +88,6 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         @Help(value = "Publish the web application, defaults to true.", arg = false)
         boolean publishWebapp() default true;
 
-        @Help(value = "Allow CORS, allows the web-app to run on a different port than the backend.", arg = false)
-        boolean allowCors() default false;
-
         @Help("A token which can be used to remotely shutdown the server on /shutdown")
         String shutdownToken();
 
@@ -152,8 +149,6 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             }
             return !info.inactive;
         });
-        srv.setCorsEnabled(config.allowCors());
-
         registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv), getAuditorFactory());
     }
 

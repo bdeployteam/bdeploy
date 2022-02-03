@@ -93,12 +93,6 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
                 }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev-central.ts"
-                }
               ]
             },
             "managed": {
@@ -106,12 +100,6 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev-managed.ts"
                 }
               ]
             },
@@ -121,12 +109,6 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
                 }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cov-standalone.ts"
-                }
               ]
             },
             "cov-central": {
@@ -135,12 +117,6 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
                 }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cov-central.ts"
-                }
               ]
             },
             "cov-managed": {
@@ -148,12 +124,6 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "6kb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cov-managed.ts"
                 }
               ]
             }
@@ -162,7 +132,8 @@
         "serve": {
           "builder": "ngx-build-plus:dev-server",
           "options": {
-            "browserTarget": "webapp:build"
+            "browserTarget": "webapp:build",
+            "proxyConfig": "src/proxy/proxy.conf.js"
           },
           "configurations": {
             "production": {
@@ -170,24 +141,29 @@
             },
             "central": {
               "browserTarget": "webapp:build:central",
+              "proxyConfig": "src/proxy/proxy.conf.dev-central.js",
               "port": 4201
             },
             "managed": {
               "browserTarget": "webapp:build:managed",
+              "proxyConfig": "src/proxy/proxy.conf.dev-managed.js",
               "port": 4202
             },
             "cov-standalone": {
               "browserTarget": "webapp:build:cov-standalone",
+              "proxyConfig": "src/proxy/proxy.conf.cov-standalone.js",
               "port": 4210,
               "extraWebpackConfig": "./cypress/coverage.webpack.js"
             },
             "cov-central": {
               "browserTarget": "webapp:build:cov-central",
+              "proxyConfig": "src/proxy/proxy.conf.cov-central.js",
               "port": 4211,
               "extraWebpackConfig": "./cypress/coverage.webpack.js"
             },
             "cov-managed": {
               "browserTarget": "webapp:build:cov-managed",
+              "proxyConfig": "src/proxy/proxy.conf.cov-managed.js",
               "port": 4212,
               "extraWebpackConfig": "./cypress/coverage.webpack.js"
             }

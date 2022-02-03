@@ -81,15 +81,14 @@ export class ObjectChangesService {
   }
 
   private getWebsocketUrl(): string {
-    if (this.cfg.config.api.startsWith('https://')) {
-      return this.cfg.config.api.replace('https', 'wss').replace('/api', '/ws');
-    } else if (this.cfg.config.api.startsWith('/')) {
-      // relative, use browser information to figure out an absolute URL, since WebSockets require this.
+    // relative, use browser information to figure out an absolute URL, since WebSockets require this.
+    if (this.cfg.config.ws.startsWith('/')) {
       const url = new URL(window.location.href);
-      return 'wss://' + url.host + '/ws';
-    } else {
-      throw new Error('Cannot figure out WebSocket URL');
+      const isHttps = url.protocol === 'https:';
+      const wsProtocol = isHttps ? 'wss:' : 'ws:';
+      return wsProtocol + url.host + this.cfg.config.ws;
     }
+    return this.cfg.config.ws;
   }
 
   private onMessage(event: MessageEvent<string>) {

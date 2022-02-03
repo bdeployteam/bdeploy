@@ -22,13 +22,10 @@ import javax.net.ssl.SSLContext;
 
 import org.glassfish.grizzly.http.CompressionConfig;
 import org.glassfish.grizzly.http.CompressionConfig.CompressionMode;
-import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.Request;
-import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
@@ -122,8 +119,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
     private UserValidator userValidator;
 
-    private boolean corsEnabled;
-
     private GrizzlyHttpContainer container;
 
     /**
@@ -167,40 +162,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
      */
     public ActivityReporter getRemoteActivityReporter() {
         return reporterDelegate;
-    }
-
-    /**
-     * @param allowCors whether this server instance will allow cross origin requests - mainly for development.
-     */
-    public void setCorsEnabled(boolean allowCors) {
-        this.corsEnabled = allowCors;
-    }
-
-    /**
-     * @param loader the classloader to load assets to serve from.
-     * @param path the path relative to the given classloader
-     * @return a {@link HttpHandler} which serves file from the given classloader according to the current CORS setting.
-     */
-    public HttpHandler getCorsAwareStaticClassPathHandler(ClassLoader loader, String path) {
-        if (!corsEnabled) {
-            // using file cache, optimizations, etc.
-            return new CLStaticHttpHandler(loader, path);
-        }
-
-        CLStaticHttpHandler handler = new CLStaticHttpHandler(loader, path) {
-
-            @Override
-            public void service(Request request, Response response) throws Exception {
-                response.setHeader("Access-Control-Allow-Credentials", "true");
-                response.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS, HEAD");
-                response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-                response.setHeader("Access-Control-Allow-Headers", "*");
-                super.service(request, response);
-            }
-        };
-        // need to disable to always hit the service method which sets the CORS headers.
-        handler.setFileCacheEnabled(false);
-        return handler;
     }
 
     /**
@@ -358,10 +319,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         config.register(new JerseyLazyReporterInitializer());
         config.register(new JerseyServerReporterContextResolver());
         config.register(new JerseyWriteLockFilter());
-
-        if (corsEnabled) {
-            config.register(JerseyCorsFilter.class);
-        }
 
         config.property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, CL_BUFFER_SIZE);
     }
