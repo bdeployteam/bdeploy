@@ -169,6 +169,8 @@ describe('Admin UI Tests (Settings)', () => {
     });
 
     cy.pressMainNavButton('Instance Groups');
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Data Grouping');
     });

@@ -111,7 +111,11 @@ describe('Instance Settings Tests', () => {
         cy.fillFormInput('newName', 'binary2.cfg');
         cy.get('button[data-cy="Confirm"]').should('be.enabled').click();
       });
+    });
 
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavFlyin('app-config-files', () => {
       cy.pressToolbarButton('Back to Overview');
     });
 
