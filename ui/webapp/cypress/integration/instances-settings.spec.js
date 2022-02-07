@@ -200,6 +200,8 @@ describe('Instance Settings Tests', () => {
       cy.pressToolbarButton('Apply');
     });
 
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavFlyin('app-config-files', () => {
       cy.pressToolbarButton('Back to Overview');
     });
