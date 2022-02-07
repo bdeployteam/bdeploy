@@ -65,3 +65,8 @@
   top: -5px;
   left: -30px;
 }
+
+.local-nav-bar {
+  background: var(--bd-bg-toolbar);
+  color: var(--bd-text);
+}

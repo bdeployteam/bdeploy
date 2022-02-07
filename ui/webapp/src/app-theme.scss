@@ -202,7 +202,7 @@ $app-dark-theme: add-custom-colors(
   mat.define-palette($md-bdgrey, 700),
   mat-define-palette($md-bdgreen, 700)
 );
-$app-dark-theme: override-theme-background($app-dark-theme, app-bar, #3d3c3e);
+$app-dark-theme: override-theme-background($app-dark-theme, app-bar, #2e2e2e);
 .app-dark-theme {
   @include all-themes($app-dark-theme);
   @include ngx-charts-dark();

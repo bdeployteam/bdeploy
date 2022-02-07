@@ -21,24 +21,7 @@
 
   overflow: visible;
 
-  opacity: 0.5;
-
   z-index: 0;
-}
-
-.local-fade-out-left {
-  height: 100%;
-  width: max(120px, 20%);
-
-  position: absolute;
-
-  background: linear-gradient(90deg, var(--bd-bg-toolbar) 0%, var(--bd-bg-toolbar) 50%, rgba(0, 0, 0, 0) 100%);
-  opacity: 0.7;
-
-  z-index: 1;
-
-  /* allows hovering on SVG elements *beneath* the content */
-  pointer-events: none;
 }
 
 .local-no-data-overlay {

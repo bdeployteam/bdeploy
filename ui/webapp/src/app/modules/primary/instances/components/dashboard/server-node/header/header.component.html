@@ -69,7 +69,6 @@
       </g>
     </g>
   </svg>
-  <div class="local-fade-out-left"></div>
   <div class="local-no-data-overlay bd-description-text" *ngIf="!hasVisiblePoint" fxLayout="column" fxLayoutAlign="center center">
     <div><strong>No data available.</strong></div>
     <div *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)">The server is not synchronized. Please synchronize first.</div>
