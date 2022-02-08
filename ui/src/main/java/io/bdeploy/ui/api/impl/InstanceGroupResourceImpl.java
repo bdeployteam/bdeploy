@@ -235,6 +235,13 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
+    public void deleteImage(String group) {
+        InstanceGroupConfiguration config = read(group);
+        config.logo = null;
+        update(group, config);
+    }
+
+    @Override
     public InputStream readImage(String group) {
         ObjectId id = read(group).logo;
         if (id == null) {

@@ -72,6 +72,11 @@ public interface InstanceGroupResource {
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
     public void updateImage(@ActivityScope @PathParam("group") String group, @FormDataParam("image") InputStream imageData);
 
+    @DELETE
+    @Path("/{group}/image")
+    @RequiredPermission(permission = Permission.WRITE, scope = "group")
+    public void deleteImage(@ActivityScope @PathParam("group") String group);
+
     @GET
     @Path("/{group}/image")
     @Produces("image/png")
