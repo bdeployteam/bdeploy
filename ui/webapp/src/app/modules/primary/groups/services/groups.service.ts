@@ -92,6 +92,10 @@ export class GroupsService {
     return this.http.post<Response>(`${this.apiPath}/${group}/image`, formData);
   }
 
+  public removeImage(group: string) {
+    return this.http.delete<Response>(`${this.apiPath}/${group}/image`);
+  }
+
   private reload() {
     this.loading$.next(true);
     forkJoin({

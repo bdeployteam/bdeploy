@@ -3,7 +3,7 @@ import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular
 import { NgForm } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, Observable, of, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { concatMap, debounceTime, finalize } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -90,6 +90,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
   /* template */ onSelectImage(image: File) {
     this.imageChanged = true;
     this.image = image;
+    this.disableSave = this.isDirty();
   }
 
   /* template */ onUnsupportedFile(file: File) {
@@ -105,15 +106,12 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
 
   public doSave(): Observable<any> {
     this.saving$.next(true);
-    return this.details.update(this.group).pipe(
-      concatMap((_) => {
-        if (this.imageChanged) {
-          return this.groups.updateImage(this.group.name, this.image);
-        } else {
-          of(true);
-        }
-      })
-    );
+    if (this.imageChanged) {
+      return this.details
+        .update(this.group)
+        .pipe(concatMap((_) => (this.image ? this.groups.updateImage(this.group.name, this.image) : this.groups.removeImage(this.group.name))));
+    }
+    return this.details.update(this.group);
   }
 
   private reset() {

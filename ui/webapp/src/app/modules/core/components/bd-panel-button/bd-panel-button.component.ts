@@ -42,7 +42,9 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   private getRoute(snap: ActivatedRouteSnapshot) {
