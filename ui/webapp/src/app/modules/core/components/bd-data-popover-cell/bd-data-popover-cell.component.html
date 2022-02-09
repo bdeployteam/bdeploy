@@ -1,0 +1,10 @@
+<div fxLayout="row" fxLayoutAlign="start" *ngIf="column.data(record) as item">
+  <div class="bd-text-ellipsis" [appBdPopup]="popup" appBdPopupTrigger="hover" [appBdPopupDelay]="500" [appBdPopupPosition]="'above-right'">
+    {{ item }}
+    <ng-template #popup>
+      <mat-card [style.padding.px]="10" [style.max-width.px]="400" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
+        <p [style.word-break]="'break-word'">{{ item }}</p>
+      </mat-card>
+    </ng-template>
+  </div>
+</div>

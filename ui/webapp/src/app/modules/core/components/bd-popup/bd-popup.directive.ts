@@ -3,6 +3,7 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import { Directive, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { cloneDeep } from 'lodash-es';
+import { PopupService } from '../../services/popup.service';
 
 /**
  * Popup preferred position.
@@ -106,7 +107,7 @@ export class BdPopupDirective implements OnInit {
   private delayTimer;
   private overlayRef: OverlayRef;
 
-  constructor(private host: ElementRef, private overlay: Overlay, private viewContainerRef: ViewContainerRef) {}
+  constructor(private host: ElementRef, private overlay: Overlay, private viewContainerRef: ViewContainerRef, private popupService: PopupService) {}
 
   ngOnInit(): void {}
 
@@ -156,6 +157,8 @@ export class BdPopupDirective implements OnInit {
     const portal = new TemplatePortal(this.appBdPopup, this.viewContainerRef);
     this.overlayRef.attach(portal);
 
+    this.popupService.setOverlay(this.overlayRef);
+
     this.appBdPopupOpened.emit(this);
   }
 
@@ -199,10 +202,12 @@ export class BdPopupDirective implements OnInit {
 
   /** Closes the overlay if present */
   closeOverlay() {
-    if (this.overlayRef) {
+    if (this.popupService.getOverlay()) {
+      this.overlayRef = this.popupService.getOverlay();
       this.overlayRef.detach();
       this.overlayRef.dispose();
       this.overlayRef = null;
     }
+    this.popupService.setOverlay(this.overlayRef);
   }
 }
