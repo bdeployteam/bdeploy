@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceConfiguration, InstancePurpose, ManagedMasterDto } from 'src/app/models/gen.dtos';
@@ -41,7 +42,8 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
     public products: ProductsService,
     private areas: NavAreasService,
     public servers: ServersService,
-    public cfg: ConfigService
+    public cfg: ConfigService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -102,7 +104,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
       .create(this.config, this.server?.hostName)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((_) => {
-        this.areas.closePanel();
+        this.router.navigate(['instances', 'dashboard', this.areas.groupContext$.value, this.config.uuid]);
       });
   }
 
