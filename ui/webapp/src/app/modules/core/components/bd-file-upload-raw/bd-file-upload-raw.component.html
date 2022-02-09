@@ -2,7 +2,7 @@
   [header]="header$ | async"
   [icon]="icon$ | async"
   [disabled]="(isUploadProcessing$ | async) || (isImporting$ | async)"
-  [warning]="(isUploadFailed$ | async) || (isImportFailed$ | async)"
+  [type]="(isUploadFailed$ | async) || (isImportFailed$ | async) ? 'warning' : 'generic'"
   (dismiss)="onDismiss()"
 >
   <mat-progress-bar

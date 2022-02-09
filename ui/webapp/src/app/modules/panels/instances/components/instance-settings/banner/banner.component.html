@@ -37,7 +37,7 @@
     <app-bd-notification-card
       icon="history"
       *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
-      [warning]="true"
+      [type]="'warning'"
       [dismissable]="false"
       header="Server Not Synchronized"
     >

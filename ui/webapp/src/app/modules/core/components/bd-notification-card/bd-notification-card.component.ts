@@ -9,7 +9,7 @@ export class BdNotificationCardComponent implements OnInit {
   @Input() header: string;
   @Input() icon: string;
   @Input() svgIcon: string;
-  @Input() warning = false;
+  @Input() type: 'error' | 'warning' | 'generic' = 'generic';
   @Input() disabled = false;
   @Input() dismissable = true;
   @Input() background: 'toolbar' | 'dialog' = 'toolbar';

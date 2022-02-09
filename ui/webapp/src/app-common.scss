@@ -171,6 +171,17 @@
     color: var(--bd-main-bar-contrast);
   }
 
+  // TODO add darker color for gradient
+  .bd-glow-bg-warn {
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn) 100%);
+    color: var(--bd-warn-contrast);
+  }
+
+  .bd-glow-bg-error {
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn) 100%);
+    color: var(--bd-warn-contrast);
+  }
+
   $drag-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 800), mat.get-color-from-palette(mat.$yellow-palette, 200));
   $border-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 300), mat.get-color-from-palette(mat.$grey-palette, 700));
   .bd-drag-card {
