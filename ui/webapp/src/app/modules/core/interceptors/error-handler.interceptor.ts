@@ -43,10 +43,10 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
                 console.warn('Cannot parse request URL', error);
               }
               this.snackbar.open(e.status + ': ' + e.statusText + ': ' + displayPath, 'DISMISS', { panelClass: 'error-snackbar' });
-              return of(null);
+              return throwError(() => e);
           }
         }
-        return throwError(e);
+        return throwError(() => e);
       })
     );
   }

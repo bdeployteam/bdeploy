@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, finalize } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -22,9 +22,15 @@ export class AddRepositoryComponent implements OnInit {
 
   /* template */ onSave() {
     this.saving$.next(true);
-    this.repositories.create(this.repository).subscribe((_) => {
-      this.saving$.next(false);
-      this.areas.closePanel();
-    });
+    this.repositories
+      .create(this.repository)
+      .pipe(finalize(() => this.saving$.next(false)))
+      .subscribe(
+        (_) => {
+          this.saving$.next(false);
+          this.areas.closePanel();
+        },
+        () => {}
+      );
   }
 }
