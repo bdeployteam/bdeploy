@@ -2,18 +2,18 @@
   <app-bd-dialog-toolbar header="Instances of {{ group.title }}">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
-      [multiple]="!dataTable.grid"
+      [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
       [defaultGrouping]="[defaultGrouping]"
       [records]="instances.instances$ | async"
-      presetKey="instances"
+      [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
     <app-bd-button
       [isToggle]="true"
       icon="grid_view"
       text="Toggle Card Mode"
-      [(toggle)]="dataTable.grid"
+      [(toggle)]="isCardView"
       tooltip="below"
       [disabled]="bulkMode.toggle && !!bulkMode.rla?.isActive"
     ></app-bd-button>
@@ -23,7 +23,7 @@
       text="Bulk Manipulation"
       [route]="['panels', 'instances', 'bulk-manip']"
       tooltip="below"
-      [disabled]="!(authService.isCurrentScopeWrite$ | async) || dataTable.grid"
+      [disabled]="!(authService.isCurrentScopeWrite$ | async) || isCardView"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
@@ -55,6 +55,8 @@
       [checked]="bulk.selection$ | async"
       (checkedChange)="bulk.selection$.next($event)"
       [checkedFrozenWhen$]="bulk.frozen$"
+      [presetKey]="presetKeyValue"
+      [grid]="isCardView"
     >
       <app-bd-no-data>
         <p>No instances have been created yet.</p>

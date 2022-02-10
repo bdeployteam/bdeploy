@@ -50,7 +50,9 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
         this.toggle = !this.toggle;
 
         // the toggle change needs to be fired *after* the click event.
-        setTimeout(() => this.toggleChange.emit(this.toggle));
+        setTimeout(() => {
+          this.toggleChange.emit(this.toggle);
+        });
 
         // we will not inhibit the click event here, as routerLink (etc.) will need it.
       }

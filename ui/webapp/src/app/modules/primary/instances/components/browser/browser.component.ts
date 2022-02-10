@@ -3,6 +3,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceBulkService } from 'src/app/modules/panels/instances/services/instance-bulk.service';
@@ -31,6 +32,9 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     return ['/instances', 'dashboard', this.areas.groupContext$.value, row.instanceConfiguration.uuid];
   };
 
+  /* template */ isCardView: boolean;
+  /* template */ presetKeyValue: string = 'instances';
+
   constructor(
     public instances: InstancesService,
     public instanceColumns: InstancesColumnsService,
@@ -39,7 +43,8 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     public areas: NavAreasService,
     public authService: AuthenticationService,
     public bulk: InstanceBulkService,
-    config: ConfigService
+    config: ConfigService,
+    private cardViewService: CardViewService
   ) {
     this.subscription = config.isCentral$.subscribe((value) => {
       if (value) {
@@ -50,6 +55,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
     this.subscription.add(this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length)));
     this.subscription.add(
       this.groups.current$.subscribe((g) => {

@@ -2,14 +2,14 @@
   <app-bd-dialog-toolbar header="Software Packages of {{ (repositories.current$ | async)?.name }}">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
-      [multiple]="!dataTable.grid"
+      [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
       [defaultGrouping]="defaultGrouping"
       [records]="repository.data$ | async"
-      presetKey="software-repository"
+      [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="isCardView" tooltip="below"></app-bd-button>
 
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
@@ -37,6 +37,8 @@
       [records]="repository.data$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
+      [presetKey]="presetKeyValue"
+      [grid]="isCardView"
     >
       <app-bd-no-data>
         <p>No products or external software packages have been uploaded yet.</p>

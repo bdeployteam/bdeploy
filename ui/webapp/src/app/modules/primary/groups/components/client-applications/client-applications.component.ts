@@ -3,6 +3,7 @@ import { DeviceDetectorService } from 'ngx-device-detector';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
+import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ClientApp, ClientsService } from '../../services/clients.service';
 import { GroupsService } from '../../services/groups.service';
 
@@ -63,7 +64,10 @@ export class ClientApplicationsComponent implements OnInit {
     return ['', { outlets: { panel: ['panels', 'groups', 'client', row.client.uuid] } }];
   };
 
-  constructor(public groups: GroupsService, public clients: ClientsService, dd: DeviceDetectorService) {
+  /* template */ isCardView: boolean;
+  /* template */ presetKeyValue: string = 'clientApplications';
+
+  constructor(public groups: GroupsService, public clients: ClientsService, dd: DeviceDetectorService, private cardViewService: CardViewService) {
     this.currentOs = (() => {
       switch (dd.os) {
         case 'Windows':
@@ -81,5 +85,7 @@ export class ClientApplicationsComponent implements OnInit {
     ];
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
+  }
 }

@@ -2,18 +2,18 @@
   <app-bd-dialog-toolbar header="Products of {{ (groups.current$ | async)?.title }}">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
-      [multiple]="!dataTable.grid"
+      [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
       [records]="products.products$ | async"
       [defaultGrouping]="defaultGrouping"
-      presetKey="products"
+      [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
     <app-bd-button
       [isToggle]="true"
       icon="grid_view"
       text="Toggle Card Mode"
-      [(toggle)]="dataTable.grid"
+      [(toggle)]="isCardView"
       tooltip="below"
       [disabled]="bulkMode.toggle && !!bulkMode.rla?.isActive"
     ></app-bd-button>
@@ -23,7 +23,7 @@
       text="Bulk Manipulation"
       [route]="['panels', 'products', 'bulk-manip']"
       tooltip="below"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async) || dataTable.grid"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async) || isCardView"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
@@ -60,6 +60,8 @@
       [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
       [checked]="bulk.selection$ | async"
       (checkedChange)="bulk.selection$.next($event)"
+      [presetKey]="presetKeyValue"
+      [grid]="isCardView"
     >
       <app-bd-no-data>
         <p>No products have been uploaded yet.</p>

@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
 import { ApplicationConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
+import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ProcessesColumnsService } from '../../../../services/processes-columns.service';
 
 @Component({
@@ -21,7 +22,12 @@ export class NodeProcessListComponent implements OnInit {
     return ['', { outlets: { panel: ['panels', 'instances', 'process', row.uid] } }];
   };
 
-  constructor(private appCols: ProcessesColumnsService) {}
+  /* template */ isCardView: boolean;
+  /* template */ presetKeyValue: string = 'processList';
 
-  ngOnInit(): void {}
+  constructor(private appCols: ProcessesColumnsService, private cardViewService: CardViewService) {}
+
+  ngOnInit(): void {
+    this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
+  }
 }

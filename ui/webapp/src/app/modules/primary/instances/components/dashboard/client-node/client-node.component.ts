@@ -3,6 +3,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
 import { ApplicationConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
 import { InstancesService } from '../../../services/instances.service';
@@ -29,6 +30,9 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
     return ['', { outlets: { panel: ['panels', 'groups', 'client', row.uid] } }];
   };
 
+  /* template */ isCardView: boolean;
+  /* template */ presetKeyValue: string = 'processList';
+
   private subscription: Subscription;
 
   constructor(
@@ -36,10 +40,12 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
     public clients: ClientsService,
     private appCols: ProcessesColumnsService,
     private areas: NavAreasService,
-    private auth: AuthenticationService
+    private auth: AuthenticationService,
+    private cardViewService: CardViewService
   ) {}
 
   ngOnInit(): void {
+    this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
     this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
       // actually not needed, we just use the same info source as server nodes to have info appear at the same time.
       if (!states) {

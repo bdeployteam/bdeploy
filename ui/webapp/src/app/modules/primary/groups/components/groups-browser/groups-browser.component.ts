@@ -3,6 +3,7 @@ import { combineLatest, Subscription } from 'rxjs';
 import { BdDataGroupingDefinition } from 'src/app/models/data';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
+import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { GroupsColumnsService } from '../../services/groups-columns.service';
 import { GroupsService } from '../../services/groups.service';
@@ -21,6 +22,8 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   private isStandalone: boolean = false;
   /* template */ public isAddAllowed: boolean = false;
   /* template */ public isAttachAllowed: boolean = false;
+  /* template */ public isCardView: boolean;
+  /* template */ public presetKeyValue: string = 'instanceGroups';
 
   /* template */ getRecordRoute = (row: InstanceGroupConfiguration) => {
     if (this.authService.isScopedExclusiveReadClient(row.name)) {
@@ -33,7 +36,8 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
     public groups: GroupsService,
     public groupColumns: GroupsColumnsService,
     public config: ConfigService,
-    public authService: AuthenticationService
+    public authService: AuthenticationService,
+    private cardViewService: CardViewService
   ) {}
 
   ngOnInit(): void {
@@ -54,6 +58,7 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
     );
     this.isAddAllowed = this.authService.isGlobalAdmin() && (this.isCentral || this.isStandalone);
     this.isAttachAllowed = this.authService.isGlobalAdmin() && this.isManaged;
+    this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
   }
 
   ngOnDestroy(): void {

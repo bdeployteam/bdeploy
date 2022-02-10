@@ -2,13 +2,13 @@
   <app-bd-dialog-toolbar header="Instance Groups">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
-      [multiple]="!dataTable.grid"
+      [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
       [records]="groups.groups$ | async"
-      presetKey="instanceGroups"
+      [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="isCardView" tooltip="below"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       *ngIf="!isManaged; else managed"
@@ -36,6 +36,8 @@
       [records]="groups.groups$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
+      [presetKey]="presetKeyValue"
+      [grid]="isCardView"
     >
       <app-bd-no-data header="Welcome to BDeploy!">
         <p [style.text-align]="'center'">

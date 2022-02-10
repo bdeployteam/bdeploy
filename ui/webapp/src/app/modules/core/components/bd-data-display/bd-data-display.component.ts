@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angu
 import { SortDirection } from '@angular/material/sort';
 import { BehaviorSubject } from 'rxjs';
 import { BdDataColumn, bdDataDefaultSearch, bdDataDefaultSort, BdDataGrouping } from 'src/app/models/data';
+import { CardViewService } from '../../services/card-view.service';
 import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
 
@@ -14,7 +15,7 @@ export class BdDataDisplayComponent<T> implements OnInit {
   /**
    * The current display mode, which will either use bd-data-table (false) or bd-data-grid (true) to visualize data.
    */
-  /* template */ _grid = false;
+  /* template */ _grid: boolean;
   @Input() set grid(val: boolean) {
     this._grid = val;
 
@@ -24,6 +25,11 @@ export class BdDataDisplayComponent<T> implements OnInit {
 
     if (val) {
       this.checkMode = false;
+    }
+
+    if (this.presetKey) {
+      // set card view in LS
+      this.cardViewService.setCardView(this.presetKey, val);
     }
   }
   get grid() {
@@ -93,6 +99,11 @@ export class BdDataDisplayComponent<T> implements OnInit {
   @Input() recordRoute: (r: T) => any[];
 
   /**
+   * Key used for persisting the view
+   */
+  @Input() presetKey: string;
+
+  /**
    * Fires when the user changes the checked elements
    */
   @Output() checkedChange = new EventEmitter<T[]>();
@@ -105,7 +116,7 @@ export class BdDataDisplayComponent<T> implements OnInit {
   @ViewChild('table', { static: false }) tableComp: BdDataTableComponent<T>;
   @ViewChild('grid', { static: false }) gridComp: BdDataGridComponent<T>;
 
-  constructor() {}
+  constructor(private cardViewService: CardViewService) {}
 
   ngOnInit(): void {}
 

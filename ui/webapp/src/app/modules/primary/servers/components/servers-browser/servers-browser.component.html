@@ -2,13 +2,13 @@
   <app-bd-dialog-toolbar header="Managed Servers of {{ (groups.current$ | async)?.title }}">
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
-      [multiple]="!dataTable.grid"
+      [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
       [records]="servers.servers$ | async"
       presetKey="instanceGroups"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="dataTable.grid" tooltip="below"></app-bd-button>
+    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="isCardView" tooltip="below"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button icon="link" text="Link Managed Server" [route]="['panels', 'servers', 'link', 'managed']" tooltip="below"></app-bd-panel-button>
   </app-bd-dialog-toolbar>
@@ -20,6 +20,8 @@
       [records]="servers.servers$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
+      [presetKey]="presetKeyValue"
+      [grid]="isCardView"
     >
       <app-bd-no-data>
         <p [style.text-align]="'center'">No managed servers have been linked to this instance group yet.</p>
