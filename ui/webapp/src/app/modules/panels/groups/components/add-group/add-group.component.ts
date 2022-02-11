@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 
@@ -11,20 +13,33 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
   templateUrl: './add-group.component.html',
   styleUrls: ['./add-group.component.css'],
 })
-export class AddGroupComponent implements OnInit {
+export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ group: Partial<InstanceGroupConfiguration> = { autoDelete: true };
 
+  private subscription: Subscription;
+
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
+  @ViewChild('form') public form: NgForm;
 
   private image: File;
 
-  constructor(private groups: GroupsService, private areas: NavAreasService) {}
+  constructor(private groups: GroupsService, private areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {}
 
   /* template */ onSelectImage(image: File) {
     this.image = image;
+  }
+
+  isDirty(): boolean {
+    return this.form.dirty;
+  }
+
+  canSave(): boolean {
+    return this.form.valid;
   }
 
   /* template */ onUnsupportedFile(file: File) {
@@ -33,8 +48,7 @@ export class AddGroupComponent implements OnInit {
 
   /* template */ onSave() {
     this.saving$.next(true);
-    this.groups
-      .create(this.group)
+    this.doSave()
       .pipe(
         finalize(() => {
           this.saving$.next(false);
@@ -43,11 +57,25 @@ export class AddGroupComponent implements OnInit {
       .subscribe((_) => {
         if (!!this.image) {
           this.groups.updateImage(this.group.name, this.image).subscribe((__) => {
-            this.areas.closePanel();
+            this.reset();
           });
         } else {
-          this.areas.closePanel();
+          this.reset();
         }
       });
+  }
+
+  private reset() {
+    this.areas.closePanel();
+    this.subscription.unsubscribe();
+  }
+
+  public doSave(): Observable<void> {
+    this.saving$.next(true);
+    return this.groups.create(this.group);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

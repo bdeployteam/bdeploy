@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar header="Add Instance Group" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form #groupForm="ngForm" (ngSubmit)="onSave()">
+    <form #form="ngForm" (ngSubmit)="onSave()">
       <div fxLayout="column" fxLayoutGap="10px">
         <app-bd-image-upload (imageSelected)="onSelectImage($event)" (unsupportedDrop)="onUnsupportedFile($event)"></app-bd-image-upload>
 
@@ -11,7 +11,7 @@
         <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
         <app-bd-form-toggle label="Automatic Cleanup" name="autoDelete" [(ngModel)]="group.autoDelete"></app-bd-form-toggle>
 
-        <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="groupForm.invalid"></app-bd-button>
+        <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="form.invalid"></app-bd-button>
       </div>
     </form>
   </app-bd-dialog-content>

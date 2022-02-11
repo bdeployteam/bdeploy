@@ -1,8 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceConfiguration, InstancePurpose, ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
@@ -21,7 +24,7 @@ interface ProductRow {
   templateUrl: './add-instance.component.html',
   styleUrls: ['./add-instance.component.css'],
 })
-export class AddInstanceComponent implements OnInit, OnDestroy {
+export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ config: Partial<InstanceConfiguration> = { autoUninstall: true, product: { name: null, tag: null } };
   /* template */ server: ManagedMasterDto;
@@ -36,6 +39,9 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
   /* template */ productNames: string[] = [];
   /* template */ serverNames: string[] = [];
 
+  @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
+  @ViewChild('form') public form: NgForm;
+
   constructor(
     private groups: GroupsService,
     private instances: InstancesService,
@@ -44,12 +50,16 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
     public servers: ServersService,
     public cfg: ConfigService,
     private router: Router
-  ) {}
+  ) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {
-    this.subscription = this.cfg.isCentral$.subscribe((value) => {
-      this.isCentral = value;
-    });
+    this.subscription.add(
+      this.cfg.isCentral$.subscribe((value) => {
+        this.isCentral = value;
+      })
+    );
     this.subscription.add(
       this.groups
         .newUuid()
@@ -94,18 +104,31 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
     );
   }
 
+  isDirty(): boolean {
+    return this.form.dirty;
+  }
+
+  canSave(): boolean {
+    return this.form.valid;
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
   /* template */ onSave(): void {
     this.loading$.next(true);
-    this.instances
-      .create(this.config, this.server?.hostName)
+    this.doSave()
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((_) => {
         this.router.navigate(['instances', 'configuration', this.areas.groupContext$.value, this.config.uuid]);
+        this.subscription.unsubscribe();
       });
+  }
+
+  public doSave(): Observable<void> {
+    this.loading$.next(true);
+    return this.instances.create(this.config, this.server?.hostName);
   }
 
   /* template */ updateProduct() {

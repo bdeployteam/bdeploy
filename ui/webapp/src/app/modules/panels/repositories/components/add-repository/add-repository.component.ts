@@ -1,7 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, finalize } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
@@ -10,27 +12,49 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   templateUrl: './add-repository.component.html',
   styleUrls: ['./add-repository.component.css'],
 })
-export class AddRepositoryComponent implements OnInit {
+export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ repository: Partial<SoftwareRepositoryConfiguration> = {};
 
-  @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
+  private subscription: Subscription;
 
-  constructor(private repositories: RepositoriesService, private areas: NavAreasService) {}
+  @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
+  @ViewChild('form') public form: NgForm;
+
+  constructor(private repositories: RepositoriesService, private areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {}
 
+  isDirty(): boolean {
+    return this.form.dirty;
+  }
+
+  canSave(): boolean {
+    return this.form.valid;
+  }
+
   /* template */ onSave() {
     this.saving$.next(true);
-    this.repositories
-      .create(this.repository)
-      .pipe(finalize(() => this.saving$.next(false)))
-      .subscribe(
-        (_) => {
+    this.doSave()
+      .pipe(
+        finalize(() => {
           this.saving$.next(false);
-          this.areas.closePanel();
-        },
-        () => {}
-      );
+        })
+      )
+      .subscribe((_) => {
+        this.areas.closePanel();
+        this.subscription.unsubscribe();
+      });
+  }
+
+  public doSave(): Observable<void> {
+    this.saving$.next(true);
+    return this.repositories.create(this.repository);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

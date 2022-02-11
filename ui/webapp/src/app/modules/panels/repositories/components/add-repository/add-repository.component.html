@@ -2,12 +2,12 @@
   <app-bd-dialog-toolbar header="Add Software Repository" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form #repositoryForm="ngForm" (ngSubmit)="onSave()">
+    <form #form="ngForm" (ngSubmit)="onSave()">
       <div fxLayout="column" fxLayoutGap="10px">
         <app-bd-form-input label="Name" name="name" [(ngModel)]="repository.name" required appIdentifier></app-bd-form-input>
         <app-bd-form-input label="Description" name="description" [(ngModel)]="repository.description"></app-bd-form-input>
 
-        <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="repositoryForm.invalid"></app-bd-button>
+        <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="form.invalid"></app-bd-button>
       </div>
     </form>
   </app-bd-dialog-content>

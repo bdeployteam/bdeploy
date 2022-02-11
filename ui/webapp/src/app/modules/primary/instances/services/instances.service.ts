@@ -117,7 +117,7 @@ export class InstancesService {
     });
   }
 
-  public create(instance: Partial<InstanceConfiguration>, managedServer: string) {
+  public create(instance: Partial<InstanceConfiguration>, managedServer: string): Observable<any> {
     return this.http.put(`${this.apiPath(this.group)}`, instance, { params: { managedServer } });
   }
 

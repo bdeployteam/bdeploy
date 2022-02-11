@@ -45,6 +45,9 @@ export interface DirtyableDialog {
   /** Determines whether the dialog is dirty. */
   isDirty(): boolean;
 
+  /** Determines whether the dialog should have save button. */
+  canSave?(): boolean;
+
   /** Saves the current state - may NOT perform ANY navigation! */
   doSave(): Observable<any>;
 }
@@ -155,12 +158,13 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
   }
 
   private confirm(component: DirtyableDialog) {
+    const canSave = component.canSave ? component.canSave() : true;
     return component.dialog
       .message({
         header: 'Save Changes?',
         message: 'The dialog contains unsaved changes. Save the changes before leaving? You may also stay and continue editing.',
         icon: 'save',
-        actions: [actCancel, actDiscard, actSave],
+        actions: canSave ? [actCancel, actDiscard, actSave] : [actCancel, actDiscard],
       })
       .pipe(
         tap((result) => {

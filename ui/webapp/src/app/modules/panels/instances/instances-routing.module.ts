@@ -40,7 +40,7 @@ import { ProcessPortsComponent } from './components/process-ports/process-ports.
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 
 const INSTANCES_ROUTES: Route[] = [
-  { path: 'add', component: AddInstanceComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'add', component: AddInstanceComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'bulk-control', component: BulkControlComponent, canActivate: [ScopedWriteGuard] },
   { path: 'bulk-manip', component: BulkManipulationComponent, canActivate: [ScopedWriteGuard] },
   { path: 'bulk-manip/update', component: UpdateProductComponent, canActivate: [ScopedWriteGuard] },

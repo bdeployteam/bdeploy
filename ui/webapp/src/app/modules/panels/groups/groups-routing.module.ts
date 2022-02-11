@@ -13,7 +13,7 @@ import { PermissionsComponent } from './components/settings/permissions/permissi
 import { SettingsComponent } from './components/settings/settings.component';
 
 const GROUPS_ROUTES: Route[] = [
-  { path: 'add', component: AddGroupComponent, canActivate: [AdminGuard] },
+  { path: 'add', component: AddGroupComponent, canActivate: [AdminGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [ScopedWriteGuard] },
   { path: 'settings/edit', component: EditComponent, canActivate: [ScopedAdminGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'settings/attributes/values', component: AttributeValuesComponent, canActivate: [ScopedWriteGuard] },

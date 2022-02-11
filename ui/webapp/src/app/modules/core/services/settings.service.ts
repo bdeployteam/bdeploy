@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { finalize, first, skipWhile, switchMap, tap } from 'rxjs/operators';
 import { SettingsConfiguration } from 'src/app/models/gen.dtos';
 import { measure } from '../utils/performance.utils';
@@ -71,10 +71,10 @@ export class SettingsService {
     );
   }
 
-  public addLdapServer(server) {
+  public addLdapServer(server): Observable<boolean> {
     this.settings$.value.auth.ldapSettings.push(server);
     this.settingsUpdated$.next(true);
-    this.areas.closePanel();
+    return of(true);
   }
 
   public editLdapServer(server, initialServer) {
@@ -87,10 +87,10 @@ export class SettingsService {
     this.settingsUpdated$.next(true);
   }
 
-  public addGlobalAttribute(attribute) {
+  public addGlobalAttribute(attribute): Observable<boolean> {
     this.settings$.value.instanceGroup.attributes.push(attribute);
     this.settingsUpdated$.next(true);
-    this.areas.closePanel();
+    return of(true);
   }
 
   public editGlobalAttribute(attribute, initialAttribute) {

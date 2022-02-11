@@ -33,7 +33,7 @@ export class AuthAdminService {
       .subscribe((users) => this.users$.next(users));
   }
 
-  public createLocalUser(userInfo: UserInfo) {
+  public createLocalUser(userInfo: UserInfo): Observable<any> {
     return this.http.put(`${this.apiPath()}/local`, userInfo);
   }
 

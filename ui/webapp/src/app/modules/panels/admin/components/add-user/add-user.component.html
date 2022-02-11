@@ -1,4 +1,4 @@
-<app-bd-dialog>
+<app-bd-dialog [loadingWhen$]="saving$">
   <app-bd-dialog-toolbar header="Add User" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="5px">
