@@ -30,7 +30,7 @@ Cypress.Commands.add('createInstance', function (groupName, instanceName, produc
   cy.checkMainNavFlyinClosed();
 
   cy.inMainNavContent(() => {
-    cy.contains('strong', instanceName).should('exist');
+    cy.contains('Configuration - ' + instanceName).should('exist');
   });
 });
 

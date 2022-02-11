@@ -104,7 +104,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy {
       .create(this.config, this.server?.hostName)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((_) => {
-        this.router.navigate(['instances', 'dashboard', this.areas.groupContext$.value, this.config.uuid]);
+        this.router.navigate(['instances', 'configuration', this.areas.groupContext$.value, this.config.uuid]);
       });
   }
 
