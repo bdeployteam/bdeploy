@@ -81,7 +81,7 @@
           <mat-divider></mat-divider>
           <app-bd-notification-card
             icon="history"
-            [warning]="true"
+            [type]="'warning'"
             [dismissable]="false"
             header="Server Not Synchronized"
             *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
@@ -126,7 +126,7 @@
     </div>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(entry$ | async)">
-    <app-bd-notification-card icon="history" [warning]="true" [dismissable]="false" header="No Information">
+    <app-bd-notification-card icon="history" [type]="'warning'" [dismissable]="false" header="No Information">
       <div [style.text-align]="'justify'">The selected history entry cannot be retrieved. Please select another one from the list.</div>
     </app-bd-notification-card>
   </app-bd-dialog-content>

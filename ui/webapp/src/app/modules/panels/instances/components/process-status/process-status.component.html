@@ -5,14 +5,14 @@
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content *ngIf="processConfig">
-    <app-bd-notification-card *ngIf="outdated$ | async" icon="warning" header="Outdated" [dismissable]="false" [warning]="true">
+    <app-bd-notification-card *ngIf="outdated$ | async" icon="warning" header="Outdated" [dismissable]="false" [type]="'warning'">
       <div [style.text-align]="'justify'">
         The process is currently running from an instance version (<strong>{{ processDetail?.status.instanceTag }}</strong
         >) which is not the active version (<strong>{{ (instances.active$ | async)?.instance?.tag }}</strong
         >). Stop the process and start it again to launch it from the active version instead.
       </div>
     </app-bd-notification-card>
-    <app-bd-notification-card *ngIf="!processDetail" icon="history" [warning]="true" [dismissable]="false" header="Server Not Synchronized">
+    <app-bd-notification-card *ngIf="!processDetail" icon="history" [type]="'warning'" [dismissable]="false" header="Server Not Synchronized">
       <div [style.text-align]="'justify'">
         The managed server hosting this instance is not synchronized, runtime details are unavailable. Please synchronize the server to see additional details.
       </div>

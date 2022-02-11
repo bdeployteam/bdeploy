@@ -2,7 +2,7 @@
   [header]="header$ | async"
   [icon]="icon$ | async"
   [disabled]="processing$ | async"
-  [warning]="failed$ | async"
+  [type]="(failed$ | async) ? 'warning' : 'generic'"
   (dismiss)="onDismiss()"
 >
   <mat-progress-bar

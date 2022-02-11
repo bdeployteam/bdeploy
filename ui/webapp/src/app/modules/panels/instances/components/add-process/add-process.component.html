@@ -26,7 +26,7 @@
       <app-bd-data-table [records]="records$ | async" [columns]="columns" [sortData]="null"></app-bd-data-table>
     </div>
     <ng-template #currentInstanceIsNotSynchronized>
-      <app-bd-notification-card icon="history" [warning]="true" [dismissable]="false" header="Server Not Synchronized">
+      <app-bd-notification-card icon="history" [type]="'warning'" [dismissable]="false" header="Server Not Synchronized">
         <div [style.text-align]="'justify'">
           The managed server responsible for the selected node is not synchronized. Please synchronize the server to continue editing.
         </div>

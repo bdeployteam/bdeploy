@@ -4,7 +4,7 @@
   <app-bd-dialog-content *ngIf="instances.active$ | async as instance">
     <app-bd-notification-card
       icon="history"
-      [warning]="true"
+      [type]="'warning'"
       [dismissable]="false"
       header="Server Not Synchronized"
       *ngIf="!(servers.isCurrentInstanceSynchronized$ | async); else currentInstanceSynchronized"
