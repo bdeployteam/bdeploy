@@ -171,14 +171,13 @@
     color: var(--bd-main-bar-contrast);
   }
 
-  // TODO add darker color for gradient
   .bd-glow-bg-warn {
-    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn) 100%);
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
     color: var(--bd-warn-contrast);
   }
 
   .bd-glow-bg-error {
-    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn) 100%);
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
     color: var(--bd-warn-contrast);
   }
 

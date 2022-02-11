@@ -66,6 +66,7 @@
     --bd-primary: #{mat.get-color-from-palette($primary)};
     --bd-accent: #{mat.get-color-from-palette($accent)};
     --bd-warn: #{mat.get-color-from-palette($warn)};
+    --bd-warn-darker: #{mat.get-color-from-palette($warn, 900)};
     --bd-main-bar: #{mat.get-color-from-palette($maintb)};
 
     --bd-text: #{mat.get-color-from-palette($fg, 'text')};
