@@ -7,5 +7,12 @@ export function convert2String(version: Version): string {
   if (!version) {
     return 'Unknown';
   }
-  return version.major + '.' + version.minor + '.' + version.micro + (version.qualifier ? version.qualifier : '');
+  return (
+    version.major +
+    '.' +
+    version.minor +
+    '.' +
+    version.micro +
+    (version.qualifier ? version.qualifier : '')
+  );
 }

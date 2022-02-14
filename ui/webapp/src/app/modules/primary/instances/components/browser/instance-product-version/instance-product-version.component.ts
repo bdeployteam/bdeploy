@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 
 @Component({
@@ -6,10 +6,6 @@ import { InstanceDto } from 'src/app/models/gen.dtos';
   templateUrl: './instance-product-version.component.html',
   styleUrls: ['./instance-product-version.component.css'],
 })
-export class InstanceProductVersionComponent implements OnInit {
+export class InstanceProductVersionComponent {
   @Input() record: InstanceDto;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

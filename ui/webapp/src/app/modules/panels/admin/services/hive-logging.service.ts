@@ -2,7 +2,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
+import {
+  RemoteDirectory,
+  RemoteDirectoryEntry,
+  StringEntryChunkDto,
+} from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
@@ -18,7 +22,12 @@ export class HiveLoggingService {
 
   private apiPath = (h: string) => `${this.cfg.config.api}/hive/${h}/logging`;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private downloadService: DownloadService, private areas: NavAreasService) {
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private downloadService: DownloadService,
+    private areas: NavAreasService
+  ) {
     this.areas.panelRoute$.subscribe((route) => {
       if (!route?.params || !route?.params['bhive']) {
         return;
@@ -46,7 +55,9 @@ export class HiveLoggingService {
             } else if (b.minion === 'master') {
               return 1;
             } else {
-              return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
+              return a.minion
+                .toLocaleLowerCase()
+                .localeCompare(b.minion.toLocaleLowerCase());
             }
           })
         );
@@ -54,19 +65,37 @@ export class HiveLoggingService {
   }
 
   public downloadLogFileContent(rd, rde) {
-    this.http.post(`${this.apiPath(this.bhive$.value)}/request/${rd.minion}`, rde, { responseType: 'text' }).subscribe((token) => {
-      this.downloadService.download(`${this.apiPath(this.bhive$.value)}/stream/${token}`);
-    });
+    this.http
+      .post(`${this.apiPath(this.bhive$.value)}/request/${rd.minion}`, rde, {
+        responseType: 'text',
+      })
+      .subscribe((token) => {
+        this.downloadService.download(
+          `${this.apiPath(this.bhive$.value)}/stream/${token}`
+        );
+      });
   }
 
-  public getLogContentChunk(rd: RemoteDirectory, rde: RemoteDirectoryEntry, offset: number, limit: number, silent: boolean): Observable<StringEntryChunkDto> {
+  public getLogContentChunk(
+    rd: RemoteDirectory,
+    rde: RemoteDirectoryEntry,
+    offset: number,
+    limit: number,
+    silent: boolean
+  ): Observable<StringEntryChunkDto> {
     const options = {
       headers: null,
-      params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
+      params: new HttpParams()
+        .set('offset', offset.toString())
+        .set('limit', limit.toString()),
     };
     if (silent) {
       options.headers = { ignoreLoadingBar: '' };
     }
-    return this.http.post<StringEntryChunkDto>(`${this.apiPath(this.bhive$.value)}/content/${rd.minion}`, rde, options);
+    return this.http.post<StringEntryChunkDto>(
+      `${this.apiPath(this.bhive$.value)}/content/${rd.minion}`,
+      rde,
+      options
+    );
   }
 }

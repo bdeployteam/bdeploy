@@ -1,10 +1,11 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Bulk Instance Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Bulk Instance Manipulation"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="selections">
-      <div>
-        <strong>{{ selections.length }}</strong> instances selected.
-      </div>
+      <div><strong>{{ selections.length }}</strong> instances selected.</div>
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"

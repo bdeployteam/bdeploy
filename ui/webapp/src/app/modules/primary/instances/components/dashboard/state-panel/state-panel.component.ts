@@ -1,7 +1,20 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { BehaviorSubject, isObservable, Observable, of } from 'rxjs';
 
-export type StateType = 'ok' | 'info' | 'warning' | 'product' | 'update' | 'unknown';
+export type StateType =
+  | 'ok'
+  | 'info'
+  | 'warning'
+  | 'product'
+  | 'update'
+  | 'unknown';
 
 export interface StateItem {
   name: string | Observable<string>;
@@ -21,7 +34,7 @@ export interface StateItemToDisplay {
   templateUrl: './state-panel.component.html',
   styleUrls: ['./state-panel.component.css'],
 })
-export class NodeStatePanelComponent implements OnInit, OnChanges {
+export class NodeStatePanelComponent implements OnChanges {
   @Input() items: StateItem[];
   @Input() narrowWhen$: BehaviorSubject<boolean>;
   @Input() lastRefreshAt$: BehaviorSubject<number>;
@@ -29,10 +42,6 @@ export class NodeStatePanelComponent implements OnInit, OnChanges {
   @Output() manualRefresh = new EventEmitter<any>();
 
   /* template */ itemsToDisplay: StateItemToDisplay[];
-
-  constructor() {}
-
-  ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.items) {

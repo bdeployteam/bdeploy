@@ -21,10 +21,13 @@ export const DEF_CONTROL_GROUP: ProcessControlGroupConfiguration = {
   stopType: ProcessControlGroupHandlingType.SEQUENTIAL,
 };
 
-export function getNodeOfApplication(nodes: InstanceNodeConfigurationDto[], uid: string): InstanceNodeConfigurationDto {
+export function getNodeOfApplication(
+  nodes: InstanceNodeConfigurationDto[],
+  uid: string
+): InstanceNodeConfigurationDto {
   for (const node of nodes) {
     const app = node.nodeConfiguration.applications.find((a) => a.uid === uid);
-    if (!!app) {
+    if (app) {
       return node;
     }
   }
@@ -34,10 +37,13 @@ export function getNodeOfApplication(nodes: InstanceNodeConfigurationDto[], uid:
 /**
  * Retrieves the Process Control Group for an Application. As a fallback for updated Systems, the Default Control Group is returned if none is found.
  */
-export function getProcessControlGroupOfApplication(groups: ProcessControlGroupConfiguration[], uid: string): ProcessControlGroupConfiguration {
+export function getProcessControlGroupOfApplication(
+  groups: ProcessControlGroupConfiguration[],
+  uid: string
+): ProcessControlGroupConfiguration {
   for (const group of groups) {
     const app = group.processOrder.find((a) => a === uid);
-    if (!!app) {
+    if (app) {
       return group;
     }
   }

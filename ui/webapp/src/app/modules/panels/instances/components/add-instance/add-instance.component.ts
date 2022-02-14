@@ -3,7 +3,11 @@ import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { InstanceConfiguration, InstancePurpose, ManagedMasterDto } from 'src/app/models/gen.dtos';
+import {
+  InstanceConfiguration,
+  InstancePurpose,
+  ManagedMasterDto,
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -22,11 +26,15 @@ interface ProductRow {
 @Component({
   selector: 'app-add-instance',
   templateUrl: './add-instance.component.html',
-  styleUrls: ['./add-instance.component.css'],
 })
-export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class AddInstanceComponent
+  implements OnInit, OnDestroy, DirtyableDialog
+{
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ config: Partial<InstanceConfiguration> = { autoUninstall: true, product: { name: null, tag: null } };
+  /* template */ config: Partial<InstanceConfiguration> = {
+    autoUninstall: true,
+    product: { name: null, tag: null },
+  };
   /* template */ server: ManagedMasterDto;
   /* template */ selectedProduct: ProductRow;
 
@@ -34,8 +42,12 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
   /* template */ serverList: ManagedMasterDto[] = [];
 
   private subscription: Subscription;
-  /* template */ public isCentral: boolean = false;
-  /* template */ purposes: InstancePurpose[] = [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
+  /* template */ public isCentral = false;
+  /* template */ purposes: InstancePurpose[] = [
+    InstancePurpose.PRODUCTIVE,
+    InstancePurpose.DEVELOPMENT,
+    InstancePurpose.TEST,
+  ];
   /* template */ productNames: string[] = [];
   /* template */ serverNames: string[] = [];
 
@@ -85,8 +97,8 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
           const prodTag = snap.queryParamMap.get('productTag');
           if (!!prodKey && !!prodTag) {
             const prod = this.prodList.find((p) => p.id === prodKey);
-            if (!!prod) {
-              if (!!prod.versions.find((v) => v === prodTag)) {
+            if (prod) {
+              if (prod.versions.find((v) => v === prodTag)) {
                 this.selectedProduct = prod;
                 this.config.product.name = prodKey;
                 this.config.product.tag = prodTag;
@@ -99,7 +111,9 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.subscription.add(
       this.servers.servers$.subscribe((s) => {
         this.serverList = s;
-        this.serverNames = this.serverList.map((s) => `${s.hostName} - ${s.description}`);
+        this.serverNames = this.serverList.map(
+          (c) => `${c.hostName} - ${c.description}`
+        );
       })
     );
   }
@@ -120,8 +134,13 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.loading$.next(true);
     this.doSave()
       .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe((_) => {
-        this.router.navigate(['instances', 'configuration', this.areas.groupContext$.value, this.config.uuid]);
+      .subscribe(() => {
+        this.router.navigate([
+          'instances',
+          'configuration',
+          this.areas.groupContext$.value,
+          this.config.uuid,
+        ]);
         this.subscription.unsubscribe();
       });
   }

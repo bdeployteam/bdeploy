@@ -11,14 +11,32 @@
         Grouping Level
       </span>
     </div>
-    <mat-divider [style.position]="'relative'" [style.top.px]="5" [style.padding-bottom.px]="10"></mat-divider>
-    <mat-select [value]="grouping?.definition" (valueChange)="setGrouping($event)" placeholder="Select Grouping">
+    <mat-divider
+      [style.position]="'relative'"
+      [style.top.px]="5"
+      [style.padding-bottom.px]="10"
+    ></mat-divider>
+    <mat-select
+      [value]="grouping?.definition"
+      (valueChange)="setGrouping($event)"
+      placeholder="Select Grouping"
+    >
       <mat-option>--</mat-option>
-      <mat-option *ngFor="let def of definitions" [value]="def">{{ def.name }}</mat-option>
+      <mat-option *ngFor="let def of definitions" [value]="def"
+        >{{ def.name }}</mat-option
+      >
     </mat-select>
-    <mat-divider [style.position]="'relative'" [style.top.px]="5" [style.padding-bottom.px]="10"></mat-divider>
+    <mat-divider
+      [style.position]="'relative'"
+      [style.top.px]="5"
+      [style.padding-bottom.px]="10"
+    ></mat-divider>
 
-    <div *ngIf="!grouping?.definition" class="bd-hint-text" [style.paddingBottom.px]="10">
+    <div
+      *ngIf="!grouping?.definition"
+      class="bd-hint-text"
+      [style.paddingBottom.px]="10"
+    >
       Choose an available grouping<br />
       from the dropdown.
     </div>

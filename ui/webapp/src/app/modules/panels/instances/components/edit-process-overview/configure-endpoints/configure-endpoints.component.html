@@ -1,5 +1,9 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Configure Endpoints of {{ (edit.process$ | async)?.name }}{{ hasPendingChanges ? '*' : '' }}" [panel]="true" [route]="['..']">
+  <app-bd-dialog-toolbar
+    header="Configure Endpoints of {{ (edit.process$ | async)?.name }}{{ hasPendingChanges ? '*' : '' }}"
+    [panel]="true"
+    [route]="['..']"
+  >
     <div fxFlex="1 0 auto"></div>
     <app-bd-button
       text="Apply"
@@ -12,8 +16,17 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form form #epForm="ngForm">
-      <div *ngIf="edit.process$.value?.endpoints?.http?.length" [style.padding-top.px]="2" fxLayout="column" fxLayoutGap="10px">
-        <div *ngFor="let endpoint of edit.process$.value?.endpoints?.http; let i = index" class="bd-rect-card" fxLayout="column">
+      <div
+        *ngIf="edit.process$.value?.endpoints?.http?.length"
+        [style.padding-top.px]="2"
+        fxLayout="column"
+        fxLayoutGap="10px"
+      >
+        <div
+          *ngFor="let endpoint of edit.process$.value?.endpoints?.http; let i = index"
+          class="bd-rect-card"
+          fxLayout="column"
+        >
           <div class="bd-bg-toolbar" fxLayout="row">
             <div class="bd-default-padding">
               Endpoint <strong>{{ endpoint.id }} - {{ endpoint.path }}</strong>
@@ -25,8 +38,18 @@
           </div>
           <div class="bd-default-padding">
             <div>
-              <div [style.padding-top.px]="20" gdColumns.sm="100%" [gdColumns.gt-sm]="'calc(50% - 5px) calc(50% - 5px)'" gdGap="5px 10px">
-                <app-bd-form-input name="epPort{{ i }}" label="Port" [(ngModel)]="endpoint.port" required></app-bd-form-input>
+              <div
+                [style.padding-top.px]="20"
+                gdColumns.sm="100%"
+                [gdColumns.gt-sm]="'calc(50% - 5px) calc(50% - 5px)'"
+                gdGap="5px 10px"
+              >
+                <app-bd-form-input
+                  name="epPort{{ i }}"
+                  label="Port"
+                  [(ngModel)]="endpoint.port"
+                  required
+                ></app-bd-form-input>
                 <app-bd-form-select
                   name="epAuthType{{ i }}"
                   label="Authentication"
@@ -49,8 +72,16 @@
                   [required]="endpoint.authType !== 'NONE'"
                   type="password"
                 ></app-bd-form-input>
-                <app-bd-form-toggle name="epSecure{{ i }}" label="Secure (Use HTTPS)" [(ngModel)]="endpoint.secure"></app-bd-form-toggle>
-                <app-bd-form-toggle name="epTrustAll{{ i }}" label="Trust All Certificates" [(ngModel)]="endpoint.trustAll"></app-bd-form-toggle>
+                <app-bd-form-toggle
+                  name="epSecure{{ i }}"
+                  label="Secure (Use HTTPS)"
+                  [(ngModel)]="endpoint.secure"
+                ></app-bd-form-toggle>
+                <app-bd-form-toggle
+                  name="epTrustAll{{ i }}"
+                  label="Trust All Certificates"
+                  [(ngModel)]="endpoint.trustAll"
+                ></app-bd-form-toggle>
                 <app-bd-form-input
                   name="tsPath{{ i }}"
                   label="Trust Store Path"

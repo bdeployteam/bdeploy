@@ -1,6 +1,13 @@
 <ng-container *ngIf="diff$ | async as diff">
-  <div [ngClass]="getBorderClass(diff.type)" *ngIf="diff.type !== 'not-in-base'">
-    <div class="local-padding local-header" fxLayout="column" *ngIf="!onlyCommand">
+  <div
+    [ngClass]="getBorderClass(diff.type)"
+    *ngIf="diff.type !== 'not-in-base'"
+  >
+    <div
+      class="local-padding local-header"
+      fxLayout="column"
+      *ngIf="!onlyCommand"
+    >
       <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
         <mat-icon [svgIcon]="diff.os"></mat-icon>
         <div fxLayout="row" fxLayoutAlign="start center">
@@ -9,57 +16,119 @@
           </ng-template>
           <div [style.margin-right.px]="3">Process:</div>
           <strong>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.name" [popup]="namePopup"></app-history-diff-field>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.name"
+              [popup]="namePopup"
+            ></app-history-diff-field>
           </strong>
           <div class="bd-description-text" *ngIf="hasProcessControl">,</div>
         </div>
         <ng-container *ngIf="hasProcessControl">
-          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+          <div
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            class="bd-description-text"
+          >
             <ng-template #uidPopup>
               <app-config-desc-cards field="cfg.uid"></app-config-desc-cards>
             </ng-template>
             <div [style.margin-right.px]="3">ID:</div>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.uid" [popup]="uidPopup"></app-history-diff-field>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.uid"
+              [popup]="uidPopup"
+            ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+          <div
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            class="bd-description-text"
+          >
             <ng-template #ctrlStartTypePopup>
-              <app-config-desc-cards field="cfg.control.startType"></app-config-desc-cards>
+              <app-config-desc-cards
+                field="cfg.control.startType"
+              ></app-config-desc-cards>
             </ng-template>
             <div [style.margin-right.px]="3">Start Type:</div>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.startType" [popup]="ctrlStartTypePopup"></app-history-diff-field>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.processControl.startType"
+              [popup]="ctrlStartTypePopup"
+            ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+          <div
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            class="bd-description-text"
+          >
             <ng-template #ctrlKeepAlivePopup>
-              <app-config-desc-cards field="cfg.control.keepAlive"></app-config-desc-cards>
+              <app-config-desc-cards
+                field="cfg.control.keepAlive"
+              ></app-config-desc-cards>
             </ng-template>
             <div [style.margin-right.px]="3">Keep Alive:</div>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.keepAlive" [popup]="ctrlKeepAlivePopup"></app-history-diff-field>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.processControl.keepAlive"
+              [popup]="ctrlKeepAlivePopup"
+            ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+          <div
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            class="bd-description-text"
+          >
             <ng-template #ctrlNoRetriesPopup>
-              <app-config-desc-cards field="cfg.control.noRetries"></app-config-desc-cards>
+              <app-config-desc-cards
+                field="cfg.control.noRetries"
+              ></app-config-desc-cards>
             </ng-template>
             <div [style.margin-right.px]="3">Keep Alive Retries:</div>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.noOfRetries" [popup]="ctrlNoRetriesPopup"></app-history-diff-field>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.processControl.noOfRetries"
+              [popup]="ctrlNoRetriesPopup"
+            ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+          <div
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            class="bd-description-text"
+          >
             <ng-template #ctrlGracePopup>
-              <app-config-desc-cards field="cfg.control.gracePeriod"></app-config-desc-cards>
+              <app-config-desc-cards
+                field="cfg.control.gracePeriod"
+              ></app-config-desc-cards>
             </ng-template>
             <div [style.margin-right.px]="3">Stop Grace Period:</div>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.gracePeriod" [popup]="ctrlGracePopup"></app-history-diff-field>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.processControl.gracePeriod"
+              [popup]="ctrlGracePopup"
+            ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+          <div
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            class="bd-description-text"
+          >
             <ng-template #ctrlAttachPopup>
-              <app-config-desc-cards field="cfg.control.attachStdin"></app-config-desc-cards>
+              <app-config-desc-cards
+                field="cfg.control.attachStdin"
+              ></app-config-desc-cards>
             </ng-template>
             <div [style.margin-right.px]="3">Attach Console:</div>
-            <app-history-diff-field [diffSide]="diffSide" [diff]="diff.processControl.attachStdin" [popup]="ctrlAttachPopup"></app-history-diff-field>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.processControl.attachStdin"
+              [popup]="ctrlAttachPopup"
+            ></app-history-diff-field>
           </div>
         </ng-container>
       </div>
@@ -71,65 +140,142 @@
         <ng-template #exePopup>
           <app-config-desc-cards field="cfg.executable"></app-config-desc-cards>
         </ng-template>
-        <app-history-diff-field [diffSide]="diffSide" [diff]="diff.start.executable" [popup]="exePopup"></app-history-diff-field>
+        <app-history-diff-field
+          [diffSide]="diffSide"
+          [diff]="diff.start.executable"
+          [popup]="exePopup"
+        ></app-history-diff-field>
         <ng-container *ngFor="let param of diff.start.parameters">
           <ng-template #paramPopup>
-            <app-param-desc-card [descriptor]="param.descriptor"></app-param-desc-card>
+            <app-param-desc-card
+              [descriptor]="param.descriptor"
+            ></app-param-desc-card>
           </ng-template>
           <!-- Don't set masking by the field, as parameters are partially pre-masked in case of passwords. -->
-          <app-history-diff-field [diffSide]="diffSide" *ngFor="let val of param.values" [diff]="val" [popup]="paramPopup"></app-history-diff-field>
+          <app-history-diff-field
+            [diffSide]="diffSide"
+            *ngFor="let val of param.values"
+            [diff]="val"
+            [popup]="paramPopup"
+          ></app-history-diff-field>
         </ng-container>
       </div>
       <ng-container *ngIf="diff.endpoints?.http?.length && !onlyCommand">
-        <div class="bd-description-text" [style.margin-top.px]="10">Endpoints:</div>
-        <div *ngFor="let epdiff of diff.endpoints.http" fxLayout="column" fxLayoutGap="5px">
-          <div [ngClass]="getBorderClass(epdiff.type)" *ngIf="epdiff.type !== 'not-in-base'" [style.padding-left.px]="5">
-            <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+        <div class="bd-description-text" [style.margin-top.px]="10">
+          Endpoints:
+        </div>
+        <div
+          *ngFor="let epdiff of diff.endpoints.http"
+          fxLayout="column"
+          fxLayoutGap="5px"
+        >
+          <div
+            [ngClass]="getBorderClass(epdiff.type)"
+            *ngIf="epdiff.type !== 'not-in-base'"
+            [style.padding-left.px]="5"
+          >
+            <div
+              fxLayout="row wrap"
+              fxLayoutGap="5px"
+              fxLayoutAlign="start center"
+            >
               <div fxLayout="row" fxLayoutAlign="start center">
                 <ng-template #pathPopup>
-                  <app-config-desc-cards field="cfg.ep.path"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.path"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Path:</div>
                 <strong>
-                  <app-history-diff-field [diffSide]="diffSide" [diff]="epdiff.path" [popup]="pathPopup"></app-history-diff-field>
+                  <app-history-diff-field
+                    [diffSide]="diffSide"
+                    [diff]="epdiff.path"
+                    [popup]="pathPopup"
+                  ></app-history-diff-field>
                 </strong>
                 <div class="bd-description-text">,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epPortPopup>
-                  <app-config-desc-cards field="cfg.ep.port"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.port"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Port:</div>
-                <app-history-diff-field [diffSide]="diffSide" [diff]="epdiff.port" [popup]="epPortPopup"></app-history-diff-field>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="epdiff.port"
+                  [popup]="epPortPopup"
+                ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epSecurePopup>
-                  <app-config-desc-cards field="cfg.ep.secure"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.secure"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Secure:</div>
-                <app-history-diff-field [diffSide]="diffSide" [diff]="epdiff.secure" [popup]="epSecurePopup"></app-history-diff-field>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="epdiff.secure"
+                  [popup]="epSecurePopup"
+                ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epTrustAllPopup>
-                  <app-config-desc-cards field="cfg.ep.trustAll"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.trustAll"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Trust All:</div>
-                <app-history-diff-field [diffSide]="diffSide" [diff]="epdiff.trustAll" [popup]="epTrustAllPopup"></app-history-diff-field>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="epdiff.trustAll"
+                  [popup]="epTrustAllPopup"
+                ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epTrustStorePopup>
-                  <app-config-desc-cards field="cfg.ep.trustStore"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.trustStore"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Trust Store:</div>
-                <app-history-diff-field [diffSide]="diffSide" [diff]="epdiff.trustStore" [popup]="epTrustStorePopup"></app-history-diff-field>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="epdiff.trustStore"
+                  [popup]="epTrustStorePopup"
+                ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epTrustStorePassPopup>
-                  <app-config-desc-cards field="cfg.ep.trustStorePass"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.trustStorePass"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Trust Store PW:</div>
                 <app-history-diff-field
@@ -140,28 +286,59 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epAuthTypePopup>
-                  <app-config-desc-cards field="cfg.ep.authType"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.authType"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Auth. Type:</div>
-                <app-history-diff-field [diffSide]="diffSide" [diff]="epdiff.authType" [popup]="epAuthTypePopup"></app-history-diff-field>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="epdiff.authType"
+                  [popup]="epAuthTypePopup"
+                ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epAuthUserPopup>
-                  <app-config-desc-cards field="cfg.ep.authUser"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.authUser"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Auth. User:</div>
-                <app-history-diff-field [diffSide]="diffSide" [diff]="epdiff.authUser" [popup]="epAuthUserPopup"></app-history-diff-field>
+                <app-history-diff-field
+                  [diffSide]="diffSide"
+                  [diff]="epdiff.authUser"
+                  [popup]="epAuthUserPopup"
+                ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div fxLayout="row" fxLayoutAlign="start center" class="bd-description-text">
+              <div
+                fxLayout="row"
+                fxLayoutAlign="start center"
+                class="bd-description-text"
+              >
                 <ng-template #epAuthPassPopup>
-                  <app-config-desc-cards field="cfg.ep.authPass"></app-config-desc-cards>
+                  <app-config-desc-cards
+                    field="cfg.ep.authPass"
+                  ></app-config-desc-cards>
                 </ng-template>
                 <div [style.margin-right.px]="3">Auth. PW:</div>
-                <app-history-diff-field [maskValue]="true" [diffSide]="diffSide" [diff]="epdiff.authPass" [popup]="epAuthPassPopup"></app-history-diff-field>
+                <app-history-diff-field
+                  [maskValue]="true"
+                  [diffSide]="diffSide"
+                  [diff]="epdiff.authPass"
+                  [popup]="epAuthPassPopup"
+                ></app-history-diff-field>
                 <div>,</div>
               </div>
             </div>

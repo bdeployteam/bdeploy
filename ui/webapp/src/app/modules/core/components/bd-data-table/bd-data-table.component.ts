@@ -17,7 +17,10 @@ import {
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
-import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
+import {
+  MatTreeFlatDataSource,
+  MatTreeFlattener,
+} from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import {
@@ -78,7 +81,9 @@ const MAX_ROWS_PER_GROUP = 500;
   styleUrls: ['./bd-data-table.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
+export class BdDataTableComponent<T>
+  implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable
+{
   /**
    * Aria caption for the table, mainly for screen readers.
    */
@@ -94,7 +99,12 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /* template */ _visibleColumns: string[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
-    this._columns = val.filter((c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH);
+    this._columns = val.filter(
+      (c) =>
+        !c.display ||
+        c.display === BdDataColumnDisplay.TABLE ||
+        c.display === BdDataColumnDisplay.BOTH
+    );
     this.updateColumnsToDisplay();
     this.updateMediaSubscriptions();
   }
@@ -106,14 +116,22 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
+  @Input() sortData: (
+    data: T[],
+    column: BdDataColumn<T>,
+    direction: SortDirection
+  ) => T[] = bdDataDefaultSort;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (
+    search: string,
+    data: T[],
+    columns: BdDataColumn<T>[]
+  ) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -203,7 +221,8 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   );
 
   /** The transformer bound to 'this', so we can use this in the transformer function */
-  private boundTransformer: (node: Node<T>, level: number) => FlatNode<T> = this.transformer.bind(this);
+  private boundTransformer: (node: Node<T>, level: number) => FlatNode<T> =
+    this.transformer.bind(this);
   private treeFlattener = new MatTreeFlattener(
     this.boundTransformer,
     (n) => n.level,
@@ -219,9 +238,17 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /* template */ checkSelection = new SelectionModel<FlatNode<T>>(true);
 
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
-  /* tempalte */ dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+  /* tempalte */ dataSource = new MatTreeFlatDataSource(
+    this.treeControl,
+    this.treeFlattener
+  );
 
-  constructor(private searchService: SearchService, private media: BreakpointObserver, private sanitizer: DomSanitizer, private settings: SettingsService) {}
+  constructor(
+    private searchService: SearchService,
+    private media: BreakpointObserver,
+    private sanitizer: DomSanitizer,
+    private settings: SettingsService
+  ) {}
 
   ngOnInit(): void {
     if (this.searchable) {
@@ -231,7 +258,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   ngOnDestroy(): void {
-    if (!!this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
     this.closeMediaSubscriptions();
@@ -240,7 +267,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   ngOnChanges(changes: SimpleChanges): void {
     // make sure that we update only if something changed which requires us to update :)
     // an update will re-create all content, so we want to avoid this as far as possible.
-    if ((!!changes['records'] && !changes['records'].isFirstChange()) || (!!changes['grouping'] && !changes['grouping'].isFirstChange())) {
+    if (
+      (!!changes['records'] && !changes['records'].isFirstChange()) ||
+      (!!changes['grouping'] && !changes['grouping'].isFirstChange())
+    ) {
       this.update();
     }
 
@@ -258,7 +288,9 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // validate that input parameters are consistent and correct.
     if (this.dragReorderMode) {
       if (!!this.sortData || !!this.grouping?.length || this.checkMode) {
-        throw new Error('Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.');
+        throw new Error(
+          'Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.'
+        );
       }
     }
 
@@ -270,11 +302,17 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     this.mediaSubscription = new Subscription();
     this._columns
       .filter((c) => !!c.showWhen)
-      .forEach((c) => this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe((bs) => this.updateColumnsToDisplay())));
+      .forEach((c) =>
+        this.mediaSubscription.add(
+          this.media
+            .observe(c.showWhen)
+            .subscribe(() => this.updateColumnsToDisplay())
+        )
+      );
   }
 
   private closeMediaSubscriptions() {
-    if (!!this.mediaSubscription) {
+    if (this.mediaSubscription) {
       this.mediaSubscription.unsubscribe();
     }
   }
@@ -282,7 +320,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   private updateColumnsToDisplay() {
     this._visibleColumns = this._columns
       .filter((c) => {
-        if (!!c.showWhen) {
+        if (c.showWhen) {
           if (!this.media.isMatched(c.showWhen)) {
             return false;
           }
@@ -314,7 +352,15 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // benchmarks show that this method is quite fast, event with a lot of data.
     // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
     this.hasMoreData = false;
-    this.dataSource.data = this.generateModel(this.searchData(this.search, !!this.records ? [...this.records] : [], this._columns), this.grouping, this.sort);
+    this.dataSource.data = this.generateModel(
+      this.searchData(
+        this.search,
+        this.records ? [...this.records] : [],
+        this._columns
+      ),
+      this.grouping,
+      this.sort
+    );
 
     // TODO: Saving of expansion state on update. To achieve this, every BdDataGrouping must
     // have a unique ID. This ID, along with the group name (which is shown in the first column)
@@ -339,7 +385,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       level: level,
     };
 
-    if (!!node.item && !!this.checked && !!this.checked.find((c) => c === node.item)) {
+    if (
+      !!node.item &&
+      !!this.checked &&
+      !!this.checked.find((c) => c === node.item)
+    ) {
       this.checkSelection.select(flatNode);
     }
 
@@ -350,11 +400,13 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
    * Generates the actual model displayed by the widget from the raw data given.
    * This method is called recursively to apply groupings at various levels.
    */
-  private generateModel(data: T[], grouping: BdDataGrouping<T>[], sort: Sort): Node<T>[] {
+  private generateModel(
+    data: T[],
+    grouping: BdDataGrouping<T>[],
+    sort: Sort
+  ): Node<T>[] {
     // if there is grouping to be applied, apply the top-most level now, and recurse.
     if (!!grouping && grouping.length > 0) {
-      const grp = grouping[0]; // apply the first grouping. later recurse and skip first level.
-
       // do grouping by identifying the "group" of each record through the BdDataGrouping.
       const byGroup = new Map<string, T[]>();
       for (const row of data) {
@@ -364,9 +416,12 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
           group = UNMATCHED_GROUP;
         }
 
-        const show = !grouping[0].selected?.length || grouping[0].selected.includes(group);
+        const show =
+          !grouping[0].selected?.length || grouping[0].selected.includes(group);
         if (show && group) {
-          const list = byGroup.has(group) ? byGroup.get(group) : byGroup.set(group, []).get(group);
+          const list = byGroup.has(group)
+            ? byGroup.get(group)
+            : byGroup.set(group, []).get(group);
           list.push(row);
         }
       }
@@ -374,7 +429,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       // sort groups - sorting is dicdated by the BdDataGrouping, or (if grouping does not specify) is natural.
       const byGroupSorted = new Map(
         [...byGroup.entries()].sort((a, b) => {
-          if (!!grouping[0].definition.sort) {
+          if (grouping[0].definition.sort) {
             return grouping[0].definition.sort(a[0], b[0], a[1], b[1]);
           }
           return bdSortGroups(a[0], b[0]);
@@ -385,7 +440,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       const result: Node<T>[] = [];
       for (const [key, value] of byGroupSorted) {
         const children = this.generateModel(value, grouping.slice(1), sort);
-        if (!!children?.length) {
+        if (children?.length) {
           result.push({
             item: null,
             groupOrFirstColumn: key,
@@ -412,7 +467,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     // last step is to transform the raw input data into Node<T> which is then further processed
     // by the transformer callback of treeControl.
     this.hasMoreData = sortedData.length > MAX_ROWS_PER_GROUP;
-    return sortedData.slice(0, MAX_ROWS_PER_GROUP).map((i) => ({ item: i, groupOrFirstColumn: this._columns[0].data(i), children: [] }));
+    return sortedData.slice(0, MAX_ROWS_PER_GROUP).map((i) => ({
+      item: i,
+      groupOrFirstColumn: this._columns[0].data(i),
+      children: [],
+    }));
   }
 
   /* template */ getNoExpandIndent(level: number) {
@@ -423,7 +482,10 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   /* template */ getUnknownIcon(col: BdDataColumn<T>) {
-    console.warn('No icon callback registered for column definition with action', col);
+    console.warn(
+      'No icon callback registered for column definition with action',
+      col
+    );
     return 'help'; // default fallback.
   }
 
@@ -431,7 +493,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     if (!node.expandable) {
       const target = !this.checkSelection.isSelected(node);
       let confirm = of(true);
-      if (!!this.checkChangeAllowed) {
+      if (this.checkChangeAllowed) {
         confirm = this.checkChangeAllowed(node.node.item, target);
       }
       confirm.subscribe((ok) => {
@@ -441,7 +503,11 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
           } else {
             this.checkSelection.deselect(node);
           }
-          this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
+          this.checkedChange.emit(
+            this.checkSelection.selected
+              .filter((s) => !!s.node.item)
+              .map((s) => s.node.item)
+          );
         } else {
           cb.checked = !target;
         }
@@ -450,18 +516,32 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       const isChecked = this.isChecked(node);
 
       // if ALL are checked, we deselect all, otherwise we "upgrade" to all selected
-      isChecked ? this.checkSelection.deselect(node) : this.checkSelection.select(node);
+      isChecked
+        ? this.checkSelection.deselect(node)
+        : this.checkSelection.select(node);
 
       const children = this.treeControl.getDescendants(node);
-      this.checkSelection.isSelected(node) ? this.checkSelection.select(...children) : this.checkSelection.deselect(...children);
-      this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
+      this.checkSelection.isSelected(node)
+        ? this.checkSelection.select(...children)
+        : this.checkSelection.deselect(...children);
+      this.checkedChange.emit(
+        this.checkSelection.selected
+          .filter((s) => !!s.node.item)
+          .map((s) => s.node.item)
+      );
     }
   }
 
-  /* template */ toggleCheckAll(cb: MatCheckbox) {
+  /* template */ toggleCheckAll() {
     const isChecked = this.isAnyChecked();
-    isChecked ? this.checkSelection.deselect(...this.treeControl.dataNodes) : this.checkSelection.select(...this.treeControl.dataNodes);
-    this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
+    isChecked
+      ? this.checkSelection.deselect(...this.treeControl.dataNodes)
+      : this.checkSelection.select(...this.treeControl.dataNodes);
+    this.checkedChange.emit(
+      this.checkSelection.selected
+        .filter((s) => !!s.node.item)
+        .map((s) => s.node.item)
+    );
   }
 
   /* template */ isChecked(node: FlatNode<T>) {
@@ -474,16 +554,23 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   }
 
   /* template */ isAllChecked() {
-    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length === this.records?.length;
+    return (
+      this.checkSelection.selected.filter((n) => !!n?.node?.item).length ===
+      this.records?.length
+    );
   }
 
   /* template */ isAnyChecked() {
-    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length > 0;
+    return (
+      this.checkSelection.selected.filter((n) => !!n?.node?.item).length > 0
+    );
   }
 
   /* template */ isPartiallyChecked(node: FlatNode<T>) {
     const children = this.treeControl.getDescendants(node);
-    const selected = children.filter((child) => this.checkSelection.isSelected(child));
+    const selected = children.filter((child) =>
+      this.checkSelection.isSelected(child)
+    );
     return selected.length > 0 && selected.length < children.length; // at least one but not all.
   }
 
@@ -493,7 +580,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
   /* template */ getImageUrl(col: BdDataColumn<T>, record: T) {
     const url = col.data(record);
-    if (!!url) {
+    if (url) {
       return this.sanitizer.bypassSecurityTrustUrl(url);
     }
   }

@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, NavigationExtras, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  ActivatedRouteSnapshot,
+  NavigationEnd,
+  NavigationExtras,
+  Router,
+} from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DirtyableDialog } from '../guards/dirty-dialog.guard';
@@ -70,7 +76,9 @@ export class NavAreasService {
 
         // update the states visible to the flyin part of the main nav.
         this.panelVisible$.next(panelSnapshot ? true : false);
-        this.panelMaximized$.next(!!panelSnapshot && !!panelSnapshot.data && !!panelSnapshot.data['max']);
+        this.panelMaximized$.next(
+          !!panelSnapshot && !!panelSnapshot.data && !!panelSnapshot.data['max']
+        );
 
         // we compare the full route from the root of the primary snapshot to determine whether
         // or not we need to close an open panel. if it changes, we close the panel.
@@ -85,7 +93,10 @@ export class NavAreasService {
 
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link
         // which includes a panel navigation.
-        if (!!this.forcePanelClose$.value || (this.primaryState && newPrimaryState !== this.primaryState)) {
+        if (
+          !!this.forcePanelClose$.value ||
+          (this.primaryState && newPrimaryState !== this.primaryState)
+        ) {
           this.closePanel(this.forcePanelClose$.value);
           this.forcePanelClose$.next(false);
         }
@@ -128,15 +139,25 @@ export class NavAreasService {
       .toString();
   }
 
-  public closePanel(force: boolean = false) {
+  public closePanel(force = false) {
     if (force) {
-      this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true, state: { ignoreDirtyGuard: true } });
+      this.router.navigate(['', { outlets: { panel: null } }], {
+        replaceUrl: true,
+        state: { ignoreDirtyGuard: true },
+      });
     } else {
-      this.router.navigate(['', { outlets: { panel: null } }], { replaceUrl: true });
+      this.router.navigate(['', { outlets: { panel: null } }], {
+        replaceUrl: true,
+      });
     }
   }
 
-  public navigateBoth(primary: any[], panel: any[], primaryExtra?: NavigationExtras, panelExtra?: NavigationExtras) {
+  public navigateBoth(
+    primary: any[],
+    panel: any[],
+    primaryExtra?: NavigationExtras,
+    panelExtra?: NavigationExtras
+  ) {
     this.router.navigate(primary, primaryExtra).then((nav) => {
       if (nav) {
         // need to perform a panel navigation separately to avoid closing the panel and to separate query params.
@@ -145,7 +166,10 @@ export class NavAreasService {
     });
   }
 
-  public registerDirtyable(dirtyable: DirtyableDialog, type: DirtyableKey): Subscription {
+  public registerDirtyable(
+    dirtyable: DirtyableDialog,
+    type: DirtyableKey
+  ): Subscription {
     this.dirtyables[type] = dirtyable;
 
     return new Subscription(() => {
@@ -177,7 +201,11 @@ export class NavAreasService {
 
   private deregisterDirtyable(dirtyable: DirtyableDialog, type: DirtyableKey) {
     if (this.dirtyables[type] !== dirtyable) {
-      console.error('Unexpected dirtyable while deregistering.', dirtyable, this.dirtyables[type]);
+      console.error(
+        'Unexpected dirtyable while deregistering.',
+        dirtyable,
+        this.dirtyables[type]
+      );
     }
 
     this.dirtyables[type] = null;
@@ -194,7 +222,10 @@ export class NavAreasService {
     return result;
   }
 
-  private findChildRouteForOutlet(route: ActivatedRoute, outlet: string): ActivatedRoute {
+  private findChildRouteForOutlet(
+    route: ActivatedRoute,
+    outlet: string
+  ): ActivatedRoute {
     if (!route.children) {
       return null;
     }
@@ -204,7 +235,7 @@ export class NavAreasService {
         return child;
       }
 
-      if (!!child.children?.length) {
+      if (child.children?.length) {
         const result = this.findChildRouteForOutlet(child, outlet);
         if (result) {
           return result;

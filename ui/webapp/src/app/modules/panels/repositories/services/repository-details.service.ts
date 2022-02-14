@@ -11,7 +11,11 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 export class RepositoryDetailsService {
   private apiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}`;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private repositories: RepositoriesService) {}
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private repositories: RepositoriesService
+  ) {}
 
   public delete(repository: SoftwareRepositoryConfiguration): Observable<any> {
     return this.http.delete(`${this.apiPath(repository.name)}`);

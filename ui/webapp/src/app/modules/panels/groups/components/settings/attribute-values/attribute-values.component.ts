@@ -2,8 +2,15 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
-import { ACTION_APPLY, ACTION_CANCEL } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  CustomAttributeDescriptor,
+  CustomAttributesRecord,
+  InstanceGroupConfiguration,
+} from 'src/app/models/gen.dtos';
+import {
+  ACTION_APPLY,
+  ACTION_CANCEL,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { GroupDetailsService } from '../../../services/group-details.service';
@@ -17,7 +24,6 @@ interface AttributeRow {
 @Component({
   selector: 'app-attribute-values',
   templateUrl: './attribute-values.component.html',
-  styleUrls: ['./attribute-values.component.css'],
 })
 export class AttributeValuesComponent implements OnInit {
   private attrNameCol: BdDataColumn<AttributeRow> = {
@@ -36,7 +42,7 @@ export class AttributeValuesComponent implements OnInit {
     id: 'remove',
     name: 'Rem.',
     data: (r) => `Remove value for ${r.name}`,
-    icon: (r) => 'delete',
+    icon: () => 'delete',
     action: (r) => this.removeAttribute(r),
     width: '30px',
   };
@@ -44,7 +50,11 @@ export class AttributeValuesComponent implements OnInit {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns: BdDataColumn<AttributeRow>[] = [this.attrNameCol, this.attrValCol, this.attrRemoveCol];
+  /* template */ columns: BdDataColumn<AttributeRow>[] = [
+    this.attrNameCol,
+    this.attrValCol,
+    this.attrRemoveCol,
+  ];
   /* template */ records: AttributeRow[] = [];
   /* template */ defs: CustomAttributeDescriptor[];
 
@@ -55,10 +65,17 @@ export class AttributeValuesComponent implements OnInit {
   private group: InstanceGroupConfiguration;
   private attributes: CustomAttributesRecord;
 
-  constructor(private groups: GroupsService, private details: GroupDetailsService) {}
+  constructor(
+    private groups: GroupsService,
+    private details: GroupDetailsService
+  ) {}
 
   ngOnInit(): void {
-    combineLatest([this.groups.current$, this.groups.attributeDefinitions$, this.groups.currentAttributeValues$]).subscribe((r) => {
+    combineLatest([
+      this.groups.current$,
+      this.groups.attributeDefinitions$,
+      this.groups.currentAttributeValues$,
+    ]).subscribe((r) => {
       this.group = r[0];
       this.defs = r[1];
       this.attributes = r[2];
@@ -116,8 +133,12 @@ export class AttributeValuesComponent implements OnInit {
     } else {
       const result: AttributeRow[] = [];
       for (const def of this.defs) {
-        if (!!this.attributes.attributes[def.name]) {
-          result.push({ id: def.name, name: def.description, value: this.attributes.attributes[def.name] });
+        if (this.attributes.attributes[def.name]) {
+          result.push({
+            id: def.name,
+            name: def.description,
+            value: this.attributes.attributes[def.name],
+          });
         }
       }
       this.records = result;

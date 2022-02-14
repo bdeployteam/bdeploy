@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { PopupPosition } from '../bd-popup/bd-popup.directive';
@@ -6,9 +6,8 @@ import { PopupPosition } from '../bd-popup/bd-popup.directive';
 @Component({
   selector: 'app-bd-button-popup',
   templateUrl: './bd-button-popup.component.html',
-  styleUrls: ['./bd-button-popup.component.css'],
 })
-export class BdButtonPopupComponent implements OnInit {
+export class BdButtonPopupComponent {
   @Input() text: string;
   @Input() icon: string;
   @Input() badge: number;
@@ -20,8 +19,4 @@ export class BdButtonPopupComponent implements OnInit {
   @Input() chevronColor: ThemePalette;
 
   @Output() popupOpened = new EventEmitter<BdButtonPopupComponent>();
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

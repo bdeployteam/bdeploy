@@ -1,19 +1,40 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { BehaviorSubject, finalize, Observable, of, Subscription, switchMap, tap } from 'rxjs';
-import { FileStatusDto, FileStatusType, RemoteDirectory } from 'src/app/models/gen.dtos';
+import {
+  BehaviorSubject,
+  finalize,
+  Observable,
+  of,
+  Subscription,
+  switchMap,
+  tap,
+} from 'rxjs';
+import {
+  FileStatusDto,
+  FileStatusType,
+  RemoteDirectory,
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'add-data-file',
   templateUrl: './add-data-file.component.html',
   styleUrls: ['./add-data-file.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class AddDataFileComponent
+  implements OnInit, OnDestroy, DirtyableDialog
+{
   /* template */ minions$ = new BehaviorSubject<string[]>([]);
 
   /* template */ tempFilePath: string;
@@ -41,8 +62,10 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
           return;
         }
         for (const dir of dd) {
-          if (!!dir.problem) {
-            console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
+          if (dir.problem) {
+            console.warn(
+              `Problem reading files from ${dir.minion}: ${dir.problem}`
+            );
             continue;
           }
         }
@@ -70,10 +93,12 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
       .subscribe((confirm) => {
         if (confirm === null || confirm === true) {
           if (this.shouldReplace() && confirm) {
-            this.df.updateFile(this.directory, this.fileToSave).subscribe(() => {
-              this.reset();
-              return;
-            });
+            this.df
+              .updateFile(this.directory, this.fileToSave)
+              .subscribe(() => {
+                this.reset();
+                return;
+              });
           } else {
             this.reset();
           }
@@ -88,14 +113,22 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
       type: FileStatusType.ADD,
       content: this.tempFileContent,
     };
-    this.directory = this.df.directories$.value.find((d) => d.minion === this.tempFileMinion);
+    this.directory = this.df.directories$.value.find(
+      (d) => d.minion === this.tempFileMinion
+    );
     if (this.shouldReplace()) {
       this.saving$.next(false);
-      return this.dialog.confirm('File Exists', 'A file with the given name exists - replace?', 'warning').pipe(
-        tap((r) => {
-          if (r) this.fileToSave.type = FileStatusType.EDIT;
-        })
-      );
+      return this.dialog
+        .confirm(
+          'File Exists',
+          'A file with the given name exists - replace?',
+          'warning'
+        )
+        .pipe(
+          tap((r) => {
+            if (r) this.fileToSave.type = FileStatusType.EDIT;
+          })
+        );
     }
     return this.df.updateFile(this.directory, this.fileToSave).pipe(
       switchMap(() => {
@@ -124,7 +157,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     }
 
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = () => {
       const result = reader.result.toString();
 
       // always set the file name/path to the original dropped file name.

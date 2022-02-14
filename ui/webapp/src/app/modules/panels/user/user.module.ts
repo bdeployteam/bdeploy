@@ -9,7 +9,13 @@ import { ThemesComponent } from './components/themes/themes.component';
 import { UserRoutingModule } from './user-routing.module';
 
 @NgModule({
-  declarations: [ThemesComponent, SettingsComponent, EditComponent, TokenComponent, PasswordComponent],
+  declarations: [
+    ThemesComponent,
+    SettingsComponent,
+    EditComponent,
+    TokenComponent,
+    PasswordComponent,
+  ],
   imports: [CommonModule, CoreModule, UserRoutingModule],
 })
 export class UserModule {}

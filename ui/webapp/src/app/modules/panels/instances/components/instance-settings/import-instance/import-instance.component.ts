@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ManifestKey } from 'src/app/models/gen.dtos';
-import { UploadStatus, UrlParameter } from 'src/app/modules/core/services/upload.service';
+import {
+  UploadStatus,
+  UrlParameter,
+} from 'src/app/modules/core/services/upload.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
 interface ImportFile {
@@ -11,9 +14,8 @@ interface ImportFile {
 @Component({
   selector: 'app-import-instance',
   templateUrl: './import-instance.component.html',
-  styleUrls: ['./import-instance.component.css'],
 })
-export class ImportInstanceComponent implements OnInit {
+export class ImportInstanceComponent {
   /* template */ files: ImportFile[] = [];
 
   /* template */ resultEval = (s: UploadStatus) => {
@@ -25,8 +27,6 @@ export class ImportInstanceComponent implements OnInit {
   };
 
   constructor(public instances: InstancesService) {}
-
-  ngOnInit(): void {}
 
   /* template */ fileAdded(file: File) {
     this.files.push({ file: file, parameters: [] });

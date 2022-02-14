@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
@@ -9,12 +15,14 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { randomString } from 'src/app/modules/core/utils/object.utils';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'add-ldap-server',
   templateUrl: './add-ldap-server.component.html',
-  styleUrls: ['./add-ldap-server.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class AddLdapServerComponent
+  implements OnInit, OnDestroy, DirtyableDialog
+{
   /* template */ tempServer: Partial<LDAPSettingsDto>;
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
 
@@ -23,7 +31,10 @@ export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialo
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(private settings: SettingsService, private areas: NavAreasService) {
+  constructor(
+    private settings: SettingsService,
+    private areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
@@ -54,7 +65,7 @@ export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialo
           this.saving$.next(false);
         })
       )
-      .subscribe((_) => {
+      .subscribe(() => {
         this.areas.closePanel();
         this.subscription.unsubscribe();
       });

@@ -1,14 +1,39 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar [panel]="true" header="History Details"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    [panel]="true"
+    header="History Details"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="entry$ | async as entry" fxLayout="column" fxLayoutGap="10px">
       <div fxLayout="row" fxLayoutGap="10px">
-        <app-user-avatar [mail]="entry?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
-        <div fxFlex="1 0 auto" gdColumns="70px 180px" gdGap="3px 5px" [style.max-width.px]="250" gdAlignColumns="center center">
+        <app-user-avatar
+          [mail]="entry?.email"
+          [hostSize]="64"
+          [avatarSize]="64"
+        ></app-user-avatar>
+        <div
+          fxFlex="1 0 auto"
+          gdColumns="70px 180px"
+          gdGap="3px 5px"
+          [style.max-width.px]="250"
+          gdAlignColumns="center center"
+        >
           <div><strong>Username:</strong></div>
-          <div class="bd-text-ellipsis" [matTooltip]="entry.user" [matTooltipShowDelay]="1000">{{ entry.user }}</div>
+          <div
+            class="bd-text-ellipsis"
+            [matTooltip]="entry.user"
+            [matTooltipShowDelay]="1000"
+          >
+            {{ entry.user }}
+          </div>
           <div><strong>E-Mail:</strong></div>
-          <div class="bd-text-ellipsis" [matTooltip]="entry.email" [matTooltipShowDelay]="1000">{{ entry.email }}</div>
+          <div
+            class="bd-text-ellipsis"
+            [matTooltip]="entry.email"
+            [matTooltipShowDelay]="1000"
+          >
+            {{ entry.email }}
+          </div>
         </div>
       </div>
       <div gdColumns="100px auto" gdGap="5px" gdAlignColumns="start center">
@@ -66,7 +91,13 @@
           [relative]="true"
           [route]="['select', entry.instanceTag]"
         ></app-bd-panel-button>
-        <app-bd-button [collapsed]="false" [toggle]="false" icon="file_download" text="Export" (click)="doExport()"></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          [toggle]="false"
+          icon="file_download"
+          text="Export"
+          (click)="doExport()"
+        ></app-bd-button>
         <app-bd-button
           *ngIf="auth.isCurrentScopeAdmin$ | async"
           [collapsed]="false"
@@ -87,8 +118,9 @@
             *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
           >
             <div [style.text-align]="'justify'">
-              The managed server responsible for this instance is not synchronized, version controls are unavailable. Please synchronize the server to use these
-              controls.
+              The managed server responsible for this instance is not
+              synchronized, version controls are unavailable. Please synchronize
+              the server to use these controls.
             </div>
           </app-bd-notification-card>
           <app-bd-button
@@ -126,8 +158,16 @@
     </div>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(entry$ | async)">
-    <app-bd-notification-card icon="history" [type]="'warning'" [dismissable]="false" header="No Information">
-      <div [style.text-align]="'justify'">The selected history entry cannot be retrieved. Please select another one from the list.</div>
+    <app-bd-notification-card
+      icon="history"
+      [type]="'warning'"
+      [dismissable]="false"
+      header="No Information"
+    >
+      <div [style.text-align]="'justify'">
+        The selected history entry cannot be retrieved. Please select another
+        one from the list.
+      </div>
     </app-bd-notification-card>
   </app-bd-dialog-content>
 </app-bd-dialog>

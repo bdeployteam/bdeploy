@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { UserInfo } from 'src/app/models/gen.dtos';
@@ -7,12 +13,12 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'add-user',
   templateUrl: './add-user.component.html',
-  styleUrls: ['./add-user.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddUserComponent implements OnInit {
+export class AddUserComponent implements OnInit, OnDestroy {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ addUser: Partial<UserInfo>;
   /* template */ addConfirm: string;
@@ -22,7 +28,10 @@ export class AddUserComponent implements OnInit {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(private authAdmin: AuthAdminService, private areas: NavAreasService) {
+  constructor(
+    private authAdmin: AuthAdminService,
+    private areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
@@ -47,7 +56,7 @@ export class AddUserComponent implements OnInit {
           this.saving$.next(false);
         })
       )
-      .subscribe((_) => {
+      .subscribe(() => {
         this.areas.closePanel();
         this.subscription.unsubscribe();
       });

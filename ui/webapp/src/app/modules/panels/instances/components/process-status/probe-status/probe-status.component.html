@@ -1,15 +1,40 @@
 <div class="local-wrapper" fxLayout="row" fxLayoutAlign="start center">
-  <div gdColumns="90px 36px auto 36px" gdGap="5px" gdAlignColumns="start center" fxFlex="1 0 auto">
+  <div
+    gdColumns="90px 36px auto 36px"
+    gdGap="5px"
+    gdAlignColumns="start center"
+    fxFlex="1 0 auto"
+  >
     <div>{{ probe.type }}</div>
-    <mat-icon fontSet="material-icons-filled" [matTooltip]="'Status: ' + probe.status" [ngClass]="class">{{ icon }}</mat-icon>
+    <mat-icon
+      fontSet="material-icons-filled"
+      [matTooltip]="'Status: ' + probe.status"
+      [ngClass]="class"
+      >{{ icon }}</mat-icon
+    >
     <div>{{ probe.time | date: 'HH:mm:ss' }}</div>
     <app-bd-button-popup text="Details" icon="info">
-      <mat-card [style.padding.px]="10" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
-        <div class="bd-description-text">{{ probe.type }} - Status {{ probe.status }}</div>
+      <mat-card
+        [style.padding.px]="10"
+        class="mat-typography"
+        fxLayout="column"
+        fxLayoutGap="5px"
+      >
+        <div class="bd-description-text">
+          {{ probe.type }} - Status {{ probe.status }}
+        </div>
         <mat-divider [style.position]="'relative'"></mat-divider>
         <div class="bd-description-text">Probe Response:</div>
-        <div [style.height.px]="400" [style.width.px]="(narrow$ | async) ? 400 : 800" fxLayout="row">
-          <app-bd-editor fxFill [readonly]="true" [content]="content$ | async"></app-bd-editor>
+        <div
+          [style.height.px]="400"
+          [style.width.px]="(narrow$ | async) ? 400 : 800"
+          fxLayout="row"
+        >
+          <app-bd-editor
+            fxFill
+            [readonly]="true"
+            [content]="content$ | async"
+          ></app-bd-editor>
         </div>
       </mat-card>
     </app-bd-button-popup>

@@ -1,8 +1,12 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Data Files - {{ instance?.instanceConfiguration?.name }}">
+  <app-bd-dialog-toolbar
+    header="Data Files - {{ instance?.instanceConfiguration?.name }}"
+  >
     <div fxFlex="1 0 auto"></div>
     <ng-container *ngIf="cfg.isCentral$ | async">
-      <app-bd-server-sync-button [server]="instance?.managedServer"></app-bd-server-sync-button>
+      <app-bd-server-sync-button
+        [server]="instance?.managedServer"
+      ></app-bd-server-sync-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <app-bd-panel-button
@@ -32,10 +36,15 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <ng-container *ngIf="noactive$ | async; else active">
-      <app-bd-no-data>The current instance does not have an active version yet. Data Files not yet available.</app-bd-no-data>
+      <app-bd-no-data
+        >The current instance does not have an active version yet. Data Files
+        not yet available.</app-bd-no-data
+      >
     </ng-container>
     <ng-template #active>
-      <ng-container *ngIf="servers.isCurrentInstanceSynchronized$ | async; else isNotSynchronized">
+      <ng-container
+        *ngIf="servers.isCurrentInstanceSynchronized$ | async; else isNotSynchronized"
+      >
         <app-bd-data-table
           [records]="records$ | async"
           [columns]="columns"
@@ -46,7 +55,10 @@
           [(checked)]="dataFilesBulkService.selection"
         >
           <app-bd-no-data>
-            <p>No data available. This either means that the instance has no active version, or no files exist.</p>
+            <p>
+              No data available. This either means that the instance has no
+              active version, or no files exist.
+            </p>
             <p>Try to refresh to fetch current information from the node(s).</p>
             <app-bd-button
               text="Refresh"
@@ -63,11 +75,15 @@
     <ng-template #isNotSynchronized>
       <app-bd-no-data>
         <p [style.text-align]="'center'">
-          <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not synchronized with the controlling server
+          <strong>{{ instance?.instanceConfiguration?.name }}</strong> is not
+          synchronized with the controlling server
           <strong>{{ instance?.managedServer?.hostName }}</strong>
         </p>
         <p>Synchronize the instance to view data files.</p>
-        <app-bd-server-sync-button [collapsed]="false" [server]="instance.managedServer"></app-bd-server-sync-button>
+        <app-bd-server-sync-button
+          [collapsed]="false"
+          [server]="instance.managedServer"
+        ></app-bd-server-sync-button>
       </app-bd-no-data>
     </ng-template>
   </app-bd-dialog-content>

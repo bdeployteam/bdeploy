@@ -15,13 +15,18 @@
       [errorStateMatcher]="this"
     />
     <mat-autocomplete #auto="matAutocomplete">
-      <mat-option *ngFor="let suggestedValue of filteredSuggested$ | async" [value]="suggestedValue">
+      <mat-option
+        *ngFor="let suggestedValue of filteredSuggested$ | async"
+        [value]="suggestedValue"
+      >
         {{ suggestedValue }}
       </mat-option>
     </mat-autocomplete>
     <div matSuffix class="bd-form-input-suffix">
       <ng-content></ng-content>
     </div>
-    <mat-error *ngIf="ngControl && ngControl.invalid">{{ getErrorMessage() }}</mat-error>
+    <mat-error *ngIf="ngControl && ngControl.invalid"
+      >{{ getErrorMessage() }}</mat-error
+    >
   </mat-form-field>
 </div>

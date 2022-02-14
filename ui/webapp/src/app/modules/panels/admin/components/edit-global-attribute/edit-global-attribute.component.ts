@@ -1,7 +1,19 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  of,
+  Subscription,
+} from 'rxjs';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -10,12 +22,14 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'edit-global-attribute',
   templateUrl: './edit-global-attribute.component.html',
-  styleUrls: ['./edit-global-attribute.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class EditGlobalAttributeComponent
+  implements OnInit, OnDestroy, DirtyableDialog
+{
   /* template */ tempAttribute: CustomAttributeDescriptor;
   /* template */ origAttribute: CustomAttributeDescriptor;
   /* template */ initialAttribute: CustomAttributeDescriptor;
@@ -27,21 +41,31 @@ export class EditGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyabl
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(private settings: SettingsService, private areas: NavAreasService) {
+  constructor(
+    private settings: SettingsService,
+    private areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnInit(): void {
     this.subscription.add(
-      combineLatest([this.areas.panelRoute$, this.settings.settings$]).subscribe(([route, settings]) => {
+      combineLatest([
+        this.areas.panelRoute$,
+        this.settings.settings$,
+      ]).subscribe(([route, settings]) => {
         if (!settings || !route?.params || !route.params['attribute']) {
           return;
         }
 
-        this.initialAttribute = settings.instanceGroup.attributes.find((a) => a.name === route.params['attribute']);
+        this.initialAttribute = settings.instanceGroup.attributes.find(
+          (a) => a.name === route.params['attribute']
+        );
         this.tempAttribute = cloneDeep(this.initialAttribute);
         this.origAttribute = cloneDeep(this.initialAttribute);
-        this.tempUsedIds = settings.instanceGroup.attributes.map((a) => a.name).filter((a) => a !== this.initialAttribute.name);
+        this.tempUsedIds = settings.instanceGroup.attributes
+          .map((a) => a.name)
+          .filter((a) => a !== this.initialAttribute.name);
         this.loading$.next(false);
       })
     );
@@ -69,7 +93,12 @@ export class EditGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyabl
   }
 
   public doSave(): Observable<void> {
-    return of(this.settings.editGlobalAttribute(this.tempAttribute, this.initialAttribute));
+    return of(
+      this.settings.editGlobalAttribute(
+        this.tempAttribute,
+        this.initialAttribute
+      )
+    );
   }
 
   private reset() {

@@ -5,8 +5,16 @@ import { RepositoriesBrowserComponent } from './components/repositories-browser/
 import { RepositoryComponent } from './components/repository/repository.component';
 
 const GROUPS_ROUTES: Route[] = [
-  { path: 'browser', component: RepositoriesBrowserComponent, canDeactivate: [DirtyDialogGuard] },
-  { path: 'repository/:repository', component: RepositoryComponent, canDeactivate: [DirtyDialogGuard] },
+  {
+    path: 'browser',
+    component: RepositoriesBrowserComponent,
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'repository/:repository',
+    component: RepositoryComponent,
+    canDeactivate: [DirtyDialogGuard],
+  },
 ];
 
 @NgModule({

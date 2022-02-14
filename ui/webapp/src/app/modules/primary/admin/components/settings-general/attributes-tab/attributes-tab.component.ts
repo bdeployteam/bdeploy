@@ -11,7 +11,6 @@ import { AttributeEditActionComponent } from './attribute-edit-action/attribute-
 @Component({
   selector: 'app-attributes-tab',
   templateUrl: './attributes-tab.component.html',
-  styleUrls: ['./attributes-tab.component.css'],
 })
 export class AttributesTabComponent implements OnInit, OnDestroy {
   private defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
@@ -31,7 +30,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     name: 'Edit',
     data: (r) => `Edit definition ${r.name}`,
     component: AttributeEditActionComponent,
-    icon: (r) => 'edit',
+    icon: () => 'edit',
     width: '40px',
   };
 
@@ -40,21 +39,31 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     name: 'Rem.',
     data: (r) => `Remove definition ${r.name}`,
     action: (r) => this.settings.removeAttribute(r),
-    icon: (r) => 'delete',
+    icon: () => 'delete',
     width: '40px',
     actionDisabled: (r) => this.disableDelete(r),
   };
 
-  /* template */ attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [this.defIdCol, this.defDescCol, this.defEditCol, this.defDelCol];
+  /* template */ attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [
+    this.defIdCol,
+    this.defDescCol,
+    this.defEditCol,
+    this.defDelCol,
+  ];
   /* template */ tempAttribute: CustomAttributeDescriptor;
   /* template */ tempUsedIds: string[];
   private selectedAttributeName: string;
 
   private subscription: Subscription;
 
-  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<CustomAttributeDescriptor>;
+  @ViewChild(BdDataTableComponent)
+  private table: BdDataTableComponent<CustomAttributeDescriptor>;
 
-  constructor(private router: Router, public settings: SettingsService, private areas: NavAreasService) {}
+  constructor(
+    private router: Router,
+    public settings: SettingsService,
+    private areas: NavAreasService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
@@ -64,15 +73,27 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
       }
       this.selectedAttributeName = route.params['attribute'];
     });
-    this.subscription.add(this.settings.settingsUpdated$.subscribe((_) => this.table.update()));
+    this.subscription.add(
+      this.settings.settingsUpdated$.subscribe(() => this.table.update())
+    );
   }
 
   /* template */ addAttribute(): void {
-    this.router.navigate(['', { outlets: { panel: ['panels', 'admin', 'global-attribute-add'] } }]);
+    this.router.navigate([
+      '',
+      { outlets: { panel: ['panels', 'admin', 'global-attribute-add'] } },
+    ]);
   }
 
   private editAttribute(attr: CustomAttributeDescriptor): void {
-    this.router.navigate(['', { outlets: { panel: ['panels', 'admin', 'global-attribute', attr.name, 'edit'] } }]);
+    this.router.navigate([
+      '',
+      {
+        outlets: {
+          panel: ['panels', 'admin', 'global-attribute', attr.name, 'edit'],
+        },
+      },
+    ]);
   }
 
   disableDelete(r) {

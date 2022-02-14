@@ -4,10 +4,21 @@
     <!-- This is *required* as paths cannot position with percent values, only absolute is supported. We can still place *other* elements -->
     <!-- Outside of the graph using percent values later on without distortion. -->
     <!-- Each element must use vector-effect="non-scaling-stroke" to keep the strokes from scaling. -->
-    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+    >
       <g *ngIf="hasVisiblePoint">
         <!-- The actual curve -->
-        <path *ngIf="!!pathInfo" [attr.d]="pathInfo" class="local-graph-curve" fill="none" vector-effect="non-scaling-stroke"></path>
+        <path
+          *ngIf="!!pathInfo"
+          [attr.d]="pathInfo"
+          class="local-graph-curve"
+          fill="none"
+          vector-effect="non-scaling-stroke"
+        ></path>
 
         <!-- The "end marker" in case there are not a full 15 data points. -->
         <g *ngIf="endMarker">
@@ -26,7 +37,14 @@
 
     <!-- These do *not* use the scaled viewBox, to be able to render text without distortion. -->
     <g *ngIf="!!maxLabel && !!maxValue && !!this.curve">
-      <line [attr.y1]="getMaxLineY()" x1="0" [attr.y2]="getMaxLineY()" x2="100%" class="local-max-line" stroke-dasharray="4 2"></line>
+      <line
+        [attr.y1]="getMaxLineY()"
+        x1="0"
+        [attr.y2]="getMaxLineY()"
+        x2="100%"
+        class="local-max-line"
+        stroke-dasharray="4 2"
+      ></line>
       <text
         text-anchor="end"
         [attr.y]="getMaxLineY() + 16"
@@ -69,9 +87,16 @@
       </g>
     </g>
   </svg>
-  <div class="local-no-data-overlay bd-description-text" *ngIf="!hasVisiblePoint" fxLayout="column" fxLayoutAlign="center center">
+  <div
+    class="local-no-data-overlay bd-description-text"
+    *ngIf="!hasVisiblePoint"
+    fxLayout="column"
+    fxLayoutAlign="center center"
+  >
     <div><strong>No data available.</strong></div>
-    <div *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)">The server is not synchronized. Please synchronize first.</div>
+    <div *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)">
+      The server is not synchronized. Please synchronize first.
+    </div>
   </div>
   <div class="local-content-sizing" fxLayout="column">
     <ng-content></ng-content>

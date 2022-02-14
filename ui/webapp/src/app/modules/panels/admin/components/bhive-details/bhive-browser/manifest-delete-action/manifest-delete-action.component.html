@@ -1,3 +1,9 @@
 <div fxLayout="row" fxLayoutAlign="start center">
-  <app-bd-button *ngIf="record.type === 'MANIFEST'" text="Delete" icon="delete" (click)="onDelete()" appClickStopPropagation></app-bd-button>
+  <app-bd-button
+    *ngIf="record.type === 'MANIFEST'"
+    text="Delete"
+    icon="delete"
+    (click)="onDelete()"
+    appClickStopPropagation
+  ></app-bd-button>
 </div>

@@ -8,7 +8,7 @@ import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data
 const COL_AVATAR: BdDataColumn<RemoteDirectoryEntry> = {
   id: 'avatar',
   name: '',
-  data: (r) => 'subject',
+  data: () => 'subject',
   width: '40px',
   component: BdDataIconCellComponent,
 };
@@ -39,7 +39,10 @@ const COL_MODIFIED: BdDataColumn<RemoteDirectoryEntry> = {
   providedIn: 'root',
 })
 export class LogColumnsService {
-  public defaultColumns: BdDataColumn<RemoteDirectoryEntry>[] = [COL_AVATAR, COL_PATH, COL_SIZE, COL_MODIFIED];
-
-  constructor() {}
+  public defaultColumns: BdDataColumn<RemoteDirectoryEntry>[] = [
+    COL_AVATAR,
+    COL_PATH,
+    COL_SIZE,
+    COL_MODIFIED,
+  ];
 }

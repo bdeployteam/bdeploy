@@ -6,7 +6,11 @@
         <div class="bd-title-text">{{ node }}</div>
       </div>
       <ng-container *ngIf="node$ | async as node">
-        <mat-icon [style.padding-left.px]="20" fxFlexAlign="center" [svgIcon]="node.os"></mat-icon>
+        <mat-icon
+          [style.padding-left.px]="20"
+          fxFlexAlign="center"
+          [svgIcon]="node.os"
+        ></mat-icon>
       </ng-container>
       <div fxFlex="1 0 auto"></div>
       <div fxLayout="row" fxLayoutGap="5px">

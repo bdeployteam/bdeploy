@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-bd-notification-card',
   templateUrl: './bd-notification-card.component.html',
   styleUrls: ['./bd-notification-card.component.css'],
 })
-export class BdNotificationCardComponent implements OnInit {
+export class BdNotificationCardComponent {
   @Input() header: string;
   @Input() icon: string;
   @Input() svgIcon: string;
@@ -15,8 +15,4 @@ export class BdNotificationCardComponent implements OnInit {
   @Input() background: 'toolbar' | 'dialog' = 'toolbar';
   @Input() collapsed = false;
   @Output() dismiss = new EventEmitter<any>();
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

@@ -5,7 +5,6 @@ import {
   EventEmitter,
   Input,
   OnDestroy,
-  OnInit,
   Output,
   QueryList,
   TemplateRef,
@@ -14,12 +13,31 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { NgControl, NgForm } from '@angular/forms';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  of,
+  Subscription,
+} from 'rxjs';
 import { debounceTime, skipWhile } from 'rxjs/operators';
-import { ApplicationConfiguration, ApplicationDto, CustomEditor, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
-import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  ApplicationConfiguration,
+  ApplicationDto,
+  CustomEditor,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType,
+} from 'src/app/models/gen.dtos';
+import {
+  ACTION_CANCEL,
+  ACTION_OK,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
+import {
+  BdSearchable,
+  SearchService,
+} from 'src/app/modules/core/services/search.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
 import { HistoryProcessConfigComponent } from '../../../history-process-config/history-process-config.component';
 
@@ -49,7 +67,9 @@ interface ParameterGroup {
   styleUrls: ['./config-process-param-group.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSearchable, AfterViewInit {
+export class ConfigProcessParamGroupComponent
+  implements OnDestroy, BdSearchable, AfterViewInit
+{
   /* template */ groups$ = new BehaviorSubject<ParameterGroup[]>(null);
   /* template */ narrow$ = new BehaviorSubject<boolean>(false);
   /* template */ search: string;
@@ -58,19 +78,32 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
   @Input() dialog: BdDialogComponent;
 
-  @ViewChild(HistoryProcessConfigComponent) preview: HistoryProcessConfigComponent;
+  @ViewChild(HistoryProcessConfigComponent)
+  preview: HistoryProcessConfigComponent;
   @ViewChildren('groupForm') public forms: QueryList<NgForm>;
-  @ViewChildren('validateCustom', { read: NgControl }) private validateCustomFields: QueryList<NgControl>;
+  @ViewChildren('validateCustom', { read: NgControl })
+  private validateCustomFields: QueryList<NgControl>;
   @Output() checkIsInvalid = new EventEmitter<boolean>();
 
   private custom: ParameterGroup;
-  /* template */ customTemp: { predecessor: string; uid: string; value: string };
+  /* template */ customTemp: {
+    predecessor: string;
+    uid: string;
+    value: string;
+  };
 
   private updatePreview$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
 
-  constructor(public edit: ProcessEditService, bop: BreakpointObserver, private searchService: SearchService) {
-    this.subscription = combineLatest([this.edit.process$, this.edit.application$]).subscribe(([process, app]) => {
+  constructor(
+    public edit: ProcessEditService,
+    bop: BreakpointObserver,
+    private searchService: SearchService
+  ) {
+    this.subscription = combineLatest([
+      this.edit.process$,
+      this.edit.application$,
+    ]).subscribe(([process, app]) => {
       if (!process || !app) {
         this.groups$.next(null);
         return;
@@ -80,10 +113,15 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       // group all parameter descriptors and configurations together for simple iteration in the template.
       const r: ParameterGroup[] = [];
       for (const pd of app.descriptor.startCommand.parameters) {
-        const grpName = !!pd.groupName?.length ? pd.groupName : UNGROUPED;
+        const grpName = pd.groupName?.length ? pd.groupName : UNGROUPED;
         let grp = r.find((g) => g.name === grpName);
         if (!grp) {
-          grp = { name: grpName, pairs: [], isCustom: false, isSelectMode: false };
+          grp = {
+            name: grpName,
+            pairs: [],
+            isCustom: false,
+            isSelectMode: false,
+          };
           r.push(grp);
         }
 
@@ -98,7 +136,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
         // check if the param has a value (yet) - if yes, push it now to have the order right within the group (same as descriptor order).
         const val = process.start?.parameters?.find((p) => p.uid === pd.uid);
-        if (!!val) {
+        if (val) {
           pair.value = val;
           if (pd.type === ParameterType.BOOLEAN) {
             pair.booleanValue = val.value === 'true';
@@ -122,11 +160,27 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       });
 
       // find custom parameters and add them;
-      this.custom = { name: CUSTOM, pairs: [], isCustom: true, isSelectMode: false };
+      this.custom = {
+        name: CUSTOM,
+        pairs: [],
+        isCustom: true,
+        isSelectMode: false,
+      };
+      // eslint-disable-next-line no-unsafe-optional-chaining
       for (const pv of process.start?.parameters) {
-        if (!app.descriptor?.startCommand?.parameters?.find((d) => d.uid === pv.uid)) {
+        if (
+          !app.descriptor?.startCommand?.parameters?.find(
+            (d) => d.uid === pv.uid
+          )
+        ) {
           // no descriptor -> custom
-          this.custom.pairs.push({ descriptor: null, value: pv, booleanValue: null, passwordLock: false, editorEnabled: true });
+          this.custom.pairs.push({
+            descriptor: null,
+            value: pv,
+            booleanValue: null,
+            passwordLock: false,
+            editorEnabled: true,
+          });
         }
       }
 
@@ -142,7 +196,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
           skipWhile((x) => !x),
           debounceTime(500)
         )
-        .subscribe((_) => this.preview.update())
+        .subscribe(() => this.preview.update())
     );
 
     this.subscription.add(
@@ -153,8 +207,6 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
     this.subscription.add(this.searchService.register(this));
   }
-
-  ngOnInit(): void {}
 
   ngAfterViewInit(): void {
     if (!this.forms) {
@@ -178,19 +230,21 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   }
 
   /* template */ getValueCount(g: ParameterGroup) {
-    return g.pairs.filter((p) => !!p.value && this.hasPairSearchMatch(p)).length;
+    return g.pairs.filter((p) => !!p.value && this.hasPairSearchMatch(p))
+      .length;
   }
 
   /* template */ doAddRemoveParameter(g: ParameterGroup, p: ParameterPair) {
     const paramList = this.edit.process$.value.start.parameters;
     if (!p.value) {
-      const descriptors = this.edit.application$.value.descriptor.startCommand.parameters;
+      const descriptors =
+        this.edit.application$.value.descriptor.startCommand.parameters;
 
       let initialValue = p.descriptor?.defaultValue;
       if (p.descriptor.global) {
         // need to lookup a potential already existing global value.
         const global = this.edit.getGlobalParameter(p.descriptor.uid);
-        if (!!global) {
+        if (global) {
           initialValue = this.edit.getGlobalParameter(p.descriptor.uid).value;
         }
       }
@@ -203,7 +257,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       const myIndex = descriptors.findIndex((x) => x.uid === p.descriptor.uid);
 
       // find the next descriptor which *has* a value *after* my own desciptor.
-      const nextDesc = descriptors.find((v, i) => i > myIndex && !!paramList.find((x) => x.uid === v.uid));
+      const nextDesc = descriptors.find(
+        (v, i) => i > myIndex && !!paramList.find((x) => x.uid === v.uid)
+      );
 
       // if we don't have a next one, simply push it at the end of the list.
       if (!nextDesc) {
@@ -223,7 +279,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
       if (g.isCustom) {
         // COMPLETELY remove a custom parameter.
-        const index = this.custom.pairs.findIndex((x) => x.value.uid === p.value.uid);
+        const index = this.custom.pairs.findIndex(
+          (x) => x.value.uid === p.value.uid
+        );
         this.custom.pairs.splice(index, 1);
 
         // if this is the last parameter, leave select mode.
@@ -242,7 +300,12 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   }
 
   /* template */ getAllValueUidLabels() {
-    return this.getAllValueUids().map((u) => this.edit.application$.value.descriptor.startCommand.parameters.find((x) => x.uid === u)?.name || u);
+    return this.getAllValueUids().map(
+      (u) =>
+        this.edit.application$.value.descriptor.startCommand.parameters.find(
+          (x) => x.uid === u
+        )?.name || u
+    );
   }
 
   /* template */ onAddCustomParameter(template: TemplateRef<any>) {
@@ -256,7 +319,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
           if (this.validateCustomFields.length < 1) {
             return false;
           }
-          return this.validateCustomFields.map((ctrl) => ctrl.valid).reduce((p, c) => p && c, true);
+          return this.validateCustomFields
+            .map((ctrl) => ctrl.valid)
+            .reduce((p, c) => p && c, true);
         },
       })
       .subscribe((r) => {
@@ -264,7 +329,11 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
           // insert the parameter at the correct position.
           const param: ParameterPair = {
             descriptor: null,
-            value: { uid: this.customTemp.uid, value: this.customTemp.value, preRendered: [] },
+            value: {
+              uid: this.customTemp.uid,
+              value: this.customTemp.value,
+              preRendered: [],
+            },
             booleanValue: false,
             editorEnabled: true,
             passwordLock: false,
@@ -275,12 +344,22 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
           if (!this.customTemp.predecessor) {
             this.edit.process$.value.start.parameters.unshift(param.value);
           } else {
-            const predecessorIndex = this.edit.process$.value.start.parameters.findIndex((p) => p.uid === this.customTemp.predecessor);
-            if (predecessorIndex === this.edit.process$.value.start.parameters.length - 1) {
+            const predecessorIndex =
+              this.edit.process$.value.start.parameters.findIndex(
+                (p) => p.uid === this.customTemp.predecessor
+              );
+            if (
+              predecessorIndex ===
+              this.edit.process$.value.start.parameters.length - 1
+            ) {
               // last parameter
               this.edit.process$.value.start.parameters.push(param.value);
             } else {
-              this.edit.process$.value.start.parameters.splice(predecessorIndex + 1, 0, param.value);
+              this.edit.process$.value.start.parameters.splice(
+                predecessorIndex + 1,
+                0,
+                param.value
+              );
             }
           }
         }
@@ -297,7 +376,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   }
 
   private doUpdateConditionals(p: ParameterPair) {
-    const uid = !!p.descriptor ? p.descriptor.uid : p.value.uid;
+    const uid = p.descriptor ? p.descriptor.uid : p.value.uid;
     for (const grp of this.groups$.value) {
       for (const pair of grp.pairs) {
         if (pair.descriptor?.condition?.parameter === uid) {
@@ -313,7 +392,10 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   }
 
   /* template */ doPreRender(p: ParameterPair) {
-    p.value.preRendered = this.edit.preRenderParameter(p.descriptor, p.value.value);
+    p.value.preRendered = this.edit.preRenderParameter(
+      p.descriptor,
+      p.value.value
+    );
     this.updatePreview$.next(true);
   }
 
@@ -324,7 +406,10 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     this.doUpdateConditionals(p);
   }
 
-  /* template */ doSetCustomEditorState(p: ParameterPair, editor: CustomEditor) {
+  /* template */ doSetCustomEditorState(
+    p: ParameterPair,
+    editor: CustomEditor
+  ) {
     p.editorEnabled = editor.allowDirectEdit;
   }
 
@@ -366,7 +451,12 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
     // search name, description, parameter, value.
     return (
-      [p.descriptor?.name, p.descriptor?.longDescription, p.descriptor?.parameter, p.value?.value]
+      [
+        p.descriptor?.name,
+        p.descriptor?.longDescription,
+        p.descriptor?.parameter,
+        p.value?.value,
+      ]
         .join(' ')
         .toLowerCase()
         .indexOf(this.search.toLowerCase()) !== -1
@@ -390,7 +480,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       return this.edit.meetsCondition(param.descriptor);
     }
 
-    if (!!param?.descriptor?.mandatory) {
+    if (param?.descriptor?.mandatory) {
       // mandatory, cannot manually add/remove. triggering the condition on another parameter will automatically add/remove.
       return of(false);
     } else {
@@ -405,8 +495,8 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         return a.descriptor.name.localeCompare(b.descriptor.name);
       }
 
-      const ida = !!a.descriptor?.uid ? a.descriptor.uid : a.value.uid;
-      const idb = !!b.descriptor?.uid ? b.descriptor.uid : b.value.uid;
+      const ida = a.descriptor?.uid ? a.descriptor.uid : a.value.uid;
+      const idb = b.descriptor?.uid ? b.descriptor.uid : b.value.uid;
 
       return ida.localeCompare(idb);
     });

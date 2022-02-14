@@ -1,14 +1,22 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { first, skipWhile } from 'rxjs/operators';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
-import { ConfigFile, ConfigFilesService } from '../../../../services/config-files.service';
+import {
+  ConfigFile,
+  ConfigFilesService,
+} from '../../../../services/config-files.service';
 
-export type ConfigFileStatusType = 'new' | 'modified' | 'local' | 'sync' | 'unsync' | 'missing';
+export type ConfigFileStatusType =
+  | 'new'
+  | 'modified'
+  | 'local'
+  | 'sync'
+  | 'unsync'
+  | 'missing';
 
 @Component({
   selector: 'app-product-sync',
   templateUrl: './product-sync.component.html',
-  styleUrls: ['./product-sync.component.css'],
 })
 export class ProductSyncComponent implements OnInit {
   @Input() record: ConfigFile;
@@ -17,7 +25,10 @@ export class ProductSyncComponent implements OnInit {
   /* template */ isText: boolean;
   /* template */ status: ConfigFileStatusType;
 
-  constructor(private cfgFiles: ConfigFilesService, private edit: InstanceEditService) {}
+  constructor(
+    private cfgFiles: ConfigFilesService,
+    private edit: InstanceEditService
+  ) {}
 
   ngOnInit(): void {
     this.isText = this.cfgFiles.isText(this.record);
@@ -30,11 +41,15 @@ export class ProductSyncComponent implements OnInit {
       return 'new';
     }
 
-    if (!this.record.persistent?.instanceId && !!this.record.persistent?.productId && !!this.record.modification?.file) {
+    if (
+      !this.record.persistent?.instanceId &&
+      !!this.record.persistent?.productId &&
+      !!this.record.modification?.file
+    ) {
       return 'new';
     }
 
-    if (!!this.record.modification?.file) {
+    if (this.record.modification?.file) {
       return 'modified';
     }
 
@@ -43,7 +58,10 @@ export class ProductSyncComponent implements OnInit {
         return 'local';
       }
 
-      if (this.record.persistent.instanceId.id === this.record.persistent.productId.id) {
+      if (
+        this.record.persistent.instanceId.id ===
+        this.record.persistent.productId.id
+      ) {
         return 'sync';
       } else {
         return 'unsync';
@@ -60,9 +78,18 @@ export class ProductSyncComponent implements OnInit {
         first()
       )
       .subscribe((s) => {
-        this.cfgFiles.loadTemplate(this.cfgFiles.getPath(this.record), s.config.config.product).subscribe((t) => {
-          this.cfgFiles.add(this.cfgFiles.getPath(this.record), t, !this.record.persistent.isText);
-        });
+        this.cfgFiles
+          .loadTemplate(
+            this.cfgFiles.getPath(this.record),
+            s.config.config.product
+          )
+          .subscribe((t) => {
+            this.cfgFiles.add(
+              this.cfgFiles.getPath(this.record),
+              t,
+              !this.record.persistent.isText
+            );
+          });
       });
   }
 
@@ -73,9 +100,14 @@ export class ProductSyncComponent implements OnInit {
         first()
       )
       .subscribe((s) => {
-        this.cfgFiles.loadTemplate(this.cfgFiles.getPath(this.record), s.config.config.product).subscribe((t) => {
-          this.cfgFiles.edit(this.cfgFiles.getPath(this.record), t);
-        });
+        this.cfgFiles
+          .loadTemplate(
+            this.cfgFiles.getPath(this.record),
+            s.config.config.product
+          )
+          .subscribe((t) => {
+            this.cfgFiles.edit(this.cfgFiles.getPath(this.record), t);
+          });
       });
   }
 }

@@ -1,10 +1,26 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { AfterViewInit, Component, HostBinding, Input, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  HostBinding,
+  Input,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import { ApplicationConfiguration, InstanceNodeConfigurationDto, MinionDto } from 'src/app/models/gen.dtos';
-import { BdDataTableComponent, DragReorderEvent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
+import {
+  ApplicationConfiguration,
+  InstanceNodeConfigurationDto,
+  MinionDto,
+} from 'src/app/models/gen.dtos';
+import {
+  BdDataTableComponent,
+  DragReorderEvent,
+} from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { InstanceEditService } from '../../../services/instance-edit.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
 
@@ -25,8 +41,12 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   };
 
   /* template */ node$ = new BehaviorSubject<MinionDto>(null);
-  /* template */ config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
-  /* template */ groupedProcesses$ = new BehaviorSubject<{ [key: string]: ApplicationConfiguration[] }>(null);
+  /* template */ config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(
+    null
+  );
+  /* template */ groupedProcesses$ = new BehaviorSubject<{
+    [key: string]: ApplicationConfiguration[];
+  }>(null);
   /* template */ allowedSources$ = new BehaviorSubject<string[]>(null);
   /* template */ isClientNode: boolean;
   /* template */ nodeType: string;
@@ -34,17 +54,38 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   /* template */ groupExpansion: { [key: string]: boolean } = {};
   /* template */ lastUid: string;
 
-  /* template */ cols: BdDataColumn<ApplicationConfiguration>[] = [...this.columns.defaultProcessesConfigColumns];
+  /* template */ cols: BdDataColumn<ApplicationConfiguration>[] = [
+    ...this.columns.defaultProcessesConfigColumns,
+  ];
 
-  @ViewChildren(BdDataTableComponent) data: QueryList<BdDataTableComponent<ApplicationConfiguration>>;
+  @ViewChildren(BdDataTableComponent) data: QueryList<
+    BdDataTableComponent<ApplicationConfiguration>
+  >;
 
   private subscription: Subscription;
 
   /* template */ getRecordRoute = (row: ApplicationConfiguration) => {
-    return ['', { outlets: { panel: ['panels', 'instances', 'config', 'process', this.nodeName, row.uid] } }];
+    return [
+      '',
+      {
+        outlets: {
+          panel: [
+            'panels',
+            'instances',
+            'config',
+            'process',
+            this.nodeName,
+            row.uid,
+          ],
+        },
+      },
+    ];
   };
 
-  constructor(private edit: InstanceEditService, public columns: ProcessesColumnsService) {}
+  constructor(
+    private edit: InstanceEditService,
+    public columns: ProcessesColumnsService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.edit.nodes$.subscribe((nodes) => {
@@ -67,7 +108,9 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription.add(
       this.edit.state$.subscribe((s) => {
         setTimeout(() => {
-          const nodeConfig = s?.config?.nodeDtos?.find((n) => n.nodeName === this.nodeName);
+          const nodeConfig = s?.config?.nodeDtos?.find(
+            (n) => n.nodeName === this.nodeName
+          );
           this.config$.next(nodeConfig);
 
           if (!nodeConfig) {
@@ -83,6 +126,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           const grouped = {};
+          // eslint-disable-next-line no-unsafe-optional-chaining
           for (const app of nodeConfig?.nodeConfiguration?.applications) {
             let group = this.getControlGroup(app);
             if (!group) {
@@ -102,7 +146,11 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           // don't use groupedProcesses keys, as this will not contain *empty* groups.
-          this.allowedSources$.next(nodeConfig.nodeConfiguration.controlGroups.map((cg) => this.nodeName + '||' + cg.name));
+          this.allowedSources$.next(
+            nodeConfig.nodeConfiguration.controlGroups.map(
+              (cg) => this.nodeName + '||' + cg.name
+            )
+          );
           this.groupedProcesses$.next(grouped);
           this.data.forEach((t) => t.update());
         });
@@ -115,7 +163,10 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /* template */ onReorder(order: DragReorderEvent<ApplicationConfiguration>) {
-    if (order.previousIndex === order.currentIndex && order.sourceId === order.targetId) {
+    if (
+      order.previousIndex === order.currentIndex &&
+      order.sourceId === order.targetId
+    ) {
       return;
     }
 
@@ -125,17 +176,29 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (order.sourceId === order.targetId) {
       // this is NOT necessary, but prevents flickering while rebuilding state.
-      moveItemInArray(this.groupedProcesses$.value[sourceGroup], order.previousIndex, order.currentIndex);
+      moveItemInArray(
+        this.groupedProcesses$.value[sourceGroup],
+        order.previousIndex,
+        order.currentIndex
+      );
     }
 
     this.edit.conceal(
       `Re-arrange ${order.item.name}`,
-      this.edit.createApplicationMove(this.config$.value.nodeName, order.previousIndex, order.currentIndex, sourceGroup, targetGroup)
+      this.edit.createApplicationMove(
+        this.config$.value.nodeName,
+        order.previousIndex,
+        order.currentIndex,
+        sourceGroup,
+        targetGroup
+      )
     );
     this.data.forEach((t) => t.update());
   }
 
   private getControlGroup(row: ApplicationConfiguration): string {
-    return this.config$.value.nodeConfiguration.controlGroups.find((cg) => cg.processOrder.includes(row.uid))?.name;
+    return this.config$.value.nodeConfiguration.controlGroups.find((cg) =>
+      cg.processOrder.includes(row.uid)
+    )?.name;
   }
 }

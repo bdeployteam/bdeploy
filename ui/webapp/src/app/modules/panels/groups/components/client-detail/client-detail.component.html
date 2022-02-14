@@ -1,6 +1,13 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [panel]="true">
-    <mat-icon [style.padding-left.px]="10" *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
+  <app-bd-dialog-toolbar
+    [header]="(app$ | async)?.client.description"
+    [panel]="true"
+  >
+    <mat-icon
+      [style.padding-left.px]="10"
+      *ngIf="(app$ | async)?.client?.os"
+      [svgIcon]="(app$ | async).client.os"
+    ></mat-icon>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="app$ | async as app">
@@ -12,9 +19,17 @@
         <strong>Instance:</strong>
         <div>{{ app.instance.name }}</div>
       </div>
-      <app-bd-expand-button text="Usage Statistics" icon="insights" [expanded]="true">
+      <app-bd-expand-button
+        text="Usage Statistics"
+        icon="insights"
+        [expanded]="true"
+      >
         <div fxLayout="row" class="local-graph" fxFlex="1 0 100px">
-          <app-client-usage-graph fxFlex="1 0 auto" [appUid]="app.client.uuid" [instanceUid]="app.instance.uuid"></app-client-usage-graph>
+          <app-client-usage-graph
+            fxFlex="1 0 auto"
+            [appUid]="app.client.uuid"
+            [instanceUid]="app.instance.uuid"
+          ></app-client-usage-graph>
         </div>
       </app-bd-expand-button>
       <mat-divider></mat-divider>
@@ -38,9 +53,12 @@
       ></app-bd-button>
       <mat-divider></mat-divider>
       <div class="bd-description-text" [style.text-align]="'justify'">
-        For <em>Click & Start</em> to work, you need to have the <em>BDeploy Launcher</em> application installed. This is done by <strong>any</strong> installer
-        automatically. If you still don't have the launcher and don't want to install the application using its installer from above, you can download the
-        standalone launcher from there.
+        For <em>Click & Start</em> to work, you need to have the
+        <em>BDeploy Launcher</em> application installed. This is done by
+        <strong>any</strong> installer automatically. If you still don't have
+        the launcher and don't want to install the application using its
+        installer from above, you can download the standalone launcher from
+        there.
       </div>
       <app-bd-button
         [svgIcon]="app.client.os"

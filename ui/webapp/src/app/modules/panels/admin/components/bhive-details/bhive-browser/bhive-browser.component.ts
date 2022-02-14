@@ -1,10 +1,14 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
-import { HiveEntryDto, ManifestKey, TreeEntryType } from 'src/app/models/gen.dtos';
+import {
+  HiveEntryDto,
+  ManifestKey,
+  TreeEntryType,
+} from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { ACTION_CLOSE } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
@@ -18,9 +22,8 @@ type BHivePathSegment = string | ManifestKey;
 @Component({
   selector: 'app-bhive-browser',
   templateUrl: './bhive-browser.component.html',
-  styleUrls: ['./bhive-browser.component.css'],
 })
-export class BHiveBrowserComponent implements OnInit {
+export class BHiveBrowserComponent implements OnDestroy {
   private readonly colAvatar: BdDataColumn<HiveEntryDto> = {
     id: 'avatar',
     name: '',
@@ -54,7 +57,12 @@ export class BHiveBrowserComponent implements OnInit {
   /* template */ bhive$ = new BehaviorSubject<string>(null);
   /* template */ path$ = new BehaviorSubject<BHivePathSegment[]>(null);
   /* template */ entries$ = new BehaviorSubject<HiveEntryDto[]>([]);
-  /* template */ columns = [this.colAvatar, this.colName, this.colSize, this.colDelete];
+  /* template */ columns = [
+    this.colAvatar,
+    this.colName,
+    this.colSize,
+    this.colDelete,
+  ];
   /* template */ sort: Sort = { active: 'name', direction: 'asc' };
 
   /* template */ previewContent$ = new BehaviorSubject<string>(null);
@@ -65,7 +73,12 @@ export class BHiveBrowserComponent implements OnInit {
 
   private subscription: Subscription;
 
-  constructor(areas: NavAreasService, public hives: HiveService, private router: Router, private route: ActivatedRoute) {
+  constructor(
+    areas: NavAreasService,
+    public hives: HiveService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
     this.subscription = areas.panelRoute$.subscribe((route) => {
       if (!route?.params || !route?.params['bhive']) {
         return;
@@ -81,8 +94,6 @@ export class BHiveBrowserComponent implements OnInit {
       this.load();
     });
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -100,9 +111,11 @@ export class BHiveBrowserComponent implements OnInit {
           this.entries$.next(entries);
         });
       } else {
-        this.hives.listManifest(this.bhive$.value, lastSegment.name, lastSegment.tag).subscribe((entries) => {
-          this.entries$.next(entries);
-        });
+        this.hives
+          .listManifest(this.bhive$.value, lastSegment.name, lastSegment.tag)
+          .subscribe((entries) => {
+            this.entries$.next(entries);
+          });
       }
     }
   }
@@ -122,7 +135,9 @@ export class BHiveBrowserComponent implements OnInit {
     if (!path?.length) {
       return null;
     }
-    const allStrings = path.map((s) => (typeof s === 'string' ? s : `|[${s.name}|${s.tag}]|`));
+    const allStrings = path.map((s) =>
+      typeof s === 'string' ? s : `|[${s.name}|${s.tag}]|`
+    );
     return Base64.encode(JSON.stringify(allStrings), true);
   }
 
@@ -140,7 +155,7 @@ export class BHiveBrowserComponent implements OnInit {
 
   private showPreviewIfText(data: Blob, name: string) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = () => {
       const result = reader.result.toString();
 
       // extract the base64 part of the data URL...
@@ -158,9 +173,20 @@ export class BHiveBrowserComponent implements OnInit {
       if (!isBinary) {
         this.previewName$.next(name);
         this.previewContent$.next(Base64.decode(base64Content));
-        this.dialog.message({ header: `Preview ${name}`, template: this.previewTemplate, actions: [ACTION_CLOSE] }).subscribe();
+        this.dialog
+          .message({
+            header: `Preview ${name}`,
+            template: this.previewTemplate,
+            actions: [ACTION_CLOSE],
+          })
+          .subscribe();
       } else {
-        this.dialog.info(`Preview ${name}`, `${name} is binary data and cannot be previewed.`).subscribe();
+        this.dialog
+          .info(
+            `Preview ${name}`,
+            `${name} is binary data and cannot be previewed.`
+          )
+          .subscribe();
       }
     };
     reader.readAsDataURL(data);
@@ -182,18 +208,26 @@ export class BHiveBrowserComponent implements OnInit {
           this.showPreviewIfText(data, r.name);
         });
       } else {
-        this.dialog.info(`Preview ${r.name}`, `${r.name} is too large to preview.`).subscribe();
+        this.dialog
+          .info(`Preview ${r.name}`, `${r.name} is too large to preview.`)
+          .subscribe();
       }
     }
 
-    this.router.navigate([], { relativeTo: this.route, queryParams: { q: this.encodePathForUrl(path) } });
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: { q: this.encodePathForUrl(path) },
+    });
   }
 
   /* template */ onNavigateUp() {
     if (this.path$.value?.length) {
       const path = [...this.path$.value];
       path.pop();
-      this.router.navigate([], { relativeTo: this.route, queryParams: { q: this.encodePathForUrl(path) } });
+      this.router.navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { q: this.encodePathForUrl(path) },
+      });
     }
   }
 }

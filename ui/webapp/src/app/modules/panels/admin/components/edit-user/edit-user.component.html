@@ -1,11 +1,33 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Edit User{{ (isDirty$ | async) ? '*' : '' }}" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Edit User{{ (isDirty$ | async) ? '*' : '' }}"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="5px">
+    <form
+      #form="ngForm"
+      (ngSubmit)="onSave()"
+      fxLayout="column"
+      fxLayoutGap="5px"
+    >
       <ng-container *ngIf="!(loading$ | async)">
-        <app-bd-form-input name="fullName" label="Full Name" [(ngModel)]="tempUser.fullName"></app-bd-form-input>
-        <app-bd-form-input name="email" label="E-Mail Address" [(ngModel)]="tempUser.email"></app-bd-form-input>
-        <app-bd-form-input name="pass" label="New Password" [(ngModel)]="tempUser.password" type="password"></app-bd-form-input>
+        <app-bd-form-input
+          name="fullName"
+          label="Full Name"
+          [(ngModel)]="tempUser.fullName"
+        ></app-bd-form-input>
+        <app-bd-form-input
+          name="email"
+          label="E-Mail Address"
+          [(ngModel)]="tempUser.email"
+        ></app-bd-form-input>
+        <app-bd-form-input
+          name="pass"
+          label="New Password"
+          [(ngModel)]="tempUser.password"
+          type="password"
+        ></app-bd-form-input>
         <app-bd-form-input
           name="passConfirm"
           label="Confirm Password"
@@ -15,7 +37,13 @@
           errorDisplay="immediate"
           [required]="!!tempUser.password?.length"
         ></app-bd-form-input>
-        <app-bd-button color="primary" [collapsed]="false" text="Apply" icon="save" [disabled]="form.invalid || !(isDirty$ | async)"></app-bd-button>
+        <app-bd-button
+          color="primary"
+          [collapsed]="false"
+          text="Apply"
+          icon="save"
+          [disabled]="form.invalid || !(isDirty$ | async)"
+        ></app-bd-button>
       </ng-container>
     </form>
   </app-bd-dialog-content>

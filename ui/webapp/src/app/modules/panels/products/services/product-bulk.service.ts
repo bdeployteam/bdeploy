@@ -16,15 +16,23 @@ export class ProductBulkService {
 
   private apiPath = (group) => `${this.cfg.config.api}/group/${group}/product`;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private groups: GroupsService, private products: ProductsService, areas: NavAreasService) {
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private groups: GroupsService,
+    private products: ProductsService,
+    areas: NavAreasService
+  ) {
     // clear selection when the primary route changes
-    areas.primaryRoute$.subscribe((r) => this.selection$.next([]));
+    areas.primaryRoute$.subscribe(() => this.selection$.next([]));
 
     // find matching selected instances if possible once instances change.
     products.products$.subscribe((prods) => {
       const newSelection: ProductDto[] = [];
       this.selection$.value.forEach((sel) => {
-        const found = prods.find((p) => p.key.name === sel.key.name && p.key.tag === sel.key.tag);
+        const found = prods.find(
+          (p) => p.key.name === sel.key.name && p.key.tag === sel.key.tag
+        );
         if (found) {
           newSelection.push(found);
         }
@@ -34,8 +42,14 @@ export class ProductBulkService {
   }
 
   public delete() {
-    return concat(this.selection$.value.map((p) => this.http.delete(`${this.apiPath(this.groups.current$.value.name)}/${p.key.name}/${p.key.tag}`))).pipe(
-      concatAll()
-    );
+    return concat(
+      this.selection$.value.map((p) =>
+        this.http.delete(
+          `${this.apiPath(this.groups.current$.value.name)}/${p.key.name}/${
+            p.key.tag
+          }`
+        )
+      )
+    ).pipe(concatAll());
   }
 }

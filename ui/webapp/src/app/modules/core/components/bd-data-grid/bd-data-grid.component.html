@@ -1,4 +1,10 @@
-<div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start" *ngIf="!grouping && recordsToDisplay$.value?.length">
+<div
+  fxLayout="row wrap"
+  fxFlex="1 0 auto"
+  class="local-sizing"
+  fxLayoutAlign="start"
+  *ngIf="!grouping && recordsToDisplay$.value?.length"
+>
   <app-bd-data-card
     fxLayout="column"
     fxLayoutAlign="stretch stretch"
@@ -26,10 +32,23 @@
   No data to show.
 </div>
 
-<mat-tab-group *ngIf="grouping" [style.width]="'100%'" animationDuration="0ms" (selectedTabChange)="onTabChange($event)">
+<mat-tab-group
+  *ngIf="grouping"
+  [style.width]="'100%'"
+  animationDuration="0ms"
+  (selectedTabChange)="onTabChange($event)"
+>
   <ng-container *ngFor="let group of groupValues">
-    <mat-tab *ngIf="!grouping.selected?.length || grouping.selected.includes(group)" [label]="group">
-      <div fxLayout="row wrap" fxFlex="1 0 auto" class="local-sizing" fxLayoutAlign="start">
+    <mat-tab
+      *ngIf="!grouping.selected?.length || grouping.selected.includes(group)"
+      [label]="group"
+    >
+      <div
+        fxLayout="row wrap"
+        fxFlex="1 0 auto"
+        class="local-sizing"
+        fxLayoutAlign="start"
+      >
         <app-bd-data-card
           fxLayout="column"
           fxLayoutAlign="stretch stretch"
@@ -47,7 +66,14 @@
         >
         </app-bd-data-card>
       </div>
-      <div *ngIf="!groupRecords.length" class="bd-hint-text local-hint-text" fxLayout="column" fxLayoutAlign="center center">No data to show.</div>
+      <div
+        *ngIf="!groupRecords.length"
+        class="bd-hint-text local-hint-text"
+        fxLayout="column"
+        fxLayoutAlign="center center"
+      >
+        No data to show.
+      </div>
     </mat-tab>
   </ng-container>
 </mat-tab-group>

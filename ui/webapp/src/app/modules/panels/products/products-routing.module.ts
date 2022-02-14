@@ -12,13 +12,41 @@ import { ProductTransferRepoComponent } from './components/product-transfer-repo
 import { ProductUploadComponent } from './components/product-upload/product-upload.component';
 
 const PPRODUCTS_ROUTES: Route[] = [
-  { path: 'upload', component: ProductUploadComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'details/:key/:tag', component: ProductDetailsComponent, canActivate: [ScopedReadGuard] },
-  { path: 'sync', component: ProductSyncComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
-  { path: 'sync/:target/select', component: SelectManagedServerComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
-  { path: 'sync/:target/:server', component: ManagedTransferComponent, canActivate: [ScopedWriteGuard, ServerCentralGuard] },
-  { path: 'bulk-manip', component: ProductBulkComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'transfer', component: ProductTransferRepoComponent, canActivate: [ScopedWriteGuard] },
+  {
+    path: 'upload',
+    component: ProductUploadComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'details/:key/:tag',
+    component: ProductDetailsComponent,
+    canActivate: [ScopedReadGuard],
+  },
+  {
+    path: 'sync',
+    component: ProductSyncComponent,
+    canActivate: [ScopedWriteGuard, ServerCentralGuard],
+  },
+  {
+    path: 'sync/:target/select',
+    component: SelectManagedServerComponent,
+    canActivate: [ScopedWriteGuard, ServerCentralGuard],
+  },
+  {
+    path: 'sync/:target/:server',
+    component: ManagedTransferComponent,
+    canActivate: [ScopedWriteGuard, ServerCentralGuard],
+  },
+  {
+    path: 'bulk-manip',
+    component: ProductBulkComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'transfer',
+    component: ProductTransferRepoComponent,
+    canActivate: [ScopedWriteGuard],
+  },
 ];
 
 @NgModule({

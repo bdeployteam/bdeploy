@@ -1,17 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RepositoryService } from 'src/app/modules/primary/repositories/services/repository.service';
 
 @Component({
   selector: 'app-software-upload',
   templateUrl: './software-upload.component.html',
-  styleUrls: ['./software-upload.component.css'],
 })
-export class SoftwareUploadComponent implements OnInit {
+export class SoftwareUploadComponent {
   /* template */ files: File[] = [];
 
   constructor(public repositoryService: RepositoryService) {}
-
-  ngOnInit(): void {}
 
   /* template */ fileAdded(file: File) {
     this.files.push(file);

@@ -1,8 +1,17 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ApplicationConfiguration, ApplicationStartType, ProcessDetailDto, ProcessProbeResultDto, ProcessState } from 'src/app/models/gen.dtos';
-import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  ApplicationConfiguration,
+  ApplicationStartType,
+  ProcessDetailDto,
+  ProcessProbeResultDto,
+  ProcessState,
+} from 'src/app/models/gen.dtos';
+import {
+  ACTION_CANCEL,
+  ACTION_OK,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -49,37 +58,51 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.details.processDetail$, this.details.processConfig$, this.instances.active$]).subscribe(
-      ([detail, config, active]) => {
-        this.clearIntervals();
-        this.outdated$.next(false);
-        if (!detail || detail?.status?.appUid !== config?.uid) {
-          return;
-        }
-        this.processDetail = detail;
-        this.processConfig = config;
-        this.startType = this.formatStartType(this.processConfig?.processControl.startType);
-        this.isCrashedWaiting = detail.status.processState === ProcessState.CRASHED_WAITING;
-        this.isRunning = ProcessesService.isRunning(detail.status.processState);
-        this.isStopping = detail.status.processState === ProcessState.RUNNING_STOP_PLANNED;
-
-        // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
-        this.starting$.next(false);
-        this.stopping$.next(false);
-        this.restarting$.next(false);
-
-        this.outdated$.next(detail.status.instanceTag !== active.activeVersion.tag);
-
-        if (this.isCrashedWaiting) {
-          this.restartProgressHandle = setInterval(() => this.doUpdateRestartProgress(detail), 1000);
-          this.doUpdateRestartProgress(detail);
-        }
-
-        if (this.isRunning) {
-          this.uptimeCalculateHandle = setTimeout(() => this.doCalculateUptimeString(detail), 1);
-        }
+    this.subscription = combineLatest([
+      this.details.processDetail$,
+      this.details.processConfig$,
+      this.instances.active$,
+    ]).subscribe(([detail, config, active]) => {
+      this.clearIntervals();
+      this.outdated$.next(false);
+      if (!detail || detail?.status?.appUid !== config?.uid) {
+        return;
       }
-    );
+      this.processDetail = detail;
+      this.processConfig = config;
+      this.startType = this.formatStartType(
+        this.processConfig?.processControl.startType
+      );
+      this.isCrashedWaiting =
+        detail.status.processState === ProcessState.CRASHED_WAITING;
+      this.isRunning = ProcessesService.isRunning(detail.status.processState);
+      this.isStopping =
+        detail.status.processState === ProcessState.RUNNING_STOP_PLANNED;
+
+      // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
+      this.starting$.next(false);
+      this.stopping$.next(false);
+      this.restarting$.next(false);
+
+      this.outdated$.next(
+        detail.status.instanceTag !== active.activeVersion.tag
+      );
+
+      if (this.isCrashedWaiting) {
+        this.restartProgressHandle = setInterval(
+          () => this.doUpdateRestartProgress(detail),
+          1000
+        );
+        this.doUpdateRestartProgress(detail);
+      }
+
+      if (this.isRunning) {
+        this.uptimeCalculateHandle = setTimeout(
+          () => this.doCalculateUptimeString(detail),
+          1
+        );
+      }
+    });
 
     this.subscription.add(
       combineLatest([this.starting$, this.stopping$, this.restarting$])
@@ -128,7 +151,10 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       throw new Error('Process config not available?!');
     }
 
-    if (this.processConfig.processControl.startType === ApplicationStartType.MANUAL_CONFIRM) {
+    if (
+      this.processConfig.processControl.startType ===
+      ApplicationStartType.MANUAL_CONFIRM
+    ) {
       confirmation = this.dialog.message({
         header: 'Confirm Process Start',
         message: `Please confirm the start of <strong>${this.processConfig.name}</strong>.`,
@@ -197,7 +223,10 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         delay = 60000 - (ms - Math.floor(ms / 60000) * 60000);
       }
       this.uptime$.next(s);
-      this.uptimeCalculateHandle = setTimeout(() => this.doCalculateUptimeString(detail), delay);
+      this.uptimeCalculateHandle = setTimeout(
+        () => this.doCalculateUptimeString(detail),
+        delay
+      );
     } else {
       this.uptime$.next(null);
     }

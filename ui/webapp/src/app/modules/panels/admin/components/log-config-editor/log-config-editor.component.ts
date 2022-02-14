@@ -10,7 +10,6 @@ import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logg
 @Component({
   selector: 'app-log-config-editor',
   templateUrl: './log-config-editor.component.html',
-  styleUrls: ['./log-config-editor.component.css'],
 })
 export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
@@ -41,6 +40,6 @@ export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe(() => this.tb.closePanel());
   }
 }

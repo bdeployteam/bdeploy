@@ -1,6 +1,10 @@
 <form #form="ngForm">
   <div class="local-header">
-    <div fxLayout="row wrap" fxLayoutGap="10px grid" *ngIf="app && edit.process$ | async as process">
+    <div
+      fxLayout="row wrap"
+      fxLayoutGap="10px grid"
+      *ngIf="app && edit.process$ | async as process"
+    >
       <app-config-desc-element card="cfg.name" class="local-field">
         <app-bd-form-input
           label="Process Name"
@@ -41,7 +45,10 @@
           errorDisplay="immediate"
         ></app-bd-form-input>
       </app-config-desc-element>
-      <app-config-desc-element card="cfg.control.attachStdin" class="local-field">
+      <app-config-desc-element
+        card="cfg.control.attachStdin"
+        class="local-field"
+      >
         <app-bd-form-toggle
           label="Attach StdIn"
           name="attachStdIn"
@@ -49,7 +56,10 @@
           [disabled]="!app.descriptor.processControl.attachStdin"
         ></app-bd-form-toggle>
       </app-config-desc-element>
-      <app-config-desc-element card="cfg.control.gracePeriod" class="local-field">
+      <app-config-desc-element
+        card="cfg.control.gracePeriod"
+        class="local-field"
+      >
         <app-bd-form-input
           class="local-field"
           label="Grace Period"

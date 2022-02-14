@@ -2,7 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ApplicationConfiguration, ProcessDetailDto, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ProcessDetailDto,
+  RemoteDirectory,
+  RemoteDirectoryEntry,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { NO_LOADING_BAR } from 'src/app/modules/core/utils/loading-bar.util';
@@ -21,7 +26,8 @@ export class ProcessDetailsService implements OnDestroy {
 
   private subscription: Subscription;
 
-  private apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}`;
+  private apiPath = (group, instance) =>
+    `${this.cfg.config.api}/group/${group}/instance/${instance}`;
 
   constructor(
     private cfg: ConfigService,
@@ -47,7 +53,11 @@ export class ProcessDetailsService implements OnDestroy {
       }
 
       // find the configuration for the application we're showing details for
-      const appsPerNode = nodes.nodeConfigDtos.map((x) => (!!x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : []));
+      const appsPerNode = nodes.nodeConfigDtos.map((x) =>
+        x?.nodeConfiguration?.applications
+          ? x.nodeConfiguration.applications
+          : []
+      );
       const allApps: ApplicationConfiguration[] = [].concat(...appsPerNode);
       const app = allApps.find((a) => a?.uid === process);
 
@@ -60,7 +70,13 @@ export class ProcessDetailsService implements OnDestroy {
 
       // now load the status details and popuplate the service data.
       this.http
-        .get<ProcessDetailDto>(`${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.uuid)}/processes/${process}`, NO_LOADING_BAR)
+        .get<ProcessDetailDto>(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            instance.instanceConfiguration.uuid
+          )}/processes/${process}`,
+          NO_LOADING_BAR
+        )
         .pipe(
           finalize(() => this.loading$.next(false)),
           measure(`Process Details`)
@@ -84,7 +100,10 @@ export class ProcessDetailsService implements OnDestroy {
 
     this.http
       .post(
-        `${this.apiPath(this.groups.current$.value.name, this.instances.active$.value.instanceConfiguration.uuid)}/processes/${detail.status.appUid}/stdin`,
+        `${this.apiPath(
+          this.groups.current$.value.name,
+          this.instances.active$.value.instanceConfiguration.uuid
+        )}/processes/${detail.status.appUid}/stdin`,
         value
       )
       .subscribe();
@@ -96,7 +115,10 @@ export class ProcessDetailsService implements OnDestroy {
 
     return this.http
       .get<RemoteDirectory>(
-        `${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.uuid)}/output/${instance.instance.tag}/${detail.status.appUid}`,
+        `${this.apiPath(
+          this.groups.current$.value.name,
+          instance.instanceConfiguration.uuid
+        )}/output/${instance.instance.tag}/${detail.status.appUid}`,
         NO_LOADING_BAR
       )
       .pipe(

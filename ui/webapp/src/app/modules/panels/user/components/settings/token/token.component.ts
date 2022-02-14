@@ -16,7 +16,10 @@ export class TokenComponent implements OnInit {
   /* template */ pack$ = new BehaviorSubject<string>('');
   /* template */ genFull = false;
 
-  constructor(private authService: AuthenticationService, private snackbarService: MatSnackBar) {}
+  constructor(
+    private authService: AuthenticationService,
+    private snackbarService: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.authService.getUserInfo().subscribe((r) => {
@@ -35,8 +38,14 @@ export class TokenComponent implements OnInit {
 
   /* template */ doCopy(value: string) {
     navigator.clipboard.writeText(value).then(
-      () => this.snackbarService.open('Copied to clipboard successfully', null, { duration: 1000 }),
-      () => this.snackbarService.open('Unable to write to clipboard.', null, { duration: 1000 })
+      () =>
+        this.snackbarService.open('Copied to clipboard successfully', null, {
+          duration: 1000,
+        }),
+      () =>
+        this.snackbarService.open('Unable to write to clipboard.', null, {
+          duration: 1000,
+        })
     );
   }
 }

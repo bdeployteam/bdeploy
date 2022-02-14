@@ -15,7 +15,6 @@ import { InstancesService } from '../../services/instances.service';
 @Component({
   selector: 'app-instances-browser',
   templateUrl: './browser.component.html',
-  styleUrls: ['./browser.component.css'],
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
@@ -23,17 +22,25 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     { name: 'Product', group: (r) => r.productDto.name },
   ];
   grouping: BdDataGroupingDefinition<InstanceDto>[];
-  defaultGrouping: BdDataGrouping<InstanceDto> = { definition: this.initGrouping[0], selected: [] };
+  defaultGrouping: BdDataGrouping<InstanceDto> = {
+    definition: this.initGrouping[0],
+    selected: [],
+  };
   hasProducts$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
 
   /* template */ getRecordRoute = (row: InstanceDto) => {
-    return ['/instances', 'dashboard', this.areas.groupContext$.value, row.instanceConfiguration.uuid];
+    return [
+      '/instances',
+      'dashboard',
+      this.areas.groupContext$.value,
+      row.instanceConfiguration.uuid,
+    ];
   };
 
   /* template */ isCardView: boolean;
-  /* template */ presetKeyValue: string = 'instances';
+  /* template */ presetKeyValue = 'instances';
 
   constructor(
     public instances: InstancesService,
@@ -48,7 +55,10 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   ) {
     this.subscription = config.isCentral$.subscribe((value) => {
       if (value) {
-        this.initGrouping.push({ name: 'Managed Server', group: (r) => r.managedServer.hostName });
+        this.initGrouping.push({
+          name: 'Managed Server',
+          group: (r) => r.managedServer.hostName,
+        });
       }
       this.grouping = [...this.initGrouping];
     });
@@ -56,7 +66,11 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
-    this.subscription.add(this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length)));
+    this.subscription.add(
+      this.products.products$.subscribe((p) =>
+        this.hasProducts$.next(!!p && !!p.length)
+      )
+    );
     this.subscription.add(
       this.groups.current$.subscribe((g) => {
         if (!g) {
@@ -64,7 +78,10 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
         }
         this.grouping = [...this.initGrouping];
         for (const attr of g.instanceAttributes) {
-          this.grouping.push({ name: attr.description, group: (r) => r.attributes.attributes[attr.name] });
+          this.grouping.push({
+            name: attr.description,
+            group: (r) => r.attributes.attributes[attr.name],
+          });
         }
       })
     );

@@ -1,14 +1,20 @@
 <app-bd-dialog [loadingWhen$]="repositories.loading$">
   <app-bd-dialog-toolbar header="Software Repositories">
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="isCardView" tooltip="below"></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="isCardView"
+      tooltip="below"
+    ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       icon="add"
       text="Add Software Repository"
       [route]="['panels', 'repositories', 'add']"
       tooltip="below"
-      [disabled]="!(authenticationService.isGlobalAdmin$ | async)"
+      [disabled]="(authenticationService.isGlobalAdmin$ | async) === false"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
 
@@ -22,7 +28,8 @@
       [presetKey]="presetKeyValue"
       [grid]="isCardView"
     >
-      <app-bd-no-data header="No Repositories have been created yet"> </app-bd-no-data>
+      <app-bd-no-data header="No Repositories have been created yet">
+      </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>
 </app-bd-dialog>

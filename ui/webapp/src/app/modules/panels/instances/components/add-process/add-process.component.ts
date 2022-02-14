@@ -1,5 +1,18 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  ViewEncapsulation,
+} from '@angular/core';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  of,
+  Subscription,
+} from 'rxjs';
 import { distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
@@ -13,9 +26,12 @@ import {
   OperatingSystem,
   ProductDto,
 } from 'src/app/models/gen.dtos';
-import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { getAppKeyName, getAppOs, updateAppOs } from 'src/app/modules/core/utils/manifest.utils';
+import {
+  getAppKeyName,
+  getAppOs,
+  updateAppOs,
+} from 'src/app/modules/core/utils/manifest.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
@@ -44,13 +60,13 @@ const colAppName: BdDataColumn<AppRow> = {
   tooltipDelay: 120000, // effectively disable: tooltip after two minutes.
 };
 
-const colType: BdDataColumn<AppRow> = {
-  id: 'type',
-  name: 'Type',
-  data: (r) => (!r.template ? null : 'auto_fix_normal'),
-  width: '30px',
-  component: BdDataIconCellComponent,
-};
+// const colType: BdDataColumn<AppRow> = {
+//   id: 'type',
+//   name: 'Type',
+//   data: (r) => (!r.template ? null : 'auto_fix_normal'),
+//   width: '30px',
+//   component: BdDataIconCellComponent,
+// };
 
 @Component({
   selector: 'app-add-process',
@@ -62,8 +78,11 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   private colAdd: BdDataColumn<AppRow> = {
     id: 'add',
     name: 'Add',
-    data: (r) => `Add ${!!r.template ? 'template ' + r.template.name : r.app.appDisplayName} to selected node.`,
-    icon: (r) => (!!r.template ? 'auto_fix_normal' : 'add'),
+    data: (r) =>
+      `Add ${
+        r.template ? 'template ' + r.template.name : r.app.appDisplayName
+      } to selected node.`,
+    icon: (r) => (r.template ? 'auto_fix_normal' : 'add'),
     action: (r) => this.addProcess(r),
     width: '36px',
   };
@@ -75,7 +94,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   /* template */ selectedTemplate: ApplicationTemplateDescriptor;
   /* template */ response: { [key: string]: string };
 
-  /* template */ clipBoardCfg$ = new BehaviorSubject<ApplicationConfiguration>(null);
+  /* template */ clipBoardCfg$ = new BehaviorSubject<ApplicationConfiguration>(
+    null
+  );
   /* template */ clipBoardError$ = new BehaviorSubject<string>(null);
 
   @ViewChild('varTemplate') template: TemplateRef<any>;
@@ -83,7 +104,12 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(private groups: GroupsService, private edit: ProcessEditService, public instanceEdit: InstanceEditService, public servers: ServersService) {}
+  constructor(
+    private groups: GroupsService,
+    private edit: ProcessEditService,
+    public instanceEdit: InstanceEditService,
+    public servers: ServersService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = combineLatest([
@@ -126,7 +152,13 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         const baseKey = getAppKeyName(app.key);
         let group = groups.find((g) => g.appKeyName === baseKey);
         if (!group) {
-          group = { appKeyName: baseKey, appDisplayName: app.name, applications: [], availableOs: [], templates: [] };
+          group = {
+            appKeyName: baseKey,
+            appDisplayName: app.name,
+            applications: [],
+            availableOs: [],
+            templates: [],
+          };
           groups.push(group);
         }
 
@@ -157,11 +189,18 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   /* template */ doPaste(cfg: ApplicationConfiguration) {
     this.edit.node$.value.nodeConfiguration.applications.push(cfg);
-    this.instanceEdit.getLastControlGroup(this.edit.node$.value.nodeConfiguration).processOrder.push(cfg.uid);
+    this.instanceEdit
+      .getLastControlGroup(this.edit.node$.value.nodeConfiguration)
+      .processOrder.push(cfg.uid);
     this.instanceEdit.conceal(`Paste ${cfg.name}`);
   }
 
-  private readFromClipboard(node: InstanceNodeConfigurationDto, product: ProductDto, apps: ApplicationDto[], minion: MinionDto) {
+  private readFromClipboard(
+    node: InstanceNodeConfigurationDto,
+    product: ProductDto,
+    apps: ApplicationDto[],
+    minion: MinionDto
+  ) {
     this.clipBoardCfg$.next(null);
     this.clipBoardError$.next(null);
 
@@ -170,7 +209,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       // extensions but never from web pages itself. it is rumored that there is a config
       // which can be enabled ("Dom.Events.Testing.AsynClipBoard"), however that did not
       // change browser behaviour in tests.
-      this.clipBoardError$.next('Clipboard access is not supported in this browser. Pasting applications is not possible.');
+      this.clipBoardError$.next(
+        'Clipboard access is not supported in this browser. Pasting applications is not possible.'
+      );
       return;
     }
 
@@ -181,13 +222,16 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         if (value.state !== 'granted') {
           // otherwise 'prompt' is open - not an error
           if (value.state === 'denied') {
-            this.clipBoardError$.next('No permission to read from the clipboard, pasting not possible.');
+            this.clipBoardError$.next(
+              'No permission to read from the clipboard, pasting not possible.'
+            );
           }
-          return;
         }
       },
       (reason) => {
-        this.clipBoardError$.next(`Cannot check clipboard permission (${reason}).`);
+        this.clipBoardError$.next(
+          `Cannot check clipboard permission (${reason}).`
+        );
       }
     );
 
@@ -205,14 +249,16 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         appConfig.application = updateAppOs(appConfig.application, minion.os);
       }
 
-      this.edit.getApplication(appConfig.application.name).subscribe(
-        (app) => {
+      this.edit.getApplication(appConfig.application.name).subscribe({
+        next: (app) => {
           if (!app || !app.descriptor) {
             return; // app not found, product mismatch?
           }
           if (
-            (app.descriptor.type === ApplicationType.SERVER && this.isClientNode(node)) ||
-            (app.descriptor.type === ApplicationType.CLIENT && !this.isClientNode(node))
+            (app.descriptor.type === ApplicationType.SERVER &&
+              this.isClientNode(node)) ||
+            (app.descriptor.type === ApplicationType.CLIENT &&
+              !this.isClientNode(node))
           ) {
             return; // not an error, just not suitable to paste
           }
@@ -228,8 +274,8 @@ export class AddProcessComponent implements OnInit, OnDestroy {
             this.clipBoardCfg$.next(appConfig);
           });
         },
-        (err) => console.log(`Error when reading clipboard: ${err}`)
-      );
+        error: (err) => console.log(`Error when reading clipboard: ${err}`),
+      });
     });
   }
 
@@ -249,7 +295,8 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       vars = this.dialog.message({
         header: 'Assign Variable Values',
         template: this.template,
-        validation: () => this.validateHasAllVariables(row.template, this.response),
+        validation: () =>
+          this.validateHasAllVariables(row.template, this.response),
         actions: [
           { name: 'Cancel', confirm: false, result: null },
           { name: 'Confirm', confirm: true, result: this.response },
@@ -266,23 +313,38 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       if (this.isClientNode(row.node)) {
         // multiple applications for the same ID for multiple OS'.
         for (const app of row.app.applications) {
-          allCreations.push(this.edit.addProcess(row.node, app, row.template, v, []));
+          allCreations.push(
+            this.edit.addProcess(row.node, app, row.template, v, [])
+          );
         }
       } else {
         // only one application may exist with the same ID.
-        allCreations.push(this.edit.addProcess(row.node, row.app.applications[0], row.template, v, []));
+        allCreations.push(
+          this.edit.addProcess(
+            row.node,
+            row.app.applications[0],
+            row.template,
+            v,
+            []
+          )
+        );
       }
 
       this.loading$.next(true);
       combineLatest(allCreations)
         .pipe(finalize(() => this.loading$.next(false)))
-        .subscribe((_) => {
-          this.instanceEdit.conceal('Add ' + (!!row.template ? row.template.name : row.app.appDisplayName));
+        .subscribe(() => {
+          this.instanceEdit.conceal(
+            'Add ' + (row.template ? row.template.name : row.app.appDisplayName)
+          );
         });
     });
   }
 
-  private validateHasAllVariables(template: ApplicationTemplateDescriptor, variables: { [key: string]: string }) {
+  private validateHasAllVariables(
+    template: ApplicationTemplateDescriptor,
+    variables: { [key: string]: string }
+  ) {
     for (const v of template.variables) {
       if (!variables[v.uid]) {
         return false;

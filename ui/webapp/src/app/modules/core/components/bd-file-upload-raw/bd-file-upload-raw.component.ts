@@ -1,10 +1,29 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ObjectChangeDetails, ObjectChangeType, OperatingSystem, UploadInfoDto } from 'src/app/models/gen.dtos';
+import {
+  ObjectChangeDetails,
+  ObjectChangeType,
+  OperatingSystem,
+  UploadInfoDto,
+} from 'src/app/models/gen.dtos';
 import { ActivitiesService } from '../../services/activities.service';
 import { ObjectChangesService } from '../../services/object-changes.service';
-import { ImportState, ImportStatus, UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
+import {
+  ImportState,
+  ImportStatus,
+  UploadService,
+  UploadState,
+  UploadStatus,
+  UrlParameter,
+} from '../../services/upload.service';
 
 @Component({
   selector: 'app-bd-file-upload-raw',
@@ -22,7 +41,9 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   /* template */ uploadStatus: UploadStatus;
   /* template */ importStatus: ImportStatus;
-  /* template */ processingHint$ = new BehaviorSubject<string>('Working on it...');
+  /* template */ processingHint$ = new BehaviorSubject<string>(
+    'Working on it...'
+  );
   /* template */ isUploadFinished$ = new BehaviorSubject<boolean>(false);
   /* template */ isUploadFailed$ = new BehaviorSubject<boolean>(false);
   /* template */ isUploading$ = new BehaviorSubject<boolean>(false);
@@ -35,7 +56,7 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   /* template */ set supportAllOs(b: boolean) {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
-    if (!!dto) {
+    if (dto) {
       if (b) {
         dto.supportedOperatingSystems = undefined;
       } else {
@@ -51,16 +72,20 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   /* template */ set supportWindows(b: boolean) {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
-    if (!!dto) {
+    if (dto) {
       if (b) {
         if (dto.supportedOperatingSystems === undefined) {
           dto.supportedOperatingSystems = [OperatingSystem.WINDOWS];
-        } else if (!dto.supportedOperatingSystems.includes(OperatingSystem.WINDOWS)) {
+        } else if (
+          !dto.supportedOperatingSystems.includes(OperatingSystem.WINDOWS)
+        ) {
           dto.supportedOperatingSystems.push(OperatingSystem.WINDOWS);
         }
       } else {
         if (dto.supportedOperatingSystems !== undefined) {
-          dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter((e) => e !== OperatingSystem.WINDOWS);
+          dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter(
+            (e) => e !== OperatingSystem.WINDOWS
+          );
         }
       }
     }
@@ -68,21 +93,29 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   /* template */ get supportWindows(): boolean {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
-    return !!dto && !!dto.supportedOperatingSystems && dto.supportedOperatingSystems.includes(OperatingSystem.WINDOWS);
+    return (
+      !!dto &&
+      !!dto.supportedOperatingSystems &&
+      dto.supportedOperatingSystems.includes(OperatingSystem.WINDOWS)
+    );
   }
 
   /* template */ set supportLinux(b: boolean) {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
-    if (!!dto) {
+    if (dto) {
       if (b) {
         if (dto.supportedOperatingSystems === undefined) {
           dto.supportedOperatingSystems = [OperatingSystem.LINUX];
-        } else if (!dto.supportedOperatingSystems.includes(OperatingSystem.LINUX)) {
+        } else if (
+          !dto.supportedOperatingSystems.includes(OperatingSystem.LINUX)
+        ) {
           dto.supportedOperatingSystems.push(OperatingSystem.LINUX);
         }
       } else {
         if (dto.supportedOperatingSystems !== undefined) {
-          dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter((e) => e !== OperatingSystem.LINUX);
+          dto.supportedOperatingSystems = dto.supportedOperatingSystems.filter(
+            (e) => e !== OperatingSystem.LINUX
+          );
         }
       }
     }
@@ -90,22 +123,41 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   /* template */ get supportLinux(): boolean {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
-    return !!dto && !!dto.supportedOperatingSystems && dto.supportedOperatingSystems.includes(OperatingSystem.LINUX);
+    return (
+      !!dto &&
+      !!dto.supportedOperatingSystems &&
+      dto.supportedOperatingSystems.includes(OperatingSystem.LINUX)
+    );
   }
 
   private subscription: Subscription;
 
-  constructor(private uploads: UploadService, private changes: ObjectChangesService, private activities: ActivitiesService) {}
+  constructor(
+    private uploads: UploadService,
+    private changes: ObjectChangesService,
+    private activities: ActivitiesService
+  ) {}
 
   ngOnInit(): void {
-    this.uploadStatus = this.uploads.uploadFile(this.uploadUrl, this.file, this.parameters, this.formDataParam);
-    this.subscription = this.changes.subscribe(ObjectChangeType.ACTIVITIES, { scope: [this.uploadStatus.scope] }, (e) => {
-      this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES]);
-    });
+    this.uploadStatus = this.uploads.uploadFile(
+      this.uploadUrl,
+      this.file,
+      this.parameters,
+      this.formDataParam
+    );
+    this.subscription = this.changes.subscribe(
+      ObjectChangeType.ACTIVITIES,
+      { scope: [this.uploadStatus.scope] },
+      (e) => {
+        this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES]);
+      }
+    );
     this.subscription.add(
-      this.uploadStatus.stateObservable.pipe(finalize(() => this.uploadDone())).subscribe(() => {
-        this.setProcessDetails();
-      })
+      this.uploadStatus.stateObservable
+        .pipe(finalize(() => this.uploadDone()))
+        .subscribe(() => {
+          this.setProcessDetails();
+        })
     );
     this.subscription.add(
       this.uploadStatus.progressObservable.subscribe(() => {
@@ -115,7 +167,14 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
   }
 
   private isUserInputRequired(): boolean {
-    return !!this.uploadStatus.detail && !(!!this.uploadStatus?.detail?.isHive || !!this.uploadStatus?.detail?.isProduct) && !!!this.importStatus;
+    return (
+      !!this.uploadStatus.detail &&
+      !(
+        !!this.uploadStatus?.detail?.isHive ||
+        !!this.uploadStatus?.detail?.isProduct
+      ) &&
+      !this.importStatus
+    );
   }
 
   uploadDone() {
@@ -130,9 +189,12 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
   }
 
   import() {
-    this.importStatus = this.uploads.importFile(this.importUrl, this.uploadStatus.detail);
+    this.importStatus = this.uploads.importFile(
+      this.importUrl,
+      this.uploadStatus.detail
+    );
     this.subscription.add(
-      this.importStatus.stateObservable.subscribe((state) => {
+      this.importStatus.stateObservable.subscribe(() => {
         this.setProcessDetails();
       })
     );
@@ -144,7 +206,9 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
 
   private onEventReceived(e: string) {
     // we accept all events as we don't know the scope we're looking for beforehand.
-    const events = this.activities.getActivitiesFromEvent(e, [this.uploadStatus.scope]);
+    const events = this.activities.getActivitiesFromEvent(e, [
+      this.uploadStatus.scope,
+    ]);
 
     // each received event's root scope must match a scope of an UploadStatus object.
     // discard all events where this is not true.
@@ -155,12 +219,18 @@ export class BdFileUploadRawComponent implements OnInit, OnDestroy {
   }
 
   private setProcessDetails() {
-    this.isUploadFinished$.next(this.uploadStatus?.state === UploadState.FINISHED);
+    this.isUploadFinished$.next(
+      this.uploadStatus?.state === UploadState.FINISHED
+    );
     this.isUploadFailed$.next(this.uploadStatus?.state === UploadState.FAILED);
     this.isUploading$.next(this.uploadStatus?.state === UploadState.UPLOADING);
-    this.isUploadProcessing$.next(this.uploadStatus?.state === UploadState.PROCESSING);
+    this.isUploadProcessing$.next(
+      this.uploadStatus?.state === UploadState.PROCESSING
+    );
     this.isImporting$.next(this.importStatus?.state === ImportState.IMPORTING);
-    this.isImportFinished$.next(this.importStatus?.state === ImportState.FINISHED);
+    this.isImportFinished$.next(
+      this.importStatus?.state === ImportState.FINISHED
+    );
     this.isImportFailed$.next(this.importStatus?.state === ImportState.FAILED);
     this.icon$.next(this.getIcon());
     this.header$.next(this.getHeader());

@@ -1,5 +1,19 @@
 <div fxLayout="row" fxLayoutAlign="start">
-  <mat-icon *ngIf="column.data(record).status === false" class="bd-warning-text" [matTooltip]="column.data(record).message">warning</mat-icon>
-  <mat-icon *ngIf="column.data(record).status === true" class="bd-success-text" [matTooltip]="column.data(record).message">done</mat-icon>
-  <mat-icon *ngIf="column.data(record).status === undefined" class="local-unknown">help</mat-icon>
+  <mat-icon
+    *ngIf="column.data(record).status === false"
+    class="bd-warning-text"
+    [matTooltip]="column.data(record).message"
+    >warning</mat-icon
+  >
+  <mat-icon
+    *ngIf="column.data(record).status === true"
+    class="bd-success-text"
+    [matTooltip]="column.data(record).message"
+    >done</mat-icon
+  >
+  <mat-icon
+    *ngIf="column.data(record).status === undefined"
+    class="local-unknown"
+    >help</mat-icon
+  >
 </div>

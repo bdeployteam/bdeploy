@@ -1,4 +1,11 @@
-import { Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Observable, of, Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
@@ -12,33 +19,39 @@ import { ProcessEditService } from '../../../services/process-edit.service';
 @Component({
   selector: 'app-configure-endpoints',
   templateUrl: './configure-endpoints.component.html',
-  styleUrls: ['./configure-endpoints.component.css'],
 })
-export class ConfigureEndpointsComponent implements OnInit, DirtyableDialog, OnDestroy {
+export class ConfigureEndpointsComponent
+  implements DirtyableDialog, OnDestroy, AfterViewInit
+{
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChildren('epForm') private forms: QueryList<NgForm>;
 
   /* template */ authTypeValues = Object.keys(HttpAuthenticationType);
-  /* template */ authTypeLabels = Object.keys(HttpAuthenticationType).map((t) => t.substring(0, 1) + t.substring(1).toLowerCase());
+  /* template */ authTypeLabels = Object.keys(HttpAuthenticationType).map(
+    (t) => t.substring(0, 1) + t.substring(1).toLowerCase()
+  );
   /* template */ hasPendingChanges: boolean;
   /* template */ isFromInvalid: boolean;
 
   private subscription: Subscription;
 
-  constructor(public edit: ProcessEditService, public instanceEdit: InstanceEditService) {}
-
-  ngOnInit(): void {}
+  constructor(
+    public edit: ProcessEditService,
+    public instanceEdit: InstanceEditService
+  ) {}
 
   ngAfterViewInit(): void {
     if (!this.forms) {
       return;
     }
     this.forms.forEach((form) => {
-      this.subscription = form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
-        this.isFromInvalid = status === 'INVALID';
-        this.hasPendingChanges = this.isDirty();
-      });
+      this.subscription = form.statusChanges
+        .pipe(debounceTime(100))
+        .subscribe((status) => {
+          this.isFromInvalid = status === 'INVALID';
+          this.hasPendingChanges = this.isDirty();
+        });
     });
   }
 
@@ -51,12 +64,12 @@ export class ConfigureEndpointsComponent implements OnInit, DirtyableDialog, OnD
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
     return of(true).pipe(
-      tap((_) => {
+      tap(() => {
         this.instanceEdit.conceal('Change endpoint configuration');
       })
     );

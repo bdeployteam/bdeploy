@@ -1,8 +1,15 @@
 <app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="singleProduct.product$">
-  <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Details"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="singleProduct.product$ | async as prod">
+    <div
+      fxLayout="column"
+      fxLayoutGap="10px"
+      *ngIf="singleProduct.product$ | async as prod"
+    >
       <div gdColumns="70px auto" gdGap="5px">
         <strong>ID:</strong>
         <div>{{ prod.product }}</div>
@@ -14,7 +21,10 @@
         <div>{{ prod.vendor }}</div>
       </div>
       <app-bd-expand-button [text]="'Used In'" icon="settings_system_daydream">
-        <app-bd-data-display [records]="singleProduct.getUsedIn() | async" [columns]="instanceColumns">
+        <app-bd-data-display
+          [records]="singleProduct.getUsedIn() | async"
+          [columns]="instanceColumns"
+        >
           <app-bd-no-data>
             <div>This version is not used in any instance.</div>
           </app-bd-no-data>
@@ -22,15 +32,24 @@
       </app-bd-expand-button>
       <ng-container *ngIf="singleProduct.product$ | async as prod">
         <app-bd-expand-button [text]="'Labels'" icon="label">
-          <app-bd-data-display [records]="singleProduct.labels$ | async" [columns]="labelColumns">
+          <app-bd-data-display
+            [records]="singleProduct.labels$ | async"
+            [columns]="labelColumns"
+          >
             <app-bd-no-data>
               <div>This product has no labels.</div>
             </app-bd-no-data>
           </app-bd-data-display>
         </app-bd-expand-button>
 
-        <app-bd-expand-button text="Application Templates" icon="bookmark_border">
-          <app-bd-data-display [records]="prod.applicationTemplates" [columns]="appTemplColumns">
+        <app-bd-expand-button
+          text="Application Templates"
+          icon="bookmark_border"
+        >
+          <app-bd-data-display
+            [records]="prod.applicationTemplates"
+            [columns]="appTemplColumns"
+          >
             <app-bd-no-data>
               <div>This product has no application templates.</div>
             </app-bd-no-data>
@@ -38,7 +57,10 @@
         </app-bd-expand-button>
 
         <app-bd-expand-button text="Instance Templates" icon="bookmarks">
-          <app-bd-data-display [records]="prod.instanceTemplates" [columns]="instTemplColumns">
+          <app-bd-data-display
+            [records]="prod.instanceTemplates"
+            [columns]="instTemplColumns"
+          >
             <app-bd-no-data>
               <div>This product has no instance templates.</div>
             </app-bd-no-data>
@@ -46,7 +68,10 @@
         </app-bd-expand-button>
 
         <app-bd-expand-button text="Plugins" icon="extension">
-          <app-bd-data-display [records]="singleProductPlugins$ | async" [columns]="pluginColumns">
+          <app-bd-data-display
+            [records]="singleProductPlugins$ | async"
+            [columns]="pluginColumns"
+          >
             <app-bd-no-data>
               <div>This product has no plugins.</div>
             </app-bd-no-data>

@@ -1,11 +1,22 @@
 import { Directive, Input } from '@angular/core';
-import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
+import {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
 
 export const PASSWORD_VALIDATION = 'passwordMismatch';
 
 @Directive({
   selector: '[appPasswordVerification]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: PasswordVerificationValidator, multi: true }],
+  providers: [
+    {
+      provide: NG_VALIDATORS,
+      useExisting: PasswordVerificationValidator,
+      multi: true,
+    },
+  ],
 })
 export class PasswordVerificationValidator implements Validator {
   @Input('appPasswordVerification') referencePass: string;

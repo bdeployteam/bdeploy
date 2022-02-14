@@ -10,8 +10,10 @@ export interface BdValidationMessageExtractor {
 }
 
 const msgExtractors: BdValidationMessageExtractor[] = [];
-export function bdValidationRegisterMessageExtractor(extractor: BdValidationMessageExtractor) {
-  if (!!msgExtractors.find((e) => e.id === extractor.id)) {
+export function bdValidationRegisterMessageExtractor(
+  extractor: BdValidationMessageExtractor
+) {
+  if (msgExtractors.find((e) => e.id === extractor.id)) {
     return;
   }
 
@@ -21,32 +23,35 @@ export function bdValidationRegisterMessageExtractor(extractor: BdValidationMess
 /**
  * Returns proper error messages for all common validators which can be registered on a bd-form-*
  */
-export function bdValidationMessage(label: string, errors: ValidationErrors): string {
+export function bdValidationMessage(
+  label: string,
+  errors: ValidationErrors
+): string {
   if (!errors) {
     return null;
   }
 
   // commonly available validators
-  if (!!errors['required']) {
+  if (errors['required']) {
     return `${label} is required.`;
   }
-  if (!!errors['minlength']) {
+  if (errors['minlength']) {
     return `${label} must be at least ${errors['minlength'].requiredLength} characters.`;
   }
-  if (!!errors['maxlength']) {
+  if (errors['maxlength']) {
     return `${label} must be at maximum ${errors['maxlength'].requiredLength} characters.`;
   }
 
   // our own validators
-  if (!!errors[ID_VALIDATION]) {
+  if (errors[ID_VALIDATION]) {
     return `${label} contains invalid characters`;
   }
 
-  if (!!errors[TRIM_VALIDATION]) {
+  if (errors[TRIM_VALIDATION]) {
     return `${label} contains leading or trailing spaces`;
   }
 
-  if (!!errors[PASSWORD_VALIDATION]) {
+  if (errors[PASSWORD_VALIDATION]) {
     return `${label} must match the given password`;
   }
 

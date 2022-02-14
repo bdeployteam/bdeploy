@@ -1,5 +1,5 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
@@ -13,12 +13,18 @@ import {
   InstanceTemplateGroup,
   ProcessControlGroupConfiguration,
   ProductDto,
-  TemplateApplication
+  TemplateApplication,
 } from 'src/app/models/gen.dtos';
-import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  ACTION_CANCEL,
+  ACTION_OK,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/manifest.utils';
+import {
+  getAppKeyName,
+  getTemplateAppKey,
+} from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
@@ -36,7 +42,12 @@ export interface TemplateMessage {
 const tplColName: BdDataColumn<TemplateMessage> = {
   id: 'name',
   name: 'Name',
-  data: (r) => (!!r.template?.name ? r.template.name : !!r.template?.template ? r.template.template : r.template.application),
+  data: (r) =>
+    r.template?.name
+      ? r.template.name
+      : r.template?.template
+      ? r.template.template
+      : r.template.application,
 };
 
 const tplColDetails: BdDataColumn<TemplateMessage> = {
@@ -52,7 +63,7 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
   templateUrl: './instance-templates.component.html',
   styleUrls: ['./instance-templates.component.css'],
 })
-export class InstanceTemplatesComponent implements OnInit, OnDestroy {
+export class InstanceTemplatesComponent implements OnDestroy {
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
 
   /* template */ records: InstanceTemplateDescriptor[];
@@ -62,7 +73,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   /* template */ variables: { [key: string]: string }; // key is var name, value is value.
   /* template */ groups: { [key: string]: string }; // key is group name, value is target node name.
   /* template */ messages: TemplateMessage[];
-  /* template */ msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
+  /* template */ msgColumns: BdDataColumn<TemplateMessage>[] = [
+    tplColName,
+    tplColDetails,
+  ];
   /* template */ isAnyGroupSelected = false;
   /* template */ hasAllVariables = false;
   /* template */ firstStepCompleted = false;
@@ -79,9 +93,21 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
   private product: ProductDto;
   private subscription: Subscription;
 
-  constructor(public servers: ServersService, public instanceEdit: InstanceEditService, private products: ProductsService, private edit: ProcessEditService) {
-    this.subscription = combineLatest([this.instanceEdit.state$, this.products.products$]).subscribe(([state, prods]) => {
-      const prod = prods?.find((p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag);
+  constructor(
+    public servers: ServersService,
+    public instanceEdit: InstanceEditService,
+    private products: ProductsService,
+    private edit: ProcessEditService
+  ) {
+    this.subscription = combineLatest([
+      this.instanceEdit.state$,
+      this.products.products$,
+    ]).subscribe(([state, prods]) => {
+      const prod = prods?.find(
+        (p) =>
+          p.key.name === state?.config?.config?.product.name &&
+          p.key.tag === state?.config?.config?.product.tag
+      );
 
       if (!prod) {
         this.records = [];
@@ -94,8 +120,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
@@ -104,7 +128,13 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     if (group.type === ApplicationType.CLIENT) {
       return [null, CLIENT_NODE_NAME];
     } else {
-      return [null, ...this.instanceEdit.state$.value?.config?.nodeDtos.map((n) => n.nodeName).filter((n) => n !== CLIENT_NODE_NAME)];
+      return [
+        null,
+        // eslint-disable-next-line no-unsafe-optional-chaining
+        ...this.instanceEdit.state$.value?.config?.nodeDtos
+          .map((n) => n.nodeName)
+          .filter((n) => n !== CLIENT_NODE_NAME),
+      ];
     }
   }
 
@@ -178,7 +208,9 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     const observables = [];
 
     // prepare available process control groups
-    const pcgs = this.template.processControlGroups.map((p) => Object.assign({}, p) as ProcessControlGroupConfiguration);
+    const pcgs = this.template.processControlGroups.map(
+      (p) => Object.assign({}, p) as ProcessControlGroupConfiguration
+    );
     pcgs.forEach((p) => (p.processOrder = []));
 
     for (const groupName of Object.keys(this.groups)) {
@@ -187,7 +219,9 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         continue; // skipped.
       }
 
-      const node = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === nodeName);
+      const node = this.instanceEdit.state$.value?.config?.nodeDtos?.find(
+        (n) => n.nodeName === nodeName
+      );
       const group = this.template.groups.find((g) => g.name === groupName);
 
       if (!node || !group) {
@@ -206,7 +240,13 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         // for servers, we need to find the appropriate application with the correct OS.
         for (const app of group.applications) {
           // need to prepare process control groups synchronously before adding applications.
-          this.prepareProcessControlGroups(app, node, pcgs, groupName, nodeName);
+          this.prepareProcessControlGroups(
+            app,
+            node,
+            pcgs,
+            groupName,
+            nodeName
+          );
 
           observables.push(
             this.instanceEdit.nodes$.pipe(
@@ -215,7 +255,13 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
               // pick the first valid node info
               first(),
               // map the node info to the application key we need for our node.
-              map((n) => this.instanceEdit.stateApplications$.value?.find((a) => a.key.name === getTemplateAppKey(this.product, app, n[nodeName]))),
+              map((n) =>
+                this.instanceEdit.stateApplications$.value?.find(
+                  (a) =>
+                    a.key.name ===
+                    getTemplateAppKey(this.product, app, n[nodeName])
+                )
+              ),
               // map the key of the app to an observable to actually add the application if possible.
               map((a) => {
                 if (!a) {
@@ -223,19 +269,31 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
                     group: groupName,
                     node: nodeName,
                     template: app,
-                    appname: !!app?.name ? app.name : app.application,
-                    message: { icon: 'warning', message: 'Cannot find application in product for target OS.' },
+                    appname: app?.name ? app.name : app.application,
+                    message: {
+                      icon: 'warning',
+                      message:
+                        'Cannot find application in product for target OS.',
+                    },
                   });
                   return of<string>(null);
                 } else {
                   const status = [];
-                  return this.edit.addProcess(node, a, app, this.variables, status).pipe(
-                    finalize(() => {
-                      status.forEach((e) =>
-                        this.messages.push({ group: groupName, node: nodeName, appname: !!app?.name ? app.name : a.name, template: app, message: e })
-                      );
-                    })
-                  );
+                  return this.edit
+                    .addProcess(node, a, app, this.variables, status)
+                    .pipe(
+                      finalize(() => {
+                        status.forEach((e) =>
+                          this.messages.push({
+                            group: groupName,
+                            node: nodeName,
+                            appname: app?.name ? app.name : a.name,
+                            template: app,
+                            message: e,
+                          })
+                        );
+                      })
+                    );
                 }
               }),
               // since adding returns an observable we concat them, so a subscription to the observable will yield the addProcess response.
@@ -253,19 +311,21 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             const appKey = getAppKeyName(app.key);
             if (searchKey === appKey) {
               observables.push(
-                this.edit.addProcess(node, app, template, this.variables, status).pipe(
-                  finalize(() => {
-                    status.forEach((e) =>
-                      this.messages.push({
-                        group: groupName,
-                        node: nodeName,
-                        appname: !!template?.name ? template.name : app.name,
-                        template: template,
-                        message: e,
-                      })
-                    );
-                  })
-                )
+                this.edit
+                  .addProcess(node, app, template, this.variables, status)
+                  .pipe(
+                    finalize(() => {
+                      status.forEach((e) =>
+                        this.messages.push({
+                          group: groupName,
+                          node: nodeName,
+                          appname: template?.name ? template.name : app.name,
+                          template: template,
+                          message: e,
+                        })
+                      );
+                    })
+                  )
               );
             }
           }
@@ -282,12 +342,14 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     // now execute and await all additions.
     combineLatest(observables)
       .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe((_) => {
-        this.instanceEdit.state$.value?.config?.nodeDtos.forEach((n) => this.cleanProcessControlGroup(n));
+      .subscribe(() => {
+        this.instanceEdit.state$.value?.config?.nodeDtos.forEach((n) =>
+          this.cleanProcessControlGroup(n)
+        );
 
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
-        if (!!this.messages.length) {
+        if (this.messages.length) {
           applyResult = this.dialog.message({
             header: 'Template Messages',
             template: this.tplMessages,
@@ -300,7 +362,9 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
         applyResult.subscribe((r) => {
           if (r) {
-            this.instanceEdit.conceal(`Apply instance template ${templateName}`);
+            this.instanceEdit.conceal(
+              `Apply instance template ${templateName}`
+            );
           } else {
             this.instanceEdit.discard();
           }
@@ -319,8 +383,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     nodeName: string
   ) {
     const cg = app.preferredProcessControlGroup;
-    if (!!cg) {
-      const existingCg = node.nodeConfiguration.controlGroups.find((n) => n.name === cg);
+    if (cg) {
+      const existingCg = node.nodeConfiguration.controlGroups.find(
+        (n) => n.name === cg
+      );
       if (!existingCg) {
         // need to prepare the group.
         const pcgTempl = pcgs.find((p) => p.name === cg);
@@ -330,7 +396,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             node: nodeName,
             appname: null,
             template: null,
-            message: { icon: 'warning', message: `Cannot find template for requested process control group ${cg}` },
+            message: {
+              icon: 'warning',
+              message: `Cannot find template for requested process control group ${cg}`,
+            },
           });
         } else {
           // TODO: check order of groups...? Which order is relevant? Order of groups in template?
@@ -344,7 +413,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
    * Removes empty process control groups from the configuration.
    */
   private cleanProcessControlGroup(node: InstanceNodeConfigurationDto) {
-    node.nodeConfiguration.controlGroups = node.nodeConfiguration.controlGroups.filter((n) => !!n.processOrder?.length);
+    node.nodeConfiguration.controlGroups =
+      node.nodeConfiguration.controlGroups.filter(
+        (n) => !!n.processOrder?.length
+      );
   }
 
   /* template */ onStepSelectionChange(event: StepperSelectionEvent) {
@@ -362,7 +434,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         this.secondStepCompleted = false;
         this.variables = {};
 
-        if (!!this.template.variables?.length) {
+        if (this.template.variables?.length) {
           for (const v of this.template.variables) {
             this.variables[v.uid] = v.defaultValue;
           }

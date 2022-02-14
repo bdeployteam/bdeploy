@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ParameterDescriptor } from 'src/app/models/gen.dtos';
 
 @Component({
@@ -6,10 +6,6 @@ import { ParameterDescriptor } from 'src/app/models/gen.dtos';
   templateUrl: './param-desc-card.component.html',
   styleUrls: ['./param-desc-card.component.css'],
 })
-export class ParamDescCardComponent implements OnInit {
+export class ParamDescCardComponent {
   @Input() descriptor: ParameterDescriptor;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

@@ -5,8 +5,16 @@ import { ClientApplicationsComponent } from './components/client-applications/cl
 import { GroupsBrowserComponent } from './components/groups-browser/groups-browser.component';
 
 const GROUPS_ROUTES: Route[] = [
-  { path: 'browser', component: GroupsBrowserComponent, canDeactivate: [DirtyDialogGuard] },
-  { path: 'clients/:group', component: ClientApplicationsComponent, canDeactivate: [DirtyDialogGuard] },
+  {
+    path: 'browser',
+    component: GroupsBrowserComponent,
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'clients/:group',
+    component: ClientApplicationsComponent,
+    canDeactivate: [DirtyDialogGuard],
+  },
 ];
 
 @NgModule({

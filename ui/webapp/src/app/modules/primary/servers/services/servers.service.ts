@@ -2,7 +2,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, finalize, tap } from 'rxjs/operators';
-import { ManagedMasterDto, ObjectChangeType, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
+import {
+  ManagedMasterDto,
+  ObjectChangeType,
+  ProductDto,
+  ProductTransferDto,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -26,13 +31,18 @@ export class ServersService {
   private apiPath = `${this.cfg.config.api}/managed-servers`;
   private group: string;
   private subscription: Subscription;
-  private isCentral: boolean = false;
+  private isCentral = false;
   public isCurrentInstanceSynchronized$ = new BehaviorSubject<boolean>(true);
   public isServerDetailsSynchronized$ = new BehaviorSubject<boolean>(true);
 
   private update$ = new BehaviorSubject<string>(null);
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private changes: ObjectChangesService, private groups: GroupsService) {
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private changes: ObjectChangesService,
+    private groups: GroupsService
+  ) {
     this.groups.current$.subscribe((g) => this.update$.next(g?.name));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
     this.cfg.isCentral$.subscribe((value) => {
@@ -41,14 +51,18 @@ export class ServersService {
   }
 
   private updateChangeSubscription(group: string) {
-    if (!!this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
 
-    if (!!group) {
-      this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, { scope: [group] }, (change) => {
-        this.update$.next(group);
-      });
+    if (group) {
+      this.subscription = this.changes.subscribe(
+        ObjectChangeType.INSTANCE_GROUP,
+        { scope: [group] },
+        () => {
+          this.update$.next(group);
+        }
+      );
     }
   }
 
@@ -78,19 +92,23 @@ export class ServersService {
 
   public synchronize(server: ManagedMasterDto): Observable<ManagedMasterDto> {
     if (this.isCentral) {
-      return this.http.get<ManagedMasterDto>(`${this.apiPath}/synchronize/${this.group}/${server.hostName}`).pipe(
-        tap((s) => {
-          if (!!this.servers$.value?.length) {
-            this.servers$.value.splice(
-              this.servers$.value.findIndex((o) => o.hostName === s.hostName),
-              1,
-              s
-            );
+      return this.http
+        .get<ManagedMasterDto>(
+          `${this.apiPath}/synchronize/${this.group}/${server.hostName}`
+        )
+        .pipe(
+          tap((s) => {
+            if (this.servers$.value?.length) {
+              this.servers$.value.splice(
+                this.servers$.value.findIndex((o) => o.hostName === s.hostName),
+                1,
+                s
+              );
 
-            this.servers$.next(this.servers$.value);
-          }
-        })
-      );
+              this.servers$.next(this.servers$.value);
+            }
+          })
+        );
     }
     return of(null);
   }
@@ -117,9 +135,11 @@ export class ServersService {
   private getSynchronizedOffset(server: ManagedMasterDto): number {
     if (this.isCentral) {
       // prefer current information if loaded.
-      const currentS = this.servers$.value?.find((s) => s.hostName === server.hostName);
+      const currentS = this.servers$.value?.find(
+        (s) => s.hostName === server.hostName
+      );
       const currentTime = this.cfg.getCorrectedNow(); // use server time to compare.
-      return currentTime - (!!currentS ? currentS : server).lastSync;
+      return currentTime - (currentS ? currentS : server).lastSync;
     }
     return 0;
   }
@@ -130,45 +150,61 @@ export class ServersService {
         .put(`${this.apiPath}/auto-attach/${this.group}`, server, {
           headers: suppressGlobalErrorHandling(new HttpHeaders()),
         })
-        .subscribe(
-          (r) => {
+        .subscribe({
+          next: () => {
             s.next(AttachType.AUTO);
             s.complete();
           },
-          (autoErr) => {
-            this.http.put(`${this.apiPath}/manual-attach/${this.group}`, server).subscribe(
-              (r) => {
-                s.next(AttachType.MANUAL);
-                s.complete();
-              },
-              (manualErr) => {
-                s.error(manualErr);
-                s.complete();
-              }
-            );
-          }
-        );
+          error: () => {
+            this.http
+              .put(`${this.apiPath}/manual-attach/${this.group}`, server)
+              .subscribe({
+                next: () => {
+                  s.next(AttachType.MANUAL);
+                  s.complete();
+                },
+                error: (manualErr) => {
+                  s.error(manualErr);
+                  s.complete();
+                },
+              });
+          },
+        });
     });
   }
 
   public manualAttachCentral(ident: string): Observable<string> {
-    return this.http.put(`${this.apiPath}/manual-attach-central`, ident, { responseType: 'text' });
+    return this.http.put(`${this.apiPath}/manual-attach-central`, ident, {
+      responseType: 'text',
+    });
   }
 
   public getCentralIdent(server: ManagedMasterDto): Observable<string> {
-    return this.http.post(`${this.apiPath}/central-ident/${this.group}`, server, { responseType: 'text' });
+    return this.http.post(
+      `${this.apiPath}/central-ident/${this.group}`,
+      server,
+      { responseType: 'text' }
+    );
   }
 
   public getManagedIdent(): Observable<ManagedMasterDto> {
     // TODO: why is this method in the wrong service on the server?
-    return this.http.get<ManagedMasterDto>(`${this.cfg.config.api}/backend-info/managed-master`);
+    return this.http.get<ManagedMasterDto>(
+      `${this.cfg.config.api}/backend-info/managed-master`
+    );
   }
 
   public getRemoteProducts(server: string): Observable<ProductDto[]> {
-    return this.http.get<ProductDto[]>(`${this.apiPath}/list-products/${this.group}/${server}`).pipe(measure('Load remote products'));
+    return this.http
+      .get<ProductDto[]>(
+        `${this.apiPath}/list-products/${this.group}/${server}`
+      )
+      .pipe(measure('Load remote products'));
   }
 
   public transferProducts(transfer: ProductTransferDto): Observable<any> {
-    return this.http.post(`${this.apiPath}/transfer-products/${this.group}`, transfer).pipe(measure('Initiate Product Transfer'));
+    return this.http
+      .post(`${this.apiPath}/transfer-products/${this.group}`, transfer)
+      .pipe(measure('Initiate Product Transfer'));
   }
 }

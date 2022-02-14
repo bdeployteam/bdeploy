@@ -1,9 +1,21 @@
 <div fxLayout="row" fxLayoutAlign="center center">
-  <app-bd-button-popup text="Details" icon="info" tooltip="below" preferredPosition="left-below">
-    <app-bd-notification-card header="Problem Details" [dismissable]="false" [icon]="record.message.icon" [style.min-width.px]="350" background="dialog">
+  <app-bd-button-popup
+    text="Details"
+    icon="info"
+    tooltip="below"
+    preferredPosition="left-below"
+  >
+    <app-bd-notification-card
+      header="Problem Details"
+      [dismissable]="false"
+      [icon]="record.message.icon"
+      [style.min-width.px]="350"
+      background="dialog"
+    >
       <div fxLayout="column" fxLayoutGap="5px" class="bd-default-padding">
         <div>
-          While applying <strong>{{ record.group }}</strong> to <strong>{{ record.node }}</strong
+          While applying <strong>{{ record.group }}</strong> to
+          <strong>{{ record.node }}</strong
           ><span *ngIf="!!record.appname"
             >, when processing <strong>{{ record.appname }}</strong></span
           >:

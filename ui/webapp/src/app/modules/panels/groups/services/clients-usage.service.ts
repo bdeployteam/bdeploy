@@ -35,15 +35,23 @@ export class ClientsUsageService {
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
-  constructor(private http: HttpClient, private cfg: ConfigService, private groups: GroupsService) {}
+  constructor(
+    private http: HttpClient,
+    private cfg: ConfigService,
+    private groups: GroupsService
+  ) {}
 
   public load(uuid: string): Observable<ClientUsagePerApp[]> {
     this.loading$.next(true);
-    return this.http.get<ClientUsageData>(`${this.apiPath(this.groups.current$.value.name)}/${uuid}/clientUsage`).pipe(
-      finalize(() => this.loading$.next(false)),
-      measure('Load Client Usage'),
-      map((usage) => this.transform(usage))
-    );
+    return this.http
+      .get<ClientUsageData>(
+        `${this.apiPath(this.groups.current$.value.name)}/${uuid}/clientUsage`
+      )
+      .pipe(
+        finalize(() => this.loading$.next(false)),
+        measure('Load Client Usage'),
+        map((usage) => this.transform(usage))
+      );
   }
 
   /**

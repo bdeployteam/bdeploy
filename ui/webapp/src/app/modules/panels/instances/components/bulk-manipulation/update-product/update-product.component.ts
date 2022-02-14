@@ -12,27 +12,33 @@ import { InstanceBulkService } from '../../../services/instance-bulk.service';
 @Component({
   selector: 'app-update-product',
   templateUrl: './update-product.component.html',
-  styleUrls: ['./update-product.component.css'],
 })
 export class UpdateProductComponent implements OnInit, OnDestroy {
   private readonly productUpdateAction: BdDataColumn<ProductDto> = {
     id: 'update',
     name: 'Upd.',
-    data: (r) => 'Set as current version for all selected instances.',
+    data: () => 'Set as current version for all selected instances.',
     action: (r) => this.updateProduct(r),
-    icon: (r) => 'security_update_good',
+    icon: () => 'security_update_good',
     width: '40px',
   };
 
   /* template */ products$ = new BehaviorSubject<ProductDto[]>(null);
   /* template */ processing$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns: BdDataColumn<ProductDto>[] = [this.productCols.productVersionColumn, this.productUpdateAction];
+  /* template */ columns: BdDataColumn<ProductDto>[] = [
+    this.productCols.productVersionColumn,
+    this.productUpdateAction,
+  ];
   /* template */ saved$ = new BehaviorSubject<number>(0);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
-  constructor(public bulk: InstanceBulkService, public products: ProductsService, private productCols: ProductsColumnsService) {}
+  constructor(
+    public bulk: InstanceBulkService,
+    public products: ProductsService,
+    private productCols: ProductsColumnsService
+  ) {}
 
   ngOnInit(): void {
     // need to do this on *next* update cycle.
@@ -48,7 +54,7 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.products$.next(p.filter((p) => p.key.name === prodName));
+      this.products$.next(p.filter((x) => x.key.name === prodName));
     });
   }
 
@@ -73,18 +79,27 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
         if (errors.length > 0) {
           // display generic internal error and stay on the page with the current selection - nothing happened.
           this.dialog
-            .info('Sorry that did not work', 'There was an unexpected error during server communication', 'error')
+            .info(
+              'Sorry that did not work',
+              'There was an unexpected error during server communication',
+              'error'
+            )
             .pipe(finalize(() => this.processing$.next(false)))
             .subscribe();
         } else {
           const problematic = updates.filter((p) => !!p.validation?.length);
-          if (!!problematic.length) {
+          if (problematic.length) {
             // display brief validation summary and stay on the page with the current selection - nothing happened.
             this.dialog
               .info(
                 'Validation Issues',
                 `<p>Unfortunately there are validation issues, the bulk update cannot be performed.</p><mat-divider></mat-divider><ul>${problematic
-                  .map((p) => `<li>${p.config.config.name}: ${p.validation.length} issue${p.validation.length > 1 ? 's' : ''}</li>`)
+                  .map(
+                    (p) =>
+                      `<li>${p.config.config.name}: ${
+                        p.validation.length
+                      } issue${p.validation.length > 1 ? 's' : ''}</li>`
+                  )
                   .join()}</ul><p>No changes were performed</p>`,
                 'warning'
               )
@@ -92,7 +107,6 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
               .subscribe();
           } else {
             // all is well, we can now save the updates.
-            const errors = [];
             this.bulk
               .saveUpdate(updates)
               .pipe(
@@ -101,7 +115,7 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
 
                   // in case of errors - DISPLAY them :)
                   let msg = of(true);
-                  if (!!errors?.length) {
+                  if (errors?.length) {
                     msg = this.dialog.info(
                       `Errors while saving`,
                       `<strong>${errors.length}</strong> errors have occured during saving. Please verify the correctness of all affected instances.`,
@@ -109,11 +123,11 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
                     );
                   }
 
-                  msg.subscribe((_) => this.tb.closePanel());
+                  msg.subscribe(() => this.tb.closePanel());
                 })
               )
               .subscribe({
-                next: (_) => {
+                next: () => {
                   this.saved$.next(this.saved$.value + 1);
                 },
                 error: (e) => {

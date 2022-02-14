@@ -1,4 +1,11 @@
-import { Component, Input, OnInit, Optional, Self, ViewChild, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  Input,
+  Optional,
+  Self,
+  ViewChild,
+  ViewEncapsulation,
+} from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
@@ -9,7 +16,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   styleUrls: ['./bd-form-toggle.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdFormToggleComponent implements OnInit, ControlValueAccessor {
+export class BdFormToggleComponent implements ControlValueAccessor {
   @Input() label: string;
   @Input() name: string;
   @Input() disabled: boolean;
@@ -30,16 +37,16 @@ export class BdFormToggleComponent implements OnInit, ControlValueAccessor {
   }
 
   private internalValue: any = '';
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouchedCb: () => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChangedCb: (_: any) => void = () => {};
 
   constructor(@Optional() @Self() private ngControl: NgControl) {
-    if (!!ngControl) {
+    if (ngControl) {
       ngControl.valueAccessor = this;
     }
   }
-
-  ngOnInit(): void {}
 
   writeValue(v: any): void {
     if (v !== this.internalValue) {
@@ -60,11 +67,11 @@ export class BdFormToggleComponent implements OnInit, ControlValueAccessor {
     if (this.disabled) {
       return;
     }
-    if (!!this.checkbox) {
+    if (this.checkbox) {
       this.checkbox.toggle();
       this.value = this.checkbox.checked;
     }
-    if (!!this.slide) {
+    if (this.slide) {
       this.slide.toggle();
       this.value = this.slide.checked;
     }

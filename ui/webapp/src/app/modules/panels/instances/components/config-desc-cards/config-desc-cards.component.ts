@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 export type AppBaseFields = 'cfg.name' | 'cfg.uid';
 export type AppCommandFields = 'cfg.executable';
@@ -20,19 +20,26 @@ export type AppEndpointFields =
   | 'cfg.ep.authUser'
   | 'cfg.ep.authPass';
 
-export type InstFields = 'inst.name' | 'inst.description' | 'inst.purpose' | 'inst.productTag' | 'inst.autoStart' | 'inst.autoUninstall' | 'inst.configTree';
+export type InstFields =
+  | 'inst.name'
+  | 'inst.description'
+  | 'inst.purpose'
+  | 'inst.productTag'
+  | 'inst.autoStart'
+  | 'inst.autoUninstall'
+  | 'inst.configTree';
 
-export type AllFields = AppBaseFields | AppProcessCtrlFields | AppCommandFields | AppEndpointFields | InstFields;
+export type AllFields =
+  | AppBaseFields
+  | AppProcessCtrlFields
+  | AppCommandFields
+  | AppEndpointFields
+  | InstFields;
 
 @Component({
   selector: 'app-config-desc-cards',
   templateUrl: './config-desc-cards.component.html',
-  styleUrls: ['./config-desc-cards.component.css'],
 })
-export class ConfigDescCardsComponent implements OnInit {
+export class ConfigDescCardsComponent {
   @Input() field: AllFields;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

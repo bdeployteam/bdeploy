@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
@@ -6,11 +6,7 @@ import { BdDataColumn } from 'src/app/models/data';
   templateUrl: './bd-data-permission-level-cell.component.html',
   styleUrls: ['./bd-data-permission-level-cell.component.css'],
 })
-export class BdDataPermissionLevelCellComponent<T> implements OnInit {
+export class BdDataPermissionLevelCellComponent<T> {
   @Input() record: T;
   @Input() column: BdDataColumn<T>;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

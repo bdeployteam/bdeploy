@@ -11,4 +11,4 @@ export interface EditorPlugin {
 }
 
 export type EditorPluginConstructor = new (api: Api) => EditorPlugin;
-declare var EditorPlugin: EditorPluginConstructor;
+declare const EditorPlugin: EditorPluginConstructor;

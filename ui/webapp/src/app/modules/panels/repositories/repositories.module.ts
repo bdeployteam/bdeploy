@@ -10,7 +10,14 @@ import { SoftwareUploadComponent } from './components/software-upload/software-u
 import { RepositoriesRoutingModule } from './repositories-routing.module';
 
 @NgModule({
-  declarations: [AddRepositoryComponent, SettingsComponent, EditComponent, PermissionsComponent, SoftwareUploadComponent, SoftwareDetailsComponent],
+  declarations: [
+    AddRepositoryComponent,
+    SettingsComponent,
+    EditComponent,
+    PermissionsComponent,
+    SoftwareUploadComponent,
+    SoftwareDetailsComponent,
+  ],
   imports: [CommonModule, CoreModule, RepositoriesRoutingModule],
 })
 export class RepositoriesModule {}

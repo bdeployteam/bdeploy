@@ -1,9 +1,16 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Manage Nodes" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Manage Nodes"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
-      <div>You can choose which of the nodes available on the server will be available for configuration in this instance.</div>
+      <div>
+        You can choose which of the nodes available on the server will be
+        available for configuration in this instance.
+      </div>
       <app-bd-data-table
         [records]="records"
         [columns]="columns"

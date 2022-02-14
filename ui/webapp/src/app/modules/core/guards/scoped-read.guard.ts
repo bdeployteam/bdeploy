@@ -7,14 +7,14 @@ import { NavAreasService } from '../services/nav-areas.service';
 // common logic to find a named param in a route tree.
 export function findParam(name: string, route: ActivatedRouteSnapshot): string {
   const param = route.paramMap.get(name);
-  if (!!param) {
+  if (param) {
     return param;
   }
 
   for (const child of route.children) {
-    const param = findParam(name, child);
-    if (!!param) {
-      return param;
+    const tParam = findParam(name, child);
+    if (tParam) {
+      return tParam;
     }
   }
 }
@@ -23,19 +23,35 @@ export function findParam(name: string, route: ActivatedRouteSnapshot): string {
   providedIn: 'root',
 })
 export class ScopedReadGuard implements CanActivate {
-  constructor(private authService: AuthenticationService, private snackbar: MatSnackBar, private router: Router, private areas: NavAreasService) {}
+  constructor(
+    private authService: AuthenticationService,
+    private snackbar: MatSnackBar,
+    private router: Router,
+    private areas: NavAreasService
+  ) {}
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    const group = findParam('group', route) || this.areas._tempNavGroupContext$.value || this.areas.groupContext$.value;
-    const repo = findParam('repo', route) || this.areas._tempNavGroupContext$.value || this.areas.repositoryContext$.value;
-    const ctx = !!group ? group : repo;
+    const group =
+      findParam('group', route) ||
+      this.areas._tempNavGroupContext$.value ||
+      this.areas.groupContext$.value;
+    const repo =
+      findParam('repo', route) ||
+      this.areas._tempNavGroupContext$.value ||
+      this.areas.repositoryContext$.value;
+    const ctx = group ? group : repo;
 
     this.areas._tempNavGroupContext$.next(group);
     this.areas._tempNavRepoContext$.next(group);
 
-    if (this.authService.isAuthenticated() && !this.authService.isScopedRead(ctx)) {
+    if (
+      this.authService.isAuthenticated() &&
+      !this.authService.isScopedRead(ctx)
+    ) {
       this.snackbar.open(
-        `Unfortunately, ${route.url.join('/')} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
+        `Unfortunately, ${route.url.join(
+          '/'
+        )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
         'DISMISS',
         { panelClass: 'error-snackbar' }
       );

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -9,9 +9,8 @@ import { ProcessEditService } from '../../services/process-edit.service';
 @Component({
   selector: 'app-edit-process-overview',
   templateUrl: './edit-process-overview.component.html',
-  styleUrls: ['./edit-process-overview.component.css'],
 })
-export class EditProcessOverviewComponent implements OnInit {
+export class EditProcessOverviewComponent {
   /* template */ clientNodeName = CLIENT_NODE_NAME;
 
   constructor(
@@ -21,8 +20,6 @@ export class EditProcessOverviewComponent implements OnInit {
     private areas: NavAreasService,
     private snackbar: MatSnackBar
   ) {}
-
-  ngOnInit(): void {}
 
   /* template */ doDelete() {
     const process = this.edit.process$.value;
@@ -35,8 +32,14 @@ export class EditProcessOverviewComponent implements OnInit {
     const process = this.edit.process$.value;
 
     navigator.clipboard.writeText(JSON.stringify(process, null, '\t')).then(
-      () => this.snackbar.open('Copied to clipboard successfully', null, { duration: 1000 }),
-      () => this.snackbar.open('Unable to write to clipboard.', null, { duration: 1000 })
+      () =>
+        this.snackbar.open('Copied to clipboard successfully', null, {
+          duration: 1000,
+        }),
+      () =>
+        this.snackbar.open('Unable to write to clipboard.', null, {
+          duration: 1000,
+        })
     );
   }
 }

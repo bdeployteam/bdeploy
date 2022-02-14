@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import ReconnectingWebSocket, { ErrorEvent } from 'reconnecting-websocket';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-import { ObjectChangeDto, ObjectChangeInitDto, ObjectChangeRegistrationDto, ObjectChangeType, ObjectScope, RegistrationAction } from 'src/app/models/gen.dtos';
+import {
+  ObjectChangeDto,
+  ObjectChangeInitDto,
+  ObjectChangeRegistrationDto,
+  ObjectChangeType,
+  ObjectScope,
+  RegistrationAction,
+} from 'src/app/models/gen.dtos';
 import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
 
@@ -31,7 +38,9 @@ export class ObjectChangesService {
 
   private createWebSocket() {
     // See io.bdeploy.jersey.ws.change.ObjectChangeWebSocket
-    const _socket = new ReconnectingWebSocket(this.getWebsocketUrl() + '/object-changes');
+    const _socket = new ReconnectingWebSocket(
+      this.getWebsocketUrl() + '/object-changes'
+    );
     _socket.addEventListener('open', () => {
       const init: ObjectChangeInitDto = {
         token: this.auth.getToken(),
@@ -59,7 +68,7 @@ export class ObjectChangesService {
       this._error$.next(err);
       this.onErrorIncrease();
     });
-    _socket.addEventListener('close', (e) => {
+    _socket.addEventListener('close', () => {
       // "close" is essentially an error, as we NEVER want to close the websocket as long as the application is alive.
       this.onErrorIncrease();
     });
@@ -97,10 +106,15 @@ export class ObjectChangesService {
   }
 
   private key(type: ObjectChangeType, scope: ObjectScope): string {
-    return `${type}|${!!scope.scope?.length ? scope.scope.join(';') : '[]'}`;
+    return `${type}|${scope.scope?.length ? scope.scope.join(';') : '[]'}`;
   }
 
-  subscribe(type: ObjectChangeType, scope: ObjectScope, next: (next: ObjectChangeDto) => void, error?: (err: ErrorEvent) => void): Subscription {
+  subscribe(
+    type: ObjectChangeType,
+    scope: ObjectScope,
+    next: (next: ObjectChangeDto) => void,
+    error?: (err: ErrorEvent) => void
+  ): Subscription {
     // First determine whether we need to subscribe on the server.
     const key = this.key(type, scope);
     const needSub = !this._refs[key]?.refCount;
@@ -111,7 +125,13 @@ export class ObjectChangesService {
       // we're the first, need to subscribe
       this._refs[key] = { refCount: 1, type, scope };
       if (this._open$.value) {
-        this.ws.send(JSON.stringify({ action: RegistrationAction.ADD, type: type, scope: scope } as ObjectChangeRegistrationDto));
+        this.ws.send(
+          JSON.stringify({
+            action: RegistrationAction.ADD,
+            type: type,
+            scope: scope,
+          } as ObjectChangeRegistrationDto)
+        );
       }
     } else {
       // somebody else already using the same key, the server send us changes already.
@@ -132,7 +152,7 @@ export class ObjectChangesService {
       next(change);
     });
 
-    if (!!error) {
+    if (error) {
       underlyingSubscription.add(this._error$.subscribe((err) => error(err)));
     }
 
@@ -145,7 +165,13 @@ export class ObjectChangesService {
       if (needUnsub) {
         // we're the last one with this subscription, unsubscribe from the server.
         delete this._refs[key];
-        this.ws.send(JSON.stringify({ action: RegistrationAction.REMOVE, type: type, scope: scope } as ObjectChangeRegistrationDto));
+        this.ws.send(
+          JSON.stringify({
+            action: RegistrationAction.REMOVE,
+            type: type,
+            scope: scope,
+          } as ObjectChangeRegistrationDto)
+        );
       } else {
         // we're not the last one, so just decrease the ref-count for the server subscription.
         this._refs[key].refCount--;

@@ -5,7 +5,12 @@ import { ScopedAdminGuard } from '../../core/guards/scoped-admin.guard';
 import { ServersBrowserComponent } from './components/servers-browser/servers-browser.component';
 
 const SERVERS_ROUTES: Route[] = [
-  { path: 'browser/:group', component: ServersBrowserComponent, canActivate: [ScopedAdminGuard], canDeactivate: [DirtyDialogGuard] },
+  {
+    path: 'browser/:group',
+    component: ServersBrowserComponent,
+    canActivate: [ScopedAdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
 ];
 
 @NgModule({

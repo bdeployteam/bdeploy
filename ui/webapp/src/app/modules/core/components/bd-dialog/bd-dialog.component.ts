@@ -1,7 +1,23 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { ACTION_NO, ACTION_OK, ACTION_YES, BdDialogMessage, BdDialogMessageComponent } from '../bd-dialog-message/bd-dialog-message.component';
+import {
+  ACTION_NO,
+  ACTION_OK,
+  ACTION_YES,
+  BdDialogMessage,
+  BdDialogMessageComponent,
+} from '../bd-dialog-message/bd-dialog-message.component';
 
 /** Amount of pixels within which we trigger "near" events */
 const SCROLL_PROXIMITY = 100;
@@ -19,7 +35,9 @@ export enum BdDialogScrollEvent {
   styleUrls: ['./bd-dialog.component.css'],
 })
 export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
+  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(
+    false
+  );
   @Input() resetWhen$ = new BehaviorSubject<any>(false);
   @Input() hideContentWhenLoading = true;
   @Input() restoreScrollAfterLoad = false;
@@ -34,10 +52,10 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscription: Subscription;
   private storedPosition: number;
 
-  constructor() {}
-
   ngOnInit(): void {
-    this.showContent$ = this.loadingWhen$.pipe(map((v) => !(v && this.hideContentWhenLoading)));
+    this.showContent$ = this.loadingWhen$.pipe(
+      map((v) => !(v && this.hideContentWhenLoading))
+    );
   }
 
   ngAfterViewInit(): void {
@@ -69,17 +87,34 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (!!this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
 
-  public info(header: string, message: string, icon?: string): Observable<boolean> {
+  public info(
+    header: string,
+    message: string,
+    icon?: string
+  ): Observable<boolean> {
     return this.message({ header, message, icon, actions: [ACTION_OK] });
   }
 
-  public confirm(header: string, message: string, icon?: string, confirmation?: string, hint?: string): Observable<boolean> {
-    return this.message({ header, message, icon, confirmation, confirmationHint: hint, actions: [ACTION_NO, ACTION_YES] });
+  public confirm(
+    header: string,
+    message: string,
+    icon?: string,
+    confirmation?: string,
+    hint?: string
+  ): Observable<boolean> {
+    return this.message({
+      header,
+      message,
+      icon,
+      confirmation,
+      confirmationHint: hint,
+      actions: [ACTION_NO, ACTION_YES],
+    });
   }
 
   public message<T>(msg: BdDialogMessage<T>): Observable<T> {

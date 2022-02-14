@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { ConfigService } from './config.service';
 
 // defined in index.html directly to be as global as possible.
-declare var downloadLocation: { assign: (url: string) => {}; click: (link: HTMLAnchorElement) => {} };
+declare let downloadLocation: {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  assign: (url: string) => {};
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  click: (link: HTMLAnchorElement) => {};
+};
 
 /**
  * Note: ALWAYS use DownloadService to trigger a download for tests to be able to intercept the action.

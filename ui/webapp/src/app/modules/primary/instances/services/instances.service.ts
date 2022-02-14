@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  of,
+  Subscription,
+} from 'rxjs';
 import { debounceTime, finalize, first, map, skipWhile } from 'rxjs/operators';
 import {
   CustomAttributesRecord,
@@ -35,7 +41,9 @@ import { ServersService } from '../../servers/services/servers.service';
 export class InstancesService {
   listLoading$ = new BehaviorSubject<boolean>(true);
   activeLoading$ = new BehaviorSubject<boolean>(false);
-  loading$ = combineLatest([this.listLoading$, this.activeLoading$]).pipe(map(([a, b]) => a || b));
+  loading$ = combineLatest([this.listLoading$, this.activeLoading$]).pipe(
+    map(([a, b]) => a || b)
+  );
 
   instances$ = new BehaviorSubject<InstanceDto[]>([]);
   othersNeedReload$ = new BehaviorSubject<boolean>(false);
@@ -46,7 +54,9 @@ export class InstancesService {
   /** the *active* instance version */
   active$ = new BehaviorSubject<InstanceDto>(null);
   activeNodeCfgs$ = new BehaviorSubject<InstanceNodeConfigurationListDto>(null);
-  activeNodeStates$ = new BehaviorSubject<{ [minionName: string]: MinionStatusDto }>(null);
+  activeNodeStates$ = new BehaviorSubject<{
+    [minionName: string]: MinionStatusDto;
+  }>(null);
   /** the history for the *active* instance. this may not be fully complete history, it is meant for a brief overview of events on the instance. */
   activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
   private activeLoadInterval;
@@ -64,23 +74,32 @@ export class InstancesService {
     private http: HttpClient,
     private changes: ObjectChangesService,
     private areas: NavAreasService,
-    private servers: ServersService,
+    private serversService: ServersService,
     private downloads: DownloadService,
     private products: ProductsService,
     groups: GroupsService
   ) {
-    combineLatest([groups.current$, products.products$]).subscribe(([group, prods]) => this.update$.next(group?.name));
+    combineLatest([groups.current$, products.products$]).subscribe(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ([group, prods]) => this.update$.next(group?.name)
+    );
     areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
 
-    combineLatest([this.current$, this.active$, this.servers.servers$]).subscribe(([cur, act, servers]) => {
-      this.importURL$.next(`${this.apiPath(this.group)}/${cur?.instanceConfiguration?.uuid}/import`);
+    combineLatest([
+      this.current$,
+      this.active$,
+      this.serversService.servers$,
+    ]).subscribe(([cur, act, servers]) => {
+      this.importURL$.next(
+        `${this.apiPath(this.group)}/${cur?.instanceConfiguration?.uuid}/import`
+      );
       clearInterval(this.activeLoadInterval);
       clearInterval(this.activeCheckInterval);
 
       let update: Observable<InstanceDto[]> = of(null);
 
-      if (!!this.othersNeedReload$.value) {
+      if (this.othersNeedReload$.value) {
         this.othersNeedReload$.next(false);
         this.reload(this.group);
         this.instances$.next(null);
@@ -90,14 +109,22 @@ export class InstancesService {
         );
       }
 
-      update.subscribe((_) => {
+      update.subscribe(() => {
         // we'll refresh node states every 60 seconds as long as nothing else causes a reload.
-        this.activeLoadInterval = setInterval(() => this.reloadActiveStates(act), 60000);
-        this.activeCheckInterval = setInterval(() => this.checkActiveReloadState(act), 1000);
+        this.activeLoadInterval = setInterval(
+          () => this.reloadActiveStates(act),
+          60000
+        );
+        this.activeCheckInterval = setInterval(
+          () => this.checkActiveReloadState(act),
+          1000
+        );
 
         // update in case the server has changed (e.g. synchronized update state).
         if (!!servers?.length && !!cur?.managedServer?.hostName) {
-          const s = servers.find((s) => cur.managedServer.hostName === s.hostName);
+          const s = servers.find(
+            (s) => cur.managedServer.hostName === s.hostName
+          );
           if (!!s && !isEqual(cur.managedServer, s)) {
             cur.managedServer = s;
             this.current$.next(cur);
@@ -105,9 +132,11 @@ export class InstancesService {
         }
 
         if (!!servers?.length && !!act?.managedServer?.hostName) {
-          const s = servers.find((s) => act.managedServer.hostName === s.hostName);
-          if (!!s && !isEqual(act.managedServer, s)) {
-            act.managedServer = s;
+          const c = servers.find(
+            (x) => act.managedServer.hostName === x.hostName
+          );
+          if (!!c && !isEqual(act.managedServer, c)) {
+            act.managedServer = c;
             this.active$.next(act);
           }
         }
@@ -117,8 +146,13 @@ export class InstancesService {
     });
   }
 
-  public create(instance: Partial<InstanceConfiguration>, managedServer: string): Observable<any> {
-    return this.http.put(`${this.apiPath(this.group)}`, instance, { params: { managedServer } });
+  public create(
+    instance: Partial<InstanceConfiguration>,
+    managedServer: string
+  ): Observable<any> {
+    return this.http.put(`${this.apiPath(this.group)}`, instance, {
+      params: { managedServer },
+    });
   }
 
   public delete(instance: string): Observable<any> {
@@ -130,11 +164,21 @@ export class InstancesService {
   }
 
   public deleteVersion(version: string) {
-    return this.http.delete(`${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/deleteVersion/${version}`);
+    return this.http.delete(
+      `${this.apiPath(this.group)}/${
+        this.current$.value.instanceConfiguration.uuid
+      }/deleteVersion/${version}`
+    );
   }
 
-  public updateAttributes(instance: string, attributes: CustomAttributesRecord) {
-    return this.http.post(`${this.apiPath(this.group)}/${instance}/attributes`, attributes);
+  public updateAttributes(
+    instance: string,
+    attributes: CustomAttributesRecord
+  ) {
+    return this.http.post(
+      `${this.apiPath(this.group)}/${instance}/attributes`,
+      attributes
+    );
   }
 
   public download(dir: RemoteDirectory, entry: RemoteDirectoryEntry) {
@@ -145,43 +189,83 @@ export class InstancesService {
     }
 
     this.http
-      .post(`${this.apiPath(this.group)}/${origin.instanceConfiguration.uuid}/request/${dir.minion}`, entry, { responseType: 'text' })
+      .post(
+        `${this.apiPath(this.group)}/${
+          origin.instanceConfiguration.uuid
+        }/request/${dir.minion}`,
+        entry,
+        { responseType: 'text' }
+      )
       .subscribe((token) => {
-        this.downloads.download(`${this.apiPath(this.group)}/${origin.instanceConfiguration.uuid}/stream/${token}`);
+        this.downloads.download(
+          `${this.apiPath(this.group)}/${
+            origin.instanceConfiguration.uuid
+          }/stream/${token}`
+        );
       });
   }
 
-  public getContentChunk(dir: RemoteDirectory, entry: RemoteDirectoryEntry, offset: number, length: number): Observable<StringEntryChunkDto> {
+  public getContentChunk(
+    dir: RemoteDirectory,
+    entry: RemoteDirectoryEntry,
+    offset: number,
+    length: number
+  ): Observable<StringEntryChunkDto> {
     const origin = this.current$.value;
 
     if (!origin) {
       return;
     }
 
-    return this.http.post<StringEntryChunkDto>(`${this.apiPath(this.group)}/${origin.instanceConfiguration.uuid}/content/${dir.minion}`, entry, {
-      params: { offset: offset.toString(), length: length.toString() },
-      context: NO_LOADING_BAR_CONTEXT,
-    });
+    return this.http.post<StringEntryChunkDto>(
+      `${this.apiPath(this.group)}/${
+        origin.instanceConfiguration.uuid
+      }/content/${dir.minion}`,
+      entry,
+      {
+        params: { offset: offset.toString(), length: length.toString() },
+        context: NO_LOADING_BAR_CONTEXT,
+      }
+    );
   }
 
-  public loadHistory(filter: Partial<HistoryFilterDto>): Observable<HistoryResultDto> {
+  public loadHistory(
+    filter: Partial<HistoryFilterDto>
+  ): Observable<HistoryResultDto> {
     return this.http
-      .post<HistoryResultDto>(`${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/history`, filter)
+      .post<HistoryResultDto>(
+        `${this.apiPath(this.group)}/${
+          this.current$.value.instanceConfiguration.uuid
+        }/history`,
+        filter
+      )
       .pipe(measure('Current Instance History'));
   }
 
-  public loadNodes(instance: string, tag: string): Observable<InstanceNodeConfigurationListDto> {
-    return this.http.get<InstanceNodeConfigurationListDto>(`${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`);
+  public loadNodes(
+    instance: string,
+    tag: string
+  ): Observable<InstanceNodeConfigurationListDto> {
+    return this.http.get<InstanceNodeConfigurationListDto>(
+      `${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`
+    );
   }
 
   public updateBanner(banner: InstanceBannerRecord): Observable<any> {
     return this.http
-      .post(`${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/banner`, banner)
+      .post(
+        `${this.apiPath(this.group)}/${
+          this.current$.value.instanceConfiguration.uuid
+        }/banner`,
+        banner
+      )
       .pipe(measure('Update Instance Banner'));
   }
 
   public export(tag: string) {
-    const url = `${this.apiPath(this.group)}/${this.current$.value.instanceConfiguration.uuid}/export/${tag}`;
+    const url = `${this.apiPath(this.group)}/${
+      this.current$.value.instanceConfiguration.uuid
+    }/export/${tag}`;
     this.downloads.download(url);
   }
 
@@ -209,41 +293,62 @@ export class InstancesService {
         this.instances$.next(instances);
 
         // last update the current$ subject to inform about changes
-        if (!!this.areas.instanceContext$.value) {
+        if (this.areas.instanceContext$.value) {
           this.loadCurrentAndActive(this.areas.instanceContext$.value);
         }
       });
   }
 
   private updateChangeSubscription(group: string) {
-    if (!!this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
       this.subscription = null;
     }
 
-    if (!!group) {
-      this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [group] }, (change) => {
-        if (!!this.current$.value?.instanceConfiguration?.uuid && !change.scope.scope.includes(this.current$.value.instanceConfiguration.uuid)) {
-          this.othersNeedReload$.next(true); // when switching to another instance, we need to reload all.
-          return;
-        }
+    if (group) {
+      this.subscription = this.changes.subscribe(
+        ObjectChangeType.INSTANCE,
+        { scope: [group] },
+        (change) => {
+          if (
+            !!this.current$.value?.instanceConfiguration?.uuid &&
+            !change.scope.scope.includes(
+              this.current$.value.instanceConfiguration.uuid
+            )
+          ) {
+            this.othersNeedReload$.next(true); // when switching to another instance, we need to reload all.
+            return;
+          }
 
-        this.update$.next(group);
-        if (!!change.details[ObjectChangeDetails.CHANGE_HINT]) {
-          if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.BANNER && !!this.active$.value) {
-            // update banner in active version if it changes on the server.
-            this.http.get<InstanceBannerRecord>(`${this.apiPath(this.group)}/${this.active$.value.instanceConfiguration.uuid}/banner`).subscribe((banner) => {
-              this.active$.value.banner = banner;
-              this.active$.next(this.active$.value);
-            });
+          this.update$.next(group);
+          if (change.details[ObjectChangeDetails.CHANGE_HINT]) {
+            if (
+              change.details[ObjectChangeDetails.CHANGE_HINT] ===
+                ObjectChangeHint.BANNER &&
+              !!this.active$.value
+            ) {
+              // update banner in active version if it changes on the server.
+              this.http
+                .get<InstanceBannerRecord>(
+                  `${this.apiPath(this.group)}/${
+                    this.active$.value.instanceConfiguration.uuid
+                  }/banner`
+                )
+                .subscribe((banner) => {
+                  this.active$.value.banner = banner;
+                  this.active$.next(this.active$.value);
+                });
+            }
           }
         }
-      });
+      );
     }
   }
 
   private loadCurrentAndActive(i: string) {
-    const inst = this.instances$.value?.find((x) => x.instanceConfiguration.uuid === i);
+    const inst = this.instances$.value?.find(
+      (x) => x.instanceConfiguration.uuid === i
+    );
 
     // we can always set the *current* version.
     this.current$.next(inst);
@@ -266,24 +371,34 @@ export class InstancesService {
     // we either take the instance of it *is* the active version, or need to load the active config.
     let activeFetch = of(inst);
     if (inst.activeVersion.tag !== inst.instance.tag) {
-      activeFetch = this.http.get<InstanceConfiguration>(`${this.apiPath(this.group)}/${inst.instanceConfiguration.uuid}/${inst.activeVersion.tag}`).pipe(
-        measure('Active Instance Configuration Load'),
-        map((c) => {
-          // we "just" replace the configuration so we have all the other non-versioned information here as well for the dashboard and others.
-          // TODO: might be cooler if reading a single instance would yield the same data format as listing all current instances.
-          const r = cloneDeep(inst);
-          r.instance = r.activeVersion;
-          r.instanceConfiguration = c;
-          return r;
-        })
-      );
+      activeFetch = this.http
+        .get<InstanceConfiguration>(
+          `${this.apiPath(this.group)}/${inst.instanceConfiguration.uuid}/${
+            inst.activeVersion.tag
+          }`
+        )
+        .pipe(
+          measure('Active Instance Configuration Load'),
+          map((c) => {
+            // we "just" replace the configuration so we have all the other non-versioned information here as well for the dashboard and others.
+            // TODO: might be cooler if reading a single instance would yield the same data format as listing all current instances.
+            const r = cloneDeep(inst);
+            r.instance = r.activeVersion;
+            r.instanceConfiguration = c;
+            return r;
+          })
+        );
     }
 
     // otherwise load nodes first, and *then* set the current instance.
     this.activeLoading$.next(true);
     activeFetch.subscribe((act) => {
       this.http
-        .get<InstanceNodeConfigurationListDto>(`${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/${act.activeVersion.tag}/nodeConfiguration`)
+        .get<InstanceNodeConfigurationListDto>(
+          `${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/${
+            act.activeVersion.tag
+          }/nodeConfiguration`
+        )
         .pipe(
           finalize(() => this.activeLoading$.next(false)),
           measure('Active Nodes Load')
@@ -296,7 +411,7 @@ export class InstancesService {
   }
 
   private checkActiveReloadState(act: InstanceDto): boolean {
-    if (!act || !this.servers.isSynchronized(act.managedServer)) {
+    if (!act || !this.serversService.isSynchronized(act.managedServer)) {
       clearInterval(this.activeLoadInterval);
       clearInterval(this.activeCheckInterval);
       this.activeNodeStates$.next(null);
@@ -314,15 +429,27 @@ export class InstancesService {
     }
 
     this.http
-      .get<{ [minionName: string]: MinionStatusDto }>(`${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/${act.activeVersion.tag}/minionState`)
+      .get<{ [minionName: string]: MinionStatusDto }>(
+        `${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/${
+          act.activeVersion.tag
+        }/minionState`
+      )
       .pipe(measure('Node States'))
       .subscribe((states) => {
         this.activeNodeStates$.next(states);
       });
 
-    const historyFilter: Partial<HistoryFilterDto> = { showCreateEvents: true, showDeploymentEvents: true, showRuntimeEvents: true, maxResults: 150 };
+    const historyFilter: Partial<HistoryFilterDto> = {
+      showCreateEvents: true,
+      showDeploymentEvents: true,
+      showRuntimeEvents: true,
+      maxResults: 150,
+    };
     this.http
-      .post<HistoryResultDto>(`${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/history`, historyFilter)
+      .post<HistoryResultDto>(
+        `${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/history`,
+        historyFilter
+      )
       .pipe(measure('Active Instance History'))
       .subscribe((history) => {
         this.activeHistory$.next(history);

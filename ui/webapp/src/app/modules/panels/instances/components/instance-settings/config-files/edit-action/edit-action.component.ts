@@ -1,11 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FileStatusType } from 'src/app/models/gen.dtos';
-import { ConfigFile, ConfigFilesService } from '../../../../services/config-files.service';
+import {
+  ConfigFile,
+  ConfigFilesService,
+} from '../../../../services/config-files.service';
 
 @Component({
   selector: 'app-edit-action',
   templateUrl: './edit-action.component.html',
-  styleUrls: ['./edit-action.component.css'],
 })
 export class EditActionComponent implements OnInit {
   @Input() record: ConfigFile;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { AuthAdminService } from '../../services/auth-admin.service';
   templateUrl: './users-browser.component.html',
   styleUrls: ['./users-browser.component.css'],
 })
-export class UsersBrowserComponent implements OnInit {
+export class UsersBrowserComponent {
   private colPermLevel: BdDataColumn<UserInfo> = {
     id: 'permLevel',
     name: 'Global Permission',
@@ -48,7 +48,10 @@ export class UsersBrowserComponent implements OnInit {
     component: BdDataDateCellComponent,
   };
 
-  /* template */ loading$ = combineLatest([this.settings.loading$, this.authAdmin.loading$]).pipe(map(([s, a]) => s || a));
+  /* template */ loading$ = combineLatest([
+    this.settings.loading$,
+    this.authAdmin.loading$,
+  ]).pipe(map(([s, a]) => s || a));
   /* template */ columns: BdDataColumn<UserInfo>[] = [
     ...this.userColumns.defaultUsersColumns,
     this.colPermLevel,
@@ -63,20 +66,28 @@ export class UsersBrowserComponent implements OnInit {
   /* template */ sort: Sort = { active: 'name', direction: 'asc' };
 
   /* template */ getRecordRoute = (row: UserInfo) => {
-    return ['', { outlets: { panel: ['panels', 'admin', 'user-detail', row.name] } }];
+    return [
+      '',
+      { outlets: { panel: ['panels', 'admin', 'user-detail', row.name] } },
+    ];
   };
 
   /* template */ addUser: Partial<UserInfo>;
   /* template */ addConfirm: string;
 
-  constructor(public authAdmin: AuthAdminService, private userColumns: UsersColumnsService, public settings: SettingsService) {}
-
-  ngOnInit() {}
+  constructor(
+    public authAdmin: AuthAdminService,
+    private userColumns: UsersColumnsService,
+    public settings: SettingsService
+  ) {}
 
   public getAuthenticatedBy(userInfo: UserInfo): string {
     if (userInfo.externalSystem) {
       if (userInfo.externalSystem === 'LDAP') {
-        const dto: LDAPSettingsDto = this.settings.settings$.value.auth.ldapSettings.find((s) => s.id === userInfo.externalTag);
+        const dto: LDAPSettingsDto =
+          this.settings.settings$.value.auth.ldapSettings.find(
+            (s) => s.id === userInfo.externalTag
+          );
         return dto ? dto.description : userInfo.externalTag + ' (not found)';
       } else {
         return userInfo.externalTag; // should not happen
@@ -87,10 +98,24 @@ export class UsersBrowserComponent implements OnInit {
   }
 
   public getGlobalPermission(userInfo: UserInfo): Permission {
-    let p = userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.ADMIN);
-    p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.WRITE);
-    p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.READ);
-    p = p ? p : userInfo.permissions.find((sc) => sc.scope === null && sc.permission === Permission.CLIENT);
+    let p = userInfo.permissions.find(
+      (sc) => sc.scope === null && sc.permission === Permission.ADMIN
+    );
+    p = p
+      ? p
+      : userInfo.permissions.find(
+          (sc) => sc.scope === null && sc.permission === Permission.WRITE
+        );
+    p = p
+      ? p
+      : userInfo.permissions.find(
+          (sc) => sc.scope === null && sc.permission === Permission.READ
+        );
+    p = p
+      ? p
+      : userInfo.permissions.find(
+          (sc) => sc.scope === null && sc.permission === Permission.CLIENT
+        );
     return p ? p.permission : null;
   }
 }

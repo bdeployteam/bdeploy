@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanDeactivate, Router, RouterStateSnapshot } from '@angular/router';
+import { CanDeactivate, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import { BdDialogMessageAction } from '../components/bd-dialog-message/bd-dialog-message.component';
@@ -60,20 +60,19 @@ export interface DirtyableDialog {
 export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
   constructor(private areas: NavAreasService, private router: Router) {}
 
-  canDeactivate(
-    component: DirtyableDialog,
-    currentRoute: ActivatedRouteSnapshot,
-    currentState: RouterStateSnapshot,
-    nextState?: RouterStateSnapshot
-  ): Observable<boolean> {
-    const ignore = this.router.getCurrentNavigation()?.extras?.state?.ignoreDirtyGuard;
-    if (!!ignore) {
+  canDeactivate(component: DirtyableDialog): Observable<boolean> {
+    const ignore =
+      this.router.getCurrentNavigation()?.extras?.state?.ignoreDirtyGuard;
+    if (ignore) {
       return of(true); // forced navigation.
     }
 
     // If there is an open *and* dirty panel, special handling is required to keep popups
     // in visible areas (maximized panel).
-    if (this.areas.hasDirtyPanel() && this.areas.getDirtyableType(component) !== 'panel') {
+    if (
+      this.areas.hasDirtyPanel() &&
+      this.areas.getDirtyableType(component) !== 'panel'
+    ) {
       // 1. confirm on panel - otherwise reject
       // 2. hide panel
       // 3. confirm on primary - otherwise reject
@@ -97,12 +96,12 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
             // if the primary dialog is not dirtyable, continue.
             if (!this.areas.getDirtyableType(component)) {
               this.areas.forcePanelClose$.next(true);
-              return panelSave.pipe(switchMap((_) => of(true))); // disregard the result, can be any.
+              return panelSave.pipe(switchMap(() => of(true))); // disregard the result, can be any.
             }
 
             // ask confirmation on the actual component (the primary one in this case).
             return panelSave.pipe(
-              switchMap((_) =>
+              switchMap(() =>
                 this.confirm(component).pipe(
                   switchMap((x) => {
                     if (x !== DirtyActionType.CANCEL) {
@@ -114,7 +113,7 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
                       if (x === DirtyActionType.SAVE) {
                         primarySave = component.doSave();
                       }
-                      return primarySave.pipe(switchMap((_) => of(true)));
+                      return primarySave.pipe(switchMap(() => of(true)));
                     } else {
                       // navigation is cancelled. we *instead* close the panel fully, since it is only hidden now.
                       this.areas.closePanel(true);
@@ -130,13 +129,16 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
     }
 
     // panel exists, is dirtyable, is NOT dirty, and main component is not the panel - we want to force the panel to close.
-    if (!!this.areas.getDirtyable('panel') && this.areas.getDirtyableType(component) !== 'panel') {
+    if (
+      !!this.areas.getDirtyable('panel') &&
+      this.areas.getDirtyableType(component) !== 'panel'
+    ) {
       // hide the panel right away to be out of the way for a potential dirty check on the main component.
       this.areas.panelVisible$.next(false);
       this.areas.forcePanelClose$.next(true);
     }
 
-    if (!!this.areas.getDirtyableType(component)) {
+    if (this.areas.getDirtyableType(component)) {
       if (!component.isDirty()) {
         return of(true);
       }
@@ -172,9 +174,12 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
     return component.dialog
       .message({
         header: 'Save Changes?',
-        message: 'The dialog contains unsaved changes. Save the changes before leaving? You may also stay and continue editing.',
+        message:
+          'The dialog contains unsaved changes. Save the changes before leaving? You may also stay and continue editing.',
         icon: 'save',
-        actions: canSave ? [actCancel, actDiscard, actSave] : [actCancel, actDiscard],
+        actions: canSave
+          ? [actCancel, actDiscard, actSave]
+          : [actCancel, actDiscard],
       })
       .pipe(
         tap((result) => {

@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
@@ -11,7 +11,7 @@ import { SettingsService } from '../../services/settings.service';
   templateUrl: './main-nav-top.component.html',
   styleUrls: ['./main-nav-top.component.css'],
 })
-export class MainNavTopComponent implements OnInit {
+export class MainNavTopComponent {
   /* template */ logoSize = 64;
   /* template */ user: UserInfo;
 
@@ -29,6 +29,4 @@ export class MainNavTopComponent implements OnInit {
       this.user = r;
     });
   }
-
-  ngOnInit(): void {}
 }

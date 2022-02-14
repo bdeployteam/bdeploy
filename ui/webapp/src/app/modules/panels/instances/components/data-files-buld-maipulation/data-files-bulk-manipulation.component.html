@@ -1,9 +1,13 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Data Files Bulk Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Data Files Bulk Manipulation"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <div>
-        <strong>{{ dataFilesBulkService.selection.length }}</strong> data files selected.
+        <strong>{{ dataFilesBulkService.selection.length }}</strong> data files
+        selected.
       </div>
       <mat-divider></mat-divider>
       <app-bd-button

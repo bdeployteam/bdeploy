@@ -24,7 +24,7 @@ export class ConfigFilesColumnsService {
   private readonly colFileName: BdDataColumn<ConfigFile> = {
     id: 'name',
     name: 'Name',
-    data: (r) => (!!r.persistent?.path ? r.persistent.path : r.modification.file),
+    data: (r) => (r.persistent?.path ? r.persistent.path : r.modification.file),
   };
 
   private readonly colProductState: BdDataColumn<ConfigFile> = {
@@ -60,7 +60,14 @@ export class ConfigFilesColumnsService {
     width: '65px',
   };
 
-  public defaultColumns: BdDataColumn<ConfigFile>[] = [this.colFileName, this.colStatus, this.colProductState, this.colDelete, this.colRename, this.colEdit];
+  public defaultColumns: BdDataColumn<ConfigFile>[] = [
+    this.colFileName,
+    this.colStatus,
+    this.colProductState,
+    this.colDelete,
+    this.colRename,
+    this.colEdit,
+  ];
 
   constructor(private cfgFiles: ConfigFilesService) {}
 

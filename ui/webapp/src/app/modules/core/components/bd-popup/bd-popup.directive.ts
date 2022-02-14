@@ -1,6 +1,15 @@
 import { ConnectedPosition, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import { Directive, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, TemplateRef, ViewContainerRef } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  TemplateRef,
+  ViewContainerRef,
+} from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { cloneDeep } from 'lodash-es';
 import { PopupService } from '../../services/popup.service';
@@ -15,7 +24,15 @@ import { PopupService } from '../../services/popup.service';
  * Example: 'below-left' will place the popup below the button, _then_ align its right side
  * to the right side of the button, so that the popup will *extend* to the left.
  */
-export type PopupPosition = 'below-left' | 'below-right' | 'above-left' | 'above-right' | 'left-above' | 'left-below' | 'right-above' | 'right-below';
+export type PopupPosition =
+  | 'below-left'
+  | 'below-right'
+  | 'above-left'
+  | 'above-right'
+  | 'left-above'
+  | 'left-below'
+  | 'right-above'
+  | 'right-below';
 
 /**
  * minimum distance to the edge of the viewport in any direction.
@@ -93,7 +110,7 @@ const RIGHT_BELOW: ConnectedPosition = {
 @Directive({
   selector: '[appBdPopup]',
 })
-export class BdPopupDirective implements OnInit {
+export class BdPopupDirective {
   @Input() appBdPopup: TemplateRef<any>;
   @Input() appBdPopupTrigger: 'click' | 'hover' = 'click';
   @Input() appBdPopupDelay = 0;
@@ -107,13 +124,19 @@ export class BdPopupDirective implements OnInit {
   private delayTimer;
   private overlayRef: OverlayRef;
 
-  constructor(private host: ElementRef, private overlay: Overlay, private viewContainerRef: ViewContainerRef, private popupService: PopupService) {}
-
-  ngOnInit(): void {}
+  constructor(
+    private host: ElementRef,
+    private overlay: Overlay,
+    private viewContainerRef: ViewContainerRef,
+    private popupService: PopupService
+  ) {}
 
   @HostListener('mouseenter') onMouseEnter() {
     if (this.appBdPopupTrigger === 'hover' && !!this.appBdPopup) {
-      this.delayTimer = setTimeout(() => this.openOverlay(), this.appBdPopupDelay);
+      this.delayTimer = setTimeout(
+        () => this.openOverlay(),
+        this.appBdPopupDelay
+      );
     }
   }
 
@@ -129,7 +152,7 @@ export class BdPopupDirective implements OnInit {
       return;
     }
 
-    if (!!this.overlayRef) {
+    if (this.overlayRef) {
       this.closeOverlay();
     } else {
       this.openOverlay();
@@ -190,7 +213,9 @@ export class BdPopupDirective implements OnInit {
   }
 
   private fixupPanelClasses(pos: ConnectedPosition[]) {
-    const name = !!this.appBdPopupChevronColor ? this.appBdPopupChevronColor : 'default';
+    const name = this.appBdPopupChevronColor
+      ? this.appBdPopupChevronColor
+      : 'default';
     const result = [];
     pos.forEach((p) => {
       const x = cloneDeep(p);

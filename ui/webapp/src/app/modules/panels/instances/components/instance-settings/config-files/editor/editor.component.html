@@ -1,11 +1,30 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Edit {{ file$ | async }}" [panel]="true" [route]="['..']">
+  <app-bd-dialog-toolbar
+    header="Edit {{ file$ | async }}"
+    [panel]="true"
+    [route]="['..']"
+  >
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button text="Apply" color="primary" icon="done" [collapsed]="false" [disabled]="!(content !== originalContent)" (click)="onSave()"></app-bd-button>
+    <app-bd-button
+      text="Apply"
+      color="primary"
+      icon="done"
+      [collapsed]="false"
+      [disabled]="!(content !== originalContent)"
+      (click)="onSave()"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="!(loading$ | async) && file$ | async as file" [style.height]="'100%'" fxLayout="column">
-      <app-bd-editor fxFlex="1 0 0" [(content)]="content" [path]="file"></app-bd-editor>
+    <div
+      *ngIf="!(loading$ | async) && file$ | async as file"
+      [style.height]="'100%'"
+      fxLayout="column"
+    >
+      <app-bd-editor
+        fxFlex="1 0 0"
+        [(content)]="content"
+        [path]="file"
+      ></app-bd-editor>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

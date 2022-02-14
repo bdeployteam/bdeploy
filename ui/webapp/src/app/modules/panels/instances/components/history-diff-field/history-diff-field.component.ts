@@ -20,8 +20,6 @@ export class HistoryDiffFieldComponent implements OnInit {
   /* template */ bgClass: string;
   /* template */ value: string;
 
-  constructor() {}
-
   ngOnInit(): void {
     this.borderClass = this.getBorderClass();
     this.bgClass = this.getBgClass();
@@ -52,6 +50,8 @@ export class HistoryDiffFieldComponent implements OnInit {
       return '-';
     }
 
-    return this.maskValue ? '*'.repeat(this.diff.value.length) : this.diff.value;
+    return this.maskValue
+      ? '*'.repeat(this.diff.value.length)
+      : this.diff.value;
   }
 }

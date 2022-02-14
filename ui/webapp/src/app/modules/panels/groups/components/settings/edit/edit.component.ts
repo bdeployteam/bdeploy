@@ -1,5 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { cloneDeep } from 'lodash-es';
@@ -17,9 +23,10 @@ import { GroupDetailsService } from '../../../services/group-details.service';
 @Component({
   selector: 'app-edit',
   templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.css'],
 })
-export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
+export class EditComponent
+  implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit
+{
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ group: InstanceGroupConfiguration;
   /* template */ origGroup: InstanceGroupConfiguration;
@@ -54,12 +61,14 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
         this.group = cloneDeep(g);
         this.origGroup = cloneDeep(g);
 
-        if (!!g.logo) {
+        if (g.logo) {
           const url = this.groups.getLogoUrlOrDefault(g.name, g.logo, null);
           this.http.get(url, { responseType: 'blob' }).subscribe((data) => {
             const reader = new FileReader();
             reader.onload = () => {
-              this.origImage$.next(this.sanitizer.bypassSecurityTrustUrl(reader.result.toString()));
+              this.origImage$.next(
+                this.sanitizer.bypassSecurityTrustUrl(reader.result.toString())
+              );
             };
             reader.readAsDataURL(data);
           });
@@ -98,14 +107,20 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
   }
 
   /* template */ onUnsupportedFile(file: File) {
-    this.dialog.info('Unsupported File Type', `${file.name} has an unsupported file type.`, 'warning').subscribe();
+    this.dialog
+      .info(
+        'Unsupported File Type',
+        `${file.name} has an unsupported file type.`,
+        'warning'
+      )
+      .subscribe();
   }
 
   /* template */ onSave() {
     this.saving$.next(true);
     this.doSave()
       .pipe(finalize(() => this.saving$.next(false)))
-      .subscribe((_) => this.reset());
+      .subscribe(() => this.reset());
   }
 
   public doSave(): Observable<any> {
@@ -113,7 +128,13 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
     if (this.imageChanged) {
       return this.details
         .update(this.group)
-        .pipe(concatMap((_) => (this.image ? this.groups.updateImage(this.group.name, this.image) : this.groups.removeImage(this.group.name))));
+        .pipe(
+          concatMap(() =>
+            this.image
+              ? this.groups.updateImage(this.group.name, this.image)
+              : this.groups.removeImage(this.group.name)
+          )
+        );
     }
     return this.details.update(this.group);
   }

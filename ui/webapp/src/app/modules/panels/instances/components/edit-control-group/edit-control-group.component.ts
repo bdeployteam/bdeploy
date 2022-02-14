@@ -1,7 +1,20 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { combineLatest, debounceTime, Observable, of, Subscription, tap } from 'rxjs';
+import {
+  combineLatest,
+  debounceTime,
+  Observable,
+  of,
+  Subscription,
+  tap,
+} from 'rxjs';
 import {
   InstanceNodeConfiguration,
   ProcessControlGroupConfiguration,
@@ -22,15 +35,23 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './edit-control-group.component.html',
   styleUrls: ['./edit-control-group.component.css'],
 })
-export class EditControlGroupComponent implements OnInit, DirtyableDialog {
+export class EditControlGroupComponent
+  implements OnInit, DirtyableDialog, OnDestroy, AfterViewInit
+{
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
   private subscription: Subscription;
 
-  /* template */ handlingTypeValues = [ProcessControlGroupHandlingType.SEQUENTIAL, ProcessControlGroupHandlingType.PARALLEL];
-  /* template */ waitTypeValues = [ProcessControlGroupWaitType.CONTINUE, ProcessControlGroupWaitType.WAIT];
+  /* template */ handlingTypeValues = [
+    ProcessControlGroupHandlingType.SEQUENTIAL,
+    ProcessControlGroupHandlingType.PARALLEL,
+  ];
+  /* template */ waitTypeValues = [
+    ProcessControlGroupWaitType.CONTINUE,
+    ProcessControlGroupWaitType.WAIT,
+  ];
 
   /* template */ origGroup: ProcessControlGroupConfiguration;
   /* template */ group: ProcessControlGroupConfiguration;
@@ -38,26 +59,37 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog {
   /* template */ nodeName: string;
   /* template */ hasPendingChanges: boolean;
 
-  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, private areas: NavAreasService) {
+  constructor(
+    public cfg: ConfigService,
+    public edit: InstanceEditService,
+    public servers: ServersService,
+    private areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnInit(): void {
     this.subscription.add(
-      combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-        if (!state || !route || !route.params?.node || !route.params?.group) {
-          this.node = null;
-          return;
+      combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(
+        ([state, route]) => {
+          if (!state || !route || !route.params?.node || !route.params?.group) {
+            this.node = null;
+            return;
+          }
+
+          this.nodeName = route.params.node;
+          this.node = state.config.nodeDtos.find(
+            (n) => n.nodeName === route.params.node
+          )?.nodeConfiguration;
+
+          const index = this.node.controlGroups.findIndex(
+            (cg) => cg.name === route.params.group
+          );
+
+          this.origGroup = this.node.controlGroups[index];
+          this.group = cloneDeep(this.origGroup);
         }
-
-        this.nodeName = route.params.node;
-        this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
-
-        const index = this.node.controlGroups.findIndex((cg) => cg.name === route.params.group);
-
-        this.origGroup = this.node.controlGroups[index];
-        this.group = cloneDeep(this.origGroup);
-      })
+      )
     );
   }
 
@@ -65,9 +97,11 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog {
     if (!this.form) {
       return;
     }
-    this.subscription = this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
-      this.hasPendingChanges = this.isDirty();
-    });
+    this.subscription = this.form.valueChanges
+      .pipe(debounceTime(100))
+      .subscribe(() => {
+        this.hasPendingChanges = this.isDirty();
+      });
   }
 
   ngOnDestroy(): void {
@@ -83,14 +117,14 @@ export class EditControlGroupComponent implements OnInit, DirtyableDialog {
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
     Object.assign(this.origGroup, this.group);
 
     return of(true).pipe(
-      tap((x) => {
+      tap(() => {
         this.edit.conceal('Update Control Group ' + this.group.name);
       })
     );

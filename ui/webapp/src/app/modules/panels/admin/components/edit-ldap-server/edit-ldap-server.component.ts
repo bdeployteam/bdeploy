@@ -1,7 +1,21 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, combineLatest, debounceTime, Observable, of, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  Observable,
+  of,
+  Subscription,
+} from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -10,12 +24,14 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'edit-ldap-server',
   templateUrl: './edit-ldap-server.component.html',
-  styleUrls: ['./edit-ldap-server.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog {
+export class EditLdapServerComponent
+  implements OnInit, OnDestroy, AfterViewInit, DirtyableDialog
+{
   /* template */ tempServer: Partial<LDAPSettingsDto>;
   /* template */ origServer: Partial<LDAPSettingsDto>;
   /* template */ initialServer: Partial<LDAPSettingsDto>;
@@ -25,15 +41,28 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
   @ViewChild('form') public form: NgForm;
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
-  constructor(private settings: SettingsService, private areas: NavAreasService) {
+  constructor(
+    private settings: SettingsService,
+    private areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnInit(): void {
     this.subscription.add(
-      combineLatest([this.areas.panelRoute$, this.settings.settings$]).subscribe(([route, settings]) => {
-        this.initialServer = settings.auth.ldapSettings.find((a) => a.id === route.params['id']);
-        if (!settings || !route?.params || !route.params['id'] || !this.initialServer) {
+      combineLatest([
+        this.areas.panelRoute$,
+        this.settings.settings$,
+      ]).subscribe(([route, settings]) => {
+        this.initialServer = settings.auth.ldapSettings.find(
+          (a) => a.id === route.params['id']
+        );
+        if (
+          !settings ||
+          !route?.params ||
+          !route.params['id'] ||
+          !this.initialServer
+        ) {
           this.areas.closePanel();
           return;
         }
@@ -75,7 +104,9 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   public doSave(): Observable<void> {
-    return of(this.settings.editLdapServer(this.tempServer, this.initialServer));
+    return of(
+      this.settings.editLdapServer(this.tempServer, this.initialServer)
+    );
   }
 
   private reset() {

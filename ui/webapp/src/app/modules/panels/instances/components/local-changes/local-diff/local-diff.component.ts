@@ -7,7 +7,6 @@ import { ConfigPair } from '../../../utils/diff-utils';
 @Component({
   selector: 'app-local-diff',
   templateUrl: './local-diff.component.html',
-  styleUrls: ['./local-diff.component.css'],
 })
 export class LocalDiffComponent implements OnInit, OnDestroy {
   /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
@@ -35,11 +34,14 @@ export class LocalDiffComponent implements OnInit, OnDestroy {
       };
       const localCache = {
         config: { ...compare.config.config },
-        nodes: { applications: compareApps, nodeConfigDtos: compare.config.nodeDtos },
+        nodes: {
+          applications: compareApps,
+          nodeConfigDtos: compare.config.nodeDtos,
+        },
         version: 'Local Changes',
       };
 
-      if (!!this.edit.state$.value?.files?.length) {
+      if (this.edit.state$.value?.files?.length) {
         // config files modified.
         localCache.config.configTree = { id: 'MODIFIED' };
       }

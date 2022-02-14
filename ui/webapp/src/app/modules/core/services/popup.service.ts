@@ -7,8 +7,6 @@ import { Injectable } from '@angular/core';
 export class PopupService {
   private overlayRef: OverlayRef;
 
-  constructor() {}
-
   public setOverlay(value: OverlayRef): void {
     this.overlayRef = value;
   }

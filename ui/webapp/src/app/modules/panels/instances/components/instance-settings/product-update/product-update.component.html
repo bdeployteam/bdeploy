@@ -1,9 +1,21 @@
 <app-bd-dialog [loadingWhen$]="products.loading$">
-  <app-bd-dialog-toolbar header="Update Product" [panel]="true" [route]="['..']">
+  <app-bd-dialog-toolbar
+    header="Update Product"
+    [panel]="true"
+    [route]="['..']"
+  >
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button icon="refresh" text="Refresh" (click)="products.reload()"></app-bd-button>
+    <app-bd-button
+      icon="refresh"
+      text="Refresh"
+      (click)="products.reload()"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <app-bd-data-table [sortData]="null" [records]="records$ | async" [columns]="columns"></app-bd-data-table>
+    <app-bd-data-table
+      [sortData]="null"
+      [records]="records$ | async"
+      [columns]="columns"
+    ></app-bd-data-table>
   </app-bd-dialog-content>
 </app-bd-dialog>

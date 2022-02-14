@@ -1,4 +1,14 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -18,10 +28,10 @@ export class BdSearchFieldComponent implements OnInit, OnDestroy {
   private searchChanged = new Subject<string>();
   private subscription: Subscription;
 
-  constructor() {}
-
   ngOnInit(): void {
-    this.subscription = this.searchChanged.pipe(debounceTime(200)).subscribe((v) => this.valueChange.emit(v));
+    this.subscription = this.searchChanged
+      .pipe(debounceTime(200))
+      .subscribe((v) => this.valueChange.emit(v));
   }
 
   ngOnDestroy(): void {

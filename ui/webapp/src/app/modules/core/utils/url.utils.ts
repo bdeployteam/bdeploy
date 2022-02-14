@@ -36,8 +36,8 @@ export class URLish {
   }
 
   public toString() {
-    return `${this.scheme ? this.scheme : ''}${this.hostname}${this.port ? ':' + this.port : ''}${
-      this.pathAndQuery ? this.pathAndQuery : ''
-    }`;
+    return `${this.scheme ? this.scheme : ''}${this.hostname}${
+      this.port ? ':' + this.port : ''
+    }${this.pathAndQuery ? this.pathAndQuery : ''}`;
   }
 }

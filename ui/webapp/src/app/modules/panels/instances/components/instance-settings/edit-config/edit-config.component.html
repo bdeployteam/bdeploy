@@ -1,8 +1,17 @@
 <app-bd-dialog [loadingWhen$]="edit.loading$">
-  <app-bd-dialog-toolbar header="Instance Configuration" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Instance Configuration"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="10px">
+    <form
+      #form="ngForm"
+      (ngSubmit)="onSave()"
+      fxLayout="column"
+      fxLayoutGap="10px"
+    >
       <app-bd-notification-card
         *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
         icon="history"
@@ -11,18 +20,49 @@
         header="Server Not Synchronized"
       >
         <div [style.text-align]="'justify'">
-          The managed server responsible for this instance is not synchronized, details are unavailable. Please synchronize the server to enable editing.
+          The managed server responsible for this instance is not synchronized,
+          details are unavailable. Please synchronize the server to enable
+          editing.
         </div>
       </app-bd-notification-card>
-      <div fxLayout="column" fxLayoutGap="10px" *ngIf="edit.state$ | async as state">
+      <div
+        fxLayout="column"
+        fxLayoutGap="10px"
+        *ngIf="edit.state$ | async as state"
+      >
         <div>
           Edit instance: <strong>{{ state.config.config.uuid }}</strong>
         </div>
-        <app-bd-form-input label="Name" name="name" [(ngModel)]="state.config.config.name" required appTrimmed></app-bd-form-input>
-        <app-bd-form-input label="Description" name="description" [(ngModel)]="state.config.config.description" required></app-bd-form-input>
-        <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="state.config.config.purpose" [values]="purposes" required></app-bd-form-select>
-        <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="state.config.config.autoStart"></app-bd-form-toggle>
-        <app-bd-form-toggle label="Automatic Uninstallation" name="autoUninstall" [(ngModel)]="state.config.config.autoUninstall"></app-bd-form-toggle>
+        <app-bd-form-input
+          label="Name"
+          name="name"
+          [(ngModel)]="state.config.config.name"
+          required
+          appTrimmed
+        ></app-bd-form-input>
+        <app-bd-form-input
+          label="Description"
+          name="description"
+          [(ngModel)]="state.config.config.description"
+          required
+        ></app-bd-form-input>
+        <app-bd-form-select
+          label="Purpose"
+          name="purpose"
+          [(ngModel)]="state.config.config.purpose"
+          [values]="purposes"
+          required
+        ></app-bd-form-select>
+        <app-bd-form-toggle
+          label="Automatic Startup"
+          name="autoStart"
+          [(ngModel)]="state.config.config.autoStart"
+        ></app-bd-form-toggle>
+        <app-bd-form-toggle
+          label="Automatic Uninstallation"
+          name="autoUninstall"
+          [(ngModel)]="state.config.config.autoUninstall"
+        ></app-bd-form-toggle>
 
         <app-bd-button
           type="submit"

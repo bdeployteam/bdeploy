@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+} from 'src/app/models/data';
 import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { GroupsService } from './groups.service';
 
@@ -11,7 +15,7 @@ export class GroupsColumnsService {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
-    data: (r) => 'Instance Group',
+    data: () => 'Instance Group',
     display: BdDataColumnDisplay.CARD,
   };
 
@@ -53,7 +57,8 @@ export class GroupsColumnsService {
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
     display: BdDataColumnDisplay.CARD,
-    data: (r) => this.groups.getLogoUrlOrDefault(r.name, r.logo, '/assets/no-image.svg'),
+    data: (r) =>
+      this.groups.getLogoUrlOrDefault(r.name, r.logo, '/assets/no-image.svg'),
   };
 
   defaultGroupColumns: BdDataColumn<InstanceGroupConfiguration>[] = [

@@ -1,18 +1,34 @@
 <div fxLayout="column">
   <mat-form-field appearance="fill" class="local-form-field">
     <mat-label>{{ label }}</mat-label>
-    <mat-select [(ngModel)]="value" [id]="name" [name]="name" [required]="required" [disabled]="disabled" [errorStateMatcher]="this">
+    <mat-select
+      [(ngModel)]="value"
+      [id]="name"
+      [name]="name"
+      [required]="required"
+      [disabled]="disabled"
+      [errorStateMatcher]="this"
+    >
       <ng-container *ngIf="!component">
-        <mat-option *ngIf="!values || !values.length || allowNone">--</mat-option>
-        <mat-option *ngFor="let value of values; let i = index" [value]="value">{{ !!labels && !!labels[i] ? labels[i] : values[i] }}</mat-option>
+        <mat-option *ngIf="!values || !values.length || allowNone"
+          >--</mat-option
+        >
+        <mat-option *ngFor="let value of values; let i = index" [value]="value"
+          >{{ !!labels && !!labels[i] ? labels[i] : values[i] }}</mat-option
+        >
       </ng-container>
 
       <ng-container *ngIf="component">
         <mat-option *ngFor="let value of values; let i = index" [value]="value">
-          <app-bd-form-select-component-option [componentType]="component" [option]="value"></app-bd-form-select-component-option>
+          <app-bd-form-select-component-option
+            [componentType]="component"
+            [option]="value"
+          ></app-bd-form-select-component-option>
         </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error *ngIf="ngControl && ngControl.invalid">{{ getErrorMessage() }}</mat-error>
+    <mat-error *ngIf="ngControl && ngControl.invalid"
+      >{{ getErrorMessage() }}</mat-error
+    >
   </mat-form-field>
 </div>

@@ -3,7 +3,10 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
-import { BdDataTableComponent, DragReorderEvent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
+import {
+  BdDataTableComponent,
+  DragReorderEvent,
+} from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { LdapCheckActionComponent } from './ldap-check-action/ldap-check-action.component';
@@ -12,7 +15,6 @@ import { LdapEditActionComponent } from './ldap-edit-action/ldap-edit-action.com
 @Component({
   selector: 'app-ldap-tab',
   templateUrl: './ldap-tab.component.html',
-  styleUrls: ['./ldap-tab.component.css'],
 })
 export class LdapTabComponent implements OnInit, OnDestroy {
   private colServer: BdDataColumn<LDAPSettingsDto> = {
@@ -41,7 +43,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     name: 'Edit',
     data: (r) => `Edit server ${r.server}`,
     component: LdapEditActionComponent,
-    icon: (r) => 'edit',
+    icon: () => 'edit',
     width: '40px',
   };
 
@@ -50,21 +52,31 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     name: 'Rem.',
     data: (r) => `Remove server ${r.server}`,
     action: (r) => this.settings.removeLdapServer(r),
-    icon: (r) => 'delete',
+    icon: () => 'delete',
     width: '40px',
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  /* template */ columns: BdDataColumn<LDAPSettingsDto>[] = [this.colServer, this.colDescription, this.colCheck, this.colEdit, this.colDelete];
+  /* template */ columns: BdDataColumn<LDAPSettingsDto>[] = [
+    this.colServer,
+    this.colDescription,
+    this.colCheck,
+    this.colEdit,
+    this.colDelete,
+  ];
   /* template */ tempServer: Partial<LDAPSettingsDto>;
   /* template */ checkResult$ = new Subject<string>();
   private selectedServerId: string;
 
   private subscription: Subscription;
 
-  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<LDAPSettingsDto>;
+  @ViewChild(BdDataTableComponent)
+  private table: BdDataTableComponent<LDAPSettingsDto>;
 
-  constructor(public settings: SettingsService, private areas: NavAreasService) {}
+  constructor(
+    public settings: SettingsService,
+    private areas: NavAreasService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
@@ -74,7 +86,9 @@ export class LdapTabComponent implements OnInit, OnDestroy {
       }
       this.selectedServerId = route.params['id'];
     });
-    this.subscription.add(this.settings.settingsUpdated$.subscribe((_) => this.table.update()));
+    this.subscription.add(
+      this.settings.settingsUpdated$.subscribe(() => this.table.update())
+    );
   }
 
   /* template */ onReorder(order: DragReorderEvent<LDAPSettingsDto>) {
@@ -82,7 +96,11 @@ export class LdapTabComponent implements OnInit, OnDestroy {
       return;
     }
 
-    moveItemInArray(this.settings.settings$.value.auth.ldapSettings, order.previousIndex, order.currentIndex);
+    moveItemInArray(
+      this.settings.settings$.value.auth.ldapSettings,
+      order.previousIndex,
+      order.currentIndex
+    );
     this.settings.serversReordered();
   }
 

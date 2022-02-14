@@ -1,7 +1,22 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
-import { BdDataGrouping, BdDataGroupingDefinition, bdExtractGroups, bdSortGroups, UNMATCHED_GROUP } from 'src/app/models/data';
+import {
+  BdDataGrouping,
+  BdDataGroupingDefinition,
+  bdExtractGroups,
+  bdSortGroups,
+  UNMATCHED_GROUP,
+} from 'src/app/models/data';
 
 /**
  * A single grouping panel, providing a drop dow to choose the definition,
@@ -12,7 +27,9 @@ import { BdDataGrouping, BdDataGroupingDefinition, bdExtractGroups, bdSortGroups
   templateUrl: './bd-data-grouping-panel.component.html',
   styleUrls: ['./bd-data-grouping-panel.component.css'],
 })
-export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDestroy {
+export class BdDataGroupingPanelComponent<T>
+  implements OnInit, OnChanges, OnDestroy
+{
   /** The available grouping definitions */
   @Input() definitions: BdDataGroupingDefinition<T>[];
   /** The records currently available for grouping */
@@ -34,7 +51,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
   constructor(private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.subscription = this.popupEmitter.subscribe((_) => {
+    this.subscription = this.popupEmitter.subscribe(() => {
       // whenever the parent popup is shown, we need to update our values as the table contents may have changed.
       this.updateGroupingValues();
     });
@@ -51,13 +68,20 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
   updateGroupingValues() {
     // calculate possible values for the grouping.
     if (!!this.grouping?.definition && this.records?.length) {
-      this.groupingValues = bdExtractGroups(this.grouping.definition, this.records).sort(
-        !!this.grouping.definition.sort ? this.grouping.definition.sort : bdSortGroups
+      this.groupingValues = bdExtractGroups(
+        this.grouping.definition,
+        this.records
+      ).sort(
+        this.grouping.definition.sort
+          ? this.grouping.definition.sort
+          : bdSortGroups
       );
 
       // remove any "stale" grouping from the current setting (i.e. row value no longer present)
-      if (!!this.grouping.selected?.length) {
-        this.grouping.selected = this.grouping.selected.filter((val) => this.groupingValues.includes(val));
+      if (this.grouping.selected?.length) {
+        this.grouping.selected = this.grouping.selected.filter((val) =>
+          this.groupingValues.includes(val)
+        );
 
         if (this.grouping.selected.length === this.groupingValues.length) {
           this.grouping.selected = [];
@@ -89,7 +113,9 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
         this.grouping.selected = this.groupingValues;
       }
 
-      this.grouping.selected = this.grouping.selected.filter((g) => g !== group);
+      this.grouping.selected = this.grouping.selected.filter(
+        (g) => g !== group
+      );
 
       if (!this.grouping.selected.length) {
         // after de-selection, grouping is empty -> all checkboxes will be selected, need to re-select

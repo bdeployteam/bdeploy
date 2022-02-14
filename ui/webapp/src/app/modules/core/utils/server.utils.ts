@@ -10,7 +10,10 @@ export function suppressGlobalErrorHandling(p: HttpHeaders): HttpHeaders {
 /**
  * Retries to execute the source observable in case that an error happens
  */
-export function retryWithDelay<T>(times = 60, delayInMs = 1000): OperatorFunction<T, T> {
+export function retryWithDelay<T>(
+  times = 60,
+  delayInMs = 1000
+): OperatorFunction<T, T> {
   return retryWhen((errors) =>
     errors.pipe(
       scan((count, err) => {

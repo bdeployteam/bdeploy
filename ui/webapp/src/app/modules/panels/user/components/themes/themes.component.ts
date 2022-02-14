@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ThemeService } from 'src/app/modules/core/services/theme.service';
 
 @Component({
@@ -6,8 +6,6 @@ import { ThemeService } from 'src/app/modules/core/services/theme.service';
   templateUrl: './themes.component.html',
   styleUrls: ['./themes.component.css'],
 })
-export class ThemesComponent implements OnInit {
+export class ThemesComponent {
   constructor(public themeService: ThemeService) {}
-
-  ngOnInit(): void {}
 }

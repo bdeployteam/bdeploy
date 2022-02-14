@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,8 +12,10 @@ import { ThemeService } from '../../services/theme.service';
   templateUrl: './main-nav.component.html',
   styleUrls: ['./main-nav.component.css'],
 })
-export class MainNavComponent implements OnInit {
-  isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map((s) => s !== null));
+export class MainNavComponent {
+  isAuth$: Observable<boolean> = this.authService
+    .getTokenSubject()
+    .pipe(map((s) => s !== null));
 
   constructor(
     private authService: AuthenticationService,
@@ -36,13 +38,11 @@ export class MainNavComponent implements OnInit {
             { panelClass: 'error-snackbar' }
           )
           .afterDismissed()
-          .subscribe((_) => {
+          .subscribe(() => {
             // reset so we start counting and waiting for errors over again.
             this.changes.errorCount$.next(0);
           });
       }
     });
   }
-
-  ngOnInit(): void {}
 }

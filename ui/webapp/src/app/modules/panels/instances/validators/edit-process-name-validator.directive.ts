@@ -1,14 +1,30 @@
 import { Directive, Input } from '@angular/core';
-import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
+import {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
-import { BdValidationMessageExtractor, bdValidationRegisterMessageExtractor } from 'src/app/modules/core/validators/messages';
+import {
+  BdValidationMessageExtractor,
+  bdValidationRegisterMessageExtractor,
+} from 'src/app/modules/core/validators/messages';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 @Directive({
   selector: '[appEditProcessNameValidator]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: EditProcessNameValidatorDirective, multi: true }],
+  providers: [
+    {
+      provide: NG_VALIDATORS,
+      useExisting: EditProcessNameValidatorDirective,
+      multi: true,
+    },
+  ],
 })
-export class EditProcessNameValidatorDirective implements Validator, BdValidationMessageExtractor {
+export class EditProcessNameValidatorDirective
+  implements Validator, BdValidationMessageExtractor
+{
   public readonly id = 'edit-process-name';
 
   @Input() appEditProcessNameValidator: string;
@@ -18,7 +34,7 @@ export class EditProcessNameValidatorDirective implements Validator, BdValidatio
   }
 
   extract(label: string, errors: ValidationErrors): string {
-    if (!!errors[this.id]) {
+    if (errors[this.id]) {
       return errors[this.id];
     }
   }
@@ -30,6 +46,7 @@ export class EditProcessNameValidatorDirective implements Validator, BdValidatio
     }
 
     const errors = {};
+    // eslint-disable-next-line no-unsafe-optional-chaining
     for (const n of this.edit.state$.value?.config.nodeDtos) {
       if (n.nodeName === CLIENT_NODE_NAME) {
         // it is OK for client applications!

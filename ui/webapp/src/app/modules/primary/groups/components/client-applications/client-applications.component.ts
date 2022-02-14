@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+  BdDataGrouping,
+  BdDataGroupingDefinition,
+} from 'src/app/models/data';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -19,7 +25,7 @@ const clientIdColumn: BdDataColumn<ClientApp> = {
   name: 'Client UUID',
   data: (r) => r.client.uuid,
   hint: BdDataColumnTypeHint.DETAILS,
-  icon: (r) => 'computer',
+  icon: () => 'computer',
 };
 
 const clientInstanceColumn: BdDataColumn<ClientApp> = {
@@ -48,11 +54,16 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
 @Component({
   selector: 'app-client-applications',
   templateUrl: './client-applications.component.html',
-  styleUrls: ['./client-applications.component.css'],
 })
 export class ClientApplicationsComponent implements OnInit {
   /* template */ currentOs: OperatingSystem;
-  /* template */ columns: BdDataColumn<ClientApp>[] = [clientNameColumn, clientIdColumn, clientInstanceColumn, clientOsColumn, clientAvatarColumn];
+  /* template */ columns: BdDataColumn<ClientApp>[] = [
+    clientNameColumn,
+    clientIdColumn,
+    clientInstanceColumn,
+    clientOsColumn,
+    clientAvatarColumn,
+  ];
 
   /* template */ grouping: BdDataGroupingDefinition<ClientApp>[] = [
     { name: 'Instance Name', group: (r) => r.instance.name },
@@ -61,13 +72,21 @@ export class ClientApplicationsComponent implements OnInit {
   /* template */ defaultGrouping: BdDataGrouping<ClientApp>[];
 
   /* template */ getRecordRoute = (row: ClientApp) => {
-    return ['', { outlets: { panel: ['panels', 'groups', 'client', row.client.uuid] } }];
+    return [
+      '',
+      { outlets: { panel: ['panels', 'groups', 'client', row.client.uuid] } },
+    ];
   };
 
   /* template */ isCardView: boolean;
-  /* template */ presetKeyValue: string = 'clientApplications';
+  /* template */ presetKeyValue = 'clientApplications';
 
-  constructor(public groups: GroupsService, public clients: ClientsService, dd: DeviceDetectorService, private cardViewService: CardViewService) {
+  constructor(
+    public groups: GroupsService,
+    public clients: ClientsService,
+    dd: DeviceDetectorService,
+    private cardViewService: CardViewService
+  ) {
     this.currentOs = (() => {
       switch (dd.os) {
         case 'Windows':

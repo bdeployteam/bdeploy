@@ -4,8 +4,16 @@
     <ng-content select="app-bd-dialog-toolbar"></ng-content>
 
     <!-- main content -->
-    <div #scrollContainer class="bd-scroll-container mat-typography local-fill-height" [class.bd-default-padding]="padding" (scroll)="onScrollContent($event)">
-      <ng-content *ngIf="showContent$ | async" select="app-bd-dialog-content"></ng-content>
+    <div
+      #scrollContainer
+      class="bd-scroll-container mat-typography local-fill-height"
+      [class.bd-default-padding]="padding"
+      (scroll)="onScrollContent($event)"
+    >
+      <ng-content
+        *ngIf="showContent$ | async"
+        select="app-bd-dialog-content"
+      ></ng-content>
     </div>
   </div>
 

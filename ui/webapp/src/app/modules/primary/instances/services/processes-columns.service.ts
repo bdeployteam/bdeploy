@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+} from 'src/app/models/data';
 import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
@@ -35,10 +39,10 @@ export class ProcessesColumnsService {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
-    data: (r) => (!!r.uid ? r.uid : 'New Process'),
+    data: (r) => (r.uid ? r.uid : 'New Process'),
     width: '120px',
     showWhen: '(min-width:1000px)',
-    classes: (r) => (!!r.uid ? [] : ['bd-description-text']),
+    classes: (r) => (r.uid ? [] : ['bd-description-text']),
   };
 
   processAvatarColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -57,14 +61,15 @@ export class ProcessesColumnsService {
     classes: (r) => this.getStateClass(r),
   };
 
-  processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
-    id: 'name',
-    name: 'Name and OS',
-    hint: BdDataColumnTypeHint.TITLE,
-    data: (r) => r.name,
-    classes: (r) => this.getStateClass(r),
-    component: ProcessNameAndOsComponent,
-  };
+  processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> =
+    {
+      id: 'name',
+      name: 'Name and OS',
+      hint: BdDataColumnTypeHint.TITLE,
+      data: (r) => r.name,
+      classes: (r) => this.getStateClass(r),
+      component: ProcessNameAndOsComponent,
+    };
 
   processOsColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'os',
@@ -85,15 +90,19 @@ export class ProcessesColumnsService {
   processActualityColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'actuality',
     name: 'Actuality',
-    description: 'Whether the process is running from the currently active instance version',
+    description:
+      'Whether the process is running from the currently active instance version',
     hint: BdDataColumnTypeHint.DETAILS,
     component: ProcessOutdatedComponent,
     data: (r) => {
-      const procTag = ProcessesService.get(this.processes.processStates$.value, r.uid)?.instanceTag;
+      const procTag = ProcessesService.get(
+        this.processes.processStates$.value,
+        r.uid
+      )?.instanceTag;
       const instTag = this.instances.active$.value?.instance?.tag;
       return procTag === instTag ? null : procTag;
     }, // for sorting and display on the card.
-    icon: (r) => 'thermostat',
+    icon: () => 'thermostat',
     width: '70px',
   };
 
@@ -102,7 +111,9 @@ export class ProcessesColumnsService {
     name: 'Status',
     hint: BdDataColumnTypeHint.STATUS,
     component: ProcessStatusIconComponent,
-    data: (r) => ProcessesService.get(this.processes.processStates$.value, r.uid)?.processState,
+    data: (r) =>
+      ProcessesService.get(this.processes.processStates$.value, r.uid)
+        ?.processState,
     width: '40px',
   };
 
@@ -139,18 +150,27 @@ export class ProcessesColumnsService {
     this.applicationNameColumn,
   ];
 
-  defaultProcessesConfigClientColumns: BdDataColumn<ApplicationConfiguration>[] = [
-    this.processNameAndOsAndEditStatusColumn,
-    this.processIdColumn,
-    this.processAvatarColumn,
-    this.applicationNameColumn,
-  ];
+  defaultProcessesConfigClientColumns: BdDataColumn<ApplicationConfiguration>[] =
+    [
+      this.processNameAndOsAndEditStatusColumn,
+      this.processIdColumn,
+      this.processAvatarColumn,
+      this.applicationNameColumn,
+    ];
 
-  constructor(private processes: ProcessesService, private instances: InstancesService, private ports: PortsService, private edit: InstanceEditService) {}
+  constructor(
+    private processes: ProcessesService,
+    private instances: InstancesService,
+    private ports: PortsService,
+    private edit: InstanceEditService
+  ) {}
 
   private getAllPortsRating(r: ApplicationConfiguration) {
     const currentStates = this.ports.activePortStates$.value;
-    const processState = ProcessesService.get(this.processes.processStates$.value, r.uid);
+    const processState = ProcessesService.get(
+      this.processes.processStates$.value,
+      r.uid
+    );
     if (!currentStates || !processState) {
       return undefined;
     }

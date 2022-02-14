@@ -1,8 +1,18 @@
-<mat-card *ngIf="!!descriptor" [style.padding.px]="10" [style.max-width.px]="550" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
-  <div>
-    Parameter <strong>{{ descriptor.name }}</strong>
-  </div>
-  <div gdColumns="100px auto" gdGap="5px" gdAlignColumns="start start" [style.padding.px]="10">
+<mat-card
+  *ngIf="!!descriptor"
+  [style.padding.px]="10"
+  [style.max-width.px]="550"
+  class="mat-typography"
+  fxLayout="column"
+  fxLayoutGap="5px"
+>
+  <div>Parameter <strong>{{ descriptor.name }}</strong></div>
+  <div
+    gdColumns="100px auto"
+    gdGap="5px"
+    gdAlignColumns="start start"
+    [style.padding.px]="10"
+  >
     <strong><div>Name:</div></strong>
     <div>{{ descriptor?.name }}</div>
     <strong><div>Description:</div></strong>
@@ -21,18 +31,31 @@
     </div>
     <strong><div>Default Value:</div></strong>
     <div class="local-break">
-      <code>{{
-        descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ? '*'.repeat(descriptor?.defaultValue?.length) : descriptor?.defaultValue) : '(none)'
-      }}</code>
+      <code
+        >{{ descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ?
+        '*'.repeat(descriptor?.defaultValue?.length) : descriptor?.defaultValue)
+        : '(none)' }}</code
+      >
     </div>
     <ng-container *ngIf="!!descriptor.condition?.parameter">
       <strong><div>Condition:</div></strong>
       <div class="local-break">
-        Parameter <code>{{ descriptor.condition.parameter }}</code> must <code>{{ descriptor.condition.must }} {{ descriptor.condition.value }}</code>
+        Parameter <code>{{ descriptor.condition.parameter }}</code> must
+        <code
+          >{{ descriptor.condition.must }} {{ descriptor.condition.value
+          }}</code
+        >
       </div>
     </ng-container>
   </div>
 </mat-card>
-<mat-card *ngIf="!descriptor" [style.padding.px]="10" [style.max-width.px]="450" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
+<mat-card
+  *ngIf="!descriptor"
+  [style.padding.px]="10"
+  [style.max-width.px]="450"
+  class="mat-typography"
+  fxLayout="column"
+  fxLayoutGap="5px"
+>
   No further information about this parameter available.
 </mat-card>

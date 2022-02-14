@@ -1,9 +1,29 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, QueryList, TemplateRef, ViewChildren } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  QueryList,
+  TemplateRef,
+  ViewChildren,
+} from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { filter, finalize, mergeMap } from 'rxjs/operators';
-import { CustomEditor, ParameterConfiguration, ParameterDescriptor, PluginInfoDto } from 'src/app/models/gen.dtos';
-import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  CustomEditor,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  PluginInfoDto,
+} from 'src/app/models/gen.dtos';
+import {
+  ACTION_CANCEL,
+  ACTION_OK,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { EditorPlugin } from 'src/app/modules/core/plugins/plugin.editor';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
@@ -22,7 +42,8 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() readonly: boolean;
 
   @Output() valueConfirmed: EventEmitter<any> = new EventEmitter<any>();
-  @Output() pluginLoaded: EventEmitter<CustomEditor> = new EventEmitter<CustomEditor>();
+  @Output() pluginLoaded: EventEmitter<CustomEditor> =
+    new EventEmitter<CustomEditor>();
 
   @ViewChildren('editorPanel') editorPanels: QueryList<ElementRef<any>>;
 
@@ -35,14 +56,25 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private editor: EditorPlugin;
 
-  constructor(private plugins: PluginService, private groups: GroupsService, private edit: ProcessEditService) {}
+  constructor(
+    private plugins: PluginService,
+    private groups: GroupsService,
+    private edit: ProcessEditService
+  ) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.groups.current$, this.edit.product$])
+    this.subscription = combineLatest([
+      this.groups.current$,
+      this.edit.product$,
+    ])
       .pipe(
         filter(([g, p]) => !!g && !!p),
         mergeMap(([group, product]) => {
-          return this.plugins.getEditorPlugin(group.name, product.key, this.descriptor.customEditor);
+          return this.plugins.getEditorPlugin(
+            group.name,
+            product.key,
+            this.descriptor.customEditor
+          );
         })
       )
       .subscribe((r) => {
@@ -82,7 +114,9 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     this.plugins.load(this.plugin, this.findEditor().modulePath).then((m) => {
-      this.editor = new m.default(this.plugins.getApi(this.plugin)) as EditorPlugin;
+      this.editor = new m.default(
+        this.plugins.getApi(this.plugin)
+      ) as EditorPlugin;
       this.currentValue = this.value.value;
 
       this.dialog
@@ -102,6 +136,8 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private findEditor(): CustomEditor {
-    return this.plugin.editors.find((e) => e.typeName === this.descriptor.customEditor);
+    return this.plugin.editors.find(
+      (e) => e.typeName === this.descriptor.customEditor
+    );
   }
 }

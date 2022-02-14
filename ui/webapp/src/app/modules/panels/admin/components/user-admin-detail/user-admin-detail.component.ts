@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -30,19 +30,23 @@ const COL_PERMISSION: BdDataColumn<ScopedPermission> = {
   templateUrl: './user-admin-detail.component.html',
   styleUrls: ['./user-admin-detail.component.css'],
 })
-export class UserAdminDetailComponent implements OnInit, OnDestroy {
+export class UserAdminDetailComponent implements OnDestroy {
   private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
     id: 'delete',
     name: 'Delete',
-    data: (r) => `Delete Permission`,
+    data: () => `Delete Permission`,
     action: (r) => this.onRemovePermission(r),
-    icon: (r) => 'delete',
+    icon: () => 'delete',
     width: '40px',
   };
 
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
   /* template */ user$ = new BehaviorSubject<UserInfo>(null);
-  /* template */ permColumns: BdDataColumn<ScopedPermission>[] = [COL_SCOPE, COL_PERMISSION, this.colDeletePerm];
+  /* template */ permColumns: BdDataColumn<ScopedPermission>[] = [
+    COL_SCOPE,
+    COL_PERMISSION,
+    this.colDeletePerm,
+  ];
   /* template */ isCurrentUser: boolean;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -56,7 +60,10 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
     groups: GroupsService,
     private router: Router
   ) {
-    this.subscription = combineLatest([areas.panelRoute$, authAdmin.users$]).subscribe(([route, users]) => {
+    this.subscription = combineLatest([
+      areas.panelRoute$,
+      authAdmin.users$,
+    ]).subscribe(([route, users]) => {
       if (!users || !route?.params || !route.params['user']) {
         this.user$.next(null);
         return;
@@ -67,8 +74,6 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
@@ -78,7 +83,13 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
 
     if (this.isCurrentUser && perm.scope === null) {
       // refuse to remove global permissions from current user
-      this.dialog.info('Cannot remove global permission', 'You cannot remove global permissions from yourself.', 'warning').subscribe();
+      this.dialog
+        .info(
+          'Cannot remove global permission',
+          'You cannot remove global permissions from yourself.',
+          'warning'
+        )
+        .subscribe();
       return;
     }
 
@@ -100,18 +111,23 @@ export class UserAdminDetailComponent implements OnInit, OnDestroy {
   }
 
   /* template */ onDelete(userInfo: UserInfo): void {
-    this.dialog.confirm('Delete User', `Are you sure you want to delete user ${userInfo.name}?`).subscribe((r) => {
-      if (!r) {
-        return;
-      }
+    this.dialog
+      .confirm(
+        'Delete User',
+        `Are you sure you want to delete user ${userInfo.name}?`
+      )
+      .subscribe((r) => {
+        if (!r) {
+          return;
+        }
 
-      this.loading$.next(true);
-      this.authAdmin
-        .deleteUser(userInfo.name)
-        .pipe(finalize(() => this.loading$.next(false)))
-        .subscribe((_) => {
-          this.areas.closePanel();
-        });
-    });
+        this.loading$.next(true);
+        this.authAdmin
+          .deleteUser(userInfo.name)
+          .pipe(finalize(() => this.loading$.next(false)))
+          .subscribe(() => {
+            this.areas.closePanel();
+          });
+      });
   }
 }

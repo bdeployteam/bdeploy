@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceDto } from 'src/app/models/gen.dtos';
@@ -10,18 +10,19 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 @Component({
   selector: 'app-bulk-control',
   templateUrl: './bulk-control.component.html',
-  styleUrls: ['./bulk-control.component.css'],
 })
-export class BulkControlComponent implements OnInit {
+export class BulkControlComponent {
   /* template */ starting$ = new BehaviorSubject<boolean>(false);
   /* template */ stopping$ = new BehaviorSubject<boolean>(false);
   /* template */ restarting$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(public instances: InstancesService, public servers: ServersService, private processes: ProcessesService) {}
-
-  ngOnInit(): void {}
+  constructor(
+    public instances: InstancesService,
+    public servers: ServersService,
+    private processes: ProcessesService
+  ) {}
 
   /* template */ doStart(instance: InstanceDto) {
     this.dialog

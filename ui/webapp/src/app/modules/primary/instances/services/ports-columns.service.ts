@@ -43,8 +43,16 @@ export class PortsColumnsService {
     width: '40px',
   };
 
-  public defaultPortsColumns: BdDataColumn<NodeApplicationPort>[] = [portNameCol, portNumCol, portStateCol, this.portRatingCol];
-  public defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort>[] = [portAppCol, ...this.defaultPortsColumns];
+  public defaultPortsColumns: BdDataColumn<NodeApplicationPort>[] = [
+    portNameCol,
+    portNumCol,
+    portStateCol,
+    this.portRatingCol,
+  ];
+  public defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort>[] = [
+    portAppCol,
+    ...this.defaultPortsColumns,
+  ];
 
   constructor(private processes: ProcessesService) {}
 

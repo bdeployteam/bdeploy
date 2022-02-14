@@ -1,7 +1,10 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
-import { ApplicationConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  InstanceNodeConfigurationDto,
+} from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -19,7 +22,9 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
   @Input() node: InstanceNodeConfigurationDto;
 
   @Input() gridWhen$: BehaviorSubject<boolean>;
-  @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>;
+  @Input() groupingWhen$: BehaviorSubject<
+    BdDataGrouping<ApplicationConfiguration>[]
+  >;
   @Input() collapsedWhen$: BehaviorSubject<boolean>;
   @Input() narrowWhen$: BehaviorSubject<boolean>;
 
@@ -27,11 +32,14 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
   /* template */ columns = this.appCols.defaultProcessClientColumns;
 
   /* template */ getRecordRoute = (row: ApplicationConfiguration) => {
-    return ['', { outlets: { panel: ['panels', 'groups', 'client', row.uid] } }];
+    return [
+      '',
+      { outlets: { panel: ['panels', 'groups', 'client', row.uid] } },
+    ];
   };
 
   /* template */ isCardView: boolean;
-  /* template */ presetKeyValue: string = 'processList';
+  /* template */ presetKeyValue = 'processList';
 
   private subscription: Subscription;
 
@@ -57,12 +65,19 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
       const prodItem: StateItem = {
         name: this.node.nodeConfiguration.product.tag,
         type: updAvail ? 'update' : 'product',
-        tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${updAvail ? ' - Newer version available' : ''}`,
+        tooltip: `Product Version: ${this.node.nodeConfiguration.product.tag}${
+          updAvail ? ' - Newer version available' : ''
+        }`,
         click:
           updAvail && this.auth.isCurrentScopeWrite()
             ? () => {
                 this.areas.navigateBoth(
-                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.uuid],
+                  [
+                    'instances',
+                    'configuration',
+                    this.areas.groupContext$.value,
+                    this.node.nodeConfiguration.uuid,
+                  ],
                   ['panels', 'instances', 'settings', 'product']
                 );
               }

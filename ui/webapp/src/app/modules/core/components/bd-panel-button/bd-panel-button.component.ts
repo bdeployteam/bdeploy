@@ -1,6 +1,17 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
-import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
 import { Subscription } from 'rxjs';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdButtonColorMode } from '../bd-button/bd-button.component';
@@ -8,7 +19,6 @@ import { BdButtonColorMode } from '../bd-button/bd-button.component';
 @Component({
   selector: 'app-bd-panel-button',
   templateUrl: './bd-panel-button.component.html',
-  styleUrls: ['./bd-panel-button.component.css'],
 })
 export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() icon: string;
@@ -37,7 +47,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(): void {
     this.generatedRoute = this.getRoute(this.areas.panelRoute$.value);
   }
 
@@ -64,7 +74,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
     if (!snap) {
       return [];
     }
-    const result = !!snap.parent ? this.getFullPanelUrl(snap.parent) : [];
+    const result = snap.parent ? this.getFullPanelUrl(snap.parent) : [];
     return [...result, ...snap.url.map((u) => u.path)];
   }
 

@@ -1,4 +1,12 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 
@@ -19,7 +27,7 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
 
   @Input() originalContent: string;
   @Input() modifiedContent: string;
-  @Input() path: string = '';
+  @Input() path = '';
   @Output() modifiedContentChange = new EventEmitter<string>();
 
   /* template */ editorOptions = {
@@ -32,9 +40,11 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   constructor(private themeService: ThemeService, private host: ElementRef) {}
 
   ngOnInit(): void {
-    this.subscription = this.themeService.getThemeSubject().subscribe((theme) => {
+    this.subscription = this.themeService.getThemeSubject().subscribe(() => {
       if (this.globalMonaco) {
-        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
+        this.globalMonaco.editor.setTheme(
+          this.themeService.isDarkTheme() ? 'vs-dark' : 'vs'
+        );
       }
     });
   }
@@ -73,12 +83,21 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   initMonaco() {
     this.globalMonaco.editor.getModels().forEach((m) => m.dispose());
     const model = {
-      original: this.globalMonaco.editor.createModel(this.originalContent, undefined),
-      modified: this.globalMonaco.editor.createModel(this.modifiedContent, undefined, this.globalMonaco.Uri.parse(this.path)),
+      original: this.globalMonaco.editor.createModel(
+        this.originalContent,
+        undefined
+      ),
+      modified: this.globalMonaco.editor.createModel(
+        this.modifiedContent,
+        undefined,
+        this.globalMonaco.Uri.parse(this.path)
+      ),
     };
     this.monaco.setModel(model);
-    this.monaco.getModifiedEditor().onDidChangeModelContent((e) => {
-      this.modifiedContentChange.emit(this.monaco.getModifiedEditor().getValue());
+    this.monaco.getModifiedEditor().onDidChangeModelContent(() => {
+      this.modifiedContentChange.emit(
+        this.monaco.getModifiedEditor().getValue()
+      );
     });
   }
 

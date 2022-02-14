@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+} from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 
 @Injectable({
@@ -32,7 +36,7 @@ export class ProductsColumnsService {
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
     display: BdDataColumnDisplay.CARD,
-    data: (r) => '/assets/no-image.svg',
+    data: () => '/assets/no-image.svg',
   };
 
   defaultProductsColumns: BdDataColumn<ProductDto>[] = [
@@ -42,7 +46,8 @@ export class ProductsColumnsService {
     this.productLogoCardColumn,
   ];
 
-  defaultReducedProductsColumns: BdDataColumn<ProductDto>[] = [this.productNameColumn, this.productVersionColumn];
-
-  constructor() {}
+  defaultReducedProductsColumns: BdDataColumn<ProductDto>[] = [
+    this.productNameColumn,
+    this.productVersionColumn,
+  ];
 }

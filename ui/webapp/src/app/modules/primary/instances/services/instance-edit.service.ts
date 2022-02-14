@@ -3,7 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { applyChangeset, Changeset, diff } from 'json-diff-ts';
 import { cloneDeep, isEqual } from 'lodash-es';
-import { BehaviorSubject, combineLatest, forkJoin, Observable, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  forkJoin,
+  Observable,
+  of,
+  Subject,
+} from 'rxjs';
 import { debounceTime, finalize, first, tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
@@ -26,7 +33,10 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { mapObjToArray } from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
-import { DEF_CONTROL_GROUP, getNodeOfApplication } from 'src/app/modules/panels/instances/utils/instance-utils';
+import {
+  DEF_CONTROL_GROUP,
+  getNodeOfApplication,
+} from 'src/app/modules/panels/instances/utils/instance-utils';
 import { GroupsService } from '../../groups/services/groups.service';
 import { ProductsService } from '../../products/services/products.service';
 import { InstancesService } from './instances.service';
@@ -58,13 +68,21 @@ export interface Edit {
  * Note that a 'virtual' edit may be created without looking at base/state. Any edit will be
  * applied after it has been created.
  */
-export type EditFactory = (description: string, base: GlobalEditState, state: GlobalEditState) => Edit;
+export type EditFactory = (
+  description: string,
+  base: GlobalEditState,
+  state: GlobalEditState
+) => Edit;
 
 /** A generic edit, which may represent virtually any change. */
 export class InstanceEdit implements Edit {
   private changeset: Changeset;
 
-  constructor(public description: string, base: GlobalEditState, current: GlobalEditState) {
+  constructor(
+    public description: string,
+    base: GlobalEditState,
+    current: GlobalEditState
+  ) {
     // clone changeset to decouple from changes to the source object.
     this.changeset = cloneDeep(diff(base, current));
   }
@@ -92,25 +110,37 @@ export class InstanceApplicationMoveEdit implements Edit {
   ) {}
 
   public apply(current: GlobalEditState) {
-    const nodeConfig = current.config.nodeDtos.find((n) => n.nodeName === this.nodeName).nodeConfiguration;
+    const nodeConfig = current.config.nodeDtos.find(
+      (n) => n.nodeName === this.nodeName
+    ).nodeConfiguration;
 
     // Step 1 - reorder in process control groups.
     if (this.source === this.target) {
       // can use a simple move in array.
-      const orderList = nodeConfig.controlGroups.find((cg) => cg.name === this.source).processOrder;
+      const orderList = nodeConfig.controlGroups.find(
+        (cg) => cg.name === this.source
+      ).processOrder;
       moveItemInArray(orderList, this.previousIndex, this.currentIndex);
     } else {
       // need to move from one array to another.
-      const sourceList = nodeConfig.controlGroups.find((cg) => cg.name === this.source).processOrder;
-      const targetList = nodeConfig.controlGroups.find((cg) => cg.name === this.target).processOrder;
+      const sourceList = nodeConfig.controlGroups.find(
+        (cg) => cg.name === this.source
+      ).processOrder;
+      const targetList = nodeConfig.controlGroups.find(
+        (cg) => cg.name === this.target
+      ).processOrder;
       const item = sourceList[this.previousIndex];
       sourceList.splice(this.previousIndex, 1);
       targetList.splice(this.currentIndex, 0, item);
     }
 
     // Step 2 - reorder in applications.
-    const allApps = ([] as string[]).concat(...nodeConfig.controlGroups.map((cg) => cg.processOrder));
-    nodeConfig.applications.sort((a, b) => allApps.indexOf(a.uid) - allApps.indexOf(b.uid));
+    const allApps = ([] as string[]).concat(
+      ...nodeConfig.controlGroups.map((cg) => cg.processOrder)
+    );
+    nodeConfig.applications.sort(
+      (a, b) => allApps.indexOf(a.uid) - allApps.indexOf(b.uid)
+    );
   }
 }
 
@@ -159,7 +189,10 @@ export class InstanceEditService {
       const cur = this.current$.value;
       this.current$.next(instance);
 
-      if (instance?.instance?.name !== cur?.instance?.name || instance?.instance?.tag !== cur?.instance?.tag) {
+      if (
+        instance?.instance?.name !== cur?.instance?.name ||
+        instance?.instance?.tag !== cur?.instance?.tag
+      ) {
         if (!!this.undos?.length || !!this.redos?.length) {
           // instance (version?) changes, but we have edits... this means we're basically doomed.
           console.warn('Instance update with pending changes.');
@@ -179,14 +212,16 @@ export class InstanceEditService {
       });
     });
 
-    this.areas.panelRoute$.subscribe((route) => {
+    this.areas.panelRoute$.subscribe(() => {
       if (this.isAllowEdit() && this.hasPendingChanges()) {
         console.warn('Unconcealed changes on route change, discarding.');
         this.discard();
       }
     });
 
-    this.validationDebounce$.pipe(debounceTime(500)).subscribe((x) => this.validate());
+    this.validationDebounce$
+      .pipe(debounceTime(500))
+      .subscribe(() => this.validate());
     this.issues$.subscribe((i) => this.issuesSubject$.next(i));
   }
 
@@ -198,9 +233,22 @@ export class InstanceEditService {
   }
 
   /** Creates a special edit factory which reorders applications on the given node */
-  public createApplicationMove(node: string, previous: number, current: number, source: string, target: string): EditFactory {
-    return (desc: string, base: GlobalEditState, state: GlobalEditState) => {
-      return new InstanceApplicationMoveEdit(desc, node, previous, current, source, target);
+  public createApplicationMove(
+    node: string,
+    previous: number,
+    current: number,
+    source: string,
+    target: string
+  ): EditFactory {
+    return (desc: string) => {
+      return new InstanceApplicationMoveEdit(
+        desc,
+        node,
+        previous,
+        current,
+        source,
+        target
+      );
     };
   }
 
@@ -222,7 +270,7 @@ export class InstanceEditService {
 
     // the current state
     const state = this.reBuild();
-    const fct = !!factory ? factory : this.createStdEdit();
+    const fct = factory ? factory : this.createStdEdit();
 
     // and the diff to it :)
     const change = fct(description, state, this.state$.value);
@@ -240,7 +288,10 @@ export class InstanceEditService {
   }
 
   public dismissUpdateIssue(issue: ApplicationValidationDto) {
-    this.state$.value.warnings?.splice(this.state$.value.warnings?.indexOf(issue), 1);
+    this.state$.value.warnings?.splice(
+      this.state$.value.warnings?.indexOf(issue),
+      1
+    );
     this.conceal('Dismiss update message: ' + issue.message);
   }
 
@@ -262,12 +313,17 @@ export class InstanceEditService {
     this.issues$.next(null);
 
     const inst = this.current$.value;
-    if (!!inst) {
+    if (inst) {
       this.loading$.next(true);
       forkJoin({
-        nodes: this.instances.loadNodes(inst.instanceConfiguration.uuid, inst.instance.tag),
+        nodes: this.instances.loadNodes(
+          inst.instanceConfiguration.uuid,
+          inst.instance.tag
+        ),
         minions: this.http.get<{ [key: string]: MinionDto }>(
-          `${this.apiPath(this.groups.current$.value.name)}/${inst.instanceConfiguration.uuid}/${inst.instance.tag}/minionConfiguration`
+          `${this.apiPath(this.groups.current$.value.name)}/${
+            inst.instanceConfiguration.uuid
+          }/${inst.instance.tag}/minionConfiguration`
         ),
       })
         .pipe(
@@ -283,21 +339,35 @@ export class InstanceEditService {
             this.getLastControlGroup(nc.nodeConfiguration); // implicitly updates if required.
           }
 
-          const base: InstanceConfigurationDto = { config: inst.instanceConfiguration, nodeDtos: nodes.nodeConfigDtos };
+          const base: InstanceConfigurationDto = {
+            config: inst.instanceConfiguration,
+            nodeDtos: nodes.nodeConfigDtos,
+          };
 
           // make sure we have at least the master node if there is *no* node.
           const nodesArray = mapObjToArray(minions);
           if (!base.nodeDtos.length) {
             const masterNode = nodesArray.find((n) => n.value.master);
-            if (!!masterNode) {
-              base.nodeDtos.push(this.createEmptyNode(masterNode.key, base.config));
+            if (masterNode) {
+              base.nodeDtos.push(
+                this.createEmptyNode(masterNode.key, base.config)
+              );
             }
           }
 
           // make sure we have the client application virtual node if there are client applications.
-          const clientNode = base.nodeDtos.find((n) => n.nodeName === CLIENT_NODE_NAME);
-          if (!clientNode && !!nodes.applications.find((a) => a.descriptor.type === ApplicationType.CLIENT)) {
-            base.nodeDtos.push(this.createEmptyNode(CLIENT_NODE_NAME, base.config));
+          const clientNode = base.nodeDtos.find(
+            (n) => n.nodeName === CLIENT_NODE_NAME
+          );
+          if (
+            !clientNode &&
+            !!nodes.applications.find(
+              (a) => a.descriptor.type === ApplicationType.CLIENT
+            )
+          ) {
+            base.nodeDtos.push(
+              this.createEmptyNode(CLIENT_NODE_NAME, base.config)
+            );
           }
 
           this.base$.next({ config: base, files: [], warnings: [] });
@@ -335,7 +405,10 @@ export class InstanceEditService {
    * @returns  whether there is one or more concealed changes.
    */
   private hasSaveableChanges(): boolean {
-    return this.undos.length > 0 && this.hasChanges(this.state$.value, this.base$.value);
+    return (
+      this.undos.length > 0 &&
+      this.hasChanges(this.state$.value, this.base$.value)
+    );
   }
 
   /** Applies all current InstanceEdits and saves the result to the server. */
@@ -351,7 +424,9 @@ export class InstanceEditService {
 
     if (!this.hasChanges(state, this.base$.value)) {
       // we have literally undone all changes, so no need to save, we just reset.
-      console.warn('No changes detected, you have logically undone all changes, not saving');
+      console.warn(
+        'No changes detected, you have logically undone all changes, not saving'
+      );
       this.reset();
       return of(null);
     }
@@ -359,21 +434,31 @@ export class InstanceEditService {
     const managedServer = this.current$.value.managedServer?.hostName;
     const expect = this.current$.value.instance.tag;
 
-    const update: InstanceUpdateDto = { config: state.config, files: state.files, validation: null };
+    const update: InstanceUpdateDto = {
+      config: state.config,
+      files: state.files,
+      validation: null,
+    };
 
     return this.http
-      .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.config.uuid}/update`, update, { params: { managedServer, expect } })
+      .post(
+        `${this.apiPath(this.groups.current$.value.name)}/${
+          state.config.config.uuid
+        }/update`,
+        update,
+        { params: { managedServer, expect } }
+      )
       .pipe(
         finalize(() => this.saving$.next(false)),
         measure('Save Instance'),
-        tap((_) => this.reset()) // success :) lets reset.
+        tap(() => this.reset()) // success :) lets reset.
       );
   }
 
   /** Removes the last edit from the edit stack, effectively undoing it */
   public undo(): void {
     const change = this.undos.pop();
-    if (!!change) {
+    if (change) {
       this.redos.push(change);
       this.redo$.next(change);
     }
@@ -411,11 +496,15 @@ export class InstanceEditService {
       return null;
     }
 
-    return this.stateApplications$.value.find((a) => a.key.name === name)?.descriptor;
+    return this.stateApplications$.value.find((a) => a.key.name === name)
+      ?.descriptor;
   }
 
   /** Creates an empty node, which can be added to an instance configuration */
-  public createEmptyNode(name: string, instance: InstanceConfiguration): InstanceNodeConfigurationDto {
+  public createEmptyNode(
+    name: string,
+    instance: InstanceConfiguration
+  ): InstanceNodeConfigurationDto {
     return {
       nodeName: name,
       nodeConfiguration: {
@@ -448,19 +537,29 @@ export class InstanceEditService {
     const baseAppIndex = baseNodeApps?.findIndex((a) => a.uid === uid);
     const stateAppIndex = stateNodeApps?.findIndex((a) => a.uid === uid);
 
-    const baseAppCg = baseNode?.nodeConfiguration?.controlGroups?.find((cg) => cg.processOrder.includes(uid));
-    const stateAppCg = stateNode?.nodeConfiguration?.controlGroups?.find((cg) => cg.processOrder.includes(uid));
+    const baseAppCg = baseNode?.nodeConfiguration?.controlGroups?.find((cg) =>
+      cg.processOrder.includes(uid)
+    );
+    const stateAppCg = stateNode?.nodeConfiguration?.controlGroups?.find((cg) =>
+      cg.processOrder.includes(uid)
+    );
 
     const baseAppCgIndex = baseAppCg?.processOrder?.findIndex((a) => a === uid);
-    const stateAppCgIndex = stateAppCg?.processOrder?.findIndex((a) => a === uid);
+    const stateAppCgIndex = stateAppCg?.processOrder?.findIndex(
+      (a) => a === uid
+    );
 
     // if undefined, we just switch to "not found" - the node might not even exist.
-    const baseComp = baseAppIndex === undefined || baseAppIndex === null ? -1 : baseAppIndex;
-    const stateComp = stateAppIndex === undefined || stateAppIndex === null ? -1 : stateAppIndex;
+    const baseComp =
+      baseAppIndex === undefined || baseAppIndex === null ? -1 : baseAppIndex;
+    const stateComp =
+      stateAppIndex === undefined || stateAppIndex === null
+        ? -1
+        : stateAppIndex;
 
-    if (!!this.issues$.value?.length) {
+    if (this.issues$.value?.length) {
       const issues = this.issues$.value.filter((i) => i.appUid === uid);
-      if (!!issues?.length) {
+      if (issues?.length) {
         return ProcessEditState.INVALID;
       }
     }
@@ -477,7 +576,10 @@ export class InstanceEditService {
         baseAppCg?.name === stateAppCg?.name &&
         baseAppCgIndex === stateAppCgIndex &&
         baseNode.nodeName === stateNode.nodeName &&
-        !this.hasChanges(baseNodeApps[baseAppIndex], stateNodeApps[stateAppIndex])
+        !this.hasChanges(
+          baseNodeApps[baseAppIndex],
+          stateNodeApps[stateAppIndex]
+        )
       ) {
         return ProcessEditState.NONE;
       } else {
@@ -493,7 +595,11 @@ export class InstanceEditService {
   }
 
   private validate() {
-    if (!this.state$.value?.config || !this.groups.current$.value?.name || !this.current$.value) {
+    if (
+      !this.state$.value?.config ||
+      !this.groups.current$.value?.name ||
+      !this.current$.value
+    ) {
       // re-request validation once loading is done...
       this.requestValidation();
       return;
@@ -507,22 +613,37 @@ export class InstanceEditService {
 
     // don't validate config files in case we have large files.
     this.validating$.next(true);
-    const upd: InstanceUpdateDto = { config: this.state$.value?.config, files: null, validation: null };
+    const upd: InstanceUpdateDto = {
+      config: this.state$.value?.config,
+      files: null,
+      validation: null,
+    };
     this.http
-      .post<ApplicationValidationDto[]>(`${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.uuid}/validate`, upd)
+      .post<ApplicationValidationDto[]>(
+        `${this.apiPath(this.groups.current$.value.name)}/${
+          this.state$.value?.config.config.uuid
+        }/validate`,
+        upd
+      )
       .pipe(
         finalize(() => this.validating$.next(false)),
         measure('Validate Instance Configuration')
       )
-      .subscribe((u) => this.issues$.next(!!u?.length ? u : null));
+      .subscribe((u) => this.issues$.next(u?.length ? u : null));
   }
 
   public updateProduct(target: ProductDto) {
     this.validating$.next(true);
-    const upd: InstanceUpdateDto = { config: this.state$.value?.config, files: this.state$.value?.files, validation: null };
+    const upd: InstanceUpdateDto = {
+      config: this.state$.value?.config,
+      files: this.state$.value?.files,
+      validation: null,
+    };
     forkJoin({
       update: this.http.post<InstanceUpdateDto>(
-        `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.uuid}/updateProductVersion/${target.key.tag}`,
+        `${this.apiPath(this.groups.current$.value.name)}/${
+          this.state$.value?.config.config.uuid
+        }/updateProductVersion/${target.key.tag}`,
         upd
       ),
       apps: this.products.loadApplications(target),
@@ -533,13 +654,19 @@ export class InstanceEditService {
       )
       .subscribe(({ update, apps }) => {
         this.stateApplications$.next(apps);
-        this.state$.next({ config: update.config, files: update.files, warnings: !!update.validation?.length ? [...update.validation] : null });
+        this.state$.next({
+          config: update.config,
+          files: update.files,
+          warnings: update.validation?.length ? [...update.validation] : null,
+        });
 
         this.conceal(`Update Product Version to ${target.key.tag}`);
       });
   }
 
-  public getLastControlGroup(node: InstanceNodeConfiguration): ProcessControlGroupConfiguration {
+  public getLastControlGroup(
+    node: InstanceNodeConfiguration
+  ): ProcessControlGroupConfiguration {
     if (!node.controlGroups?.length) {
       node.controlGroups = [cloneDeep(DEF_CONTROL_GROUP)];
       node.controlGroups[0].processOrder = node.applications.map((a) => a.uid);
@@ -551,7 +678,9 @@ export class InstanceEditService {
     return !this.state$.value?.config?.config?.product?.name
       ? false
       : !!this.products.products$.value.find(
-          (p) => p.key.name === this.state$.value.config.config.product.name && p.key.tag === this.state$.value.config.config.product.tag
+          (p) =>
+            p.key.name === this.state$.value.config.config.product.name &&
+            p.key.tag === this.state$.value.config.config.product.tag
         );
   }
 
@@ -559,7 +688,10 @@ export class InstanceEditService {
     if (!this.state$.value?.config?.nodeDtos?.length) {
       return null;
     }
-    return getNodeOfApplication(this.state$.value?.config?.nodeDtos, uid)?.nodeConfiguration.applications.find((a) => a.uid === uid);
+    return getNodeOfApplication(
+      this.state$.value?.config?.nodeDtos,
+      uid
+    )?.nodeConfiguration.applications.find((a) => a.uid === uid);
   }
 
   /** Creates the current state from the base and all recorded edits. */
@@ -590,7 +722,10 @@ export class InstanceEditService {
     }
 
     // since some code regards null/undefined as equivalent, objects may not have properties which were null previously as they are simply left out.
-    return !isEqual(this.removeNullValues(object), this.removeNullValues(original));
+    return !isEqual(
+      this.removeNullValues(object),
+      this.removeNullValues(original)
+    );
   }
 
   /**
@@ -601,9 +736,18 @@ export class InstanceEditService {
    */
   private removeNullValues(obj: any): any {
     if (typeof obj === 'object') {
-      return Object.entries(obj)
-        .filter(([k, v]) => ![null, undefined].includes(v))
-        .reduce((r, [key, value]) => ({ ...r, [key]: this.removeNullValues(value) }), {});
+      return (
+        Object.entries(obj)
+          //eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .filter(([k, v]) => ![null, undefined].includes(v))
+          .reduce(
+            (r, [key, value]) => ({
+              ...r,
+              [key]: this.removeNullValues(value),
+            }),
+            {}
+          )
+      );
     } else {
       return obj;
     }

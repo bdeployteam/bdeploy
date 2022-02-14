@@ -1,15 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'attribute-edit-action',
   templateUrl: './attribute-edit-action.component.html',
-  styleUrls: ['./attribute-edit-action.component.css'],
 })
-export class AttributeEditActionComponent implements OnInit {
+export class AttributeEditActionComponent {
   @Input() record: CustomAttributeDescriptor;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

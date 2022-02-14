@@ -1,5 +1,9 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar header="Edit Instance Group" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Edit Instance Group"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
@@ -10,11 +14,30 @@
             [image]="origImage$ | async"
             (unsupportedDrop)="onUnsupportedFile($event)"
           ></app-bd-image-upload>
-          <app-bd-form-input label="Title" name="title" [(ngModel)]="group.title" required></app-bd-form-input>
-          <app-bd-form-input label="Description" name="description" [(ngModel)]="group.description"></app-bd-form-input>
-          <app-bd-form-toggle label="Automatic Cleanup" name="autoDelete" [(ngModel)]="group.autoDelete"></app-bd-form-toggle>
+          <app-bd-form-input
+            label="Title"
+            name="title"
+            [(ngModel)]="group.title"
+            required
+          ></app-bd-form-input>
+          <app-bd-form-input
+            label="Description"
+            name="description"
+            [(ngModel)]="group.description"
+          ></app-bd-form-input>
+          <app-bd-form-toggle
+            label="Automatic Cleanup"
+            name="autoDelete"
+            [(ngModel)]="group.autoDelete"
+          ></app-bd-form-toggle>
 
-          <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="form.invalid || !disableSave"></app-bd-button>
+          <app-bd-button
+            color="primary"
+            [collapsed]="false"
+            text="Save"
+            icon="save"
+            [disabled]="form.invalid || !disableSave"
+          ></app-bd-button>
         </div>
       </form>
     </div>

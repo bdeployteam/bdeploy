@@ -1,9 +1,25 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar [panel]="true" header="Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    [panel]="true"
+    header="Node {{ nodeName$ | async }}"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="nodeState$ | async as state" fxLayout="column" fxLayoutGap="10px">
-      <app-bd-notification-card [svgIcon]="state.config.os" [dismissable]="false" header="{{ nodeName$ | async }} - {{ state.config.os }}">
-        <div gdColumns="120px auto" gdRows="repeat(4, 24px)" gdGap="5px" gdAlignColumns="start center">
+    <div
+      *ngIf="nodeState$ | async as state"
+      fxLayout="column"
+      fxLayoutGap="10px"
+    >
+      <app-bd-notification-card
+        [svgIcon]="state.config.os"
+        [dismissable]="false"
+        header="{{ nodeName$ | async }} - {{ state.config.os }}"
+      >
+        <div
+          gdColumns="120px auto"
+          gdRows="repeat(4, 24px)"
+          gdGap="5px"
+          gdAlignColumns="start center"
+        >
           <div>BDeploy Version:</div>
           <div class="bd-text-ellipsis">{{ nodeVersion }}</div>
           <div>Number of CPUs:</div>
@@ -32,9 +48,16 @@
     </div>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(nodeState$ | async)">
-    <app-bd-notification-card icon="history" [type]="'warning'" [dismissable]="false" header="Server Not Synchronized">
+    <app-bd-notification-card
+      icon="history"
+      [type]="'warning'"
+      [dismissable]="false"
+      header="Server Not Synchronized"
+    >
       <div [style.text-align]="'justify'">
-        The managed server responsible for this node is not synchronized, details are unavailable. Please synchronize the server to see additional details.
+        The managed server responsible for this node is not synchronized,
+        details are unavailable. Please synchronize the server to see additional
+        details.
       </div>
     </app-bd-notification-card>
   </app-bd-dialog-content>

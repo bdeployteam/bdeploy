@@ -1,4 +1,16 @@
 <div fxLayout="row" fxLayoutAlign="start">
-  <mat-icon *ngIf="svgIcon$ | async as svg" fontSet="material-icons-filled" [matTooltip]="hint$ | async" [ngClass]="class$ | async" [svgIcon]="svg"></mat-icon>
-  <mat-icon *ngIf="icon$ | async as icon" fontSet="material-icons-filled" [matTooltip]="hint$ | async" [ngClass]="class$ | async">{{ icon }}</mat-icon>
+  <mat-icon
+    *ngIf="svgIcon$ | async as svg"
+    fontSet="material-icons-filled"
+    [matTooltip]="hint$ | async"
+    [ngClass]="class$ | async"
+    [svgIcon]="svg"
+  ></mat-icon>
+  <mat-icon
+    *ngIf="icon$ | async as icon"
+    fontSet="material-icons-filled"
+    [matTooltip]="hint$ | async"
+    [ngClass]="class$ | async"
+    >{{ icon }}</mat-icon
+  >
 </div>

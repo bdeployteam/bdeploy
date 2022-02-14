@@ -1,7 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ApplicationConfiguration, ApplicationDescriptor } from 'src/app/models/gen.dtos';
-import { ApplicationConfigurationDiff, DiffType, HistoryDiffService } from '../../services/history-diff.service';
+import {
+  ApplicationConfiguration,
+  ApplicationDescriptor,
+} from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfigurationDiff,
+  DiffType,
+  HistoryDiffService,
+} from '../../services/history-diff.service';
 
 @Component({
   selector: 'app-history-process-config',
@@ -19,7 +26,9 @@ export class HistoryProcessConfigComponent implements OnInit {
   /** Which side of the diff is this process on. */
   @Input() diffSide: 'left' | 'right' | 'none' = 'none';
 
-  /* template */ diff$ = new BehaviorSubject<ApplicationConfigurationDiff>(null);
+  /* template */ diff$ = new BehaviorSubject<ApplicationConfigurationDiff>(
+    null
+  );
 
   constructor(private diffService: HistoryDiffService) {}
 
@@ -28,7 +37,13 @@ export class HistoryProcessConfigComponent implements OnInit {
   }
 
   public update(): void {
-    this.diff$.next(this.diffService.diffAppConfig(this.baseConfig, this.compareConfig, this.baseDescriptor));
+    this.diff$.next(
+      this.diffService.diffAppConfig(
+        this.baseConfig,
+        this.compareConfig,
+        this.baseDescriptor
+      )
+    );
   }
 
   /* template */ getBorderClass(diffType: DiffType): string | string[] {
@@ -41,9 +56,13 @@ export class HistoryProcessConfigComponent implements OnInit {
     }
 
     if (this.diff$.value?.type === DiffType.NOT_IN_COMPARE) {
-      return this.diffSide === 'right' ? 'local-border-added' : 'local-border-removed';
+      return this.diffSide === 'right'
+        ? 'local-border-added'
+        : 'local-border-removed';
     } else if (this.diff$.value?.type === DiffType.NOT_IN_BASE) {
-      return this.diffSide === 'right' ? 'local-border-removed' : 'local-border-added';
+      return this.diffSide === 'right'
+        ? 'local-border-removed'
+        : 'local-border-added';
     } else if (this.diff$.value?.type === DiffType.CHANGED) {
       return 'local-border-changed';
     }

@@ -13,8 +13,9 @@
       appTrimmed
     ></app-bd-form-input>
     <div>
-      You can choose a predecessor from the list of existing parameters. The custom parameter will be added <em>after</em> the selected parameter, or at the
-      start of the list if none is selected.
+      You can choose a predecessor from the list of existing parameters. The
+      custom parameter will be added <em>after</em> the selected parameter, or
+      at the start of the list if none is selected.
     </div>
     <app-bd-form-select
       label="Predecessor"
@@ -25,26 +26,44 @@
       [(ngModel)]="customTemp.predecessor"
     ></app-bd-form-select>
     <div>
-      You may also provide a value right away, or edit the value later on. The value is put on the final command line <strong>as is</strong>, so make sure to
-      give a propper command line argument.
+      You may also provide a value right away, or edit the value later on. The
+      value is put on the final command line <strong>as is</strong>, so make
+      sure to give a propper command line argument.
     </div>
-    <app-bd-form-input name="value" label="Custom Parameter Value" [(ngModel)]="customTemp.value"></app-bd-form-input>
+    <app-bd-form-input
+      name="value"
+      label="Custom Parameter Value"
+      [(ngModel)]="customTemp.value"
+    ></app-bd-form-input>
   </div>
 </ng-template>
 
-<div class="bd-default-padding" *ngIf="process && app" fxLayout="column" fxLayoutGap="10px">
+<div
+  class="bd-default-padding"
+  *ngIf="process && app"
+  fxLayout="column"
+  fxLayoutGap="10px"
+>
   <!-- Single parameter group -->
   <mat-accordion [multi]="true" class="local-headers-align">
     <ng-container *ngFor="let group of groups$ | async; let i = index">
       <mat-expansion-panel #panel *ngIf="hasGroupSearchMatch(group)">
         <mat-expansion-panel-header>
-          <mat-panel-title>
-            {{ group.name }}
-          </mat-panel-title>
+          <mat-panel-title> {{ group.name }} </mat-panel-title>
           <mat-panel-description *ngIf="!(narrow$ | async)">
-            <span *ngIf="!search">{{ getValueCount(group) }}/{{ group.pairs.length }} parameters configured.</span>
-            <span *ngIf="!!search">Configured or optional parameters match search.</span>
-            <span *ngIf="groupForm.invalid && !panel.expanded" class="bd-warning-text" [style.font-size]="'smaller'">Validation Failed</span>
+            <span *ngIf="!search"
+              >{{ getValueCount(group) }}/{{ group.pairs.length }} parameters
+              configured.</span
+            >
+            <span *ngIf="!!search"
+              >Configured or optional parameters match search.</span
+            >
+            <span
+              *ngIf="groupForm.invalid && !panel.expanded"
+              class="bd-warning-text"
+              [style.font-size]="'smaller'"
+              >Validation Failed</span
+            >
             <div *ngIf="panel.expanded" fxLayout="row" fxLayoutGap="5px">
               <app-bd-button
                 *ngIf="group.isCustom"
@@ -66,10 +85,20 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
         <form #groupForm="ngForm" fxLayout="column">
-          <div fxFlexAlign="center" *ngIf="group.isSelectMode" fxLayout="row" fxLayoutAlign="start center" class="bd-hint-text" [style.padding-top.px]="20">
+          <div
+            fxFlexAlign="center"
+            *ngIf="group.isSelectMode"
+            fxLayout="row"
+            fxLayoutAlign="start center"
+            class="bd-hint-text"
+            [style.padding-top.px]="20"
+          >
             <span class="local-edit-desc">
-              Use the <mat-icon>add</mat-icon> and <mat-icon>delete</mat-icon> buttons in front of each optional parameter to add or remove them. Mandatory
-              parameters cannot be removed. When you are done, press the <mat-icon>check</mat-icon> button to confirm.
+              Use the <mat-icon>add</mat-icon> and
+              <mat-icon>delete</mat-icon> buttons in front of each optional
+              parameter to add or remove them. Mandatory parameters cannot be
+              removed. When you are done, press the
+              <mat-icon>check</mat-icon> button to confirm.
             </span>
           </div>
           <div
@@ -79,7 +108,12 @@
             gdGap="5px 10px"
           >
             <!-- Empty group hint -->
-            <div *ngIf="getValueCount(group) === 0 && !group.isSelectMode" class="bd-hint-text">No parameters are currently configured in this group.</div>
+            <div
+              *ngIf="getValueCount(group) === 0 && !group.isSelectMode"
+              class="bd-hint-text"
+            >
+              No parameters are currently configured in this group.
+            </div>
 
             <!-- Single parameter -->
             <ng-container *ngFor="let p of sortPairs(group.pairs)">
@@ -89,11 +123,18 @@
                 *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)"
               >
                 <ng-template #popup>
-                  <app-param-desc-card [descriptor]="p.descriptor"></app-param-desc-card>
+                  <app-param-desc-card
+                    [descriptor]="p.descriptor"
+                  ></app-param-desc-card>
                 </ng-template>
 
                 <!-- Checkbox for select mode... -->
-                <div class="local-select-wrapper" *ngIf="group.isSelectMode" fxLayout="column" fxLayoutAlign="center center">
+                <div
+                  class="local-select-wrapper"
+                  *ngIf="group.isSelectMode"
+                  fxLayout="column"
+                  fxLayoutAlign="center center"
+                >
                   <mat-icon
                     *ngFor="let canToggle of [canAddRemove(p) | async]"
                     (click)="!canToggle ? null : doAddRemoveParameter(group, p)"
@@ -103,7 +144,8 @@
                     matRipple
                     [style.cursor]="'pointer'"
                     class="local-add-remove"
-                    >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add' }}</mat-icon
+                    >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add'
+                    }}</mat-icon
                   >
                 </div>
 

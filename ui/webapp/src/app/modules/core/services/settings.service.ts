@@ -18,7 +18,11 @@ export class SettingsService {
 
   private origSettings: SettingsConfiguration;
 
-  constructor(private config: ConfigService, private http: HttpClient, private areas: NavAreasService) {
+  constructor(
+    private config: ConfigService,
+    private http: HttpClient,
+    private areas: NavAreasService
+  ) {
     this.load();
 
     areas.adminRoute$.subscribe((r) => {
@@ -49,7 +53,7 @@ export class SettingsService {
   public waitUntilLoaded(): Observable<SettingsConfiguration> {
     return this.loading$.pipe(
       skipWhile((v) => v === true),
-      switchMap((_) => this.settings$),
+      switchMap(() => this.settings$),
       first()
     );
   }
@@ -64,11 +68,16 @@ export class SettingsService {
       return;
     }
     this.loading$.next(true);
-    return this.http.post<SettingsConfiguration>(this.config.config.api + '/master/settings', this.settings$.value).pipe(
-      tap((_) => {
-        this.load();
-      })
-    );
+    return this.http
+      .post<SettingsConfiguration>(
+        this.config.config.api + '/master/settings',
+        this.settings$.value
+      )
+      .pipe(
+        tap(() => {
+          this.load();
+        })
+      );
   }
 
   public addLdapServer(server): Observable<boolean> {
@@ -78,12 +87,19 @@ export class SettingsService {
   }
 
   public editLdapServer(server, initialServer) {
-    this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(initialServer), 1, server);
+    this.settings$.value.auth.ldapSettings.splice(
+      this.settings$.value.auth.ldapSettings.indexOf(initialServer),
+      1,
+      server
+    );
     this.settingsUpdated$.next(true);
   }
 
   public removeLdapServer(server) {
-    this.settings$.value.auth.ldapSettings.splice(this.settings$.value.auth.ldapSettings.indexOf(server), 1);
+    this.settings$.value.auth.ldapSettings.splice(
+      this.settings$.value.auth.ldapSettings.indexOf(server),
+      1
+    );
     this.settingsUpdated$.next(true);
   }
 
@@ -94,12 +110,19 @@ export class SettingsService {
   }
 
   public editGlobalAttribute(attribute, initialAttribute) {
-    this.settings$.value.instanceGroup.attributes.splice(this.settings$.value.instanceGroup.attributes.indexOf(initialAttribute), 1, attribute);
+    this.settings$.value.instanceGroup.attributes.splice(
+      this.settings$.value.instanceGroup.attributes.indexOf(initialAttribute),
+      1,
+      attribute
+    );
     this.settingsUpdated$.next(true);
   }
 
   public removeAttribute(attribute) {
-    this.settings$.value.instanceGroup.attributes.splice(this.settings$.value.instanceGroup.attributes.indexOf(attribute), 1);
+    this.settings$.value.instanceGroup.attributes.splice(
+      this.settings$.value.instanceGroup.attributes.indexOf(attribute),
+      1
+    );
     this.settingsUpdated$.next(true);
   }
 

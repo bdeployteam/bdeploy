@@ -31,7 +31,7 @@ export class CleanupService {
         measure('Calculate Cleanup')
       )
       .subscribe((groups) => {
-        const g = groups.filter((g) => !!g.actions?.length);
+        const g = groups.filter((c) => !!c.actions?.length);
         this.cleanup$.next(g?.length ? g : null);
         this.countdown$.next(600);
 

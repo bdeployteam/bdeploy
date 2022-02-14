@@ -13,12 +13,39 @@ import { PermissionsComponent } from './components/settings/permissions/permissi
 import { SettingsComponent } from './components/settings/settings.component';
 
 const GROUPS_ROUTES: Route[] = [
-  { path: 'add', component: AddGroupComponent, canActivate: [AdminGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'settings', component: SettingsComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'settings/edit', component: EditComponent, canActivate: [ScopedAdminGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'settings/attributes/values', component: AttributeValuesComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'settings/attributes/definitions', component: AttributeDefinitionsComponent, canActivate: [ScopedAdminGuard] },
-  { path: 'settings/permissions', component: PermissionsComponent, canActivate: [ScopedAdminGuard], data: { max: true } },
+  {
+    path: 'add',
+    component: AddGroupComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'settings',
+    component: SettingsComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'settings/edit',
+    component: EditComponent,
+    canActivate: [ScopedAdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'settings/attributes/values',
+    component: AttributeValuesComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'settings/attributes/definitions',
+    component: AttributeDefinitionsComponent,
+    canActivate: [ScopedAdminGuard],
+  },
+  {
+    path: 'settings/permissions',
+    component: PermissionsComponent,
+    canActivate: [ScopedAdminGuard],
+    data: { max: true },
+  },
   { path: 'client/:app', component: ClientDetailComponent },
 ];
 

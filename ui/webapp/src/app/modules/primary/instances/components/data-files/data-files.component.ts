@@ -1,7 +1,11 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
-import { InstanceDto, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import {
+  InstanceDto,
+  RemoteDirectory,
+  RemoteDirectoryEntry,
+} from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -44,35 +48,59 @@ const colModTime: BdDataColumn<FileListEntry> = {
 @Component({
   selector: 'app-data-files',
   templateUrl: './data-files.component.html',
-  styleUrls: ['./data-files.component.css'],
 })
 export class DataFilesComponent implements OnInit, OnDestroy {
   private readonly colDownload: BdDataColumn<FileListEntry> = {
     id: 'download',
     name: 'Downl.',
-    data: (r) => 'Download File',
+    data: () => 'Download File',
     action: (r) => this.doDownload(r),
-    icon: (r) => 'cloud_download',
+    icon: () => 'cloud_download',
     width: '50px',
-    actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
+    actionDisabled: () => !this.authService.isCurrentScopeWrite(),
   };
 
   private readonly colDelete: BdDataColumn<FileListEntry> = {
     id: 'delete',
     name: 'Delete',
-    data: (r) => 'Delete File',
+    data: () => 'Delete File',
     action: (r) => this.doDelete(r),
-    icon: (r) => 'delete',
+    icon: () => 'delete',
     width: '50px',
-    actionDisabled: (r) => !this.authService.isCurrentScopeWrite(),
+    actionDisabled: () => !this.authService.isCurrentScopeWrite(),
   };
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ records$ = new BehaviorSubject<FileListEntry[]>(null);
   /* template */ noactive$ = new BehaviorSubject<boolean>(true);
-  /* template */ columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDownload, this.colDelete];
-  /* template */ grouping: BdDataGrouping<FileListEntry>[] = [{ definition: { group: (r) => r.directory.minion, name: 'Node Name' }, selected: [] }];
+  /* template */ columns: BdDataColumn<FileListEntry>[] = [
+    colPath,
+    colModTime,
+    colSize,
+    this.colDownload,
+    this.colDelete,
+  ];
+  /* template */ grouping: BdDataGrouping<FileListEntry>[] = [
+    {
+      definition: { group: (r) => r.directory.minion, name: 'Node Name' },
+      selected: [],
+    },
+  ];
   /* template */ getRecordRoute = (row: FileListEntry) => {
-    return ['', { outlets: { panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path, 'view'] } }];
+    return [
+      '',
+      {
+        outlets: {
+          panel: [
+            'panels',
+            'instances',
+            'data-files',
+            row.directory.minion,
+            row.entry.path,
+            'view',
+          ],
+        },
+      },
+    ];
   };
 
   /* template */ instance: InstanceDto;
@@ -90,7 +118,11 @@ export class DataFilesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.instances.current$, this.servers.servers$, this.cfg.isCentral$]).subscribe(([inst, srvs, isCentral]) => {
+    this.subscription = combineLatest([
+      this.instances.current$,
+      this.servers.servers$,
+      this.cfg.isCentral$,
+    ]).subscribe(([inst, srvs, isCentral]) => {
       if (isCentral && !srvs?.length) {
         return;
       }
@@ -106,8 +138,10 @@ export class DataFilesComponent implements OnInit, OnDestroy {
 
         const entries: FileListEntry[] = [];
         for (const dir of dd) {
-          if (!!dir.problem) {
-            console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
+          if (dir.problem) {
+            console.warn(
+              `Problem reading files from ${dir.minion}: ${dir.problem}`
+            );
             continue;
           }
           for (const entry of dir.entries) {
@@ -128,7 +162,10 @@ export class DataFilesComponent implements OnInit, OnDestroy {
     this.instance = inst;
     this.noactive$.next(!inst?.activeVersion?.tag);
 
-    if (this.noactive$.value || !this.servers.isSynchronized(inst?.managedServer)) {
+    if (
+      this.noactive$.value ||
+      !this.servers.isSynchronized(inst?.managedServer)
+    ) {
       this.loading$.next(false);
       return;
     }
@@ -146,7 +183,7 @@ export class DataFilesComponent implements OnInit, OnDestroy {
       )
       .subscribe((confirm) => {
         if (confirm) {
-          this.df.deleteFile(r.directory, r.entry).subscribe((_) => {
+          this.df.deleteFile(r.directory, r.entry).subscribe(() => {
             this.load(this.instance);
           });
         }

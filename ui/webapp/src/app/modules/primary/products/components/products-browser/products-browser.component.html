@@ -1,5 +1,7 @@
 <app-bd-dialog [loadingWhen$]="products.loading$">
-  <app-bd-dialog-toolbar header="Products of {{ (groups.current$ | async)?.title }}">
+  <app-bd-dialog-toolbar
+    header="Products of {{ (groups.current$ | async)?.title }}"
+  >
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
       [multiple]="!isCardView"
@@ -23,7 +25,7 @@
       text="Bulk Manipulation"
       [route]="['panels', 'products', 'bulk-manip']"
       tooltip="below"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async) || isCardView"
+      [disabled]="(auth.isCurrentScopeWrite$ | async) === false || isCardView"
     ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
@@ -31,21 +33,21 @@
       icon="sync_alt"
       text="Synchronize Product Versions"
       [route]="['panels', 'products', 'sync']"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
+      [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
       tooltip="below"
     ></app-bd-panel-button>
     <app-bd-panel-button
       icon="drive_file_move"
       text="Import Product..."
       [route]="['panels', 'products', 'transfer']"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
+      [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
       tooltip="below"
     ></app-bd-panel-button>
     <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Product..."
       [route]="['panels', 'products', 'upload']"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
+      [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
       tooltip="below"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
@@ -66,7 +68,12 @@
       <app-bd-no-data>
         <p>No products have been uploaded yet.</p>
         <p>Start by uploading a new one.</p>
-        <app-bd-panel-button icon="cloud_upload" text="Upload Product..." [collapsed]="false" [route]="['panels', 'products', 'upload']"></app-bd-panel-button>
+        <app-bd-panel-button
+          icon="cloud_upload"
+          text="Upload Product..."
+          [collapsed]="false"
+          [route]="['panels', 'products', 'upload']"
+        ></app-bd-panel-button>
       </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>

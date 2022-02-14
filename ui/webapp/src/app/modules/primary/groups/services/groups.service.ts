@@ -15,7 +15,10 @@ import {
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
-import { EMPTY_SCOPE, ObjectChangesService } from '../../../core/services/object-changes.service';
+import {
+  EMPTY_SCOPE,
+  ObjectChangesService,
+} from '../../../core/services/object-changes.service';
 import { SettingsService } from '../../../core/services/settings.service';
 
 @Injectable({
@@ -40,7 +43,9 @@ export class GroupsService {
   attributeDefinitions$ = new BehaviorSubject<CustomAttributeDescriptor[]>([]);
 
   /** All attribute values for all groups */
-  attributeValues$ = new BehaviorSubject<{ [index: string]: CustomAttributesRecord }>({});
+  attributeValues$ = new BehaviorSubject<{
+    [index: string]: CustomAttributesRecord;
+  }>({});
 
   constructor(
     private cfg: ConfigService,
@@ -50,14 +55,21 @@ export class GroupsService {
     private settings: SettingsService
   ) {
     this.areas.groupContext$.subscribe((r) => this.setCurrent(r));
-    this.update$.pipe(debounceTime(100)).subscribe((_) => this.reload());
-    this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, EMPTY_SCOPE, (change) => {
-      if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.SERVERS) {
-        // ignore changes in managed servers, those as handled in ServersService.
-        return;
+    this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
+    this.changes.subscribe(
+      ObjectChangeType.INSTANCE_GROUP,
+      EMPTY_SCOPE,
+      (change) => {
+        if (
+          change.details[ObjectChangeDetails.CHANGE_HINT] ===
+          ObjectChangeHint.SERVERS
+        ) {
+          // ignore changes in managed servers, those as handled in ServersService.
+          return;
+        }
+        this.update$.next(change);
       }
-      this.update$.next(change);
-    });
+    );
   }
 
   public getLogoUrlOrDefault(group: string, id: ObjectId, def: string) {
@@ -75,12 +87,14 @@ export class GroupsService {
   public newUuid(): Observable<string> {
     return new Observable<string>((s) => {
       const sub = this.current$.subscribe((r) => {
-        if (!!r) {
-          this.http.get(`${this.apiPath}/${r.name}/new-uuid`, { responseType: 'text' }).subscribe((uuid) => {
-            s.next(uuid);
-            s.complete();
-            sub.unsubscribe();
-          });
+        if (r) {
+          this.http
+            .get(`${this.apiPath}/${r.name}/new-uuid`, { responseType: 'text' })
+            .subscribe((uuid) => {
+              s.next(uuid);
+              s.complete();
+              sub.unsubscribe();
+            });
         }
       });
     });
@@ -100,7 +114,9 @@ export class GroupsService {
     this.loading$.next(true);
     forkJoin({
       groups: this.http.get<InstanceGroupConfiguration[]>(this.apiPath),
-      attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(`${this.apiPath}/list-attributes`),
+      attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(
+        `${this.apiPath}/list-attributes`
+      ),
     })
       .pipe(
         finalize(() => this.loading$.next(false)),
@@ -113,13 +129,13 @@ export class GroupsService {
         this.attributeValues$.next(result.attributes);
 
         // last update the current$ subject to inform about changes
-        if (!!this.areas.groupContext$.value) {
+        if (this.areas.groupContext$.value) {
           this.setCurrent(this.areas.groupContext$.value);
         }
       });
 
     this.settings.settings$.subscribe((s) => {
-      if (!!s) {
+      if (s) {
         this.attributeDefinitions$.next(s?.instanceGroup?.attributes);
       }
     });

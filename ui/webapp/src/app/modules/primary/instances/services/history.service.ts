@@ -33,7 +33,9 @@ export class HistoryService {
       this.update(filter);
     });
 
-    this.subscription.add(this.instances.current$.subscribe(() => this.reset()));
+    this.subscription.add(
+      this.instances.current$.subscribe(() => this.reset())
+    );
   }
 
   /** Stops reading and publishing history and resets all internal state */
@@ -44,7 +46,7 @@ export class HistoryService {
 
   /** Continues loading history, picking up from the last known point */
   public more() {
-    if (!!this.filter$.value.startTag) {
+    if (this.filter$.value.startTag) {
       this.update(this.filter$.value);
     }
   }
@@ -65,8 +67,8 @@ export class HistoryService {
         // will continue loading next time.
         filter.startTag = result.next;
 
-        if (!!oldStart) {
-          const arr = !!this.history$.value ? [...this.history$.value] : [];
+        if (oldStart) {
+          const arr = this.history$.value ? [...this.history$.value] : [];
           arr.push(...result.events);
           this.history$.next(arr);
         } else {

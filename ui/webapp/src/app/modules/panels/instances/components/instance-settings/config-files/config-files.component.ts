@@ -1,29 +1,41 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataGrouping,
+  BdDataGroupingDefinition,
+} from 'src/app/models/data';
 import { FileStatusType } from 'src/app/models/gen.dtos';
-import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  ACTION_CANCEL,
+  ACTION_OK,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
 import { ConfigFilesColumnsService } from '../../../services/config-files-columns.service';
-import { ConfigFile, ConfigFilesService } from '../../../services/config-files.service';
+import {
+  ConfigFile,
+  ConfigFilesService,
+} from '../../../services/config-files.service';
 
 @Component({
   selector: 'app-config-files',
   templateUrl: './config-files.component.html',
-  styleUrls: ['./config-files.component.css'],
 })
-export class ConfigFilesComponent implements OnInit, OnDestroy {
+export class ConfigFilesComponent implements OnDestroy {
   /* template */ records$ = new BehaviorSubject<ConfigFile[]>(null);
-  /* template */ columns: BdDataColumn<ConfigFile>[] = this.cfgFileColumns.defaultColumns;
+  /* template */ columns: BdDataColumn<ConfigFile>[] =
+    this.cfgFileColumns.defaultColumns;
 
   /* template */ groupingDefinition: BdDataGroupingDefinition<ConfigFile> = {
     name: 'Configuration File Availability',
     group: (r) => this.getGroup(r),
   };
 
-  /* template */ grouping: BdDataGrouping<ConfigFile>[] = [{ definition: this.groupingDefinition, selected: [] }];
+  /* template */ grouping: BdDataGrouping<ConfigFile>[] = [
+    { definition: this.groupingDefinition, selected: [] },
+  ];
 
   /* template */ tempFilePath: string;
   /* template */ tempFileError: string;
@@ -32,17 +44,21 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
   private tempFileIsBin = false;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild('tempFileInput', { static: false }) private tempFileInput: BdFormInputComponent;
+  @ViewChild('tempFileInput', { static: false })
+  private tempFileInput: BdFormInputComponent;
 
   private subscription: Subscription;
 
-  constructor(public cfgFiles: ConfigFilesService, public cfgFileColumns: ConfigFilesColumnsService) {
+  constructor(
+    public cfgFiles: ConfigFilesService,
+    public cfgFileColumns: ConfigFilesColumnsService
+  ) {
     this.subscription = this.cfgFiles.files$.subscribe((f) => {
-      this.records$.next(f?.filter((f) => f.modification?.type !== FileStatusType.DELETE));
+      this.records$.next(
+        f?.filter((x) => x.modification?.type !== FileStatusType.DELETE)
+      );
     });
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -53,7 +69,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
       return 'Current instance configuration files';
     }
 
-    if (!!r?.persistent?.productId) {
+    if (r?.persistent?.productId) {
       return 'Files available from the current product version.';
     }
   }
@@ -67,14 +83,22 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
         header: 'Add Configuration File',
         icon: 'add',
         template: tpl,
-        validation: () => (!this.tempFileInput ? false : !this.tempFileInput.isInvalid() && !this.tempFileContentLoading$.value),
+        validation: () =>
+          !this.tempFileInput
+            ? false
+            : !this.tempFileInput.isInvalid() &&
+              !this.tempFileContentLoading$.value,
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
         if (!r) {
           return;
         }
-        this.cfgFiles.add(this.tempFilePath, this.tempFileContent, this.tempFileIsBin);
+        this.cfgFiles.add(
+          this.tempFilePath,
+          this.tempFileContent,
+          this.tempFileIsBin
+        );
       });
   }
 
@@ -89,7 +113,7 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
     }
 
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = () => {
       const result = reader.result.toString();
 
       // always set the file name/path to the original dropped file name.

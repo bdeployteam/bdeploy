@@ -1,8 +1,12 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import {
+  HistoryEntryDto,
+  HistoryEntryType,
+  InstanceStateRecord,
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -15,9 +19,8 @@ import { histKey, histKeyDecode } from '../../utils/history-key.utils';
 @Component({
   selector: 'app-history-entry',
   templateUrl: './history-entry.component.html',
-  styleUrls: ['./history-entry.component.css'],
 })
-export class HistoryEntryComponent implements OnInit, OnDestroy {
+export class HistoryEntryComponent implements OnDestroy {
   /* template */ entry$ = new BehaviorSubject<HistoryEntryDto>(null);
   /* template */ state$ = new BehaviorSubject<InstanceStateRecord>(null);
 
@@ -41,23 +44,29 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
     public servers: ServersService,
     public auth: AuthenticationService
   ) {
-    this.subscription = combineLatest([this.areas.panelRoute$, this.history.history$, this.states.state$]).subscribe(([route, entries, state]) => {
+    this.subscription = combineLatest([
+      this.areas.panelRoute$,
+      this.history.history$,
+      this.states.state$,
+    ]).subscribe(([route, entries, state]) => {
       // Note: basing the selection on an index in the service has some drawbacks, but we can do that now without needing to change a lot in the backend.
       const key = route?.paramMap?.get('key');
       this.state$.next(state);
       if (!key || !entries) {
         this.entry$.next(null);
       } else {
-        const entry = entries.find((e) => isEqual(histKey(e), histKeyDecode(key)));
+        const entry = entries.find((e) =>
+          isEqual(histKey(e), histKeyDecode(key))
+        );
         this.entry$.next(entry);
         this.isCreate = entry.type === HistoryEntryType.CREATE;
-        this.isInstalled = !!state?.installedTags?.find((s) => s === entry?.instanceTag);
+        this.isInstalled = !!state?.installedTags?.find(
+          (s) => s === entry?.instanceTag
+        );
         this.isActive = state?.activeTag === entry?.instanceTag;
       }
     });
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();

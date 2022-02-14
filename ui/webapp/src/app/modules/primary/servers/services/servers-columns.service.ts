@@ -26,7 +26,7 @@ export class ServersColumnsService {
     id: 'nodeCount',
     name: 'Nodes',
     data: (r) => Object.keys(r.minions.minions).length,
-    icon: (r) => 'dock',
+    icon: () => 'dock',
     hint: BdDataColumnTypeHint.DETAILS,
   };
 
@@ -34,7 +34,7 @@ export class ServersColumnsService {
     id: 'syncTime',
     name: 'Last Sync.',
     data: (r) => r.lastSync,
-    icon: (r) => 'history',
+    icon: () => 'history',
     hint: BdDataColumnTypeHint.DETAILS,
     component: BdDataDateCellComponent,
   };
@@ -56,7 +56,8 @@ export class ServersColumnsService {
     this.serverSyncColumn,
   ];
 
-  public defaultReducedServerColumns: BdDataColumn<ManagedMasterDto>[] = [this.serverNameColumn, this.serverDescColumn];
-
-  constructor() {}
+  public defaultReducedServerColumns: BdDataColumn<ManagedMasterDto>[] = [
+    this.serverNameColumn,
+    this.serverDescColumn,
+  ];
 }

@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
+import {
+  RouteConfigLoadEnd,
+  RouteConfigLoadStart,
+  Router,
+} from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { NavAreasService } from './modules/core/services/nav-areas.service';
@@ -19,7 +23,6 @@ export class AppComponent implements OnInit {
     console.log('----------------------------------------');
 
     // potential official fix for broken history on cancelled navigation, see https://github.com/angular/angular/issues/13586
-    // @ts-ignore: private option not yet exposed for public use
     router.canceledNavigationResolution = 'computed';
   }
 
@@ -35,15 +38,19 @@ export class AppComponent implements OnInit {
     });
 
     this.subscription.add(
-      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadStart)).subscribe((e) => {
-        this.loadCount++;
-      })
+      this.router.events
+        .pipe(filter((e) => e instanceof RouteConfigLoadStart))
+        .subscribe(() => {
+          this.loadCount++;
+        })
     );
 
     this.subscription.add(
-      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadEnd)).subscribe((e) => {
-        this.decreaseLoadCount();
-      })
+      this.router.events
+        .pipe(filter((e) => e instanceof RouteConfigLoadEnd))
+        .subscribe(() => {
+          this.decreaseLoadCount();
+        })
     );
   }
 

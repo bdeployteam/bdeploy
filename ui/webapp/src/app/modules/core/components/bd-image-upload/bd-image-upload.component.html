@@ -1,18 +1,39 @@
 <div class="bd-image-upload-container" fxLayout="column">
-  <div class="bd-image-upload-title-container" fxLayout="row" fxLayoutAlign="start center">
+  <div
+    class="bd-image-upload-title-container"
+    fxLayout="row"
+    fxLayoutAlign="start center"
+  >
     <span class="local-title" fxFlex="1 0 auto">Logo</span>
-    <button aria-label="Browse" mat-icon-button type="button" [disabled]="disabled" (click)="fileInput.click()">
+    <button
+      aria-label="Browse"
+      mat-icon-button
+      type="button"
+      [disabled]="disabled"
+      (click)="fileInput.click()"
+    >
       <mat-icon>folder_open</mat-icon>
     </button>
-    <button aria-label="Delete" mat-icon-button type="button" [disabled]="disabled" (click)="resetImage(); fileInput.value = null">
+    <button
+      aria-label="Delete"
+      mat-icon-button
+      type="button"
+      [disabled]="disabled"
+      (click)="resetImage(); fileInput.value = null"
+    >
       <mat-icon>delete</mat-icon>
     </button>
     <input type="file" hidden (change)="onImageChange($event)" #fileInput />
   </div>
 
   <div class="local-preview-container">
-    <img class="logo" [src]="image" alt="logo" *ngIf="image != null" />
-    <img class="logo-dummy" src="/assets/no-image.svg" alt="logo" *ngIf="image == null" />
-    <p *ngIf="image == null">No logo defined</p>
+    <img class="logo" [src]="image" alt="logo" *ngIf="image" />
+    <img
+      class="logo-dummy"
+      src="/assets/no-image.svg"
+      alt="logo"
+      *ngIf="!image"
+    />
+    <p *ngIf="!image">No logo defined</p>
   </div>
 </div>

@@ -3,7 +3,10 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
+import {
+  ClientApp,
+  ClientsService,
+} from 'src/app/modules/primary/groups/services/clients.service';
 
 @Component({
   selector: 'app-client-detail',
@@ -14,7 +17,9 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   /* template */ app$ = new BehaviorSubject<ClientApp>(null);
 
   /* template */ downloadingInstaller$ = new BehaviorSubject<boolean>(false);
-  /* template */ downloadingClickAndStart$ = new BehaviorSubject<boolean>(false);
+  /* template */ downloadingClickAndStart$ = new BehaviorSubject<boolean>(
+    false
+  );
 
   /* template */ downloadingLauncher$ = new BehaviorSubject<boolean>(false);
   /* template */ downloadingLauncherZip$ = new BehaviorSubject<boolean>(false);
@@ -25,7 +30,11 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   constructor(private areas: NavAreasService, public clients: ClientsService) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.clients.apps$, this.areas.panelRoute$, this.clients.launcher$]).subscribe(([apps, route, launcher]) => {
+    this.subscription = combineLatest([
+      this.clients.apps$,
+      this.areas.panelRoute$,
+      this.clients.launcher$,
+    ]).subscribe(([apps, route, launcher]) => {
       if (!route || !apps || !route.paramMap.has('app')) {
         this.app$.next(null);
         return;
@@ -59,7 +68,11 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   /* template */ downloadClickAndStart(app: ClientApp) {
     this.downloadingClickAndStart$.next(true);
     this.clients
-      .downloadClickAndStart(app.client.uuid, app.client.description, app.instance.uuid)
+      .downloadClickAndStart(
+        app.client.uuid,
+        app.client.description,
+        app.instance.uuid
+      )
       .pipe(finalize(() => this.downloadingClickAndStart$.next(false)))
       .subscribe();
   }

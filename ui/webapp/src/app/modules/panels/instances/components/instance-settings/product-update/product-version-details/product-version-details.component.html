@@ -1,11 +1,19 @@
 <ng-template #detailsPopup>
-  <div fxLayout="row" fxLayoutAlign="end end" class="local-details-popup-position">
-    <mat-card [style.padding.px]="10" class="mat-typography local-details-popup-sizing" fxLayout="column" fxLayoutGap="5px">
+  <div
+    fxLayout="row"
+    fxLayoutAlign="end end"
+    class="local-details-popup-position"
+  >
+    <mat-card
+      [style.padding.px]="10"
+      class="mat-typography local-details-popup-sizing"
+      fxLayout="column"
+      fxLayoutGap="5px"
+    >
       <h2>Product Details</h2>
       <mat-chip-list>
         <mat-chip *ngFor="let label of labels"
-          ><strong>{{ label.a }}</strong
-          >: {{ label.b }}</mat-chip
+          ><strong>{{ label.a }}</strong>: {{ label.b }}</mat-chip
         >
       </mat-chip-list>
     </mat-card>
@@ -13,5 +21,12 @@
 </ng-template>
 
 <div fxLayout="row" fxLayoutAlign="start center">
-  <div [appBdPopup]="detailsPopup" [appBdPopupDelay]="500" appBdPopupTrigger="hover" appBdPopupPosition="below-left">{{ column.data(record) }}</div>
+  <div
+    [appBdPopup]="detailsPopup"
+    [appBdPopupDelay]="500"
+    appBdPopupTrigger="hover"
+    appBdPopupPosition="below-left"
+  >
+    {{ column.data(record) }}
+  </div>
 </div>

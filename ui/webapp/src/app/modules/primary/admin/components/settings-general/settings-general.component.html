@@ -11,11 +11,22 @@
       ></app-bd-panel-button>
     </ng-container>
     <ng-container *ngIf="generalTab.isActive || ldapTab.isActive">
-      <app-bd-panel-button [collapsed]="false" color="primary" text="Test Authentication..." [route]="['panels', 'admin', 'auth-test']"></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        color="primary"
+        text="Test Authentication..."
+        [route]="['panels', 'admin', 'auth-test']"
+      ></app-bd-panel-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="attributeTab.isActive">
-      <app-bd-button icon="add" text="New Attribute..." color="primary" [collapsed]="false" (click)="attributes.addAttribute()"></app-bd-button>
+      <app-bd-button
+        icon="add"
+        text="New Attribute..."
+        color="primary"
+        [collapsed]="false"
+        (click)="attributes.addAttribute()"
+      ></app-bd-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="pluginTab.isActive">
@@ -28,26 +39,55 @@
       ></app-bd-panel-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
-    <app-bd-button text="Discard" [collapsed]="false" [disabled]="!settings.isDirty()" (click)="settings.discard()"></app-bd-button>
-    <app-bd-button text="Save" [collapsed]="false" color="primary" icon="save" [disabled]="!settings.isDirty()" (click)="doSave().subscribe()"></app-bd-button>
+    <app-bd-button
+      text="Discard"
+      [collapsed]="false"
+      [disabled]="!settings.isDirty()"
+      (click)="settings.discard()"
+    ></app-bd-button>
+    <app-bd-button
+      text="Save"
+      [collapsed]="false"
+      color="primary"
+      icon="save"
+      [disabled]="!settings.isDirty()"
+      (click)="doSave().subscribe()"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutAlign="start center">
-      <mat-tab-group class="tab-container" mat-align-tabs="start" dynamicHeight animationDuration="0ms">
+      <mat-tab-group
+        class="tab-container"
+        mat-align-tabs="start"
+        dynamicHeight
+        animationDuration="0ms"
+      >
         <mat-tab #generalTab fxLayout="column">
-          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">settings</mat-icon>General</ng-template>
+          <ng-template mat-tab-label
+            ><mat-icon [style.margin-right.px]="5">settings</mat-icon
+            >General</ng-template
+          >
           <app-general-tab></app-general-tab>
         </mat-tab>
         <mat-tab #ldapTab fxLayout="column">
-          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">security</mat-icon>LDAP Auth.</ng-template>
+          <ng-template mat-tab-label
+            ><mat-icon [style.margin-right.px]="5">security</mat-icon>LDAP
+            Auth.</ng-template
+          >
           <app-ldap-tab #ldap></app-ldap-tab>
         </mat-tab>
         <mat-tab #attributeTab fxLayout="column">
-          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">more</mat-icon>Global Attributes</ng-template>
+          <ng-template mat-tab-label
+            ><mat-icon [style.margin-right.px]="5">more</mat-icon>Global
+            Attributes</ng-template
+          >
           <app-attributes-tab #attributes></app-attributes-tab>
         </mat-tab>
         <mat-tab #pluginTab fxLayout="column">
-          <ng-template mat-tab-label><mat-icon [style.margin-right.px]="5">extension</mat-icon>Plugins</ng-template>
+          <ng-template mat-tab-label
+            ><mat-icon [style.margin-right.px]="5">extension</mat-icon
+            >Plugins</ng-template
+          >
           <ng-template matTabContent>
             <app-plugins-tab></app-plugins-tab>
           </ng-template>

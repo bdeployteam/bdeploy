@@ -2,7 +2,11 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { ApplicationTemplateDescriptor, InstanceTemplateDescriptor, PluginInfoDto } from 'src/app/models/gen.dtos';
+import {
+  ApplicationTemplateDescriptor,
+  InstanceTemplateDescriptor,
+  PluginInfoDto,
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -71,12 +75,24 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
 })
 export class SoftwareDetailsComponent implements OnInit {
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
-  /* template */ appTemplColumns: BdDataColumn<ApplicationTemplateDescriptor>[] = [appTemplateNameColumn];
-  /* template */ instTemplColumns: BdDataColumn<InstanceTemplateDescriptor>[] = [instTemplateNameColumn];
-  /* template */ pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
+  /* template */ labelColumns: BdDataColumn<LabelRecord>[] = [
+    labelKeyColumn,
+    labelValueColumn,
+  ];
+  /* template */ appTemplColumns: BdDataColumn<ApplicationTemplateDescriptor>[] =
+    [appTemplateNameColumn];
+  /* template */ instTemplColumns: BdDataColumn<InstanceTemplateDescriptor>[] =
+    [instTemplateNameColumn];
+  /* template */ pluginColumns: BdDataColumn<PluginInfoDto>[] = [
+    pluginNameColumn,
+    pluginVersionColumn,
+    pluginOIDColumn,
+  ];
 
-  /* template */ loading$ = combineLatest([this.deleting$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
+  /* template */ loading$ = combineLatest([
+    this.deleting$,
+    this.repository.loading$,
+  ]).pipe(map(([a, b]) => a || b));
   /* template */ preparing$ = new BehaviorSubject<boolean>(false);
   /* template */ softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
@@ -94,17 +110,23 @@ export class SoftwareDetailsComponent implements OnInit {
   }
 
   /* template */ doDelete(software: any) {
-    this.dialog.confirm(`Delete ${software.key.tag}`, `Are you sure you want to delete version ${software.key.tag}?`, 'delete').subscribe((r) => {
-      if (r) {
-        this.deleting$.next(true);
-        this.detailsService
-          .delete()
-          .pipe(finalize(() => this.deleting$.next(false)))
-          .subscribe((_) => {
-            this.areas.closePanel();
-          });
-      }
-    });
+    this.dialog
+      .confirm(
+        `Delete ${software.key.tag}`,
+        `Are you sure you want to delete version ${software.key.tag}?`,
+        'delete'
+      )
+      .subscribe((r) => {
+        if (r) {
+          this.deleting$.next(true);
+          this.detailsService
+            .delete()
+            .pipe(finalize(() => this.deleting$.next(false)))
+            .subscribe(() => {
+              this.areas.closePanel();
+            });
+        }
+      });
   }
 
   /* template */ doDownload() {

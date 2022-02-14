@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { ProcessHandleDto } from 'src/app/models/gen.dtos';
@@ -56,9 +56,8 @@ const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
 @Component({
   selector: 'app-process-natives',
   templateUrl: './process-natives.component.html',
-  styleUrls: ['./process-natives.component.css'],
 })
-export class ProcessNativesComponent implements OnInit, OnDestroy {
+export class ProcessNativesComponent implements OnDestroy {
   /* template */ columns: BdDataColumn<ProcessHandleDto>[] = [
     nativePidColumn,
     nativeCmdColumn,
@@ -74,13 +73,11 @@ export class ProcessNativesComponent implements OnInit, OnDestroy {
   constructor(public details: ProcessDetailsService) {
     this.subscription = this.details.processDetail$.subscribe((detail) => {
       this.processes = [];
-      if (!!detail) {
+      if (detail) {
         this.flattenProcesses(this.processes, detail.handle);
       }
     });
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();

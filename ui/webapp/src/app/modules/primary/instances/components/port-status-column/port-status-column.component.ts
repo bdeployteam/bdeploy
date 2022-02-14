@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
@@ -6,11 +6,7 @@ import { BdDataColumn } from 'src/app/models/data';
   templateUrl: './port-status-column.component.html',
   styleUrls: ['./port-status-column.component.css'],
 })
-export class PortStatusColumnComponent<T> implements OnInit {
+export class PortStatusColumnComponent<T> {
   @Input() record: T;
   @Input() column: BdDataColumn<T>;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

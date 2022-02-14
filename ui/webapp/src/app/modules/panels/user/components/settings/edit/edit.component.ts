@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
@@ -15,9 +21,10 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 @Component({
   selector: 'app-edit',
   templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.css'],
 })
-export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class EditComponent
+  implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit
+{
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ mail$ = new BehaviorSubject<string>(null);
   /* template */ user: UserInfo;
@@ -30,8 +37,14 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private subscription: Subscription;
   private mailChanged = new Subject<string>();
 
-  constructor(private auth: AuthenticationService, public settings: SettingsService, areas: NavAreasService) {
-    this.subscription = this.mailChanged.pipe(debounceTime(500)).subscribe((v) => this.mail$.next(v));
+  constructor(
+    private auth: AuthenticationService,
+    public settings: SettingsService,
+    areas: NavAreasService
+  ) {
+    this.subscription = this.mailChanged
+      .pipe(debounceTime(500))
+      .subscribe((v) => this.mail$.next(v));
     this.subscription.add(areas.registerDirtyable(this, 'panel'));
   }
 
@@ -44,7 +57,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
         finalize(() => this.loading$.next(false))
       )
       .subscribe((u) => {
-        if (!!u) {
+        if (u) {
           this.user = cloneDeep(u);
           this.orig = cloneDeep(u);
           this.mail$.next(this.user.email);
@@ -72,13 +85,15 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
     this.loading$.next(true);
     this.orig = cloneDeep(this.user);
-    return this.auth.updateUserInfo(this.user).pipe(finalize(() => this.loading$.next(false)));
+    return this.auth
+      .updateUserInfo(this.user)
+      .pipe(finalize(() => this.loading$.next(false)));
   }
 
   /* template */ updateMail(): void {

@@ -1,15 +1,35 @@
-<mat-expansion-panel [ngClass]="borderClass" [(expanded)]="expanded" (expandedChange)="expandedChange.emit($event)" togglePosition="before">
+<mat-expansion-panel
+  [ngClass]="borderClass"
+  [(expanded)]="expanded"
+  (expandedChange)="expandedChange.emit($event)"
+  togglePosition="before"
+>
   <mat-expansion-panel-header>
     <mat-panel-title>
-      <div fxLayout="row" fxFlex="1 0 auto" fxLayoutAlign="start center" fxLayoutGap="5px">
-        <div class="local-padding local-header" fxFlex="1 0 auto" fxLayout="column">
+      <div
+        fxLayout="row"
+        fxFlex="1 0 auto"
+        fxLayoutAlign="start center"
+        fxLayoutGap="5px"
+      >
+        <div
+          class="local-padding local-header"
+          fxFlex="1 0 auto"
+          fxLayout="column"
+        >
           <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
             <div fxLayout="column">
               <div class="bd-type-text">Control Group</div>
               <div class="bd-title-text">{{ group.name }}</div>
             </div>
             <div fxFlex="1 0 auto"></div>
-            <div fxLayout="row wrap" fxLayoutAlign="start center" fxLayoutGap="5px" class="local-config" *ngIf="!(narrow$ | async)">
+            <div
+              fxLayout="row wrap"
+              fxLayoutAlign="start center"
+              fxLayoutGap="5px"
+              class="local-config"
+              *ngIf="!(narrow$ | async)"
+            >
               <mat-icon fontSet="material-icons-filled">play_arrow</mat-icon>
               <div>{{ group.startType }} - {{ group.startWait }}</div>
               <mat-divider [vertical]="true"></mat-divider>
@@ -17,8 +37,20 @@
               <div>{{ group.stopType }}</div>
             </div>
             <mat-divider [vertical]="true"></mat-divider>
-            <app-bd-button text="Move Up" icon="keyboard_arrow_up" [disabled]="isTop" (click)="onMoveUp()" appClickStopPropagation></app-bd-button>
-            <app-bd-button text="Move Down" icon="keyboard_arrow_down" [disabled]="isBottom" (click)="onMoveDown()" appClickStopPropagation></app-bd-button>
+            <app-bd-button
+              text="Move Up"
+              icon="keyboard_arrow_up"
+              [disabled]="isTop"
+              (click)="onMoveUp()"
+              appClickStopPropagation
+            ></app-bd-button>
+            <app-bd-button
+              text="Move Down"
+              icon="keyboard_arrow_down"
+              [disabled]="isBottom"
+              (click)="onMoveDown()"
+              appClickStopPropagation
+            ></app-bd-button>
             <app-bd-panel-button
               text="Edit Control Group"
               icon="edit"

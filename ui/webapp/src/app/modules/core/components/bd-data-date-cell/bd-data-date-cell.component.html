@@ -1,4 +1,6 @@
 <div fxLayout="row" fxLayoutAlign="start" *ngIf="column.data(record) as item">
-  <ng-container *ngIf="!!item">{{ item | date: 'dd.MM.yy HH:mm:ss' }}</ng-container>
+  <ng-container *ngIf="!!item"
+    >{{ item | date: 'dd.MM.yy HH:mm:ss' }}</ng-container
+  >
   <ng-container *ngIf="!item">Never</ng-container>
 </div>

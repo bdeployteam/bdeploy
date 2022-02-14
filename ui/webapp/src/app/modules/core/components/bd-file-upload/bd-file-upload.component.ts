@@ -1,9 +1,25 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { ManifestKey, ObjectChangeDetails, ObjectChangeType } from 'src/app/models/gen.dtos';
+import {
+  ManifestKey,
+  ObjectChangeDetails,
+  ObjectChangeType,
+} from 'src/app/models/gen.dtos';
 import { ActivitiesService } from '../../services/activities.service';
 import { ObjectChangesService } from '../../services/object-changes.service';
-import { UploadService, UploadState, UploadStatus, UrlParameter } from '../../services/upload.service';
+import {
+  UploadService,
+  UploadState,
+  UploadStatus,
+  UrlParameter,
+} from '../../services/upload.service';
 
 @Component({
   selector: 'app-bd-file-upload',
@@ -15,13 +31,17 @@ export class BdFileUploadComponent implements OnInit, OnDestroy {
   @Input() url: string;
   @Input() parameters: UrlParameter[];
   @Input() formDataParam = 'file';
-  @Input() resultEvaluator: (status: UploadStatus) => string = this.defaultResultDetailsEvaluation;
+  @Input() resultEvaluator: (status: UploadStatus) => string =
+    this.defaultResultDetailsEvaluation;
 
+  // eslint-disable-next-line @angular-eslint/no-output-native
   @Output() success = new EventEmitter<any>();
   @Output() dismiss = new EventEmitter<File>();
 
   /* template */ status: UploadStatus;
-  /* template */ processingHint$ = new BehaviorSubject<string>('Working on it...');
+  /* template */ processingHint$ = new BehaviorSubject<string>(
+    'Working on it...'
+  );
   /* template */ finished$ = new BehaviorSubject<boolean>(false);
   /* template */ failed$ = new BehaviorSubject<boolean>(false);
   /* template */ uploading$ = new BehaviorSubject<boolean>(false);
@@ -31,13 +51,26 @@ export class BdFileUploadComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(private uploads: UploadService, private changes: ObjectChangesService, private activities: ActivitiesService) {}
+  constructor(
+    private uploads: UploadService,
+    private changes: ObjectChangesService,
+    private activities: ActivitiesService
+  ) {}
 
   ngOnInit(): void {
-    this.status = this.uploads.uploadFile(this.url, this.file, this.parameters, this.formDataParam);
-    this.subscription = this.changes.subscribe(ObjectChangeType.ACTIVITIES, { scope: [this.status.scope] }, (e) => {
-      this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES]);
-    });
+    this.status = this.uploads.uploadFile(
+      this.url,
+      this.file,
+      this.parameters,
+      this.formDataParam
+    );
+    this.subscription = this.changes.subscribe(
+      ObjectChangeType.ACTIVITIES,
+      { scope: [this.status.scope] },
+      (e) => {
+        this.onEventReceived(e.details[ObjectChangeDetails.ACTIVITIES]);
+      }
+    );
 
     this.subscription.add(
       this.status.stateObservable.subscribe((state) => {
@@ -72,12 +105,17 @@ export class BdFileUploadComponent implements OnInit, OnDestroy {
       return 'Software version already exists. Nothing to do.';
     }
     const softwares: ManifestKey[] = status.detail;
-    return 'New software: ' + softwares.map((key) => key.name + ' ' + key.tag).join(',');
+    return (
+      'New software: ' +
+      softwares.map((key) => key.name + ' ' + key.tag).join(',')
+    );
   }
 
   private onEventReceived(e: string) {
     // we accept all events as we don't know the scope we're looking for beforehand.
-    const events = this.activities.getActivitiesFromEvent(e, [this.status.scope]);
+    const events = this.activities.getActivitiesFromEvent(e, [
+      this.status.scope,
+    ]);
 
     // each received event's root scope must match a scope of an UploadStatus object.
     // discard all events where this is not true.

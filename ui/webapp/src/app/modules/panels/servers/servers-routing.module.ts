@@ -10,10 +10,27 @@ import { ServerDetailsComponent } from './components/server-details/server-detai
 import { ServerEditComponent } from './components/server-details/server-edit/server-edit.component';
 
 const SERVERS_ROUTES: Route[] = [
-  { path: 'details/:server', component: ServerDetailsComponent, canActivate: [ScopedAdminGuard] },
-  { path: 'details/:server/edit', component: ServerEditComponent, canActivate: [ScopedAdminGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'link/central', component: LinkCentralComponent, canActivate: [ServerManagedGuard, ScopedAdminGuard] },
-  { path: 'link/managed', component: LinkManagedComponent, canActivate: [ServerCentralGuard, ScopedAdminGuard] },
+  {
+    path: 'details/:server',
+    component: ServerDetailsComponent,
+    canActivate: [ScopedAdminGuard],
+  },
+  {
+    path: 'details/:server/edit',
+    component: ServerEditComponent,
+    canActivate: [ScopedAdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'link/central',
+    component: LinkCentralComponent,
+    canActivate: [ServerManagedGuard, ScopedAdminGuard],
+  },
+  {
+    path: 'link/managed',
+    component: LinkManagedComponent,
+    canActivate: [ServerCentralGuard, ScopedAdminGuard],
+  },
 ];
 
 @NgModule({

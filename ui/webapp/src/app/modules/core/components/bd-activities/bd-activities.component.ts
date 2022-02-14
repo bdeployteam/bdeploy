@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivitiesService, ActivitySnapshotTreeNode } from '../../services/activities.service';
+import { Component } from '@angular/core';
+import {
+  ActivitiesService,
+  ActivitySnapshotTreeNode,
+} from '../../services/activities.service';
 import { AuthenticationService } from '../../services/authentication.service';
 
 interface SquashedActivity {
@@ -14,16 +17,21 @@ interface SquashedActivity {
   templateUrl: './bd-activities.component.html',
   styleUrls: ['./bd-activities.component.css'],
 })
-export class BdActivitiesComponent implements OnInit {
-  constructor(public activities: ActivitiesService, public auth: AuthenticationService) {}
+export class BdActivitiesComponent {
+  constructor(
+    public activities: ActivitiesService,
+    public auth: AuthenticationService
+  ) {}
 
-  ngOnInit(): void {}
-
-  /* template */ squashActivity(act: ActivitySnapshotTreeNode): SquashedActivity {
+  /* template */ squashActivity(
+    act: ActivitySnapshotTreeNode
+  ): SquashedActivity {
     const result = { current: act, parent: act, parentInfo: [], header: null };
 
     result.current = this.doSquash(act, result);
-    result.header = !result.parentInfo?.length ? result.current?.snapshot?.name : result.parentInfo.join(' / ');
+    result.header = !result.parentInfo?.length
+      ? result.current?.snapshot?.name
+      : result.parentInfo.join(' / ');
 
     return result;
   }
@@ -32,12 +40,14 @@ export class BdActivitiesComponent implements OnInit {
     this.activities.cancelActivity(squashed.current.snapshot.uuid).subscribe();
   }
 
-  /* template */ doTrack(index: number, item: ActivitySnapshotTreeNode) {
+  /* template */ doTrack(index: number) {
     return index;
   }
 
   /* template */ calculatePercentDone(squashed: SquashedActivity) {
-    return Math.round((100 * squashed.current.snapshot.current) / squashed.current.snapshot.max);
+    return Math.round(
+      (100 * squashed.current.snapshot.current) / squashed.current.snapshot.max
+    );
   }
 
   /* template */ formatDuration(node: ActivitySnapshotTreeNode) {
@@ -63,7 +73,10 @@ export class BdActivitiesComponent implements OnInit {
     return s;
   }
 
-  private doSquash(act: ActivitySnapshotTreeNode, target: SquashedActivity): ActivitySnapshotTreeNode {
+  private doSquash(
+    act: ActivitySnapshotTreeNode,
+    target: SquashedActivity
+  ): ActivitySnapshotTreeNode {
     target.parentInfo.push(act.snapshot.name);
 
     if (act?.children?.length) {

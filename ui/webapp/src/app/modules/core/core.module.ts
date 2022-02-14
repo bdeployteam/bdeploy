@@ -174,7 +174,12 @@ export function loadAppConfig(cfgService: ConfigService) {
     httpInterceptorProviders,
     CookieService,
     /* make sure that ConfigService and HistoryService are initialize always on startup */
-    { provide: APP_INITIALIZER, useFactory: loadAppConfig, deps: [ConfigService], multi: true },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: loadAppConfig,
+      deps: [ConfigService],
+      multi: true,
+    },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
   ],
   imports: [

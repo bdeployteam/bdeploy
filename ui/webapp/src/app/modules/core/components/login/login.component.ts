@@ -22,7 +22,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   public loginFailed = false;
   public loginFailedMessage;
 
-  constructor(private route: ActivatedRoute, private router: Router, public auth: AuthenticationService, private snackBar: MatSnackBar) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    public auth: AuthenticationService,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.tokenSubscription = this.auth.getTokenSubject().subscribe((token) => {
@@ -44,12 +49,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.auth
       .authenticate(this.user, this.pass)
       .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe(
-        (_) => {
+      .subscribe({
+        next: () => {
           console.log(`User "${this.user}" successfully logged in`);
           this.snackBar.dismiss(); // potentially open snackbar by error handler(s).
         },
-        (error) => {
+        error: (error) => {
           if (error.status === 401) {
             this.loginFailedMessage = `User "${this.user}" failed to authenticate`;
           } else {
@@ -58,8 +63,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
           console.error(this.loginFailedMessage, error);
           this.loginFailed = true;
-        }
-      );
+        },
+      });
   }
 
   /* template */ onLogoClick() {

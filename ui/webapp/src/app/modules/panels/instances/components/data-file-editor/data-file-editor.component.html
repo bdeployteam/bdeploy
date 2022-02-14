@@ -6,12 +6,30 @@
     actionText="Back to Viewer"
   >
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button text="Save" color="primary" icon="save" [collapsed]="false" [disabled]="!(content !== originalContent)" (click)="onSave()"></app-bd-button>
+    <app-bd-button
+      text="Save"
+      color="primary"
+      icon="save"
+      [collapsed]="false"
+      [disabled]="!(content !== originalContent)"
+      (click)="onSave()"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="!(loading$ | async) && file$ | async as file" [style.height]="'100%'" fxLayout="column">
-      <app-bd-editor *ngIf="!(binary$ | async)" fxFlex="1 0 0" [(content)]="content" [path]="file.path"></app-bd-editor>
-      <app-bd-no-data *ngIf="binary$ | async">Binary data cannot be edited online.</app-bd-no-data>
+    <div
+      *ngIf="!(loading$ | async) && file$ | async as file"
+      [style.height]="'100%'"
+      fxLayout="column"
+    >
+      <app-bd-editor
+        *ngIf="!(binary$ | async)"
+        fxFlex="1 0 0"
+        [(content)]="content"
+        [path]="file.path"
+      ></app-bd-editor>
+      <app-bd-no-data *ngIf="binary$ | async"
+        >Binary data cannot be edited online.</app-bd-no-data
+      >
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

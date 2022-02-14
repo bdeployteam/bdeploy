@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Observable, of, Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
@@ -14,23 +14,31 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 @Component({
   selector: 'app-edit-config',
   templateUrl: './edit-config.component.html',
-  styleUrls: ['./edit-config.component.css'],
 })
-export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
+export class EditConfigComponent
+  implements OnDestroy, DirtyableDialog, AfterViewInit
+{
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
   private subscription: Subscription;
 
-  /* template */ purposes = [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
+  /* template */ purposes = [
+    InstancePurpose.PRODUCTIVE,
+    InstancePurpose.DEVELOPMENT,
+    InstancePurpose.TEST,
+  ];
   /* template */ hasPendingChanges: boolean;
 
-  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, areas: NavAreasService) {
+  constructor(
+    public cfg: ConfigService,
+    public edit: InstanceEditService,
+    public servers: ServersService,
+    areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
-
-  ngOnInit(): void {}
 
   ngAfterViewInit(): void {
     if (!this.form) {
@@ -56,12 +64,12 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, 
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
     return of(true).pipe(
-      tap((x) => {
+      tap(() => {
         this.edit.conceal('Change Instance Configuration');
       })
     );

@@ -1,5 +1,7 @@
 <app-bd-dialog [loadingWhen$]="repository.loading$">
-  <app-bd-dialog-toolbar header="Software Packages of {{ (repositories.current$ | async)?.name }}">
+  <app-bd-dialog-toolbar
+    header="Software Packages of {{ (repositories.current$ | async)?.name }}"
+  >
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
       [multiple]="!isCardView"
@@ -9,7 +11,13 @@
       [records]="repository.data$ | async"
       [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="isCardView" tooltip="below"></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="isCardView"
+      tooltip="below"
+    ></app-bd-button>
 
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
@@ -17,7 +25,7 @@
       text="Repository Settings"
       [route]="['panels', 'repositories', 'settings']"
       tooltip="below"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
+      [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
     ></app-bd-panel-button>
 
     <mat-divider [vertical]="true"></mat-divider>
@@ -25,7 +33,7 @@
       icon="cloud_upload"
       text="Upload Software"
       [route]="['panels', 'repositories', 'upload']"
-      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
+      [disabled]="(auth.isCurrentScopeWrite$ | async) === false"
       tooltip="below"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>

@@ -1,16 +1,54 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Edit User" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Edit User"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="10px">
+    <form
+      #form="ngForm"
+      (ngSubmit)="onSave()"
+      fxLayout="column"
+      fxLayoutGap="10px"
+    >
       <div fxLayout="row" fxLayoutAlign="center center">
-        <app-user-avatar [avatarSize]="64" [hostSize]="64" [mail]="mail$ | async"></app-user-avatar>
+        <app-user-avatar
+          [avatarSize]="64"
+          [hostSize]="64"
+          [mail]="mail$ | async"
+        ></app-user-avatar>
       </div>
-      <div fxLayout="column" *ngIf="!!user && !user.external" fxLayoutGap="10px">
-        <app-bd-form-input [(ngModel)]="user.name" name="name" label="Username" [disabled]="true"></app-bd-form-input>
-        <app-bd-form-input [(ngModel)]="user.fullName" name="fullName" label="Full Name"></app-bd-form-input>
-        <app-bd-form-input [(ngModel)]="user.email" (ngModelChange)="updateMail()" name="email" label="E-Mail Address"></app-bd-form-input>
-        <app-bd-button color="primary" type="submit" text="Save" icon="save" [disabled]="!disableSave || form.invalid" [collapsed]="false"></app-bd-button>
+      <div
+        fxLayout="column"
+        *ngIf="!!user && !user.external"
+        fxLayoutGap="10px"
+      >
+        <app-bd-form-input
+          [(ngModel)]="user.name"
+          name="name"
+          label="Username"
+          [disabled]="true"
+        ></app-bd-form-input>
+        <app-bd-form-input
+          [(ngModel)]="user.fullName"
+          name="fullName"
+          label="Full Name"
+        ></app-bd-form-input>
+        <app-bd-form-input
+          [(ngModel)]="user.email"
+          (ngModelChange)="updateMail()"
+          name="email"
+          label="E-Mail Address"
+        ></app-bd-form-input>
+        <app-bd-button
+          color="primary"
+          type="submit"
+          text="Save"
+          icon="save"
+          [disabled]="!disableSave || form.invalid"
+          [collapsed]="false"
+        ></app-bd-button>
       </div>
     </form>
   </app-bd-dialog-content>

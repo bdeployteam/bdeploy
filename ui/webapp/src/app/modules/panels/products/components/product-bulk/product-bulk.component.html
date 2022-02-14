@@ -1,10 +1,15 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Bulk Manipulate Products" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Bulk Manipulate Products"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="bulk.selection$ | async as selected">
-      <div>
-        <strong>{{ selected.length }}</strong> products selected.
-      </div>
+    <div
+      fxLayout="column"
+      fxLayoutGap="10px"
+      *ngIf="bulk.selection$ | async as selected"
+    >
+      <div><strong>{{ selected.length }}</strong> products selected.</div>
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"

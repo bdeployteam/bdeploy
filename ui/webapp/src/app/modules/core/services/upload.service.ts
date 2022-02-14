@@ -1,4 +1,11 @@
-import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpEventType,
+  HttpHeaders,
+  HttpParams,
+  HttpRequest,
+  HttpResponse,
+} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { UploadInfoDto } from 'src/app/models/gen.dtos';
@@ -95,7 +102,12 @@ export class UploadService {
    *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public upload(url: string, files: File[], urlParameter: UrlParameter[][], formDataParam: string): Map<string, UploadStatus> {
+  public upload(
+    url: string,
+    files: File[],
+    urlParameter: UrlParameter[][],
+    formDataParam: string
+  ): Map<string, UploadStatus> {
     const result: Map<string, UploadStatus> = new Map();
 
     for (let i = 0; i < files.length; ++i) {
@@ -116,7 +128,12 @@ export class UploadService {
    *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public uploadFile(url: string, file: File, urlParameter: UrlParameter[], formDataParam: string): UploadStatus {
+  public uploadFile(
+    url: string,
+    file: File,
+    urlParameter: UrlParameter[],
+    formDataParam: string
+  ): UploadStatus {
     // create a new progress-subject for every file
     const uploadStatus = new UploadStatus();
     const progressSubject = new Subject<number>();
@@ -137,7 +154,9 @@ export class UploadService {
     // Suppress global error handling and enable progress reporting
     const options = {
       reportProgress: true,
-      headers: suppressGlobalErrorHandling(new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })),
+      headers: suppressGlobalErrorHandling(
+        new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })
+      ),
     };
 
     // create and set additional HttpParams
@@ -145,7 +164,10 @@ export class UploadService {
       let httpParams = new HttpParams();
       urlParameter.forEach((p) => {
         if (p.type === 'boolean') {
-          httpParams = httpParams.set(p.id, p.value === true ? 'true' : 'false');
+          httpParams = httpParams.set(
+            p.id,
+            p.value === true ? 'true' : 'false'
+          );
         } else {
           httpParams = httpParams.set(p.id, p.value);
         }
@@ -155,8 +177,8 @@ export class UploadService {
 
     // create a http-post request and pass the form
     const req = new HttpRequest('POST', url, formData, options);
-    const sub = this.http.request(req).subscribe(
-      (event) => {
+    const sub = this.http.request(req).subscribe({
+      next: (event) => {
         if (event.type === HttpEventType.UploadProgress) {
           const percentDone = Math.round((100 * event.loaded) / event.total);
           progressSubject.next(percentDone);
@@ -172,13 +194,14 @@ export class UploadService {
           stateSubject.complete();
         }
       },
-      (error) => {
-        uploadStatus.detail = error.statusText + ' (Status ' + error.status + ')';
+      error: (error) => {
+        uploadStatus.detail =
+          error.statusText + ' (Status ' + error.status + ')';
         stateSubject.next(UploadState.FAILED);
         progressSubject.complete();
         stateSubject.complete();
-      }
-    );
+      },
+    });
     uploadStatus.cancel = () => sub.unsubscribe();
     return uploadStatus;
   }
@@ -193,28 +216,36 @@ export class UploadService {
     });
     stateSubject.next(ImportState.IMPORTING);
 
-    this.http.post<UploadInfoDto>(url, dto, { headers: suppressGlobalErrorHandling(new HttpHeaders()) }).subscribe(
-      (d) => {
-        importStatus.detail = d.details;
-        stateSubject.next(ImportState.FINISHED);
-        stateSubject.complete();
-      },
-      (error) => {
-        importStatus.detail = error.statusText + ' (Status ' + error.status + ')';
-        stateSubject.next(ImportState.FAILED);
-        stateSubject.complete();
-      }
-    );
+    this.http
+      .post<UploadInfoDto>(url, dto, {
+        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      })
+      .subscribe({
+        next: (d) => {
+          importStatus.detail = d.details;
+          stateSubject.next(ImportState.FINISHED);
+          stateSubject.complete();
+        },
+        error: (error) => {
+          importStatus.detail =
+            error.statusText + ' (Status ' + error.status + ')';
+          stateSubject.next(ImportState.FAILED);
+          stateSubject.complete();
+        },
+      });
     return importStatus;
   }
 
   uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      // tslint:disable-next-line:no-bitwise
-      const r = (Math.random() * 16) | 0,
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+      /[xy]/g,
+      function (c) {
         // tslint:disable-next-line:no-bitwise
-        v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
+        const r = (Math.random() * 16) | 0,
+          // tslint:disable-next-line:no-bitwise
+          v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      }
+    );
   }
 }

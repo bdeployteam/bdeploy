@@ -1,8 +1,16 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Import Product" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Import Product"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
-      <mat-stepper #stepper [linear]="true" orientation="vertical" (selectionChange)="onStepSelectionChange($event)">
+      <mat-stepper
+        #stepper
+        [linear]="true"
+        orientation="vertical"
+        (selectionChange)="onStepSelectionChange($event)"
+      >
         <mat-step label="Choose Source Repository" [completed]="!!selectedRepo">
           <div fxLayout="column" fxLayoutGap="5px">
             <span>Choose the repository to import from.</span>
@@ -19,10 +27,15 @@
         </mat-step>
         <mat-step label="Choose Product" [completed]="!!selectedProductId">
           <div [style.min-height.px]="63">
-            <app-bd-loading-overlay [show]="productsLoading$ | async" mode="hide">
+            <app-bd-loading-overlay
+              [show]="productsLoading$ | async"
+              mode="hide"
+            >
               <div fxLayout="column" fxLayoutGap="5px">
                 <span>Choose the product to import.</span>
-                <span class="bd-description-text">Only products with importable versions are shown.</span>
+                <span class="bd-description-text"
+                  >Only products with importable versions are shown.</span
+                >
                 <app-bd-form-select
                   errorDisplay="immediate"
                   [values]="prodIds"

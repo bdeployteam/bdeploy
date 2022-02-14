@@ -11,11 +11,25 @@
   </mat-card>
 </ng-template>
 
-<div class="bd-rect-card local-sizing local-nav-bar" fxLayout="column" fxLayoutGap="5px">
+<div
+  class="bd-rect-card local-sizing local-nav-bar"
+  fxLayout="column"
+  fxLayoutGap="5px"
+>
   <!-- Logo & Expand Button -->
-  <div fxLayout="row" [style.min-height.px]="100" [style.height.px]="100" [style.padding-bottom.px]="14" fxLayoutAlign="center center">
+  <div
+    fxLayout="row"
+    [style.min-height.px]="100"
+    [style.height.px]="100"
+    [style.padding-bottom.px]="14"
+    fxLayoutAlign="center center"
+  >
     <div class="local-hamburger-button">
-      <div class="hamburger hamburger--arrow" [ngClass]="{ 'is-active': expanded }" (click)="expanded = !expanded">
+      <div
+        class="hamburger hamburger--arrow"
+        [ngClass]="{ 'is-active': expanded }"
+        (click)="expanded = !expanded"
+      >
         <span class="hamburger-box">
           <span class="hamburger-inner"></span>
         </span>
@@ -32,7 +46,12 @@
   </div>
 
   <!-- Groups -->
-  <app-main-nav-button icon="view_carousel" text="Instance Groups" [collapsed]="!expanded" [route]="['/groups/browser']"></app-main-nav-button>
+  <app-main-nav-button
+    icon="view_carousel"
+    text="Instance Groups"
+    [collapsed]="!expanded"
+    [route]="['/groups/browser']"
+  ></app-main-nav-button>
 
   <app-main-nav-button
     icon="storage"
@@ -129,7 +148,11 @@
   <!-- Footer -->
   <div fxFlex="1 0 auto"></div>
   <div class="local-server-type-wrapper-expanded" *ngIf="expanded">
-    <span class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">{{ cfgService.config.mode }}</span>
+    <span
+      class="local-server-type"
+      [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+      >{{ cfgService.config.mode }}</span
+    >
   </div>
   <div
     *ngIf="expanded"
@@ -149,10 +172,20 @@
       [value]="!(activities.activities$ | async)?.length ? 100 : 0"
       [diameter]="24"
     ></mat-spinner>
-    <div *ngIf="!!(activities.activities$ | async)?.length" [style.padding-left.px]="10" class="bd-text">
+    <div
+      *ngIf="!!(activities.activities$ | async)?.length"
+      [style.padding-left.px]="10"
+      class="bd-text"
+    >
       {{ (activities.activities$ | async)?.length }} Activities.
     </div>
-    <div *ngIf="!(activities.activities$ | async)?.length" [style.padding-left.px]="10" class="bd-disabled-text">No Activities.</div>
+    <div
+      *ngIf="!(activities.activities$ | async)?.length"
+      [style.padding-left.px]="10"
+      class="bd-disabled-text"
+    >
+      No Activities.
+    </div>
   </div>
 
   <div
@@ -169,11 +202,20 @@
   </div>
 
   <div *ngIf="!expanded" class="local-short-version">
-    <div [style.width.px]="36" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
+    <div
+      [style.width.px]="36"
+      [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+    >
       {{ cfgService.config.version | formatVersionShort }}
     </div>
   </div>
-  <div fxLayout="column" fxLayoutGap="5px" *ngIf="expanded" class="local-footer" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
+  <div
+    fxLayout="column"
+    fxLayoutGap="5px"
+    *ngIf="expanded"
+    class="local-footer"
+    [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+  >
     <div gdColumns="50px auto" gdGap="5px">
       <span>Version:</span>
       <span>{{ cfgService?.config?.version | formatVersion }}</span>
@@ -188,7 +230,18 @@
     [route]="['/admin/']"
     [disabled]="!(authService.isGlobalAdmin$ | async)"
   ></app-main-nav-button>
-  <a href="/assets/doc/index.html" target="_blank" class="bd-button-link" aria-label="Help">
-    <app-bd-button fxFlexAlign="center center" icon="help_outline" text="Help" color="toolbar" [collapsed]="!expanded"></app-bd-button>
+  <a
+    href="/assets/doc/index.html"
+    target="_blank"
+    class="bd-button-link"
+    aria-label="Help"
+  >
+    <app-bd-button
+      fxFlexAlign="center center"
+      icon="help_outline"
+      text="Help"
+      color="toolbar"
+      [collapsed]="!expanded"
+    ></app-bd-button>
   </a>
 </div>

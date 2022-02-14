@@ -13,8 +13,6 @@ export class ProductVersionDetailsComponent implements OnInit {
 
   /* template */ labels: { a: string; b: string }[] = [];
 
-  constructor() {}
-
   ngOnInit(): void {
     for (const key of Object.keys(this.record.labels)) {
       this.labels.push({ a: key, b: this.record.labels[key] });

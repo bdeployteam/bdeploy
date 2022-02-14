@@ -8,7 +8,13 @@
       [records]="groups.groups$ | async"
       [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="isCardView" tooltip="below"></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="isCardView"
+      tooltip="below"
+    ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       *ngIf="!isManaged; else managed"
@@ -42,14 +48,30 @@
       <app-bd-no-data header="Welcome to BDeploy!">
         <p [style.text-align]="'center'">
           To get you started quickly, consider reading our
-          <a rel="noopener noreferrer" href="https://bdeploy.io/user/index.html#_getting_started" target="_blank">documentation</a>!
+          <a
+            rel="noopener noreferrer"
+            href="https://bdeploy.io/user/index.html#_getting_started"
+            target="_blank"
+            >documentation</a
+          >!
         </p>
         <ng-container *ngIf="isAddAllowed">
-          <p [style.text-align]="'center'">No instance groups have been created yet. Start by creating a new one.</p>
-          <app-bd-panel-button icon="add" text="Add Instance Group..." [collapsed]="false" [route]="['panels', 'groups', 'add']"></app-bd-panel-button>
+          <p [style.text-align]="'center'">
+            No instance groups have been created yet. Start by creating a new
+            one.
+          </p>
+          <app-bd-panel-button
+            icon="add"
+            text="Add Instance Group..."
+            [collapsed]="false"
+            [route]="['panels', 'groups', 'add']"
+          ></app-bd-panel-button>
         </ng-container>
         <ng-container *ngIf="isAttachAllowed">
-          <p [style.text-align]="'center'">No instance groups have been linked yet. Start by linking one from a central server.</p>
+          <p [style.text-align]="'center'">
+            No instance groups have been linked yet. Start by linking one from a
+            central server.
+          </p>
           <app-bd-panel-button
             icon="link"
             text="Link Instance Group..."

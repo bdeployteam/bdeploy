@@ -4,7 +4,11 @@ import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
-import { LauncherDto, ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
+import {
+  LauncherDto,
+  ManifestKey,
+  OperatingSystem,
+} from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 
 export interface SoftwareVersion {
@@ -38,23 +42,33 @@ export class SoftwareUpdateService {
       .subscribe(([b, l]) => {
         const tags: { [key: string]: SoftwareVersion } = {};
         b.forEach((key) => {
-          const k = tags[key.tag] || { version: key.tag, system: [], launcher: [], current: convert2String(this.cfg.config.version) === key.tag };
+          const k = tags[key.tag] || {
+            version: key.tag,
+            system: [],
+            launcher: [],
+            current: convert2String(this.cfg.config.version) === key.tag,
+          };
           k.system.push(key);
           tags[key.tag] = k;
         });
 
         l.forEach((key) => {
-          const k = tags[key.tag] || { version: key.tag, system: [], launcher: [], current: convert2String(this.cfg.config.version) === key.tag };
+          const k = tags[key.tag] || {
+            version: key.tag,
+            system: [],
+            launcher: [],
+            current: convert2String(this.cfg.config.version) === key.tag,
+          };
           k.launcher.push(key);
           tags[key.tag] = k;
         });
 
         this.software$.next(
-          Object.values(tags).sort((a, b) => {
-            if (a.version > b.version) {
+          Object.values(tags).sort((x, y) => {
+            if (x.version > y.version) {
               return -1;
             }
-            if (a.version < b.version) {
+            if (x.version < y.version) {
               return 1;
             }
             return 0;

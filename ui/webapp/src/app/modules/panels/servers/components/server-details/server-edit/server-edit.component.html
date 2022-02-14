@@ -1,15 +1,47 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Edit Details" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Edit Details"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="10px">
+    <form
+      #form="ngForm"
+      (ngSubmit)="onSave()"
+      fxLayout="column"
+      fxLayoutGap="10px"
+    >
       <div *ngIf="server" fxLayout="column" fxLayoutGap="10px">
-        <app-bd-form-input name="description" label="Description" [(ngModel)]="server.description"></app-bd-form-input>
-        <app-bd-form-input name="uri" label="URI" [(ngModel)]="server.uri" appTrimmed></app-bd-form-input>
-        <div><strong>Advanced Users Only:</strong> Replace authorization token with a new one. Handle with care!</div>
-        <app-bd-form-input name="token" label="Authorization Token" [(ngModel)]="server.auth" appTrimmed></app-bd-form-input>
+        <app-bd-form-input
+          name="description"
+          label="Description"
+          [(ngModel)]="server.description"
+        ></app-bd-form-input>
+        <app-bd-form-input
+          name="uri"
+          label="URI"
+          [(ngModel)]="server.uri"
+          appTrimmed
+        ></app-bd-form-input>
+        <div>
+          <strong>Advanced Users Only:</strong> Replace authorization token with
+          a new one. Handle with care!
+        </div>
+        <app-bd-form-input
+          name="token"
+          label="Authorization Token"
+          [(ngModel)]="server.auth"
+          appTrimmed
+        ></app-bd-form-input>
 
-        <app-bd-button text="Save" icon="save" [collapsed]="false" color="primary" [disabled]="form.invalid || !disableSave"></app-bd-button>
+        <app-bd-button
+          text="Save"
+          icon="save"
+          [collapsed]="false"
+          color="primary"
+          [disabled]="form.invalid || !disableSave"
+        ></app-bd-button>
       </div>
     </form>
   </app-bd-dialog-content>

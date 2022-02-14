@@ -13,7 +13,10 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class DataFilesBulkService {
-  public selection: { directory: RemoteDirectory; entry: RemoteDirectoryEntry }[] = [];
+  public selection: {
+    directory: RemoteDirectory;
+    entry: RemoteDirectoryEntry;
+  }[] = [];
   public frozen$ = new BehaviorSubject<boolean>(false);
 
   private apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
@@ -28,17 +31,27 @@ export class DataFilesBulkService {
     private dataFilesService: DataFilesService
   ) {
     // clear selection when the primary route changes
-    areas.primaryRoute$.subscribe((r) => (this.selection = []));
+    areas.primaryRoute$.subscribe(() => (this.selection = []));
   }
 
   async deleteFiles(): Promise<any> {
     return Promise.all(
-      this.selection.map((file) => new Promise((resolve) => this.dataFilesService.deleteFile(file.directory, file.entry).subscribe((data) => resolve(data))))
+      this.selection.map(
+        (file) =>
+          new Promise((resolve) =>
+            this.dataFilesService
+              .deleteFile(file.directory, file.entry)
+              .subscribe((data) => resolve(data))
+          )
+      )
     ).then((data: any) => data);
   }
 
   public downloadDataFile() {
-    const path = this.apiPath(this.groups.current$.value.name, this.instances.current$.value.instanceConfiguration.uuid);
+    const path = this.apiPath(
+      this.groups.current$.value.name,
+      this.instances.current$.value.instanceConfiguration.uuid
+    );
 
     const minion = this.selection[0]?.directory?.minion;
     const entries: RemoteDirectoryEntry[] = [];

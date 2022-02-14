@@ -3,7 +3,13 @@ import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { ApiAccessToken, CredentialsApi, Permission, UserChangePasswordDto, UserInfo } from '../../../models/gen.dtos';
+import {
+  ApiAccessToken,
+  CredentialsApi,
+  Permission,
+  UserChangePasswordDto,
+  UserInfo,
+} from '../../../models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ConfigService } from './config.service';
 import { NavAreasService } from './nav-areas.service';
@@ -12,56 +18,81 @@ import { NavAreasService } from './nav-areas.service';
   providedIn: 'root',
 })
 export class AuthenticationService {
-  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(this.cookies.check('st') ? this.cookies.get('st') : null);
+  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(
+    this.cookies.check('st') ? this.cookies.get('st') : null
+  );
 
   public userInfoSubject: BehaviorSubject<UserInfo> = new BehaviorSubject(null);
-  public isCurrentScopedExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isCurrentScopeWrite$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isCurrentScopeAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isCurrentScopedExclusiveReadClient$: BehaviorSubject<boolean> =
+    new BehaviorSubject(false);
+  public isCurrentScopeWrite$: BehaviorSubject<boolean> = new BehaviorSubject(
+    false
+  );
+  public isCurrentScopeAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(
+    false
+  );
   public isGlobalAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
-  public isGlobalExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isGlobalExclusiveReadClient$: BehaviorSubject<boolean> =
+    new BehaviorSubject(false);
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private cookies: CookieService, private areas: NavAreasService) {
-    combineLatest([areas.groupContext$, areas.repositoryContext$]).subscribe(([groupContext, repositoryContext]) => {
-      if (groupContext || repositoryContext) {
-        this.isCurrentScopeAdmin$.next(this.isCurrentScopeAdmin());
-        this.isCurrentScopeWrite$.next(this.isCurrentScopeWrite());
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private cookies: CookieService,
+    private areas: NavAreasService
+  ) {
+    combineLatest([areas.groupContext$, areas.repositoryContext$]).subscribe(
+      ([groupContext, repositoryContext]) => {
+        if (groupContext || repositoryContext) {
+          this.isCurrentScopeAdmin$.next(this.isCurrentScopeAdmin());
+          this.isCurrentScopeWrite$.next(this.isCurrentScopeWrite());
+        }
+        if (groupContext) {
+          this.isCurrentScopedExclusiveReadClient$.next(
+            this.isCurrentScopeExclusiveReadClient()
+          );
+        }
       }
-      if (groupContext) {
-        this.isCurrentScopedExclusiveReadClient$.next(this.isCurrentScopeExclusiveReadClient());
-      }
-    });
+    );
 
     this.tokenSubject.subscribe(() => {
       this.isGlobalAdmin$.next(this.isGlobalAdmin());
-      this.isGlobalExclusiveReadClient$.next(this.isGlobalExclusiveReadClient());
+      this.isGlobalExclusiveReadClient$.next(
+        this.isGlobalExclusiveReadClient()
+      );
     });
   }
 
   authenticate(username: string, password: string): Observable<any> {
     return this.http
-      .post(this.cfg.config.api + '/auth', { user: username, password: password } as CredentialsApi, {
-        responseType: 'text',
-        headers: suppressGlobalErrorHandling(new HttpHeaders()),
-      })
+      .post(
+        this.cfg.config.api + '/auth',
+        { user: username, password: password } as CredentialsApi,
+        {
+          responseType: 'text',
+          headers: suppressGlobalErrorHandling(new HttpHeaders()),
+        }
+      )
       .pipe(
-        tap(
-          (result) => {
+        tap({
+          next: (result) => {
             this.tokenSubject.next(result);
             // this is required if the backend runs on a different server than the frontend (dev)
             // - don't use secure, as this will fail in the development case (HTTP server only).
             this.cookies.set('st', result, 365, '/', null, false, 'Strict');
           },
-          (error) => {
+          error: () => {
             this.tokenSubject.next(null);
             this.cookies.delete('st', '/');
-          }
-        ),
-        map(
-          (result) => {
-            this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').pipe(tap((userInfo) => this.userInfoSubject.next(userInfo)));
           },
-          (error) => {
+        }),
+        map(
+          () => {
+            this.http
+              .get<UserInfo>(this.cfg.config.api + '/auth/user')
+              .pipe(tap((userInfo) => this.userInfoSubject.next(userInfo)));
+          },
+          () => {
             this.userInfoSubject.next(null);
           }
         )
@@ -81,7 +112,10 @@ export class AuthenticationService {
   }
 
   private getTokenPayload(): ApiAccessToken {
-    const payload: any = this.tokenSubject && this.tokenSubject.value ? JSON.parse(atob(this.tokenSubject.value)).p : null;
+    const payload: any =
+      this.tokenSubject && this.tokenSubject.value
+        ? JSON.parse(atob(this.tokenSubject.value)).p
+        : null;
     return payload ? JSON.parse(atob(payload)) : null;
   }
 
@@ -106,7 +140,9 @@ export class AuthenticationService {
   isGlobalAdmin(): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
-      return !!tokenPayload.c.find((c) => c.scope === null && c.permission === Permission.ADMIN);
+      return !!tokenPayload.c.find(
+        (c) => c.scope === null && c.permission === Permission.ADMIN
+      );
     }
     return false;
   }
@@ -114,7 +150,9 @@ export class AuthenticationService {
   isGlobalWrite(): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
-      return !!tokenPayload.c.find((c) => c.scope === null && c.permission === Permission.WRITE);
+      return !!tokenPayload.c.find(
+        (c) => c.scope === null && c.permission === Permission.WRITE
+      );
     }
     return false;
   }
@@ -122,7 +160,9 @@ export class AuthenticationService {
   isGlobalRead(): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
-      return !!tokenPayload.c.find((c) => c.scope === null && c.permission === Permission.READ);
+      return !!tokenPayload.c.find(
+        (c) => c.scope === null && c.permission === Permission.READ
+      );
     }
     return false;
   }
@@ -131,9 +171,13 @@ export class AuthenticationService {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
       // if it has a CLIENT permission
-      const clientPerm = tokenPayload.c.find((c) => c.scope === null && c.permission === Permission.CLIENT);
+      const clientPerm = tokenPayload.c.find(
+        (c) => c.scope === null && c.permission === Permission.CLIENT
+      );
       // and *NO* other global permissions
-      const nonClientPerm = tokenPayload.c.find((c) => c.scope === null && c.permission !== Permission.CLIENT);
+      const nonClientPerm = tokenPayload.c.find(
+        (c) => c.scope === null && c.permission !== Permission.CLIENT
+      );
 
       return !!clientPerm && !nonClientPerm;
     }
@@ -141,7 +185,9 @@ export class AuthenticationService {
   }
 
   private isCurrentScopeAdmin(): boolean {
-    const scope = !!this.areas.groupContext$.value ? this.areas.groupContext$.value : this.areas.repositoryContext$.value;
+    const scope = this.areas.groupContext$.value
+      ? this.areas.groupContext$.value
+      : this.areas.repositoryContext$.value;
     if (!scope) {
       throw new Error('No scope currently active');
     }
@@ -149,7 +195,9 @@ export class AuthenticationService {
   }
 
   isCurrentScopeWrite(): boolean {
-    const scope = !!this.areas.groupContext$.value ? this.areas.groupContext$.value : this.areas.repositoryContext$.value;
+    const scope = this.areas.groupContext$.value
+      ? this.areas.groupContext$.value
+      : this.areas.repositoryContext$.value;
     if (!scope) {
       throw new Error('No scope currently active');
     }
@@ -157,7 +205,9 @@ export class AuthenticationService {
   }
 
   isCurrentScopeRead(): boolean {
-    const scope = !!this.areas.groupContext$.value ? this.areas.groupContext$.value : this.areas.repositoryContext$.value;
+    const scope = this.areas.groupContext$.value
+      ? this.areas.groupContext$.value
+      : this.areas.repositoryContext$.value;
     if (!scope) {
       throw new Error('No scope currently active');
     }
@@ -173,21 +223,33 @@ export class AuthenticationService {
 
   isScopedAdmin(scope: string): boolean {
     if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return !!this.userInfoSubject.value.permissions.find((sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.ADMIN));
+      return !!this.userInfoSubject.value.permissions.find(
+        (sc) =>
+          (sc.scope === null || sc.scope === scope) &&
+          this.ge(sc.permission, Permission.ADMIN)
+      );
     }
     return false;
   }
 
   isScopedWrite(scope: string): boolean {
     if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return !!this.userInfoSubject.value.permissions.find((sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.WRITE));
+      return !!this.userInfoSubject.value.permissions.find(
+        (sc) =>
+          (sc.scope === null || sc.scope === scope) &&
+          this.ge(sc.permission, Permission.WRITE)
+      );
     }
     return false;
   }
 
   isScopedRead(scope: string): boolean {
     if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return !!this.userInfoSubject.value.permissions.find((sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, Permission.READ));
+      return !!this.userInfoSubject.value.permissions.find(
+        (sc) =>
+          (sc.scope === null || sc.scope === scope) &&
+          this.ge(sc.permission, Permission.READ)
+      );
     }
     return false;
   }
@@ -195,10 +257,16 @@ export class AuthenticationService {
   isScopedExclusiveReadClient(scope: string): boolean {
     if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
       // We have either a global or scoped CLIENT permission,
-      const clientPerm = this.userInfoSubject.value.permissions.find((sc) => (sc.scope === null || sc.scope === scope) && sc.permission === Permission.CLIENT);
+      const clientPerm = this.userInfoSubject.value.permissions.find(
+        (sc) =>
+          (sc.scope === null || sc.scope === scope) &&
+          sc.permission === Permission.CLIENT
+      );
       // ... and there is *NO* other permission on the user.
       const nonClientPerm = this.userInfoSubject.value.permissions.find(
-        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission !== Permission.CLIENT
+        (sc) =>
+          (sc.scope === null || sc.scope === scope) &&
+          sc.permission !== Permission.CLIENT
       );
       return !!clientPerm && !nonClientPerm;
     }
@@ -208,9 +276,18 @@ export class AuthenticationService {
   private ge(c1: Permission, c2: Permission): boolean {
     switch (c2) {
       case Permission.CLIENT:
-        return c1 === Permission.CLIENT || c1 === Permission.READ || c1 === Permission.WRITE || c1 === Permission.ADMIN;
+        return (
+          c1 === Permission.CLIENT ||
+          c1 === Permission.READ ||
+          c1 === Permission.WRITE ||
+          c1 === Permission.ADMIN
+        );
       case Permission.READ:
-        return c1 === Permission.READ || c1 === Permission.WRITE || c1 === Permission.ADMIN;
+        return (
+          c1 === Permission.READ ||
+          c1 === Permission.WRITE ||
+          c1 === Permission.ADMIN
+        );
       case Permission.WRITE:
         return c1 === Permission.WRITE || c1 === Permission.ADMIN;
       case Permission.ADMIN:
@@ -219,7 +296,9 @@ export class AuthenticationService {
   }
 
   getUserInfo(): Observable<UserInfo> {
-    this.http.get<UserInfo>(this.cfg.config.api + '/auth/user').subscribe((userInfo) => this.userInfoSubject.next(userInfo));
+    this.http
+      .get<UserInfo>(this.cfg.config.api + '/auth/user')
+      .subscribe((userInfo) => this.userInfoSubject.next(userInfo));
     return this.userInfoSubject.asObservable();
   }
 

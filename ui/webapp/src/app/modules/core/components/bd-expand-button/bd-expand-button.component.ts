@@ -1,4 +1,9 @@
-import { Component, HostBinding, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  HostBinding,
+  Input,
+  ViewEncapsulation,
+} from '@angular/core';
 
 @Component({
   selector: 'app-bd-expand-button',
@@ -6,12 +11,8 @@ import { Component, HostBinding, Input, OnInit, ViewEncapsulation } from '@angul
   styleUrls: ['./bd-expand-button.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdExpandButtonComponent implements OnInit {
+export class BdExpandButtonComponent {
   @Input() icon: string;
   @HostBinding('attr.data-cy') @Input() text: string;
   @Input() expanded = false;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

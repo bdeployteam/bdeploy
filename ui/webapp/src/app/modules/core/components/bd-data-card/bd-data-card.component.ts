@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 
@@ -46,27 +54,43 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!!changes['columns']) {
+    if (changes['columns']) {
       this.calculateColumnPlacing();
     }
   }
 
   private calculateColumnPlacing() {
     // from the column definitions, find the columns we want to render...
-    this.colType = this.columns.find((c) => c.hint === BdDataColumnTypeHint.TYPE);
-    this.colTitle = this.columns.find((c) => c.hint === BdDataColumnTypeHint.TITLE);
-    this.colDescription = this.columns.find((c) => c.hint === BdDataColumnTypeHint.DESCRIPTION);
-    this.colStatus = this.columns.find((c) => c.hint === BdDataColumnTypeHint.STATUS);
-    this.colFooter = this.columns.find((c) => c.hint === BdDataColumnTypeHint.FOOTER);
-    this.colAvatar = this.columns.find((c) => c.hint === BdDataColumnTypeHint.AVATAR);
-    this.colActions = this.columns.filter((c) => c.hint === BdDataColumnTypeHint.ACTIONS);
-    this.colDetails = this.columns.filter((c) => c.hint === BdDataColumnTypeHint.DETAILS);
+    this.colType = this.columns.find(
+      (c) => c.hint === BdDataColumnTypeHint.TYPE
+    );
+    this.colTitle = this.columns.find(
+      (c) => c.hint === BdDataColumnTypeHint.TITLE
+    );
+    this.colDescription = this.columns.find(
+      (c) => c.hint === BdDataColumnTypeHint.DESCRIPTION
+    );
+    this.colStatus = this.columns.find(
+      (c) => c.hint === BdDataColumnTypeHint.STATUS
+    );
+    this.colFooter = this.columns.find(
+      (c) => c.hint === BdDataColumnTypeHint.FOOTER
+    );
+    this.colAvatar = this.columns.find(
+      (c) => c.hint === BdDataColumnTypeHint.AVATAR
+    );
+    this.colActions = this.columns.filter(
+      (c) => c.hint === BdDataColumnTypeHint.ACTIONS
+    );
+    this.colDetails = this.columns.filter(
+      (c) => c.hint === BdDataColumnTypeHint.DETAILS
+    );
   }
 
   /* template */ getImageUrl() {
-    if (!!this.colAvatar) {
+    if (this.colAvatar) {
       const url = this.colAvatar.data(this.record);
-      if (!!url) {
+      if (url) {
         return this.sanitizer.bypassSecurityTrustStyle(`url(${url})`);
       }
     }

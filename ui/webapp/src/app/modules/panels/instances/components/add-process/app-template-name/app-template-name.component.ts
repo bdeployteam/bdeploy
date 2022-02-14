@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { AppRow } from '../add-process.component';
 
@@ -7,11 +7,7 @@ import { AppRow } from '../add-process.component';
   templateUrl: './app-template-name.component.html',
   styleUrls: ['./app-template-name.component.css'],
 })
-export class AppTemplateNameComponent implements OnInit {
+export class AppTemplateNameComponent {
   @Input() record: AppRow;
   @Input() column: BdDataColumn<AppRow>;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

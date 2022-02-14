@@ -2,7 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
-import { InstanceDto, InstanceNodeConfigurationListDto, ParameterType } from 'src/app/models/gen.dtos';
+import {
+  InstanceDto,
+  InstanceNodeConfigurationListDto,
+  ParameterType,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NO_LOADING_BAR } from 'src/app/modules/core/utils/loading-bar.util';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -35,7 +39,11 @@ export class PortsService {
     private instances: InstancesService,
     private processes: ProcessesService
   ) {
-    combineLatest([this.instances.active$, this.instances.activeNodeCfgs$, this.processes.processStates$]).subscribe(([instance, nodes, states]) => {
+    combineLatest([
+      this.instances.active$,
+      this.instances.activeNodeCfgs$,
+      this.processes.processStates$,
+    ]).subscribe(([instance, nodes, states]) => {
       if (!instance || !nodes || !states) {
         this.activePortStates$.next(null);
         return;
@@ -45,7 +53,10 @@ export class PortsService {
     });
   }
 
-  private loadActivePorts(instance: InstanceDto, cfgs: InstanceNodeConfigurationListDto) {
+  private loadActivePorts(
+    instance: InstanceDto,
+    cfgs: InstanceNodeConfigurationListDto
+  ) {
     if (!instance || !cfgs) {
       this.activePortStates$.next(null);
       return;
@@ -64,8 +75,12 @@ export class PortsService {
 
       for (const app of node.nodeConfiguration.applications) {
         for (const param of app.start.parameters) {
-          const appDesc = cfgs.applications.find((a) => a.key.name === app.application.name)?.descriptor;
-          const paramDesc = appDesc?.startCommand.parameters.find((p) => p.uid === param.uid);
+          const appDesc = cfgs.applications.find(
+            (a) => a.key.name === app.application.name
+          )?.descriptor;
+          const paramDesc = appDesc?.startCommand.parameters.find(
+            (p) => p.uid === param.uid
+          );
 
           if (!paramDesc || paramDesc.type !== ParameterType.SERVER_PORT) {
             continue;
@@ -87,24 +102,30 @@ export class PortsService {
         new Observable((s) => {
           this.http
             .post<{ [key: number]: boolean }>(
-              `${this.apiPath(this.groups.current$.value.name)}/${instance.instanceConfiguration.uuid}/check-ports/${node.nodeName}`,
+              `${this.apiPath(this.groups.current$.value.name)}/${
+                instance.instanceConfiguration.uuid
+              }/check-ports/${node.nodeName}`,
               portsOfNode.map((na) => na.port),
               NO_LOADING_BAR
             )
-            .pipe(measure(`Ports of ${instance.instanceConfiguration.uuid}/${node.nodeName}`))
-            .subscribe(
-              (result) => {
+            .pipe(
+              measure(
+                `Ports of ${instance.instanceConfiguration.uuid}/${node.nodeName}`
+              )
+            )
+            .subscribe({
+              next: (result) => {
                 for (const desc of portsOfNode) {
                   desc.state = result[desc.port];
                 }
                 s.next(portsOfNode);
                 s.complete();
               },
-              (err) => {
+              error: (err) => {
                 s.error(err);
                 s.complete();
-              }
-            );
+              },
+            });
         })
       );
 

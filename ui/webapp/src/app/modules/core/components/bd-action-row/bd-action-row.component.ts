@@ -1,14 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-bd-action-row',
   templateUrl: './bd-action-row.component.html',
-  styleUrls: ['./bd-action-row.component.css'],
 })
-export class BdActionRowComponent implements OnInit {
+export class BdActionRowComponent {
   @Input() align: 'left' | 'right' = 'right';
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

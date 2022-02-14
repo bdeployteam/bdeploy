@@ -50,16 +50,24 @@ const detailOsCol: BdDataColumn<MinionRow> = {
 @Component({
   selector: 'app-server-details',
   templateUrl: './server-details.component.html',
-  styleUrls: ['./server-details.component.css'],
   providers: [ServerDetailsService],
 })
 export class ServerDetailsComponent implements OnInit {
   private deleting$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ loading$ = combineLatest([this.deleting$, this.servers.loading$, this.serverDetails.loading$]).pipe(map(([a, b, c]) => a || b || c));
+  /* template */ loading$ = combineLatest([
+    this.deleting$,
+    this.servers.loading$,
+    this.serverDetails.loading$,
+  ]).pipe(map(([a, b, c]) => a || b || c));
   /* template */ transfering$ = new BehaviorSubject<boolean>(false);
   /* template */ installing$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
+  /* template */ columns = [
+    detailNameCol,
+    detailVersionCol,
+    detailMasterCol,
+    detailOsCol,
+  ];
   /* template */ synchronizing$ = new BehaviorSubject<boolean>(false);
   /* template */ version: string;
   /* template */ minions: MinionRow[];
@@ -67,7 +75,12 @@ export class ServerDetailsComponent implements OnInit {
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(public servers: ServersService, public serverDetails: ServerDetailsService, public auth: AuthenticationService, public areas: NavAreasService) {}
+  constructor(
+    public servers: ServersService,
+    public serverDetails: ServerDetailsService,
+    public auth: AuthenticationService,
+    public areas: NavAreasService
+  ) {}
 
   ngOnInit(): void {
     this.serverDetails.server$.subscribe((server) => {
@@ -108,7 +121,7 @@ export class ServerDetailsComponent implements OnInit {
           this.serverDetails
             .delete(server)
             .pipe(finalize(() => this.deleting$.next(false)))
-            .subscribe((_) => this.areas.closePanel());
+            .subscribe(() => this.areas.closePanel());
         }
       });
   }
@@ -134,19 +147,29 @@ export class ServerDetailsComponent implements OnInit {
     this.serverDetails
       .remoteUpdateInstall(server)
       .pipe(finalize(() => this.installing$.next(false)))
-      .subscribe(
-        (v) => {
-          this.dialog.info('Update complete', `The server has come back online after updating, the current server version is ${this.version}`).subscribe();
+      .subscribe({
+        next: () => {
+          this.dialog
+            .info(
+              'Update complete',
+              `The server has come back online after updating, the current server version is ${this.version}`
+            )
+            .subscribe();
         },
-        (err) => {
+        error: (err) => {
           let msg = err;
           if (err instanceof Error) {
             msg = err.message;
           } else if (err instanceof HttpErrorResponse) {
             msg = err.statusText;
           }
-          this.dialog.info('Eror Updating', `There was an error applying the update to the server: ${msg}`).subscribe();
-        }
-      );
+          this.dialog
+            .info(
+              'Eror Updating',
+              `There was an error applying the update to the server: ${msg}`
+            )
+            .subscribe();
+        },
+      });
   }
 }

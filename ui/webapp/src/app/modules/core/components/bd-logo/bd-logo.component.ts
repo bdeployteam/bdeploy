@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-bd-logo',
@@ -6,11 +6,7 @@ import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
   styleUrls: ['./bd-logo.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdLogoComponent implements OnInit {
+export class BdLogoComponent {
   @Input() public size: number;
   @Input() public color: string;
-
-  constructor() {}
-
-  ngOnInit() {}
 }

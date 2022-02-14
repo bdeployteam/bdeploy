@@ -13,12 +13,39 @@ import { SoftwareDetailsComponent } from './components/software-details/software
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 
 const REPOSITORIES_ROUTES: Route[] = [
-  { path: 'add', component: AddRepositoryComponent, canActivate: [AdminGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'settings', component: SettingsComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'settings/edit', component: EditComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'settings/permissions', component: PermissionsComponent, canActivate: [ScopedAdminGuard], data: { max: true } },
-  { path: 'upload', component: SoftwareUploadComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'details/:key/:tag', component: SoftwareDetailsComponent, canActivate: [ScopedReadGuard] },
+  {
+    path: 'add',
+    component: AddRepositoryComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'settings',
+    component: SettingsComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'settings/edit',
+    component: EditComponent,
+    canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'settings/permissions',
+    component: PermissionsComponent,
+    canActivate: [ScopedAdminGuard],
+    data: { max: true },
+  },
+  {
+    path: 'upload',
+    component: SoftwareUploadComponent,
+    canActivate: [ScopedWriteGuard],
+  },
+  {
+    path: 'details/:key/:tag',
+    component: SoftwareDetailsComponent,
+    canActivate: [ScopedReadGuard],
+  },
 ];
 
 @NgModule({

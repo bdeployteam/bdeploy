@@ -1,10 +1,22 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 
-export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inherit';
+export type BdButtonColorMode =
+  | 'primary'
+  | 'accent'
+  | 'toolbar'
+  | 'warn'
+  | 'inherit';
 
 @Component({
   selector: 'app-bd-button',
@@ -12,7 +24,7 @@ export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inh
   styleUrls: ['./bd-button.component.css'],
   animations: [scaleWidthFromZero, scaleWidthToZero],
 })
-export class BdButtonComponent implements OnInit, AfterViewInit {
+export class BdButtonComponent implements AfterViewInit {
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() fontSet: string;
@@ -24,7 +36,9 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
   @Input() color: BdButtonColorMode;
   @Input() disabled = false;
   @Input() isSubmit = true; // default in HTML *is* submit.
-  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
+  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(
+    false
+  );
 
   @Input() isToggle = false;
   @Input() toggleOnClick = true;
@@ -33,14 +47,14 @@ export class BdButtonComponent implements OnInit, AfterViewInit {
 
   constructor(public _elementRef: ElementRef) {}
 
-  ngOnInit(): void {}
-
   ngAfterViewInit() {
     /*
      * Click event handler for the button. we bind on the host, NOT on the button intentionally
      * as otherwise events will still be generated even if the button is disabled.
      */
-    fromEvent<MouseEvent>(this._elementRef.nativeElement, 'click', { capture: true }).subscribe((event) => {
+    fromEvent<MouseEvent>(this._elementRef.nativeElement, 'click', {
+      capture: true,
+    }).subscribe((event) => {
       if (this.disabled) {
         event.stopPropagation();
         return;

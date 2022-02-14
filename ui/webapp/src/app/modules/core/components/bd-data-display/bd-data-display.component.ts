@@ -1,7 +1,18 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { BehaviorSubject } from 'rxjs';
-import { BdDataColumn, bdDataDefaultSearch, bdDataDefaultSort, BdDataGrouping } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  bdDataDefaultSearch,
+  bdDataDefaultSort,
+  BdDataGrouping,
+} from 'src/app/models/data';
 import { CardViewService } from '../../services/card-view.service';
 import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
@@ -9,9 +20,8 @@ import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
 @Component({
   selector: 'app-bd-data-display',
   templateUrl: './bd-data-display.component.html',
-  styleUrls: ['./bd-data-display.component.css'],
 })
-export class BdDataDisplayComponent<T> implements OnInit {
+export class BdDataDisplayComponent<T> {
   /**
    * The current display mode, which will either use bd-data-table (false) or bd-data-grid (true) to visualize data.
    */
@@ -53,14 +63,22 @@ export class BdDataDisplayComponent<T> implements OnInit {
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
+  @Input() sortData: (
+    data: T[],
+    column: BdDataColumn<T>,
+    direction: SortDirection
+  ) => T[] = bdDataDefaultSort;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (
+    search: string,
+    data: T[],
+    columns: BdDataColumn<T>[]
+  ) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -117,8 +135,6 @@ export class BdDataDisplayComponent<T> implements OnInit {
   @ViewChild('grid', { static: false }) gridComp: BdDataGridComponent<T>;
 
   constructor(private cardViewService: CardViewService) {}
-
-  ngOnInit(): void {}
 
   public update(): void {
     this.tableComp?.update();

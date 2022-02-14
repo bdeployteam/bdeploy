@@ -4,7 +4,10 @@ import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto, ObjectChangeType } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
+import {
+  EMPTY_SCOPE,
+  ObjectChangesService,
+} from 'src/app/modules/core/services/object-changes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
 
@@ -19,7 +22,12 @@ export class LinkCentralComponent implements OnInit {
 
   private subscription: Subscription;
 
-  constructor(private servers: ServersService, private changes: ObjectChangesService, private areas: NavAreasService, public downloads: DownloadService) {}
+  constructor(
+    private servers: ServersService,
+    private changes: ObjectChangesService,
+    private areas: NavAreasService,
+    public downloads: DownloadService
+  ) {}
 
   ngOnInit(): void {
     this.servers
@@ -27,7 +35,11 @@ export class LinkCentralComponent implements OnInit {
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((r) => (this.payload = r));
 
-    this.subscription = this.changes.subscribe(ObjectChangeType.MANAGED_MASTER_ATTACH, EMPTY_SCOPE, (c) => this.areas.closePanel());
+    this.subscription = this.changes.subscribe(
+      ObjectChangeType.MANAGED_MASTER_ATTACH,
+      EMPTY_SCOPE,
+      () => this.areas.closePanel()
+    );
   }
 
   /* template */ onDragStart($event) {
@@ -40,7 +52,7 @@ export class LinkCentralComponent implements OnInit {
 
     if (event.dataTransfer.files.length > 0) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = () => {
         const data = reader.result.toString();
         this.onManualAttach(data);
       };
@@ -61,7 +73,7 @@ export class LinkCentralComponent implements OnInit {
   }
 
   private onManualAttach(ident: string) {
-    this.servers.manualAttachCentral(ident).subscribe((r) => {
+    this.servers.manualAttachCentral(ident).subscribe(() => {
       this.areas.closePanel();
     });
   }

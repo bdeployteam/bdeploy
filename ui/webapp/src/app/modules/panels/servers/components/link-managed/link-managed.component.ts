@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { AttachType, ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import {
+  AttachType,
+  ServersService,
+} from 'src/app/modules/primary/servers/services/servers.service';
 import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
 
 @Component({
@@ -12,19 +15,21 @@ import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
   templateUrl: './link-managed.component.html',
   styleUrls: ['./link-managed.component.css'],
 })
-export class LinkManagedComponent implements OnInit {
+export class LinkManagedComponent {
   /* template */ payload: ManagedMasterDto;
   /* template */ ident: string;
   /* template */ manual = false;
   /* template */ loadingIdent$ = new BehaviorSubject<boolean>(true);
 
-  constructor(private servers: ServersService, private areas: NavAreasService, private downloads: DownloadService) {}
-
-  ngOnInit(): void {}
+  constructor(
+    private servers: ServersService,
+    private areas: NavAreasService,
+    private downloads: DownloadService
+  ) {}
 
   private readFile(file: File) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = () => {
       this.payload = JSON.parse(reader.result.toString());
     };
     reader.readAsText(file);
@@ -70,7 +75,10 @@ export class LinkManagedComponent implements OnInit {
   }
 
   /* template */ onDownloadCentralIdent() {
-    this.downloads.downloadBlob('central-' + this.payload.hostName + '.txt', new Blob([this.ident], { type: 'text/plain' }));
+    this.downloads.downloadBlob(
+      'central-' + this.payload.hostName + '.txt',
+      new Blob([this.ident], { type: 'text/plain' })
+    );
     this.areas.closePanel();
   }
 }

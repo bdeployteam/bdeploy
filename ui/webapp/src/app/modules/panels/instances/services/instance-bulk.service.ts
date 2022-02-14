@@ -2,7 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, concat, Observable, of } from 'rxjs';
 import { concatAll, filter, map, mergeMap } from 'rxjs/operators';
-import { ApplicationValidationDto, InstanceDto, InstanceUpdateDto, ProductDto } from 'src/app/models/gen.dtos';
+import {
+  ApplicationValidationDto,
+  InstanceDto,
+  InstanceUpdateDto,
+  ProductDto,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
@@ -15,17 +20,27 @@ export class InstanceBulkService {
   public selection$ = new BehaviorSubject<InstanceDto[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);
 
-  private apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}`;
+  private apiPath = (group, instance) =>
+    `${this.cfg.config.api}/group/${group}/instance/${instance}`;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private groups: GroupsService, private instance: InstancesService, areas: NavAreasService) {
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private groups: GroupsService,
+    private instance: InstancesService,
+    areas: NavAreasService
+  ) {
     // clear selection when the primary route changes
-    areas.primaryRoute$.subscribe((r) => this.selection$.next([]));
+    areas.primaryRoute$.subscribe(() => this.selection$.next([]));
 
     // find matching selected instances if possible once instances change.
     instance.instances$.subscribe((i) => {
       const newSelection: InstanceDto[] = [];
       this.selection$.value.forEach((inst) => {
-        const found = i.find((i) => i.instanceConfiguration.uuid === inst.instanceConfiguration.uuid);
+        const found = i.find(
+          (c) =>
+            c.instanceConfiguration.uuid === inst.instanceConfiguration.uuid
+        );
         if (found) {
           newSelection.push(found);
         }
@@ -36,13 +51,27 @@ export class InstanceBulkService {
 
   public start() {
     return concat(
-      this.selection$.value.map((inst) => this.http.get(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/processes/start`))
+      this.selection$.value.map((inst) =>
+        this.http.get(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            inst.instanceConfiguration.uuid
+          )}/processes/start`
+        )
+      )
     ).pipe(concatAll());
   }
 
   public stop() {
     return concat(
-      this.selection$.value.map((inst) => this.http.get(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/processes/stop`))
+      this.selection$.value.map((inst) =>
+        this.http.get(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            inst.instanceConfiguration.uuid
+          )}/processes/stop`
+        )
+      )
     ).pipe(concatAll());
   }
 
@@ -50,22 +79,45 @@ export class InstanceBulkService {
     return concat(this.selection$.value).pipe(
       filter((i) => i.instanceConfiguration.product.tag !== target.key.tag),
       mergeMap((i) =>
-        this.instance.loadNodes(i.instanceConfiguration.uuid, i.instance.tag).pipe(
-          map((nodes) => {
-            const upd: InstanceUpdateDto = { config: { config: i.instanceConfiguration, nodeDtos: nodes.nodeConfigDtos }, files: [], validation: [] };
-            return upd;
-          })
+        this.instance
+          .loadNodes(i.instanceConfiguration.uuid, i.instance.tag)
+          .pipe(
+            map((nodes) => {
+              const upd: InstanceUpdateDto = {
+                config: {
+                  config: i.instanceConfiguration,
+                  nodeDtos: nodes.nodeConfigDtos,
+                },
+                files: [],
+                validation: [],
+              };
+              return upd;
+            })
+          )
+      ),
+      mergeMap((u) =>
+        this.http.post<InstanceUpdateDto>(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            u.config.config.uuid
+          )}/updateProductVersion/${target.key.tag}`,
+          u
         )
       ),
       mergeMap((u) =>
-        this.http.post<InstanceUpdateDto>(`${this.apiPath(this.groups.current$.value.name, u.config.config.uuid)}/updateProductVersion/${target.key.tag}`, u)
-      ),
-      mergeMap((u) =>
-        this.http.post<ApplicationValidationDto[]>(`${this.apiPath(this.groups.current$.value.name, u.config.config.uuid)}/validate`, u).pipe(
-          map((v) => {
-            return { config: u.config, files: [], validation: v };
-          })
-        )
+        this.http
+          .post<ApplicationValidationDto[]>(
+            `${this.apiPath(
+              this.groups.current$.value.name,
+              u.config.config.uuid
+            )}/validate`,
+            u
+          )
+          .pipe(
+            map((v) => {
+              return { config: u.config, files: [], validation: v };
+            })
+          )
       )
     );
   }
@@ -73,24 +125,45 @@ export class InstanceBulkService {
   public saveUpdate(updates: InstanceUpdateDto[]): Observable<any> {
     return of(...updates).pipe(
       mergeMap((u) => {
-        const dto = this.selection$.value.find((i) => i.instanceConfiguration.uuid === u.config.config.uuid);
+        const dto = this.selection$.value.find(
+          (i) => i.instanceConfiguration.uuid === u.config.config.uuid
+        );
         const managedServer = dto.managedServer?.hostName;
         const expect = dto.instance.tag;
-        return this.http.post(`${this.apiPath(this.groups.current$.value.name, u.config.config.uuid)}/update`, u, { params: { managedServer, expect } });
+        return this.http.post(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            u.config.config.uuid
+          )}/update`,
+          u,
+          { params: { managedServer, expect } }
+        );
       })
     );
   }
 
   public delete() {
     return concat(
-      this.selection$.value.map((inst) => this.http.delete(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/delete`))
+      this.selection$.value.map((inst) =>
+        this.http.delete(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            inst.instanceConfiguration.uuid
+          )}/delete`
+        )
+      )
     ).pipe(concatAll());
   }
 
   public install(): Observable<any> {
     return concat(
       this.selection$.value.map((inst) =>
-        this.http.get(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/${inst.instance.tag}/install`)
+        this.http.get(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            inst.instanceConfiguration.uuid
+          )}/${inst.instance.tag}/install`
+        )
       )
     ).pipe(concatAll());
   }
@@ -98,7 +171,12 @@ export class InstanceBulkService {
   public activate(): Observable<any> {
     return concat(
       this.selection$.value.map((inst) =>
-        this.http.get(`${this.apiPath(this.groups.current$.value.name, inst.instanceConfiguration.uuid)}/${inst.instance.tag}/activate`)
+        this.http.get(
+          `${this.apiPath(
+            this.groups.current$.value.name,
+            inst.instanceConfiguration.uuid
+          )}/${inst.instance.tag}/activate`
+        )
       )
     ).pipe(concatAll());
   }

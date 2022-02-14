@@ -10,11 +10,36 @@ import { DataFilesComponent } from './components/data-files/data-files.component
 import { HistoryComponent } from './components/history/history.component';
 
 const INSTANCES_ROUTES: Route[] = [
-  { path: 'browser/:group', component: BrowserComponent, canActivate: [ScopedReadGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'dashboard/:group/:instance', component: DashboardComponent, canActivate: [ScopedReadGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'configuration/:group/:instance', component: ConfigurationComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'history/:group/:instance', component: HistoryComponent, canActivate: [ScopedReadGuard], canDeactivate: [DirtyDialogGuard] },
-  { path: 'data-files/:group/:instance', component: DataFilesComponent, canActivate: [ScopedReadGuard], canDeactivate: [DirtyDialogGuard] },
+  {
+    path: 'browser/:group',
+    component: BrowserComponent,
+    canActivate: [ScopedReadGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'dashboard/:group/:instance',
+    component: DashboardComponent,
+    canActivate: [ScopedReadGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'configuration/:group/:instance',
+    component: ConfigurationComponent,
+    canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'history/:group/:instance',
+    component: HistoryComponent,
+    canActivate: [ScopedReadGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'data-files/:group/:instance',
+    component: DataFilesComponent,
+    canActivate: [ScopedReadGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
 ];
 
 @NgModule({

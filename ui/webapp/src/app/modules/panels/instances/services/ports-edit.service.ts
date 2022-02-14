@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { ApplicationConfiguration, ParameterConfiguration, ParameterDescriptor, ParameterType } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ParameterConfiguration,
+  ParameterDescriptor,
+  ParameterType,
+} from 'src/app/models/gen.dtos';
 import { URLish } from 'src/app/modules/core/utils/url.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from './process-edit.service';
@@ -18,38 +23,58 @@ export interface PortParmGroup {
 export class PortsEditService {
   public ports$ = new BehaviorSubject<PortParmGroup[]>(null);
 
-  constructor(public edit: InstanceEditService, private procEdit: ProcessEditService) {
-    combineLatest([this.edit.state$, this.edit.stateApplications$]).subscribe(([s, a]) => {
-      if (!s || !a) {
-        this.ports$.next(null);
-        return;
-      }
+  constructor(
+    public edit: InstanceEditService,
+    private procEdit: ProcessEditService
+  ) {
+    combineLatest([this.edit.state$, this.edit.stateApplications$]).subscribe(
+      ([s, a]) => {
+        if (!s || !a) {
+          this.ports$.next(null);
+          return;
+        }
 
-      const portParams: PortParmGroup[] = [];
+        const portParams: PortParmGroup[] = [];
 
-      for (const node of s.config.nodeDtos) {
-        for (const app of node.nodeConfiguration.applications) {
-          for (const param of app.start.parameters) {
-            const appDesc = this.edit.getApplicationDescriptor(app.application.name);
-            const paramDesc = appDesc?.startCommand?.parameters?.find((p) => p.uid === param.uid);
+        for (const node of s.config.nodeDtos) {
+          for (const app of node.nodeConfiguration.applications) {
+            for (const param of app.start.parameters) {
+              const appDesc = this.edit.getApplicationDescriptor(
+                app.application.name
+              );
+              const paramDesc = appDesc?.startCommand?.parameters?.find(
+                (p) => p.uid === param.uid
+              );
 
-            if (!paramDesc || !this.isPortParam(paramDesc)) {
-              continue;
-            }
+              if (!paramDesc || !this.isPortParam(paramDesc)) {
+                continue;
+              }
 
-            const ppg = portParams.find((p) => p.desc.uid === paramDesc.uid && p.desc.global && paramDesc.global && p.params[0].value === param.value);
-            if (!ppg) {
-              portParams.push({ apps: [app], params: [param], desc: paramDesc, port: this.getPortValue(param, paramDesc) });
-            } else {
-              ppg.params.push(param);
-              ppg.apps.push(app);
+              const ppg = portParams.find(
+                (p) =>
+                  p.desc.uid === paramDesc.uid &&
+                  p.desc.global &&
+                  paramDesc.global &&
+                  p.params[0].value === param.value
+              );
+              if (!ppg) {
+                portParams.push({
+                  apps: [app],
+                  params: [param],
+                  desc: paramDesc,
+                  port: this.getPortValue(param, paramDesc),
+                });
+              } else {
+                ppg.params.push(param);
+                ppg.apps.push(app);
+              }
             }
           }
         }
-      }
 
-      this.ports$.next(portParams);
-    });
+        this.ports$.next(portParams);
+      }
+    );
   }
 
   public shiftPorts(ports: PortParmGroup[], amount: number): string[] {
@@ -70,7 +95,7 @@ export class PortsEditService {
       this.setPortValue(group, `${num}`);
     }
 
-    if (!!errors.length) {
+    if (errors.length) {
       this.edit.discard(); // discard whatever we did...
     } else {
       this.edit.conceal(`Shift ports by ${amount}`);
@@ -79,7 +104,10 @@ export class PortsEditService {
     return errors;
   }
 
-  private getPortValue(param: ParameterConfiguration, desc: ParameterDescriptor) {
+  private getPortValue(
+    param: ParameterConfiguration,
+    desc: ParameterDescriptor
+  ) {
     if (desc.type === ParameterType.URL) {
       // the instance-edit-ports component will give us only parameters where this is valid!
       return new URLish(param.value).port;
@@ -97,7 +125,10 @@ export class PortsEditService {
         param.value = value;
       }
 
-      param.preRendered = this.procEdit.preRenderParameter(group.desc, param.value);
+      param.preRendered = this.procEdit.preRenderParameter(
+        group.desc,
+        param.value
+      );
     }
     group.port = value;
   }

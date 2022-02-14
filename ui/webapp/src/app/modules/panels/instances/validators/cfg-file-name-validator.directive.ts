@@ -1,13 +1,29 @@
 import { Directive } from '@angular/core';
-import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
-import { BdValidationMessageExtractor, bdValidationRegisterMessageExtractor } from 'src/app/modules/core/validators/messages';
+import {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
+import {
+  BdValidationMessageExtractor,
+  bdValidationRegisterMessageExtractor,
+} from 'src/app/modules/core/validators/messages';
 import { ConfigFilesService } from '../services/config-files.service';
 
 @Directive({
   selector: '[appCfgFileNameValidator]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: CfgFileNameValidatorDirective, multi: true }],
+  providers: [
+    {
+      provide: NG_VALIDATORS,
+      useExisting: CfgFileNameValidatorDirective,
+      multi: true,
+    },
+  ],
 })
-export class CfgFileNameValidatorDirective implements Validator, BdValidationMessageExtractor {
+export class CfgFileNameValidatorDirective
+  implements Validator, BdValidationMessageExtractor
+{
   public readonly id = 'cfg-file-name';
 
   constructor(private cfgFiles: ConfigFilesService) {
@@ -15,7 +31,7 @@ export class CfgFileNameValidatorDirective implements Validator, BdValidationMes
   }
 
   extract(label: string, errors: ValidationErrors): string {
-    if (!!errors[this.id]) {
+    if (errors[this.id]) {
       return errors[this.id];
     }
   }

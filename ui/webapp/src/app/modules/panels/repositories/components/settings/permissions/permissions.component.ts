@@ -1,7 +1,11 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { Permission, UserInfo } from 'src/app/models/gen.dtos';
-import { ACTION_CANCEL, ACTION_OK, BdDialogMessageAction } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  ACTION_CANCEL,
+  ACTION_OK,
+  BdDialogMessageAction,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { BdDataPermissionLevelCellComponent } from '../../../../../core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
@@ -11,9 +15,8 @@ import { RepositoryUsersService } from '../../../services/repository-users.servi
 @Component({
   selector: 'app-permissions',
   templateUrl: './permissions.component.html',
-  styleUrls: ['./permissions.component.css'],
 })
-export class PermissionsComponent implements OnInit, OnDestroy {
+export class PermissionsComponent {
   private readonly colGlobalPerm: BdDataColumn<UserInfo> = {
     id: 'global',
     name: 'Global Perm.',
@@ -36,7 +39,10 @@ export class PermissionsComponent implements OnInit, OnDestroy {
     data: (r) => `Modify permissions for ${r.name}`,
     action: (r) => this.doModify(this.modDialog, r),
     actionDisabled: (r) => this.getAvailablePermissionsFor(r).length === 0,
-    icon: (r) => (!this.getLocalPermissionLevel(r) && !this.getGlobalPermissionLevel(r) ? 'add' : 'edit'),
+    icon: (r) =>
+      !this.getLocalPermissionLevel(r) && !this.getGlobalPermissionLevel(r)
+        ? 'add'
+        : 'edit',
     width: '40px',
   };
 
@@ -47,13 +53,27 @@ export class PermissionsComponent implements OnInit, OnDestroy {
     disabled: () => !this.getLocalPermissionLevel(this.modUser),
   };
 
-  private groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
+  private groupNames = [
+    'Local Permission',
+    'Global Permission',
+    'No Permission',
+  ];
 
-  /* template */ columns: BdDataColumn<UserInfo>[] = [...this.userCols.defaultUsersColumns, this.colGlobalPerm, this.colLocalPerm, this.colModPerm];
+  /* template */ columns: BdDataColumn<UserInfo>[] = [
+    ...this.userCols.defaultUsersColumns,
+    this.colGlobalPerm,
+    this.colLocalPerm,
+    this.colModPerm,
+  ];
   /* template */ grouping: BdDataGrouping<UserInfo>[] = [
     {
       definition: {
-        group: (r) => (!this.getLocalPermissionLevel(r) ? (!this.getGlobalPermissionLevel(r) ? this.groupNames[2] : this.groupNames[1]) : this.groupNames[0]),
+        group: (r) =>
+          !this.getLocalPermissionLevel(r)
+            ? !this.getGlobalPermissionLevel(r)
+              ? this.groupNames[2]
+              : this.groupNames[1]
+            : this.groupNames[0],
         name: 'Permission Type',
         sort: (a, b) => this.groupNames.indexOf(a) - this.groupNames.indexOf(b),
       },
@@ -68,18 +88,20 @@ export class PermissionsComponent implements OnInit, OnDestroy {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
 
-  constructor(public repos: RepositoriesService, public users: RepositoryUsersService, public userCols: UsersColumnsService) {}
-
-  ngOnInit(): void {}
-
-  ngOnDestroy(): void {}
+  constructor(
+    public repos: RepositoriesService,
+    public users: RepositoryUsersService,
+    public userCols: UsersColumnsService
+  ) {}
 
   private getLocalPermissionLevel(user: UserInfo): Permission {
-    return user.permissions.find((p) => p.scope === this.repos.current$.value.name)?.permission;
+    return user.permissions.find(
+      (p) => p.scope === this.repos.current$.value.name
+    )?.permission;
   }
 
   private getGlobalPermissionLevel(user: UserInfo): Permission {
-    const p = user.permissions.find((p) => !p.scope)?.permission;
+    const p = user.permissions.find((c) => !c.scope)?.permission;
     if (!p) {
       return Permission.READ; // implicit READ permission on repos for everybody.
     }
@@ -90,7 +112,11 @@ export class PermissionsComponent implements OnInit, OnDestroy {
     this.modUser = user;
     this.modPerm = this.getLocalPermissionLevel(user);
     this.dialog
-      .message({ header: `Modify ${user.name} permissions`, template: tpl, actions: [this.actRemoveLocal, ACTION_CANCEL, ACTION_OK] })
+      .message({
+        header: `Modify ${user.name} permissions`,
+        template: tpl,
+        actions: [this.actRemoveLocal, ACTION_CANCEL, ACTION_OK],
+      })
       .subscribe((r) => {
         if (r === this.actRemoveLocal.result) {
           this.users.updatePermission(user, null).subscribe();

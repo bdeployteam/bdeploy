@@ -1,7 +1,23 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { max } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { BdDataColumn, BdDataColumnDisplay, bdDataDefaultSearch, BdDataGrouping, bdExtractGroups, UNMATCHED_GROUP } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  bdDataDefaultSearch,
+  BdDataGrouping,
+  bdExtractGroups,
+  UNMATCHED_GROUP,
+} from 'src/app/models/data';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
 
@@ -10,14 +26,21 @@ import { BdSearchable, SearchService } from '../../services/search.service';
   templateUrl: './bd-data-grid.component.html',
   styleUrls: ['./bd-data-grid.component.css'],
 })
-export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, OnChanges {
+export class BdDataGridComponent<T>
+  implements OnInit, OnDestroy, BdSearchable, OnChanges
+{
   /**
    * The columns to display
    */
   /* template */ _columns: BdDataColumn<T>[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
-    this._columns = val.filter((c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH);
+    this._columns = val.filter(
+      (c) =>
+        !c.display ||
+        c.display === BdDataColumnDisplay.CARD ||
+        c.display === BdDataColumnDisplay.BOTH
+    );
   }
 
   /**
@@ -25,7 +48,11 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
    * concatenate each value in each record object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (
+    search: string,
+    data: T[],
+    columns: BdDataColumn<T>[]
+  ) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-grid should register itself as a BdSearchable with the global SearchService.
@@ -65,7 +92,10 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
 
   private subscription: Subscription;
 
-  constructor(private searchService: SearchService, public areas: NavAreasService) {}
+  constructor(
+    private searchService: SearchService,
+    public areas: NavAreasService
+  ) {}
 
   ngOnInit(): void {
     if (this.searchable) {
@@ -94,14 +124,17 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
     // populate records to display with empty search by default.
     this.bdOnSearch(null);
     if (this.grouping) {
-      this.groupValues = bdExtractGroups(this.grouping.definition, this.records);
+      this.groupValues = bdExtractGroups(
+        this.grouping.definition,
+        this.records
+      );
       this.activeGroup = this.groupValues[0];
       this.groupRecords = this.getGroupRecords(this.activeGroup);
     }
   }
 
   ngOnDestroy(): void {
-    if (!!this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
@@ -111,7 +144,9 @@ export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, 
   }
 
   bdOnSearch(search: string) {
-    this.recordsToDisplay$.next(this.searchData(search, this.records, this._columns));
+    this.recordsToDisplay$.next(
+      this.searchData(search, this.records, this._columns)
+    );
     if (this.activeGroup) {
       this.groupRecords = this.getGroupRecords(this.activeGroup);
     }

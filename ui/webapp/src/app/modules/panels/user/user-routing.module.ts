@@ -10,7 +10,11 @@ import { ThemesComponent } from './components/themes/themes.component';
 const USER_ROUTES: Route[] = [
   { path: 'themes', component: ThemesComponent },
   { path: 'settings', component: SettingsComponent },
-  { path: 'settings/edit', component: EditComponent, canDeactivate: [DirtyDialogGuard] },
+  {
+    path: 'settings/edit',
+    component: EditComponent,
+    canDeactivate: [DirtyDialogGuard],
+  },
   { path: 'settings/password', component: PasswordComponent },
   { path: 'settings/token', component: TokenComponent },
 ];

@@ -1,21 +1,35 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import { Component, Input, ViewChild } from '@angular/core';
 import { RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-main-nav-button',
   templateUrl: './main-nav-button.component.html',
-  styleUrls: ['./main-nav-button.component.css'],
   animations: [
     trigger('showHide', [
-      state('visible', style({ display: 'flex', transform: 'translateX(0px)', opacity: 1 })),
-      state('hidden', style({ display: 'none', transform: 'translateX(-50px)', opacity: 0 })),
+      state(
+        'visible',
+        style({ display: 'flex', transform: 'translateX(0px)', opacity: 1 })
+      ),
+      state(
+        'hidden',
+        style({ display: 'none', transform: 'translateX(-50px)', opacity: 0 })
+      ),
       transition('visible => hidden', animate('0.2s ease')),
-      transition('hidden => visible', [style({ display: 'flex' }), animate('0.2s ease')]),
+      transition('hidden => visible', [
+        style({ display: 'flex' }),
+        animate('0.2s ease'),
+      ]),
     ]),
   ],
 })
-export class MainNavButtonComponent implements OnInit {
+export class MainNavButtonComponent {
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() text: string;
@@ -25,9 +39,6 @@ export class MainNavButtonComponent implements OnInit {
   @Input() route: any[];
   @Input() panel = false;
 
-  @ViewChild(RouterLinkActive, { static: false }) /* template */ rla: RouterLinkActive;
-
-  constructor() {}
-
-  ngOnInit(): void {}
+  @ViewChild(RouterLinkActive, { static: false }) /* template */
+  rla: RouterLinkActive;
 }

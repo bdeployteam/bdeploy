@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -13,7 +13,7 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
   templateUrl: './history-compare.component.html',
   styleUrls: ['./history-compare.component.css'],
 })
-export class HistoryCompareComponent implements OnInit, OnDestroy {
+export class HistoryCompareComponent implements OnDestroy {
   /* template */ narrow$ = new BehaviorSubject<boolean>(false);
 
   /* template */ base$ = new BehaviorSubject<string>(null);
@@ -26,7 +26,12 @@ export class HistoryCompareComponent implements OnInit, OnDestroy {
   private compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private subscription: Subscription;
 
-  constructor(private areas: NavAreasService, bop: BreakpointObserver, private details: HistoryDetailsService, public instances: InstancesService) {
+  constructor(
+    private areas: NavAreasService,
+    bop: BreakpointObserver,
+    private details: HistoryDetailsService,
+    public instances: InstancesService
+  ) {
     this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
       this.narrow$.next(bs.matches);
     });
@@ -58,18 +63,18 @@ export class HistoryCompareComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(
-      combineLatest([this.baseConfig$, this.compareConfig$]).subscribe(([base, compare]) => {
-        if (!!base && !!compare) {
-          const pair = new ConfigPair(base, compare);
-          this.configPair$.next(pair);
-        } else {
-          this.configPair$.next(null);
+      combineLatest([this.baseConfig$, this.compareConfig$]).subscribe(
+        ([base, compare]) => {
+          if (!!base && !!compare) {
+            const pair = new ConfigPair(base, compare);
+            this.configPair$.next(pair);
+          } else {
+            this.configPair$.next(null);
+          }
         }
-      })
+      )
     );
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();

@@ -15,15 +15,23 @@ export class AuditService {
 
   constructor(private cfg: ConfigService, private http: HttpClient) {}
 
-  public hiveAuditLog(hive: string, lastInstant: number, lineLimit: number): Observable<AuditLogDto[]> {
+  public hiveAuditLog(
+    hive: string,
+    lastInstant: number,
+    lineLimit: number
+  ): Observable<AuditLogDto[]> {
     this.loading$.next(true);
-    let params: HttpParams = new HttpParams().set('hive', hive).set('lineLimit', '' + lineLimit);
+    let params: HttpParams = new HttpParams()
+      .set('hive', hive)
+      .set('lineLimit', '' + lineLimit);
     if (lastInstant) {
       params = params.set('lastInstant', '' + lastInstant);
     }
-    return this.http.get<AuditLogDto[]>(`${this.apiPath()}/hiveAuditLog`, { params: params }).pipe(
-      measure('Load BHive Audit Logs'),
-      finalize(() => this.loading$.next(false))
-    );
+    return this.http
+      .get<AuditLogDto[]>(`${this.apiPath()}/hiveAuditLog`, { params: params })
+      .pipe(
+        measure('Load BHive Audit Logs'),
+        finalize(() => this.loading$.next(false))
+      );
   }
 }

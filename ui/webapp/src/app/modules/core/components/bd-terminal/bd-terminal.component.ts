@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
 import { IDisposable } from 'xterm';
@@ -18,7 +26,7 @@ const EL_TO_EOL: string = CSI + '0K'; // clear from cursor to EOL
   templateUrl: './bd-terminal.component.html',
   styleUrls: ['./bd-terminal.component.css'],
 })
-export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
+export class BdTerminalComponent implements AfterViewInit, OnDestroy {
   @Input() content$: Observable<string>;
   @Input() allowInput = false;
   @Output() userInput = new EventEmitter<string>();
@@ -32,10 +40,6 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
   private stdinBufferCursorPos = 0;
   private stdinStartX: number;
 
-  constructor() {}
-
-  ngOnInit(): void {}
-
   ngAfterViewInit() {
     this.term.underlying.attachCustomKeyEventHandler((event) => {
       // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
@@ -43,7 +47,7 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
       return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
     });
 
-    this.term.underlying.setOption('fontSize', 12);
+    this.term.underlying.options.fontSize = 12;
 
     this.content$.subscribe((content) => {
       if (this.allowInput) {
@@ -83,7 +87,9 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Retrieve the current X position of the cursor */
   private getCursorX(): number {
-    return this.term.underlying ? this.term.underlying.buffer.active.cursorX : undefined;
+    return this.term.underlying
+      ? this.term.underlying.buffer.active.cursorX
+      : undefined;
   }
 
   /** Wires up user input possibilities if they are enabled. */
@@ -97,7 +103,7 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       // TODO: migrate to keyEventInput - need a solution for pasting, everything should be straight forward.
-      this.stdinSubscription = this.term.keyInput.subscribe((input) => {
+      this.stdinSubscription = this.term.keyEventInput.subscribe((input) => {
         // store initial position on first keystroke after terminal output
         if (!this.stdinStartX) {
           this.stdinStartX = this.getCursorX();
@@ -105,33 +111,45 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // keyboard input usually is a single charactor or CSI sequence, but clipboard content is a string
         let idx = 0;
-        while (idx < input.length) {
+        while (idx < input.key.length) {
           if (input[idx] === '\r') {
             idx++;
             this.sendStdin();
-          } else if (input.charCodeAt(idx) === 0x7f) {
+          } else if (input.key.charCodeAt(idx) === 0x7f) {
             idx++;
             if (this.stdinBufferCursorPos > 0) {
               this.clearInput();
-              this.stdinBuffer = this.stdinBuffer.substring(0, this.stdinBufferCursorPos - 1) + this.stdinBuffer.substring(this.stdinBufferCursorPos);
+              this.stdinBuffer =
+                this.stdinBuffer.substring(0, this.stdinBufferCursorPos - 1) +
+                this.stdinBuffer.substring(this.stdinBufferCursorPos);
               this.stdinBufferCursorPos--;
               this.updateInput();
             }
           } else {
             this.clearInput();
-            if (input.charCodeAt(idx) >= 32) {
-              this.stdinBuffer = [this.stdinBuffer.slice(0, this.stdinBufferCursorPos), input[idx], this.stdinBuffer.slice(this.stdinBufferCursorPos)].join('');
+            if (input.key.charCodeAt(idx) >= 32) {
+              this.stdinBuffer = [
+                this.stdinBuffer.slice(0, this.stdinBufferCursorPos),
+                input[idx],
+                this.stdinBuffer.slice(this.stdinBufferCursorPos),
+              ].join('');
               this.stdinBufferCursorPos++;
               idx++;
-            } else if (input.substr(idx).startsWith(CSI)) {
+            } else if (input.key.substr(idx).startsWith(CSI)) {
               idx += CSI.length;
-              if (idx < input.length) {
+              if (idx < input.key.length) {
                 switch (input[idx]) {
                   case 'C': // cursor right
-                    this.stdinBufferCursorPos = this.stdinBufferCursorPos + (this.stdinBuffer.length > this.stdinBufferCursorPos ? 1 : 0);
+                    this.stdinBufferCursorPos =
+                      this.stdinBufferCursorPos +
+                      (this.stdinBuffer.length > this.stdinBufferCursorPos
+                        ? 1
+                        : 0);
                     break;
                   case 'D': // cursor left
-                    this.stdinBufferCursorPos = this.stdinBufferCursorPos - (this.stdinBufferCursorPos > 0 ? 1 : 0);
+                    this.stdinBufferCursorPos =
+                      this.stdinBufferCursorPos -
+                      (this.stdinBufferCursorPos > 0 ? 1 : 0);
                     break;
                   case 'H': // pos 1
                     this.stdinBufferCursorPos = 0;
@@ -187,7 +205,11 @@ export class BdTerminalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Retrieves the current amoun of lines taken up by user input */
   private getInputLineCount() {
-    return this.stdinBuffer ? Math.ceil((this.stdinStartX + this.stdinBuffer.length) / this.getTermCols()) : 1;
+    return this.stdinBuffer
+      ? Math.ceil(
+          (this.stdinStartX + this.stdinBuffer.length) / this.getTermCols()
+        )
+      : 1;
   }
 
   /** Clears all existing content in the terminal */

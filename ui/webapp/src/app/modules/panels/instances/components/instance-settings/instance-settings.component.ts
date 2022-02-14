@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -11,9 +11,8 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 @Component({
   selector: 'app-instance-settings',
   templateUrl: './instance-settings.component.html',
-  styleUrls: ['./instance-settings.component.css'],
 })
-export class InstanceSettingsComponent implements OnInit {
+export class InstanceSettingsComponent {
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -25,8 +24,6 @@ export class InstanceSettingsComponent implements OnInit {
     private instances: InstancesService,
     private router: Router
   ) {}
-
-  ngOnInit(): void {}
 
   /* template */ doDelete() {
     const inst = this.instances.current$.value;
@@ -45,8 +42,12 @@ export class InstanceSettingsComponent implements OnInit {
           this.instances
             .delete(inst.instanceConfiguration.uuid)
             .pipe(finalize(() => this.deleting$.next(false)))
-            .subscribe((_) => {
-              this.router.navigate(['instances', 'browser', this.groups.current$.value.name]);
+            .subscribe(() => {
+              this.router.navigate([
+                'instances',
+                'browser',
+                this.groups.current$.value.name,
+              ]);
             });
         }
       });

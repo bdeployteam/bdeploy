@@ -8,9 +8,18 @@
       [route]="['panels', 'admin', 'software', 'upload']"
       tooltip="below"
     ></app-bd-panel-button>
-    <app-bd-button icon="refresh" text="Refresh" (click)="software.load()" tooltip="below"></app-bd-button>
+    <app-bd-button
+      icon="refresh"
+      text="Refresh"
+      (click)="software.load()"
+      tooltip="below"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <app-bd-data-table [records]="software.software$ | async" [columns]="columns" [recordRoute]="getRecordRoute"></app-bd-data-table>
+    <app-bd-data-table
+      [records]="software.software$ | async"
+      [columns]="columns"
+      [recordRoute]="getRecordRoute"
+    ></app-bd-data-table>
   </app-bd-dialog-content>
 </app-bd-dialog>

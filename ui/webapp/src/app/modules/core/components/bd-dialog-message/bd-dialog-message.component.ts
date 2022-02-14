@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, TemplateRef } from '@angular/core';
+import { Component, HostListener, OnDestroy, TemplateRef } from '@angular/core';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
@@ -50,16 +50,48 @@ export interface BdDialogMessage<T> {
   dismissResult?: T;
 }
 
-export const ACTION_CONFIRM: BdDialogMessageAction<boolean> = { name: 'Confirm', result: true, confirm: true };
-export const ACTION_APPLY: BdDialogMessageAction<boolean> = { name: 'Apply', result: true, confirm: true };
+export const ACTION_CONFIRM: BdDialogMessageAction<boolean> = {
+  name: 'Confirm',
+  result: true,
+  confirm: true,
+};
+export const ACTION_APPLY: BdDialogMessageAction<boolean> = {
+  name: 'Apply',
+  result: true,
+  confirm: true,
+};
 
-export const ACTION_OK: BdDialogMessageAction<boolean> = { name: 'OK', result: true, confirm: true };
-export const ACTION_DISCARD: BdDialogMessageAction<boolean> = { name: 'Discard', result: true, confirm: true };
-export const ACTION_CANCEL: BdDialogMessageAction<boolean> = { name: 'Cancel', result: false, confirm: false };
-export const ACTION_CLOSE: BdDialogMessageAction<boolean> = { name: 'Close', result: false, confirm: false };
+export const ACTION_OK: BdDialogMessageAction<boolean> = {
+  name: 'OK',
+  result: true,
+  confirm: true,
+};
+export const ACTION_DISCARD: BdDialogMessageAction<boolean> = {
+  name: 'Discard',
+  result: true,
+  confirm: true,
+};
+export const ACTION_CANCEL: BdDialogMessageAction<boolean> = {
+  name: 'Cancel',
+  result: false,
+  confirm: false,
+};
+export const ACTION_CLOSE: BdDialogMessageAction<boolean> = {
+  name: 'Close',
+  result: false,
+  confirm: false,
+};
 
-export const ACTION_YES: BdDialogMessageAction<boolean> = { name: 'Yes', result: true, confirm: true };
-export const ACTION_NO: BdDialogMessageAction<boolean> = { name: 'No', result: false, confirm: false };
+export const ACTION_YES: BdDialogMessageAction<boolean> = {
+  name: 'Yes',
+  result: true,
+  confirm: true,
+};
+export const ACTION_NO: BdDialogMessageAction<boolean> = {
+  name: 'No',
+  result: false,
+  confirm: false,
+};
 
 @Component({
   selector: 'app-bd-dialog-message',
@@ -67,7 +99,7 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = { name: 'No', result: f
   styleUrls: ['./bd-dialog-message.component.css'],
   animations: [delayedFadeIn],
 })
-export class BdDialogMessageComponent implements OnInit, OnDestroy {
+export class BdDialogMessageComponent implements OnDestroy {
   public message$ = new BehaviorSubject<BdDialogMessage<any>>(null);
   public result$ = new Subject<any>();
   public confirmed$ = new BehaviorSubject<boolean>(true);
@@ -90,17 +122,17 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
 
   constructor() {
     // reset confirmation state whenever a new message arrives which requires confirmation.
-    this.subscription = this.message$.pipe(filter((v) => !!v)).subscribe((r) => this.confirmed$.next(!r.confirmation));
+    this.subscription = this.message$
+      .pipe(filter((v) => !!v))
+      .subscribe((r) => this.confirmed$.next(!r.confirmation));
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
   public reset(): void {
-    if (!!this.message$.value) {
+    if (this.message$.value) {
       this.result$.error('Dialog Message Reset');
       this.message$.next(null);
       this._userConfirmation = '';
@@ -108,7 +140,7 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:keyup.Enter', ['$event'])
-  private onEnterPress(event: KeyboardEvent): void {
+  private onEnterPress(): void {
     // find single confirm action.
     const x = this.message$.value?.actions?.filter((a) => a.confirm);
     if (x?.length !== 1) {

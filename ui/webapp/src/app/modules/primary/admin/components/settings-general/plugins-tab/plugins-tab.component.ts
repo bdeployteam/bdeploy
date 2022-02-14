@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
@@ -10,9 +10,8 @@ import { PluginLoadActionComponent } from './plugin-load-action/plugin-load-acti
 @Component({
   selector: 'app-plugins-tab',
   templateUrl: './plugins-tab.component.html',
-  styleUrls: ['./plugins-tab.component.css'],
 })
-export class PluginsTabComponent implements OnInit {
+export class PluginsTabComponent {
   private colId: BdDataColumn<PluginInfoDto> = {
     id: 'id',
     name: 'ID',
@@ -76,11 +75,11 @@ export class PluginsTabComponent implements OnInit {
     this.colDelete,
   ];
 
-  /* template */ plugins$ = this.plugins.plugins$.pipe(map((data) => this.sortPlugins(data)));
+  /* template */ plugins$ = this.plugins.plugins$.pipe(
+    map((data) => this.sortPlugins(data))
+  );
 
   constructor(public plugins: PluginAdminService) {}
-
-  ngOnInit(): void {}
 
   private sortPlugins(data: PluginInfoDto[]): PluginInfoDto[] {
     return [...data].sort((a, b) => {

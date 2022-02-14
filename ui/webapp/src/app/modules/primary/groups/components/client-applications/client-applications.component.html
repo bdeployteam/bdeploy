@@ -1,5 +1,7 @@
 <app-bd-dialog [loadingWhen$]="clients.loading$">
-  <app-bd-dialog-toolbar header="Client Applications - {{ (groups.current$ | async)?.name }}">
+  <app-bd-dialog-toolbar
+    header="Client Applications - {{ (groups.current$ | async)?.name }}"
+  >
     <div fxFlex="1 0 auto"></div>
     <app-bd-data-grouping
       [multiple]="!isCardView"
@@ -9,7 +11,13 @@
       [records]="clients.apps$ | async"
       [presetKey]="presetKeyValue"
     ></app-bd-data-grouping>
-    <app-bd-button [isToggle]="true" icon="grid_view" text="Toggle Card Mode" [(toggle)]="isCardView" tooltip="below"></app-bd-button>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="isCardView"
+      tooltip="below"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <app-bd-data-display
@@ -22,7 +30,9 @@
       [grid]="isCardView"
     >
       <app-bd-no-data>
-        <p [style.text-align]="'center'">No instance in this instance group has configured client applications.</p>
+        <p [style.text-align]="'center'">
+          No instance in this instance group has configured client applications.
+        </p>
       </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>

@@ -34,7 +34,9 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
   private getStateIcon() {
     if (this.states?.activeTag === this.record.instanceTag) {
       return 'check_circle'; // active
-    } else if (!!this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
+    } else if (
+      this.states?.installedTags?.find((v) => v === this.record.instanceTag)
+    ) {
       return 'check_circle_outline'; // installed
     }
 
@@ -44,7 +46,9 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
   private getStateTooltip(): string {
     if (this.states?.activeTag === this.record.instanceTag) {
       return 'This version is active.'; // active
-    } else if (!!this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
+    } else if (
+      this.states?.installedTags?.find((v) => v === this.record.instanceTag)
+    ) {
       return 'This version is installed'; // installed
     }
   }
@@ -54,10 +58,14 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
       return [];
     }
 
-    if (!!this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
+    if (
+      this.states?.installedTags?.find((v) => v === this.record.instanceTag)
+    ) {
       // if the version is older than the last-active tag, we'll uninstall it later on.
-      if (!!this.states?.lastActiveTag) {
-        if (Number(this.states.lastActiveTag) > Number(this.record.instanceTag)) {
+      if (this.states?.lastActiveTag) {
+        if (
+          Number(this.states.lastActiveTag) > Number(this.record.instanceTag)
+        ) {
           return ['local-greyed'];
         }
       }

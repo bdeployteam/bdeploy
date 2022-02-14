@@ -1,18 +1,53 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Add Instance" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Add Instance"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form fxLayout="column" fxLayoutGap="10px" #form="ngForm" (ngSubmit)="onSave()">
-      <div>
-        Creating instance: <strong>{{ config.uuid }}</strong>
+    <form
+      fxLayout="column"
+      fxLayoutGap="10px"
+      #form="ngForm"
+      (ngSubmit)="onSave()"
+    >
+      <div>Creating instance: <strong>{{ config.uuid }}</strong></div>
+      <div class="bd-warning-text" *ngIf="!prodList?.length">
+        No products are available. Upload a product first.
       </div>
-      <div class="bd-warning-text" *ngIf="!prodList?.length">No products are available. Upload a product first.</div>
-      <div class="bd-warning-text" *ngIf="isCentral && !serverList?.length">No managed server available. Link a managed server first.</div>
-      <app-bd-form-input label="Name" name="name" [(ngModel)]="config.name" required appTrimmed></app-bd-form-input>
-      <app-bd-form-input label="Description" name="description" [(ngModel)]="config.description" required></app-bd-form-input>
-      <app-bd-form-select label="Purpose" name="purpose" [(ngModel)]="config.purpose" [values]="purposes" required></app-bd-form-select>
-      <app-bd-form-toggle label="Automatic Startup" name="autoStart" [(ngModel)]="config.autoStart"></app-bd-form-toggle>
-      <app-bd-form-toggle label="Automatic Uninstallation" name="autoUninstall" [(ngModel)]="config.autoUninstall"></app-bd-form-toggle>
+      <div class="bd-warning-text" *ngIf="isCentral && !serverList?.length">
+        No managed server available. Link a managed server first.
+      </div>
+      <app-bd-form-input
+        label="Name"
+        name="name"
+        [(ngModel)]="config.name"
+        required
+        appTrimmed
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Description"
+        name="description"
+        [(ngModel)]="config.description"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-select
+        label="Purpose"
+        name="purpose"
+        [(ngModel)]="config.purpose"
+        [values]="purposes"
+        required
+      ></app-bd-form-select>
+      <app-bd-form-toggle
+        label="Automatic Startup"
+        name="autoStart"
+        [(ngModel)]="config.autoStart"
+      ></app-bd-form-toggle>
+      <app-bd-form-toggle
+        label="Automatic Uninstallation"
+        name="autoUninstall"
+        [(ngModel)]="config.autoUninstall"
+      ></app-bd-form-toggle>
       <app-bd-form-select
         label="Product"
         name="product"
@@ -40,7 +75,14 @@
         required
       ></app-bd-form-select>
 
-      <app-bd-button type="submit" text="Save" [collapsed]="false" icon="save" color="primary" [disabled]="form.invalid"></app-bd-button>
+      <app-bd-button
+        type="submit"
+        text="Save"
+        [collapsed]="false"
+        icon="save"
+        color="primary"
+        [disabled]="form.invalid"
+      ></app-bd-button>
     </form>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -12,9 +12,8 @@ import { GroupDetailsService } from '../../services/group-details.service';
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.css'],
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
@@ -29,29 +28,38 @@ export class SettingsComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {}
-
   /* template */ onRepair(group: InstanceGroupConfiguration): void {
-    this.dialog.confirm('Repair', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive').subscribe((confirmed) => {
-      if (confirmed) {
-        this.repairing$.next(true);
-        this.details
-          .repair(group.name)
-          .pipe(finalize(() => this.repairing$.next(false)))
-          .subscribe((r) => {
-            console.groupCollapsed('Damaged Objects');
-            const keys = Object.keys(r);
-            for (const key of keys) {
-              console.log(key, ':', r[key]);
-            }
-            console.groupEnd();
+    this.dialog
+      .confirm(
+        'Repair',
+        'Repairing will remove any (anyhow) damaged and unusable elements from the BHive'
+      )
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.repairing$.next(true);
+          this.details
+            .repair(group.name)
+            .pipe(finalize(() => this.repairing$.next(false)))
+            .subscribe((r) => {
+              console.groupCollapsed('Damaged Objects');
+              const keys = Object.keys(r);
+              for (const key of keys) {
+                console.log(key, ':', r[key]);
+              }
+              console.groupEnd();
 
-            this.dialog
-              .info(`Repair`, !!keys?.length ? `Repair removed ${keys.length} damaged objects` : `No damaged objects were found.`, 'build')
-              .subscribe();
-          });
-      }
-    });
+              this.dialog
+                .info(
+                  `Repair`,
+                  keys?.length
+                    ? `Repair removed ${keys.length} damaged objects`
+                    : `No damaged objects were found.`,
+                  'build'
+                )
+                .subscribe();
+            });
+        }
+      });
   }
 
   /* template */ onPrune(group: InstanceGroupConfiguration): void {
@@ -60,7 +68,9 @@ export class SettingsComponent implements OnInit {
       .prune(group.name)
       .pipe(finalize(() => this.pruning$.next(false)))
       .subscribe((r) => {
-        this.dialog.info('Prune', `Prune freed <strong>${r}</strong> in ${group.name}.`).subscribe();
+        this.dialog
+          .info('Prune', `Prune freed <strong>${r}</strong> in ${group.name}.`)
+          .subscribe();
       });
   }
 
@@ -80,7 +90,7 @@ export class SettingsComponent implements OnInit {
           this.details
             .delete(group)
             .pipe(finalize(() => this.deleting$.next(false)))
-            .subscribe((r) => {
+            .subscribe(() => {
               this.router.navigate(['groups', 'browser']);
             });
         }

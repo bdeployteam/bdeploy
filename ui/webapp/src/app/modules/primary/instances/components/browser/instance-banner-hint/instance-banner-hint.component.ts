@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 
 @Component({
@@ -6,10 +6,6 @@ import { InstanceDto } from 'src/app/models/gen.dtos';
   templateUrl: './instance-banner-hint.component.html',
   styleUrls: ['./instance-banner-hint.component.css'],
 })
-export class InstanceBannerHintComponent implements OnInit {
+export class InstanceBannerHintComponent {
   @Input() record: InstanceDto;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

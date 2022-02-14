@@ -1,4 +1,10 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -27,7 +33,10 @@ import { NavAreasService } from '../../services/nav-areas.service';
   ],
 })
 export class MainNavFlyinComponent implements OnInit {
-  constructor(private areas: NavAreasService, private media: BreakpointObserver) {}
+  constructor(
+    private areas: NavAreasService,
+    private media: BreakpointObserver
+  ) {}
 
   @HostBinding('attr.data-cy')
   @HostBinding('@openClose')

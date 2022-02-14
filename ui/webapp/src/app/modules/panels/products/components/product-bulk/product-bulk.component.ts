@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -7,16 +7,13 @@ import { ProductBulkService } from '../../services/product-bulk.service';
 @Component({
   selector: 'app-product-bulk',
   templateUrl: './product-bulk.component.html',
-  styleUrls: ['./product-bulk.component.css'],
 })
-export class ProductBulkComponent implements OnInit {
+export class ProductBulkComponent {
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   constructor(public bulk: ProductBulkService) {}
-
-  ngOnInit(): void {}
 
   /* template */ onDelete() {
     this.dialog

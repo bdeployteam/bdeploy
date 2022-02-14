@@ -1,17 +1,45 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="User Settings" [panel]="true"> </app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="User Settings" [panel]="true">
+  </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="user">
       <div fxLayout="row" fxLayoutGap="10px">
-        <app-user-avatar [mail]="user?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
-        <div fxFlex="1 0 auto" gdColumns="70px 180px" gdGap="3px 5px" [style.max-width.px]="250">
+        <app-user-avatar
+          [mail]="user?.email"
+          [hostSize]="64"
+          [avatarSize]="64"
+        ></app-user-avatar>
+        <div
+          fxFlex="1 0 auto"
+          gdColumns="70px 180px"
+          gdGap="3px 5px"
+          [style.max-width.px]="250"
+        >
           <div><strong>Username:</strong></div>
-          <div class="bd-text-ellipsis" [matTooltip]="user.name" [matTooltipShowDelay]="1000">{{ user.name }}</div>
+          <div
+            class="bd-text-ellipsis"
+            [matTooltip]="user.name"
+            [matTooltipShowDelay]="1000"
+          >
+            {{ user.name }}
+          </div>
           <div><strong>Full Name:</strong></div>
-          <div class="bd-text-ellipsis" [matTooltip]="user.fullName" [matTooltipShowDelay]="1000">{{ user.fullName }}</div>
+          <div
+            class="bd-text-ellipsis"
+            [matTooltip]="user.fullName"
+            [matTooltipShowDelay]="1000"
+          >
+            {{ user.fullName }}
+          </div>
           <div><strong>E-Mail:</strong></div>
-          <div class="bd-text-ellipsis" [matTooltip]="user.email" [matTooltipShowDelay]="1000">{{ user.email }}</div>
+          <div
+            class="bd-text-ellipsis"
+            [matTooltip]="user.email"
+            [matTooltipShowDelay]="1000"
+          >
+            {{ user.email }}
+          </div>
         </div>
       </div>
 
@@ -31,8 +59,19 @@
         icon="fingerprint"
         text="Change Password..."
       ></app-bd-panel-button>
-      <app-bd-panel-button [collapsed]="false" [route]="['token']" [relative]="true" icon="vpn_key" text="Create Token(s)..."></app-bd-panel-button>
-      <app-bd-button [collapsed]="false" icon="exit_to_app" text="Logout" (click)="logout()"></app-bd-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [route]="['token']"
+        [relative]="true"
+        icon="vpn_key"
+        text="Create Token(s)..."
+      ></app-bd-panel-button>
+      <app-bd-button
+        [collapsed]="false"
+        icon="exit_to_app"
+        text="Logout"
+        (click)="logout()"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

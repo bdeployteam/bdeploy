@@ -2,7 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ClientApplicationDto, InstanceClientAppsDto, InstanceConfiguration, LauncherDto, ObjectChangeType, OperatingSystem } from 'src/app/models/gen.dtos';
+import {
+  ClientApplicationDto,
+  InstanceClientAppsDto,
+  InstanceConfiguration,
+  LauncherDto,
+  ObjectChangeType,
+  OperatingSystem,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
@@ -34,7 +41,9 @@ export class ClientsService {
     private downloads: DownloadService,
     private changes: ObjectChangesService
   ) {
-    this.groups.current$.subscribe((g) => this.updateChangeSubscription(g?.name));
+    this.groups.current$.subscribe((g) =>
+      this.updateChangeSubscription(g?.name)
+    );
   }
 
   private reload(group: string) {
@@ -45,8 +54,12 @@ export class ClientsService {
 
     this.loading$.next(true);
     forkJoin({
-      launchers: this.http.get<LauncherDto>(`${this.apiSwupPath}/launcherLatest`),
-      apps: this.http.get<InstanceClientAppsDto[]>(`${this.apiGroupPath(group)}/client-apps`),
+      launchers: this.http.get<LauncherDto>(
+        `${this.apiSwupPath}/launcherLatest`
+      ),
+      apps: this.http.get<InstanceClientAppsDto[]>(
+        `${this.apiGroupPath(group)}/client-apps`
+      ),
     })
       .pipe(
         finalize(() => this.loading$.next(false)),
@@ -57,44 +70,67 @@ export class ClientsService {
 
         const r: ClientApp[] = [];
         for (const inst of result.apps) {
-          r.push(...inst.applications.map((a) => ({ instance: inst.instance, client: a })));
+          r.push(
+            ...inst.applications.map((a) => ({
+              instance: inst.instance,
+              client: a,
+            }))
+          );
         }
         this.apps$.next(r);
       });
   }
 
   private updateChangeSubscription(group: string) {
-    if (!!this.subscription) {
+    if (this.subscription) {
       this.subscription.unsubscribe();
     }
 
-    if (!!group) {
-      this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [group] }, (change) => {
-        this.reload(group);
-      });
+    if (group) {
+      this.subscription = this.changes.subscribe(
+        ObjectChangeType.INSTANCE,
+        { scope: [group] },
+        () => {
+          this.reload(group);
+        }
+      );
     }
 
     this.reload(group);
   }
 
   public hasLauncher(os: OperatingSystem): boolean {
-    return !!this.launcher$.value && !!this.launcher$.value.launchers && !!this.launcher$.value.launchers[os];
+    return (
+      !!this.launcher$.value &&
+      !!this.launcher$.value.launchers &&
+      !!this.launcher$.value.launchers[os]
+    );
   }
 
   /** Downloads the Click & Start file for the given client application */
-  public downloadClickAndStart(app: string, name: string, instance: string): Observable<any> {
+  public downloadClickAndStart(
+    app: string,
+    name: string,
+    instance: string
+  ): Observable<any> {
     return new Observable((s) => {
-      this.http.get(`${this.apiInstancePath(this.groups.current$.value.name)}/${instance}/${app}/clickAndStart`).subscribe(
-        (data) => {
-          this.downloads.downloadJson(name + '.bdeploy', data);
-          s.next(null);
-          s.complete();
-        },
-        (err) => {
-          s.error(err);
-          s.complete();
-        }
-      );
+      this.http
+        .get(
+          `${this.apiInstancePath(
+            this.groups.current$.value.name
+          )}/${instance}/${app}/clickAndStart`
+        )
+        .subscribe({
+          next: (data) => {
+            this.downloads.downloadJson(name + '.bdeploy', data);
+            s.next(null);
+            s.complete();
+          },
+          error: (err) => {
+            s.error(err);
+            s.complete();
+          },
+        });
     });
   }
 
@@ -102,20 +138,25 @@ export class ClientsService {
   public downloadInstaller(app: string, instance: string): Observable<any> {
     return new Observable((s) => {
       this.http
-        .get(`${this.apiInstancePath(this.groups.current$.value.name)}/${instance}/${app}/installer/zip`, {
-          responseType: 'text',
-        })
-        .subscribe(
-          (token) => {
+        .get(
+          `${this.apiInstancePath(
+            this.groups.current$.value.name
+          )}/${instance}/${app}/installer/zip`,
+          {
+            responseType: 'text',
+          }
+        )
+        .subscribe({
+          next: (token) => {
             this.downloads.download(this.downloads.createDownloadUrl(token));
             s.next(null);
             s.complete();
           },
-          (err) => {
+          error: (err) => {
             s.error(err);
             s.complete();
-          }
-        );
+          },
+        });
     });
   }
 
@@ -127,17 +168,17 @@ export class ClientsService {
           params: { os: os.toLowerCase() },
           responseType: 'text',
         })
-        .subscribe(
-          (token) => {
+        .subscribe({
+          next: (token) => {
             this.downloads.download(this.downloads.createDownloadUrl(token));
             s.next(null);
             s.complete();
           },
-          (err) => {
+          error: (err) => {
             s.error(err);
             s.complete();
-          }
-        );
+          },
+        });
     });
   }
 
@@ -149,7 +190,9 @@ export class ClientsService {
     }
 
     // TODO: To allow better progress reporting, we should use our prepare/token/download mechanism instead.
-    this.downloads.download(`${this.apiSwupPath}/download/${launchers[os].name}/${launchers[os].tag}`);
+    this.downloads.download(
+      `${this.apiSwupPath}/download/${launchers[os].name}/${launchers[os].tag}`
+    );
     return of(null);
   }
 }

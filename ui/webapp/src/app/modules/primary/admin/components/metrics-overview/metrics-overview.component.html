@@ -1,8 +1,18 @@
 <app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar header="Local Server Metrics"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <mat-tab-group mat-align-tabs="start" dynamicHeight animationDuration="0ms" (selectedTabChange)="doSelect($event.tab.textLabel)" class="metrics-tabs-group">
-      <mat-tab fxLayout="column" *ngFor="let key of keys$ | async" [label]="key">
+    <mat-tab-group
+      mat-align-tabs="start"
+      dynamicHeight
+      animationDuration="0ms"
+      (selectedTabChange)="doSelect($event.tab.textLabel)"
+      class="metrics-tabs-group"
+    >
+      <mat-tab
+        fxLayout="column"
+        *ngFor="let key of keys$ | async"
+        [label]="key"
+      >
         <ng-template mat-tab-label>{{ key }}</ng-template>
       </mat-tab>
     </mat-tab-group>
@@ -145,7 +155,14 @@
       </ng-container>
 
       <!-- Metrics of selected group -->
-      <h3 *ngIf="selectedGroup" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px"><mat-icon>lightbulb</mat-icon>Click a metric to view details</h3>
+      <h3
+        *ngIf="selectedGroup"
+        fxLayout="row"
+        fxLayoutAlign="start center"
+        fxLayoutGap="5px"
+      >
+        <mat-icon>lightbulb</mat-icon>Click a metric to view details
+      </h3>
       <div *ngIf="selectedGroup" class="charts-area">
         <div class="count-chart" [style.height.px]="countGraphHeight">
           <ngx-charts-bar-horizontal
@@ -169,28 +186,38 @@
                 >Count: <strong>{{ selectedTimer.counter.value }}</strong></span
               >
               <span
-                >Rate [mean]: <strong>{{ selectedTimer.meter.meanRate }}</strong></span
+                >Rate [mean]:
+                <strong>{{ selectedTimer.meter.meanRate }}</strong></span
               >
               <span
-                >Rate [1min]: <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span
+                >Rate [1min]:
+                <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span
               >
               <mat-divider></mat-divider>
               <span
-                >Time [75th]: <strong>{{ histogramDetails.p75th }} ms</strong></span
+                >Time [75th]:
+                <strong>{{ histogramDetails.p75th }} ms</strong></span
               >
               <span
-                >Time [99th]: <strong>{{ histogramDetails.p99th }} ms</strong></span
+                >Time [99th]:
+                <strong>{{ histogramDetails.p99th }} ms</strong></span
               >
               <span
-                >Time [min]: <strong>{{ histogramDetails.min }} ms</strong></span
+                >Time [min]:
+                <strong>{{ histogramDetails.min }} ms</strong></span
               >
               <span
-                >Time [max]: <strong>{{ histogramDetails.max }} ms</strong></span
+                >Time [max]:
+                <strong>{{ histogramDetails.max }} ms</strong></span
               >
             </div>
             <mat-divider></mat-divider>
             Histogram weighted values:
-            <div *ngIf="timerSeries" [style.height.px]="300" class="timer-chart">
+            <div
+              *ngIf="timerSeries"
+              [style.height.px]="300"
+              class="timer-chart"
+            >
               <ngx-charts-line-chart
                 [referenceLines]="referenceLines"
                 [showRefLines]="true"
@@ -204,7 +231,10 @@
                 [showYAxisLabel]="true"
               ></ngx-charts-line-chart>
             </div>
-            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px"><mat-icon>lightbulb</mat-icon>Histogram values are sorted by value, not time.</h3>
+            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+              <mat-icon>lightbulb</mat-icon>Histogram values are sorted by
+              value, not time.
+            </h3>
           </ng-container>
         </div>
       </div>

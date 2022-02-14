@@ -5,6 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './connection-lost.component.html',
   styleUrls: ['./connection-lost.component.css'],
 })
-export class ConnectionLostComponent {
-  constructor() {}
-}
+export class ConnectionLostComponent {}

@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ProcessProbeResultDto } from 'src/app/models/gen.dtos';
 
@@ -8,7 +8,7 @@ import { ProcessProbeResultDto } from 'src/app/models/gen.dtos';
   templateUrl: './probe-status.component.html',
   styleUrls: ['./probe-status.component.css'],
 })
-export class ProbeStatusComponent implements OnInit, OnChanges, OnDestroy {
+export class ProbeStatusComponent implements OnChanges, OnDestroy {
   @Input() probe: ProcessProbeResultDto;
 
   /* template */ class: string;
@@ -24,13 +24,11 @@ export class ProbeStatusComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(): void {
     const isBad = this.probe.status < 200 || this.probe.status >= 400;
     this.class = isBad ? 'local-bad' : 'local-good';
     this.icon = isBad ? 'heart_broken' : 'favorite';

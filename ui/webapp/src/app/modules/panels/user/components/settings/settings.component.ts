@@ -9,13 +9,16 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.css'],
 })
 export class SettingsComponent implements OnInit {
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
   /* template */ user: UserInfo;
 
-  constructor(private router: Router, public authService: AuthenticationService, public settings: SettingsService) {}
+  constructor(
+    private router: Router,
+    public authService: AuthenticationService,
+    public settings: SettingsService
+  ) {}
 
   ngOnInit(): void {
     this.authService

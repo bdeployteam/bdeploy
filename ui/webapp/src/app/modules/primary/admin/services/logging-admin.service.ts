@@ -2,7 +2,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
+import {
+  RemoteDirectory,
+  RemoteDirectoryEntry,
+  StringEntryChunkDto,
+} from 'src/app/models/gen.dtos';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { DownloadService } from '../../../core/services/download.service';
@@ -16,7 +20,11 @@ export class LoggingAdminService {
 
   private apiPath = () => `${this.cfg.config.api}/logging-admin`;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, private downloadService: DownloadService) {}
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private downloadService: DownloadService
+  ) {}
 
   public reload() {
     this.loading$.next(true);
@@ -34,7 +42,9 @@ export class LoggingAdminService {
             } else if (b.minion === 'master') {
               return 1;
             } else {
-              return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
+              return a.minion
+                .toLocaleLowerCase()
+                .localeCompare(b.minion.toLocaleLowerCase());
             }
           })
         )
@@ -42,20 +52,36 @@ export class LoggingAdminService {
   }
 
   public downloadLogFileContent(rd, rde) {
-    this.http.post(`${this.apiPath()}/request/${rd.minion}`, rde, { responseType: 'text' }).subscribe((token) => {
-      this.downloadService.download(`${this.apiPath()}/stream/${token}`);
-    });
+    this.http
+      .post(`${this.apiPath()}/request/${rd.minion}`, rde, {
+        responseType: 'text',
+      })
+      .subscribe((token) => {
+        this.downloadService.download(`${this.apiPath()}/stream/${token}`);
+      });
   }
 
-  public getLogContentChunk(rd: RemoteDirectory, rde: RemoteDirectoryEntry, offset: number, limit: number, silent: boolean): Observable<StringEntryChunkDto> {
+  public getLogContentChunk(
+    rd: RemoteDirectory,
+    rde: RemoteDirectoryEntry,
+    offset: number,
+    limit: number,
+    silent: boolean
+  ): Observable<StringEntryChunkDto> {
     const options = {
       headers: null,
-      params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
+      params: new HttpParams()
+        .set('offset', offset.toString())
+        .set('limit', limit.toString()),
     };
     if (silent) {
       options.headers = { ignoreLoadingBar: '' };
     }
-    return this.http.post<StringEntryChunkDto>(`${this.apiPath()}/content/${rd.minion}`, rde, options);
+    return this.http.post<StringEntryChunkDto>(
+      `${this.apiPath()}/content/${rd.minion}`,
+      rde,
+      options
+    );
   }
 
   public getLogConfig(): Observable<string> {

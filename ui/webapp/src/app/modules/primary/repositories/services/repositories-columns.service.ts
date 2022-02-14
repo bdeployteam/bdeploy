@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+} from 'src/app/models/data';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { RepositoriesService } from './repositories.service';
 
@@ -11,7 +15,7 @@ export class RepositoriesColumnsService {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
-    data: (r) => 'Software Repository',
+    data: () => 'Software Repository',
     display: BdDataColumnDisplay.CARD,
   };
 
@@ -37,7 +41,7 @@ export class RepositoriesColumnsService {
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
     display: BdDataColumnDisplay.CARD,
-    data: (r) => '/assets/repository.svg',
+    data: () => '/assets/repository.svg',
   };
 
   defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration>[] = [

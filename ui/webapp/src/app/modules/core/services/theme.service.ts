@@ -20,7 +20,10 @@ export class ThemeService {
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     const themeName = localStorage.getItem('theme');
-    if (!themeName || (themeName !== Theme.DARK && themeName !== Theme.DEFAULT)) {
+    if (
+      !themeName ||
+      (themeName !== Theme.DARK && themeName !== Theme.DEFAULT)
+    ) {
       localStorage.setItem('theme', Theme.DEFAULT);
     }
     this.updateTheme(localStorage.getItem('theme') as Theme);

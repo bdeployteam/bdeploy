@@ -1,4 +1,8 @@
-<div fxFlex="1 0 auto" fxLayout="column" [class.bd-editor-inited]="inited$ | async">
+<div
+  fxFlex="1 0 auto"
+  fxLayout="column"
+  [class.bd-editor-inited]="inited$ | async"
+>
   <ngx-monaco-editor
     name="content"
     [style.height]="'100%'"

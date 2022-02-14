@@ -1,4 +1,12 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { debounceTime, Subscription } from 'rxjs';
 import { ApplicationDto, ApplicationStartType } from 'src/app/models/gen.dtos';
@@ -9,14 +17,16 @@ import { ProcessEditService } from '../../../../services/process-edit.service';
   templateUrl: './config-process-header.component.html',
   styleUrls: ['./config-process-header.component.css'],
 })
-export class ConfigProcessHeaderComponent implements OnInit, OnDestroy {
+export class ConfigProcessHeaderComponent
+  implements OnInit, OnDestroy, AfterViewInit
+{
   @ViewChild('form') public form: NgForm;
   @Output() checkIsInvalid = new EventEmitter<boolean>();
 
   /* template */ app: ApplicationDto;
   /* template */ startTypes: ApplicationStartType[];
   /* template */ startTypeLabels: string[];
-  /* template */ hasPendingChanges: boolean = false;
+  /* template */ hasPendingChanges = false;
 
   private subscription: Subscription;
 
@@ -43,9 +53,16 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy {
 
   private getStartTypes(app: ApplicationDto): ApplicationStartType[] {
     const supported = app?.descriptor?.processControl?.supportedStartTypes;
-    if (!supported?.length || !!supported.find((s) => s === ApplicationStartType.INSTANCE)) {
-      return [ApplicationStartType.INSTANCE, ApplicationStartType.MANUAL, ApplicationStartType.MANUAL_CONFIRM];
-    } else if (!!supported.find((s) => s === ApplicationStartType.MANUAL)) {
+    if (
+      !supported?.length ||
+      !!supported.find((s) => s === ApplicationStartType.INSTANCE)
+    ) {
+      return [
+        ApplicationStartType.INSTANCE,
+        ApplicationStartType.MANUAL,
+        ApplicationStartType.MANUAL_CONFIRM,
+      ];
+    } else if (supported.find((s) => s === ApplicationStartType.MANUAL)) {
       return [ApplicationStartType.MANUAL, ApplicationStartType.MANUAL_CONFIRM];
     } else {
       return supported;

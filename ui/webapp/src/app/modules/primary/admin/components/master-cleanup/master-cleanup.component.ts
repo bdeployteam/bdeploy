@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { CleanupAction } from 'src/app/models/gen.dtos';
 import { CleanupService } from '../../services/cleanup.service';
@@ -28,10 +28,12 @@ const COL_DESC: BdDataColumn<CleanupAction> = {
   styleUrls: ['./master-cleanup.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class MasterCleanupComponent implements OnInit {
-  /* template */ columns: BdDataColumn<CleanupAction>[] = [COL_TYPE, COL_WHAT, COL_DESC];
+export class MasterCleanupComponent {
+  /* template */ columns: BdDataColumn<CleanupAction>[] = [
+    COL_TYPE,
+    COL_WHAT,
+    COL_DESC,
+  ];
 
   constructor(public cleanup: CleanupService) {}
-
-  ngOnInit() {}
 }

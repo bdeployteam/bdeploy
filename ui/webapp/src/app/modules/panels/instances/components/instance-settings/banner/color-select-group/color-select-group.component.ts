@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { ColorSelectComponent } from '../color-select/color-select.component';
 
 export interface ColorDef {
@@ -10,9 +10,8 @@ export interface ColorDef {
 @Component({
   selector: 'app-color-select-group',
   templateUrl: './color-select-group.component.html',
-  styleUrls: ['./color-select-group.component.css'],
 })
-export class ColorSelectGroupComponent implements OnInit {
+export class ColorSelectGroupComponent {
   @Output() colorChanged = new EventEmitter<ColorDef>();
 
   /* template */ colors = [
@@ -25,10 +24,6 @@ export class ColorSelectGroupComponent implements OnInit {
     { name: 'Critical', fg: '#FFFFFF', bg: '#EA000A' },
   ];
   /* template */ selected;
-
-  constructor() {}
-
-  ngOnInit(): void {}
 
   public setDefault() {
     this.selected = this.colors[0].name;

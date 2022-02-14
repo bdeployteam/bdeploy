@@ -1,4 +1,10 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
@@ -15,12 +21,17 @@ import { ServerDetailsService } from '../../../services/server-details.service';
 @Component({
   selector: 'app-server-edit',
   templateUrl: './server-edit.component.html',
-  styleUrls: ['./server-edit.component.css'],
   providers: [ServerDetailsService],
 })
-export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
+export class ServerEditComponent
+  implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit
+{
   /* tepmlate */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ loading$ = combineLatest([this.saving$, this.servers.loading$, this.details.loading$]).pipe(map(([a, b, c]) => a || b || c));
+  /* template */ loading$ = combineLatest([
+    this.saving$,
+    this.servers.loading$,
+    this.details.loading$,
+  ]).pipe(map(([a, b, c]) => a || b || c));
 
   /* template */ server: ManagedMasterDto;
   /* template */ orig: ManagedMasterDto;
@@ -31,7 +42,11 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
   @ViewChild('form') public form: NgForm;
   private subscription: Subscription;
 
-  constructor(private servers: ServersService, public details: ServerDetailsService, areas: NavAreasService) {
+  constructor(
+    private servers: ServersService,
+    public details: ServerDetailsService,
+    areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
@@ -64,7 +79,7 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => {
+    this.doSave().subscribe(() => {
       this.orig = cloneDeep(this.server);
       this.tb.closePanel();
     });
@@ -72,6 +87,8 @@ export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, 
 
   public doSave() {
     this.saving$.next(true);
-    return this.details.update(this.server).pipe(finalize(() => this.saving$.next(false)));
+    return this.details
+      .update(this.server)
+      .pipe(finalize(() => this.saving$.next(false)));
   }
 }

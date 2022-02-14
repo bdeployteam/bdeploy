@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnInit } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 
 @Component({
@@ -7,15 +7,11 @@ import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
   styleUrls: ['./bd-loading-overlay.component.css'],
   animations: [delayedFadeIn, delayedFadeOut],
 })
-export class BdLoadingOverlayComponent implements OnInit {
+export class BdLoadingOverlayComponent {
   @Input() show: boolean;
   @Input() mode: 'dim' | 'hide' = 'dim';
 
   @HostBinding('attr.data-cy') get dataCy() {
     return this.show ? 'loading' : 'loaded';
   }
-
-  constructor() {}
-
-  ngOnInit(): void {}
 }

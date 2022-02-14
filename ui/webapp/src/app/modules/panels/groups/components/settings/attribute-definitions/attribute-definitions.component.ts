@@ -1,9 +1,15 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { CustomAttributeDescriptor, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
-import { ACTION_APPLY, ACTION_CANCEL } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
+import {
+  CustomAttributeDescriptor,
+  InstanceGroupConfiguration,
+} from 'src/app/models/gen.dtos';
+import {
+  ACTION_APPLY,
+  ACTION_CANCEL,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { GroupDetailsService } from '../../../services/group-details.service';
@@ -11,9 +17,8 @@ import { GroupDetailsService } from '../../../services/group-details.service';
 @Component({
   selector: 'app-attribute-definitions',
   templateUrl: './attribute-definitions.component.html',
-  styleUrls: ['./attribute-definitions.component.css'],
 })
-export class AttributeDefinitionsComponent implements OnInit {
+export class AttributeDefinitionsComponent {
   private defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'id',
     name: 'ID',
@@ -31,24 +36,32 @@ export class AttributeDefinitionsComponent implements OnInit {
     name: 'Rem.',
     data: (r) => `Remove definition ${r.name}`,
     action: (r) => this.removeDefinition(r),
-    icon: (r) => 'delete',
+    icon: () => 'delete',
     width: '30px',
   };
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns: BdDataColumn<CustomAttributeDescriptor>[] = [this.defIdCol, this.defDescCol, this.defDelCol];
+  /* template */ columns: BdDataColumn<CustomAttributeDescriptor>[] = [
+    this.defIdCol,
+    this.defDescCol,
+    this.defDelCol,
+  ];
 
   /* template */ newId: string;
   /* template */ newDesc: string;
   /* template */ newUsedIds: string[];
 
-  constructor(public groups: GroupsService, public details: GroupDetailsService) {}
+  constructor(
+    public groups: GroupsService,
+    public details: GroupDetailsService
+  ) {}
 
-  ngOnInit(): void {}
-
-  /* template */ showAddDialog(group: InstanceGroupConfiguration, templ: TemplateRef<any>) {
+  /* template */ showAddDialog(
+    group: InstanceGroupConfiguration,
+    templ: TemplateRef<any>
+  ) {
     this.newUsedIds = group.instanceAttributes.map((r) => r.name);
     this.dialog
       .message({

@@ -1,4 +1,12 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 
@@ -37,9 +45,11 @@ export class BdEditorComponent implements OnInit, OnDestroy {
   constructor(private themeService: ThemeService, private host: ElementRef) {}
 
   ngOnInit(): void {
-    this.subscription = this.themeService.getThemeSubject().subscribe((theme) => {
+    this.subscription = this.themeService.getThemeSubject().subscribe(() => {
       if (this.globalMonaco) {
-        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
+        this.globalMonaco.editor.setTheme(
+          this.themeService.isDarkTheme() ? 'vs-dark' : 'vs'
+        );
       }
     });
 
@@ -94,7 +104,11 @@ export class BdEditorComponent implements OnInit, OnDestroy {
 
     this.globalMonaco.editor.getModels().forEach((m) => m.dispose());
 
-    const model = this.globalMonaco.editor.createModel(this.editorContent, undefined, this.globalMonaco.Uri.parse(this.editorPath));
+    const model = this.globalMonaco.editor.createModel(
+      this.editorContent,
+      undefined,
+      this.globalMonaco.Uri.parse(this.editorPath)
+    );
     this.monaco.setModel(model);
   }
 }

@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+} from 'src/app/models/data';
 import { RepositoryService } from './repository.service';
 
 @Injectable({
@@ -51,7 +55,7 @@ export class RepositoryColumnsService {
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
     display: BdDataColumnDisplay.CARD,
-    data: (r) => '/assets/no-image.svg',
+    data: () => '/assets/no-image.svg',
   };
 
   cardVendor: BdDataColumn<any> = {
@@ -59,7 +63,7 @@ export class RepositoryColumnsService {
     name: 'Vendor',
     hint: BdDataColumnTypeHint.FOOTER,
     display: BdDataColumnDisplay.CARD,
-    data: (r) => '-',
+    data: () => '-',
   };
 
   defaultRepositoryColumns: BdDataColumn<any>[] = [

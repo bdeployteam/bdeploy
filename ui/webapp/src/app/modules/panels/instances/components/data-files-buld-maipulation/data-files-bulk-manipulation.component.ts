@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -11,19 +11,24 @@ import { DataFilesService } from 'src/app/modules/primary/instances/services/dat
   templateUrl: './data-files-bulk-manipulation.component.html',
   styleUrls: ['./data-files-bulk-manipulation.component.css'],
 })
-export class DataFilesBulkManipulationComponent implements OnInit {
+export class DataFilesBulkManipulationComponent {
   /* template */ starting$ = new BehaviorSubject<boolean>(false);
   /* template */ stopping$ = new BehaviorSubject<boolean>(false);
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
   /* template */ installing$ = new BehaviorSubject<boolean>(false);
   /* template */ activating$ = new BehaviorSubject<boolean>(false);
   /* template */ isAllSameProduct: boolean;
-  /* template */ selections: { directory: RemoteDirectory; entry: RemoteDirectoryEntry }[];
+  /* template */ selections: {
+    directory: RemoteDirectory;
+    entry: RemoteDirectoryEntry;
+  }[];
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(public dataFilesBulkService: DataFilesBulkService, private areas: NavAreasService, private dataFilesService: DataFilesService) {}
-
-  ngOnInit(): void {}
+  constructor(
+    public dataFilesBulkService: DataFilesBulkService,
+    private areas: NavAreasService,
+    private dataFilesService: DataFilesService
+  ) {}
 
   /* template */ onDelete() {
     const count = this.dataFilesBulkService.selection.length;

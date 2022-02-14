@@ -1,5 +1,8 @@
 <app-bd-dialog [loadingWhen$]="instances.loading$">
-  <app-bd-dialog-toolbar *ngIf="instances.activeLoading$ | async" header="Dashboard - loading"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    *ngIf="instances.activeLoading$ | async"
+    header="Dashboard - loading"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-toolbar
     *ngIf="!(instances.activeLoading$ | async)"
     header="Dashboard - {{ !!activeInstance ? activeInstance.instanceConfiguration.name : currentInstance?.instanceConfiguration.name }}"
@@ -11,12 +14,19 @@
       [matTooltip]="!activeInstance.managedServer?.hostName ? null : 'On ' + activeInstance.managedServer.hostName"
     >
       <ng-container *ngIf="!(narrow$ | async)"
-        >Showing Active Version: {{ activeInstance.activeVersion.tag
-        }}<span *ngIf="!!activeInstance.managedServer?.hostName"> on {{ activeInstance.managedServer.hostName }}</span></ng-container
+        >Showing Active Version: {{ activeInstance.activeVersion.tag }}<span
+          *ngIf="!!activeInstance.managedServer?.hostName"
+        >
+          on {{ activeInstance.managedServer.hostName }}</span
+        ></ng-container
       >
-      <ng-container *ngIf="narrow$ | async">Ver.: {{ activeInstance.activeVersion.tag }}</ng-container>
+      <ng-container *ngIf="narrow$ | async"
+        >Ver.: {{ activeInstance.activeVersion.tag }}</ng-container
+      >
     </div>
-    <ng-container *ngIf="activeInstance?.managedServer?.update?.updateAvailable && (auth.isCurrentScopeAdmin$ | async)">
+    <ng-container
+      *ngIf="activeInstance?.managedServer?.update?.updateAvailable && (auth.isCurrentScopeAdmin$ | async)"
+    >
       <app-bd-button
         text="Server Update Available"
         icon="system_update"
@@ -30,7 +40,9 @@
     </ng-container>
     <ng-container *ngIf="isCentral">
       <ng-container *ngIf="currentInstance">
-        <app-bd-server-sync-button [server]="currentInstance.managedServer"></app-bd-server-sync-button>
+        <app-bd-server-sync-button
+          [server]="currentInstance.managedServer"
+        ></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
       </ng-container>
     </ng-container>
@@ -71,17 +83,30 @@
   <app-bd-dialog-content>
     <ng-container>
       <ng-container *ngIf="!!currentInstance?.productDto">
-        <div *ngIf="currentInstance?.instance.tag !== currentInstance?.activeVersion?.tag" class="bd-rect-card" fxLayout="column" [style.margin-bottom.px]="10">
+        <div
+          *ngIf="currentInstance?.instance.tag !== currentInstance?.activeVersion?.tag"
+          class="bd-rect-card"
+          fxLayout="column"
+          [style.margin-bottom.px]="10"
+        >
           <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
             <div fxLayout="column" fxFlex="1 0 0">
               <div *ngIf="!!currentInstance?.activeVersion?.tag">
-                This instance has a newer configuration version available to be activated ({{ currentInstance?.instance.tag }}). You can
+                This instance has a newer configuration version available to be
+                activated ({{ currentInstance?.instance.tag }}). You can
                 <strong>install and activate</strong> this version now.
               </div>
-              <div *ngIf="!currentInstance?.activeVersion?.tag">This instance has no active version. You can install and activate the current version now.</div>
+              <div *ngIf="!currentInstance?.activeVersion?.tag">
+                This instance has no active version. You can install and
+                activate the current version now.
+              </div>
               <div class="bd-description-text">
-                To <strong>install, uninstall or activate</strong> other versions, please go to the
-                <a [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]">instance history</a>.
+                To <strong>install, uninstall or activate</strong> other
+                versions, please go to the
+                <a
+                  [routerLink]="['/instances', 'history', areas.groupContext$.value, areas.instanceContext$.value]"
+                  >instance history</a
+                >.
               </div>
             </div>
             <ng-container *ngIf="states$ | async as state">
@@ -113,16 +138,22 @@
       </ng-container>
 
       <div fxLayout="column" fxLayoutGap="10px" *ngIf="activeInstance">
-        <app-bd-banner *ngIf="activeInstance.banner && activeInstance.banner.text" [banner]="activeInstance.banner"></app-bd-banner>
+        <app-bd-banner
+          *ngIf="activeInstance.banner && activeInstance.banner.text"
+          [banner]="activeInstance.banner"
+        ></app-bd-banner>
 
         <!-- Each node in the instance (the ones containing applications only) -->
         <ng-container *ngIf="instances.activeNodeCfgs$ | async as nodes">
           <app-bd-no-data *ngIf="!nodes?.nodeConfigDtos?.length">
             <p [style.text-align]="'center'">
-              <strong>{{ currentInstance?.instanceConfiguration.name }}</strong> does not have any configured applications in the current instance version.
-              Dashboard not available.
+              <strong>{{ currentInstance?.instanceConfiguration.name }}</strong>
+              does not have any configured applications in the current instance
+              version. Dashboard not available.
             </p>
-            <p [style.text-align]="'center'">Configure, install and activate instance version first.</p>
+            <p [style.text-align]="'center'">
+              Configure, install and activate instance version first.
+            </p>
             <app-bd-button
               text="Configure Instance"
               icon="settings"
@@ -153,9 +184,12 @@
       <!-- Show hint if there is no active version. -->
       <app-bd-no-data *ngIf="!activeInstance">
         <p [style.text-align]="'center'">
-          <strong>{{ currentInstance?.instanceConfiguration.name }}</strong> does not have an active version. Dashboard not yet available.
+          <strong>{{ currentInstance?.instanceConfiguration.name }}</strong>
+          does not have an active version. Dashboard not yet available.
         </p>
-        <p [style.text-align]="'center'">Configure, install and activate instance version first.</p>
+        <p [style.text-align]="'center'">
+          Configure, install and activate instance version first.
+        </p>
         <app-bd-button
           text="Configure Instance"
           icon="settings"

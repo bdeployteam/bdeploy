@@ -1,18 +1,82 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar header="Add Server" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Add Server"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <form #form="ngForm" (ngSubmit)="onSave()" fxLayout="column" fxLayoutGap="5px">
-      <app-bd-form-input label="Server URL" name="server" [(ngModel)]="tempServer.server" required appTrimmed></app-bd-form-input>
-      <app-bd-form-input label="Description" name="description" [(ngModel)]="tempServer.description" required></app-bd-form-input>
-      <app-bd-form-input label="User" name="user" [(ngModel)]="tempServer.user" required></app-bd-form-input>
-      <app-bd-form-input label="Password" name="pass" [(ngModel)]="tempServer.pass" type="password"></app-bd-form-input>
-      <app-bd-form-input label="Account Base" name="base" [(ngModel)]="tempServer.accountBase" required></app-bd-form-input>
-      <app-bd-form-input label="Account Pattern" name="pattern" [(ngModel)]="tempServer.accountPattern" required></app-bd-form-input>
-      <app-bd-form-input label="Account User Field" name="userField" [(ngModel)]="tempServer.accountUserName" required></app-bd-form-input>
-      <app-bd-form-input label="Account Name Field" name="nameField" [(ngModel)]="tempServer.accountFullName" required></app-bd-form-input>
-      <app-bd-form-input label="Account E-Mail Field" name="mailField" [(ngModel)]="tempServer.accountEmail" required></app-bd-form-input>
-      <app-bd-form-toggle label="Follow Referrals" name="referrals" [(ngModel)]="tempServer.followReferrals"></app-bd-form-toggle>
-      <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="form.invalid"></app-bd-button>
+    <form
+      #form="ngForm"
+      (ngSubmit)="onSave()"
+      fxLayout="column"
+      fxLayoutGap="5px"
+    >
+      <app-bd-form-input
+        label="Server URL"
+        name="server"
+        [(ngModel)]="tempServer.server"
+        required
+        appTrimmed
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Description"
+        name="description"
+        [(ngModel)]="tempServer.description"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="User"
+        name="user"
+        [(ngModel)]="tempServer.user"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Password"
+        name="pass"
+        [(ngModel)]="tempServer.pass"
+        type="password"
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Account Base"
+        name="base"
+        [(ngModel)]="tempServer.accountBase"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Account Pattern"
+        name="pattern"
+        [(ngModel)]="tempServer.accountPattern"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Account User Field"
+        name="userField"
+        [(ngModel)]="tempServer.accountUserName"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Account Name Field"
+        name="nameField"
+        [(ngModel)]="tempServer.accountFullName"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Account E-Mail Field"
+        name="mailField"
+        [(ngModel)]="tempServer.accountEmail"
+        required
+      ></app-bd-form-input>
+      <app-bd-form-toggle
+        label="Follow Referrals"
+        name="referrals"
+        [(ngModel)]="tempServer.followReferrals"
+      ></app-bd-form-toggle>
+      <app-bd-button
+        color="primary"
+        [collapsed]="false"
+        text="Save"
+        icon="save"
+        [disabled]="form.invalid"
+      ></app-bd-button>
     </form>
   </app-bd-dialog-content>
 </app-bd-dialog>

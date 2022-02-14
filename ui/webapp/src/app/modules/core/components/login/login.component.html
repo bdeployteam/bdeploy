@@ -1,13 +1,38 @@
 <app-bd-dialog [loadingWhen$]="loading$" [hideContentWhenLoading]="false">
   <app-bd-dialog-content>
-    <div class="local-sizing" fxLayout.gt-sm="row" fxLayout.lt-md="column" fxFlex="1 0 auto">
-      <div fxFlex="1 0 auto" class="local-logo-area bd-glow-bg" fxLayout="column" fxLayoutAlign="center center">
-        <app-bd-logo [size]="256" [ngClass]="logoClass" (click)="onLogoClick()"></app-bd-logo>
+    <div
+      class="local-sizing"
+      fxLayout.gt-sm="row"
+      fxLayout.lt-md="column"
+      fxFlex="1 0 auto"
+    >
+      <div
+        fxFlex="1 0 auto"
+        class="local-logo-area bd-glow-bg"
+        fxLayout="column"
+        fxLayoutAlign="center center"
+      >
+        <app-bd-logo
+          [size]="256"
+          [ngClass]="logoClass"
+          (click)="onLogoClick()"
+        ></app-bd-logo>
       </div>
       <div fxFlex="2 0 auto" fxLayout="column" fxLayoutAlign="center center">
-        <form #loginForm="ngForm" (ngSubmit)="onSubmit()" class="local-login-area" fxLayout="column" fxLayoutGap="10px">
+        <form
+          #loginForm="ngForm"
+          (ngSubmit)="onSubmit()"
+          class="local-login-area"
+          fxLayout="column"
+          fxLayoutGap="10px"
+        >
           <div class="local-header">BDeploy Login</div>
-          <app-bd-form-input [(ngModel)]="user" name="user" label="Username" required></app-bd-form-input>
+          <app-bd-form-input
+            [(ngModel)]="user"
+            name="user"
+            label="Username"
+            required
+          ></app-bd-form-input>
           <app-bd-form-input
             [(ngModel)]="pass"
             name="pass"
@@ -20,7 +45,14 @@
               <mat-error>{{ loginFailedMessage }}</mat-error>
             </div>
             <div fxFlex="1 0 auto"></div>
-            <button mat-raised-button [disabled]="loginForm.invalid" type="submit" color="accent">Login</button>
+            <button
+              mat-raised-button
+              [disabled]="loginForm.invalid"
+              type="submit"
+              color="accent"
+            >
+              Login
+            </button>
           </div>
         </form>
       </div>

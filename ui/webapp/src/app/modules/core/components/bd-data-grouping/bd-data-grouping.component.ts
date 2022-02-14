@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 
@@ -10,7 +18,6 @@ interface BdDataGroupingStorage {
 @Component({
   selector: 'app-bd-data-grouping',
   templateUrl: './bd-data-grouping.component.html',
-  styleUrls: ['./bd-data-grouping.component.css'],
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /** whether mutiple groupings are supported */
@@ -44,12 +51,12 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     // we support changing the preset key, so we can re-use the same widget and
     // have different grouping keys for table and card views.
-    if (!!changes['multiple']) {
+    if (changes['multiple']) {
       this.loadPreset();
       this.fireUpdate();
     }
 
-    if (!!changes['records']) {
+    if (changes['records']) {
       // in case the previous set of records was completely empty, we need to reload
       // default grouping (etc.) for the stored values to be available (potentially).
       if (!changes['records'].previousValue?.length) {
@@ -65,7 +72,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   private loadPreset() {
     // always start with a single entry with no grouping selected.
-    if (!!this.defaultGrouping?.length) {
+    if (this.defaultGrouping?.length) {
       this.groupings = [...this.defaultGrouping];
     } else {
       this.groupings = [{ definition: null, selected: [] }];
@@ -85,18 +92,20 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     const restored: BdDataGrouping<T>[] = [];
     try {
       const parsed = JSON.parse(stored) as BdDataGroupingStorage[];
-      if (!!parsed?.length) {
+      if (parsed?.length) {
         for (const item of parsed) {
           const def = this.definitions.find((d) => d.name === item.name);
           if (!def) {
-            console.warn('Grouping definition not (any longer?) available: ' + item.name);
+            console.warn(
+              'Grouping definition not (any longer?) available: ' + item.name
+            );
             continue;
           }
           restored.push({ definition: def, selected: item.selected });
         }
       }
 
-      if (!!restored?.length) {
+      if (restored?.length) {
         this.groupings = restored;
       }
     } catch (e) {
@@ -108,10 +117,22 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /* template */ savePreset() {
     localStorage.setItem(
       this.getStorageKey(),
-      JSON.stringify(this.groupings.filter((g) => !!g.definition).map((g) => ({ name: g.definition.name, selected: g.selected } as BdDataGroupingStorage)))
+      JSON.stringify(
+        this.groupings
+          .filter((g) => !!g.definition)
+          .map(
+            (g) =>
+              ({
+                name: g.definition.name,
+                selected: g.selected,
+              } as BdDataGroupingStorage)
+          )
+      )
     );
 
-    this.snackBar.open('Preset saved in local browser.', null, { duration: 1500 });
+    this.snackBar.open('Preset saved in local browser.', null, {
+      duration: 1500,
+    });
   }
 
   /* template */ addGrouping() {

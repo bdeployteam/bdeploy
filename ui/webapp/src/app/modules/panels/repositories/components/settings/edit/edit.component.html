@@ -1,13 +1,28 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar header="Edit Software Repository" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Edit Software Repository"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <form #form="ngForm" (ngSubmit)="onSave()">
         <div fxLayout="column" fxLayoutGap="10px" *ngIf="repository">
-          <app-bd-form-input label="Description" name="description" [(ngModel)]="repository.description" (ngModelChange)="onChange()"></app-bd-form-input>
+          <app-bd-form-input
+            label="Description"
+            name="description"
+            [(ngModel)]="repository.description"
+            (ngModelChange)="onChange()"
+          ></app-bd-form-input>
 
-          <app-bd-button color="primary" [collapsed]="false" text="Save" icon="save" [disabled]="form.invalid || !disableSave"></app-bd-button>
+          <app-bd-button
+            color="primary"
+            [collapsed]="false"
+            text="Save"
+            icon="save"
+            [disabled]="form.invalid || !disableSave"
+          ></app-bd-button>
         </div>
       </form>
     </div>

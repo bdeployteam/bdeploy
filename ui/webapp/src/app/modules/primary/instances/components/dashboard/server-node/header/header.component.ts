@@ -1,6 +1,11 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { HistoryEntryType, InstanceNodeConfigurationDto, OperatingSystem, ProcessState } from 'src/app/models/gen.dtos';
+import {
+  HistoryEntryType,
+  InstanceNodeConfigurationDto,
+  OperatingSystem,
+  ProcessState,
+} from 'src/app/models/gen.dtos';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { InstancesService } from '../../../../services/instances.service';
 
@@ -46,7 +51,10 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(private instances: InstancesService, public servers: ServersService) {}
+  constructor(
+    private instances: InstancesService,
+    public servers: ServersService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
@@ -60,16 +68,21 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
       const state = states[this.node.nodeName].config;
 
       // first we want to find the curve to plot, either cpu usage (windows), or load average (all others)
-      if ((!!this.show && this.show === 'cpu') || (!this.show && state.os === OperatingSystem.WINDOWS)) {
+      if (
+        (!!this.show && this.show === 'cpu') ||
+        (!this.show && state.os === OperatingSystem.WINDOWS)
+      ) {
         this.curve = state.monitoring.cpuUsage;
         this.curveLabel = 'System CPU Usage';
         this.maxValue = 1.0; // system cpu load: 0.0 to 1.0
-        this.formatter = (n) => Math.round((n * 100 + Number.EPSILON) * 100) / 100 + '%';
+        this.formatter = (n) =>
+          Math.round((n * 100 + Number.EPSILON) * 100) / 100 + '%';
       } else {
         this.curve = state.monitoring.loadAvg;
         this.curveLabel = 'Load Average';
         this.maxValue = state.monitoring.availableProcessors;
-        this.formatter = (n) => Math.round(((n + Number.EPSILON) * 100) / 100).toString();
+        this.formatter = (n) =>
+          Math.round(((n + Number.EPSILON) * 100) / 100).toString();
       }
 
       this.maxLabel = 'Available CPUs: ' + state.monitoring.availableProcessors;
@@ -86,23 +99,34 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
         }
 
         const limit = this.renderTime - TOTAL_MS; // skip events older than this.
-        const eventsInTimeframe = history.events.filter((e) => e.timestamp >= limit);
+        const eventsInTimeframe = history.events.filter(
+          (e) => e.timestamp >= limit
+        );
         const eventsToRender: MarkedEvent[] = [];
+        let userInfo = '';
+        let eventType: MarkedEventType = 'info';
 
         for (const ev of eventsInTimeframe) {
           switch (ev.type) {
             case HistoryEntryType.CREATE:
-              eventsToRender.push({ description: `${ev.title} by ${ev.user}`, time: ev.timestamp, type: 'info' });
+              eventsToRender.push({
+                description: `${ev.title} by ${ev.user}`,
+                time: ev.timestamp,
+                type: 'info',
+              });
               break;
             case HistoryEntryType.DEPLOYMENT:
-              eventsToRender.push({ description: `${ev.title} by ${ev.user}`, time: ev.timestamp, type: 'info' });
+              eventsToRender.push({
+                description: `${ev.title} by ${ev.user}`,
+                time: ev.timestamp,
+                type: 'info',
+              });
               break;
             case HistoryEntryType.RUNTIME:
               if (ev.runtimeEvent.node !== this.node.nodeName) {
                 continue;
               }
 
-              let eventType: MarkedEventType = 'info';
               switch (ev.runtimeEvent.state) {
                 case ProcessState.CRASHED_PERMANENTLY:
                   eventType = 'error';
@@ -113,8 +137,12 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
                   break;
               }
 
-              const userInfo = !!ev.user ? ` by ${ev.user}` : '';
-              eventsToRender.push({ description: `${ev.title}${userInfo}`, time: ev.timestamp, type: eventType });
+              userInfo = ev.user ? ` by ${ev.user}` : '';
+              eventsToRender.push({
+                description: `${ev.title}${userInfo}`,
+                time: ev.timestamp,
+                type: eventType,
+              });
               break;
           }
         }
@@ -141,7 +169,6 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
   private generatePath() {
     let path = '';
 
-    const highestVal = this.getMaxY();
     this.pathPoints = this.generatePoints();
 
     let prevX = 100;
@@ -159,7 +186,9 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
         path += `M ${pointX},${pointY}`;
       } else {
         // cubic bezier, with the handles shifted 3% off the start/end points - this will give a nice and smooth curve.
-        path += `C ${prevX - 3},${prevY} ${pointX + 3},${pointY} ${pointX},${pointY}`;
+        path += `C ${prevX - 3},${prevY} ${
+          pointX + 3
+        },${pointY} ${pointX},${pointY}`;
       }
 
       prevX = pointX;
@@ -178,7 +207,11 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
     const data = this.getRelevantDataPoints();
 
     let curX = 100;
-    for (let index = 0; index < data.length; ++index, curX = curX - PERC_PER_MIN) {
+    for (
+      let index = 0;
+      index < data.length;
+      ++index, curX = curX - PERC_PER_MIN
+    ) {
       const pointX = curX;
       const pointY = 100 - (data[index] / highestVal) * 100;
 

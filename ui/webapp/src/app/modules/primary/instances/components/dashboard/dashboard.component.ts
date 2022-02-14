@@ -16,7 +16,10 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { getNodeOfApplication, getProcessControlGroupOfApplication } from 'src/app/modules/panels/instances/utils/instance-utils';
+import {
+  getNodeOfApplication,
+  getProcessControlGroupOfApplication,
+} from 'src/app/modules/panels/instances/utils/instance-utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceStateService } from '../../services/instance-state.service';
 import { InstancesService } from '../../services/instances.service';
@@ -29,20 +32,36 @@ import { InstancesService } from '../../services/instances.service';
 export class DashboardComponent implements OnInit, OnDestroy {
   /* template */ narrow$ = new BehaviorSubject<boolean>(true);
 
-  /* template */ serverNodes$ = new BehaviorSubject<InstanceNodeConfigurationDto[]>([]);
-  /* template */ clientNode$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
-  /* template */ allApplications$ = new BehaviorSubject<ApplicationConfiguration[]>([]);
+  /* template */ serverNodes$ = new BehaviorSubject<
+    InstanceNodeConfigurationDto[]
+  >([]);
+  /* template */ clientNode$ =
+    new BehaviorSubject<InstanceNodeConfigurationDto>(null);
+  /* template */ allApplications$ = new BehaviorSubject<
+    ApplicationConfiguration[]
+  >([]);
 
   /* template */ gridMode$ = new BehaviorSubject<boolean>(false);
-  /* template */ grouping$ = new BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>([]);
-  /* template */ defaultGrouping$ = new BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>([]);
+  /* template */ grouping$ = new BehaviorSubject<
+    BdDataGrouping<ApplicationConfiguration>[]
+  >([]);
+  /* template */ defaultGrouping$ = new BehaviorSubject<
+    BdDataGrouping<ApplicationConfiguration>[]
+  >([]);
 
-  /* template */ groupingDefinitions: BdDataGroupingDefinition<ApplicationConfiguration>[] = [
-    { name: 'Process Control Group', group: (a) => this.getControlGroupDesc(a), sort: (a, b, eA) => this.sortControlGroup(a, b, eA) },
-    { name: 'Start Type', group: (a) => a?.processControl?.startType },
-    { name: 'Application', group: (a) => a?.application?.name },
+  /* template */ groupingDefinitions: BdDataGroupingDefinition<ApplicationConfiguration>[] =
+    [
+      {
+        name: 'Process Control Group',
+        group: (a) => this.getControlGroupDesc(a),
+        sort: (a, b, eA) => this.sortControlGroup(a, b, eA),
+      },
+      { name: 'Start Type', group: (a) => a?.processControl?.startType },
+      { name: 'Application', group: (a) => a?.application?.name },
+    ];
+  /* template */ defaultGrouping: BdDataGrouping<ApplicationConfiguration>[] = [
+    { definition: this.groupingDefinitions[0], selected: [] },
   ];
-  /* template */ defaultGrouping: BdDataGrouping<ApplicationConfiguration>[] = [{ definition: this.groupingDefinitions[0], selected: [] }];
 
   /* template */ collapsed$ = new BehaviorSubject<boolean>(false);
 
@@ -54,7 +73,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /* template */ isInstalled: boolean;
 
   private subscription: Subscription;
-  /* template */ public isCentral: boolean = false;
+  /* template */ public isCentral = false;
   private isCardView: boolean;
 
   constructor(
@@ -69,7 +88,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
+    this.subscription = this.media
+      .observe('(max-width:700px)')
+      .subscribe((bs) => this.narrow$.next(bs.matches));
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
@@ -86,20 +107,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         this.serverNodes$.next(
           nodes.nodeConfigDtos
-            .filter((p) => p.nodeName !== CLIENT_NODE_NAME && !!p.nodeConfiguration?.applications?.length)
+            .filter(
+              (p) =>
+                p.nodeName !== CLIENT_NODE_NAME &&
+                !!p.nodeConfiguration?.applications?.length
+            )
             .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName))
         );
 
         const allApps = [];
-        nodes.nodeConfigDtos.forEach((x) => allApps.push(...(!!x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : [])));
+        nodes.nodeConfigDtos.forEach((x) =>
+          allApps.push(
+            ...(x?.nodeConfiguration?.applications
+              ? x.nodeConfiguration.applications
+              : [])
+          )
+        );
         this.allApplications$.next(allApps);
-        this.clientNode$.next(nodes.nodeConfigDtos.find((p) => p.nodeName === CLIENT_NODE_NAME && p.nodeConfiguration?.applications?.length));
+        this.clientNode$.next(
+          nodes.nodeConfigDtos.find(
+            (p) =>
+              p.nodeName === CLIENT_NODE_NAME &&
+              p.nodeConfiguration?.applications?.length
+          )
+        );
       })
     );
     this.subscription.add(
       this.states.state$.subscribe((s) => {
         this.states$.next(s);
-        this.isInstalled = !!s?.installedTags?.find((s) => s === this.currentInstance?.instance.tag);
+        this.isInstalled = !!s?.installedTags?.find(
+          (c) => c === this.currentInstance?.instance.tag
+        );
       })
     );
     this.subscription.add(
@@ -144,13 +183,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!node) {
       return null; // client apps
     }
-    const grp = getProcessControlGroupOfApplication(node.nodeConfiguration?.controlGroups, app.uid);
-    return `${grp?.name} [${grp?.startType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}-${
-      grp?.startWait === ProcessControlGroupWaitType.WAIT ? 'W' : 'C'
-    }/${grp?.stopType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'}]`;
+    const grp = getProcessControlGroupOfApplication(
+      node.nodeConfiguration?.controlGroups,
+      app.uid
+    );
+    return `${grp?.name} [${
+      grp?.startType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'
+    }-${grp?.startWait === ProcessControlGroupWaitType.WAIT ? 'W' : 'C'}/${
+      grp?.stopType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'
+    }]`;
   }
 
-  private sortControlGroup(a: string, b: string, entriesA: ApplicationConfiguration[]): number {
+  private sortControlGroup(
+    a: string,
+    b: string,
+    entriesA: ApplicationConfiguration[]
+  ): number {
     // a group can only exist if it has entries, so entriesA cannot be empty. All entries are on the same node, so we calculate the node
     // (hosting the control groups) from *any* application.
     if (!entriesA) {
@@ -163,8 +211,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     // need to account for the strings built in the getControlGroupDesc function
-    const indexA = node.nodeConfiguration.controlGroups?.findIndex((g) => a?.startsWith(g.name + ' ['));
-    const indexB = node.nodeConfiguration.controlGroups?.findIndex((g) => b?.startsWith(g.name + ' ['));
+    const indexA = node.nodeConfiguration.controlGroups?.findIndex((g) =>
+      a?.startsWith(g.name + ' [')
+    );
+    const indexB = node.nodeConfiguration.controlGroups?.findIndex((g) =>
+      b?.startsWith(g.name + ' [')
+    );
 
     return indexA - indexB;
   }

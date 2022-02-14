@@ -3,7 +3,10 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import { InstanceNodeConfigurationDto, MinionDto } from 'src/app/models/gen.dtos';
+import {
+  InstanceNodeConfigurationDto,
+  MinionDto,
+} from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -26,7 +29,6 @@ const colNodeName: BdDataColumn<NodeRow> = {
 @Component({
   selector: 'app-nodes',
   templateUrl: './nodes.component.html',
-  styleUrls: ['./nodes.component.css'],
 })
 export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ records: NodeRow[] = [];
@@ -39,28 +41,36 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   private subscription: Subscription;
 
-  constructor(public edit: InstanceEditService, public servers: ServersService, areas: NavAreasService) {
+  constructor(
+    public edit: InstanceEditService,
+    public servers: ServersService,
+    areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnInit(): void {
     this.subscription.add(
-      combineLatest([this.edit.nodes$, this.edit.state$]).subscribe(([nodes, state]) => {
-        this.records = [];
+      combineLatest([this.edit.nodes$, this.edit.state$]).subscribe(
+        ([nodes, state]) => {
+          this.records = [];
 
-        if (!nodes || !state) {
-          return;
-        }
+          if (!nodes || !state) {
+            return;
+          }
 
-        for (const key of Object.keys(nodes)) {
-          const config = state.config.nodeDtos.find((n) => n.nodeName === key);
-          const row = { name: key, node: nodes[key], config: config };
-          this.records.push(row);
-          if (!!config) {
-            this.checked.push(row);
+          for (const key of Object.keys(nodes)) {
+            const config = state.config.nodeDtos.find(
+              (n) => n.nodeName === key
+            );
+            const row = { name: key, node: nodes[key], config: config };
+            this.records.push(row);
+            if (config) {
+              this.checked.push(row);
+            }
           }
         }
-      })
+      )
     );
   }
 
@@ -74,6 +84,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   /* template */ onCheckedChange(rows: NodeRow[]) {
     // need to propagate changes to the state object.
+    // eslint-disable-next-line no-unsafe-optional-chaining
     for (const node of [...this.edit.state$.value?.config.nodeDtos]) {
       if (node.nodeName === CLIENT_NODE_NAME) {
         continue;
@@ -81,27 +92,39 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
       if (!rows.find((r) => r.name === node.nodeName)) {
         // no longer in the list, remove.
-        this.edit.state$.value?.config.nodeDtos.splice(this.edit.state$.value?.config.nodeDtos.indexOf(node), 1);
+        this.edit.state$.value?.config.nodeDtos.splice(
+          this.edit.state$.value?.config.nodeDtos.indexOf(node),
+          1
+        );
         this.records.find((r) => r.name === node.nodeName).config = null;
       }
     }
 
     for (const row of rows) {
-      if (!this.edit.state$.value?.config.nodeDtos.find((n) => n.nodeName === row.name)) {
+      if (
+        !this.edit.state$.value?.config.nodeDtos.find(
+          (n) => n.nodeName === row.name
+        )
+      ) {
         const inst = this.edit.current$.value;
-        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration));
+        this.edit.state$.value?.config.nodeDtos.push(
+          this.edit.createEmptyNode(row.name, inst.instanceConfiguration)
+        );
       }
     }
     this.hasPendingChanges = this.edit.hasPendingChanges();
   }
 
-  /* template */ checkChangeAllowed: (row: NodeRow, target: boolean) => Observable<boolean> = (row, target) => {
+  /* template */ checkChangeAllowed: (
+    row: NodeRow,
+    target: boolean
+  ) => Observable<boolean> = (row, target) => {
     // checking is always allowed
     if (target) {
       return of(true);
     }
 
-    if (!!row.config?.nodeConfiguration?.applications?.length) {
+    if (row.config?.nodeConfiguration?.applications?.length) {
       return this.dialog.confirm(
         `Remove Node`,
         `Removing the node <strong>${row.name}</strong> will also remove <strong>${row.config.nodeConfiguration.applications.length}</strong> applications.`,
@@ -113,10 +136,10 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
   };
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
-    return of(true).pipe(tap((_) => this.edit.conceal('Select Instance Nodes')));
+    return of(true).pipe(tap(() => this.edit.conceal('Select Instance Nodes')));
   }
 }

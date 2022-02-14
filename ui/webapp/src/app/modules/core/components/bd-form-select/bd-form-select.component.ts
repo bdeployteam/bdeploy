@@ -1,5 +1,12 @@
-import { Component, Input, OnInit, Optional, Self, Type, ViewEncapsulation } from '@angular/core';
-import { ControlValueAccessor, FormControl, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
+import {
+  Component,
+  Input,
+  Optional,
+  Self,
+  Type,
+  ViewEncapsulation,
+} from '@angular/core';
+import { ControlValueAccessor, FormControl, NgControl } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
 
@@ -9,7 +16,9 @@ import { bdValidationMessage } from '../../validators/messages';
   styleUrls: ['./bd-form-select.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdFormSelectComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
+export class BdFormSelectComponent
+  implements ControlValueAccessor, ErrorStateMatcher
+{
   @Input() label: string;
   @Input() name: string;
   @Input() values: any[] = [];
@@ -32,16 +41,16 @@ export class BdFormSelectComponent implements OnInit, ControlValueAccessor, Erro
   }
 
   private internalValue: any = null;
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouchedCb: () => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChangedCb: (_: any) => void = () => {};
 
   constructor(@Optional() @Self() public ngControl: NgControl) {
-    if (!!ngControl) {
+    if (ngControl) {
       ngControl.valueAccessor = this;
     }
   }
-
-  ngOnInit(): void {}
 
   writeValue(v: any): void {
     if (v !== this.internalValue) {
@@ -57,12 +66,15 @@ export class BdFormSelectComponent implements OnInit, ControlValueAccessor, Erro
     this.onTouchedCb = fn;
   }
 
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+  isErrorState(control: FormControl | null): boolean {
     if (!this.isInvalid()) {
       return false;
     }
 
-    return this.errorDisplay === 'immediate' || !!(control && (control.dirty || control.touched));
+    return (
+      this.errorDisplay === 'immediate' ||
+      !!(control && (control.dirty || control.touched))
+    );
   }
 
   private isInvalid() {

@@ -19,10 +19,13 @@ export class BhiveLogBrowserComponent implements OnInit {
     data: (r) => `Download ${r.path}`,
     width: '40px',
     action: (r) => this.download(this.directory$.value, r),
-    icon: (r) => 'cloud_download',
+    icon: () => 'cloud_download',
   };
 
-  /* template */ columns: BdDataColumn<RemoteDirectoryEntry>[] = [...this.cols.defaultColumns, this.colDownload];
+  /* template */ columns: BdDataColumn<RemoteDirectoryEntry>[] = [
+    ...this.cols.defaultColumns,
+    this.colDownload,
+  ];
   /* template */ records$ = new BehaviorSubject<RemoteDirectoryEntry[]>([]);
   /* template */ sort: Sort = { active: 'modified', direction: 'desc' };
   /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
@@ -30,7 +33,7 @@ export class BhiveLogBrowserComponent implements OnInit {
   private _index = 0;
   /* template */ set selectedIndex(index: number) {
     this._index = index;
-    if (!!this.hiveLogging.directories$.value?.length) {
+    if (this.hiveLogging.directories$.value?.length) {
       this.directory$.next(this.hiveLogging.directories$.value[index]);
     } else {
       this.directory$.next(null);
@@ -42,13 +45,32 @@ export class BhiveLogBrowserComponent implements OnInit {
   }
 
   /* template */ getRecordRoute = (row: RemoteDirectoryEntry) => {
-    return ['', { outlets: { panel: ['panels', 'admin', 'bhive', this.hiveLogging.bhive$.value, 'logs', this.directory$.value.minion, row.path] } }];
+    return [
+      '',
+      {
+        outlets: {
+          panel: [
+            'panels',
+            'admin',
+            'bhive',
+            this.hiveLogging.bhive$.value,
+            'logs',
+            this.directory$.value.minion,
+            row.path,
+          ],
+        },
+      },
+    ];
   };
 
   public activeRemoteDirectory: RemoteDirectory = null;
   public activeRemoteDirectoryEntry: RemoteDirectoryEntry = null;
 
-  constructor(public authService: AuthenticationService, public hiveLogging: HiveLoggingService, private cols: LogColumnsService) {}
+  constructor(
+    public authService: AuthenticationService,
+    public hiveLogging: HiveLoggingService,
+    private cols: LogColumnsService
+  ) {}
 
   public ngOnInit(): void {
     this.hiveLogging.directories$.subscribe((dirs) => {
@@ -61,7 +83,13 @@ export class BhiveLogBrowserComponent implements OnInit {
     this.hiveLogging.reload();
   }
 
-  private download(remoteDirectory: RemoteDirectory, remoteDirectoryEntry: RemoteDirectoryEntry) {
-    this.hiveLogging.downloadLogFileContent(remoteDirectory, remoteDirectoryEntry);
+  private download(
+    remoteDirectory: RemoteDirectory,
+    remoteDirectoryEntry: RemoteDirectoryEntry
+  ) {
+    this.hiveLogging.downloadLogFileContent(
+      remoteDirectory,
+      remoteDirectoryEntry
+    );
   }
 }

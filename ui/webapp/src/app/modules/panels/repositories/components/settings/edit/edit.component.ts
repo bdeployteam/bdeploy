@@ -14,7 +14,6 @@ import { RepositoryDetailsService } from '../../../services/repository-details.s
 @Component({
   selector: 'app-edit',
   templateUrl: './edit.component.html',
-  styleUrls: ['./edit.component.css'],
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
@@ -26,7 +25,12 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
-  constructor(public repositories: RepositoriesService, public details: RepositoryDetailsService, private http: HttpClient, areas: NavAreasService) {
+  constructor(
+    public repositories: RepositoriesService,
+    public details: RepositoryDetailsService,
+    private http: HttpClient,
+    areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
@@ -51,12 +55,12 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   /* template */ onSave(): void {
     this.saving$.next(true);
-    this.doSave().subscribe(
-      (_) => {
+    this.doSave().subscribe({
+      next: () => {
         this.reset();
       },
-      (err) => this.saving$.next(false)
-    );
+      error: () => this.saving$.next(false),
+    });
   }
 
   /* template */ public doSave(): Observable<any> {

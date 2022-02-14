@@ -3,14 +3,22 @@ import { Injectable } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { ActivitySnapshot, ObjectChangeDetails, ObjectChangeType, ObjectScope } from '../../../models/gen.dtos';
+import {
+  ActivitySnapshot,
+  ObjectChangeDetails,
+  ObjectChangeType,
+  ObjectScope,
+} from '../../../models/gen.dtos';
 import { AuthenticationService } from './authentication.service';
 import { ConfigService } from './config.service';
 import { NavAreasService } from './nav-areas.service';
 import { EMPTY_SCOPE, ObjectChangesService } from './object-changes.service';
 
 export class ActivitySnapshotTreeNode {
-  constructor(public snapshot: ActivitySnapshot, public children: ActivitySnapshotTreeNode[]) {}
+  constructor(
+    public snapshot: ActivitySnapshot,
+    public children: ActivitySnapshotTreeNode[]
+  ) {}
 }
 
 @Injectable({
@@ -21,35 +29,53 @@ export class ActivitiesService {
 
   private changesSubscription: Subscription;
 
-  constructor(private cfg: ConfigService, private http: HttpClient, areas: NavAreasService, changes: ObjectChangesService, auth: AuthenticationService) {
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    areas: NavAreasService,
+    changes: ObjectChangesService,
+    auth: AuthenticationService
+  ) {
     combineLatest([areas.groupContext$, areas.instanceContext$])
       .pipe(debounceTime(500))
       .subscribe(([group, instance]) => {
         const scope: ObjectScope = cloneDeep(EMPTY_SCOPE);
-        if (!!group) {
+        if (group) {
           scope.scope.push(group);
 
-          if (!!instance) {
+          if (instance) {
             scope.scope.push(instance);
           }
         }
 
-        if (!!this.changesSubscription) {
+        if (this.changesSubscription) {
           this.changesSubscription.unsubscribe();
         }
 
         // reset in case there are no more matching activities in the new scope.
         this.activities$.next([]);
 
-        if (scope.scope.length === 0 || auth.isCurrentScopeExclusiveReadClient()) {
+        if (
+          scope.scope.length === 0 ||
+          auth.isCurrentScopeExclusiveReadClient()
+        ) {
           // in this case we would see *all* activities from *all* scopes. this is not only a performance
           // but also a permission-wise problem, as permissions are granted on group level (first level of scope).
           return;
         }
 
-        this.changesSubscription = changes.subscribe(ObjectChangeType.ACTIVITIES, scope, (c) => {
-          this.activities$.next(this.getActivitiesFromEvent(c.details[ObjectChangeDetails.ACTIVITIES], scope.scope));
-        });
+        this.changesSubscription = changes.subscribe(
+          ObjectChangeType.ACTIVITIES,
+          scope,
+          (c) => {
+            this.activities$.next(
+              this.getActivitiesFromEvent(
+                c.details[ObjectChangeDetails.ACTIVITIES],
+                scope.scope
+              )
+            );
+          }
+        );
       });
   }
 
@@ -57,7 +83,10 @@ export class ActivitiesService {
     return this.http.delete(this.cfg.config.api + '/activities/' + uuid);
   }
 
-  public getActivitiesFromEvent(data: any, scope: string[]): ActivitySnapshotTreeNode[] {
+  public getActivitiesFromEvent(
+    data: any,
+    scope: string[]
+  ): ActivitySnapshotTreeNode[] {
     const allActivities = JSON.parse(data) as ActivitySnapshot[];
 
     if (!allActivities?.length) {
@@ -68,14 +97,19 @@ export class ActivitiesService {
     const rootNodes: ActivitySnapshotTreeNode[] = [];
 
     // create a node for each activity.
-    allActivities.map((a) => new ActivitySnapshotTreeNode(a, [])).forEach((n) => allTreeNodes.set(n.snapshot.uuid, n));
+    allActivities
+      .map((a) => new ActivitySnapshotTreeNode(a, []))
+      .forEach((n) => allTreeNodes.set(n.snapshot.uuid, n));
 
     // wire up nodes with each other and find root nodes which are interesting.
     allTreeNodes.forEach((n) => {
       if (n.snapshot.parentUuid) {
         const parentNode = allTreeNodes.get(n.snapshot.parentUuid);
         if (!parentNode) {
-          console.warn('Cannot find referenced parent activity for: ' + JSON.stringify(n.snapshot));
+          console.warn(
+            'Cannot find referenced parent activity for: ' +
+              JSON.stringify(n.snapshot)
+          );
         } else {
           parentNode.children.push(n);
         }
@@ -110,7 +144,9 @@ export class ActivitiesService {
   public getMostRelevantMessage(node: ActivitySnapshotTreeNode): string {
     // recurse down, always pick the /last/ child.
     if (node.children && node.children.length > 0) {
-      return this.getMostRelevantMessage(node.children[node.children.length - 1]);
+      return this.getMostRelevantMessage(
+        node.children[node.children.length - 1]
+      );
     }
 
     if (!node.snapshot) {

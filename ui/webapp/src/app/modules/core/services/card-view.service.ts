@@ -20,6 +20,9 @@ export class CardViewService {
 
   setCardView(presetKey: string, value: boolean): void {
     const temp = localStorage.getItem('card_view');
-    localStorage.setItem('card_view', JSON.stringify({ ...JSON.parse(temp), ...{ [presetKey]: value } }));
+    localStorage.setItem(
+      'card_view',
+      JSON.stringify({ ...JSON.parse(temp), ...{ [presetKey]: value } })
+    );
   }
 }

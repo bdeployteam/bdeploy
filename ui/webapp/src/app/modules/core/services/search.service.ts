@@ -13,8 +13,6 @@ export class SearchService {
   private registrations: BdSearchable[] = [];
   public enableSearch$ = new BehaviorSubject<boolean>(false);
 
-  constructor() {}
-
   set search(value: string) {
     this.registrations.forEach((r) => {
       // try to update. in complex naviation cases, this may fail as widgets are in the process of being destroyed.

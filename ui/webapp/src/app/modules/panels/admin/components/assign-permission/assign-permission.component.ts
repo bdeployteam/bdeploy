@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { Permission } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -6,22 +11,28 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'assign-permission',
   templateUrl: './assign-permission.component.html',
-  styleUrls: ['./assign-permission.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssignPermissionComponent implements OnInit {
+export class AssignPermissionComponent implements OnInit, OnDestroy {
   /* template */ scopes$ = new BehaviorSubject<string[]>([null]);
   /* template */ labels$ = new BehaviorSubject<string[]>(['Global']);
   /* template */ assignScope: string;
   /* template */ assignPerm: Permission;
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ allPerms: Permission[] = Object.keys(Permission).map((k) => Permission[k]);
+  /* template */ allPerms: Permission[] = Object.keys(Permission).map(
+    (k) => Permission[k]
+  );
 
   private subscription: Subscription;
 
-  constructor(private authAdmin: AuthAdminService, private areas: NavAreasService, private groups: GroupsService) {}
+  constructor(
+    private authAdmin: AuthAdminService,
+    private areas: NavAreasService,
+    private groups: GroupsService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.groups.groups$.subscribe((groups) => {
@@ -38,12 +49,17 @@ export class AssignPermissionComponent implements OnInit {
   }
 
   /* template */ onSave() {
-    const user = this.authAdmin.users$.value.find((u) => u.name === this.areas.panelRoute$.value.params['user']);
+    const user = this.authAdmin.users$.value.find(
+      (u) => u.name === this.areas.panelRoute$.value.params['user']
+    );
     const existing = user.permissions.find((p) => p.scope === this.assignScope);
-    if (!!existing) {
+    if (existing) {
       existing.permission = this.assignPerm;
     } else {
-      user.permissions.push({ scope: this.assignScope, permission: this.assignPerm });
+      user.permissions.push({
+        scope: this.assignScope,
+        permission: this.assignPerm,
+      });
     }
 
     this.subscription.add(

@@ -8,7 +8,6 @@ import { InstanceBulkService } from '../../services/instance-bulk.service';
 @Component({
   selector: 'app-bulk-manipulation',
   templateUrl: './bulk-manipulation.component.html',
-  styleUrls: ['./bulk-manipulation.component.css'],
 })
 export class BulkManipulationComponent implements OnInit, OnDestroy {
   /* template */ starting$ = new BehaviorSubject<boolean>(false);
@@ -26,7 +25,11 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription = this.bulk.selection$.subscribe((selections) => {
       this.selections = selections;
-      this.isAllSameProduct = selections.every((i) => !!i.productDto?.key?.name && i.productDto.key.name === selections[0].productDto.key.name);
+      this.isAllSameProduct = selections.every(
+        (i) =>
+          !!i.productDto?.key?.name &&
+          i.productDto.key.name === selections[0].productDto.key.name
+      );
     });
   }
 

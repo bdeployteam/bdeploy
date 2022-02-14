@@ -4,7 +4,12 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import { ApplicationValidationDto, InstanceConfiguration, InstanceNodeConfigurationDto, InstanceTemplateDescriptor } from 'src/app/models/gen.dtos';
+import {
+  ApplicationValidationDto,
+  InstanceConfiguration,
+  InstanceNodeConfigurationDto,
+  InstanceTemplateDescriptor,
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -19,7 +24,9 @@ import { InstanceEditService } from '../../services/instance-edit.service';
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.css'],
 })
-export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class ConfigurationComponent
+  implements OnInit, OnDestroy, DirtyableDialog
+{
   private readonly issueColApp: BdDataColumn<ApplicationValidationDto> = {
     id: 'app',
     name: 'Application',
@@ -44,29 +51,43 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   private readonly issueColDismiss: BdDataColumn<ApplicationValidationDto> = {
     id: 'dismiss',
     name: 'Dismiss',
-    data: (r) => 'Dismiss this update message',
+    data: () => 'Dismiss this update message',
     action: (r) => this.edit.dismissUpdateIssue(r),
-    icon: (r) => 'delete',
+    icon: () => 'delete',
     width: '40px',
   };
 
-  /* template */ issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [this.issueColApp, this.issueColParam, this.issueColMsg, this.issueColDismiss];
-  /* template */ validationColumns: BdDataColumn<ApplicationValidationDto>[] = [this.issueColApp, this.issueColParam, this.issueColMsg];
+  /* template */ issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [
+    this.issueColApp,
+    this.issueColParam,
+    this.issueColMsg,
+    this.issueColDismiss,
+  ];
+  /* template */ validationColumns: BdDataColumn<ApplicationValidationDto>[] = [
+    this.issueColApp,
+    this.issueColParam,
+    this.issueColMsg,
+  ];
 
   /* template */ narrow$ = new BehaviorSubject<boolean>(true);
   /* template */ headerName$ = new BehaviorSubject<string>('Loading');
 
   /* template */ config$ = new BehaviorSubject<InstanceConfiguration>(null);
-  /* template */ serverNodes$ = new BehaviorSubject<InstanceNodeConfigurationDto[]>([]);
-  /* template */ clientNode$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
+  /* template */ serverNodes$ = new BehaviorSubject<
+    InstanceNodeConfigurationDto[]
+  >([]);
+  /* template */ clientNode$ =
+    new BehaviorSubject<InstanceNodeConfigurationDto>(null);
 
-  /* template */ templates$ = new BehaviorSubject<InstanceTemplateDescriptor[]>(null);
+  /* template */ templates$ = new BehaviorSubject<InstanceTemplateDescriptor[]>(
+    null
+  );
   /* template */ isEmptyInstance$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   private subscription: Subscription;
-  public isCentral: boolean = false;
+  public isCentral = false;
 
   constructor(
     public cfg: ConfigService,
@@ -78,7 +99,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     private router: Router,
     public auth: AuthenticationService
   ) {
-    this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
+    this.subscription = this.media
+      .observe('(max-width:700px)')
+      .subscribe((bs) => this.narrow$.next(bs.matches));
     this.subscription.add(this.areas.registerDirtyable(this, 'primary'));
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
@@ -89,29 +112,44 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
 
   ngOnInit(): void {
     this.subscription.add(
-      combineLatest([this.edit.state$, this.products.products$]).subscribe(([state, products]) => {
-        if (!state || !products) {
-          this.config$.next(null);
-          this.serverNodes$.next([]);
-          this.clientNode$.next(null);
-        } else {
-          this.config$.next(state.config.config);
-          this.headerName$.next(
-            this.edit.hasPendingChanges() || this.edit.hasSaveableChanges$.value ? `${state.config.config.name}*` : state.config.config.name
-          );
+      combineLatest([this.edit.state$, this.products.products$]).subscribe(
+        ([state, products]) => {
+          if (!state || !products) {
+            this.config$.next(null);
+            this.serverNodes$.next([]);
+            this.clientNode$.next(null);
+          } else {
+            this.config$.next(state.config.config);
+            this.headerName$.next(
+              this.edit.hasPendingChanges() ||
+                this.edit.hasSaveableChanges$.value
+                ? `${state.config.config.name}*`
+                : state.config.config.name
+            );
 
-          this.serverNodes$.next(state.config.nodeDtos.filter((p) => !this.isClientNode(p)).sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)));
-          this.clientNode$.next(state.config.nodeDtos.find((n) => this.isClientNode(n)));
+            this.serverNodes$.next(
+              state.config.nodeDtos
+                .filter((p) => !this.isClientNode(p))
+                .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName))
+            );
+            this.clientNode$.next(
+              state.config.nodeDtos.find((n) => this.isClientNode(n))
+            );
 
-          const prod = products.find((p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag);
-          if (!!prod) {
-            this.templates$.next(prod.instanceTemplates);
+            const prod = products.find(
+              (p) =>
+                p.key.name === state.config.config.product.name &&
+                p.key.tag === state.config.config.product.tag
+            );
+            if (prod) {
+              this.templates$.next(prod.instanceTemplates);
+            }
+
+            this.edit.requestValidation();
           }
-
-          this.edit.requestValidation();
+          this.isEmptyInstance$.next(this.isEmptyInstance());
         }
-        this.isEmptyInstance$.next(this.isEmptyInstance());
-      })
+      )
     );
   }
 
@@ -128,10 +166,15 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => {
+    this.doSave().subscribe(() => {
       // after save navigate back to the dashboard - this will take the user where he will likely want to continue
       // anyway (install, activate, start processes, etc.)
-      this.router.navigate(['instances', 'dashboard', this.areas.groupContext$.value, this.areas.instanceContext$.value]);
+      this.router.navigate([
+        'instances',
+        'dashboard',
+        this.areas.groupContext$.value,
+        this.areas.instanceContext$.value,
+      ]);
     });
   }
 
@@ -148,8 +191,9 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
       return true;
     }
 
+    // eslint-disable-next-line no-unsafe-optional-chaining
     for (const node of this.edit.state$.value?.config.nodeDtos) {
-      if (!!node.nodeConfiguration?.applications?.length) {
+      if (node.nodeConfiguration?.applications?.length) {
         return false;
       }
     }

@@ -8,7 +8,6 @@ import { RepositoriesService } from '../../services/repositories.service';
 @Component({
   selector: 'app-repositories-browser',
   templateUrl: './repositories-browser.component.html',
-  styleUrls: ['./repositories-browser.component.css'],
 })
 export class RepositoriesBrowserComponent implements OnInit {
   /* template */ getRecordRoute = (row: SoftwareRepositoryConfiguration) => {
@@ -16,7 +15,7 @@ export class RepositoriesBrowserComponent implements OnInit {
   };
 
   /* template */ isCardView: boolean;
-  /* template */ presetKeyValue: string = 'softwareRepositories';
+  /* template */ presetKeyValue = 'softwareRepositories';
 
   constructor(
     public repositories: RepositoriesService,

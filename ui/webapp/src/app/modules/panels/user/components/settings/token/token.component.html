@@ -1,11 +1,16 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Token for {{ (user$ | async)?.name }}" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Token for {{ (user$ | async)?.name }}"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <div>
-        Use the following token to remotely access this server in your name, e.g. for pushing products. To do so, copy the complete content to the according
-        tool.
+        Use the following token to remotely access this server in your name,
+        e.g. for pushing products. To do so, copy the complete content to the
+        according tool.
       </div>
       <div>
         <app-bd-form-toggle
@@ -16,15 +21,32 @@
         ></app-bd-form-toggle>
       </div>
       <div>
-        A full token pack is typically required by the CLI, build tools, etc. A slim token is required to perform HTTPS communication with the BDeploy server.
+        A full token pack is typically required by the CLI, build tools, etc. A
+        slim token is required to perform HTTPS communication with the BDeploy
+        server.
       </div>
       <div>
-        <strong>Attention:</strong> This token is sensitive information as it allows remote access under your name. Do not pass this token on to others.
+        <strong>Attention:</strong> This token is sensitive information as it
+        allows remote access under your name. Do not pass this token on to
+        others.
       </div>
       <div fxLayout="column">
-        <textarea #inputTarget readonly class="local-large-text" fxFlex="1 0 auto">{{ pack$ | async }}</textarea>
+        <textarea
+          #inputTarget
+          readonly
+          class="local-large-text"
+          fxFlex="1 0 auto"
+        >
+{{ pack$ | async }}</textarea
+        >
       </div>
-      <app-bd-button color="toolbar" text="Copy To Clipboard" icon="content_copy" [collapsed]="false" (click)="doCopy(inputTarget.value)"></app-bd-button>
+      <app-bd-button
+        color="toolbar"
+        text="Copy To Clipboard"
+        icon="content_copy"
+        [collapsed]="false"
+        (click)="doCopy(inputTarget.value)"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

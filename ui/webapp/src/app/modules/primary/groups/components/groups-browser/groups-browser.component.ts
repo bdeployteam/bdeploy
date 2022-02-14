@@ -11,19 +11,18 @@ import { GroupsService } from '../../services/groups.service';
 @Component({
   selector: 'app-groups-browser',
   templateUrl: './groups-browser.component.html',
-  styleUrls: ['./groups-browser.component.css'],
 })
 export class GroupsBrowserComponent implements OnInit, OnDestroy {
   grouping: BdDataGroupingDefinition<InstanceGroupConfiguration>[] = [];
 
   private subscription: Subscription;
-  private isCentral: boolean = false;
-  /* template */ public isManaged: boolean = false;
-  private isStandalone: boolean = false;
-  /* template */ public isAddAllowed: boolean = false;
-  /* template */ public isAttachAllowed: boolean = false;
+  private isCentral = false;
+  /* template */ public isManaged = false;
+  private isStandalone = false;
+  /* template */ public isAddAllowed = false;
+  /* template */ public isAttachAllowed = false;
   /* template */ public isCardView: boolean;
-  /* template */ public presetKeyValue: string = 'instanceGroups';
+  /* template */ public presetKeyValue = 'instanceGroups';
 
   /* template */ getRecordRoute = (row: InstanceGroupConfiguration) => {
     if (this.authService.isScopedExclusiveReadClient(row.name)) {
@@ -45,18 +44,24 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
       this.grouping = attrs.map((attr) => {
         return {
           name: attr.description,
-          group: (r) => this.groups.attributeValues$.value[r.name]?.attributes[attr.name],
+          group: (r) =>
+            this.groups.attributeValues$.value[r.name]?.attributes[attr.name],
         };
       });
     });
     this.subscription.add(
-      combineLatest([this.config.isCentral$, this.config.isManaged$, this.config.isStandalone$]).subscribe(([isCentral, isManaged, isStandalone]) => {
+      combineLatest([
+        this.config.isCentral$,
+        this.config.isManaged$,
+        this.config.isStandalone$,
+      ]).subscribe(([isCentral, isManaged, isStandalone]) => {
         this.isCentral = isCentral;
         this.isManaged = isManaged;
         this.isStandalone = isStandalone;
       })
     );
-    this.isAddAllowed = this.authService.isGlobalAdmin() && (this.isCentral || this.isStandalone);
+    this.isAddAllowed =
+      this.authService.isGlobalAdmin() && (this.isCentral || this.isStandalone);
     this.isAttachAllowed = this.authService.isGlobalAdmin() && this.isManaged;
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
   }

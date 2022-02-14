@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -12,9 +12,8 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 @Component({
   selector: 'app-data-file-viewer',
   templateUrl: './data-file-viewer.component.html',
-  styleUrls: ['./data-file-viewer.component.css'],
 })
-export class DataFileViewerComponent implements OnInit, OnDestroy {
+export class DataFileViewerComponent implements OnDestroy {
   /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
   /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
   /* template */ content$ = new Subject<string>();
@@ -27,8 +26,16 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
   private offset = 0;
   private subscription: Subscription;
 
-  constructor(private instances: InstancesService, areas: NavAreasService, df: DataFilesService, auth: AuthenticationService) {
-    this.subscription = combineLatest([areas.panelRoute$, df.directories$]).subscribe(([r, d]) => {
+  constructor(
+    private instances: InstancesService,
+    areas: NavAreasService,
+    df: DataFilesService,
+    auth: AuthenticationService
+  ) {
+    this.subscription = combineLatest([
+      areas.panelRoute$,
+      df.directories$,
+    ]).subscribe(([r, d]) => {
       if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
         return;
       }
@@ -39,7 +46,10 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
       const fileName = r.params['file'];
 
       // check if we need to reset, otherwise e.g. the file size was updated, which is fine to follow along.
-      if (nodeName !== this.directory$.value?.minion || fileName !== this.file$.value?.path) {
+      if (
+        nodeName !== this.directory$.value?.minion ||
+        fileName !== this.file$.value?.path
+      ) {
         // reset!
         this.offset = 0;
       }
@@ -73,8 +83,6 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     clearInterval(this.followInterval);
@@ -98,13 +106,15 @@ export class DataFileViewerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.instances.getContentChunk(dir, entry, this.offset, 0).subscribe((chunk) => {
-      if (!chunk) {
-        return;
-      }
+    this.instances
+      .getContentChunk(dir, entry, this.offset, 0)
+      .subscribe((chunk) => {
+        if (!chunk) {
+          return;
+        }
 
-      this.content$.next(chunk.content);
-      this.offset = chunk.endPointer;
-    });
+        this.content$.next(chunk.content);
+        this.offset = chunk.endPointer;
+      });
   }
 }

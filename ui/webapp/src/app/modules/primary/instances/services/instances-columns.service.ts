@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
+import {
+  BdDataColumn,
+  BdDataColumnDisplay,
+  BdDataColumnTypeHint,
+} from 'src/app/models/data';
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
@@ -48,8 +52,11 @@ export class InstancesColumnsService {
     id: 'product',
     name: 'Product',
     hint: BdDataColumnTypeHint.DETAILS,
-    data: (r) => (!!r.productDto?.name ? r.productDto.name : r.instanceConfiguration.product.name),
-    icon: (r) => 'apps',
+    data: (r) =>
+      r.productDto?.name
+        ? r.productDto.name
+        : r.instanceConfiguration.product.name,
+    icon: () => 'apps',
     showWhen: '(min-width: 600px)',
   };
 
@@ -59,15 +66,15 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
     data: (r) => r.instanceConfiguration.product.tag,
     component: InstanceProductVersionComponent,
-    icon: (r) => 'smartphone',
+    icon: () => 'smartphone',
   };
 
   instanceProductActiveColumn: BdDataColumn<InstanceDto> = {
     id: 'activeProductVersion',
     name: 'Active Version',
     hint: BdDataColumnTypeHint.DETAILS,
-    data: (r) => (!!r.activeProductDto ? r.activeProductDto.key.tag : null),
-    icon: (r) => 'security_update_good',
+    data: (r) => (r.activeProductDto ? r.activeProductDto.key.tag : null),
+    icon: () => 'security_update_good',
     showWhen: '(min-width: 750px)',
   };
 
@@ -83,8 +90,11 @@ export class InstancesColumnsService {
     id: 'managedServer',
     name: 'Managed Server',
     hint: BdDataColumnTypeHint.DETAILS,
-    data: (r) => (!!r.managedServer ? `${r.managedServer.hostName} - ${r.managedServer.description}` : null),
-    icon: (r) => 'dns',
+    data: (r) =>
+      r.managedServer
+        ? `${r.managedServer.hostName} - ${r.managedServer.description}`
+        : null,
+    icon: () => 'dns',
     showWhen: '(min-width: 650px)',
   };
 
@@ -110,7 +120,11 @@ export class InstancesColumnsService {
     this.instanceSyncColumn,
   ];
 
-  constructor(private cfg: ConfigService, private instances: InstancesService, private servers: ServersService) {
+  constructor(
+    private cfg: ConfigService,
+    private instances: InstancesService,
+    private servers: ServersService
+  ) {
     if (cfg.config.mode !== MinionMode.CENTRAL) {
       this.instanceSyncColumn.display = BdDataColumnDisplay.NONE;
       this.instanceServerColumn.display = BdDataColumnDisplay.NONE;

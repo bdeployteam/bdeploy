@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -9,9 +9,8 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 @Component({
   selector: 'app-log-file-viewer',
   templateUrl: './log-file-viewer.component.html',
-  styleUrls: ['./log-file-viewer.component.css'],
 })
-export class LogFileViewerComponent implements OnInit {
+export class LogFileViewerComponent implements OnDestroy {
   /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
   /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
   /* template */ content$ = new Subject<string>();
@@ -21,8 +20,14 @@ export class LogFileViewerComponent implements OnInit {
   private offset = 0;
   private subscription: Subscription;
 
-  constructor(private loggingAdmin: LoggingAdminService, areas: NavAreasService) {
-    this.subscription = combineLatest([areas.panelRoute$, loggingAdmin.directories$]).subscribe(([r, d]) => {
+  constructor(
+    private loggingAdmin: LoggingAdminService,
+    areas: NavAreasService
+  ) {
+    this.subscription = combineLatest([
+      areas.panelRoute$,
+      loggingAdmin.directories$,
+    ]).subscribe(([r, d]) => {
       if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
         return;
       }
@@ -31,7 +36,10 @@ export class LogFileViewerComponent implements OnInit {
       const fileName = r.params['file'];
 
       // check if we need to reset, otherwise e.g. the file size was updated, which is fine to follow along.
-      if (nodeName !== this.directory$.value?.minion || fileName !== this.file$.value?.path) {
+      if (
+        nodeName !== this.directory$.value?.minion ||
+        fileName !== this.file$.value?.path
+      ) {
         // reset!
         this.offset = 0;
       }
@@ -62,8 +70,6 @@ export class LogFileViewerComponent implements OnInit {
     );
   }
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     clearInterval(this.followInterval);
@@ -83,13 +89,15 @@ export class LogFileViewerComponent implements OnInit {
       return;
     }
 
-    this.loggingAdmin.getLogContentChunk(dir, entry, this.offset, 0, true).subscribe((chunk) => {
-      if (!chunk) {
-        return;
-      }
+    this.loggingAdmin
+      .getLogContentChunk(dir, entry, this.offset, 0, true)
+      .subscribe((chunk) => {
+        if (!chunk) {
+          return;
+        }
 
-      this.content$.next(chunk.content);
-      this.offset = chunk.endPointer;
-    });
+        this.content$.next(chunk.content);
+        this.offset = chunk.endPointer;
+      });
   }
 }

@@ -1,5 +1,12 @@
-import { Component, Input, OnInit, Optional, Self, ViewEncapsulation } from '@angular/core';
-import { ControlValueAccessor, FormControl, FormGroupDirective, NgControl, NgForm } from '@angular/forms';
+import {
+  Component,
+  Input,
+  OnInit,
+  Optional,
+  Self,
+  ViewEncapsulation,
+} from '@angular/core';
+import { ControlValueAccessor, FormControl, NgControl } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { bdValidationMessage } from '../../validators/messages';
@@ -10,7 +17,9 @@ import { bdValidationMessage } from '../../validators/messages';
   styleUrls: ['./bd-form-input.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdFormInputComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
+export class BdFormInputComponent
+  implements OnInit, ControlValueAccessor, ErrorStateMatcher
+{
   @Input() label: string;
   @Input() name: string;
   @Input() required: any;
@@ -32,11 +41,13 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
   }
 
   private internalValue: any = '';
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouchedCb: () => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onChangedCb: (_: any) => void = () => {};
 
   constructor(@Optional() @Self() public ngControl: NgControl) {
-    if (!!ngControl) {
+    if (ngControl) {
       ngControl.valueAccessor = this;
     }
   }
@@ -64,12 +75,15 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
     this.onTouchedCb = fn;
   }
 
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+  isErrorState(control: FormControl | null): boolean {
     if (!this.isInvalid()) {
       return false;
     }
 
-    return this.errorDisplay === 'immediate' || !!(control && (control.dirty || control.touched));
+    return (
+      this.errorDisplay === 'immediate' ||
+      !!(control && (control.dirty || control.touched))
+    );
   }
 
   public isInvalid() {
@@ -105,6 +119,10 @@ export class BdFormInputComponent implements OnInit, ControlValueAccessor, Error
       return;
     }
 
-    this.filteredSuggested$.next(this.suggested.filter((e) => e.toLowerCase().includes(inputAsString.toLowerCase())));
+    this.filteredSuggested$.next(
+      this.suggested.filter((e) =>
+        e.toLowerCase().includes(inputAsString.toLowerCase())
+      )
+    );
   }
 }

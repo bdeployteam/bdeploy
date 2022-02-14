@@ -1,4 +1,11 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -6,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
   templateUrl: './bd-file-drop.component.html',
   styleUrls: ['./bd-file-drop.component.css'],
 })
-export class BdFileDropComponent implements OnInit {
+export class BdFileDropComponent {
   /** Whether the control is disabled. */
   @Input() disabled = false;
 
@@ -23,10 +30,6 @@ export class BdFileDropComponent implements OnInit {
 
   /* template */ active = false;
   /* template */ validationError$ = new BehaviorSubject<boolean>(false);
-
-  constructor() {}
-
-  ngOnInit(): void {}
 
   doSelectFiles() {
     this.fileRef.nativeElement.click();

@@ -11,8 +11,6 @@ export class FileDropDirective {
   @Output() filesDropped = new EventEmitter<FileList>();
   @Output() filesHovered = new EventEmitter<boolean>();
 
-  constructor() {}
-
   @HostListener('drop', ['$event'])
   onDrop($event) {
     $event.preventDefault();
@@ -29,7 +27,7 @@ export class FileDropDirective {
   }
 
   @HostListener('dragleave', ['$event'])
-  onDragLeave($event) {
+  onDragLeave() {
     this.filesHovered.emit(false);
   }
 }

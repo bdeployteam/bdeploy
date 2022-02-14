@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -11,16 +11,18 @@ import { RepositoryDetailsService } from '../../services/repository-details.serv
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.css'],
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
 
-  constructor(public auth: AuthenticationService, public repositories: RepositoriesService, public details: RepositoryDetailsService, private router: Router) {}
-
-  ngOnInit(): void {}
+  constructor(
+    public auth: AuthenticationService,
+    public repositories: RepositoriesService,
+    public details: RepositoryDetailsService,
+    private router: Router
+  ) {}
 
   /* template */ onDelete(repository: SoftwareRepositoryConfiguration): void {
     this.dialog
@@ -38,7 +40,7 @@ export class SettingsComponent implements OnInit {
           this.details
             .delete(repository)
             .pipe(finalize(() => this.deleting$.next(false)))
-            .subscribe((r) => {
+            .subscribe(() => {
               this.router.navigate(['repositories', 'browser']);
             });
         }

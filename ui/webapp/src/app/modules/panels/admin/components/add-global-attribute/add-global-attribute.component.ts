@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
@@ -8,12 +14,14 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 @Component({
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'add-global-attribute',
   templateUrl: './add-global-attribute.component.html',
-  styleUrls: ['./add-global-attribute.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class AddGlobalAttributeComponent
+  implements OnInit, OnDestroy, DirtyableDialog
+{
   /* template */ tempAttribute: CustomAttributeDescriptor;
   /* template */ tempUsedIds: string[];
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
@@ -23,13 +31,17 @@ export class AddGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyable
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(private settings: SettingsService, private areas: NavAreasService) {
+  constructor(
+    private settings: SettingsService,
+    private areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnInit(): void {
     this.tempAttribute = { name: '', description: '' };
-    this.tempUsedIds = this.settings.settings$.value.instanceGroup.attributes.map((a) => a.name);
+    this.tempUsedIds =
+      this.settings.settings$.value.instanceGroup.attributes.map((a) => a.name);
   }
 
   isDirty(): boolean {
@@ -48,7 +60,7 @@ export class AddGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyable
           this.saving$.next(false);
         })
       )
-      .subscribe((_) => {
+      .subscribe(() => {
         this.areas.closePanel();
         this.subscription.unsubscribe();
       });

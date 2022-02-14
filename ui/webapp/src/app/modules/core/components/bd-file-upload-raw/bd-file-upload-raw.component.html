@@ -10,28 +10,67 @@
     [mode]="(isUploading$ | async) ? 'determinate' : 'indeterminate'"
     [value]="uploadStatus.progressObservable | async"
   ></mat-progress-bar>
-  <div *ngIf="(isUploading$ | async) || (isUploadProcessing$ | async) || (isImporting$ | async)" class="local-hint-text bd-description-text">
+  <div
+    *ngIf="(isUploading$ | async) || (isUploadProcessing$ | async) || (isImporting$ | async)"
+    class="local-hint-text bd-description-text"
+  >
     {{ processingHint$ | async }}
   </div>
-  <div *ngIf="isUploadFailed$ | async" class="local-hint-text bd-description-text">
+  <div
+    *ngIf="isUploadFailed$ | async"
+    class="local-hint-text bd-description-text"
+  >
     {{ uploadStatus.detail }}
   </div>
-  <div *ngIf="isUploadFinished$ | async" class="local-hint-text bd-description-text">
+  <div
+    *ngIf="isUploadFinished$ | async"
+    class="local-hint-text bd-description-text"
+  >
     {{ this.uploadStatus?.detail?.details }}
   </div>
-  <div *ngIf="isImportFailed$ | async" class="local-hint-text bd-description-text">
+  <div
+    *ngIf="isImportFailed$ | async"
+    class="local-hint-text bd-description-text"
+  >
     {{ importStatus?.detail }}
   </div>
-  <div *ngIf="isImportFinished$ | async" class="local-hint-text bd-description-text">
+  <div
+    *ngIf="isImportFinished$ | async"
+    class="local-hint-text bd-description-text"
+  >
     {{ importStatus?.detail }}
   </div>
-  <div *ngIf="!!uploadStatus.detail && !(!!uploadStatus?.detail?.isHive || !!uploadStatus?.detail?.isProduct) && !!!importStatus">
-    <app-bd-form-input label="Name" name="name" [(ngModel)]="uploadStatus.detail.name" required></app-bd-form-input>
-    <app-bd-form-input label="Version" name="tag" [(ngModel)]="uploadStatus.detail.tag" required></app-bd-form-input>
+  <div
+    *ngIf="!!uploadStatus.detail && !(!!uploadStatus?.detail?.isHive || !!uploadStatus?.detail?.isProduct) && !!!importStatus"
+  >
+    <app-bd-form-input
+      label="Name"
+      name="name"
+      [(ngModel)]="uploadStatus.detail.name"
+      required
+    ></app-bd-form-input>
+    <app-bd-form-input
+      label="Version"
+      name="tag"
+      [(ngModel)]="uploadStatus.detail.tag"
+      required
+    ></app-bd-form-input>
     <div class="package-os-buttons">
-      <app-bd-form-toggle label="Operating System Independent" name="allOs" [(ngModel)]="supportAllOs"></app-bd-form-toggle>
-      <app-bd-form-toggle label="Windows" name="windows" [(ngModel)]="supportWindows"></app-bd-form-toggle>
-      <app-bd-form-toggle label="Linux" name="linux" [(ngModel)]="supportLinux"></app-bd-form-toggle>
+      <app-bd-form-toggle
+        label="Operating System Independent"
+        name="allOs"
+        [(ngModel)]="supportAllOs"
+      ></app-bd-form-toggle>
+      <app-bd-form-toggle
+        label="Windows"
+        name="windows"
+        [(ngModel)]="supportWindows"
+      ></app-bd-form-toggle>
+      <app-bd-form-toggle
+        label="Linux"
+        name="linux"
+        [(ngModel)]="supportLinux"
+      ></app-bd-form-toggle>
     </div>
 
     <app-bd-button

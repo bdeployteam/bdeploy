@@ -1,5 +1,8 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar [header]="'Details for ' + (software$ | async)?.version" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    [header]="'Details for ' + (software$ | async)?.version"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <div gdColumns="auto auto" gdGap="5px">

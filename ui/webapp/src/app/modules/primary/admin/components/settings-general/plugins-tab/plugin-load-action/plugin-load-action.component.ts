@@ -1,18 +1,15 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
 import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugin-admin.service';
 
 @Component({
   selector: 'app-plugin-load-action',
   templateUrl: './plugin-load-action.component.html',
-  styleUrls: ['./plugin-load-action.component.css'],
 })
-export class PluginLoadActionComponent implements OnInit {
+export class PluginLoadActionComponent {
   @Input() record: PluginInfoDto;
 
   constructor(private plugins: PluginAdminService) {}
-
-  ngOnInit(): void {}
 
   /* template */ doLoadUnload() {
     if (this.record.loaded) {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -12,18 +12,28 @@ import { ProductsService } from '../../services/products.service';
 @Component({
   selector: 'app-products-browser',
   templateUrl: './products-browser.component.html',
-  styleUrls: ['./products-browser.component.css'],
 })
-export class ProductsBrowserComponent implements OnInit, OnDestroy {
-  grouping: BdDataGroupingDefinition<ProductDto>[] = [{ name: 'Product ID', group: (r) => r.product }];
-  defaultGrouping: BdDataGrouping<ProductDto>[] = [{ definition: this.grouping[0], selected: [] }];
+export class ProductsBrowserComponent implements OnInit {
+  grouping: BdDataGroupingDefinition<ProductDto>[] = [
+    { name: 'Product ID', group: (r) => r.product },
+  ];
+  defaultGrouping: BdDataGrouping<ProductDto>[] = [
+    { definition: this.grouping[0], selected: [] },
+  ];
 
   /* template */ getRecordRoute = (row: ProductDto) => {
-    return ['', { outlets: { panel: ['panels', 'products', 'details', row.key.name, row.key.tag] } }];
+    return [
+      '',
+      {
+        outlets: {
+          panel: ['panels', 'products', 'details', row.key.name, row.key.tag],
+        },
+      },
+    ];
   };
 
   /* template */ isCardView: boolean;
-  /* template */ presetKeyValue: string = 'products';
+  /* template */ presetKeyValue = 'products';
 
   constructor(
     public cfg: ConfigService,
@@ -38,6 +48,4 @@ export class ProductsBrowserComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
   }
-
-  ngOnDestroy(): void {}
 }

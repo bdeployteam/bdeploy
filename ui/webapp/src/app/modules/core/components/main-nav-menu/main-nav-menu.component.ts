@@ -1,5 +1,14 @@
-import { animate, animateChild, group, query, state, style, transition, trigger } from '@angular/animations';
-import { Component, HostBinding, Input, OnInit } from '@angular/core';
+import {
+  animate,
+  animateChild,
+  group,
+  query,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import { Component, HostBinding, Input } from '@angular/core';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 import { ActivitiesService } from '../../services/activities.service';
@@ -10,7 +19,10 @@ import { NavAreasService } from '../../services/nav-areas.service';
 @Component({
   selector: 'app-main-nav-menu',
   templateUrl: './main-nav-menu.component.html',
-  styleUrls: ['./main-nav-menu.component.css', './main-nav-menu-hamburger.scss'],
+  styleUrls: [
+    './main-nav-menu.component.css',
+    './main-nav-menu-hamburger.scss',
+  ],
   animations: [
     delayedFadeIn,
     delayedFadeOut,
@@ -19,8 +31,18 @@ import { NavAreasService } from '../../services/nav-areas.service';
     trigger('menuOpenClose', [
       state('closed', style({ width: '64px' })),
       state('open', style({ width: '220px' })),
-      transition('open => closed', [group([animate('0.2s ease', style({ width: '64px' })), query('@*', [animateChild()])])]),
-      transition('closed => open', [group([animate('0.2s ease', style({ width: '220px' })), query('@*', [animateChild()])])]),
+      transition('open => closed', [
+        group([
+          animate('0.2s ease', style({ width: '64px' })),
+          query('@*', [animateChild()]),
+        ]),
+      ]),
+      transition('closed => open', [
+        group([
+          animate('0.2s ease', style({ width: '220px' })),
+          query('@*', [animateChild()]),
+        ]),
+      ]),
     ]),
     trigger('headerOpenClose', [
       state('closed', style({ width: '104px' })),
@@ -30,7 +52,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
     ]),
   ],
 })
-export class MainNavMenuComponent implements OnInit {
+export class MainNavMenuComponent {
   @Input() set expanded(val: boolean) {
     this.areas.menuMaximized$.next(!this.areas.menuMaximized$.value);
   }
@@ -45,8 +67,6 @@ export class MainNavMenuComponent implements OnInit {
     public areas: NavAreasService,
     public activities: ActivitiesService
   ) {}
-
-  ngOnInit(): void {}
 
   @HostBinding('@menuOpenClose') get animationState() {
     return this.expanded ? 'open' : 'closed';

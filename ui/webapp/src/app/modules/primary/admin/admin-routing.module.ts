@@ -22,13 +22,35 @@ const ADMIN_ROUTES: Route[] = [
     component: AdminShellComponent,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'admin' },
-      { path: 'general', component: SettingsGeneralComponent, canDeactivate: [DirtyDialogGuard], outlet: 'admin' },
-      { path: 'users', component: UsersBrowserComponent, canDeactivate: [CanDeactivateGuard], outlet: 'admin' },
+      {
+        path: 'general',
+        component: SettingsGeneralComponent,
+        canDeactivate: [DirtyDialogGuard],
+        outlet: 'admin',
+      },
+      {
+        path: 'users',
+        component: UsersBrowserComponent,
+        canDeactivate: [CanDeactivateGuard],
+        outlet: 'admin',
+      },
       { path: 'hive', component: BHiveComponent, outlet: 'admin' },
-      { path: 'systemsoftware', component: UpdateBrowserComponent, outlet: 'admin' },
-      { path: 'manualcleanup', component: MasterCleanupComponent, outlet: 'admin' },
+      {
+        path: 'systemsoftware',
+        component: UpdateBrowserComponent,
+        outlet: 'admin',
+      },
+      {
+        path: 'manualcleanup',
+        component: MasterCleanupComponent,
+        outlet: 'admin',
+      },
       { path: 'metrics', component: MetricsOverviewComponent, outlet: 'admin' },
-      { path: 'logFiles', component: LogFilesBrowserComponent, outlet: 'admin' },
+      {
+        path: 'logFiles',
+        component: LogFilesBrowserComponent,
+        outlet: 'admin',
+      },
     ],
   },
 ];

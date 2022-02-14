@@ -1,11 +1,28 @@
 <ng-template #addTemplate>
   <div>Select an attribute and assign a value.</div>
-  <app-bd-form-select [(ngModel)]="newAttr" name="attribute" label="Group Attribute" [values]="defs" [labels]="defLabels" required></app-bd-form-select>
-  <app-bd-form-input [(ngModel)]="newValue" name="value" label="Attribute Value" required></app-bd-form-input>
+  <app-bd-form-select
+    [(ngModel)]="newAttr"
+    name="attribute"
+    label="Group Attribute"
+    [values]="defs"
+    [labels]="defLabels"
+    required
+  ></app-bd-form-select>
+  <app-bd-form-input
+    [(ngModel)]="newValue"
+    name="value"
+    label="Attribute Value"
+    required
+  ></app-bd-form-input>
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Group Attribute Values" [panel]="true" [route]="['..', '..']"> </app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Group Attribute Values"
+    [panel]="true"
+    [route]="['..', '..']"
+  >
+  </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
@@ -14,7 +31,13 @@
           <div>No attribute values</div>
         </app-bd-no-data>
       </app-bd-data-display>
-      <app-bd-button #btn text="Set Attribute Value..." icon="edit" [collapsed]="false" (click)="showAddDialog(addTemplate)"></app-bd-button>
+      <app-bd-button
+        #btn
+        text="Set Attribute Value..."
+        icon="edit"
+        [collapsed]="false"
+        (click)="showAddDialog(addTemplate)"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

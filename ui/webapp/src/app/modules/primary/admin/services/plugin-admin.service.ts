@@ -4,7 +4,10 @@ import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ObjectChangeType, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import { EMPTY_SCOPE, ObjectChangesService } from '../../../core/services/object-changes.service';
+import {
+  EMPTY_SCOPE,
+  ObjectChangesService,
+} from '../../../core/services/object-changes.service';
 import { measure } from '../../../core/utils/performance.utils';
 
 @Injectable({
@@ -15,10 +18,16 @@ export class PluginAdminService {
   public plugins$ = new BehaviorSubject<PluginInfoDto[]>([]);
 
   private apiPath = () => `${this.cfg.config.api}/plugin-admin`;
-  public globalUploadUrl$ = new BehaviorSubject<string>(`${this.apiPath()}/upload-global`);
+  public globalUploadUrl$ = new BehaviorSubject<string>(
+    `${this.apiPath()}/upload-global`
+  );
 
-  constructor(private http: HttpClient, private cfg: ConfigService, changes: ObjectChangesService) {
-    changes.subscribe(ObjectChangeType.PLUGIN, EMPTY_SCOPE, (change) => {
+  constructor(
+    private http: HttpClient,
+    private cfg: ConfigService,
+    changes: ObjectChangesService
+  ) {
+    changes.subscribe(ObjectChangeType.PLUGIN, EMPTY_SCOPE, () => {
       this.reload();
     });
 

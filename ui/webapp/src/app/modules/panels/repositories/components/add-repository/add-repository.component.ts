@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
@@ -10,9 +10,8 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 @Component({
   selector: 'app-add-repository',
   templateUrl: './add-repository.component.html',
-  styleUrls: ['./add-repository.component.css'],
 })
-export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class AddRepositoryComponent implements OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
   /* template */ repository: Partial<SoftwareRepositoryConfiguration> = {};
 
@@ -21,11 +20,12 @@ export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialo
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(private repositories: RepositoriesService, private areas: NavAreasService) {
+  constructor(
+    private repositories: RepositoriesService,
+    private areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
-
-  ngOnInit(): void {}
 
   isDirty(): boolean {
     return this.form.dirty;
@@ -43,7 +43,7 @@ export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialo
           this.saving$.next(false);
         })
       )
-      .subscribe((_) => {
+      .subscribe(() => {
         this.areas.closePanel();
         this.subscription.unsubscribe();
       });

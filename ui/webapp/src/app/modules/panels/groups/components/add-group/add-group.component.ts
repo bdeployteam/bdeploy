@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -11,11 +11,12 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 @Component({
   selector: 'app-add-group',
   templateUrl: './add-group.component.html',
-  styleUrls: ['./add-group.component.css'],
 })
-export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class AddGroupComponent implements OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ group: Partial<InstanceGroupConfiguration> = { autoDelete: true };
+  /* template */ group: Partial<InstanceGroupConfiguration> = {
+    autoDelete: true,
+  };
 
   private subscription: Subscription;
 
@@ -27,8 +28,6 @@ export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
   constructor(private groups: GroupsService, private areas: NavAreasService) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
-
-  ngOnInit(): void {}
 
   /* template */ onSelectImage(image: File) {
     this.image = image;
@@ -43,7 +42,13 @@ export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   /* template */ onUnsupportedFile(file: File) {
-    this.dialog.info('Unsupported File Type', `${file.name} has an unsupported file type.`, 'warning').subscribe();
+    this.dialog
+      .info(
+        'Unsupported File Type',
+        `${file.name} has an unsupported file type.`,
+        'warning'
+      )
+      .subscribe();
   }
 
   /* template */ onSave() {
@@ -54,9 +59,9 @@ export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
           this.saving$.next(false);
         })
       )
-      .subscribe((_) => {
-        if (!!this.image) {
-          this.groups.updateImage(this.group.name, this.image).subscribe((__) => {
+      .subscribe(() => {
+        if (this.image) {
+          this.groups.updateImage(this.group.name, this.image).subscribe(() => {
             this.reset();
           });
         } else {

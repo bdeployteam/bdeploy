@@ -1,15 +1,36 @@
 <ng-template #previewTemplate>
   <div [style.width.px]="800" [style.height.px]="500">
-    <app-bd-editor fxFlex="1 0 auto" [content]="previewContent$ | async" [path]="previewName$ | async" [readonly]="true"></app-bd-editor>
+    <app-bd-editor
+      fxFlex="1 0 auto"
+      [content]="previewContent$ | async"
+      [path]="previewName$ | async"
+      [readonly]="true"
+    ></app-bd-editor>
   </div>
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="hives.loading$">
-  <app-bd-dialog-toolbar [header]="'Browse ' + (bhive$ | async)" [panel]="true" [relative]="true" [route]="['..']">
+  <app-bd-dialog-toolbar
+    [header]="'Browse ' + (bhive$ | async)"
+    [panel]="true"
+    [relative]="true"
+    [route]="['..']"
+  >
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button *ngIf="path$ | async" icon="navigate_before" text="Back to Parent" color="primary" (click)="onNavigateUp()"></app-bd-button>
+    <app-bd-button
+      *ngIf="path$ | async"
+      icon="navigate_before"
+      text="Back to Parent"
+      color="primary"
+      (click)="onNavigateUp()"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <app-bd-data-table [records]="entries$ | async" [columns]="columns" [sort]="sort" (recordClick)="onClick($event)"></app-bd-data-table>
+    <app-bd-data-table
+      [records]="entries$ | async"
+      [columns]="columns"
+      [sort]="sort"
+      (recordClick)="onClick($event)"
+    ></app-bd-data-table>
   </app-bd-dialog-content>
 </app-bd-dialog>

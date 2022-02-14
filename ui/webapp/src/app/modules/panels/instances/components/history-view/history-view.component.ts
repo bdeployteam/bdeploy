@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { InstanceNodeConfigurationListDto } from 'src/app/models/gen.dtos';
@@ -12,14 +12,18 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
   templateUrl: './history-view.component.html',
   styleUrls: ['./history-view.component.css'],
 })
-export class HistoryViewComponent implements OnInit, OnDestroy {
+export class HistoryViewComponent implements OnDestroy {
   /* template */ base$ = new BehaviorSubject<string>(null);
   /* template */ config$ = new BehaviorSubject<InstanceConfigCache>(null);
   /* template */ clientNodeName = CLIENT_NODE_NAME;
 
   private subscription: Subscription;
 
-  constructor(private areas: NavAreasService, private details: HistoryDetailsService, public instances: InstancesService) {
+  constructor(
+    private areas: NavAreasService,
+    private details: HistoryDetailsService,
+    public instances: InstancesService
+  ) {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
       const base = route?.paramMap?.get('base');
       if (!base) {
@@ -33,13 +37,14 @@ export class HistoryViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  /* template */ getAppDesc(nodes: InstanceNodeConfigurationListDto, name: string) {
+  /* template */ getAppDesc(
+    nodes: InstanceNodeConfigurationListDto,
+    name: string
+  ) {
     return nodes?.applications.find((a) => a.key.name === name)?.descriptor;
   }
 }

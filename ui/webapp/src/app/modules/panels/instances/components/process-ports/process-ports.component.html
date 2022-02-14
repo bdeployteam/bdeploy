@@ -1,9 +1,17 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Ports of {{ (details.processConfig$ | async)?.name }}" [panel]="true" [route]="['..']"> </app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Ports of {{ (details.processConfig$ | async)?.name }}"
+    [panel]="true"
+    [route]="['..']"
+  >
+  </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
-      <app-bd-data-display [columns]="columns.defaultPortsColumns" [records]="ports$ | async">
+      <app-bd-data-display
+        [columns]="columns.defaultPortsColumns"
+        [records]="ports$ | async"
+      >
         <app-bd-no-data>
           <div>No server ports configured.</div>
         </app-bd-no-data>

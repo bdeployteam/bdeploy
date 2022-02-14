@@ -24,7 +24,11 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
 
   private offset = 0;
 
-  constructor(private auth: AuthenticationService, private instances: InstancesService, public details: ProcessDetailsService) {}
+  constructor(
+    private auth: AuthenticationService,
+    private instances: InstancesService,
+    public details: ProcessDetailsService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.follow$.subscribe((b) => {
@@ -35,7 +39,10 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
     });
 
     this.subscription.add(
-      combineLatest([this.details.processConfig$, this.details.processDetail$]).subscribe(([cfg, detail]) => {
+      combineLatest([
+        this.details.processConfig$,
+        this.details.processDetail$,
+      ]).subscribe(([cfg, detail]) => {
         if (!detail) {
           this.available$.next(false);
           this.follow$.next(false);
@@ -48,9 +55,14 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
         this.hasStdin$.next(cfg.processControl.attachStdin);
         this.stdin$.next(
           // if the process supports stdin, has stdin, is running, and the user has write permission.
-          cfg.processControl.attachStdin && detail.hasStdin && ProcessesService.isRunning(detail.status.processState) && this.auth.isCurrentScopeWrite()
+          cfg.processControl.attachStdin &&
+            detail.hasStdin &&
+            ProcessesService.isRunning(detail.status.processState) &&
+            this.auth.isCurrentScopeWrite()
         );
-        this.follow$.next(ProcessesService.isRunning(detail.status.processState));
+        this.follow$.next(
+          ProcessesService.isRunning(detail.status.processState)
+        );
         this.available$.next(true);
 
         this.nextChunk(); // initial
@@ -72,14 +84,16 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
       if (!this.offset && entry.size > MAX_TAIL) {
         this.offset = entry.size - MAX_TAIL;
       }
-      this.instances.getContentChunk(dir, entry, this.offset, 0).subscribe((chunk) => {
-        if (!chunk) {
-          return;
-        }
+      this.instances
+        .getContentChunk(dir, entry, this.offset, 0)
+        .subscribe((chunk) => {
+          if (!chunk) {
+            return;
+          }
 
-        this.content$.next(chunk.content);
-        this.offset = chunk.endPointer;
-      });
+          this.content$.next(chunk.content);
+          this.offset = chunk.endPointer;
+        });
     });
   }
 

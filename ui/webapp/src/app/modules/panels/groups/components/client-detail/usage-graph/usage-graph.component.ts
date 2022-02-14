@@ -1,5 +1,8 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
-import { ClientsUsageService, ClientUsagePerApp } from '../../../services/clients-usage.service';
+import { Component, Input, OnChanges } from '@angular/core';
+import {
+  ClientsUsageService,
+  ClientUsagePerApp,
+} from '../../../services/clients-usage.service';
 
 const PERC_PER_DAY = 100 / 29;
 
@@ -8,7 +11,7 @@ const PERC_PER_DAY = 100 / 29;
   templateUrl: './usage-graph.component.html',
   styleUrls: ['./usage-graph.component.css'],
 })
-export class ClientUsageGraphComponent implements OnInit, OnChanges {
+export class ClientUsageGraphComponent implements OnChanges {
   @Input() instanceUid: string;
   @Input() appUid: string;
 
@@ -22,8 +25,6 @@ export class ClientUsageGraphComponent implements OnInit, OnChanges {
   /* template */ endMarker = false;
 
   constructor(private clients: ClientsUsageService) {}
-
-  ngOnInit(): void {}
 
   ngOnChanges(): void {
     this.clients.load(this.instanceUid).subscribe((usage) => {
@@ -41,7 +42,9 @@ export class ClientUsageGraphComponent implements OnInit, OnChanges {
       this.hasVisiblePoint = false;
     } else {
       const reverseDailyUsage = [...usageOfApp.usage].reverse();
-      this.curve = reverseDailyUsage.map((u) => u.usage.reduce((p, c) => p + c.usage, 0));
+      this.curve = reverseDailyUsage.map((u) =>
+        u.usage.reduce((p, c) => p + c.usage, 0)
+      );
       this.days = reverseDailyUsage.map((u) => u.day);
     }
 
@@ -56,7 +59,6 @@ export class ClientUsageGraphComponent implements OnInit, OnChanges {
   private generatePath() {
     let path = '';
 
-    const highestVal = this.getMaxY();
     this.pathPoints = this.generatePoints();
 
     let prevX = 100;
@@ -74,7 +76,9 @@ export class ClientUsageGraphComponent implements OnInit, OnChanges {
         path += `M ${pointX},${pointY}`;
       } else {
         // cubic bezier, with the handles shifted 2% off the start/end points - this will give a nice and smooth curve.
-        path += `C ${prevX - 2},${prevY} ${pointX + 2},${pointY} ${pointX},${pointY}`;
+        path += `C ${prevX - 2},${prevY} ${
+          pointX + 2
+        },${pointY} ${pointX},${pointY}`;
       }
 
       prevX = pointX;
@@ -93,7 +97,11 @@ export class ClientUsageGraphComponent implements OnInit, OnChanges {
     const data = this.getRelevantDataPoints();
 
     let curX = 100;
-    for (let index = 0; index < data.length; ++index, curX = curX - PERC_PER_DAY) {
+    for (
+      let index = 0;
+      index < data.length;
+      ++index, curX = curX - PERC_PER_DAY
+    ) {
       const pointX = curX;
       const pointY = 100 - (data[index] / highestVal) * 100;
 

@@ -33,7 +33,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.sub = this.servers.servers$.subscribe((_) => {
+    this.sub = this.servers.servers$.subscribe(() => {
       this.update();
     });
 
@@ -48,12 +48,16 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   }
 
   updateSyncState() {
-    const instance = this.instancesService.current$?.value?.managedServer || this.instancesService.active$?.value?.managedServer;
+    const instance =
+      this.instancesService.current$?.value?.managedServer ||
+      this.instancesService.active$?.value?.managedServer;
     if (instance) {
       this.servers.updateInstanceSyncState(instance);
     }
     if (this.serverDetailsService.server$?.value) {
-      this.servers.updateServerSyncState(this.serverDetailsService.server$?.value);
+      this.servers.updateServerSyncState(
+        this.serverDetailsService.server$?.value
+      );
     }
   }
 
@@ -77,23 +81,33 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     this.noPerm$.next(false);
     if (!isSynchronized && this.server?.update?.forceUpdate) {
       this.sync$.next(false);
-      this.tooltip$.next('The server requires a mandatory update before synchronization is possible.');
+      this.tooltip$.next(
+        'The server requires a mandatory update before synchronization is possible.'
+      );
       this.badge$.next(null);
     } else if (!isSynchronized) {
       this.sync$.next(false);
-      this.tooltip$.next('The server is not synchronized. Click to synchronize now');
+      this.tooltip$.next(
+        'The server is not synchronized. Click to synchronize now'
+      );
       this.badge$.next(null);
     } else {
       this.sync$.next(true);
 
-      const remainingSeconds = Math.round(this.servers.getRemainingSynchronizedTime(this.server) / 1000);
+      const remainingSeconds = Math.round(
+        this.servers.getRemainingSynchronizedTime(this.server) / 1000
+      );
 
       if (remainingSeconds > 60) {
         const remainingMinutes = Math.round(remainingSeconds / 60);
-        this.tooltip$.next(`The server is in synchronized state for ${remainingMinutes} minutes`);
+        this.tooltip$.next(
+          `The server is in synchronized state for ${remainingMinutes} minutes`
+        );
         this.badge$.next(remainingMinutes);
       } else {
-        this.tooltip$.next(`The server is in synchronized state for ${remainingSeconds} seconds`);
+        this.tooltip$.next(
+          `The server is in synchronized state for ${remainingSeconds} seconds`
+        );
         this.badge$.next(remainingSeconds);
       }
     }

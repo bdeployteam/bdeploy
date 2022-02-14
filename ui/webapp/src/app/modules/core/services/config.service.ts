@@ -8,9 +8,17 @@ import { isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { delay, retryWhen, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { BackendInfoDto, MinionMode, PluginInfoDto, Version } from '../../../models/gen.dtos';
+import {
+  BackendInfoDto,
+  MinionMode,
+  PluginInfoDto,
+  Version,
+} from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
-import { ConnectionVersionComponent, VERSION_DATA } from '../components/connection-version/connection-version.component';
+import {
+  ConnectionVersionComponent,
+  VERSION_DATA,
+} from '../components/connection-version/connection-version.component';
 import { NO_LOADING_BAR_CONTEXT } from '../utils/loading-bar.util';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 import { ThemeService } from './theme.service';
@@ -47,20 +55,61 @@ export class ConfigService {
     sanitizer: DomSanitizer
   ) {
     // register all custom icons we want to use with <mat-icon>
-    iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
-    iconRegistry.addSvgIcon('progress', sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg'));
-    iconRegistry.addSvgIcon('plus', sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg'));
-    iconRegistry.addSvgIcon('star', sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg'));
-    iconRegistry.addSvgIcon('group-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/group-settings.svg'));
-    iconRegistry.addSvgIcon('instance-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg'));
-    iconRegistry.addSvgIcon('repository-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/repository-settings.svg'));
-    iconRegistry.addSvgIcon('start-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg'));
-    iconRegistry.addSvgIcon('stop-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
+    iconRegistry.addSvgIcon(
+      'bdeploy',
+      sanitizer.bypassSecurityTrustResourceUrl(
+        'assets/logo-single-path-square.svg'
+      )
+    );
+    iconRegistry.addSvgIcon(
+      'progress',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'plus',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'star',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'group-settings',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/group-settings.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'instance-settings',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'repository-settings',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/repository-settings.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'start-scheduled',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'stop-scheduled',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg')
+    );
 
-    iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
-    iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
-    iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
-    iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
+    iconRegistry.addSvgIcon(
+      'LINUX',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'WINDOWS',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'AIX',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg')
+    );
+    iconRegistry.addSvgIcon(
+      'MACOS',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg')
+    );
 
     // check whether the server version changed every minute.
     // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.
@@ -70,8 +119,8 @@ export class ConfigService {
   /** Used during application init to load the configuration. */
   public load(): Promise<AppConfig> {
     return new Promise((resolve) => {
-      this.getBackendInfo(true).subscribe(
-        (bv) => {
+      this.getBackendInfo(true).subscribe({
+        next: (bv) => {
           this.config = {
             version: bv.version,
             api: environment.apiUrl,
@@ -86,10 +135,10 @@ export class ConfigService {
           this.isStandalone$.next(this.config.mode === MinionMode.STANDALONE);
           resolve(this.config);
         },
-        (err) => {
+        error: (err) => {
           console.error('Cannot load configuration', err);
-        }
-      );
+        },
+      });
     });
   }
 
@@ -102,7 +151,7 @@ export class ConfigService {
 
   private doCheckVersion(bv: BackendInfoDto) {
     if (!isEqual(this.config.version, bv.version)) {
-      if (!!this.overlayRef) {
+      if (this.overlayRef) {
         if (this.isUnreachable) {
           // we were recovering and now the backend reports another version.
           this.closeOverlay();
@@ -115,7 +164,11 @@ export class ConfigService {
       this.stopCheckAndLockVersion();
 
       this.overlayRef = this.overlay.create({
-        positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+        positionStrategy: this.overlay
+          .position()
+          .global()
+          .centerHorizontally()
+          .centerVertically(),
         hasBackdrop: true,
       });
 
@@ -123,7 +176,17 @@ export class ConfigService {
       const portal = new ComponentPortal(
         ConnectionVersionComponent,
         null,
-        Injector.create({ providers: [{ provide: VERSION_DATA, useValue: { oldVersion: this.config.version, newVersion: bv.version } }] })
+        Injector.create({
+          providers: [
+            {
+              provide: VERSION_DATA,
+              useValue: {
+                oldVersion: this.config.version,
+                newVersion: bv.version,
+              },
+            },
+          ],
+        })
       );
       this.overlayRef.attach(portal);
     }
@@ -141,7 +204,11 @@ export class ConfigService {
       this.isUnreachable = true;
 
       this.overlayRef = this.overlay.create({
-        positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+        positionStrategy: this.overlay
+          .position()
+          .global()
+          .centerHorizontally()
+          .centerVertically(),
         hasBackdrop: true,
       });
 
@@ -185,7 +252,9 @@ export class ConfigService {
   public getBackendInfo(errorHandling = false): Observable<BackendInfoDto> {
     return this.http
       .get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
-        headers: errorHandling ? {} : suppressGlobalErrorHandling(new HttpHeaders()),
+        headers: errorHandling
+          ? {}
+          : suppressGlobalErrorHandling(new HttpHeaders()),
         context: NO_LOADING_BAR_CONTEXT,
       })
       .pipe(

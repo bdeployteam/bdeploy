@@ -1,17 +1,32 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar header="Bulk Product Update" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Bulk Product Update"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="bulk.selection$ | async as selection">
       <div *ngIf="!!selection.length" fxLayout="column" fxLayoutGap="10px">
         <div>
-          Update <strong>{{ selection.length }}</strong> selected instances' product version.
+          Update <strong>{{ selection.length }}</strong> selected instances'
+          product version.
         </div>
-        <div>This operation requires successful validation of each instance after applying the update to succeed.</div>
-        <app-bd-data-table [records]="products$ | async" [columns]="columns" *ngIf="!(processing$ | async)"></app-bd-data-table>
+        <div>
+          This operation requires successful validation of each instance after
+          applying the update to succeed.
+        </div>
+        <app-bd-data-table
+          [records]="products$ | async"
+          [columns]="columns"
+          *ngIf="!(processing$ | async)"
+        ></app-bd-data-table>
         <ng-container *ngIf="processing$ | async">
           <mat-divider></mat-divider>
           <div>
-            <em>Working on it, saved {{ saved$ | async }} of {{ selection.length }} updates.</em>
+            <em
+              >Working on it, saved {{ saved$ | async }} of {{ selection.length
+              }} updates.</em
+            >
           </div>
         </ng-container>
       </div>

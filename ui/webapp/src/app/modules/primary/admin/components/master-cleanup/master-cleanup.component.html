@@ -1,7 +1,13 @@
 <app-bd-dialog>
   <app-bd-dialog-toolbar header="Cleanup">
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button *ngIf="cleanup.cleanup$ | async" [collapsed]="false" icon="clear" text="Abort Cleanup" (click)="cleanup.cancelCleanup()"></app-bd-button>
+    <app-bd-button
+      *ngIf="cleanup.cleanup$ | async"
+      [collapsed]="false"
+      icon="clear"
+      text="Abort Cleanup"
+      (click)="cleanup.cancelCleanup()"
+    ></app-bd-button>
     <app-bd-button
       *ngIf="cleanup.cleanup$ | async as clean"
       [collapsed]="false"
@@ -23,11 +29,18 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="bd-default-padding">
-      <mat-tab-group dynamicHeight *ngIf="cleanup.cleanup$ | async as groups" animationDuration="0ms">
+      <mat-tab-group
+        dynamicHeight
+        *ngIf="cleanup.cleanup$ | async as groups"
+        animationDuration="0ms"
+      >
         <mat-tab *ngFor="let group of groups">
           <ng-template mat-tab-label>{{ group.name }}</ng-template>
           <ng-template matTabContent>
-            <app-bd-data-table [records]="group.actions" [columns]="columns"></app-bd-data-table>
+            <app-bd-data-table
+              [records]="group.actions"
+              [columns]="columns"
+            ></app-bd-data-table>
           </ng-template>
         </mat-tab>
       </mat-tab-group>

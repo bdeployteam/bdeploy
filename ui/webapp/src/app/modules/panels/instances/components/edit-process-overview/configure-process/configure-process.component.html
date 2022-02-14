@@ -1,12 +1,28 @@
 <app-bd-dialog #dialog [padding]="false">
-  <app-bd-dialog-toolbar header="Configure {{ (edit.process$ | async)?.name }}{{ hasPendingChanges ? '*' : '' }}" [panel]="true" [route]="['..']">
+  <app-bd-dialog-toolbar
+    header="Configure {{ (edit.process$ | async)?.name }}{{ hasPendingChanges ? '*' : '' }}"
+    [panel]="true"
+    [route]="['..']"
+  >
     <div fxFlex="1 0 auto"></div>
-    <app-bd-button text="Apply" [collapsed]="false" icon="done" color="primary" (click)="onSave()" [disabled]="!hasPendingChanges || isInvalid"></app-bd-button>
+    <app-bd-button
+      text="Apply"
+      [collapsed]="false"
+      icon="done"
+      color="primary"
+      (click)="onSave()"
+      [disabled]="!hasPendingChanges || isInvalid"
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
-      <app-config-process-header (checkIsInvalid)="checkIsInvalid($event)"></app-config-process-header>
-      <app-config-process-param-group [dialog]="dialog" (checkIsInvalid)="checkIsInvalid($event)"></app-config-process-param-group>
+      <app-config-process-header
+        (checkIsInvalid)="checkIsInvalid($event)"
+      ></app-config-process-header>
+      <app-config-process-param-group
+        [dialog]="dialog"
+        (checkIsInvalid)="checkIsInvalid($event)"
+      ></app-config-process-param-group>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

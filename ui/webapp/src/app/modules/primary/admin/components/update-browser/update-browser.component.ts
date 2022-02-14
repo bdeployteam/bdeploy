@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
-import { SoftwareUpdateService, SoftwareVersion } from '../../services/software-update.service';
+import {
+  SoftwareUpdateService,
+  SoftwareVersion,
+} from '../../services/software-update.service';
 
 const COL_TAG: BdDataColumn<SoftwareVersion> = {
   id: 'tag',
@@ -13,7 +16,7 @@ const COL_TAG: BdDataColumn<SoftwareVersion> = {
 const COL_SYSTEM: BdDataColumn<SoftwareVersion> = {
   id: 'system',
   name: 'Has System',
-  data: (r) => (!!r.system?.length ? 'check_box' : 'check_box_outline_blank'),
+  data: (r) => (r.system?.length ? 'check_box' : 'check_box_outline_blank'),
   width: '50px',
   component: BdDataIconCellComponent,
 };
@@ -21,7 +24,7 @@ const COL_SYSTEM: BdDataColumn<SoftwareVersion> = {
 const COL_LAUNCHER: BdDataColumn<SoftwareVersion> = {
   id: 'launcher',
   name: 'Has Launcher',
-  data: (r) => (!!r.launcher?.length ? 'check_box' : 'check_box_outline_blank'),
+  data: (r) => (r.launcher?.length ? 'check_box' : 'check_box_outline_blank'),
   width: '50px',
   component: BdDataIconCellComponent,
 };
@@ -32,9 +35,20 @@ const COL_LAUNCHER: BdDataColumn<SoftwareVersion> = {
   styleUrls: ['./update-browser.component.css'],
 })
 export class UpdateBrowserComponent implements OnInit {
-  /* template */ columns: BdDataColumn<SoftwareVersion>[] = [COL_TAG, COL_SYSTEM, COL_LAUNCHER];
+  /* template */ columns: BdDataColumn<SoftwareVersion>[] = [
+    COL_TAG,
+    COL_SYSTEM,
+    COL_LAUNCHER,
+  ];
   /* template */ getRecordRoute = (r: SoftwareVersion) => {
-    return ['', { outlets: { panel: ['panels', 'admin', 'software', 'details', r.version] } }];
+    return [
+      '',
+      {
+        outlets: {
+          panel: ['panels', 'admin', 'software', 'details', r.version],
+        },
+      },
+    ];
   };
 
   constructor(public software: SoftwareUpdateService) {}

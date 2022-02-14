@@ -9,20 +9,42 @@
     appEditUniqueValueValidator
     [disallowedValues]="newUsedIds"
   ></app-bd-form-input>
-  <app-bd-form-input [(ngModel)]="newDesc" name="description" label="Definition Description" required></app-bd-form-input>
+  <app-bd-form-input
+    [(ngModel)]="newDesc"
+    name="description"
+    label="Definition Description"
+    required
+  ></app-bd-form-input>
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Instance Attribute Definitions" [panel]="true" [route]="['..', '..']"> </app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar
+    header="Instance Attribute Definitions"
+    [panel]="true"
+    [route]="['..', '..']"
+  >
+  </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="groups.current$ | async as group">
-      <app-bd-data-display [columns]="columns" [records]="group.instanceAttributes">
+    <div
+      fxLayout="column"
+      fxLayoutGap="10px"
+      *ngIf="groups.current$ | async as group"
+    >
+      <app-bd-data-display
+        [columns]="columns"
+        [records]="group.instanceAttributes"
+      >
         <app-bd-no-data>
           <div>No attribute definitions</div>
         </app-bd-no-data>
       </app-bd-data-display>
-      <app-bd-button text="Add Definition..." icon="add" [collapsed]="false" (click)="showAddDialog(group, addTemplate)"></app-bd-button>
+      <app-bd-button
+        text="Add Definition..."
+        icon="add"
+        [collapsed]="false"
+        (click)="showAddDialog(group, addTemplate)"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

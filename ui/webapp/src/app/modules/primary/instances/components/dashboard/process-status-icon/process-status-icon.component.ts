@@ -1,6 +1,18 @@
-import { Component, HostBinding, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  HostBinding,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+} from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { ApplicationConfiguration, ProcessState, ProcessStatusDto } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfiguration,
+  ProcessState,
+  ProcessStatusDto,
+} from 'src/app/models/gen.dtos';
 import { ProcessesService } from '../../../services/processes.service';
 
 @Component({
@@ -8,7 +20,9 @@ import { ProcessesService } from '../../../services/processes.service';
   templateUrl: './process-status-icon.component.html',
   styleUrls: ['./process-status-icon.component.css'],
 })
-export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
+export class ProcessStatusIconComponent
+  implements OnInit, OnChanges, OnDestroy
+{
   @Input() record: ApplicationConfiguration;
 
   @HostBinding('attr.data-cy') dataCy: string;
@@ -24,8 +38,12 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
   constructor(private processes: ProcessesService) {}
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.processes.processStates$, this.change$]).subscribe(([ps, _]) => {
-      if (!!this.record) {
+    this.subscription = combineLatest([
+      this.processes.processStates$,
+      this.change$,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ]).subscribe(([ps, _]) => {
+      if (this.record) {
         this.update(ps);
       }
     });
@@ -52,21 +70,56 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
       case ProcessState.STOPPED:
         return this.next('stop', null, 'Stopped', 'local-stopped');
       case ProcessState.STOPPED_START_PLANNED:
-        return this.next(null, 'start-scheduled', 'Process scheduled to start', 'local-stopped');
+        return this.next(
+          null,
+          'start-scheduled',
+          'Process scheduled to start',
+          'local-stopped'
+        );
       case ProcessState.RUNNING_NOT_STARTED:
-        return this.next(null, 'start-scheduled', 'Process starting', 'local-running');
+        return this.next(
+          null,
+          'start-scheduled',
+          'Process starting',
+          'local-running'
+        );
       case ProcessState.RUNNING:
         return this.next('favorite', null, 'Running', 'local-running');
       case ProcessState.RUNNING_UNSTABLE:
-        return this.next('favorite', null, 'Running (Recently Crashed)', 'local-crashed');
+        return this.next(
+          'favorite',
+          null,
+          'Running (Recently Crashed)',
+          'local-crashed'
+        );
       case ProcessState.RUNNING_NOT_ALIVE:
-        return this.next('heart_broken', null, 'Process lifeness probe reported a problem in the running process', 'local-crashed');
+        return this.next(
+          'heart_broken',
+          null,
+          'Process lifeness probe reported a problem in the running process',
+          'local-crashed'
+        );
       case ProcessState.RUNNING_STOP_PLANNED:
-        return this.next(null, 'stop-scheduled', 'Running (Stop Planned)', 'local-running');
+        return this.next(
+          null,
+          'stop-scheduled',
+          'Running (Stop Planned)',
+          'local-running'
+        );
       case ProcessState.CRASHED_WAITING:
-        return this.next('report_problem', null, 'Crashed (Restart pending)', 'local-crashed');
+        return this.next(
+          'report_problem',
+          null,
+          'Crashed (Restart pending)',
+          'local-crashed'
+        );
       case ProcessState.CRASHED_PERMANENTLY:
-        return this.next('error', null, 'Crashed (Too many retries, stopped)', 'local-crashed');
+        return this.next(
+          'error',
+          null,
+          'Crashed (Too many retries, stopped)',
+          'local-crashed'
+        );
     }
   }
 

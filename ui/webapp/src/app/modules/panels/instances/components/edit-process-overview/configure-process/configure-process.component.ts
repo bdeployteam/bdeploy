@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -11,9 +11,8 @@ import { ProcessEditService } from '../../../services/process-edit.service';
 @Component({
   selector: 'app-configure-process',
   templateUrl: './configure-process.component.html',
-  styleUrls: ['./configure-process.component.css'],
 })
-export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDialog {
+export class ConfigureProcessComponent implements OnDestroy, DirtyableDialog {
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
@@ -22,11 +21,13 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
 
   private subscription: Subscription;
 
-  constructor(public edit: ProcessEditService, private instanceEdit: InstanceEditService, areas: NavAreasService) {
+  constructor(
+    public edit: ProcessEditService,
+    private instanceEdit: InstanceEditService,
+    areas: NavAreasService
+  ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
-
-  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -37,13 +38,16 @@ export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDi
   }
 
   /* template */ onSave() {
-    this.doSave().subscribe((_) => this.tb.closePanel());
+    this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
     return of(true).pipe(
-      tap((_) => {
-        this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);
+      tap(() => {
+        this.edit.alignGlobalParameters(
+          this.edit.application$.value,
+          this.edit.process$.value
+        );
         this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
       })
     );

@@ -3,7 +3,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { InstanceUsageDto, ManifestKey, PluginInfoDto, ProductDto } from 'src/app/models/gen.dtos';
+import {
+  InstanceUsageDto,
+  ManifestKey,
+  PluginInfoDto,
+  ProductDto,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -37,8 +42,10 @@ export class ProductDetailsService implements OnDestroy {
   private subscription: Subscription;
   private prodSubscription: Subscription;
 
-  private apiPath = () => `${this.cfg.config.api}/group/${this.areas.groupContext$.value}/product/${this.productKey$.value}/${this.productTag$.value}`;
-  private pluginApiPath = () => `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.groupContext$.value}`;
+  private apiPath = () =>
+    `${this.cfg.config.api}/group/${this.areas.groupContext$.value}/product/${this.productKey$.value}/${this.productTag$.value}`;
+  private pluginApiPath = () =>
+    `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.groupContext$.value}`;
 
   constructor(
     private products: ProductsService,
@@ -52,15 +59,23 @@ export class ProductDetailsService implements OnDestroy {
       this.productKey$.next(p.get('key'));
       this.productTag$.next(p.get('tag'));
 
-      if (!!this.prodSubscription) {
+      if (this.prodSubscription) {
         this.prodSubscription.unsubscribe();
       }
       this.prodSubscription = this.products.products$
-        .pipe(map((prods) => prods.find((e) => e.key.name === this.productKey$.value && e.key.tag === this.productTag$.value)))
+        .pipe(
+          map((prods) =>
+            prods.find(
+              (e) =>
+                e.key.name === this.productKey$.value &&
+                e.key.tag === this.productTag$.value
+            )
+          )
+        )
         .subscribe((prod) => {
           this.usedIn$.next(null);
           this.product$.next(prod);
-          this.labels$.next(!!prod ? this.mapLabels(prod) : null);
+          this.labels$.next(prod ? this.mapLabels(prod) : null);
         });
     });
   }
@@ -84,7 +99,10 @@ export class ProductDetailsService implements OnDestroy {
   public getPlugins(): Observable<PluginInfoDto[]> {
     if (!this.plugins$.value && !this.pluginsLoading$.value) {
       this.pluginsLoading$.next(true);
-      const key: ManifestKey = { name: this.productKey$.value, tag: this.productTag$.value };
+      const key: ManifestKey = {
+        name: this.productKey$.value,
+        tag: this.productTag$.value,
+      };
       this.http
         .post<PluginInfoDto[]>(this.pluginApiPath(), key)
         .pipe(finalize(() => this.pluginsLoading$.next(false)))
@@ -99,11 +117,13 @@ export class ProductDetailsService implements OnDestroy {
 
   public download(): Observable<any> {
     return new Observable<any>((s) => {
-      this.http.get(`${this.apiPath()}/zip`, { responseType: 'text' }).subscribe((token) => {
-        this.downloads.download(this.downloads.createDownloadUrl(token));
-        s.next(token);
-        s.complete();
-      });
+      this.http
+        .get(`${this.apiPath()}/zip`, { responseType: 'text' })
+        .subscribe((token) => {
+          this.downloads.download(this.downloads.createDownloadUrl(token));
+          s.next(token);
+          s.complete();
+        });
     });
   }
 

@@ -12,7 +12,11 @@
   [type]="isSubmit ? 'submit' : 'button'"
   [attr.aria-label]="text"
 >
-  <div fxLayout="row" [class.local-wrapper-expanded]="!collapsed" [class.local-wrapper-collapsed]="collapsed">
+  <div
+    fxLayout="row"
+    [class.local-wrapper-expanded]="!collapsed"
+    [class.local-wrapper-collapsed]="collapsed"
+  >
     <mat-icon
       *ngIf="icon && !svgIcon && !(loadingWhen$ | async)"
       [fontSet]="fontSet"
@@ -32,7 +36,12 @@
       matBadgeSize="small"
       [matBadgeColor]="badgeColor"
     ></mat-icon>
-    <mat-spinner *ngIf="loadingWhen$ | async" [diameter]="24" class="bd-inherited-spinner" [class.local-spinner]="!collapsed"></mat-spinner>
+    <mat-spinner
+      *ngIf="loadingWhen$ | async"
+      [diameter]="24"
+      class="bd-inherited-spinner"
+      [class.local-spinner]="!collapsed"
+    ></mat-spinner>
     <span
       *ngIf="text && !collapsed"
       [ngClass]="(!!icon || !!svgIcon) && !(loadingWhen$ | async) ? 'local-label-position' : []"

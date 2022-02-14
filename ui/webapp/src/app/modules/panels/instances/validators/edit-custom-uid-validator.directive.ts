@@ -1,22 +1,38 @@
 import { Directive } from '@angular/core';
-import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
-import { BdValidationMessageExtractor, bdValidationRegisterMessageExtractor } from 'src/app/modules/core/validators/messages';
+import {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator,
+} from '@angular/forms';
+import {
+  BdValidationMessageExtractor,
+  bdValidationRegisterMessageExtractor,
+} from 'src/app/modules/core/validators/messages';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 @Directive({
   selector: '[appEditCustomUidValidator]',
-  providers: [{ provide: NG_VALIDATORS, useExisting: EditCustomUidValidatorDirective, multi: true }],
+  providers: [
+    {
+      provide: NG_VALIDATORS,
+      useExisting: EditCustomUidValidatorDirective,
+      multi: true,
+    },
+  ],
 })
-export class EditCustomUidValidatorDirective implements Validator, BdValidationMessageExtractor {
+export class EditCustomUidValidatorDirective
+  implements Validator, BdValidationMessageExtractor
+{
   public readonly id = 'edit-custom-uid';
-  private readonly uidRegExp = new RegExp('^[A-Za-z][A-Za-z0-9_\\-\\.]*$');
+  private readonly uidRegExp = new RegExp(/^[A-Za-z][A-Za-z0-9_\\-\\.]*$/);
 
   constructor(private edit: InstanceEditService) {
     bdValidationRegisterMessageExtractor(this);
   }
 
   extract(label: string, errors: ValidationErrors): string {
-    if (!!errors[this.id]) {
+    if (errors[this.id]) {
       return errors[this.id];
     }
   }

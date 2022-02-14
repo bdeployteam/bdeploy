@@ -1,7 +1,18 @@
-<div class="local-container" [ngClass]="borderClass" [appBdPopup]="popup" appBdPopupTrigger="hover" [appBdPopupDelay]="500" appBdPopupPosition="above-right">
+<div
+  class="local-container"
+  [ngClass]="borderClass"
+  [appBdPopup]="popup"
+  appBdPopupTrigger="hover"
+  [appBdPopupDelay]="500"
+  appBdPopupPosition="above-right"
+>
   <div class="local-bg-position" [ngClass]="bgClass"></div>
   <div *ngIf="!maxWidthPx" class="local-text">{{ value }}</div>
-  <div *ngIf="!!maxWidthPx" class="local-text bd-text-ellipsis" [style.max-width.px]="maxWidthPx">
+  <div
+    *ngIf="!!maxWidthPx"
+    class="local-text bd-text-ellipsis"
+    [style.max-width.px]="maxWidthPx"
+  >
     {{ value }}
   </div>
 </div>

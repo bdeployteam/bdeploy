@@ -1,5 +1,17 @@
-<app-bd-button-popup #popup text="Data Grouping" icon="filter_alt" tooltip="below" [collapsed]="true" [badge]="filteredGroups.length">
-  <mat-card [style.padding.px]="10" class="mat-typography" fxLayout="column" fxLayoutGap="5px">
+<app-bd-button-popup
+  #popup
+  text="Data Grouping"
+  icon="filter_alt"
+  tooltip="below"
+  [collapsed]="true"
+  [badge]="filteredGroups.length"
+>
+  <mat-card
+    [style.padding.px]="10"
+    class="mat-typography"
+    fxLayout="column"
+    fxLayoutGap="5px"
+  >
     <div fxLayout="row" fxLayoutGap="5px">
       <!-- a grouping panel per grouping -->
       <div fxLayout="row wrap" fxLayoutGap="5px">
@@ -17,7 +29,13 @@
       <!-- the management panel (add/remove/save) -->
       <div fxLayout="column" fxLayoutGap="5px">
         <ng-container *ngIf="multiple">
-          <app-bd-button text="Add" icon="add" tooltip="above" (click)="addGrouping()" [disabled]="groupings.length >= 5"></app-bd-button>
+          <app-bd-button
+            text="Add"
+            icon="add"
+            tooltip="above"
+            (click)="addGrouping()"
+            [disabled]="groupings.length >= 5"
+          ></app-bd-button>
           <app-bd-button
             text="Remove"
             icon="remove"
@@ -25,9 +43,19 @@
             (click)="removeGrouping()"
             [disabled]="groupings.length === 1 && !groupings[0].definition"
           ></app-bd-button>
-          <mat-divider [style.position]="'relative'" [style.top.px]="5" [style.padding-bottom.px]="10"></mat-divider>
+          <mat-divider
+            [style.position]="'relative'"
+            [style.top.px]="5"
+            [style.padding-bottom.px]="10"
+          ></mat-divider>
         </ng-container>
-        <app-bd-button *ngIf="presetKey" tooltip="above" text="Save as local preset" icon="push_pin" (click)="savePreset()"></app-bd-button>
+        <app-bd-button
+          *ngIf="presetKey"
+          tooltip="above"
+          text="Save as local preset"
+          icon="push_pin"
+          (click)="savePreset()"
+        ></app-bd-button>
       </div>
     </div>
   </mat-card>

@@ -1,29 +1,50 @@
 <mat-sidenav-container class="admin-shell-container">
   <mat-sidenav mode="side" opened class="admin-shell-nav mat-elevation-z2">
     <mat-nav-list>
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['general'] } }]" routerLinkActive="active-setting"
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['general'] } }]"
+        routerLinkActive="active-setting"
         ><mat-icon class="nav-icon">settings</mat-icon>Settings</a
       >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['users'] } }]" routerLinkActive="active-setting"
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['users'] } }]"
+        routerLinkActive="active-setting"
         ><mat-icon class="nav-icon">account_circle</mat-icon>User Accounts</a
       >
 
       <div class="menu-group">Housekeeping</div>
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['manualcleanup'] } }]" routerLinkActive="active-setting"
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['manualcleanup'] } }]"
+        routerLinkActive="active-setting"
         ><mat-icon class="nav-icon">delete_sweep</mat-icon>Manual Cleanup</a
       >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['hive'] } }]" routerLinkActive="active-setting"
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['hive'] } }]"
+        routerLinkActive="active-setting"
         ><mat-icon class="nav-icon">sd_storage</mat-icon>BHives</a
       >
 
       <div class="menu-group">Maintenance</div>
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['metrics'] } }]" routerLinkActive="active-setting"
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['metrics'] } }]"
+        routerLinkActive="active-setting"
         ><mat-icon class="nav-icon">timeline</mat-icon>Metrics</a
       >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['logFiles'] } }]" routerLinkActive="active-setting"
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['logFiles'] } }]"
+        routerLinkActive="active-setting"
         ><mat-icon class="nav-icon">subject</mat-icon>Logging</a
       >
-      <a mat-list-item [routerLink]="[{ outlets: { admin: ['systemsoftware'] } }]" routerLinkActive="active-setting"
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['systemsoftware'] } }]"
+        routerLinkActive="active-setting"
         ><mat-icon class="nav-icon">system_update</mat-icon>BDeploy Update</a
       >
     </mat-nav-list>

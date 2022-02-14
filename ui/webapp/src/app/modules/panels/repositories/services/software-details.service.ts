@@ -34,7 +34,8 @@ export class SoftwareDetailsService implements OnDestroy {
     `${this.cfg.config.api}/group/${this.areas.repositoryContext$.value}/product/${this.manifestKey$.value}/${this.manifestTag$.value}`;
   private softwareApiPath = () =>
     `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/content/${this.manifestKey$.value}/${this.manifestTag$.value}`;
-  private pluginApiPath = () => `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.repositoryContext$.value}`;
+  private pluginApiPath = () =>
+    `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.repositoryContext$.value}`;
 
   constructor(
     private route: ActivatedRoute,
@@ -48,11 +49,19 @@ export class SoftwareDetailsService implements OnDestroy {
       this.manifestKey$.next(p.get('key'));
       this.manifestTag$.next(p.get('tag'));
 
-      if (!!this.softwareSubscription) {
+      if (this.softwareSubscription) {
         this.softwareSubscription.unsubscribe();
       }
       this.softwareSubscription = this.repository.data$
-        .pipe(map((data) => data.find((e) => e.key.name === this.manifestKey$.value && e.key.tag === this.manifestTag$.value)))
+        .pipe(
+          map((data) =>
+            data.find(
+              (e) =>
+                e.key.name === this.manifestKey$.value &&
+                e.key.tag === this.manifestTag$.value
+            )
+          )
+        )
         .subscribe((data) => {
           this.softwarePackage$.next(data);
           this.labels$.next(this.mapLabels(data));
@@ -67,7 +76,10 @@ export class SoftwareDetailsService implements OnDestroy {
   public getPlugins(): Observable<PluginInfoDto[]> {
     if (!this.plugins$.value && !this.pluginsLoading$.value) {
       this.pluginsLoading$.next(true);
-      const key: ManifestKey = { name: this.manifestKey$.value, tag: this.manifestTag$.value };
+      const key: ManifestKey = {
+        name: this.manifestKey$.value,
+        tag: this.manifestTag$.value,
+      };
       this.http
         .post<PluginInfoDto[]>(this.pluginApiPath(), key)
         .pipe(finalize(() => this.pluginsLoading$.next(false)))
@@ -82,11 +94,13 @@ export class SoftwareDetailsService implements OnDestroy {
 
   public download(): Observable<any> {
     return new Observable<any>((s) => {
-      this.http.get(`${this.getApiPath4Type()}/zip`, { responseType: 'text' }).subscribe((token) => {
-        this.downloads.download(this.downloads.createDownloadUrl(token));
-        s.next(token);
-        s.complete();
-      });
+      this.http
+        .get(`${this.getApiPath4Type()}/zip`, { responseType: 'text' })
+        .subscribe((token) => {
+          this.downloads.download(this.downloads.createDownloadUrl(token));
+          s.next(token);
+          s.complete();
+        });
     });
   }
 
@@ -100,7 +114,7 @@ export class SoftwareDetailsService implements OnDestroy {
 
   mapLabels(software: any) {
     const labels: LabelRecord[] = [];
-    if (!!software?.labels) {
+    if (software?.labels) {
       for (const k of Object.keys(software.labels)) {
         labels.push({ key: k, value: software.labels[k] });
       }

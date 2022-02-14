@@ -2,7 +2,12 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BarHorizontalComponent } from '@swimlane/ngx-charts';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { JerseyServerMonitoringDto, MetricBundle, MetricGroup, TimerMetric } from '../../../../../models/gen.dtos';
+import {
+  JerseyServerMonitoringDto,
+  MetricBundle,
+  MetricGroup,
+  TimerMetric,
+} from '../../../../../models/gen.dtos';
 import { MetricsService } from '../../services/metrics.service';
 
 export interface SeriesElement {
@@ -67,7 +72,9 @@ export class MetricsOverviewComponent implements OnInit {
 
           this.allMetrics.set(group, item);
         }
-        this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
+        this.keys$.next(
+          this.keys$.value.concat(Array.from(this.allMetrics.keys()))
+        );
         this.doSelect(this.keys$.value[0]);
       });
   }
@@ -151,7 +158,8 @@ export class MetricsOverviewComponent implements OnInit {
 
       let lastTasksQueued = this.serverStats?.snapshots[0]?.poolTasksQueued;
       let lastTasksFinished = this.serverStats?.snapshots[0]?.poolTasksFinished;
-      let lastTasksCancelled = this.serverStats?.snapshots[0]?.poolTasksCancelled;
+      let lastTasksCancelled =
+        this.serverStats?.snapshots[0]?.poolTasksCancelled;
 
       const conBytesRead: SeriesElement[] = [];
       const conBytesWritten: SeriesElement[] = [];
@@ -181,13 +189,31 @@ export class MetricsOverviewComponent implements OnInit {
         const label = new Date(snap.snapshotTime);
 
         vmCpuThreadCount.push({ name: label, value: snap.vmThreads });
-        vmMemTotal.push({ name: label, value: snap.vmTotalMem / (1024 * 1024) });
-        vmMemUsed.push({ name: label, value: (snap.vmTotalMem - snap.vmFreeMem) / (1024 * 1024) });
+        vmMemTotal.push({
+          name: label,
+          value: snap.vmTotalMem / (1024 * 1024),
+        });
+        vmMemUsed.push({
+          name: label,
+          value: (snap.vmTotalMem - snap.vmFreeMem) / (1024 * 1024),
+        });
 
-        reqCompleted.push({ name: label, value: snap.reqCompleted - lastReqCompleted });
-        reqReceived.push({ name: label, value: snap.reqReceived - lastReqReceived });
-        reqCancelled.push({ name: label, value: snap.reqCancelled - lastReqCancelled });
-        reqTimedOut.push({ name: label, value: snap.reqTimedOut - lastReqTimedOut });
+        reqCompleted.push({
+          name: label,
+          value: snap.reqCompleted - lastReqCompleted,
+        });
+        reqReceived.push({
+          name: label,
+          value: snap.reqReceived - lastReqReceived,
+        });
+        reqCancelled.push({
+          name: label,
+          value: snap.reqCancelled - lastReqCancelled,
+        });
+        reqTimedOut.push({
+          name: label,
+          value: snap.reqTimedOut - lastReqTimedOut,
+        });
 
         lastReqCompleted = snap.reqCompleted;
         lastReqReceived = snap.reqReceived;
@@ -202,28 +228,52 @@ export class MetricsOverviewComponent implements OnInit {
         poolCoreSize = snap.poolCoreSize;
         poolMaxSize = snap.poolMaxSize;
         poolCurrentSize.push({ name: label, value: snap.poolCurrentSize });
-        poolExceeded.push({ name: label, value: snap.poolExceeded - lastPoolExceeded });
+        poolExceeded.push({
+          name: label,
+          value: snap.poolExceeded - lastPoolExceeded,
+        });
         lastPoolExceeded = snap.poolExceeded;
         if (snap.poolCurrentSize > poolHighestCurrent) {
           poolHighestCurrent = snap.poolCurrentSize;
         }
 
-        poolTasksQueued.push({ name: label, value: snap.poolTasksQueued - lastTasksQueued });
-        poolTasksFinished.push({ name: label, value: snap.poolTasksFinished - lastTasksFinished });
-        poolTasksCancelled.push({ name: label, value: snap.poolTasksCancelled - lastTasksCancelled });
+        poolTasksQueued.push({
+          name: label,
+          value: snap.poolTasksQueued - lastTasksQueued,
+        });
+        poolTasksFinished.push({
+          name: label,
+          value: snap.poolTasksFinished - lastTasksFinished,
+        });
+        poolTasksCancelled.push({
+          name: label,
+          value: snap.poolTasksCancelled - lastTasksCancelled,
+        });
 
         lastTasksQueued = snap.poolTasksQueued;
         lastTasksFinished = snap.poolTasksFinished;
         lastTasksCancelled = snap.poolTasksCancelled;
 
-        conBytesRead.push({ name: label, value: snap.conBytesRead - lastBytesRead });
-        conBytesWritten.push({ name: label, value: snap.conBytesWritten - lastBytesWritten });
+        conBytesRead.push({
+          name: label,
+          value: snap.conBytesRead - lastBytesRead,
+        });
+        conBytesWritten.push({
+          name: label,
+          value: snap.conBytesWritten - lastBytesWritten,
+        });
 
         lastBytesRead = snap.conBytesRead;
         lastBytesWritten = snap.conBytesWritten;
 
-        conBytesReadAbs.push({ name: label, value: snap.conBytesRead / (1024 * 1024) });
-        conBytesWrittenAbs.push({ name: label, value: snap.conBytesWritten / (1024 * 1024) });
+        conBytesReadAbs.push({
+          name: label,
+          value: snap.conBytesRead / (1024 * 1024),
+        });
+        conBytesWrittenAbs.push({
+          name: label,
+          value: snap.conBytesWritten / (1024 * 1024),
+        });
       }
 
       this.vmCpu.push({ name: 'Threads', series: vmCpuThreadCount });
@@ -231,7 +281,10 @@ export class MetricsOverviewComponent implements OnInit {
 
       this.vmMem.push({ name: 'Total Memory MB', series: vmMemTotal });
       this.vmMem.push({ name: 'Used Memory MB', series: vmMemUsed });
-      this.vmMemRef.push({ name: 'Max Memory MB', value: vmMemMax / (1024 * 1024) });
+      this.vmMemRef.push({
+        name: 'Max Memory MB',
+        value: vmMemMax / (1024 * 1024),
+      });
 
       this.req.push({ name: 'Received', series: reqReceived });
       this.req.push({ name: 'Completed', series: reqCompleted });
@@ -244,10 +297,16 @@ export class MetricsOverviewComponent implements OnInit {
       this.reqAbs.push({ name: 'Timed Out', series: reqTimedOutAbs });
 
       this.poolSize.push({ name: 'Current Size', series: poolCurrentSize });
-      this.poolSize.push({ name: 'Times Limit Exceeded', series: poolExceeded });
+      this.poolSize.push({
+        name: 'Times Limit Exceeded',
+        series: poolExceeded,
+      });
       this.poolSizeRef.push({ name: 'Core Size', value: poolCoreSize });
       if (poolHighestCurrent * 2 >= poolMaxSize) {
-        this.poolSizeRef.push({ name: 'Maximum Pool Size', value: poolMaxSize });
+        this.poolSizeRef.push({
+          name: 'Maximum Pool Size',
+          value: poolMaxSize,
+        });
       }
 
       this.poolTasks.push({ name: 'Queued', series: poolTasksQueued });

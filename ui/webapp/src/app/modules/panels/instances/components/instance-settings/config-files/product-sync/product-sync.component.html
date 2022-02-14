@@ -27,7 +27,13 @@
     <ng-container *ngSwitchCase="'missing'">
       <div>File only in product templates.</div>
       <div fxFlex="1 0 auto"></div>
-      <app-bd-button text="Create from product template" icon="add" (click)="doAddFromTemplate()" [style.padding-right.px]="30" tooltip="below"></app-bd-button>
+      <app-bd-button
+        text="Create from product template"
+        icon="add"
+        (click)="doAddFromTemplate()"
+        [style.padding-right.px]="30"
+        tooltip="below"
+      ></app-bd-button>
     </ng-container>
   </ng-container>
 </div>

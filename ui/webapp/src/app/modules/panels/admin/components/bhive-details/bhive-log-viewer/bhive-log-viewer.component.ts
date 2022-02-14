@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -11,7 +11,7 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
   templateUrl: './bhive-log-viewer.component.html',
   styleUrls: ['./bhive-log-viewer.component.css'],
 })
-export class BhiveLogViewerComponent implements OnInit {
+export class BhiveLogViewerComponent implements OnDestroy {
   /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
   /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
   /* template */ content$ = new Subject<string>();
@@ -22,7 +22,10 @@ export class BhiveLogViewerComponent implements OnInit {
   private offset = 0;
 
   constructor(private hiveLogging: HiveLoggingService, areas: NavAreasService) {
-    this.subscription = combineLatest([areas.panelRoute$, hiveLogging.directories$]).subscribe(([r, d]) => {
+    this.subscription = combineLatest([
+      areas.panelRoute$,
+      hiveLogging.directories$,
+    ]).subscribe(([r, d]) => {
       if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
         return;
       }
@@ -31,7 +34,10 @@ export class BhiveLogViewerComponent implements OnInit {
       const fileName = r.params['file'];
 
       // check if we need to reset, otherwise e.g. the file size was updated, which is fine to follow along.
-      if (nodeName !== this.directory$.value?.minion || fileName !== this.file$.value?.path) {
+      if (
+        nodeName !== this.directory$.value?.minion ||
+        fileName !== this.file$.value?.path
+      ) {
         // reset!
         this.offset = 0;
       }
@@ -62,8 +68,6 @@ export class BhiveLogViewerComponent implements OnInit {
     );
   }
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     clearInterval(this.followInterval);
@@ -83,13 +87,15 @@ export class BhiveLogViewerComponent implements OnInit {
       return;
     }
 
-    this.hiveLogging.getLogContentChunk(dir, entry, this.offset, 0, true).subscribe((chunk) => {
-      if (!chunk) {
-        return;
-      }
+    this.hiveLogging
+      .getLogContentChunk(dir, entry, this.offset, 0, true)
+      .subscribe((chunk) => {
+        if (!chunk) {
+          return;
+        }
 
-      this.content$.next(chunk.content);
-      this.offset = chunk.endPointer;
-    });
+        this.content$.next(chunk.content);
+        this.offset = chunk.endPointer;
+      });
   }
 }
