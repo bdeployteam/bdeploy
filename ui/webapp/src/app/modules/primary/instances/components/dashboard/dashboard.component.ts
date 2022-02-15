@@ -161,6 +161,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!node) {
       return a.localeCompare(b); // client apps
     }
-    return node.nodeConfiguration.controlGroups?.findIndex((g) => g.name === a) - node.nodeConfiguration.controlGroups?.findIndex((g) => g.name === b);
+
+    // need to account for the strings built in the getControlGroupDesc function
+    const indexA = node.nodeConfiguration.controlGroups?.findIndex((g) => a?.startsWith(g.name + ' ['));
+    const indexB = node.nodeConfiguration.controlGroups?.findIndex((g) => b?.startsWith(g.name + ' ['));
+
+    return indexA - indexB;
   }
 }
