@@ -4,12 +4,12 @@ plugins {
 
 dependencies {
     implementation(
-        'org.glassfish.jersey.ext:jersey-proxy-client:3.0.3',
+        'org.glassfish.jersey.ext:jersey-proxy-client:3.0.4',
         'javax.xml.bind:jaxb-api:2.3.1',
         'org.glassfish.jaxb:jaxb-runtime:3.0.2',
         'javax.activation:activation:1.1.1',
         'jakarta.servlet:jakarta.servlet-api:5.0.0',
-        'org.slf4j:jul-to-slf4j:1.7.35',
+        'org.slf4j:jul-to-slf4j:1.7.36',
         'org.glassfish.grizzly:grizzly-http-servlet:3.0.1',
         project(":common"),
     )
@@ -18,10 +18,10 @@ dependencies {
     commonTestDeps(project(":logging"))
 
     api(
-        'org.glassfish.jersey.media:jersey-media-json-jackson:3.0.3',
-        'org.glassfish.jersey.media:jersey-media-multipart:3.0.3',
-        'org.glassfish.jersey.inject:jersey-hk2:3.0.3',
-        'org.glassfish.jersey.containers:jersey-container-grizzly2-http:3.0.3',
+        'org.glassfish.jersey.media:jersey-media-json-jackson:3.0.4',
+        'org.glassfish.jersey.media:jersey-media-multipart:3.0.4',
+        'org.glassfish.jersey.inject:jersey-hk2:3.0.4',
+        'org.glassfish.jersey.containers:jersey-container-grizzly2-http:3.0.4',
         'org.glassfish.grizzly:grizzly-websockets:3.0.1',
         'org.glassfish.grizzly:grizzly-http-client:1.16',
     )

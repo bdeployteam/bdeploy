@@ -6,8 +6,8 @@ dependencies {
     api (
         'commons-codec:commons-codec:1.15',
         'com.google.guava:guava:31.0.1-jre',
-        'io.dropwizard.metrics:metrics-core:4.2.7',
-        'org.slf4j:slf4j-api:1.7.35',
+        'io.dropwizard.metrics:metrics-core:4.2.8',
+        'org.slf4j:slf4j-api:1.7.36',
         'com.j256.simplemagic:simplemagic:1.17',
         'javax.annotation:javax.annotation-api:1.3.2',
         'com.github.spotbugs:spotbugs-annotations:4.5.3',
