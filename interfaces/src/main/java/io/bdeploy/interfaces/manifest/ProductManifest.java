@@ -207,6 +207,8 @@ public class ProductManifest {
             app.application = resolveStringValue(app.application, parentDesc.application);
             app.name = resolveStringValue(app.name, parentDesc.name);
             app.description = resolveStringValue(app.description, parentDesc.description);
+            app.preferredProcessControlGroup = resolveStringValue(app.preferredProcessControlGroup,
+                    parentDesc.preferredProcessControlGroup);
 
             // merge process control partial object as map
             for (var entry : parentDesc.processControl.entrySet()) {
