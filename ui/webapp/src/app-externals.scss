@@ -4,6 +4,7 @@
   font-family: 'Material Icons Outlined';
   font-style: normal;
   font-weight: 400;
+  font-display: swap;
   src: url(assets/gok-H7zzDkdnRel8-DQ6KAXJ69wP1tGnf4ZGhUce.woff2) format('woff2');
 }
 
@@ -11,6 +12,7 @@
   font-family: 'Material Icons Filled';
   font-style: normal;
   font-weight: 400;
+  font-display: swap;
   src: url(assets/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
 }
 
@@ -51,6 +53,7 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 300;
+  font-display: swap;
   src: local('Roboto Light'), local('Roboto-Light'), url('assets/roboto-v19-latin-300.woff2') format('woff2');
 }
 /* roboto-regular - latin */
@@ -58,6 +61,7 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
+  font-display: swap;
   src: local('Roboto'), local('Roboto-Regular'), url('assets/roboto-v19-latin-regular.woff2') format('woff2');
 }
 /* roboto-500 - latin */
@@ -65,5 +69,6 @@
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 500;
+  font-display: swap;
   src: local('Roboto Medium'), local('Roboto-Medium'), url('assets/roboto-v19-latin-500.woff2') format('woff2');
 }

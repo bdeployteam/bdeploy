@@ -46,6 +46,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.jersey.JerseyCachingCLStaticHttpHandler;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthService;
@@ -65,6 +66,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -242,12 +244,13 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
-    public InputStream readImage(String group) {
+    public Response readImage(String group) {
         ObjectId id = read(group).logo;
         if (id == null) {
-            return null;
+            return Response.ok().build();
         }
-        return getGroupHive(group).execute(new ObjectLoadOperation().setObject(id));
+        return Response.ok(getGroupHive(group).execute(new ObjectLoadOperation().setObject(id)))
+                .header("Cache-Control", JerseyCachingCLStaticHttpHandler.CACHE_AGGRESSIVE).build();
     }
 
     @Override

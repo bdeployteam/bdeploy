@@ -28,6 +28,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/group")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -81,7 +82,7 @@ public interface InstanceGroupResource {
     @Path("/{group}/image")
     @Produces("image/png")
     @Unsecured // required to allow requests from browser directly (e.g. CSS).
-    public InputStream readImage(@ActivityScope @PathParam("group") String group);
+    public Response readImage(@ActivityScope @PathParam("group") String group);
 
     /**
      * Create a new unique (in the given group) UUID for an instance.
