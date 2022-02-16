@@ -39,7 +39,7 @@ export class SearchService {
     this.registrations = this.registrations.filter((x) => x !== searchable);
 
     // WHENEVER some searchable deregisters, clear the search since that must be some kind of navigation.
-    this.currentSearch = '';
+    this.search = '';
 
     setTimeout(() => {
       this.enableSearch$.next(this.registrations.length > 0);
