@@ -36,7 +36,7 @@ export class ConfigProcessHeaderComponent implements OnInit, OnDestroy {
     }
     this.subscription.add(
       this.form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
-        this.checkIsInvalid.emit(status === 'INVALID');
+        this.checkIsInvalid.emit(status !== 'VALID');
       })
     );
   }

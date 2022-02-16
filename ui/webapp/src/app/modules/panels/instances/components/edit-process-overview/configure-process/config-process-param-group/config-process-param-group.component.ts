@@ -163,7 +163,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
     this.forms.forEach((form) => {
       this.subscription.add(
         form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
-          this.checkIsInvalid.emit(status === 'INVALID');
+          this.checkIsInvalid.emit(status !== 'VALID');
         })
       );
     });
