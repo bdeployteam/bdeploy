@@ -1,10 +1,10 @@
 <div class="bd-image-upload-container" fxLayout="column">
   <div class="bd-image-upload-title-container" fxLayout="row" fxLayoutAlign="start center">
     <span class="local-title" fxFlex="1 0 auto">Logo</span>
-    <button mat-icon-button type="button" [disabled]="disabled" (click)="fileInput.click()">
+    <button aria-label="Browse" mat-icon-button type="button" [disabled]="disabled" (click)="fileInput.click()">
       <mat-icon>folder_open</mat-icon>
     </button>
-    <button mat-icon-button type="button" [disabled]="disabled" (click)="resetImage(); fileInput.value = null">
+    <button aria-label="Delete" mat-icon-button type="button" [disabled]="disabled" (click)="resetImage(); fileInput.value = null">
       <mat-icon>delete</mat-icon>
     </button>
     <input type="file" hidden (change)="onImageChange($event)" #fileInput />

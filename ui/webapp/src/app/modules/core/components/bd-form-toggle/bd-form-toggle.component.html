@@ -9,13 +9,20 @@
       [style.cursor]="disabled ? undefined : 'pointer'"
     >
       <div fxFlex="1 0 auto" class="bd-form-toggle-label">{{ label }}</div>
-      <mat-checkbox *ngIf="appearance === 'checkbox'" [style.pointer-events]="'none'" [checked]="value" [disabled]="disabled"></mat-checkbox>
+      <mat-checkbox
+        *ngIf="appearance === 'checkbox'"
+        [style.pointer-events]="'none'"
+        [checked]="value"
+        [disabled]="disabled"
+        [attr.aria-label]="label"
+      ></mat-checkbox>
       <mat-slide-toggle
         *ngIf="appearance === 'slide'"
         [style.pointer-events]="'none'"
         [checked]="value"
         [disabled]="disabled"
         class="bd-form-toggle-slide-toggle"
+        [attr.aria-label]="label"
       ></mat-slide-toggle>
       <div class="bd-form-toggle-suffix">
         <ng-content></ng-content>

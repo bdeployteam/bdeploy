@@ -110,7 +110,14 @@
               fxLayoutAlign="start center"
             >
               <!-- Button to expand or collapse a group -->
-              <button *ngIf="row.expandable" mat-icon-button [style.marginLeft.px]="row.level * 24" (click)="treeControl.toggle(row)" appClickStopPropagation>
+              <button
+                *ngIf="row.expandable"
+                mat-icon-button
+                [style.marginLeft.px]="row.level * 24"
+                (click)="treeControl.toggle(row)"
+                aria-label="Expand / Collapse"
+                appClickStopPropagation
+              >
                 <mat-icon class="mat-icon-rtl-mirror">
                   {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
                 </mat-icon>
