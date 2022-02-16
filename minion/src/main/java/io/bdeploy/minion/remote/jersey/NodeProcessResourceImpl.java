@@ -3,11 +3,6 @@ package io.bdeploy.minion.remote.jersey;
 import java.io.File;
 import java.nio.file.Path;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.SecurityContext;
-
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestListOperation;
@@ -25,6 +20,10 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.pcu.ProcessController;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class NodeProcessResourceImpl implements NodeProcessResource {
 

@@ -349,6 +349,13 @@ public class ProcessController {
     }
 
     /**
+     * Signals that a planned start operations has been aborted for any reason. The process is put back into STOPPED state.
+     */
+    public void abortStart(String user) {
+        executeLocked("AbortStart", user, this::doAbortStart);
+    }
+
+    /**
      * Sets the intent that stopping this process is planned in the near future. This does not have any effect on the process
      * itself. It will still be running and stopping must be explicitly invoked to really terminate the process. Setting this
      * intent is typically done when stopping multiple processes one after each other to visualize the desired target state.
@@ -478,6 +485,16 @@ public class ProcessController {
 
         processState = ProcessState.STOPPED_START_PLANNED;
         logger.log(l -> l.info("Starting planned for {}", processConfig.name));
+    }
+
+    /** Updates the state that starting is planned */
+    private void doAbortStart() {
+        if (!processState.isStopped()) {
+            return;
+        }
+
+        processState = ProcessState.STOPPED;
+        logger.log(l -> l.info("Starting aborted for {}", processConfig.name));
     }
 
     /** Updates the state that stopping is planned */

@@ -32,7 +32,7 @@
 
       <ng-container *ngIf="processDetail">
         <ng-container *ngIf="!isRunning && !isCrashedWaiting">
-          <ng-container *ngIf="processDetail?.status.exitCode">
+          <ng-container *ngIf="processDetail?.status.exitCode || processDetail?.stopTime > 0">
             <mat-icon>exit_to_app</mat-icon>
             <div>Exit Code:</div>
             <div>{{ processDetail?.status.exitCode }}</div>

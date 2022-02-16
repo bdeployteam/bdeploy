@@ -50,6 +50,9 @@ public class ParallelBulkControl extends AbstractBulkControl {
                 if (!r.result) {
                     failed.add(r.appId);
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.log(l -> l.warn("Parallel startup interrupted"));
             } catch (Exception e) {
                 logger.log(l -> l.warn("Error when reading result of parallel start operation", e));
             }
@@ -75,6 +78,9 @@ public class ParallelBulkControl extends AbstractBulkControl {
                 if (r.result) {
                     stopped.add(r.appId);
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.log(l -> l.warn("Parallel stop interrupted"));
             } catch (Exception e) {
                 logger.log(l -> l.warn("Error when reading result of parallel stop operation", e));
             }

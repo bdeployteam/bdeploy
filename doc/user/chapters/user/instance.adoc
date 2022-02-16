@@ -225,7 +225,7 @@ Each *Process Control Group* has configurable behavior for contained processes r
 Possible values for the *Start Type* and *Stop Type* handling configuration are:
 
 * `SEQUENTIAL`: Each *Process* in the group is handled (started/stopped) sequentially. Any potential waiting (for startup and or shutdown, depending on the capabilities of the process) is done before proceeding to the next *Process* or *Process Control Group*.
-* `PARALLEL`: Each *Process* in the group is handled (started/stopped) in parallel. Only once all *Process* operations within the group have finished, the group is considered finished and processing continues with the next *Process Control Group*.
+* `PARALLEL`: Each *Process* in the group is handled (started/stopped) in parallel. Only once all *Process* operations within the group have finished, the group is considered finished and processing continues with the next *Process Control Group*. Be aware that in conjunction with `CONTINUE` wait mode for process startup, this will make a group complete immediately and continue on to the next group immediately as well.
 
 Additionally, each *Process Control Group* can be configured to wait for process startup, i.e. startup probes. Each *Process Control Group* has a *Start Wait* con:figure-caption:
 

@@ -11,6 +11,7 @@ import java.util.TreeSet;
 
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
+import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 
 /**
@@ -47,22 +48,37 @@ public class BulkProcessController {
             }
         }
 
-        List<String> failed = new ArrayList<>();
-
+        boolean failing = false;
         for (ProcessControlGroupConfiguration controlGroup : processes.getControlGroups()) {
-            try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceUuid, activeTag, controlGroup, processes,
-                    controlGroup.startType)) {
-                failed.addAll(bulk.startGroup(running));
+            if (!failing) {
+                try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceUuid, activeTag, controlGroup, processes,
+                        controlGroup.startType)) {
+                    List<String> failed = bulk.startGroup(running);
+
+                    if (!failed.isEmpty()) {
+                        logger.log(l -> l.warn("Not all applications could be started, skipping other Control Groups. Failed {}",
+                                failed));
+                        failing = true;
+                    }
+                }
+            } else {
+                // a PREVIOUS group failed. Instead of starting we revert to STOPPED state in case we prepared starting.
+                for (var entry : processes.controllers.entrySet()) {
+                    if (controlGroup.processOrder.contains(entry.getKey())
+                            && entry.getValue().getState() == ProcessState.STOPPED_START_PLANNED) {
+                        entry.getValue().abortStart(user);
+                    }
+                }
             }
         }
 
         Duration duration = Duration.between(start, Instant.now());
-        if (failed.isEmpty()) {
+        if (!failing) {
             logger.log(l -> l.info("Applications have been started in {}", ProcessControllerHelper.formatDuration(duration)),
                     activeTag);
             return;
         }
-        logger.log(l -> l.warn("Not all applications could be started. Failed {}", failed));
+
     }
 
     /**

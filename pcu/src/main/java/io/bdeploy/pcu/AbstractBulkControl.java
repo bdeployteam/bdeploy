@@ -1,7 +1,8 @@
 package io.bdeploy.pcu;
 
-import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
@@ -62,25 +63,37 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
         }
 
         // Start it
-        try {
-            if (controlGroup.startWait == ProcessControlGroupWaitType.WAIT) {
-                try (StateListener listener = StateListener.createFor(controller).expect(ProcessState.RUNNING)) {
-                    controller.start(user);
+        if (controlGroup.startWait == ProcessControlGroupWaitType.WAIT) {
+            try (MultiStateListener listener = MultiStateListener.createFor(controller)) {
+                CompletableFuture<Boolean> processStarted = new CompletableFuture<>();
 
-                    if (controller.getState() != ProcessState.RUNNING) {
-                        logger.log(l -> l.info("Waiting for startup"), activeTag, appId);
+                // RUNNING is OK, CRASHED_PERMANENTLY and STOPPED are signals to give up immediately.
+                listener.on(ProcessState.RUNNING, () -> processStarted.complete(true));
+                listener.on(ProcessState.CRASHED_PERMANENTLY,
+                        () -> processStarted.completeExceptionally(new RuntimeException("Permanent crash while starting")));
+                listener.on(ProcessState.STOPPED,
+                        () -> processStarted.completeExceptionally(new RuntimeException("Stopped while starting")));
 
-                        // Should this be configurable somehow? If an application does not start correctly, this is a bug in the application.
-                        listener.await(Duration.ofHours(1));
+                controller.start(user);
+
+                if (controller.getState() != ProcessState.RUNNING) {
+                    logger.log(l -> l.info("Waiting for startup"), activeTag, appId);
+                    try {
+                        return processStarted.get(); // await process changes.
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return false;
+                    } catch (ExecutionException e) {
+                        logger.log(l -> l.warn("Failed to start " + config.uid + ": " + e.getCause().toString()));
+                        return false;
                     }
                 }
-            } else {
-                controller.start(user);
+
+                return true;
             }
+        } else {
+            controller.start(user);
             return true;
-        } catch (Exception ex) {
-            logger.log(l -> l.info("Failed to start application.", ex), activeTag, appId);
-            return false;
         }
     }
 
