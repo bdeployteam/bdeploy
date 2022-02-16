@@ -600,6 +600,17 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    public Response getEntriesZipSteam(String minion, List<RemoteDirectoryEntry> entries) {
+        RemoteService svc = root.getMinions().getRemote(minion);
+        if (svc == null) {
+            throw new WebApplicationException("Cannot find minion " + minion, Status.NOT_FOUND);
+        }
+        CommonDirectoryEntryResource sdr = ResourceProvider.getVersionedResource(svc, CommonDirectoryEntryResource.class,
+                context);
+        return sdr.getEntriesZipStream(entries);
+    }
+
+    @Override
     public void updateDataEntries(String uuid, String minion, List<FileStatusDto> updates) {
         RemoteService svc = root.getMinions().getRemote(minion);
         if (svc == null) {

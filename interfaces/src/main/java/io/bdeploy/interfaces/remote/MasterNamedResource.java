@@ -132,6 +132,15 @@ public interface MasterNamedResource {
     public Response getEntryStream(@QueryParam("m") String minion, RemoteDirectoryEntry entry);
 
     /**
+     * @param minion the minion the entries refer to.
+     * @param entries the requested entries to stream.
+     * @return an {@link InputStream} that can be used to stream a ZIP file containing all entries.
+     */
+    @POST
+    @Path("/dataDir/streamZipEntries")
+    public Response getEntriesZipSteam(@QueryParam("m") String minion, List<RemoteDirectoryEntry> entries);
+
+    /**
      * Add/edit/delete files in the DATA directory.
      */
     @PUT

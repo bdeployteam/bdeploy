@@ -37,18 +37,24 @@ export class DataFilesBulkService {
     ).then((data: any) => data);
   }
 
-  // TODO: Markus to change this function to use proper api call
   public downloadDataFile() {
     const path = this.apiPath(this.groups.current$.value.name, this.instances.current$.value.instanceConfiguration.uuid);
-    const selection = this.selection.map((sel) => {
-      return { ...sel.entry, minion: sel.directory.minion };
-    });
+
+    const minion = this.selection[0]?.directory?.minion;
+    const entries: RemoteDirectoryEntry[] = [];
+    for (const sel of this.selection) {
+      if (sel.directory.minion !== minion) {
+        throw new Error('Cannot download files from multiple minions');
+      }
+      entries.push(sel.entry);
+    }
+
     this.http
-      .post(`${path}/request/data-files-download`, selection, {
+      .post(`${path}/requestMultiZip/${minion}`, entries, {
         responseType: 'text',
       })
       .subscribe((token) => {
-        this.downloads.download(`${path}/stream/${token}`);
+        this.downloads.download(`${path}/streamMultiZip/${token}`);
       });
   }
 }

@@ -986,6 +986,11 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
+    public String getContentMultiZipStreamRequest(String instanceId, String minion, List<RemoteDirectoryEntry> entries) {
+        return resrs.createRequest(new EntryRequest(minion, instanceId, entries));
+    }
+
+    @Override
     public void updateDataFiles(String instanceId, String minion, List<FileStatusDto> updates) {
         InstanceManifest im = readInstance(instanceId);
         if (im == null) {
@@ -1013,14 +1018,28 @@ public class InstanceResourceImpl implements InstanceResource {
     public Response getContentStream(String instanceId, String token) {
         EntryRequest rq = resrs.consumeRequestToken(token);
 
-        InstanceManifest im = readInstance(instanceId, rq.entry.tag);
+        InstanceManifest im = readInstance(instanceId, rq.getEntry().tag);
         if (im == null) {
-            throw new WebApplicationException("Cannot load " + instanceId + ":" + rq.entry.tag, Status.NOT_FOUND);
+            throw new WebApplicationException("Cannot load " + instanceId + ":" + rq.getEntry().tag, Status.NOT_FOUND);
         }
 
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        return root.getNamedMaster(group).getEntryStream(rq.minion, rq.entry);
+        return root.getNamedMaster(group).getEntryStream(rq.minion, rq.getEntry());
+    }
+
+    @Override
+    public Response getContentMultiZipStream(String instanceId, String token) {
+        EntryRequest rq = resrs.consumeRequestToken(token);
+
+        InstanceManifest im = readInstance(instanceId, rq.entries.get(0).tag);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId + ":" + rq.entries.get(0).tag, Status.NOT_FOUND);
+        }
+
+        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        return root.getNamedMaster(group).getEntriesZipSteam(rq.minion, rq.entries);
     }
 
     @Override

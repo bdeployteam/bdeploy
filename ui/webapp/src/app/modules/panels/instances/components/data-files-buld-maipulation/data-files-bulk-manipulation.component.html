@@ -14,14 +14,13 @@
         icon="delete"
         (click)="onDelete()"
       ></app-bd-button>
-      <!-- TODO: Markus to uncomment this when api is ready. -->
-      <!-- <app-bd-button
+      <app-bd-button
         [collapsed]="false"
         [disabled]="!dataFilesBulkService.selection.length || (deleting$ | async)"
         text="Download Selected Data Files"
         icon="cloud_download"
         (click)="onDownload()"
-      ></app-bd-button> -->
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -64,7 +64,7 @@ public class LoggingAdminResourceImpl implements LoggingAdminResource {
     public Response getLogContentStream(String token) {
         EntryRequest rq = resrs.consumeRequestToken(token);
         CommonRootResource root = ResourceProvider.getResource(minion.getSelf(), CommonRootResource.class, context);
-        return root.getLogStream(rq.minion, rq.entry);
+        return root.getLogStream(rq.minion, rq.getEntry());
     }
 
     @Override

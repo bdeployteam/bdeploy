@@ -8,14 +8,9 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.StreamingOutput;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
@@ -30,6 +25,13 @@ import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.minion.MinionRoot;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.StreamingOutput;
 
 public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryResource {
 
@@ -113,7 +115,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
         }
 
         // Build a response with the stream
-        ResponseBuilder responeBuilder = Response.ok(new StreamingOutput() {
+        ResponseBuilder responseBuilder = Response.ok(new StreamingOutput() {
 
             @Override
             public void write(OutputStream output) throws IOException {
@@ -134,12 +136,52 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
             long size = Files.size(actual);
             ContentDisposition contentDisposition = ContentDisposition.type("attachement").size(size)
                     .fileName(actual.getFileName().toString()).build();
-            responeBuilder.header("Content-Disposition", contentDisposition);
-            responeBuilder.header("Content-Length", size);
-            return responeBuilder.build();
+            responseBuilder.header("Content-Disposition", contentDisposition);
+            responseBuilder.header("Content-Length", size);
+            return responseBuilder.build();
         } catch (IOException e) {
             throw new WebApplicationException("Cannot provide download for entry", e);
         }
+    }
+
+    @Override
+    public Response getEntriesZipStream(List<RemoteDirectoryEntry> entries) {
+        // Build a response with the stream
+        var responseBuilder = Response.ok(new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream output) throws IOException {
+                try (var zos = new ZipOutputStream(output)) {
+
+                    for (var entry : entries) {
+                        var path = getEntryPath(entry); // will throw in case of error
+                        var ze = new ZipEntry(entry.path); // relative path name.
+
+                        ze.setTime(Files.getLastModifiedTime(path).toMillis());
+                        zos.putNextEntry(ze);
+
+                        try (var is = Files.newInputStream(path)) {
+                            is.transferTo(zos);
+                        }
+
+                        zos.closeEntry();
+                    }
+
+                    zos.close();
+                } catch (IOException ioe) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Could not fully write output", ioe);
+                    } else {
+                        log.warn("Could not fully write output: {}", ioe.toString());
+                    }
+                }
+            }
+        });
+
+        // Load and attach metadata to give the file a nice name
+        var contentDisposition = ContentDisposition.type("attachement").fileName("DataFiles.zip").build();
+        responseBuilder.header("Content-Disposition", contentDisposition);
+        return responseBuilder.build();
     }
 
 }

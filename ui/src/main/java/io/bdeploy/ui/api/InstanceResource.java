@@ -214,6 +214,12 @@ public interface InstanceResource {
             @PathParam("minion") String minion, RemoteDirectoryEntry entry);
 
     @POST
+    @Path("/{instance}/requestMultiZip/{minion}")
+    @RequiredPermission(permission = Permission.READ)
+    public String getContentMultiZipStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("minion") String minion, List<RemoteDirectoryEntry> entry);
+
+    @POST
     @Path("/{instance}/data/update/{minion}")
     @RequiredPermission(permission = Permission.WRITE)
     public void updateDataFiles(@ActivityScope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
@@ -230,6 +236,13 @@ public interface InstanceResource {
     @Path("/{instance}/stream/{token}")
     @RequiredPermission(permission = Permission.READ)
     public Response getContentStream(@ActivityScope @PathParam("instance") String instanceId, @PathParam("token") String token);
+
+    @GET
+    @Unsecured
+    @Path("/{instance}/streamMultiZip/{token}")
+    @RequiredPermission(permission = Permission.READ)
+    public Response getContentMultiZipStream(@ActivityScope @PathParam("instance") String instanceId,
+            @PathParam("token") String token);
 
     @POST
     @Path("/{instance}/check-ports/{minion}")
