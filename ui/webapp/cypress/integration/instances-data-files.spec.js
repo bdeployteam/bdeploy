@@ -166,14 +166,17 @@ describe('Instance Data Files Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Add File');
-      cy.contains('app-bd-notification-card', 'Add Data File').within(() => {
-        cy.fillFormSelect('minion', 'master');
-        cy.fillFormInput('path', 'test.txt');
-        cy.get('button[data-cy="OK"]').should('be.enabled').click();
-      });
+    });
 
-      cy.waitUntilContentLoaded();
+    cy.inMainNavFlyin('add-data-file', () => {
+      cy.fillFormSelect('minion', 'master');
+      cy.fillFormInput('path', 'test.txt');
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
+    });
 
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
       cy.contains('tr', 'test.txt').should('exist').click();
     });
 
@@ -217,27 +220,27 @@ describe('Instance Data Files Tests', () => {
           cy.contains('0 B').should('not.exist');
         });
       cy.pressToolbarButton('Add File');
+    });
 
-      cy.contains('app-bd-notification-card', 'Add Data File').within(() => {
-        cy.fillFormSelect('minion', 'master');
-        cy.fillFormInput('path', 'test.txt');
-        cy.get('button[data-cy="OK"]').should('be.enabled').click();
+    cy.inMainNavFlyin('add-data-file', () => {
+      cy.fillFormSelect('minion', 'master');
+      cy.fillFormInput('path', 'test.txt');
+      cy.get('button[data-cy="Save"]').should('be.enabled').click();
+    });
+
+    cy.contains('app-bd-notification-card', 'File Exists')
+      .should('exist')
+      .within(() => {
+        cy.get('button[data-cy="Yes"]').click();
       });
 
-      cy.contains('app-bd-notification-card', 'File Exists')
-        .should('exist')
-        .within(() => {
-          cy.get('button[data-cy="Yes"]').click();
-        });
+    cy.waitUntilContentLoaded();
 
-      cy.waitUntilContentLoaded();
-
-      cy.contains('tr', 'test.txt')
-        .should('exist')
-        .within(() => {
-          cy.contains('0 B').should('exist');
-        });
-    });
+    cy.contains('tr', 'test.txt')
+      .should('exist')
+      .within(() => {
+        cy.contains('0 B').should('exist');
+      });
   });
 
   it('Checks bulk manipulation', () => {

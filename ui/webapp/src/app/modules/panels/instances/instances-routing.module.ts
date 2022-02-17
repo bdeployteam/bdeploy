@@ -4,6 +4,7 @@ import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { AddControlGroupComponent } from './components/add-control-group/add-control-group.component';
+import { AddDataFileComponent } from './components/add-data-file/add-data-file.component';
 import { AddInstanceComponent } from './components/add-instance/add-instance.component';
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
@@ -102,6 +103,12 @@ const INSTANCES_ROUTES: Route[] = [
     canActivate: [ScopedWriteGuard],
     canDeactivate: [DirtyDialogGuard],
     data: { max: true },
+  },
+  {
+    path: 'data-files/add',
+    component: AddDataFileComponent,
+    canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard],
   },
 ];
 
