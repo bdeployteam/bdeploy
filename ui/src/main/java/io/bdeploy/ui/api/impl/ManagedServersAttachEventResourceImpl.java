@@ -4,7 +4,6 @@ import java.util.Map;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.ui.api.ManagedServersAttachEventResource;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -30,9 +29,6 @@ public class ManagedServersAttachEventResourceImpl implements ManagedServersAtta
         if (hive == null) {
             throw new WebApplicationException("Instance Group not found", Status.NOT_FOUND);
         }
-
-        InstanceGroupManifest igm = new InstanceGroupManifest(hive);
-        changes.create(ObjectChangeType.INSTANCE_GROUP, igm.getKey());
     }
 
 }

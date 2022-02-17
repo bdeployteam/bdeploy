@@ -89,11 +89,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         }
 
         BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
-        SoftwareRepositoryManifest srm = new SoftwareRepositoryManifest(h);
-        Manifest.Key key = srm.update(config);
         registry.register(config.name, h);
-
-        changes.create(ObjectChangeType.SOFTWARE_REPO, key, null);
+        SoftwareRepositoryManifest srm = new SoftwareRepositoryManifest(h);
+        srm.update(config);
     }
 
     private BHive getRepoHive(String repo) {
@@ -112,8 +110,7 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
     @Override
     public void update(String repo, SoftwareRepositoryConfiguration config) {
         RuntimeAssert.assertEquals(repo, config.name, "Repository update changes repository name");
-        Manifest.Key key = new SoftwareRepositoryManifest(getRepoHive(repo)).update(config);
-        changes.change(ObjectChangeType.SOFTWARE_REPO, key);
+        new SoftwareRepositoryManifest(getRepoHive(repo)).update(config);
     }
 
     @Override

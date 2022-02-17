@@ -93,7 +93,6 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
-import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
@@ -304,8 +303,6 @@ public class InstanceResourceImpl implements InstanceResource {
         // #syncInstance here,
         // it requires the association to already exist.
         rc.initResource(new ManagedServersResourceImpl()).synchronize(group, managedServer);
-
-        changes.create(ObjectChangeType.INSTANCE, key);
     }
 
     private MasterRootResource getManagingRootResource(String managedServer) {
@@ -399,12 +396,10 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         MasterRootResource root = getManagingRootResource(managedServer);
-        Manifest.Key key = root.getNamedMaster(group).update(config, expectedTag);
+        root.getNamedMaster(group).update(config, expectedTag);
 
         // immediately fetch back so we have it to create the association
         syncInstance(minion, rc, group, instanceId);
-
-        changes.create(ObjectChangeType.INSTANCE, key);
     }
 
     @Override
@@ -904,9 +899,6 @@ public class InstanceResourceImpl implements InstanceResource {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
 
-        // cannot use scope service, as the upload will add a virtual scope.
-        ObjectScope actualScope = new ObjectScope(this.group, instanceId);
-
         if (minion.getMode() == MinionMode.CENTRAL) {
             // MUST delegate this 1:1 to managed
             RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
@@ -929,7 +921,6 @@ public class InstanceResourceImpl implements InstanceResource {
 
                 List<Key> keys = response.readEntity(new GenericType<List<Key>>() {
                 });
-                keys.forEach(k -> changes.create(ObjectChangeType.INSTANCE, k, actualScope));
                 return keys;
             } catch (IOException e) {
                 throw new WebApplicationException("Cannot delegate import to managed server", e);
@@ -942,7 +933,6 @@ public class InstanceResourceImpl implements InstanceResource {
 
             Map<String, MinionDto> nodes = getMinionConfiguration(instanceId, null);
             Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, nodes, context);
-            changes.create(ObjectChangeType.INSTANCE, newKey, actualScope);
             return Collections.singletonList(newKey);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);

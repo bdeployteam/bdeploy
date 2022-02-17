@@ -48,7 +48,6 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
-import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
@@ -240,8 +239,6 @@ public class ProductResourceImpl implements ProductResource {
                         Status.BAD_REQUEST);
             }
 
-            // careful about scope, as uploading induces an extra scope...
-            result.forEach(k -> changes.create(ObjectChangeType.PRODUCT, k, new ObjectScope(this.group)));
             return result;
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
@@ -352,8 +349,6 @@ public class ProductResourceImpl implements ProductResource {
         CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
         objectIds.forEach(copy::addObject);
         repoHive.execute(copy);
-
-        changes.create(ObjectChangeType.PRODUCT, key);
     }
 
     @Override

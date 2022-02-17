@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,8 @@ import org.glassfish.hk2.utilities.Binder;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.ManifestSpawnListener;
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -32,10 +35,21 @@ import io.bdeploy.common.util.RuntimeAssert;
  */
 public class BHiveRegistry implements AutoCloseable {
 
+    /**
+     * A listener which can be attached to the registry which is notified whenever {@link Manifest}s spawn in any of the
+     * registered hives, see {@link ManifestSpawnListener}.
+     */
+    public interface MultiManifestSpawnListener {
+
+        public void spawn(String hiveName, Collection<Manifest.Key> keys);
+    }
+
     private final Set<Path> locations = new TreeSet<>();
     private final Map<String, BHive> hives = new TreeMap<>();
     private final ActivityReporter reporter;
     private final Function<BHive, Permission> permissionClassifier;
+    private final List<MultiManifestSpawnListener> listeners = new ArrayList<>();
+    private final Map<String, ManifestSpawnListener> internalListeners = new TreeMap<>();
 
     /**
      * @param reporter the {@link ActivityReporter} used for all {@link BHive} discovered by the registry
@@ -57,6 +71,20 @@ public class BHiveRegistry implements AutoCloseable {
     }
 
     /**
+     * @param listener a listener to be notified if {@link Manifest}s spawn in any of the registered {@link BHive}s.
+     */
+    public void addManifestSpawnListener(MultiManifestSpawnListener listener) {
+        listeners.add(listener);
+    }
+
+    /**
+     * @param listener a previously registered {@link MultiManifestSpawnListener}.
+     */
+    public void removeManifestSpawnListener(MultiManifestSpawnListener listener) {
+        listeners.remove(listener);
+    }
+
+    /**
      * Manually register an additional (non-discovered) {@link BHive} to be available in the registry.
      * <p>
      * Note that this {@link BHive} will be {@link BHive#close() closed} along with all other {@link BHive} when the registry is
@@ -64,6 +92,12 @@ public class BHiveRegistry implements AutoCloseable {
      */
     public void register(String name, BHive hive) {
         hives.put(name, hive);
+
+        // redirecting listener
+        ManifestSpawnListener listener = (keys) -> listeners.forEach(l -> l.spawn(name, keys));
+
+        internalListeners.put(name, listener);
+        hive.addSpawnListener(listener);
     }
 
     /**
@@ -74,6 +108,8 @@ public class BHiveRegistry implements AutoCloseable {
     public void unregister(String name) {
         BHive hive = hives.remove(name);
         RuntimeAssert.assertNotNull(hive);
+
+        hive.removeSpawnListener(internalListeners.remove(name));
         hive.close();
     }
 

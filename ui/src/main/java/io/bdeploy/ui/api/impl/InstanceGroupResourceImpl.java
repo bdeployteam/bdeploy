@@ -47,7 +47,6 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.JerseyCachingCLStaticHttpHandler;
-import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -135,11 +134,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
         try {
             BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
-            InstanceGroupManifest igm = new InstanceGroupManifest(h);
-            Manifest.Key key = igm.update(config);
             registry.register(config.name, h);
-
-            changes.create(ObjectChangeType.INSTANCE_GROUP, key, new ObjectScope(config.name));
+            InstanceGroupManifest igm = new InstanceGroupManifest(h);
+            igm.update(config);
         } catch (Exception e) {
             PathHelper.deleteRecursive(hive);
             throw e;
@@ -163,9 +160,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     public void update(String group, InstanceGroupConfiguration config) {
         RuntimeAssert.assertEquals(group, config.name, "Group update changes group name");
         InstanceGroupManifest igm = new InstanceGroupManifest(getGroupHive(group));
-        Manifest.Key key = igm.update(config);
-
-        changes.change(ObjectChangeType.INSTANCE_GROUP, key);
+        igm.update(config);
 
         // the rest may run a while in the background and propagate changes to each server where possible.
         if (minion.getMode() == MinionMode.CENTRAL) {

@@ -31,10 +31,6 @@ public class ChangeEventManager {
         return Map.of(ObjectChangeDetails.KEY_NAME.name(), key.getName(), ObjectChangeDetails.KEY_TAG.name(), key.getTag());
     }
 
-    public void create(ObjectChangeType type, Manifest.Key key) {
-        bc.send(new ObjectChangeDto(type.name(), scope.getObjectScope(), ObjectEvent.CREATED, detailsFromKey(key)));
-    }
-
     public void create(ObjectChangeType type, Manifest.Key key, ObjectScope scope) {
         bc.send(new ObjectChangeDto(type.name(), scope, ObjectEvent.CREATED, detailsFromKey(key)));
     }

@@ -130,6 +130,14 @@ public class BHive implements AutoCloseable, BHiveExecution {
         return auditor;
     }
 
+    public void addSpawnListener(ManifestSpawnListener listener) {
+        manifests.addSpawnListener(listener);
+    }
+
+    public void removeSpawnListener(ManifestSpawnListener listener) {
+        manifests.removeSpawnListener(listener);
+    }
+
     /**
      * Sets the supplier that provides the content that is written to a lock file.
      */
@@ -228,6 +236,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
             }
             PathHelper.deleteRecursive(objTmp);
         }
+        manifests.close();
         auditor.close();
     }
 
