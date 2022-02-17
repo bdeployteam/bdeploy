@@ -8,7 +8,7 @@
 
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
-    id "com.gradle.plugin-publish" version "0.18.0"
+    id "com.gradle.plugin-publish" version "0.20.0"
     id 'java-gradle-plugin'
     id 'eclipse'
     id "com.github.ben-manes.versions" version "0.42.0"
@@ -21,7 +21,7 @@ repositories {
     }
 }
 
-version = "4.0.4"
+version = "4.1.0"
 group = "io.bdeploy"
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -33,7 +33,7 @@ dependencies {
     testImplementation gradleTestKit()
 
     implementation (
-        'io.bdeploy:api:4.0.4'
+        'io.bdeploy:api:4.1.0'
     )
 }
 
