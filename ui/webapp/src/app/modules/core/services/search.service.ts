@@ -16,7 +16,14 @@ export class SearchService {
   constructor() {}
 
   set search(value: string) {
-    this.registrations.forEach((r) => r.bdOnSearch(value));
+    this.registrations.forEach((r) => {
+      // try to update. in complex naviation cases, this may fail as widgets are in the process of being destroyed.
+      try {
+        r.bdOnSearch(value);
+      } catch (e) {
+        console.warn('Cannot update searchable', e);
+      }
+    });
     this.currentSearch = value;
   }
 
