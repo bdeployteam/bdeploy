@@ -13,7 +13,7 @@ import {
   InstanceTemplateGroup,
   ProcessControlGroupConfiguration,
   ProductDto,
-  TemplateApplication,
+  TemplateApplication
 } from 'src/app/models/gen.dtos';
 import { ACTION_CANCEL, ACTION_OK } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -151,7 +151,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     // setup things required by the templates.
     this.groupNodes = {};
     this.groupLabels = {};
-    this.template.groups.map((group) => {
+    this.template.groups.forEach((group) => {
       this.groupNodes[group.name] = this.getNodesFor(group);
       this.groupLabels[group.name] = this.getLabelsFor(group);
     });
