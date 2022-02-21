@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +18,6 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.PathHelper;
@@ -29,17 +29,16 @@ import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
-import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.WebApplicationException;
@@ -71,6 +70,9 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Inject
     private MinionRoot minion;
+
+    @Inject
+    private NodeManager nodes;
 
     @Context
     private SecurityContext security;
@@ -198,14 +200,13 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Override
     public void setLoggerConfig(Path config) {
-        MinionConfiguration minionConfig = minion.getMinions();
-        try (Activity updating = reporter.start("Update Node Logging", minionConfig.size())) {
-            for (var entry : minionConfig.entrySet()) {
+        Collection<String> nodeNames = nodes.getAllNodeNames();
+        try (Activity updating = reporter.start("Update Node Logging", nodeNames.size())) {
+            for (String nodeName : nodeNames) {
                 try {
-                    ResourceProvider.getVersionedResource(entry.getValue().remote, MinionStatusResource.class, security)
-                            .setLoggerConfig(config);
+                    nodes.getNodeResourceIfOnlineOrThrow(nodeName, MinionStatusResource.class, security).setLoggerConfig(config);
                 } catch (Exception e) {
-                    log.error("Cannot udpate logging configuration on {}", entry.getKey(), e);
+                    log.error("Cannot udpate logging configuration on {}", nodeName, e);
                 }
 
                 updating.workAndCancelIfRequested(1);
@@ -219,18 +220,17 @@ public class CommonRootResourceImpl implements CommonRootResource {
     public List<RemoteDirectory> getLogDirectories(String hive) {
         List<RemoteDirectory> result = new ArrayList<>();
 
-        MinionConfiguration minionConfig = minion.getMinions();
-        try (Activity reading = reporter.start("Reading Node Logs", minionConfig.size())) {
-            for (var entry : minionConfig.entrySet()) {
+        Collection<String> nodeNames = nodes.getAllNodeNames();
+        try (Activity reading = reporter.start("Reading Node Logs", nodeNames.size())) {
+            for (String nodeName : nodeNames) {
                 RemoteDirectory dir = new RemoteDirectory();
-                dir.minion = entry.getKey();
+                dir.minion = nodeName;
 
                 try {
-                    dir.entries.addAll(
-                            ResourceProvider.getVersionedResource(entry.getValue().remote, MinionStatusResource.class, security)
-                                    .getLogEntries(hive));
+                    dir.entries.addAll(nodes.getNodeResourceIfOnlineOrThrow(nodeName, MinionStatusResource.class, security)
+                            .getLogEntries(hive));
                 } catch (Exception e) {
-                    log.warn("Problem fetching log directory of {}", entry.getKey(), e);
+                    log.warn("Problem fetching log directory of {}", nodeName, e);
                     dir.problem = e.toString();
                 }
 
@@ -244,25 +244,14 @@ public class CommonRootResourceImpl implements CommonRootResource {
     }
 
     @Override
-    public EntryChunk getLogContent(String minionName, RemoteDirectoryEntry entry, long offset, long limit) {
-        RemoteService svc = minion.getMinions().getRemote(minionName);
-        if (svc == null) {
-            throw new WebApplicationException("Cannot find minion " + minionName, Status.NOT_FOUND);
-        }
-        CommonDirectoryEntryResource sdr = ResourceProvider.getVersionedResource(svc, CommonDirectoryEntryResource.class,
-                security);
-        return sdr.getEntryContent(entry, offset, limit);
+    public EntryChunk getLogContent(String nodeName, RemoteDirectoryEntry entry, long offset, long limit) {
+        return nodes.getNodeResourceIfOnlineOrThrow(nodeName, CommonDirectoryEntryResource.class, security).getEntryContent(entry,
+                offset, limit);
     }
 
     @Override
-    public Response getLogStream(String minionName, RemoteDirectoryEntry entry) {
-        RemoteService svc = minion.getMinions().getRemote(minionName);
-        if (svc == null) {
-            throw new WebApplicationException("Cannot find minion " + minionName, Status.NOT_FOUND);
-        }
-        CommonDirectoryEntryResource sdr = ResourceProvider.getVersionedResource(svc, CommonDirectoryEntryResource.class,
-                security);
-        return sdr.getEntryStream(entry);
+    public Response getLogStream(String nodeName, RemoteDirectoryEntry entry) {
+        return nodes.getNodeResourceIfOnlineOrThrow(nodeName, CommonDirectoryEntryResource.class, security).getEntryStream(entry);
     }
 
 }

@@ -84,7 +84,6 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
@@ -105,6 +104,7 @@ import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.ApplicationDto;
@@ -153,6 +153,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private NodeManager nodes;
 
     @Inject
     private MasterProvider mp;
@@ -469,11 +472,11 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public Map<String, MinionDto> getMinionConfiguration(String instance, String versionTag) {
         if (minion.getMode() != MinionMode.CENTRAL) {
-            return minion.getMinions().values();
+            return nodes.getAllNodes();
         }
         ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
         ManagedMasterDto server = ms.getServerForInstance(group, instance, versionTag);
-        return server.minions.values();
+        return server.minions;
     }
 
     @Override
@@ -481,7 +484,7 @@ public class InstanceResourceImpl implements InstanceResource {
         if (minion.getMode() != MinionMode.CENTRAL) {
             RemoteService remote = minion.getSelf();
             MasterRootResource root = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, null);
-            return root.getMinions();
+            return root.getNodes();
         }
         ManagedServersResource msr = rc.initResource(new ManagedServersResourceImpl());
         ManagedMasterDto master = msr.getServerForInstance(group, instanceId, versionTag);
@@ -937,11 +940,8 @@ public class InstanceResourceImpl implements InstanceResource {
         try {
             Files.copy(inputStream, zip);
 
-            MinionConfiguration config = new MinionConfiguration();
             Map<String, MinionDto> nodes = getMinionConfiguration(instanceId, null);
-            nodes.forEach(config::addMinion);
-
-            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, config, context);
+            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, nodes, context);
             changes.create(ObjectChangeType.INSTANCE, newKey, actualScope);
             return Collections.singletonList(newKey);
         } catch (IOException e) {

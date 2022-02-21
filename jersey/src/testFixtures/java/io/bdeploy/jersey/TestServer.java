@@ -12,14 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import javax.annotation.Priority;
-import jakarta.ws.rs.Priorities;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.ext.Provider;
 
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
@@ -44,6 +40,11 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.UuidHelper;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * {@link TestServer} provides an embedded Grizzly/Jersey server with the
@@ -71,6 +72,7 @@ public class TestServer
     private final List<Object> registrations = new ArrayList<>();
     private final List<AutoCloseable> resources = new ArrayList<>();
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
+    private CompletionStage<RegistrationTarget> startup;
 
     private final Map<HttpHandlerRegistration, HttpHandler> handlers = new HashMap<>();
     private ServiceLocator rootLocator;
@@ -128,6 +130,11 @@ public class TestServer
 
     public Auditor getAuditor() {
         return auditor;
+    }
+
+    @Override
+    public CompletionStage<RegistrationTarget> afterStartup() {
+        return startup;
     }
 
     @Override
@@ -286,6 +293,7 @@ public class TestServer
             if (auditor != null) {
                 this.server.setAuditor(auditor);
             }
+            startup = server.afterStartup();
             handlers.forEach((r, h) -> this.server.addHandler(h, r));
             this.server.start();
         }
@@ -296,6 +304,7 @@ public class TestServer
 
         @Override
         public void close() {
+            startup = null;
             server.close();
         }
 

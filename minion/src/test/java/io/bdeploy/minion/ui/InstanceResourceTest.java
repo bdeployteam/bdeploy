@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -37,16 +36,14 @@ import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest.Builder;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
-import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
-import io.bdeploy.interfaces.minion.MinionDto;
-import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import jakarta.ws.rs.NotFoundException;
@@ -54,21 +51,18 @@ import jakarta.ws.rs.NotFoundException;
 @ExtendWith(TestMinion.class)
 public class InstanceResourceTest {
 
-    @BeforeEach
-    void addNodes(MinionRoot mr) {
-        BHive hive = mr.getHive();
-        MinionManifest mf = new MinionManifest(hive);
+    void addNodes(RemoteService remote) {
+        NodeManagementResource nmr = ResourceProvider.getResource(remote, NodeManagementResource.class, null);
 
-        MinionConfiguration config = mf.read();
-        config.addMinion("Node1", MinionDto.create(false, config.getRemote("master")));
-        config.addMinion("Node2", MinionDto.create(false, config.getRemote("master")));
-        config.addMinion("Node3", MinionDto.create(false, config.getRemote("master")));
-
-        mf.update(config);
+        nmr.addNode("Node1", remote);
+        nmr.addNode("Node2", remote);
+        nmr.addNode("Node3", remote);
     }
 
     @Test
     void getConfiguration(InstanceGroupResource root, @TempDir Path tmpDir, RemoteService remote) throws Exception {
+        addNodes(remote);
+
         // Prepare and push group
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);
@@ -115,6 +109,8 @@ public class InstanceResourceTest {
 
     @Test
     void updateConfiguration(InstanceGroupResource root, RemoteService remote, @TempDir Path tmpDir) throws Exception {
+        addNodes(remote);
+
         // Prepare and push group
         InstanceGroupConfiguration group = TestFactory.createInstanceGroup("Demo");
         root.create(group);
@@ -179,7 +175,6 @@ public class InstanceResourceTest {
     /** Creates a new instance within the given group. A new node config is created for each passed node name */
     private void createInstance(RemoteService remote, Path tmp, String groupName, ProductManifest product, String instanceName,
             String... nodeNames) {
-
         InstanceConfiguration instanceConfig = TestFactory.createInstanceConfig(instanceName, product);
         try (BHive hive = new BHive(tmp.resolve("hive").toUri(), null, new ActivityReporter.Null())) {
             PushOperation pushOperation = new PushOperation();
@@ -212,7 +207,9 @@ public class InstanceResourceTest {
     }
 
     @Test
-    void purposes(InstanceGroupResource root) {
+    void purposes(InstanceGroupResource root, RemoteService remote) {
+        addNodes(remote);
+
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();
         group.name = "demo";
         group.description = "Demo";
@@ -223,6 +220,8 @@ public class InstanceResourceTest {
 
     @Test
     void crud(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
+        addNodes(remote);
+
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();
         group.name = "demo";
         group.description = "Demo";
@@ -261,6 +260,8 @@ public class InstanceResourceTest {
 
     @Test
     void multipleVersions(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {
+        addNodes(remote);
+
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();
         group.name = "demo";
         group.description = "Demo";
@@ -298,6 +299,8 @@ public class InstanceResourceTest {
 
     @Test
     void checkPortStates(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws Exception {
+        addNodes(remote);
+
         InstanceGroupConfiguration group = new InstanceGroupConfiguration();
         group.name = "demo";
         group.description = "Demo";

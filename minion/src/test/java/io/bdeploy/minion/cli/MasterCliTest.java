@@ -27,12 +27,12 @@ import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.security.AuthPackAccessor;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.LocalLoginTool;
 import io.bdeploy.minion.BCX509Helper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdown;
-import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.cli.RemoteUserTool;
 
 @ExtendWith(TestActivityReporter.class)
@@ -44,6 +44,7 @@ public class MasterCliTest {
     @RegisterExtension
     TestCliTool hiveTools = new TestCliTool(new BHiveCli());
 
+    @SuppressWarnings("resource")
     @Test
     void testMasterCli(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
         int port;
@@ -70,7 +71,9 @@ public class MasterCliTest {
 
             ks = mr.getState().keystorePath;
             pp = mr.getState().keystorePass;
-            pack = AuthPackAccessor.getAuthPack(mr.getMinions().getRemote(Minion.DEFAULT_NAME).getKeyStore());
+
+            pack = AuthPackAccessor
+                    .getAuthPack(new MinionManifest(mr.getHive()).read().getMinion(mr.getState().self).remote.getKeyStore());
         }
 
         Path tmpStore = tmp.resolve("pubstore");
@@ -113,7 +116,7 @@ public class MasterCliTest {
 
         RemoteService self;
         try (MinionRoot mr = new MinionRoot(root, reporter)) {
-            self = mr.getSelf();
+            self = new MinionManifest(mr.getHive()).read().getMinion(mr.getState().self).remote;
         }
 
         Thread master = new Thread(() -> {

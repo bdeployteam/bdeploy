@@ -1,28 +1,27 @@
 package io.bdeploy.ui.api.impl;
 
-import java.util.Collections;
 import java.util.Map;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.UriInfo;
-
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
-import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
-import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.dto.BackendInfoDto;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.UriInfo;
 
 public class BackendInfoResourceImpl implements BackendInfoResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private NodeManager nodes;
 
     @Context
     private UriInfo info;
@@ -37,27 +36,16 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
         ManagedMasterDto dto = new ManagedMasterDto();
 
         dto.hostName = minion.getHostName();
-        dto.auth = minion.getSelf().getAuthPack();
+        dto.auth = nodes.getSelf().remote.getAuthPack();
         dto.uri = info.getBaseUri().toString();
-        dto.minions = minion.getMinions();
+        dto.minions = nodes.getAllNodes();
 
         return dto;
     }
 
     @Override
     public Map<String, MinionStatusDto> getNodeStatus() {
-        RemoteService remote = minion.getSelf();
-
-        // Central server does not have any nodes. Thus return self only
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            String name = minion.getMinions().values().keySet().iterator().next();
-            MinionStatusResource status = ResourceProvider.getVersionedResource(remote, MinionStatusResource.class, null);
-            return Collections.singletonMap(name, status.getStatus());
-        }
-
-        // Delegate to the master to find out all nodes and their state
-        MasterRootResource root = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, null);
-        return root.getMinions();
+        return ResourceProvider.getVersionedResource(nodes.getSelf().remote, MasterRootResource.class, null).getNodes();
     }
 
 }

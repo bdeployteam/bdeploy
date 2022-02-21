@@ -23,7 +23,10 @@
           <div>BDeploy Version:</div>
           <div class="bd-text-ellipsis">{{ nodeVersion }}</div>
           <div>Number of CPUs:</div>
-          <div>{{ state.config.monitoring.availableProcessors }}</div>
+          <div>
+            {{ !!state.monitoring?.availableProcessors ?
+            state.monitoring.availableProcessors : 'Unknown' }}
+          </div>
           <div>Master:</div>
           <div>{{ state.config.master ? 'yes' : 'no' }}</div>
           <ng-container *ngIf="!state.offline">
@@ -32,7 +35,7 @@
           </ng-container>
           <ng-container *ngIf="state.offline">
             <div>Status:</div>
-            <div>{{ state.infoText }}</div>
+            <div class="bd-text-ellipsis">{{ state.infoText }}</div>
           </ng-container>
         </div>
       </app-bd-notification-card>

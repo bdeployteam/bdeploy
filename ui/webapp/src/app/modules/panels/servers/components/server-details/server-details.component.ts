@@ -94,8 +94,8 @@ export class ServerDetailsComponent implements OnInit {
   }
 
   private getMinionRecords(server: ManagedMasterDto): MinionRow[] {
-    return Object.keys(server.minions.minions).map((k) => {
-      const dto = server.minions.minions[k];
+    return Object.keys(server.minions).map((k) => {
+      const dto = server.minions[k];
       return {
         name: k,
         os: dto.os,

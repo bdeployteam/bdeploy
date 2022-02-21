@@ -132,6 +132,7 @@ export class NavAreasService {
   }
 
   public getRouteId(snapshot: ActivatedRouteSnapshot) {
+    // TODO: this should not change when just changing route parameters
     return snapshot.pathFromRoot
       .map((r) => r.url)
       .reduce((a, v) => a.concat(v), [])

@@ -55,7 +55,6 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
@@ -344,14 +343,14 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        return attached.minions.values();
+        return attached.minions;
     }
 
     @Override
     public Map<String, MinionStatusDto> getMinionStateOfManagedServer(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        return root.getMinions();
+        return root.getNodes();
     }
 
     private RemoteService getConfiguredRemote(String groupName, String serverName) {
@@ -476,8 +475,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         Map<String, MinionStatusDto> status = backendInfo.getNodeStatus();
         Map<String, MinionDto> config = status.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
-        MinionConfiguration minions = attached.minions;
-        minions.replaceWith(config);
+        attached.minions = config;
 
         // 8. update current information in the hive.
         mm.attach(attached, true);

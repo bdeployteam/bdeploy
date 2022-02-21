@@ -37,6 +37,7 @@ export class NodeDetailsComponent implements OnInit, OnDestroy {
       ]).subscribe(([node, states, cfgs]) => {
         if (!node || !states) {
           this.nodeState$.next(null);
+          this.nodeCfg$.next(null);
         } else {
           this.nodeState$.next(states[node]);
 

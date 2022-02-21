@@ -1,5 +1,5 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import {
   HistoryEntryType,
   InstanceNodeConfigurationDto,
@@ -31,7 +31,7 @@ interface MarkedEvent {
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
 })
-export class NodeHeaderComponent implements OnInit, OnDestroy {
+export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   @Input() node: InstanceNodeConfigurationDto;
   @Input() show: 'load' | 'cpu';
   @Input() hasAction = true;
@@ -49,6 +49,8 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
   /* template */ hasVisiblePoint = false;
   /* template */ formatter: (number) => string;
 
+  private changes$ = new BehaviorSubject<boolean>(false);
+
   private subscription: Subscription;
 
   constructor(
@@ -57,7 +59,10 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
+    this.subscription = combineLatest([
+      this.instances.activeNodeStates$,
+      this.changes$,
+    ]).subscribe(([states]) => {
       if (!states || !states[this.node.nodeName]?.config) {
         this.curve = [];
         this.maxValue = 0;
@@ -65,12 +70,16 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const state = states[this.node.nodeName].config;
+      const state = states[this.node.nodeName];
+
+      if (!state.monitoring) {
+        return;
+      }
 
       // first we want to find the curve to plot, either cpu usage (windows), or load average (all others)
       if (
         (!!this.show && this.show === 'cpu') ||
-        (!this.show && state.os === OperatingSystem.WINDOWS)
+        (!this.show && state.config.os === OperatingSystem.WINDOWS)
       ) {
         this.curve = state.monitoring.cpuUsage;
         this.curveLabel = 'System CPU Usage';
@@ -154,6 +163,10 @@ export class NodeHeaderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  ngOnChanges(): void {
+    this.changes$.next(true);
   }
 
   private update() {

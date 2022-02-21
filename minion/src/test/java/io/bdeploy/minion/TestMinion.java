@@ -88,6 +88,15 @@ public class TestMinion extends TestServer {
     }
 
     @Override
+    public void beforeTestExecution(ExtensionContext context) throws Exception {
+        super.beforeTestExecution(context);
+
+        // now is the time :D run the after startup.
+        CloseableMinionRoot cmr = getExtensionStore(context).get(CloseableMinionRoot.class, CloseableMinionRoot.class);
+        super.afterStartup().thenRun(() -> cmr.mr.afterStartup(true));
+    }
+
+    @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
             throws ParameterResolutionException {
         if (parameterContext.getParameter().getType().isAssignableFrom(MinionRoot.class)) {

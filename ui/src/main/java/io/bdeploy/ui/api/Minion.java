@@ -8,7 +8,6 @@ import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 
@@ -36,12 +35,13 @@ public interface Minion {
     /**
      * Returns the configuration of this minion
      */
-    public MinionDto getMinionConfig();
+    public MinionDto getSelfConfig();
 
     /**
-     * Retrieve registered nodes. This makes only sense if the current VM hosts a master, otherwise only 'self' is returned.
+     * @return the {@link NodeManager} for this {@link Minion}.
+     * @apiNote this should only be used when outside a resource - resources should inject a {@link NodeManager} directly.
      */
-    public MinionConfiguration getMinions();
+    public NodeManager getNodeManager();
 
     /**
      * Creates and returns a new weak token for the given principal. The weak token

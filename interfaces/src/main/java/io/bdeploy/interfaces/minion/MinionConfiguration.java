@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import io.bdeploy.common.security.RemoteService;
-
 /**
  * Holds the list of known minions.
  */
@@ -18,14 +16,6 @@ public class MinionConfiguration {
      * The list of known minions indexed by their name
      */
     private final SortedMap<String, MinionDto> minions = new TreeMap<>();
-
-    /**
-     * Replaces all existing minions with the given configuration.
-     */
-    public void replaceWith(Map<String, MinionDto> newConfigs) {
-        minions.clear();
-        minions.putAll(newConfigs);
-    }
 
     /**
      * Adds the given minion to the list of known minions
@@ -68,22 +58,14 @@ public class MinionConfiguration {
     }
 
     /**
-     * Returns the remote service for the given minion.
-     *
-     * @param minionName
-     *            the name of the minion
-     * @return the remote service
-     */
-    public RemoteService getRemote(String minionName) {
-        return getMinion(minionName).remote;
-    }
-
-    /**
      * @param minionName the name of the minion.
-     * @return whether the minion exists
+     * @param newConfig the new minion configuration.
      */
-    public boolean hasMinion(String minionName) {
-        return minions.containsKey(minionName);
+    public void replaceMinion(String minionName, MinionDto newConfig) {
+        if (!minions.containsKey(minionName)) {
+            throw new IllegalArgumentException("Minion with the given name does not exist.");
+        }
+        minions.put(minionName, newConfig);
     }
 
     /**
@@ -98,13 +80,6 @@ public class MinionConfiguration {
      */
     public Map<String, MinionDto> values() {
         return Collections.unmodifiableMap(minions);
-    }
-
-    /**
-     * Returns how many minions are attached.
-     */
-    public int size() {
-        return minions.size();
     }
 
 }

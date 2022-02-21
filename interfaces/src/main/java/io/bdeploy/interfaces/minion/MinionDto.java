@@ -32,11 +32,6 @@ public class MinionDto {
     public RemoteService remote;
 
     /**
-     * Monitoring data
-     */
-    public MinionMonitoringDto monitoring;
-
-    /**
      * Creates and returns a new minion DTO using the given remote. The OS and the
      * version is taken from the currently running VM.
      *
@@ -49,7 +44,6 @@ public class MinionDto {
         dto.remote = remote;
         dto.version = VersionHelper.getVersion();
         dto.os = OsHelper.getRunningOs();
-        dto.monitoring = new MinionMonitoringDto();
         return dto;
     }
 

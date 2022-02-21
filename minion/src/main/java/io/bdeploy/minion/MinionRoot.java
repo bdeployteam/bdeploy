@@ -61,21 +61,21 @@ import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
-import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
-import io.bdeploy.minion.job.NodeMonitorJob;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
+import io.bdeploy.minion.nodes.NodeManagerImpl;
 import io.bdeploy.minion.plugin.PluginManagerImpl;
 import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.NodeManager;
 import jakarta.ws.rs.WebApplicationException;
 import net.jsign.AuthenticodeSigner;
 import net.jsign.pe.PEFile;
@@ -100,6 +100,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private final Path downloadDir;
 
     private final MinionProcessController processController;
+    private final NodeManagerImpl nodeManager;
 
     private Path updates;
     private MinionUpdateManager updateManager = t -> log.error("No Update Manager, cannot update Minion!");
@@ -126,6 +127,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.downloadDir = create(root.resolve("downloads"));
 
         this.processController = new MinionProcessController();
+        this.nodeManager = new NodeManagerImpl();
     }
 
     @Override
@@ -141,8 +143,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     @Override
     public RemoteService getSelf() {
-        MinionState state = getState();
-        return getMinions().getRemote(state.self);
+        return nodeManager.getSelf().remote;
     }
 
     @Override
@@ -182,6 +183,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         doMigrate();
         updateMinionConfiguration();
+    }
+
+    /**
+     * Called once *after* starting the actual HTTPS server. Can be used for initialization which requires the
+     * server to be online already.
+     */
+    public void afterStartup(boolean isTest) {
+        nodeManager.initialize(this, isTest);
     }
 
     /** Updates the logging config file if required, and switches to using it */
@@ -315,20 +324,6 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             return changed;
         }
 
-        // Contact minion to get the current version
-        MinionStatusDto remoteStatus = MinionHelper.tryContactMinion(config.remote, 1, 0);
-        if (remoteStatus == null) {
-            log.warn("Configured minion '{}' is currently offline.", minionName);
-            return changed;
-        }
-        MinionDto remoteConfig = remoteStatus.config;
-        log.info("Minion '{}' successfully contacted. Version={} OS={}", minionName, remoteConfig.version, remoteConfig.os);
-
-        // Check if an update is required
-        if (!VersionHelper.equals(config.version, remoteConfig.version)) {
-            config.version = remoteConfig.version;
-            changed = true;
-        }
         return changed;
     }
 
@@ -376,14 +371,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public MinionDto getMinionConfig() {
-        String myName = getState().self;
-        return getMinions().getMinion(myName);
+    public NodeManager getNodeManager() {
+        return nodeManager;
     }
 
     @Override
-    public MinionConfiguration getMinions() {
-        return MinionManifest.getConfiguration(hive);
+    public MinionDto getSelfConfig() {
+        return nodeManager.getSelf();
     }
 
     @Override
@@ -413,7 +407,6 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         if (minionMode != MinionMode.NODE) {
             MasterCleanupJob.create(this, getState().cleanupSchedule);
-            NodeMonitorJob.create(this); // master triggers an update for all nodes.
         }
         CleanupDownloadDirJob.create(scheduler, downloadDir);
     }

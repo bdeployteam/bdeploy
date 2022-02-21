@@ -58,5 +58,10 @@
 		<Logger name="io.bdeploy.pcu" additivity="false" level="info" >
 			<AppenderRef ref="GlobalRoute" />
 		</Logger>
+		
+		<!-- Node Management -->
+		<Logger name="io.bdeploy.minion.nodes" additivity="false" level="info" >
+			<AppenderRef ref="GlobalRoute" />
+		</Logger>
 	</Loggers>
 </Configuration>

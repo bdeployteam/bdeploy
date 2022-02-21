@@ -62,6 +62,7 @@ import io.bdeploy.minion.remote.jersey.NodeProxyResourceImpl;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.api.impl.UiResources;
 import jakarta.inject.Singleton;
 
@@ -155,6 +156,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv,
             MasterConfig config) {
         r.onStartup(config.consoleLog());
+        srv.afterStartup().thenRun(() -> r.afterStartup(false));
 
         srv.setAuditor(RollingFileAuditor.getInstance(r.getLogDir()));
         r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
@@ -183,6 +185,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             protected void configure() {
                 // required for SoftwareUpdateResourceImpl.
                 bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
+                bind(minionRoot.getNodeManager()).to(NodeManager.class);
                 bind(ControllingMasterProvider.class).in(Singleton.class).to(MasterProvider.class);
                 if (pluginManager != null) {
                     bind(pluginManager).to(PluginManager.class);

@@ -25,7 +25,7 @@
       </div>
     </app-bd-notification-card>
     <app-bd-notification-card
-      *ngIf="!processDetail"
+      *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
       icon="history"
       [type]="'warning'"
       [dismissable]="false"
@@ -107,6 +107,13 @@
       </ng-container>
     </div>
     <mat-divider></mat-divider>
+    <div
+      *ngIf="!processDetail && !(details.loading$ | async)"
+      class="bd-hint-text"
+      [style.margin-top.px]="10"
+    >
+      No process details available.
+    </div>
     <ng-container *ngIf="processDetail">
       <div
         fxLayout="row"

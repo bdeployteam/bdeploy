@@ -28,6 +28,11 @@ public class MinionStatusDto {
     public Instant startup;
 
     /**
+     * Transient monitoring information.
+     */
+    public MinionMonitoringDto monitoring;
+
+    /**
      * Creates a new node status indicating that this node is offline.
      *
      * @param config

@@ -78,6 +78,7 @@ java configuration Managed-Init : minion-base {
 	argument "--mode=MANAGED";
 	argument "--initUser=admin";
 	argument "--initPassword=admin";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed.txt";
 }
 
 /**
@@ -97,19 +98,22 @@ java configuration Managed-Node-Init : minion-base {
  * Registers the node with the master root.
  */
 java configuration Node-Register : minion-base {
-	argument "node";
+	argument "remote-node";
 	argument "--root=${workspace_loc}/runtime/master";
 	argument "--add=node";
-	argument "--remote=https://localhost:7702/api";
-	argument "--tokenFile=${workspace_loc}/runtime/token-node.txt";
+	argument "--remote=https://localhost:7701/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
+	argument "--node=https://localhost:7702/api";
+	argument "--nodeTokenFile=${workspace_loc}/runtime/token-node.txt";
 }
 
 /**
  * Removes the node from the master root.
  */
 java configuration Node-Remove : minion-base {
-	argument "node";
-	argument "--root=${workspace_loc}/runtime/master";
+	argument "remote-node";
+	argument "--remote=https://localhost:7701/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
 	argument "--remove=node";
 }
 
@@ -117,19 +121,21 @@ java configuration Node-Remove : minion-base {
  * Registers the managed node with the managed root.
  */
 java configuration Managed-Node-Register : minion-base {
-	argument "node";
-	argument "--root=${workspace_loc}/runtime/managed";
+	argument "remote-node";
 	argument "--add=node";
-	argument "--remote=https://localhost:7707/api";
-	argument "--tokenFile=${workspace_loc}/runtime/token-managed-node.txt";
+	argument "--remote=https://localhost:7706/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed.txt";
+	argument "--node=https://localhost:7707/api";
+	argument "--nodeTokenFile=${workspace_loc}/runtime/token-managed-node.txt";
 }
 
 /**
  * Removes the managed node from the managed root.
  */
 java configuration Managed-Node-Remove : minion-base {
-	argument "node";
-	argument "--root=${workspace_loc}/runtime/managed";
+	argument "remote-node";
+	argument "--remote=https://localhost:7706/api";
+	argument "--tokenFile=${workspace_loc}/runtime/token-managed.txt";
 	argument "--remove=node";
 }
 

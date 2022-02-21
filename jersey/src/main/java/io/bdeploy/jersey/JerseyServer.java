@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -106,6 +107,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final Instant startTime = Instant.now();
     private final Collection<AutoCloseable> closeableResources = new ArrayList<>();
     private final ActivityReporter.Delegating reporterDelegate = new ActivityReporter.Delegating();
+    private final CompletableFuture<RegistrationTarget> startup = new CompletableFuture<>();
 
     private final AtomicLong broadcasterId = new AtomicLong(0);
     private final ScheduledExecutorService broadcastScheduler = Executors.newScheduledThreadPool(1,
@@ -155,6 +157,11 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     @Override
     public KeyStore getKeyStore() {
         return store;
+    }
+
+    @Override
+    public CompletableFuture<RegistrationTarget> afterStartup() {
+        return startup;
     }
 
     /**
@@ -289,6 +296,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             server.start();
 
             log.info("Started Version {}", VersionHelper.getVersion());
+
+            startup.complete(this);
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot start server", e);
         }

@@ -17,6 +17,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
+import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
 
 @Component({
@@ -54,6 +55,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     public details: ProcessDetailsService,
     public processes: ProcessesService,
     public instances: InstancesService,
+    public servers: ServersService,
     private cfg: ConfigService
   ) {}
 
@@ -65,24 +67,30 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     ]).subscribe(([detail, config, active]) => {
       this.clearIntervals();
       this.outdated$.next(false);
-      if (!detail || detail?.status?.appUid !== config?.uid) {
-        return;
-      }
-      this.processDetail = detail;
       this.processConfig = config;
       this.startType = this.formatStartType(
         this.processConfig?.processControl.startType
       );
-      this.isCrashedWaiting =
-        detail.status.processState === ProcessState.CRASHED_WAITING;
-      this.isRunning = ProcessesService.isRunning(detail.status.processState);
-      this.isStopping =
-        detail.status.processState === ProcessState.RUNNING_STOP_PLANNED;
 
       // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
       this.starting$.next(false);
       this.stopping$.next(false);
       this.restarting$.next(false);
+
+      if (!detail || detail?.status?.appUid !== config?.uid) {
+        this.processDetail = null;
+        this.isCrashedWaiting = false;
+        this.isRunning = false;
+        this.isStopping = false;
+        this.outdated$.next(false);
+        return;
+      }
+      this.processDetail = detail;
+      this.isCrashedWaiting =
+        detail.status.processState === ProcessState.CRASHED_WAITING;
+      this.isRunning = ProcessesService.isRunning(detail.status.processState);
+      this.isStopping =
+        detail.status.processState === ProcessState.RUNNING_STOP_PLANNED;
 
       this.outdated$.next(
         detail.status.instanceTag !== active.activeVersion.tag

@@ -1,6 +1,7 @@
 package io.bdeploy.ui.cleanup;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,7 +22,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.cleanup.CleanupGroup;
@@ -32,7 +32,6 @@ import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
-import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -40,6 +39,7 @@ import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.NodeManager;
 import jakarta.ws.rs.core.SecurityContext;
 
 /**
@@ -101,18 +101,21 @@ public class CleanupHelper {
         // no nodes to cleanup on central. actual node cleanup for managed masters done on each master.
         if (minion.getMode() != MinionMode.CENTRAL) {
             // minions cleanup
-            for (Map.Entry<String, MinionDto> node : minion.getMinions().entrySet()) {
-                log.info("Calculate node {}, using {} anchors.", node.getKey(), instanceNodeManifestsToKeep.size());
+            NodeManager nodes = minion.getNodeManager();
+            Collection<String> nodeNames = nodes.getAllNodeNames();
 
-                RemoteService remote = node.getValue().remote;
-                NodeCleanupResource scr = ResourceProvider.getVersionedResource(remote, NodeCleanupResource.class, null);
+            for (String nodeName : nodeNames) {
+                log.info("Calculate node {}, using {} anchors.", nodeName, instanceNodeManifestsToKeep.size());
+
                 try {
-                    List<CleanupAction> actions = scr.cleanup(instanceNodeManifestsToKeep);
-                    groups.add(new CleanupGroup("Node " + node.getKey(), node.getKey(), null, actions));
+                    List<CleanupAction> actions = nodes
+                            .getNodeResourceIfOnlineOrThrow(nodeName, NodeCleanupResource.class, securityContext)
+                            .cleanup(instanceNodeManifestsToKeep);
+                    groups.add(new CleanupGroup("Node " + nodeName, nodeName, null, actions));
                 } catch (Exception e) {
-                    log.warn("Cannot perform cleanup on minion {}", node.getKey());
+                    log.warn("Cannot perform cleanup on minion {}", nodeName);
                     log.debug("Error details", e);
-                    groups.add(new CleanupGroup("Not possible to clean offline minion " + node.getKey(), node.getKey(), null,
+                    groups.add(new CleanupGroup("Not possible to clean offline minion " + nodeName, nodeName, null,
                             Collections.emptyList()));
                 }
             }
@@ -153,17 +156,11 @@ public class CleanupHelper {
     }
 
     private void executeForMinion(CleanupGroup group) {
-        RemoteService svc = minion.getMinions().getRemote(group.minion);
-        if (svc == null) {
-            log.warn("Minion {} associated with cleanup group {} not found", group.minion, group.name);
-            return;
-        }
-        log.info("Performing cleanup group {} on {}", group.name, group.minion);
-        NodeCleanupResource scr = ResourceProvider.getVersionedResource(svc, NodeCleanupResource.class, null);
+        NodeManager nodes = minion.getNodeManager();
         try {
-            scr.perform(group.actions);
+            nodes.getNodeResourceIfOnlineOrThrow(group.minion, NodeCleanupResource.class, securityContext).perform(group.actions);
         } catch (Exception e) {
-            log.warn("Cannot perform cleanup on minion {}", group.minion);
+            log.warn("Cannot perform cleanup on minion {}: {}", group.minion, e.toString());
             log.debug("Error details", e);
         }
     }

@@ -1,15 +1,17 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   InstanceDto,
   InstanceNodeConfigurationListDto,
+  MinionStatusDto,
   ParameterType,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { NO_LOADING_BAR } from 'src/app/modules/core/utils/loading-bar.util';
+import { NO_LOADING_BAR_CONTEXT } from 'src/app/modules/core/utils/loading-bar.util';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
+import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { GroupsService } from '../../groups/services/groups.service';
 import { InstancesService } from './instances.service';
 import { ProcessesService } from './processes.service';
@@ -43,19 +45,21 @@ export class PortsService {
       this.instances.active$,
       this.instances.activeNodeCfgs$,
       this.processes.processStates$,
-    ]).subscribe(([instance, nodes, states]) => {
-      if (!instance || !nodes || !states) {
+      this.instances.activeNodeStates$,
+    ]).subscribe(([instance, nodes, states, nodeStates]) => {
+      if (!instance || !nodes || !states || !nodeStates) {
         this.activePortStates$.next(null);
         return;
       }
 
-      this.loadActivePorts(instance, nodes);
+      this.loadActivePorts(instance, nodes, nodeStates);
     });
   }
 
   private loadActivePorts(
     instance: InstanceDto,
-    cfgs: InstanceNodeConfigurationListDto
+    cfgs: InstanceNodeConfigurationListDto,
+    nodeStates: { [key: string]: MinionStatusDto }
   ) {
     if (!instance || !cfgs) {
       this.activePortStates$.next(null);
@@ -69,6 +73,10 @@ export class PortsService {
       if (node.nodeName === CLIENT_NODE_NAME) {
         // no ports on client node.
         continue;
+      }
+
+      if (nodeStates[node.nodeName]?.offline) {
+        continue; // offline, don't bother.
       }
 
       const portsOfNode: NodeApplicationPort[] = [];
@@ -106,7 +114,10 @@ export class PortsService {
                 instance.instanceConfiguration.uuid
               }/check-ports/${node.nodeName}`,
               portsOfNode.map((na) => na.port),
-              NO_LOADING_BAR
+              {
+                headers: suppressGlobalErrorHandling(new HttpHeaders()),
+                context: NO_LOADING_BAR_CONTEXT,
+              }
             )
             .pipe(
               measure(
@@ -122,6 +133,7 @@ export class PortsService {
                 s.complete();
               },
               error: (err) => {
+                this.instances.reloadActiveStates(this.instances.active$.value);
                 s.error(err);
                 s.complete();
               },

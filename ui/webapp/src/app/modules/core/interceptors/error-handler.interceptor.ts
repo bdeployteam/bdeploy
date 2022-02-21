@@ -67,7 +67,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
               try {
                 displayPath = new URL(request.url).pathname;
               } catch (error) {
-                console.warn('Cannot parse request URL', error);
+                // silent.
               }
               this.snackbar.open(
                 e.status + ': ' + e.statusText + ': ' + displayPath,

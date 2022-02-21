@@ -3,7 +3,6 @@ package io.bdeploy.interfaces.remote;
 import java.util.List;
 
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
-import io.bdeploy.interfaces.minion.MinionMonitoringDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -43,15 +42,4 @@ public interface MinionStatusResource {
     @GET
     @Path("/logs")
     public List<RemoteDirectoryEntry> getLogEntries(@QueryParam("h") String hive);
-
-    /**
-     * Get updated monitoring information based on persisted information in
-     * MinionManifest
-     *
-     * @param update true if the MinionManifest should be updated, false otherwise
-     * @return the updated monitoring information
-     */
-    @GET
-    @Path("/monitoring")
-    public MinionMonitoringDto getMonitoring(@QueryParam("u") boolean update);
 }

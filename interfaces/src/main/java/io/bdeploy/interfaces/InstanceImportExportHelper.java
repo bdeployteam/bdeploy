@@ -35,7 +35,6 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
-import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -104,7 +103,7 @@ public class InstanceImportExportHelper {
      * @param context the {@link SecurityContext}
      * @return the resulting {@link Key} in the target {@link BHive}
      */
-    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid, MinionConfiguration minions,
+    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid, Map<String, MinionDto> minions,
             SecurityContext context) {
         try (FileSystem zfs = PathHelper.openZip(zipFilePath)) {
             Path zroot = zfs.getPath("/");
@@ -127,7 +126,7 @@ public class InstanceImportExportHelper {
     }
 
     private static Manifest.Key importFromData(BHive target, InstanceCompleteConfigDto dto, ObjectId cfgId, String uuid,
-            MinionConfiguration minions, SecurityContext context) {
+            Map<String, MinionDto> minions, SecurityContext context) {
         if (!Objects.equals(dto.config.configTree, cfgId)) {
             log.warn("Configuration tree has unexpected ID: {} <-> {}", dto.config.configTree, cfgId);
         }
@@ -166,7 +165,7 @@ public class InstanceImportExportHelper {
 
             String minionName = node.getKey();
             if (!minionName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
-                MinionDto minionDto = minions.getMinion(minionName);
+                MinionDto minionDto = minions.get(minionName);
                 reAssignApplications(target, nodeCfg, minionName, minionDto);
             }
 

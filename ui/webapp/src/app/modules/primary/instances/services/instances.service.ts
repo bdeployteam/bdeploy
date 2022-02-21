@@ -54,9 +54,9 @@ export class InstancesService {
   /** the *active* instance version */
   active$ = new BehaviorSubject<InstanceDto>(null);
   activeNodeCfgs$ = new BehaviorSubject<InstanceNodeConfigurationListDto>(null);
-  activeNodeStates$ = new BehaviorSubject<{
-    [minionName: string]: MinionStatusDto;
-  }>(null);
+  activeNodeStates$ = new BehaviorSubject<{ [key: string]: MinionStatusDto }>(
+    null
+  );
   /** the history for the *active* instance. this may not be fully complete history, it is meant for a brief overview of events on the instance. */
   activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
   private activeLoadInterval;
@@ -79,9 +79,8 @@ export class InstancesService {
     private products: ProductsService,
     groups: GroupsService
   ) {
-    combineLatest([groups.current$, products.products$]).subscribe(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      ([group, prods]) => this.update$.next(group?.name)
+    combineLatest([groups.current$, products.products$]).subscribe(([group]) =>
+      this.update$.next(group?.name)
     );
     areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
@@ -109,11 +108,12 @@ export class InstancesService {
         );
       }
 
-      update.subscribe(() => {
-        // we'll refresh node states every 60 seconds as long as nothing else causes a reload.
+      update.subscribe((_) => {
+        // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
+        // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
         this.activeLoadInterval = setInterval(
           () => this.reloadActiveStates(act),
-          60000
+          10000
         );
         this.activeCheckInterval = setInterval(
           () => this.checkActiveReloadState(act),
@@ -423,7 +423,7 @@ export class InstancesService {
   }
 
   /** Reloads the currently active instance's node states and history */
-  private reloadActiveStates(act: InstanceDto) {
+  public reloadActiveStates(act: InstanceDto) {
     if (!this.checkActiveReloadState(act)) {
       return;
     }

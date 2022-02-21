@@ -13,6 +13,7 @@ import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
+import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
@@ -35,17 +36,9 @@ public class MinionManifest {
     }
 
     /**
-     * Loads and returns the latest version of the minion configuration
-     */
-    public static MinionConfiguration getConfiguration(BHive bhive) {
-        MinionManifest manifest = new MinionManifest(bhive);
-        return manifest.read();
-    }
-
-    /**
      * @return the {@link Key} of the latest version of the {@link Manifest}.
      */
-    public Manifest.Key getKey() {
+    private Manifest.Key getKey() {
         Optional<Long> max = hive.execute(new ManifestMaxIdOperation().setManifestName(MANIFEST_NAME));
         if (!max.isPresent()) {
             return null;
@@ -81,6 +74,7 @@ public class MinionManifest {
             Tree.Builder tb = new Tree.Builder().add(new Tree.Key(FILE_NAME, Tree.EntryType.BLOB), descOid);
             mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
             hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
+            hive.execute(new ManifestDeleteOldByIdOperation().setToDelete(mfb.getKey().getName()));
         }
     }
 

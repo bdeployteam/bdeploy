@@ -258,7 +258,7 @@ public class ObjectDatabase extends LockableDatabase {
                                 .collect(Collectors.toCollection(TreeSet::new));
                     } catch (UncheckedIOException e) {
                         // something was removed in the middle of the walk... retry.
-                        if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 10) {
+                        if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 20) {
                             throw e;
                         }
                     }
@@ -268,7 +268,7 @@ public class ObjectDatabase extends LockableDatabase {
                 }
 
                 // Delay the loop a little
-                Thread.sleep(10);
+                Thread.sleep(50);
             } while (true);
         }
     }

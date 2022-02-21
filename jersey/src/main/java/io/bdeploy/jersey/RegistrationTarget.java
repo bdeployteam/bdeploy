@@ -1,6 +1,8 @@
 package io.bdeploy.jersey;
 
 import java.security.KeyStore;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
@@ -50,5 +52,10 @@ public interface RegistrationTarget {
      * @param wsa the WebSocketApplication
      */
     public void registerWebsocketApplication(String urlMapping, WebSocketApplication wsa);
+
+    /**
+     * @return a {@link CompletableFuture} which is completed after the server has completed startup.
+     */
+    public CompletionStage<RegistrationTarget> afterStartup();
 
 }

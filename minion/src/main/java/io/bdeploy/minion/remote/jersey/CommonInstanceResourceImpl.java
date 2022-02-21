@@ -6,13 +6,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.SecurityContext;
-
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -33,6 +26,13 @@ import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.NodeManager;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
@@ -40,6 +40,9 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private NodeManager nodes;
 
     @Inject
     private MasterProvider mp;
@@ -131,9 +134,7 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
                         Status.PRECONDITION_FAILED);
             }
 
-            return ResourceProvider
-                    .getVersionedResource(minion.getMinions().getRemote(nodeName), NodeProxyResource.class, context)
-                    .forward(wrapper);
+            return nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProxyResource.class, context).forward(wrapper);
         }
     }
 

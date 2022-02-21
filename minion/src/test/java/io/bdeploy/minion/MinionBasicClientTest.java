@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.SortedMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,7 @@ public class MinionBasicClientTest {
 
     @Test
     public void listMinionsTest(MasterRootResource master) throws Exception {
-        SortedMap<String, MinionStatusDto> minions = master.getMinions();
+        Map<String, MinionStatusDto> minions = master.getNodes();
         assertThat(minions.size(), is(1));
         assertThat(minions.get(Minion.DEFAULT_NAME), is(notNullValue()));
     }
