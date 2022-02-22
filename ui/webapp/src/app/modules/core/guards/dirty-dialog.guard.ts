@@ -50,6 +50,8 @@ export interface DirtyableDialog {
 
   /** Saves the current state - may NOT perform ANY navigation! */
   doSave(): Observable<any>;
+
+  doReplace?(): Observable<any>;
 }
 
 @Injectable({
@@ -146,8 +148,16 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
             return of(false);
           }
           if (x === DirtyActionType.SAVE) {
-            this.areas.forcePanelClose$.next(true);
-            return component.doSave().pipe(switchMap((_) => of(true)));
+            return component.doSave().pipe(
+              switchMap((replace) => {
+                const closeDialog = replace === true || replace === null;
+                if (component.doReplace && replace) {
+                  component.doReplace().subscribe();
+                }
+                this.areas.forcePanelClose$.next(closeDialog);
+                return of(closeDialog);
+              })
+            );
           }
           return of(true);
         })

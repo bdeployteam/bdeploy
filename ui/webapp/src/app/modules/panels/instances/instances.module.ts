@@ -10,6 +10,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { CoreModule } from '../../core/core.module';
 import { InstancesModule as PrimaryInstancesModule } from '../../primary/instances/instances.module';
+import { AddControlGroupComponent } from './components/add-control-group/add-control-group.component';
+import { AddDataFileComponent } from './components/add-data-file/add-data-file.component';
 import { AddInstanceComponent } from './components/add-instance/add-instance.component';
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { AppTemplateNameComponent } from './components/add-process/app-template-name/app-template-name.component';
@@ -21,6 +23,7 @@ import { ConfigDescElementComponent } from './components/config-desc-element/con
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { DataFilesBulkManipulationComponent } from './components/data-files-buld-maipulation/data-files-bulk-manipulation.component';
+import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigProcessHeaderComponent } from './components/edit-process-overview/configure-process/config-process-header/config-process-header.component';
 import { ConfigProcessParamGroupComponent } from './components/edit-process-overview/configure-process/config-process-param-group/config-process-param-group.component';
@@ -71,8 +74,6 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { AddControlGroupComponent } from './components/add-control-group/add-control-group.component';
-import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
 
 @NgModule({
   declarations: [
@@ -138,6 +139,7 @@ import { EditControlGroupComponent } from './components/edit-control-group/edit-
     ProbeStatusComponent,
     AddControlGroupComponent,
     EditControlGroupComponent,
+    AddDataFileComponent,
   ],
   imports: [
     CommonModule,

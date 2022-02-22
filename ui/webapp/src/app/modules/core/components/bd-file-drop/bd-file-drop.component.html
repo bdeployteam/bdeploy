@@ -10,9 +10,13 @@
 >
   <div fxLayout="row" fxLayoutAlign="center center">
     <mat-icon class="local-drop-icon">cloud_upload</mat-icon>
-    <span class="local-drop-text">{{ hintText }}, or&nbsp;</span>
-    <button [disabled]="disabled" (click)="doSelectFiles()" class="local-drop-browse" [ngClass]="disabled ? 'local-drop-browse-disabled' : []">browse.</button>
-    <input type="file" #file style="display: none" (change)="onFilesAdded()" [accept]="types" multiple />
+    <div class="local-drop-text">
+      <div>{{ hintText }}, or&nbsp;</div>
+      <button [disabled]="disabled" (click)="doSelectFiles()" class="local-drop-browse" [ngClass]="disabled ? 'local-drop-browse-disabled' : []">
+        browse.
+      </button>
+      <input type="file" #file style="display: none" (change)="onFilesAdded()" [accept]="types" multiple />
+    </div>
   </div>
   <div *ngIf="validationError$ | async" fxLayout="row" fxLayoutAlign="center center" class="local-error">
     <mat-icon class="local-drop-icon">report</mat-icon>
