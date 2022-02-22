@@ -4,7 +4,7 @@
     <app-process-status-icon [record]="processConfig"></app-process-status-icon>
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
-  <app-bd-dialog-content *ngIf="processConfig">
+  <app-bd-dialog-content>
     <app-bd-notification-card *ngIf="outdated$ | async" icon="warning" header="Outdated" [dismissable]="false" [type]="'warning'">
       <div [style.text-align]="'justify'">
         The process is currently running from an instance version (<strong>{{ processDetail?.status.instanceTag }}</strong
@@ -17,7 +17,7 @@
         The managed server hosting this instance is not synchronized, runtime details are unavailable. Please synchronize the server to see additional details.
       </div>
     </app-bd-notification-card>
-    <div gdColumns="24px 90px auto" gdGap="10px" [style.padding.px]="20" gdAlignColumns="start center">
+    <div *ngIf="processConfig" gdColumns="24px 90px auto" gdGap="10px" [style.padding.px]="20" gdAlignColumns="start center">
       <mat-icon class="local-id-labels">fingerprint</mat-icon>
       <div class="local-id-labels">Process ID:</div>
       <div class="local-id-labels">{{ processConfig?.uid }}</div>
