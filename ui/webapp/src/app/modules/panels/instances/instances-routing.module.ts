@@ -78,8 +78,8 @@ const INSTANCES_ROUTES: Route[] = [
   { path: 'history/:key/compare/:base/:compare', component: HistoryCompareComponent, canActivate: [ScopedReadGuard], data: { max: true } },
   { path: 'history/:key/select/:base', component: HistoryCompareSelectComponent, canActivate: [ScopedReadGuard] },
   { path: 'config/add-process/:node', component: AddProcessComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'config/add-control-group/:node', component: AddControlGroupComponent, canActivate: [ScopedWriteGuard] },
-  { path: 'config/edit-control-group/:node/:group', component: EditControlGroupComponent, canActivate: [ScopedWriteGuard] },
+  { path: 'config/add-control-group/:node', component: AddControlGroupComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
+  { path: 'config/edit-control-group/:node/:group', component: EditControlGroupComponent, canActivate: [ScopedWriteGuard], canDeactivate: [DirtyDialogGuard] },
   { path: 'config/process/:node/:process', component: EditProcessOverviewComponent, canActivate: [ScopedWriteGuard] },
   { path: 'config/process/:node/:process/move', component: MoveProcessComponent, canActivate: [ScopedWriteGuard] },
   {

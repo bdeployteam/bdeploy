@@ -10,6 +10,7 @@ import {
 } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
@@ -21,7 +22,7 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './edit-control-group.component.html',
   styleUrls: ['./edit-control-group.component.css'],
 })
-export class EditControlGroupComponent implements OnInit {
+export class EditControlGroupComponent implements OnInit, DirtyableDialog {
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
@@ -37,23 +38,27 @@ export class EditControlGroupComponent implements OnInit {
   /* template */ nodeName: string;
   /* template */ hasPendingChanges: boolean;
 
-  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, private areas: NavAreasService) {}
+  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, private areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-      if (!state || !route || !route.params?.node || !route.params?.group) {
-        this.node = null;
-        return;
-      }
+    this.subscription.add(
+      combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
+        if (!state || !route || !route.params?.node || !route.params?.group) {
+          this.node = null;
+          return;
+        }
 
-      this.nodeName = route.params.node;
-      this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
+        this.nodeName = route.params.node;
+        this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
 
-      const index = this.node.controlGroups.findIndex((cg) => cg.name === route.params.group);
+        const index = this.node.controlGroups.findIndex((cg) => cg.name === route.params.group);
 
-      this.origGroup = this.node.controlGroups[index];
-      this.group = cloneDeep(this.origGroup);
-    });
+        this.origGroup = this.node.controlGroups[index];
+        this.group = cloneDeep(this.origGroup);
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -71,6 +76,10 @@ export class EditControlGroupComponent implements OnInit {
 
   public isDirty(): boolean {
     return isDirty(this.group, this.origGroup);
+  }
+
+  canSave(): boolean {
+    return this.form.valid;
   }
 
   /* template */ onSave() {

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
@@ -24,6 +25,7 @@ export class EditGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyabl
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
+  @ViewChild('form') public form: NgForm;
 
   constructor(private settings: SettingsService, private areas: NavAreasService) {
     this.subscription = areas.registerDirtyable(this, 'panel');
@@ -60,6 +62,10 @@ export class EditGlobalAttributeComponent implements OnInit, OnDestroy, Dirtyabl
       return false;
     }
     return isDirty(this.tempAttribute, this.initialAttribute);
+  }
+
+  canSave(): boolean {
+    return this.form.valid;
   }
 
   public doSave(): Observable<void> {

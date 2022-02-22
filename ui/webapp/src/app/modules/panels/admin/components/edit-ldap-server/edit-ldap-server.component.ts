@@ -60,6 +60,10 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
+  canSave(): boolean {
+    return this.form.valid;
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }

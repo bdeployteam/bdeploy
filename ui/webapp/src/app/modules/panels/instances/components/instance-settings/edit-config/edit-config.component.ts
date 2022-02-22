@@ -51,6 +51,10 @@ export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, 
     return this.edit.hasPendingChanges();
   }
 
+  canSave(): boolean {
+    return this.form.valid;
+  }
+
   /* template */ onSave() {
     this.doSave().subscribe((_) => this.tb.closePanel());
   }

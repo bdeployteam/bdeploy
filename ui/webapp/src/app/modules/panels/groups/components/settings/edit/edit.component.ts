@@ -87,6 +87,10 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterV
     return isDirty(this.group, this.origGroup) || this.imageChanged;
   }
 
+  canSave(): boolean {
+    return this.form.valid;
+  }
+
   /* template */ onSelectImage(image: File) {
     this.imageChanged = true;
     this.image = image;

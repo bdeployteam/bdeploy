@@ -10,6 +10,7 @@ import {
 } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
@@ -29,7 +30,7 @@ const GROUP_TEMPLATE = {
   templateUrl: './add-control-group.component.html',
   styleUrls: ['./add-control-group.component.css'],
 })
-export class AddControlGroupComponent implements OnInit {
+export class AddControlGroupComponent implements OnInit, DirtyableDialog {
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
@@ -44,17 +45,21 @@ export class AddControlGroupComponent implements OnInit {
   /* template */ nodeName: string;
   /* template */ hasPendingChanges: boolean;
 
-  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, private areas: NavAreasService) {}
+  constructor(public cfg: ConfigService, public edit: InstanceEditService, public servers: ServersService, private areas: NavAreasService) {
+    this.subscription = areas.registerDirtyable(this, 'panel');
+  }
 
   ngOnInit(): void {
-    this.subscription = combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
-      if (!state || !route || !route.params?.node) {
-        this.node = null;
-        return;
-      }
-      this.nodeName = route.params.node;
-      this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
-    });
+    this.subscription.add(
+      combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
+        if (!state || !route || !route.params?.node) {
+          this.node = null;
+          return;
+        }
+        this.nodeName = route.params.node;
+        this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -72,6 +77,10 @@ export class AddControlGroupComponent implements OnInit {
 
   public isDirty(): boolean {
     return isDirty(this.newGroup, GROUP_TEMPLATE);
+  }
+
+  canSave(): boolean {
+    return this.form.valid;
   }
 
   /* template */ onSave() {
