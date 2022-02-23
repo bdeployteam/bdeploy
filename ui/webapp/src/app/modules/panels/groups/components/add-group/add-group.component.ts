@@ -53,21 +53,15 @@ export class AddGroupComponent implements OnDestroy, DirtyableDialog {
 
   /* template */ onSave() {
     this.saving$.next(true);
-    this.doSave()
-      .pipe(
-        finalize(() => {
-          this.saving$.next(false);
-        })
-      )
-      .subscribe(() => {
-        if (this.image) {
-          this.groups.updateImage(this.group.name, this.image).subscribe(() => {
-            this.reset();
-          });
-        } else {
+    this.doSave().subscribe(() => {
+      if (this.image) {
+        this.groups.updateImage(this.group.name, this.image).subscribe(() => {
           this.reset();
-        }
-      });
+        });
+      } else {
+        this.reset();
+      }
+    });
   }
 
   private reset() {
@@ -77,7 +71,11 @@ export class AddGroupComponent implements OnDestroy, DirtyableDialog {
 
   public doSave(): Observable<void> {
     this.saving$.next(true);
-    return this.groups.create(this.group);
+    return this.groups.create(this.group).pipe(
+      finalize(() => {
+        this.saving$.next(false);
+      })
+    );
   }
 
   ngOnDestroy(): void {
