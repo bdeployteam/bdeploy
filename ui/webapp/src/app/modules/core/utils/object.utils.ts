@@ -25,15 +25,6 @@ export function formatSize(size: number): string {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function groupArrayBy<T>(array: T[], key: string): {} {
-  return array.reduce((pv, cv) => {
-    // eslint-disable-next-line
-    ((pv[cv[key]] = pv[cv[key]]) || []).push(cv);
-    return pv;
-  }, {});
-}
-
 export function randomString(length: number, alowNumbers?: boolean): string {
   const chars = alowNumbers
     ? '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
