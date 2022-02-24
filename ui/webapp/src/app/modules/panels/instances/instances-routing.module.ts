@@ -207,7 +207,7 @@ const INSTANCES_ROUTES: Route[] = [
     canActivate: [ScopedWriteGuard],
   },
   {
-    path: 'config/edit-control-group/:node/:group',
+    path: 'config/edit-control-group/:node/:cgrp',
     component: EditControlGroupComponent,
     canActivate: [ScopedWriteGuard],
   },

@@ -72,7 +72,7 @@ export class EditControlGroupComponent
     this.subscription.add(
       combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(
         ([state, route]) => {
-          if (!state || !route || !route.params?.node || !route.params?.group) {
+          if (!state || !route || !route.params?.node || !route.params?.cgrp) {
             this.node = null;
             return;
           }
@@ -83,7 +83,7 @@ export class EditControlGroupComponent
           )?.nodeConfiguration;
 
           const index = this.node.controlGroups.findIndex(
-            (cg) => cg.name === route.params.group
+            (cg) => cg.name === route.params.cgrp
           );
 
           this.origGroup = this.node.controlGroups[index];
