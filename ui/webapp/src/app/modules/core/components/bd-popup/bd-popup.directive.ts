@@ -6,7 +6,9 @@ import {
   EventEmitter,
   HostListener,
   Input,
+  OnDestroy,
   Output,
+  Renderer2,
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
@@ -110,7 +112,7 @@ const RIGHT_BELOW: ConnectedPosition = {
 @Directive({
   selector: '[appBdPopup]',
 })
-export class BdPopupDirective {
+export class BdPopupDirective implements OnDestroy {
   @Input() appBdPopup: TemplateRef<any>;
   @Input() appBdPopupTrigger: 'click' | 'hover' = 'click';
   @Input() appBdPopupDelay = 0;
@@ -123,27 +125,40 @@ export class BdPopupDirective {
 
   private delayTimer;
   private overlayRef: OverlayRef;
+  private canClosePopover = false;
 
   constructor(
     private host: ElementRef,
     private overlay: Overlay,
     private viewContainerRef: ViewContainerRef,
-    private popupService: PopupService
+    private popupService: PopupService,
+    private _render: Renderer2
   ) {}
+
+  ngOnDestroy(): void {
+    this.closeOverlay();
+  }
 
   @HostListener('mouseenter') onMouseEnter() {
     if (this.appBdPopupTrigger === 'hover' && !!this.appBdPopup) {
-      this.delayTimer = setTimeout(
-        () => this.openOverlay(),
-        this.appBdPopupDelay
-      );
+      this.delayTimer = setTimeout(() => {
+        this.canClosePopover = true;
+        this.openOverlay();
+        setTimeout(() => {
+          this.keepPopupOpen();
+        }, 100);
+      }, this.appBdPopupDelay);
     }
   }
 
   @HostListener('mouseleave') onMouseLeave() {
     if (this.appBdPopupTrigger === 'hover' && !!this.appBdPopup) {
-      clearTimeout(this.delayTimer);
-      this.closeOverlay();
+      setTimeout(() => {
+        if (this.canClosePopover) {
+          clearTimeout(this.delayTimer);
+          this.closeOverlay();
+        }
+      }, 100);
     }
   }
 
@@ -234,5 +249,26 @@ export class BdPopupDirective {
       this.overlayRef = null;
     }
     this.popupService.setOverlay(this.overlayRef);
+  }
+
+  /** Keeps popup open if mouse is over of popup */
+  keepPopupOpen() {
+    const tempClasses = this.fixupPanelClasses(this.getPositions());
+
+    tempClasses.forEach((item) => {
+      const popover = window.document.querySelector(`.${item.panelClass}`);
+      if (popover) {
+        this._render.listen(popover, 'mouseover', () => {
+          this.canClosePopover = false;
+        });
+
+        this._render.listen(popover, 'mouseout', () => {
+          this.canClosePopover = true;
+          setTimeout(() => {
+            if (this.canClosePopover) this.closeOverlay();
+          }, 0);
+        });
+      }
+    });
   }
 }
