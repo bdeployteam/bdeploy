@@ -155,7 +155,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);
 
             if (minionDto == null) {
-                // FIXME: we now allow partial updates. OK?
+                // this means the node needs to be updated separately later on.
                 log.warn("Cannot push update to offline node {}", nodeName);
                 continue;
             }

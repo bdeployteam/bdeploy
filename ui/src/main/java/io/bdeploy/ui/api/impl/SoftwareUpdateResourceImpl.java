@@ -96,10 +96,6 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         BackendInfoResource bi = rc.initResource(new BackendInfoResourceImpl());
         Set<OperatingSystem> required = new TreeSet<>();
         for (var entry : bi.getNodeStatus().entrySet()) {
-            if (entry.getValue().offline) {
-                // a node is offline, not good.
-                throw new WebApplicationException("Node offline, cannot update: " + entry.getKey(), Status.PRECONDITION_FAILED);
-            }
             required.add(entry.getValue().config.os);
         }
 
