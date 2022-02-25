@@ -117,6 +117,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private HttpServer server;
     private Auditor auditor = new Slf4jAuditor();
     private final JerseyServerMonitor monitor = new JerseyServerMonitor();
+    private final JerseyServerMonitoringSamplerService serverMonitoring = new JerseyServerMonitoringSamplerService(monitor);
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     private UserValidator userValidator;
@@ -374,6 +375,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
         @Override
         protected void configure() {
+            // NOTE: *DO NOT* create singleton resources here on the fly, since this binder is used
+            // when initializing plugins as well. For every plugin loaded this might cause resource leaks.
+
             bind(JerseyBroadcastingActivityReporter.class).in(Singleton.class).to(JerseyBroadcastingActivityReporter.class);
             bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);
             bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
@@ -381,9 +385,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             bind(startTime).named(START_TIME).to(Instant.class);
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
-
-            // bind instance to start sampling thread immediately.
-            bind(new JerseyServerMonitoringSamplerService(monitor)).to(JerseyServerMonitoringSamplerService.class);
+            bind(serverMonitoring).to(JerseyServerMonitoringSamplerService.class);
 
             // need to lazily access the auditor in case it is changed later.
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);

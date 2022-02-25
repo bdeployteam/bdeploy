@@ -5,10 +5,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.jvnet.hk2.annotations.Service;
+
 import com.google.common.collect.EvictingQueue;
 
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
+import jakarta.inject.Singleton;
 
+@Service
+@Singleton
 public class JerseyServerMonitoringSamplerService {
 
     private static final int MAX_SNAPSHOTS = 1 * 60; // every minute, 60 samples
