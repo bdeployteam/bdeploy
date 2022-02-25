@@ -24,6 +24,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.glassfish.jersey.client.ClientProperties;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.bdeploy.bhive.util.StorageHelper;
@@ -47,6 +49,7 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointTyp
 import io.bdeploy.interfaces.descriptor.application.LifenessProbeDescriptor;
 import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
 import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
+import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 
 /**
@@ -747,7 +750,7 @@ public class ProcessController {
                             probe.endpoint));
                     running = true; // no way to check.
                 } else {
-                    running = doProbe(ProcessProbeType.STARTUP, startupEp.get());
+                    running = doProbe(ProcessProbeType.STARTUP, 0, startupEp.get());
                 }
             }
 
@@ -780,9 +783,10 @@ public class ProcessController {
         Optional<HttpEndpoint> aliveEp = processConfig.endpoints.http.stream().filter(ep -> ep.id.equals(probe.endpoint))
                 .findFirst();
 
-        executeLocked("Probe Alive", DEFAULT_USER, () -> {
-            boolean alive = doProbe(ProcessProbeType.LIFENESS, aliveEp.get());
+        // Don't do this locked. If a probe blocks, we would like to be able to still stop the process (for example).
+        boolean alive = doProbe(ProcessProbeType.LIFENESS, probe.periodSeconds, aliveEp.get());
 
+        executeLocked("Probe Alive", DEFAULT_USER, () -> {
             if (processState == ProcessState.RUNNING && !alive) {
                 processState = ProcessState.RUNNING_NOT_ALIVE;
             } else if (processState == ProcessState.RUNNING_NOT_ALIVE && alive) {
@@ -791,7 +795,7 @@ public class ProcessController {
         });
     }
 
-    private boolean doProbe(ProcessProbeType type, HttpEndpoint ep) {
+    private boolean doProbe(ProcessProbeType type, long timeout, HttpEndpoint ep) {
         if (ep == null) {
             logger.log(l -> l.error("Null endpoint to probe {}", type));
             return false;
@@ -799,8 +803,14 @@ public class ProcessController {
 
         try {
             HttpEndpoint processed = CommonEndpointHelper.processEndpoint(variableResolver, ep);
-            Response rs = CommonEndpointHelper.initClient(processed).request().get();
+            WebTarget client = CommonEndpointHelper.initClient(processed);
 
+            if (timeout > 0) {
+                client.property(ClientProperties.CONNECT_TIMEOUT, timeout * 1000);
+                client.property(ClientProperties.READ_TIMEOUT, timeout * 1000);
+            }
+
+            Response rs = client.request().get();
             String resp = rs.hasEntity() ? rs.readEntity(String.class) : "Empty Response";
             int status = rs.getStatus();
 
