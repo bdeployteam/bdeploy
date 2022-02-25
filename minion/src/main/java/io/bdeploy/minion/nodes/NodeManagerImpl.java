@@ -32,7 +32,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
 @Service
-public class NodeManagerImpl implements NodeManager {
+public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(NodeManagerImpl.class);
 
@@ -71,6 +71,12 @@ public class NodeManagerImpl implements NodeManager {
 
             log.info("... done");
         }
+    }
+
+    @Override
+    public void close() {
+        schedule.shutdownNow();
+        contact.shutdownNow();
     }
 
     private void initialFetchNodeStates() {
