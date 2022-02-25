@@ -18,6 +18,7 @@ import io.bdeploy.bhive.audit.AuditParameterExtractor.AuditWith;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.objects.ManifestDatabase;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter.Activity;
 
@@ -73,7 +74,8 @@ public class CopyOperation extends BHive.Operation<TransferStatistics> {
             }
 
             if (!manifests.isEmpty()) {
-                List<Manifest> loaded = manifests.stream().map(getManifestDatabase()::getManifest).collect(Collectors.toList());
+                ManifestDatabase mdb = getManifestDatabase();
+                List<Manifest> loaded = manifests.stream().map(mdb::getManifest).collect(Collectors.toList());
 
                 InsertManifestOperation destinationManifestInsert = new InsertManifestOperation();
                 loaded.forEach(destinationManifestInsert::addManifest);

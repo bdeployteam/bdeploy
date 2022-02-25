@@ -295,7 +295,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         MasterRootResource root = getManagingRootResource(managedServer);
 
-        Manifest.Key key = root.getNamedMaster(group)
+        root.getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
                         getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
 

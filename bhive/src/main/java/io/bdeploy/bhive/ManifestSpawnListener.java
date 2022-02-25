@@ -3,7 +3,6 @@ package io.bdeploy.bhive;
 import java.util.Collection;
 
 import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.Manifest.Key;
 
 /**
  * Listener which is notified when a {@link Manifest} is created from remote

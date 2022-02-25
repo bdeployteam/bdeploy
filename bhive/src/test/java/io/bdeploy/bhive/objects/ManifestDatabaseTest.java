@@ -24,28 +24,31 @@ public class ManifestDatabaseTest extends DbTestBase {
     public void storeAndRead(@TempDir Path tmp) throws IOException {
         Path dbDir = tmp.resolve("manifests");
 
-        ManifestDatabase db = new ManifestDatabase(dbDir);
-
         Manifest.Key key = new Manifest.Key("test/app1", "v1.0");
-        Manifest.Builder mf = new Manifest.Builder(key).setRoot(randomId()).addLabel("test", "label");
+        try (ManifestDatabase db = new ManifestDatabase(dbDir)) {
+            Manifest.Builder mf = new Manifest.Builder(key).setRoot(randomId()).addLabel("test", "label");
 
-        db.addManifest(mf.build(null));
+            db.addManifest(mf.build(null));
+        }
 
-        db = new ManifestDatabase(dbDir);
-        assertTrue(db.hasManifest(key));
+        try (ManifestDatabase db = new ManifestDatabase(dbDir)) {
+            assertTrue(db.hasManifest(key));
 
-        Manifest m = db.getManifest(key);
-        assertThat(m, is(notNullValue()));
-        assertThat(m.getLabels().get("test"), is("label"));
+            Manifest m = db.getManifest(key);
+            assertThat(m, is(notNullValue()));
+            assertThat(m.getLabels().get("test"), is("label"));
 
-        assertFalse(db.getAllManifests().isEmpty());
-        assertIterableEquals(db.getAllManifests(), db.getAllForName("test/app1"));
-        assertIterableEquals(db.getAllForName("test"), db.getAllForName("test/app1"));
+            assertFalse(db.getAllManifests().isEmpty());
+            assertIterableEquals(db.getAllManifests(), db.getAllForName("test/app1"));
+            assertIterableEquals(db.getAllForName("test"), db.getAllForName("test/app1"));
 
-        db.removeManifest(key);
+            db.removeManifest(key);
 
-        db = new ManifestDatabase(dbDir);
-        assertFalse(db.hasManifest(key));
+        }
+
+        try (ManifestDatabase db = new ManifestDatabase(dbDir)) {
+            assertFalse(db.hasManifest(key));
+        }
     }
 
 }
