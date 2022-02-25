@@ -388,7 +388,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
         InstanceGroupManifest igm = new InstanceGroupManifest(hive);
 
-        List<InstanceManifest> updatedInstances = new ArrayList<>();
         List<InstanceManifest> removedInstances = new ArrayList<>();
 
         // 1. Fetch information about updates, possibly required
@@ -439,7 +438,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 InstanceManifest im = InstanceManifest.of(hive, key);
                 if (instanceIds.contains(im.getConfiguration().uuid)) {
                     // MAYBE has been updated by the sync.
-                    updatedInstances.add(im);
                     continue; // OK. instance exists
                 }
 
@@ -481,10 +479,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         mm.attach(attached, true);
 
         // 9. send out notifications after *all* is done.
-        for (var im : updatedInstances) {
-            changes.change(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName, im.getConfiguration().uuid));
-        }
-
         for (var im : removedInstances) {
             changes.remove(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName, im.getConfiguration().uuid));
         }

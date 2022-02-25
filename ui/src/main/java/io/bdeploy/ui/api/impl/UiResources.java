@@ -4,6 +4,7 @@ import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.jersey.JerseyCachingCLStaticHttpHandler;
+import io.bdeploy.jersey.JerseyEagerServiceInitializer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.ProductUpdateService;
@@ -38,6 +39,9 @@ public class UiResources {
 
         server.register(PermissionRequestFilter.class);
 
+        // force immediate initialization of the manifest spawn bridge so it can attach to the hive registry.
+        server.register(new JerseyEagerServiceInitializer<>(ManifestSpawnToChangeEventBridge.class));
+
         server.register(new AbstractBinder() {
 
             @Override
@@ -47,6 +51,7 @@ public class UiResources {
                 bind(RemoteEntryStreamRequestService.class).in(Singleton.class).to(RemoteEntryStreamRequestService.class);
                 bind(ChangeEventManager.class).in(Singleton.class).to(ChangeEventManager.class);
                 bind(ProductUpdateService.class).in(Singleton.class).to(ProductUpdateService.class);
+                bind(ManifestSpawnToChangeEventBridge.class).in(Singleton.class).to(ManifestSpawnToChangeEventBridge.class);
             }
         });
     }

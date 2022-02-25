@@ -11,19 +11,30 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
+import io.bdeploy.bhive.ManifestSpawnListener;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.PathHelper;
 
 /**
@@ -31,10 +42,19 @@ import io.bdeploy.common.util.PathHelper;
  * a database based on name and tag of each {@link Manifest}. This allows
  * concurrent updates to the database even from different processes.
  */
-public class ManifestDatabase extends LockableDatabase {
+public class ManifestDatabase extends LockableDatabase implements AutoCloseable {
+
+    private final static Logger log = LoggerFactory.getLogger(ManifestDatabase.class);
 
     private final Path root;
     private final Path tmp;
+
+    private final List<ManifestSpawnListener> listeners = new ArrayList<>();
+
+    private ScheduledFuture<?> schedNotify;
+    private final List<Manifest.Key> added = new ArrayList<>();
+    private final ScheduledExecutorService notify = Executors
+            .newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory("Manifest DB Notifier"));
 
     /**
      * A cache for Manifest objects which need to actually be loaded from disk.
@@ -59,6 +79,57 @@ public class ManifestDatabase extends LockableDatabase {
         if (!Files.exists(tmp)) {
             PathHelper.mkdirs(tmp);
         }
+    }
+
+    @Override
+    public void close() {
+        notify.shutdownNow();
+    }
+
+    public void addSpawnListener(ManifestSpawnListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeSpawnListener(ManifestSpawnListener listener) {
+        listeners.remove(listener);
+    }
+
+    public void scheduleNotify(Manifest.Key key) {
+        if (listeners.isEmpty()) {
+            return;
+        }
+
+        synchronized (added) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding {} to notify queue", key);
+            }
+            added.add(key);
+        }
+
+        if (schedNotify != null && !schedNotify.isDone()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cancel existing scheduled notify");
+            }
+            schedNotify.cancel(false);
+        }
+
+        schedNotify = notify.schedule(() -> {
+            List<Manifest.Key> copy;
+            synchronized (added) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Notify {} listeners: {}", listeners.size(), added);
+                }
+                copy = new ArrayList<>(added);
+                added.clear();
+            }
+            for (ManifestSpawnListener listener : listeners) {
+                try {
+                    listener.spawn(copy);
+                } catch (Exception e) {
+                    log.warn("Exception in manifest listener", e);
+                }
+            }
+        }, 100, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -107,6 +178,7 @@ public class ManifestDatabase extends LockableDatabase {
                 }
             }
             manifestCache.put(manifest.getKey(), manifest);
+            scheduleNotify(manifest.getKey());
         });
     }
 

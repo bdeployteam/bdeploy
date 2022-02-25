@@ -111,8 +111,8 @@ public class CommonRootResourceImpl implements CommonRootResource {
         }
 
         BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
-        new SoftwareRepositoryManifest(h).update(config);
         registry.register(config.name, h);
+        new SoftwareRepositoryManifest(h).update(config);
     }
 
     @Override
@@ -167,8 +167,8 @@ public class CommonRootResourceImpl implements CommonRootResource {
         meta.managed = (minion.getMode() != MinionMode.STANDALONE);
 
         BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
-        new InstanceGroupManifest(h).update(meta);
         registry.register(meta.name, h);
+        new InstanceGroupManifest(h).update(meta);
     }
 
     @Override

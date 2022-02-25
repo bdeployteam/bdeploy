@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { mergeMap, publishReplay, refCount } from 'rxjs/operators';
+import { combineLatest, Observable, of, ReplaySubject } from 'rxjs';
+import { mergeMap, share } from 'rxjs/operators';
 import { InstanceDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -21,10 +21,17 @@ export class InstanceStateService {
     private groups: GroupsService,
     private instances: InstancesService
   ) {
-    this.state$ = this.instances.current$.pipe(
-      mergeMap((i) => this.getLoadCall(i)),
-      publishReplay(1),
-      refCount()
+    this.state$ = combineLatest([
+      this.instances.current$,
+      this.instances.instances$, // trigger to reload on changes.
+    ]).pipe(
+      mergeMap(([i]) => this.getLoadCall(i)),
+      share({
+        connector: () => new ReplaySubject(1),
+        resetOnError: false,
+        resetOnComplete: false,
+        resetOnRefCountZero: false,
+      })
     );
   }
 
