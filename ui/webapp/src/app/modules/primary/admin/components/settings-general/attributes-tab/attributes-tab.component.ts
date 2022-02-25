@@ -74,7 +74,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
       this.selectedAttributeName = route.params['attribute'];
     });
     this.subscription.add(
-      this.settings.settingsUpdated$.subscribe(() => this.table.update())
+      this.settings.settingsUpdated$.subscribe(() => this.table?.update())
     );
   }
 

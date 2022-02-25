@@ -37,21 +37,19 @@ export class AddRepositoryComponent implements OnDestroy, DirtyableDialog {
 
   /* template */ onSave() {
     this.saving$.next(true);
-    this.doSave()
-      .pipe(
-        finalize(() => {
-          this.saving$.next(false);
-        })
-      )
-      .subscribe(() => {
-        this.areas.closePanel();
-        this.subscription.unsubscribe();
-      });
+    this.doSave().subscribe(() => {
+      this.areas.closePanel();
+      this.subscription.unsubscribe();
+    });
   }
 
   public doSave(): Observable<void> {
     this.saving$.next(true);
-    return this.repositories.create(this.repository);
+    return this.repositories.create(this.repository).pipe(
+      finalize(() => {
+        this.saving$.next(false);
+      })
+    );
   }
 
   ngOnDestroy(): void {

@@ -87,7 +87,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
       this.selectedServerId = route.params['id'];
     });
     this.subscription.add(
-      this.settings.settingsUpdated$.subscribe(() => this.table.update())
+      this.settings.settingsUpdated$.subscribe(() => this.table?.update())
     );
   }
 
