@@ -9,6 +9,7 @@
       class="bd-scroll-container mat-typography local-fill-height"
       [class.bd-default-padding]="padding"
       (scroll)="onScrollContent($event)"
+      cdkScrollable
     >
       <ng-content
         *ngIf="showContent$ | async"
