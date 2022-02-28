@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
 import { CanDeactivateGuard } from '../../core/guards/can-deactivate.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { BHiveComponent } from './components/bhive/bhive.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
@@ -56,7 +57,7 @@ const ADMIN_ROUTES: Route[] = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(ADMIN_ROUTES)],
+  imports: [RouterModule.forChild(setRouteId(ADMIN_ROUTES))],
   exports: [RouterModule],
 })
 export class AdminRoutingModule {}

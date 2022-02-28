@@ -4,6 +4,7 @@ import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { ScopedAdminGuard } from '../../core/guards/scoped-admin.guard';
 import { ServerCentralGuard } from '../../core/guards/server-central.guard';
 import { ServerManagedGuard } from '../../core/guards/server-managed.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { LinkCentralComponent } from './components/link-central/link-central.component';
 import { LinkManagedComponent } from './components/link-managed/link-managed.component';
 import { ServerDetailsComponent } from './components/server-details/server-details.component';
@@ -34,7 +35,7 @@ const SERVERS_ROUTES: Route[] = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(SERVERS_ROUTES)],
+  imports: [RouterModule.forChild(setRouteId(SERVERS_ROUTES))],
   exports: [RouterModule],
 })
 export class ServersRoutingModule {}

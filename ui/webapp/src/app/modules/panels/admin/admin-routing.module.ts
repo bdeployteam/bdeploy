@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminGuard } from '../../core/guards/admin.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { AddGlobalAttributeComponent } from './components/add-global-attribute/add-global-attribute.component';
 import { AddLdapServerComponent } from './components/add-ldap-server/add-ldap-server.component';
 import { AddPluginComponent } from './components/add-plugin/add-plugin.component';
@@ -135,7 +136,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(setRouteId(routes))],
   exports: [RouterModule],
 })
 export class AdminRoutingModule {}

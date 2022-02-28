@@ -4,6 +4,7 @@ import { AdminGuard } from '../../core/guards/admin.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { ScopedAdminGuard } from '../../core/guards/scoped-admin.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { AddGroupComponent } from './components/add-group/add-group.component';
 import { ClientDetailComponent } from './components/client-detail/client-detail.component';
 import { AttributeDefinitionsComponent } from './components/settings/attribute-definitions/attribute-definitions.component';
@@ -46,11 +47,14 @@ const GROUPS_ROUTES: Route[] = [
     canActivate: [ScopedAdminGuard],
     data: { max: true },
   },
-  { path: 'client/:app', component: ClientDetailComponent },
+  {
+    path: 'client/:app',
+    component: ClientDetailComponent,
+  },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(GROUPS_ROUTES)],
+  imports: [RouterModule.forChild(setRouteId(GROUPS_ROUTES))],
   exports: [RouterModule],
 })
 export class GroupsRoutingModule {}

@@ -66,7 +66,7 @@ export class MainNavFlyinComponent implements OnInit {
       if (!route) {
         this.panelContent = '';
       } else {
-        this.panelContent = this.areas.getRouteId(route);
+        this.panelContent = this.areas.getAnimationRouteId(route);
       }
     });
   }

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { EditComponent } from './components/settings/edit/edit.component';
 import { PasswordComponent } from './components/settings/password/password.component';
 import { SettingsComponent } from './components/settings/settings.component';
@@ -20,7 +21,7 @@ const USER_ROUTES: Route[] = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(USER_ROUTES)],
+  imports: [RouterModule.forChild(setRouteId(USER_ROUTES))],
   exports: [RouterModule],
 })
 export class UserRoutingModule {}

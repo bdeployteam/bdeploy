@@ -92,7 +92,7 @@ export class MainNavContentComponent implements OnInit {
       if (!route) {
         this.animationState = '';
       } else {
-        this.animationState = this.areas.getRouteId(route);
+        this.animationState = this.areas.getAnimationRouteId(route);
       }
     });
   }

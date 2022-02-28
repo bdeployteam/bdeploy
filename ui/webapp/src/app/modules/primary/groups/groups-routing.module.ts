@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { ClientApplicationsComponent } from './components/client-applications/client-applications.component';
 import { GroupsBrowserComponent } from './components/groups-browser/groups-browser.component';
 
@@ -18,7 +19,7 @@ const GROUPS_ROUTES: Route[] = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(GROUPS_ROUTES)],
+  imports: [RouterModule.forChild(setRouteId(GROUPS_ROUTES))],
   exports: [RouterModule],
 })
 export class GroupsRoutingModule {}

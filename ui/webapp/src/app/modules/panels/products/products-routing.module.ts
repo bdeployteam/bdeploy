@@ -3,6 +3,7 @@ import { Route, RouterModule } from '@angular/router';
 import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { ServerCentralGuard } from '../../core/guards/server-central.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { ProductBulkComponent } from './components/product-bulk/product-bulk.component';
 import { ProductDetailsComponent } from './components/product-details/product-details.component';
 import { ManagedTransferComponent } from './components/product-sync/managed-transfer/managed-transfer.component';
@@ -50,7 +51,7 @@ const PPRODUCTS_ROUTES: Route[] = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(PPRODUCTS_ROUTES)],
+  imports: [RouterModule.forChild(setRouteId(PPRODUCTS_ROUTES))],
   exports: [RouterModule],
 })
 export class ProductsRoutingModule {}

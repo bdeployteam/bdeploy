@@ -3,6 +3,7 @@ import { Route, RouterModule } from '@angular/router';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
+import { setRouteId } from '../../core/utils/routeId-generator';
 import { AddControlGroupComponent } from './components/add-control-group/add-control-group.component';
 import { AddDataFileComponent } from './components/add-data-file/add-data-file.component';
 import { AddInstanceComponent } from './components/add-instance/add-instance.component';
@@ -257,7 +258,7 @@ const INSTANCES_ROUTES: Route[] = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(INSTANCES_ROUTES)],
+  imports: [RouterModule.forChild(setRouteId(INSTANCES_ROUTES))],
   exports: [RouterModule],
 })
 export class InstancesRoutingModule {}
