@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { InstanceDto } from 'src/app/models/gen.dtos';
@@ -41,6 +42,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   /* template */ isCardView: boolean;
   /* template */ presetKeyValue = 'instances';
+  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
 
   constructor(
     public instances: InstancesService,

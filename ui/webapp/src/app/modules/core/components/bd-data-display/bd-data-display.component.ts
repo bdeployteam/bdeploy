@@ -5,7 +5,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { BehaviorSubject } from 'rxjs';
 import {
   BdDataColumn,
@@ -68,6 +68,9 @@ export class BdDataDisplayComponent<T> {
     column: BdDataColumn<T>,
     direction: SortDirection
   ) => T[] = bdDataDefaultSort;
+
+  /** The current sort dicdated by the sortHeader if available (table only) */
+  @Input() sort: Sort;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
