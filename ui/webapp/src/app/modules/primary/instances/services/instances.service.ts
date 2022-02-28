@@ -100,15 +100,19 @@ export class InstancesService {
 
       if (this.othersNeedReload$.value) {
         this.othersNeedReload$.next(false);
-        this.reload(this.group);
         this.instances$.next(null);
         update = this.instances$.pipe(
           skipWhile((x) => !x),
           first()
         );
+        this.reload(this.group);
       }
 
       update.subscribe((_) => {
+        console.log(
+          `Instance Change, Current=${cur?.instanceConfiguration?.uuid}:${cur?.instance?.tag}, Cur-Active=${cur?.activeVersion?.tag}, Active=${act?.instanceConfiguration?.uuid}:${act?.instance?.tag}`
+        );
+
         // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
         // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
         this.activeLoadInterval = setInterval(
@@ -363,7 +367,14 @@ export class InstancesService {
       return;
     }
 
-    if (inst.activeVersion.tag === this.active$.value?.instance?.tag) {
+    console.log(
+      `Load Instance, Current=${inst.instanceConfiguration.uuid}:${inst.instance.tag}, Active=${inst.activeVersion.tag}, Old-Active=${this.active$.value?.instanceConfiguration?.uuid}:${this.active$.value?.instance?.tag}`
+    );
+
+    if (
+      i === this.active$.value?.instanceConfiguration?.uuid &&
+      inst.activeVersion.tag === this.active$.value?.instance?.tag
+    ) {
       // we already have the active version loaded, nothing to do.
       return;
     }
