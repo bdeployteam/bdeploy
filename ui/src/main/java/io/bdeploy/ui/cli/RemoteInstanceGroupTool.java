@@ -83,6 +83,12 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
             desc.name = config.create();
             desc.description = config.description();
             desc.title = config.title();
+
+            if (desc.title == null) {
+                // fallback - make sure a title is set.
+                desc.title = desc.name;
+            }
+
             client.create(desc);
 
             if (iconPath != null) {

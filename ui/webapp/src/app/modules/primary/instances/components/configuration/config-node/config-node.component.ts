@@ -21,6 +21,7 @@ import {
   BdDataTableComponent,
   DragReorderEvent,
 } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
+import { DEF_CONTROL_GROUP } from 'src/app/modules/panels/instances/utils/instance-utils';
 import { InstanceEditService } from '../../../services/instance-edit.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
 
@@ -53,6 +54,8 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   /* template */ node: string;
   /* template */ groupExpansion: { [key: string]: boolean } = {};
   /* template */ lastUid: string;
+  /* template */ clientTableId =
+    CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
 
   /* template */ cols: BdDataColumn<ApplicationConfiguration>[] = [
     ...this.columns.defaultProcessesConfigColumns,

@@ -53,7 +53,7 @@
     </ng-container>
     <ng-template #clientTable>
       <app-bd-data-table
-        id="client-apps"
+        [id]="clientTableId"
         [records]="(config$ | async)?.nodeConfiguration.applications"
         [columns]="cols"
         [sortData]="null"
