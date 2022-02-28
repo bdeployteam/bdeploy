@@ -105,7 +105,7 @@
           icon="delete"
           text="Delete"
           (click)="doDelete()"
-          [disabled]="deleting$ | async"
+          [disabled]="(deleting$ | async) || isInstalled"
           [loadingWhen$]="deleting$"
         ></app-bd-button>
         <ng-container *ngIf="state$ | async as state">
