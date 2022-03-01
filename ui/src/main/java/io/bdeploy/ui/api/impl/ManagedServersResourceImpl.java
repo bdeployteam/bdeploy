@@ -55,6 +55,7 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
@@ -259,9 +260,8 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMasterDto dto = masters.getManagedMaster(selected);
 
         if (dto == null) {
-            throw new WebApplicationException(
-                    "Recorded managed server for instance " + instanceId + " no longer available on instance group: " + selected,
-                    Status.NOT_FOUND);
+            throw new WebApplicationException("Recorded managed server for instance " + instanceId
+                    + " no longer available on instance group: " + instanceGroup, Status.NOT_FOUND);
         }
 
         // clear token - don't transfer over the wire if not required.
@@ -343,7 +343,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        return attached.minions;
+        return attached.minions.values();
     }
 
     @Override
@@ -473,7 +473,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         Map<String, MinionStatusDto> status = backendInfo.getNodeStatus();
         Map<String, MinionDto> config = status.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
-        attached.minions = config;
+        attached.minions = new MinionConfiguration(config);
 
         // 8. update current information in the hive.
         mm.attach(attached, true);

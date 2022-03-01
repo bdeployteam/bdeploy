@@ -4,6 +4,7 @@ import java.util.Map;
 
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -38,7 +39,7 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
         dto.hostName = minion.getHostName();
         dto.auth = nodes.getSelf().remote.getAuthPack();
         dto.uri = info.getBaseUri().toString();
-        dto.minions = nodes.getAllNodes();
+        dto.minions = new MinionConfiguration(nodes.getAllNodes());
 
         return dto;
     }

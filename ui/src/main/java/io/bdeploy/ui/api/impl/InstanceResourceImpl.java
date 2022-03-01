@@ -471,7 +471,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
         ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
         ManagedMasterDto server = ms.getServerForInstance(group, instance, versionTag);
-        return server.minions;
+        return server.minions.values();
     }
 
     @Override

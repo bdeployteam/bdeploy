@@ -17,6 +17,13 @@ public class MinionConfiguration {
      */
     private final SortedMap<String, MinionDto> minions = new TreeMap<>();
 
+    public MinionConfiguration() {
+    }
+
+    public MinionConfiguration(Map<String, MinionDto> config) {
+        this.minions.putAll(config);
+    }
+
     /**
      * Adds the given minion to the list of known minions
      *
