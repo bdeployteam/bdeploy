@@ -1,11 +1,10 @@
 package io.bdeploy.interfaces.manifest.managed;
 
 import java.time.Instant;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
-import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
 
 public class ManagedMasterDto {
 
@@ -15,7 +14,7 @@ public class ManagedMasterDto {
     public String uri;
     public String auth;
     public Instant lastSync;
-    public Map<String, MinionDto> minions;
+    public MinionConfiguration minions;
     public MinionUpdateDto update;
 
 }

@@ -25,7 +25,7 @@ export class ServersColumnsService {
   serverNodesColumn: BdDataColumn<ManagedMasterDto> = {
     id: 'nodeCount',
     name: 'Nodes',
-    data: (r) => Object.keys(r.minions).length,
+    data: (r) => Object.keys(r.minions.minions).length,
     icon: (r) => 'dock',
     hint: BdDataColumnTypeHint.DETAILS,
   };
