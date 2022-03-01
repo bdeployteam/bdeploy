@@ -41,10 +41,12 @@ export class BdFormInputComponent
   }
 
   private internalValue: any = '';
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouchedCb: () => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChangedCb: (_: any) => void = () => {};
+  private onTouchedCb: () => void = () => {
+    /* intentionally empty */
+  };
+  private onChangedCb: (_: any) => void = () => {
+    /* intentionally empty */
+  };
 
   constructor(@Optional() @Self() public ngControl: NgControl) {
     if (ngControl) {
