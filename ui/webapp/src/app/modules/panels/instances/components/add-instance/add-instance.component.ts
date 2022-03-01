@@ -131,23 +131,22 @@ export class AddInstanceComponent
   }
 
   /* template */ onSave(): void {
-    this.loading$.next(true);
-    this.doSave()
-      .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe(() => {
-        this.router.navigate([
-          'instances',
-          'configuration',
-          this.areas.groupContext$.value,
-          this.config.uuid,
-        ]);
-        this.subscription.unsubscribe();
-      });
+    this.doSave().subscribe(() => {
+      this.router.navigate([
+        'instances',
+        'configuration',
+        this.areas.groupContext$.value,
+        this.config.uuid,
+      ]);
+      this.subscription.unsubscribe();
+    });
   }
 
   public doSave(): Observable<void> {
     this.loading$.next(true);
-    return this.instances.create(this.config, this.server?.hostName);
+    return this.instances
+      .create(this.config, this.server?.hostName)
+      .pipe(finalize(() => this.loading$.next(false)));
   }
 
   /* template */ updateProduct() {

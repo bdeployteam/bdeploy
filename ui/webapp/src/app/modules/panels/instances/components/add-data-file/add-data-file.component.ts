@@ -9,6 +9,7 @@ import { NgForm } from '@angular/forms';
 import {
   BehaviorSubject,
   finalize,
+  map,
   Observable,
   of,
   Subscription,
@@ -83,27 +84,7 @@ export class AddDataFileComponent
   }
 
   /* template */ onSave() {
-    this.saving$.next(true);
-    this.doSave()
-      .pipe(
-        finalize(() => {
-          this.saving$.next(false);
-        })
-      )
-      .subscribe((confirm) => {
-        if (confirm === null || confirm === true) {
-          if (this.shouldReplace() && confirm) {
-            this.df
-              .updateFile(this.directory, this.fileToSave)
-              .subscribe(() => {
-                this.reset();
-                return;
-              });
-          } else {
-            this.reset();
-          }
-        }
-      });
+    this.doSave().subscribe();
   }
 
   public doSave(): Observable<any> {
@@ -116,9 +97,19 @@ export class AddDataFileComponent
     this.directory = this.df.directories$.value.find(
       (d) => d.minion === this.tempFileMinion
     );
+
+    // standard update
+    let update: Observable<any> = this.df
+      .updateFile(this.directory, this.fileToSave)
+      .pipe(
+        switchMap(() => {
+          return of(true);
+        })
+      );
+
+    // replace update
     if (this.shouldReplace()) {
-      this.saving$.next(false);
-      return this.dialog
+      update = this.dialog
         .confirm(
           'File Exists',
           'A file with the given name exists - replace?',
@@ -127,13 +118,22 @@ export class AddDataFileComponent
         .pipe(
           tap((r) => {
             if (r) this.fileToSave.type = FileStatusType.EDIT;
+          }),
+          switchMap((confirm) => {
+            if (this.shouldReplace() && confirm) {
+              return this.df
+                .updateFile(this.directory, this.fileToSave)
+                .pipe(map(() => true));
+            }
+            return of(false);
           })
         );
     }
-    return this.df.updateFile(this.directory, this.fileToSave).pipe(
-      switchMap(() => {
-        this.reset();
-        return of(true);
+
+    return update.pipe(
+      finalize(() => this.saving$.next(false)),
+      tap((r) => {
+        if (r) this.reset();
       })
     );
   }

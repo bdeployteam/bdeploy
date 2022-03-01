@@ -22,7 +22,7 @@
       ></app-bd-form-input>
       <app-bd-file-drop
         (fileAdded)="doAddFileContent($event)"
-        hintText="Optionally drop file to add initial content"
+        hintText="Drop file to add initial content"
       ></app-bd-file-drop>
       <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
       <div *ngIf="tempFileError" class="bd-warning-text">
