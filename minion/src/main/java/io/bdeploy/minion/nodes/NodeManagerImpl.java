@@ -84,6 +84,9 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         this.requests.forEach((n, r) -> {
             try {
                 r.get();
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                log.error("Unexpected exception on initial node contact", ie);
             } catch (Exception e) {
                 // should never happen
                 log.error("Unexpected exception on initial node contact", e);
@@ -204,6 +207,10 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                 var rq = requests.get(name);
                 try {
                     rq.get(100, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    log.warn("Waiting for node {} failed: {}", name, ie.toString());
+                    return null;
                 } catch (Exception e) {
                     log.warn("Waiting for node {} failed: {}", name, e.toString());
                     return null;
