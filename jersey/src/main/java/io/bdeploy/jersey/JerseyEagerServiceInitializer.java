@@ -26,6 +26,7 @@ public class JerseyEagerServiceInitializer<T> implements ContainerLifecycleListe
 
     @Override
     public void onShutdown(Container container) {
+        // nothing to do on shutdown.
     }
 
 }
