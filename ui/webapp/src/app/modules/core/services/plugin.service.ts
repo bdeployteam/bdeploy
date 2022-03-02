@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { lastValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { Api } from '../plugins/plugin.api';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
@@ -43,41 +43,46 @@ export class PluginService {
   }
 
   public getApi(plugin: PluginInfoDto): Api {
+    // Note: it is very important to *NOT* use 'this' in the returned object, as 'this' will be a *very* different
+    // object than expected when those methods are actually called. we need to alias this to a delegate.
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const delegate = this;
     return {
       get(path, params?) {
-        return lastValueFrom(
-          this.http.get(this.buildPluginUrl(plugin, path), {
+        return firstValueFrom(
+          delegate.http.get(delegate.buildPluginUrl(plugin, path), {
             params: params,
             responseType: 'text',
           })
         );
       },
       put(path, body, params?) {
-        return lastValueFrom(
-          this.http.put(this.buildPluginUrl(plugin, path), body, {
+        return firstValueFrom(
+          delegate.http.put(delegate.buildPluginUrl(plugin, path), body, {
             params: params,
             responseType: 'text',
           })
         );
       },
       post(path, body, params?) {
-        return lastValueFrom(
-          this.http.post(this.buildPluginUrl(plugin, path), body, {
+        return firstValueFrom(
+          delegate.http.post(delegate.buildPluginUrl(plugin, path), body, {
             params: params,
             responseType: 'text',
           })
         );
       },
       delete(path, params?) {
-        return lastValueFrom(
-          this.http.delete(this.buildPluginUrl(plugin, path), {
+        return firstValueFrom(
+          delegate.http.delete(delegate.buildPluginUrl(plugin, path), {
             params: params,
             responseType: 'text',
           })
         );
       },
       getResourceUrl() {
-        return this.config.getPluginUrl(plugin);
+        return delegate.config.getPluginUrl(plugin);
       },
     };
   }
