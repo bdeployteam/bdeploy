@@ -152,6 +152,7 @@ export class NavAreasService {
     } else {
       this.router.navigate(['', { outlets: { panel: null } }], {
         replaceUrl: true,
+        queryParamsHandling: 'preserve',
       });
     }
   }
