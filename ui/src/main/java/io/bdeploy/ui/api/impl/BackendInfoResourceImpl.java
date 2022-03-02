@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api.impl;
 
+import java.util.Collections;
 import java.util.Map;
 
 import io.bdeploy.common.util.VersionHelper;
@@ -7,9 +8,11 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.dto.BackendInfoDto;
 import jakarta.inject.Inject;
@@ -46,6 +49,10 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
 
     @Override
     public Map<String, MinionStatusDto> getNodeStatus() {
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            return Collections.singletonMap(nodes.getSelfName(),
+                    ResourceProvider.getResource(nodes.getSelf().remote, MinionStatusResource.class, null).getStatus());
+        }
         return ResourceProvider.getVersionedResource(nodes.getSelf().remote, MasterRootResource.class, null).getNodes();
     }
 

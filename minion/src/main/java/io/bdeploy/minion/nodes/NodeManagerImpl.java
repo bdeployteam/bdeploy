@@ -244,6 +244,11 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         return config.getMinion(self);
     }
 
+    @Override
+    public String getSelfName() {
+        return self;
+    }
+
     private synchronized void scheduleSave() {
         // in case there was one scheduled - cancel it and reschedule.
         if (saveJob != null && !saveJob.isDone()) {

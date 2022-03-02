@@ -63,6 +63,11 @@ public interface NodeManager {
     public MinionDto getSelf();
 
     /**
+     * @return the currently running minions own name.
+     */
+    public String getSelfName();
+
+    /**
      * @param name the name of the node to add.
      * @param config the configuration of the node.
      */
