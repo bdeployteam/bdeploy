@@ -140,7 +140,7 @@ export class NavAreasService {
   }
 
   public getAnimationRouteId(snapshot: ActivatedRouteSnapshot) {
-    return snapshot?.data?.routerId ?? '';
+    return snapshot?.data?.routeId ?? '';
   }
 
   public closePanel(force = false) {
