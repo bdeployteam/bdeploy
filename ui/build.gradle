@@ -248,14 +248,15 @@ triggerStopCoverageCentral.mustRunAfter runCypressHeadless
 triggerStopCoverageManaged.mustRunAfter runCypressHeadless
 test.dependsOn doneWithCypressHeadless
 
-task release(type: Copy, dependsOn: runCypressHeadless) {
-    from "${webappDir}/cypress/fixtures/instance-export.zip"
-    into new File(project(':test-data').projectDir, "bin-test-data")
-    rename {
-        version + ".zip"
-    }
-
+task release(dependsOn: runCypressHeadless) {
     doLast {
+        copy {
+            from("${webappDir}/cypress/fixtures/instance-export.zip") {
+                rename { version + ".zip" }
+            }
+            into new File(project(':test-data').projectDir, "bin-test-data")
+        }
+
         println "Release seems to do well with UI tests"
     }
 }
