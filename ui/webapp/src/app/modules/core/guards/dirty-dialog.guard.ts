@@ -48,9 +48,18 @@ export interface DirtyableDialog {
   /** Determines whether the dialog should have save button. */
   canSave?(): boolean;
 
-  /** Saves the current state - may NOT perform ANY navigation! */
+  /**
+   * Saves the current state - may NOT perform ANY navigation!
+   * <p>
+   * May return an observable which resolves to boolean 'true' value. In this case,
+   * and if a doReplace method is present, doReplace is called in addition to doSave.
+   */
   doSave(): Observable<any>;
 
+  /**
+   * Optional method which can be provided. In this case, resolving an observable returned by doSave
+   * to the boolean value 'true' will make the guard call this method in addition.
+   */
   doReplace?(): Observable<any>;
 }
 

@@ -12,4 +12,5 @@ public enum ObjectChangeDetails {
     ACTIVITIES,
     USER_NAME,
     ID,
+    NODE,
 }

@@ -42,6 +42,7 @@ import { PluginsTabComponent } from './components/settings-general/plugins-tab/p
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
+import { NodesComponent } from './components/nodes/nodes.component';
 
 @NgModule({
   declarations: [
@@ -63,6 +64,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     AttributeEditActionComponent,
     LdapEditActionComponent,
     LdapCheckActionComponent,
+    NodesComponent,
   ],
   imports: [
     CommonModule,

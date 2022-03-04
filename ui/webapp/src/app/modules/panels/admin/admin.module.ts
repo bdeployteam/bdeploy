@@ -23,6 +23,10 @@ import { LogFileViewerComponent } from './components/log-file-viewer/log-file-vi
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 import { UserAdminDetailComponent } from './components/user-admin-detail/user-admin-detail.component';
+import { NodeDetailsComponent } from './components/node-details/node-details.component';
+import { NodeUpdateComponent } from './components/node-details/node-update/node-update.component';
+import { AddNodeComponent } from './components/add-node/add-node.component';
+import { NodeEditComponent } from './components/node-details/node-edit/node-edit.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +50,10 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
     AddUserComponent,
     EditUserComponent,
     AssignPermissionComponent,
+    NodeDetailsComponent,
+    NodeUpdateComponent,
+    AddNodeComponent,
+    NodeEditComponent,
   ],
   imports: [CommonModule, CoreModule, AdminRoutingModule, MatTabsModule],
 })

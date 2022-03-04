@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
@@ -17,6 +18,7 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.minion.NodeAttachDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.NodeManagementResource;
@@ -47,6 +49,9 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
         @Help("The node remote authentication token as file")
         String nodeTokenFile();
 
+        @Help("A node identification file which can be used instead of the --add, --node and --nodeToken* parameters")
+        String nodeIdentFile();
+
         @Help(value = "When given, list all known nodes.", arg = false)
         boolean list() default false;
     }
@@ -60,8 +65,13 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
         if (config.list()) {
             return doListMinions(svc);
         } else if (config.add() != null) {
-            helpAndFailIfMissing(config.node(), "Missing --node");
-            return doAddMinion(svc, config.add(), createNodeRemote(config));
+            if (config.nodeIdentFile() != null) {
+                NodeAttachDto nad = StorageHelper.fromPath(Paths.get(config.nodeIdentFile()), NodeAttachDto.class);
+                return doAddMinion(svc, config.add(), nad.remote);
+            } else {
+                helpAndFailIfMissing(config.node(), "Missing --node");
+                return doAddMinion(svc, config.add(), createNodeRemote(config));
+            }
         } else if (config.remove() != null) {
             return doRemoveMinion(svc, config.remove());
         }

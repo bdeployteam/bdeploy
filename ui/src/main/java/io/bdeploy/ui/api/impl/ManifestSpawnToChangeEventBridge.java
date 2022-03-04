@@ -17,6 +17,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry.MultiManifestSpawnListener;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -40,14 +41,23 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
 
     @Override
     public void spawn(String hiveName, Collection<Key> keys) {
-        // we skip this for the default hive.
-        if (JerseyRemoteBHive.DEFAULT_NAME.equals(hiveName)) {
-            return;
-        }
-
         if (log.isDebugEnabled()) {
             log.debug("BHive {} spawned {} manifests", hiveName, keys.size());
         }
+
+        // most of the things are not interesting in the default hive, only some global meta-data
+        if (JerseyRemoteBHive.DEFAULT_NAME.equals(hiveName)) {
+            for (Manifest.Key key : keys) {
+                if (key.getName().equals(MinionManifest.MANIFEST_NAME)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Node configuration change, new version: {}", key.getTag());
+                    }
+                    events.change(ObjectChangeType.NODES, key);
+                }
+            }
+            return;
+        }
+
         BHive hive = reg.get(hiveName);
 
         // key of an instance group/software repo manifest IF it exists in the hive.

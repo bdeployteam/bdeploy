@@ -17,6 +17,7 @@ import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
@@ -27,6 +28,10 @@ import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.NodeManager;
+import io.bdeploy.ui.api.impl.ChangeEventManager;
+import io.bdeploy.ui.dto.ObjectChangeDetails;
+import io.bdeploy.ui.dto.ObjectChangeHint;
+import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
@@ -39,6 +44,8 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     private MinionRoot root;
     private String self;
     private MinionConfiguration config;
+
+    private ChangeEventManager changes;
 
     private final Map<String, Boolean> contactWarning = new ConcurrentHashMap<>();
     private final Map<String, MinionStatusDto> status = new ConcurrentHashMap<>();
@@ -140,6 +147,10 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                 // previously inhibited contact warning means node was not reachable. log recovery
                 if (Boolean.FALSE.equals(contactWarning.get(node))) {
                     log.info("Node {} connection recovered", node);
+                    if (changes != null) {
+                        changes.change(ObjectChangeType.NODES,
+                                Map.of(ObjectChangeDetails.NODE, node, ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+                    }
                 }
 
                 contactWarning.put(node, Boolean.TRUE);
@@ -166,6 +177,10 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
             if (Boolean.TRUE.equals(contactWarning.get(node))) {
                 contactWarning.put(node, Boolean.FALSE); // no warning, contact failed.
                 log.warn("Failed to fetch node status: {}", e.toString());
+                if (changes != null) {
+                    changes.change(ObjectChangeType.NODES,
+                            Map.of(ObjectChangeDetails.NODE, node, ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));
+                }
             }
         }
     }
@@ -273,6 +288,15 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     }
 
     @Override
+    public void editNode(String name, RemoteService node) {
+        log.info("Editing node {}", name);
+
+        MinionDto m = config.getMinion(name);
+        m.remote = node;
+        scheduleSave();
+    }
+
+    @Override
     public void removeNode(String name) {
         log.info("Removing node {}", name);
 
@@ -280,6 +304,11 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         status.remove(name);
         contactWarning.remove(name);
         scheduleSave();
+    }
+
+    @Override
+    public void setChangeEventManager(ChangeEventManager changes) {
+        this.changes = changes;
     }
 
 }

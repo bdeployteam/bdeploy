@@ -8,6 +8,7 @@ import { BHiveComponent } from './components/bhive/bhive.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
+import { NodesComponent } from './components/nodes/nodes.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
@@ -33,6 +34,11 @@ const ADMIN_ROUTES: Route[] = [
         path: 'users',
         component: UsersBrowserComponent,
         canDeactivate: [CanDeactivateGuard],
+        outlet: 'admin',
+      },
+      {
+        path: 'nodes',
+        component: NodesComponent,
         outlet: 'admin',
       },
       { path: 'hive', component: BHiveComponent, outlet: 'admin' },

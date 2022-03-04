@@ -10,12 +10,13 @@ import java.util.Collection;
 import java.util.Collections;
 
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.Configuration.ValueMapping;
-import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.HostnameValidator;
 import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -31,6 +32,7 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.NodeAttachDto;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.InitTool.InitConfig;
@@ -63,10 +65,14 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         @Help("Path to the ZIP file you extracted this program from. Set to 'ignore' to skip. Be aware that this will cause an immediate update once connected to a remote master.")
         String dist();
 
-        @Help("Write the access token to a token file instead of printing it on the console. Only required for nodes.")
+        @Help("Write the access token to a token file instead of printing it on the console. This is only for automated testing.")
         @EnvironmentFallback("BDEPLOY_TOKENFILE")
         @Validator(NonExistingPathValidator.class)
         String tokenFile();
+
+        @Help("Write the node identification file to the given location. This can be used to attach the node to a master.")
+        @Validator(NonExistingPathValidator.class)
+        String nodeIdentFile();
 
         @Help("Internal update directory.")
         String updateDir();
@@ -98,6 +104,8 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
         if (config.mode() != MinionMode.NODE) {
             helpAndFailIfMissing(config.initUser(), "Missing --initUser");
             helpAndFailIfMissing(config.initPassword(), "Missing --initPassword");
+        } else {
+            helpAndFailIfMissing(config.nodeIdentFile(), "Missing --nodeIdentFile");
         }
 
         Path root = Paths.get(config.root());
@@ -111,10 +119,6 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             if (config.tokenFile() != null) {
                 Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
                 result.addField("Token File", config.tokenFile());
-            } else {
-                if (config.mode() == MinionMode.NODE) {
-                    out().println(pack);
-                }
             }
 
             if (config.mode() != MinionMode.NODE) {
@@ -122,6 +126,18 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                         Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
 
                 result.addField("User Created", config.initUser());
+            } else {
+                MinionConfiguration mc = new MinionManifest(mr.getHive()).read();
+                MinionDto self = mc.getMinion(mr.getState().self);
+
+                NodeAttachDto nad = new NodeAttachDto();
+                nad.name = config.hostname();
+                nad.remote = self.remote;
+
+                Files.write(Paths.get(config.nodeIdentFile()), StorageHelper.toRawBytes(nad));
+
+                out().println("Node Identification written to " + config.nodeIdentFile());
+                out().println("Use this file through the BDeploy CLI or UI to attach the node to a master server.");
             }
 
             result.addField("Mode", config.mode().name());

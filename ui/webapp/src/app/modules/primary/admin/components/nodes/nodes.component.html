@@ -1,0 +1,30 @@
+<app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
+  <app-bd-dialog-toolbar header="Nodes">
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button
+      text="Refresh"
+      icon="refresh"
+      (click)="nodesAdmin.reload()"
+    ></app-bd-button>
+    <app-bd-panel-button
+      [collapsed]="false"
+      color="primary"
+      text="Add Node..."
+      tooltip="below"
+      icon="add"
+      [route]="['panels', 'admin', 'add-node']"
+    ></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="bd-default-padding">
+      <app-bd-data-table
+        #dataDisplay
+        [records]="nodesAdmin.nodes$ | async"
+        [columns]="columns"
+        [recordRoute]="getRecordRoute"
+        [sort]="sort"
+      >
+      </app-bd-data-table>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

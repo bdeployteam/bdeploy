@@ -63,6 +63,7 @@ import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
+import io.bdeploy.ui.api.impl.ChangeEventManagerToNodeManagerInitializer;
 import io.bdeploy.ui.api.impl.UiResources;
 import jakarta.inject.Singleton;
 
@@ -178,6 +179,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.register(CommonRootResourceImpl.class);
         srv.register(PublicRootResourceImpl.class);
         srv.register(MasterSettingsResourceImpl.class);
+        srv.register(new ChangeEventManagerToNodeManagerInitializer(minionRoot.getNodeManager()));
 
         srv.register(new AbstractBinder() {
 

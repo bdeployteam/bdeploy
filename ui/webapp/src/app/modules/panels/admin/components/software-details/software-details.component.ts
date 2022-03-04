@@ -5,6 +5,7 @@ import { OperatingSystem } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import {
   SoftwareUpdateService,
   SoftwareVersion,
@@ -39,30 +40,13 @@ export class SoftwareDetailsComponent implements OnDestroy {
       const sw = s.find((x) => x.version === version);
       this.software$.next(sw);
 
-      this.systemOs$.next(sw.system.map((x) => this.determineOs(x.name)));
-      this.launcherOs$.next(sw.launcher.map((x) => this.determineOs(x.name)));
+      this.systemOs$.next(sw.system.map((x) => getAppOs(x)));
+      this.launcherOs$.next(sw.launcher.map((x) => getAppOs(x)));
     });
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  private determineOs(name: string): OperatingSystem {
-    const upper = name.toUpperCase();
-    if (upper.endsWith(OperatingSystem.WINDOWS)) {
-      return OperatingSystem.WINDOWS;
-    }
-    if (upper.endsWith(OperatingSystem.LINUX)) {
-      return OperatingSystem.LINUX;
-    }
-    if (upper.endsWith(OperatingSystem.AIX)) {
-      return OperatingSystem.AIX;
-    }
-    if (upper.endsWith(OperatingSystem.MACOS)) {
-      return OperatingSystem.MACOS;
-    }
-    return OperatingSystem.UNKNOWN;
   }
 
   /* template */ doDelete() {

@@ -1,0 +1,88 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar
+    [panel]="true"
+    header="Node {{ nodeName$ | async }}"
+  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div
+      *ngIf="nodeState$ | async as state; else noState"
+      fxLayout="column"
+      fxLayoutGap="10px"
+    >
+      <app-bd-notification-card
+        [svgIcon]="state.config.os"
+        [dismissable]="false"
+        header="{{ nodeName$ | async }} - {{ state.config.os }}"
+      >
+        <div
+          gdColumns="120px auto"
+          gdRows="repeat(4, 24px)"
+          gdGap="5px"
+          gdAlignColumns="start center"
+        >
+          <div>BDeploy Version:</div>
+          <div class="bd-text-ellipsis">{{ nodeVersion }}</div>
+          <div>Number of CPUs:</div>
+          <div>
+            {{ !!state.monitoring?.availableProcessors ?
+            state.monitoring.availableProcessors : 'Unknown' }}
+          </div>
+          <div>Master:</div>
+          <div>{{ state.config.master ? 'yes' : 'no' }}</div>
+          <ng-container *ngIf="!state.offline">
+            <div>Up Since:</div>
+            <div>{{ state.startup | date: 'dd.MM.yyyy HH:mm' }}</div>
+          </ng-container>
+          <ng-container *ngIf="state.offline">
+            <div>Status:</div>
+            <div
+              class="bd-text-ellipsis"
+              [matTooltip]="state.infoText"
+              [matTooltipShowDelay]="500"
+            >
+              {{ state.infoText }}
+            </div>
+          </ng-container>
+        </div>
+      </app-bd-notification-card>
+
+      <mat-divider></mat-divider>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Edit..."
+        icon="edit"
+        [relative]="true"
+        [route]="['edit']"
+        [disabled]="state.config?.master"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Apply Software Update"
+        icon="system_update"
+        [relative]="true"
+        [route]="['update']"
+        [disabled]="isCurrent || state.offline || state.config?.master"
+      ></app-bd-panel-button>
+      <app-bd-button
+        text="Remove"
+        icon="delete"
+        [collapsed]="false"
+        (click)="onDelete()"
+        [disabled]="state.config?.master || (deleting$ | async)"
+        [loadingWhen$]="deleting$"
+      ></app-bd-button>
+    </div>
+    <ng-template #noState>
+      <app-bd-notification-card
+        icon="history"
+        [type]="'warning'"
+        [dismissable]="false"
+        header="Server Details not available"
+      >
+        <div [style.text-align]="'justify'">
+          Node details are not available.
+        </div>
+      </app-bd-notification-card>
+    </ng-template>
+  </app-bd-dialog-content>
+</app-bd-dialog>

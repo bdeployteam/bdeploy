@@ -1,0 +1,49 @@
+<app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
+  <app-bd-dialog-toolbar
+    header="Add Node"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <form #form="ngForm">
+      <div fxLayout="column" fxLayoutGap="10px">
+        <mat-card
+          fxLayout="column"
+          fxLayoutAlign="center center"
+          class="bd-drag-card bd-drop-card"
+          (drop)="onDrop($event)"
+          (dragover)="onOver($event)"
+        >
+          Drop node information here!
+        </mat-card>
+        <app-bd-form-input
+          name="name"
+          label="Name"
+          [(ngModel)]="data.name"
+          required
+          appIdentifier
+        ></app-bd-form-input>
+        <app-bd-form-input
+          name="uri"
+          label="Node URI"
+          [(ngModel)]="data.remote.uri"
+          required
+        ></app-bd-form-input>
+        <app-bd-form-input
+          name="auth"
+          label="Full Auth. Token"
+          [(ngModel)]="data.remote.authPack"
+          required
+        ></app-bd-form-input>
+        <app-bd-button
+          color="primary"
+          [disabled]="!canSave() || (adding$ | async)"
+          [loadingWhen$]="adding$"
+          [collapsed]="false"
+          text="Save"
+          icon="save"
+          (click)="onSave()"
+        ></app-bd-button>
+      </div>
+    </form>
+  </app-bd-dialog-content>
+</app-bd-dialog>

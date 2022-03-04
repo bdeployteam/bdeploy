@@ -5,11 +5,12 @@ import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { setRouteId } from '../../core/utils/routeId-generator';
 import { AddGlobalAttributeComponent } from './components/add-global-attribute/add-global-attribute.component';
 import { AddLdapServerComponent } from './components/add-ldap-server/add-ldap-server.component';
+import { AddNodeComponent } from './components/add-node/add-node.component';
 import { AddPluginComponent } from './components/add-plugin/add-plugin.component';
 import { AddUserComponent } from './components/add-user/add-user.component';
 import { AssignPermissionComponent } from './components/assign-permission/assign-permission.component';
 import { AuthTestComponent } from './components/auth-test/auth-test.component';
-import { BHiveBrowserComponent as BHiveBrowserComponent } from './components/bhive-details/bhive-browser/bhive-browser.component';
+import { BHiveBrowserComponent } from './components/bhive-details/bhive-browser/bhive-browser.component';
 import { BhiveDetailsComponent as BHiveDetailsComponent } from './components/bhive-details/bhive-details.component';
 import { BhiveLogBrowserComponent } from './components/bhive-details/bhive-log-browser/bhive-log-browser.component';
 import { BhiveLogViewerComponent } from './components/bhive-details/bhive-log-viewer/bhive-log-viewer.component';
@@ -19,6 +20,9 @@ import { EditLdapServerComponent } from './components/edit-ldap-server/edit-ldap
 import { EditUserComponent } from './components/edit-user/edit-user.component';
 import { LogConfigEditorComponent } from './components/log-config-editor/log-config-editor.component';
 import { LogFileViewerComponent } from './components/log-file-viewer/log-file-viewer.component';
+import { NodeDetailsComponent } from './components/node-details/node-details.component';
+import { NodeEditComponent } from './components/node-details/node-edit/node-edit.component';
+import { NodeUpdateComponent } from './components/node-details/node-update/node-update.component';
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 import { UserAdminDetailComponent } from './components/user-admin-detail/user-admin-detail.component';
@@ -32,6 +36,28 @@ const routes: Routes = [
   {
     path: 'user-detail/:user',
     component: UserAdminDetailComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'add-node',
+    component: AddNodeComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'node-detail/:node',
+    component: NodeDetailsComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'node-detail/:node/edit',
+    component: NodeEditComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'node-detail/:node/update',
+    component: NodeUpdateComponent,
     canActivate: [AdminGuard],
   },
   {

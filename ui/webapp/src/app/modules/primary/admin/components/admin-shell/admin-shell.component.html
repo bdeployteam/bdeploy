@@ -14,6 +14,13 @@
         ><mat-icon class="nav-icon">account_circle</mat-icon>User Accounts</a
       >
 
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['nodes'] } }]"
+        routerLinkActive="active-setting"
+        ><mat-icon class="nav-icon">dns</mat-icon>Nodes</a
+      >
+
       <div class="menu-group">Housekeeping</div>
       <a
         mat-list-item

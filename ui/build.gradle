@@ -164,6 +164,9 @@ task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
     workingDir "$webappDir"
     group = BasePlugin.BUILD_GROUP
 
+    // required for bin-test-data update.
+    outputs.file "${webappDir}/cypress/fixtures/instance-export.zip"
+
     List<String> properties = getCypressConfig()
     if(project.hasProperty('cypressIgnoreExitValue')) {
         ignoreExitValue = true
@@ -248,15 +251,13 @@ triggerStopCoverageCentral.mustRunAfter runCypressHeadless
 triggerStopCoverageManaged.mustRunAfter runCypressHeadless
 test.dependsOn doneWithCypressHeadless
 
-task release(dependsOn: runCypressHeadless) {
-    doLast {
-        copy {
-            from("${webappDir}/cypress/fixtures/instance-export.zip") {
-                rename { version + ".zip" }
-            }
-            into new File(project(':test-data').projectDir, "bin-test-data")
-        }
+task release(type: Copy, dependsOn: runCypressHeadless) {
+    from("${webappDir}/cypress/fixtures/instance-export.zip") {
+        rename { version + ".zip" }
+    }
+    into new File(project(':test-data').projectDir, "bin-test-data")
 
+    doLast {
         println "Release seems to do well with UI tests"
     }
 }

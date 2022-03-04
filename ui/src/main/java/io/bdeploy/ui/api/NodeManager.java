@@ -3,8 +3,10 @@ package io.bdeploy.ui.api;
 import java.util.Collection;
 import java.util.Map;
 
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.ui.api.impl.ChangeEventManager;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -74,8 +76,19 @@ public interface NodeManager {
     public void addNode(String name, MinionDto config);
 
     /**
+     * @param name the name of the node to edit.
+     * @param node the updated configuration for the node.
+     */
+    public void editNode(String name, RemoteService node);
+
+    /**
      * @param name the name of the node to remove.
      */
     public void removeNode(String name);
+
+    /**
+     * @param changes the {@link ChangeEventManager} to be used by this {@link NodeManager}.
+     */
+    public void setChangeEventManager(ChangeEventManager changes);
 
 }

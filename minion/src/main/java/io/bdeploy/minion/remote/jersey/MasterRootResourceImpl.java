@@ -2,6 +2,7 @@ package io.bdeploy.minion.remote.jersey;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,8 +71,12 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void addNode(String name, RemoteService minion) {
-        // Store information in our hive
         nodes.addNode(name, MinionDto.create(false, minion));
+    }
+
+    @Override
+    public void editNode(String name, RemoteService minion) {
+        nodes.editNode(name, minion);
     }
 
     @Override
@@ -98,8 +103,39 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
         // Push the update to the nodes. Ensure that master is the last one
         String masterName = root.getState().self;
+        Collection<String> nodeNames = nodes.getAllNodeNames();
         SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>(new SortOneAsLastComparator(masterName));
-        pushUpdate(version, bhive, updateOs, toUpdate);
+        pushUpdate(version, bhive, updateOs, nodeNames, toUpdate);
+
+        // DON'T check for cancel from here on anymore to avoid inconsistent setups
+        // (inconsistent setups can STILL occur in mixed-OS setups)
+        prepareUpdate(version, clean, toUpdate);
+
+        // now perform the update on all
+        List<Throwable> problems = performUpdate(version, toUpdate);
+        if (!problems.isEmpty()) {
+            WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
+                    Status.INTERNAL_SERVER_ERROR);
+            problems.forEach(ex::addSuppressed);
+            throw ex;
+        }
+    }
+
+    @Override
+    public void updateNode(String name, Manifest.Key version, boolean clean) {
+        BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+
+        Set<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
+        if (!keys.contains(version)) {
+            throw new WebApplicationException("Key not found: + " + version, Status.NOT_FOUND);
+        }
+
+        // find target OS for update package
+        OperatingSystem updateOs = getTargetOsFromUpdate(version);
+
+        // Push the update to the nodes. Ensure that master is the last one
+        SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>();
+        pushUpdate(version, bhive, updateOs, Collections.singletonList(name), toUpdate);
 
         // DON'T check for cancel from here on anymore to avoid inconsistent setups
         // (inconsistent setups can STILL occur in mixed-OS setups)
@@ -147,9 +183,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
         preparing.done();
     }
 
-    private void pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs,
+    private void pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, Collection<String> nodeNames,
             SortedMap<String, MinionUpdateResource> toUpdate) {
-        Collection<String> nodeNames = nodes.getAllNodeNames();
         Activity pushing = reporter.start("Pushing Update to Nodes", nodeNames.size());
         for (String nodeName : nodeNames) {
             MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);

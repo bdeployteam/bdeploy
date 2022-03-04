@@ -1,0 +1,34 @@
+<app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
+  <app-bd-dialog-toolbar
+    header="Edit {{nodeName}}"
+    [panel]="true"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <form #form="ngForm">
+      <div fxLayout="column" fxLayoutGap="10px">
+        <app-bd-form-input
+          name="uri"
+          label="Node URI"
+          [(ngModel)]="data.uri"
+          required
+        ></app-bd-form-input>
+        <app-bd-form-input
+          name="auth"
+          label="Full Auth. Token"
+          [(ngModel)]="data.authPack"
+          required
+        ></app-bd-form-input>
+        <app-bd-button
+          color="primary"
+          [disabled]="!canSave() || (saving$ | async)"
+          [loadingWhen$]="saving$"
+          [collapsed]="false"
+          text="Save"
+          icon="save"
+          (click)="onSave()"
+        ></app-bd-button>
+      </div>
+    </form>
+  </app-bd-dialog-content>
+</app-bd-dialog>
