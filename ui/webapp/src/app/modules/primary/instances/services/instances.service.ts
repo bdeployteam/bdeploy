@@ -79,8 +79,12 @@ export class InstancesService {
     private products: ProductsService,
     groups: GroupsService
   ) {
-    combineLatest([groups.current$, products.products$]).subscribe(([group]) =>
-      this.update$.next(group?.name)
+    combineLatest([groups.current$, products.products$]).subscribe(
+      ([group, products]) => {
+        if (group && products) {
+          this.update$.next(group?.name);
+        }
+      }
     );
     areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));

@@ -17,7 +17,7 @@ import { GroupsService } from '../../groups/services/groups.service';
 })
 export class ProductsService {
   loading$ = new BehaviorSubject<boolean>(true);
-  products$ = new BehaviorSubject<ProductDto[]>([]);
+  products$ = new BehaviorSubject<ProductDto[]>(null);
 
   private group: string;
   private subscription: Subscription;
@@ -65,7 +65,7 @@ export class ProductsService {
 
   private load(group: string) {
     if (!group) {
-      this.products$.next([]);
+      this.products$.next(null);
       this.updateChangeSubscription(null);
       return;
     }

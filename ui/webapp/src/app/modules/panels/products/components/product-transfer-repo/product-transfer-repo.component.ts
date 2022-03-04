@@ -70,9 +70,10 @@ export class ProductTransferRepoComponent implements OnInit {
           .loadProductsOf(this.selectedRepo.name)
           .pipe(finalize(() => this.productsLoading$.next(false)))
           .subscribe((prods) => {
+            const products = this.products.products$.value || [];
             const filtered = prods.filter(
               (p) =>
-                !this.products.products$.value?.find(
+                !products.find(
                   (p2) => p2.key.name === p.key.name && p2.key.tag === p.key.tag
                 )
             );

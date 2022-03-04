@@ -21,8 +21,9 @@ export class UpdateActionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.index = this.products.products$.value.indexOf(this.record);
-    this.curIndex = this.products.products$.value.findIndex(
+    const products = this.products.products$.value || [];
+    this.index = products.indexOf(this.record);
+    this.curIndex = products.findIndex(
       (r) =>
         this.edit.state$.value?.config.config.product.name === r.key.name &&
         this.edit.state$.value?.config.config.product.tag === r.key.tag

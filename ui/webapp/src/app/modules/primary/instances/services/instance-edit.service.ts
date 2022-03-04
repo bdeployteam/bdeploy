@@ -675,9 +675,10 @@ export class InstanceEditService {
   }
 
   private hasCurrentProduct() {
+    const products = this.products.products$.value || [];
     return !this.state$.value?.config?.config?.product?.name
       ? false
-      : !!this.products.products$.value.find(
+      : !!products.find(
           (p) =>
             p.key.name === this.state$.value.config.config.product.name &&
             p.key.tag === this.state$.value.config.config.product.tag

@@ -80,7 +80,7 @@ export class AddInstanceComponent
           this.config.uuid = r;
           this.subscription.add(
             this.products.products$.subscribe((products) => {
-              products.forEach((p) => {
+              products?.forEach((p) => {
                 let item = this.prodList.find((x) => x.id === p.key.name);
                 if (!item) {
                   item = { id: p.key.name, name: p.name, versions: [] };
