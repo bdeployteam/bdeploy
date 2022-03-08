@@ -47,7 +47,7 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
       return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
     });
 
-    this.term.underlying.options.fontSize = 12;
+    this.term.underlying.setOption('fontSize', 12);
 
     this.content$.subscribe((content) => {
       if (this.allowInput) {
@@ -103,7 +103,7 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
       });
 
       // TODO: migrate to keyEventInput - need a solution for pasting, everything should be straight forward.
-      this.stdinSubscription = this.term.keyEventInput.subscribe((input) => {
+      this.stdinSubscription = this.term.keyInput.subscribe((input) => {
         // store initial position on first keystroke after terminal output
         if (!this.stdinStartX) {
           this.stdinStartX = this.getCursorX();
@@ -111,11 +111,11 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
 
         // keyboard input usually is a single charactor or CSI sequence, but clipboard content is a string
         let idx = 0;
-        while (idx < input.key.length) {
+        while (idx < input.length) {
           if (input[idx] === '\r') {
             idx++;
             this.sendStdin();
-          } else if (input.key.charCodeAt(idx) === 0x7f) {
+          } else if (input.charCodeAt(idx) === 0x7f) {
             idx++;
             if (this.stdinBufferCursorPos > 0) {
               this.clearInput();
@@ -127,7 +127,7 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
             }
           } else {
             this.clearInput();
-            if (input.key.charCodeAt(idx) >= 32) {
+            if (input.charCodeAt(idx) >= 32) {
               this.stdinBuffer = [
                 this.stdinBuffer.slice(0, this.stdinBufferCursorPos),
                 input[idx],
@@ -135,9 +135,9 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
               ].join('');
               this.stdinBufferCursorPos++;
               idx++;
-            } else if (input.key.substr(idx).startsWith(CSI)) {
+            } else if (input.substr(idx).startsWith(CSI)) {
               idx += CSI.length;
-              if (idx < input.key.length) {
+              if (idx < input.length) {
                 switch (input[idx]) {
                   case 'C': // cursor right
                     this.stdinBufferCursorPos =
