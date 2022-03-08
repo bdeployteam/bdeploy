@@ -9,7 +9,6 @@ import { DataFilesService } from 'src/app/modules/primary/instances/services/dat
 @Component({
   selector: 'app-data-files-bulk-manipulation',
   templateUrl: './data-files-bulk-manipulation.component.html',
-  styleUrls: ['./data-files-bulk-manipulation.component.css'],
 })
 export class DataFilesBulkManipulationComponent {
   /* template */ starting$ = new BehaviorSubject<boolean>(false);

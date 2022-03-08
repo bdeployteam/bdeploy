@@ -33,7 +33,6 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 @Component({
   selector: 'app-edit-control-group',
   templateUrl: './edit-control-group.component.html',
-  styleUrls: ['./edit-control-group.component.css'],
 })
 export class EditControlGroupComponent
   implements OnInit, DirtyableDialog, OnDestroy, AfterViewInit
