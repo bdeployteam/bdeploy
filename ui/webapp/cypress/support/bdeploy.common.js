@@ -54,41 +54,69 @@ Cypress.Commands.add('pressToolbarButton', function (text) {
 });
 
 Cypress.Commands.add('fillFormInput', function (name, data) {
-  const s = 'app-bd-form-input' + (name === undefined ? '' : `[name="${name}"]`);
+  const s =
+    'app-bd-form-input' + (name === undefined ? '' : `[name="${name}"]`);
   cy.get(s).within(() => {
     cy.get('mat-form-field').should('exist').click();
-    cy.get('input').should('exist').and('have.focus').and('be.enabled').clear().type(data);
+    cy.get('input')
+      .should('exist')
+      .and('have.focus')
+      .and('be.enabled')
+      .clear()
+      .type(data);
   });
 });
 
 Cypress.Commands.add('fillFormSelect', function (name, data) {
-  const s = 'app-bd-form-select' + (name === undefined ? '' : `[name="${name}"]`);
+  const s =
+    'app-bd-form-select' + (name === undefined ? '' : `[name="${name}"]`);
   cy.get(s).within(() => {
     cy.get('mat-form-field').should('exist').click();
     // escape all .within scopes to find the global overlay content
-    cy.document().its('body').find('.cdk-overlay-container').contains('mat-option', data).should('exist').click();
+    cy.document()
+      .its('body')
+      .find('.cdk-overlay-container')
+      .contains('mat-option', data)
+      .should('exist')
+      .click();
   });
 });
 
 Cypress.Commands.add('fillFormToggle', function (name) {
-  const s = 'app-bd-form-toggle' + (name === undefined ? '' : `[name="${name}"]`);
+  const s =
+    'app-bd-form-toggle' + (name === undefined ? '' : `[name="${name}"]`);
   cy.get(s).should('exist').click();
 });
 
-Cypress.Commands.add('fillImageUpload', function (filePath, mimeType, checkEmpty = true) {
-  cy.get('app-bd-image-upload').within(() => {
-    if (checkEmpty) {
-      cy.get('img[src="/assets/no-image.svg"]').should('exist');
-    }
-    cy.get('input[type="file"]').selectFile({ contents: Cypress.config('fixturesFolder') + '/' + filePath, mimeType: mimeType }, { force: true });
-    cy.get('img[src="/assets/no-image.svg"]').should('not.exist');
-    cy.get('img[alt="logo"]').should('exist');
-  });
-});
+Cypress.Commands.add(
+  'fillImageUpload',
+  function (filePath, mimeType, checkEmpty = true) {
+    cy.get('app-bd-image-upload').within(() => {
+      if (checkEmpty) {
+        cy.get('img[src="/assets/no-image.svg"]').should('exist');
+      }
+      cy.get('input[type="file"]').selectFile(
+        {
+          contents: Cypress.config('fixturesFolder') + '/' + filePath,
+          mimeType: mimeType,
+        },
+        { force: true }
+      );
+      cy.get('img[src="/assets/no-image.svg"]').should('not.exist');
+      cy.get('img[alt="logo"]').should('exist');
+    });
+  }
+);
 
 Cypress.Commands.add('fillFileDrop', function (name, mimeType = undefined) {
   cy.get('app-bd-file-drop').within(() => {
-    cy.get('input[type="file"]').selectFile({ contents: Cypress.config('fixturesFolder') + '/' + name, mimeType: mimeType }, { force: true });
+    cy.get('input[type="file"]').selectFile(
+      {
+        contents: Cypress.config('fixturesFolder') + '/' + name,
+        mimeType: mimeType,
+      },
+      { force: true }
+    );
   });
 });
 
@@ -124,75 +152,95 @@ Cypress.Commands.add('downloadFromLinkHref', function (link) {
   });
 });
 
-Cypress.Commands.add('downloadByLinkClick', { prevSubject: true }, function (subject, filename, fixture = false) {
-  cy.window().then((win) => {
-    let url = null;
-    const stubbed = cy
-      // @ts-ignore
-      .stub(win.downloadLocation, 'click')
-      .onFirstCall()
-      .callsFake((link) => {
-        url = link;
-      });
-
-    cy.wrap(subject)
-      .click()
-      .should(() => {
-        expect(stubbed).to.be.calledOnce;
-        expect(url).to.be.not.null;
-      })
-      .then(() => {
-        stubbed.restore();
-
+Cypress.Commands.add(
+  'downloadByLinkClick',
+  { prevSubject: true },
+  function (subject, filename, fixture = false) {
+    cy.window().then((win) => {
+      let url = null;
+      const stubbed = cy
         // @ts-ignore
-        cy.downloadFromLinkHref(url).then((rq) => {
-          expect(rq.status).to.equal(200);
-          cy.writeFile(Cypress.config('downloadsFolder') + '/' + filename, rq.response).then(() => {
+        .stub(win.downloadLocation, 'click')
+        .onFirstCall()
+        .callsFake((link) => {
+          url = link;
+        });
+
+      cy.wrap(subject)
+        .click()
+        .should(() => {
+          expect(stubbed).to.be.calledOnce;
+          expect(url).to.be.not.null;
+        })
+        .then(() => {
+          stubbed.restore();
+
+          // @ts-ignore
+          cy.downloadFromLinkHref(url).then((rq) => {
+            expect(rq.status).to.equal(200);
+            cy.writeFile(
+              Cypress.config('downloadsFolder') + '/' + filename,
+              rq.response
+            ).then(() => {
+              if (fixture) {
+                cy.task('moveFile', {
+                  from: Cypress.config('downloadsFolder') + '/' + filename,
+                  to: Cypress.config('fixturesFolder') + '/' + filename,
+                });
+              }
+            });
+          });
+        });
+    });
+  }
+);
+
+Cypress.Commands.add(
+  'downloadByLocationAssign',
+  { prevSubject: true },
+  (subject, filename, fixture = false) => {
+    cy.window().then((win) => {
+      let url = null;
+      const stubbed = cy
+        // @ts-ignore
+        .stub(win.downloadLocation, 'assign')
+        .onFirstCall()
+        .callsFake((link) => {
+          url = link;
+        });
+
+      cy.wrap(subject)
+        .click()
+        .should(() => {
+          expect(stubbed).to.be.calledOnce;
+          expect(url).to.be.not.null;
+        })
+        .then(() => {
+          stubbed.restore();
+
+          if (url.startsWith('/api')) {
+            url = url.substring(4);
+          }
+          if (url.startsWith('/')) {
+            // URL argument is relative in production, see application config.json
+            url = Cypress.env('backendBaseUrl') + url;
+          }
+
+          cy.task('downloadFileFromUrl', {
+            url: url,
+            fileName: Cypress.config('downloadsFolder') + '/' + filename,
+          }).then(() => {
             if (fixture) {
-              cy.task('moveFile', { from: Cypress.config('downloadsFolder') + '/' + filename, to: Cypress.config('fixturesFolder') + '/' + filename });
+              cy.task('moveFile', {
+                from: Cypress.config('downloadsFolder') + '/' + filename,
+                to: Cypress.config('fixturesFolder') + '/' + filename,
+              });
             }
           });
         });
-      });
-  });
-});
-
-Cypress.Commands.add('downloadByLocationAssign', { prevSubject: true }, (subject, filename, fixture = false) => {
-  cy.window().then((win) => {
-    let url = null;
-    const stubbed = cy
-      // @ts-ignore
-      .stub(win.downloadLocation, 'assign')
-      .onFirstCall()
-      .callsFake((link) => {
-        url = link;
-      });
-
-    cy.wrap(subject)
-      .click()
-      .should(() => {
-        expect(stubbed).to.be.calledOnce;
-        expect(url).to.be.not.null;
-      })
-      .then(() => {
-        stubbed.restore();
-
-        if (url.startsWith('/api')) {
-          url = url.substring(4);
-        }
-        if (url.startsWith('/')) {
-          // URL argument is relative in production, see application config.json
-          url = Cypress.env('backendBaseUrl') + url;
-        }
-
-        cy.task('downloadFileFromUrl', { url: url, fileName: Cypress.config('downloadsFolder') + '/' + filename }).then(() => {
-          if (fixture) {
-            cy.task('moveFile', { from: Cypress.config('downloadsFolder') + '/' + filename, to: Cypress.config('fixturesFolder') + '/' + filename });
-          }
-        });
-      });
-  });
-});
+    });
+  }
+);
 
 Cypress.Commands.add('typeInMonacoEditor', function (text, clear = false) {
   if (clear) {

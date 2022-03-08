@@ -37,7 +37,9 @@ describe('Central/Managed Basic Test', function () {
     cy.pressMainNavButton('Managed Servers');
     cy.get('app-servers-browser').should('exist');
     cy.inMainNavContent(() => {
-      cy.contains('tr', 'Description of managed server').should('have.length', 1).click();
+      cy.contains('tr', 'Description of managed server')
+        .should('have.length', 1)
+        .click();
     });
     cy.inMainNavFlyin('app-server-details', () => {
       cy.get(`app-bd-button[text="Delete"]`).click();
@@ -51,9 +53,20 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Creates an instance on managed server', () => {
-    cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip', false, 'MANAGED');
+    cy.uploadProductIntoGroup(
+      groupName,
+      'test-product-1-direct.zip',
+      false,
+      'MANAGED'
+    );
 
-    cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0', 'MANAGED');
+    cy.createInstance(
+      groupName,
+      instanceName,
+      'Demo Product',
+      '1.0.0',
+      'MANAGED'
+    );
 
     cy.visitCentral('/');
     cy.waitUntilContentLoaded();
@@ -124,8 +137,19 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Creates an instance on central server', () => {
-    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', false, 'CENTRAL');
-    cy.createInstance(groupName, instanceName2, 'Demo Product', '2.0.0', 'CENTRAL');
+    cy.uploadProductIntoGroup(
+      groupName,
+      'test-product-2-direct.zip',
+      false,
+      'CENTRAL'
+    );
+    cy.createInstance(
+      groupName,
+      instanceName2,
+      'Demo Product',
+      '2.0.0',
+      'CENTRAL'
+    );
 
     cy.visitManaged('/');
     cy.waitUntilContentLoaded();
@@ -151,9 +175,11 @@ describe('Central/Managed Basic Test', function () {
 
     // create some from a template
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
-        cy.get('button[data-cy^="Apply Instance Template"]').click();
-      });
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
+        () => {
+          cy.get('button[data-cy^="Apply Instance Template"]').click();
+        }
+      );
     });
 
     cy.waitUntilContentLoaded();
@@ -164,7 +190,7 @@ describe('Central/Managed Basic Test', function () {
       cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
       cy.get('button[data-cy="Next"]').click();
 
-      cy.fillFormInput('Text Value', 'Test');
+      cy.fillFormInput('Text Value', 'Test').type('{esc}');
       cy.fillFormInput('Sleep Timeout', '30');
       cy.get('button[data-cy="Confirm"]').click();
     });

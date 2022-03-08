@@ -70,6 +70,7 @@
                   <app-bd-form-select
                     [label]="'Group \'' + group.name + '\''"
                     [matTooltip]="group.description"
+                    matTooltipPosition="above"
                     [attr.name]="group.name"
                     [(ngModel)]="groups[group.name]"
                     [values]="groupNodes[group.name]"
@@ -99,6 +100,7 @@
                   [attr.name]="v.name"
                   [label]="v.name"
                   [matTooltip]="v.description"
+                  matTooltipPosition="above"
                   [suggested]="v.suggestedValues"
                   required
                   (ngModelChange)="validateHasAllVariables()"

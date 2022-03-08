@@ -213,7 +213,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     @Override
     public MinionDto getNodeConfigIfOnline(String name) {
         var state = status.get(name);
-        if (state.offline) {
+        if (state == null || state.offline) {
             if (requests.containsKey(name)) {
                 // a background connection request is running.
                 // we do not want to block for an extended time here, however this might come

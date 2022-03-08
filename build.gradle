@@ -19,7 +19,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.adarshr:gradle-test-logger-plugin:3.1.0'
+        classpath 'com.adarshr:gradle-test-logger-plugin:3.2.0'
         classpath 'gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11'
         classpath 'org.cyclonedx:cyclonedx-gradle-plugin:1.4.0'
     }

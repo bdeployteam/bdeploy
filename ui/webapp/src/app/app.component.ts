@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject, OnInit } from '@angular/core';
 import {
   RouteConfigLoadEnd,
   RouteConfigLoadStart,
@@ -6,6 +7,7 @@ import {
 } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import { NavAreasService } from './modules/core/services/nav-areas.service';
 
 @Component({
@@ -17,10 +19,19 @@ export class AppComponent implements OnInit {
   subscription: Subscription;
   loadCount = 0;
 
-  constructor(private router: Router, private areas: NavAreasService) {
+  constructor(
+    private router: Router,
+    private areas: NavAreasService,
+    @Inject(DOCUMENT) document: Document
+  ) {
     console.log('----------------------------------------');
     console.log('BDeploy started...');
     console.log('----------------------------------------');
+
+    // in case of UI tests we may need some additional classes. this dummy class gives the scope.
+    if (environment.uiTest) {
+      document.body.classList.add('ui-test');
+    }
 
     // potential official fix for broken history on cancelled navigation, see https://github.com/angular/angular/issues/13586
     router.canceledNavigationResolution = 'computed';

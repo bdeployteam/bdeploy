@@ -25,3 +25,12 @@ body {
 .tooltip-with-newline {
   white-space: pre-line;
 }
+
+/**
+ * during UI tests, disable all tooltips globally. not only do they look strange in
+ * screenshots, but they also cause tests to fail, since they may block clicks to elements
+ * in cypress, even though they are invisible.
+ */
+.ui-test .mat-tooltip-panel {
+  display: none;
+}
