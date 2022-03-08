@@ -9,7 +9,6 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 @Component({
   selector: 'app-bhive-log-viewer',
   templateUrl: './bhive-log-viewer.component.html',
-  styleUrls: ['./bhive-log-viewer.component.css'],
 })
 export class BhiveLogViewerComponent implements OnDestroy {
   /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);

@@ -10,7 +10,6 @@ import { HiveLoggingService } from '../../../services/hive-logging.service';
 @Component({
   selector: 'app-bhive-log-browser',
   templateUrl: './bhive-log-browser.component.html',
-  styleUrls: ['./bhive-log-browser.component.css'],
 })
 export class BhiveLogBrowserComponent implements OnInit {
   private readonly colDownload: BdDataColumn<RemoteDirectoryEntry> = {

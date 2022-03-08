@@ -30,7 +30,6 @@ import { DataFilesService } from 'src/app/modules/primary/instances/services/dat
   // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'add-data-file',
   templateUrl: './add-data-file.component.html',
-  styleUrls: ['./add-data-file.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddDataFileComponent

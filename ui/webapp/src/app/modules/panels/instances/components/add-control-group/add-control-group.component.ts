@@ -40,7 +40,6 @@ const GROUP_TEMPLATE = {
 @Component({
   selector: 'app-add-control-group',
   templateUrl: './add-control-group.component.html',
-  styleUrls: ['./add-control-group.component.css'],
 })
 export class AddControlGroupComponent
   implements OnInit, OnDestroy, AfterViewInit
