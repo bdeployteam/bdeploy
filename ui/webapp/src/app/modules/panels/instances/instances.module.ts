@@ -70,6 +70,7 @@ import { ProcessPortsComponent } from './components/process-ports/process-ports.
 import { ProbeStatusComponent } from './components/process-status/probe-status/probe-status.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { CustomNodeFilterPipe, NodeFilterPipe } from './utils/filter-node';
 import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-validator.directive';
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
@@ -140,6 +141,8 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
     AddControlGroupComponent,
     EditControlGroupComponent,
     AddDataFileComponent,
+    NodeFilterPipe,
+    CustomNodeFilterPipe,
   ],
   imports: [
     CommonModule,

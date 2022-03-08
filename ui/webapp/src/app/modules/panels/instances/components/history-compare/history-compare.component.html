@@ -92,6 +92,7 @@
               *ngFor="let appPair of nodePair.applications"
             >
               <app-history-process-config
+                [hidden]="!(appPair.base | customNodeFilter: searchTerm)"
                 fxFlex="50%"
                 [baseConfig]="appPair.base"
                 [compareConfig]="appPair.compare"
@@ -100,6 +101,7 @@
                 diffSide="left"
               ></app-history-process-config>
               <app-history-process-config
+                [hidden]="!(appPair.compare | customNodeFilter: searchTerm)"
                 fxFlex="50%"
                 [baseConfig]="appPair.compare"
                 [compareConfig]="appPair.base"

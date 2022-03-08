@@ -3,6 +3,10 @@ import { Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  BdSearchable,
+  SearchService,
+} from 'src/app/modules/core/services/search.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
 import { ConfigPair } from '../../utils/diff-utils';
@@ -13,7 +17,7 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
   templateUrl: './history-compare.component.html',
   styleUrls: ['./history-compare.component.css'],
 })
-export class HistoryCompareComponent implements OnDestroy {
+export class HistoryCompareComponent implements OnDestroy, BdSearchable {
   /* template */ narrow$ = new BehaviorSubject<boolean>(false);
 
   /* template */ base$ = new BehaviorSubject<string>(null);
@@ -21,6 +25,8 @@ export class HistoryCompareComponent implements OnDestroy {
 
   /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
   /* template */ clientNodeName = CLIENT_NODE_NAME;
+
+  /* template */ searchTerm = '';
 
   private baseConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
@@ -30,7 +36,8 @@ export class HistoryCompareComponent implements OnDestroy {
     private areas: NavAreasService,
     bop: BreakpointObserver,
     private details: HistoryDetailsService,
-    public instances: InstancesService
+    public instances: InstancesService,
+    private searchService: SearchService
   ) {
     this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
       this.narrow$.next(bs.matches);
@@ -74,9 +81,15 @@ export class HistoryCompareComponent implements OnDestroy {
         }
       )
     );
+
+    this.subscription.add(this.searchService.register(this));
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  bdOnSearch(value: string) {
+    this.searchTerm = value;
   }
 }
