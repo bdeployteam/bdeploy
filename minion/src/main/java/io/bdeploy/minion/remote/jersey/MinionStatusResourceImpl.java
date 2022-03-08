@@ -10,6 +10,9 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -44,9 +47,15 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
 
     private final MinionMonitoringDto rollingMonitoring = new MinionMonitoringDto();
 
+    private static final ScheduledExecutorService monitorUpdate = Executors.newSingleThreadScheduledExecutor();
+
     @Inject
     @Named(JerseyServer.START_TIME)
     private Instant startTime;
+
+    public MinionStatusResourceImpl() {
+        monitorUpdate.scheduleAtFixedRate(this::updateMonitoringData, 0, 60, TimeUnit.SECONDS);
+    }
 
     @Override
     public MinionStatusDto getStatus() {
@@ -54,7 +63,7 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
         s.startup = startTime;
         s.config = root.getSelfConfig();
         s.monitoring = rollingMonitoring;
-        return updateMonitoringData(s);
+        return s;
     }
 
     @Override
@@ -106,47 +115,32 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
         return entries;
     }
 
-    private MinionStatusDto updateMonitoringData(MinionStatusDto minion) {
+    private void updateMonitoringData() {
         OperatingSystemMXBean osMBean = ManagementFactory.getOperatingSystemMXBean();
         com.sun.management.OperatingSystemMXBean extOsMBean = ManagementFactory
                 .getPlatformMXBean(com.sun.management.OperatingSystemMXBean.class);
 
         long now = System.currentTimeMillis();
-        if (minion.monitoring == null) {
-            minion.monitoring = new MinionMonitoringDto();
+
+        if (rollingMonitoring.loadAvg == null) {
+            rollingMonitoring.loadAvg = new ArrayList<>();
+        }
+        if (rollingMonitoring.cpuUsage == null) {
+            rollingMonitoring.cpuUsage = new ArrayList<>();
         }
 
-        if (now - minion.monitoring.timestamp <= 1000 * 58) {
-            // skip update if the data is less than roundabout a minute old.
-            return minion;
-        }
-
-        if (minion.monitoring.loadAvg == null) {
-            minion.monitoring.loadAvg = new ArrayList<>();
-        }
-        if (minion.monitoring.cpuUsage == null) {
-            minion.monitoring.cpuUsage = new ArrayList<>();
-        }
-
-        // if existing data is older than 5min, assume that it's old data and start a
-        // new list
-        if ((now - minion.monitoring.timestamp > 1000 * 60 * 5)) {
-            minion.monitoring.loadAvg = new ArrayList<>();
-            minion.monitoring.cpuUsage = new ArrayList<>();
-        }
-        minion.monitoring.timestamp = now;
-        minion.monitoring.availableProcessors = osMBean.getAvailableProcessors();
-        minion.monitoring.loadAvg.add(0, osMBean.getSystemLoadAverage());
-        minion.monitoring.cpuUsage.add(0, extOsMBean.getCpuLoad());
+        rollingMonitoring.timestamp = now;
+        rollingMonitoring.availableProcessors = osMBean.getAvailableProcessors();
+        rollingMonitoring.loadAvg.add(0, osMBean.getSystemLoadAverage());
+        rollingMonitoring.cpuUsage.add(0, extOsMBean.getCpuLoad());
 
         // keep values for 15min
-        while (minion.monitoring.loadAvg.size() > 15) {
-            minion.monitoring.loadAvg.remove(minion.monitoring.loadAvg.size() - 1);
+        while (rollingMonitoring.loadAvg.size() > 15) {
+            rollingMonitoring.loadAvg.remove(rollingMonitoring.loadAvg.size() - 1);
         }
-        while (minion.monitoring.cpuUsage.size() > 15) {
-            minion.monitoring.cpuUsage.remove(minion.monitoring.cpuUsage.size() - 1);
+        while (rollingMonitoring.cpuUsage.size() > 15) {
+            rollingMonitoring.cpuUsage.remove(rollingMonitoring.cpuUsage.size() - 1);
         }
-        return minion;
     }
 
 }
