@@ -20,13 +20,13 @@
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="attributeTab.isActive">
-      <app-bd-button
+      <app-bd-panel-button
         icon="add"
-        text="New Attribute..."
-        color="primary"
         [collapsed]="false"
-        (click)="attributes.addAttribute()"
-      ></app-bd-button>
+        color="primary"
+        text="New Attribute..."
+        [route]="['panels', 'admin', 'global-attribute-add']"
+      ></app-bd-panel-button>
       <mat-divider [vertical]="true"></mat-divider>
     </ng-container>
     <ng-container *ngIf="pluginTab.isActive">
@@ -61,6 +61,8 @@
         mat-align-tabs="start"
         dynamicHeight
         animationDuration="0ms"
+        (selectedTabChange)="tabChanged($event)"
+        [(selectedIndex)]="tabIndex"
       >
         <mat-tab #generalTab fxLayout="column">
           <ng-template mat-tab-label

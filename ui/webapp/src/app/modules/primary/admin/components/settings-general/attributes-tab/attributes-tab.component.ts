@@ -78,24 +78,6 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     );
   }
 
-  /* template */ addAttribute(): void {
-    this.router.navigate([
-      '',
-      { outlets: { panel: ['panels', 'admin', 'global-attribute-add'] } },
-    ]);
-  }
-
-  private editAttribute(attr: CustomAttributeDescriptor): void {
-    this.router.navigate([
-      '',
-      {
-        outlets: {
-          panel: ['panels', 'admin', 'global-attribute', attr.name, 'edit'],
-        },
-      },
-    ]);
-  }
-
   disableDelete(r) {
     return this.selectedAttributeName === r.name;
   }
