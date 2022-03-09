@@ -6,7 +6,21 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm">
-      <div fxLayout="column" fxLayoutGap="10px">
+      <div fxLayout="column" fxLayoutGap="10px" *ngIf="data && orig">
+        <span
+          >You can either manually enter node information below, or drop a
+          <code>node-ident</code> file which is created during the
+          initialization process on the physical node.</span
+        >
+        <mat-card
+          fxLayout="column"
+          fxLayoutAlign="center center"
+          class="bd-drag-card bd-drop-card"
+          (drop)="onDrop($event)"
+          (dragover)="onOver($event)"
+        >
+          Drop node information here!
+        </mat-card>
         <app-bd-form-input
           name="uri"
           label="Node URI"

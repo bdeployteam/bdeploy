@@ -16,9 +16,12 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
+export const NODE_MIME_TYPE = 'text/plain';
+
 @Component({
   selector: 'app-node-edit',
   templateUrl: './node-edit.component.html',
+  styleUrls: ['./node-edit.component.css'],
 })
 export class NodeEditComponent implements OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
@@ -77,5 +80,36 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
       this.data = this.orig; // avoid "unsaved" warning.
       this.tb.closePanel();
     });
+  }
+
+  private readFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const x = JSON.parse(reader.result.toString());
+      this.data.uri = x.remote.uri;
+      this.data.authPack = x.remote.authPack;
+    };
+    reader.readAsText(file);
+  }
+
+  /* template */ onDrop(event: DragEvent) {
+    event.preventDefault();
+
+    if (event.dataTransfer.files.length > 0) {
+      this.readFile(event.dataTransfer.files[0]);
+    } else if (event.dataTransfer.types.includes(NODE_MIME_TYPE)) {
+      const x = JSON.parse(event.dataTransfer.getData(NODE_MIME_TYPE));
+      this.data.uri = x.remote.uri;
+      this.data.authPack = x.remote.authPack;
+    }
+  }
+
+  /* template */ onOver(event: DragEvent) {
+    // need to cancel the event and return false to ALLOW drop.
+    if (event.preventDefault) {
+      event.preventDefault();
+    }
+
+    return false;
   }
 }

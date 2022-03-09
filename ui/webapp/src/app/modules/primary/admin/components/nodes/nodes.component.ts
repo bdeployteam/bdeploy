@@ -12,15 +12,21 @@ const nodeColName: BdDataColumn<MinionRecord> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
+  width: '180px',
 };
 
 const nodeColStatus: BdDataColumn<MinionRecord> = {
   id: 'status',
   name: 'Status',
-  data: (r) =>
-    r.status.offline
-      ? 'Offline' + (r.status.infoText ? ' (' + r.status.infoText + ')' : '')
-      : 'Online',
+  data: (r) => (r.status.offline ? 'Offline' : 'Online'),
+  width: '80px',
+};
+
+const nodeColInfo: BdDataColumn<MinionRecord> = {
+  id: 'info',
+  name: 'Additional Information',
+  data: (r) => r.status.infoText,
+  showWhen: '(min-width: 1280px)',
 };
 
 const nodeColVersion: BdDataColumn<MinionRecord> = {
@@ -28,7 +34,7 @@ const nodeColVersion: BdDataColumn<MinionRecord> = {
   name: 'Version',
   data: (r) =>
     r.status.config?.version ? convert2String(r.status.config.version) : '',
-  tooltip: (r) => 'The last known version of the node',
+  tooltip: () => 'The last known version of the node',
   width: '140px',
 };
 
@@ -55,6 +61,7 @@ export class NodesComponent {
   /* template */ columns: BdDataColumn<MinionRecord>[] = [
     nodeColName,
     nodeColStatus,
+    nodeColInfo,
     nodeColVersion,
     nodeColOs,
   ];
