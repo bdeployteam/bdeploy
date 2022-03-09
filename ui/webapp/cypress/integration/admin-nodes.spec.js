@@ -1,0 +1,75 @@
+//@ts-check
+
+describe('Admin Nodes Test', () => {
+  beforeEach(() => {
+    cy.login();
+  });
+
+  it('Tests Master Node', () => {
+    cy.visit('/');
+    cy.get('.local-hamburger-button').click();
+    cy.get('button[data-cy=Administration]').click();
+
+    cy.contains('a', 'Nodes').click();
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'master').should('exist').click();
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_Admin_Nodes_Details');
+
+    cy.inMainNavFlyin('app-node-details', () => {
+      cy.get('button[data-cy^=Edit]').should('be.disabled');
+      cy.get('button[data-cy^=Apply]').should('be.disabled');
+      cy.get('button[data-cy^=Remove]').should('be.disabled');
+      cy.pressToolbarButton('Close');
+    });
+
+    cy.checkMainNavFlyinClosed();
+  });
+
+  it('Tests Add/Remove', () => {
+    cy.pressToolbarButton('Add Node');
+
+    cy.intercept({ method: 'GET', url: '**/api/node-admin/nodes' }).as('list');
+    cy.intercept({
+      method: 'PUT',
+      url: '**/api/node-admin/nodes/TestNode**',
+    }).as('add');
+
+    cy.inMainNavFlyin('app-add-node', () => {
+      cy.fillFormInput('name', 'TestNode');
+      cy.fillFormInput('uri', 'Dummy');
+      cy.fillFormInput('auth', 'Dummy');
+      cy.contains('button', 'Save').click();
+    });
+
+    cy.checkMainNavFlyinClosed();
+    cy.wait('@add');
+    cy.wait('@list');
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'TestNode').should('exist').click();
+    });
+
+    cy.inMainNavFlyin('app-node-details', () => {
+      cy.get('button[data-cy^=Edit]').should('be.enabled');
+      cy.get('button[data-cy^=Apply]').should('be.disabled');
+      cy.get('button[data-cy^=Remove]').should('be.enabled').click();
+
+      cy.contains('app-bd-notification-card', 'Remove TestNode').within(() => {
+        cy.get('button[data-cy^=Yes]').click();
+      });
+    });
+
+    cy.wait('@list');
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'TestNode').should('not.exist');
+    });
+  });
+});

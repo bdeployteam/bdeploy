@@ -61,7 +61,7 @@ export class NodeDetailsComponent implements OnDestroy {
     const nodeName = this.nodeName$.value;
     this.dialog
       .confirm(
-        `Delete ${nodeName}?`,
+        `Remove ${nodeName}?`,
         'The node will be removed. This cannot be undone. Any Instance configured to this node will <strong>stop working until configured differently.</strong>',
         'delete'
       )
