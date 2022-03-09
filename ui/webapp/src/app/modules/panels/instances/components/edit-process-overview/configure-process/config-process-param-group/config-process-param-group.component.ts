@@ -1,6 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
-  AfterViewInit,
   Component,
   EventEmitter,
   Input,
@@ -68,7 +67,7 @@ interface ParameterGroup {
   encapsulation: ViewEncapsulation.None,
 })
 export class ConfigProcessParamGroupComponent
-  implements OnDestroy, BdSearchable, AfterViewInit
+  implements OnDestroy, BdSearchable
 {
   /* template */ groups$ = new BehaviorSubject<ParameterGroup[]>(null);
   /* template */ narrow$ = new BehaviorSubject<boolean>(false);
@@ -94,6 +93,7 @@ export class ConfigProcessParamGroupComponent
 
   private updatePreview$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
+  private formsLoaded = false;
 
   constructor(
     public edit: ProcessEditService,
@@ -191,6 +191,10 @@ export class ConfigProcessParamGroupComponent
     });
 
     this.subscription.add(
+      this.groups$.subscribe(() => setTimeout(() => this.checkFormsStatus()))
+    );
+
+    this.subscription.add(
       this.updatePreview$
         .pipe(
           skipWhile((x) => !x),
@@ -208,17 +212,19 @@ export class ConfigProcessParamGroupComponent
     this.subscription.add(this.searchService.register(this));
   }
 
-  ngAfterViewInit(): void {
-    if (!this.forms) {
-      return;
+  private checkFormsStatus() {
+    if (!this.formsLoaded && this.forms && this.forms.length) {
+      this.forms.forEach((form) => {
+        this.subscription.add(
+          form.statusChanges.pipe(debounceTime(100)).subscribe(() => {
+            this.checkIsInvalid.emit(
+              this.forms.some((form) => !form.valid && !form.disabled)
+            );
+          })
+        );
+      });
+      this.formsLoaded = true;
     }
-    this.forms.forEach((form) => {
-      this.subscription.add(
-        form.statusChanges.pipe(debounceTime(100)).subscribe((status) => {
-          this.checkIsInvalid.emit(status !== 'VALID');
-        })
-      );
-    });
   }
 
   ngOnDestroy(): void {
