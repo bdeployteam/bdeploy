@@ -39,6 +39,9 @@ describe('Admin Nodes Test', () => {
       url: '**/api/node-admin/nodes/TestNode**',
     }).as('add');
 
+    cy.waitUntilContentLoaded();
+    cy.screenshot('Doc_Admin_Nodes_Add');
+
     cy.inMainNavFlyin('app-add-node', () => {
       cy.fillFormInput('name', 'TestNode');
       cy.fillFormInput('uri', 'Dummy');
