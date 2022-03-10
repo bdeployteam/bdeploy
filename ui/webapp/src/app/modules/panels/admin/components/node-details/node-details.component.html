@@ -63,6 +63,14 @@
         [route]="['update']"
         [disabled]="isCurrent || state.offline || state.config?.master"
       ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Remote Maintenance"
+        icon="build"
+        [relative]="true"
+        [route]="['maintenance']"
+        [disabled]="state.offline"
+      ></app-bd-panel-button>
       <app-bd-button
         text="Remove"
         icon="delete"

@@ -4,6 +4,8 @@ import java.util.Map;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import jakarta.ws.rs.Consumes;
@@ -63,6 +65,22 @@ public interface MasterRootResource extends CommonUpdateResource {
     @POST
     @Path("/minions/{name}/update")
     public void updateNode(@PathParam("name") String name, Manifest.Key version, @QueryParam("clean") boolean clean);
+
+    /**
+     * @param name the name of the node to check.
+     */
+    @POST
+    @Path("/minions/{name}/fsck")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public Map<String, String> fsckNode(@PathParam("name") String name);
+
+    /**
+     * @param name the name of the node to prune.
+     */
+    @POST
+    @Path("/minions/{name}/prune")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public long pruneNode(@PathParam("name") String name);
 
     /**
      * Request the master that is responsible for the given named Hive.

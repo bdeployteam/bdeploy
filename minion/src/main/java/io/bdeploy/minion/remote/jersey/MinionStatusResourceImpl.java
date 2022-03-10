@@ -10,15 +10,20 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.op.FsckOperation;
+import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -64,6 +69,22 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
         s.config = root.getSelfConfig();
         s.monitoring = rollingMonitoring;
         return s;
+    }
+
+    @Override
+    public long pruneDefaultBHive() {
+        LongAdder adder = new LongAdder();
+        root.getHive().execute(new PruneOperation()).forEach((k, v) -> adder.add(v));
+        return adder.sum();
+    }
+
+    @Override
+    public Map<String, String> repairDefaultBHive() {
+        Map<String, String> result = new TreeMap<>();
+        root.getHive().execute(new FsckOperation().setRepair(true)).forEach((v) -> {
+            result.put(v.getElementId().toString(), v.getPathString());
+        });
+        return result;
     }
 
     @Override

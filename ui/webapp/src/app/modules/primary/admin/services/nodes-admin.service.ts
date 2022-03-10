@@ -77,4 +77,19 @@ export class NodesAdminService {
       .delete(`${this.apiPath()}/nodes/${nodeName}`)
       .pipe(measure(`Remove node ${nodeName}`));
   }
+
+  public fsckNode(nodeName: string): Observable<{ [key: string]: string }> {
+    return this.http
+      .post<{ [key: string]: string }>(
+        `${this.apiPath()}/nodes/${nodeName}/fsck`,
+        null
+      )
+      .pipe(measure(`Fsck node ${nodeName}`));
+  }
+
+  public pruneNode(nodeName: string): Observable<number> {
+    return this.http
+      .post<number>(`${this.apiPath()}/nodes/${nodeName}/prune`, null)
+      .pipe(measure(`Prune node ${nodeName}`));
+  }
 }

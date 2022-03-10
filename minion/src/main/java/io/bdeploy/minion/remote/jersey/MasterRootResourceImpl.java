@@ -31,6 +31,7 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
@@ -82,6 +83,16 @@ public class MasterRootResourceImpl implements MasterRootResource {
     @Override
     public void removeNode(String name) {
         nodes.removeNode(name);
+    }
+
+    @Override
+    public Map<String, String> fsckNode(String name) {
+        return nodes.getNodeResourceIfOnlineOrThrow(name, MinionStatusResource.class, context).repairDefaultBHive();
+    }
+
+    @Override
+    public long pruneNode(String name) {
+        return nodes.getNodeResourceIfOnlineOrThrow(name, MinionStatusResource.class, context).pruneDefaultBHive();
     }
 
     @Override

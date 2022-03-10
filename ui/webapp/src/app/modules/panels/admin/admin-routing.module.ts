@@ -22,6 +22,7 @@ import { LogConfigEditorComponent } from './components/log-config-editor/log-con
 import { LogFileViewerComponent } from './components/log-file-viewer/log-file-viewer.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { NodeEditComponent } from './components/node-details/node-edit/node-edit.component';
+import { NodeMaintenanceComponent } from './components/node-details/node-maintenance/node-maintenance.component';
 import { NodeUpdateComponent } from './components/node-details/node-update/node-update.component';
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
@@ -58,6 +59,11 @@ const routes: Routes = [
   {
     path: 'node-detail/:node/update',
     component: NodeUpdateComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'node-detail/:node/maintenance',
+    component: NodeMaintenanceComponent,
     canActivate: [AdminGuard],
   },
   {

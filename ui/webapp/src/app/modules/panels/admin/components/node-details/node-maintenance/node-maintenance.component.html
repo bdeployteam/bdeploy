@@ -1,0 +1,34 @@
+<app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
+  <app-bd-dialog-toolbar
+    [header]="'Remote Maintenance: ' + nodeName"
+    [panel]="true"
+    [route]="['..']"
+  >
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="5px" *ngIf="state">
+      <span
+        >The operations below allow to remotely perform maintenance actions on
+        the node. These actions can help in repairing or cleaning up node
+        storage.</span
+      >
+      <app-bd-button
+        text="Repair Default BHive"
+        icon="build"
+        [collapsed]="false"
+        [disabled]="state.offline || (repairing$ | async)"
+        (click)="doFsck()"
+        [loadingWhen$]="repairing$"
+      ></app-bd-button>
+      <app-bd-button
+        text="Prune Default BHive"
+        icon="delete_sweep"
+        [collapsed]="false"
+        [disabled]="state.offline || (pruning$ | async)"
+        (click)="doPrune()"
+        [loadingWhen$]="pruning$"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

@@ -1,11 +1,14 @@
 package io.bdeploy.interfaces.remote;
 
 import java.util.List;
+import java.util.Map;
 
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -24,6 +27,22 @@ public interface MinionStatusResource {
      */
     @GET
     public MinionStatusDto getStatus();
+
+    /**
+     * Repairs the default BHive, which is used for node operation and system data.
+     *
+     * @return a map of {@link ObjectId} to path strings within a Manifest. Those objects were damaged and removed.
+     */
+    @POST
+    @Path("/maintenance/repair")
+    public Map<String, String> repairDefaultBHive();
+
+    /**
+     * @return the amount of data cleaned from the BHive in bytes.
+     */
+    @POST
+    @Path("/maintenance/prune")
+    public long pruneDefaultBHive();
 
     /**
      * @param file the new logger config file.

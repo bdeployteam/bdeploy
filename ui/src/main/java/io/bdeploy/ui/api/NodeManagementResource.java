@@ -70,4 +70,20 @@ public interface NodeManagementResource {
     @RequiredPermission(permission = Permission.ADMIN)
     public void updateNode(@PathParam("name") String name, List<Key> target);
 
+    /**
+     * @param name the name of the node to check.
+     */
+    @POST
+    @Path("/nodes/{name}/fsck")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public Map<String, String> fsckNode(@PathParam("name") String name);
+
+    /**
+     * @param name the name of the node to prune.
+     */
+    @POST
+    @Path("/nodes/{name}/prune")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public long pruneNode(@PathParam("name") String name);
+
 }

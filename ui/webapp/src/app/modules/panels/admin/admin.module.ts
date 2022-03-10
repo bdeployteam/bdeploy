@@ -27,6 +27,7 @@ import { NodeDetailsComponent } from './components/node-details/node-details.com
 import { NodeUpdateComponent } from './components/node-details/node-update/node-update.component';
 import { AddNodeComponent } from './components/add-node/add-node.component';
 import { NodeEditComponent } from './components/node-details/node-edit/node-edit.component';
+import { NodeMaintenanceComponent } from './components/node-details/node-maintenance/node-maintenance.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { NodeEditComponent } from './components/node-details/node-edit/node-edit
     NodeUpdateComponent,
     AddNodeComponent,
     NodeEditComponent,
+    NodeMaintenanceComponent,
   ],
   imports: [CommonModule, CoreModule, AdminRoutingModule, MatTabsModule],
 })

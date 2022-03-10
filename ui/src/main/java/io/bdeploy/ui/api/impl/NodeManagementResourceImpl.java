@@ -82,4 +82,20 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
         }).forEach(k -> root.updateNode(name, k.getKey(), true));
     }
 
+    @Override
+    public Map<String, String> fsckNode(String name) {
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            throw new WebApplicationException("Operation not available in mode CENTRAL");
+        }
+        return ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).fsckNode(name);
+    }
+
+    @Override
+    public long pruneNode(String name) {
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            throw new WebApplicationException("Operation not available in mode CENTRAL");
+        }
+        return ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).pruneNode(name);
+    }
+
 }
