@@ -9,7 +9,7 @@
     <div
       fxLayout="column"
       fxLayoutGap="10px"
-      *ngIf="config$ | async as cfg"
+      *ngIf="(config$ | async) as cfg"
       [style.padding-top.px]="2"
     >
       <div class="bd-rect-card" fxLayout="column">
@@ -56,7 +56,7 @@
           </div>
           <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
             <app-history-process-config
-              *ngFor="let app of node.nodeConfiguration.applications"
+              *ngFor="let app of node.nodeConfiguration.applications | nodeFilter: searchTerm"
               [baseConfig]="app"
               [compareConfig]="app"
               [baseDescriptor]="getAppDesc(cfg?.nodes, app.application.name)"
