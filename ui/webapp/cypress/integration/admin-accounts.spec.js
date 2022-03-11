@@ -44,7 +44,9 @@ describe('Admin UI Tests (Accounts)', () => {
     // create a test user
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Create User');
-      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
+      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as(
+        'createUser'
+      );
     });
 
     cy.inMainNavFlyin('add-user', () => {
@@ -184,6 +186,7 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.get('button[data-cy="Apply"]').should('be.enabled').click();
     });
 
+    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_User_Accounts_Edit');
 
     cy.waitUntilContentLoaded();

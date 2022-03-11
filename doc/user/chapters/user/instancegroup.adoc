@@ -83,3 +83,19 @@ The *Instance* determines whether it is included in the automatic cleanup job. I
 Click an *Instance* to proceed to the <<Instance Dashboard>>.
 
 image::images/Doc_DemoInstance.png[Instance Browser, align=center, width=480,link="images/Doc_DemoInstance.png"]
+
+==== Global Attributes on Instance Groups
+
+<<Global Attributes>> can be configured - as the name suggests - globally in the system administration. Each Instance Group *may* then associate a *value* with each of these global attributes.
+
+image::images/Doc_SetGlobalAttributeValue.png[Set Global Attribute Values, align=center, width=480,link="images/Doc_SetGlobalAttributeValue.png"]
+
+The value can then be used in grouping instance groups through the grouping panel.
+
+image::images/Doc_GroupingPanel.png[Group by Global Attribute, align=center, width=480,link="images/Doc_GroupingPanel.png"]
+
+==== Instance Group Attributes
+
+Very similarly to the global attributes, each *Instance Group* may have its own *attributes*. These attributes are not global, but are only visible within the *Instance Group*. Each *Instance* can assign a value to each of these attributes. Again, similar to the *Instance Group* browser, the *Instance* browser can use the assigned values to group *Instances* by those values.
+
+The *attributes* are defined in the *Instance Group* settings. The *values* are assigned in the *Instance* settings.
