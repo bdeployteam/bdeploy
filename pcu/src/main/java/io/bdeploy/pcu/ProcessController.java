@@ -508,14 +508,15 @@ public class ProcessController {
 
         doCancelProbeTasks();
 
+        logger.log(l -> l.info("Stopping planned for {}, current state: {}", processConfig.name, processState));
         processState = ProcessState.RUNNING_STOP_PLANNED;
-        logger.log(l -> l.info("Stopping planned for {}", processConfig.name));
     }
 
     /** Stops the application */
     private void doStop() {
         // Do nothing if already stopped
         if (processState.isStopped()) {
+            logger.log(l -> l.debug("Process already in state {}: {} - doing nothing", processState, processConfig.uid));
             return;
         }
 

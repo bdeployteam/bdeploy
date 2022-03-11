@@ -1,7 +1,7 @@
 package io.bdeploy.pcu;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -43,12 +43,12 @@ public class InstanceProcessControllerTest {
         assertTrue(status.isAppRunningOrScheduled("App1"));
 
         // Start the second application
-        controller.start("App2", null);
+        controller.start(List.of("App2"), null);
         status = controller.getStatus();
         assertTrue(status.isAppRunningOrScheduled("App2"));
 
         // Stop one application
-        controller.stop("App1", null);
+        controller.stop(List.of("App1"), null);
         status = controller.getStatus();
         assertTrue(!status.isAppRunningOrScheduled("App1"));
 
@@ -92,7 +92,7 @@ public class InstanceProcessControllerTest {
 
         // Upgrade active version
         controller.setActiveTag("2");
-        controller.start("App2", null);
+        controller.start(List.of("App2"), null);
         status = controller.getStatus();
         assertTrue(status.areAppsRunningOrScheduled());
         assertTrue(status.areAppsRunningOrScheduledInVersion("1"));
@@ -100,14 +100,14 @@ public class InstanceProcessControllerTest {
         assertTrue(status.isAppRunningOrScheduled("App1"));
         assertTrue(status.isAppRunningOrScheduled("App2"));
 
-        // Try to launch applications again
-        assertThrows(RuntimeException.class, () -> controller.start("App1", null));
-        assertThrows(RuntimeException.class, () -> controller.start("App2", null));
+        // Try to launch applications again - NOOP in new implementation
+        assertDoesNotThrow(() -> controller.start(List.of("App1"), null));
+        assertDoesNotThrow(() -> controller.start(List.of("App2"), null));
 
         // Move back to version 1 and try again
         controller.setActiveTag("1");
-        assertThrows(RuntimeException.class, () -> controller.start("App1", null));
-        assertThrows(RuntimeException.class, () -> controller.start("App2", null));
+        assertDoesNotThrow(() -> controller.start(List.of("App1"), null));
+        assertDoesNotThrow(() -> controller.start(List.of("App2"), null));
 
         // Stop all applications
         controller.stopAll(null);

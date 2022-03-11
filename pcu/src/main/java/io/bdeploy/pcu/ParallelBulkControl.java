@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -35,10 +34,11 @@ public class ParallelBulkControl extends AbstractBulkControl {
     }
 
     @Override
-    public List<String> startGroup(Map<String, ProcessController> running) {
+    public List<String> startGroup(Collection<String> toStart) {
         List<Future<TaskResult>> tasks = new ArrayList<>();
-        for (String appId : controlGroup.processOrder) {
-            tasks.add(parallelExec.submit(() -> new TaskResult(appId, doStartSingle(running, appId))));
+        for (String appId : toStart.stream()
+                .sorted((a, b) -> controlGroup.processOrder.indexOf(a) - controlGroup.processOrder.indexOf(b)).toList()) {
+            tasks.add(parallelExec.submit(() -> new TaskResult(appId, doStartSingle(appId))));
         }
 
         logger.log(l -> l.info("All applications of control group {} processed.", controlGroup.name));

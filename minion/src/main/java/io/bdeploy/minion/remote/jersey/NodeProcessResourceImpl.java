@@ -2,6 +2,7 @@ package io.bdeploy.minion.remote.jersey;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.List;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -45,12 +46,17 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
 
     @Override
     public void start(String instanceId, String applicationId) {
+        start(instanceId, List.of(applicationId));
+    }
+
+    @Override
+    public void start(String instanceId, List<String> applicationIds) {
         MinionProcessController processController = root.getProcessController();
         InstanceProcessController instanceController = processController.get(instanceId);
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.start(applicationId, context.getUserPrincipal().getName());
+        instanceController.start(applicationIds, context.getUserPrincipal().getName());
     }
 
     @Override
@@ -65,12 +71,17 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
 
     @Override
     public void stop(String instanceId, String applicationId) {
+        stop(instanceId, List.of(applicationId));
+    }
+
+    @Override
+    public void stop(String instanceId, List<String> applicationIds) {
         MinionProcessController processController = root.getProcessController();
         InstanceProcessController instanceController = processController.get(instanceId);
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
-        instanceController.stop(applicationId, context.getUserPrincipal().getName());
+        instanceController.stop(applicationIds, context.getUserPrincipal().getName());
     }
 
     @Override

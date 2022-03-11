@@ -107,7 +107,7 @@ public class MinionDeployTest {
         assertEquals(uuid, info.instance.uuid);
 
         /* STEP 6: run/control processes on the remote */
-        master.getNamedMaster("demo").start(uuid, "app");
+        master.getNamedMaster("demo").start(uuid, List.of("app"));
 
         InstanceStatusDto status;
         do {
@@ -125,7 +125,7 @@ public class MinionDeployTest {
         // give the script a bit to write output
         Threads.sleep(200);
 
-        master.getNamedMaster("demo").stop(uuid, "app");
+        master.getNamedMaster("demo").stop(uuid, List.of("app"));
         status = master.getNamedMaster("demo").getStatus(uuid);
         System.out.println(status);
         assertFalse(status.isAppRunningOrScheduled("app"));

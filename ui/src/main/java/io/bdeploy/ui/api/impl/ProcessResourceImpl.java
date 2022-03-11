@@ -56,33 +56,33 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public void startProcess(String processId) {
+    public void startProcess(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Launching");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.start(instanceId, processId);
+            master.start(instanceId, processIds);
         }
     }
 
     @Override
-    public void stopProcess(String processId) {
+    public void stopProcess(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Stopping");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.stop(instanceId, processId);
+            master.stop(instanceId, processIds);
         }
     }
 
     @Override
-    public void restartProcess(String processId) {
+    public void restartProcess(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Restarting");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.stop(instanceId, processId);
-            master.start(instanceId, processId);
+            master.stop(instanceId, processIds);
+            master.start(instanceId, processIds);
         }
     }
 

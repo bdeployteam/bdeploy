@@ -693,23 +693,31 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public void start(String instanceId, String applicationId) {
-        // Check if this version is already running on a node
+        start(instanceId, List.of(applicationId));
+    }
+
+    @Override
+    public void start(String instanceId, List<String> applicationIds) {
         InstanceStatusDto status = getStatus(instanceId);
-        if (status.isAppRunning(applicationId)) {
-            String node = status.getNodeWhereAppIsRunningOrScheduled(applicationId);
-            throw new WebApplicationException("Application is already running on node '" + node + "'.",
-                    Status.INTERNAL_SERVER_ERROR);
+        Map<String, List<String>> groupedByNode = new TreeMap<>();
+
+        for (String applicationId : applicationIds) {
+            // Find minion where the application is deployed
+            String nodeName = status.getNodeWhereAppIsDeployed(applicationId);
+            if (nodeName == null) {
+                throw new WebApplicationException("Application is not deployed on any node: " + applicationId,
+                        Status.INTERNAL_SERVER_ERROR);
+            }
+            groupedByNode.computeIfAbsent(nodeName, (n) -> new ArrayList<>()).add(applicationId);
         }
 
-        // Find minion where the application is deployed
-        String nodeName = status.getNodeWhereAppIsDeployed(applicationId);
-        if (nodeName == null) {
-            throw new WebApplicationException("Application is not deployed on any node.", Status.INTERNAL_SERVER_ERROR);
-        }
-
-        // Now launch this application on the node
-        try (Activity activity = reporter.start("Launching " + status.getAppStatus(applicationId).appName, -1)) {
-            nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).start(instanceId, applicationId);
+        for (var entry : groupedByNode.entrySet()) {
+            try (Activity activity = reporter.start("Launching " + entry.getValue().size() + " applications on " + entry.getKey(),
+                    -1)) {
+                // Now launch this application on the node
+                nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).start(instanceId,
+                        entry.getValue());
+            }
         }
     }
 
@@ -734,18 +742,32 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public void stop(String instanceId, String applicationId) {
-        // Find out where the application is running on
+        stop(instanceId, List.of(applicationId));
+    }
+
+    @Override
+    public void stop(String instanceId, List<String> applicationIds) {
         InstanceStatusDto status = getStatus(instanceId);
-        if (!status.isAppRunningOrScheduled(applicationId)) {
-            throw new WebApplicationException("Application is not running on any node.", Status.INTERNAL_SERVER_ERROR);
+        Map<String, List<String>> groupedByNode = new TreeMap<>();
+
+        for (var applicationId : applicationIds) {
+            //Find minion where the application is running
+            String nodeName = status.getNodeWhereAppIsRunningOrScheduled(applicationId);
+
+            if (nodeName == null) {
+                continue; // ignore - not running.
+            }
+
+            groupedByNode.computeIfAbsent(nodeName, (n) -> new ArrayList<>());
         }
 
-        //Find minion where the application is running
-        String nodeName = status.getNodeWhereAppIsRunningOrScheduled(applicationId);
-
-        // Now stop this application on the node
-        try (Activity activity = reporter.start("Stopping " + status.getAppStatus(applicationId).appName, -1)) {
-            nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).stop(instanceId, applicationId);
+        for (var entry : groupedByNode.entrySet()) {
+            // Now stop the applications on the node
+            try (Activity activity = reporter.start("Stopping " + entry.getValue().size() + " applications on " + entry.getKey(),
+                    -1)) {
+                nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).stop(instanceId,
+                        entry.getValue());
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package io.bdeploy.pcu;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -20,6 +21,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryManager;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
@@ -216,7 +218,10 @@ public class InstanceProcessController {
 
             // Let the desired strategy start all processes
             BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
-            strategy.startAll(user, running);
+            strategy.startAll(user, running,
+                    list.controllers.entrySet().stream()
+                            .filter(e -> e.getValue().getDescriptor().processControl.startType == ApplicationStartType.INSTANCE)
+                            .map(e -> e.getKey()).toList());
         } finally {
             readLock.unlock();
         }
@@ -240,62 +245,64 @@ public class InstanceProcessController {
         logger.log(l -> l.info("Stopping all running applications."));
 
         BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, processMap.get(activeTag));
-        strategy.stopAll(user, running);
+        strategy.stopAll(user, running, running.keySet());
     }
 
     /**
      * Starts the latest activated version of the given application.
      *
-     * @param applicationId
-     *            the application identifier
+     * @param applicationIds
+     *            the application identifiers
      * @param user the user who triggered the start
      */
-    public void start(String applicationId, String user) {
+    public void start(List<String> applicationIds, String user) {
         if (activeTag == null) {
             throw new PcuRuntimeException("No active tag has been set");
         }
         try {
             readLock.lock();
-            for (ProcessList list : processMap.values()) {
-                Map<String, ProcessController> running = list.getWithState(SET_RUNNING);
-                if (running.containsKey(applicationId)) {
-                    ProcessStatusDto dto = running.get(applicationId).getStatus();
-                    throw new PcuRuntimeException(
-                            "Application '" + dto.appUid + "' already running in version '" + dto.instanceTag + "'");
-                }
+
+            // Ensure that something is deployed
+            ProcessList list = processMap.get(activeTag);
+            if (list == null) {
+                throw new PcuRuntimeException("Activated version '" + activeTag + "' is not deployed");
             }
+            // Compute runtime state across all versions
+            Map<String, ProcessController> running = new HashMap<>();
+            for (ProcessList anyList : processMap.values()) {
+                running.putAll(anyList.getWithState(SET_RUNNING_SCHEDULED));
+            }
+
+            // Start all missing applications
+            logger.log(l -> l.info("Starting applications: {}", applicationIds), activeTag);
+
+            // Let the desired strategy start all processes
+            BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
+            strategy.startAll(user, running, applicationIds);
         } finally {
             readLock.unlock();
-        }
-
-        // Start the latest version
-        try {
-            ProcessList list = processMap.get(activeTag);
-            ProcessController controller = list.get(applicationId);
-            controller.start(user);
-        } catch (Exception ex) {
-            logger.log(l -> l.error("Failed to start application", ex), activeTag, applicationId);
         }
     }
 
     /**
      * Stops the given application.
      *
-     * @param applicationId
-     *            the application identifier
+     * @param applicationIds
+     *            the application identifiers
      * @param user the user who triggered the stop
      */
-    public void stop(String applicationId, String user) {
-        ProcessController process = findProcessController(applicationId, SET_RUNNING_SCHEDULED);
-        if (process == null) {
-            throw new PcuRuntimeException("Application not running");
+    public void stop(List<String> applicationIds, String user) {
+        // Determine all running versions across all tags
+        Map<String, ProcessController> running = new TreeMap<>();
+        for (ProcessList list : processMap.values()) {
+            Map<String, ProcessController> runningScheduled = list.getWithState(SET_RUNNING_SCHEDULED);
+            running.putAll(runningScheduled);
         }
-        try {
-            process.stop(user);
-        } catch (Exception ex) {
-            String tag = process.getStatus().instanceTag;
-            logger.log(l -> l.error("Failed to stop application", ex), tag, applicationId);
-        }
+
+        logger.log(l -> l.info("Stopping applications: {}", applicationIds));
+
+        BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, processMap.get(activeTag));
+        strategy.stopAll(user, running, applicationIds);
     }
 
     /**
