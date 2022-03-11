@@ -66,7 +66,10 @@ describe('Admin UI Tests (Settings)', () => {
         cy.fillFormInput('pass', user.pass);
       });
 
-      cy.intercept({ method: 'POST', url: '/api/auth/admin/traceAuthentication' }).as('authCheck');
+      cy.intercept({
+        method: 'POST',
+        url: '/api/auth/admin/traceAuthentication',
+      }).as('authCheck');
       cy.get('button[data-cy="Perform Test"]').should('be.enabled').click();
       cy.wait('@authCheck').then((intercept) => {
         expect(intercept.response.statusCode).to.equal(200);
@@ -97,7 +100,10 @@ describe('Admin UI Tests (Settings)', () => {
     });
 
     cy.inMainNavContent(() => {
-      cy.intercept({ method: 'POST', url: '/api/auth/admin/testLdapServer' }).as('ldapCheck');
+      cy.intercept({
+        method: 'POST',
+        url: '/api/auth/admin/testLdapServer',
+      }).as('ldapCheck');
 
       cy.contains('tr', 'Test Server')
         .should('exist')
@@ -160,12 +166,22 @@ describe('Admin UI Tests (Settings)', () => {
     cy.inMainNavFlyin('app-attribute-values', () => {
       cy.get('button[data-cy^="Set Attribute Value"]').click();
 
-      cy.contains('app-bd-notification-card', 'Set Attribute Value').within(() => {
-        cy.fillFormSelect('attribute', 'Test Attribute');
-        cy.fillFormInput('value', 'Test Value');
+      cy.contains('app-bd-notification-card', 'Set Attribute Value').within(
+        () => {
+          cy.fillFormSelect('attribute', 'Test Attribute');
+          cy.fillFormInput('value', 'Test Value');
+        }
+      );
+    });
 
-        cy.get('button[data-cy="Apply"]').should('be.enabled').click();
-      });
+    cy.screenshot('Doc_SetGlobalAttributeValue');
+
+    cy.inMainNavFlyin('app-attribute-values', () => {
+      cy.contains('app-bd-notification-card', 'Set Attribute Value').within(
+        () => {
+          cy.get('button[data-cy="Apply"]').should('be.enabled').click();
+        }
+      );
     });
 
     cy.pressMainNavButton('Instance Groups');
@@ -179,7 +195,12 @@ describe('Admin UI Tests (Settings)', () => {
       // this is NOT a bd-form-select
       cy.get('mat-select').should('exist').click();
       // escape all .within scopes to find the global overlay content
-      cy.document().its('body').find('.cdk-overlay-container').contains('mat-option', 'Test Attribute').should('exist').click();
+      cy.document()
+        .its('body')
+        .find('.cdk-overlay-container')
+        .contains('mat-option', 'Test Attribute')
+        .should('exist')
+        .click();
 
       cy.contains('mat-checkbox', 'Test Value').within(() => {
         cy.get('input[type="checkbox"]').should('be.checked');
@@ -231,7 +252,9 @@ describe('Admin UI Tests (Settings)', () => {
     });
 
     cy.inMainNavContent(() => {
-      cy.intercept({ method: 'GET', url: '/api/plugin-admin/list' }).as('pluginList');
+      cy.intercept({ method: 'GET', url: '/api/plugin-admin/list' }).as(
+        'pluginList'
+      );
       cy.contains('tr', 'pause').should('exist');
       cy.contains('tr', 'bdeploy-demo-plugin')
         .should('exist')

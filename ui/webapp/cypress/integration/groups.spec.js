@@ -19,7 +19,9 @@ describe('Groups Tests', () => {
     cy.visit('/');
     cy.createGroup(groupName);
 
-    cy.screenshot('Doc_SearchBarEnabled', { clip: { x: 0, y: 0, height: 80, width: 1280 } });
+    cy.screenshot('Doc_SearchBarEnabled', {
+      clip: { x: 0, y: 0, height: 80, width: 1280 },
+    });
     cy.screenshot('Doc_DemoGroup');
 
     cy.enterGroup(groupName);
@@ -29,6 +31,7 @@ describe('Groups Tests', () => {
 
   it('Switches to card mode', () => {
     cy.visit('/');
+    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', groupName).should('exist');
@@ -63,7 +66,9 @@ describe('Groups Tests', () => {
 
     cy.inMainNavFlyin('app-settings', () => {
       cy.get(`app-bd-panel-button[text="Edit Instance Group..."]`).click();
-      cy.get('app-bd-dialog-toolbar[header="Edit Instance Group"]').should('exist');
+      cy.get('app-bd-dialog-toolbar[header="Edit Instance Group"]').should(
+        'exist'
+      );
 
       cy.fillFormInput('description', `Description of ${instanceName}`);
     });
@@ -164,8 +169,13 @@ describe('Groups Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Download"]').downloadByLocationAssign('product-2.0.0.zip');
-      validateZip('product-2.0.0.zip', 'manifests/io.bdeploy/demo/product/2.0.0');
+      cy.get('button[data-cy^="Download"]').downloadByLocationAssign(
+        'product-2.0.0.zip'
+      );
+      validateZip(
+        'product-2.0.0.zip',
+        'manifests/io.bdeploy/demo/product/2.0.0'
+      );
     });
 
     cy.inMainNavFlyin('app-product-details', () => {
@@ -179,8 +189,12 @@ describe('Groups Tests', () => {
     });
     // ...with opened "Add Instance" flyin
     cy.inMainNavFlyin('app-add-instance', () => {
-      cy.contains('app-bd-form-select[name="product"]', 'Demo Product').should('exist');
-      cy.contains('app-bd-form-select[name="version"]', '2.0.0').should('exist');
+      cy.contains('app-bd-form-select[name="product"]', 'Demo Product').should(
+        'exist'
+      );
+      cy.contains('app-bd-form-select[name="version"]', '2.0.0').should(
+        'exist'
+      );
     });
 
     cy.screenshot('Doc_InstanceAdd');
@@ -189,7 +203,10 @@ describe('Groups Tests', () => {
     cy.pressMainNavButton('Products');
     cy.get('app-products-browser').should('exist');
 
-    cy.intercept({ method: 'GET', url: `/api/group/${groupName}/product/io.bdeploy/demo/product/2.0.0/usedIn` }).as('getUsage');
+    cy.intercept({
+      method: 'GET',
+      url: `/api/group/${groupName}/product/io.bdeploy/demo/product/2.0.0/usedIn`,
+    }).as('getUsage');
 
     cy.inMainNavContent(() => {
       cy.contains('tr', /Demo Product.*2.0.0/)
@@ -205,7 +222,10 @@ describe('Groups Tests', () => {
       cy.get('button[data-cy="Delete"]').should('be.enabled').click();
 
       cy.get('app-bd-notification-card').within(() => {
-        cy.get('button[data-cy="Yes"]').should('exist').and('be.enabled').click();
+        cy.get('button[data-cy="Yes"]')
+          .should('exist')
+          .and('be.enabled')
+          .click();
       });
     });
     cy.checkMainNavFlyinClosed();
