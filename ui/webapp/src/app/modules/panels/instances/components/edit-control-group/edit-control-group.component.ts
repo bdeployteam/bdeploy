@@ -96,11 +96,11 @@ export class EditControlGroupComponent
     if (!this.form) {
       return;
     }
-    this.subscription = this.form.valueChanges
-      .pipe(debounceTime(100))
-      .subscribe(() => {
+    this.subscription.add(
+      this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.hasPendingChanges = this.isDirty();
-      });
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -120,7 +120,8 @@ export class EditControlGroupComponent
   }
 
   public doSave(): Observable<any> {
-    Object.assign(this.origGroup, this.group);
+    const index = this.node.controlGroups.indexOf(this.origGroup);
+    this.node.controlGroups[index] = this.group;
 
     return of(true).pipe(
       tap(() => {
