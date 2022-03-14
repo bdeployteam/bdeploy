@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BarHorizontalComponent } from '@swimlane/ngx-charts';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -20,10 +21,10 @@ export interface SeriesElement {
   templateUrl: './metrics-overview.component.html',
   styleUrls: ['./metrics-overview.component.css'],
 })
-export class MetricsOverviewComponent implements OnInit {
+export class MetricsOverviewComponent implements OnInit, OnDestroy {
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ keys$ = new BehaviorSubject<string[]>(['SERVER']);
-  /* template */ selectedTabIndex = 0;
+  /* template */ tabIndex: number;
 
   allMetrics: Map<MetricGroup, MetricBundle>;
   selectedGroup: MetricGroup;
@@ -57,7 +58,11 @@ export class MetricsOverviewComponent implements OnInit {
 
   countGraphHeight = 100;
 
-  constructor(private metrics: MetricsService) {}
+  constructor(
+    private metrics: MetricsService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.metrics
@@ -75,7 +80,10 @@ export class MetricsOverviewComponent implements OnInit {
         this.keys$.next(
           this.keys$.value.concat(Array.from(this.allMetrics.keys()))
         );
-        this.doSelect(this.keys$.value[0]);
+        this.tabIndex = parseInt(
+          this.route.snapshot.queryParamMap.get('tabIndex')
+        );
+        this.doSelect(this.tabIndex);
       });
   }
 
@@ -91,12 +99,12 @@ export class MetricsOverviewComponent implements OnInit {
     return this.allMetrics.get(group).timers[name];
   }
 
-  doSelect(selection) {
-    if (selection === 'SERVER') {
-      this.selectServer();
-    } else {
-      this.select(selection);
-    }
+  doSelect(tabIndex: number) {
+    this.router.navigate([], { queryParams: { tabIndex: tabIndex } });
+    this.tabIndex = tabIndex;
+    this.tabIndex
+      ? this.select(this.keys$.value[this.tabIndex])
+      : this.selectServer();
   }
 
   private selectServer() {
@@ -384,5 +392,9 @@ export class MetricsOverviewComponent implements OnInit {
   private toMillis(nanos: number): number {
     // nanos to millis and round to 2 decimal places
     return Math.round(nanos / 10000) / 100;
+  }
+
+  ngOnDestroy(): void {
+    this.router.navigate([], { queryParams: {} });
   }
 }
