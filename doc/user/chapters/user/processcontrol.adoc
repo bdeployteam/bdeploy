@@ -4,7 +4,14 @@ For the active *instance version*, the *process control* of each *Process* can b
 
 image::images/Doc_DashboardProcessControl.png[Process Control Panel,align=center,width=480,link="images/Doc_DashboardProcessControl.png"]
 
-In addition to the actions for individual processes, the <<Instance Dashboard>> offers *bulk control* actions from its toolbar, which allow to control all processes of *start type* `INSTANCE` at once.
+==== Process Bulk Control
+
+In addition to the actions for individual processes, the <<Instance Dashboard>> offers *bulk control* actions from its toolbar, which allow to control all processes of *start type* `INSTANCE`, or multiple selected processes (of any start type except `MANUAL_CONFIRM`) at once.
+
+image::images/Doc_DashboardBulkProcessControl.png[Bulk Process Control,align=center,width=480,link="images/Doc_DashboardBulkProcessControl.png"]
+
+[NOTE]
+Using the *bulk control* actions with a single process selected is the same as using the individual actions on the process details panel.
 
 ==== Process Status
 
@@ -63,7 +70,7 @@ The *Start Type* of a *Process* can be configured in the *Process Configuration*
 | Process must be started manually. No automatic startup will be done.
 
 | `MANUAL_CONFIRM`
-| Process must be started manually and an additional confirmation is required. 
+| Process must be started manually and an additional confirmation is required. These kind of processes *cannot* take part in bulk control actions.
 
 | `INSTANCE`
 | Process will be started automatically *if* the _Automatic Startup_ flag of the *Instance* is set. 
@@ -81,6 +88,9 @@ image::images/Doc_DashboardProcessManualConfirm.png[Manual Confirmation On Start
 The *process control* starts the processes in the order as they are defined in the *process configuration* dialog. *Processes* can be grouped in *Process Control Groups*, which dictate the exact behavior for a group of *Processes*. When btn:[Start Instance] is invoked then all processes with startup type `INSTANCE` are started in the defined order - potentially waiting for a *startup probe* after launching the command. When btn:[Stop Instance] is invoked then all running processes are stopped according to the group strategies. The order is reversed during the stop operation. That means the last process is stopped first and the first process is stopped at last (in `SEQUENTIAL` mode). The next process is stopped only when the previous is terminated. The same holds for *Process Control Groups*; groups are processed one after another when starting, and in reverse order when stopping.
 
 The exact meanings of the different configuration options is described in the <<Process Control Groups>> section.
+
+[NOTE]
+Bulk control of selected processes uses the exact same <<Process Control Groups>> configuration as the btn:[Start Instance] and btn:[Stop Instance] actions. Only selected processes will be affected, as opposed to the whole instance. The btn:[Start Instance] and btn:[Stop Instance] will only affect processes with start type `INSTANCE`, bulk control can also affect processes with start type `MANUAL` in addition (when selected).
 
 ==== Keep Alive
 

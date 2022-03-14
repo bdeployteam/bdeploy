@@ -12,6 +12,9 @@ Once the instance has been <<Instance Configuration,configured>>, installed and 
 
 image::images/Doc_InstanceDashboardActive.png[Instance Dashboard,align=center, width=480, link="images/Doc_InstanceDashboardActive.png"]
 
+[NOTE]
+For more information, see <<Process Control>>
+
 === Instance Configuration
 
 The first step is to select the desired and required nodes used in the instance. The *master* node is enabled by default, the virtual *Client Applications* node is always present if client applications exist in the *product*. Additional nodes can be selected from the *Instance Settings*'s *Manage Nodes* section.
