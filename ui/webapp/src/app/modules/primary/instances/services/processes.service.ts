@@ -129,38 +129,38 @@ export class ProcessesService {
       });
   }
 
-  public start(pid: string): Observable<any> {
+  public start(pids: string[]): Observable<any> {
     return this.http
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
         )}/start`,
-        [pid]
+        pids
       )
       .pipe(finalize(() => this.reload()));
   }
 
-  public stop(pid: string): Observable<any> {
+  public stop(pids: string[]): Observable<any> {
     return this.http
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
         )}/stop`,
-        [pid]
+        pids
       )
       .pipe(finalize(() => this.reload()));
   }
 
-  public restart(pid: string): Observable<any> {
+  public restart(pids: string[]): Observable<any> {
     return this.http
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
         )}/restart`,
-        [pid]
+        pids
       )
       .pipe(finalize(() => this.reload()));
   }

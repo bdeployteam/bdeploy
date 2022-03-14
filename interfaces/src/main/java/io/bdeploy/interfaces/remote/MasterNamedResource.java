@@ -211,9 +211,9 @@ public interface MasterNamedResource {
      *
      * @param instanceId the unique id of the instance.
      * @param applicationId the unique ID of the application.
-     * @deprecated use
+     * @deprecated use {@link #start(String, List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "4.2.0", forRemoval = true)
     @POST
     @Path("/startApp")
     public void start(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
@@ -223,6 +223,7 @@ public interface MasterNamedResource {
      *
      * @param instanceId the instance ID
      * @param applicationIds the applications to start
+     * @since 4.2.0
      */
     @POST
     @Path("/startApps")
@@ -233,9 +234,9 @@ public interface MasterNamedResource {
      *
      * @param instanceId the unique id of the instance.
      * @param applicationId the unique ID of the application.
-     * @deprecated
+     * @deprecated use {@link #stop(String, List)} instead.
      */
-    @Deprecated
+    @Deprecated(since = "4.2.0", forRemoval = true)
     @POST
     @Path("/stopApp")
     public void stop(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
@@ -245,6 +246,7 @@ public interface MasterNamedResource {
      *
      * @param instanceId the unique id of the instance.
      * @param applicationIds the applications to stop.
+     * @since 4.2.0
      */
     @POST
     @Path("/stopApps")

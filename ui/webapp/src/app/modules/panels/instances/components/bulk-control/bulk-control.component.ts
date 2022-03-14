@@ -1,9 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { InstanceDto } from 'src/app/models/gen.dtos';
+import { ApplicationStartType, InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { ProcessesBulkService } from 'src/app/modules/primary/instances/services/processes-bulk.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
@@ -16,13 +17,33 @@ export class BulkControlComponent {
   /* template */ stopping$ = new BehaviorSubject<boolean>(false);
   /* template */ restarting$ = new BehaviorSubject<boolean>(false);
 
+  /* template */ startingMulti$ = new BehaviorSubject<boolean>(false);
+  /* template */ stoppingMulti$ = new BehaviorSubject<boolean>(false);
+  /* template */ restartingMulti$ = new BehaviorSubject<boolean>(false);
+
+  /* template */ bulkContainsConfirmed = false;
+
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   constructor(
     public instances: InstancesService,
     public servers: ServersService,
-    private processes: ProcessesService
-  ) {}
+    private processes: ProcessesService,
+    public bulk: ProcessesBulkService
+  ) {
+    this.bulk.selection$.subscribe((s) => {
+      if (!s?.length) {
+        this.bulkContainsConfirmed = false;
+      } else {
+        this.bulkContainsConfirmed =
+          s.filter(
+            (c) =>
+              c?.processControl?.startType ===
+              ApplicationStartType.MANUAL_CONFIRM
+          ).length > 0;
+      }
+    });
+  }
 
   /* template */ doStart(instance: InstanceDto) {
     this.dialog
@@ -70,6 +91,57 @@ export class BulkControlComponent {
           this.processes
             .restartInstance()
             .pipe(finalize(() => this.restarting$.next(false)))
+            .subscribe();
+        }
+      });
+  }
+
+  /* template */ doStartMulti(instance: InstanceDto) {
+    this.dialog
+      .confirm(
+        'Confirm Start',
+        `This will start selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+      )
+      .subscribe((b) => {
+        if (b) {
+          this.startingMulti$.next(true);
+          this.processes
+            .start(this.bulk.selection$.value.map((s) => s.uid))
+            .pipe(finalize(() => this.startingMulti$.next(false)))
+            .subscribe();
+        }
+      });
+  }
+
+  /* template */ doStopMulti(instance: InstanceDto) {
+    this.dialog
+      .confirm(
+        'Confirm Stop',
+        `This will stop selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+      )
+      .subscribe((b) => {
+        if (b) {
+          this.stoppingMulti$.next(true);
+          this.processes
+            .stop(this.bulk.selection$.value.map((s) => s.uid))
+            .pipe(finalize(() => this.stoppingMulti$.next(false)))
+            .subscribe();
+        }
+      });
+  }
+
+  /* template */ doRestartMulti(instance: InstanceDto) {
+    this.dialog
+      .confirm(
+        'Confirm Restart',
+        `This will restart selected processes in the instance <strong>${instance.instanceConfiguration.name}</strong>. Do you want to continue?`
+      )
+      .subscribe((b) => {
+        if (b) {
+          this.restartingMulti$.next(true);
+          this.processes
+            .restart(this.bulk.selection$.value.map((s) => s.uid))
+            .pipe(finalize(() => this.restartingMulti$.next(false)))
             .subscribe();
         }
       });

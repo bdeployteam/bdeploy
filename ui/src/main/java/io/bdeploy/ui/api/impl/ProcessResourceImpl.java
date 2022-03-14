@@ -56,7 +56,7 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public void startProcess(List<String> processIds) {
+    public void startProcesses(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Launching");
@@ -66,7 +66,7 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public void stopProcess(List<String> processIds) {
+    public void stopProcesses(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Stopping");
@@ -76,7 +76,7 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public void restartProcess(List<String> processIds) {
+    public void restartProcesses(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Restarting");
@@ -107,7 +107,7 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public void restart() {
+    public void restartAll() {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Restaring All");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {

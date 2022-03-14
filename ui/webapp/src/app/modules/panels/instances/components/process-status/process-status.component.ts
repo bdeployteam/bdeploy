@@ -179,7 +179,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         return;
       }
       this.processes
-        .start(this.processDetail.status.appUid)
+        .start([this.processDetail.status.appUid])
         .pipe(finalize(() => this.starting$.next(false)))
         .subscribe();
     });
@@ -188,7 +188,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ stop() {
     this.stopping$.next(true);
     this.processes
-      .stop(this.processDetail.status.appUid)
+      .stop([this.processDetail.status.appUid])
       .pipe(finalize(() => this.stopping$.next(false)))
       .subscribe();
   }
@@ -196,7 +196,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ restart() {
     this.restarting$.next(true);
     this.processes
-      .restart(this.processDetail.status.appUid)
+      .restart([this.processDetail.status.appUid])
       .pipe(finalize(() => this.restarting$.next(false)))
       .subscribe();
   }

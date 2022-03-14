@@ -7,4 +7,7 @@
   [sortData]="null"
   [presetKey]="presetKeyValue"
   [grid]="isCardView"
+  [checkMode]="bulkMode"
+  [checked]="bulk.selection$ | async"
+  (checkedChange)="bulk.selection$.next($event)"
 ></app-bd-data-display>

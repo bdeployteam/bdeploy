@@ -1,10 +1,5 @@
 <app-bd-dialog [loadingWhen$]="instances.loading$">
   <app-bd-dialog-toolbar
-    *ngIf="instances.activeLoading$ | async"
-    header="Dashboard - loading"
-  ></app-bd-dialog-toolbar>
-  <app-bd-dialog-toolbar
-    *ngIf="!(instances.activeLoading$ | async)"
     header="Dashboard - {{ !!activeInstance ? activeInstance.instanceConfiguration.name : currentInstance?.instanceConfiguration.name }}"
   >
     <div fxFlex="1 0 auto"></div>
@@ -73,6 +68,7 @@
       tooltip="below"
     ></app-bd-button>
     <app-bd-panel-button
+      #bulkBtn
       text="Bulk Control"
       icon="library_add_check"
       [route]="['panels', 'instances', 'bulk-control']"
@@ -169,6 +165,7 @@
             [groupingWhen$]="grouping$"
             [collapsedWhen$]="collapsed$"
             [narrowWhen$]="narrow$"
+            [bulkMode]="bulkBtn.toggle && bulkBtn.rla?.isActive"
           ></app-instance-server-node>
           <app-instance-client-node
             *ngIf="clientNode$ | async as node"

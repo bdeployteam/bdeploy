@@ -47,6 +47,50 @@
           [loadingWhen$]="restarting$"
           [disabled]="restarting$ | async"
         ></app-bd-button>
+        <mat-divider></mat-divider>
+        <div fxLayout="column" fxLayoutGap="10px">
+          <div>
+            Control
+            <strong>{{ (bulk.selection$ | async)?.length || 0 }}</strong>
+            selected processes.
+          </div>
+          <app-bd-notification-card
+            *ngIf="bulkContainsConfirmed"
+            type="warning"
+            header="Confirmation Required"
+            [dismissable]="false"
+          >
+            The selection contains one or more processes which require
+            confirmation. Those processes can not be controlled in a bulk.
+          </app-bd-notification-card>
+        </div>
+        <app-bd-button
+          [collapsed]="false"
+          fontSet="material-icons-filled"
+          icon="play_arrow"
+          text="Start Selected Processes"
+          (click)="doStartMulti(instance)"
+          [loadingWhen$]="startingMulti$"
+          [disabled]="(startingMulti$ | async) || !(bulk.selection$ | async)?.length || bulkContainsConfirmed"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          fontSet="material-icons-filled"
+          icon="stop"
+          text="Stop Selected Processes"
+          (click)="doStopMulti(instance)"
+          [loadingWhen$]="stoppingMulti$"
+          [disabled]="(stoppingMulti$ | async) || !(bulk.selection$ | async)?.length || bulkContainsConfirmed"
+        ></app-bd-button>
+        <app-bd-button
+          [collapsed]="false"
+          fontSet="material-icons-filled"
+          icon="replay"
+          text="Restart Selected Processes"
+          (click)="doRestartMulti(instance)"
+          [loadingWhen$]="restartingMulti$"
+          [disabled]="(restartingMulti$ | async) || !(bulk.selection$ | async)?.length || bulkContainsConfirmed"
+        ></app-bd-button>
       </div>
     </ng-template>
   </app-bd-dialog-content>
