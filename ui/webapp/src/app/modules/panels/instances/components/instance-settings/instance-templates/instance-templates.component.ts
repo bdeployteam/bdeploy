@@ -42,12 +42,7 @@ export interface TemplateMessage {
 const tplColName: BdDataColumn<TemplateMessage> = {
   id: 'name',
   name: 'Name',
-  data: (r) =>
-    r.template?.name
-      ? r.template.name
-      : r.template?.template
-      ? r.template.template
-      : r.template.application,
+  data: (r) => (r.appname ? r.appname : `${r.group}/${r.node}`),
 };
 
 const tplColDetails: BdDataColumn<TemplateMessage> = {
@@ -269,7 +264,11 @@ export class InstanceTemplatesComponent implements OnDestroy {
                     group: groupName,
                     node: nodeName,
                     template: app,
-                    appname: app?.name ? app.name : app.application,
+                    appname: app?.name
+                      ? app.name
+                      : app.template
+                      ? app.template
+                      : app.application,
                     message: {
                       icon: 'warning',
                       message:
@@ -350,6 +349,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
         if (this.messages.length) {
+          console.log(this.messages);
           applyResult = this.dialog.message({
             header: 'Template Messages',
             template: this.tplMessages,

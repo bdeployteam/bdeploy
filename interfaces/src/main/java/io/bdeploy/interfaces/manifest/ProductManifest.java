@@ -166,20 +166,44 @@ public class ProductManifest {
         for (var itd : instTemplates) {
             for (var group : itd.groups) {
                 for (var app : group.applications) {
-                    resolveAppTemplate(app, appTemplates, itd.variables);
+                    try {
+                        resolveAppTemplate(app, appTemplates, itd.variables);
+                    } catch (Exception e) {
+                        log.error("Cannot resolve application template {} from instance template {}", app.name, itd.name, e);
+                    }
                 }
+
+                // remove unresolved things.
+                group.applications.removeIf(a -> !a.resolved);
+            }
+
+            // remove group if no application resolved.
+            itd.groups.removeIf(g -> g.applications.isEmpty());
+        }
+
+        // remove template if no application in any group resolved.
+        instTemplates.removeIf(t -> t.groups.isEmpty());
+
+        for (ApplicationTemplateDescriptor atd : appTemplates) {
+            try {
+                resolveAppTemplate(atd, appTemplates, atd.variables);
+            } catch (Exception e) {
+                log.error("Cannot resolve application template {}", atd.name, e);
             }
         }
 
-        for (ApplicationTemplateDescriptor atd : appTemplates) {
-            resolveAppTemplate(atd, appTemplates, atd.variables);
-        }
+        appTemplates.removeIf(a -> !a.resolved);
     }
 
     private static void resolveAppTemplate(TemplateApplication app, List<ApplicationTemplateDescriptor> appTemplates,
             List<TemplateVariable> varList) {
         if (app.resolved) {
             return;
+        }
+
+        if (app.template == null && app.application == null) {
+            // unfortunately no more information available...
+            throw new IllegalArgumentException("Template without application and template reference found");
         }
 
         if (app.template != null) {
@@ -217,11 +241,17 @@ public class ProductManifest {
                 }
             }
 
-            // merge start parameters
-            for (var param : parentDesc.startParameters) {
-                var existing = app.startParameters.stream().filter(p -> p.uid.equals(param.uid)).findAny();
-                if (!existing.isPresent()) {
-                    app.startParameters.add(param);
+            if (app.startParameters == null) {
+                app.startParameters = new ArrayList<>();
+            }
+
+            if (parentDesc.startParameters != null) {
+                // merge start parameters
+                for (var param : parentDesc.startParameters) {
+                    var existing = app.startParameters.stream().filter(p -> p.uid.equals(param.uid)).findAny();
+                    if (!existing.isPresent()) {
+                        app.startParameters.add(param);
+                    }
                 }
             }
         }
