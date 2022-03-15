@@ -5,6 +5,7 @@ package io.bdeploy.tea.plugin.rcp;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,6 +54,7 @@ public class RcpProductBuildService implements BDeployApplicationService {
                 ad.os = OperatingSystem.valueOf(os.name());
                 ad.source = () -> getPathForRCPProductInstall(task, os);
                 ad.task = bgTask;
+                ad.cleanup = () -> Collections.singletonList(getPathForRCPProductInstall(task, os).getParentFile());
 
                 result.add(ad);
             }

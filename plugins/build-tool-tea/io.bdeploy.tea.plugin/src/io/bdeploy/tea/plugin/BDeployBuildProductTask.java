@@ -53,13 +53,15 @@ public class BDeployBuildProductTask {
     private final File target;
     private final BDeployTargetSpec pushTarget;
     private final BDeployTargetSpec sourceServer;
+    private final boolean cleanup;
 
     public BDeployBuildProductTask(BDeployProductBuild desc, File target, BDeployTargetSpec pushTarget,
-            BDeployTargetSpec sourceServer) {
+            BDeployTargetSpec sourceServer, boolean cleanup) {
         this.desc = desc;
         this.target = target;
         this.pushTarget = pushTarget;
         this.sourceServer = sourceServer;
+        this.cleanup = cleanup;
     }
 
     @Override
@@ -202,6 +204,19 @@ public class BDeployBuildProductTask {
 
             log.info("Importing product from " + prodInfoYaml);
             key = ProductManifestBuilder.importFromDescriptor(prodInfoYaml.toPath(), bhive, fetcher, true);
+        } finally {
+            for (BDeployApplicationBuild ad : desc.apps) {
+                if (cleanup && ad.cleanup != null) {
+                    List<File> toClean = ad.cleanup.get();
+                    for (File c : toClean) {
+                        if (c.isDirectory()) {
+                            FileUtils.deleteDirectory(c);
+                        } else if (c.isFile()) {
+                            c.delete();
+                        }
+                    }
+                }
+            }
         }
 
     }

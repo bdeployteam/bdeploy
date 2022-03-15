@@ -4,6 +4,7 @@
 package io.bdeploy.tea.plugin.services;
 
 import java.io.File;
+import java.util.List;
 import java.util.function.Supplier;
 
 import org.eclipse.tea.core.BackgroundTask;
@@ -21,4 +22,6 @@ public class BDeployApplicationBuild {
     public Supplier<File> source;
     public OperatingSystem os;
     public BackgroundTask task;
+    public Supplier<List<File>> cleanup;
+
 }
