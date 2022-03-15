@@ -190,7 +190,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * server to be online already.
      */
     public void afterStartup(boolean isTest) {
+        // first initialize the node manager.
         nodeManager.initialize(this, isTest);
+
+        // then start auto-start processes and so on. note: only auto-starts on *this* node.
+        // we *must* do it after startup of server to already have a UI where startup
+        // could be aborted/monitored/etc.
+        processController.autoStart();
     }
 
     /** Updates the logging config file if required, and switches to using it */
@@ -638,7 +644,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         // Startup processes according to their configuration
         processController.setActiveVersions(activeVersions);
-        processController.autoStart();
+
+        // don't perform actual start here - we delay this until #afterStartup
     }
 
     private void initProcessControllerForInstance(SortedMap<String, Manifest.Key> activeVersions, Key key) {
