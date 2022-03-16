@@ -2,7 +2,6 @@ package io.bdeploy.pcu;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
@@ -25,10 +24,10 @@ public interface BulkControlStrategy extends AutoCloseable {
     /**
      * Start all processes of the control group.
      *
-     * @param running all currently running processes.
+     * @param toStart all processes which should be started using the groups configuration.
      * @return a {@link Future} {@link List} of process IDs which could <strong>not</strong> be started.
      */
-    public List<String> startGroup(Map<String, ProcessController> running);
+    public List<String> startGroup(Collection<String> toStart);
 
     /**
      * Stop all processes of the control group.

@@ -1,5 +1,6 @@
 package io.bdeploy.ui.cli;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -91,7 +92,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 if (appId == null || appId.isEmpty()) {
                     ir.getProcessResource(instanceId).startAll();
                 } else {
-                    ir.getProcessResource(instanceId).startProcess(appId);
+                    ir.getProcessResource(instanceId).startProcess(List.of(appId));
                     if (config.join()) {
                         doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(appId).processState);
                     }
@@ -100,7 +101,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 if (appId == null || appId.isEmpty()) {
                     ir.getProcessResource(instanceId).stopAll();
                 } else {
-                    ir.getProcessResource(instanceId).stopProcess(appId);
+                    ir.getProcessResource(instanceId).stopProcess(List.of(appId));
                 }
             }
             return createSuccess();

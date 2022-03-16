@@ -1,6 +1,5 @@
 package io.bdeploy.pcu;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -9,8 +8,6 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.ProcessControlGroupWaitType;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
-import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
-import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 
 public abstract class AbstractBulkControl implements BulkControlStrategy {
 
@@ -33,34 +30,18 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
     /**
      * Synchronously starts a given process, potentially including wait for startup probe, etc.
      *
-     * @param running all currently running applications - state is from before bulk-operation.
      * @param appId the application to start.
      * @return whether the application was started given its configuration (e.g. including awaiting startup probe).
      */
-    protected boolean doStartSingle(Map<String, ProcessController> running, String appId) {
+    protected boolean doStartSingle(String appId) {
         ProcessController controller = processes.get(appId);
         if (controller == null) {
             // this is silently ignored in the sequential mode. we consider it "OK" here to achieve the same.
             return true;
         }
 
-        // Write logs when the application is already running
-        if (running.containsKey(appId)) {
-            ProcessStatusDto data = controller.getStatus();
-            if (data.instanceTag.equals(activeTag)) {
-                logger.log(l -> l.warn("Application already running in a different version."), data.instanceTag, data.appUid);
-            } else {
-                logger.log(l -> l.info("Application already running."), data.instanceTag, data.appUid);
-            }
-            return true;
-        }
-
         // Only start when auto-start is configured
         ProcessConfiguration config = controller.getDescriptor();
-        if (config.processControl.startType != ApplicationStartType.INSTANCE) {
-            logger.log(l -> l.info("Application does not have 'instance' start type set."), activeTag, appId);
-            return true;
-        }
 
         // Start it
         if (controlGroup.startWait == ProcessControlGroupWaitType.WAIT) {
@@ -105,6 +86,7 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
      */
     protected boolean doStopSingle(ProcessController process) {
         try {
+            logger.log(l -> l.debug("Stopping single application {}", process.getDescriptor().uid));
             process.stop(user);
             return true;
         } catch (Exception ex) {

@@ -65,7 +65,7 @@ public class EndpointsTest {
         master.getNamedMaster("demo").activate(instance);
         assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
 
-        master.getNamedMaster("demo").start(uuid, "app");
+        master.getNamedMaster("demo").start(uuid, List.of("app"));
 
         SortedMap<String, EndpointsConfiguration> allEndpoints = common.getInstanceResource("demo").getAllEndpoints(uuid);
         List<HttpEndpoint> httpEndpoints = allEndpoints.entrySet().stream().flatMap(e -> e.getValue().http.stream())

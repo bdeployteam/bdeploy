@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.bdeploy.common.util.MdcLogger;
@@ -26,10 +25,11 @@ public class SequentialBulkControl extends AbstractBulkControl {
     }
 
     @Override
-    public List<String> startGroup(Map<String, ProcessController> running) {
+    public List<String> startGroup(Collection<String> toStart) {
         List<String> failed = new ArrayList<>();
-        for (String appId : controlGroup.processOrder) {
-            if (!doStartSingle(running, appId)) {
+        for (String appId : toStart.stream()
+                .sorted((a, b) -> controlGroup.processOrder.indexOf(a) - controlGroup.processOrder.indexOf(b)).toList()) {
+            if (!doStartSingle(appId)) {
                 failed.add(appId);
             }
         }
@@ -44,7 +44,8 @@ public class SequentialBulkControl extends AbstractBulkControl {
 
         // Execute shutdown in new thread so that the caller is not blocked
         Instant start = Instant.now();
-        for (ProcessController process : toStop) {
+        for (ProcessController process : toStop.stream().sorted((a, b) -> controlGroup.processOrder.indexOf(b.getDescriptor().uid)
+                - controlGroup.processOrder.indexOf(a.getDescriptor().uid)).toList()) {
             if (doStopSingle(process)) {
                 stopped.add(process.getDescriptor().uid);
             }

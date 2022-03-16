@@ -131,33 +131,36 @@ export class ProcessesService {
 
   public start(pid: string): Observable<any> {
     return this.http
-      .get(
+      .post(
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
-        )}/${pid}/start`
+        )}/start`,
+        [pid]
       )
       .pipe(finalize(() => this.reload()));
   }
 
   public stop(pid: string): Observable<any> {
     return this.http
-      .get(
+      .post(
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
-        )}/${pid}/stop`
+        )}/stop`,
+        [pid]
       )
       .pipe(finalize(() => this.reload()));
   }
 
   public restart(pid: string): Observable<any> {
     return this.http
-      .get(
+      .post(
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
-        )}/${pid}/restart`
+        )}/restart`,
+        [pid]
       )
       .pipe(finalize(() => this.reload()));
   }
@@ -168,7 +171,7 @@ export class ProcessesService {
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
-        )}/start`
+        )}/startAll`
       )
       .pipe(finalize(() => this.reload()));
   }
@@ -179,7 +182,7 @@ export class ProcessesService {
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
-        )}/stop`
+        )}/stopAll`
       )
       .pipe(finalize(() => this.reload()));
   }
@@ -190,7 +193,7 @@ export class ProcessesService {
         `${this.apiPath(
           this.groups.current$.value.name,
           this.instance.instanceConfiguration.uuid
-        )}/restart`
+        )}/restartAll`
       )
       .pipe(finalize(() => this.reload()));
   }

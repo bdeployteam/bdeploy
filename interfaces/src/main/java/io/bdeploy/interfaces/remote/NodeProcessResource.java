@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.remote;
 
+import java.util.List;
+
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -34,10 +36,24 @@ public interface NodeProcessResource {
      *            the unique id of the instance.
      * @param applicationId
      *            the unique ID of the application.
+     * @deprecated use {@link #start(String, List)} instead.
      */
+    @Deprecated
     @POST
     @Path("/startApp")
     public void start(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
+
+    /**
+     * Starts one or more applications of an instance, respecting potential process control groups
+     *
+     * @param instanceId
+     *            the unique id of the instance.
+     * @param applicationIds
+     *            the unique IDs of the applications.
+     */
+    @POST
+    @Path("/startApps")
+    public void start(@QueryParam("u") String instanceId, List<String> applicationIds);
 
     /**
      * Stops a single application of an instance.
@@ -46,10 +62,24 @@ public interface NodeProcessResource {
      *            the unique id of the instance.
      * @param applicationId
      *            the unique ID of the application.
+     * @deprecated use {@link #stop(String, List)} instead.
      */
+    @Deprecated
     @POST
     @Path("/stopApp")
     public void stop(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
+
+    /**
+     * Stops one or more applications of an instance, respecting potential process control groups
+     *
+     * @param instanceId
+     *            the unique id of the instance.
+     * @param applicationId
+     *            the unique ID of the application.
+     */
+    @POST
+    @Path("/stopApps")
+    public void stop(@QueryParam("u") String instanceId, List<String> applicationId);
 
     /**
      * Stops all applications of an instance.
