@@ -75,7 +75,11 @@ export class PortsService {
         continue;
       }
 
-      if (nodeStates[node.nodeName]?.offline) {
+      // if nof in the list, the node may be no longer configured on the server
+      if (
+        !Object.keys(nodeStates).includes(node.nodeName) ||
+        nodeStates[node.nodeName]?.offline
+      ) {
         continue; // offline, don't bother.
       }
 
@@ -106,45 +110,52 @@ export class PortsService {
         }
       }
 
-      allQueries.push(
-        new Observable((s) => {
-          this.http
-            .post<{ [key: number]: boolean }>(
-              `${this.apiPath(this.groups.current$.value.name)}/${
-                instance.instanceConfiguration.uuid
-              }/check-ports/${node.nodeName}`,
-              portsOfNode.map((na) => na.port),
-              {
-                headers: suppressGlobalErrorHandling(new HttpHeaders()),
-                context: NO_LOADING_BAR_CONTEXT,
-              }
-            )
-            .pipe(
-              measure(
-                `Ports of ${instance.instanceConfiguration.uuid}/${node.nodeName}`
-              )
-            )
-            .subscribe({
-              next: (result) => {
-                for (const desc of portsOfNode) {
-                  desc.state = result[desc.port];
+      if (portsOfNode.length > 0) {
+        allQueries.push(
+          new Observable((s) => {
+            this.http
+              .post<{ [key: number]: boolean }>(
+                `${this.apiPath(this.groups.current$.value.name)}/${
+                  instance.instanceConfiguration.uuid
+                }/check-ports/${node.nodeName}`,
+                portsOfNode.map((na) => na.port),
+                {
+                  headers: suppressGlobalErrorHandling(new HttpHeaders()),
+                  context: NO_LOADING_BAR_CONTEXT,
                 }
-                s.next(portsOfNode);
-                s.complete();
-              },
-              error: (err) => {
-                this.instances.reloadActiveStates(this.instances.active$.value);
-                s.error(err);
-                s.complete();
-              },
-            });
-        })
-      );
-
+              )
+              .pipe(
+                measure(
+                  `Ports of ${instance.instanceConfiguration.uuid}/${node.nodeName}`
+                )
+              )
+              .subscribe({
+                next: (result) => {
+                  for (const desc of portsOfNode) {
+                    desc.state = result[desc.port];
+                  }
+                  s.next(portsOfNode);
+                  s.complete();
+                },
+                error: (err) => {
+                  this.instances.reloadActiveStates(
+                    this.instances.active$.value
+                  );
+                  s.error(err);
+                  s.complete();
+                },
+              });
+          })
+        );
+      }
+    }
+    if (allQueries.length > 0) {
       forkJoin(allQueries).subscribe((results) => {
         const flat: NodeApplicationPort[] = [].concat(...results);
         this.activePortStates$.next(flat);
       });
+    } else {
+      this.activePortStates$.next([]);
     }
   }
 }
