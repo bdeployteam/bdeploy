@@ -38,7 +38,7 @@
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "prettier/prettier": [
-          "error",
+          "warn",
           {
             "endOfLine": "auto"
           }
@@ -53,7 +53,7 @@
       ],
       "rules": {
         "prettier/prettier": [
-          "error",
+          "warn",
           {
             "endOfLine": "auto"
           }
