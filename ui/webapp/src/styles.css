@@ -34,3 +34,7 @@ body {
 .ui-test .mat-tooltip-panel {
   display: none;
 }
+
+.mat-tooltip-panel {
+  pointer-events: none;
+}
