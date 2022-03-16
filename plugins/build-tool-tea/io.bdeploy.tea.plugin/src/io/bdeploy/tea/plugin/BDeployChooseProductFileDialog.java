@@ -30,6 +30,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
     private String selected;
     private BDeployTargetSpec target;
+    private boolean cleanup = true;
     private final BDeployProductListDescriptor products;
     private Runnable buttonUpdate;
     private final TaskingLog log;
@@ -47,6 +48,10 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
     public BDeployTargetSpec getChosenTarget() {
         return target;
+    }
+
+    public boolean getCleanup() {
+        return cleanup;
     }
 
     @SuppressWarnings("unchecked")
@@ -100,6 +105,11 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         BDeployServerPanel panel = new BDeployServerPanel(comp, log);
         GridDataFactory.fillDefaults().hint(300, 150).applyTo(panel);
 
+        Button checkCleanup = new Button(comp, SWT.CHECK);
+        GridDataFactory.fillDefaults().grab(true, false).applyTo(checkCleanup);
+        checkCleanup.setText("Cleanup Temporary Data (Applications, Product Files) after build.");
+        checkCleanup.setSelection(cleanup);
+
         buttonUpdate = () -> {
             Button button = getButton(OK);
             if (button != null) {
@@ -131,6 +141,14 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
             public void widgetSelected(SelectionEvent e) {
                 panel.setEnabled(!radioZip.getSelection());
                 buttonUpdate.run();
+            }
+        });
+
+        checkCleanup.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                cleanup = checkCleanup.getSelection();
             }
         });
 

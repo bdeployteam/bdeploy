@@ -79,6 +79,7 @@ public class BDeployProductTaskChain implements TaskChain {
     private Path bdeployProductFile;
     private BDeployTargetSpec target;
     private BDeployTargetSpec source;
+    private boolean cleanup;
 
     @TaskChainUiInit
     public void uiInit(Shell parent, BDeployConfig cfg, TaskingLog log, BuildDirectories dirs, TeaBuildVersionService bvs)
@@ -120,6 +121,7 @@ public class BDeployProductTaskChain implements TaskChain {
 
             target = dlg.getChosenTarget();
             bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
+            cleanup = dlg.getCleanup();
 
             if (target == null) {
                 // that's OK - package instead of push.
@@ -318,7 +320,7 @@ public class BDeployProductTaskChain implements TaskChain {
         c.addTask(BackgroundTask
                 .allBarrier(pd.apps.stream().map(a -> a.task).filter(Objects::nonNull).collect(Collectors.toList())));
 
-        BDeployBuildProductTask build = new BDeployBuildProductTask(pd, hive, target, source);
+        BDeployBuildProductTask build = new BDeployBuildProductTask(pd, hive, target, source, cleanup);
         c.addTask(build);
 
         if (target == null && cfg.bdeployProductPushServer != null) {
