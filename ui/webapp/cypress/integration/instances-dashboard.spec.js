@@ -29,9 +29,11 @@ describe('Instance Dashboard Tests', () => {
 
     // create some from a template
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
-        cy.get('button[data-cy^="Apply Instance Template"]').click();
-      });
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
+        () => {
+          cy.get('button[data-cy^="Apply Instance Template"]').click();
+        }
+      );
     });
 
     cy.waitUntilContentLoaded();
@@ -100,7 +102,9 @@ describe('Instance Dashboard Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Click"]').downloadByLinkClick('dashboard-click-start.json');
+      cy.get('button[data-cy^="Click"]').downloadByLinkClick(
+        'dashboard-click-start.json'
+      );
     });
   });
 
@@ -193,6 +197,88 @@ describe('Instance Dashboard Tests', () => {
 
     cy.inMainNavFlyin('app-process-console', () => {
       cy.pressToolbarButton('Back to Overview');
+    });
+  });
+
+  it('Test Selected Bulk Process Control', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.waitUntilContentLoaded();
+
+    cy.checkMainNavFlyinClosed();
+
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Bulk Control');
+    });
+
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavFlyin('app-bulk-control', () => {
+      cy.contains('div', 'selected processes.')
+        .should('exist')
+        .within(() => {
+          cy.contains('strong', '0').should('exist');
+        });
+    });
+
+    cy.inMainNavContent(() => {
+      cy.contains('app-instance-server-node', 'master').within(() => {
+        cy.contains('tr', 'Server With Sleep').within(() => {
+          cy.get('input[type="checkbox"]').check({ force: true });
+        });
+        cy.contains('tr', 'Another Server With Sleep').within(() => {
+          cy.get('input[type="checkbox"]').check({ force: true });
+        });
+      });
+    });
+
+    cy.screenshot('Doc_DashboardBulkProcessControl');
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/group/**/instance/**/processes',
+    }).as('list');
+
+    cy.inMainNavFlyin('app-bulk-control', () => {
+      cy.contains('div', 'selected processes.')
+        .should('exist')
+        .within(() => {
+          cy.contains('strong', '2').should('exist');
+        });
+
+      cy.get('button[data-cy="Start Selected Processes"]').click();
+
+      cy.contains('app-bd-notification-card', 'Confirm Start').within(() => {
+        cy.get('button[data-cy="Yes"]').click();
+      });
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.wait('@list');
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.get('tr:contains("OK")').should('have.length', 2);
+    });
+
+    cy.inMainNavFlyin('app-bulk-control', () => {
+      cy.contains('div', 'selected processes.')
+        .should('exist')
+        .within(() => {
+          cy.contains('strong', '2').should('exist');
+        });
+
+      cy.get('button[data-cy="Stop Selected Processes"]').click();
+
+      cy.contains('app-bd-notification-card', 'Confirm Stop').within(() => {
+        cy.get('button[data-cy="Yes"]').click();
+      });
+    });
+
+    cy.waitUntilContentLoaded();
+    cy.wait('@list');
+    cy.waitUntilContentLoaded();
+
+    cy.inMainNavContent(() => {
+      cy.get('tr:contains("stop")').should('have.length', 3);
     });
   });
 
