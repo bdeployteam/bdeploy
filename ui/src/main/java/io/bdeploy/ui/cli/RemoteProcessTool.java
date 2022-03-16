@@ -92,7 +92,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 if (appId == null || appId.isEmpty()) {
                     ir.getProcessResource(instanceId).startAll();
                 } else {
-                    ir.getProcessResource(instanceId).startProcess(List.of(appId));
+                    ir.getProcessResource(instanceId).startProcesses(List.of(appId));
                     if (config.join()) {
                         doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(appId).processState);
                     }
@@ -101,7 +101,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 if (appId == null || appId.isEmpty()) {
                     ir.getProcessResource(instanceId).stopAll();
                 } else {
-                    ir.getProcessResource(instanceId).stopProcess(List.of(appId));
+                    ir.getProcessResource(instanceId).stopProcesses(List.of(appId));
                 }
             }
             return createSuccess();

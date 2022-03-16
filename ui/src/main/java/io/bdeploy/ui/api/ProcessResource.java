@@ -33,17 +33,17 @@ public interface ProcessResource {
     @POST
     @Path("/start")
     @RequiredPermission(permission = Permission.WRITE)
-    public void startProcess(List<String> appId);
+    public void startProcesses(List<String> appId);
 
     @POST
     @Path("/stop")
     @RequiredPermission(permission = Permission.WRITE)
-    public void stopProcess(List<String> appId);
+    public void stopProcesses(List<String> appId);
 
     @POST
     @Path("/restart")
     @RequiredPermission(permission = Permission.WRITE)
-    public void restartProcess(List<String> appId);
+    public void restartProcesses(List<String> appId);
 
     @GET
     @Path("/startAll")
@@ -58,7 +58,7 @@ public interface ProcessResource {
     @GET
     @Path("/restartAll")
     @RequiredPermission(permission = Permission.WRITE)
-    public void restart();
+    public void restartAll();
 
     @GET
     @Path("/dataDirSnapshot")

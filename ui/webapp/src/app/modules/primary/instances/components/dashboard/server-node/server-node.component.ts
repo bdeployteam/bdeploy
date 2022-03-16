@@ -26,6 +26,7 @@ import { StateItem, StateType } from '../state-panel/state-panel.component';
 export class ServerNodeComponent implements OnInit, OnDestroy {
   @Input() node: InstanceNodeConfigurationDto;
 
+  @Input() bulkMode: boolean;
   @Input() gridWhen$: BehaviorSubject<boolean>;
   @Input() groupingWhen$: BehaviorSubject<
     BdDataGrouping<ApplicationConfiguration>[]
