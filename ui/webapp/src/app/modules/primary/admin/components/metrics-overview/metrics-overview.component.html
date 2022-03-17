@@ -5,7 +5,8 @@
       mat-align-tabs="start"
       dynamicHeight
       animationDuration="0ms"
-      (selectedTabChange)="doSelect($event.tab.textLabel)"
+      (selectedIndexChange)="doSelect($event)"
+      [(selectedIndex)]="tabIndex"
       class="metrics-tabs-group"
     >
       <mat-tab
