@@ -56,6 +56,11 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
+
+        if (applicationIds.isEmpty()) {
+            return; // nothing to do.
+        }
+
         instanceController.start(applicationIds, context.getUserPrincipal().getName());
     }
 
@@ -81,6 +86,11 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
         if (instanceController == null) {
             throw new WebApplicationException("Instance with ID '" + instanceId + "' is unknown");
         }
+
+        if (applicationIds.isEmpty()) {
+            return; // nothing to do.
+        }
+
         instanceController.stop(applicationIds, context.getUserPrincipal().getName());
     }
 

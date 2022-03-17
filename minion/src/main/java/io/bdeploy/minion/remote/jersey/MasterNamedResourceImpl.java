@@ -758,7 +758,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 continue; // ignore - not running.
             }
 
-            groupedByNode.computeIfAbsent(nodeName, (n) -> new ArrayList<>());
+            groupedByNode.computeIfAbsent(nodeName, (n) -> new ArrayList<>()).add(applicationId);
         }
 
         for (var entry : groupedByNode.entrySet()) {
