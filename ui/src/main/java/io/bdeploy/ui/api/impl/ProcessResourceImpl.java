@@ -18,6 +18,7 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.ProcessResource;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -61,7 +62,18 @@ public class ProcessResourceImpl implements ProcessResource {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Launching");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.start(instanceId, processIds);
+            try {
+                master.start(instanceId, processIds);
+            } catch (WebApplicationException wea) {
+                // Compatibility with pre-4.2.0
+                if (wea.getResponse().getStatus() == 499) {
+                    for (var p : processIds) {
+                        master.start(instanceId, p);
+                    }
+                } else {
+                    throw wea;
+                }
+            }
         }
     }
 
@@ -71,7 +83,18 @@ public class ProcessResourceImpl implements ProcessResource {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Stopping");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.stop(instanceId, processIds);
+            try {
+                master.stop(instanceId, processIds);
+            } catch (WebApplicationException wea) {
+                // Compatibility with pre-4.2.0
+                if (wea.getResponse().getStatus() == 499) {
+                    for (var p : processIds) {
+                        master.stop(instanceId, p);
+                    }
+                } else {
+                    throw wea;
+                }
+            }
         }
     }
 
@@ -81,8 +104,20 @@ public class ProcessResourceImpl implements ProcessResource {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
         try (Activity activity = reporter.start("Restarting");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.stop(instanceId, processIds);
-            master.start(instanceId, processIds);
+            try {
+                master.stop(instanceId, processIds);
+                master.start(instanceId, processIds);
+            } catch (WebApplicationException wea) {
+                // Compatibility with pre-4.2.0
+                if (wea.getResponse().getStatus() == 499) {
+                    for (var p : processIds) {
+                        master.stop(instanceId, p);
+                        master.start(instanceId, p);
+                    }
+                } else {
+                    throw wea;
+                }
+            }
         }
     }
 
