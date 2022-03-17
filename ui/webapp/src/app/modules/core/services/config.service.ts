@@ -93,6 +93,10 @@ export class ConfigService {
       'stop-scheduled',
       sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg')
     );
+    iconRegistry.addSvgIcon(
+      'sync-all',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg')
+    );
 
     iconRegistry.addSvgIcon(
       'LINUX',

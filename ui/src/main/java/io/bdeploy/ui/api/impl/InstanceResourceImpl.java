@@ -64,8 +64,10 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
@@ -112,6 +114,8 @@ import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
+import io.bdeploy.ui.dto.InstanceOverallStatusDto;
+import io.bdeploy.ui.dto.InstanceOverallStatusDto.OverallStatus;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
@@ -257,6 +261,121 @@ public class InstanceResourceImpl implements InstanceResource {
                     managedMaster, attributes, banner, im.getManifest(), activeVersion));
         }
         return result;
+    }
+
+    @Override
+    public List<InstanceOverallStatusDto> syncAllAndGetStatus() {
+        List<InstanceOverallStatusDto> listResult = new ArrayList<>();
+
+        // 1) on CENTRAL only, synchronize ALL managed servers. only after that we know all instances.
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
+            List<ManagedMasterDto> servers = rs.getManagedServers(group);
+
+            log.info("Mass-synchronize {} server(s).", servers.size());
+
+            try (Activity sync = reporter.start("Synchronize Servers", servers.size())) {
+                for (ManagedMasterDto host : servers) {
+                    rs.synchronize(group, host.hostName);
+                    sync.workAndCancelIfRequested(1);
+                }
+            }
+        }
+
+        // 2) fetch all instances, and query their process state.
+        SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
+        try (Activity all = reporter.start("Fetch Instance Status", imKeys.size())) {
+            for (Key imKey : imKeys) {
+                InstanceManifest im = InstanceManifest.of(hive, imKey);
+
+                if (im.getState(hive).read().activeTag == null) {
+                    continue; // no active tag means there cannot be any status.
+                }
+
+                InstanceConfiguration config = im.getConfiguration();
+                InstanceOverallStatusDto result = new InstanceOverallStatusDto();
+                result.uuid = config.uuid;
+
+                // get all node status of the responsible master.
+                RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
+                try (Activity syncFetch = reporter.start("Querying " + config.name, 3);
+                        NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
+                    // sync just in case we're on central, does nothing on standalone/managed
+                    syncInstance(minion, rc, group, config.uuid);
+                    syncFetch.workAndCancelIfRequested(1);
+
+                    MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+                    MasterNamedResource namedMaster = master.getNamedMaster(group);
+
+                    Map<String, MinionStatusDto> nodeStatus = master.getNodes();
+                    syncFetch.workAndCancelIfRequested(1);
+
+                    InstanceStatusDto processStatus = namedMaster.getStatus(config.uuid);
+                    InstanceNodeConfigurationListDto nodeDtos = new InstanceNodeConfigurationListDto();
+                    gatherNodeConfigurations(nodeDtos, im);
+
+                    List<String> stoppedApps = new ArrayList<>();
+                    List<String> runningApps = new ArrayList<>();
+
+                    for (var nodeCfg : nodeDtos.nodeConfigDtos) {
+                        if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeCfg.nodeName)) {
+                            continue; // don't check client.
+                        }
+
+                        MinionStatusDto state = nodeStatus.get(nodeCfg.nodeName);
+
+                        if (state == null || state.offline) {
+                            result.status = OverallStatus.WARNING;
+                            result.messages.add("Node " + nodeCfg.nodeName + " is not available");
+                            continue;
+                        }
+
+                        InstanceNodeStatusDto statusOnNode = processStatus.node2Applications.get(nodeCfg.nodeName);
+
+                        for (var app : nodeCfg.nodeConfiguration.applications) {
+                            if (app.processControl.startType != ApplicationStartType.INSTANCE) {
+                                continue;
+                            }
+
+                            if (!statusOnNode.isAppDeployed(app.uid)) {
+                                log.warn("Expected application is not currently deployed: " + app.uid);
+                                continue;
+                            }
+
+                            // instance application, check status
+                            ProcessStatusDto status = statusOnNode.getStatus(app.uid);
+                            if (status.processState.isStopped()) {
+                                stoppedApps.add(app.name);
+                            } else {
+                                runningApps.add(app.name);
+                            }
+                        }
+                    }
+
+                    if (stoppedApps.isEmpty() && runningApps.isEmpty()) {
+                        // this means that ther are no instance type applications on the instance.
+                        if (result.status != OverallStatus.WARNING) {
+                            result.status = OverallStatus.STOPPED;
+                        }
+                    } else if (stoppedApps.isEmpty() || runningApps.isEmpty()) {
+                        // valid - either all stopped or all running.
+                        if (result.status != OverallStatus.WARNING) {
+                            result.status = runningApps.isEmpty() ? OverallStatus.STOPPED : OverallStatus.RUNNING;
+                        }
+                    } else {
+                        // not ok, some apps started, some stopped - that will be a warning.
+                        result.status = OverallStatus.WARNING;
+                        result.messages.add(stoppedApps.size() + " instance type applications are not running.");
+                    }
+
+                    syncFetch.workAndCancelIfRequested(1);
+                }
+
+                all.workAndCancelIfRequested(1);
+                listResult.add(result);
+            }
+        }
+        return listResult;
     }
 
     @Override

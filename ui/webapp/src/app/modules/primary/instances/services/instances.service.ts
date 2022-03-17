@@ -17,6 +17,7 @@ import {
   InstanceConfiguration,
   InstanceDto,
   InstanceNodeConfigurationListDto,
+  InstanceOverallStatusDto,
   MinionStatusDto,
   ObjectChangeDetails,
   ObjectChangeHint,
@@ -305,6 +306,12 @@ export class InstancesService {
           this.loadCurrentAndActive(this.areas.instanceContext$.value);
         }
       });
+  }
+
+  public syncAndFetchState(): Observable<InstanceOverallStatusDto[]> {
+    return this.http
+      .get<InstanceOverallStatusDto[]>(`${this.apiPath(this.group)}/syncAll`)
+      .pipe(measure('Sync and fetch all instance state'));
   }
 
   private updateChangeSubscription(group: string) {

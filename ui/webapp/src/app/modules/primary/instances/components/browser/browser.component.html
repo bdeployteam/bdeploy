@@ -28,6 +28,14 @@
       tooltip="below"
       [disabled]="!(authService.isCurrentScopeWrite$ | async) || isCardView"
     ></app-bd-panel-button>
+    <app-bd-button
+      svgIcon="sync-all"
+      text="Fetch instance states"
+      tooltip="below"
+      (click)="doSyncAll()"
+      [loadingWhen$]="syncingAll$"
+      [disabled]="syncingAll$ | async"
+    ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       svgIcon="group-settings"
@@ -50,7 +58,7 @@
   <app-bd-dialog-content>
     <app-bd-data-display
       #dataTable
-      [columns]="instanceColumns.defaultInstancesColumns"
+      [columns]="columns"
       [records]="instances.instances$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
