@@ -1,8 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-import { InstanceDto } from 'src/app/models/gen.dtos';
+import { BehaviorSubject, finalize, Subscription } from 'rxjs';
+import {
+  BdDataColumn,
+  BdDataGrouping,
+  BdDataGroupingDefinition,
+} from 'src/app/models/data';
+import { InstanceDto, InstanceOverallStatusDto } from 'src/app/models/gen.dtos';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -12,6 +17,7 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { GroupsService } from '../../../groups/services/groups.service';
 import { InstancesColumnsService } from '../../services/instances-columns.service';
 import { InstancesService } from '../../services/instances.service';
+import { OverallStatusColumnComponent } from './overall-status-column/overall-status-column.component';
 
 @Component({
   selector: 'app-instances-browser',
@@ -28,8 +34,21 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     selected: [],
   };
   hasProducts$ = new BehaviorSubject<boolean>(false);
+  syncingAll$ = new BehaviorSubject<boolean>(false);
 
+  private overallStates: InstanceOverallStatusDto[];
   private subscription: Subscription;
+
+  private colOverallStatus: BdDataColumn<InstanceDto> = {
+    id: 'status',
+    name: 'Status',
+    data: (r) =>
+      this.overallStates?.find((x) => x.uuid === r.instanceConfiguration?.uuid),
+    component: OverallStatusColumnComponent,
+    width: '50px',
+  };
+
+  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   /* template */ getRecordRoute = (row: InstanceDto) => {
     return [
@@ -43,6 +62,19 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   /* template */ isCardView: boolean;
   /* template */ presetKeyValue = 'instances';
   /* template */ sort: Sort = { active: 'name', direction: 'asc' };
+  /* template */ columns: BdDataColumn<InstanceDto>[] = [
+    this.instanceColumns.instanceNameColumn,
+    this.instanceColumns.instanceTypeColumn,
+    this.instanceColumns.instanceIdColumn,
+    this.instanceColumns.instanceDescriptionColumn,
+    this.instanceColumns.instanceProductColumn,
+    this.instanceColumns.instanceProductVersionColumn,
+    this.instanceColumns.instanceProductActiveColumn,
+    this.instanceColumns.instanceBannerColumn,
+    this.instanceColumns.instanceServerColumn,
+    this.colOverallStatus,
+    this.instanceColumns.instanceSyncColumn,
+  ];
 
   constructor(
     public instances: InstancesService,
@@ -91,5 +123,25 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  doSyncAll() {
+    this.dialog
+      .confirm(
+        'Query all Instances',
+        'This action will <strong>contact all servers and nodes</strong> in the group, to fetch the latest data. This may take a while. Are you sure?'
+      )
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+        this.syncingAll$.next(true);
+        this.instances
+          .syncAndFetchState()
+          .pipe(finalize(() => this.syncingAll$.next(false)))
+          .subscribe((s) => {
+            this.overallStates = s;
+          });
+      });
   }
 }

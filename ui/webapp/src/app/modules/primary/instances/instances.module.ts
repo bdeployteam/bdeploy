@@ -28,6 +28,7 @@ import { ProcessNameAndOsComponent } from './components/process-name-and-os/proc
 import { RatingStatusColumnComponent } from './components/rating-status-column/rating-status-column.component';
 import { StateStatusColumnComponent } from './components/state-status-column/state-status-column.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { OverallStatusColumnComponent } from './components/browser/overall-status-column/overall-status-column.component';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     RatingStatusColumnComponent,
     StateStatusColumnComponent,
     ControlGroupComponent,
+    OverallStatusColumnComponent,
   ],
   exports: [
     // for panels.

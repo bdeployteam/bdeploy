@@ -1,0 +1,29 @@
+<div fxLayout="row">
+  <ng-container *ngIf="getStatus() as status">
+    <mat-icon
+      *ngIf="status.status === 'RUNNING'"
+      fontSet="material-icons-filled"
+      class="bd-success-text"
+      matTooltip="Instance is running"
+      matTooltipShowDelay="500"
+      >play_arrow</mat-icon
+    >
+    <mat-icon
+      *ngIf="status.status === 'STOPPED'"
+      fontSet="material-icons-filled"
+      class="bd-disabled-text"
+      matTooltip="Instance is stopped"
+      matTooltipShowDelay="500"
+      >stop</mat-icon
+    >
+    <mat-icon
+      *ngIf="status.status === 'WARNING'"
+      fontSet="material-icons-filled"
+      class="bd-warning-text"
+      [matTooltip]="status.messages?.join('\n')"
+      matTooltipClass="tooltip-with-newline"
+      matTooltipShowDelay="500"
+      >warning</mat-icon
+    >
+  </ng-container>
+</div>

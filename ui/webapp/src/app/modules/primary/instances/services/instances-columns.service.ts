@@ -107,19 +107,6 @@ export class InstancesColumnsService {
     width: '50px',
   };
 
-  defaultInstancesColumns: BdDataColumn<InstanceDto>[] = [
-    this.instanceNameColumn,
-    this.instanceTypeColumn,
-    this.instanceIdColumn,
-    this.instanceDescriptionColumn,
-    this.instanceProductColumn,
-    this.instanceProductVersionColumn,
-    this.instanceProductActiveColumn,
-    this.instanceBannerColumn,
-    this.instanceServerColumn,
-    this.instanceSyncColumn,
-  ];
-
   constructor(
     private cfg: ConfigService,
     private instances: InstancesService,

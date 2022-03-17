@@ -31,6 +31,7 @@ import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
+import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 import jakarta.ws.rs.Consumes;
@@ -55,6 +56,13 @@ public interface InstanceResource {
 
     @GET
     public List<InstanceDto> list();
+
+    /**
+     * Synchronizes all instances and receives their overall status, including potential hints on to what is "wrong".
+     */
+    @GET
+    @Path("/syncAll")
+    public List<InstanceOverallStatusDto> syncAllAndGetStatus();
 
     @GET
     @Path("/{instance}/versions")
