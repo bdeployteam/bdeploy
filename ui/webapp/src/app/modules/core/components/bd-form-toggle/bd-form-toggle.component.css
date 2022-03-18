@@ -22,13 +22,11 @@
   position: relative;
 
   top: -1px;
-  right: -3px;
   max-height: 20px;
+  padding-right: 14px;
 }
 
 .bd-form-toggle-suffix mat-icon {
   font-size: 150%;
   line-height: 1.125;
-
-  padding-left: 10px;
 }

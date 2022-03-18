@@ -17,6 +17,12 @@ public class ParameterConfiguration {
     public String uid;
 
     /**
+     * Whether this parameter is pinned. This information is used by the web UI to
+     * more prominently present those parameters to the user.
+     */
+    public boolean pinned;
+
+    /**
      * The actual value of the parameter as set in the UI. This field is potentially
      * redundant with an entry in the {@link #preRendered} list. The reason to store
      * it redundantly is solely lookup and expansion of other parameter's

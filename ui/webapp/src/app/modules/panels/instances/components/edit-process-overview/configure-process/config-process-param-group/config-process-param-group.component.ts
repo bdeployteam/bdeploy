@@ -256,7 +256,12 @@ export class ConfigProcessParamGroupComponent
       }
 
       // create the new parameter.
-      p.value = { uid: p.descriptor.uid, value: initialValue, preRendered: [] };
+      p.value = {
+        uid: p.descriptor.uid,
+        value: initialValue,
+        pinned: false,
+        preRendered: [],
+      };
       this.doPreRender(p);
 
       // the correct insertion point is *before* the *succeeding* parameter definition, as custom parameters may succedd the *preceeding* one.
@@ -338,6 +343,7 @@ export class ConfigProcessParamGroupComponent
             value: {
               uid: this.customTemp.uid,
               value: this.customTemp.value,
+              pinned: false,
               preRendered: [],
             },
             booleanValue: false,
@@ -379,6 +385,10 @@ export class ConfigProcessParamGroupComponent
 
     // need to make sure we add/remove parameters which meet/don't meet their condition.
     this.doUpdateConditionals(p);
+  }
+
+  /* template */ doTogglePin(p: ParameterPair) {
+    p.value.pinned = !p.value.pinned;
   }
 
   private doUpdateConditionals(p: ParameterPair) {

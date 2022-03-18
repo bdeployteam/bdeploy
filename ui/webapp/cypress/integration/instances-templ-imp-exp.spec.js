@@ -114,12 +114,16 @@ describe('Instance Settings Tests', () => {
       });
       cy.contains('mat-expansion-panel', 'Sleep Configuration').within(() => {
         cy.get('mat-panel-title').click();
-        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+        cy.get('mat-expansion-panel-header').should(
+          'have.attr',
+          'aria-expanded',
+          'true'
+        );
 
         cy.get('app-bd-form-input[name="param.sleep"]')
           .should('exist')
           .within(() => {
-            cy.get('input').should('have.value', '5');
+            cy.get('input[name="param.sleep"]').should('have.value', '5');
           });
       });
 
@@ -177,10 +181,12 @@ describe('Instance Settings Tests', () => {
     cy.screenshot('Doc_InstanceAddProcessTemplVars');
 
     cy.inMainNavFlyin('app-add-process', () => {
-      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
-        cy.fillFormInput('Sleep Timeout', '7');
-        cy.get('button[data-cy="Confirm"]').click();
-      });
+      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(
+        () => {
+          cy.fillFormInput('Sleep Timeout', '7');
+          cy.get('button[data-cy="Confirm"]').click();
+        }
+      );
     });
 
     cy.inMainNavContent(() => {
@@ -202,12 +208,16 @@ describe('Instance Settings Tests', () => {
       });
       cy.contains('mat-expansion-panel', 'Sleep Configuration').within(() => {
         cy.get('mat-panel-title').click();
-        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
+        cy.get('mat-expansion-panel-header').should(
+          'have.attr',
+          'aria-expanded',
+          'true'
+        );
 
         cy.get('app-bd-form-input[name="param.sleep"]')
           .should('exist')
           .within(() => {
-            cy.get('input').should('have.value', '7');
+            cy.get('input[name="param.sleep"]').should('have.value', '7');
           });
       });
       cy.pressToolbarButton('Back to Overview');
@@ -225,7 +235,10 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-history-entry', () => {
-      cy.get('button[data-cy^="Export"]').downloadByLocationAssign('instance-export.zip', true);
+      cy.get('button[data-cy^="Export"]').downloadByLocationAssign(
+        'instance-export.zip',
+        true
+      );
       validateZip('instance-export.zip', 'instance.json', true);
     });
   });
@@ -240,7 +253,9 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.contains('Current Version: 1').should('exist');
-      cy.contains('.bd-rect-card', 'The instance is currently empty').should('exist');
+      cy.contains('.bd-rect-card', 'The instance is currently empty').should(
+        'exist'
+      );
       cy.pressToolbarButton('Instance Settings');
     });
 

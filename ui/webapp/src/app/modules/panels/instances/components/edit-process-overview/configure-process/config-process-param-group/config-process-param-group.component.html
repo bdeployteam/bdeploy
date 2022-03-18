@@ -171,31 +171,52 @@
                   [appServerIssuesValidator]="p.value ? p.value.uid : p.descriptor.uid"
                 >
                   <div fxLayout="row" class="local-form-input-actions">
-                    <mat-icon
-                      class="local-revert-button"
-                      *ngIf="!!p.descriptor?.defaultValue && !p.descriptor?.fixed"
-                      matTooltip="Click to revert the parameter value to the default."
-                      [matTooltipShowDelay]="500"
-                      (click)="doChangeValue(p, p.descriptor.defaultValue)"
-                      [style.cursor]="'pointer'"
-                      >restore</mat-icon
-                    >
-                    <mat-icon
-                      *ngIf="p.passwordLock && p.editorEnabled && !group.isSelectMode"
-                      matTooltip="Click to enable editing of password field."
-                      [matTooltipShowDelay]="500"
-                      (click)="p.passwordLock = false"
-                      [style.cursor]="'pointer'"
-                      >lock</mat-icon
-                    >
-                    <app-custom-editor
-                      *ngIf="p.descriptor?.customEditor && !group.isSelectMode"
-                      (valueConfirmed)="doChangeValue(p, $event)"
-                      (pluginLoaded)="doSetCustomEditorState(p, $event)"
-                      [descriptor]="p.descriptor"
-                      [value]="p.value"
-                      [dialog]="dialog"
-                    ></app-custom-editor>
+                    <ng-container *ngIf="p?.value && !group.isSelectMode">
+                      <mat-icon
+                        class="local-hover-button"
+                        *ngIf="!!p.descriptor?.defaultValue && !p.descriptor?.fixed"
+                        matTooltip="Click to revert the parameter value to the default."
+                        [matTooltipShowDelay]="500"
+                        (click)="doChangeValue(p, p.descriptor.defaultValue)"
+                        [style.cursor]="'pointer'"
+                        >restore</mat-icon
+                      >
+                      <!-- hidden input so that pinning is part of the form (validation, enablement, etc.) -->
+                      <input
+                        #pin
+                        [name]="'pin-' + (p.value ? p.value.uid : p.descriptor.uid)"
+                        type="checkbox"
+                        [(ngModel)]="p.value.pinned"
+                        [style.display]="'none'"
+                      />
+                      <mat-icon
+                        class="local-hover-button"
+                        [class.local-pin-inactive]="!p.value.pinned"
+                        [class.local-pin-active]="p.value.pinned"
+                        matTooltip="Click to pin the parameter to the process details panel."
+                        [matTooltipShowDelay]="500"
+                        (click)="doTogglePin(p)"
+                        [style.cursor]="'pointer'"
+                        appClickStopPropagation
+                        >push_pin</mat-icon
+                      >
+                      <mat-icon
+                        *ngIf="p.passwordLock && p.editorEnabled && !group.isSelectMode"
+                        matTooltip="Click to enable editing of password field."
+                        [matTooltipShowDelay]="500"
+                        (click)="p.passwordLock = false"
+                        [style.cursor]="'pointer'"
+                        >lock</mat-icon
+                      >
+                      <app-custom-editor
+                        *ngIf="p.descriptor?.customEditor && !group.isSelectMode"
+                        (valueConfirmed)="doChangeValue(p, $event)"
+                        (pluginLoaded)="doSetCustomEditorState(p, $event)"
+                        [descriptor]="p.descriptor"
+                        [value]="p.value"
+                        [dialog]="dialog"
+                      ></app-custom-editor>
+                    </ng-container>
                     <mat-icon
                       *ngIf="p.descriptor?.global"
                       class="bd-secondary-text"
@@ -210,6 +231,7 @@
                 <app-bd-form-toggle
                   *ngIf="isBoolean(p)"
                   fxFlex="1 0 auto"
+                  class="local-form-input"
                   [label]="!!p.descriptor ? p.descriptor.name : p.value.uid"
                   [name]="p.value ? p.value.uid : p.descriptor.uid"
                   [attr.name]="p.value ? p.value.uid : p.descriptor.uid"
@@ -221,13 +243,36 @@
                   appBdPopupPosition="above-right"
                   [disabled]="group.isSelectMode || p.descriptor?.fixed"
                 >
-                  <mat-icon
-                    *ngIf="p.descriptor?.global"
-                    class="bd-secondary-text"
-                    matTooltip="Global parameters are the same on all processes."
-                    [matTooltipShowDelay]="500"
-                    >public</mat-icon
-                  >
+                  <div fxLayout="row" class="local-form-input-actions">
+                    <ng-container *ngIf="p?.value && !group.isSelectMode">
+                      <!-- hidden input so that pinning is part of the form (validation, enablement, etc.) -->
+                      <input
+                        #pin
+                        [name]="'pin-' + (p.value ? p.value.uid : p.descriptor.uid)"
+                        type="checkbox"
+                        [(ngModel)]="p.value.pinned"
+                        [style.display]="'none'"
+                      />
+                      <mat-icon
+                        class="local-hover-button"
+                        [class.local-pin-inactive]="!p.value.pinned"
+                        [class.local-pin-active]="p.value.pinned"
+                        matTooltip="Click to pin the parameter to the process details panel."
+                        [matTooltipShowDelay]="500"
+                        (click)="doTogglePin(p)"
+                        [style.cursor]="'pointer'"
+                        appClickStopPropagation
+                        >push_pin</mat-icon
+                      >
+                    </ng-container>
+                    <mat-icon
+                      *ngIf="p.descriptor?.global"
+                      class="bd-secondary-text"
+                      matTooltip="Global parameters are the same on all processes."
+                      [matTooltipShowDelay]="500"
+                      >public</mat-icon
+                    >
+                  </div>
                 </app-bd-form-toggle>
               </div>
             </ng-container>

@@ -229,6 +229,19 @@
           icon="cast"
           text="Process Console"
         ></app-bd-panel-button>
+        <ng-container *ngIf="pinnedParameters?.length">
+          <mat-divider></mat-divider>
+          <app-bd-expand-button
+            text="Pinned Parameters"
+            icon="push_pin"
+            [expanded]="true"
+          >
+            <app-bd-data-table
+              [records]="pinnedParameters"
+              [columns]="pinnedColumns"
+            ></app-bd-data-table>
+          </app-bd-expand-button>
+        </ng-container>
       </div>
     </ng-container>
   </app-bd-dialog-content>

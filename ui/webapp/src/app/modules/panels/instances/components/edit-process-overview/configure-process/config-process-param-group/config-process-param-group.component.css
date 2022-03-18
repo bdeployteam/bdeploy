@@ -41,11 +41,23 @@
   padding-right: 3px;
 }
 
-.local-form-input .local-revert-button {
+.local-pin-inactive {
+  color: var(--bd-text-disabled);
+}
+
+.local-pin-inactive:hover {
+  color: var(--bd-text);
+}
+
+.local-pin-active {
+  color: var(--bd-primary);
+}
+
+.local-form-input .local-hover-button:not(.local-pin-active) {
   display: none !important;
 }
 
-.local-form-input:hover .local-revert-button {
+.local-form-input:hover .local-hover-button {
   display: block !important;
 }
 

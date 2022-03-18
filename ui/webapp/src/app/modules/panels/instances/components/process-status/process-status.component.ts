@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
+import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   ApplicationStartType,
+  ParameterType,
   ProcessDetailDto,
   ProcessProbeResultDto,
   ProcessState,
@@ -19,6 +21,28 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
+import { PinnedParameterValueComponent } from './pinned-parameter-value/pinned-parameter-value.component';
+
+export interface PinnedParameter {
+  appUid: string;
+  paramUid: string;
+  name: string;
+  value: string;
+  type: ParameterType;
+}
+
+const colPinnedName: BdDataColumn<PinnedParameter> = {
+  id: 'name',
+  name: 'Name',
+  data: (r) => r.name,
+};
+
+const colPinnedValue: BdDataColumn<PinnedParameter> = {
+  id: 'value',
+  name: 'Value',
+  data: (r) => r.value,
+  component: PinnedParameterValueComponent,
+};
 
 @Component({
   selector: 'app-process-status',
@@ -41,6 +65,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ processDetail: ProcessDetailDto;
   /* template */ processConfig: ApplicationConfiguration;
   /* template */ startType: 'Instance' | 'Manual' | 'Confirmed Manual';
+  /* template */ pinnedParameters: PinnedParameter[] = [];
+  /* template */ pinnedColumns: BdDataColumn<PinnedParameter>[] = [
+    colPinnedName,
+    colPinnedValue,
+  ];
 
   public performing$ = new BehaviorSubject<boolean>(false);
 
@@ -65,13 +94,36 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.details.processDetail$,
       this.details.processConfig$,
       this.instances.active$,
-    ]).subscribe(([detail, config, active]) => {
+      this.instances.activeNodeCfgs$,
+    ]).subscribe(([detail, config, active, nodes]) => {
       this.clearIntervals();
       this.outdated$.next(false);
       this.processConfig = config;
       this.startType = this.formatStartType(
         this.processConfig?.processControl.startType
       );
+
+      const app = nodes?.applications?.find(
+        (a) =>
+          a.key.name === config?.application?.name &&
+          a.key.tag === config?.application?.tag
+      );
+      if (app) {
+        this.pinnedParameters = config.start.parameters
+          .filter((p) => p.pinned)
+          .map((p) => {
+            const desc = app?.descriptor?.startCommand?.parameters?.find(
+              (x) => x.uid === p.uid
+            );
+            return {
+              appUid: config.uid,
+              paramUid: p.uid,
+              name: desc.name,
+              value: p.value,
+              type: desc.type,
+            };
+          });
+      }
 
       // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
       this.starting$.next(false);

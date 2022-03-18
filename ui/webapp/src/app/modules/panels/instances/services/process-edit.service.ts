@@ -309,6 +309,7 @@ export class ProcessEditService {
         return {
           uid: p.uid,
           value: val,
+          pinned: false,
           preRendered: this.preRenderParameter(p, val),
         };
       })
