@@ -142,17 +142,19 @@ public class BulkProcessController {
             }
         }
 
-        handled.forEach(running::remove); // everything we were able to assign to a process control group.
+        List<String> origApps = new ArrayList<>(applicationIds);
+        handled.forEach(origApps::remove); // everything we were able to assign to a process control group.
 
         // processes which are not assigned to any group in the CURRENT instance version - stopped last (different to previous BDeploy versions).
-        if (!running.isEmpty()) {
+        if (!origApps.isEmpty()) {
             ProcessControlGroupConfiguration anonGroup = new ProcessControlGroupConfiguration();
             anonGroup.name = "Unassigned Processes";
-            anonGroup.processOrder.addAll(running.keySet()); // no order.
+            anonGroup.processOrder.addAll(origApps); // no order.
 
+            List<ProcessController> toStop = origApps.stream().map(e -> running.get(e)).toList();
             try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceUuid, activeTag, anonGroup, processes,
                     anonGroup.stopType)) {
-                stopped.addAll(bulk.stopGroup(running.values()));
+                stopped.addAll(bulk.stopGroup(toStop));
             }
         }
     }
