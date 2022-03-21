@@ -147,7 +147,7 @@
         <app-bd-button
           class="local-control-button"
           [collapsed]="false"
-          [disabled]="!(!(auth.isCurrentScopeWrite$ | async) || (performing$ | async) ? false : (isRunning || isCrashedWaiting) && !isStopping)"
+          [disabled]="!(!(auth.isCurrentScopeWrite$ | async) || (performing$ | async) ? false : (isRunning || isCrashedWaiting || isStartPlanned) && !isStopping)"
           (click)="stop()"
           matTooltip="Stop Application"
         >

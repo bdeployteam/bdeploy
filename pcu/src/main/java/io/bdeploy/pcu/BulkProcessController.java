@@ -7,13 +7,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Optional;
 
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
-import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 
 /**
  * Handling of "Start All" and "Stop All" process controls.
@@ -41,6 +39,9 @@ public class BulkProcessController {
     public void startAll(String user, Map<String, ProcessController> running, Collection<String> applicationIds) {
         Instant start = Instant.now();
 
+        List<String> leftOverApps = new ArrayList<>(applicationIds);
+        List<ProcessControlGroupConfiguration> groups = new ArrayList<>(processes.getControlGroups());
+
         for (var appId : applicationIds) {
             if (running.containsKey(appId)) {
                 logger.log(l -> l.info("Application already running from version {}: {}",
@@ -48,15 +49,29 @@ public class BulkProcessController {
             }
 
             var controller = processes.controllers.get(appId);
-            if (controller.getDescriptor().processControl.startType == ApplicationStartType.INSTANCE
-                    && controller.getState().isStopped() && !running.containsKey(appId)) {
+            if (controller.getState().isStopped() && !running.containsKey(appId)) {
                 // process will be started in the group at some point. mark it as such.
                 controller.prepareStart(user);
             }
+
+            // find a control group for the process, if none is found, it is left over.
+            Optional<ProcessControlGroupConfiguration> grp = groups.stream().filter(g -> g.processOrder.contains(appId))
+                    .findAny();
+            if (grp.isPresent()) {
+                leftOverApps.remove(appId);
+            }
+        }
+
+        // find processes which don't belong to any group and assign them to an anonymous one.
+        if (!leftOverApps.isEmpty()) {
+            ProcessControlGroupConfiguration anonGroup = new ProcessControlGroupConfiguration();
+            anonGroup.name = "Unassigned Processes";
+            anonGroup.processOrder.addAll(leftOverApps); // no order.
+            groups.add(anonGroup);
         }
 
         boolean failing = false;
-        for (ProcessControlGroupConfiguration controlGroup : processes.getControlGroups()) {
+        for (ProcessControlGroupConfiguration controlGroup : groups) {
             if (!failing) {
                 List<String> appsInGroup = applicationIds.stream()
                         .filter(a -> controlGroup.processOrder.contains(a) && !running.containsKey(a)).toList();
@@ -107,55 +122,68 @@ public class BulkProcessController {
         // use the CURRENT group configuration where possible.
         List<ProcessControlGroupConfiguration> currentGroups = processes.getControlGroups();
 
-        // Set intent that all should be stopped - the order does not matter as all of them are set to scheduled stop IMMEDIATELY.
-        for (var app : applicationIds) {
-            var process = running.get(app);
-            if (process == null) {
-                logger.log(l -> l.warn("Process not running: {}", app));
-                continue;
-            }
-            try {
-                process.prepareStop(user);
-            } catch (Exception ex) {
-                String appId = process.getDescriptor().uid;
-                String tag = process.getStatus().instanceTag;
-                logger.log(l -> l.error("Failed to prepare stopping of application.", ex), tag, appId);
-            }
-        }
-
-        Set<String> handled = new TreeSet<>(); // ID's which we *tried* to stop
-        Set<String> stopped = new TreeSet<>(); // ID's which actually stopped.
-
         // reverse the groups.
         List<ProcessControlGroupConfiguration> reverseGroups = new ArrayList<>(currentGroups);
         Collections.reverse(reverseGroups);
 
+        List<String> leftOverApps = new ArrayList<>(applicationIds);
+
+        // Set intent that all should be stopped - the order does not matter as all of them are set to scheduled stop IMMEDIATELY.
         for (ProcessControlGroupConfiguration controlGroup : reverseGroups) {
             // reverse ordered by the current control groups order.
-            List<ProcessController> toStop = applicationIds.stream().filter(e -> controlGroup.processOrder.contains(e))
-                    .sorted((a, b) -> Integer.compare(controlGroup.processOrder.indexOf(b), controlGroup.processOrder.indexOf(a)))
-                    .peek(e -> handled.add(e)).map(e -> running.get(e)).toList();
+            List<ProcessController> toStop = getToStop(running, applicationIds, controlGroup);
+
+            for (var process : toStop) {
+                try {
+                    if (process.getState() == ProcessState.STOPPED_START_PLANNED) {
+                        // abort start.
+                        process.abortStart(user);
+                    } else {
+                        process.prepareStop(user);
+                    }
+                    leftOverApps.remove(process.getDescriptor().uid);
+                } catch (Exception ex) {
+                    String appId = process.getDescriptor().uid;
+                    String tag = process.getStatus().instanceTag;
+                    logger.log(l -> l.error("Failed to prepare stopping of application.", ex), tag, appId);
+                }
+            }
+        }
+
+        // processes which are not assigned to any group in the CURRENT instance version - stopped last (different to previous BDeploy versions).
+        if (!leftOverApps.isEmpty()) {
+            ProcessControlGroupConfiguration anonGroup = new ProcessControlGroupConfiguration();
+            anonGroup.name = "Unassigned Processes";
+            anonGroup.processOrder.addAll(leftOverApps); // no order.
+            reverseGroups.add(anonGroup);
+        }
+
+        for (ProcessControlGroupConfiguration controlGroup : reverseGroups) {
+            // reverse ordered by the current control groups order.
+            List<ProcessController> toStop = getToStop(running, applicationIds, controlGroup);
+
+            if (toStop.isEmpty()) {
+                continue;
+            }
 
             try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceUuid, activeTag, controlGroup, processes,
                     controlGroup.stopType)) {
-                stopped.addAll(bulk.stopGroup(toStop));
+                bulk.stopGroup(toStop);
             }
         }
+    }
 
-        List<String> origApps = new ArrayList<>(applicationIds);
-        handled.forEach(origApps::remove); // everything we were able to assign to a process control group.
-
-        // processes which are not assigned to any group in the CURRENT instance version - stopped last (different to previous BDeploy versions).
-        if (!origApps.isEmpty()) {
-            ProcessControlGroupConfiguration anonGroup = new ProcessControlGroupConfiguration();
-            anonGroup.name = "Unassigned Processes";
-            anonGroup.processOrder.addAll(origApps); // no order.
-
-            List<ProcessController> toStop = origApps.stream().map(e -> running.get(e)).toList();
-            try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceUuid, activeTag, anonGroup, processes,
-                    anonGroup.stopType)) {
-                stopped.addAll(bulk.stopGroup(toStop));
-            }
-        }
+    private List<ProcessController> getToStop(Map<String, ProcessController> running, Collection<String> applicationIds,
+            ProcessControlGroupConfiguration controlGroup) {
+        List<ProcessController> toStop = applicationIds.stream().filter(e -> controlGroup.processOrder.contains(e))
+                .sorted((a, b) -> Integer.compare(controlGroup.processOrder.indexOf(b), controlGroup.processOrder.indexOf(a)))
+                .map(e -> {
+                    if (running.containsKey(e)) {
+                        return running.get(e);
+                    } else {
+                        return processes.controllers.get(e);
+                    }
+                }).toList();
+        return toStop;
     }
 }

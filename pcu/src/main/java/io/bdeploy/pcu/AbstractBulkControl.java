@@ -43,6 +43,18 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
         // Only start when auto-start is configured
         ProcessConfiguration config = controller.getDescriptor();
 
+        // if the process is already running, we'll use that.
+        if (controller.getState().isRunning()) {
+            return true;
+        }
+
+        // if the process is not *planned* to start, we reject it. this is important in case
+        // we use startAll and then stopAll to "abort" starting.
+        if (controller.getState() != ProcessState.STOPPED_START_PLANNED) {
+            logger.log(l -> l.warn("Skipping start of {}, not in planned start state", config.uid));
+            return false;
+        }
+
         // Start it
         if (controlGroup.startWait == ProcessControlGroupWaitType.WAIT) {
             try (MultiStateListener listener = MultiStateListener.createFor(controller)) {

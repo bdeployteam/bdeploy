@@ -37,6 +37,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ isCrashedWaiting: boolean;
   /* template */ isStopping: boolean;
   /* template */ isRunning: boolean;
+  /* template */ isStartPlanned: boolean;
   /* template */ processDetail: ProcessDetailDto;
   /* template */ processConfig: ApplicationConfiguration;
   /* template */ startType: 'Instance' | 'Manual' | 'Confirmed Manual';
@@ -81,6 +82,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         this.processDetail = null;
         this.isCrashedWaiting = false;
         this.isRunning = false;
+        this.isStartPlanned = false;
         this.isStopping = false;
         this.outdated$.next(false);
         return;
@@ -89,6 +91,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.isCrashedWaiting =
         detail.status.processState === ProcessState.CRASHED_WAITING;
       this.isRunning = ProcessesService.isRunning(detail.status.processState);
+      this.isStartPlanned =
+        detail.status.processState === ProcessState.STOPPED_START_PLANNED;
       this.isStopping =
         detail.status.processState === ProcessState.RUNNING_STOP_PLANNED;
 

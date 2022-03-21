@@ -751,14 +751,15 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Map<String, List<String>> groupedByNode = new TreeMap<>();
 
         for (var applicationId : applicationIds) {
-            //Find minion where the application is running
-            String nodeName = status.getNodeWhereAppIsRunningOrScheduled(applicationId);
+            // Find node where the application is running
+            Optional<String> node = status.node2Applications.entrySet().stream()
+                    .filter(e -> e.getValue().getStatus(applicationId) != null).map(e -> e.getKey()).findFirst();
 
-            if (nodeName == null) {
-                continue; // ignore - not running.
+            if (node.isEmpty()) {
+                continue; // ignore - not deployed.
             }
 
-            groupedByNode.computeIfAbsent(nodeName, (n) -> new ArrayList<>()).add(applicationId);
+            groupedByNode.computeIfAbsent(node.get(), (n) -> new ArrayList<>()).add(applicationId);
         }
 
         for (var entry : groupedByNode.entrySet()) {
