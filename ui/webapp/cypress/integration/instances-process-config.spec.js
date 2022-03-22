@@ -241,9 +241,19 @@ describe('Instance Process Config Tests', () => {
             .should('be.enabled')
             .should('have.value', 10);
           cy.get('input[name="param.sleep"]').clear().type('5');
+
+          // need to force this as it is hidden - there is no native hover support in cypress, so no way to show it.
+          cy.contains('mat-icon', 'push_pin').click({ force: true });
+          cy.contains('mat-icon', 'push_pin').should(
+            'have.class',
+            'local-pin-active'
+          );
         });
       });
+    });
+    cy.screenshot('Doc_InstanceConfigParameterPin');
 
+    cy.inMainNavFlyin('app-configure-process', () => {
       // add a custom parameter
       cy.contains('mat-expansion-panel', 'Custom Parameters').within(() => {
         cy.get('mat-panel-title').click();
@@ -342,7 +352,36 @@ describe('Instance Process Config Tests', () => {
       cy.waitUntilContentLoaded();
     });
 
-    // save navigates to dashboard, navigate back
+    // install, activate check pinned parameter on panel.
+    cy.inMainNavContent(() => {
+      cy.contains('.bd-rect-card', 'has no active version')
+        .should('exist')
+        .within(() => {
+          cy.waitForApi(() => {
+            cy.get('button[data-cy="Install"]').should('be.enabled').click();
+          });
+
+          cy.waitForApi(() => {
+            cy.get('button[data-cy="Activate"]').should('be.enabled').click();
+          });
+        });
+
+      cy.contains('app-instance-server-node', 'master')
+        .should('exist')
+        .within(() => {
+          cy.contains('tr', 'Server Application A').should('exist').click();
+        });
+    });
+
+    cy.inMainNavFlyin('app-process-status', () => {
+      cy.contains('app-bd-expand-button', 'Pinned Parameters').within(() => {
+        cy.contains('tr', 'Sleep Timeout').should('exist');
+      });
+    });
+
+    cy.screenshot('Doc_DashboardPinnedParameter');
+
+    // navigate back to configuration to continue tests
     cy.pressMainNavButton('Instance Configuration');
     cy.waitUntilContentLoaded();
 

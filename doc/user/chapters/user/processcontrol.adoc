@@ -116,6 +116,16 @@ The applications server ports (if any are defined) and their state on the target
 
 Clicking on the btn:[Native Processes] below the process control will open a panel showing all operating system processes that associated with this *Process*.
 
+==== Parameter Pinning
+
+Parameter Pinning allows you to pin "important" paramteres, so that they are not only visible during configuration of a process, but also on the process panel on the dashboard. This provides quick access to information about a process. A parameter can be pinned by clicking the little pin icon which appears on each parameters editor when hovering over it.
+
+image::images/Doc_InstanceConfigParameterPin.png[Data Files,align=center,width=480,link="images/Doc_InstanceConfigParameterPin.png"]
+
+The pinned parameter is visible after saving, *installation* and *activation* of the *Instance* version where the parameter has been pinned.
+
+image::images/Doc_DashboardPinnedParameter.png[Data Files,align=center,width=480,link="images/Doc_DashboardPinnedParameter.png"]
+
 ==== Data Files
 
 The *Data Files* page lists all files that are stored in the data directory of each node. Files can be downloaded or opened directly in the the UI where possible. The table is by default sorted by the last modification timestamp. Thus the newest files displayed first.
