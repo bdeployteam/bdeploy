@@ -35,7 +35,7 @@ import jakarta.ws.rs.BadRequestException;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-public class DataFilesTest {
+class DataFilesTest {
 
     @Test
     void testDataFiles(BHive local, CommonRootResource master, InstanceGroupResource igr, RemoteService remote, @TempDir Path tmp)

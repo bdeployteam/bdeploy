@@ -40,7 +40,7 @@ import io.bdeploy.pcu.TestAppFactory;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class MinionCleanupTest {
+class MinionCleanupTest {
 
     @Test
     void mfCleanup(BHive local, NodeCleanupResource scr, RemoteService remote, ActivityReporter reporter, @TempDir Path tmp) {

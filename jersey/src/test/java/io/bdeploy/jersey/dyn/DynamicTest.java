@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 
-public class DynamicTest {
+class DynamicTest {
 
     DynamicTestResourceLocatorImpl locator = new DynamicTestResourceLocatorImpl();
 

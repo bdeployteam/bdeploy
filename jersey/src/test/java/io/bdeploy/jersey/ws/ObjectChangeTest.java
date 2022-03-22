@@ -21,7 +21,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
 import io.bdeploy.jersey.ws.change.msg.ObjectEvent;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 
-public class ObjectChangeTest {
+class ObjectChangeTest {
 
     @RegisterExtension
     TestServer ext = new TestServer();

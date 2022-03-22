@@ -23,7 +23,7 @@ import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestActivityReporter.class)
-public class LoggingConfigTest {
+class LoggingConfigTest {
 
     @Test
     void updateConfig(MinionStatusResource msr, @TempDir Path tmp, MinionRoot mr) throws Exception {

@@ -18,7 +18,7 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessState;
  * Listener that can be added to a process controller to wait for status changes.
  * Enables event-driven testing without hard-coded delays.
  */
-public class StateListener implements Consumer<ProcessStateChangeDto>, AutoCloseable {
+class StateListener implements Consumer<ProcessStateChangeDto>, AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(StateListener.class);
 
@@ -32,7 +32,7 @@ public class StateListener implements Consumer<ProcessStateChangeDto>, AutoClose
     /**
      * Creates a new listener that gets notified whenever the state of the process is changed.
      */
-    public static StateListener createFor(ProcessController pc) {
+    static StateListener createFor(ProcessController pc) {
         StateListener listener = new StateListener(pc);
         pc.addStatusListener(listener);
         return listener;
@@ -54,7 +54,7 @@ public class StateListener implements Consumer<ProcessStateChangeDto>, AutoClose
      *            the expected target states.
      * @return this for chaining.
      */
-    public StateListener expect(ProcessState... expected) {
+    StateListener expect(ProcessState... expected) {
         this.expected = Arrays.asList(expected);
         this.remaining = new LinkedList<>(Arrays.asList(expected));
         this.events = new ArrayList<>();
@@ -93,7 +93,7 @@ public class StateListener implements Consumer<ProcessStateChangeDto>, AutoClose
      * Causes the current thread to wait until all desired target states have been reached or the specified waiting time
      * elapses. An exception will be thrown if the waiting time exceeds.
      */
-    public void await(Duration duration) throws Exception {
+    void await(Duration duration) throws Exception {
         Boolean done = future.get(duration.getSeconds(), TimeUnit.SECONDS);
         if (Boolean.TRUE.equals(done)) {
             return;

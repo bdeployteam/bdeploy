@@ -25,7 +25,7 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
 
 @ExtendWith(TestMinion.class)
-public class InstanceGroupResourceTest {
+class InstanceGroupResourceTest {
 
     @Test
     void crud(InstanceGroupResource res, JerseyClientFactory factory) throws IOException {

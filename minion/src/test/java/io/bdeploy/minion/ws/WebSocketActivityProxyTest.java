@@ -31,7 +31,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
-public class WebSocketActivityProxyTest {
+class WebSocketActivityProxyTest {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketActivityProxyTest.class);
     private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
@@ -86,7 +86,7 @@ public class WebSocketActivityProxyTest {
         public String produce();
     }
 
-    public class ProducerImpl implements Producer {
+    class ProducerImpl implements Producer {
 
         @Inject
         private ActivityReporter reporter;
@@ -102,7 +102,7 @@ public class WebSocketActivityProxyTest {
         }
     }
 
-    public class ProxyImpl implements Proxy {
+    class ProxyImpl implements Proxy {
 
         @Inject
         private ActivityReporter reporter;

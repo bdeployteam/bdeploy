@@ -34,14 +34,14 @@ import io.bdeploy.common.cli.ToolBase;
  * Tests a few of the basic tools.
  */
 @ExtendWith(TestActivityReporter.class)
-public class BasicToolTest {
+class BasicToolTest {
 
     @RegisterExtension
     final TestCliTool tools = new TestCliTool(new BHiveCli());
 
     @SlowTest
     @Test
-    public void testRoundTrip(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
+    void testRoundTrip(@TempDir Path tmp, ActivityReporter reporter) throws Exception {
         Path hiveDir = tmp.resolve("hive");
         Path srcDir = tmp.resolve("src");
         Path expDir = tmp.resolve("exp");
@@ -119,7 +119,7 @@ public class BasicToolTest {
     }
 
     @Test
-    public void helpTest(@TempDir Path tmp) throws Exception {
+    void helpTest(@TempDir Path tmp) throws Exception {
         ToolBase.setTestMode(true);
 
         assertThrows(IllegalArgumentException.class, () -> {

@@ -17,7 +17,7 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.AuthResource;
 
 @ExtendWith(TestMinion.class)
-public class AuthResourceTest {
+class AuthResourceTest {
 
     @Test
     void testAuth(AuthResource auth, TestMinion backend) throws GeneralSecurityException {

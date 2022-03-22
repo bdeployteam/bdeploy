@@ -21,7 +21,7 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ApplicationDto;
 
 @ExtendWith(TestMinion.class)
-public class ApplicationResourceTest {
+class ApplicationResourceTest {
 
     @Test
     void applications(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {

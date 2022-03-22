@@ -23,10 +23,10 @@ import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.common.ContentHelper;
 
 @ExtendWith(TestHive.class)
-public class FsckOpTest {
+class FsckOpTest {
 
     @Test
-    public void testFsck(BHive hive, @TempDir Path tmp) throws IOException {
+    void testFsck(BHive hive, @TempDir Path tmp) throws IOException {
         Path src = ContentHelper.genSimpleTestTree(tmp, "src");
         Manifest.Key key = new Manifest.Key("test", "v1");
 

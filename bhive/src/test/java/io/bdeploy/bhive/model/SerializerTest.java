@@ -15,18 +15,18 @@ import org.junit.jupiter.api.Test;
 import io.bdeploy.bhive.objects.DbTestBase;
 import io.bdeploy.bhive.util.StorageHelper;
 
-public class SerializerTest extends DbTestBase {
+class SerializerTest extends DbTestBase {
 
     private final ObjectId OID1 = randomId();
     private final ObjectId OID2 = randomId();
 
     @Test
-    public void serializeOid() {
+    void serializeOid() {
         assertThat(OID1.compareTo(roundtrip(OID1)), is(0));
     }
 
     @Test
-    public void serializeTree() {
+    void serializeTree() {
         ObjectId id1 = OID1;
         ObjectId id2 = OID2;
 
@@ -60,7 +60,7 @@ public class SerializerTest extends DbTestBase {
     }
 
     @Test
-    public void testEntryOrder() {
+    void testEntryOrder() {
         Tree.Key k1 = new Tree.Key("a", Tree.EntryType.BLOB);
         Tree.Key k2 = new Tree.Key("z", Tree.EntryType.BLOB);
 
@@ -82,7 +82,7 @@ public class SerializerTest extends DbTestBase {
     }
 
     @Test
-    public void serializeManifest() {
+    void serializeManifest() {
         ObjectId id1 = OID1;
 
         String timeStr = Long.toString(System.currentTimeMillis());

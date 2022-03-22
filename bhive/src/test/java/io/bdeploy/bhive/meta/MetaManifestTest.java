@@ -25,7 +25,7 @@ import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.common.ContentHelper;
 
 @ExtendWith(TestHive.class)
-public class MetaManifestTest {
+class MetaManifestTest {
 
     private static final class MyMeta {
 

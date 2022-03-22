@@ -15,7 +15,7 @@ import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 
-public class AuditorLoadTest {
+class AuditorLoadTest {
 
     @Test
     void testAuditorLoad(@TempDir Path tmp) {

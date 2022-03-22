@@ -14,10 +14,10 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.ui.api.Minion;
 
 @ExtendWith(TestMinion.class)
-public class MinionBasicClientTest {
+class MinionBasicClientTest {
 
     @Test
-    public void listMinionsTest(MasterRootResource master) throws Exception {
+    void listMinionsTest(MasterRootResource master) throws Exception {
         Map<String, MinionStatusDto> minions = master.getNodes();
         assertThat(minions.size(), is(1));
         assertThat(minions.get(Minion.DEFAULT_NAME), is(notNullValue()));

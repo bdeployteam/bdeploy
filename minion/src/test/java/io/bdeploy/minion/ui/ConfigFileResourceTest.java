@@ -37,7 +37,7 @@ import jakarta.ws.rs.InternalServerErrorException;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-public class ConfigFileResourceTest {
+class ConfigFileResourceTest {
 
     @Test
     void updates(BHive local, CommonRootResource master, InstanceGroupResource igr, RemoteService remote, @TempDir Path tmp)

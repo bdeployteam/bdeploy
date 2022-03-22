@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.bdeploy.jersey.TestServer;
 
-public class InjectionTest {
+class InjectionTest {
 
     private static final String TEST = "test";
 

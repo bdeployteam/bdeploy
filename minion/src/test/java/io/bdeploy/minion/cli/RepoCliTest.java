@@ -23,13 +23,13 @@ import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.ui.cli.RemoteRepoTool;
 
 @ExtendWith(TestMinion.class)
-public class RepoCliTest {
+class RepoCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());
 
     @Test
-    public void crud(CommonRootResource master, MinionRoot root) {
+    void crud(CommonRootResource master, MinionRoot root) {
         assertTrue(master.getSoftwareRepositories().isEmpty());
 
         SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryConfiguration();
@@ -48,7 +48,7 @@ public class RepoCliTest {
     }
 
     @Test
-    public void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root)
+    void toolCreate(CommonRootResource master, RemoteService service, @AuthPack String auth, MinionRoot root)
             throws IOException {
         tools.execute(RemoteRepoTool.class, "--remote=" + service.getUri(), "--token=" + auth,
                 "--storage=" + root.getStorageLocations().get(0).toString(), "--add=test", "--description=desc");

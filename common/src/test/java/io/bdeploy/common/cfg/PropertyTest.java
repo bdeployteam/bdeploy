@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import io.bdeploy.common.cfg.Configuration.ConfigurationNameMapping;
 
-public class PropertyTest {
+class PropertyTest {
 
     @Test
-    public void testProperties() {
+    void testProperties() {
         String value = System.getProperty("user.home");
 
         Configuration c = new Configuration();

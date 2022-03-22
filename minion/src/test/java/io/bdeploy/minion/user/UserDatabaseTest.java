@@ -23,7 +23,7 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestMinion.class)
-public class UserDatabaseTest {
+class UserDatabaseTest {
 
     @Test
     void userRoles(MinionRoot root) {
@@ -95,7 +95,7 @@ public class UserDatabaseTest {
     }
 
     @Test
-    public void userNames(MinionRoot root) {
+    void userNames(MinionRoot root) {
         UserDatabase db = root.getUsers();
         int originalSize = db.getAllNames().size();
 

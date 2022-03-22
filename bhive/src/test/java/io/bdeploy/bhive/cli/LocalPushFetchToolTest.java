@@ -9,13 +9,13 @@ import org.junit.jupiter.api.io.TempDir;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TestCliTool;
 
-public class LocalPushFetchToolTest {
+class LocalPushFetchToolTest {
 
     @RegisterExtension
     final TestCliTool tools = new TestCliTool(new BHiveCli());
 
     @Test
-    public void testPush(@TempDir Path tmp) throws Exception {
+    void testPush(@TempDir Path tmp) throws Exception {
         Path src = ContentHelper.genSimpleTestTree(tmp, "source");
         Path target = tmp.resolve("target");
         Path hive1 = tmp.resolve("hive1");
@@ -35,7 +35,7 @@ public class LocalPushFetchToolTest {
     }
 
     @Test
-    public void testFetch(@TempDir Path tmp) throws Exception {
+    void testFetch(@TempDir Path tmp) throws Exception {
         Path src = ContentHelper.genSimpleTestTree(tmp, "source");
         Path target = tmp.resolve("target");
         Path hive1 = tmp.resolve("hive1");

@@ -64,7 +64,7 @@ import io.bdeploy.ui.api.Minion;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class MinionDeployTest {
+class MinionDeployTest {
 
     @RegisterExtension
     TestCliTool launcher = new TestCliTool(new LauncherCli());

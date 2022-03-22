@@ -20,10 +20,10 @@ import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.Test;
 
-public class NioLockingTest {
+class NioLockingTest {
 
     @Test
-    public void testLockingPerformance() throws IOException {
+    void testLockingPerformance() throws IOException {
         Path lockFile = Files.createTempFile("locktest-", ".tmp");
         try {
             long start = System.currentTimeMillis();
@@ -42,7 +42,7 @@ public class NioLockingTest {
     }
 
     @Test
-    public void twoThreadLockTest() throws Exception {
+    void twoThreadLockTest() throws Exception {
         Path lockFile = Files.createTempFile("locktest-", ".tmp");
         ExecutorService pool = Executors.newFixedThreadPool(4);
         long start = System.currentTimeMillis();

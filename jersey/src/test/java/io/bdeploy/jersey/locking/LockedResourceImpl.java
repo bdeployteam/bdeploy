@@ -2,14 +2,13 @@ package io.bdeploy.jersey.locking;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jakarta.inject.Singleton;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
+import jakarta.inject.Singleton;
 
 @LockingResource
 @Singleton

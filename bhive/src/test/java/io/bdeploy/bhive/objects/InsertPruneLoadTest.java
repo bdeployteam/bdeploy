@@ -52,7 +52,7 @@ import io.bdeploy.common.ActivityReporter;
  * Replace 'X' with a unique string per started JVM to avoid manifest name collisions in the test.
  */
 @ExtendWith(TestHive.class)
-public class InsertPruneLoadTest {
+class InsertPruneLoadTest {
 
     private static final Logger log = LoggerFactory.getLogger(InsertPruneLoadTest.class);
 

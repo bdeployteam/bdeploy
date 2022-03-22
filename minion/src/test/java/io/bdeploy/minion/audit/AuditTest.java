@@ -22,7 +22,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
-public class AuditTest {
+class AuditTest {
 
     @Path("/svc")
     public interface Service {

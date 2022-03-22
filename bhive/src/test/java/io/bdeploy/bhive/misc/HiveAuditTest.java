@@ -28,10 +28,10 @@ import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.audit.AuditRecord.Severity;
 
 @ExtendWith(TestHive.class)
-public class HiveAuditTest {
+class HiveAuditTest {
 
     @Test
-    public void testAudit(BHive hive, @TempDir Path tmp) throws IOException {
+    void testAudit(BHive hive, @TempDir Path tmp) throws IOException {
         Path src = ContentHelper.genSimpleTestTree(tmp, "src");
         Manifest.Key key = new Manifest.Key("test", "v1");
 

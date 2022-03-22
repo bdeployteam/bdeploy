@@ -24,7 +24,7 @@ import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestHive.class)
 @ExtendWith(TestMinion.class)
-public class InstanceManifestHistoryTest {
+class InstanceManifestHistoryTest {
 
     @Test
     void writeRead(@TempDir Path tmp, MinionRoot root, CommonRootResource master, RemoteService remote, BHive local)

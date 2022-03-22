@@ -8,7 +8,7 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 
-public class TemplateHelperTest {
+class TemplateHelperTest {
 
     private static final String R = "RESOLVED";
 

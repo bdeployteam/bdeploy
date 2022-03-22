@@ -14,7 +14,7 @@ import io.bdeploy.bhive.BHive.Operation;
 import io.bdeploy.bhive.TestHive;
 
 @ExtendWith(TestHive.class)
-public class OperationSynchronizerTest {
+class OperationSynchronizerTest {
 
     @Test
     void testSynchronizer(BHive hive) throws Exception {

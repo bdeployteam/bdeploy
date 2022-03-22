@@ -130,7 +130,7 @@ public class TestMinion extends TestServer {
 
         final MinionRoot mr;
 
-        public CloseableMinionRoot(int port, MinionMode mode) {
+        CloseableMinionRoot(int port, MinionMode mode) {
             try {
                 root = Files.createTempDirectory("mr-");
                 mr = new MinionRoot(root, new ActivityReporter.Null());

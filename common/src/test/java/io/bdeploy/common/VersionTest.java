@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import io.bdeploy.common.util.VersionHelper;
 
-public class VersionTest {
+class VersionTest {
 
     @Test
     void version() {

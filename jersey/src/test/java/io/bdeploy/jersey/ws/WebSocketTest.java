@@ -24,7 +24,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 
-public class WebSocketTest {
+class WebSocketTest {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketTest.class);
 

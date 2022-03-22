@@ -29,7 +29,7 @@ import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.util.PathHelper;
 
 @ExtendWith(TestHive.class)
-public class SnapshotAndDiffTest {
+class SnapshotAndDiffTest {
 
     @Test
     void scannerTest(@TempDir Path tmp, BHive hive) throws IOException {

@@ -36,7 +36,7 @@ import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-public class DataFileTest {
+class DataFileTest {
 
     @Test
     void testDataFile(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp,

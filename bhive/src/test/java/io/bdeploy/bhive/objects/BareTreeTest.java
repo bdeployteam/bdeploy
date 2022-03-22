@@ -17,7 +17,7 @@ import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TestActivityReporter;
 
 @ExtendWith(TestActivityReporter.class)
-public class BareTreeTest {
+class BareTreeTest {
 
     @Test
     void impExp(@TempDir Path tmp, ActivityReporter reporter) throws IOException {

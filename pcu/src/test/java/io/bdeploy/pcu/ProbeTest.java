@@ -17,7 +17,7 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
 import io.bdeploy.jersey.TestServer;
 
-public class ProbeTest {
+class ProbeTest {
 
     private final AtomicBoolean fakeStart = new AtomicBoolean(false);
 

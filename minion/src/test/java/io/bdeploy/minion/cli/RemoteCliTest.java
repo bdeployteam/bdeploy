@@ -29,7 +29,6 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.minion.TestMinion.AuthPack;
-import io.bdeploy.minion.deploy.MinionDeployTest;
 import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.cli.RemoteDeploymentTool;
 import io.bdeploy.ui.cli.RemoteInstanceTool;
@@ -41,7 +40,7 @@ import io.bdeploy.ui.cli.RemoteProcessTool;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class RemoteCliTest {
+class RemoteCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());
