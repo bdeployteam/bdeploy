@@ -51,7 +51,7 @@
         <div fxLayout="column" fxLayoutGap="10px">
           <div>
             Control
-            <strong>{{ (bulk.selection$ | async)?.length || 0 }}</strong>
+            <strong>{{ bulkSelection.length || 0 }}</strong>
             selected processes.
           </div>
           <app-bd-notification-card
@@ -71,7 +71,7 @@
           text="Start Selected Processes"
           (click)="doStartMulti(instance)"
           [loadingWhen$]="startingMulti$"
-          [disabled]="(startingMulti$ | async) || !(bulk.selection$ | async)?.length || bulkContainsConfirmed"
+          [disabled]="(startingMulti$ | async) || !bulkSelection.length || bulkContainsConfirmed"
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
@@ -80,7 +80,7 @@
           text="Stop Selected Processes"
           (click)="doStopMulti(instance)"
           [loadingWhen$]="stoppingMulti$"
-          [disabled]="(stoppingMulti$ | async) || !(bulk.selection$ | async)?.length || bulkContainsConfirmed"
+          [disabled]="(stoppingMulti$ | async) || !bulkSelection.length || bulkContainsConfirmed"
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
@@ -89,7 +89,7 @@
           text="Restart Selected Processes"
           (click)="doRestartMulti(instance)"
           [loadingWhen$]="restartingMulti$"
-          [disabled]="(restartingMulti$ | async) || !(bulk.selection$ | async)?.length || bulkContainsConfirmed"
+          [disabled]="(restartingMulti$ | async) || !bulkSelection.length || bulkContainsConfirmed"
         ></app-bd-button>
       </div>
     </ng-template>

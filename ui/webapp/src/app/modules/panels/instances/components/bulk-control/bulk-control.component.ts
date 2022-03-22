@@ -22,6 +22,7 @@ export class BulkControlComponent {
   /* template */ restartingMulti$ = new BehaviorSubject<boolean>(false);
 
   /* template */ bulkContainsConfirmed = false;
+  /* template */ bulkSelection: string[] = [];
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -32,16 +33,26 @@ export class BulkControlComponent {
     public bulk: ProcessesBulkService
   ) {
     this.bulk.selection$.subscribe((s) => {
-      if (!s?.length) {
+      if (!s) {
         this.bulkContainsConfirmed = false;
-      } else {
-        this.bulkContainsConfirmed =
-          s.filter(
+        this.bulkSelection = [];
+        return;
+      }
+
+      this.bulkContainsConfirmed = Object.keys(s).some(
+        (k) =>
+          s[k].filter(
             (c) =>
               c?.processControl?.startType ===
               ApplicationStartType.MANUAL_CONFIRM
-          ).length > 0;
-      }
+          ).length > 0
+      );
+
+      const result: string[] = [];
+      Object.keys(s).forEach((k) => {
+        result.push(...s[k].map((c) => c.uid));
+      });
+      this.bulkSelection = result;
     });
   }
 
@@ -106,7 +117,7 @@ export class BulkControlComponent {
         if (b) {
           this.startingMulti$.next(true);
           this.processes
-            .start(this.bulk.selection$.value.map((s) => s.uid))
+            .start(this.bulkSelection)
             .pipe(finalize(() => this.startingMulti$.next(false)))
             .subscribe();
         }
@@ -123,7 +134,7 @@ export class BulkControlComponent {
         if (b) {
           this.stoppingMulti$.next(true);
           this.processes
-            .stop(this.bulk.selection$.value.map((s) => s.uid))
+            .stop(this.bulkSelection)
             .pipe(finalize(() => this.stoppingMulti$.next(false)))
             .subscribe();
         }
@@ -140,7 +151,7 @@ export class BulkControlComponent {
         if (b) {
           this.restartingMulti$.next(true);
           this.processes
-            .restart(this.bulk.selection$.value.map((s) => s.uid))
+            .restart(this.bulkSelection)
             .pipe(finalize(() => this.restartingMulti$.next(false)))
             .subscribe();
         }
