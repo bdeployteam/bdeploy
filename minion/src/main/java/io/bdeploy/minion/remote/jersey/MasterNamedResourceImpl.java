@@ -753,7 +753,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         for (var applicationId : applicationIds) {
             // Find node where the application is running
             Optional<String> node = status.node2Applications.entrySet().stream()
-                    .filter(e -> e.getValue().getStatus(applicationId) != null).map(e -> e.getKey()).findFirst();
+                    .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null).map(e -> e.getKey())
+                    .findFirst();
 
             if (node.isEmpty()) {
                 continue; // ignore - not deployed.
