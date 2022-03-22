@@ -159,10 +159,6 @@
                 >
                 <div
                   *ngIf="!col.component || row.expandable"
-                  [matBadge]="row.node.children.length"
-                  [matBadgeHidden]="!row.expandable"
-                  matBadgeSize="small"
-                  matBadgeOverlap="false"
                   class="bd-text-ellipsis"
                   fxFlex="1 0 0"
                   [style.text-align]="'left'"
