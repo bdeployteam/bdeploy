@@ -109,29 +109,7 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
             }
 
             // ask confirmation on the actual component (the primary one in this case).
-            return panelSave.pipe(
-              switchMap(() =>
-                this.confirm(component).pipe(
-                  switchMap((x) => {
-                    if (x !== DirtyActionType.CANCEL) {
-                      // navigation accepted. since the panel is only hidden, we need to make sure it is completely closed
-                      // once the navigation is done.
-                      this.areas.forcePanelClose$.next(true);
-
-                      let primarySave = of(true);
-                      if (x === DirtyActionType.SAVE) {
-                        primarySave = component.doSave();
-                      }
-                      return primarySave.pipe(switchMap(() => of(true)));
-                    } else {
-                      // navigation is cancelled. we *instead* close the panel fully, since it is only hidden now.
-                      this.areas.closePanel(true);
-                      return of(false);
-                    }
-                  })
-                )
-              )
-            );
+            return this.confirmAndSavePrimaryComponent(panelSave, component);
           }
         })
       );
@@ -152,30 +130,65 @@ export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
         return of(true);
       }
 
-      return this.confirm(component).pipe(
-        switchMap((x) => {
-          if (x === DirtyActionType.CANCEL) {
-            this.areas.forcePanelClose$.next(false);
-            return of(false);
-          }
-          if (x === DirtyActionType.SAVE) {
-            return component.doSave().pipe(
-              switchMap((replace) => {
-                const closeDialog = replace === true || replace === null;
-                if (component.doReplace && replace) {
-                  component.doReplace().subscribe();
-                }
-                this.areas.forcePanelClose$.next(closeDialog);
-                return of(closeDialog);
-              })
-            );
-          }
-          return of(true);
-        })
-      );
+      return this.confirmAndSaveComponent(component);
     } else {
       return of(true);
     }
+  }
+
+  private confirmAndSaveComponent(
+    component: DirtyableDialog
+  ): Observable<boolean> {
+    return this.confirm(component).pipe(
+      switchMap((x) => {
+        if (x === DirtyActionType.CANCEL) {
+          this.areas.forcePanelClose$.next(false);
+          return of(false);
+        }
+        if (x === DirtyActionType.SAVE) {
+          return component.doSave().pipe(
+            switchMap((replace) => {
+              const closeDialog = replace === true || replace === null;
+              if (component.doReplace && replace) {
+                component.doReplace().subscribe();
+              }
+              this.areas.forcePanelClose$.next(closeDialog);
+              return of(closeDialog);
+            })
+          );
+        }
+        return of(true);
+      })
+    );
+  }
+
+  private confirmAndSavePrimaryComponent(
+    panelSave: Observable<boolean>,
+    component: DirtyableDialog
+  ): Observable<boolean> {
+    return panelSave.pipe(
+      switchMap(() =>
+        this.confirm(component).pipe(
+          switchMap((x) => {
+            if (x !== DirtyActionType.CANCEL) {
+              // navigation accepted. since the panel is only hidden, we need to make sure it is completely closed
+              // once the navigation is done.
+              this.areas.forcePanelClose$.next(true);
+
+              let primarySave = of(true);
+              if (x === DirtyActionType.SAVE) {
+                primarySave = component.doSave();
+              }
+              return primarySave.pipe(switchMap(() => of(true)));
+            } else {
+              // navigation is cancelled. we *instead* close the panel fully, since it is only hidden now.
+              this.areas.closePanel(true);
+              return of(false);
+            }
+          })
+        )
+      )
+    );
   }
 
   private confirm(component: DirtyableDialog) {

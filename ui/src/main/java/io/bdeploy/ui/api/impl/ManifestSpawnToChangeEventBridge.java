@@ -69,38 +69,42 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
                 continue; // not interested.
             }
 
-            // try to find out what the heck it is. we want to identify: Instance Group, Software Repo, Instance, Product
-            if (igmKey != null && key.equals(igmKey)) {
-                // update for instance group published.
+            processKeySpawn(hiveName, hive, igmKey, swrKey, key);
+        }
+    }
+
+    private void processKeySpawn(String hiveName, BHive hive, Manifest.Key igmKey, Manifest.Key swrKey, Manifest.Key key) {
+        // try to find out what the heck it is. we want to identify: Instance Group, Software Repo, Instance, Product
+        if (igmKey != null && key.equals(igmKey)) {
+            // update for instance group published.
+            if (log.isDebugEnabled()) {
+                log.debug("Instance Group update for {}", hiveName);
+            }
+            events.create(ObjectChangeType.INSTANCE_GROUP, igmKey, new ObjectScope(hiveName));
+        } else if (swrKey != null && key.equals(swrKey)) {
+            // update for software repo published.
+            if (log.isDebugEnabled()) {
+                log.debug("Software Repository update for {}", hiveName);
+            }
+            events.create(ObjectChangeType.SOFTWARE_REPO, swrKey, new ObjectScope(hiveName));
+        } else {
+            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
+            if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
+                // it is a product!
                 if (log.isDebugEnabled()) {
-                    log.debug("Instance Group update for {}", hiveName);
+                    log.debug("Product update for {}: {}", hiveName, key);
                 }
-                events.create(ObjectChangeType.INSTANCE_GROUP, igmKey, new ObjectScope(hiveName));
-            } else if (swrKey != null && key.equals(swrKey)) {
-                // update for software repo published.
+                events.create(ObjectChangeType.PRODUCT, key, new ObjectScope(hiveName));
+            } else if (mf.getLabels().containsKey(InstanceManifest.INSTANCE_LABEL)) {
+                // it is an instance!
+                InstanceManifest im = InstanceManifest.of(hive, key);
                 if (log.isDebugEnabled()) {
-                    log.debug("Software Repository update for {}", hiveName);
+                    log.debug("Instance update for {}: {}", hiveName, im.getConfiguration().uuid);
                 }
-                events.create(ObjectChangeType.SOFTWARE_REPO, swrKey, new ObjectScope(hiveName));
+                events.create(ObjectChangeType.INSTANCE, key, new ObjectScope(hiveName, im.getConfiguration().uuid));
             } else {
-                Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
-                if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
-                    // it is a product!
-                    if (log.isDebugEnabled()) {
-                        log.debug("Product update for {}: {}", hiveName, key);
-                    }
-                    events.create(ObjectChangeType.PRODUCT, key, new ObjectScope(hiveName));
-                } else if (mf.getLabels().containsKey(InstanceManifest.INSTANCE_LABEL)) {
-                    // it is an instance!
-                    InstanceManifest im = InstanceManifest.of(hive, key);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Instance update for {}: {}", hiveName, im.getConfiguration().uuid);
-                    }
-                    events.create(ObjectChangeType.INSTANCE, key, new ObjectScope(hiveName, im.getConfiguration().uuid));
-                } else {
-                    // we have no idea, and we don't care :)
-                    log.trace("Unknown Manifest spawn in {}: {}", hiveName, key);
-                }
+                // we have no idea, and we don't care :)
+                log.trace("Unknown Manifest spawn in {}: {}", hiveName, key);
             }
         }
     }

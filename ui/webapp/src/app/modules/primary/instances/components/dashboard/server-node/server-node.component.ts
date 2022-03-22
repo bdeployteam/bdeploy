@@ -135,20 +135,28 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     let stoppedApps = 0;
     let deadApps = 0;
     this.node.nodeConfiguration.applications.forEach((app) => {
-      if (app.processControl.startType === ApplicationStartType.INSTANCE) {
-        const state = ProcessesService.get(states, app.uid)?.processState;
-        if (!ProcessesService.isRunning(state)) {
-          stoppedApps++;
-        } else {
-          if (state === ProcessState.RUNNING_NOT_ALIVE) {
-            deadApps++;
-          } else {
-            runningApps++;
-          }
-        }
+      if (app.processControl.startType !== ApplicationStartType.INSTANCE) {
+        return;
+      }
+
+      const state = ProcessesService.get(states, app.uid)?.processState;
+      if (!ProcessesService.isRunning(state)) {
+        stoppedApps++;
+      } else if (state === ProcessState.RUNNING_NOT_ALIVE) {
+        deadApps++;
+      } else {
+        runningApps++;
       }
     });
 
+    this.updateProcessStateItem(stoppedApps, deadApps, runningApps);
+  }
+
+  private updateProcessStateItem(
+    stoppedApps: number,
+    deadApps: number,
+    runningApps: number
+  ) {
     this.processesState.next(
       !stoppedApps && !deadApps ? 'ok' : !runningApps ? 'info' : 'warning'
     );

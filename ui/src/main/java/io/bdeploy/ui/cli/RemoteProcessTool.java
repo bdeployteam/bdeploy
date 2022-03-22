@@ -88,23 +88,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .getInstanceResource(groupName);
         String appId = config.application();
         if (config.start() || config.stop()) {
-            if (config.start()) {
-                if (appId == null || appId.isEmpty()) {
-                    ir.getProcessResource(instanceId).startAll();
-                } else {
-                    ir.getProcessResource(instanceId).startProcesses(List.of(appId));
-                    if (config.join()) {
-                        doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(appId).processState);
-                    }
-                }
-            } else if (config.stop()) {
-                if (appId == null || appId.isEmpty()) {
-                    ir.getProcessResource(instanceId).stopAll();
-                } else {
-                    ir.getProcessResource(instanceId).stopProcesses(List.of(appId));
-                }
-            }
-            return createSuccess();
+            return doStartStop(config, instanceId, ir, appId);
         }
 
         Map<String, ProcessStatusDto> status = ir.getProcessResource(instanceId).getStatus();
@@ -133,6 +117,26 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
             return result;
         }
+    }
+
+    private RenderableResult doStartStop(RemoteProcessConfig config, String instanceId, InstanceResource ir, String appId) {
+        if (config.start()) {
+            if (appId == null || appId.isEmpty()) {
+                ir.getProcessResource(instanceId).startAll();
+            } else {
+                ir.getProcessResource(instanceId).startProcesses(List.of(appId));
+                if (config.join()) {
+                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(appId).processState);
+                }
+            }
+        } else if (config.stop()) {
+            if (appId == null || appId.isEmpty()) {
+                ir.getProcessResource(instanceId).stopAll();
+            } else {
+                ir.getProcessResource(instanceId).stopProcesses(List.of(appId));
+            }
+        }
+        return createSuccess();
     }
 
     private void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {

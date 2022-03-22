@@ -227,36 +227,41 @@ public class ProductManifest {
                 }
             }
 
-            // merge simple attributes
-            app.application = resolveStringValue(app.application, parentDesc.application);
-            app.name = resolveStringValue(app.name, parentDesc.name);
-            app.description = resolveStringValue(app.description, parentDesc.description);
-            app.preferredProcessControlGroup = resolveStringValue(app.preferredProcessControlGroup,
-                    parentDesc.preferredProcessControlGroup);
-
-            // merge process control partial object as map
-            for (var entry : parentDesc.processControl.entrySet()) {
-                if (!app.processControl.containsKey(entry.getKey())) {
-                    app.processControl.put(entry.getKey(), entry.getValue());
-                }
-            }
-
-            if (app.startParameters == null) {
-                app.startParameters = new ArrayList<>();
-            }
-
-            if (parentDesc.startParameters != null) {
-                // merge start parameters
-                for (var param : parentDesc.startParameters) {
-                    var existing = app.startParameters.stream().filter(p -> p.uid.equals(param.uid)).findAny();
-                    if (!existing.isPresent()) {
-                        app.startParameters.add(param);
-                    }
-                }
-            }
+            // merge all kinds of attributes, so that 'app' contains a complete template in the end.
+            mergeParentIntoTemplate(app, parentDesc);
         }
 
         app.resolved = true;
+    }
+
+    private static void mergeParentIntoTemplate(TemplateApplication app, ApplicationTemplateDescriptor parentDesc) {
+        // merge simple attributes
+        app.application = resolveStringValue(app.application, parentDesc.application);
+        app.name = resolveStringValue(app.name, parentDesc.name);
+        app.description = resolveStringValue(app.description, parentDesc.description);
+        app.preferredProcessControlGroup = resolveStringValue(app.preferredProcessControlGroup,
+                parentDesc.preferredProcessControlGroup);
+
+        // merge process control partial object as map
+        for (var entry : parentDesc.processControl.entrySet()) {
+            if (!app.processControl.containsKey(entry.getKey())) {
+                app.processControl.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (app.startParameters == null) {
+            app.startParameters = new ArrayList<>();
+        }
+
+        if (parentDesc.startParameters != null) {
+            // merge start parameters
+            for (var param : parentDesc.startParameters) {
+                var existing = app.startParameters.stream().filter(p -> p.uid.equals(param.uid)).findAny();
+                if (!existing.isPresent()) {
+                    app.startParameters.add(param);
+                }
+            }
+        }
     }
 
     private static String resolveStringValue(String ours, String theirs) {

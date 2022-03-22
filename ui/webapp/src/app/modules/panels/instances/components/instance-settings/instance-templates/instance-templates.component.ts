@@ -1,7 +1,13 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  of,
+  Subscription,
+} from 'rxjs';
 import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -233,102 +239,17 @@ export class InstanceTemplatesComponent implements OnDestroy {
       // not set or SERVER
       if (group.type !== ApplicationType.CLIENT) {
         // for servers, we need to find the appropriate application with the correct OS.
-        for (const app of group.applications) {
-          // need to prepare process control groups synchronously before adding applications.
-          this.prepareProcessControlGroups(
-            app,
-            node,
-            pcgs,
-            groupName,
-            nodeName
-          );
-
-          observables.push(
-            this.instanceEdit.nodes$.pipe(
-              // wait for node information
-              skipWhile((n) => !n),
-              // pick the first valid node info
-              first(),
-              // map the node info to the application key we need for our node.
-              map((n) =>
-                this.instanceEdit.stateApplications$.value?.find(
-                  (a) =>
-                    a.key.name ===
-                    getTemplateAppKey(this.product, app, n[nodeName])
-                )
-              ),
-              // map the key of the app to an observable to actually add the application if possible.
-              map((a) => {
-                if (!a) {
-                  this.messages.push({
-                    group: groupName,
-                    node: nodeName,
-                    template: app,
-                    appname: app?.name
-                      ? app.name
-                      : app.template
-                      ? app.template
-                      : app.application,
-                    message: {
-                      icon: 'warning',
-                      message:
-                        'Cannot find application in product for target OS.',
-                    },
-                  });
-                  return of<string>(null);
-                } else {
-                  const status = [];
-                  return this.edit
-                    .addProcess(node, a, app, this.variables, status)
-                    .pipe(
-                      finalize(() => {
-                        status.forEach((e) =>
-                          this.messages.push({
-                            group: groupName,
-                            node: nodeName,
-                            appname: app?.name ? app.name : a.name,
-                            template: app,
-                            message: e,
-                          })
-                        );
-                      })
-                    );
-                }
-              }),
-              // since adding returns an observable we concat them, so a subscription to the observable will yield the addProcess response.
-              concatAll()
-            )
-          );
-        }
+        this.applyServerGroup(
+          group,
+          node,
+          pcgs,
+          groupName,
+          nodeName,
+          observables
+        );
       } else {
         // for clients we add all matches, regardless of the OS.
-        for (const template of group.applications) {
-          // need to find all apps in the product which match the key name...
-          const searchKey = this.product.product + '/' + template.application;
-          const status = [];
-          for (const app of this.instanceEdit.stateApplications$.value) {
-            const appKey = getAppKeyName(app.key);
-            if (searchKey === appKey) {
-              observables.push(
-                this.edit
-                  .addProcess(node, app, template, this.variables, status)
-                  .pipe(
-                    finalize(() => {
-                      status.forEach((e) =>
-                        this.messages.push({
-                          group: groupName,
-                          node: nodeName,
-                          appname: template?.name ? template.name : app.name,
-                          template: template,
-                          message: e,
-                        })
-                      );
-                    })
-                  )
-              );
-            }
-          }
-        }
+        this.applyClientGroup(group, observables, node, groupName, nodeName);
       }
     }
 
@@ -370,6 +291,111 @@ export class InstanceTemplatesComponent implements OnDestroy {
           }
         });
       });
+  }
+
+  private applyClientGroup(
+    group: InstanceTemplateGroup,
+    observables: Observable<string>[],
+    node: InstanceNodeConfigurationDto,
+    groupName: string,
+    nodeName: string
+  ) {
+    for (const template of group.applications) {
+      // need to find all apps in the product which match the key name...
+      const searchKey = this.product.product + '/' + template.application;
+      const status = [];
+      for (const app of this.instanceEdit.stateApplications$.value) {
+        const appKey = getAppKeyName(app.key);
+        if (searchKey === appKey) {
+          observables.push(
+            this.edit
+              .addProcess(node, app, template, this.variables, status)
+              .pipe(
+                finalize(() => {
+                  status.forEach((e) =>
+                    this.messages.push({
+                      group: groupName,
+                      node: nodeName,
+                      appname: template?.name ? template.name : app.name,
+                      template: template,
+                      message: e,
+                    })
+                  );
+                })
+              )
+          );
+        }
+      }
+    }
+  }
+
+  private applyServerGroup(
+    group: InstanceTemplateGroup,
+    node: InstanceNodeConfigurationDto,
+    pcgs: ProcessControlGroupConfiguration[],
+    groupName: string,
+    nodeName: string,
+    observables: Observable<string>[]
+  ) {
+    for (const app of group.applications) {
+      // need to prepare process control groups synchronously before adding applications.
+      this.prepareProcessControlGroups(app, node, pcgs, groupName, nodeName);
+
+      observables.push(
+        this.instanceEdit.nodes$.pipe(
+          // wait for node information
+          skipWhile((n) => !n),
+          // pick the first valid node info
+          first(),
+          // map the node info to the application key we need for our node.
+          map((n) =>
+            this.instanceEdit.stateApplications$.value?.find(
+              (a) =>
+                a.key.name === getTemplateAppKey(this.product, app, n[nodeName])
+            )
+          ),
+          // map the key of the app to an observable to actually add the application if possible.
+          map((a) => {
+            if (!a) {
+              this.messages.push({
+                group: groupName,
+                node: nodeName,
+                template: app,
+                appname: app?.name
+                  ? app.name
+                  : app.template
+                  ? app.template
+                  : app.application,
+                message: {
+                  icon: 'warning',
+                  message: 'Cannot find application in product for target OS.',
+                },
+              });
+              return of<string>(null);
+            } else {
+              const status = [];
+              return this.edit
+                .addProcess(node, a, app, this.variables, status)
+                .pipe(
+                  finalize(() => {
+                    status.forEach((e) =>
+                      this.messages.push({
+                        group: groupName,
+                        node: nodeName,
+                        appname: app?.name ? app.name : a.name,
+                        template: app,
+                        message: e,
+                      })
+                    );
+                  })
+                );
+            }
+          }),
+          // since adding returns an observable we concat them, so a subscription to the observable will yield the addProcess response.
+          concatAll()
+        )
+      );
+    }
   }
 
   /**

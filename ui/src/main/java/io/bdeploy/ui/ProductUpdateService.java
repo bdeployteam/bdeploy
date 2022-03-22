@@ -58,61 +58,8 @@ public class ProductUpdateService {
         }
 
         for (var app : allApps) {
-            var current = currentApplications == null ? null
-                    : currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
-            var target = targetApplications.stream().filter(a -> a.getKey().getName().equals(app.application.getName()))
-                    .findFirst();
-
-            if (current != null && current.isEmpty()) {
-                throw new IllegalStateException("Cannot find current application: " + app.application);
-            }
-
-            if (target.isEmpty()) {
-                // cannot update, application no longer exists. perform "dummy" update, so validation detects this.
-                app.application = new Manifest.Key(app.application.getName(), "NOT_PRESENT");
-                validationIssues.add(new ApplicationValidationDto(app.uid, null, "Application " + app.application.getName()
-                        + " not available in product version " + targetProduct.getKey().getTag()));
-                continue;
-            }
-
-            ApplicationDescriptor targetDesc = target.get().getDescriptor();
-            app.application = target.get().getKey();
-            app.pooling = targetDesc.pooling;
-
-            // update process control data - this is not configurable by user.
-            app.processControl.startupProbe = targetDesc.processControl.startupProbe;
-            app.processControl.lifenessProbe = targetDesc.processControl.lifenessProbe;
-
-            if (app.start != null && app.start.parameters != null && !app.start.parameters.isEmpty()) {
-                // update existing parameter order (just the order)
-                app.start.parameters = reorderParameters(app.start.parameters, targetDesc.startCommand.parameters);
-            }
-
-            if (targetDesc.startCommand.parameters != null && !targetDesc.startCommand.parameters.isEmpty()) {
-                app.start.executable = targetDesc.startCommand.launcherPath;
-
-                if (current != null) {
-                    // update parameters, add missing, add validation notice for removed parameters
-                    app.start.parameters = updateParameters(app, targetDesc, app.start.parameters,
-                            targetDesc.startCommand.parameters, current.get().getDescriptor().startCommand.parameters, allApps,
-                            validationIssues);
-                }
-            }
-
-            List<HttpEndpoint> epDescs = targetDesc.endpoints == null || targetDesc.endpoints.http == null
-                    ? Collections.emptyList()
-                    : targetDesc.endpoints.http;
-            List<HttpEndpoint> epValues = app.endpoints == null || app.endpoints.http == null ? Collections.emptyList()
-                    : app.endpoints.http;
-
-            // add/remove endpoints.
-            app.endpoints.http = updateEndpoints(epValues, epDescs);
-
-            if (targetDesc.stopCommand == null) {
-                app.stop = null;
-            } else {
-                app.stop = createCommand(targetDesc.stopCommand, app, targetDesc, allApps);
-            }
+            updateApplication(app, allApps, currentProduct, targetProduct, currentApplications, targetApplications,
+                    validationIssues);
         }
 
         if (currentProduct == null) {
@@ -125,6 +72,63 @@ public class ProductUpdateService {
         }
 
         return instance;
+    }
+
+    private void updateApplication(ApplicationConfiguration app, List<ApplicationConfiguration> allApps,
+            ProductManifest currentProduct, ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
+            List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues) {
+        var current = currentApplications == null ? null
+                : currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
+        var target = targetApplications.stream().filter(a -> a.getKey().getName().equals(app.application.getName())).findFirst();
+
+        if (current != null && current.isEmpty()) {
+            throw new IllegalStateException("Cannot find current application: " + app.application);
+        }
+
+        if (target.isEmpty()) {
+            // cannot update, application no longer exists. perform "dummy" update, so validation detects this.
+            app.application = new Manifest.Key(app.application.getName(), "NOT_PRESENT");
+            validationIssues.add(new ApplicationValidationDto(app.uid, null, "Application " + app.application.getName()
+                    + " not available in product version " + targetProduct.getKey().getTag()));
+            return;
+        }
+
+        ApplicationDescriptor targetDesc = target.get().getDescriptor();
+        app.application = target.get().getKey();
+        app.pooling = targetDesc.pooling;
+
+        // update process control data - this is not configurable by user.
+        app.processControl.startupProbe = targetDesc.processControl.startupProbe;
+        app.processControl.lifenessProbe = targetDesc.processControl.lifenessProbe;
+
+        if (app.start != null && app.start.parameters != null && !app.start.parameters.isEmpty()) {
+            // update existing parameter order (just the order)
+            app.start.parameters = reorderParameters(app.start.parameters, targetDesc.startCommand.parameters);
+        }
+
+        if (targetDesc.startCommand.parameters != null && !targetDesc.startCommand.parameters.isEmpty()) {
+            app.start.executable = targetDesc.startCommand.launcherPath;
+
+            if (current != null) {
+                // update parameters, add missing, add validation notice for removed parameters
+                app.start.parameters = updateParameters(app, targetDesc, app.start.parameters, targetDesc.startCommand.parameters,
+                        current.get().getDescriptor().startCommand.parameters, allApps, validationIssues);
+            }
+        }
+
+        List<HttpEndpoint> epDescs = targetDesc.endpoints == null || targetDesc.endpoints.http == null ? Collections.emptyList()
+                : targetDesc.endpoints.http;
+        List<HttpEndpoint> epValues = app.endpoints == null || app.endpoints.http == null ? Collections.emptyList()
+                : app.endpoints.http;
+
+        // add/remove endpoints.
+        app.endpoints.http = updateEndpoints(epValues, epDescs);
+
+        if (targetDesc.stopCommand == null) {
+            app.stop = null;
+        } else {
+            app.stop = createCommand(targetDesc.stopCommand, app, targetDesc, allApps);
+        }
     }
 
     private List<ParameterConfiguration> reorderParameters(List<ParameterConfiguration> values,
@@ -384,66 +388,71 @@ public class ProductUpdateService {
         }
 
         for (var paramDesc : desc.parameters) {
-            var paramValue = command.parameters.stream().filter(p -> p.uid.equals(paramDesc.uid)).findFirst().orElse(null);
+            var value = command.parameters.stream().filter(p -> p.uid.equals(paramDesc.uid)).findFirst().orElse(null);
 
-            // check condition.
-            if (!meetsCondition(process, appDesc, paramDesc)) {
-                if (paramValue != null && paramValue.value != null) {
-                    result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
-                            "Parameter does not meet required condition"));
-                }
-                continue; // no further checks as a non-met
-            }
-
-            // check mandatory.
-            if (paramDesc.mandatory && (paramValue == null || paramValue.value == null)) {
-                result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Mandatory parameter has no value."));
-            }
-
-            if (paramValue == null || paramValue.value == null) {
-                continue; // further checks check the value.
-            }
-
-            var stringVal = paramValue.value;
-
-            // check syntax of variable substitutions.
-            if (stringVal.contains("{{") || stringVal.contains("}}")) {
-                if (!stringVal.contains("{{") || !stringVal.contains("}}") || !stringVal.contains(":")) {
-                    result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Invalid variable substitution syntax"));
-                }
-            }
-
-            // check allowed values per type.
-            switch (paramDesc.type) {
-                case BOOLEAN:
-                    if (!stringVal.equals("true") && !stringVal.equals("false")) {
-                        result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
-                                "Boolean parameter should have value 'true' or 'false', has '" + stringVal + "' instead."));
-                    }
-                    break;
-                case CLIENT_PORT:
-                case SERVER_PORT:
-                case NUMERIC:
-                    try {
-                        Long.parseLong(stringVal);
-                    } catch (NumberFormatException e) {
-                        result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
-                                "Value must be numeric, is: " + stringVal));
-                    }
-                    break;
-                case URL:
-                    try {
-                        new URLish(stringVal);
-                    } catch (IllegalArgumentException e) {
-                        result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Value must be URL-like."));
-                    }
-                    break;
-                default:
-                    break;
-            }
+            validateParameter(process, appDesc, value, paramDesc, result);
         }
 
         return result;
+    }
+
+    private void validateParameter(ApplicationConfiguration process, ApplicationDescriptor appDesc,
+            ParameterConfiguration paramValue, ParameterDescriptor paramDesc, List<ApplicationValidationDto> result) {
+        // check condition.
+        if (!meetsCondition(process, appDesc, paramDesc)) {
+            if (paramValue != null && paramValue.value != null) {
+                result.add(
+                        new ApplicationValidationDto(process.uid, paramDesc.uid, "Parameter does not meet required condition"));
+            }
+            return;
+        }
+
+        // check mandatory.
+        if (paramDesc.mandatory && (paramValue == null || paramValue.value == null)) {
+            result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Mandatory parameter has no value."));
+        }
+
+        if (paramValue == null || paramValue.value == null) {
+            return;
+        }
+
+        var stringVal = paramValue.value;
+
+        // check syntax of variable substitutions.
+        if (stringVal.contains("{{") || stringVal.contains("}}")) {
+            if (!stringVal.contains("{{") || !stringVal.contains("}}") || !stringVal.contains(":")) {
+                result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Invalid variable substitution syntax"));
+            }
+        }
+
+        // check allowed values per type.
+        switch (paramDesc.type) {
+            case BOOLEAN:
+                if (!stringVal.equals("true") && !stringVal.equals("false")) {
+                    result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
+                            "Boolean parameter should have value 'true' or 'false', has '" + stringVal + "' instead."));
+                }
+                break;
+            case CLIENT_PORT:
+            case SERVER_PORT:
+            case NUMERIC:
+                try {
+                    Long.parseLong(stringVal);
+                } catch (NumberFormatException e) {
+                    result.add(
+                            new ApplicationValidationDto(process.uid, paramDesc.uid, "Value must be numeric, is: " + stringVal));
+                }
+                break;
+            case URL:
+                try {
+                    new URLish(stringVal);
+                } catch (IllegalArgumentException e) {
+                    result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Value must be URL-like."));
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     private boolean meetsCondition(ApplicationConfiguration process, ApplicationDescriptor desc, ParameterDescriptor param) {
