@@ -8,10 +8,10 @@ public interface Auditor extends AutoCloseable {
     /**
      * Stores the given audit record.
      *
-     * @param record
+     * @param rec
      *            record to write
      */
-    public void audit(AuditRecord record);
+    public void audit(AuditRecord rec);
 
     @Override
     public void close();

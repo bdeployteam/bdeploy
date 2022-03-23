@@ -11,8 +11,8 @@ public class TestAuditor implements Auditor {
     public List<AuditRecord> audits = new CopyOnWriteArrayList<>();
 
     @Override
-    public void audit(AuditRecord record) {
-        this.audits.add(record);
+    public void audit(AuditRecord rec) {
+        this.audits.add(rec);
     }
 
     @Override

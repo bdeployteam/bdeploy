@@ -113,7 +113,7 @@ public class InstanceProcessController {
                             return;
                         }
                         ProcessStatusDto status = controller.getStatus();
-                        runtimeHistory.record(status.pid, status.exitCode, status.processState, config.name, event.user);
+                        runtimeHistory.recordEvent(status.pid, status.exitCode, status.processState, config.name, event.user);
                     });
                 }
 

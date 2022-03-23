@@ -33,13 +33,13 @@ class InstanceManifestHistoryTest {
         InstanceManifestHistory history = new InstanceManifestHistory(instanceKey, local);
 
         long old = System.currentTimeMillis();
-        history.record(Action.INSTALL, "test", "comment1");
+        history.recordAction(Action.INSTALL, "test", "comment1");
         assertTrue(history.findMostRecent(Action.INSTALL).timestamp >= old);
         assertEquals("comment1", history.findMostRecent(Action.INSTALL).comment);
 
         Threads.sleep(10);
         long now = System.currentTimeMillis();
-        history.record(Action.INSTALL, "test", "comment2");
+        history.recordAction(Action.INSTALL, "test", "comment2");
         assertTrue(history.findMostRecent(Action.INSTALL).timestamp >= now);
         assertEquals("comment2", history.findMostRecent(Action.INSTALL).comment);
     }

@@ -14,7 +14,7 @@ public class MinionApplicationRuntimeHistory {
         return records;
     }
 
-    public void addRecord(MinionRuntimeHistoryRecord record) {
-        records.add(record);
+    public void addRecord(MinionRuntimeHistoryRecord rec) {
+        records.add(rec);
     }
 }
