@@ -708,7 +708,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 throw new WebApplicationException("Application is not deployed on any node: " + applicationId,
                         Status.INTERNAL_SERVER_ERROR);
             }
-            groupedByNode.computeIfAbsent(nodeName, (n) -> new ArrayList<>()).add(applicationId);
+            groupedByNode.computeIfAbsent(nodeName, n -> new ArrayList<>()).add(applicationId);
         }
 
         for (var entry : groupedByNode.entrySet()) {
@@ -760,7 +760,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 continue; // ignore - not deployed.
             }
 
-            groupedByNode.computeIfAbsent(node.get(), (n) -> new ArrayList<>()).add(applicationId);
+            groupedByNode.computeIfAbsent(node.get(), n -> new ArrayList<>()).add(applicationId);
         }
 
         for (var entry : groupedByNode.entrySet()) {

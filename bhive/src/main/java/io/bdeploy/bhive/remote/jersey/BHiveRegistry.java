@@ -94,7 +94,7 @@ public class BHiveRegistry implements AutoCloseable {
         hives.put(name, hive);
 
         // redirecting listener
-        ManifestSpawnListener listener = (keys) -> listeners.forEach(l -> l.spawn(name, keys));
+        ManifestSpawnListener listener = keys -> listeners.forEach(l -> l.spawn(name, keys));
 
         internalListeners.put(name, listener);
         hive.addSpawnListener(listener);
