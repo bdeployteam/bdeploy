@@ -152,7 +152,6 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
             @Override
             public void write(OutputStream output) throws IOException {
                 try (var zos = new ZipOutputStream(output)) {
-
                     for (var entry : entries) {
                         var path = getEntryPath(entry); // will throw in case of error
                         var ze = new ZipEntry(entry.path); // relative path name.
@@ -166,8 +165,6 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
 
                         zos.closeEntry();
                     }
-
-                    zos.close();
                 } catch (IOException ioe) {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not fully write output", ioe);

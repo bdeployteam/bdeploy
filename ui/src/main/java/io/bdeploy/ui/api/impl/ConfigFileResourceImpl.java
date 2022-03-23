@@ -79,9 +79,7 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
         // collect all blobs from the product's config tree
         if (pCfgTree != null) {
             TreeView view = hive.execute(new ScanOperation().setTree(pCfgTree));
-            view.visit(new TreeVisitor.Builder().onBlob(b -> {
-                productMap.put(b.getPathString(), b.getElementId());
-            }).build());
+            view.visit(new TreeVisitor.Builder().onBlob(b -> productMap.put(b.getPathString(), b.getElementId())).build());
         }
 
         // collect all blobs from the current config tree

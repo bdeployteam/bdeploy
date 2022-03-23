@@ -19,6 +19,10 @@ public class WindowsInstaller {
     private static final String END_CONFIG = "###END_CONFIG###";
     private static final String END_BDEPLOY = "###END_BDEPLOY###";
 
+    private WindowsInstaller() {
+        // static helper only.
+    }
+
     /**
      * Embeds the given configuration into the given signed PE/COFF executable.
      */

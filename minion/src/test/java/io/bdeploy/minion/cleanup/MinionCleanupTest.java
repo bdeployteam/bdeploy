@@ -115,7 +115,7 @@ class MinionCleanupTest {
     }
 
     @Test
-    void dirCleanup(NodeCleanupResource scr, MinionRoot root, @TempDir Path tmp) {
+    void dirCleanup(NodeCleanupResource scr, MinionRoot root) {
         Path dd = root.getDeploymentDir();
         Path testDir = dd.resolve("123-dummy-abc");
 

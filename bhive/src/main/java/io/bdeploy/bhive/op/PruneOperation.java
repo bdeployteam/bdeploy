@@ -43,7 +43,7 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
         AtomicLong max = new AtomicLong(-1);
         LongAdder current = new LongAdder();
 
-        try (Activity activity = getActivityReporter().start("Prune (calculating)", () -> max.get(), () -> current.sum())) {
+        try (Activity activity = getActivityReporter().start("Prune (calculating)", max::get, current::sum)) {
             // Wait for other operations locking the marker root (e.g. another prune).
             // The CreateObjectMarkersOperation and ClearObjectMarkersOperation will hold
             // off until the root is unlocked again, so:

@@ -6,9 +6,12 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class ClientUsageData {
 
-    private transient final SimpleDateFormat sdf;
+    @JsonIgnore
+    private final SimpleDateFormat sdf;
 
     // day -> applicationId -> hostname -> count
     SortedMap<String, SortedMap<String, SortedMap<String, Integer>>> clientUsage = new TreeMap<>();

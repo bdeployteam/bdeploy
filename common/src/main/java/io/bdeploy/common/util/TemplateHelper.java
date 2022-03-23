@@ -1,7 +1,7 @@
 package io.bdeploy.common.util;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -121,7 +121,7 @@ public class TemplateHelper {
      * Whatever result is returned by the processor will be re-inserted *as template variable* (including
      * the pattern start and end markers!) in the string.
      */
-    public static String updateReferences(String value, Function<String, String> processor) {
+    public static String updateReferences(String value, UnaryOperator<String> processor) {
         StringBuilder builder = new StringBuilder();
         int currentStart = 0;
 

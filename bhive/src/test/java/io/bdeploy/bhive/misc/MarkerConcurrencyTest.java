@@ -19,9 +19,9 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 
 @ExtendWith(TestHive.class)
-class MarkerConcurrency {
+class MarkerConcurrencyTest {
 
-    private static final Logger log = LoggerFactory.getLogger(MarkerConcurrency.class);
+    private static final Logger log = LoggerFactory.getLogger(MarkerConcurrencyTest.class);
 
     @Test
     void testSequentialMarks(BHive hive, @TempDir Path tmp) throws Exception {

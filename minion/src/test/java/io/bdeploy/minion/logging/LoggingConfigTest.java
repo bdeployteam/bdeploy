@@ -41,7 +41,7 @@ class LoggingConfigTest {
     }
 
     @Test
-    void readFiles(CommonRootResource crr, @TempDir Path tmp, MinionRoot mr) throws Exception {
+    void readFiles(CommonRootResource crr, MinionRoot mr) throws Exception {
         Files.write(mr.getLogDir().resolve("server.log"), Collections.singleton("log1"));
         Files.write(mr.getLogDir().resolve("server-1.log"), Collections.singleton("log2"));
 

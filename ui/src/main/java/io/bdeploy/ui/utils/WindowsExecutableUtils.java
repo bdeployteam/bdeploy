@@ -53,6 +53,10 @@ import net.jsign.pe.PEFile;
  */
 public class WindowsExecutableUtils {
 
+    private WindowsExecutableUtils() {
+        // static helper only.
+    }
+
     /**
      * Embeds the given bytes into given signed PE/COFF executable.
      */
@@ -61,7 +65,7 @@ public class WindowsExecutableUtils {
 
             List<CMSSignedData> signatures = pe.getSignatures();
             if (signatures.isEmpty()) {
-                throw new RuntimeException("Only signed executables can be modified.");
+                throw new IllegalStateException("Only signed executables can be modified.");
             }
 
             // we only support a single top level signature.
@@ -219,7 +223,7 @@ public class WindowsExecutableUtils {
 
     private static void checkSpcDigest(SignerInformation signerInformation, ContentInfo contentInfo1, CMSSignedData signedData)
             throws IOException {
-        byte messageDigestInAuthenticatedAttr[];
+        byte[] messageDigestInAuthenticatedAttr;
         Attribute attribute = (Attribute) signerInformation.getSignedAttributes().toHashtable().get(CMSAttributes.messageDigest);
         Object digestObj = attribute.getAttrValues().iterator().next();
 
@@ -355,7 +359,7 @@ public class WindowsExecutableUtils {
             return outputStream.toByteArray();
         }
 
-        return null;
+        return new byte[0];
     }
 
 }

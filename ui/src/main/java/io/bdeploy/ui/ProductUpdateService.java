@@ -254,7 +254,7 @@ public class ProductUpdateService {
         String strValue = val.value != null ? val.value : "";
 
         if (desc == null) {
-            // custom parameter;
+            // custom parameter
             val.preRendered = Collections.singletonList(strValue);
             return;
         }
@@ -349,14 +349,14 @@ public class ProductUpdateService {
             // again. the node configuration itself does not carry much information which needs validation.
             for (var process : node.nodeConfiguration.applications) {
                 var desc = applications.stream().filter(m -> m.getKey().getName().equals(process.application.getName()))
-                        .map(m -> m.getDescriptor()).findFirst();
+                        .map(ApplicationManifest::getDescriptor).findFirst();
                 if (desc.isEmpty()) {
                     result.add(new ApplicationValidationDto(process.uid, null,
                             "Cannot find application " + process.application.getName()));
                     continue;
                 }
 
-                // check unique process names;
+                // check unique process names
                 var conflictUid = processNames.put(process.name, process.uid);
                 if (conflictUid != null && !node.nodeName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
                     result.add(new ApplicationValidationDto(process.uid, null,
@@ -419,10 +419,9 @@ public class ProductUpdateService {
         var stringVal = paramValue.value;
 
         // check syntax of variable substitutions.
-        if (stringVal.contains("{{") || stringVal.contains("}}")) {
-            if (!stringVal.contains("{{") || !stringVal.contains("}}") || !stringVal.contains(":")) {
-                result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Invalid variable substitution syntax"));
-            }
+        if ((stringVal.contains("{{") || stringVal.contains("}}"))
+                && (!stringVal.contains("{{") || !stringVal.contains("}}") || !stringVal.contains(":"))) {
+            result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Invalid variable substitution syntax"));
         }
 
         // check allowed values per type.
@@ -433,9 +432,7 @@ public class ProductUpdateService {
                             "Boolean parameter should have value 'true' or 'false', has '" + stringVal + "' instead."));
                 }
                 break;
-            case CLIENT_PORT:
-            case SERVER_PORT:
-            case NUMERIC:
+            case CLIENT_PORT, SERVER_PORT, NUMERIC:
                 try {
                     Long.parseLong(stringVal);
                 } catch (NumberFormatException e) {
@@ -479,10 +476,7 @@ public class ProductUpdateService {
         }
 
         if (value == null) {
-            if (param.condition.must == ParameterConditionType.BE_EMPTY) {
-                return true;
-            }
-            return false;
+            return param.condition.must == ParameterConditionType.BE_EMPTY;
         }
 
         switch (param.condition.must) {

@@ -43,9 +43,7 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     @Override
     public void updateUsers(List<UserInfo> infos) {
         infos.forEach(this::updateUser);
-        infos.forEach(u -> {
-            cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, u.name));
-        });
+        infos.forEach(u -> cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, u.name)));
     }
 
     @Override

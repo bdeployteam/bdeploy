@@ -56,7 +56,7 @@ import jakarta.ws.rs.NotFoundException;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-class PublicApiTestV1 {
+class PublicApiV1Test {
 
     @Test
     void testV1(BHive local, MasterRootResource master, CommonRootResource common, RemoteService remote, @TempDir Path tmp)

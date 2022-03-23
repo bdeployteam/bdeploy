@@ -53,7 +53,7 @@ public class SequentialBulkControl extends AbstractBulkControl {
 
         // Check if we could stop all applications
         Duration duration = Duration.between(start, Instant.now());
-        boolean allStopped = toStop.stream().map(pc -> stopped.contains(pc.getDescriptor().uid)).noneMatch(b -> b == false);
+        boolean allStopped = toStop.stream().map(pc -> stopped.contains(pc.getDescriptor().uid)).noneMatch(b -> !b);
         if (allStopped) {
             logger.log(l -> l.info("Applications in Control Group {} have been stopped in {} ", controlGroup.name,
                     ProcessControllerHelper.formatDuration(duration)));

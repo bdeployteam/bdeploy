@@ -786,7 +786,7 @@ public class ProcessController {
 
         if (aliveEp.isEmpty()) {
             // systemic error, this should never happen as the endpoint has already be checked before scheduling this task.
-            throw new RuntimeException("Unexpected error in retrieving lifeness endpoint.");
+            throw new PcuRuntimeException("Unexpected error in retrieving lifeness endpoint.");
         }
 
         // Don't do this locked. If a probe blocks, we would like to be able to still stop the process (for example).

@@ -28,6 +28,10 @@ public class CommonEndpointHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CommonEndpointHelper.class);
 
+    private CommonEndpointHelper() {
+        // static helper only.
+    }
+
     private static String initUri(HttpEndpoint endpoint) {
         return (endpoint.secure ? "https://" : "http://") + "localhost:" + endpoint.port
                 + (endpoint.path.startsWith("/") ? "" : "/") + endpoint.path;

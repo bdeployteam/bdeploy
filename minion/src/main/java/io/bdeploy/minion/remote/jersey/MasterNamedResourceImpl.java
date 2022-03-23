@@ -425,12 +425,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             // does NOT validate that the product exists, as it might still reside on the
             // central server, not this one.
 
-            SortedMap<String, InstanceNodeConfiguration> nodes = new TreeMap<>();
+            SortedMap<String, InstanceNodeConfiguration> nodeMap = new TreeMap<>();
             if (state.nodeDtos != null) {
-                state.nodeDtos.forEach(n -> nodes.put(n.nodeName, updateControlGroups(n.nodeConfiguration)));
+                state.nodeDtos.forEach(n -> nodeMap.put(n.nodeName, updateControlGroups(n.nodeConfiguration)));
             }
 
-            return createInstanceVersion(rootKey, state.config, nodes);
+            return createInstanceVersion(rootKey, state.config, nodeMap);
         }
     }
 
@@ -753,7 +753,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         for (var applicationId : applicationIds) {
             // Find node where the application is running
             Optional<String> node = status.node2Applications.entrySet().stream()
-                    .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null).map(e -> e.getKey())
+                    .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null).map(Entry::getKey)
                     .findFirst();
 
             if (node.isEmpty()) {

@@ -206,7 +206,7 @@ public class ProductManifestBuilder {
         ProductManifestBuilder builder = new ProductManifestBuilder(prod);
 
         // 4a. check if product is already present
-        if (hive.execute(new ManifestExistsOperation().setManifest(prodKey))) {
+        if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(prodKey)))) {
             throw new IllegalStateException("Product " + prodKey + " is already present.");
         }
 

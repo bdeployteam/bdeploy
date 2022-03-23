@@ -26,7 +26,7 @@ import jakarta.inject.Inject;
 @Service
 public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListener {
 
-    private final static Logger log = LoggerFactory.getLogger(ManifestSpawnToChangeEventBridge.class);
+    private static final Logger log = LoggerFactory.getLogger(ManifestSpawnToChangeEventBridge.class);
 
     @Inject
     private ChangeEventManager events;

@@ -104,9 +104,7 @@ public class BulkProcessController {
         if (!failing) {
             logger.log(l -> l.info("Applications have been started in {}", ProcessControllerHelper.formatDuration(duration)),
                     activeTag);
-            return;
         }
-
     }
 
     /**
@@ -175,7 +173,7 @@ public class BulkProcessController {
 
     private List<ProcessController> getToStop(Map<String, ProcessController> running, Collection<String> applicationIds,
             ProcessControlGroupConfiguration controlGroup) {
-        List<ProcessController> toStop = applicationIds.stream().filter(e -> controlGroup.processOrder.contains(e))
+        return applicationIds.stream().filter(e -> controlGroup.processOrder.contains(e))
                 .sorted((a, b) -> Integer.compare(controlGroup.processOrder.indexOf(b), controlGroup.processOrder.indexOf(a)))
                 .map(e -> {
                     if (running.containsKey(e)) {
@@ -184,6 +182,5 @@ public class BulkProcessController {
                         return processes.controllers.get(e);
                     }
                 }).toList();
-        return toStop;
     }
 }
