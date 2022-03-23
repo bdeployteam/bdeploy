@@ -14,7 +14,7 @@ public abstract class PrefixResolver implements VariableResolver {
      *
      * @param prefix the prefix resolved by this resolver
      */
-    public PrefixResolver(Variables prefix) {
+    protected PrefixResolver(Variables prefix) {
         this.prefix = prefix;
     }
 

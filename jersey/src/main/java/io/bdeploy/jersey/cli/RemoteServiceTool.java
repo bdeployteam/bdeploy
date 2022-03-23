@@ -82,7 +82,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
 
     private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
-    public RemoteServiceTool(Class<T> configClass) {
+    protected RemoteServiceTool(Class<T> configClass) {
         super(configClass);
     }
 

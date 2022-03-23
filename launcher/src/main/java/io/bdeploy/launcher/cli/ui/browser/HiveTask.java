@@ -28,7 +28,7 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
     protected final Auditor auditor;
     protected final StringBuilder builder = new StringBuilder();
 
-    public HiveTask(List<Path> hives, Auditor auditor) {
+    protected HiveTask(List<Path> hives, Auditor auditor) {
         this.hives = hives;
         this.auditor = auditor;
     }

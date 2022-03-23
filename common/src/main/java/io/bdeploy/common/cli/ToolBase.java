@@ -507,7 +507,7 @@ public abstract class ToolBase {
         /**
          * @param configClass the configuration annotation class to use.
          */
-        public ConfiguredCliTool(Class<T> configClass) {
+        protected ConfiguredCliTool(Class<T> configClass) {
             this.configClass = configClass;
         }
 

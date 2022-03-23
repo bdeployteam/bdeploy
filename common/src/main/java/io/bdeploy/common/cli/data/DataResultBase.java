@@ -11,7 +11,7 @@ public abstract class DataResultBase implements DataResult {
     private final Map<String, String> fields = new LinkedHashMap<>(); // preserve order.
     private final PrintStream output;
 
-    public DataResultBase(PrintStream output) {
+    protected DataResultBase(PrintStream output) {
         this.output = output;
     }
 

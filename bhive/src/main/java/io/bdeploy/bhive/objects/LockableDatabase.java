@@ -20,7 +20,7 @@ public abstract class LockableDatabase {
      *            does not support {@link Path#toFile()} (for instance ZIP file),
      *            there is no locking capability.
      */
-    public LockableDatabase(Path root) {
+    protected LockableDatabase(Path root) {
         this.lockFile = determineLockFile(root);
     }
 
