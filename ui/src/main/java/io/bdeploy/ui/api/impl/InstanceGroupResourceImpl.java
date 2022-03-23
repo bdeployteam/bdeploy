@@ -46,7 +46,6 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
-import io.bdeploy.jersey.JerseyCachingCLStaticHttpHandler;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -72,6 +71,7 @@ import jakarta.ws.rs.core.SecurityContext;
 public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     private static final Logger log = LoggerFactory.getLogger(InstanceGroupResourceImpl.class);
+    private static final String CACHE_AGGRESSIVE = "public, max-age=31536000";
 
     @Inject
     private BHiveRegistry registry;
@@ -245,7 +245,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             return Response.ok().build();
         }
         return Response.ok(getGroupHive(group).execute(new ObjectLoadOperation().setObject(id)))
-                .header("Cache-Control", JerseyCachingCLStaticHttpHandler.CACHE_AGGRESSIVE).build();
+                .header("Cache-Control", CACHE_AGGRESSIVE).build();
     }
 
     @Override

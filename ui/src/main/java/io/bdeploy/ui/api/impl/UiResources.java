@@ -1,9 +1,9 @@
 package io.bdeploy.ui.api.impl;
 
+import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
-import io.bdeploy.jersey.JerseyCachingCLStaticHttpHandler;
 import io.bdeploy.jersey.JerseyEagerServiceInitializer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.ui.ProductTransferService;
@@ -17,8 +17,7 @@ public class UiResources {
     }
 
     public static void register(RegistrationTarget server) {
-        server.addHandler(new JerseyCachingCLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"),
-                HttpHandlerRegistration.ROOT);
+        server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"), HttpHandlerRegistration.ROOT);
         server.register(AuthResourceImpl.class);
         server.register(HiveResourceImpl.class);
         server.register(BackendInfoResourceImpl.class);
