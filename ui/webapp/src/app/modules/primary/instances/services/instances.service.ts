@@ -80,10 +80,20 @@ export class InstancesService {
     private products: ProductsService,
     groups: GroupsService
   ) {
+    // clear out stuff whenever the group is re-set.
+    groups.current$.subscribe(() => {
+      // whenever the current group changes, we trigger a delayed reload (below).
+      // we *anyhow* want to remove the outdated data before doing this.
+      // otherwise the user would briefly see the old data before loading begins.
+      this.listLoading$.next(true); // will load in a bit.
+      this.instances$.next([]);
+    });
+
+    // only do actual loading once BOTH group and products are ready.
     combineLatest([groups.current$, products.products$]).subscribe(
       ([group, products]) => {
         if (group && products) {
-          this.update$.next(group?.name);
+          this.update$.next(group.name);
         }
       }
     );

@@ -177,7 +177,7 @@ public class ClientCleanup {
             log.info("No damanged software manifests found.");
         }
         for (Key key : broken) {
-            log.info("Removing broken software manifest '" + key + "'");
+            log.info("Removing broken software manifest '{}'", key);
             mf.remove(key);
         }
 
@@ -186,11 +186,11 @@ public class ClientCleanup {
         if (result.isEmpty()) {
             log.info("No damaged elements found.");
         } else {
-            log.warn("Found %1 damanged elements.", result.size());
+            log.warn("Found {} damanged elements.", result.size());
             for (ElementView ele : result) {
                 String name = ele.getElementId().toString();
                 String value = (ele instanceof DamagedObjectView dov ? (dov.getType() + " ") : "") + ele.getPathString();
-                log.warn("%1 - %2", name, value);
+                log.warn("{} - {}", name, value);
             }
         }
     }

@@ -3,7 +3,7 @@ package io.bdeploy.pcu;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -127,7 +127,7 @@ class ProcessControllerTest {
         listener.await(TIMEOUT);
 
         // Recover task must be canceled
-        assertTrue(process.getRecoverTask() == null);
+        assertNull(process.getRecoverTask());
     }
 
     @Test
@@ -273,7 +273,7 @@ class ProcessControllerTest {
         listener.await(TIMEOUT);
 
         // Recover task must be canceled and counter must be reset due to the manual start
-        assertTrue(process.getRecoverTask() == null);
+        assertNull(process.getRecoverTask());
         ProcessDetailDto details = process.getDetails();
         assertEquals(0, details.retryCount);
 

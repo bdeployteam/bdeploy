@@ -2,6 +2,8 @@ package io.bdeploy.bhive.objects;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -136,10 +138,10 @@ class NestedManifestTest extends DbTestBase {
 
         // now check that the cache is equal.
         Manifest rootMf = hive.execute(new ManifestLoadOperation().setManifest(root));
-        assertTrue(builtMf == rootMf); // check instance equal since it comes from a cache even after first insert above
+        assertSame(builtMf, rootMf); // check instance equal since it comes from a cache even after first insert above
 
         SortedMap<String, Key> cachedRefs = rootMf.getCachedReferences(hive, Integer.MAX_VALUE, false);
-        assertTrue(refKeys.equals(cachedRefs));
+        assertEquals(refKeys, cachedRefs);
 
         Manifest.Key outerKey = new Manifest.Key("outer", "v1");
         try (Transaction t = hive.getTransactions().begin()) {
@@ -162,8 +164,8 @@ class NestedManifestTest extends DbTestBase {
         assertThat(refKeys.get("nested-root"), is(root));
 
         // now again the cache for double-nested
-        assertTrue(hive.execute(new ManifestLoadOperation().setManifest(outerKey))
-                .getCachedReferences(hive, Integer.MAX_VALUE, false).equals(refKeys));
+        assertEquals(refKeys, hive.execute(new ManifestLoadOperation().setManifest(outerKey)).getCachedReferences(hive,
+                Integer.MAX_VALUE, false));
 
         // finally check whether the manifest cache is evicted properly when deleting a manifest
         hive.execute(new ManifestDeleteOperation().setToDelete(root));

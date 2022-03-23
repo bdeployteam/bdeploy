@@ -44,7 +44,7 @@ import io.bdeploy.common.util.PathHelper;
  */
 public class ManifestDatabase extends LockableDatabase implements AutoCloseable {
 
-    private final static Logger log = LoggerFactory.getLogger(ManifestDatabase.class);
+    private static final Logger log = LoggerFactory.getLogger(ManifestDatabase.class);
 
     private final Path root;
     private final Path tmp;

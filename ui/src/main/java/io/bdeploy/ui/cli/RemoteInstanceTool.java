@@ -311,18 +311,20 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             if (update.validation != null && !update.validation.isEmpty()) {
                 result.addField("Update Warnings", "There have been update warnings.");
 
-                update.validation.forEach(val -> result.addField(" - "
-                        + (val.appUid == null ? "Global" : (val.appUid + (val.paramUid == null ? "" : (" - " + val.paramUid)))),
-                        val.message));
+                update.validation.forEach(val -> {
+                    String puid = val.paramUid == null ? "" : (" - " + val.paramUid);
+                    result.addField(" - " + (val.appUid == null ? "Global" : (val.appUid + puid)), val.message);
+                });
             }
 
             result.addField("Updated To", target);
         } else {
             result.setMessage("Validation Issues");
 
-            issues.forEach(val -> result.addField(
-                    " - " + (val.appUid == null ? "Global" : (val.appUid + (val.paramUid == null ? "" : (" - " + val.paramUid)))),
-                    val.message));
+            issues.forEach(val -> {
+                String puid = val.paramUid == null ? "" : (" - " + val.paramUid);
+                result.addField(" - " + (val.appUid == null ? "Global" : (val.appUid + puid)), val.message);
+            });
 
             result.addField("Update Aborted", "Cannot perform update due to validation issues");
         }

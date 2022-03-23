@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
@@ -221,7 +222,7 @@ public class InstanceProcessController {
             strategy.startAll(user, running,
                     list.controllers.entrySet().stream()
                             .filter(e -> e.getValue().getDescriptor().processControl.startType == ApplicationStartType.INSTANCE)
-                            .map(e -> e.getKey()).toList());
+                            .map(Entry::getKey).toList());
         } finally {
             readLock.unlock();
         }

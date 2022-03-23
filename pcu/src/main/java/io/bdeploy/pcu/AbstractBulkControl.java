@@ -77,7 +77,7 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
                         Thread.currentThread().interrupt();
                         return false;
                     } catch (ExecutionException e) {
-                        logger.log(l -> l.warn("Failed to start " + config.uid + ": " + e.getCause().toString()));
+                        logger.log(l -> l.warn("Failed to start {}: {}", config.uid, e.getCause().toString()));
                         return false;
                     }
                 }

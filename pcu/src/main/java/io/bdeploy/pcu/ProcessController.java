@@ -786,7 +786,7 @@ public class ProcessController {
 
         if (aliveEp.isEmpty()) {
             // systemic error, this should never happen as the endpoint has already be checked before scheduling this task.
-            throw new RuntimeException("Unexpected error in retrieving lifeness endpoint.");
+            throw new PcuRuntimeException("Unexpected error in retrieving lifeness endpoint.");
         }
 
         // Don't do this locked. If a probe blocks, we would like to be able to still stop the process (for example).
@@ -1113,7 +1113,7 @@ public class ProcessController {
     private void notifyListeners(ProcessStateChangeDto status) {
         try {
             logger.log(l -> l.debug("Notify listeners about new process state {}.", status.newState));
-            statusListeners.forEach(c -> c.accept(status));
+            new ArrayList<>(statusListeners).forEach(c -> c.accept(status));
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));
         }

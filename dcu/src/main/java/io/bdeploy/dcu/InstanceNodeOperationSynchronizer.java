@@ -47,8 +47,6 @@ public class InstanceNodeOperationSynchronizer {
             } catch (ExecutionException e) {
                 throw new IllegalStateException("Operation failed", e);
             }
-
-            return;
         } else {
             try {
                 hive.execute(op);

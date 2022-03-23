@@ -337,7 +337,7 @@ public class InstanceResourceImpl implements InstanceResource {
                             }
 
                             if (!statusOnNode.isAppDeployed(app.uid)) {
-                                log.warn("Expected application is not currently deployed: " + app.uid);
+                                log.warn("Expected application is not currently deployed: {}", app.uid);
                                 continue;
                             }
 
@@ -684,7 +684,8 @@ public class InstanceResourceImpl implements InstanceResource {
             hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
 
             // 2. push product to remote in case it is not yet there, and we have it.
-            if (hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product))) {
+            if (Boolean.TRUE
+                    .equals(hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product)))) {
                 TransferStatistics stats = hive.execute(
                         new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
@@ -753,7 +754,7 @@ public class InstanceResourceImpl implements InstanceResource {
         try {
             current = ProductManifest.of(hive, state.config.config.product);
         } catch (Exception e) {
-            log.info("Missing source product on product update: " + state.config.config.product);
+            log.info("Missing source product on product update: {}", state.config.config.product);
         }
         List<ApplicationManifest> currentApps = current == null ? null
                 : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).toList();
@@ -762,8 +763,7 @@ public class InstanceResourceImpl implements InstanceResource {
         List<ApplicationManifest> targetApps = target.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
                 .toList();
 
-        InstanceUpdateDto updated = pus.update(state, target, current, targetApps, currentApps);
-        return updated;
+        return pus.update(state, target, current, targetApps, currentApps);
     }
 
     @Override
@@ -1036,9 +1036,8 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
                 syncInstance(minion, rc, group, instanceId);
 
-                List<Key> keys = response.readEntity(new GenericType<List<Key>>() {
+                return response.readEntity(new GenericType<List<Key>>() {
                 });
-                return keys;
             } catch (IOException e) {
                 throw new WebApplicationException("Cannot delegate import to managed server", e);
             }
@@ -1048,8 +1047,8 @@ public class InstanceResourceImpl implements InstanceResource {
         try {
             Files.copy(inputStream, zip);
 
-            Map<String, MinionDto> nodes = getMinionConfiguration(instanceId, null);
-            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, nodes, context);
+            Map<String, MinionDto> nodeMap = getMinionConfiguration(instanceId, null);
+            Key newKey = InstanceImportExportHelper.importFrom(zip, hive, instanceId, nodeMap, context);
             return Collections.singletonList(newKey);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);

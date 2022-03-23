@@ -20,7 +20,7 @@ public class ObjectChangeRegistration {
      * Add a matching scope for the given type.
      */
     public void add(String type, ObjectScope scope) {
-        registrations.computeIfAbsent(type, (t) -> new ArrayList<>()).add(scope);
+        registrations.computeIfAbsent(type, t -> new ArrayList<>()).add(scope);
         notifyListeners();
     }
 

@@ -3,6 +3,8 @@ package io.bdeploy.ui.dto;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Generated;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
@@ -36,6 +38,38 @@ public class ProductDto implements Comparable<ProductDto> {
     @Override
     public int compareTo(ProductDto o) {
         return key.compareTo(o.key);
+    }
+
+    @Generated("Eclipse")
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        return result;
+    }
+
+    @Generated("Eclipse")
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ProductDto other = (ProductDto) obj;
+        if (key == null) {
+            if (other.key != null) {
+                return false;
+            }
+        } else if (!key.equals(other.key)) {
+            return false;
+        }
+        return true;
     }
 
 }

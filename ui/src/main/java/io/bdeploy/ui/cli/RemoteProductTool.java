@@ -134,8 +134,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
         msr.transferProducts(config.instanceGroup(), ptd);
 
-        while (msr.getActiveTransfers(config.instanceGroup()).stream().filter(d -> d.compareTo(dto.get()) == 0).findAny()
-                .isPresent()) {
+        while (msr.getActiveTransfers(config.instanceGroup()).stream().anyMatch(d -> d.compareTo(dto.get()) == 0)) {
             out().println("Waiting for transfer.");
             try {
                 Thread.sleep(1000);

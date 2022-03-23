@@ -67,7 +67,7 @@ public class ClientPathHelper {
         List<Path> hives = new ArrayList<>();
         hives.add(rootDir.resolve("bhive"));
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootDir,
-                (p) -> p.getFileName().toString().toLowerCase().startsWith("bdeploy-"))) {
+                p -> p.getFileName().toString().toLowerCase().startsWith("bdeploy-"))) {
             Iterator<Path> dirs = stream.iterator();
             while (dirs.hasNext()) {
                 Path nestedRoot = dirs.next();

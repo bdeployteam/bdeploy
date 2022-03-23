@@ -129,7 +129,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
             for (var portAndState : states.entrySet()) {
                 var matchedPorts = nodePortsGrouped.get(portAndState.getKey());
-                if (matchedPorts == null || matchedPorts.size() < 1) {
+                if (matchedPorts == null || matchedPorts.isEmpty()) {
                     throw new IllegalStateException(
                             "Cannot map port " + portAndState.getKey() + " of node " + np.getKey() + ", port: " + matchedPorts);
                 }

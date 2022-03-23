@@ -231,10 +231,10 @@ public class JerseyClientFactory {
 
         try {
             return new ObjectChangeClientWebSocket(client, ws.get());
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Cannot open WebSocket (interrupted)", ie);
         } catch (Exception e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
             throw new IllegalStateException("Cannot open WebSocket", e);
         }
     }

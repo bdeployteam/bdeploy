@@ -87,17 +87,17 @@ public class ProcessList {
             }
         }
 
-        List<ProcessControlGroupConfiguration> controlGroups = new ArrayList<>();
+        List<ProcessControlGroupConfiguration> cgs = new ArrayList<>();
 
         // the default group, containing all processes which are not (yet) in any group is always the first group.
         if (!defaultGroup.processOrder.isEmpty()) {
-            controlGroups.add(defaultGroup);
+            cgs.add(defaultGroup);
         }
 
         // now the rest of the groups.
-        controlGroups.addAll(groups);
+        cgs.addAll(groups);
 
-        setControlGroups(controlGroups);
+        setControlGroups(cgs);
     }
 
     /**

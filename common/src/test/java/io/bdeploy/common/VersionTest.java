@@ -43,7 +43,7 @@ class VersionTest {
 
         assertTrue(VersionHelper.compare("1.2.3", "1.0.0") > 0);
         assertTrue(VersionHelper.compare("1.2.3", "1.3.0") < 0);
-        assertTrue(VersionHelper.compare("1.2.3", "1.2.3") == 0);
+        assertEquals(0, VersionHelper.compare("1.2.3", "1.2.3"));
 
         vs.add(VersionHelper.parse("1.2.3"));
         vs.add(VersionHelper.parse("1.0.1"));
