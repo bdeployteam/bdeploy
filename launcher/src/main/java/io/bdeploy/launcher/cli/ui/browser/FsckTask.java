@@ -37,8 +37,8 @@ public class FsckTask extends HiveTask {
         for (ElementView ele : result) {
             builder.append(ele.getElementId());
             builder.append(" ");
-            if (ele instanceof DamagedObjectView) {
-                builder.append((((DamagedObjectView) ele).getType()));
+            if (ele instanceof DamagedObjectView dov) {
+                builder.append(dov.getType());
                 builder.append(" ");
             }
             builder.append(ele.getPathString());

@@ -189,8 +189,7 @@ public class ClientCleanup {
             log.warn("Found %1 damanged elements.", result.size());
             for (ElementView ele : result) {
                 String name = ele.getElementId().toString();
-                String value = (ele instanceof DamagedObjectView ? (((DamagedObjectView) ele).getType() + " ") : "")
-                        + ele.getPathString();
+                String value = (ele instanceof DamagedObjectView dov ? (dov.getType() + " ") : "") + ele.getPathString();
                 log.warn("%1 - %2", name, value);
             }
         }

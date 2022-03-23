@@ -115,16 +115,16 @@ public class BCX509Helper {
             Object pemObject;
 
             while ((pemObject = parser.readObject()) != null) {
-                if (pemObject instanceof X509CertificateHolder) {
-                    chain.add(new JcaX509CertificateConverter().getCertificate((X509CertificateHolder) pemObject));
+                if (pemObject instanceof X509CertificateHolder xch) {
+                    chain.add(new JcaX509CertificateConverter().getCertificate(xch));
                 }
 
-                if (pemObject instanceof PEMKeyPair) {
+                if (pemObject instanceof PEMKeyPair pkp) {
                     if (kp != null) {
                         throw new IllegalArgumentException("PEM contains multiple kay pairs");
                     }
 
-                    kp = new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) pemObject);
+                    kp = new JcaPEMKeyConverter().getKeyPair(pkp);
                 }
             }
         }

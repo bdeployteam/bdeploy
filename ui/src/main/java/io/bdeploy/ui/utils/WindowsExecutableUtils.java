@@ -204,10 +204,7 @@ public class WindowsExecutableUtils {
                 .get(CMSAttributes.messageDigest);
         Object digestObjOfCounterSignature = attributeOfCounterSignature.getAttrValues().iterator().next();
 
-        if (digestObjOfCounterSignature instanceof ASN1OctetString) {
-
-            ASN1OctetString oct = (ASN1OctetString) digestObjOfCounterSignature;
-
+        if (digestObjOfCounterSignature instanceof ASN1OctetString oct) {
             messageDigestInCounterSignature = oct.getOctets();
         } else {
             throw new IllegalStateException("No message digest was found in authenticated attributes of counter signature");
@@ -226,8 +223,7 @@ public class WindowsExecutableUtils {
         Attribute attribute = (Attribute) signerInformation.getSignedAttributes().toHashtable().get(CMSAttributes.messageDigest);
         Object digestObj = attribute.getAttrValues().iterator().next();
 
-        if (digestObj instanceof ASN1OctetString) {
-            ASN1OctetString oct = (ASN1OctetString) digestObj;
+        if (digestObj instanceof ASN1OctetString oct) {
             messageDigestInAuthenticatedAttr = oct.getOctets();
         } else {
             throw new IllegalStateException("No message digest was found in authenticated attributes");
@@ -306,30 +302,29 @@ public class WindowsExecutableUtils {
         if ((contentInfo.getContentType().getId()).equals(AuthenticodeObjectIdentifiers.SPC_INDIRECT_DATA_OBJID.getId())) {
             ASN1Primitive obj = contentInfo.getContent().toASN1Primitive();
 
-            if (obj instanceof ASN1Sequence) {
-                Enumeration<?> e = ((ASN1Sequence) obj).getObjects();
+            if (obj instanceof ASN1Sequence oas) {
+                Enumeration<?> e = oas.getObjects();
                 e.nextElement();
                 Object messageDigestObj = e.nextElement();
 
-                if (messageDigestObj instanceof ASN1Sequence) {
-                    Enumeration<?> e1 = ((ASN1Sequence) messageDigestObj).getObjects();
+                if (messageDigestObj instanceof ASN1Sequence mdoas) {
+                    Enumeration<?> e1 = mdoas.getObjects();
 
                     Object seq = e1.nextElement();
                     Object digestObj = e1.nextElement();
 
-                    if (seq instanceof ASN1Sequence) {
-                        Enumeration<?> e2 = ((ASN1Sequence) seq).getObjects();
+                    if (seq instanceof ASN1Sequence sas) {
+                        Enumeration<?> e2 = sas.getObjects();
                         Object digestAlgorithmObj = e2.nextElement();
 
-                        if (digestAlgorithmObj instanceof ASN1ObjectIdentifier) {
-                            AlgorithmIdentifier a = new DefaultDigestAlgorithmIdentifierFinder().find(
-                                    new DefaultAlgorithmNameFinder().getAlgorithmName((ASN1ObjectIdentifier) digestAlgorithmObj));
+                        if (digestAlgorithmObj instanceof ASN1ObjectIdentifier daoi) {
+                            AlgorithmIdentifier a = new DefaultDigestAlgorithmIdentifierFinder()
+                                    .find(new DefaultAlgorithmNameFinder().getAlgorithmName(daoi));
                             algId = AlgorithmIdentifier.getInstance(a);
                         }
                     }
 
-                    if (digestObj instanceof ASN1OctetString) {
-                        ASN1OctetString oct = (ASN1OctetString) digestObj;
+                    if (digestObj instanceof ASN1OctetString oct) {
                         digest = oct.getOctets();
                     }
                 }
@@ -349,8 +344,8 @@ public class WindowsExecutableUtils {
     private static byte[] getSpcBlob(ASN1Primitive primitive) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        if (primitive instanceof ASN1Sequence) {
-            Iterator<?> it = ((ASN1Sequence) primitive).iterator();
+        if (primitive instanceof ASN1Sequence as) {
+            Iterator<?> it = as.iterator();
 
             while (it.hasNext()) {
                 ASN1Primitive p = (ASN1Primitive) it.next();
