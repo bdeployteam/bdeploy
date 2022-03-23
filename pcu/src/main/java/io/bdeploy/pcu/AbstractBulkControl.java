@@ -18,7 +18,7 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
     protected final ProcessControlGroupConfiguration controlGroup;
     protected final ProcessList processes;
 
-    public AbstractBulkControl(String user, String instance, String tag, ProcessControlGroupConfiguration group,
+    protected AbstractBulkControl(String user, String instance, String tag, ProcessControlGroupConfiguration group,
             ProcessList processes) {
         this.user = user;
         this.activeTag = tag;

@@ -19,7 +19,7 @@ public abstract class ElementView implements Comparable<ElementView> {
     private final ObjectId id;
     private final List<String> path;
 
-    public ElementView(ObjectId id, Collection<String> path) {
+    protected ElementView(ObjectId id, Collection<String> path) {
         this.id = id;
         this.path = new ArrayList<>(path);
     }
