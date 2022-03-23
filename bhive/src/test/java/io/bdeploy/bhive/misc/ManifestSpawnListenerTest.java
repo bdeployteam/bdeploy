@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -38,11 +39,13 @@ class ManifestSpawnListenerTest {
         Manifest.Key key2 = new Manifest.Key("test", "2");
         Manifest.Key key3 = new Manifest.Key("test", "3");
 
-        CompletableFuture<Collection<Manifest.Key>> notifyOne = new CompletableFuture<>();
+        CountDownLatch notifyOne = new CountDownLatch(2);
+        List<Manifest.Key> allOnes = new ArrayList<>();
         CompletableFuture<Collection<Manifest.Key>> notifyTwo = new CompletableFuture<>();
 
         ManifestSpawnListener l1 = (k) -> {
-            notifyOne.complete(k);
+            allOnes.addAll(k);
+            k.forEach(x -> notifyOne.countDown());
         };
 
         test.addSpawnListener(l1);
@@ -53,12 +56,11 @@ class ManifestSpawnListenerTest {
             test.execute(new InsertManifestOperation().addManifest(new Manifest.Builder(key2).setRoot(emptyTree).build(test)));
         }
 
-        Collection<Manifest.Key> keys = notifyOne.get(1, TimeUnit.SECONDS); // await.
+        notifyOne.await(1, TimeUnit.SECONDS); // await.
 
-        assertTrue(notifyOne.isDone());
-        assertEquals(2, keys.size());
-        assertTrue(keys.contains(key1));
-        assertTrue(keys.contains(key2));
+        assertEquals(2, allOnes.size());
+        assertTrue(allOnes.contains(key1));
+        assertTrue(allOnes.contains(key2));
 
         test.removeSpawnListener(l1);
 
