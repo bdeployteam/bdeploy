@@ -49,7 +49,7 @@ import io.bdeploy.pcu.TestAppFactory;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestActivityReporter.class)
-public class ProductCliTest {
+class ProductCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());

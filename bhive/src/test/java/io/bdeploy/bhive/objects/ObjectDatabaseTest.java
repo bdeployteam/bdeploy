@@ -29,16 +29,16 @@ import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TestActivityReporter;
 
 @ExtendWith(TestActivityReporter.class)
-public class ObjectDatabaseTest extends DbTestBase {
+class ObjectDatabaseTest extends DbTestBase {
 
     @Test
-    public void testInsertSmallObject(@TempDir Path tmp, ActivityReporter r) throws IOException {
+    void testInsertSmallObject(@TempDir Path tmp, ActivityReporter r) throws IOException {
         String content = "This is a test";
         testWithContent(content, tmp, r);
     }
 
     @Test
-    public void testInsertLargeObject(@TempDir Path tmp, ActivityReporter r) throws IOException {
+    void testInsertLargeObject(@TempDir Path tmp, ActivityReporter r) throws IOException {
         // generate a string with more than MAX_BUFFER_SIZE bytes (can be quite large).
         long minSize = ObjectDatabase.MAX_BUFFER_SIZE;
 
@@ -72,7 +72,7 @@ public class ObjectDatabaseTest extends DbTestBase {
     @SlowTest
     @ParameterizedTest
     @ValueSource(ints = { 512, 1024, 4096, 1024 * 1024 })
-    public void compareStreamWithInMemoryHash(int fsz, @TempDir Path tmp, ActivityReporter r) throws IOException {
+    void compareStreamWithInMemoryHash(int fsz, @TempDir Path tmp, ActivityReporter r) throws IOException {
         Path tmpDir = tmp.resolve("stream");
         List<Path> paths = new ArrayList<>();
         for (int i = 0; i < 100; ++i) {

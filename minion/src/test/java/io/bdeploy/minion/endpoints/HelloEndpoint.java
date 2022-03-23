@@ -1,5 +1,6 @@
 package io.bdeploy.minion.endpoints;
 
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -9,8 +10,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 
 @Path("/test/with")
 @Produces(MediaType.APPLICATION_JSON)

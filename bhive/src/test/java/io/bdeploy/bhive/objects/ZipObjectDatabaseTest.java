@@ -20,7 +20,7 @@ import io.bdeploy.common.util.PathHelper;
  * Runs all tests from {@link ObjectDatabaseTest} but with a ZIP compressed DB.
  */
 @ExtendWith(TestActivityReporter.class)
-public class ZipObjectDatabaseTest extends ObjectDatabaseTest {
+class ZipObjectDatabaseTest extends ObjectDatabaseTest {
 
     private ObjectDatabase zipDb;
     private Path zipPath;
@@ -28,7 +28,7 @@ public class ZipObjectDatabaseTest extends ObjectDatabaseTest {
     private FileSystem zfs;
 
     @BeforeEach
-    public void initZipDb(@TempDir Path tmp, ActivityReporter r) throws IOException {
+    void initZipDb(@TempDir Path tmp, ActivityReporter r) throws IOException {
         zipPath = tmp.resolve("zip-hive.zip");
         zfs = PathHelper.openZip(zipPath);
 
@@ -37,7 +37,7 @@ public class ZipObjectDatabaseTest extends ObjectDatabaseTest {
     }
 
     @AfterEach
-    public void cleanZipDb() throws IOException {
+    void cleanZipDb() throws IOException {
         zfs.close();
         zfs = null;
     }

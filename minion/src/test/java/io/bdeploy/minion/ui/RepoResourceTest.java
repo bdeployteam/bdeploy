@@ -42,7 +42,7 @@ import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestActivityReporter.class)
-public class RepoResourceTest {
+class RepoResourceTest {
 
     @Test
     void crud(SoftwareRepositoryResource repos) {

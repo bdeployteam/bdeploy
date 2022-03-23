@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(TestMinion.class)
-public class EncryptDescryptTest {
+class EncryptDescryptTest {
 
     private static final class TestPayload {
 

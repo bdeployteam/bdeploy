@@ -18,7 +18,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.TestServer;
 
 @ExtendWith(TestActivityReporter.class)
-public class RemoteHiveTestBase {
+class RemoteHiveTestBase {
 
     @RegisterExtension
     TestServer ext = new TestServer();
@@ -28,7 +28,7 @@ public class RemoteHiveTestBase {
     private URI uri;
 
     @BeforeEach
-    public void startRemoteServer(RemoteService svc, BHive hive, ActivityReporter r) throws Exception {
+    void startRemoteServer(RemoteService svc, BHive hive, ActivityReporter r) throws Exception {
         registry = new BHiveRegistry(r, null);
 
         // requires TestHive extension on subclass.
@@ -44,7 +44,7 @@ public class RemoteHiveTestBase {
     }
 
     @AfterEach
-    public void stopServer() {
+    void stopServer() {
         if (remote != null) {
             remote.close();
             remote = null;

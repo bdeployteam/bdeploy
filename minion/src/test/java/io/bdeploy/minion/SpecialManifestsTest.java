@@ -44,7 +44,7 @@ import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.Minion;
 
 @ExtendWith(TestHive.class)
-public class SpecialManifestsTest {
+class SpecialManifestsTest {
 
     @Test
     void customerManifest(BHive hive) {

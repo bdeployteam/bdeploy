@@ -5,11 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Map;
 import java.util.TreeMap;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Provider;
-import jakarta.inject.Singleton;
-import jakarta.ws.rs.PathParam;
-
 import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.ServiceLocator;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -20,8 +15,12 @@ import org.jvnet.hk2.annotations.Service;
 
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.dyn.DynamicTestResource.ValueDto;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.PathParam;
 
-public class DynamicInjectionTest {
+class DynamicInjectionTest {
 
     @RegisterExtension
     TestServer ext = new TestServer(new TestBinder(), DynamicInjectionTestResourceLocatorImpl.class);

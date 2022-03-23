@@ -7,11 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.MediaType;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -24,8 +19,12 @@ import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 import io.bdeploy.jersey.resources.JerseyMetricsResource;
 import io.bdeploy.jersey.resources.JerseyMetricsResource.MetricBundle;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
 
-public class MetricsTest {
+class MetricsTest {
 
     @RegisterExtension
     TestServer srv = new TestServer(ProducerImpl.class);

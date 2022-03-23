@@ -19,12 +19,12 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 
-public class ProcessControllerTest {
+class ProcessControllerTest {
 
     private final static Duration TIMEOUT = Duration.ofSeconds(60);
 
     @Test
-    public void testStartStop(@TempDir Path tmp) throws Exception {
+    void testStartStop(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App1", false, "60");
         StateListener listener = StateListener.createFor(process);
 
@@ -43,7 +43,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testRecover(@TempDir Path tmp) throws Exception {
+    void testRecover(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App2", false, "100");
         StateListener listener = StateListener.createFor(process);
 
@@ -73,7 +73,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testRecoverAfterCrash(@TempDir Path tmp) throws Exception {
+    void testRecoverAfterCrash(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App3", true, "100");
         process.setRecoverDelays(Duration.ofSeconds(1));
         process.setStableThreshold(Duration.ofSeconds(1));
@@ -100,7 +100,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testStopWhileInCrashBackOff(@TempDir Path tmp) throws Exception {
+    void testStopWhileInCrashBackOff(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App4", true, "1");
         StateListener listener = StateListener.createFor(process);
 
@@ -131,7 +131,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testStartStopInParallel(@TempDir Path tmp) throws Exception {
+    void testStartStopInParallel(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App5", true, "100");
         StateListener listener = StateListener.createFor(process);
         AtomicInteger failedCounter = new AtomicInteger(0);
@@ -209,7 +209,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testRecoverAttemptsExceeded(@TempDir Path tmp) throws Exception {
+    void testRecoverAttemptsExceeded(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App6", true, "1");
         process.setRecoverAttempts(1);
 
@@ -230,7 +230,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testStopWithoutRecover(@TempDir Path tmp) throws Exception {
+    void testStopWithoutRecover(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App7", false, "1");
         StateListener listener = StateListener.createFor(process);
 
@@ -245,7 +245,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testStartWhileInCrashBackOff(@TempDir Path tmp) throws Exception {
+    void testStartWhileInCrashBackOff(@TempDir Path tmp) throws Exception {
         ProcessController process = TestFactory.create(tmp, "App8", true, "300");
         StateListener listener = StateListener.createFor(process);
 
@@ -284,7 +284,7 @@ public class ProcessControllerTest {
     }
 
     @Test
-    public void testVariableReplacement(@TempDir Path tmp) throws Exception {
+    void testVariableReplacement(@TempDir Path tmp) throws Exception {
         Map<String, String> vars = Collections.singletonMap("SLEEP_TIMEOUT", "100");
 
         ProcessController process = TestFactory.create(tmp, "App9", false, "{{SLEEP_TIMEOUT}}");

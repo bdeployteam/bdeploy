@@ -25,7 +25,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.TestServer;
 
-public class VersioningTest {
+class VersioningTest {
 
     @RegisterExtension
     TestServer srv = new TestServer(VersionedImpl.class, UnversionedImpl.class, FakePRR.class);

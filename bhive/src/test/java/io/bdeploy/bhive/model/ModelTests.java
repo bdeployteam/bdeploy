@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import io.bdeploy.bhive.objects.DbTestBase;
 
-public class ModelTests extends DbTestBase {
+class ModelTests extends DbTestBase {
 
     @Test
-    public void testDuplicatePath() {
+    void testDuplicatePath() {
         Tree.Key k1 = new Tree.Key("XX", Tree.EntryType.BLOB);
         Tree.Key k2 = new Tree.Key("XX", Tree.EntryType.TREE);
 

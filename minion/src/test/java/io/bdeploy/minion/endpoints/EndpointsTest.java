@@ -42,7 +42,7 @@ import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestHive.class)
 @ExtendWith(TestMinion.class)
-public class EndpointsTest {
+class EndpointsTest {
 
     private static final Logger log = LoggerFactory.getLogger(EndpointsTest.class);
 

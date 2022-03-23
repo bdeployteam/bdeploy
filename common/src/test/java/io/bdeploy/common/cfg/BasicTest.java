@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class BasicTest {
+class BasicTest {
 
     @Test
-    public void testBasic() {
+    void testBasic() {
         Configuration c = new Configuration();
         c.add("--booleanArg", "--intArg=3");
 
@@ -28,7 +28,7 @@ public class BasicTest {
     }
 
     @Test
-    public void testDefault() {
+    void testDefault() {
         Configuration c = new Configuration();
 
         TestConfig tc = c.get(TestConfig.class);
@@ -44,7 +44,7 @@ public class BasicTest {
     }
 
     @Test
-    public void testRaw() {
+    void testRaw() {
         Configuration c = new Configuration();
         c.add("--some", "--arg");
         assertTrue(c.getAllRawObjects().containsKey("some"));

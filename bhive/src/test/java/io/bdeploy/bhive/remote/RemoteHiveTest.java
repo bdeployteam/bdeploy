@@ -46,10 +46,10 @@ import io.bdeploy.common.security.RemoteService;
 
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class RemoteHiveTest extends RemoteHiveTestBase {
+class RemoteHiveTest extends RemoteHiveTestBase {
 
     @Test
-    public void testRemote(RemoteService svc, BHive hive, @TempDir Path tmp, ActivityReporter r) throws Exception {
+    void testRemote(RemoteService svc, BHive hive, @TempDir Path tmp, ActivityReporter r) throws Exception {
         Path src = ContentHelper.genSimpleTestTree(tmp, "src");
         Manifest.Key key = new Manifest.Key("app", "v1");
 
@@ -112,7 +112,7 @@ public class RemoteHiveTest extends RemoteHiveTestBase {
     }
 
     @Test
-    public void testNestedManifests(RemoteService svc, BHive hive, @TempDir Path tmp, ActivityReporter r) throws IOException {
+    void testNestedManifests(RemoteService svc, BHive hive, @TempDir Path tmp, ActivityReporter r) throws IOException {
         Path src1 = ContentHelper.genSimpleTestTree(tmp, "src1");
         Path src2 = ContentHelper.genSimpleTestTree(tmp, "src2");
 

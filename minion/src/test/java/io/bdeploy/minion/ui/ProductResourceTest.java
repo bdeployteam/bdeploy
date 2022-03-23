@@ -24,7 +24,7 @@ import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
-public class ProductResourceTest {
+class ProductResourceTest {
 
     @Test
     void products(InstanceGroupResource root, RemoteService remote, @TempDir Path tmp) throws IOException {

@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test;
 import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;
 import io.bdeploy.common.cfg.Configuration.ValueMapping;
 
-public class ConversionTest {
+class ConversionTest {
 
     @Test
-    public void testConversion() {
+    void testConversion() {
         Configuration c = new Configuration();
 
         c.add("--testByte=3", "--testChar=a", "--testInt=9", "--testShort=8", "--testLong=7", "--testFloat=0.9",
@@ -52,7 +52,7 @@ public class ConversionTest {
     }
 
     @Test
-    public void testMultiAdd() {
+    void testMultiAdd() {
         Configuration c = new Configuration();
         c.add("--testStringArray=1");
         c.add("--testStringArray=2");
@@ -69,7 +69,7 @@ public class ConversionTest {
     }
 
     @Test
-    public void testEqualsSign() {
+    void testEqualsSign() {
         Configuration c = new Configuration();
         c.add("--testStringArray=this=test");
         c.add("--testStringArray=some=other");

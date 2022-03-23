@@ -20,7 +20,7 @@ import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 
-public class StreamTest {
+class StreamTest {
 
     private static Path src;
 

@@ -35,7 +35,7 @@ import io.bdeploy.common.security.RemoteService;
 
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class FetchPushTest extends RemoteHiveTestBase {
+class FetchPushTest extends RemoteHiveTestBase {
 
     @Test
     void rePushWithExistingRemoteRoot(@TempDir Path tmp, RemoteService svc, ActivityReporter r) throws IOException {

@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import io.bdeploy.common.ActivityReporter.Activity;
 
-public class BasicActivityReporterTest {
+class BasicActivityReporterTest {
 
     private static ActivityReporter.Stream stream = new ActivityReporter.Stream(System.out);
 

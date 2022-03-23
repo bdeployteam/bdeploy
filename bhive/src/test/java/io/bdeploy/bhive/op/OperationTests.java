@@ -19,10 +19,10 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.ContentHelper;
 
 @ExtendWith(TestHive.class)
-public class OperationTests {
+class OperationTests {
 
     @Test
-    public void testBasicOperations(BHive hive, @TempDir Path tmp) throws IOException {
+    void testBasicOperations(BHive hive, @TempDir Path tmp) throws IOException {
         Path src = ContentHelper.genSimpleTestTree(tmp, "src");
         Path tmpDir = tmp.resolve("exp");
 

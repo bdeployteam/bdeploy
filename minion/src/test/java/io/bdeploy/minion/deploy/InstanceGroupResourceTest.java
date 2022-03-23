@@ -30,12 +30,12 @@ import io.bdeploy.ui.dto.InstanceClientAppsDto;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class InstanceGroupResourceTest {
+class InstanceGroupResourceTest {
 
     private static final String GROUP_NAME = "demo";
 
     @Test
-    public void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root,
+    void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root,
             CommonRootResource common, RemoteService remote, @TempDir Path tmp) throws IOException, InterruptedException {
         OperatingSystem runningOs = OsHelper.getRunningOs();
 

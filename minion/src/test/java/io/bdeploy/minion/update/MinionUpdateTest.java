@@ -42,7 +42,7 @@ import io.bdeploy.ui.cli.RemoteMasterTool;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
-public class MinionUpdateTest {
+class MinionUpdateTest {
 
     @RegisterExtension
     TestCliTool cli = new TestCliTool(new MinionServerCli());

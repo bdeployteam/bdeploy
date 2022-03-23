@@ -12,7 +12,7 @@ public class DynamicTestResourceLocatorImpl implements DynamicTestResourceLocato
 
     private final Map<String, String> namedValues = new TreeMap<>();
 
-    public void register(String key, String value) {
+    void register(String key, String value) {
         namedValues.put(key, value);
     }
 

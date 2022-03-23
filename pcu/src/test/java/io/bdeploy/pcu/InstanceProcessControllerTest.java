@@ -21,10 +21,10 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 
-public class InstanceProcessControllerTest {
+class InstanceProcessControllerTest {
 
     @Test
-    public void testStartStopApps(@TempDir Path tmp) throws Exception {
+    void testStartStopApps(@TempDir Path tmp) throws Exception {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", false, "{{SLEEP_TIME}}");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
@@ -61,7 +61,7 @@ public class InstanceProcessControllerTest {
     }
 
     @Test
-    public void testMultiVersionApp(@TempDir Path tmp) throws Exception {
+    void testMultiVersionApp(@TempDir Path tmp) throws Exception {
         InstanceProcessController controller = new InstanceProcessController("MyInstance");
 
         // Create two applications in version 1 and add to the controller
@@ -114,7 +114,7 @@ public class InstanceProcessControllerTest {
     }
 
     @Test
-    public void testAutoStartAndRecover(@TempDir Path tmp) throws Exception {
+    void testAutoStartAndRecover(@TempDir Path tmp) throws Exception {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", false, "600");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
@@ -151,7 +151,7 @@ public class InstanceProcessControllerTest {
     }
 
     @Test
-    public void testStartStopOrder(@TempDir Path tmp) throws Exception {
+    void testStartStopOrder(@TempDir Path tmp) throws Exception {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", true, "600");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);

@@ -24,7 +24,7 @@ import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.jersey.TestServer;
 
-public class InstanceProcessControllerParallelTest {
+class InstanceProcessControllerParallelTest {
 
     private final AtomicBoolean fakeStart = new AtomicBoolean(false);
 
@@ -38,7 +38,7 @@ public class InstanceProcessControllerParallelTest {
     } });
 
     @Test
-    public void testParallelStartStopOrder(@TempDir Path tmp) throws Exception {
+    void testParallelStartStopOrder(@TempDir Path tmp) throws Exception {
         ProcessConfiguration app1 = TestFactory.createConfig(tmp, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(tmp, "App2", true, "600");
 

@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import io.bdeploy.common.security.ScopedPermission.Permission;
 
-public class ScopedPermissionTests {
+class ScopedPermissionTests {
 
     @Test
-    public void testGlobalRead() {
+    void testGlobalRead() {
         ScopedPermission permission = new ScopedPermission(Permission.READ);
 
         // Global read is allowed. Nothing else
@@ -25,7 +25,7 @@ public class ScopedPermissionTests {
     }
 
     @Test
-    public void testGlobalWrite() {
+    void testGlobalWrite() {
         ScopedPermission permission = new ScopedPermission(Permission.WRITE);
 
         // Global read,write is allowed. Nothing else
@@ -40,7 +40,7 @@ public class ScopedPermissionTests {
     }
 
     @Test
-    public void testGlobalAdmin() {
+    void testGlobalAdmin() {
         ScopedPermission permission = new ScopedPermission(Permission.ADMIN);
 
         // Everything is allowed
@@ -55,7 +55,7 @@ public class ScopedPermissionTests {
     }
 
     @Test
-    public void testScopedRead() {
+    void testScopedRead() {
         ScopedPermission permission = new ScopedPermission("a", Permission.READ);
 
         // Global nothing is allowed
@@ -75,7 +75,7 @@ public class ScopedPermissionTests {
     }
 
     @Test
-    public void testScopedWrite() {
+    void testScopedWrite() {
         ScopedPermission permission = new ScopedPermission("a", Permission.WRITE);
 
         // Global nothing is allowed
@@ -95,7 +95,7 @@ public class ScopedPermissionTests {
     }
 
     @Test
-    public void testScopedAdmin() {
+    void testScopedAdmin() {
         ScopedPermission permission = new ScopedPermission("a", Permission.ADMIN);
 
         // Global nothing is allowed

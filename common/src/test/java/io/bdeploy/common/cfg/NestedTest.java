@@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class NestedTest {
+class NestedTest {
 
     @Test
-    public void testNested() {
+    void testNested() {
         Configuration c = new Configuration();
         c.add("--testChar=x");
 

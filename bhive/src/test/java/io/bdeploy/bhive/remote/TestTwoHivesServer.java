@@ -31,7 +31,7 @@ import io.bdeploy.jersey.TestServer;
 
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class TestTwoHivesServer {
+class TestTwoHivesServer {
 
     @RegisterExtension
     TestServer ext = new TestServer();
@@ -54,7 +54,7 @@ public class TestTwoHivesServer {
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         if (registry != null) {
             registry.close();
             registry = null;
@@ -62,7 +62,7 @@ public class TestTwoHivesServer {
     }
 
     @Test
-    public void testTwoHives(RemoteService svc, BHive hive, @TempDir Path tmp, ActivityReporter r) throws Exception {
+    void testTwoHives(RemoteService svc, BHive hive, @TempDir Path tmp, ActivityReporter r) throws Exception {
         try (RemoteBHive r1 = RemoteBHive.forService(svc, "h1", r); RemoteBHive r2 = RemoteBHive.forService(svc, "h2", r)) {
             Manifest.Key key = new Manifest.Key("app", "v1");
 

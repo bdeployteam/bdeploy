@@ -11,10 +11,10 @@ import jakarta.ws.rs.core.UriBuilder;
 
 import org.junit.jupiter.api.Test;
 
-public class UriSchemeTest {
+class UriSchemeTest {
 
     @Test
-    public void testUriScheme() throws URISyntaxException {
+    void testUriScheme() throws URISyntaxException {
         URI u1 = UriBuilder.fromUri("bhive://host:1234").build();
         assertThat(u1.getScheme(), is("bhive"));
 

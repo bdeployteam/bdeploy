@@ -10,7 +10,7 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.BackendInfoResource;
 
 @ExtendWith(TestMinion.class)
-public class BackendInfoTest {
+class BackendInfoTest {
 
     @Test
     void testVersion(BackendInfoResource rsrc) {

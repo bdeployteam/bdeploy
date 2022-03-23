@@ -18,7 +18,7 @@ import io.bdeploy.jersey.ClientSslContextAccessor;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 
-public class RootTest {
+class RootTest {
 
     @RegisterExtension
     TestServer ext = new TestServer();

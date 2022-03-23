@@ -18,10 +18,10 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.bhive.model.Manifest;
 
-public class ManifestDatabaseTest extends DbTestBase {
+class ManifestDatabaseTest extends DbTestBase {
 
     @Test
-    public void storeAndRead(@TempDir Path tmp) throws IOException {
+    void storeAndRead(@TempDir Path tmp) throws IOException {
         Path dbDir = tmp.resolve("manifests");
 
         Manifest.Key key = new Manifest.Key("test/app1", "v1.0");

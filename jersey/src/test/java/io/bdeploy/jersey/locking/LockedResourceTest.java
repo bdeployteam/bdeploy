@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.TestServer;
 
-public class LockedResourceTest {
+class LockedResourceTest {
 
     @RegisterExtension
     TestServer srv = new TestServer(LockedResourceImpl.class);

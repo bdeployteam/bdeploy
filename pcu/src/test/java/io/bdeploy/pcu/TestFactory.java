@@ -13,7 +13,7 @@ import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.App
  * Factory class to create instance {@linkplain InstanceProcessController controllers}, process {@linkplain ProcessConfiguration
  * configuration} and process {@linkplain ProcessController controllers}.
  */
-public class TestFactory {
+class TestFactory {
 
     /**
      * Creates and returns a new group configuration.

@@ -44,10 +44,10 @@ import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 
 @ExtendWith(TestActivityReporter.class)
-public class ObjectManagerTest extends DbTestBase {
+class ObjectManagerTest extends DbTestBase {
 
     @Test
-    public void testImportExport(@TempDir Path tmp, ActivityReporter r) throws IOException, InterruptedException {
+    void testImportExport(@TempDir Path tmp, ActivityReporter r) throws IOException, InterruptedException {
         Path mySource = ContentHelper.genSimpleTestTree(tmp, "source");
         Path myTarget = tmp.resolve("target");
 
@@ -88,7 +88,7 @@ public class ObjectManagerTest extends DbTestBase {
 
     @SlowTest
     @Test
-    public void importLarge(@TempDir Path tmp, ActivityReporter r) throws IOException {
+    void importLarge(@TempDir Path tmp, ActivityReporter r) throws IOException {
         Path mySource = tmp.resolve("src");
 
         ExecutorService s = Executors.newFixedThreadPool(4);
@@ -150,7 +150,7 @@ public class ObjectManagerTest extends DbTestBase {
     }
 
     @Test
-    public void testEmptyDirImport(@TempDir Path tmp, ActivityReporter r) throws Exception {
+    void testEmptyDirImport(@TempDir Path tmp, ActivityReporter r) throws Exception {
         Path mySource = ContentHelper.genSimpleTestTree(tmp, "source");
 
         Path emptyDir = mySource.resolve("emptyDir");

@@ -19,12 +19,12 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ImportOperation;
 
 @ExtendWith(TestHive.class)
-public class MarkerConcurrency {
+class MarkerConcurrency {
 
     private static final Logger log = LoggerFactory.getLogger(MarkerConcurrency.class);
 
     @Test
-    public void testSequentialMarks(BHive hive, @TempDir Path tmp) throws Exception {
+    void testSequentialMarks(BHive hive, @TempDir Path tmp) throws Exception {
 
         // a test for manual comparison of performance when removing locking, e.g. as added with ce525e07 in MarkerDatabase
 
@@ -48,7 +48,7 @@ public class MarkerConcurrency {
     }
 
     @Test
-    public void testConcurrentMarks(BHive hive, @TempDir Path tmp) throws Exception {
+    void testConcurrentMarks(BHive hive, @TempDir Path tmp) throws Exception {
         Path source = tmp.resolve("source");
         Files.createDirectories(source);
 

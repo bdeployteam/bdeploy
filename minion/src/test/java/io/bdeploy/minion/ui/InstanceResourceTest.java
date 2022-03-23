@@ -49,7 +49,7 @@ import io.bdeploy.ui.dto.InstanceVersionDto;
 import jakarta.ws.rs.NotFoundException;
 
 @ExtendWith(TestMinion.class)
-public class InstanceResourceTest {
+class InstanceResourceTest {
 
     void addNodes(RemoteService remote) {
         NodeManagementResource nmr = ResourceProvider.getResource(remote, NodeManagementResource.class, null);

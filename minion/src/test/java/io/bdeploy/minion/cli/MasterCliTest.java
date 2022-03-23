@@ -36,7 +36,7 @@ import io.bdeploy.minion.cli.shutdown.RemoteShutdown;
 import io.bdeploy.ui.cli.RemoteUserTool;
 
 @ExtendWith(TestActivityReporter.class)
-public class MasterCliTest {
+class MasterCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());

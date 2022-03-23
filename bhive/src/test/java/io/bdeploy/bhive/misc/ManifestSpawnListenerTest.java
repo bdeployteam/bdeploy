@@ -30,7 +30,7 @@ import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.common.util.FutureHelper;
 
 @ExtendWith(TestHive.class)
-public class ManifestSpawnListenerTest {
+class ManifestSpawnListenerTest {
 
     @Test
     void testSpawnListener(BHive test) throws Exception {
