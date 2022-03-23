@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Helper to collect tracing message.
@@ -45,6 +44,6 @@ public class AuthTrace {
     }
 
     List<String> getMessages() {
-        return messages.stream().map(Message::format).collect(Collectors.toList());
+        return messages.stream().map(Message::format).toList();
     }
 }

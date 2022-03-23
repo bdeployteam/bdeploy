@@ -2,7 +2,6 @@ package io.bdeploy.interfaces.variables;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.MoreCollectors;
 
@@ -46,8 +45,7 @@ public class ApplicationParameterProvider {
      * @return the value of the specified parameter.
      */
     public ApplicationConfiguration getAppByName(String appName) {
-        Collection<ApplicationConfiguration> apps = config.applications.stream().filter(a -> a.name.equals(appName))
-                .collect(Collectors.toList());
+        Collection<ApplicationConfiguration> apps = config.applications.stream().filter(a -> a.name.equals(appName)).toList();
         if (apps.isEmpty()) {
             throw new IllegalArgumentException("Unable to resolve parameter value. Application with the " + "name '" + appName
                     + "' is not existing in this instance.");
@@ -71,8 +69,7 @@ public class ApplicationParameterProvider {
     }
 
     public String getParam(ApplicationConfiguration app, String paramId) {
-        List<ParameterConfiguration> params = app.start.parameters.stream().filter(p -> p.uid.equals(paramId))
-                .collect(Collectors.toList());
+        List<ParameterConfiguration> params = app.start.parameters.stream().filter(p -> p.uid.equals(paramId)).toList();
         if (params.size() != 1) {
             throw new IllegalArgumentException(
                     "Cannot find unique parameter " + paramId + " for application " + app.name + ", found " + params.size());

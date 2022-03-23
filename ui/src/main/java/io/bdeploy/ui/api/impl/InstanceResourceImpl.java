@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -640,7 +639,7 @@ public class InstanceResourceImpl implements InstanceResource {
                         descriptor.name = mf.getDescriptor().name;
                         descriptor.descriptor = mf.getDescriptor();
                         return descriptor;
-                    }).collect(Collectors.toList()));
+                    }).toList());
         } catch (Exception e) {
             log.warn("Cannot load product of instance version {}: {}", thisIm.getManifest(), productKey, e);
         }
@@ -757,11 +756,11 @@ public class InstanceResourceImpl implements InstanceResource {
             log.info("Missing source product on product update: " + state.config.config.product);
         }
         List<ApplicationManifest> currentApps = current == null ? null
-                : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).collect(Collectors.toList());
+                : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).toList();
 
         ProductManifest target = ProductManifest.of(hive, new Manifest.Key(state.config.config.product.getName(), productTag));
         List<ApplicationManifest> targetApps = target.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
-                .collect(Collectors.toList());
+                .toList();
 
         InstanceUpdateDto updated = pus.update(state, target, current, targetApps, currentApps);
         return updated;
@@ -770,8 +769,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public List<ApplicationValidationDto> validate(String instanceId, InstanceUpdateDto state) {
         ProductManifest pm = ProductManifest.of(hive, state.config.config.product);
-        List<ApplicationManifest> am = pm.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
-                .collect(Collectors.toList());
+        List<ApplicationManifest> am = pm.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).toList();
 
         return pus.validate(state, am);
     }

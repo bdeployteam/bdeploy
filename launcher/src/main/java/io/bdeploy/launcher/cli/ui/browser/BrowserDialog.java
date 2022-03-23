@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
 import javax.swing.InputMap;
@@ -124,7 +123,7 @@ public class BrowserDialog extends BaseDialog {
         try (BHive hive = new BHive(hivePath.toUri(), auditor != null ? auditor : RollingFileAuditor.getFactory().apply(hivePath),
                 new ActivityReporter.Null())) {
             ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-            model.addAll(manifest.list().stream().filter(mf -> mf.clickAndStart != null).collect(Collectors.toList()));
+            model.addAll(manifest.list().stream().filter(mf -> mf.clickAndStart != null).toList());
         }
         doUpdateButtonState();
     }

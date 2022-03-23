@@ -3,7 +3,6 @@ package io.bdeploy.interfaces;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -57,7 +56,7 @@ public class UserInfo implements Comparable<UserInfo> {
      * @return the global permissions
      */
     public Collection<ScopedPermission> getGlobalPermissions() {
-        return permissions.stream().filter(ScopedPermission::isGlobal).collect(Collectors.toList());
+        return permissions.stream().filter(ScopedPermission::isGlobal).toList();
     }
 
     /**

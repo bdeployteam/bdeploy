@@ -124,8 +124,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
         // fetch the states of each node's collected ports
         for (var np : ports.entrySet()) {
-            var states = ir.getPortStates(config.uuid(), np.getKey(),
-                    np.getValue().stream().map(NodePort::getPort).collect(Collectors.toList()));
+            var states = ir.getPortStates(config.uuid(), np.getKey(), np.getValue().stream().map(NodePort::getPort).toList());
             var nodePortsGrouped = np.getValue().stream().collect(Collectors.groupingBy(NodePort::getPort));
 
             for (var portAndState : states.entrySet()) {

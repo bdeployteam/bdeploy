@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -140,7 +139,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 keys.forEach(pushOp::addManifest);
                 tmpHive.execute(pushOp);
 
-                return keys.stream().filter(UpdateHelper::isBDeployServerKey).collect(Collectors.toList());
+                return keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
             }
         } finally {
             PathHelper.deleteRecursive(tmpDir);
