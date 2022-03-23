@@ -337,7 +337,7 @@ public class InstanceResourceImpl implements InstanceResource {
                             }
 
                             if (!statusOnNode.isAppDeployed(app.uid)) {
-                                log.warn("Expected application is not currently deployed: " + app.uid);
+                                log.warn("Expected application is not currently deployed: {}", app.uid);
                                 continue;
                             }
 
@@ -753,7 +753,7 @@ public class InstanceResourceImpl implements InstanceResource {
         try {
             current = ProductManifest.of(hive, state.config.config.product);
         } catch (Exception e) {
-            log.info("Missing source product on product update: " + state.config.config.product);
+            log.info("Missing source product on product update: {}", state.config.config.product);
         }
         List<ApplicationManifest> currentApps = current == null ? null
                 : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).toList();

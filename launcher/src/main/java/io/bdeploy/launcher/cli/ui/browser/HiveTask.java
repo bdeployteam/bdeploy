@@ -36,7 +36,7 @@ public abstract class HiveTask extends SwingWorker<String, Void> {
     @Override
     protected String doInBackground() throws Exception {
         int i = 0;
-        log.info("Executing '" + getTaskName() + "'");
+        log.info("Executing '{}'", getTaskName());
         for (Path hiveDir : hives) {
             Path rootDir = hiveDir.getParent();
             builder.append(hiveDir.toString()).append("\n");
