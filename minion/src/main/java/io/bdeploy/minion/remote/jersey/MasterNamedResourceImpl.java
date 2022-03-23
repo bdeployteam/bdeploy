@@ -175,7 +175,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         getState(imf, hive).install(key.getTag());
-        imf.getHistory(hive).record(Action.INSTALL, context.getUserPrincipal().getName(), null);
+        imf.getHistory(hive).recordAction(Action.INSTALL, context.getUserPrincipal().getName(), null);
     }
 
     @Override
@@ -193,7 +193,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (activeTag != null) {
             try {
                 InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag);
-                oldIm.getHistory(hive).record(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
+                oldIm.getHistory(hive).recordAction(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
 
                 // make sure all nodes which no longer participate are deactivated.
                 for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifests().entrySet()) {
@@ -247,7 +247,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         getState(imf, hive).activate(key.getTag());
-        imf.getHistory(hive).record(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
+        imf.getHistory(hive).recordAction(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
     }
 
     /**
@@ -336,7 +336,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         getState(imf, hive).uninstall(key.getTag());
-        imf.getHistory(hive).record(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
+        imf.getHistory(hive).recordAction(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
     }
 
     private Manifest.Key createInstanceVersion(Manifest.Key target, InstanceConfiguration config,
@@ -381,7 +381,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         Manifest.Key key = builder.insert(hive);
-        InstanceManifest.of(hive, key).getHistory(hive).record(Action.CREATE, context.getUserPrincipal().getName(), null);
+        InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.CREATE, context.getUserPrincipal().getName(), null);
         return key;
     }
 
@@ -926,7 +926,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         im.getBanner(hive).set(instanceBannerRecord);
 
-        im.getHistory(hive).record(instanceBannerRecord.text != null ? Action.BANNER_SET : Action.BANNER_CLEAR,
+        im.getHistory(hive).recordAction(instanceBannerRecord.text != null ? Action.BANNER_SET : Action.BANNER_CLEAR,
                 context.getUserPrincipal().getName(), null);
     }
 

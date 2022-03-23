@@ -3,7 +3,7 @@ package io.bdeploy.common.audit;
 public class NullAuditor implements Auditor {
 
     @Override
-    public void audit(AuditRecord record) {
+    public void audit(AuditRecord rec) {
         // do nothing.
     }
 

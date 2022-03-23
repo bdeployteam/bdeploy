@@ -53,8 +53,8 @@ public class InstanceState {
         return stored;
     }
 
-    private void store(InstanceStateRecord record) {
-        meta.write(hive, record);
+    private void store(InstanceStateRecord rec) {
+        meta.write(hive, rec);
     }
 
 }

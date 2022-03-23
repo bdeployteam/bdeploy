@@ -27,8 +27,8 @@ public class MinionRuntimeHistoryManager {
      * threads for the same application, that a key conflict can occur during recording.
      * </p>
      */
-    public synchronized void record(long processId, int exitCode, ProcessState action, String applicationId, String user) {
-        store(readOrCreate().record(new MinionRuntimeHistoryRecord(processId, exitCode, action, user, System.currentTimeMillis()),
+    public synchronized void recordEvent(long processId, int exitCode, ProcessState action, String applicationId, String user) {
+        store(readOrCreate().recordEvent(new MinionRuntimeHistoryRecord(processId, exitCode, action, user, System.currentTimeMillis()),
                 applicationId));
     }
 

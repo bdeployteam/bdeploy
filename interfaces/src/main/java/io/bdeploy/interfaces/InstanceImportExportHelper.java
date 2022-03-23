@@ -182,7 +182,7 @@ public class InstanceImportExportHelper {
         }
 
         Key result = imfb.insert(target);
-        InstanceManifest.of(target, result).getHistory(target).record(Action.CREATE,
+        InstanceManifest.of(target, result).getHistory(target).recordAction(Action.CREATE,
                 context != null ? context.getUserPrincipal().getName() : ApiAccessToken.SYSTEM_USER, null);
         return result;
     }

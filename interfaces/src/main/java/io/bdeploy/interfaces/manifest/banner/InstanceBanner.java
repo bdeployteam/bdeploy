@@ -30,8 +30,8 @@ public class InstanceBanner {
         return stored;
     }
 
-    private void store(InstanceBannerRecord record) {
-        meta.write(hive, record);
+    private void store(InstanceBannerRecord rec) {
+        meta.write(hive, rec);
     }
 
 }

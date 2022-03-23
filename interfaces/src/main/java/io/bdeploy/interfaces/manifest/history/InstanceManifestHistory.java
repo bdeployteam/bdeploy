@@ -43,7 +43,7 @@ public class InstanceManifestHistory {
      *
      * @param action the performed action.
      */
-    public void record(Action action, String user, String comment) {
+    public void recordAction(Action action, String user, String comment) {
         store(readOrCreate().append(new InstanceManifestHistoryRecord(action, System.currentTimeMillis(), user, comment)));
     }
 
@@ -81,8 +81,8 @@ public class InstanceManifestHistory {
 
         public List<InstanceManifestHistoryRecord> records = new ArrayList<>();
 
-        public History append(InstanceManifestHistoryRecord record) {
-            this.records.add(record);
+        public History append(InstanceManifestHistoryRecord rec) {
+            this.records.add(rec);
             return this;
         }
     }

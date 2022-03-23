@@ -17,21 +17,21 @@ public class Slf4jAuditor implements Auditor {
     }
 
     @Override
-    public void audit(AuditRecord record) {
-        MDC.put("WHO", record.who);
-        MDC.put("WHAT", record.what);
-        MDC.put("PARAMETERS", record.parameters);
-        MDC.put("METHOD", record.method);
+    public void audit(AuditRecord rec) {
+        MDC.put("WHO", rec.who);
+        MDC.put("WHAT", rec.what);
+        MDC.put("PARAMETERS", rec.parameters);
+        MDC.put("METHOD", rec.method);
 
-        switch (record.severity) {
+        switch (rec.severity) {
             case NORMAL:
-                log.info(record.message);
+                log.info(rec.message);
                 break;
             case WARNING:
-                log.warn(record.message);
+                log.warn(rec.message);
                 break;
             case ERROR:
-                log.error(record.message);
+                log.error(rec.message);
                 break;
         }
     }

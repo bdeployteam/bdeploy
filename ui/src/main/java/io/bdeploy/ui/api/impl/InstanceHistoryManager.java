@@ -103,17 +103,17 @@ public class InstanceHistoryManager {
     private List<HistoryEntryDto> loadHistory(InstanceManifest mf) {
         List<HistoryEntryDto> entries = new ArrayList<>();
         String tag = mf.getManifest().getTag();
-        for (InstanceManifestHistoryRecord record : mf.getHistory(hive).getFullHistory()) {
-            HistoryEntryType type = computeType(record.action);
-            HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, tag);
+        for (InstanceManifestHistoryRecord rec : mf.getHistory(hive).getFullHistory()) {
+            HistoryEntryType type = computeType(rec.action);
+            HistoryEntryDto entry = new HistoryEntryDto(rec.timestamp, tag);
 
-            UserInfo userInfo = computeUser(record.user);
+            UserInfo userInfo = computeUser(rec.user);
             if (userInfo != null) {
                 entry.user = userInfo.name;
                 entry.email = userInfo.email;
             }
 
-            entry.title = computeConfigTitle(record.action, tag);
+            entry.title = computeConfigTitle(rec.action, tag);
             entry.type = type;
             entries.add(entry);
         }
@@ -156,12 +156,12 @@ public class InstanceHistoryManager {
     private List<HistoryEntryDto> getApplicationRuntimeHistory(String minionName, String tag, String appName,
             MinionApplicationRuntimeHistory history) {
         List<HistoryEntryDto> result = new ArrayList<>();
-        for (MinionRuntimeHistoryRecord record : history.getRecords()) {
-            HistoryEntryDto entry = new HistoryEntryDto(record.timestamp, tag);
+        for (MinionRuntimeHistoryRecord rec : history.getRecords()) {
+            HistoryEntryDto entry = new HistoryEntryDto(rec.timestamp, tag);
             entry.type = HistoryEntryType.RUNTIME;
-            entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, record.pid, record.exitCode, record.state);
-            entry.title = computeRuntimeTitle(record.state, appName);
-            UserInfo userInfo = computeUser(record.user);
+            entry.runtimeEvent = new HistoryEntryRuntimeDto(minionName, rec.pid, rec.exitCode, rec.state);
+            entry.title = computeRuntimeTitle(rec.state, appName);
+            UserInfo userInfo = computeUser(rec.user);
             if (userInfo != null) {
                 entry.user = userInfo.name;
                 entry.email = userInfo.email;

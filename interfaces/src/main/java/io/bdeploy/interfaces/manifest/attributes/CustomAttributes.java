@@ -14,8 +14,8 @@ public class CustomAttributes {
         this.meta = new MetaManifest<>(manifestKey, false, CustomAttributesRecord.class);
     }
 
-    public void set(CustomAttributesRecord record) {
-        store(record); // overwrite
+    public void set(CustomAttributesRecord rec) {
+        store(rec); // overwrite
     }
 
     public CustomAttributesRecord read() {
@@ -34,8 +34,8 @@ public class CustomAttributes {
         return stored;
     }
 
-    private void store(CustomAttributesRecord record) {
-        meta.write(hive, record);
+    private void store(CustomAttributesRecord rec) {
+        meta.write(hive, rec);
     }
 
 }

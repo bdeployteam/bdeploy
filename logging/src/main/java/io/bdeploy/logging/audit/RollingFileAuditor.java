@@ -74,18 +74,18 @@ public class RollingFileAuditor implements Auditor {
     /**
      * Writes the given audit record to the file-system.
      *
-     * @param record the record to write
+     * @param rec the record to write
      */
     @Override
-    public void audit(AuditRecord record) {
+    public void audit(AuditRecord rec) {
         try {
             if (logAppender.isStopped()) {
                 return;
             }
 
             Log4jLogEvent.Builder builder = Log4jLogEvent.newBuilder();
-            builder.setMessage(new SimpleMessage(record.message));
-            switch (record.severity) {
+            builder.setMessage(new SimpleMessage(rec.message));
+            switch (rec.severity) {
                 case NORMAL:
                     builder.setLevel(Level.INFO);
                     break;
@@ -98,10 +98,10 @@ public class RollingFileAuditor implements Auditor {
             }
 
             StringMap contextData = ContextDataFactory.createContextData();
-            contextData.putValue("WHO", record.who);
-            contextData.putValue("WHAT", record.what);
-            contextData.putValue("PARAMETERS", record.parameters);
-            contextData.putValue("METHOD", record.method);
+            contextData.putValue("WHO", rec.who);
+            contextData.putValue("WHAT", rec.what);
+            contextData.putValue("PARAMETERS", rec.parameters);
+            contextData.putValue("METHOD", rec.method);
             builder.setContextData(contextData);
 
             Log4jLogEvent logEvent = builder.build();
