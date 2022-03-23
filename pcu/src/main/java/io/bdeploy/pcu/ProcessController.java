@@ -1113,7 +1113,7 @@ public class ProcessController {
     private void notifyListeners(ProcessStateChangeDto status) {
         try {
             logger.log(l -> l.debug("Notify listeners about new process state {}.", status.newState));
-            statusListeners.forEach(c -> c.accept(status));
+            new ArrayList<>(statusListeners).forEach(c -> c.accept(status));
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to notify listener about current process status.", ex));
         }
