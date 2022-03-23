@@ -69,9 +69,18 @@ export class RepositoryService {
     private changes: ObjectChangesService,
     repositories: RepositoriesService
   ) {
-    repositories.current$.subscribe((repository) =>
-      this.update$.next(repository?.name)
-    );
+    repositories.current$.subscribe((repository) => {
+      // whenever the current repo changes, we trigger a delayed reload.
+      // we *anyhow* want to remove the outdated data before doing this.
+      // otherwise the user would briefly see the old data before loading begins.
+      this.productsLoading$.next(true);
+      this.softwarePackagesLoading$.next(true);
+      this.products$.next([]);
+      this.softwarePackages$.next([]);
+
+      // trigger delayed update.
+      this.update$.next(repository?.name);
+    });
     this.update$.pipe(debounceTime(100)).subscribe((r) => this.reload(r));
   }
 
