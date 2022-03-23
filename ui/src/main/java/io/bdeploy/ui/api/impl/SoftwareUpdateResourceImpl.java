@@ -87,7 +87,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     @Override
     public List<Key> getBDeployVersions() {
         return getHive().execute(new ManifestListOperation().setManifestName(BDEPLOY_MF_NAME)).stream()
-                .sorted(VersionComparator.BY_TAG_NEWEST_LAST).collect(Collectors.toList());
+                .sorted(VersionComparator.BY_TAG_NEWEST_LAST).toList();
     }
 
     @Override
@@ -116,7 +116,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     @Override
     public List<Key> getLauncherVersions() {
         return getHive().execute(new ManifestListOperation().setManifestName(LAUNCHER_MF_NAME)).stream()
-                .sorted(VersionComparator.BY_TAG_NEWEST_LAST).collect(Collectors.toList());
+                .sorted(VersionComparator.BY_TAG_NEWEST_LAST).toList();
     }
 
     @Override

@@ -2,10 +2,6 @@ package io.bdeploy.ui.api.impl;
 
 import java.util.List;
 import java.util.SortedSet;
-import java.util.stream.Collectors;
-
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +14,8 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.dto.ApplicationDto;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 public class ApplicationResourceImpl implements ApplicationResource {
 
@@ -42,7 +40,7 @@ public class ApplicationResourceImpl implements ApplicationResource {
                 descriptor.name = mf.getDescriptor().name;
                 descriptor.descriptor = mf.getDescriptor();
                 return descriptor;
-            }).collect(Collectors.toList());
+            }).toList();
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
                 log.debug("Cannot load product {}", productKey, e);

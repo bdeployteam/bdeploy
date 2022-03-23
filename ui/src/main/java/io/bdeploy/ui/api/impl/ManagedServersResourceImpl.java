@@ -242,7 +242,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         return masters.getManagedMasters().values().stream().map(e -> {
             e.auth = null;
             return e;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     @Override
@@ -413,7 +413,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             CommonRootResource masterRoot = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);
             CommonInstanceResource master = masterRoot.getInstanceResource(groupName);
             SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
-            List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).collect(Collectors.toList());
+            List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).toList();
 
             FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName);
             try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
@@ -538,9 +538,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         localVersion.addAll(getLocalPackage(SoftwareUpdateResource.LAUNCHER_MF_NAME));
 
         // Compute what is missing and what needs to be installed
-        updateDto.packagesToInstall = localVersion.stream().map(ScopedManifestKey::getKey).collect(Collectors.toList());
+        updateDto.packagesToInstall = localVersion.stream().map(ScopedManifestKey::getKey).toList();
         localVersion.removeAll(remoteVersions);
-        updateDto.packagesToTransfer = localVersion.stream().map(ScopedManifestKey::getKey).collect(Collectors.toList());
+        updateDto.packagesToTransfer = localVersion.stream().map(ScopedManifestKey::getKey).toList();
 
         return updateDto;
     }
@@ -574,7 +574,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     public void installUpdate(String groupName, String serverName, MinionUpdateDto updates) {
         // Only retain server packages in the list of packages to install
         Collection<Key> keys = updates.packagesToInstall;
-        Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).collect(Collectors.toList());
+        Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
 
         // Determine OS of the master
         Optional<MinionDto> masterDto = getMinionsOfManagedServer(groupName, serverName).values().stream()

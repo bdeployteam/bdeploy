@@ -2,7 +2,6 @@ package io.bdeploy.pcu;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -27,7 +26,7 @@ public class InstanceNodeOrderProvider implements Function<String, List<String>>
         Manifest.Key inmKey = new Manifest.Key(instanceNodeName, tag);
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, inmKey);
         List<ApplicationConfiguration> apps = inm.getConfiguration().applications;
-        return apps.stream().map(app -> app.uid).collect(Collectors.toList());
+        return apps.stream().map(app -> app.uid).toList();
     }
 
 }
