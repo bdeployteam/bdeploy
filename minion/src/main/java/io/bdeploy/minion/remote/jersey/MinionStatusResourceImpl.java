@@ -81,9 +81,8 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
     @Override
     public Map<String, String> repairDefaultBHive() {
         Map<String, String> result = new TreeMap<>();
-        root.getHive().execute(new FsckOperation().setRepair(true)).forEach(v -> {
-            result.put(v.getElementId().toString(), v.getPathString());
-        });
+        root.getHive().execute(new FsckOperation().setRepair(true))
+                .forEach(v -> result.put(v.getElementId().toString(), v.getPathString()));
         return result;
     }
 

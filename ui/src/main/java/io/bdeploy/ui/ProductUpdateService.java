@@ -58,8 +58,7 @@ public class ProductUpdateService {
         }
 
         for (var app : allApps) {
-            updateApplication(app, allApps, currentProduct, targetProduct, currentApplications, targetApplications,
-                    validationIssues);
+            updateApplication(app, allApps, targetProduct, currentApplications, targetApplications, validationIssues);
         }
 
         if (currentProduct == null) {
@@ -75,7 +74,7 @@ public class ProductUpdateService {
     }
 
     private void updateApplication(ApplicationConfiguration app, List<ApplicationConfiguration> allApps,
-            ProductManifest currentProduct, ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
+            ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
             List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues) {
         var current = currentApplications == null ? null
                 : currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
