@@ -57,6 +57,13 @@ const routes: Routes = [
     canDeactivate: [DirtyDialogGuard],
   },
   {
+    path: 'node-detail/:node/replace',
+    component: NodeEditComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+    data: { replace: true },
+  },
+  {
     path: 'node-detail/:node/update',
     component: NodeUpdateComponent,
     canActivate: [AdminGuard],

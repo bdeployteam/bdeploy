@@ -51,6 +51,14 @@ public interface MasterRootResource extends CommonUpdateResource {
     public void editNode(@PathParam("name") String name, RemoteService minion);
 
     /**
+     * @param name the name of the minion to edit.
+     * @param minion the updated minion configuration for the minion.
+     */
+    @POST
+    @Path("/minions/{name}/replace")
+    public void replaceNode(@PathParam("name") String name, RemoteService minion);
+
+    /**
      * @param name the name of the minion to remove.
      */
     @DELETE

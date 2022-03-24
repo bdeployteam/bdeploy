@@ -72,6 +72,12 @@ export class NodesAdminService {
       .pipe(measure(`Edit node ${nodeName}`));
   }
 
+  public replaceNode(nodeName: string, remote: RemoteService): Observable<any> {
+    return this.http
+      .post(`${this.apiPath()}/nodes/${nodeName}/replace`, remote)
+      .pipe(measure(`Replace node ${nodeName}`));
+  }
+
   public removeNode(nodeName: string): Observable<any> {
     return this.http
       .delete(`${this.apiPath()}/nodes/${nodeName}`)

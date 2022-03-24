@@ -5,6 +5,7 @@ import {
   BehaviorSubject,
   combineLatest,
   finalize,
+  map,
   Observable,
   Subscription,
 } from 'rxjs';
@@ -25,9 +26,16 @@ export const NODE_MIME_TYPE = 'text/plain';
 })
 export class NodeEditComponent implements OnDestroy, DirtyableDialog {
   /* template */ saving$ = new BehaviorSubject<boolean>(false);
+  /* template */ replacing$ = new BehaviorSubject<boolean>(false);
   /* template */ data: RemoteService;
   /* template */ orig: RemoteService;
   /* template */ nodeName: string;
+  /* template */ replace = false;
+
+  /* template */ loading$ = combineLatest([
+    this.nodesAdmin.loading$,
+    this.replacing$,
+  ]).pipe(map(([l, r]) => l || r));
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -46,10 +54,12 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
             return;
           }
 
+          this.replace = !!r.data.replace;
           this.nodeName = r.params.node;
-          this.orig = n.find(
-            (x) => x.name === this.nodeName
-          ).status?.config?.remote;
+          this.orig = cloneDeep(
+            n.find((x) => x.name === this.nodeName).status?.config?.remote
+          );
+          this.orig.authPack = ''; // clear existing pack, not relevant AT ALL.
           this.data = cloneDeep(this.orig);
         }
       )
@@ -69,10 +79,17 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
   }
 
   doSave(): Observable<any> {
-    this.saving$.next(true);
-    return this.nodesAdmin
-      .editNode(this.nodeName, this.data)
-      .pipe(finalize(() => this.saving$.next(false)));
+    if (this.replace) {
+      this.replacing$.next(true);
+      return this.nodesAdmin
+        .replaceNode(this.nodeName, this.data)
+        .pipe(finalize(() => this.replacing$.next(false)));
+    } else {
+      this.saving$.next(true);
+      return this.nodesAdmin
+        .editNode(this.nodeName, this.data)
+        .pipe(finalize(() => this.saving$.next(false)));
+    }
   }
 
   onSave() {

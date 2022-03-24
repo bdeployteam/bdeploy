@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
@@ -27,8 +28,12 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.SortOneAsLastComparator;
 import io.bdeploy.interfaces.UpdateHelper;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
@@ -78,6 +83,92 @@ public class MasterRootResourceImpl implements MasterRootResource {
     @Override
     public void editNode(String name, RemoteService minion) {
         nodes.editNode(name, minion);
+    }
+
+    private Map<String, NodeGroupState> getInstancesToReinstall(String node) {
+        Map<String, NodeGroupState> result = new TreeMap<>();
+
+        try (Activity finding = reporter.start("Finding Instances to repair on Node " + node)) {
+            CommonRootResource groups = rc.initResource(new CommonRootResourceImpl());
+
+            groups.getInstanceGroups().forEach(g -> {
+                NodeGroupState ngs = new NodeGroupState();
+
+                // find all instances in the group
+                BHive hive = registry.get(g.name);
+                SortedSet<Key> ims = InstanceManifest.scan(hive, true);
+
+                ims.forEach(e -> {
+                    InstanceManifest im = InstanceManifest.of(hive, e);
+                    InstanceConfiguration i = im.getConfiguration();
+
+                    // find all installed/active versions
+                    InstanceStateRecord states = im.getState(hive).read();
+                    NodeInstanceState ns = new NodeInstanceState();
+                    ns.active = states.activeTag;
+                    ns.name = i.name;
+
+                    for (String installed : states.installedTags) {
+                        // if it does, we add it to the list we want to re-install.
+                        if (im.getInstanceNodeManifests().containsKey(node)) {
+                            ns.installed.add(installed);
+                        }
+                    }
+
+                    if (!ns.installed.isEmpty()) {
+                        ngs.instances.put(i.uuid, ns);
+                    }
+                });
+
+                if (!ngs.instances.isEmpty()) {
+                    result.put(g.name, ngs);
+                }
+            });
+        }
+
+        return result;
+    }
+
+    @Override
+    public void replaceNode(String name, RemoteService minion) {
+        // 1. update the node configuration. this also forces contact with the node to be established.
+        editNode(name, minion);
+
+        // 3. find all instances in which the node participates.
+        Map<String, NodeGroupState> toReinstall = getInstancesToReinstall(name);
+
+        // 4. trigger re-install of all software.
+        try (Activity grpReinstall = reporter.start("Replacing Node " + name, toReinstall.size())) {
+            for (var entry : toReinstall.entrySet()) {
+                String group = entry.getKey();
+                NodeGroupState ngs = entry.getValue();
+
+                BHive hive = registry.get(group);
+
+                for (var instanceEntry : ngs.instances.entrySet()) {
+                    String instanceId = instanceEntry.getKey();
+                    NodeInstanceState nis = instanceEntry.getValue();
+
+                    MasterNamedResource mnr = getNamedMaster(group);
+
+                    try (Activity instReinstall = reporter.start("Restoring " + nis.name, nis.installed.size())) {
+                        for (var instanceTag : nis.installed) {
+                            InstanceManifest iim = InstanceManifest.load(hive, instanceId, instanceTag);
+
+                            mnr.install(iim.getManifest());
+                            if (instanceTag.equals(nis.active)) {
+                                mnr.activate(iim.getManifest());
+                            }
+
+                            instReinstall.workAndCancelIfRequested(1);
+                        }
+                    }
+                }
+
+                grpReinstall.workAndCancelIfRequested(1);
+            }
+        }
+
     }
 
     @Override
@@ -250,6 +341,18 @@ public class MasterRootResourceImpl implements MasterRootResource {
         }
 
         return rc.initResource(new MasterNamedResourceImpl(root, h, reporter));
+    }
+
+    private static final class NodeGroupState {
+
+        public Map<String, NodeInstanceState> instances = new TreeMap<>();
+    }
+
+    private static final class NodeInstanceState {
+
+        public String name;
+        public List<String> installed = new ArrayList<>();
+        public String active;
     }
 
 }

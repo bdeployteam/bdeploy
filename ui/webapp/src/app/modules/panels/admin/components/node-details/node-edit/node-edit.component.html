@@ -1,6 +1,6 @@
-<app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
+<app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar
-    header="Edit {{nodeName}}"
+    [header]="(replace ? 'Replace ' : 'Edit ') + nodeName"
     [panel]="true"
     [route]="['..']"
   ></app-bd-dialog-toolbar>
@@ -12,6 +12,10 @@
           <code>node-ident</code> file which is created during the
           initialization process on the physical node.</span
         >
+        <span *ngIf="replace">
+          Note that <strong>replacing</strong> a node may take a while, since
+          all software and configuration on the new node will be restored.
+        </span>
         <mat-card
           fxLayout="column"
           fxLayoutAlign="center center"

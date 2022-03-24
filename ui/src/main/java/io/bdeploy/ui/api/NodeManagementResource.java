@@ -71,6 +71,15 @@ public interface NodeManagementResource {
     public void updateNode(@PathParam("name") String name, List<Key> target);
 
     /**
+     * @param name the name of the node to apply an update to.
+     * @param node the new node's configuration.
+     */
+    @POST
+    @Path("/nodes/{name}/replace")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void replaceNode(@PathParam("name") String name, RemoteService node);
+
+    /**
      * @param name the name of the node to check.
      */
     @POST

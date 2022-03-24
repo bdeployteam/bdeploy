@@ -57,6 +57,14 @@
       ></app-bd-panel-button>
       <app-bd-panel-button
         [collapsed]="false"
+        text="Replace..."
+        icon="swap_calls"
+        [relative]="true"
+        [route]="['replace']"
+        [disabled]="state.config?.master"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
         text="Apply Software Update"
         icon="system_update"
         [relative]="true"

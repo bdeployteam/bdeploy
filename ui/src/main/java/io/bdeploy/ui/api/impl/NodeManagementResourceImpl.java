@@ -6,6 +6,8 @@ import java.util.Map;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
+import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -14,8 +16,10 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
+import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 
@@ -29,8 +33,20 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
     @Inject
     private Minion minion;
 
+    @Inject
+    private ActivityReporter reporter;
+
+    @Inject
+    private BHiveRegistry registry;
+
+    @Inject
+    private NodeManager nodes;
+
     @Context
     private SecurityContext context;
+
+    @Context
+    private ResourceContext rc;
 
     @Override
     public Map<String, MinionStatusDto> getNodes() {
@@ -80,6 +96,14 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
             }
             return a.getKey().toString().compareTo(b.getKey().toString());
         }).forEach(k -> root.updateNode(name, k.getKey(), true));
+    }
+
+    @Override
+    public void replaceNode(String name, RemoteService node) {
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            throw new WebApplicationException("Operation not available in mode CENTRAL");
+        }
+        ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).replaceNode(name, node);
     }
 
     @Override

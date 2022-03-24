@@ -15,6 +15,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
@@ -28,7 +29,6 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
-import io.bdeploy.dcu.InstanceNodeOperationSynchronizer;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
@@ -258,7 +258,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             bind(root.getUsers()).to(AuthService.class);
             bind(root.getState().storageMinFree).named(JerseyServer.FILE_SYSTEM_MIN_SPACE).to(Long.class);
             bind(ocws).to(ObjectChangeBroadcaster.class);
-            bind(new InstanceNodeOperationSynchronizer()).to(InstanceNodeOperationSynchronizer.class);
+            bind(new TaskSynchronizer()).to(TaskSynchronizer.class);
         }
     }
 

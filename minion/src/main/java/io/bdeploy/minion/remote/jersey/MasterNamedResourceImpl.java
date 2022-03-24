@@ -179,6 +179,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
+    @WriteLock
     public void activate(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 

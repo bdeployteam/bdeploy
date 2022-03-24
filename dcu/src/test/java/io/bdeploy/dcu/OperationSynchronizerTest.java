@@ -12,13 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHive.Operation;
 import io.bdeploy.bhive.TestHive;
+import io.bdeploy.common.TaskSynchronizer;
 
 @ExtendWith(TestHive.class)
 class OperationSynchronizerTest {
 
     @Test
     void testSynchronizer(BHive hive) throws Exception {
-        InstanceNodeOperationSynchronizer sync = new InstanceNodeOperationSynchronizer();
+        TaskSynchronizer sync = new TaskSynchronizer();
 
         // setup a single operation which is performed by multiple threads at once. It should only be performed once.
         // Once the operation is done though, another request would be valid.
@@ -31,7 +32,7 @@ class OperationSynchronizerTest {
 
                 @Override
                 public void run() {
-                    sync.perform("a", hive, cop);
+                    sync.perform("a", () -> hive.execute(cop));
                 }
             });
         }
@@ -42,7 +43,7 @@ class OperationSynchronizerTest {
         assertEquals(1, cop.getCounter());
 
         // perform once more, this should now work again
-        sync.perform("a", hive, cop);
+        sync.perform("a", () -> hive.execute(cop));
         assertEquals(2, cop.getCounter());
     }
 

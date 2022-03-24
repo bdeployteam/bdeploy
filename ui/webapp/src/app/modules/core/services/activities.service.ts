@@ -56,11 +56,12 @@ export class ActivitiesService {
         this.activities$.next([]);
 
         if (
-          scope.scope.length === 0 ||
-          auth.isCurrentScopeExclusiveReadClient()
+          !auth.isGlobalAdmin() &&
+          (scope.scope.length === 0 || auth.isCurrentScopeExclusiveReadClient())
         ) {
           // in this case we would see *all* activities from *all* scopes. this is not only a performance
           // but also a permission-wise problem, as permissions are granted on group level (first level of scope).
+          // global admins STILL want to see all activities, e.g. when performing maintenance on global scope.
           return;
         }
 
@@ -137,6 +138,8 @@ export class ActivitiesService {
         }
       }
     });
+
+    console.log(rootNodes);
 
     return rootNodes;
   }

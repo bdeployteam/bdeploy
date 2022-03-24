@@ -28,6 +28,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -72,7 +73,7 @@ public class InstanceNodeController {
     private static final String PCU_JSON = "pcu.json";
 
     private final BHive hive;
-    private final InstanceNodeOperationSynchronizer syncOps;
+    private final TaskSynchronizer syncOps;
     private final InstanceNodeManifest manifest;
     private final CompositeResolver resolvers = new CompositeResolver();
     private final Path root;
@@ -83,8 +84,7 @@ public class InstanceNodeController {
      * @param root the root directory used for deployment/runtime
      * @param manifest the instance node manifest
      */
-    public InstanceNodeController(BHive hive, Path root, InstanceNodeManifest manifest,
-            InstanceNodeOperationSynchronizer syncOps) {
+    public InstanceNodeController(BHive hive, Path root, InstanceNodeManifest manifest, TaskSynchronizer syncOps) {
         this.hive = hive;
         this.syncOps = syncOps;
         this.root = root;
@@ -238,7 +238,7 @@ public class InstanceNodeController {
         PathHelper.deleteRecursive(targetDir);
 
         // write all the manifest content (config only) to the according target location
-        syncOps.perform(targetDir, hive, new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir));
+        syncOps.perform(targetDir, () -> hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir)));
 
         // write all required applications to the pool
         SortedMap<Manifest.Key, Path> exportedPaths = installPooledApplicationsFor(dc);
@@ -299,7 +299,7 @@ public class InstanceNodeController {
                 result.put(key, target);
 
                 if (!Files.isDirectory(target)) {
-                    syncOps.perform(target, hive, new ExportOperation().setTarget(target).setManifest(key));
+                    syncOps.perform(target, () -> hive.execute(new ExportOperation().setTarget(target).setManifest(key)));
                 }
             }
         }
@@ -363,7 +363,7 @@ public class InstanceNodeController {
         List<InstanceNodeController> toKeep = new ArrayList<>();
         for (Manifest.Key key : inHive) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(source, key);
-            InstanceNodeController inc = new InstanceNodeController(source, root, inmf, new InstanceNodeOperationSynchronizer());
+            InstanceNodeController inc = new InstanceNodeController(source, root, inmf, new TaskSynchronizer());
 
             if (inc.isInstalled()) {
                 toKeep.add(inc);

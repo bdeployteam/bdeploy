@@ -285,6 +285,9 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         status.put(name, createStarting(minion));
         contactWarning.put(name, Boolean.FALSE); // was not reachable (new), issue recovery log.
         scheduleSave();
+
+        log.info("Updating state for added node {}", name);
+        fetchNodeState(name);
     }
 
     @Override
@@ -294,6 +297,9 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         MinionDto m = config.getMinion(name);
         m.remote = node;
         scheduleSave();
+
+        log.info("Updating state for edited node {}", name);
+        fetchNodeState(name);
     }
 
     @Override
