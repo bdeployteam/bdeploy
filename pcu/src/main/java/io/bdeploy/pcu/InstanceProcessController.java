@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiConsumer;
 
 import com.google.common.collect.Sets;
 
@@ -192,37 +193,56 @@ public class InstanceProcessController {
     }
 
     /**
+     * @return All running processes in the instance *regardless* of the instance tag they have been started from.
+     */
+    private Map<String, ProcessController> getAllRunningAndScheduled() {
+        Map<String, ProcessController> running = new TreeMap<>();
+        for (ProcessList list : processMap.values()) {
+            running.putAll(list.getWithState(SET_RUNNING_SCHEDULED));
+        }
+        return running;
+    }
+
+    /**
+     * @param operation an operation which requires both the list of running processes as well as the controllers for the *active*
+     *            instance.
+     */
+    private void performStartOperation(BiConsumer<ProcessList, Map<String, ProcessController>> operation) {
+        if (activeTag == null) {
+            throw new PcuRuntimeException("No active tag has been set");
+        }
+
+        // Ensure that something is deployed
+        ProcessList list = processMap.get(activeTag);
+        if (list == null) {
+            throw new PcuRuntimeException("Activated version '" + activeTag + "' is not deployed");
+        }
+
+        // Compute runtime state across all versions
+        Map<String, ProcessController> running = getAllRunningAndScheduled();
+
+        // Let the desired strategy start all processes
+        operation.accept(list, running);
+    }
+
+    /**
      * Starts all applications of the currently active tag.
      *
      * @param user the user who triggered the stop - null for default user
      */
     public void startAll(String user) {
-        if (activeTag == null) {
-            throw new PcuRuntimeException("No active tag has been set");
-        }
         try {
             readLock.lock();
 
-            // Ensure that something is deployed
-            ProcessList list = processMap.get(activeTag);
-            if (list == null) {
-                throw new PcuRuntimeException("Activated version '" + activeTag + "' is not deployed");
-            }
-            // Compute runtime state across all versions
-            Map<String, ProcessController> running = new HashMap<>();
-            for (ProcessList anyList : processMap.values()) {
-                running.putAll(anyList.getWithState(SET_RUNNING_SCHEDULED));
-            }
+            performStartOperation((list, running) -> {
+                // Start all missing applications
+                logger.log(l -> l.info("Starting all applications."), activeTag);
 
-            // Start all missing applications
-            logger.log(l -> l.info("Starting all applications."), activeTag);
-
-            // Let the desired strategy start all processes
-            BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
-            strategy.startAll(user, running,
-                    list.controllers.entrySet().stream()
-                            .filter(e -> e.getValue().getDescriptor().processControl.startType == ApplicationStartType.INSTANCE)
-                            .map(Entry::getKey).toList());
+                BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
+                strategy.startAll(user, running, list.controllers.entrySet().stream()
+                        .filter(e -> e.getValue().getDescriptor().processControl.startType == ApplicationStartType.INSTANCE)
+                        .map(Entry::getKey).toList());
+            });
         } finally {
             readLock.unlock();
         }
@@ -237,11 +257,7 @@ public class InstanceProcessController {
      */
     public void stopAll(String user) {
         // Determine all running versions across all tags
-        Map<String, ProcessController> running = new TreeMap<>();
-        for (ProcessList list : processMap.values()) {
-            Map<String, ProcessController> runningScheduled = list.getWithState(SET_RUNNING_SCHEDULED);
-            running.putAll(runningScheduled);
-        }
+        Map<String, ProcessController> running = getAllRunningAndScheduled();
 
         logger.log(l -> l.info("Stopping all running applications."));
 
@@ -257,29 +273,17 @@ public class InstanceProcessController {
      * @param user the user who triggered the start
      */
     public void start(List<String> applicationIds, String user) {
-        if (activeTag == null) {
-            throw new PcuRuntimeException("No active tag has been set");
-        }
         try {
             readLock.lock();
 
-            // Ensure that something is deployed
-            ProcessList list = processMap.get(activeTag);
-            if (list == null) {
-                throw new PcuRuntimeException("Activated version '" + activeTag + "' is not deployed");
-            }
-            // Compute runtime state across all versions
-            Map<String, ProcessController> running = new HashMap<>();
-            for (ProcessList anyList : processMap.values()) {
-                running.putAll(anyList.getWithState(SET_RUNNING_SCHEDULED));
-            }
+            performStartOperation((list, running) -> {
+                // Start all missing applications
+                logger.log(l -> l.info("Starting applications: {}", applicationIds), activeTag);
 
-            // Start all missing applications
-            logger.log(l -> l.info("Starting applications: {}", applicationIds), activeTag);
-
-            // Let the desired strategy start all processes
-            BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
-            strategy.startAll(user, running, applicationIds);
+                // Let the desired strategy start all processes
+                BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
+                strategy.startAll(user, running, applicationIds);
+            });
         } finally {
             readLock.unlock();
         }
@@ -294,11 +298,7 @@ public class InstanceProcessController {
      */
     public void stop(List<String> applicationIds, String user) {
         // Determine all running versions across all tags
-        Map<String, ProcessController> running = new TreeMap<>();
-        for (ProcessList list : processMap.values()) {
-            Map<String, ProcessController> runningScheduled = list.getWithState(SET_RUNNING_SCHEDULED);
-            running.putAll(runningScheduled);
-        }
+        Map<String, ProcessController> running = getAllRunningAndScheduled();
 
         logger.log(l -> l.info("Stopping applications: {}", applicationIds));
 

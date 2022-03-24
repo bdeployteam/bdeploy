@@ -5,10 +5,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.glassfish.jersey.media.multipart.ContentDisposition;
+import org.glassfish.jersey.media.multipart.ContentDisposition.ContentDispositionBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.op.CopyOperation;
+import io.bdeploy.bhive.op.ObjectListOperation;
+import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.ui.api.DownloadService;
+import io.bdeploy.ui.api.Minion;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.WebApplicationException;
@@ -18,16 +35,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.StreamingOutput;
-
-import org.glassfish.jersey.media.multipart.ContentDisposition;
-import org.glassfish.jersey.media.multipart.ContentDisposition.ContentDispositionBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.common.util.UuidHelper;
-import io.bdeploy.ui.api.DownloadService;
-import io.bdeploy.ui.api.Minion;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * A generic service serving files that have been prepared by a (secure call). The following steps are required in order to
@@ -182,6 +190,33 @@ public class DownloadServiceImpl implements DownloadService {
         responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
         responeBuilder.header(HttpHeaders.CONTENT_LENGTH, file.toFile().length());
         return responeBuilder.build();
+    }
+
+    /**
+     * @param hive the {@link BHive} to use as source
+     * @param name the name of the manifest to export
+     * @param tag the tag of the manifest to export
+     * @return a registered token available for download
+     */
+    public String createManifestZipAndRegister(BHive hive, String name, String tag) {
+        Manifest.Key key = new Manifest.Key(name, tag);
+
+        // Determine required objects
+        Set<ObjectId> objectIds = hive.execute(new ObjectListOperation().addManifest(key));
+
+        // Copy objects into the target hive
+
+        String token = createNewToken();
+        Path targetFile = getStoragePath(token);
+        URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
+        try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
+            CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
+            op.addManifest(key);
+            objectIds.forEach(op::addObject);
+            hive.execute(op);
+        }
+        registerForDownload(token, key.directoryFriendlyName() + ".zip");
+        return token;
     }
 
 }

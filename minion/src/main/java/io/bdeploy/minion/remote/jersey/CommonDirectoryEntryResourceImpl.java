@@ -43,7 +43,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
     @Override
     public EntryChunk getEntryContent(RemoteDirectoryEntry entry, long offset, long limit) {
         // determine file first...
-        Path actual = getEntryPath(entry);
+        Path actual = getEntryPath(root, entry);
 
         if (limit == 0) {
             limit = Long.MAX_VALUE;
@@ -78,7 +78,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
         return null; // offset == size...
     }
 
-    private Path getEntryPath(RemoteDirectoryEntry entry) {
+    static Path getEntryPath(MinionRoot root, RemoteDirectoryEntry entry) {
         Path rootDir;
         if (entry.root != null) {
             DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.uuid), entry.tag);
@@ -100,7 +100,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
 
     @Override
     public Response getEntryStream(RemoteDirectoryEntry entry) {
-        Path actual = getEntryPath(entry);
+        Path actual = getEntryPath(root, entry);
         String mediaType = MediaType.APPLICATION_OCTET_STREAM;
         try {
             ContentInfo ci = ContentInfoUtil.findExtensionMatch(actual.getFileName().toString());
@@ -153,7 +153,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
             public void write(OutputStream output) throws IOException {
                 try (var zos = new ZipOutputStream(output)) {
                     for (var entry : entries) {
-                        var path = getEntryPath(entry); // will throw in case of error
+                        var path = getEntryPath(root, entry); // will throw in case of error
                         var ze = new ZipEntry(entry.path); // relative path name.
 
                         ze.setTime(Files.getLastModifiedTime(path).toMillis());

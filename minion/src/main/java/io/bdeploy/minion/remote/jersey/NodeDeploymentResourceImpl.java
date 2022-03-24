@@ -252,26 +252,6 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         return result;
     }
 
-    private Path getEntryPath(RemoteDirectoryEntry entry) {
-        Path rootDir;
-        if (entry.root != null) {
-            DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.uuid), entry.tag);
-            rootDir = dpp.get(entry.root).toAbsolutePath();
-        } else {
-            rootDir = root.getRootDir();
-        }
-        Path actual = rootDir.resolve(entry.path);
-
-        if (!actual.startsWith(rootDir)) {
-            throw new WebApplicationException("Trying to escape " + rootDir, Status.BAD_REQUEST);
-        }
-
-        if (!Files.exists(actual)) {
-            throw new WebApplicationException("Cannot find " + actual, Status.NOT_FOUND);
-        }
-        return actual;
-    }
-
     @Override
     public void updateDataEntries(String uuid, List<FileStatusDto> updates) {
         Path dataDir = new DeploymentPathProvider(root.getDeploymentDir().resolve(uuid), null).get(SpecialDirectory.DATA);
@@ -305,7 +285,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
     @Override
     public void deleteDataEntry(RemoteDirectoryEntry entry) {
-        Path actual = getEntryPath(entry);
+        Path actual = CommonDirectoryEntryResourceImpl.getEntryPath(root, entry);
         try {
             Files.delete(actual);
         } catch (IOException e) {

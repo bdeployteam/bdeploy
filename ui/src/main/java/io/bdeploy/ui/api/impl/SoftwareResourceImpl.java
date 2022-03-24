@@ -132,24 +132,8 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
     @Override
     public String createSoftwareZipFile(String name, String tag) {
-        Manifest.Key key = new Manifest.Key(name, tag);
-
-        // Determine required objects
-        Set<ObjectId> objectIds = hive.execute(new ObjectListOperation().addManifest(key));
-
-        // Copy objects into the target hive
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        String token = ds.createNewToken();
-        Path targetFile = ds.getStoragePath(token);
-        URI targetUri = UriBuilder.fromUri("jar:" + targetFile.toUri()).build();
-        try (BHive zipHive = new BHive(targetUri, null, new ActivityReporter.Null())) {
-            CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
-            op.addManifest(key);
-            objectIds.forEach(op::addObject);
-            hive.execute(op);
-        }
-        ds.registerForDownload(token, key.directoryFriendlyName() + ".zip");
-        return token;
+        return ds.createManifestZipAndRegister(hive, name, tag);
     }
 
     @Override
