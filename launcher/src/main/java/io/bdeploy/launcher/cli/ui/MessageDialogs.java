@@ -3,6 +3,9 @@ package io.bdeploy.launcher.cli.ui;
 import java.awt.Dimension;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
@@ -11,19 +14,24 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.common.util.ProcessHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.launcher.cli.LauncherTool;
+import io.bdeploy.launcher.cli.ProcessHelper;
 import io.bdeploy.launcher.cli.SoftwareUpdateException;
 
 /**
  * Provides static helpers to display a {@linkplain MessageDialog}
  */
 public class MessageDialogs {
+
+    private static final Logger log = LoggerFactory.getLogger(MessageDialogs.class);
 
     private MessageDialogs() {
     }
@@ -127,9 +135,23 @@ public class MessageDialogs {
 
     /** Returns a string containing details about the running OS. */
     private static String getOsDetails() {
-        // Windows: Return full version including build number
+        // Windows: Return full OS details if possible.
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
-            return ProcessHelper.launch(new ProcessBuilder("cmd.exe", "/c", "ver"));
+            Path winDir = Paths.get(System.getenv("SYSTEMROOT"));
+            Path sys32Dir = winDir.resolve("System32");
+            Path sysInfo = sys32Dir.resolve("systeminfo.exe");
+
+            if (!Files.isDirectory(sys32Dir) || !Files.isExecutable(sysInfo)) {
+                log.info("Cannot get Windows Version details, systeminfo.exe not executable at {}", sysInfo);
+                return null;
+            }
+
+            try {
+                // use absolute path to the utility - no PATH involved.
+                return ProcessHelper.launch(new ProcessBuilder(sysInfo.toAbsolutePath().toString()));
+            } catch (Exception e) {
+                log.info("Unable to gather Windows OS details", e);
+            }
         }
 
         // No specific information to display

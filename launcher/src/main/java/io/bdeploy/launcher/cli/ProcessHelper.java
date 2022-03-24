@@ -1,10 +1,18 @@
-package io.bdeploy.common.util;
+package io.bdeploy.launcher.cli;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Launcher specific helper to execute and read the output of a *simple* command.
+ */
 public class ProcessHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessHelper.class);
 
     private ProcessHelper() {
     }
@@ -20,10 +28,18 @@ public class ProcessHelper {
      * @param builder the process to launch
      * @return the output of the process
      */
-    public static String launch(ProcessBuilder builder) {
+    public static String launch(ProcessBuilder builder) throws InterruptedException {
         try {
             builder.redirectErrorStream(true);
-            return readOutput(builder.start());
+            Process proc = builder.start();
+            String output = readOutput(proc);
+
+            int result = proc.waitFor();
+            if (result != 0) {
+                log.error("Cannot run command, output: {}", output);
+                return null; // oops - did not succeed, we LOG the output instead of returning it.
+            }
+            return output;
         } catch (IOException ioe) {
             return null;
         }

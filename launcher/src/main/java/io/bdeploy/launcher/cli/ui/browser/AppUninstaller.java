@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
-import io.bdeploy.common.util.ProcessHelper;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
+import io.bdeploy.launcher.cli.ProcessHelper;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
 
 /**
