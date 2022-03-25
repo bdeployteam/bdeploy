@@ -143,7 +143,7 @@ export class BdDialogMessageComponent implements OnDestroy {
   private onEnterPress(): void {
     // find single confirm action.
     const x = this.message$.value?.actions?.filter((a) => a.confirm);
-    if (x?.length !== 1) {
+    if (x?.length !== 1 || !this.confirmed$.value) {
       return; // do nothing, none or multiple confirming actions, don't know which to press :)
     }
 
