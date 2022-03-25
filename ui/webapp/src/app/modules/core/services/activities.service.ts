@@ -139,8 +139,6 @@ export class ActivitiesService {
       }
     });
 
-    console.log(rootNodes);
-
     return rootNodes;
   }
 
