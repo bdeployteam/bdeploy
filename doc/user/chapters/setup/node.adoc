@@ -46,3 +46,17 @@ image::images/Doc_Admin_Nodes_Add.png[Add Node, align=center, width=480, link="i
 In case you do not have the `node-ident.txt` file to drop to the drop zone, you can also drag the _content_ of the file as plain text to the drop zone - this has the same effect.
 
 When editing an existing node by selecting it in the list, you can also drop the same `node-ident.txt` file to update the information. This way you can create nodes before they actually exist - using a dummy URI and authentication - and later on update the node administration with the actual configuration. This allows to configure instances to their future nodes without them existing yet.
+
+===== Replacing and Restoring Nodes
+
+*BDeploy* supports replacing and restoring nodes. This is primarily meant to restore nodes after a catastrophic failure of the node in question. This feature is capable of re-installing all required node configurations of all instances which are/were deployed on the node.
+
+Replacing can be performed via the <<Administrative Web UI>>, much the same as _editing_ a node. The steps to replace a node are:
+
+. Find the node in the <<Administrative Web UI>> and click it to open the node details panel.
+. In the panel, click btn:[Replace...]. This will bring up the _Replace Node_ panel.
+. Initialize the new node on the target system. This can be done at any time up until now in preparation.
+. Drag & drop the `node-ident.txt` file to the drop zone in the _Replace Node_ panel. The URI and authentication information will be prefilled.
+. Click the btn:[Save] button. The panel will enter loading state. You can follow the progress of the operation in the _Activities_ panel from the main menu.
+. Once the operation completes, you will be brought back to the node details panel.
+. Replacing and restoring has been performed, and all instances which use this node are available again.
