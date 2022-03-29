@@ -99,6 +99,7 @@ import { ConfigService } from './services/config.service';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { IdentifierValidator } from './validators/identifier.directive';
 import { PasswordVerificationValidator } from './validators/password-verification.directive';
+import { PortValueValidatorDirective } from './validators/port-value.directive';
 import { TrimmedValidator } from './validators/trimmed.directive';
 
 export function loadAppConfig(cfgService: ConfigService) {
@@ -170,6 +171,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdExpandButtonComponent,
     BdDataSizeCellComponent,
     BdDataPopoverCellComponent,
+    PortValueValidatorDirective,
   ],
   providers: [
     httpInterceptorProviders,
@@ -287,6 +289,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     PasswordVerificationValidator,
     EditUniqueValueValidatorDirective,
     BdExpandButtonComponent,
+    PortValueValidatorDirective,
   ],
 })
 export class CoreModule {}

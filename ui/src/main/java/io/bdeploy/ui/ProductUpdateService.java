@@ -433,7 +433,11 @@ public class ProductUpdateService {
                 break;
             case CLIENT_PORT, SERVER_PORT, NUMERIC:
                 try {
-                    Long.parseLong(stringVal);
+                    long l = Long.parseLong(stringVal);
+                    if (paramDesc.type != ParameterType.NUMERIC && (l < 0 || l > (Short.MAX_VALUE * 2))) {
+                        result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
+                                "Value for port parameter is out of range: " + l));
+                    }
                 } catch (NumberFormatException e) {
                     result.add(
                             new ApplicationValidationDto(process.uid, paramDesc.uid, "Value must be numeric, is: " + stringVal));

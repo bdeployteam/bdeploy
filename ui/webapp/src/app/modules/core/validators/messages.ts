@@ -1,6 +1,7 @@
 import { ValidationErrors } from '@angular/forms';
 import { ID_VALIDATION } from './identifier.directive';
 import { PASSWORD_VALIDATION } from './password-verification.directive';
+import { PORT_VALIDATION } from './port-value.directive';
 import { TRIM_VALIDATION } from './trimmed.directive';
 
 export interface BdValidationMessageExtractor {
@@ -53,6 +54,10 @@ export function bdValidationMessage(
 
   if (errors[PASSWORD_VALIDATION]) {
     return `${label} must match the given password`;
+  }
+
+  if (errors[PORT_VALIDATION]) {
+    return `${label} is out of range: ${errors[PORT_VALIDATION].value}`;
   }
 
   for (const x of msgExtractors) {

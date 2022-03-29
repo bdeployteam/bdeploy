@@ -433,6 +433,13 @@ export class ConfigProcessParamGroupComponent
     return p.descriptor?.type === ParameterType.BOOLEAN;
   }
 
+  /* template */ isPort(p: ParameterPair) {
+    return (
+      p.descriptor?.type === ParameterType.CLIENT_PORT ||
+      p.descriptor?.type === ParameterType.SERVER_PORT
+    );
+  }
+
   /* template */ getInputType(p: ParameterPair) {
     if (!p?.descriptor?.type) {
       return undefined;

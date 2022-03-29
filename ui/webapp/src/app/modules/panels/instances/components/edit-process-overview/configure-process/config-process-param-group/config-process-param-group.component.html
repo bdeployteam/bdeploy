@@ -169,6 +169,7 @@
                   [suggested]="p.descriptor?.suggestedValues"
                   class="local-form-input"
                   [appServerIssuesValidator]="p.value ? p.value.uid : p.descriptor.uid"
+                  [appPortValueValidator]="isPort(p)"
                 >
                   <div fxLayout="row" class="local-form-input-actions">
                     <ng-container *ngIf="p?.value && !group.isSelectMode">
