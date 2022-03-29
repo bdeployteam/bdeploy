@@ -63,7 +63,7 @@ export interface DragReorderEvent<T> {
   targetId: string;
 }
 
-const MAX_ROWS_PER_GROUP = 500;
+const MAX_ROWS_PER_GROUP = 250;
 
 /**
  * A table which renders generic data based on column descriptions. Supports:
