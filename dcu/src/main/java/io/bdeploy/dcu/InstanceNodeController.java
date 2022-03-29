@@ -336,7 +336,7 @@ public class InstanceNodeController {
         } catch (Exception e) {
             // might have missing variable references, since we only 'see' what is on our
             // node. Applications from other nodes are not available.
-            log.warn("Cannot process configuration file: {}", file);
+            log.warn("Cannot process configuration file: {}: {}", file, e.toString());
             if (log.isDebugEnabled()) {
                 log.debug("Error details", e);
             }
