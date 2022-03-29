@@ -46,13 +46,13 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
             long totalSize = dataIn.readLong();
 
             String baseActivity = "Receiving";
+            ManifestConsistencyCheckOperation checkOp = new ManifestConsistencyCheckOperation();
             try (Activity activity = getActivityReporter().start(baseActivity, totalSize);
                     ReportingInputStream reportingIn = new ReportingInputStream(dataIn, totalSize, activity, baseActivity)) {
                 SortedSet<ObjectId> objects = new TreeSet<>();
                 SortedSet<Manifest> manifests = new TreeSet<>();
 
                 // Read all manifests from the stream
-                ManifestConsistencyCheckOperation checkOp = new ManifestConsistencyCheckOperation();
                 long counter = dataIn.readLong();
                 for (int i = 0; i < counter; i++) {
                     long size = dataIn.readLong();
@@ -78,17 +78,21 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                     }
                 });
 
-                // Check manifests for consistency and remove invalid ones
-                Set<ElementView> damaged = execute(checkOp.setDryRun(false));
-                if (!damaged.isEmpty()) {
-                    throw new IllegalStateException(
-                            "Failed to stream all required objects. Removed " + damaged.size() + " missing/damaged elements.");
-                }
+                result.duration = Duration.between(start, Instant.now()).toMillis();
+            }
+            // Check manifests for consistency and remove invalid ones
+            Set<ElementView> damaged = execute(checkOp.setDryRun(false));
+            if (!damaged.isEmpty()) {
+                throw new IllegalStateException(
+                        "Failed to stream all required objects. Removed " + damaged.size() + " missing/damaged elements.");
             }
             result.transferSize = countingIn.getCount();
         } finally {
+            if (result.duration == 0) {
+                // fallback only if no duration has been calculated (aborted, failure, etc.).
+                result.duration = Duration.between(start, Instant.now()).toMillis();
+            }
             StreamHelper.close(input);
-            result.duration = Duration.between(start, Instant.now()).toMillis();
         }
         return result;
     }

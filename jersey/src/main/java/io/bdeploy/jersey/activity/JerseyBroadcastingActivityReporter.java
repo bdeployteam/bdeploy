@@ -55,7 +55,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
      * registered as singleton in ANOTHER locator...
      */
     private static final List<JerseyRemoteActivity> globalActivities = new CopyOnWriteArrayList<>();
-    private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new InheritableThreadLocal<>();
+    private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
     private static final Set<ObjectScope> activeScopes = new TreeSet<>();
 
     private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
