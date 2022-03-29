@@ -74,6 +74,16 @@ public class Manifest implements Serializable, Comparable<Manifest> {
     }
 
     /**
+     * Used to figure out an order of {@link Manifest} insertion during transfers when references
+     * do not yet exist in the target BHive.
+     *
+     * @return the existing set of cached references, regardless of their existence in any BHive.
+     */
+    SortedSet<ReferenceKey> internalGetCachedReferences() {
+        return references;
+    }
+
+    /**
      * Retrieves a set of cached dependencies. This cache is created when inserting the {@link Manifest}. {@link Manifest}s
      * created by previous versions before the cache existed will return <code>null</code> always.
      * <p>

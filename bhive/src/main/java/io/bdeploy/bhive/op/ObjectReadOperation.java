@@ -16,6 +16,7 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.audit.AuditParameterExtractor.NoAudit;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.model.SortManifestsByReferences;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.util.StorageHelper;
@@ -69,8 +70,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
                 }
                 result.sumMissingObjects = counter;
 
-                // Insert manifests as last operation
-                manifests.forEach(mf -> {
+                // Insert manifests as last operation - sorted by references they may have to each other.
+                manifests.stream().sorted(new SortManifestsByReferences()).forEach(mf -> {
                     if (!getManifestDatabase().hasManifest(mf.getKey())) {
                         getManifestDatabase().addManifest(mf);
                         result.sumManifests++;

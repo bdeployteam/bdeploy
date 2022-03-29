@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +26,7 @@ import io.bdeploy.bhive.TestHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.model.SortManifestsByReferences;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.model.Tree.EntryType;
 import io.bdeploy.bhive.objects.view.TreeView;
@@ -172,5 +175,51 @@ class NestedManifestTest extends DbTestBase {
         assertThrows(IllegalStateException.class, () -> {
             hive.execute(new ManifestLoadOperation().setManifest(root));
         });
+    }
+
+    @Test
+    void testSortByRefs(BHive hive, @TempDir Path rootd) throws IOException {
+        Path tmp = ContentHelper.genSimpleTestTree(rootd, "source");
+
+        Manifest.Key na = new Manifest.Key("nested-a", "v1");
+        Manifest.Key nb = new Manifest.Key("nested-b", "v1");
+        Manifest.Key root = new Manifest.Key("a-root", "v1"); // lexically before children.
+
+        Manifest builtMf;
+        try (Transaction t = hive.getTransactions().begin()) {
+            hive.execute(new ImportOperation().setManifest(na).setSourcePath(tmp));
+            hive.execute(new ImportOperation().setManifest(nb).setSourcePath(tmp));
+
+            Tree.Builder rootTree = new Tree.Builder()
+                    .add(new Tree.Key("nested-a", EntryType.MANIFEST),
+                            hive.execute(new InsertManifestRefOperation().setManifest(na)))
+                    .add(new Tree.Key("nested-b", EntryType.MANIFEST),
+                            hive.execute(new InsertManifestRefOperation().setManifest(nb)));
+
+            Manifest.Builder mbr = new Manifest.Builder(root);
+            mbr.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(rootTree)));
+
+            builtMf = mbr.build(hive);
+            hive.execute(new InsertManifestOperation().addManifest(builtMf));
+        }
+
+        Manifest rm = hive.execute(new ManifestLoadOperation().setManifest(root));
+        Manifest am = hive.execute(new ManifestLoadOperation().setManifest(na));
+        Manifest bm = hive.execute(new ManifestLoadOperation().setManifest(nb));
+
+        List<Manifest> sort1 = Arrays.asList(am, bm, rm);
+        List<Manifest> sort2 = Arrays.asList(rm, bm, am);
+        List<Manifest> sort3 = Arrays.asList(bm, rm, am, null);
+        List<Manifest> sort4 = Arrays.asList(bm, rm, am, bm);
+
+        sort1.sort(new SortManifestsByReferences());
+        sort2.sort(new SortManifestsByReferences());
+        sort3.sort(new SortManifestsByReferences());
+        sort4.sort(new SortManifestsByReferences());
+
+        assertEquals(Arrays.asList(am, bm, rm), sort1);
+        assertEquals(Arrays.asList(am, bm, rm), sort2);
+        assertEquals(Arrays.asList(null, am, bm, rm), sort3);
+        assertEquals(Arrays.asList(am, bm, bm, rm), sort4);
     }
 }
