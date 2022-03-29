@@ -19,8 +19,8 @@ dependencies {
         
         'com.twelvemonkeys.imageio:imageio-core:3.8.2',
         'com.twelvemonkeys.imageio:imageio-bmp:3.8.2',
-        'net.java.dev.jna:jna:5.10.0',
-        'net.java.dev.jna:jna-platform:5.10.0'
+        'net.java.dev.jna:jna:5.11.0',
+        'net.java.dev.jna:jna-platform:5.11.0'
     )
 
     commonTestDeps(testFixtures(project(":bhive")))

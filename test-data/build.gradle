@@ -3,7 +3,7 @@ import java.util.concurrent.TimeUnit
 
 plugins {
     id 'base'
-    id "com.github.psxpaul.execfork" version "0.1.15"
+    id "com.github.psxpaul.execfork" version "0.2.0"
     id "de.undercouch.download" version "5.0.2"
     id "jacoco"
     id "com.github.breadmoirai.github-release" version "2.2.12"
@@ -319,7 +319,7 @@ void setupBinServerTasks(String version) {
         args = [ "master", "--consoleLog" ] // TODO: this should be 'start' but this is only supported by 3.3.0 or newer.
         waitForPort = port
         stopAfter = tasks["binTriggerStopBDeploy_${key}"]
-        standardOutput = "${buildDir}/out_${key}.txt"
+        standardOutput = new File("${buildDir}/out_${key}.txt")
     }
 
     if(key.startsWith("1")) {
