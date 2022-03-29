@@ -103,8 +103,8 @@ public class BHiveTransactions {
             }
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Starting transaction {}", uuid, new RuntimeException("Starting Transaction"));
+        if (log.isTraceEnabled()) {
+            log.trace("Starting transaction {}", uuid, new RuntimeException("Starting Transaction"));
         }
 
         return () -> {
@@ -120,8 +120,8 @@ public class BHiveTransactions {
                 log.warn("Out-of-order transaction found: {}, expected: {}", top, uuid);
             }
 
-            if (log.isDebugEnabled()) {
-                log.debug("Ending transaction {}", uuid, new RuntimeException("Ending Transaction"));
+            if (log.isTraceEnabled()) {
+                log.trace("Ending transaction {}", uuid, new RuntimeException("Ending Transaction"));
             }
 
             stack.remove(uuid);
