@@ -14,6 +14,7 @@ import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data
 import { ACTION_CLOSE } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { SearchService } from 'src/app/modules/core/services/search.service';
 import { HiveService } from 'src/app/modules/primary/admin/services/hive.service';
 import { ManifestDeleteActionComponent } from './manifest-delete-action/manifest-delete-action.component';
 
@@ -72,9 +73,11 @@ export class BHiveBrowserComponent implements OnDestroy {
   @ViewChild('previewTemplate') private previewTemplate: TemplateRef<any>;
 
   private subscription: Subscription;
+  private lastQuery: string;
 
   constructor(
     areas: NavAreasService,
+    search: SearchService,
     public hives: HiveService,
     private router: Router,
     private activatedRoute: ActivatedRoute
@@ -86,8 +89,15 @@ export class BHiveBrowserComponent implements OnDestroy {
 
       this.bhive$.next(route.params['bhive']);
       if (route.queryParams['q']) {
-        this.path$.next(this.decodePathForUrl(route.queryParams['q']));
+        if (this.lastQuery !== route.queryParams['q']) {
+          this.lastQuery = route.queryParams['q'];
+          this.path$.next(this.decodePathForUrl(route.queryParams['q']));
+
+          // clear out previous search in case we changed paths.
+          search.search = '';
+        }
       } else {
+        this.lastQuery = null;
         this.path$.next(null);
       }
 
