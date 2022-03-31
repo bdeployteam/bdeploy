@@ -77,6 +77,17 @@
             </app-bd-no-data>
           </app-bd-data-display>
         </app-bd-expand-button>
+
+        <app-bd-expand-button text="Dependencies" icon="lan">
+          <app-bd-data-display
+            [records]="prod.references"
+            [columns]="refColumns"
+          >
+            <app-bd-no-data>
+              <div>This product has no dependencies.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
       </ng-container>
 
       <app-bd-button

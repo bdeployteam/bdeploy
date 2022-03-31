@@ -6,6 +6,7 @@ import {
   ApplicationTemplateDescriptor,
   InstanceTemplateDescriptor,
   InstanceUsageDto,
+  ManifestKey,
   PluginInfoDto,
   ProductDto,
 } from 'src/app/models/gen.dtos';
@@ -80,6 +81,18 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
   width: '50px',
 };
 
+const refNameColumn: BdDataColumn<ManifestKey> = {
+  id: 'name',
+  name: 'Name',
+  data: (r) => r.name,
+};
+
+const refTagColumn: BdDataColumn<ManifestKey> = {
+  id: 'tag',
+  name: 'Ver.',
+  data: (r) => r.tag,
+};
+
 @Component({
   selector: 'app-product-details',
   templateUrl: './product-details.component.html',
@@ -104,6 +117,11 @@ export class ProductDetailsComponent implements OnInit {
     pluginNameColumn,
     pluginVersionColumn,
     pluginOIDColumn,
+  ];
+
+  /* template */ refColumns: BdDataColumn<ManifestKey>[] = [
+    refNameColumn,
+    refTagColumn,
   ];
 
   /* template */ loading$ = combineLatest([

@@ -18,10 +18,11 @@ public class DataResultText extends DataResultBase {
     @Override
     public void render() {
         DataTable table = DataFormat.TEXT.createTable(out());
+        table.setLineWrapHint(true);
+
         if (getThrowable() != null) {
             table.setCaption(getMessage() != null ? getMessage() : "Error");
             table.setHideHeadersHint(true);
-            table.setLineWrapHint(true);
             table.column(new DataTableColumn("Error", 120));
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                 try (PrintWriter pw = new PrintWriter(baos)) {

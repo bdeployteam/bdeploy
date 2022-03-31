@@ -2,6 +2,7 @@ package io.bdeploy.ui.dto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.annotation.Generated;
 
@@ -21,6 +22,7 @@ public class ProductDto implements Comparable<ProductDto> {
     public ObjectId configTree;
     public List<InstanceTemplateDescriptor> instanceTemplates;
     public List<ApplicationTemplateDescriptor> applicationTemplates;
+    public SortedSet<Manifest.Key> references;
 
     public static ProductDto create(ProductManifest manifest) {
         ProductDto dto = new ProductDto();
@@ -32,6 +34,7 @@ public class ProductDto implements Comparable<ProductDto> {
         dto.configTree = manifest.getConfigTemplateTreeId();
         dto.instanceTemplates = manifest.getInstanceTemplates();
         dto.applicationTemplates = manifest.getApplicationTemplates();
+        dto.references = manifest.getReferences();
         return dto;
     }
 

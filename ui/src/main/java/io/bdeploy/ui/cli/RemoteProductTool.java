@@ -52,6 +52,9 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         @Help(value = "The product version to copy")
         String product();
 
+        @Help(value = "A product version to show details about.")
+        String details();
+
     }
 
     public RemoteProductTool() {
@@ -71,9 +74,44 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         } else if (config.transferToManaged() != null) {
             helpAndFailIfMissing(config.product(), "Missing --product");
             return transferToManaged(remote, config);
+        } else if (config.details() != null) {
+            return showDetails(remote, config);
         } else {
             return createNoOp();
         }
+    }
+
+    private RenderableResult showDetails(RemoteService remote, ProductConfig config) {
+        DataResult result = createEmptyResult();
+
+        ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
+                .getProductResource(config.instanceGroup());
+
+        Manifest.Key key = Manifest.Key.parse(config.details());
+
+        Optional<ProductDto> dto = pr.list(key.getName()).stream().filter(p -> p.key.getTag().equals(key.getTag())).findFirst();
+
+        if (dto.isEmpty()) {
+            throw new IllegalStateException("Cannot find product: " + config.details());
+        }
+
+        ProductDto prod = dto.get();
+        result.addField("Key", prod.key.toString());
+        result.addField("ID", prod.product);
+        result.addField("Name", prod.name);
+        result.addField("Vendor", prod.vendor);
+        result.addField("Config. Tree ID", prod.configTree);
+        result.addField("Labels",
+                String.join("\n", prod.labels.entrySet().stream().map(e -> e.getKey() + ": " + e.getValue()).toList()));
+        result.addField("Application Templates", String.join("\n", prod.applicationTemplates.stream().map(t -> t.name).toList()));
+        result.addField("Instance Templates", String.join("\n", prod.instanceTemplates.stream().map(t -> t.name).toList()));
+        result.addField("Dependencies",
+                String.join("\n", prod.references.stream().map(r -> r.getName() + ":" + r.getTag()).toList()));
+
+        // applications?
+        // plugins?
+
+        return result;
     }
 
     private DataTable list(RemoteService remote, ProductConfig config) {

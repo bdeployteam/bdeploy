@@ -152,10 +152,11 @@ public class DataTableText extends DataTableBase {
                     + (3 * (spanning.size() - 1));
 
             String remaining = item.data;
-            while (remaining.length() > width) {
-                int index = width;
+            while (remaining.length() > width || remaining.contains("\n")) {
+                int newLine = remaining.indexOf('\n');
+                int index = newLine == -1 ? width : newLine;
 
-                if (!allowBreak) {
+                if (!allowBreak && newLine == -1) {
                     while (index-- > 0) {
                         if (Character.isWhitespace(remaining.charAt(index))) {
                             break;

@@ -65,7 +65,7 @@ export class ProductDetailsService implements OnDestroy {
       this.prodSubscription = this.products.products$
         .pipe(
           map((prods) =>
-            prods.find(
+            prods?.find(
               (e) =>
                 e.key.name === this.productKey$.value &&
                 e.key.tag === this.productTag$.value

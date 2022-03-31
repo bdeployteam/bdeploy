@@ -42,7 +42,7 @@ public class DataTableJson extends DataTableBase {
     }
 
     static String quote(String data) {
-        return "\"" + data.replace("\"", "\\\"") + "\"";
+        return "\"" + data.replace("\"", "\\\"").replace("\n", "\\n").replace("\\", "\\\\") + "\"";
     }
 
 }
