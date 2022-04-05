@@ -233,7 +233,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
                 // refresh state if we successfully awaited the request.
                 state = status.get(name);
-                if (state.offline) {
+                if (state == null || state.offline) {
                     // still offline after we tried to contact it.
                     return null;
                 }

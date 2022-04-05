@@ -4,6 +4,7 @@ import { BehaviorSubject, finalize, Observable } from 'rxjs';
 import {
   ManifestKey,
   MinionStatusDto,
+  NodeAttachDto,
   ObjectChangeType,
   RemoteService,
 } from 'src/app/models/gen.dtos';
@@ -60,10 +61,10 @@ export class NodesAdminService {
       .pipe(measure(`Update node ${nodeName}`));
   }
 
-  public addNode(nodeName: string, remote: RemoteService): Observable<any> {
+  public addNode(dto: NodeAttachDto): Observable<any> {
     return this.http
-      .put(`${this.apiPath()}/nodes/${nodeName}`, remote)
-      .pipe(measure(`Add node ${nodeName}`));
+      .put(`${this.apiPath()}/nodes`, dto)
+      .pipe(measure(`Add node ${dto.name}`));
   }
 
   public editNode(nodeName: string, remote: RemoteService): Observable<any> {

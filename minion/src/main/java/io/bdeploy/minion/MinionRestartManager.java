@@ -3,12 +3,12 @@ package io.bdeploy.minion;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 
 /**
- * Allows swapping the minions actual update logic (usually exiting the JVM after a short timeout with a special exit code).
+ * Allows swapping the minions actual restart logic (usually exiting the JVM after a short timeout with a special exit code).
  *
  * @see MinionUpdateResource
  */
 @FunctionalInterface
-public interface MinionUpdateManager {
+public interface MinionRestartManager {
 
     /**
      * Trigger update of the minion. This would usually involve shutting down the JVM with a special exist code to tell a script
@@ -17,6 +17,6 @@ public interface MinionUpdateManager {
      * @param timeout time in milliseconds to delay asynchronously before updating. This allows currently running operations (as
      *            the remote update operation itself) to finish.
      */
-    public void performUpdate(long timeout);
+    public void performRestart(long timeout);
 
 }

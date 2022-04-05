@@ -55,4 +55,9 @@ public class UiResources {
         });
     }
 
+    public static void registerNode(RegistrationTarget server) {
+        server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/assets/node/"),
+                HttpHandlerRegistration.ROOT);
+    }
+
 }

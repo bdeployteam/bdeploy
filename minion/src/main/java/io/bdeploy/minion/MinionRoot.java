@@ -103,7 +103,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private final NodeManagerImpl nodeManager;
 
     private Path updates;
-    private MinionUpdateManager updateManager = t -> log.error("No Update Manager, cannot update Minion!");
+    private MinionRestartManager restartManager = t -> log.error("No Update Manager, cannot update Minion!");
 
     private Scheduler scheduler;
     private PluginManager pluginManager;
@@ -157,17 +157,17 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     /**
-     * @param manager a replacement for the default {@link MinionUpdateManager}.
+     * @param manager a replacement for the default {@link MinionRestartManager}.
      */
-    public void setUpdateManager(MinionUpdateManager manager) {
-        this.updateManager = manager;
+    public void setRestartManager(MinionRestartManager manager) {
+        this.restartManager = manager;
     }
 
     /**
-     * @return the {@link MinionUpdateManager} responsible for updating this minion.
+     * @return the {@link MinionRestartManager} responsible for restarting this minion.
      */
-    public MinionUpdateManager getUpdateManager() {
-        return updateManager;
+    public MinionRestartManager getRestartManager() {
+        return restartManager;
     }
 
     /**

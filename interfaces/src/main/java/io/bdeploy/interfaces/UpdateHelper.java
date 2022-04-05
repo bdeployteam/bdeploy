@@ -68,7 +68,7 @@ public class UpdateHelper {
     /**
      * This must match what the launcher script(s) expect to perform an update.
      */
-    public static final int CODE_UPDATE = 42;
+    public static final int CODE_RESTART = 42;
 
     private static final Logger log = LoggerFactory.getLogger(UpdateHelper.class);
 

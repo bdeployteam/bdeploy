@@ -76,6 +76,7 @@ import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
@@ -280,6 +281,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 log.info("Launcher successfully launched. PID={}", process.pid());
                 log.info("Check logs in {} for more details.", ClientPathHelper.getHome(rootDir, requiredVersion));
             } else {
+                // the source server could have been migrated/converted to node. in this case, display a message.
+                if (doCheckForMigratedNode()) {
+                    log.warn("Migrated node detected, cannot continue");
+                    return;
+                }
+
                 doInstall(hive, reporter, splash);
                 if (config.updateOnly()) {
                     log.info("Application successfully installed/updated.");
@@ -328,10 +335,24 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             ApplicationExitCodeDescriptor exitCodes = appDesc.exitCodes;
             if (exitCodes != null && exitCodes.update != null && exitCodes.update == exitCode) {
                 log.info("Application signaled that updates should be installed. Restarting...");
-                doExit(UpdateHelper.CODE_UPDATE);
+                doExit(UpdateHelper.CODE_RESTART);
             }
             log.info("Application terminated with exit code {}.", exitCode);
         }
+    }
+
+    private boolean doCheckForMigratedNode() {
+        MinionStatusResource msr = ResourceProvider.getVersionedResource(clickAndStart.host, MinionStatusResource.class, null);
+
+        if (!msr.getStatus().config.master) {
+            log.info("Minion is not a master: {}", clickAndStart.host.getUri());
+
+            MessageDialogs.showServerIsNode();
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -535,7 +556,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // We just exit with the update code so that the outer launcher can do all required tasks
         if (System.getenv(BDEPLOY_DELEGATE) != null) {
             log.info("Update of launcher required. Delegating to parent to do this...");
-            doExit(UpdateHelper.CODE_UPDATE);
+            doExit(UpdateHelper.CODE_RESTART);
             return;
         }
 
@@ -557,7 +578,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Signal that a new update is available
             log.info("Restarting...");
-            doExit(UpdateHelper.CODE_UPDATE);
+            doExit(UpdateHelper.CODE_RESTART);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create update marker");
         }
@@ -583,7 +604,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // The native launcher cannot install updates while we are running
         if (OsHelper.getRunningOs() == OperatingSystem.WINDOWS) {
             log.info("Found existing update marker. Exiting to allow updates to be installed.");
-            doExit(UpdateHelper.CODE_UPDATE);
+            doExit(UpdateHelper.CODE_RESTART);
         }
 
         // On Linux we wait for some time until the marker disappears
@@ -597,7 +618,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Terminate and restart in any case
         log.info("Exiting to apply updates.");
-        doExit(UpdateHelper.CODE_UPDATE);
+        doExit(UpdateHelper.CODE_RESTART);
     }
 
     /**

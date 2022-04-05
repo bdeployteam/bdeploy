@@ -65,6 +65,14 @@
       ></app-bd-panel-button>
       <app-bd-panel-button
         [collapsed]="false"
+        text="Convert to Node..."
+        icon="drive_file_move"
+        [relative]="true"
+        [route]="['conversion']"
+        [disabled]="!state.config?.master"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
         text="Apply Software Update"
         icon="system_update"
         [relative]="true"

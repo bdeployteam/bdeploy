@@ -70,7 +70,7 @@ class MinionUpdateTest {
     void doTestUpdate(MinionRoot root, CommonUpdateResource resource, RemoteService remote, Path tmp, BHive local)
             throws IOException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
-        root.setUpdateManager((t) -> updateTriggered.set(true));
+        root.setRestartManager((t) -> updateTriggered.set(true));
         root.onStartup(true);
 
         Path updateSource = TestAppFactory.createDummyApp("minion", tmp);
@@ -118,7 +118,7 @@ class MinionUpdateTest {
     void doTestZippedUpdate(MinionRoot root, CommonUpdateResource resource, RemoteService svc, Path tmp, String auth)
             throws IOException, GeneralSecurityException {
         AtomicBoolean updateTriggered = new AtomicBoolean(false);
-        root.setUpdateManager((t) -> updateTriggered.set(true));
+        root.setRestartManager((t) -> updateTriggered.set(true));
 
         // generate test app into a ZIP
         Path zip = tmp.resolve("xxx-2.0.0.zip");

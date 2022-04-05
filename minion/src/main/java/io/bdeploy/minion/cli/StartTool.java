@@ -50,7 +50,7 @@ import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonDirectoryEntryResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
-import io.bdeploy.minion.remote.jersey.JerseyAwareMinionUpdateManager;
+import io.bdeploy.minion.remote.jersey.JerseyAwareMinionRestartManager;
 import io.bdeploy.minion.remote.jersey.MasterRootResourceImpl;
 import io.bdeploy.minion.remote.jersey.MasterSettingsResourceImpl;
 import io.bdeploy.minion.remote.jersey.MinionStatusResourceImpl;
@@ -125,6 +125,8 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
                 if (r.getMode() != MinionMode.NODE) {
                     // MASTER (standalone, managed, central)
                     setupServerMaster(config, r, srv, reg);
+                } else {
+                    setupServerNode(config, srv);
                 }
 
                 if (config.shutdownToken() != null) {
@@ -138,6 +140,12 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             }
         } catch (Exception e) {
             throw new IllegalStateException("Cannot start server", e);
+        }
+    }
+
+    private void setupServerNode(MasterConfig config, JerseyServer srv) {
+        if (config.publishWebapp()) {
+            UiResources.registerNode(srv);
         }
     }
 
@@ -160,7 +168,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.afterStartup().thenRun(() -> r.afterStartup(false));
 
         srv.setAuditor(RollingFileAuditor.getInstance(r.getLogDir()));
-        r.setUpdateManager(new JerseyAwareMinionUpdateManager(srv));
+        r.setRestartManager(new JerseyAwareMinionRestartManager(srv));
         r.setupServerTasks(r.getMode());
         delegate.setDelegate(srv.getRemoteActivityReporter());
 

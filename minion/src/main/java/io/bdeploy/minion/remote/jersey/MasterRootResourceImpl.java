@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -15,9 +17,14 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.op.ManifestMaxIdOperation;
+import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
@@ -29,7 +36,11 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.SortOneAsLastComparator;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
@@ -40,7 +51,13 @@ import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.api.BackendInfoResource;
+import io.bdeploy.ui.api.InstanceGroupResource;
+import io.bdeploy.ui.api.InstanceResource;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
+import io.bdeploy.ui.dto.BackendInfoDto;
+import io.bdeploy.ui.dto.InstanceDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -78,6 +95,194 @@ public class MasterRootResourceImpl implements MasterRootResource {
     @Override
     public void addNode(String name, RemoteService minion) {
         nodes.addNode(name, MinionDto.create(false, minion));
+    }
+
+    @Override
+    public void convertNode(String name, RemoteService minion) {
+        try (Activity finding = reporter.start("Migrating " + name)) {
+            // first, contact and verify information.
+            MinionMigrationState state = checkAndPrepareNodesForMigration(name, minion);
+
+            // make sure all instance groups on the source server also exist on the target (this) server.
+            checkAndPrepareInstanceGroupsForMigration(minion, state);
+
+            // fetch all instances from all instance groups
+            checkAndCollectInstancesForMigration(minion, state);
+
+            // transfer all data and post process instances on the go.
+            transferAndProcessInstances(minion, state);
+
+            // tell the now-node that it is a node now, and it should restart.
+            ResourceProvider.getResource(minion, MinionUpdateResource.class, context).convertToNode();
+
+            // last step, add all nodes.
+            state.allNodes.forEach((k, v) -> nodes.addNode(k, v.config));
+        }
+    }
+
+    private void checkAndCollectInstancesForMigration(RemoteService minion, MinionMigrationState state) {
+        InstanceGroupResource remoteIgr = ResourceProvider.getResource(minion, InstanceGroupResource.class, context);
+
+        try (Activity finding = reporter.start("Finding Instances for Migration", state.allGroups.size())) {
+            for (InstanceGroupConfiguration igc : state.allGroups) {
+                InstanceResource remoteIr = remoteIgr.getInstanceResource(igc.name);
+
+                List<InstanceDto> instances = remoteIr.list();
+                state.allInstances.put(igc.name, instances);
+                Map<String, List<Manifest.Key>> toFetch = state.toFetch.computeIfAbsent(igc.name, k -> new TreeMap<>());
+
+                for (InstanceDto instance : instances) {
+                    List<Manifest.Key> toFetchForInstance = new ArrayList<>();
+                    toFetchForInstance.add(instance.activeVersion != null ? instance.activeVersion : instance.latestVersion);
+                    toFetchForInstance.add(instance.activeProduct != null ? instance.activeProduct : instance.productDto.key);
+                    toFetch.put(instance.instanceConfiguration.uuid, toFetchForInstance);
+                }
+            }
+            finding.workAndCancelIfRequested(1);
+        }
+    }
+
+    private void transferAndProcessInstances(RemoteService minion, MinionMigrationState state) {
+        try (Activity fetching = reporter.start("Transferring Data for Migration")) {
+            for (Map.Entry<String, Map<String, List<Manifest.Key>>> grpEntry : state.toFetch.entrySet()) {
+                BHive grpHive = registry.get(grpEntry.getKey()); // must exist, see previous steps.
+
+                for (Map.Entry<String, List<Manifest.Key>> entry : grpEntry.getValue().entrySet()) {
+                    // only fetch things which are not there yet. FetchOperation would do this automatically,
+                    // but we want to know what to delete in case post-processing goes wrong.
+                    List<Key> toFetch = entry.getValue().stream()
+                            .filter(k -> Boolean.FALSE.equals(grpHive.execute(new ManifestExistsOperation().setManifest(k))))
+                            .toList();
+
+                    try (Transaction tx = grpHive.getTransactions().begin()) {
+                        // actually fetch.
+                        grpHive.execute(
+                                new FetchOperation().setRemote(minion).setHiveName(grpEntry.getKey()).addManifest(toFetch));
+
+                        // TODO: fetch instance runtimeDependencies overrides here once implemented.
+                    }
+
+                    try {
+                        // replace oldMasterName in node configs with the new name. we do this immediately
+                        // so that we have a chance to remove things we fetched in case we encounter an error.
+                        postProcessInstance(grpEntry.getKey(), entry.getKey(), state.originalName, state.newName);
+                    } catch (Exception e) {
+                        // in case of *any* exception while post-processing the instance, we want to get rid of things we fetched.
+                        log.error("Cannot perform migration on instance {}: {}", entry.getKey(), e.toString());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Error Details:", e);
+                        }
+
+                        // remove all the manifests for this instance again.
+                        toFetch.forEach(m -> grpHive.execute(new ManifestDeleteOperation().setToDelete(m)));
+                    }
+                }
+            }
+        }
+    }
+
+    private void postProcessInstance(String instanceGroup, String instance, String oldNodeName, String newNodeName) {
+        BHive hive = registry.get(instanceGroup);
+
+        String rootName = InstanceManifest.getRootName(instance);
+        Optional<Long> latest = hive.execute(new ManifestMaxIdOperation().setManifestName(rootName));
+        if (latest.isEmpty()) {
+            // instance not found?!
+            throw new WebApplicationException("Instance not found after fetching: " + instance, Status.EXPECTATION_FAILED);
+        }
+
+        InstanceManifest existing = InstanceManifest.of(hive, new Manifest.Key(rootName, String.valueOf(latest.get())));
+
+        InstanceManifest.Builder imfb = new InstanceManifest.Builder().setInstanceConfiguration(existing.getConfiguration());
+        for (Map.Entry<String, InstanceNodeConfiguration> node : existing.getInstanceNodeConfiguration(hive).entrySet()) {
+            InstanceNodeManifest.Builder inmBuilder = new InstanceNodeManifest.Builder();
+            InstanceNodeConfiguration nodeCfg = node.getValue();
+
+            String minionName = node.getKey();
+            if (minionName.equals(oldNodeName)) {
+                minionName = newNodeName;
+            }
+
+            inmBuilder.setConfigTreeId(existing.getConfiguration().configTree);
+            inmBuilder.setInstanceNodeConfiguration(nodeCfg);
+            inmBuilder.setMinionName(minionName);
+            inmBuilder.setKey(new Manifest.Key(nodeCfg.uuid + "/" + minionName, Long.toString(latest.get() + 1)));
+
+            imfb.addInstanceNodeManifest(minionName, inmBuilder.insert(hive));
+        }
+
+        Key result = imfb.insert(hive);
+        InstanceManifest.of(hive, result).getHistory(hive).recordAction(Action.CREATE, context.getUserPrincipal().getName(),
+                "Migration to node");
+
+    }
+
+    private void checkAndPrepareInstanceGroupsForMigration(RemoteService minion, MinionMigrationState state) {
+        CommonRootResource remoteCrr = ResourceProvider.getVersionedResource(minion, CommonRootResource.class, context);
+        CommonRootResource localCrr = rc.initResource(new CommonRootResourceImpl());
+
+        List<InstanceGroupConfiguration> localGroups = localCrr.getInstanceGroups();
+        state.allGroups = remoteCrr.getInstanceGroups();
+
+        for (InstanceGroupConfiguration igc : state.allGroups) {
+            Optional<InstanceGroupConfiguration> existingIg = localGroups.stream().filter(i -> i.name.equals(igc.name)).findAny();
+
+            if (existingIg.isEmpty()) {
+                // need to create it. there is no way to apply the logo, it has to be done manually later
+                igc.logo = null;
+                localCrr.addInstanceGroup(igc, null);
+            }
+        }
+    }
+
+    private MinionMigrationState checkAndPrepareNodesForMigration(String name, RemoteService minion) {
+        BackendInfoResource bir = ResourceProvider.getResource(minion, BackendInfoResource.class, context);
+        BackendInfoDto info = bir.getVersion();
+        MinionMigrationState result = new MinionMigrationState();
+
+        if (!(info.mode == MinionMode.MANAGED || info.mode == MinionMode.STANDALONE)) {
+            throw new WebApplicationException("Requested conversion is not possible, minion has wrong mode: " + info.mode,
+                    Status.EXPECTATION_FAILED);
+        }
+
+        Map<String, MinionStatusDto> allNodes = bir.getNodeStatus();
+        String oldMasterName = null;
+        for (Entry<String, MinionStatusDto> entry : allNodes.entrySet()) {
+            if (entry.getValue().offline) {
+                throw new WebApplicationException(
+                        "All nodes on target server must be online during conversion, offline node: " + entry.getKey(),
+                        Status.EXPECTATION_FAILED);
+            }
+
+            if (entry.getValue().config.master) {
+                if (oldMasterName != null) {
+                    throw new WebApplicationException("Multiple master nodes found: " + entry.getKey() + ", " + oldMasterName,
+                            Status.EXPECTATION_FAILED);
+                }
+
+                oldMasterName = entry.getKey();
+            } else if (nodes.getAllNodeNames().contains(entry.getKey())) {
+                throw new WebApplicationException("Duplicate node name detected, cannot convert: " + entry.getKey(),
+                        Status.EXPECTATION_FAILED);
+            }
+        }
+
+        if (oldMasterName == null) {
+            throw new WebApplicationException("No master node configuration found", Status.EXPECTATION_FAILED);
+        }
+
+        // update config, this could be a different URL/pack/etc (user provided).
+        MinionStatusDto status = allNodes.remove(oldMasterName);
+        status.config.remote = minion;
+        status.config.master = false;
+        status.infoText = "Converting...";
+        allNodes.put(name, status);
+
+        result.newName = name;
+        result.originalName = oldMasterName;
+        result.allNodes = allNodes;
+
+        return result;
     }
 
     @Override
@@ -353,6 +558,16 @@ public class MasterRootResourceImpl implements MasterRootResource {
         public String name;
         public List<String> installed = new ArrayList<>();
         public String active;
+    }
+
+    private static final class MinionMigrationState {
+
+        public String newName;
+        public String originalName;
+        public List<InstanceGroupConfiguration> allGroups;
+        public Map<String, MinionStatusDto> allNodes;
+        public Map<String, Map<String, List<Manifest.Key>>> toFetch = new TreeMap<>();
+        public Map<String, List<InstanceDto>> allInstances = new TreeMap<>();
     }
 
 }

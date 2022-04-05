@@ -16,8 +16,7 @@ import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard'
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
-
-export const NODE_MIME_TYPE = 'text/plain';
+import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
 
 @Component({
   selector: 'app-node-edit',

@@ -32,7 +32,6 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
-import io.bdeploy.interfaces.minion.NodeAttachDto;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.InitTool.InitConfig;
@@ -40,6 +39,7 @@ import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteMasterTool;
+import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.ws.rs.core.UriBuilder;
 
 @Help("Initialize a minion root directory")
@@ -132,6 +132,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
                 NodeAttachDto nad = new NodeAttachDto();
                 nad.name = config.hostname();
+                nad.sourceMode = MinionMode.NODE;
                 nad.remote = self.remote;
 
                 Files.write(Paths.get(config.nodeIdentFile()), StorageHelper.toRawBytes(nad));

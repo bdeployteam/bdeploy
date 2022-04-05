@@ -331,6 +331,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.ObjectChangeType',
         'io.bdeploy.ui.dto.ObjectChangeHint',
         'io.bdeploy.ui.dto.ObjectChangeDetails',
+        'io.bdeploy.ui.dto.NodeAttachDto',
         // Other, generic
         'io.bdeploy.common.Version',
         'io.bdeploy.common.ActivitySnapshot',

@@ -36,12 +36,12 @@ IF NOT "%ERRORLEVEL%"=="42" (
     )
     goto :end
 )
-echo "Minion signalled update request."
+echo "Minion signalled restart request."
 
 @rem Check if we have the expected update in place
 IF NOT EXIST "%APP_UPDATE_NEXT%\\lib" (
-    echo "Unexpected directory structure in update dir. Update will not be applied. Terminating."
-    goto :fail
+    echo "No update to be applied has been found. Restarting."
+    goto :execute
 )
 
 @rem Remove old backups before creating a new one

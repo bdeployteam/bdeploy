@@ -15,6 +15,7 @@
       >
 
       <a
+        *ngIf="!(cfg.isCentral$ | async)"
         mat-list-item
         [routerLink]="[{ outlets: { admin: ['nodes'] } }]"
         routerLinkActive="active-setting"

@@ -1,8 +1,12 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
-import { RemoteService } from 'src/app/models/gen.dtos';
+import { BehaviorSubject, finalize, Observable, of, Subscription } from 'rxjs';
+import { MinionMode, NodeAttachDto } from 'src/app/models/gen.dtos';
+import {
+  ACTION_CANCEL,
+  BdDialogMessageAction,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -12,17 +16,19 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
 
 export const NODE_MIME_TYPE = 'text/plain';
 
-interface SimpleNodeConfig {
-  name: string;
-  remote: RemoteService;
-}
-
-const DEF_NODE: SimpleNodeConfig = {
+const DEF_NODE: NodeAttachDto = {
   name: '',
+  sourceMode: MinionMode.NODE,
   remote: {
     uri: '',
     authPack: '',
   },
+};
+
+const ACTION_MIGRATE: BdDialogMessageAction<boolean> = {
+  name: 'Migrate',
+  result: true,
+  confirm: true,
 };
 
 @Component({
@@ -59,14 +65,28 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
   doSave(): Observable<any> {
     this.adding$.next(true);
     return this.nodesAdmin
-      .addNode(this.data.name, this.data.remote)
+      .addNode(this.data)
       .pipe(finalize(() => this.adding$.next(false)));
   }
 
   onSave() {
-    this.doSave().subscribe(() => {
-      this.data = cloneDeep(DEF_NODE);
-      this.tb.closePanel();
+    let confirmation: Observable<boolean> = of(true);
+    if (this.data.sourceMode !== MinionMode.NODE) {
+      confirmation = this.dialog.message({
+        header: 'Migrate Server',
+        message: `This action will migrate the selected server from mode <code>${this.data.sourceMode}</code> to <code>NODE</code>. Existing software will be moved to this server. The migrated server will no longer provide any user interface. This action cannot be undone. Are you sure?`,
+        icon: 'warning',
+        actions: [ACTION_CANCEL, ACTION_MIGRATE],
+      });
+    }
+
+    confirmation.subscribe((x) => {
+      if (x) {
+        this.doSave().subscribe(() => {
+          this.data = cloneDeep(DEF_NODE);
+          this.tb.closePanel();
+        });
+      }
     });
   }
 

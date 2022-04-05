@@ -43,6 +43,14 @@ public interface MasterRootResource extends CommonUpdateResource {
     public void addNode(@PathParam("name") String name, RemoteService minion);
 
     /**
+     * @param name the name of the minion to add.
+     * @param minion the configuration of a server which is currently STANDALONE or MANAGED. It will be migrated to a node.
+     */
+    @PUT
+    @Path("/minions/{name}/migrate")
+    public void convertNode(@PathParam("name") String name, RemoteService minion);
+
+    /**
      * @param name the name of the minion to edit.
      * @param minion the updated minion configuration for the minion.
      */

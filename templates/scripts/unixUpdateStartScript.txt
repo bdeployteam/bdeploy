@@ -178,7 +178,7 @@ if [ -d "\$APP_HOME/update/next" ]; then
         rm -rf "\$APP_HOME/update/next"
         rm "\$APP_HOME/update/.updating"
     else
-        echo "Unexpected directory structure in update dir, not applying!"
+        echo "No update to be applied has been found. Restarting."
     fi
 fi
 
@@ -234,7 +234,7 @@ if [[ -n "\${BDEPLOY_DELEGATE}" ]]; then
 fi
 
 if [ \$state == 42 ]; then
-    echo "Minion signalled update request, restarting"
+    echo "Minion signalled restart request, restarting"
     exec "\$0" "\${ORIG_ARGS[@]}"
 fi
 
