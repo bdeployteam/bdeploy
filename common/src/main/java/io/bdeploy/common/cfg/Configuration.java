@@ -221,8 +221,7 @@ public class Configuration {
 
         // check source type
         if (!(object instanceof String) && !returnType.isAnnotation()) {
-            throw new IllegalStateException("Illegal conversion from non-string object to different type: "
-                    + (object == null ? "null" : object.getClass()) + " to " + returnType);
+            throw new IllegalStateException(getParameterConfigurationHint(returnType, method.getName(), object));
         }
 
         // do actual conversion
@@ -235,6 +234,24 @@ public class Configuration {
         conversions.put(method, conversion);
 
         return conversion;
+    }
+
+    private String getParameterConfigurationHint(Class<?> returnType, String methodName, Object object) {
+        StringBuilder hint = new StringBuilder();
+
+        hint.append("Could not resolve " + methodName + " parameter. ");
+
+        if (returnType.isArray()) {
+            hint.append("Please specify parameter like this: " + methodName + "=<value1> " + methodName
+                    + "=<value2>... or like this: " + methodName + "=<value1>,<value2>... ");
+        } else {
+            hint.append("Please specify parameter like this: " + methodName + "=<value>. ");
+        }
+
+        hint.append("Illegal conversion from non-string object to different type: "
+                + (object == null ? "null" : object.getClass()) + " to " + returnType);
+
+        return hint.toString();
     }
 
     private UnaryOperator<Object> getMapper(Method method) {
