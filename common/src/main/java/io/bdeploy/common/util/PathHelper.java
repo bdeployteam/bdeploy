@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.Comparator;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class PathHelper {
     }
 
     /**
-     * Tests if the given location can be modified. Testing is done by trying to create a new file.
+     * Tests if the given location can be modified.
      */
     public static boolean isReadOnly(Path path) {
         try {
@@ -81,6 +82,79 @@ public class PathHelper {
             return false;
         } catch (Exception ioe) {
             return true;
+        }
+    }
+
+    /**
+     * Tests if the given location can be modified. Additionally the permissions are checked for consistency. Following conditions
+     * lead to an exception:
+     * <ul>
+     * <li>Directory is read-only but we can write some files in there</li>
+     * <li>Directory is writable but we cannot modify existing files</li>
+     * <li>Directory is writable but we cannot delete files</li>
+     * </ul>
+     *
+     * @param directory directory to check permissions. A new file will be created in there to check for write permissions
+     * @param existingFile file that is already existing. File is tested if it can be opened for writing. The file must exist if
+     *            not the check is skipped.
+     * @return {@code true} if the root directory is read-only and {@code false} if files can be created / modified
+     */
+    public static boolean isReadOnly(Path directory, Path existingFile) {
+        boolean canCreate = true;
+        boolean canDelete = true;
+
+        // Check if we can create a new file
+        Path testFile = directory.resolve(UuidHelper.randomId());
+        try {
+            PathHelper.mkdirs(directory);
+            Files.newOutputStream(testFile).close();
+        } catch (Exception ioe) {
+            canCreate = false;
+        }
+
+        // Check if we can delete the file
+        if (canCreate) {
+            try {
+                Files.delete(testFile);
+            } catch (Exception ioe) {
+                canDelete = false;
+            }
+        }
+
+        // Throw if we can create but not delete files
+        if (canCreate && !canDelete) {
+            throw new IllegalStateException("Inconsistent file and folder permissions: Missing permission to delete files.");
+        }
+        boolean readOnlyDir = !canCreate;
+
+        // Check for consistent permissions if possible
+        if (exists(existingFile)) {
+            boolean writable = isWritable(existingFile);
+            if (readOnlyDir && writable) {
+                throw new IllegalStateException("Inconsistent file and folder permissions: Missing permission to create files.");
+            }
+            if (!readOnlyDir && !writable) {
+                throw new IllegalStateException("Inconsistent file and folder permissions. Missing permission to modify files.");
+            }
+        }
+        return readOnlyDir;
+    }
+
+    /**
+     * Tests if the given file can be modified.
+     * <p>
+     * Implementation note: {@link Files#isWritable} reports wrong results and cannot be used as replacement. When advanced
+     * permissions are granted where a user can can <tt>'Create Files/Write Data'</tt> but cannot
+     * <tt>'Create Folders/Append Data'</tt> then this JAVA API returns 'true' where in reality trying to open the file for
+     * writing is not denied. Trying to open new stream for writing does work more reliable and reports the correct result.
+     * </p>
+     */
+    public static boolean isWritable(Path path) {
+        try {
+            Files.newOutputStream(path, StandardOpenOption.WRITE).close();
+            return true;
+        } catch (Exception ioe) {
+            return false;
         }
     }
 

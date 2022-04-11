@@ -252,10 +252,10 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
      */
     private void doLaunch(Auditor auditor, LauncherSplash splash) {
         log.info("Launcher version '{}' started.", VersionHelper.getVersionAsString());
-        log.info("Home directory: {}", rootDir);
+        log.info("Root directory: {}", rootDir);
         if (readOnlyRootDir) {
             log.info("User directory: {}", userArea);
-            log.info("Home directory is readonly. No new applications or updates can be installed.");
+            log.info("Root directory is readonly. No new applications or updates can be installed.");
         }
 
         LauncherSplashReporter reporter = new LauncherSplashReporter(splash);
@@ -451,8 +451,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         rootDir = Paths.get(config.homeDir()).toAbsolutePath();
         updateDir = PathHelper.ofNullableStrig(config.updateDir());
 
+        // Check for inconsistent file and folder permissions
+        Path versionsFile = rootDir.resolve(ClientPathHelper.LAUNCHER_DIR).resolve("version.properties");
+        readOnlyRootDir = PathHelper.isReadOnly(rootDir, versionsFile);
+
         // Try to get a user-area if the root is readonly
-        if (PathHelper.isReadOnly(rootDir)) {
+        if (readOnlyRootDir) {
             userArea = ClientPathHelper.getUserArea();
             if (userArea == null || PathHelper.isReadOnly(userArea)) {
                 throw new IllegalStateException("The user area '" + userArea + "' does not exist or cannot be modified.");
@@ -469,7 +473,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         appsDir = rootDir.resolve("apps");
         poolDir = appsDir.resolve("pool");
         appDir = appsDir.resolve(clickAndStart.applicationId);
-        readOnlyRootDir = PathHelper.isReadOnly(rootDir);
 
         // Enrich log messages with the application that is about to be launched
         String pid = String.format("PID: %1$5s", ProcessHandle.current().pid());
@@ -530,7 +533,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 hive.execute(new LockDirectoryOperation().setDirectory(rootDir)); // this could wait for other launchers.
             }
         }
-        log.info("Entered locked execution mode");
+        log.debug("Entered locked execution mode");
         try {
             return runnable.call();
         } catch (RuntimeException rex) {
@@ -538,7 +541,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to execute locked operation", ex);
         } finally {
-            log.info("Leaving locked execution mode");
+            log.debug("Leaving locked execution mode");
             if (!readOnlyRootDir) {
                 hive.execute(new ReleaseDirectoryLockOperation().setDirectory(rootDir));
             }
@@ -556,7 +559,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         log.info("Launcher updates found. Updating from {} to {}", runningVersion, latestVersion);
 
         // Check if we have write permissions to install the update
-        if (PathHelper.isReadOnly(rootDir)) {
+        if (readOnlyRootDir) {
             throw new SoftwareUpdateException("launcher",
                     "Installed=" + runningVersion.toString() + " Available=" + latestVersion.toString());
         }
