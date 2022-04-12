@@ -27,6 +27,7 @@
       <tr
         mat-row
         *matRowDef="let row; columns: _visibleColumns"
+        (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
         [routerLink]="!!row.node.item ? recordRoute(row.node.item) : []"
         [routerLinkActive]="!!row.node.item ? 'mat-row-route-active' : []"
         [style.cursor]="!!row.node.item ? 'pointer' : 'auto'"

@@ -1,7 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
 import { BdDataGroupingDefinition } from 'src/app/models/data';
-import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
+import {
+  InstanceGroupConfiguration,
+  MinionMode,
+} from 'src/app/models/gen.dtos';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -24,10 +28,21 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
   /* template */ public isCardView: boolean;
   /* template */ public presetKeyValue = 'instanceGroups';
 
+  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+
   /* template */ getRecordRoute = (row: InstanceGroupConfiguration) => {
     if (this.authService.isScopedExclusiveReadClient(row.name)) {
       return ['/groups', 'clients', row.name];
     }
+
+    // in case we're managed but the group is not (yet), we're not allowed to enter the group.
+    if (!row.managed && this.config.config.mode === MinionMode.MANAGED) {
+      return [
+        '',
+        { outlets: { panel: ['panels', 'servers', 'link', 'central'] } },
+      ];
+    }
+
     return ['/instances', 'browser', row.name];
   };
 
@@ -68,5 +83,18 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  onRecordClick(row: InstanceGroupConfiguration) {
+    // in case we're managed but the group is not (yet), we're not allowed to enter the group - show a message instead
+    if (!row.managed && this.config.config.mode === MinionMode.MANAGED) {
+      this.dialog
+        .info(
+          'Group not managed',
+          `This server has been reconfigured to be <code>MANAGED</code>, however the instance group ${row.name} is not yet managed. You need to link the group with its counterpart on the <code>CENTRAL</code> server.`,
+          'link'
+        )
+        .subscribe();
+    }
   }
 }
