@@ -6,6 +6,7 @@ import java.util.Map;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -26,6 +27,7 @@ public interface MinionStatusResource {
      * @return the status of the minion.
      */
     @GET
+    @WeakTokenAllowed
     public MinionStatusDto getStatus();
 
     /**

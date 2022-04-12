@@ -8,6 +8,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -36,13 +37,12 @@ public interface NodeManagementResource {
     public Map<String, MinionStatusDto> getNodes();
 
     /**
-     * @param name the name of the new node to add
-     * @param node the remote configuration (URI, auth).
+     * @param data the attach data including remote configuration (URI, auth).
      */
     @PUT
-    @Path("/nodes/{name}")
+    @Path("/nodes")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void addNode(@PathParam("name") String name, RemoteService node);
+    public void addNode(NodeAttachDto data);
 
     /**
      * @param name the name of the node to edit

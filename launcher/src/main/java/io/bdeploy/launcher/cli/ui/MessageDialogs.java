@@ -79,6 +79,20 @@ public class MessageDialogs {
     }
 
     /**
+     * Opens the dialog to show a message stating that the server is now a now, application needs to be re-downloaded.
+     */
+    public static void showServerIsNode() {
+        MessageDialog dialog = new MessageDialog("Server no longer available");
+        dialog.setHeaderIcon(WindowHelper.loadIcon("/refresh.png", 32, 32));
+        dialog.setHeaderText("Server no longer available");
+        dialog.setSummary("<html>The server has been migrated to a different location. " + //
+                "You need to re-download the application from the new location.</html>");
+        dialog.setVisible(true);
+        dialog.setDetails("There are no further details available.");
+        dialog.waitForExit();
+    }
+
+    /**
      * Opens a dialog to show the given multi-line result.
      */
     public static void showDetailedMessage(String message) {

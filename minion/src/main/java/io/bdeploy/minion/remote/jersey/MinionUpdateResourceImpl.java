@@ -10,10 +10,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +30,10 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.api.MinionMode;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
@@ -41,6 +41,23 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
 
     @Inject
     private MinionRoot root;
+
+    @Override
+    public void convertToNode() {
+        // convert to type node.
+        root.modifyState((s) -> {
+            s.mode = MinionMode.NODE;
+        });
+
+        // we cannot delete (or rename) them here and now, as still in use.
+        // after re-launch we can no longer determine whether (and what) we should move/delete.
+        log.warn("Storage locations of the server are now unused and can be deleted:");
+        for (Path p : root.getStorageLocations()) {
+            log.warn(" * {}", p);
+        }
+
+        root.getRestartManager().performRestart(1_000);
+    }
 
     @Override
     public void update(Manifest.Key key) {
@@ -51,7 +68,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
                     Status.PRECONDITION_FAILED);
         }
 
-        root.getUpdateManager().performUpdate(1_000);
+        root.getRestartManager().performRestart(1_000);
     }
 
     @Override

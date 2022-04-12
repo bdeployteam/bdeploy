@@ -43,9 +43,11 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.ws.rs.NotFoundException;
 
 @ExtendWith(TestMinion.class)
@@ -54,9 +56,16 @@ class InstanceResourceTest {
     void addNodes(RemoteService remote) {
         NodeManagementResource nmr = ResourceProvider.getResource(remote, NodeManagementResource.class, null);
 
-        nmr.addNode("Node1", remote);
-        nmr.addNode("Node2", remote);
-        nmr.addNode("Node3", remote);
+        NodeAttachDto dto = new NodeAttachDto();
+        dto.remote = remote;
+        dto.sourceMode = MinionMode.NODE;
+
+        dto.name = "Node1";
+        nmr.addNode(dto);
+        dto.name = "Node2";
+        nmr.addNode(dto);
+        dto.name = "Node3";
+        nmr.addNode(dto);
     }
 
     @Test

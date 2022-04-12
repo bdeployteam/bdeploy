@@ -24,6 +24,21 @@ describe('Admin Nodes Test', () => {
       cy.get('button[data-cy^=Edit]').should('be.disabled');
       cy.get('button[data-cy^=Apply]').should('be.disabled');
       cy.get('button[data-cy^=Remove]').should('be.disabled');
+
+      cy.get('button[data-cy^=Convert]').click();
+    });
+
+    cy.inMainNavFlyin('app-node-conversion', () => {
+      cy.contains('Drag me to the target server').should('exist');
+    });
+
+    cy.screenshot('Doc_Admin_Nodes_Conversion');
+
+    cy.inMainNavFlyin('app-node-conversion', () => {
+      cy.pressToolbarButton('Back to Overview');
+    });
+
+    cy.inMainNavFlyin('app-node-details', () => {
       cy.pressToolbarButton('Close');
     });
 
@@ -34,10 +49,6 @@ describe('Admin Nodes Test', () => {
     cy.pressToolbarButton('Add Node');
 
     cy.intercept({ method: 'GET', url: '**/api/node-admin/nodes' }).as('list');
-    cy.intercept({
-      method: 'PUT',
-      url: '**/api/node-admin/nodes/TestNode**',
-    }).as('add');
 
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_Nodes_Add');
@@ -50,7 +61,6 @@ describe('Admin Nodes Test', () => {
     });
 
     cy.checkMainNavFlyinClosed();
-    cy.wait('@add');
     cy.wait('@list');
     cy.waitUntilContentLoaded();
 

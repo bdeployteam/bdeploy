@@ -18,11 +18,12 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.interfaces.minion.NodeAttachDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.cli.RemoteNodeTool.NodeConfig;
+import io.bdeploy.ui.dto.NodeAttachDto;
 
 /**
  * Manages nodes.
@@ -102,7 +103,13 @@ public class RemoteNodeTool extends RemoteServiceTool<NodeConfig> {
 
     private DataResult doAddMinion(RemoteService svc, String minionName, RemoteService nodeRemote) {
         NodeManagementResource root = ResourceProvider.getResource(svc, NodeManagementResource.class, getLocalContext());
-        root.addNode(minionName, nodeRemote);
+
+        NodeAttachDto dto = new NodeAttachDto();
+        dto.name = minionName;
+        dto.remote = nodeRemote;
+        dto.sourceMode = MinionMode.NODE;
+
+        root.addNode(dto);
 
         return createSuccess().addField("Node Name", minionName);
     }

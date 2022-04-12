@@ -60,3 +60,26 @@ Replacing can be performed via the <<Administrative Web UI>>, much the same as _
 . Click the btn:[Save] button. The panel will enter loading state. You can follow the progress of the operation in the _Activities_ panel from the main menu.
 . Once the operation completes, you will be brought back to the node details panel.
 . Replacing and restoring has been performed, and all instances which use this node are available again.
+
+===== Convert/Migrate to Node
+
+Existing `STANDALONE` and `MANAGED` servers can be migrated to type `NODE`. This can be handy in case software needs to run standalone on a `NODE` before the actual master server is available. In this case, setup a `STANDALONE` server on the node, configure all the required software, and migrate the server to `NODE` type later.
+
+To convert an existing server:
+
+. Open the <<Administrative Web UI>> on both servers in separate browser tabs.
+. On the new master server, click btn:[Add Node...] in the toolbar to bring up the _Add Node_ panel.
+. On the to-be-migrated server, click the *master* node in the list of nodes. Click the btn:[Convert to Node...] button.
+. Now drag the yellow node identification card from the to-be-migrated server to the new masters drop zone.
+. Information about the server is pre-filled in the form. Double check the information and press btn:[Save] to start the migration.
+. You will be promted to confirm the migration. Click btn:[Migrate] to continue.
+
+image::images/Doc_Admin_Nodes_Conversion.png[Node Conversion, align=center, width=480, link="images/Doc_Admin_Nodes_Conversion.png"]
+
+After the migration is complete, the server will be available as a `NODE` on the new master server. All the *Instances* have been migrated to the new master server.
+
+[NOTE]
+During migration all *Instances* are modified in a way such that software still runs on the same phsyical hardware as before, i.e. the now-new master server is *not* participating in any of the *Instances* configuration. Instead, the previously-master, now-node server is still configured as deployment target where this was the case previously.
+
+[NOTE]
+If the to-be-migrated server has *Nodes* attached to it, all those *Nodes* will be attached to the new master after migration.

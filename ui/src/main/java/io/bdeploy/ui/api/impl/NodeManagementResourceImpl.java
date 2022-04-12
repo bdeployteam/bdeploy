@@ -17,6 +17,7 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
 import io.bdeploy.ui.api.NodeManager;
+import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -57,11 +58,16 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
     }
 
     @Override
-    public void addNode(String name, RemoteService node) {
+    public void addNode(NodeAttachDto data) {
         if (minion.getMode() == MinionMode.CENTRAL) {
             throw new WebApplicationException("Operation not available in mode CENTRAL");
         }
-        ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).addNode(name, node);
+
+        if (data.sourceMode == MinionMode.NODE) {
+            ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).addNode(data.name, data.remote);
+        } else {
+            ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).convertNode(data.name, data.remote);
+        }
     }
 
     @Override

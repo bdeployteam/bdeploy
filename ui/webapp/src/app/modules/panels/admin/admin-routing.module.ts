@@ -20,6 +20,7 @@ import { EditLdapServerComponent } from './components/edit-ldap-server/edit-ldap
 import { EditUserComponent } from './components/edit-user/edit-user.component';
 import { LogConfigEditorComponent } from './components/log-config-editor/log-config-editor.component';
 import { LogFileViewerComponent } from './components/log-file-viewer/log-file-viewer.component';
+import { NodeConversionComponent } from './components/node-details/node-conversion/node-conversion.component';
 import { NodeDetailsComponent } from './components/node-details/node-details.component';
 import { NodeEditComponent } from './components/node-details/node-edit/node-edit.component';
 import { NodeMaintenanceComponent } from './components/node-details/node-maintenance/node-maintenance.component';
@@ -71,6 +72,11 @@ const routes: Routes = [
   {
     path: 'node-detail/:node/maintenance',
     component: NodeMaintenanceComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'node-detail/:node/conversion',
+    component: NodeConversionComponent,
     canActivate: [AdminGuard],
   },
   {

@@ -14,19 +14,32 @@
     fxLayoutGap="30px"
   >
     <div class="local-header">Server Version Changed</div>
-    <div fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center center">
-      <div>The server version has changed to:</div>
-      <div>
-        <strong>{{ newVersion }}</strong>
-      </div>
+    <div
+      *ngIf="mode === 'NODE'; else versionChange"
+      fxLayout="column"
+      fxLayoutGap="10px"
+      fxLayoutAlign="center center"
+    >
+      <div>The server version has changed to <code>NODE</code></div>
       <div>BDeploy must be reloaded to apply changes.</div>
     </div>
+    <ng-template #versionChange>
+      <div fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center center">
+        <div>The server version has changed to:</div>
+        <div>
+          <strong>{{ newVersion }}</strong>
+        </div>
+        <div>BDeploy must be reloaded to apply changes.</div>
+      </div>
+    </ng-template>
     <app-bd-button
       icon="cached"
       text="Reload BDeploy"
       [collapsed]="false"
       (click)="onReload()"
     ></app-bd-button>
-    <div class="bd-hint-text">Previous Server Version: {{ oldVersion }}</div>
+    <div *ngIf="mode !== 'NODE'" class="bd-hint-text">
+      Previous Server Version: {{ oldVersion }}
+    </div>
   </div>
 </div>

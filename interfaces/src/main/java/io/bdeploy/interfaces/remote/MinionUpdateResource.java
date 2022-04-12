@@ -1,14 +1,14 @@
 package io.bdeploy.interfaces.remote;
 
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.Manifest.Key;
 
 /**
  * Perform a remote update of a minion.
@@ -38,4 +38,11 @@ public interface MinionUpdateResource {
     @PUT
     @Path("/prepare")
     public void prepare(Manifest.Key key, @QueryParam("clean") boolean clean);
+
+    /**
+     * Converts the running server to type NODE and restarts. This operation cannot be reversed!
+     */
+    @GET
+    @Path("/convertToNode")
+    public void convertToNode();
 }

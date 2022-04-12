@@ -6,7 +6,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { delay, retryWhen, tap } from 'rxjs/operators';
+import { catchError, delay, retryWhen, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import {
   BackendInfoDto,
@@ -25,6 +25,7 @@ import { ThemeService } from './theme.service';
 
 export interface AppConfig {
   version: Version;
+  hostname: string;
   api: string;
   ws: string;
   mode: MinionMode;
@@ -127,6 +128,7 @@ export class ConfigService {
         next: (bv) => {
           this.config = {
             version: bv.version,
+            hostname: bv.name,
             api: environment.apiUrl,
             ws: environment.wsUrl,
             mode: bv.mode,
@@ -262,6 +264,14 @@ export class ConfigService {
         context: NO_LOADING_BAR_CONTEXT,
       })
       .pipe(
+        catchError((e) => {
+          if (e?.status === 404) {
+            // in case the version backend is no longer available, it is extremely likely
+            // that the server has been migrated to NODE (nodes don't have UI backends).
+            window.location.reload();
+          }
+          throw e;
+        }),
         tap((v) => {
           const serverTime = v.time;
           const clientTime = Date.now();
