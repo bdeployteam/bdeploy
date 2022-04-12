@@ -120,15 +120,27 @@ The table below shows some the most common error messages and how to solve them.
 |Start the BDeploy server and check that the port is not blocked by a firewall.
 
 |`Inconsistent file and folder permissions: Missing permission to delete files.`
-|Permissions of the root directory are invalid. Typically happens when just he _'Modify'_ permission is revoked. 
-|Make sure to also revoke the _'Write'_ permissions to make the installation read-only or to grant 'Modify' permission.
+|Permissions of the root directory are invalid. Typically happens when just he `Modify` permission is revoked. 
+|Make sure to also revoke the `Write` permissions to make the installation read-only or grant `Modify` permission.
 
 |`Inconsistent file and folder permissions: Missing permission to create files.`
 |Permissions of the root directory are invalid. Typically happens when the _'Advanced Security'_ options are used.
-|Make sure that the permissions are set to _'Modify'_ or to _'Read, Execute'_.
+|Make sure that the permissions are set to `Modify` or to `Read, Execute`.
 
 |`Inconsistent file and folder permissions. Missing permission to modify files.`
 |Permissions of the root directory are invalid. Typically happens when the _'Advanced Security'_ options are used.
-|Make sure that the permissions are set to _'Modify'_ or to _'Read, Execute'_.
+|Make sure that the permissions are set to `Modify` or to `Read, Execute`.
+
+|`BDeploy home directory has changed. Expected X. Got Y.`
+|Launcher detected that the installation directory has been moved or that it is accessed via a different path.
+a|When moving was done intentially update the path in the `bdeploy.home` file. 
+
+When accessing the launcher via a file share then make sure that the path is exactly the same. 
+
+ * _\\my-server\launcher_ 
+ * _\\my-server.my-domain\launcher_ 
+ * _\\192.168.2.100\launcher_
+ 
+ The above network paths are treated as a different even if they actually resolve to the same server. When starting the launcher make sure to always use the same path.
 
 |===

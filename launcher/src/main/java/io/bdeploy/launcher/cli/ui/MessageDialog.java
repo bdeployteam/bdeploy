@@ -39,6 +39,9 @@ public class MessageDialog extends BaseDialog {
     /** Label containing a nice human readable error message */
     protected JLabel errorSummary;
 
+    /** Label containing a more technical error message */
+    protected JTextArea errorMessage;
+
     /** Label containing the header icon */
     protected JLabel headerIcon;
 
@@ -87,6 +90,13 @@ public class MessageDialog extends BaseDialog {
     }
 
     /**
+     * Sets a short more detailed summary message.
+     */
+    public void setDetailsSummary(String text) {
+        this.errorMessage.setText(text);
+    }
+
+    /**
      * Sets the message that is displayed in the expandable detail area.
      */
     public void setDetails(String text) {
@@ -122,12 +132,24 @@ public class MessageDialog extends BaseDialog {
         errorSummary.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12f));
         content.add(errorSummary);
 
+        JPanel errorContainer = new JPanel();
+        errorContainer.setBackground(Color.WHITE);
+        errorContainer.setBorder(new EmptyBorder(10, 10, 10, 10));
+        errorContainer.setLayout(new BorderLayout(15, 15));
+
+        errorMessage = new JTextArea();
+        errorMessage.setEditable(false);
+        errorMessage.setLineWrap(true);
+        errorMessage.setFont(errorSummary.getFont().deriveFont(Font.BOLD, 12f));
+        errorContainer.add(errorMessage, BorderLayout.PAGE_START);
+
         errorDetails = new JTextArea();
         errorDetails.setEditable(false);
         errorDetails.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         JScrollPane scrollPane = new JScrollPane(errorDetails);
-        content.add(scrollPane);
+        errorContainer.add(scrollPane, BorderLayout.CENTER);
 
+        content.add(errorContainer);
         return content;
     }
 
