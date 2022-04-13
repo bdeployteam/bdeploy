@@ -163,6 +163,9 @@ public class MessageDialogs {
             try {
                 // use absolute path to the utility - no PATH involved.
                 return ProcessHelper.launch(new ProcessBuilder(sysInfo.toAbsolutePath().toString()));
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                log.info("Unable to gather Windows OS details", ie);
             } catch (Exception e) {
                 log.info("Unable to gather Windows OS details", e);
             }
