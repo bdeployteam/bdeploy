@@ -93,7 +93,7 @@
         text="Delete"
         icon="delete"
         (click)="doDelete(software)"
-        [disabled]="!(auth.isCurrentScopeAdmin$ | async)"
+        [disabled]="(isRequiredByProduct$ | async) || !(auth.isCurrentScopeAdmin$ | async)"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

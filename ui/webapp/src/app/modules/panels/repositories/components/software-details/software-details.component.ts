@@ -96,6 +96,27 @@ export class SoftwareDetailsComponent implements OnInit {
   /* template */ preparing$ = new BehaviorSubject<boolean>(false);
   /* template */ softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
+  isRequiredByProduct$ = combineLatest([
+    this.detailsService.softwarePackage$,
+    this.repository.products$,
+  ]).pipe(
+    map(([software, products]) => [
+      software,
+      products.reduce((acc, product) => acc.concat(product.references), []),
+    ]),
+    map(([software, references]) => {
+      const isExternalSoftware = software?.type === 'External Software';
+      return (
+        isExternalSoftware &&
+        references.some(
+          (reference) =>
+            software.key.name === reference.name &&
+            software.key.tag == reference.tag
+        )
+      );
+    })
+  );
+
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   constructor(
