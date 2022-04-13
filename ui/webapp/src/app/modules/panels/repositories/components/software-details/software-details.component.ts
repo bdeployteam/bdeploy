@@ -111,7 +111,7 @@ export class SoftwareDetailsComponent implements OnInit {
         references.some(
           (reference) =>
             software.key.name === reference.name &&
-            software.key.tag == reference.tag
+            software.key.tag === reference.tag
         )
       );
     })
