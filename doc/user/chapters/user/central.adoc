@@ -84,15 +84,15 @@ It is not required to synchronize the other way (`CENTRAL` to `MANAGED`) as this
 
 There is a limited possibility to change the _purpose_ of an already intialized *BDeploy* server root directory. It is only possible to migrate from `STANDALONE` to `MANAGED` and vice versa, as data is _mostly_ compatible. A command line tooling exists for this purpose:
 
+[NOTE]
+Migration from `STANDALONE` or `MANAGED` to `NODE` is available using a dedicated workflow from the Web UI. This allows to start off an installation as `STANDALONE` and later on migrate that to be a `NODE` in a larger setup. See <<Convert/Migrate to Node>>
+
 [source,bash]
 ----
 bdeploy config --root=<root-directory> --mode=MANAGED
 ----
 
 The value for mode may be `MANAGED` or `STANDALONE`. The actual migration of data may be performed later on when first accessing them. For instance, when clicking an *Instance Group*, you might be prompted that an *Instance Group* requires to be attached to a `CENTRAL` server in `MANAGED` mode, and the *Attach to Central Server* wizard is launched.
-
-[NOTE]
-*BDeploy* server root directories are assumed to be of mode `STANDALONE` if they have been initilized with a *BDeploy* version prior to _1.4.0_.
 
 ==== Product Synchronization
 
