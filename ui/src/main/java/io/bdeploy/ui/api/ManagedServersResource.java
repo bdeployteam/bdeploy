@@ -13,6 +13,7 @@ import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.ui.dto.MinionSyncResultDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
 import jakarta.ws.rs.Consumes;
@@ -127,7 +128,7 @@ public interface ManagedServersResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public ManagedMasterDto synchronize(@ActivityScope @PathParam("group") String groupName,
+    public MinionSyncResultDto synchronize(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @GET

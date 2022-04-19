@@ -42,6 +42,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributes;
 import io.bdeploy.interfaces.manifest.banner.InstanceBanner;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
+import io.bdeploy.interfaces.manifest.state.InstanceOverallState;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsage;
 import jakarta.ws.rs.WebApplicationException;
@@ -308,6 +309,14 @@ public class InstanceManifest {
      */
     public InstanceBanner getBanner(BHiveExecution bhive) {
         return new InstanceBanner(getManifest(), bhive);
+    }
+
+    /**
+     * @param bhive the {@link BHiveExecution} used to perform operations on the overall state.
+     * @return the {@link InstanceOverallState} which can be used to read or update the overall instance state.
+     */
+    public InstanceOverallState getOverallState(BHiveExecution bhive) {
+        return new InstanceOverallState(getManifest(), bhive);
     }
 
     /**

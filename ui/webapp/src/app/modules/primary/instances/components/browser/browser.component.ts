@@ -1,12 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { BehaviorSubject, finalize, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataGrouping,
   BdDataGroupingDefinition,
 } from 'src/app/models/data';
-import { InstanceDto, InstanceOverallStatusDto } from 'src/app/models/gen.dtos';
+import { InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -34,18 +34,18 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     selected: [],
   };
   hasProducts$ = new BehaviorSubject<boolean>(false);
-  syncingAll$ = new BehaviorSubject<boolean>(false);
 
-  private overallStates: InstanceOverallStatusDto[];
   private subscription: Subscription;
 
   private colOverallStatus: BdDataColumn<InstanceDto> = {
     id: 'status',
     name: 'Status',
     data: (r) =>
-      this.overallStates?.find((x) => x.uuid === r.instanceConfiguration?.uuid),
+      this.instances.overallStates$.value?.find(
+        (x) => x.uuid === r.instanceConfiguration?.uuid
+      ),
     component: OverallStatusColumnComponent,
-    width: '50px',
+    width: '90px',
   };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -135,13 +135,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
         if (!confirmed) {
           return;
         }
-        this.syncingAll$.next(true);
-        this.instances
-          .syncAndFetchState()
-          .pipe(finalize(() => this.syncingAll$.next(false)))
-          .subscribe((s) => {
-            this.overallStates = s;
-          });
+        this.instances.syncAndFetchState([]);
       });
   }
 }

@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, finalize, tap } from 'rxjs/operators';
 import {
   ManagedMasterDto,
+  MinionSyncResultDto,
   ObjectChangeType,
   ProductDto,
   ProductTransferDto,
@@ -90,19 +91,23 @@ export class ServersService {
       });
   }
 
-  public synchronize(server: ManagedMasterDto): Observable<ManagedMasterDto> {
+  public synchronize(
+    server: ManagedMasterDto
+  ): Observable<MinionSyncResultDto> {
     if (this.isCentral) {
       return this.http
-        .get<ManagedMasterDto>(
+        .get<MinionSyncResultDto>(
           `${this.apiPath}/synchronize/${this.group}/${server.hostName}`
         )
         .pipe(
           tap((s) => {
             if (this.servers$.value?.length) {
               this.servers$.value.splice(
-                this.servers$.value.findIndex((o) => o.hostName === s.hostName),
+                this.servers$.value.findIndex(
+                  (o) => o.hostName === s.server.hostName
+                ),
                 1,
-                s
+                s.server
               );
 
               this.servers$.next(this.servers$.value);

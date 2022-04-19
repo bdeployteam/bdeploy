@@ -70,7 +70,9 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
           this.synchronizing$.next(false);
         })
       )
-      .subscribe();
+      .subscribe((result) => {
+        this.instancesService.updateStatusDtos(result.states);
+      });
   }
 
   private update() {

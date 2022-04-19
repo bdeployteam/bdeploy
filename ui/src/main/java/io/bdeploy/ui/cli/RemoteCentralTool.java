@@ -33,6 +33,7 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteCentralTool.CentralConfig;
 import io.bdeploy.ui.dto.BackendInfoDto;
+import io.bdeploy.ui.dto.MinionSyncResultDto;
 import jakarta.ws.rs.WebApplicationException;
 
 @Help("Manage attached managed servers on central server")
@@ -127,9 +128,9 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
             helpAndFailIfMissing(config.server(), "Missing --server");
 
-            ManagedMasterDto newDto = msr.synchronize(config.instanceGroup(), config.server());
+            MinionSyncResultDto result = msr.synchronize(config.instanceGroup(), config.server());
             return createSuccess().addField("Managed Server", config.server()).addField("Running Version",
-                    newDto.update.runningVersion);
+                    result.server.update.runningVersion);
         } else if (config.delete()) {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
             helpAndFailIfMissing(config.server(), "Missing --server");
