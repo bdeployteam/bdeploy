@@ -372,4 +372,11 @@ public interface MasterNamedResource {
     @POST
     @Path("/attributes")
     public void updateAttributes(@QueryParam("u") String instanceId, CustomAttributesRecord attributes);
+
+    /**
+     * Updates each instances recorded overall status in the instance group's BHive.
+     */
+    @GET
+    @Path("/overallStatus")
+    public void updateOverallStatus();
 }

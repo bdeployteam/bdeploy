@@ -1,5 +1,5 @@
-<div fxLayout="row">
-  <ng-container *ngIf="getStatus() as status">
+<div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="3px">
+  <ng-container *ngIf="getStatus() as status; else noStatus">
     <mat-icon
       *ngIf="status.status === 'RUNNING'"
       fontSet="material-icons-filled"
@@ -25,5 +25,21 @@
       matTooltipShowDelay="500"
       >warning</mat-icon
     >
+    <span
+      class="local-timestamp"
+      matTooltip="The time when the overall status was updated last."
+      matTooltipShowDelay="500"
+      matTooltipPosition="above"
+      >{{ status.timestamp | date: 'HH:mm' }}</span
+    >
   </ng-container>
+  <ng-template #noStatus>
+    <mat-icon
+      fontSet="material-icons-filled"
+      class="bd-disabled-text"
+      matTooltip="No information available, or information timed out."
+      matTooltipShowDelay="500"
+      >help</mat-icon
+    >
+  </ng-template>
 </div>

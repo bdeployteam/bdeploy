@@ -18,6 +18,7 @@ import {
   InstanceDto,
   InstanceNodeConfigurationListDto,
   InstanceOverallStatusDto,
+  ManifestKey,
   MinionStatusDto,
   ObjectChangeDetails,
   ObjectChangeHint,
@@ -62,6 +63,9 @@ export class InstancesService {
   activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
   private activeLoadInterval;
   private activeCheckInterval;
+
+  overallStates$ = new BehaviorSubject<InstanceOverallStatusDto[]>([]);
+  overallStatesLoading$ = new BehaviorSubject<boolean>(false);
 
   private group: string;
   private subscription: Subscription;
@@ -310,6 +314,12 @@ export class InstancesService {
       )
       .subscribe((instances) => {
         this.instances$.next(instances);
+        this.overallStates$.next(
+          instances.map((x) => ({
+            uuid: x.instanceConfiguration.uuid,
+            ...x.overallState,
+          }))
+        );
 
         // last update the current$ subject to inform about changes
         if (this.areas.instanceContext$.value) {
@@ -318,10 +328,34 @@ export class InstancesService {
       });
   }
 
-  public syncAndFetchState(): Observable<InstanceOverallStatusDto[]> {
-    return this.http
-      .get<InstanceOverallStatusDto[]>(`${this.apiPath(this.group)}/syncAll`)
-      .pipe(measure('Sync and fetch all instance state'));
+  public syncAndFetchState(instances: ManifestKey[]): void {
+    this.overallStatesLoading$.next(true);
+    this.http
+      .post<InstanceOverallStatusDto[]>(
+        `${this.apiPath(this.group)}/syncAll`,
+        instances
+      )
+      .pipe(
+        finalize(() => this.overallStatesLoading$.next(false)),
+        measure('Sync and fetch instance state')
+      )
+      .subscribe((s) => {
+        // merge the result according to uuid in the existing list.
+        this.updateStatusDtos(s);
+      });
+  }
+
+  public updateStatusDtos(s: InstanceOverallStatusDto[]) {
+    const old = this.overallStates$.value || [];
+    s.forEach((x) => {
+      const i = old.findIndex((y) => y.uuid === x.uuid);
+      if (i !== -1) {
+        old.splice(i, 1, x);
+      } else {
+        old.push(x);
+      }
+    });
+    this.overallStates$.next(old);
   }
 
   private updateChangeSubscription(group: string) {

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.NoScopeInheritance;
 import io.bdeploy.common.security.RequiredPermission;
@@ -60,9 +61,9 @@ public interface InstanceResource {
     /**
      * Synchronizes all instances and receives their overall status, including potential hints on to what is "wrong".
      */
-    @GET
+    @POST
     @Path("/syncAll")
-    public List<InstanceOverallStatusDto> syncAllAndGetStatus();
+    public List<InstanceOverallStatusDto> syncInstances(List<Manifest.Key> instances);
 
     @GET
     @Path("/{instance}/versions")

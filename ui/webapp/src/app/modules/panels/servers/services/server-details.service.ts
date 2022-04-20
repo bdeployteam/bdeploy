@@ -101,7 +101,7 @@ export class ServerDetailsService implements OnDestroy {
         .subscribe({
           next: () => {
             this.servers.synchronize(server).subscribe({
-              next: (sync) => this.complete(sync, s),
+              next: (sync) => this.complete(sync.server, s),
               error: (err) => this.complete(null, s, err),
             });
           },

@@ -5,6 +5,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
 
 public class InstanceDto {
 
@@ -23,11 +24,12 @@ public class InstanceDto {
     public ManagedMasterDto managedServer;
     public CustomAttributesRecord attributes;
     public InstanceBannerRecord banner;
+    public InstanceOverallStateRecord overallState;
 
     public static InstanceDto create(Manifest.Key instance, InstanceConfiguration instanceConfiguration, ProductDto productDto,
             Manifest.Key activeProduct, ProductDto activeProductDto, boolean newerVersionAvailable,
             ManagedMasterDto managedServer, CustomAttributesRecord attributes, InstanceBannerRecord banner,
-            Manifest.Key latestVersion, Manifest.Key activeVersion) {
+            Manifest.Key latestVersion, Manifest.Key activeVersion, InstanceOverallStateRecord overallState) {
         InstanceDto dto = new InstanceDto();
         dto.instance = instance;
         dto.instanceConfiguration = instanceConfiguration;
@@ -40,6 +42,7 @@ public class InstanceDto {
         dto.banner = banner;
         dto.latestVersion = latestVersion;
         dto.activeVersion = activeVersion;
+        dto.overallState = overallState;
         return dto;
     }
 }

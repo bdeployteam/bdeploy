@@ -2,3 +2,8 @@ ul {
   list-style-type: square;
   padding-inline-start: 20px;
 }
+
+.local-timestamp {
+  font-size: small;
+  padding: 0px 3px;
+}

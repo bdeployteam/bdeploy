@@ -332,6 +332,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.ObjectChangeHint',
         'io.bdeploy.ui.dto.ObjectChangeDetails',
         'io.bdeploy.ui.dto.NodeAttachDto',
+        'io.bdeploy.ui.dto.MinionSyncResultDto',
         // Other, generic
         'io.bdeploy.common.Version',
         'io.bdeploy.common.ActivitySnapshot',
@@ -346,7 +347,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.UserInfo',
         'io.bdeploy.interfaces.UserPermissionUpdateDto',
         'io.bdeploy.interfaces.UserChangePasswordDto',
-        'io.bdeploy.interfaces.manifest.managed.ManagedMasterDto',
         'io.bdeploy.interfaces.plugin.PluginInfoDto',
         'io.bdeploy.api.remote.v1.dto.CredentialsApi',
         'io.bdeploy.jersey.ws.change.msg.ObjectChangeDto',

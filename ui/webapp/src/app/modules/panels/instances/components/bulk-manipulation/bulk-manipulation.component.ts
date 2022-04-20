@@ -3,6 +3,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { InstanceBulkService } from '../../services/instance-bulk.service';
 
 @Component({
@@ -20,7 +21,10 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(public bulk: InstanceBulkService) {}
+  constructor(
+    public bulk: InstanceBulkService,
+    public instance: InstancesService
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.bulk.selection$.subscribe((selections) => {
@@ -97,6 +101,10 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
           .pipe(finalize(() => this.activating$.next(false)))
           .subscribe();
       });
+  }
+
+  /* template */ onFetchStates() {
+    this.bulk.fetchStates();
   }
 
   ngOnDestroy(): void {

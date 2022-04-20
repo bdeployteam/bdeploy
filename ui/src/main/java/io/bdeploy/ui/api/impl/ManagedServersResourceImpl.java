@@ -76,6 +76,8 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.CentralIdentDto;
+import io.bdeploy.ui.dto.InstanceOverallStatusDto;
+import io.bdeploy.ui.dto.MinionSyncResultDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -366,7 +368,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
-    public ManagedMasterDto synchronize(String groupName, String serverName) {
+    public MinionSyncResultDto synchronize(String groupName, String serverName) {
         if (minion.getMode() != MinionMode.CENTRAL) {
             return null;
         }
@@ -376,7 +378,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         }
     }
 
-    private ManagedMasterDto synchronizeTransacted(BHive hive, String groupName, String serverName) {
+    private MinionSyncResultDto synchronizeTransacted(BHive hive, String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
 
         BackendInfoResource backendInfo = ResourceProvider.getVersionedResource(svc, BackendInfoResource.class, context);
@@ -384,6 +386,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             throw new WebApplicationException("Server is no longer in managed mode: " + serverName, Status.EXPECTATION_FAILED);
         }
 
+        MinionSyncResultDto result = new MinionSyncResultDto();
         ManagedMasters mm = new ManagedMasters(hive);
         ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
         InstanceGroupManifest igm = new InstanceGroupManifest(hive);
@@ -409,7 +412,18 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             metaManifests.forEach(push::addManifest);
             hive.execute(push);
 
-            // 3. Fetch all instance and meta manifests, no products.
+            // 3a. on newer versions, trigger update of overall status.
+            try {
+                MasterRootResource mr = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+
+                // this trigger will update the current information on each instance and persist that in a meta-manifest,
+                // which then in turn is fetched later.
+                mr.getNamedMaster(groupName).updateOverallStatus();
+            } catch (Exception e) {
+                log.info("Cannot update overall instance status before sync: {}", e.toString());
+            }
+
+            // 3b. Fetch all instance and meta manifests, no products.
             CommonRootResource masterRoot = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);
             CommonInstanceResource master = masterRoot.getInstanceResource(groupName);
             SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
@@ -456,6 +470,15 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             // 5. for all the fetched manifests, if they are instances, associate the server with it, and send out a change
             for (Manifest.Key instance : instances.keySet()) {
                 new ControllingMaster(hive, instance).associate(serverName);
+
+                try {
+                    // additionally also read the last known instance overall state and return it...
+                    InstanceManifest im = InstanceManifest.of(hive, instance);
+                    result.states.add(new InstanceOverallStatusDto(im.getConfiguration().uuid, im.getOverallState(hive).read()));
+                } catch (Exception e) {
+                    // this is ignorable.
+                    log.error("Cannot read instance overall state for {}: {}", instance, e.toString());
+                }
             }
 
             // 6. try to sync instance group properties
@@ -486,7 +509,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
 
-        return attached;
+        result.server = attached;
+
+        return result;
     }
 
     @Override

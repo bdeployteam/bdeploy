@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 
 import org.apache.commons.codec.binary.Base64;
@@ -53,6 +54,8 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
@@ -64,11 +67,14 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
+import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
+import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord.OverallStatus;
 import io.bdeploy.interfaces.manifest.state.InstanceState;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsage;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.NodeDeploymentResource;
@@ -941,5 +947,87 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void updateAttributes(String instanceId, CustomAttributesRecord attributes) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         im.getAttributes(hive).set(attributes);
+    }
+
+    @Override
+    public void updateOverallStatus() {
+        SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
+        Map<String, MinionStatusDto> nodeStatus = nodes.getAllNodeStatus();
+
+        try (Activity all = reporter.start("Fetch Instance Status", imKeys.size())) {
+            for (Key imKey : imKeys) {
+                InstanceManifest im = InstanceManifest.of(hive, imKey);
+
+                if (im.getState(hive).read().activeTag == null) {
+                    continue; // no active tag means there cannot be any status.
+                }
+
+                InstanceConfiguration config = im.getConfiguration();
+
+                // get all node status of the responsible master.
+                InstanceStatusDto processStatus = getStatus(config.uuid);
+                List<InstanceNodeConfigurationDto> nodeConfigs = readExistingNodeConfigs(im);
+
+                List<String> stoppedApps = new ArrayList<>();
+                List<String> runningApps = new ArrayList<>();
+
+                OverallStatus overallStatus = OverallStatus.RUNNING;
+                List<String> overallStatusMessages = new ArrayList<>();
+
+                for (var nodeCfg : nodeConfigs) {
+                    if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeCfg.nodeName)) {
+                        continue; // don't check client.
+                    }
+
+                    MinionStatusDto state = nodeStatus.get(nodeCfg.nodeName);
+
+                    if (state == null || state.offline) {
+                        overallStatus = InstanceOverallStateRecord.OverallStatus.WARNING;
+                        overallStatusMessages.add("Node " + nodeCfg.nodeName + " is not available");
+                        continue;
+                    }
+
+                    InstanceNodeStatusDto statusOnNode = processStatus.node2Applications.get(nodeCfg.nodeName);
+
+                    for (var app : nodeCfg.nodeConfiguration.applications) {
+                        if (app.processControl.startType != ApplicationStartType.INSTANCE) {
+                            continue;
+                        }
+
+                        if (!statusOnNode.isAppDeployed(app.uid)) {
+                            log.warn("Expected application is not currently deployed: {}", app.uid);
+                            continue;
+                        }
+
+                        // instance application, check status
+                        ProcessStatusDto status = statusOnNode.getStatus(app.uid);
+                        if (status.processState.isStopped()) {
+                            stoppedApps.add(app.name);
+                        } else {
+                            runningApps.add(app.name);
+                        }
+                    }
+                }
+
+                if (stoppedApps.isEmpty() && runningApps.isEmpty()) {
+                    // this means that ther are no instance type applications on the instance.
+                    if (overallStatus != OverallStatus.WARNING) {
+                        overallStatus = OverallStatus.STOPPED;
+                    }
+                } else if (stoppedApps.isEmpty() || runningApps.isEmpty()) {
+                    // valid - either all stopped or all running.
+                    if (overallStatus != OverallStatus.WARNING) {
+                        overallStatus = runningApps.isEmpty() ? OverallStatus.STOPPED : OverallStatus.RUNNING;
+                    }
+                } else {
+                    // not ok, some apps started, some stopped - that will be a warning.
+                    overallStatus = OverallStatus.WARNING;
+                    overallStatusMessages.add(stoppedApps.size() + " instance type applications are not running.");
+                }
+
+                im.getOverallState(hive).update(overallStatus, overallStatusMessages);
+                all.workAndCancelIfRequested(1);
+            }
+        }
     }
 }

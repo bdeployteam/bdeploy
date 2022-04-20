@@ -180,4 +180,10 @@ export class InstanceBulkService {
       )
     ).pipe(concatAll());
   }
+
+  public fetchStates(): void {
+    this.instance.syncAndFetchState(
+      this.selection$.value?.map((i) => i.instance)
+    );
+  }
 }

@@ -26,6 +26,15 @@
         (click)="onStop()"
       ></app-bd-button>
       <mat-divider></mat-divider>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selections.length || (stopping$ | async)"
+        [loadingWhen$]="instance.overallStatesLoading$"
+        text="Fetch Instance States"
+        svgIcon="sync-all"
+        (click)="onFetchStates()"
+      ></app-bd-button>
+      <mat-divider></mat-divider>
       <app-bd-panel-button
         [collapsed]="false"
         [disabled]="!selections.length || !isAllSameProduct"
