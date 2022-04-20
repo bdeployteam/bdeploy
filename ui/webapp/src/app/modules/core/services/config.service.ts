@@ -115,6 +115,10 @@ export class ConfigService {
       'MACOS',
       sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg')
     );
+    iconRegistry.addSvgIcon(
+      'global_pin',
+      sanitizer.bypassSecurityTrustResourceUrl('assets/global-pin.svg')
+    );
 
     // check whether the server version changed every minute.
     // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.

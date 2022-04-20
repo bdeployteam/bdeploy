@@ -46,6 +46,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -371,5 +372,22 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         manifest.getAttributes(groupHive).set(attributes);
         changes.change(ObjectChangeType.INSTANCE_GROUP, key,
                 Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.ATTRIBUTES));
+    }
+
+    @Override
+    public void updatePreset(String group, boolean multiple, List<CustomDataGrouping> preset) {
+        BHive groupHive = getGroupHive(group);
+        InstanceGroupManifest manifest = new InstanceGroupManifest(groupHive);
+        Key key = manifest.getKey();
+        if (key == null) {
+            throw new WebApplicationException("Cannot load " + group, Status.NOT_FOUND);
+        }
+        InstanceGroupConfiguration igc = manifest.read();
+        if (multiple) {
+            igc.multipleGroupingPreset = preset;
+        } else {
+            igc.singleGroupingPreset = preset;
+        }
+        update(group, igc);
     }
 }

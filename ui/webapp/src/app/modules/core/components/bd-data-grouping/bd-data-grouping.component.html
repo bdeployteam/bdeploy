@@ -56,6 +56,13 @@
           icon="push_pin"
           (click)="savePreset()"
         ></app-bd-button>
+        <app-bd-button
+          *ngIf="presetKey && hasGlobalPreset"
+          tooltip="above"
+          text="Save as global preset"
+          svgIcon="global_pin"
+          (click)="saveGlobalPreset()"
+        ></app-bd-button>
       </div>
     </div>
   </mat-card>

@@ -6,6 +6,7 @@ import { debounceTime, finalize } from 'rxjs/operators';
 import {
   CustomAttributeDescriptor,
   CustomAttributesRecord,
+  CustomDataGrouping,
   InstanceGroupConfiguration,
   ObjectChangeDetails,
   ObjectChangeHint,
@@ -108,6 +109,17 @@ export class GroupsService {
 
   public removeImage(group: string) {
     return this.http.delete<Response>(`${this.apiPath}/${group}/image`);
+  }
+
+  public updatePreset(
+    group: string,
+    preset: CustomDataGrouping[],
+    multiple: boolean
+  ): Observable<any> {
+    return this.http.put<any>(
+      `${this.apiPath}/${group}/presets?multiple=${multiple}`,
+      preset
+    );
   }
 
   private reload() {

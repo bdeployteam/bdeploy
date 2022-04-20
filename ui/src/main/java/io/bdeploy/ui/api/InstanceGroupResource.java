@@ -15,6 +15,7 @@ import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
+import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
@@ -119,5 +120,11 @@ public interface InstanceGroupResource {
     @Path("/{group}/attributes")
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
     public void updateAttributes(@ActivityScope @PathParam("group") String group, CustomAttributesRecord attributes);
+
+    @PUT
+    @Path("/{group}/presets")
+    @RequiredPermission(permission = Permission.WRITE, scope = "group")
+    public void updatePreset(@ActivityScope @PathParam("group") String group, @QueryParam("multiple") boolean multiple,
+            List<CustomDataGrouping> preset);
 
 }

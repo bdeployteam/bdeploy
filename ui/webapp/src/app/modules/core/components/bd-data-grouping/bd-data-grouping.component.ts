@@ -9,11 +9,8 @@ import {
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
-
-interface BdDataGroupingStorage {
-  name: string;
-  selected: string[];
-}
+import { CustomDataGrouping } from 'src/app/models/gen.dtos';
+import { calculateGrouping } from 'src/app/modules/core/utils/preset.utils';
 
 @Component({
   selector: 'app-bd-data-grouping',
@@ -35,8 +32,12 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /** The initial grouping which should be used if nothing has been saved. */
   @Input() defaultGrouping: BdDataGrouping<T>[];
 
+  @Input() hasGlobalPreset = false;
+
   /** Emitted when the grouping changes. This may be emitted once after creating the component if a preset is loaded. */
   @Output() groupingChange = new EventEmitter<BdDataGrouping<T>[]>();
+
+  @Output() globalPresetSaved = new EventEmitter<CustomDataGrouping[]>();
 
   /* template */ groupings: BdDataGrouping<T>[] = [];
   /* template */ filteredGroups: BdDataGrouping<T>[];
@@ -89,22 +90,12 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     }
 
     // deserialize the stored preset.
-    const restored: BdDataGrouping<T>[] = [];
     try {
-      const parsed = JSON.parse(stored) as BdDataGroupingStorage[];
-      if (parsed?.length) {
-        for (const item of parsed) {
-          const def = this.definitions.find((d) => d.name === item.name);
-          if (!def) {
-            console.warn(
-              'Grouping definition not (any longer?) available: ' + item.name
-            );
-            continue;
-          }
-          restored.push({ definition: def, selected: item.selected });
-        }
-      }
-
+      const parsed = JSON.parse(stored) as CustomDataGrouping[];
+      const restored: BdDataGrouping<T>[] = calculateGrouping(
+        this.definitions,
+        parsed
+      );
       if (restored?.length) {
         this.groupings = restored;
       }
@@ -114,25 +105,31 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     this.filteredGroups = this.getFilteredGroups();
   }
 
+  private groupingToPreset(): CustomDataGrouping[] {
+    return this.groupings
+      .filter((g) => !!g.definition)
+      .map(
+        (g) =>
+          ({
+            name: g.definition.name,
+            selected: g.selected,
+          } as CustomDataGrouping)
+      );
+  }
+
   /* template */ savePreset() {
     localStorage.setItem(
       this.getStorageKey(),
-      JSON.stringify(
-        this.groupings
-          .filter((g) => !!g.definition)
-          .map(
-            (g) =>
-              ({
-                name: g.definition.name,
-                selected: g.selected,
-              } as BdDataGroupingStorage)
-          )
-      )
+      JSON.stringify(this.groupingToPreset())
     );
 
     this.snackBar.open('Preset saved in local browser.', null, {
       duration: 1500,
     });
+  }
+
+  saveGlobalPreset() {
+    this.globalPresetSaved.emit(this.groupingToPreset());
   }
 
   /* template */ addGrouping() {

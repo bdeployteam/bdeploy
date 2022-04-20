@@ -5,6 +5,7 @@ import java.util.List;
 
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.settings.CustomAttributeDescriptor;
+import io.bdeploy.interfaces.settings.CustomDataGrouping;
 
 public class InstanceGroupConfiguration {
 
@@ -52,4 +53,14 @@ public class InstanceGroupConfiguration {
      * The name of the default grouping attribute in the instance overview UI.
      */
     public String defaultInstanceGroupingAttribute;
+
+    /**
+     * The name of the default multiple grouping for the instance group overview UI.
+     */
+    public List<CustomDataGrouping> multipleGroupingPreset = new ArrayList<>();
+
+    /**
+     * The name of the default single grouping for the instance group overview UI.
+     */
+    public List<CustomDataGrouping> singleGroupingPreset = new ArrayList<>();
 }

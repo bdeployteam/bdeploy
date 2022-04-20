@@ -8,9 +8,11 @@
       [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"
       [definitions]="grouping"
-      [defaultGrouping]="[defaultGrouping]"
+      [defaultGrouping]="defaultGrouping"
       [records]="instances.instances$ | async"
       [presetKey]="presetKeyValue"
+      [hasGlobalPreset]="true"
+      (globalPresetSaved)="saveGlobalPreset($event)"
     ></app-bd-data-grouping>
     <app-bd-button
       [isToggle]="true"
