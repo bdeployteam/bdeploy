@@ -2,6 +2,8 @@ package io.bdeploy.pcu;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
@@ -66,15 +68,20 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
                         () -> processStarted.completeExceptionally(new RuntimeException("Permanent crash while starting")));
                 listener.on(ProcessState.STOPPED,
                         () -> processStarted.completeExceptionally(new RuntimeException("Stopped while starting")));
+                listener.on(ProcessState.RUNNING_STOP_PLANNED,
+                        () -> processStarted.completeExceptionally(new RuntimeException("Stop planned while starting")));
 
                 controller.start(user);
 
                 if (controller.getState() != ProcessState.RUNNING) {
                     logger.log(l -> l.info("Waiting for startup"), activeTag, appId);
                     try {
-                        return processStarted.get(); // await process changes.
+                        return processStarted.get(20, TimeUnit.MINUTES); // await process changes.
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        return false;
+                    } catch (TimeoutException e) {
+                        logger.log(l -> l.error("Timed out starting {}", config.uid));
                         return false;
                     } catch (ExecutionException e) {
                         logger.log(l -> l.warn("Failed to start {}: {}", config.uid, e.getCause().toString()));
