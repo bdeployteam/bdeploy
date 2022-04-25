@@ -114,7 +114,7 @@ endpoints: <12>
       port: "{{V:port-param}}"
       secure: false
     - id: "Lifeness Endpoint"
-      type: PROBE_STARTUP <15>
+      type: PROBE_ALIVE <15>
       path: "lifeness/endpoint"
       port: "{{V:port-param}}"
       secure: false
