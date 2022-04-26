@@ -57,6 +57,7 @@ public class JerseyClientFactory {
 
     private static final Logger log = LoggerFactory.getLogger(JerseyClientFactory.class);
     private static ActivityReporter defaultReporter = new ActivityReporter.Null();
+    private static long globalReadTimeout = 0;
 
     private SSLContext sslContext;
     private String bearer;
@@ -125,6 +126,17 @@ public class JerseyClientFactory {
     }
 
     /**
+     * Sets the global read timeout for all client connections.
+     * <p>
+     * 0 means no timeout at all (the default), timeout is specified in seconds.
+     *
+     * @param timeout the global read timeout to use on *all* client connections.
+     */
+    public static void setGlobalReadTimeout(long timeout) {
+        globalReadTimeout = timeout;
+    }
+
+    /**
      * @return the configured {@link SSLContext} used by this factory. This is only
      *         for testing.
      */
@@ -161,6 +173,9 @@ public class JerseyClientFactory {
 
         // for HttpUrlConnection to allow restricted headers, see https://eclipse-ee4j.github.io/jersey.github.io/documentation/latest/client.html#d0e4971
         System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+
+        // timeouts for connect and read. 30 seconds to connect must be enough, read timeout default infinite, but can be set globally (e.g. for central).
+        builder.connectTimeout(30, TimeUnit.SECONDS).readTimeout(globalReadTimeout, TimeUnit.SECONDS);
 
         builder.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.CHUNKED);
 
