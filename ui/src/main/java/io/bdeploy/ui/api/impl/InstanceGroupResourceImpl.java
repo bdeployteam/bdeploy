@@ -38,7 +38,9 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -99,8 +101,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     private ChangeEventManager changes;
 
     @Override
-    public List<InstanceGroupConfiguration> list() {
-        List<InstanceGroupConfiguration> result = new ArrayList<>();
+    public List<InstanceGroupConfigurationDto> list() {
+        List<InstanceGroupConfigurationDto> result = new ArrayList<>();
         for (BHive hive : registry.getAll().values()) {
             InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
             if (cfg == null) {
@@ -111,7 +113,16 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
                 continue;
             }
-            result.add(cfg);
+
+            // Fetch instance group's instance uuids and add them to searchable text
+            List<String> instanceUuids = new ArrayList<>();
+            SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
+            for (Key imKey : imKeys) {
+                InstanceManifest im = InstanceManifest.of(hive, imKey);
+                InstanceConfiguration config = im.getConfiguration();
+                instanceUuids.add(config.uuid);
+            }
+            result.add(new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceUuids)));
         }
         return result;
     }

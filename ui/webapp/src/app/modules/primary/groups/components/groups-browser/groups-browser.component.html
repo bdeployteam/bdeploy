@@ -42,6 +42,7 @@
       [records]="groups.groups$ | async"
       [recordRoute]="getRecordRoute"
       [searchable]="true"
+      [searchData]="searchInstanceGroupData"
       [presetKey]="presetKeyValue"
       [grid]="isCardView"
       (recordClick)="onRecordClick($event)"

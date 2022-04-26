@@ -74,7 +74,7 @@ export interface BdDataColumn<T> {
   /** A hint which determines where to place column contents on a card. */
   hint?: BdDataColumnTypeHint;
 
-  /** In which mode the colum should be displayed, both if unset */
+  /** In which mode the column should be displayed, both if unset */
   display?: BdDataColumnDisplay;
 
   /** Override tooltip delay in milliseconds. */

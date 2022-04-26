@@ -1,8 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { combineLatest, Subscription } from 'rxjs';
-import { BdDataGroupingDefinition } from 'src/app/models/data';
 import {
-  InstanceGroupConfiguration,
+  BdDataColumn,
+  bdDataDefaultSearch,
+  BdDataGroupingDefinition,
+} from 'src/app/models/data';
+import {
+  InstanceGroupConfigurationDto,
   MinionMode,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -17,7 +21,7 @@ import { GroupsService } from '../../services/groups.service';
   templateUrl: './groups-browser.component.html',
 })
 export class GroupsBrowserComponent implements OnInit, OnDestroy {
-  grouping: BdDataGroupingDefinition<InstanceGroupConfiguration>[] = [];
+  grouping: BdDataGroupingDefinition<InstanceGroupConfigurationDto>[] = [];
 
   private subscription: Subscription;
   private isCentral = false;
@@ -30,7 +34,8 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  /* template */ getRecordRoute = (row: InstanceGroupConfiguration) => {
+  /* template */ getRecordRoute = (r: InstanceGroupConfigurationDto) => {
+    const row = r.instanceGroupConfiguration;
     if (this.authService.isScopedExclusiveReadClient(row.name)) {
       return ['/groups', 'clients', row.name];
     }
@@ -60,7 +65,9 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
         return {
           name: attr.description,
           group: (r) =>
-            this.groups.attributeValues$.value[r.name]?.attributes[attr.name],
+            this.groups.attributeValues$.value[
+              r.instanceGroupConfiguration.name
+            ]?.attributes[attr.name],
         };
       });
     });
@@ -85,8 +92,9 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  onRecordClick(row: InstanceGroupConfiguration) {
+  onRecordClick(r: InstanceGroupConfigurationDto) {
     // in case we're managed but the group is not (yet), we're not allowed to enter the group - show a message instead
+    const row = r.instanceGroupConfiguration;
     if (!row.managed && this.config.config.mode === MinionMode.MANAGED) {
       this.dialog
         .info(
@@ -96,5 +104,20 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
         )
         .subscribe();
     }
+  }
+
+  searchInstanceGroupData(
+    search: string,
+    data: InstanceGroupConfigurationDto[],
+    columns: BdDataColumn<InstanceGroupConfigurationDto>[]
+  ) {
+    return bdDataDefaultSearch(search, data, [
+      ...columns,
+      {
+        id: 'searchableText',
+        name: 'SearchableText',
+        data: (r) => r.searchableText,
+      },
+    ]);
   }
 }

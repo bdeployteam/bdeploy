@@ -14,6 +14,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.jersey.ActivityScope;
@@ -37,7 +38,7 @@ import jakarta.ws.rs.core.Response;
 public interface InstanceGroupResource {
 
     @GET
-    public List<InstanceGroupConfiguration> list();
+    public List<InstanceGroupConfigurationDto> list();
 
     @PUT
     @RequiredPermission(permission = Permission.ADMIN)
