@@ -57,12 +57,13 @@
           (click)="savePreset()"
         ></app-bd-button>
         <app-bd-button
-          *ngIf="presetKey && hasGlobalPreset"
+          *ngIf="presetKey && hasGlobalPreset && (auth.isCurrentScopeAdmin$ | async)"
           tooltip="above"
           text="Save as global preset"
           svgIcon="global_pin"
           (click)="saveGlobalPreset()"
         ></app-bd-button>
+        <app-bd-dialog></app-bd-dialog>
       </div>
     </div>
   </mat-card>

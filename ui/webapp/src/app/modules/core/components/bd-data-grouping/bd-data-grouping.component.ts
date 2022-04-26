@@ -6,10 +6,13 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { CustomDataGrouping } from 'src/app/models/gen.dtos';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { calculateGrouping } from 'src/app/modules/core/utils/preset.utils';
 
 @Component({
@@ -39,10 +42,15 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   @Output() globalPresetSaved = new EventEmitter<CustomDataGrouping[]>();
 
+  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+
   /* template */ groupings: BdDataGrouping<T>[] = [];
   /* template */ filteredGroups: BdDataGrouping<T>[];
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor(
+    private snackBar: MatSnackBar,
+    public auth: AuthenticationService
+  ) {}
 
   ngOnInit(): void {
     this.loadPreset();
@@ -129,7 +137,16 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   saveGlobalPreset() {
-    this.globalPresetSaved.emit(this.groupingToPreset());
+    this.dialog
+      .confirm(
+        'Save global preset?',
+        'This will set global default preset for all users of the instance group'
+      )
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.globalPresetSaved.emit(this.groupingToPreset());
+        }
+      });
   }
 
   /* template */ addGrouping() {
