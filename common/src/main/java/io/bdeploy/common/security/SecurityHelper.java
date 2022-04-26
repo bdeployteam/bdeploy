@@ -262,6 +262,10 @@ public class SecurityHelper {
     public void importSignaturePack(String pack, KeyStore ks, char[] passphrase) throws GeneralSecurityException, IOException {
         SignaturePack sigs = SignaturePack.parse(pack);
 
+        if (sigs.c == null || sigs.t == null) {
+            throw new IllegalArgumentException("Given token is not a full authentication pack");
+        }
+
         String aliasCert = CERT_ALIAS;
         String aliasToken = TOKEN_ALIAS;
 
