@@ -35,6 +35,7 @@ import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterRootResource;
+import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
@@ -121,6 +122,11 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
             try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
                 BHiveRegistry reg = setupServerCommon(delegate, r, srv, config);
+
+                if (r.getMode() == MinionMode.CENTRAL) {
+                    // one hour default read timeout. even long running 'installs' should be finished within that time.
+                    JerseyClientFactory.setGlobalReadTimeout(60 * 60);
+                }
 
                 if (r.getMode() != MinionMode.NODE) {
                     // MASTER (standalone, managed, central)
