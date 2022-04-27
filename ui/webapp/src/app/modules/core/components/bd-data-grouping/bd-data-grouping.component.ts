@@ -140,7 +140,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     this.dialog
       .confirm(
         'Save global preset?',
-        'This will set global default preset for all users of the instance group'
+        'This will set as the global default preset for all users.'
       )
       .subscribe((confirmed) => {
         if (confirmed) {
