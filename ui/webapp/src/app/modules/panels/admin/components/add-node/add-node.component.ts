@@ -71,7 +71,7 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
 
   onSave() {
     let confirmation: Observable<boolean> = of(true);
-    if (this.data.sourceMode !== MinionMode.NODE) {
+    if (this.data.sourceMode && this.data.sourceMode !== MinionMode.NODE) {
       confirmation = this.dialog.message({
         header: 'Migrate Server',
         message: `This action will migrate the selected server from mode <code>${this.data.sourceMode}</code> to <code>NODE</code>. Existing software will be moved to this server. The migrated server will no longer provide any user interface. This action cannot be undone. Are you sure?`,
