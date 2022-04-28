@@ -438,7 +438,8 @@ void setupBinServerTasks(String version) {
                 }
 
                 if(!rqFound) {
-                    def rq = (check =~ "Minion signalled update request")
+                    // can be "update request" (<4.3.0) or "restart request" (>4.3.0)
+                    def rq = (check =~ /Minion signalled (update|restart) request/)
                     if(rq.size() == 1) {
                         println "Server received update request"
                         rqFound = true;
