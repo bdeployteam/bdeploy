@@ -8,6 +8,7 @@ import {
   CustomAttributesRecord,
   CustomDataGrouping,
   InstanceGroupConfiguration,
+  InstanceGroupConfigurationDto,
   ObjectChangeDetails,
   ObjectChangeHint,
   ObjectChangeType,
@@ -32,7 +33,7 @@ export class GroupsService {
   loading$ = new BehaviorSubject<boolean>(true);
 
   /** All instance groups */
-  groups$ = new BehaviorSubject<InstanceGroupConfiguration[]>([]);
+  groups$ = new BehaviorSubject<InstanceGroupConfigurationDto[]>([]);
 
   /** The "current" group based on the current route context */
   current$ = new BehaviorSubject<InstanceGroupConfiguration>(null);
@@ -125,7 +126,7 @@ export class GroupsService {
   private reload() {
     this.loading$.next(true);
     forkJoin({
-      groups: this.http.get<InstanceGroupConfiguration[]>(this.apiPath),
+      groups: this.http.get<InstanceGroupConfigurationDto[]>(this.apiPath),
       attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(
         `${this.apiPath}/list-attributes`
       ),
@@ -157,7 +158,9 @@ export class GroupsService {
     this.currentAttributeValues$.next(this.attributeValues$.value[group]);
 
     const current = this.current$.value;
-    const updated = this.groups$.value.find((g) => g.name === group);
+    const updated = this.groups$.value
+      .map((dto) => dto.instanceGroupConfiguration)
+      .find((g) => g.name === group);
 
     if (isEqual(current, updated)) {
       return;

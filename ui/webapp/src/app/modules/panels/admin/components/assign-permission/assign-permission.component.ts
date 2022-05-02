@@ -40,7 +40,9 @@ export class AssignPermissionComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const sortedNames = groups.map((g) => g.name).sort();
+      const sortedNames = groups
+        .map((g) => g.instanceGroupConfiguration.name)
+        .sort();
 
       this.scopes$.next([null, ...sortedNames]);
       this.labels$.next(['Global', ...sortedNames]);

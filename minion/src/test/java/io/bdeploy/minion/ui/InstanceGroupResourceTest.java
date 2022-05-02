@@ -9,20 +9,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @ExtendWith(TestMinion.class)
 class InstanceGroupResourceTest {
@@ -38,12 +38,12 @@ class InstanceGroupResourceTest {
 
         res.create(cfg);
 
-        List<InstanceGroupConfiguration> list = res.list();
+        List<InstanceGroupConfigurationDto> list = res.list();
         assertEquals(1, list.size());
-        assertEquals("demo", list.get(0).name);
-        assertEquals("Demo Title", list.get(0).title);
-        assertEquals("This is a Demo", list.get(0).description);
-        assertNull(list.get(0).logo);
+        assertEquals("demo", list.get(0).instanceGroupConfiguration.name);
+        assertEquals("Demo Title", list.get(0).instanceGroupConfiguration.title);
+        assertEquals("This is a Demo", list.get(0).instanceGroupConfiguration.description);
+        assertNull(list.get(0).instanceGroupConfiguration.logo);
 
         // cannot call update image directly to properly fake a form.
         try (InputStream logoStream = InstanceGroupResourceTest.class.getClassLoader().getResourceAsStream("logo64.png")) {
