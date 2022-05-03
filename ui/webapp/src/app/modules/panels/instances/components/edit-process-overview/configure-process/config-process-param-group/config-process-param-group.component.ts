@@ -86,6 +86,7 @@ export class ConfigProcessParamGroupComponent
 
   private custom: ParameterGroup;
   /* template */ customTemp: {
+    isEdit: boolean;
     predecessor: string;
     uid: string;
     value: string;
@@ -307,7 +308,9 @@ export class ConfigProcessParamGroupComponent
   }
 
   /* template */ getAllValueUids() {
-    return this.edit.process$.value.start.parameters.map((x) => x.uid);
+    return this.edit.process$.value.start.parameters
+      .map((x) => x.uid)
+      .filter((uid) => !this.customTemp.isEdit || uid !== this.customTemp.uid);
   }
 
   /* template */ getAllValueUidLabels() {
@@ -319,8 +322,50 @@ export class ConfigProcessParamGroupComponent
     );
   }
 
+  /* template */ onEditCustomParameter(
+    param: ParameterPair,
+    template: TemplateRef<any>
+  ) {
+    const parameters = this.edit.process$.value.start.parameters;
+    const paramIndex = parameters.findIndex((p) => p.uid === param.value.uid);
+    this.customTemp = {
+      predecessor: paramIndex > 0 ? parameters[paramIndex - 1].uid : null,
+      uid: param.value.uid,
+      value: param.value.value,
+      isEdit: true,
+    };
+    this.dialog
+      .message({
+        header: 'Edit Custom Parameter',
+        template,
+        actions: [ACTION_CANCEL, ACTION_OK],
+        validation: () => {
+          if (this.validateCustomFields.length < 1) {
+            return false;
+          }
+          return this.validateCustomFields
+            .map((ctrl) => ctrl.valid || ctrl.disabled)
+            .reduce((p, c) => p && c, true);
+        },
+      })
+      .subscribe((r) => {
+        if (r) {
+          // delete old parameter version
+          this.deleteCustomParameter(this.customTemp.uid);
+          // insert updated parameter at the correct position.
+          this.insertCustomParameterAtCorrectPosition();
+        }
+        this.customTemp = null;
+      });
+  }
+
   /* template */ onAddCustomParameter(template: TemplateRef<any>) {
-    this.customTemp = { predecessor: null, uid: null, value: null };
+    this.customTemp = {
+      predecessor: null,
+      uid: null,
+      value: null,
+      isEdit: false,
+    };
     this.dialog
       .message({
         header: 'Add Custom Parameter',
@@ -338,45 +383,63 @@ export class ConfigProcessParamGroupComponent
       .subscribe((r) => {
         if (r) {
           // insert the parameter at the correct position.
-          const param: ParameterPair = {
-            descriptor: null,
-            value: {
-              uid: this.customTemp.uid,
-              value: this.customTemp.value,
-              pinned: false,
-              preRendered: [],
-            },
-            booleanValue: false,
-            editorEnabled: true,
-            passwordLock: false,
-          };
-          this.doPreRender(param);
-          this.custom.pairs.push(param);
-
-          if (!this.customTemp.predecessor) {
-            this.edit.process$.value.start.parameters.unshift(param.value);
-          } else {
-            const predecessorIndex =
-              this.edit.process$.value.start.parameters.findIndex(
-                (p) => p.uid === this.customTemp.predecessor
-              );
-            if (
-              predecessorIndex ===
-              this.edit.process$.value.start.parameters.length - 1
-            ) {
-              // last parameter
-              this.edit.process$.value.start.parameters.push(param.value);
-            } else {
-              this.edit.process$.value.start.parameters.splice(
-                predecessorIndex + 1,
-                0,
-                param.value
-              );
-            }
-          }
+          this.insertCustomParameterAtCorrectPosition();
         }
         this.customTemp = null;
       });
+  }
+
+  private deleteCustomParameter(uid: string) {
+    const pairIndex = this.custom.pairs.findIndex(
+      (pair) => pair.value.uid === uid
+    );
+    if (pairIndex >= 0) {
+      this.custom.pairs.splice(pairIndex, 1);
+    }
+    const parameters = this.edit.process$.value.start.parameters;
+    const paramIndex = parameters.findIndex((p) => p.uid === uid);
+    if (paramIndex >= 0) {
+      parameters.splice(paramIndex, 1);
+    }
+  }
+
+  private insertCustomParameterAtCorrectPosition() {
+    const param: ParameterPair = {
+      descriptor: null,
+      value: {
+        uid: this.customTemp.uid,
+        value: this.customTemp.value,
+        pinned: false,
+        preRendered: [],
+      },
+      booleanValue: false,
+      editorEnabled: true,
+      passwordLock: false,
+    };
+    this.doPreRender(param);
+    this.custom.pairs.push(param);
+
+    if (!this.customTemp.predecessor) {
+      this.edit.process$.value.start.parameters.unshift(param.value);
+    } else {
+      const predecessorIndex =
+        this.edit.process$.value.start.parameters.findIndex(
+          (p) => p.uid === this.customTemp.predecessor
+        );
+      if (
+        predecessorIndex ===
+        this.edit.process$.value.start.parameters.length - 1
+      ) {
+        // last parameter
+        this.edit.process$.value.start.parameters.push(param.value);
+      } else {
+        this.edit.process$.value.start.parameters.splice(
+          predecessorIndex + 1,
+          0,
+          param.value
+        );
+      }
+    }
   }
 
   /* template */ doChangeValue(p: ParameterPair, val: any) {
