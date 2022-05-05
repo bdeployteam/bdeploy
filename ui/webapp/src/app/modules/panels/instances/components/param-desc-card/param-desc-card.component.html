@@ -47,6 +47,10 @@
         >
       </div>
     </ng-container>
+    <ng-container *ngIf="descriptor?.mandatory">
+      <strong><div>Mandatory:</div></strong>
+      <div class="local-break">This parameter cannot be removed</div>
+    </ng-container>
   </div>
 </mat-card>
 <mat-card
