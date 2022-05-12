@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import {
@@ -16,6 +18,8 @@ import {
 } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 
+const INIT_REPOSITORIES = [];
+
 @Injectable({
   providedIn: 'root',
 })
@@ -26,7 +30,9 @@ export class RepositoriesService {
   loading$ = new BehaviorSubject<boolean>(true);
 
   /** All software repositories */
-  repositories$ = new BehaviorSubject<SoftwareRepositoryConfiguration[]>([]);
+  repositories$ = new BehaviorSubject<SoftwareRepositoryConfiguration[]>(
+    INIT_REPOSITORIES
+  );
 
   /** The *current* repository based on the current route context */
   current$ = new BehaviorSubject<SoftwareRepositoryConfiguration>(null);
@@ -35,7 +41,9 @@ export class RepositoriesService {
     private cfg: ConfigService,
     private http: HttpClient,
     private changes: ObjectChangesService,
-    private areas: NavAreasService
+    private areas: NavAreasService,
+    private snackbar: MatSnackBar,
+    private router: Router
   ) {
     this.areas.repositoryContext$.subscribe((r) => this.setCurrent(r));
     this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
@@ -79,8 +87,29 @@ export class RepositoriesService {
   }
 
   private setCurrent(repository: string) {
-    this.current$.next(
-      this.repositories$.value.find((r) => r.name === repository)
+    const repositories = this.repositories$.value;
+
+    const currentRepository = repositories.find((r) => r.name === repository);
+
+    const notFound =
+      !!repository && !currentRepository && repositories !== INIT_REPOSITORIES;
+    if (notFound) {
+      this.onNotFound();
+      return;
+    }
+
+    this.current$.next(currentRepository);
+  }
+
+  private onNotFound() {
+    this.snackbar.open(
+      `Unfortunately, ${this.router.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
+      'DISMISS',
+      { panelClass: 'error-snackbar' }
     );
+    this.areas.forcePanelClose$.next(true);
+    this.router.navigate(['repositories', 'browser'], {
+      state: { ignoreDirtyGuard: true },
+    });
   }
 }

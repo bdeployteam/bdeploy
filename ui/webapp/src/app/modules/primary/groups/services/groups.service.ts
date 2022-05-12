@@ -1,5 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
@@ -23,6 +25,8 @@ import {
 } from '../../../core/services/object-changes.service';
 import { SettingsService } from '../../../core/services/settings.service';
 
+const INIT_GROUPS = [];
+
 @Injectable({
   providedIn: 'root',
 })
@@ -33,7 +37,7 @@ export class GroupsService {
   loading$ = new BehaviorSubject<boolean>(true);
 
   /** All instance groups */
-  groups$ = new BehaviorSubject<InstanceGroupConfigurationDto[]>([]);
+  groups$ = new BehaviorSubject<InstanceGroupConfigurationDto[]>(INIT_GROUPS);
 
   /** The "current" group based on the current route context */
   current$ = new BehaviorSubject<InstanceGroupConfiguration>(null);
@@ -54,7 +58,9 @@ export class GroupsService {
     private http: HttpClient,
     private changes: ObjectChangesService,
     private areas: NavAreasService,
-    private settings: SettingsService
+    private settings: SettingsService,
+    private snackbar: MatSnackBar,
+    private router: Router
   ) {
     this.areas.groupContext$.subscribe((r) => this.setCurrent(r));
     this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
@@ -157,15 +163,34 @@ export class GroupsService {
   private setCurrent(group: string) {
     this.currentAttributeValues$.next(this.attributeValues$.value[group]);
 
+    const groups = this.groups$.value;
     const current = this.current$.value;
-    const updated = this.groups$.value
+    const updated = groups
       .map((dto) => dto.instanceGroupConfiguration)
       .find((g) => g.name === group);
+
+    const notFound = !!group && !updated && groups !== INIT_GROUPS;
+    if (notFound) {
+      this.onNotFound();
+      return;
+    }
 
     if (isEqual(current, updated)) {
       return;
     }
 
     this.current$.next(updated);
+  }
+
+  private onNotFound() {
+    this.snackbar.open(
+      `Unfortunately, ${this.router.url} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
+      'DISMISS',
+      { panelClass: 'error-snackbar' }
+    );
+    this.areas.forcePanelClose$.next(true);
+    this.router.navigate(['/groups/browser'], {
+      state: { ignoreDirtyGuard: true },
+    });
   }
 }
