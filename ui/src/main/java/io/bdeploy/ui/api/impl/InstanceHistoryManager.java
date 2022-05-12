@@ -208,6 +208,10 @@ public class InstanceHistoryManager {
                 return process + " crashed";
             case CRASHED_PERMANENTLY:
                 return process + " crashed permanently.";
+            case STOPPED_START_PLANNED:
+                return process + " planned to start";
+            case RUNNING_STOP_PLANNED:
+                return process + " planned to stop";
             default:
                 return "";
         }
