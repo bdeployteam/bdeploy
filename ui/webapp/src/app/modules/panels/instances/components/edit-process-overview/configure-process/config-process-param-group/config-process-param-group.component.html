@@ -7,6 +7,7 @@
       label="Unique ID"
       appEditCustomUidValidator
       appEditUniqueValueValidator
+      [disabled]="customTemp.isEdit"
       [disallowedValues]="getAllValueUids()"
       [(ngModel)]="customTemp.uid"
       required
@@ -190,6 +191,16 @@
                         [(ngModel)]="p.value.pinned"
                         [style.display]="'none'"
                       />
+                      <mat-icon
+                        *ngIf="group.isCustom"
+                        class="local-hover-button"
+                        matTooltip="Click to edit the parameter"
+                        [matTooltipShowDelay]="500"
+                        (click)="onEditCustomParameter(p, addCustom)"
+                        [style.cursor]="'pointer'"
+                        appClickStopPropagation
+                        >edit</mat-icon
+                      >
                       <mat-icon
                         class="local-hover-button"
                         [class.local-pin-inactive]="!p.value.pinned"
