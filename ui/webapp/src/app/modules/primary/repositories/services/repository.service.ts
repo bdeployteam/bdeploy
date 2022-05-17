@@ -60,9 +60,6 @@ export class RepositoryService {
     this.softwarePackagesLoading$,
   ]).pipe(map(([pl, el]) => pl || el));
 
-  /** the current selection */
-  current$ = new BehaviorSubject<any>(null);
-
   constructor(
     private cfg: ConfigService,
     private http: HttpClient,
