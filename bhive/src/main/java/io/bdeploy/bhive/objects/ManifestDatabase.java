@@ -53,8 +53,8 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
 
     private ScheduledFuture<?> schedNotify;
     private final List<Manifest.Key> added = new ArrayList<>();
-    private final ScheduledExecutorService notify = Executors
-            .newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory("Manifest DB Notifier"));
+    private static final ScheduledExecutorService NOTIFY_POOL = Executors.newScheduledThreadPool(2,
+            new NamedDaemonThreadFactory("Manifest DB Notifier"));
 
     /**
      * A cache for Manifest objects which need to actually be loaded from disk.
@@ -83,7 +83,9 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
 
     @Override
     public void close() {
-        notify.shutdownNow();
+        if (schedNotify != null && !schedNotify.isDone()) {
+            schedNotify.cancel(false);
+        }
     }
 
     public void addSpawnListener(ManifestSpawnListener listener) {
@@ -113,7 +115,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
             schedNotify.cancel(false);
         }
 
-        schedNotify = notify.schedule(() -> {
+        schedNotify = NOTIFY_POOL.schedule(() -> {
             List<Manifest.Key> copy;
             synchronized (added) {
                 if (log.isDebugEnabled()) {
