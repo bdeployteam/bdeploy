@@ -28,6 +28,7 @@ import {
   StringEntryChunkDto,
 } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
+import { HttpReplayService } from 'src/app/modules/core/services/http-replay.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { NO_LOADING_BAR_CONTEXT } from 'src/app/modules/core/utils/loading-bar.util';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -81,7 +82,8 @@ export class InstancesService {
     private areas: NavAreasService,
     private serversService: ServersService,
     private downloads: DownloadService,
-    private products: ProductsService,
+    private httpReplayService: HttpReplayService,
+    products: ProductsService,
     groups: GroupsService
   ) {
     // clear out stuff whenever the group is re-set.
@@ -269,7 +271,7 @@ export class InstancesService {
     instance: string,
     tag: string
   ): Observable<InstanceNodeConfigurationListDto> {
-    return this.http.get<InstanceNodeConfigurationListDto>(
+    return this.httpReplayService.get<InstanceNodeConfigurationListDto>(
       `${this.apiPath(this.group)}/${instance}/${tag}/nodeConfiguration`
     );
   }
@@ -459,7 +461,7 @@ export class InstancesService {
     // otherwise load nodes first, and *then* set the current instance.
     this.activeLoading$.next(true);
     activeFetch.subscribe((act) => {
-      this.http
+      this.httpReplayService
         .get<InstanceNodeConfigurationListDto>(
           `${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/${
             act.activeVersion.tag
