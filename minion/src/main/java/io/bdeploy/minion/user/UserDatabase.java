@@ -44,6 +44,7 @@ import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.user.ldap.LdapAuthenticator;
+import io.bdeploy.minion.user.oauth2.OpenIDConnectAuthenticator;
 import io.bdeploy.ui.api.AuthService;
 
 /**
@@ -65,12 +66,14 @@ public class UserDatabase implements AuthService {
 
     private final List<Authenticator> authenticators = new ArrayList<>();
     private final LdapAuthenticator ldapAuthenticator = new LdapAuthenticator();
+    private final OpenIDConnectAuthenticator oidcAuthenticator = new OpenIDConnectAuthenticator();
 
     public UserDatabase(MinionRoot root) {
         this.root = root;
         this.target = root.getHive();
 
         this.authenticators.add(new PasswordAuthentication());
+        this.authenticators.add(oidcAuthenticator);
         this.authenticators.add(ldapAuthenticator);
     }
 
@@ -252,7 +255,7 @@ public class UserDatabase implements AuthService {
                 if (u != null) {
                     u.lastActiveLogin = System.currentTimeMillis();
                     internalUpdate(user, u);
-                    trace.log("SUCCESS");
+                    logSuccess(trace, u);
                     return u; // already successfully authenticated using the given password.
                 }
             }
@@ -268,7 +271,7 @@ public class UserDatabase implements AuthService {
                 if (authenticated != null) {
                     authenticated.lastActiveLogin = System.currentTimeMillis();
                     internalUpdate(user, authenticated);
-                    trace.log("SUCCESS");
+                    logSuccess(trace, authenticated);
                     return authenticated;
                 }
             }
@@ -276,6 +279,30 @@ public class UserDatabase implements AuthService {
 
         trace.log("FAILURE");
         return null;
+    }
+
+    public boolean isAuthenticationValid(UserInfo info) {
+        AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
+        for (Authenticator auth : authenticators) {
+            if (auth.isResponsible(info, settings)) {
+                if (auth.isAuthenticationValid(info, settings)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void logSuccess(AuthTrace trace, UserInfo info) {
+        trace.log("Retrieved User:");
+        trace.log("  Name: " + info.name);
+        trace.log("  Full Name: " + info.fullName);
+        trace.log("  E-Mail: " + info.email);
+        trace.log("  External: " + info.external);
+        trace.log("  External System: " + info.externalSystem);
+        trace.log("  External Tag: " + info.externalTag);
+
+        trace.log("SUCCESS");
     }
 
     @Override

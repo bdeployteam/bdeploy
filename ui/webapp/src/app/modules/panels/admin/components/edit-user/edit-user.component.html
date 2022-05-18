@@ -5,46 +5,88 @@
     [route]="['..']"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <form
-      #form="ngForm"
-      (ngSubmit)="onSave()"
-      fxLayout="column"
-      fxLayoutGap="5px"
-    >
-      <ng-container *ngIf="!(loading$ | async)">
-        <app-bd-form-input
-          name="fullName"
-          label="Full Name"
-          [(ngModel)]="tempUser.fullName"
-        ></app-bd-form-input>
-        <app-bd-form-input
-          name="email"
-          label="E-Mail Address"
-          [(ngModel)]="tempUser.email"
-        ></app-bd-form-input>
-        <app-bd-form-input
-          name="pass"
-          label="New Password"
-          [(ngModel)]="tempUser.password"
-          type="password"
-        ></app-bd-form-input>
-        <app-bd-form-input
-          name="passConfirm"
-          label="Confirm Password"
-          [(ngModel)]="passConfirm"
-          type="password"
-          [appPasswordVerification]="tempUser.password"
-          errorDisplay="immediate"
-          [required]="!!tempUser.password?.length"
-        ></app-bd-form-input>
-        <app-bd-button
-          color="primary"
-          [collapsed]="false"
-          text="Apply"
-          icon="save"
-          [disabled]="form.invalid || !(isDirty$ | async)"
-        ></app-bd-button>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <form #form="ngForm" fxLayout="column" fxLayoutGap="5px">
+        <ng-container *ngIf="!(loading$ | async)">
+          <app-bd-form-input
+            name="fullName"
+            label="Full Name"
+            [(ngModel)]="tempUser.fullName"
+            [disabled]="tempUser.external"
+          ></app-bd-form-input>
+          <app-bd-form-input
+            name="email"
+            label="E-Mail Address"
+            [(ngModel)]="tempUser.email"
+            [disabled]="tempUser.external"
+          ></app-bd-form-input>
+          <ng-container *ngIf="!tempUser.external">
+            <app-bd-form-input
+              name="pass"
+              label="New Password"
+              [(ngModel)]="tempUser.password"
+              type="password"
+            ></app-bd-form-input>
+            <app-bd-form-input
+              name="passConfirm"
+              label="Confirm Password"
+              [(ngModel)]="passConfirm"
+              type="password"
+              [appPasswordVerification]="tempUser.password"
+              errorDisplay="immediate"
+              [required]="!!tempUser.password?.length"
+            ></app-bd-form-input>
+          </ng-container>
+        </ng-container>
+      </form>
+      <ng-container *ngIf="tempUser.external">
+        <mat-divider></mat-divider>
+        <ng-container *ngIf="tempUser.externalSystem === 'LDAP'">
+          <p>
+            The user is currently authenticated by
+            <strong
+              >{{tempUser.externalTag ? tempUser.externalTag : 'any configured
+              server'}}</strong
+            >
+            using LDAP. You can switch the external authentication provider,
+            provided the user can authenticate using another provider as well.
+          </p>
+          <app-bd-button
+            text="Switch to OIDC Provider"
+            icon="badge"
+            [collapsed]="false"
+            (click)="tempUser.externalSystem = 'OIDC'; tempUser.externalTag = null; updateDirty()"
+          ></app-bd-button>
+          <mat-divider></mat-divider>
+          <p>
+            You can also reset the association to a certain LDAP server, which
+            will make BDeploy contact all configured LDAP servers to
+            authenticate the user the next time he logs on.
+          </p>
+          <app-bd-button
+            text="Reset LDAP Server Association"
+            icon="restart_alt"
+            [collapsed]="false"
+            (click)="tempUser.externalTag = null; updateDirty()"
+          ></app-bd-button>
+        </ng-container>
+        <ng-container *ngIf="tempUser.externalSystem === 'OIDC'">
+          <app-bd-button
+            text="Switch to LDAP Provider"
+            icon="badge"
+            [collapsed]="false"
+            (click)="tempUser.externalSystem = 'LDAP'; tempUser.externalTag = ''; updateDirty()"
+          ></app-bd-button>
+        </ng-container>
       </ng-container>
-    </form>
+      <app-bd-button
+        color="primary"
+        [collapsed]="false"
+        text="Apply"
+        icon="save"
+        [disabled]="form.invalid || !(isDirty$ | async)"
+        (click)="onSave()"
+      ></app-bd-button>
+    </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

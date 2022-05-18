@@ -40,7 +40,15 @@ public class LdapAuthenticator implements Authenticator {
 
     @Override
     public boolean isResponsible(UserInfo user, AuthenticationSettingsDto settings) {
+        if (settings.ldapSettings.isEmpty()) {
+            return false;
+        }
         return user.external && LDAP_SYSTEM.equals(user.externalSystem);
+    }
+
+    @Override
+    public boolean isAuthenticationValid(UserInfo user, AuthenticationSettingsDto settings) {
+        return !user.inactive; // no better way right now, but in theory we need to check the LDAP server.
     }
 
     @Override
@@ -56,17 +64,23 @@ public class LdapAuthenticator implements Authenticator {
 
         Optional<LDAPSettingsDto> server = settings.ldapSettings.stream().filter(s -> s.id.equals(user.externalTag)).findAny();
         trace.log("User is associated to server " + (server.isPresent() ? server.get().server : user.externalTag));
-        if (!server.isPresent()) {
-            trace.log("LDAP server " + user.externalTag + " is no longer available, will try all servers");
-        }
 
-        if (!server.isPresent()) {
+        if (server.isPresent()) {
+            UserInfo info = findAuthenticateUpdate(user, password, server.map(Collections::singletonList).get(), trace);
+
+            if (info == null) {
+                trace.log("Associated LDAP server " + user.externalTag + " can not authenticate " + user.name
+                        + ", will try all servers");
+            } else {
+                return info;
+            }
+        } else {
+            trace.log("LDAP server " + user.externalTag + " is no longer available, will try all servers");
             log.warn("LDAP server {} associated with user {} no longer available, will try all servers.", user.externalTag,
                     user.name);
         }
 
-        return findAuthenticateUpdate(user, password, server.map(Collections::singletonList).orElse(settings.ldapSettings),
-                trace);
+        return findAuthenticateUpdate(user, password, settings.ldapSettings, trace);
     }
 
     /**
@@ -88,7 +102,7 @@ public class LdapAuthenticator implements Authenticator {
                 } catch (Exception e) {
                     log.error("Cannot create initial connection to {} as {}", server.server, server.user, e);
                     trace.log("    server " + server.server + ": connection failed");
-                    return null;
+                    continue;
                 }
 
                 try {

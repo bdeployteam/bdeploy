@@ -7,5 +7,6 @@ public class AuthenticationSettingsDto {
 
     public boolean disableBasic;
     public List<LDAPSettingsDto> ldapSettings = new ArrayList<>();
+    public OIDCSettingsDto oidcSettings = new OIDCSettingsDto();
 
 }

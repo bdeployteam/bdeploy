@@ -43,6 +43,7 @@ import { SettingsGeneralComponent } from './components/settings-general/settings
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
 import { NodesComponent } from './components/nodes/nodes.component';
+import { OidcTabComponent } from './components/settings-general/oidc-tab/oidc-tab.component';
 
 @NgModule({
   declarations: [
@@ -65,6 +66,7 @@ import { NodesComponent } from './components/nodes/nodes.component';
     LdapEditActionComponent,
     LdapCheckActionComponent,
     NodesComponent,
+    OidcTabComponent,
   ],
   imports: [
     CommonModule,
