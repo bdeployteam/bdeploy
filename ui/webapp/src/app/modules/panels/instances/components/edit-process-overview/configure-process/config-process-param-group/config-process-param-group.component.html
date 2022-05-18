@@ -164,7 +164,7 @@
                   [required]="p.descriptor?.mandatory"
                   [appBdPopup]="popup"
                   appBdPopupTrigger="hover"
-                  [appBdPopupDelay]="500"
+                  [appBdPopupDelay]="1000"
                   appBdPopupPosition="above-right"
                   [disabled]="p.passwordLock || !p.editorEnabled || group.isSelectMode || p.descriptor?.fixed"
                   [suggested]="p.descriptor?.suggestedValues"
@@ -251,7 +251,7 @@
                   (ngModelChange)="doPreRenderBoolean(p)"
                   [appBdPopup]="popup"
                   appBdPopupTrigger="hover"
-                  [appBdPopupDelay]="500"
+                  [appBdPopupDelay]="1000"
                   appBdPopupPosition="above-right"
                   [disabled]="group.isSelectMode || p.descriptor?.fixed"
                 >
