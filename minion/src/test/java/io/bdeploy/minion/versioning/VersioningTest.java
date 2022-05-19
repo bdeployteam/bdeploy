@@ -5,14 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -24,6 +16,13 @@ import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.TestServer;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 class VersioningTest {
 
@@ -105,6 +104,11 @@ class VersioningTest {
 
         @Override
         public List<InstanceGroupConfigurationApi> getInstanceGroups() {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        @Override
+        public InstanceGroupConfigurationApi getInstanceGroupByInstanceId(String instanceId) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
 

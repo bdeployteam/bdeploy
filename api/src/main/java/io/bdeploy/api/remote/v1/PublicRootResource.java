@@ -2,15 +2,6 @@ package io.bdeploy.api.remote.v1;
 
 import java.util.List;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
@@ -22,6 +13,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @OpenAPIDefinition(info = @Info(title = "BDeploy Public Master API", description = "BDeploy backend APIs for public use. "
         + "Callers must set the X-BDeploy-Authorization header to be able to access APIs. "
@@ -91,6 +90,16 @@ public interface PublicRootResource {
     @GET
     @Path("/instanceGroups")
     public List<InstanceGroupConfigurationApi> getInstanceGroups();
+
+    /**
+     * @param instanceId - the instance ID to get the instance group for.
+     * @return the {@link InstanceGroupConfigurationApi} of the instance group containing the instance with the given instance ID.
+     */
+    @Operation(summary = "Get instance group by instance ID",
+               description = "Get instance group containing instance with the given instance ID")
+    @GET
+    @Path("/groupForInstance")
+    public InstanceGroupConfigurationApi getInstanceGroupByInstanceId(@QueryParam("instanceId") String instanceId);
 
     /**
      * Returns a resource which can be used to query or access an instance.

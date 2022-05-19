@@ -3,13 +3,6 @@ package io.bdeploy.minion.api.v1;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.UriInfo;
-
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
 import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
@@ -20,6 +13,12 @@ import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfigurat
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.impl.AuthResourceImpl;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * V1 implementation of the public API.
@@ -86,6 +85,26 @@ public class PublicRootResourceImpl implements PublicRootResource {
         }
 
         return result;
+    }
+
+    @Override
+    public InstanceGroupConfigurationApi getInstanceGroupByInstanceId(String instanceId) {
+        if (instanceId == null || instanceId.isBlank()) {
+            throw new WebApplicationException("No instance group parameter given", Status.BAD_REQUEST);
+        }
+
+        for (InstanceGroupConfigurationApi instanceGroup : this.getInstanceGroups()) {
+
+            boolean containsInstance = getInstanceResource(instanceGroup.name).listInstanceConfigurations(false).values().stream()
+                    .map(instance -> instance.uuid).filter(uuid -> instanceId.equals(uuid)).findAny().isPresent();
+
+            if (containsInstance) {
+                return instanceGroup;
+            }
+
+        }
+
+        throw new WebApplicationException("No instance group found for instance ID " + instanceId, Status.NOT_FOUND);
     }
 
     @Override
