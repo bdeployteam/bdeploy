@@ -48,6 +48,7 @@ import io.bdeploy.pcu.TestAppFactory;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ProductDto;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
 /**
@@ -107,6 +108,15 @@ class PublicApiV1Test {
         assertEquals("test", eca.http.get(0).id);
         assertEquals("/api/test/with/path", eca.http.get(0).path);
 
+        assertThrows(BadRequestException.class, () -> prr.getInstanceGroupByInstanceId(null));
+        assertThrows(BadRequestException.class, () -> prr.getInstanceGroupByInstanceId(""));
+        assertThrows(BadRequestException.class, () -> prr.getInstanceGroupByInstanceId("  "));
+        assertThrows(NotFoundException.class, () -> prr.getInstanceGroupByInstanceId("Some non-existent instance uuid"));
+
+        InstanceGroupConfigurationApi instanceGroupForInstanceId = prr.getInstanceGroupByInstanceId(ica.uuid);
+        assertEquals("demo", instanceGroupForInstanceId.name);
+        assertEquals("title", instanceGroupForInstanceId.title);
+        assertEquals("For Unit Test", instanceGroupForInstanceId.description);
     }
 
     @Test
