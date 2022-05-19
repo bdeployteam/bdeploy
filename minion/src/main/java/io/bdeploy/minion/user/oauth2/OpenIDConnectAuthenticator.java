@@ -95,7 +95,11 @@ public class OpenIDConnectAuthenticator implements Authenticator {
             if (log.isTraceEnabled()) {
                 log.trace("Actually refreshing {}", user.name);
             }
-            refresh.complete(validateToken(user, settings.oidcSettings));
+            try {
+                refresh.complete(validateToken(user, settings.oidcSettings));
+            } catch (Exception e) {
+                refresh.completeExceptionally(e);
+            }
         }
 
         try {
