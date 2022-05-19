@@ -10,7 +10,9 @@
         [route]="['panels', 'admin', 'add-ldap-server']"
       ></app-bd-panel-button>
     </ng-container>
-    <ng-container *ngIf="generalTab.isActive || ldapTab.isActive">
+    <ng-container
+      *ngIf="generalTab.isActive || ldapTab.isActive || oidcTab.isActive"
+    >
       <app-bd-panel-button
         [collapsed]="false"
         color="primary"
@@ -70,6 +72,13 @@
             >General</ng-template
           >
           <app-general-tab></app-general-tab>
+        </mat-tab>
+        <mat-tab #oidcTab fxLayout="column">
+          <ng-template mat-tab-label
+            ><mat-icon [style.margin-right.px]="5">security</mat-icon>OpenID
+            Connect</ng-template
+          >
+          <app-oidc-tab #oidc></app-oidc-tab>
         </mat-tab>
         <mat-tab #ldapTab fxLayout="column">
           <ng-template mat-tab-label

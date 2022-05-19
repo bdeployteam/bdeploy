@@ -88,7 +88,9 @@ export class UsersBrowserComponent {
           this.settings.settings$.value.auth.ldapSettings.find(
             (s) => s.id === userInfo.externalTag
           );
-        return dto ? dto.description : userInfo.externalTag + ' (not found)';
+        return dto ? dto.description : 'All configured Servers';
+      } else if (userInfo.externalSystem === 'OIDC') {
+        return 'OpenID Connect';
       } else {
         return userInfo.externalTag; // should not happen
       }

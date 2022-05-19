@@ -28,4 +28,10 @@ public interface Authenticator {
      */
     UserInfo authenticate(UserInfo user, char[] password, AuthenticationSettingsDto settings, AuthTrace trace);
 
+    /**
+     * @param user the user to validate. the user presented a valid BDeploy internal token already.
+     * @return <code>true</code> in case the existing authentication is still valid, <code>false</code> otherwise.
+     */
+    boolean isAuthenticationValid(UserInfo user, AuthenticationSettingsDto settings);
+
 }

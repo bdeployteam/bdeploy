@@ -118,4 +118,9 @@ final class PasswordAuthentication implements Authenticator {
         return !user.external;
     }
 
+    @Override
+    public boolean isAuthenticationValid(UserInfo user, AuthenticationSettingsDto settings) {
+        return !user.inactive;
+    }
+
 }

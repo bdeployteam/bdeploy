@@ -157,7 +157,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
                 log.error("User not available: {}. Allowing to support legacy tokens.", user);
                 return true;
             }
-            return !info.inactive;
+            return r.getUsers().isAuthenticationValid(info);
         });
         registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv), getAuditorFactory());
     }

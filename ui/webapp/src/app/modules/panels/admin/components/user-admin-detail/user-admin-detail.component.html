@@ -82,8 +82,7 @@
         text="Edit User..."
         icon="edit"
         [route]="['panels', 'admin', 'user-detail', user.name, 'edit']"
-        [disabled]="user.external || isCurrentUser"
-        [matTooltip]="user.external ? 'Editing is only possible for local users.' : null"
+        [disabled]="isCurrentUser"
       ></app-bd-panel-button>
       <app-bd-button
         [disabled]="isCurrentUser"

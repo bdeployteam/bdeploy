@@ -1,0 +1,33 @@
+<div class="bd-default-padding">
+  <p>
+    Configuring an OpenID Connect server will allow users to authenticate
+    against it in addition to other providers. Users will be created on first
+    login.
+  </p>
+  <app-bd-form-toggle
+    [(ngModel)]="settings.settings$.value.auth.oidcSettings.enabled"
+    label="Enable OpenID Connect Authentication"
+  ></app-bd-form-toggle>
+  <p
+    [class.bd-disabled-text]="!settings.settings$.value.auth.oidcSettings.enabled"
+  >
+    Configure the server below if enabled. The server URL needs to be the OpenID
+    Connect Token endpoint.
+  </p>
+  <app-bd-form-input
+    [(ngModel)]="settings.settings$.value.auth.oidcSettings.url"
+    label="Token Server URL"
+    [disabled]="!settings.settings$.value.auth.oidcSettings.enabled"
+  ></app-bd-form-input>
+  <app-bd-form-input
+    [(ngModel)]="settings.settings$.value.auth.oidcSettings.client"
+    label="Client ID"
+    [disabled]="!settings.settings$.value.auth.oidcSettings.enabled"
+  ></app-bd-form-input>
+  <app-bd-form-input
+    type="password"
+    [(ngModel)]="settings.settings$.value.auth.oidcSettings.secret"
+    label="Client Secret"
+    [disabled]="!settings.settings$.value.auth.oidcSettings.enabled"
+  ></app-bd-form-input>
+</div>

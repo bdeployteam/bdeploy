@@ -83,6 +83,10 @@ export class EditUserComponent
     return isDirty(this.tempUser, this.origUser);
   }
 
+  /* template */ updateDirty() {
+    this.isDirty$.next(this.isDirty());
+  }
+
   /* template */ onSave() {
     this.doSave().subscribe(() => {
       this.reset();
