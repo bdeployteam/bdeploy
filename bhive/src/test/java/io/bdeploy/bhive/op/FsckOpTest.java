@@ -21,6 +21,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.common.ContentHelper;
+import io.bdeploy.common.util.PathHelper;
 
 @ExtendWith(TestHive.class)
 class FsckOpTest {
@@ -49,7 +50,7 @@ class FsckOpTest {
         Set<ElementView> broken = hive.execute(new ObjectConsistencyCheckOperation().setDryRun(false).addRoot(key));
         assertThat(broken.size(), is(1));
         assertThat(broken.iterator().next().getElementId(), is(ObjectId.parse(ContentHelper.TEST_TXT_OID)));
-        assertFalse(Files.exists(fileToMessWith));
+        assertFalse(PathHelper.exists(fileToMessWith));
 
         // the previous non-dry-run check removed the broken object. now is is no longer found by the object check
         broken = hive.execute(new ObjectConsistencyCheckOperation().addRoot(key));

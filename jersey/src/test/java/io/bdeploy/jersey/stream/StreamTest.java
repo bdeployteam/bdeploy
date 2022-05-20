@@ -16,6 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
@@ -46,7 +47,7 @@ class StreamTest {
         Path localFile = rs.download();
 
         Threads.sleep(200); // might take some time on windows..
-        assertFalse(Files.exists(src)); // deleted after writing.
+        assertFalse(PathHelper.exists(src)); // deleted after writing.
 
         byte[] targetBytes = Files.readAllBytes(localFile);
 

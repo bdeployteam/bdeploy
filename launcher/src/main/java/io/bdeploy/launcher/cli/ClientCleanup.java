@@ -100,7 +100,7 @@ public class ClientCleanup {
 
             // File-Locks could prevent that we can delete the folder
             // thus we first try to rename and then delete
-            if (launcherPath.toFile().exists()) {
+            if (PathHelper.exists(launcherPath)) {
                 Path tmpPath = launcherPath.getParent().resolve(launcherPath.getFileName() + "_delete");
                 if (!PathHelper.moveAndDelete(launcherPath, tmpPath)) {
                     log.warn("Unable to delete unused launcher.");
@@ -141,7 +141,7 @@ public class ClientCleanup {
             // File-Locks could prevent that we can delete the folder
             // thus we first try to rename and then delete
             Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
-            if (pooledPath.toFile().exists()) {
+            if (PathHelper.exists(pooledPath)) {
                 Path tmpPath = pooledPath.getParent().resolve(pooledPath.getFileName() + "_delete");
                 if (!PathHelper.moveAndDelete(pooledPath, tmpPath)) {
                     log.warn("Unable to delete unused pooled application.");
@@ -157,11 +157,11 @@ public class ClientCleanup {
     /** Cleans the hive as well as the pool and apps directory */
     private void doCleanup() {
         // Remove pool and apps directory if they are empty
-        if (poolDir.toFile().exists() && PathHelper.isDirEmpty(poolDir)) {
+        if (PathHelper.exists(poolDir) && PathHelper.isDirEmpty(poolDir)) {
             PathHelper.deleteRecursive(poolDir);
             log.info("Removed empty pool folder {}", poolDir);
         }
-        if (appsDir.toFile().exists() && PathHelper.isDirEmpty(appsDir)) {
+        if (PathHelper.exists(appsDir) && PathHelper.isDirEmpty(appsDir)) {
             PathHelper.deleteRecursive(appsDir);
             log.info("Removed apps folder {}", appsDir);
         }

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.launcher.cli.ClientPathHelper;
 import io.bdeploy.launcher.cli.ClientSoftwareConfiguration;
 import io.bdeploy.launcher.cli.ProcessHelper;
@@ -82,7 +83,7 @@ public class AppUninstaller extends SwingWorker<Void, Object> {
         // ATTENTION: This is not there if the application has been launched via click&start
         Path appHomeDir = ClientPathHelper.getAppHomeDir(rootDir, app.clickAndStart);
         Path uninstaller = appHomeDir.resolve("uninstall.run");
-        if (uninstaller.toFile().exists()) {
+        if (PathHelper.exists(uninstaller)) {
             command.add(uninstaller.toFile().getAbsolutePath());
             return command;
         }

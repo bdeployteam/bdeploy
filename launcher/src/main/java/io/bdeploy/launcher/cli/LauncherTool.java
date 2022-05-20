@@ -711,7 +711,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Application directory must be there
         // NOTE: Directory is create before by the native installer
         Collection<String> missing = new ArrayList<>();
-        if (!appDir.toFile().exists()) {
+        if (!PathHelper.exists(appDir)) {
             missing.add("Directory: " + clientAppCfg.appConfig.uid);
         }
 
@@ -721,7 +721,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         applications.addAll(clientAppCfg.resolvedRequires);
         for (Manifest.Key app : applications) {
             Path expectedPath = poolDir.resolve(app.directoryFriendlyName());
-            if (!expectedPath.toFile().exists()) {
+            if (!PathHelper.exists(expectedPath)) {
                 missing.add("Pooled-App: " + app);
             }
         }
@@ -818,7 +818,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         Path nativeLauncher = ClientPathHelper.getNativeLauncher(homeDir);
 
         Key launcher = requiredLauncher.getValue();
-        if (nativeLauncher.toFile().exists()) {
+        if (PathHelper.exists(nativeLauncher)) {
             log.info("Launcher is already installed.");
             return;
         }

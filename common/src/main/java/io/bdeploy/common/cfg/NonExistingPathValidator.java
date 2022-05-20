@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import io.bdeploy.common.cfg.Configuration.ConfigValidator;
 import io.bdeploy.common.cfg.Configuration.ValidationMessage;
+import io.bdeploy.common.util.PathHelper;
 
 @ValidationMessage("Path exists, but should not exist (or be an empty directory): %s")
 public class NonExistingPathValidator implements ConfigValidator<String> {
@@ -23,7 +24,7 @@ public class NonExistingPathValidator implements ConfigValidator<String> {
                 throw new IllegalStateException("Cannot determine directory contents: " + p, e);
             }
         }
-        return !Files.exists(p);
+        return !PathHelper.exists(p);
     }
 
 }

@@ -45,7 +45,7 @@ public class PathHelper {
      * Returns whether or not the given directory is empty. A non-existing directory is assumed to be empty.
      */
     public static boolean isDirEmpty(Path path) {
-        if (!path.toFile().exists()) {
+        if (!exists(path)) {
             return true;
         }
         try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(path)) {
@@ -114,7 +114,7 @@ public class PathHelper {
      * @param path the {@link Path} to delete recursively.
      */
     public static void deleteRecursive(Path path) {
-        if (!path.toFile().exists()) {
+        if (!exists(path)) {
             return;
         }
 
@@ -241,6 +241,22 @@ public class PathHelper {
             // JDK 17 throws *undeclared* UnsupportedOperationException.
             return null;
         }
+    }
+
+    /**
+     * Files.exists is incredible inefficient. Thus this helper does whatever is performance-wise best to determine if a path
+     * exists.
+     *
+     * @param path the path to check
+     * @return whether the path exists
+     */
+    public static boolean exists(Path path) {
+        // we only optimize to toFile() in case of the default file-system.
+        if (path.getFileSystem() != FileSystems.getDefault()) {
+            return Files.exists(path);
+        }
+
+        return path.toFile().exists();
     }
 
 }

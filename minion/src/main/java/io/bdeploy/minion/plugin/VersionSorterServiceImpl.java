@@ -2,9 +2,14 @@ package io.bdeploy.minion.plugin;
 
 import java.util.Comparator;
 import java.util.SortedSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -31,6 +36,9 @@ public class VersionSorterServiceImpl implements VersionSorterService {
 
     private final PluginManager manager;
     private final BHiveRegistry reg;
+
+    private final Cache<String, Comparator<String>> comparatorCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES).build();
 
     public VersionSorterServiceImpl(PluginManager manager, BHiveRegistry registry) {
         this.manager = manager;
@@ -86,20 +94,28 @@ public class VersionSorterServiceImpl implements VersionSorterService {
     @Override
     public Comparator<String> getTagComparator(String group, Manifest.Key product) {
         if (group == null || product == null) {
+            // don't even bother caching this.
             return new DefaultTagAsVersionComparator();
         }
 
-        PluginInfoDto dto = getSorterPlugin(group, product);
-        if (dto == null) {
-            return new DefaultTagAsVersionComparator();
-        }
+        try {
+            return comparatorCache.get(group + "|" + product.getName(), () -> {
+                PluginInfoDto dto = getSorterPlugin(group, product);
+                if (dto == null) {
+                    return new DefaultTagAsVersionComparator();
+                }
 
-        if (dto.sorter == null || dto.sorter.getSorter() == null) {
-            log.error("Plugin declared to have a version sorter, but doesn't: {}:{}, origin: {}", dto.name, dto.version, product);
-            return new DefaultTagAsVersionComparator();
-        }
+                if (dto.sorter == null || dto.sorter.getSorter() == null) {
+                    log.error("Plugin declared to have a version sorter, but doesn't: {}:{}, origin: {}", dto.name, dto.version,
+                            product);
+                    return new DefaultTagAsVersionComparator();
+                }
 
-        return dto.sorter.getSorter();
+                return dto.sorter.getSorter();
+            });
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Cannot load comparator for " + product + " in " + group, e);
+        }
     }
 
     /**

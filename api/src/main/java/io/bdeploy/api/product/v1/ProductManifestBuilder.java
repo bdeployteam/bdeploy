@@ -36,6 +36,7 @@ import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 
 /**
@@ -323,7 +324,7 @@ public class ProductManifestBuilder {
                     appPath = appPath.resolve(ApplicationDescriptorApi.FILE_NAME);
                 }
 
-                if (!Files.exists(appPath)) {
+                if (!PathHelper.exists(appPath)) {
                     throw new IllegalStateException("Cannot find " + appPath + " while importing " + entry.getKey());
                 }
 
@@ -361,7 +362,7 @@ public class ProductManifestBuilder {
     }
 
     public static ProductVersionDescriptor readProductVersionDescriptor(Path impDesc, Path vDesc) {
-        if (!Files.exists(vDesc)) {
+        if (!PathHelper.exists(vDesc)) {
             throw new IllegalStateException("Cannot find version descriptor at " + vDesc);
         }
         ProductVersionDescriptor versions;
@@ -374,7 +375,7 @@ public class ProductManifestBuilder {
     }
 
     public static ProductDescriptor readProductDescriptor(Path impDesc) {
-        if (!Files.exists(impDesc)) {
+        if (!PathHelper.exists(impDesc)) {
             throw new IllegalArgumentException("Product descriptor does not exist: " + impDesc);
         }
         ProductDescriptor prod;

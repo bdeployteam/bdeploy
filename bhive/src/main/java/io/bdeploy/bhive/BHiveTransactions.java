@@ -149,7 +149,7 @@ public class BHiveTransactions {
         LongAdder amount = new LongAdder();
         try {
             Files.list(markerRoot).forEach(p -> {
-                if (Files.isDirectory(p) && Files.exists(p.resolve(TX_PID_FILE))) {
+                if (Files.isDirectory(p) && PathHelper.exists(p.resolve(TX_PID_FILE))) {
                     // TX PID exists, validate.
                     try {
                         List<String> lines = Files.readAllLines(p.resolve(TX_PID_FILE));

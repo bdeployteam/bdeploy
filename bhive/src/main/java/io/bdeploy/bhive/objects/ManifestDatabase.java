@@ -72,11 +72,11 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
         this.root = root;
         this.tmp = root.resolve(".tmp");
 
-        if (!Files.exists(root)) {
+        if (!PathHelper.exists(root)) {
             PathHelper.mkdirs(root);
         }
 
-        if (!Files.exists(tmp)) {
+        if (!PathHelper.exists(tmp)) {
             PathHelper.mkdirs(tmp);
         }
     }
@@ -147,7 +147,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      * @return whether the {@link Manifest} exists in the database.
      */
     public boolean hasManifest(Manifest.Key key) {
-        return Files.exists(getPathForKey(key));
+        return PathHelper.exists(getPathForKey(key));
     }
 
     /**

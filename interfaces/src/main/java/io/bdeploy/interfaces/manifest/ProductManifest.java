@@ -8,14 +8,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.meta.PersistentManifestClassification;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
@@ -356,21 +361,29 @@ public class ProductManifest {
      */
     public static SortedSet<Manifest.Key> scan(BHive hive) {
         SortedSet<Manifest.Key> result = new TreeSet<>();
-        Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
-        for (Manifest.Key key : allKeys) {
-            try {
-                Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
-                if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
-                    result.add(key);
-                }
-            } catch (IllegalStateException iae) {
-                // this can happen if *any* manifest is removed after listing them.
-                if (log.isDebugEnabled()) {
-                    log.debug("Manifest cannot be loaded while scanning for products: {}", key, iae);
-                }
-            }
-        }
+
+        // filter out internal (meta, etc.) manifests right away so we don't waste time checking.
+        Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation()).stream().filter(k -> !k.getName().startsWith("."))
+                .collect(Collectors.toSet());
+
+        PersistentManifestClassification<ProductClassification> pc = new PersistentManifestClassification<>(hive, "products",
+                (m) -> new ProductClassification(m.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)));
+
+        pc.loadAndUpdate(allKeys);
+        pc.getClassifications().entrySet().stream().filter(e -> e.getValue().isProduct).map(e -> e.getKey()).forEach(result::add);
+
         return result;
+    }
+
+    public static final class ProductClassification {
+
+        public final boolean isProduct;
+
+        @JsonCreator
+        public ProductClassification(@JsonProperty("isProduct") boolean prod) {
+            isProduct = prod;
+        }
+
     }
 
 }

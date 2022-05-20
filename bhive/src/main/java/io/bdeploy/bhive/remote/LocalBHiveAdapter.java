@@ -37,6 +37,7 @@ import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.util.PathHelper;
 import jakarta.ws.rs.core.UriBuilder;
 
 /**
@@ -111,7 +112,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
 
     @Override
     public void push(Path zipedHive) {
-        if (!Files.exists(zipedHive)) {
+        if (!PathHelper.exists(zipedHive)) {
             throw new IllegalArgumentException("File does not exist: " + zipedHive);
         }
 

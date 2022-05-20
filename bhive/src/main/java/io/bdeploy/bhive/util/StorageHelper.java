@@ -127,6 +127,17 @@ public class StorageHelper {
     }
 
     /**
+     * De-serializes an Object of given type from a stream into memory using a generic type reference.
+     */
+    public static <T> T fromStream(InputStream is, TypeReference<T> ref) {
+        try (InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            return getMapper().readValue(is, ref);
+        } catch (IOException e) {
+            throw new IllegalStateException(JSON_READ_ERROR, e);
+        }
+    }
+
+    /**
      * De-serializes an Object of given type from a YAML content stream into memory.
      */
     public static <T> T fromYamlStream(InputStream is, Class<T> clazz) {

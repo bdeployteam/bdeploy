@@ -1,6 +1,5 @@
 package io.bdeploy.bhive.cli;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
@@ -14,6 +13,7 @@ import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.common.util.PathHelper;
 
 /**
  * Generates an access token and exports the public key for this server, given
@@ -139,7 +139,7 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
     }
 
     private void checkPrivateKeyStoreExists(Path keystore) {
-        if (!Files.exists(keystore)) {
+        if (!PathHelper.exists(keystore)) {
             out().println("You must generate a keystore manually: ");
             out().println("  openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 17800 -out cert.pem");
             out().println("  openssl pkcs12 -inkey key.pem  -in cert.pem -export -out certstore.p12");

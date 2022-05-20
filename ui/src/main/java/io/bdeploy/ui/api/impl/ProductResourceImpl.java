@@ -105,7 +105,6 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         scan.stream().map(k -> ProductManifest.of(hive, k)).filter(filter).forEach(p -> result.add(ProductDto.create(p)));
-
         if (!result.isEmpty()) {
             Map<String, Comparator<Manifest.Key>> comparators = new TreeMap<>();
             result.sort((a, b) -> {

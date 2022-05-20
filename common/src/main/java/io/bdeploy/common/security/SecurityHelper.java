@@ -34,6 +34,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.PathHelper;
 
 /**
  * Encapsulates certificate and token handling for mutual authentication.
@@ -346,7 +347,7 @@ public class SecurityHelper {
     public KeyStore loadPublicKeyStore(Path keystore, char[] passphrase) throws GeneralSecurityException, IOException {
         KeyStore ks = KeyStore.getInstance("JCEKS");
 
-        if (Files.exists(keystore)) {
+        if (PathHelper.exists(keystore)) {
             try (InputStream is = Files.newInputStream(keystore)) {
                 return loadPublicKeyStore(is, passphrase);
             }

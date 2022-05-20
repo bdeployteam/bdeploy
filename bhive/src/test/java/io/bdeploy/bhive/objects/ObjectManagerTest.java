@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -66,9 +65,9 @@ class ObjectManagerTest extends DbTestBase {
             Path t2 = myTarget.resolve(Paths.get("dir", "file.txt"));
             Path t3 = myTarget.resolve(Paths.get("dir", "subDir", "child.txt"));
 
-            assertTrue(Files.exists(t1));
-            assertTrue(Files.exists(t2));
-            assertTrue(Files.exists(t3));
+            assertTrue(PathHelper.exists(t1));
+            assertTrue(PathHelper.exists(t2));
+            assertTrue(PathHelper.exists(t3));
 
             try (InputStream is = mgr.getStreamForRelativePath(tree, "dir", "file.txt")) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {

@@ -2,10 +2,10 @@ package io.bdeploy.bhive.op;
 
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.Threads;
 
 /**
@@ -24,7 +24,7 @@ public class AwaitDirectoryLockOperation extends BHive.Operation<Void> {
 
         Path lockFile = directory.resolve(LockDirectoryOperation.LOCK_FILE);
         for (int i = 0; i < 100_000; ++i) {
-            if (!Files.exists(lockFile) || !LockDirectoryOperation.isLockFileValid(lockFile, getLockContentValidator())) {
+            if (!PathHelper.exists(lockFile) || !LockDirectoryOperation.isLockFileValid(lockFile, getLockContentValidator())) {
                 return null;
             }
             if (!Threads.sleep(10)) {

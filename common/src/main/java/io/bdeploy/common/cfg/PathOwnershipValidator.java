@@ -13,6 +13,7 @@ import io.bdeploy.common.cfg.Configuration.ConfigValidator;
 import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.common.util.PathHelper;
 
 @ValidationMessage("The given root directory does not belong to the current user: %s")
 public class PathOwnershipValidator implements ConfigValidator<String> {
@@ -26,7 +27,7 @@ public class PathOwnershipValidator implements ConfigValidator<String> {
         }
 
         Path target = Paths.get(value);
-        if (!Files.exists(target)) {
+        if (!PathHelper.exists(target)) {
             return true; // OK, the user may be able to create the directory!
         }
 

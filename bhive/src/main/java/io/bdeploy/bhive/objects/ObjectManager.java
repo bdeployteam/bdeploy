@@ -175,7 +175,7 @@ public class ObjectManager {
             handler = new DefaultReferenceHandler(this);
         }
         try {
-            if (Files.exists(location)) {
+            if (PathHelper.exists(location)) {
                 try (Stream<Path> list = Files.list(location)) {
                     if (list.findAny().isPresent()) {
                         throw new IllegalStateException("Location must not exist or be empty: " + location);
@@ -191,7 +191,7 @@ public class ObjectManager {
                 tempLocation = location;
             }
 
-            if (Files.exists(tempLocation)) {
+            if (PathHelper.exists(tempLocation)) {
                 PathHelper.deleteRecursive(tempLocation);
             }
 
@@ -208,7 +208,7 @@ public class ObjectManager {
                 internalMoveRetrying(location, tempLocation);
             } catch (Throwable t) {
                 try {
-                    if (Files.exists(tempLocation)) {
+                    if (PathHelper.exists(tempLocation)) {
                         PathHelper.deleteRecursive(tempLocation);
                     }
                 } catch (Throwable it) {
