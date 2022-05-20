@@ -2,7 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { combineLatest, Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, share } from 'rxjs/operators';
-import { InstanceDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import {
+  InstanceDto,
+  InstanceGroupConfiguration,
+  InstanceStateRecord,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { GroupsService } from '../../groups/services/groups.service';
@@ -23,26 +27,28 @@ export class InstanceStateService {
   ) {
     this.state$ = combineLatest([
       this.instances.current$,
+      this.groups.current$,
       this.instances.instances$, // trigger to reload on changes.
     ]).pipe(
-      mergeMap(([i]) => this.getLoadCall(i)),
+      mergeMap(([i, g]) => this.getLoadCall(i, g)),
       share({
         connector: () => new ReplaySubject(1),
-        resetOnError: false,
+        resetOnError: true,
         resetOnComplete: false,
         resetOnRefCountZero: false,
       })
     );
   }
 
-  private getLoadCall(i: InstanceDto): Observable<InstanceStateRecord> {
-    return !i
+  private getLoadCall(
+    i: InstanceDto,
+    g: InstanceGroupConfiguration
+  ): Observable<InstanceStateRecord> {
+    return !i || !g
       ? of(null)
       : this.http
           .get<InstanceStateRecord>(
-            `${this.apiPath(this.groups.current$.value.name)}/${
-              i.instanceConfiguration.uuid
-            }/state`
+            `${this.apiPath(g.name)}/${i.instanceConfiguration.uuid}/state`
           )
           .pipe(measure('Load Instance Version States'));
   }
