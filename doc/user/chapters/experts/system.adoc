@@ -20,6 +20,14 @@ _Gravatar_ support can be enabled here. If disabled, a generic icon is used for 
 [NOTE]
 At least one login method must be configured. Disable local accounts only if it is ensured that at least one administrator account exists via external authentication!
 
+===== OpenID Connect
+
+OAuth2 with OpenID Connect support is available if enabled and configured. The URL must be the token endpoint of the OpenID Connect provider. For example, the URL may look something like this on Keycloak, depending on configuration:
+
+ https://auth.example.com/auth/realms/realmName/protocol/openid-connect/token
+
+The Client ID and Client Secret are used to authenticate with the OpenID Connect provider, and need to be obtained from the OpenID Connect provider.
+
 ===== LDAP Auth.
 
 On the *LDAP Auth* tab, you can configure a list of LDAP servers which are queried when authenticating a user. Use drag and drop to to specify the sort order in which the LDAP servers are queried for users that log on.
