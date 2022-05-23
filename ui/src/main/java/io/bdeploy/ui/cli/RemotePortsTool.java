@@ -168,9 +168,9 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                 if (desc.descriptor.startCommand != null) {
                     for (var param : config.start.parameters) {
                         var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.uid.equals(param.uid))
-                                .findFirst().orElseThrow(
-                                        () -> new IllegalStateException("Cannot find parameter descriptor for " + param.uid));
-                        if (paramDesc.type == ParameterType.CLIENT_PORT || paramDesc.type == ParameterType.SERVER_PORT) {
+                                .findFirst().orElse(null);
+                        if (paramDesc != null
+                                && (paramDesc.type == ParameterType.CLIENT_PORT || paramDesc.type == ParameterType.SERVER_PORT)) {
                             try {
                                 result.add(new NodePort(node.nodeName, config.name, config.uid, paramDesc.type, paramDesc.name,
                                         Integer.valueOf(param.value)));
