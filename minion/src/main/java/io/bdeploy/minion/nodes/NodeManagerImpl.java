@@ -27,6 +27,7 @@ import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.api.impl.ChangeEventManager;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
@@ -66,6 +67,11 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
 
         // initially, all nodes are offline.
         this.config.entrySet().forEach(e -> this.status.put(e.getKey(), createStarting(e.getValue())));
+
+        if (root.getMode() == MinionMode.CENTRAL) {
+            // no need to fetch states, etc. central has no live nodes.
+            return;
+        }
 
         // initially, all nodes are marked as "warn on contact failure".
         this.config.entrySet().forEach(e -> this.contactWarning.put(e.getKey(), Boolean.TRUE));
