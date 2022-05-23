@@ -44,10 +44,16 @@ describe('Software Repository Tests', () => {
     // upload software and product.
     cy.inMainNavFlyin('app-software-upload', () => {
       cy.fillFileDrop('external-software-hive.zip');
-      cy.contains('app-bd-file-upload-raw', 'Success: external-software-hive.zip').should('exist');
+      cy.contains(
+        'app-bd-file-upload-raw',
+        'Success: external-software-hive.zip'
+      ).should('exist');
 
       cy.fillFileDrop('external-software-2-raw-direct.zip');
-      cy.contains('app-bd-file-upload-raw', 'Success: external-software-2-raw-direct.zip')
+      cy.contains(
+        'app-bd-file-upload-raw',
+        'Success: external-software-2-raw-direct.zip'
+      )
         .should('exist')
         .within(() => {
           cy.contains('Generic').should('exist');
@@ -67,9 +73,31 @@ describe('Software Repository Tests', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_SoftwareRepoUploadSuccess');
 
+    cy.intercept({
+      method: 'GET',
+      url: '/api/group/Test-Repo/product/list',
+    }).as('product-list');
+    cy.intercept({
+      method: 'GET',
+      url: '/api/softwarerepository/Test-Repo/content**',
+    }).as('content');
+
     cy.inMainNavFlyin('app-software-upload', () => {
       cy.fillFileDrop('test-product-1-direct.zip');
-      cy.contains('app-bd-file-upload-raw', 'Success: test-product-1-direct.zip').should('exist');
+      cy.contains(
+        'app-bd-file-upload-raw',
+        'Success: test-product-1-direct.zip'
+      ).should('exist');
+    });
+
+    cy.wait('@product-list');
+    cy.wait('@content');
+
+    cy.visit('/');
+    cy.pressMainNavButton('Software Repositories');
+
+    cy.inMainNavContent(() => {
+      cy.contains('tr', 'Test-Repo').should('exist').click();
     });
 
     // check presence of software and product
@@ -133,8 +161,13 @@ describe('Software Repository Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Download"]').downloadByLocationAssign('product-1.0.0.zip');
-      validateZip('product-1.0.0.zip', 'manifests/io.bdeploy/demo/product/1.0.0');
+      cy.get('button[data-cy^="Download"]').downloadByLocationAssign(
+        'product-1.0.0.zip'
+      );
+      validateZip(
+        'product-1.0.0.zip',
+        'manifests/io.bdeploy/demo/product/1.0.0'
+      );
 
       cy.get('button[data-cy^="Delete"]').click();
       cy.contains('app-bd-notification-card', 'Delete 1.0.0').within(() => {
