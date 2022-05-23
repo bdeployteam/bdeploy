@@ -38,6 +38,8 @@ import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
+import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCache;
+import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCacheRecord;
 
 /**
  * A special manifestation of a {@link Manifest} which must follow a certain layout and groups multiple applications together
@@ -81,6 +83,14 @@ public class ProductManifest {
         String label = mf.getLabels().get(ProductManifestBuilder.PRODUCT_LABEL);
         if (label == null) {
             return null;
+        }
+
+        ProductManifestStaticCache cacheStorage = new ProductManifestStaticCache(manifest, hive);
+        ProductManifestStaticCacheRecord cached = cacheStorage.read();
+
+        if (cached != null) {
+            return new ProductManifest(label, mf, cached.appRefs, cached.otherRefs, cached.desc, cached.cfgEntry, cached.plugins,
+                    cached.templates, cached.applicationTemplates);
         }
 
         SortedSet<Key> allRefs = new TreeSet<>(
@@ -160,8 +170,19 @@ public class ProductManifest {
 
         // lazy, DFS resolving of all templates.
         resolveTemplates(templates, applicationTemplates);
-
         applicationTemplates.sort((a, b) -> a.name.compareTo(b.name));
+
+        // store persistent information.
+        try {
+            cacheStorage.store(appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates);
+        } catch (Exception e) {
+            // there is a chance for a race condition here, which actually does not do any harm (except for a
+            // tiny performance hit since two threads calculate this). in case two threads try to persist the
+            // exact same thing, we simply ignore the failure.
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot store persistent cache for {}: {}", manifest, e.toString());
+            }
+        }
 
         return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates);
     }

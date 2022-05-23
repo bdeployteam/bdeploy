@@ -120,8 +120,7 @@ public class InstanceManifest {
 
         // don't actually load the product - it's optional on the minions.
         // this is to not force ALL of a product suite to the remote. minions may
-        // receive
-        // only a subset of a product to deploy.
+        // receive only a subset of a product to deploy.
         InstanceManifest result = new InstanceManifest(key, ic);
 
         Tree root = hive.execute(new TreeLoadOperation().setTree(mf.getRoot()));

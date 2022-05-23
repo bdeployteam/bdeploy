@@ -90,7 +90,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
         Set<Key> keySet = hive.execute(new ManifestListOperation());
         for (Manifest.Key k : keySet) {
-            if (SoftwareRepositoryManifest.isSoftwareRepositoryManifest(k)) {
+            if (SoftwareRepositoryManifest.isSoftwareRepositoryManifest(k) || k.getName().startsWith(".")) {
                 continue;
             }
             // collect all non-products and all manifests that belong to products
