@@ -135,7 +135,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
             long required = h.execute(sop);
 
             if ((required * 2) >= space) {
-                throw new WebApplicationException("Not enough space available to savely perform update",
+                throw new WebApplicationException("Not enough space available to safely perform update",
                         Status.PRECONDITION_FAILED);
             }
         } catch (IOException e) {

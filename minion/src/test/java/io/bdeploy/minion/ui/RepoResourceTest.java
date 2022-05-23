@@ -1,7 +1,6 @@
 package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -115,9 +114,6 @@ class RepoResourceTest {
         assertEquals(200, rs.getStatus());
 
         assertTrue(swr.list(true, true).contains(swKey));
-
-        String softwareDiskUsage = swr.getSoftwareDiskUsage(swKey.getName());
-        assertNotNull(softwareDiskUsage);
 
         String token = swr.createSoftwareZipFile(swKey.getName(), swKey.getTag());
         Response download = dlService.download(token);

@@ -26,6 +26,7 @@ public class BHiveCli extends ToolBase {
         register(PruneTool.class);
         register(TokenTool.class);
         register(TreeTool.class);
+        register(DiscUsageTool.class);
 
         register(PushTool.class);
         register(FetchTool.class);

@@ -37,9 +37,7 @@ import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
-import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -107,13 +105,6 @@ public class SoftwareResourceImpl implements SoftwareResource {
         result.removeIf(apps::contains); // remove all manifests that belong to a product
         result.sort(vss.getKeyComparator(null, null));
         return result;
-    }
-
-    @Override
-    public String getSoftwareDiskUsage(String name) {
-        Set<Key> mfs = hive.execute(new ManifestListOperation().setManifestName(name));
-        Set<ObjectId> objs = hive.execute(new ObjectListOperation().addManifest(mfs));
-        return FormatHelper.formatFileSize(hive.execute(new ObjectSizeOperation().addObject(objs)));
     }
 
     @Override
