@@ -175,6 +175,8 @@ public class InstanceHistoryManager {
         switch (action) {
             case CREATE:
                 return "Version " + tag + ": Created";
+            case DELETE:
+                return "Version " + tag + ": Deleted";
             case INSTALL:
                 return "Version " + tag + ": Installed";
             case UNINSTALL:
@@ -235,7 +237,7 @@ public class InstanceHistoryManager {
     }
 
     private HistoryEntryType computeType(Action action) {
-        if (action == Action.CREATE) {
+        if (action == Action.CREATE || action == Action.DELETE) {
             return HistoryEntryType.CREATE;
         }
         return HistoryEntryType.DEPLOYMENT;

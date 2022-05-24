@@ -20,6 +20,7 @@ public class InstanceManifestHistory {
 
     public enum Action {
         CREATE,
+        DELETE,
         INSTALL,
         UNINSTALL,
         ACTIVATE,

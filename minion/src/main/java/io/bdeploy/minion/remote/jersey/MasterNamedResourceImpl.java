@@ -556,7 +556,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public void deleteVersion(String instanceUuid, String tag) {
-        InstanceManifest.delete(hive, new Manifest.Key(InstanceManifest.getRootName(instanceUuid), tag));
+        Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceUuid), tag);
+        InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.DELETE, context.getUserPrincipal().getName(), null);
+        InstanceManifest.delete(hive, key);
     }
 
     @Override
