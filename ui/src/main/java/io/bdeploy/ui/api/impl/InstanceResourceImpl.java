@@ -118,7 +118,6 @@ import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
-import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 import io.bdeploy.ui.utils.WindowsInstaller;
 import io.bdeploy.ui.utils.WindowsInstallerConfig;
@@ -201,16 +200,10 @@ public class InstanceResourceImpl implements InstanceResource {
             Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
                     k -> vss.getTagComparator(group, im.getConfiguration().product));
 
-            ProductDto productDto = null;
-            try {
-                productDto = ProductDto.create(ProductManifest.of(hive, config.product));
-            } catch (Exception e) {
-                // ignore: product not found
-            }
+            boolean hasProduct = scan.contains(config.product);
 
             Key activeVersion = null;
             Key activeProduct = null;
-            ProductDto activeProductDto = null;
             try {
                 InstanceStateRecord state = getDeploymentStates(config.uuid);
 
@@ -219,7 +212,6 @@ public class InstanceResourceImpl implements InstanceResource {
                         InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
                         activeVersion = mf.getManifest();
                         activeProduct = mf.getConfiguration().product;
-                        activeProductDto = ProductDto.create(ProductManifest.of(hive, activeProduct));
                     } catch (Exception e) {
                         // ignore: product of active version not found
                     }
@@ -230,19 +222,16 @@ public class InstanceResourceImpl implements InstanceResource {
             }
 
             boolean newerVersionAvailable = false;
+            String productName = config.product.getName();
+            String productTag = config.product.getTag();
 
-            if (productDto != null && productDto.key != null) {
-                String productName = productDto.key.getName();
-                String productTag = productDto.key.getTag();
+            // reverse order of comparison to get newest version first.
+            Optional<String> newestProductVersion = scan.stream().filter(key -> key.getName().equals(productName))
+                    .map(Key::getTag).sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
 
-                // reverse order of comparison to get newest version first.
-                Optional<String> newestProductVersion = scan.stream().filter(key -> key.getName().equals(productName))
-                        .map(Key::getTag).sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
-
-                if (newestProductVersion.isPresent()) {
-                    String newestProductTag = newestProductVersion.get();
-                    newerVersionAvailable = productVersionComparator.compare(productTag, newestProductTag) < 0;
-                }
+            if (newestProductVersion.isPresent()) {
+                String newestProductTag = newestProductVersion.get();
+                newerVersionAvailable = productVersionComparator.compare(productTag, newestProductTag) < 0;
             }
 
             ManagedMasterDto managedMaster = null;
@@ -256,8 +245,8 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceOverallStateRecord overallState = im.getOverallState(hive).read();
 
             // Clear security token before sending via REST
-            result.add(InstanceDto.create(imKey, config, productDto, activeProduct, activeProductDto, newerVersionAvailable,
-                    managedMaster, attributes, banner, im.getManifest(), activeVersion, overallState));
+            result.add(InstanceDto.create(imKey, config, hasProduct, activeProduct, newerVersionAvailable, managedMaster,
+                    attributes, banner, im.getManifest(), activeVersion, overallState));
         }
         return result;
     }

@@ -48,7 +48,8 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const prodName = this.bulk.selection$.value[0].productDto.key.name;
+    const prodName =
+      this.bulk.selection$.value[0].instanceConfiguration.product.name;
     this.products.products$.subscribe((p) => {
       if (!p) {
         return;

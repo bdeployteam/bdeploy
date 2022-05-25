@@ -12,7 +12,7 @@ public class InstanceDto {
     public Manifest.Key instance;
 
     public InstanceConfiguration instanceConfiguration;
-    public ProductDto productDto; // DTO of instanceConfiguration.product
+    public boolean hasProduct;
 
     public Manifest.Key activeProduct;
     public ProductDto activeProductDto;
@@ -26,16 +26,15 @@ public class InstanceDto {
     public InstanceBannerRecord banner;
     public InstanceOverallStateRecord overallState;
 
-    public static InstanceDto create(Manifest.Key instance, InstanceConfiguration instanceConfiguration, ProductDto productDto,
-            Manifest.Key activeProduct, ProductDto activeProductDto, boolean newerVersionAvailable,
-            ManagedMasterDto managedServer, CustomAttributesRecord attributes, InstanceBannerRecord banner,
-            Manifest.Key latestVersion, Manifest.Key activeVersion, InstanceOverallStateRecord overallState) {
+    public static InstanceDto create(Manifest.Key instance, InstanceConfiguration instanceConfiguration, boolean hasProduct,
+            Manifest.Key activeProduct, boolean newerVersionAvailable, ManagedMasterDto managedServer,
+            CustomAttributesRecord attributes, InstanceBannerRecord banner, Manifest.Key latestVersion,
+            Manifest.Key activeVersion, InstanceOverallStateRecord overallState) {
         InstanceDto dto = new InstanceDto();
         dto.instance = instance;
         dto.instanceConfiguration = instanceConfiguration;
-        dto.productDto = productDto;
+        dto.hasProduct = hasProduct;
         dto.activeProduct = activeProduct;
-        dto.activeProductDto = activeProductDto;
         dto.newerVersionAvailable = newerVersionAvailable;
         dto.managedServer = managedServer;
         dto.attributes = attributes;

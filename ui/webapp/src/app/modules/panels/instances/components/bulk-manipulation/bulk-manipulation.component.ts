@@ -31,8 +31,9 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
       this.selections = selections;
       this.isAllSameProduct = selections.every(
         (i) =>
-          !!i.productDto?.key?.name &&
-          i.productDto.key.name === selections[0].productDto.key.name
+          !!i?.instanceConfiguration?.product?.name &&
+          i.instanceConfiguration.product.name ===
+            selections[0].instanceConfiguration.product.name
       );
     });
   }

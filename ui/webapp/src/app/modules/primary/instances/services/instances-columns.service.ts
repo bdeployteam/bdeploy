@@ -7,6 +7,7 @@ import {
 import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
+import { ProductsService } from '../../products/services/products.service';
 import { ServersService } from '../../servers/services/servers.service';
 import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
@@ -53,9 +54,11 @@ export class InstancesColumnsService {
     name: 'Product',
     hint: BdDataColumnTypeHint.DETAILS,
     data: (r) =>
-      r.productDto?.name
-        ? r.productDto.name
-        : r.instanceConfiguration.product.name,
+      this.products.products$.value.find(
+        (p) =>
+          p.key.name === r.instanceConfiguration.product.name &&
+          p.key.tag === r.instanceConfiguration.product.tag
+      )?.name || r.instanceConfiguration.product.name,
     icon: () => 'apps',
     showWhen: '(min-width: 600px)',
   };
@@ -73,7 +76,7 @@ export class InstancesColumnsService {
     id: 'activeProductVersion',
     name: 'Active Version',
     hint: BdDataColumnTypeHint.DETAILS,
-    data: (r) => (r.activeProductDto ? r.activeProductDto.key.tag : null),
+    data: (r) => (r.activeProduct ? r.activeProduct.tag : null),
     icon: () => 'security_update_good',
     showWhen: '(min-width: 750px)',
   };
@@ -110,7 +113,8 @@ export class InstancesColumnsService {
   constructor(
     private cfg: ConfigService,
     private instances: InstancesService,
-    private servers: ServersService
+    private servers: ServersService,
+    private products: ProductsService
   ) {
     if (cfg.config.mode !== MinionMode.CENTRAL) {
       this.instanceSyncColumn.display = BdDataColumnDisplay.NONE;

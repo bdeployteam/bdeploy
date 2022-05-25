@@ -134,7 +134,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
                 for (InstanceDto instance : instances) {
                     List<Manifest.Key> toFetchForInstance = new ArrayList<>();
                     toFetchForInstance.add(instance.activeVersion != null ? instance.activeVersion : instance.latestVersion);
-                    toFetchForInstance.add(instance.activeProduct != null ? instance.activeProduct : instance.productDto.key);
+                    toFetchForInstance.add(
+                            instance.activeProduct != null ? instance.activeProduct : instance.instanceConfiguration.product);
                     toFetch.put(instance.instanceConfiguration.uuid, toFetchForInstance);
                 }
             }

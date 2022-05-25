@@ -27,7 +27,15 @@ import { OverallStatusColumnComponent } from './overall-status-column/overall-st
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
     { name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose },
-    { name: 'Product', group: (r) => r.productDto.name },
+    {
+      name: 'Product',
+      group: (r) =>
+        this.products.products$.value.find(
+          (p) =>
+            p.key.name === r.instanceConfiguration.product.name &&
+            p.key.tag === r.instanceConfiguration.product.tag
+        )?.name || r.instanceConfiguration.product.name,
+    },
   ];
   grouping: BdDataGroupingDefinition<InstanceDto>[];
   defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [];

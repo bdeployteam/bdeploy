@@ -606,7 +606,7 @@ export class InstanceEditService {
     }
 
     // if the current product is not available, there is no way (currently) we can validate that...
-    if (!this.current$.value.productDto) {
+    if (!this.current$.value.hasProduct) {
       this.validating$.next(false);
       return;
     }
