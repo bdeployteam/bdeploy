@@ -43,6 +43,7 @@ export class ConfigService {
   private versionLock = false;
 
   private backendTimeOffset = 0;
+  private backendOffsetWarning = false;
 
   isCentral$ = new BehaviorSubject<boolean>(false);
   isManaged$ = new BehaviorSubject<boolean>(false);
@@ -236,7 +237,12 @@ export class ConfigService {
 
           // calculate the time offset between the client and the server
           this.backendTimeOffset = serverTime - clientTime;
-          console.log('Server time offset', this.backendTimeOffset, 'ms');
+
+          // log if we're exceeding a certain threshold
+          if (this.backendTimeOffset > 500 && !this.backendOffsetWarning) {
+            console.warn('Server time offset', this.backendTimeOffset, 'ms');
+            this.backendOffsetWarning = true;
+          }
         })
       );
   }

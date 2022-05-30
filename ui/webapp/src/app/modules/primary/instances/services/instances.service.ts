@@ -130,10 +130,6 @@ export class InstancesService {
       }
 
       update.subscribe((_) => {
-        console.log(
-          `Instance Change, Current=${cur?.instanceConfiguration?.uuid}:${cur?.instance?.tag}, Cur-Active=${cur?.activeVersion?.tag}, Active=${act?.instanceConfiguration?.uuid}:${act?.instance?.tag}`
-        );
-
         // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
         // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
         this.activeLoadInterval = setInterval(
@@ -423,10 +419,6 @@ export class InstancesService {
       this.active$.next(null);
       return;
     }
-
-    console.log(
-      `Load Instance, Current=${inst.instanceConfiguration.uuid}:${inst.instance.tag}, Active=${inst.activeVersion.tag}, Old-Active=${this.active$.value?.instanceConfiguration?.uuid}:${this.active$.value?.instance?.tag}`
-    );
 
     if (
       i === this.active$.value?.instanceConfiguration?.uuid &&
