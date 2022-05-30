@@ -237,7 +237,11 @@ public class InstanceResourceImpl implements InstanceResource {
             ManagedMasterDto managedMaster = null;
             if (minion.getMode() == MinionMode.CENTRAL) {
                 ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
-                managedMaster = ms.getServerForInstance(group, config.uuid, imKey.getTag());
+                try {
+                    managedMaster = ms.getServerForInstance(group, config.uuid, imKey.getTag());
+                } catch (WebApplicationException e) {
+                    log.warn("Cannot load managed server for group {}, instance {}", group, config.uuid);
+                }
             }
 
             CustomAttributesRecord attributes = im.getAttributes(hive).read();
