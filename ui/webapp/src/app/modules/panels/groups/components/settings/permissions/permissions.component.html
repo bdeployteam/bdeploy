@@ -12,7 +12,7 @@
   </div>
 </ng-template>
 
-<app-bd-dialog>
+<app-bd-dialog [loadingWhen$]="users.loading$">
   <app-bd-dialog-toolbar
     header="Permissions - {{ (groups.current$ | async)?.name }}"
     [panel]="true"
