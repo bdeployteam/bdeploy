@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
+import { distinctUntilChanged, finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
@@ -173,6 +173,18 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         .pipe(map(([a, b, c]) => a || b || c))
         .subscribe((b) => {
           this.performing$.next(b);
+        })
+    );
+
+    // when processConfig$ emits value with new uid, confirmation dialog must be closed
+    this.subscription.add(
+      this.details.processConfig$
+        .pipe(
+          map((config) => config?.uid),
+          distinctUntilChanged()
+        )
+        .subscribe(() => {
+          this.dialog?.messageComp.reset();
         })
     );
   }
