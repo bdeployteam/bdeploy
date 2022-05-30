@@ -48,6 +48,7 @@ export class ConfigService {
   isManaged$ = new BehaviorSubject<boolean>(false);
   isStandalone$ = new BehaviorSubject<boolean>(false);
 
+  // prettier-ignore
   constructor(
     private themes: ThemeService /* dummy: required to bootstrap theming early! */,
     private http: HttpClient,
@@ -56,69 +57,22 @@ export class ConfigService {
     sanitizer: DomSanitizer
   ) {
     // register all custom icons we want to use with <mat-icon>
-    iconRegistry.addSvgIcon(
-      'bdeploy',
-      sanitizer.bypassSecurityTrustResourceUrl(
-        'assets/logo-single-path-square.svg'
-      )
-    );
-    iconRegistry.addSvgIcon(
-      'progress',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'plus',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'star',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'group-settings',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/group-settings.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'instance-settings',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'repository-settings',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/repository-settings.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'start-scheduled',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'stop-scheduled',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'sync-all',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg')
-    );
+    iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
+    iconRegistry.addSvgIcon('progress', sanitizer.bypassSecurityTrustResourceUrl('assets/progress.svg'));
+    iconRegistry.addSvgIcon('plus', sanitizer.bypassSecurityTrustResourceUrl('assets/plus.svg'));
+    iconRegistry.addSvgIcon('star', sanitizer.bypassSecurityTrustResourceUrl('assets/star.svg'));
+    iconRegistry.addSvgIcon('group-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/group-settings.svg'));
+    iconRegistry.addSvgIcon('instance-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg'));
+    iconRegistry.addSvgIcon('repository-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/repository-settings.svg'));
+    iconRegistry.addSvgIcon('start-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg'));
+    iconRegistry.addSvgIcon('stop-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
+    iconRegistry.addSvgIcon('sync-all', sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg'));
 
-    iconRegistry.addSvgIcon(
-      'LINUX',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'WINDOWS',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'AIX',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'MACOS',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg')
-    );
-    iconRegistry.addSvgIcon(
-      'global_pin',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/global-pin.svg')
-    );
+    iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
+    iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
+    iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
+    iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
+    iconRegistry.addSvgIcon('global_pin', sanitizer.bypassSecurityTrustResourceUrl('assets/global-pin.svg'));
 
     // check whether the server version changed every minute.
     // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.
@@ -289,5 +243,9 @@ export class ConfigService {
 
   public getCorrectedNow(): number {
     return Date.now() + this.backendTimeOffset;
+  }
+
+  public isCurrentlyUnreachable(): boolean {
+    return this.isUnreachable;
   }
 }
