@@ -73,15 +73,6 @@ describe('Software Repository Tests', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_SoftwareRepoUploadSuccess');
 
-    cy.intercept({
-      method: 'GET',
-      url: '/api/group/Test-Repo/product/list',
-    }).as('product-list');
-    cy.intercept({
-      method: 'GET',
-      url: '/api/softwarerepository/Test-Repo/content**',
-    }).as('content');
-
     cy.inMainNavFlyin('app-software-upload', () => {
       cy.fillFileDrop('test-product-1-direct.zip');
       cy.contains(
@@ -90,15 +81,8 @@ describe('Software Repository Tests', () => {
       ).should('exist');
     });
 
-    cy.wait('@product-list');
-    cy.wait('@content');
-
-    cy.visit('/');
-    cy.pressMainNavButton('Software Repositories');
-
-    cy.inMainNavContent(() => {
-      cy.contains('tr', 'Test-Repo').should('exist').click();
-    });
+    cy.waitUntilContentLoaded();
+    cy.contains('tr', 'io.bdeploy/demo/product').should('exist');
 
     // check presence of software and product
     cy.inMainNavContent(() => {
@@ -175,6 +159,7 @@ describe('Software Repository Tests', () => {
       });
     });
 
+    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Demo Product').should('not.exist');
     });

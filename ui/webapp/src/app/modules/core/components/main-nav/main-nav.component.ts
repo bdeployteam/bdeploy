@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActivitiesService } from '../../services/activities.service';
 import { AuthenticationService } from '../../services/authentication.service';
+import { ConfigService } from '../../services/config.service';
 import { ObjectChangesService } from '../../services/object-changes.service';
 import { ThemeService } from '../../services/theme.service';
 
@@ -22,11 +23,12 @@ export class MainNavComponent {
     public themeService: ThemeService,
     public activities: ActivitiesService,
     private changes: ObjectChangesService,
+    private config: ConfigService,
     private snackbar: MatSnackBar
   ) {
     this.changes.errorCount$.subscribe((count) => {
       // in case we exceed a certain threshold, we will show a warning to the user. the error count is reset, and we start over again in case the user dismisses this message.
-      if (count === 3) {
+      if (count === 3 && !this.config.isCurrentlyUnreachable()) {
         // we check for the exact number to avout repeated messages.
         // this is a number that should not happen in a typical session, *except* when there is a systemic problem with websockets. also
         // this number of errors should occur "rather" quickly in case there is a websocket issue.

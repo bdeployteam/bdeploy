@@ -7,6 +7,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.function.UnaryOperator;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -25,6 +26,11 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.WebTarget;
 
 public class CommonEndpointHelper {
+
+    static {
+        // you don't want to know. if you do, see DCS-417 or https://github.com/eclipse-ee4j/jersey/issues/3293
+        HttpsURLConnection.getDefaultSSLSocketFactory();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(CommonEndpointHelper.class);
 

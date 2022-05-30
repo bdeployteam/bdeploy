@@ -118,9 +118,6 @@ export class ObjectChangesService {
     // First determine whether we need to subscribe on the server.
     const key = this.key(type, scope);
     const needSub = !this._refs[key]?.refCount;
-
-    console.log(`OC Sub ${key} ${needSub ? 'fresh' : 'reuse'}`);
-
     if (needSub) {
       // we're the first, need to subscribe
       this._refs[key] = { refCount: 1, type, scope };
@@ -159,9 +156,6 @@ export class ObjectChangesService {
     // return a subscription which will unsubscribe both from the change feed and the server if required.
     return new Subscription(() => {
       const needUnsub = this._refs[key]?.refCount === 1;
-
-      console.log(`OC Unsub ${key} ${needUnsub ? 'unsub' : 'keep'}`);
-
       if (needUnsub) {
         // we're the last one with this subscription, unsubscribe from the server.
         delete this._refs[key];
