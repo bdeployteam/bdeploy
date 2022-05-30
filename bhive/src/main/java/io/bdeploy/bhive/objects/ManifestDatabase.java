@@ -62,6 +62,8 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      * Assuming a max object size of ~4K (manifest includes cached references), this cache would grow to ~10MB.
      */
     private final Cache<Manifest.Key, Manifest> manifestCache = CacheBuilder.newBuilder().maximumSize(2_500).build();
+    private final Cache<Path, Set<Manifest.Key>> manifestListCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES).build();
 
     /**
      * @param root the root path of the database, created empty if it does not yet
@@ -180,6 +182,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
                 }
             }
             manifestCache.put(manifest.getKey(), manifest);
+            manifestListCache.invalidateAll();
             scheduleNotify(manifest.getKey());
         });
     }
@@ -195,6 +198,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
         locked(() -> {
             Files.deleteIfExists(getPathForKey(key));
             manifestCache.invalidate(key);
+            manifestListCache.invalidateAll();
         });
     }
 
@@ -203,7 +207,16 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      */
     public Set<Manifest.Key> getAllManifests() {
         // structure is dir:root/dir:name/dir:name/file:tag
-        return collectManifests(root);
+        return collectManifestsCached(root);
+    }
+
+    private Set<Manifest.Key> collectManifestsCached(Path r) {
+        try {
+            return manifestListCache.get(r, () -> collectManifests(r));
+        } catch (ExecutionException e) {
+            log.warn("Cannot fetch manifest list cache", e);
+            return collectManifests(r); // fallback.
+        }
     }
 
     private Set<Manifest.Key> collectManifests(Path scanRoot) {
@@ -265,7 +278,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
             return result;
         }
         Path namedRoot = root.resolve(name);
-        return collectManifests(namedRoot);
+        return collectManifestsCached(namedRoot);
     }
 
     /**
@@ -294,6 +307,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      */
     public void invalidateCaches() {
         this.manifestCache.invalidateAll();
+        this.manifestListCache.invalidateAll();
     }
 
 }
