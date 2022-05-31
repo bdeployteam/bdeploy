@@ -285,7 +285,13 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/clientUsage")
-    @RequiredPermission(permission = Permission.READ)
+    @RequiredPermission(permission = Permission.CLIENT)
     public ClientUsageData getClientUsageData(@ActivityScope @PathParam("instance") String instanceId);
+
+    @GET
+    @Path("/{instance}/uiDirect/{app}/{ep : [^/]+}")
+    @RequiredPermission(permission = Permission.CLIENT)
+    public String getUiDirectUrl(@ActivityScope @PathParam("instance") String instance, @PathParam("app") String application,
+            @PathParam("ep") String endpoint);
 
 }

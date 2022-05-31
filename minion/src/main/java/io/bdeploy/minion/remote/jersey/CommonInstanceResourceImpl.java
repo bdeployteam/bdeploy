@@ -95,8 +95,8 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
 
     @Override
     public CommonProxyResource getProxyResource(String instanceId, String applicationId) {
-        return rc.initResource(
-                new CommonProxyResourceImpl(groupName, instanceId, applicationId, getAllEndpoints(instanceId), this::forward));
+        return rc.initResource(new CommonProxyResourceImpl(groupName, instanceId, applicationId, getAllEndpoints(instanceId),
+                this::forward, null));
     }
 
     @Override

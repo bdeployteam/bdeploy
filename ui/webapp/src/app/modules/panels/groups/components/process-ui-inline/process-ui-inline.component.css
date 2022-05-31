@@ -1,0 +1,29 @@
+.local-app-frame {
+  border: 2px dashed var(--bd-accent);
+}
+
+.local-group {
+  position: relative; /* allows absolute positioning of children */
+}
+
+.local-loading {
+  position: absolute;
+  top: 30px;
+  left: calc(50% - 140px);
+
+  width: 240px;
+
+  text-align: center;
+
+  border-radius: 5px;
+  padding: 20px;
+
+  color: var(--bd-text);
+  background-color: var(--bd-bg-toolbar);
+
+  z-index: 99;
+}
+
+.local-loading-done {
+  display: none;
+}

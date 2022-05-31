@@ -5,6 +5,8 @@ import java.util.Set;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -18,6 +20,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -143,4 +146,16 @@ public interface CommonRootResource {
     @POST
     @Path("/logStream")
     public Response getLogStream(@QueryParam("m") String minion, RemoteDirectoryEntry entry);
+
+    /**
+     * Creates a proxy for a UI endpoint on the given group/instance/application.
+     * <p>
+     * This endpoint is top level, as it is not allowed to use query parameters, which all other endpoints on this level
+     * unfortunately use.
+     */
+    @Path("/upx/{group}/{instance}/{app}")
+    @RequiredPermission(permission = Permission.CLIENT, scope = "group")
+    public CommonProxyResource getUiProxyResource(@PathParam("group") String group, @PathParam("instance") String instance,
+            @PathParam("app") String application);
+
 }

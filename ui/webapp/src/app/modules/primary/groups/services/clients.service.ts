@@ -6,9 +6,11 @@ import {
   ClientApplicationDto,
   InstanceClientAppsDto,
   InstanceConfiguration,
+  InstanceUiEndpointsDto,
   LauncherDto,
   ObjectChangeType,
   OperatingSystem,
+  UiEndpointDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
@@ -19,6 +21,7 @@ import { GroupsService } from './groups.service';
 export interface ClientApp {
   instance: InstanceConfiguration;
   client: ClientApplicationDto;
+  endpoint: UiEndpointDto;
 }
 
 @Injectable({
@@ -60,6 +63,9 @@ export class ClientsService {
       apps: this.http.get<InstanceClientAppsDto[]>(
         `${this.apiGroupPath(group)}/client-apps`
       ),
+      uiEps: this.http.get<InstanceUiEndpointsDto[]>(
+        `${this.apiGroupPath(group)}/ui-endpoints`
+      ),
     })
       .pipe(
         finalize(() => this.loading$.next(false)),
@@ -74,6 +80,16 @@ export class ClientsService {
             ...inst.applications.map((a) => ({
               instance: inst.instance,
               client: a,
+              endpoint: null,
+            }))
+          );
+        }
+        for (const eps of result.uiEps) {
+          r.push(
+            ...eps.endpoints.map((e) => ({
+              instance: eps.instance,
+              client: null,
+              endpoint: e,
             }))
           );
         }
@@ -194,5 +210,14 @@ export class ClientsService {
       `${this.apiSwupPath}/download/${launchers[os].name}/${launchers[os].tag}`
     );
     return of(null);
+  }
+
+  public getDirectUiURI(app: ClientApp): Observable<string> {
+    return this.http.get(
+      `${this.apiInstancePath(this.groups.current$.value.name)}/${
+        app.instance.uuid
+      }/uiDirect/${app.endpoint.uuid}/${app.endpoint.endpoint.id}`,
+      { responseType: 'text' }
+    );
   }
 }

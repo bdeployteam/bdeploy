@@ -1,11 +1,15 @@
 package io.bdeploy.ui.api.impl;
 
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
+import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpHandlerRegistration;
+import org.glassfish.grizzly.http.server.Request;
+import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import io.bdeploy.jersey.JerseyEagerServiceInitializer;
 import io.bdeploy.jersey.RegistrationTarget;
+import io.bdeploy.jersey.errorpages.JerseyCustomErrorPages;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
@@ -56,8 +60,16 @@ public class UiResources {
     }
 
     public static void registerNode(RegistrationTarget server) {
-        server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/assets/node/"),
-                HttpHandlerRegistration.ROOT);
+        server.addHandler(new HttpHandler() {
+
+            @Override
+            public void service(Request request, Response response) throws Exception {
+                String html = JerseyCustomErrorPages.getErrorHtml("This server is a <code>NODE</code> and does not have a UI.");
+                response.setContentType("text/html");
+                response.setContentLength(html.length());
+                response.getWriter().write(html);
+            }
+        }, HttpHandlerRegistration.ROOT);
     }
 
 }

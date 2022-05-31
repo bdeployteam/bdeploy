@@ -67,6 +67,7 @@ import { ParamDescCardComponent } from './components/param-desc-card/param-desc-
 import { ProcessConsoleComponent } from './components/process-console/process-console.component';
 import { ProcessNativesComponent } from './components/process-natives/process-natives.component';
 import { ProcessPortsComponent } from './components/process-ports/process-ports.component';
+import { PinnedParameterValueComponent } from './components/process-status/pinned-parameter-value/pinned-parameter-value.component';
 import { ProbeStatusComponent } from './components/process-status/probe-status/probe-status.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
 import { InstancesRoutingModule } from './instances-routing.module';
@@ -75,7 +76,6 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { PinnedParameterValueComponent } from './components/process-status/pinned-parameter-value/pinned-parameter-value.component';
 
 @NgModule({
   declarations: [

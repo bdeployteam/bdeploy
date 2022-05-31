@@ -16,14 +16,14 @@ import { GroupsService } from '../../services/groups.service';
 const clientNameColumn: BdDataColumn<ClientApp> = {
   id: 'name',
   name: 'Client Name',
-  data: (r) => r.client.description,
+  data: (r) => (r.client ? r.client.description : r.endpoint.endpoint.id),
   hint: BdDataColumnTypeHint.TITLE,
 };
 
 const clientIdColumn: BdDataColumn<ClientApp> = {
   id: 'id',
-  name: 'Client UUID',
-  data: (r) => r.client.uuid,
+  name: 'App. UUID',
+  data: (r) => (r.client ? r.client.uuid : r.endpoint.uuid),
   hint: BdDataColumnTypeHint.DETAILS,
   icon: () => 'computer',
 };
@@ -38,7 +38,7 @@ const clientInstanceColumn: BdDataColumn<ClientApp> = {
 const clientOsColumn: BdDataColumn<ClientApp> = {
   id: 'os',
   name: 'OS',
-  data: (r) => r.client.os,
+  data: (r) => (r.client ? r.client.os : 'WEB'),
   display: BdDataColumnDisplay.TABLE,
   component: BdDataSvgIconCellComponent,
 };
@@ -47,7 +47,7 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
   id: 'osAvatar',
   name: 'OS',
   hint: BdDataColumnTypeHint.AVATAR,
-  data: (r) => `/assets/${r.client.os.toLowerCase()}.svg`,
+  data: (r) => `/assets/${r.client ? r.client.os.toLowerCase() : 'web'}.svg`,
   display: BdDataColumnDisplay.CARD,
 };
 
@@ -67,15 +67,35 @@ export class ClientApplicationsComponent implements OnInit {
 
   /* template */ grouping: BdDataGroupingDefinition<ClientApp>[] = [
     { name: 'Instance Name', group: (r) => r.instance.name },
-    { name: 'Operating System', group: (r) => r.client.os },
+    {
+      name: 'Operating System',
+      group: (r) => (r.client ? r.client.os : 'WEB'),
+    },
   ];
   /* template */ defaultGrouping: BdDataGrouping<ClientApp>[];
 
   /* template */ getRecordRoute = (row: ClientApp) => {
-    return [
-      '',
-      { outlets: { panel: ['panels', 'groups', 'client', row.client.uuid] } },
-    ];
+    if (row.client) {
+      return [
+        '',
+        { outlets: { panel: ['panels', 'groups', 'client', row.client.uuid] } },
+      ];
+    } else {
+      return [
+        '',
+        {
+          outlets: {
+            panel: [
+              'panels',
+              'groups',
+              'endpoint',
+              row.endpoint.uuid,
+              row.endpoint.endpoint.id,
+            ],
+          },
+        },
+      ];
+    }
   };
 
   /* template */ isCardView: boolean;
@@ -100,7 +120,7 @@ export class ClientApplicationsComponent implements OnInit {
 
     this.defaultGrouping = [
       { definition: this.grouping[0], selected: [] },
-      { definition: this.grouping[1], selected: [this.currentOs] },
+      { definition: this.grouping[1], selected: [this.currentOs, 'WEB'] },
     ];
   }
 

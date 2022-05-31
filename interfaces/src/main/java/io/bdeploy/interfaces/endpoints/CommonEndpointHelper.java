@@ -38,12 +38,33 @@ public class CommonEndpointHelper {
         // static helper only.
     }
 
-    private static String initUri(HttpEndpoint endpoint) {
-        return (endpoint.secure ? "https://" : "http://") + "localhost:" + endpoint.port
-                + (endpoint.path.startsWith("/") ? "" : "/") + endpoint.path;
+    public static String initUri(HttpEndpoint endpoint, String hostname, String subPath) {
+        return (endpoint.secure ? "https://" : "http://") + hostname + (endpoint.port != null ? (":" + endpoint.port) : "")
+                + concatWithSlashes(endpoint.path, subPath);
     }
 
-    public static WebTarget initClient(HttpEndpoint endpoint) throws GeneralSecurityException {
+    private static String concatWithSlashes(String p1, String p2) {
+        String r;
+
+        p1 = p1 == null ? "" : p1;
+        p2 = p2 == null ? "" : p2;
+
+        if (p1.endsWith("/") && p2.startsWith("/")) {
+            r = p1 + p2.substring(1); // both have the slash
+        } else if (p1.endsWith("/") || p2.startsWith("/")) {
+            r = p1 + p2; // one has the slash
+        } else {
+            r = p1 + "/" + p2; // no slashes, add one.
+        }
+
+        if (r.startsWith("/")) {
+            return r;
+        } else {
+            return "/" + r;
+        }
+    }
+
+    public static WebTarget initClient(HttpEndpoint endpoint, String subPath) throws GeneralSecurityException {
         ClientBuilder client = ClientBuilder.newBuilder();
 
         if (endpoint.secure && endpoint.trustAll) {
@@ -80,7 +101,8 @@ public class CommonEndpointHelper {
             client.register(HttpAuthenticationFeature.digest(endpoint.authUser, endpoint.authPass));
         }
 
-        return client.build().target(initUri(endpoint));
+        // client is always used locally, so we use localhost as hostname to avoid contacting somebody else unintentionally.
+        return client.build().target(initUri(endpoint, "localhost", subPath));
     }
 
     public static HttpEndpoint processEndpoint(VariableResolver resolver, HttpEndpoint rawEndpoint) {
@@ -90,6 +112,7 @@ public class CommonEndpointHelper {
 
         processed.id = rawEndpoint.id;
         processed.path = rawEndpoint.path;
+        processed.contextPath = rawEndpoint.contextPath;
         processed.port = p.apply(rawEndpoint.port);
         processed.secure = rawEndpoint.secure;
         processed.trustAll = rawEndpoint.trustAll;

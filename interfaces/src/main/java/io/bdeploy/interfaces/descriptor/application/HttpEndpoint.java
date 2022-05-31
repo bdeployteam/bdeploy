@@ -9,6 +9,7 @@ public class HttpEndpoint {
         DEFAULT,
         PROBE_STARTUP,
         PROBE_ALIVE,
+        UI,
     }
 
     public enum HttpAuthenticationType {
@@ -24,11 +25,22 @@ public class HttpEndpoint {
     public String id;
 
     /**
-     * The path to the endpoint on the server.
+     * The root path to the endpoint on the server.
      * <p>
      * Note that path parameters are currently not supported.
      */
     public String path;
+
+    /**
+     * Additional path segment which should be appended to the endpoint path given.
+     * <p>
+     * Any request to any endpoint will always include {path}/{contextPath}/{subPath} where subPath are any
+     * trailing path segments given in the actual request.
+     * <p>
+     * Using contextPath instead of path can be important to applications which use relative paths to resolve additional
+     * resources.
+     */
+    public String contextPath;
 
     /**
      * The port running the service. This is usually a reference to a configuration parameter of the hosting application

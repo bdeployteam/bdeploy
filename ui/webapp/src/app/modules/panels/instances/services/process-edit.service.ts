@@ -20,6 +20,7 @@ import {
   TemplateParameter,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { expandVar } from 'src/app/modules/core/utils/object.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
@@ -337,46 +338,13 @@ export class ProcessEditService {
       while (found) {
         const rex = new RegExp(/{{T:([^}]*)}}/).exec(value);
         if (rex) {
-          value = value.replace(
-            rex[0],
-            this.expandVar(rex[1], variables, status)
-          );
+          value = value.replace(rex[0], expandVar(rex[1], variables, status));
         } else {
           found = false;
         }
       }
     }
     return value;
-  }
-
-  private expandVar(
-    variable: string,
-    variables: { [key: string]: string },
-    status: StatusMessage[]
-  ): string {
-    let varName = variable;
-    const colIndex = varName.indexOf(':');
-    if (colIndex !== -1) {
-      varName = varName.substr(0, colIndex);
-    }
-    const val = variables[varName];
-
-    if (colIndex !== -1) {
-      const op = variable.substr(colIndex + 1);
-      const opNum = Number(op);
-      const valNum = Number(val);
-
-      if (Number.isNaN(opNum) || Number.isNaN(valNum)) {
-        status.push({
-          icon: 'error',
-          message: `Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`,
-        });
-        return variable;
-      }
-      return (valNum + opNum).toString();
-    }
-
-    return val;
   }
 
   public meetsCondition(param: ParameterDescriptor): Observable<boolean> {

@@ -73,6 +73,7 @@ export class ConfigService {
     iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
     iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
     iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
+    iconRegistry.addSvgIcon('WEB', sanitizer.bypassSecurityTrustResourceUrl('assets/web.svg'));
     iconRegistry.addSvgIcon('global_pin', sanitizer.bypassSecurityTrustResourceUrl('assets/global-pin.svg'));
 
     // check whether the server version changed every minute.

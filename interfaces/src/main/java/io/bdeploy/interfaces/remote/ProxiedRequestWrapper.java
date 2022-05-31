@@ -17,8 +17,11 @@ public class ProxiedRequestWrapper {
     public String method;
     public HttpEndpoint endpoint;
 
+    public String subPath;
     public Map<String, List<String>> headers;
     public Map<String, List<String>> queryParameters;
+
+    // TODO: cookies!
 
     public String base64body;
     public String bodyType;
@@ -26,7 +29,8 @@ public class ProxiedRequestWrapper {
     @JsonCreator
     public ProxiedRequestWrapper(@JsonProperty("group") String group, @JsonProperty("instanceId") String instanceId,
             @JsonProperty("applicationId") String applicationId, @JsonProperty("method") String method,
-            @JsonProperty("endpoint") HttpEndpoint endpoint, @JsonProperty("headers") Map<String, List<String>> headers,
+            @JsonProperty("endpoint") HttpEndpoint endpoint, @JsonProperty("subPath") String subPath,
+            @JsonProperty("headers") Map<String, List<String>> headers,
             @JsonProperty("queryParameters") Map<String, List<String>> queryParameters,
             @JsonProperty("base64body") String base64body, @JsonProperty("bodyType") String bodyType) {
         this.group = group;
@@ -34,6 +38,7 @@ public class ProxiedRequestWrapper {
         this.applicationId = applicationId;
         this.method = method;
         this.endpoint = endpoint;
+        this.subPath = subPath;
         this.headers = headers;
         this.queryParameters = queryParameters;
         this.base64body = base64body;

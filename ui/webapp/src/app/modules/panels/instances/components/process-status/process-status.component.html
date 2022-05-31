@@ -229,6 +229,16 @@
           icon="cast"
           text="Process Console"
         ></app-bd-panel-button>
+        <ng-container *ngIf="uiEndpoints?.length">
+          <mat-divider></mat-divider>
+          <app-bd-button
+            *ngFor="let ep of uiEndpoints"
+            [text]="'Open UI: ' + ep.id"
+            icon="preview"
+            [collapsed]="false"
+            [routerLink]="getRouterLink(ep)"
+          ></app-bd-button>
+        </ng-container>
         <ng-container *ngIf="pinnedParameters?.length">
           <mat-divider></mat-divider>
           <app-bd-expand-button

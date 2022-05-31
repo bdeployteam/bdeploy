@@ -31,7 +31,6 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.minion.MinionRoot;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -55,16 +54,17 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
         NodeProcessResource spr = rc.initResource(new NodeProcessResourceImpl());
         InstanceNodeStatusDto ins = spr.getStatus(wrapper.instanceId);
         ProcessStatusDto ps = ins.getStatus(wrapper.applicationId);
+        InstanceNodeManifest inm = findInstanceNodeManifest(wrapper.instanceId, ps.instanceTag);
 
         if (!ps.processState.isRunning()) {
-            throw new WebApplicationException(
-                    "Process with ID " + wrapper.applicationId + " is not running and ready for instance " + wrapper.instanceId,
-                    Status.PRECONDITION_FAILED);
+            return wrap(Response.status(Status.PRECONDITION_FAILED.getStatusCode(),
+                    "Process '" + ps.appName + "' in instance '" + inm.getConfiguration().name + "' is not running or not ready")
+                    .build());
         }
 
-        InstanceNodeManifest inm = findInstanceNodeManifest(wrapper.instanceId, ps.instanceTag);
         if (inm == null) {
-            throw new WebApplicationException("Cannot find instance " + wrapper.instanceId, Status.NOT_FOUND);
+            return wrap(Response.status(Status.PRECONDITION_FAILED.getStatusCode(), "Cannot find instance " + wrapper.instanceId)
+                    .build());
         }
 
         DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(inm.getUUID()),
@@ -82,7 +82,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
 
         try {
             byte[] body = wrapper.base64body == null ? null : Base64.decodeBase64(wrapper.base64body);
-            WebTarget target = CommonEndpointHelper.initClient(processedEndpoint);
+            WebTarget target = CommonEndpointHelper.initClient(processedEndpoint, wrapper.subPath);
 
             for (Map.Entry<String, List<String>> entry : wrapper.queryParameters.entrySet()) {
                 target = target.queryParam(entry.getKey(), entry.getValue().toArray());
@@ -109,8 +109,11 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
                 return wrap(request.build(wrapper.method).invoke());
             }
         } catch (Exception e) {
-            throw new WebApplicationException("Failed to call endpoint " + wrapper.endpoint.id + " on target application "
-                    + wrapper.applicationId + " for instance " + wrapper.instanceId, e);
+            log.warn("Error in endpoint processing for {}/{}/{}", wrapper.group, wrapper.instanceId, wrapper.applicationId, e);
+            return wrap(Response.status(Status.PRECONDITION_FAILED.getStatusCode(),
+                    "Failed to call endpoint " + wrapper.endpoint.id + " on target application " + wrapper.applicationId
+                            + " for instance " + wrapper.instanceId + ": " + e.toString())
+                    .build());
         }
     }
 

@@ -72,7 +72,7 @@ class EndpointsTest {
         assertEquals("test", httpEndpoints.get(0).id);
 
         // start a server which actually provides the endpoint at the generated port
-        Response response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test");
+        Response response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test", "");
         log.info("Result: {}", response.getStatusInfo());
         assertEquals(200, response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());

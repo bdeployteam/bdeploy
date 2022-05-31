@@ -31,9 +31,11 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
+import io.bdeploy.interfaces.remote.CommonProxyResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.jersey.JerseySecurityContext;
+import io.bdeploy.jersey.errorpages.JerseyCustomErrorPages;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.AuthService;
@@ -252,6 +254,30 @@ public class CommonRootResourceImpl implements CommonRootResource {
     @Override
     public Response getLogStream(String nodeName, RemoteDirectoryEntry entry) {
         return nodes.getNodeResourceIfOnlineOrThrow(nodeName, CommonDirectoryEntryResource.class, security).getEntryStream(entry);
+    }
+
+    @Override
+    public CommonProxyResource getUiProxyResource(String group, String instance, String application) {
+        BHive h = registry.get(group);
+        if (h == null) {
+            throw new WebApplicationException("Hive not found: " + group, Status.NOT_FOUND);
+        }
+
+        CommonInstanceResource ir = rc.initResource(new CommonInstanceResourceImpl(group, h));
+        CommonProxyResource pr = rc.initResource(
+                new CommonProxyResourceImpl(group, instance, application, ir.getAllEndpoints(instance), ir::forward, (resp) -> {
+                    // cannot process our own 401, as we're rejected *very* early in the framework in case we're not authorized.
+                    switch (resp.responseCode) {
+                        case 412:
+                            // application not running, and similar errors. we keep the original response but add a custom error page to it.
+                            return Response.fromResponse(resp.defaultUnwrap())
+                                    .entity(JerseyCustomErrorPages.getErrorHtml(resp.responseReason)).build();
+                        default:
+                            return resp.defaultUnwrap();
+                    }
+                }));
+
+        return pr;
     }
 
 }

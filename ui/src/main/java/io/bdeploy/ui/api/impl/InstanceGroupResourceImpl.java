@@ -41,6 +41,8 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointType;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -60,9 +62,11 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
+import io.bdeploy.ui.dto.InstanceUiEndpointsDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
+import io.bdeploy.ui.dto.UiEndpointDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -317,6 +321,61 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 continue;
             }
             result.add(clientApps);
+        }
+        return result;
+    }
+
+    @Override
+    public Collection<InstanceUiEndpointsDto> listUiEndpoints(String group) {
+        Collection<InstanceUiEndpointsDto> result = new ArrayList<>();
+
+        BHive hive = getGroupHive(group);
+        InstanceResource resource = getInstanceResource(group);
+        for (InstanceDto idto : resource.list()) {
+            String instanceId = idto.instanceConfiguration.uuid;
+
+            // Always use latest version to lookup remote service
+            InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
+
+            // Contact master to find out the active version. Skip if no version is active
+            String active = getInstanceResource(group).getDeploymentStates(instanceId).activeTag;
+            if (active == null) {
+                continue;
+            }
+
+            // Get a list of all node manifests - clients are stored in a special node
+            if (!active.equals(im.getManifest().getTag())) {
+                // make sure we do have the active version.
+                im = InstanceManifest.load(hive, instanceId, active);
+            }
+            SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
+
+            InstanceUiEndpointsDto allInstEps = new InstanceUiEndpointsDto();
+            allInstEps.instance = idto.instanceConfiguration;
+            allInstEps.endpoints = new ArrayList<>();
+
+            for (Map.Entry<String, Key> nodeEntry : manifests.entrySet()) {
+                // Add all configured client applications
+                InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, nodeEntry.getValue());
+                for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
+                    for (HttpEndpoint configuredEp : appConfig.endpoints.http) {
+                        if (configuredEp.type != HttpEndpointType.UI) {
+                            continue;
+                        }
+
+                        UiEndpointDto uiEp = new UiEndpointDto();
+                        uiEp.uuid = appConfig.uid;
+                        uiEp.endpoint = configuredEp;
+                        allInstEps.endpoints.add(uiEp);
+                    }
+                }
+
+                // Only add if we have at least one application
+                if (allInstEps.endpoints.isEmpty()) {
+                    continue;
+                }
+                result.add(allInstEps);
+            }
         }
         return result;
     }

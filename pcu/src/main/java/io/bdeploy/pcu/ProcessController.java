@@ -809,7 +809,7 @@ public class ProcessController {
 
         try {
             HttpEndpoint processed = CommonEndpointHelper.processEndpoint(variableResolver, ep);
-            WebTarget client = CommonEndpointHelper.initClient(processed);
+            WebTarget client = CommonEndpointHelper.initClient(processed, null);
 
             if (timeout > 0) {
                 client.property(ClientProperties.CONNECT_TIMEOUT, timeout * 1000);

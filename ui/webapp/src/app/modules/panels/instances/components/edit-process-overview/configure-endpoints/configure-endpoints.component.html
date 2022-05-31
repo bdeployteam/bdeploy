@@ -29,7 +29,11 @@
         >
           <div class="bd-bg-toolbar" fxLayout="row">
             <div class="bd-default-padding">
-              Endpoint <strong>{{ endpoint.id }} - {{ endpoint.path }}</strong>
+              Endpoint
+              <strong
+                >{{ endpoint.id }} - {{ endpoint.path }} {{ endpoint.contextPath
+                ? ('(' + endpoint.contextPath + ')') : '' }}</strong
+              >
             </div>
             <div fxFlex="1 0 auto"></div>
             <div class="bd-default-padding bd-description-text">

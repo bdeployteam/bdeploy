@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.jersey.errorpages.JerseyCustomErrorPages;
 import jakarta.ws.rs.NameBinding;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -120,6 +121,11 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
             authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
         }
 
+        // Check cookie.
+        if (authorizationHeader == null && requestContext.getCookies().containsKey("st")) {
+            authorizationHeader = AUTHENTICATION_SCHEME + " " + requestContext.getCookies().get("st").getValue();
+        }
+
         // Validate the Authorization header
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             abortWithUnauthorized(requestContext);
@@ -173,8 +179,9 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private void abortWithUnauthorized(ContainerRequestContext requestContext) {
         // Abort the filter chain with a 401 status code response
         // The WWW-Authenticate header is sent along with the response
-        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
-                .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME + " realm=\"" + REALM + "\"").build());
+        requestContext.abortWith(
+                Response.status(Response.Status.UNAUTHORIZED).entity(JerseyCustomErrorPages.getErrorHtml("Not Authorized."))
+                        .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME + " realm=\"" + REALM + "\"").build());
     }
 
     public static ApiAccessToken validateToken(String tokenValue, KeyStore ks) {

@@ -65,10 +65,12 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
+import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -91,6 +93,9 @@ import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
+import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
@@ -1135,6 +1140,59 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         return root.getNamedMaster(group).getClientUsage(instanceId);
+    }
+
+    @Override
+    public String getUiDirectUrl(String instance, String application, String endpoint) {
+        // we try to get by without contacting the node, so we use our own data here.
+        InstanceStateRecord state = getDeploymentStates(instance);
+        InstanceManifest im = InstanceManifest.load(hive, instance, state.activeTag);
+
+        String nodeName = null;
+        InstanceNodeConfiguration ic = null;
+        ApplicationConfiguration app = null;
+
+        for (Map.Entry<String, Manifest.Key> entry : im.getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
+            InstanceNodeConfiguration inc = inmf.getConfiguration();
+
+            for (ApplicationConfiguration ac : inc.applications) {
+                if (ac.uid.equals(application)) {
+                    app = ac;
+                    break;
+                }
+            }
+
+            if (app != null) {
+                ic = inc;
+                nodeName = entry.getKey();
+                break;
+            }
+        }
+
+        if (app == null || ic == null || nodeName == null) {
+            throw new WebApplicationException("Cannot find application or node for " + application + " in instance " + instance,
+                    Status.NOT_FOUND);
+        }
+
+        Optional<HttpEndpoint> ep = app.endpoints.http.stream().filter(e -> e.id.equals(endpoint)).findAny();
+
+        if (ep.isEmpty()) {
+            throw new WebApplicationException(
+                    "Cannot find endpoint " + endpoint + " for application " + application + " in instance " + instance,
+                    Status.NOT_FOUND);
+        }
+
+        Map<String, MinionDto> minions = getMinionConfiguration(instance, state.activeTag);
+        MinionDto minion = minions.get(nodeName);
+
+        // note that we cannot resolve deployment paths here, but this *should* not matter for calculating a URI.
+        CompositeResolver list = new CompositeResolver();
+        list.add(new ApplicationVariableResolver(app));
+        list.add(new ApplicationParameterValueResolver(app.uid, ic));
+
+        HttpEndpoint processed = CommonEndpointHelper.processEndpoint(list, ep.get());
+        return CommonEndpointHelper.initUri(processed, minion.remote.getUri().getHost(), processed.contextPath);
     }
 
 }

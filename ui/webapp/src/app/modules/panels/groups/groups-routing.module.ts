@@ -7,6 +7,7 @@ import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { setRouteId } from '../../core/utils/routeId-generator';
 import { AddGroupComponent } from './components/add-group/add-group.component';
 import { ClientDetailComponent } from './components/client-detail/client-detail.component';
+import { ProcessUiInlineComponent } from './components/process-ui-inline/process-ui-inline.component';
 import { AttributeDefinitionsComponent } from './components/settings/attribute-definitions/attribute-definitions.component';
 import { AttributeValuesComponent } from './components/settings/attribute-values/attribute-values.component';
 import { EditComponent } from './components/settings/edit/edit.component';
@@ -50,6 +51,11 @@ const GROUPS_ROUTES: Route[] = [
   {
     path: 'client/:app',
     component: ClientDetailComponent,
+  },
+  {
+    path: 'endpoint/:app/:endpoint',
+    component: ProcessUiInlineComponent,
+    data: { max: true },
   },
 ];
 

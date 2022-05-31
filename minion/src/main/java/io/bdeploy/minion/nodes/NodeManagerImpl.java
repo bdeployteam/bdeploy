@@ -182,7 +182,7 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
             // log it, we don't want to hold status in the futures.
             if (Boolean.TRUE.equals(contactWarning.get(node))) {
                 contactWarning.put(node, Boolean.FALSE); // no warning, contact failed.
-                log.warn("Failed to fetch node status: {}", e.toString());
+                log.warn("Failed to fetch node {} status: {}", node, e.toString());
                 if (changes != null) {
                     changes.change(ObjectChangeType.NODES,
                             Map.of(ObjectChangeDetails.NODE, node, ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE));

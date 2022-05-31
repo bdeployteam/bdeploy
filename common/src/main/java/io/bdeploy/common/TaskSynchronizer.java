@@ -13,7 +13,20 @@ import java.util.concurrent.Future;
  */
 public class TaskSynchronizer {
 
-    private final Map<Comparable<?>, Future<?>> tasks = new TreeMap<>();
+    @SuppressWarnings("unchecked")
+    private final Map<Comparable<?>, Future<?>> tasks = new TreeMap<>((a, b) -> {
+        String clsAName = a.getClass().getName();
+        String clsBName = b.getClass().getName();
+
+        int x = clsAName.compareTo(clsBName);
+
+        if (x != 0) {
+            return x;
+        }
+
+        // only if SAME classes.
+        return ((Comparable<Object>) a).compareTo(b);
+    });
 
     /**
      * @param key the key to check

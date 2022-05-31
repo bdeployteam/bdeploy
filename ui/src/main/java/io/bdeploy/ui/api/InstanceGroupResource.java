@@ -20,6 +20,7 @@ import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
+import io.bdeploy.ui.dto.InstanceUiEndpointsDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -107,6 +108,11 @@ public interface InstanceGroupResource {
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
     public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group,
             @QueryParam("os") OperatingSystem os);
+
+    @GET
+    @Path("/{group}/ui-endpoints")
+    @RequiredPermission(permission = Permission.CLIENT, scope = "group")
+    public Collection<InstanceUiEndpointsDto> listUiEndpoints(@ActivityScope @PathParam("group") String group);
 
     @GET
     @Path("/list-attributes")

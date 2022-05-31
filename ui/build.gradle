@@ -312,6 +312,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.ClientApplicationDto',
         'io.bdeploy.ui.dto.InstanceDto',
         'io.bdeploy.ui.dto.InstanceClientAppsDto',
+        'io.bdeploy.ui.dto.InstanceUiEndpointsDto',
         'io.bdeploy.ui.dto.InstanceOverallStatusDto',
         'io.bdeploy.ui.dto.InstanceNodeConfigurationListDto',
         'io.bdeploy.ui.dto.ProductDto',

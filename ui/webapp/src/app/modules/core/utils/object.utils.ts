@@ -1,3 +1,5 @@
+import { StatusMessage } from 'src/app/models/config.model';
+
 export interface SimpleEntry<V> {
   key: string;
   value: V;
@@ -33,4 +35,34 @@ export function randomString(length: number, alowNumbers?: boolean): string {
   for (let i = length; i > 0; --i)
     result += chars[Math.floor(Math.random() * chars.length)];
   return result;
+}
+
+export function expandVar(
+  variable: string,
+  variables: { [key: string]: string },
+  status: StatusMessage[]
+): string {
+  let varName = variable;
+  const colIndex = varName.indexOf(':');
+  if (colIndex !== -1) {
+    varName = varName.substring(0, colIndex);
+  }
+  const val = variables[varName];
+
+  if (colIndex !== -1) {
+    const op = variable.substring(colIndex + 1);
+    const opNum = Number(op);
+    const valNum = Number(val);
+
+    if (Number.isNaN(opNum) || Number.isNaN(valNum)) {
+      status.push({
+        icon: 'error',
+        message: `Invalid variable substitution for ${variable}: '${op}' or '${val}' is not a number.`,
+      });
+      return variable;
+    }
+    return (valNum + opNum).toString();
+  }
+
+  return val;
 }

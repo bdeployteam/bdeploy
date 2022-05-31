@@ -1,0 +1,59 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar
+    [header]="app?.endpoint?.endpoint?.id"
+    [panel]="true"
+    [route]="returnPanel"
+    [relative]="false"
+  >
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button
+      text="Reload"
+      icon="refresh"
+      tooltip="left"
+      (click)="frameLoaded = false; iframe?.contentWindow?.location?.reload()"
+    ></app-bd-button>
+    <app-bd-button
+      text="Fullscreen"
+      icon="fullscreen"
+      tooltip="left"
+      (click)="iframe?.contentWindow?.document?.documentElement?.requestFullscreen()"
+    ></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-button
+      text="Open in new Tab"
+      icon="open_in_new"
+      tooltip="left"
+      (click)="openUiEndpoint()"
+    ></app-bd-button>
+    <app-bd-button
+      text="Open directly on node in new Tab"
+      icon="open_in_browser"
+      tooltip="left"
+      [disabled]="!directUri"
+      [matTooltip]="directUri ? null : 'Direct URI to application not available.'"
+      matTooltipPosition="left"
+      (click)="openUiEndpointDirect()"
+    ></app-bd-button>
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxFill class="local-group">
+      <div class="local-loading" [class.local-loading-done]="frameLoaded">
+        Loading...
+      </div>
+      <div class="local-loading" *ngIf="!app">
+        Application or Endpoint not found.
+      </div>
+      <iframe
+        #iframe
+        fxFill
+        class="local-app-frame"
+        [src]="url ? url : 'about:blank'"
+        [name]="app?.endpoint?.endpoint?.id"
+        allowfullscreen="true"
+        referrerpolicy="no-referrer"
+        (load)="frameLoaded = true"
+      ></iframe>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

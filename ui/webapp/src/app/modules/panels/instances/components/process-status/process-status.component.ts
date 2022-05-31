@@ -1,10 +1,13 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   ApplicationStartType,
+  HttpEndpoint,
+  HttpEndpointType,
   ParameterType,
   ProcessDetailDto,
   ProcessProbeResultDto,
@@ -17,6 +20,7 @@ import {
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
@@ -70,6 +74,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     colPinnedName,
     colPinnedValue,
   ];
+  /* template */ uiEndpoints: HttpEndpoint[] = [];
 
   public performing$ = new BehaviorSubject<boolean>(false);
 
@@ -82,11 +87,13 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
 
   constructor(
     public auth: AuthenticationService,
+    public groups: GroupsService,
     public details: ProcessDetailsService,
     public processes: ProcessesService,
     public instances: InstancesService,
     public servers: ServersService,
-    private cfg: ConfigService
+    private cfg: ConfigService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -124,6 +131,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
             };
           });
       }
+
+      // figure out if we have UI endpoints configured.
+      this.uiEndpoints = config?.endpoints.http.filter(
+        (e) => e.type === HttpEndpointType.UI
+      );
 
       // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
       this.starting$.next(false);
@@ -267,6 +279,29 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       .restart([this.processDetail.status.appUid])
       .pipe(finalize(() => this.restarting$.next(false)))
       .subscribe();
+  }
+
+  /* template */ getRouterLink(r: HttpEndpoint) {
+    const returnUrl = this.route.snapshot.pathFromRoot
+      .map((s) => s.url.map((u) => u.toString()).join('/'))
+      .join('/');
+    return [
+      '',
+      {
+        outlets: {
+          panel: [
+            'panels',
+            'groups',
+            'endpoint',
+            this.processConfig.uid,
+            r.id,
+            {
+              returnPanel: returnUrl,
+            },
+          ],
+        },
+      },
+    ];
   }
 
   private doCalculateUptimeString(detail) {
