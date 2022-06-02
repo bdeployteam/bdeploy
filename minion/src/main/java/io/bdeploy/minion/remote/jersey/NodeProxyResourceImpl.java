@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.NodeProcessResource;
 import io.bdeploy.interfaces.remote.NodeProxyResource;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
+import io.bdeploy.interfaces.remote.ProxiedRequestWrapper.ProxiedRequestCookie;
 import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
@@ -36,6 +39,8 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -103,6 +108,14 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
                 }
             }
 
+            if (wrapper.requestCookies != null) {
+                for (Map.Entry<String, ProxiedRequestCookie> entry : wrapper.requestCookies.entrySet()) {
+                    ProxiedRequestCookie c = entry.getValue();
+                    request.cookie(new Cookie.Builder(entry.getKey()).value(c.value).version(c.version).path(c.path)
+                            .domain(c.domain).build());
+                }
+            }
+
             if (body != null) {
                 return wrap(request.build(wrapper.method, Entity.entity(body, wrapper.bodyType)).invoke());
             } else {
@@ -123,6 +136,11 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
         wrapper.headers = resp.getStringHeaders();
         wrapper.responseCode = resp.getStatus();
         wrapper.responseReason = resp.getStatusInfo().getReasonPhrase();
+        wrapper.cookies = resp.getCookies().entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> {
+            NewCookie c = e.getValue();
+            return new ProxiedResponseWrapper.ProxiedResonseCookie(c.getName(), c.getValue(), c.getVersion(), c.getPath(),
+                    c.getDomain(), c.getComment(), c.getMaxAge(), c.getExpiry(), c.isSecure(), c.isHttpOnly());
+        }));
 
         if (resp.hasEntity()) {
             try (InputStream is = resp.readEntity(InputStream.class)) {
