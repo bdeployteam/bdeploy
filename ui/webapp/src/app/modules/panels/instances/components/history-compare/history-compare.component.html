@@ -4,6 +4,15 @@
     [panel]="true"
     [route]="['..', '..', '..']"
   >
+    <div fxFlex="grow" fxLayoutAlign="end end">
+      <app-bd-button
+        text="Show only differences"
+        [(toggle)]="showOnlyDifferences"
+        [isToggle]="true"
+        [collapsed]="false"
+      >
+      </app-bd-button>
+    </div>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div
@@ -52,7 +61,7 @@
 
       <!-- Nodes. -->
       <ng-container *ngFor="let nodePair of pair.nodes">
-        <div class="bd-rect-card" *ngIf="!!nodePair?.applications?.length">
+        <div class="bd-rect-card" *ngIf="showNodePair(nodePair)">
           <div fxLayout="column">
             <div
               fxLayout="row"
@@ -91,24 +100,26 @@
               fxLayoutAlign="stretch stretch"
               *ngFor="let appPair of nodePair.applications"
             >
-              <app-history-process-config
-                [hidden]="!(appPair.base | customNodeFilter: searchTerm)"
-                fxFlex="50%"
-                [baseConfig]="appPair.base"
-                [compareConfig]="appPair.compare"
-                [baseDescriptor]="appPair.baseDesc"
-                [hasProcessControl]="nodePair.name !== clientNodeName"
-                diffSide="left"
-              ></app-history-process-config>
-              <app-history-process-config
-                [hidden]="!(appPair.compare | customNodeFilter: searchTerm)"
-                fxFlex="50%"
-                [baseConfig]="appPair.compare"
-                [compareConfig]="appPair.base"
-                [baseDescriptor]="appPair.compareDesc"
-                [hasProcessControl]="nodePair.name !== clientNodeName"
-                diffSide="right"
-              ></app-history-process-config>
+              <ng-container *ngIf="showAppPair(appPair)">
+                <app-history-process-config
+                  [hidden]="!(appPair.base | customNodeFilter: searchTerm)"
+                  fxFlex="50%"
+                  [baseConfig]="appPair.base"
+                  [compareConfig]="appPair.compare"
+                  [baseDescriptor]="appPair.baseDesc"
+                  [hasProcessControl]="nodePair.name !== clientNodeName"
+                  diffSide="left"
+                ></app-history-process-config>
+                <app-history-process-config
+                  [hidden]="!(appPair.compare | customNodeFilter: searchTerm)"
+                  fxFlex="50%"
+                  [baseConfig]="appPair.compare"
+                  [compareConfig]="appPair.base"
+                  [baseDescriptor]="appPair.compareDesc"
+                  [hasProcessControl]="nodePair.name !== clientNodeName"
+                  diffSide="right"
+                ></app-history-process-config>
+              </ng-container>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ import {
 } from 'src/app/modules/core/services/search.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
-import { ConfigPair } from '../../utils/diff-utils';
+import { ApplicationPair, ConfigPair, NodePair } from '../../utils/diff-utils';
 import { InstanceConfigCache } from '../../utils/instance-utils';
 
 @Component({
@@ -27,6 +27,7 @@ export class HistoryCompareComponent implements OnDestroy, BdSearchable {
   /* template */ clientNodeName = CLIENT_NODE_NAME;
 
   /* template */ searchTerm = '';
+  /* template */ showOnlyDifferences = false;
 
   private baseConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
@@ -83,6 +84,17 @@ export class HistoryCompareComponent implements OnDestroy, BdSearchable {
     );
 
     this.subscription.add(this.searchService.register(this));
+  }
+
+  /* template */ showAppPair(appPair: ApplicationPair): boolean {
+    const showAll = !this.showOnlyDifferences;
+    return showAll || appPair.hasDifferences;
+  }
+
+  /* template */ showNodePair(nodePair: NodePair): boolean {
+    const hasApplications = !!nodePair?.applications?.length;
+    const showAll = !this.showOnlyDifferences;
+    return hasApplications && (showAll || nodePair.hasDifferences);
   }
 
   ngOnDestroy(): void {
