@@ -7,21 +7,33 @@ import {
   InstanceConfiguration,
   InstanceNodeConfigurationDto,
 } from 'src/app/models/gen.dtos';
+import {
+  ApplicationConfigurationDiff,
+  DiffType,
+} from '../services/history-diff.service';
 import { InstanceConfigCache } from './instance-utils';
 
 export class ApplicationPair {
+  hasDifferences: boolean;
+
   constructor(
     public base: ApplicationConfiguration,
     public compare: ApplicationConfiguration,
     public baseDesc: ApplicationDescriptor,
     public compareDesc: ApplicationDescriptor
-  ) {}
+  ) {
+    const left = new ApplicationConfigurationDiff(base, compare, baseDesc);
+    const right = new ApplicationConfigurationDiff(compare, base, compareDesc);
+    this.hasDifferences =
+      left.type !== DiffType.UNCHANGED || right.type !== DiffType.UNCHANGED;
+  }
 }
 
 export class NodePair {
   name: string;
   isOrderChanged: boolean;
   applications: ApplicationPair[] = [];
+  hasDifferences: boolean;
 
   constructor(
     base: InstanceNodeConfigurationDto,
@@ -68,6 +80,10 @@ export class NodePair {
         )
       );
     }
+
+    this.hasDifferences = this.applications.some(
+      (appPair) => appPair.hasDifferences
+    );
   }
 }
 
