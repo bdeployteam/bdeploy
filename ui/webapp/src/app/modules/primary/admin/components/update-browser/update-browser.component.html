@@ -1,6 +1,12 @@
 <app-bd-dialog [loadingWhen$]="software.loading$">
   <app-bd-dialog-toolbar header="System Software">
     <div fxFlex="1 0 auto"></div>
+    <app-bd-button
+      text="Restart Server"
+      icon="restart_alt"
+      (click)="restartServer()"
+      tooltip="below"
+    ></app-bd-button>
     <app-bd-panel-button
       icon="cloud_upload"
       text="Upload Software"

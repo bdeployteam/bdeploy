@@ -1,5 +1,8 @@
 package io.bdeploy.interfaces.remote;
 
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.Version;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -7,10 +10,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.common.Version;
 
 /**
  * Perform updates on central
@@ -41,5 +40,12 @@ public interface CommonUpdateResource {
     @GET
     @Path("/update-api-version")
     public Version getUpdateApiVersion();
+
+    /**
+     * Restarts the server without applying any changes to it.
+     */
+    @GET
+    @Path("/restart")
+    public void restartServer();
 
 }

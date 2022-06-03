@@ -3,6 +3,13 @@ package io.bdeploy.ui.api;
 import java.io.InputStream;
 import java.util.List;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.ui.dto.LauncherDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -12,14 +19,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.common.security.RequiredPermission;
-import io.bdeploy.common.security.ScopedPermission.Permission;
-import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.LauncherDto;
 
 /**
  * Provides API to remote-update the master as well as the launcher software.
@@ -94,5 +93,9 @@ public interface SoftwareUpdateResource {
     @Path("/createLauncherInstaller")
     @Produces(MediaType.TEXT_PLAIN)
     public String createLauncherInstallerFor(@QueryParam("os") String osName);
+
+    @GET
+    @Path("/restart")
+    public void restartServer();
 
 }

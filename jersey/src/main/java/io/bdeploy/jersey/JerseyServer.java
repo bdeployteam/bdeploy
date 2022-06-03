@@ -121,7 +121,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     private UserValidator userValidator;
-
     private GrizzlyHttpContainer container;
 
     /**
@@ -134,25 +133,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         this.port = port;
         this.store = store;
         this.passphrase = passphrase.clone();
-
-        // Grizzly uses JUL
-        if (!SLF4JBridgeHandler.isInstalled()) {
-            // level of JUL is controlled with the level for the own logger
-            Level target = Level.WARNING;
-            if (log.isInfoEnabled()) {
-                target = Level.INFO;
-            }
-            if (log.isDebugEnabled()) {
-                target = Level.FINE;
-            }
-            if (log.isTraceEnabled()) {
-                target = Level.FINER;
-                // not finest, as this breaks grizzly.
-            }
-            java.util.logging.Logger.getLogger("").setLevel(target);
-            SLF4JBridgeHandler.removeHandlersForRootLogger();
-            SLF4JBridgeHandler.install();
-        }
     }
 
     @Override
@@ -238,6 +218,29 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     @Override
     public void registerWebsocketApplication(String urlMapping, WebSocketApplication wsa) {
         wsApplications.put(urlMapping, wsa);
+    }
+
+    public static void updateLogging() {
+        // Grizzly uses JUL
+        if (SLF4JBridgeHandler.isInstalled()) {
+            SLF4JBridgeHandler.uninstall();
+        }
+
+        // level of JUL is controlled with the level for the own logger
+        Level target = Level.WARNING;
+        if (log.isInfoEnabled()) {
+            target = Level.INFO;
+        }
+        if (log.isDebugEnabled()) {
+            target = Level.FINE;
+        }
+        if (log.isTraceEnabled()) {
+            target = Level.FINER;
+            // not finest, as this breaks grizzly.
+        }
+        java.util.logging.Logger.getLogger("").setLevel(target);
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
     }
 
     /**

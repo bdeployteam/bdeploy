@@ -107,4 +107,8 @@ export class SoftwareUpdateService {
       responseType: 'text',
     });
   }
+
+  public restartServer() {
+    return this.http.get(`${this.apiPath()}/restart`);
+  }
 }
