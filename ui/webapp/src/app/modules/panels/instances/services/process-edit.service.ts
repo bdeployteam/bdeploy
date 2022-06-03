@@ -215,6 +215,9 @@ export class ProcessEditService {
     }
 
     if (desc.hasValue) {
+      if (!desc.parameter) {
+        return [strValue];
+      }
       if (desc.valueAsSeparateArg) {
         return [desc.parameter, strValue];
       }

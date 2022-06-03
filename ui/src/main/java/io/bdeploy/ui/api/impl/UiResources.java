@@ -14,6 +14,7 @@ import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import jakarta.inject.Singleton;
+import jakarta.ws.rs.core.MediaType;
 
 public class UiResources {
 
@@ -65,7 +66,7 @@ public class UiResources {
             @Override
             public void service(Request request, Response response) throws Exception {
                 String html = JerseyCustomErrorPages.getErrorHtml("This server is a <code>NODE</code> and does not have a UI.");
-                response.setContentType("text/html");
+                response.setContentType(MediaType.TEXT_HTML);
                 response.setContentLength(html.length());
                 response.getWriter().write(html);
             }

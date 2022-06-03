@@ -92,7 +92,7 @@ export class ProcessUiInlineComponent implements OnDestroy {
 
   private cpWithSlash(cp: string) {
     if (!cp) {
-      return '';
+      return '/';
     }
     return cp[0] === '/' ? cp : `/${cp}`;
   }

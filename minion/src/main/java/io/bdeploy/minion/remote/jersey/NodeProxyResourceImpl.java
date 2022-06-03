@@ -116,7 +116,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
                 }
             }
 
-            if (body != null) {
+            if (body != null && wrapper.bodyType != null) {
                 return wrap(request.build(wrapper.method, Entity.entity(body, wrapper.bodyType)).invoke());
             } else {
                 return wrap(request.build(wrapper.method).invoke());

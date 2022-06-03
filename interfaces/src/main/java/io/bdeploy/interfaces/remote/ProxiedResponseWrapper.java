@@ -15,8 +15,6 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 public class ProxiedResponseWrapper {
 
-    public static final String COOKIE_BDPROXY = "BDPROXY_";
-
     /**
      * Wraps information about a single cookies sent along with a request.
      */
@@ -69,8 +67,8 @@ public class ProxiedResponseWrapper {
         if (cookies != null) {
             for (Map.Entry<String, ProxiedResonseCookie> entry : cookies.entrySet()) {
                 ProxiedResonseCookie c = entry.getValue();
-                builder.cookie(new NewCookie.Builder(COOKIE_BDPROXY + entry.getKey()).value(c.value).version(c.version)
-                        .path(c.path).domain(c.domain).comment(c.comment).maxAge(c.maxAge).expiry(c.expiry).secure(c.secure)
+                builder.cookie(new NewCookie.Builder(entry.getKey()).value(c.value).version(c.version).path(c.path)
+                        .domain(c.domain).comment(c.comment).maxAge(c.maxAge).expiry(c.expiry).secure(c.secure)
                         .httpOnly(c.httpOnly).build());
             }
         }

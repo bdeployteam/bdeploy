@@ -14,7 +14,6 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.remote.CommonProxyResource;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper.ProxiedRequestCookie;
-import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -65,9 +64,8 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
     }
 
     private ProxiedRequestWrapper wrap(String endpointId, String sub, byte[] body, String method) {
-        Map<String, ProxiedRequestCookie> cookies = request.getCookies().entrySet().stream()
-                .filter(e -> e.getKey().startsWith(ProxiedResponseWrapper.COOKIE_BDPROXY))
-                .collect(Collectors.toMap(e -> e.getKey().substring(ProxiedResponseWrapper.COOKIE_BDPROXY.length()), e -> {
+        Map<String, ProxiedRequestCookie> cookies = request.getCookies().entrySet().stream().filter(e -> !e.getKey().equals("st"))
+                .collect(Collectors.toMap(Entry::getKey, e -> {
                     Cookie k = e.getValue();
                     return new ProxiedRequestWrapper.ProxiedRequestCookie(k.getName(), k.getValue(), k.getVersion(), k.getPath(),
                             k.getDomain());
