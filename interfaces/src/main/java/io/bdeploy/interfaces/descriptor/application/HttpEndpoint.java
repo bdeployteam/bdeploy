@@ -91,4 +91,18 @@ public class HttpEndpoint {
      */
     public HttpEndpointType type = HttpEndpointType.DEFAULT;
 
+    /**
+     * Whether the endpoint hosts a Web UI which can be proxied.
+     * <p>
+     * The proxying feature (e.g. for inlining, or displaying across networks) requires web application to be
+     * <ul>
+     * <li>Location agnostic - the URL presented to the browser is *not* the URL where the UI is hosted at, it is instead
+     * rewritten.
+     * <li>Limited to simple request/response models, i.e. no WebSockets.
+     * </ul>
+     * <p>
+     * Currently, this flag is only evaluated for endpoints of type UI.
+     */
+    public boolean proxying = false;
+
 }

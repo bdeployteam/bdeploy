@@ -178,6 +178,7 @@ public class ProductUpdateService {
                 HttpEndpoint ep = val.get();
                 ep.path = desc.path;
                 ep.type = desc.type;
+                ep.proxying = desc.proxying;
                 result.add(ep);
             } else {
                 result.add(desc);

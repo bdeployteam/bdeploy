@@ -121,6 +121,7 @@ public class CommonEndpointHelper {
         processed.authType = rawEndpoint.authType;
         processed.authUser = p.apply(rawEndpoint.authUser);
         processed.authPass = p.apply(rawEndpoint.authPass);
+        processed.proxying = rawEndpoint.proxying;
 
         return processed;
     }

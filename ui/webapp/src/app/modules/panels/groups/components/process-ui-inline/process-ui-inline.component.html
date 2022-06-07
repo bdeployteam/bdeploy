@@ -10,13 +10,15 @@
       text="Reload"
       icon="refresh"
       tooltip="left"
-      (click)="frameLoaded = false; iframe?.contentWindow?.location?.reload()"
+      (click)="reloadIFrame()"
+      [disabled]="!app?.endpoint?.endpoint?.proxying"
     ></app-bd-button>
     <app-bd-button
       text="Fullscreen"
       icon="fullscreen"
       tooltip="left"
-      (click)="iframe?.contentWindow?.document?.documentElement?.requestFullscreen()"
+      (click)="setIFrameFullscreen()"
+      [disabled]="!app?.endpoint?.endpoint?.proxying"
     ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-button
@@ -24,9 +26,10 @@
       icon="open_in_new"
       tooltip="left"
       (click)="openUiEndpoint()"
+      [disabled]="!app?.endpoint?.endpoint?.proxying"
     ></app-bd-button>
     <app-bd-button
-      text="Open directly on node in new Tab"
+      text="Open directly on host in new Tab"
       icon="open_in_browser"
       tooltip="left"
       [disabled]="!directUri"
@@ -38,22 +41,43 @@
 
   <app-bd-dialog-content>
     <div fxLayout="column" fxFill class="local-group">
-      <div class="local-loading" [class.local-loading-done]="frameLoaded">
-        Loading...
-      </div>
       <div class="local-loading" *ngIf="!app">
         Application or Endpoint not found.
       </div>
-      <iframe
-        #iframe
+      <div
+        *ngIf="!app?.endpoint?.endpoint?.proxying"
         fxFill
-        class="local-app-frame"
-        [src]="url ? url : 'about:blank'"
-        [name]="app?.endpoint?.endpoint?.id"
-        allowfullscreen="true"
-        referrerpolicy="no-referrer"
-        (load)="frameLoaded = true"
-      ></iframe>
+        fxLayout="column"
+        fxLayoutAlign="center center"
+        fxLayoutGap="10px"
+      >
+        <span
+          >This endpoint does not support proxying, and can thus not be
+          displayed inline.</span
+        >
+        <app-bd-button
+          *ngIf="directUri"
+          [collapsed]="false"
+          text="Open directly on host in new Tab"
+          icon="open_in_browser"
+          (click)="openUiEndpointDirect()"
+        ></app-bd-button>
+      </div>
+      <ng-container *ngIf="app?.endpoint?.endpoint?.proxying">
+        <div class="local-loading" [class.local-loading-done]="frameLoaded">
+          Loading...
+        </div>
+        <iframe
+          #iframe
+          fxFill
+          class="local-app-frame"
+          [src]="url ? url : 'about:blank'"
+          [name]="app?.endpoint?.endpoint?.id"
+          allowfullscreen="true"
+          referrerpolicy="no-referrer"
+          (load)="frameLoaded = true"
+        ></iframe>
+      </ng-container>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

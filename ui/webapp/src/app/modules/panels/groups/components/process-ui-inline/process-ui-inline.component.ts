@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { combineLatest, first, skipWhile, Subscription } from 'rxjs';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -26,6 +26,7 @@ export class ProcessUiInlineComponent implements OnDestroy {
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild('iframe', { static: false }) private iframe: ElementRef;
 
   constructor(
     clients: ClientsService,
@@ -88,6 +89,15 @@ export class ProcessUiInlineComponent implements OnDestroy {
 
   /* template */ openUiEndpointDirect() {
     this.openUrl(this.directUri);
+  }
+
+  /* template */ reloadIFrame() {
+    this.frameLoaded = false;
+    this.iframe?.nativeElement?.contentWindow?.location?.reload();
+  }
+
+  /* template */ setIFrameFullscreen() {
+    this.iframe?.nativeElement?.contentWindow?.document?.documentElement?.requestFullscreen();
   }
 
   private cpWithSlash(cp: string) {
