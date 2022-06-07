@@ -17,13 +17,12 @@ const ADMIN_ROUTES: Route[] = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'all',
+    redirectTo: '/admin/all/(admin:general)',
   },
   {
     path: 'all',
     component: AdminShellComponent,
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'general', outlet: 'admin' },
       {
         path: 'general',
         component: SettingsGeneralComponent,

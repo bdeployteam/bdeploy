@@ -6,7 +6,7 @@ import {
   Self,
   ViewEncapsulation,
 } from '@angular/core';
-import { ControlValueAccessor, FormControl, NgControl } from '@angular/forms';
+import { ControlValueAccessor, UntypedFormControl, NgControl } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { bdValidationMessage } from '../../validators/messages';
@@ -77,7 +77,7 @@ export class BdFormInputComponent
     this.onTouchedCb = fn;
   }
 
-  isErrorState(control: FormControl | null): boolean {
+  isErrorState(control: UntypedFormControl | null): boolean {
     if (!this.isInvalid()) {
       return false;
     }
