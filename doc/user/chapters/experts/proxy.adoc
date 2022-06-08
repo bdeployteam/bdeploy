@@ -90,6 +90,7 @@ endpoints:
       secure: false
       authType: NONE
       type: UI
+      proxying: true
 ----
 
 [NOTE]
@@ -97,7 +98,7 @@ The differenciation between `path` and `contextPath` is that while `path` define
 
 ===== UI Endpoint Proxying =====
 
-Much like "normal" <<Endpoint Proxying>>, *BDeploy* also provides proxying for UI endpoints. A UI endpoint will be reachable on any participating *BDeploy* server (`STANDALONE` only or `CENTRAL` and `MANAGED` if used). *BDeploy* handles all the traffic from and to the actual web application. There is no direct access to the *actual* application required.
+Much like "normal" <<Endpoint Proxying>>, *BDeploy* also provides proxying for UI endpoints - when enabled using the `proxying` attribute on the endpoint. A UI endpoint will be reachable on any participating *BDeploy* server (`STANDALONE` only or `CENTRAL` and `MANAGED` if used). *BDeploy* handles all the traffic from and to the actual web application. There is no direct access to the *actual* application required.
 
 [NOTE]
 This feature is intended for simple use cases. Advanced use cases may not work as expected (e.g. WebSockets). *BDeploy* uses a simple request/response wrapping internally to forward requests and is *not* a full HTTP proxy.
