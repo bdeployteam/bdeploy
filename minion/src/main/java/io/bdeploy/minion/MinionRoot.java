@@ -238,6 +238,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             MinionLoggingContextDataProvider.setLogDir(logDir.toAbsolutePath().toString());
         }
 
+        // finally, update the forwarded config for JerseyServer
+        JerseyServer.updateLogging();
+
         return baseline;
     }
 

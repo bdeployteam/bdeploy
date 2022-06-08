@@ -42,6 +42,8 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.UpdateHelper;
+import io.bdeploy.interfaces.remote.CommonUpdateResource;
+import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
@@ -341,6 +343,13 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         Version running = VersionHelper.getVersion();
         Version launcherVersion = VersionHelper.tryParse(smk.getTag());
         return VersionHelper.equals(launcherVersion, running);
+    }
+
+    @Override
+    public void restartServer() {
+        CommonUpdateResource root = ResourceProvider.getResource(minion.getSelf(), CommonUpdateResource.class, context);
+        log.warn("Explicit restart by user");
+        root.restartServer();
     }
 
 }

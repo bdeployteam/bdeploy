@@ -40,11 +40,15 @@ public class ParameterConfiguration {
         preRendered.clear();
 
         if (desc.hasValue) {
-            if (desc.valueAsSeparateArg) {
-                preRendered.add(desc.parameter);
+            if (desc.parameter == null) {
                 preRendered.add(value);
             } else {
-                preRendered.add(desc.parameter + desc.valueSeparator + value);
+                if (desc.valueAsSeparateArg) {
+                    preRendered.add(desc.parameter);
+                    preRendered.add(value);
+                } else {
+                    preRendered.add(desc.parameter + desc.valueSeparator + value);
+                }
             }
         } else {
             preRendered.add(desc.parameter);

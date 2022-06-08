@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import {
   SoftwareUpdateService,
   SoftwareVersion,
@@ -51,9 +52,24 @@ export class UpdateBrowserComponent implements OnInit {
     ];
   };
 
+  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+
   constructor(public software: SoftwareUpdateService) {}
 
   ngOnInit() {
     this.software.load();
+  }
+
+  /* template */ restartServer() {
+    this.dialog
+      .confirm(
+        'Restart Server',
+        'Are you sure you want to restart the server? This will interrupt existing operations and connections.'
+      )
+      .subscribe((x) => {
+        if (!x) return;
+
+        this.software.restartServer().subscribe();
+      });
   }
 }

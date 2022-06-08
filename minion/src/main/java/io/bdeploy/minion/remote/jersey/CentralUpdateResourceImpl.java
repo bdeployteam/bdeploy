@@ -2,12 +2,6 @@ package io.bdeploy.minion.remote.jersey;
 
 import java.util.Set;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.container.ResourceContext;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response.Status;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +16,12 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.CommonUpdateResource;
+import io.bdeploy.minion.MinionRoot;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response.Status;
 
 public class CentralUpdateResourceImpl implements CommonUpdateResource {
 
@@ -29,6 +29,9 @@ public class CentralUpdateResourceImpl implements CommonUpdateResource {
 
     @Inject
     private BHiveRegistry registry;
+
+    @Inject
+    private MinionRoot root;
 
     @Context
     private ResourceContext rc;
@@ -74,6 +77,11 @@ public class CentralUpdateResourceImpl implements CommonUpdateResource {
         }
 
         return scoped.getOperatingSystem();
+    }
+
+    @Override
+    public void restartServer() {
+        root.getRestartManager().performRestart(1_000);
     }
 
 }

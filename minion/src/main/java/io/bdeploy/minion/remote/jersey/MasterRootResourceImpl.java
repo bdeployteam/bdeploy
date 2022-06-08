@@ -540,6 +540,11 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     @Override
+    public void restartServer() {
+        root.getRestartManager().performRestart(1_000);
+    }
+
+    @Override
     public MasterNamedResource getNamedMaster(String name) {
         BHive h = registry.get(name);
         if (h == null) {
