@@ -141,8 +141,17 @@ List<String> getCypressConfig() {
         timeout = project.property('cypressTimeout')
     }
     return [
-        "--config", "baseUrl=http://localhost:4210,defaultCommandTimeout=${timeout},requestTimeout=${timeout},responseTimeout=${timeout},taskTimeout=${timeout},execTimeout=${timeout},pageLoadTimeout=${timeout}"
-        + (project.hasProperty('cypressNoCentral') ? ",ignoreTestFiles=central-managed.spec.js" : ""),
+        "--config", "{\"baseUrl\":\"http://localhost:4210\","+
+                    "\"defaultCommandTimeout\":${timeout},"+
+                    "\"requestTimeout\":${timeout},"+
+                    "\"responseTimeout\":${timeout},"+
+                    "\"taskTimeout\":${timeout},"+
+                    "\"execTimeout\":${timeout},"+
+                    "\"pageLoadTimeout\":${timeout}"
+                    + (project.hasProperty('cypressNoCentral') 
+                        ? ",\"e2e\":{\"excludeSpecPattern\":\"**/central-managed.spec.js\"}" 
+                        : "") +
+                    "}",
         "--env", "backendBaseUrl=https://localhost:${standalonePort}/api"
         + ",baseUrlCentral=http://localhost:4211"
         + ",backendBaseUrlCentral=https://localhost:${centralPort}/api"
