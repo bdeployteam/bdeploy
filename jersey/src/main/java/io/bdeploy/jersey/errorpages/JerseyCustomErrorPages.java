@@ -12,6 +12,9 @@ public class JerseyCustomErrorPages {
     private static final String ERROR_TEMPLATE = readTemplate();
     private static final String LOGO_TEMPLATE = readLogo();
 
+    private JerseyCustomErrorPages() {
+    }
+
     private static String readTemplate() {
         try (InputStream is = JerseyCustomErrorPages.class.getResourceAsStream("error-template.html")) {
             return new String(StreamHelper.read(is), StandardCharsets.UTF_8);

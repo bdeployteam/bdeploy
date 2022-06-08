@@ -14,6 +14,7 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.remote.CommonProxyResource;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper.ProxiedRequestCookie;
+import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -48,7 +49,7 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
         this.applicationId = applicationId;
         this.endpoints = endpoints;
         this.forwarder = forwarder;
-        this.unwrapper = unwrapper != null ? unwrapper : r -> r.defaultUnwrap();
+        this.unwrapper = unwrapper != null ? unwrapper : ProxiedResponseWrapper::defaultUnwrap;
     }
 
     private HttpEndpoint getEndpoint(String endpointId) {

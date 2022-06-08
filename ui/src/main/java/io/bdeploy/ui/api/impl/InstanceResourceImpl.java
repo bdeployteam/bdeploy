@@ -1184,7 +1184,7 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         Map<String, MinionDto> minions = getMinionConfiguration(instance, state.activeTag);
-        MinionDto minion = minions.get(nodeName);
+        MinionDto node = minions.get(nodeName);
 
         // note that we cannot resolve deployment paths here, but this *should* not matter for calculating a URI.
         CompositeResolver list = new CompositeResolver();
@@ -1192,7 +1192,7 @@ public class InstanceResourceImpl implements InstanceResource {
         list.add(new ApplicationParameterValueResolver(app.uid, ic));
 
         HttpEndpoint processed = CommonEndpointHelper.processEndpoint(list, ep.get());
-        return CommonEndpointHelper.initUri(processed, minion.remote.getUri().getHost(), processed.contextPath);
+        return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath);
     }
 
 }

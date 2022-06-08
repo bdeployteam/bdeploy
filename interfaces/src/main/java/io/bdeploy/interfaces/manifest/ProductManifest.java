@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -388,10 +389,10 @@ public class ProductManifest {
                 .collect(Collectors.toSet());
 
         PersistentManifestClassification<ProductClassification> pc = new PersistentManifestClassification<>(hive, "products",
-                (m) -> new ProductClassification(m.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)));
+                m -> new ProductClassification(m.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)));
 
         pc.loadAndUpdate(allKeys);
-        pc.getClassifications().entrySet().stream().filter(e -> e.getValue().isProduct).map(e -> e.getKey()).forEach(result::add);
+        pc.getClassifications().entrySet().stream().filter(e -> e.getValue().isProduct).map(Entry::getKey).forEach(result::add);
 
         return result;
     }

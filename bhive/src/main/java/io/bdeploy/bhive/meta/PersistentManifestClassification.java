@@ -56,7 +56,7 @@ public class PersistentManifestClassification<T> {
         this.hive = hive;
 
         // we need a single static lock per classification name. it's ok to *never* expire this.
-        loadLocks.computeIfAbsent(classificationName, (k) -> new Object());
+        loadLocks.computeIfAbsent(classificationName, k -> new Object());
     }
 
     /**
