@@ -41,7 +41,7 @@ Technical experts can use the _Check_ action to test a single LDAP server entry:
 
 image::images/Doc_Admin_Ldap_Server_Config.png[BDeploy LDAP Server Configuration,align=center,width=480,link="images/Doc_Admin_Ldap_Server_Config.png"]
 
-===== LDAP Server Properties
+====== LDAP Server Properties
 
 The following properties can be configured for each LDAP Server:
 
@@ -81,6 +81,19 @@ The following properties can be configured for each LDAP Server:
 | Specifies whether the authentication process should follow referrals or not.
 
 |===
+
+====== LDAP Certificate Trust
+
+[NOTE]
+This section currently only applies to Linux installations.
+
+If the configured LDAP server uses official certificates which are not trusted by the current JVM's default trust store, you can alternatively configure the *BDeploy* service to use the system _cacert_ trust stores, which are typically available at a location like `/etc/pki/ca-trust/extracted/java/cacerts`. This path may be different on different Linux distributions.
+
+To use this trust store, you need to add these parameters to the command line of *BDeploy*:
+
+ -Djavax.net.ssl.trustStore=/etc/pki/ca-trust/extracted/java/cacerts -Djavax.net.ssl.trustStoreType=jks -Djavax.net.ssl.trustStorePassword=changeit
+
+You can do so by means provided by the Linux distribution, e.g. directly editing the `bdeploy.service` systemd service file or setting `BDEPLOY_OPTS` environment variable to that value either globally or in a service environment file.
 
 ===== Global Attributes
 
