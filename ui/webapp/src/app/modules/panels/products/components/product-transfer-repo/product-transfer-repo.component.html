@@ -16,6 +16,7 @@
             <span>Choose the repository to import from.</span>
             <app-bd-form-select
               errorDisplay="immediate"
+              name="repository"
               [values]="repos"
               [labels]="repoLabels"
               label="Repository"
@@ -37,6 +38,7 @@
                   >Only products with importable versions are shown.</span
                 >
                 <app-bd-form-select
+                  name="product"
                   errorDisplay="immediate"
                   [values]="prodIds"
                   [labels]="prodLabels"
