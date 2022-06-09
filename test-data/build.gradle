@@ -246,6 +246,7 @@ githubRelease {
     repo 'bdeploy'
     tagName "v${version}"
     releaseName "Release ${version}"
+    targetCommitish "master"
 
     releaseAssets.from(project(":minion").linux64DistZip)
     releaseAssets.from(project(":minion").win64DistZip)
