@@ -132,6 +132,14 @@ task updateFixtures() {
     }
 }
 
+String quoteJson(String s) {
+    if(org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        // on windows, cypress CLI runs through an additional set of unquoting. hate this.
+        s = s.replace("\"", "\\\"");
+    }
+    return s;
+}
+
 List<String> getCypressConfig() {
     def standalonePort = project(":test-data").testServerPort
     def centralPort = project(":test-data").testServerPortCentral
@@ -141,7 +149,7 @@ List<String> getCypressConfig() {
         timeout = project.property('cypressTimeout')
     }
     return [
-        "--config", "{\"baseUrl\":\"http://localhost:4210\","+
+        "--config", quoteJson("{\"baseUrl\":\"http://localhost:4210\","+
                     "\"defaultCommandTimeout\":${timeout},"+
                     "\"requestTimeout\":${timeout},"+
                     "\"responseTimeout\":${timeout},"+
@@ -151,7 +159,7 @@ List<String> getCypressConfig() {
                     + (project.hasProperty('cypressNoCentral') 
                         ? ",\"e2e\":{\"excludeSpecPattern\":\"**/central-managed.spec.js\"}" 
                         : "") +
-                    "}",
+                    "}"),
         "--env", "backendBaseUrl=https://localhost:${standalonePort}/api"
         + ",baseUrlCentral=http://localhost:4211"
         + ",backendBaseUrlCentral=https://localhost:${centralPort}/api"
