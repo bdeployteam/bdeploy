@@ -27,7 +27,7 @@ export class HistoryCompareComponent implements OnDestroy, BdSearchable {
   /* template */ clientNodeName = CLIENT_NODE_NAME;
 
   /* template */ searchTerm = '';
-  /* template */ showOnlyDifferences = false;
+  /* template */ showOnlyDifferences = true;
 
   private baseConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
