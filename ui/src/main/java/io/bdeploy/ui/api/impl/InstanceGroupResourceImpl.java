@@ -454,9 +454,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         }
         InstanceGroupConfiguration igc = manifest.read();
         if (multiple) {
-            igc.multipleGroupingPreset = preset;
+            igc.groupingMultiplePreset = preset;
         } else {
-            igc.singleGroupingPreset = preset;
+            igc.groupingSinglePreset = preset;
         }
         update(group, igc);
     }

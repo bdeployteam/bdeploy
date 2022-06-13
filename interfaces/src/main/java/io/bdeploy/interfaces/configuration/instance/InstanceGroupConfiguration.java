@@ -55,12 +55,12 @@ public class InstanceGroupConfiguration {
     public String defaultInstanceGroupingAttribute;
 
     /**
-     * The name of the default multiple grouping for the instance group overview UI.
+     * The name of the default multiple data grouping for the instance group overview UI.
      */
-    public List<CustomDataGrouping> multipleGroupingPreset = new ArrayList<>();
+    public List<CustomDataGrouping> groupingMultiplePreset = new ArrayList<>();
 
     /**
-     * The name of the default single grouping for the instance group overview UI.
+     * The name of the default single data grouping for the instance group overview UI.
      */
-    public List<CustomDataGrouping> singleGroupingPreset = new ArrayList<>();
+    public List<CustomDataGrouping> groupingSinglePreset = new ArrayList<>();
 }

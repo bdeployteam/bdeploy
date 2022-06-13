@@ -3,8 +3,7 @@ import { CustomDataGrouping } from 'src/app/models/gen.dtos';
 
 export function calculateGrouping<T>(
   definitions: BdDataGroupingDefinition<T>[],
-  preset: CustomDataGrouping[],
-  defaultGrouping: BdDataGrouping<T>[] = []
+  preset: CustomDataGrouping[]
 ): BdDataGrouping<T>[] {
   const result: BdDataGrouping<T>[] = [];
   if (preset?.length) {
@@ -19,5 +18,5 @@ export function calculateGrouping<T>(
       result.push({ definition: def, selected: item.selected });
     }
   }
-  return result.length ? result : defaultGrouping;
+  return result;
 }

@@ -14,6 +14,31 @@ import { CustomDataGrouping } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { calculateGrouping } from 'src/app/modules/core/utils/preset.utils';
+import { BdDialogMessageAction } from '../bd-dialog-message/bd-dialog-message.component';
+
+enum ON_EMPTY_PRESET {
+  SAVE_EMPTY_PRESET,
+  DELETE_PRESET,
+  CANCEL,
+}
+
+const ACTION_SAVE_EMPTY_PRESET: BdDialogMessageAction<ON_EMPTY_PRESET> = {
+  name: 'Save',
+  result: ON_EMPTY_PRESET.SAVE_EMPTY_PRESET,
+  confirm: false,
+};
+
+const ACTION_DELETE_PRESET: BdDialogMessageAction<ON_EMPTY_PRESET> = {
+  name: 'Delete',
+  result: ON_EMPTY_PRESET.DELETE_PRESET,
+  confirm: false,
+};
+
+const ACTION_CANCEL: BdDialogMessageAction<ON_EMPTY_PRESET> = {
+  name: 'Cancel',
+  result: ON_EMPTY_PRESET.CANCEL,
+  confirm: false,
+};
 
 @Component({
   selector: 'app-bd-data-grouping',
@@ -106,6 +131,8 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       );
       if (restored?.length) {
         this.groupings = restored;
+      } else {
+        this.groupings = [{ definition: null, selected: [] }];
       }
     } catch (e) {
       console.error('Cannot load grouping preset', e);
@@ -126,6 +153,36 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   /* template */ savePreset() {
+    const preset = this.groupingToPreset();
+    if (preset.length === 0) {
+      this.onSaveEmptyPreset();
+    } else {
+      this.savePresetToLocalStorage();
+    }
+  }
+
+  private onSaveEmptyPreset() {
+    this.dialog
+      .message({
+        header: 'What do you mean?',
+        message: `(Save) empty grouping as local preset? Or (Delete) current local preset?`,
+        icon: 'warning',
+        actions: [
+          ACTION_CANCEL,
+          ACTION_DELETE_PRESET,
+          ACTION_SAVE_EMPTY_PRESET,
+        ],
+      })
+      .subscribe((r) => {
+        if (r === ON_EMPTY_PRESET.SAVE_EMPTY_PRESET) {
+          this.savePresetToLocalStorage();
+        } else if (r === ON_EMPTY_PRESET.DELETE_PRESET) {
+          this.deletePresetFromLocalStorage();
+        }
+      });
+  }
+
+  private savePresetToLocalStorage() {
     localStorage.setItem(
       this.getStorageKey(),
       JSON.stringify(this.groupingToPreset())
@@ -136,15 +193,53 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     });
   }
 
-  saveGlobalPreset() {
+  private deletePresetFromLocalStorage() {
+    localStorage.removeItem(this.getStorageKey());
+
+    this.snackBar.open('Preset deleted from local browser.', null, {
+      duration: 1500,
+    });
+  }
+
+  /* template */ saveGlobalPreset() {
+    const preset = this.groupingToPreset();
+    if (preset.length) {
+      this.confirmSavingGlobalPreset(preset);
+    } else {
+      this.confirmSavingOrDeletingGlobalPreset();
+    }
+  }
+
+  private confirmSavingGlobalPreset(preset: CustomDataGrouping[]) {
     this.dialog
       .confirm(
         'Save global preset?',
-        'This will set as the global default preset for all users.'
+        'This will grouping will be set as the global default preset for all users.'
       )
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.globalPresetSaved.emit(this.groupingToPreset());
+          this.globalPresetSaved.emit(preset);
+        }
+      });
+  }
+
+  private confirmSavingOrDeletingGlobalPreset() {
+    this.dialog
+      .message({
+        header: 'What do you mean?',
+        message: `(Save) empty grouping as global preset? Or (Delete) current global preset?`,
+        icon: 'warning',
+        actions: [
+          ACTION_CANCEL,
+          ACTION_DELETE_PRESET,
+          ACTION_SAVE_EMPTY_PRESET,
+        ],
+      })
+      .subscribe((r) => {
+        if (r === ON_EMPTY_PRESET.SAVE_EMPTY_PRESET) {
+          this.globalPresetSaved.emit([]);
+        } else if (r === ON_EMPTY_PRESET.DELETE_PRESET) {
+          this.globalPresetSaved.emit(null);
         }
       });
   }
