@@ -294,7 +294,7 @@ task buildAngular(type:Exec) { t ->
 task installAngular(type:Exec) { t ->
     inputs.file "$webappDir/package.json"
     outputs.dir "$webappDir/node_modules"
-    sharedNpmLogic(t, ["install"])
+    sharedNpmLogic(t, ["ci", "--legacy-peer-deps"])
 }
 
 evaluationDependsOn(':doc')
