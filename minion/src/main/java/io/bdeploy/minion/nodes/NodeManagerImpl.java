@@ -69,7 +69,9 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
         this.config.entrySet().forEach(e -> this.status.put(e.getKey(), createStarting(e.getValue())));
 
         if (root.getMode() == MinionMode.CENTRAL) {
-            // no need to fetch states, etc. central has no live nodes.
+            // no need to periodically fetch states here. However we *do* want to verify connectivity
+            // to our own backend once. This is required for things like log file fetching, etc.
+            initialFetchNodeStates();
             return;
         }
 
