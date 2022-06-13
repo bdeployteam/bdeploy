@@ -1,7 +1,6 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { applyChangeset, Changeset, diff } from 'json-diff-ts';
 import { cloneDeep, isEqual } from 'lodash-es';
 import {
   BehaviorSubject,
@@ -59,7 +58,7 @@ export interface Edit {
   description: string;
 
   /** Applies the changes to the current state */
-  apply(current: GlobalEditState);
+  apply(current: GlobalEditState): GlobalEditState;
 }
 
 /**
@@ -74,22 +73,28 @@ export type EditFactory = (
   state: GlobalEditState
 ) => Edit;
 
-/** A generic edit, which may represent virtually any change. */
+/**
+ * A generic edit, which may represent virtually any change.
+ *
+ * This used to store a diff and patch that diff on the given input state. However this proved unreliable
+ * and also used nearly the same amount of RAM as the logic now: simple store a clone of the current state
+ * and return it if required.
+ */
 export class InstanceEdit implements Edit {
-  private changeset: Changeset;
+  private state: GlobalEditState;
 
   constructor(
     public description: string,
     base: GlobalEditState,
     current: GlobalEditState
   ) {
-    // clone changeset to decouple from changes to the source object.
-    this.changeset = cloneDeep(diff(base, current));
+    // clone current state so nobody outside can modify what we stored.
+    this.state = cloneDeep(current);
   }
 
-  public apply(current: GlobalEditState) {
-    // clone changeset to decouple from changes through applying *another* change.
-    applyChangeset(current, cloneDeep(this.changeset));
+  public apply(current: GlobalEditState): GlobalEditState {
+    // clone state so following edits will not destroy what we stored
+    return cloneDeep(this.state);
   }
 }
 
@@ -109,7 +114,7 @@ export class InstanceApplicationMoveEdit implements Edit {
     private target: string
   ) {}
 
-  public apply(current: GlobalEditState) {
+  public apply(current: GlobalEditState): GlobalEditState {
     const nodeConfig = current.config.nodeDtos.find(
       (n) => n.nodeName === this.nodeName
     ).nodeConfiguration;
@@ -141,6 +146,8 @@ export class InstanceApplicationMoveEdit implements Edit {
     nodeConfig.applications.sort(
       (a, b) => allApps.indexOf(a.uid) - allApps.indexOf(b.uid)
     );
+
+    return current;
   }
 }
 
@@ -700,10 +707,10 @@ export class InstanceEditService {
     if (!this.base$.value) {
       return null;
     }
-    const state = cloneDeep(this.base$.value);
+    let state = cloneDeep(this.base$.value);
 
     for (const change of this.undos) {
-      change.apply(state);
+      state = change.apply(state);
     }
 
     return state;
