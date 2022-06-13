@@ -17,6 +17,32 @@ Uploading a new *Product Version* is done in the *Products* page of the *Instanc
 
 The *Product Version* is now available and can be used in all *Instances* of this *Instance Group*.
 
+==== Import Product Version
+
+You can import a new *Product Version* from a software repository.
+It is done in the *Products* page of the *Instance Group*
+
+ . Click on the desired *Instance Group*
+ . Click on btn:[Products] button in the main menu.
+ . Click on the btn:[Import Product...] button in the toolbar.
+ . Select software repository.
++
+image::images/Doc_ImportProduct_SelectRepo.png[Choose Repo, align=center, width=480, link="images/Doc_ImportProduct_SelectRepo.png"]
+ . Select product.
++
+image::images/Doc_ImportProduct_SelectProduct.png[Choose Product, align=center, width=480, link="images/Doc_ImportProduct_SelectProduct.png"]
+ . Select product version.
++
+image::images/Doc_ImportProduct_SelectVersion.png[Choose Product Version, align=center, width=480, link="images/Doc_ImportProduct_SelectVersion.png"]
+ . Click import button.
++
+image::images/Doc_ImportProduct_PanelFilled.png[Press Import button, align=center, width=480, link="images/Doc_ImportProduct_PanelFilled.png"]
+ . The product will appear in the list of available products once successfully imported.
++
+image::images/Doc_ImportProduct_Success.png[Product Version imported, align=center, width=480, link="images/Doc_ImportProduct_Success.png"]
+
+The *Product Version* is now available and can be used in all *Instances* of this *Instance Group*.
+
 ==== Upgrade Instance
 
 Changing the *Product Version* of an *Instance* is done in the *Instance Configuration* dialog:

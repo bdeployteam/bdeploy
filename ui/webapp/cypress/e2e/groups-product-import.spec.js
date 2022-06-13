@@ -100,11 +100,19 @@ describe('Instance Group Product Import Test', () => {
     });
     cy.inMainNavFlyin('app-product-transfer-repo', () => {
       cy.waitUntilContentLoaded();
+    });
+    cy.screenshot('Doc_ImportProduct_SelectRepo');
+    cy.inMainNavFlyin('app-product-transfer-repo', () => {
       cy.fillFormSelect('repository', softwareRepoName);
+    });
+    cy.screenshot('Doc_ImportProduct_SelectProduct');
+    cy.inMainNavFlyin('app-product-transfer-repo', () => {
       cy.fillFormSelect('product', productName);
+    });
+    cy.screenshot('Doc_ImportProduct_SelectVersion');
+    cy.inMainNavFlyin('app-product-transfer-repo', () => {
       cy.contains('mat-checkbox', productVersion).should('exist').click();
     });
-    cy.screenshot('Doc_ImportProduct_PanelFilled');
     cy.inMainNavFlyin('app-product-transfer-repo', () => {
       cy.contains('button', 'Import').should('exist').and('be.enabled').click();
     });
