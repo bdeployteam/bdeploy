@@ -32,7 +32,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "allowedCommonJsDependencies": ["clone-deep", "json-diff-ts"],
+            "allowedCommonJsDependencies": ["clone-deep"],
             "outputPath": "dist/webapp",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -208,8 +208,6 @@
   },
   "cli": {
     "analytics": false,
-    "schematicCollections": [
-      "@angular-eslint/schematics"
-    ]
+    "schematicCollections": ["@angular-eslint/schematics"]
   }
 }
