@@ -125,16 +125,14 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
           });
         }
 
-        this.defaultSingleGrouping = calculateGrouping(
-          this.grouping,
-          g.singleGroupingPreset,
-          this.generateDefaultGrouping()
-        );
-        this.defaultMultipleGrouping = calculateGrouping(
-          this.grouping,
-          g.multipleGroupingPreset,
-          this.generateDefaultGrouping()
-        );
+        this.defaultSingleGrouping =
+          g.groupingSinglePreset === null
+            ? this.generateDefaultGrouping()
+            : calculateGrouping(this.grouping, g.groupingSinglePreset);
+        this.defaultMultipleGrouping =
+          g.groupingMultiplePreset === null
+            ? this.generateDefaultGrouping()
+            : calculateGrouping(this.grouping, g.groupingMultiplePreset);
       })
     );
   }
