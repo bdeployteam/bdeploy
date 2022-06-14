@@ -9,6 +9,13 @@ class DefaultTagAsVersionComparator implements Comparator<String>, Serializable 
 
     @Override
     public int compare(String tagA, String tagB) {
+        if (tagA == null || tagB == null) {
+            if (tagA == tagB) {
+                return 0;
+            }
+
+            return tagA == null ? -1 : 1;
+        }
 
         // split tags into parts, e.g. "5.9.0-N20190830" -> ["5", "9", "0", "N20190830"]
         String tagTokenRegex = "[^a-zA-Z0-9']+";
