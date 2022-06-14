@@ -2,8 +2,12 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import io.bdeploy.bhive.BHive;
@@ -13,6 +17,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.model.Tree.EntryType;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
@@ -30,14 +35,19 @@ import io.bdeploy.interfaces.manifest.state.InstanceState;
 public class InstanceNodeManifest {
 
     public static final String INSTANCE_NODE_LABEL = "X-InstanceNode";
+    public static final String ROOT_CONFIG_NAME = "root";
+
+    private static final String CONFIG_TREE_NAME = "config";
 
     private InstanceNodeConfiguration config;
     private Manifest.Key key;
+    private Map<String, ObjectId> configTrees;
 
     public static InstanceNodeManifest of(BHive hive, Manifest.Key key) {
         InstanceNodeManifest result = new InstanceNodeManifest();
         result.key = key;
         result.config = loadDeploymentConfiguration(hive, key);
+        result.configTrees = loadConfigTrees(hive, key);
 
         return result;
     }
@@ -89,6 +99,14 @@ public class InstanceNodeManifest {
         return key;
     }
 
+    /**
+     * @return a map of named config trees.
+     * @see Builder#addConfigTreeId(String, ObjectId)
+     */
+    public Map<String, ObjectId> getConfigTrees() {
+        return configTrees;
+    }
+
     private static InstanceNodeConfiguration loadDeploymentConfiguration(BHive hive, Manifest.Key key) {
         Manifest manifest = hive.execute(new ManifestLoadOperation().setManifest(key));
         Tree tree = hive.execute(new TreeLoadOperation().setTree(manifest.getRoot()));
@@ -101,12 +119,32 @@ public class InstanceNodeManifest {
         }
     }
 
+    private static Map<String, ObjectId> loadConfigTrees(BHive hive, Key key) {
+        Manifest manifest = hive.execute(new ManifestLoadOperation().setManifest(key));
+        Tree tree = hive.execute(new TreeLoadOperation().setTree(manifest.getRoot()));
+
+        Map<String, ObjectId> result = new TreeMap<>();
+
+        Optional<Entry<Tree.Key, ObjectId>> namedEntry = tree.getChildren().entrySet().stream()
+                .filter(e -> e.getKey().getName().equals(CONFIG_TREE_NAME) && e.getKey().getType() == EntryType.TREE).findFirst();
+
+        if (namedEntry.isPresent()) {
+            // yay, we have a config tree - populate the map.
+            Tree cfgTree = hive.execute(new TreeLoadOperation().setTree(namedEntry.get().getValue()));
+            for (var entry : cfgTree.getChildren().entrySet()) {
+                result.put(entry.getKey().getName(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
     public static class Builder {
 
         private String name;
         private Manifest.Key key;
         private InstanceNodeConfiguration cfg;
-        private ObjectId configTree;
+        private final Map<String, ObjectId> configTrees = new TreeMap<>();
 
         public Builder setMinionName(String name) {
             this.name = name;
@@ -118,8 +156,13 @@ public class InstanceNodeManifest {
             return this;
         }
 
-        public Builder setConfigTreeId(ObjectId configTree) {
-            this.configTree = configTree;
+        /**
+         * @param name either {@link InstanceNodeManifest#ROOT_CONFIG_NAME} or the UUID of an application
+         * @param configTree the dedicated config file tree used for this name.
+         * @return this for chaining.
+         */
+        public Builder addConfigTreeId(String name, ObjectId configTree) {
+            this.configTrees.put(name, configTree);
             return this;
         }
 
@@ -151,8 +194,18 @@ public class InstanceNodeManifest {
             Tree.Builder tb = new Tree.Builder();
             tb.add(new Tree.Key(InstanceNodeConfiguration.FILE_NAME, Tree.EntryType.BLOB), cfgId);
 
-            if (configTree != null) {
-                tb.add(new Tree.Key("config", Tree.EntryType.TREE), configTree);
+            // there may be multiple config trees in case of client nodes. servers only use a single 'root' tree
+            // which is kept here just to have a reverence (avoid pruning). for client applications, the trees
+            // are actually read back and inspected later on.
+            if (!configTrees.isEmpty()) {
+                Tree.Builder cfgT = new Tree.Builder();
+                for (Map.Entry<String, ObjectId> configEntry : configTrees.entrySet()) {
+                    if (configEntry.getValue() != null) {
+                        cfgT.add(new Tree.Key(configEntry.getKey(), Tree.EntryType.TREE), configEntry.getValue());
+                    }
+                }
+                tb.add(new Tree.Key(CONFIG_TREE_NAME, Tree.EntryType.TREE),
+                        hive.execute(new InsertArtificialTreeOperation().setTree(cfgT)));
             }
 
             Manifest.Builder mfb = new Manifest.Builder(key);

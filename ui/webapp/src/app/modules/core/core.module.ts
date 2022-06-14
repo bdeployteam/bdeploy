@@ -96,6 +96,7 @@ import { httpInterceptorProviders } from './interceptors';
 import { VersionShortPipe } from './pipes/version-short.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
+import { EditItemInListValidatorDirective } from './validators/edit-item-in-list';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { IdentifierValidator } from './validators/identifier.directive';
 import { PasswordVerificationValidator } from './validators/password-verification.directive';
@@ -172,6 +173,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataSizeCellComponent,
     BdDataPopoverCellComponent,
     PortValueValidatorDirective,
+    EditItemInListValidatorDirective,
   ],
   providers: [
     httpInterceptorProviders,
@@ -290,6 +292,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     EditUniqueValueValidatorDirective,
     BdExpandButtonComponent,
     PortValueValidatorDirective,
+    EditItemInListValidatorDirective,
   ],
 })
 export class CoreModule {}

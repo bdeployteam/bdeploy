@@ -3,6 +3,8 @@ package io.bdeploy.minion.remote.jersey;
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -16,8 +18,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
+import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +43,10 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TaskExecutor;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
@@ -91,6 +97,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.StreamingOutput;
 
 @LockingResource
 public class MasterNamedResourceImpl implements MasterNamedResource {
@@ -289,7 +296,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                         context);
                 deployments = ndr.getInstanceState(instanceId);
             } catch (Exception e) {
-                throw new IllegalStateException("Node offline while checking state: " + nodeName);
+                throw new IllegalStateException("Node offline while checking state: " + nodeName, e);
             }
 
             if (deployments.installedTags.isEmpty()) {
@@ -379,10 +386,30 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             RuntimeAssert.assertEquals(inc.uuid, config.uuid, "Instance ID not set on nodes");
 
             InstanceNodeManifest.Builder inmb = new InstanceNodeManifest.Builder();
-            inmb.setConfigTreeId(config.configTree);
+            inmb.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, config.configTree);
             inmb.setMinionName(entry.getKey());
             inmb.setInstanceNodeConfiguration(inc);
             inmb.setKey(new Manifest.Key(config.uuid + '/' + entry.getKey(), target.getTag()));
+
+            // create dedicated configuration trees for client applications where required.
+            if (entry.getKey().equals(InstanceManifest.CLIENT_NODE_NAME)) {
+                // client applications *may* specify config directories.
+                for (var app : inc.applications) {
+                    if (app.processControl == null || StringHelper.isNullOrEmpty(app.processControl.configDirs)) {
+                        continue; // no dirs set.
+                    }
+
+                    // we have directories set, and need to create a dedicated config tree for the application.
+                    String[] allowedPaths = app.processControl.configDirs.split(",");
+                    ObjectId appTree = applyConfigUpdates(config.configTree, p -> {
+                        // remove unwanted paths from p.
+                        applyConfigRestrictions(allowedPaths, p, p);
+                    });
+
+                    // record the config tree for this application.
+                    inmb.addConfigTreeId(app.uid, appTree);
+                }
+            }
 
             builder.addInstanceNodeManifest(entry.getKey(), inmb.insert(hive));
         }
@@ -390,6 +417,38 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Manifest.Key key = builder.insert(hive);
         InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.CREATE, context.getUserPrincipal().getName(), null);
         return key;
+    }
+
+    /**
+     * Client applications can specify a set of allowed paths. From the current config tree and this set of allowed
+     * paths, we remove all paths which are not allowed. This builds a dedicated per-application configuration
+     * which is allowed to be provided to clients - this avoids sending sensitive config files which should only
+     * be available on servers.
+     */
+    private void applyConfigRestrictions(String[] allowedPaths, Path p, Path root) {
+        try (DirectoryStream<Path> list = Files.newDirectoryStream(p)) {
+            for (Path path : list) {
+                if (Files.isDirectory(path)) {
+                    // need to recurse to check.
+                    applyConfigRestrictions(allowedPaths, path, root);
+                } else {
+                    // only accept if the file relative path starts with the
+                    boolean ok = false;
+                    for (String x : allowedPaths) {
+                        Path rel = root.relativize(path);
+                        if (("/" + rel.toString().replace("\\", "/")).startsWith(x.endsWith("/") ? x : (x + "/"))) {
+                            ok = true;
+                        }
+                    }
+
+                    if (!ok) {
+                        PathHelper.deleteRecursive(path);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot apply content restriction", e);
+        }
     }
 
     @WriteLock
@@ -416,7 +475,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             if (configUpdates != null && !configUpdates.isEmpty()) {
                 // export existing tree and apply updates.
                 // set/reset config tree ID on instanceConfig.
-                instanceConfig.configTree = applyConfigUpdates(instanceConfig.configTree, configUpdates);
+                instanceConfig.configTree = applyConfigUpdates(instanceConfig.configTree, p -> applyUpdates(configUpdates, p));
             }
 
             // calculate target key.
@@ -471,7 +530,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         return nodeConfiguration;
     }
 
-    private ObjectId applyConfigUpdates(ObjectId configTree, List<FileStatusDto> updates) {
+    private ObjectId applyConfigUpdates(ObjectId configTree, Consumer<Path> updater) {
         Path tmpDir = null;
         try {
             tmpDir = Files.createTempDirectory(root.getTempDir(), "cfgUp-");
@@ -481,7 +540,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             exportConfigTree(configTree, cfgDir);
 
             // 2. apply updates to files
-            applyUpdates(updates, cfgDir);
+            updater.accept(cfgDir);
 
             // 3. re-import new tree from temp directory
             return hive.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(cfgDir));
@@ -509,26 +568,30 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
-    private void applyUpdates(List<FileStatusDto> updates, Path cfgDir) throws IOException {
+    private void applyUpdates(List<FileStatusDto> updates, Path cfgDir) {
         for (FileStatusDto update : updates) {
             Path file = cfgDir.resolve(update.file);
             if (!file.startsWith(cfgDir)) {
                 throw new WebApplicationException("Update wants to write to file outside update directory", Status.BAD_REQUEST);
             }
 
-            switch (update.type) {
-                case ADD:
-                    PathHelper.mkdirs(file.getParent());
-                    Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE_NEW,
-                            StandardOpenOption.SYNC);
-                    break;
-                case DELETE:
-                    Files.delete(file);
-                    break;
-                case EDIT:
-                    Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
-                    break;
+            try {
+                switch (update.type) {
+                    case ADD:
+                        PathHelper.mkdirs(file.getParent());
+                        Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE_NEW,
+                                StandardOpenOption.SYNC);
+                        break;
+                    case DELETE:
+                        Files.delete(file);
+                        break;
+                    case EDIT:
+                        Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE,
+                                StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
+                        break;
+                }
+            } catch (IOException e) {
+                throw new WebApplicationException("Cannot apply update to " + update.file, e);
             }
         }
     }
@@ -656,6 +719,16 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         // load splash screen and icon from hive and send along.
         cfg.clientSplashData = amf.readBrandingSplashScreen(hive);
         cfg.clientImageIcon = amf.readBrandingIcon(hive);
+
+        // set dedicated config tree.
+        Key clientKey = imf.getInstanceNodeManifests().get(InstanceManifest.CLIENT_NODE_NAME);
+        if (clientKey != null) {
+            InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, clientKey);
+            if (inmf != null && !inmf.getConfigTrees().isEmpty()) {
+                // we either have a dedicated one, or not :)
+                cfg.configTree = inmf.getConfigTrees().get(application);
+            }
+        }
 
         return cfg;
     }
@@ -1032,4 +1105,63 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
         }
     }
+
+    @Override
+    public Response getConfigZipSteam(String instanceId, String application) {
+        InstanceStateRecord state = getInstanceState(instanceId);
+        if (state.activeTag == null) {
+            throw new WebApplicationException("Instance has no active tag: " + instanceId, Status.NOT_FOUND);
+        }
+
+        InstanceManifest imf = InstanceManifest.load(hive, instanceId, state.activeTag);
+        Manifest.Key key = imf.getInstanceNodeManifests().get(InstanceManifest.CLIENT_NODE_NAME); // only for clients.
+
+        if (key == null) {
+            throw new WebApplicationException("Instance has no client node: " + instanceId, Status.NOT_FOUND);
+        }
+
+        InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, key);
+        ObjectId configTree = inmf.getConfigTrees().get(application);
+
+        if (configTree == null) {
+            throw new WebApplicationException(
+                    "Application " + application + " in instance " + instanceId + " does not have config files",
+                    Status.NOT_FOUND);
+        }
+
+        // Build a response with the stream
+        var responseBuilder = Response.ok(new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream output) throws IOException {
+                zipConfigTree(output, configTree);
+            }
+        });
+
+        // Load and attach metadata to give the file a nice name
+        var contentDisposition = ContentDisposition.type("attachement").fileName("DataFiles.zip").build();
+        responseBuilder.header("Content-Disposition", contentDisposition);
+        return responseBuilder.build();
+    }
+
+    private void zipConfigTree(OutputStream output, ObjectId configTree) {
+        Path tmpDir = null;
+        try {
+            tmpDir = Files.createTempDirectory(root.getTempDir(), "cfgUp-");
+            Path cfgDir = tmpDir.resolve("cfg");
+
+            // 1. export current tree to temp directory
+            exportConfigTree(configTree, cfgDir);
+
+            // 2. create ZIP stream.
+            ZipHelper.zip(output, cfgDir);
+        } catch (IOException e) {
+            throw new WebApplicationException("Cannot update configuration files", e);
+        } finally {
+            if (tmpDir != null) {
+                PathHelper.deleteRecursive(tmpDir);
+            }
+        }
+    }
+
 }

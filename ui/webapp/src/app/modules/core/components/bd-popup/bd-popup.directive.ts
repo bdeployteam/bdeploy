@@ -111,6 +111,7 @@ const RIGHT_BELOW: ConnectedPosition = {
 
 @Directive({
   selector: '[appBdPopup]',
+  exportAs: 'appBdPopup',
 })
 export class BdPopupDirective implements OnDestroy {
   @Input() appBdPopup: TemplateRef<any>;
@@ -241,7 +242,7 @@ export class BdPopupDirective implements OnDestroy {
   }
 
   /** Closes the overlay if present */
-  closeOverlay() {
+  public closeOverlay() {
     if (this.popupService.getOverlay()) {
       this.overlayRef = this.popupService.getOverlay();
       this.overlayRef.detach();

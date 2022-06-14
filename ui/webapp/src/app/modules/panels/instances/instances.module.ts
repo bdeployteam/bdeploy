@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
@@ -8,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatTreeModule } from '@angular/material/tree';
 import { CoreModule } from '../../core/core.module';
 import { InstancesModule as PrimaryInstancesModule } from '../../primary/instances/instances.module';
 import { AddControlGroupComponent } from './components/add-control-group/add-control-group.component';
@@ -159,6 +161,8 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
     MatInputModule,
     MatChipsModule,
     MatStepperModule,
+    MatTreeModule,
+    MatButtonModule,
   ],
 })
 export class InstancesModule {}

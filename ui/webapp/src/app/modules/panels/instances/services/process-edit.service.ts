@@ -153,6 +153,7 @@ export class ProcessEditService {
         noOfRetries: application.descriptor.processControl.noOfRetries,
         startupProbe: application.descriptor.processControl.startupProbe,
         lifenessProbe: application.descriptor.processControl.lifenessProbe,
+        configDirs: application.descriptor.processControl.configDirs,
       },
       start: start,
       stop: stop,

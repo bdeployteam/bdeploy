@@ -25,3 +25,11 @@ supportedOperatingSystems:
 type: "CLIENT"
 startCommand:
   launcherPath: "{{WINDOWS:client.bat}}{{LINUX:client.sh}}{{MACOS:client.sh}}"
+  parameters:
+    - uid: "param.file"
+      name: "File to open"
+      longDescription: "Path to an existing file which will be opened in and editor"
+      groupName: "Client Parameters"
+      mandatory: false
+      defaultValue: "{{P:CONFIG}}/sub-dir-1/test1.txt"
+

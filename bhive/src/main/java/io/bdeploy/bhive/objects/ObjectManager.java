@@ -107,7 +107,15 @@ public class ObjectManager {
     public ObjectId importTree(Path location, boolean skipEmpty) {
         Activity importing = reporter.start("Importing Files", 0);
         try {
-            return internalImportTree(location, importing, skipEmpty);
+            ObjectId result = internalImportTree(location, importing, skipEmpty);
+
+            // null in case the complete tree is empty (skipped).
+            if (result == null) {
+                // we never want to return null, but rather an empty root in case *everything* is empty.
+                return insertTree(new Tree.Builder().build());
+            }
+
+            return result;
         } catch (IOException e) {
             throw new IllegalStateException("Cannot import " + location, e);
         } finally {
@@ -136,8 +144,12 @@ public class ObjectManager {
                     }
 
                     // recursively calculate ObjectId from sub-tree.
-                    tree.add(new Tree.Key(path.getFileName().toString(), Tree.EntryType.TREE),
-                            internalImportTree(path, importing, skipEmpty));
+                    ObjectId imported = internalImportTree(path, importing, skipEmpty);
+
+                    // can be null in case only empty directories are found recursively.
+                    if (imported != null) {
+                        tree.add(new Tree.Key(path.getFileName().toString(), Tree.EntryType.TREE), imported);
+                    }
                 } else {
                     // insert an actual file into the tree.
                     filesOnLevel.add(fileOps.submit(() -> {
@@ -158,6 +170,12 @@ public class ObjectManager {
 
         // insert the tree into the db and return its ObjectId.
         importing.workAndCancelIfRequested(1);
+
+        // if nothing was imported, return null
+        if (tree.isEmpty() && skipEmpty) {
+            return null;
+        }
+
         return insertTree(tree.build());
     }
 

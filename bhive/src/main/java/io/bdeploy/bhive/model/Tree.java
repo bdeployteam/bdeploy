@@ -71,6 +71,13 @@ public class Tree implements Serializable {
         }
 
         /**
+         * @return whether the tree is empty
+         */
+        public synchronized boolean isEmpty() {
+            return children.isEmpty();
+        }
+
+        /**
          * @return the immutable {@link Tree}.
          */
         public synchronized Tree build() {

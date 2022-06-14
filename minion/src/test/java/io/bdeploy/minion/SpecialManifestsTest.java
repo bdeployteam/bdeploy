@@ -151,7 +151,8 @@ class SpecialManifestsTest {
             Files.write(cfgDir.resolve("config.json"), Arrays.asList("DummyConfig"));
 
             Manifest.Key ifk = ifmb.setInstanceNodeConfiguration(cfg)
-                    .setConfigTreeId(ProductManifest.of(hive, prodKey).getConfigTemplateTreeId())
+                    .addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME,
+                            ProductManifest.of(hive, prodKey).getConfigTemplateTreeId())
                     .setMinionName(Minion.DEFAULT_NAME).insert(hive);
 
             InstanceConfiguration ic = new InstanceConfiguration();

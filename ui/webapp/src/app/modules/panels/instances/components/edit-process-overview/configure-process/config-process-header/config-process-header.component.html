@@ -1,3 +1,95 @@
+<ng-template #directorySelector>
+  <mat-card
+    [style.padding.px]="10"
+    [style.max-width.px]="300"
+    class="mat-typography"
+    fxLayout="column"
+    fxLayoutGap="5px"
+  >
+    <div fxLayout="column" fxLayoutGap="10px">
+      <span
+        >Select the allowed configuration directories to be mirrored to the
+        client installation.</span
+      >
+      <mat-tree
+        [dataSource]="dirDataSource"
+        [treeControl]="dirTreeControl"
+        [style.max-height.px]="400"
+        [style.overflow]="'auto'"
+      >
+        <mat-tree-node
+          *matTreeNodeDef="let node"
+          matTreeNodeToggle
+          matTreeNodePadding
+        >
+          <button mat-icon-button disabled></button>
+          <mat-checkbox
+            [checked]="dirSelection.isSelected(node)"
+            (change)="dirSelection.toggle(node);"
+            >{{node.name}}</mat-checkbox
+          >
+        </mat-tree-node>
+
+        <mat-tree-node
+          *matTreeNodeDef="let node; when: hasChild"
+          matTreeNodePadding
+        >
+          <button
+            mat-icon-button
+            matTreeNodeToggle
+            [attr.aria-label]="'toggle ' + node.filename"
+          >
+            <mat-icon>
+              {{dirTreeControl.isExpanded(node) ? 'expand_more' :
+              'chevron_right'}}
+            </mat-icon>
+          </button>
+          <mat-checkbox
+            [checked]="descendantsAllSelected(node)"
+            [indeterminate]="descendantsPartiallySelected(node)"
+            (change)="dirItemSelectionToggle(node)"
+            >{{node.name}}</mat-checkbox
+          >
+        </mat-tree-node>
+      </mat-tree>
+      <div fxLayout="row-reverse">
+        <app-bd-button
+          text="Apply"
+          [collapsed]="false"
+          color="primary"
+          (click)="doApplyDirectories()"
+        ></app-bd-button>
+      </div>
+    </div>
+  </mat-card>
+</ng-template>
+
+<ng-template #directoryHelp>
+  <mat-card
+    [style.padding.px]="10"
+    [style.max-width.px]="1024"
+    class="mat-typography"
+    fxLayout="column"
+    fxLayoutGap="5px"
+  >
+    <div fxLayout="column" fxLayoutGap="10px">
+      <p>
+        <code>CLIENT</code> applications are not provided with potentially
+        sensitive configuration files by default.
+      </p>
+      <p>
+        This option lets you whitelist directories within the normal
+        configuration files space, which will get provisioned to clients when
+        they install this application.
+      </p>
+      <p>
+        Make sure to only include directories which contain files safe for
+        provisioning to potentially unsafe clients.
+      </p>
+    </div>
+  </mat-card>
+</ng-template>
+
 <form #form="ngForm">
   <div class="local-header">
     <div
@@ -16,61 +108,115 @@
           [appEditProcessNameValidator]="process.uid"
         ></app-bd-form-input>
       </app-config-desc-element>
-      <app-config-desc-element card="cfg.control.startType" class="local-field">
-        <app-bd-form-select
-          label="Start Type"
-          name="startType"
-          [(ngModel)]="process.processControl.startType"
-          [values]="startTypes"
-          [labels]="startTypeLabels"
-          errorDisplay="immediate"
-        ></app-bd-form-select>
-      </app-config-desc-element>
-      <app-config-desc-element card="cfg.control.keepAlive" class="local-field">
-        <app-bd-form-toggle
-          label="Keep Alive"
-          name="keepAlive"
-          [(ngModel)]="process.processControl.keepAlive"
-          [disabled]="!app.descriptor.processControl.supportsKeepAlive"
-        ></app-bd-form-toggle>
-      </app-config-desc-element>
-      <app-config-desc-element card="cfg.control.noRetries" class="local-field">
-        <app-bd-form-input
-          label="Number of Retries"
-          name="noOfRetries"
-          [(ngModel)]="process.processControl.noOfRetries"
-          [disabled]="!app.descriptor.processControl.supportsKeepAlive"
-          type="number"
-          [required]="app.descriptor.processControl.supportsKeepAlive"
-          errorDisplay="immediate"
-        ></app-bd-form-input>
-      </app-config-desc-element>
-      <app-config-desc-element
-        card="cfg.control.attachStdin"
-        class="local-field"
-      >
-        <app-bd-form-toggle
-          label="Attach StdIn"
-          name="attachStdIn"
-          [(ngModel)]="process.processControl.attachStdin"
-          [disabled]="!app.descriptor.processControl.attachStdin"
-        ></app-bd-form-toggle>
-      </app-config-desc-element>
-      <app-config-desc-element
-        card="cfg.control.gracePeriod"
-        class="local-field"
-      >
+      <ng-container *ngIf="app.descriptor.type === 'SERVER'">
+        <app-config-desc-element
+          card="cfg.control.startType"
+          class="local-field"
+        >
+          <app-bd-form-select
+            label="Start Type"
+            name="startType"
+            [(ngModel)]="process.processControl.startType"
+            [values]="startTypes"
+            [labels]="startTypeLabels"
+            errorDisplay="immediate"
+          ></app-bd-form-select>
+        </app-config-desc-element>
+        <app-config-desc-element
+          card="cfg.control.keepAlive"
+          class="local-field"
+        >
+          <app-bd-form-toggle
+            label="Keep Alive"
+            name="keepAlive"
+            [(ngModel)]="process.processControl.keepAlive"
+            [disabled]="!app.descriptor.processControl.supportsKeepAlive"
+          ></app-bd-form-toggle>
+        </app-config-desc-element>
+        <app-config-desc-element
+          card="cfg.control.noRetries"
+          class="local-field"
+        >
+          <app-bd-form-input
+            label="Number of Retries"
+            name="noOfRetries"
+            [(ngModel)]="process.processControl.noOfRetries"
+            [disabled]="!app.descriptor.processControl.supportsKeepAlive"
+            type="number"
+            [required]="app.descriptor.processControl.supportsKeepAlive"
+            errorDisplay="immediate"
+          ></app-bd-form-input>
+        </app-config-desc-element>
+        <app-config-desc-element
+          card="cfg.control.attachStdin"
+          class="local-field"
+        >
+          <app-bd-form-toggle
+            label="Attach StdIn"
+            name="attachStdIn"
+            [(ngModel)]="process.processControl.attachStdin"
+            [disabled]="!app.descriptor.processControl.attachStdin"
+          ></app-bd-form-toggle>
+        </app-config-desc-element>
+        <app-config-desc-element
+          card="cfg.control.gracePeriod"
+          class="local-field"
+        >
+          <app-bd-form-input
+            class="local-field"
+            label="Grace Period"
+            name="gracePeriod"
+            [(ngModel)]="process.processControl.gracePeriod"
+            [disabled]="!app.descriptor.processControl.gracePeriod"
+            type="number"
+            errorDisplay="immediate"
+            required
+          ></app-bd-form-input>
+        </app-config-desc-element>
+      </ng-container>
+      <ng-container *ngIf="app.descriptor.type === 'CLIENT'">
         <app-bd-form-input
           class="local-field"
-          label="Grace Period"
-          name="gracePeriod"
-          [(ngModel)]="process.processControl.gracePeriod"
-          [disabled]="!app.descriptor.processControl.gracePeriod"
-          type="number"
+          label="Allowed Configuration Directory Paths"
+          name="configDirs"
+          [(ngModel)]="process.processControl.configDirs"
           errorDisplay="immediate"
-          required
-        ></app-bd-form-input>
-      </app-config-desc-element>
+          matTooltip="A comma separated list of allowed directories for this
+          client application within the instance's configuration
+          directory."
+          matTooltipShowDelay="1000"
+          fxFlex="2 0 auto"
+          appEditItemInListValidator
+          [allowedValues]="dirFlatAllowedValues"
+        >
+          <div fxLayout="row" fxLayoutGap="10px">
+            <mat-icon
+              matTooltip="Additional Information"
+              [matTooltipShowDelay]="500"
+              matRipple
+              [style.cursor]="'pointer'"
+              appClickStopPropagation
+              [appBdPopup]="directoryHelp"
+              appBdPopupTrigger="click"
+              appBdPopupPosition="below-left"
+              >info</mat-icon
+            >
+            <mat-icon
+              matTooltip="Select Directories..."
+              [matTooltipShowDelay]="500"
+              matRipple
+              [style.cursor]="'pointer'"
+              appClickStopPropagation
+              #dirSelector="appBdPopup"
+              [appBdPopup]="directorySelector"
+              appBdPopupTrigger="click"
+              appBdPopupPosition="below-left"
+              (appBdPopupOpened)="onDirSelectorOpened(process.processControl.configDirs)"
+              >drive_file_move</mat-icon
+            >
+          </div>
+        </app-bd-form-input>
+      </ng-container>
     </div>
   </div>
 </form>

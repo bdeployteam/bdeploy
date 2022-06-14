@@ -543,6 +543,57 @@ describe('Instance Process Config Tests', () => {
     //cy.contains('div', 'myVersion - public/version').should('exist');
   });
 
+  it('Tests Client Config Whitelist', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Instance Configuration');
+
+    // configure client to receive directory via popup selection.
+    cy.inMainNavContent(() => {
+      cy.get('app-config-node[data-cy="__ClientApplications"]').within(
+        (node) => {
+          cy.contains('tr', 'Client Application').should('exist').click();
+        }
+      );
+    });
+
+    cy.inMainNavFlyin('app-edit-process-overview', () => {
+      cy.get('button[data-cy^="Configure Parameters"]').click();
+    });
+
+    cy.inMainNavFlyin('app-configure-process', () => {
+      cy.get('app-config-process-header').within(() => {
+        cy.contains('mat-icon', 'drive_file_move').click();
+      });
+    });
+
+    cy.screenshot('Doc_InstanceConfig_ClientConfigDirs');
+
+    cy.document()
+      .its('body')
+      .find('.cdk-overlay-container')
+      .contains('mat-card', 'configuration directories')
+      .should('exist')
+      .within(() => {
+        cy.contains('mat-tree-node', 'sub-dir-1')
+          .should('exist')
+          .within(() => {
+            cy.get('input[type="checkbox"]')
+              .should('not.be.checked')
+              .check({ force: true });
+          });
+
+        cy.contains('button', 'Apply').click();
+      });
+
+    cy.inMainNavFlyin('app-configure-process', () => {
+      cy.get('app-bd-form-input[name="configDirs"]').within(() => {
+        cy.get('input').should('have.value', '/sub-dir-1');
+      });
+
+      cy.pressToolbarButton('Apply');
+    });
+  });
+
   it('Cleans up', () => {
     cy.deleteGroup(groupName);
   });

@@ -2,6 +2,7 @@ package io.bdeploy.common.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
@@ -42,41 +43,62 @@ public class ZipHelper {
      */
     public static void zip(Path zipFile, Path source) {
         try (ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(zipFile.toFile())) {
-            Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
-
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    // leave out the source directory itself, it would resolve to '/' - we don't want that!
-                    if (!dir.equals(source)) {
-                        String entryName = PathHelper.separatorsToUnix(source.relativize(dir));
-                        zaos.putArchiveEntry(zaos.createArchiveEntry(dir.toFile(), entryName));
-                        zaos.closeArchiveEntry();
-                    }
-                    return super.preVisitDirectory(dir, attrs);
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    ZipArchiveEntry zae = new ZipArchiveEntry(file.toFile(), source.relativize(file).toString());
-
-                    if (PathHelper.isExecutable(PathHelper.getContentInfo(file, null))) {
-                        zae.setUnixMode(DEFAULT_EXEC_MODE);
-                    } else {
-                        zae.setUnixMode(DEFAULT_NONEXEC_MODE);
-                    }
-
-                    zaos.putArchiveEntry(zae);
-                    Files.copy(file, zaos);
-                    zaos.closeArchiveEntry();
-
-                    return super.visitFile(file, attrs);
-                }
-            });
-
-            zaos.finish();
+            internalZip(source, zaos);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot create " + zipFile, e);
         }
+    }
+
+    /**
+     * Creates a ZIP stream from the given source directory.
+     * <p>
+     * In contrast to Java's built-in ZIP {@link FileSystem}, this will determine whether files should be executable and mark them
+     * accordingly, even when run on windows.
+     *
+     * @param output the stream to write to.
+     * @param source the source directory
+     */
+    public static void zip(OutputStream output, Path source) {
+        try (ZipArchiveOutputStream zaos = new ZipArchiveOutputStream(output)) {
+            internalZip(source, zaos);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot ZIP to stream", e);
+        }
+    }
+
+    private static void internalZip(Path source, ZipArchiveOutputStream zaos) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                // leave out the source directory itself, it would resolve to '/' - we don't want that!
+                if (!dir.equals(source)) {
+                    String entryName = PathHelper.separatorsToUnix(source.relativize(dir));
+                    zaos.putArchiveEntry(zaos.createArchiveEntry(dir.toFile(), entryName));
+                    zaos.closeArchiveEntry();
+                }
+                return super.preVisitDirectory(dir, attrs);
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                ZipArchiveEntry zae = new ZipArchiveEntry(file.toFile(), source.relativize(file).toString());
+
+                if (PathHelper.isExecutable(PathHelper.getContentInfo(file, null))) {
+                    zae.setUnixMode(DEFAULT_EXEC_MODE);
+                } else {
+                    zae.setUnixMode(DEFAULT_NONEXEC_MODE);
+                }
+
+                zaos.putArchiveEntry(zae);
+                Files.copy(file, zaos);
+                zaos.closeArchiveEntry();
+
+                return super.visitFile(file, attrs);
+            }
+        });
+
+        zaos.finish();
     }
 
     /**

@@ -55,6 +55,13 @@ public class ProcessControlDescriptor {
     public boolean attachStdin = false;
 
     /**
+     * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
+     * <p>
+     * Only listed directories will be provisioned to the client.
+     */
+    public String configDirs;
+
+    /**
      * Optional startup probe which is queried to find out when a process completed startup.
      */
     public StartupProbeDescriptor startupProbe;

@@ -169,7 +169,7 @@ public class InstanceImportExportHelper {
                 reAssignApplications(target, nodeCfg, minionName, minionDto);
             }
 
-            inmBuilder.setConfigTreeId(cfgId);
+            inmBuilder.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, cfgId);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
             inmBuilder.setMinionName(minionName);
 

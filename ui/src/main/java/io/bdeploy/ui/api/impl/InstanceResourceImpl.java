@@ -32,9 +32,12 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.bhive.objects.view.ElementView;
+import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
+import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
@@ -113,6 +116,7 @@ import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.ApplicationDto;
+import io.bdeploy.ui.dto.ConfigDirDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -253,11 +257,32 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceBannerRecord banner = im.getBanner(hive).read();
             InstanceOverallStateRecord overallState = im.getOverallState(hive).read();
 
+            // load config directories
+            ConfigDirDto configRoot = null;
+            if (config.configTree != null) {
+                TreeView rootTv = hive.execute(new ScanOperation().setTree(config.configTree));
+                configRoot = new ConfigDirDto();
+                configRoot.name = "/";
+                readTree(configRoot, rootTv);
+            }
+
             // Clear security token before sending via REST
             result.add(InstanceDto.create(imKey, config, hasProduct, activeProduct, newerVersionAvailable, managedMaster,
-                    attributes, banner, im.getManifest(), activeVersion, overallState));
+                    attributes, banner, im.getManifest(), activeVersion, overallState, configRoot));
         }
         return result;
+    }
+
+    private void readTree(ConfigDirDto parent, TreeView tv) {
+        for (Map.Entry<String, ElementView> entry : tv.getChildren().entrySet()) {
+            if (entry.getValue() instanceof TreeView x) {
+                ConfigDirDto child = new ConfigDirDto();
+                child.name = entry.getKey();
+                readTree(child, x);
+
+                parent.children.add(child);
+            }
+        }
     }
 
     @Override

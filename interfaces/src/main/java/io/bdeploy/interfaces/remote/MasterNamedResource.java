@@ -379,4 +379,15 @@ public interface MasterNamedResource {
     @GET
     @Path("/overallStatus")
     public void updateOverallStatus();
+
+    /**
+     * @param instanceId the instance's ID
+     * @param application the client application's ID
+     * @return an {@link InputStream} that can be used to stream a ZIP file containing all entries.
+     */
+    @POST
+    @WeakTokenAllowed
+    @Path("/launcher/streamZipConfig")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getConfigZipSteam(@QueryParam("u") String instanceId, @QueryParam("a") String application);
 }

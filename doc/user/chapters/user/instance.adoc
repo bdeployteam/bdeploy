@@ -113,6 +113,19 @@ A preview of the command that is executed to launch this process can be viewed b
 
 image::images/Doc_InstanceConfigPreview.png[Preview Command Line with Custom Parameter,align=center, width=480, link="images/Doc_InstanceConfigPreview.png"]
 
+===== Allowable Configuration Directories
+
+[NOTE]
+This section applies to `CLIENT` applications only.
+
+`CLIENT` applications by default do not receive any <<Configuration Files>> from the instance configuration. The reason for this is simple: security. Client PCs are typically less secure than the server running `SERVER` applications. Nevertheless, also `CLIENT` applications may _require_ configuration files.
+
+Thus it is possible to *whitelist* certain configuration directories in the configuration of _each_ `CLIENT` process in the instance configuration.
+
+image::images/Doc_InstanceConfig_ClientConfigDirs.png[Allowed Configuration Directories,align=center, width=480, link="images/Doc_InstanceConfig_ClientConfigDirs.png"]
+
+Select one or more directories to have those installed to the PC running the `CLIENT` application in addition to server nodes.
+
 ==== Configuration Files
 
 The *configuration files* of all *Processes* of an *Instance* are maintained together in one place. It can be opened by clicking on the btn:[Configuration Files] button in the *Instance Settings* panel. The initial set of *configuration files* is derived from the default set delivered with the product, see <<_product_info_yaml,`product-info.yaml`>>.

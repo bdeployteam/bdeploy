@@ -2,6 +2,7 @@ package io.bdeploy.launcher.cli;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -62,9 +63,11 @@ import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
@@ -84,6 +87,7 @@ import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
+import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
@@ -98,6 +102,8 @@ import io.bdeploy.launcher.cli.branding.LauncherSplashReporter;
 import io.bdeploy.launcher.cli.ui.MessageDialogs;
 import io.bdeploy.launcher.cli.ui.TextAreaDialog;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
 
 @CliName("launcher")
 @Help("A tool which launches an application described by a '.bdeploy' file")
@@ -110,6 +116,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
     /** Validator will check whether the writing PID of the lock file is still there. */
     private static final Predicate<String> LOCK_VALIDATOR = pid -> ProcessHandle.of(Long.parseLong(pid)).isPresent();
+
+    /** name of the file containing the ID of the exported configuration version */
+    private static final String CONFIG_DIR_CHECK_FILE = ".cfgv";
 
     /**
      * Environment variable that is set in case that one launcher delegates launching to another (older) one.
@@ -678,6 +687,15 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Application specific data will be stored in a separate directory
         PathHelper.mkdirs(appDir);
 
+        // Download and install the current configuration tree if required.
+        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
+        Path cfgPath = pathProvider.get(SpecialDirectory.CONFIG);
+        PathHelper.deleteRecursive(cfgPath); // get rid of *any* existing config
+
+        if (clientAppCfg.configTree != null) {
+            downloadAndInstallConfigFiles(clientAppCfg, cfgPath);
+        }
+
         // Store branding information on file-system
         ApplicationBrandingDescriptor branding = clientAppCfg.appDesc.branding;
         if (branding != null) {
@@ -700,6 +718,41 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Calculate the difference which software is not required anymore
         log.info("Application successfully installed.");
+    }
+
+    private void downloadAndInstallConfigFiles(ClientApplicationConfiguration clientAppCfg, Path cfgPath) {
+        // contact server, download files and write into config directory.
+        MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
+        MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
+
+        Path cfgZip = appDir.resolve(clientAppCfg.configTree.getId() + ".zip");
+        Response zipDl = namedMaster.getConfigZipSteam(clickAndStart.instanceId, clickAndStart.applicationId);
+
+        if (zipDl.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+            throw new IllegalStateException("Config File download failed: " + zipDl.getStatusInfo().getStatusCode() + ": "
+                    + zipDl.getStatusInfo().getReasonPhrase());
+        }
+
+        // write the download into a temporary file so we can unzip it.
+        try (InputStream input = zipDl.readEntity(InputStream.class); OutputStream output = Files.newOutputStream(cfgZip)) {
+            StreamHelper.copy(input, output);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "Cannot read ZIP response from config files request for " + clickAndStart.applicationId);
+        }
+
+        // unzip the downloaded ZIP containing the configuration files.
+        ZipHelper.unzip(cfgZip, cfgPath);
+
+        try {
+            // record the proper ID in the config check file.
+            Files.write(cfgPath.resolve(CONFIG_DIR_CHECK_FILE), Collections.singletonList(clientAppCfg.configTree.getId()));
+        } catch (Exception e) {
+            log.warn("Cannot write config check file", e);
+        }
+
+        // remove the temporary download file.
+        PathHelper.deleteRecursive(cfgZip);
     }
 
     /**
@@ -726,6 +779,18 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
 
+        // configuration files need to be installed in the correct version
+        if (clientAppCfg.configTree != null) {
+            DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
+            Path cfgPath = pathProvider.get(SpecialDirectory.CONFIG);
+
+            boolean isCurrent = checkForCurrentConfigFiles(clientAppCfg.configTree, cfgPath);
+
+            if (!isCurrent) {
+                missing.add("Configuration Files Version: " + clientAppCfg.configTree);
+            }
+        }
+
         // Meta-Manifest about the installation must be there
         // and must refer to what the application actually requires
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
@@ -745,6 +810,27 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
         return missing;
+    }
+
+    private boolean checkForCurrentConfigFiles(ObjectId configTree, Path cfgPath) {
+        Path checkFile = cfgPath.resolve(CONFIG_DIR_CHECK_FILE);
+        if (PathHelper.exists(checkFile)) {
+            try (InputStream is = Files.newInputStream(checkFile)) {
+                List<String> lines = Files.readAllLines(checkFile);
+
+                if (lines.isEmpty()) {
+                    return false;
+                }
+
+                String check = lines.get(0);
+                if (clientAppCfg.configTree.getId().equals(check)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                log.warn("Cannot read check file: " + checkFile, e);
+            }
+        }
+        return false;
     }
 
     /**

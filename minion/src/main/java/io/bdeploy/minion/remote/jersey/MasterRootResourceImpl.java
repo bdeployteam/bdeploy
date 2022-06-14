@@ -204,7 +204,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                 minionName = newNodeName;
             }
 
-            inmBuilder.setConfigTreeId(existing.getConfiguration().configTree);
+            inmBuilder.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, existing.getConfiguration().configTree);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
             inmBuilder.setMinionName(minionName);
             inmBuilder.setKey(new Manifest.Key(nodeCfg.uuid + "/" + minionName, Long.toString(latest.get() + 1)));

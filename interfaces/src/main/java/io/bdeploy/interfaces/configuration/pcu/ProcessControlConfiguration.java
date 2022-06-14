@@ -37,6 +37,13 @@ public class ProcessControlConfiguration {
     public boolean attachStdin;
 
     /**
+     * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
+     * <p>
+     * Only listed directories will be provisioned to the client.
+     */
+    public String configDirs;
+
+    /**
      * Copy of the original startup probe descriptor.
      */
     public StartupProbeDescriptor startupProbe;

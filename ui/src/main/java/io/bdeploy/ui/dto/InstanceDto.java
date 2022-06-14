@@ -26,10 +26,12 @@ public class InstanceDto {
     public InstanceBannerRecord banner;
     public InstanceOverallStateRecord overallState;
 
+    public ConfigDirDto configRoot;
+
     public static InstanceDto create(Manifest.Key instance, InstanceConfiguration instanceConfiguration, boolean hasProduct,
             Manifest.Key activeProduct, boolean newerVersionAvailable, ManagedMasterDto managedServer,
             CustomAttributesRecord attributes, InstanceBannerRecord banner, Manifest.Key latestVersion,
-            Manifest.Key activeVersion, InstanceOverallStateRecord overallState) {
+            Manifest.Key activeVersion, InstanceOverallStateRecord overallState, ConfigDirDto configRoot) {
         InstanceDto dto = new InstanceDto();
         dto.instance = instance;
         dto.instanceConfiguration = instanceConfiguration;
@@ -42,6 +44,7 @@ public class InstanceDto {
         dto.latestVersion = latestVersion;
         dto.activeVersion = activeVersion;
         dto.overallState = overallState;
+        dto.configRoot = configRoot;
         return dto;
     }
 }
