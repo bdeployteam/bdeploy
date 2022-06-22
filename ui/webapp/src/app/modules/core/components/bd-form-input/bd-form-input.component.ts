@@ -6,7 +6,11 @@ import {
   Self,
   ViewEncapsulation,
 } from '@angular/core';
-import { ControlValueAccessor, UntypedFormControl, NgControl } from '@angular/forms';
+import {
+  ControlValueAccessor,
+  NgControl,
+  UntypedFormControl,
+} from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { bdValidationMessage } from '../../validators/messages';
@@ -27,6 +31,7 @@ export class BdFormInputComponent
   @Input() type: string;
   @Input() suggested: string[];
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
+  @Input() passwordLock = false;
 
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
