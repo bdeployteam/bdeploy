@@ -16,6 +16,7 @@ import {
   ApplicationConfiguration,
   InstanceNodeConfigurationDto,
   MinionDto,
+  ProcessControlGroupConfiguration,
 } from 'src/app/models/gen.dtos';
 import {
   BdDataTableComponent,
@@ -203,5 +204,12 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.config$.value.nodeConfiguration.controlGroups.find((cg) =>
       cg.processOrder.includes(row.uid)
     )?.name;
+  }
+
+  /* template */ doTrack(
+    index: number,
+    group: ProcessControlGroupConfiguration
+  ) {
+    return group.name;
   }
 }

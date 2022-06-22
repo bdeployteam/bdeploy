@@ -34,7 +34,7 @@
   <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
     <ng-container *ngIf="!isClientNode; else clientTable">
       <app-control-group
-        *ngFor="let group of (config$ | async)?.nodeConfiguration.controlGroups"
+        *ngFor="let group of (config$ | async)?.nodeConfiguration.controlGroups; trackBy: doTrack"
         [group]="group"
         [node$]="config$"
         [(expanded)]="groupExpansion[group.name]"
