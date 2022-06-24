@@ -10,10 +10,10 @@ import org.junit.Test;
 /**
  * A simple unit test for the 'io.bdeploy.gradle.greeting' plugin.
  */
-class BDeployGradlePluginTest {
+public class BDeployGradlePluginTest {
 
 	@Test
-	void pluginApplication() {
+	public void pluginApplication() {
 		Project root = ProjectBuilder.builder().build();
 
 		root.getPlugins().apply(BDeployGradlePlugin.PLUGIN_ID);
