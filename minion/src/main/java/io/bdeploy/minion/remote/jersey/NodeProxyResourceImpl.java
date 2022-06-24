@@ -62,13 +62,13 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
         InstanceNodeManifest inm = findInstanceNodeManifest(wrapper.instanceId, ps.instanceTag);
 
         if (!ps.processState.isRunning()) {
-            return wrap(Response.status(Status.PRECONDITION_FAILED.getStatusCode(),
+            return wrap(Response.status(Status.SERVICE_UNAVAILABLE.getStatusCode(),
                     "Process '" + ps.appName + "' in instance '" + inm.getConfiguration().name + "' is not running or not ready")
                     .build());
         }
 
         if (inm == null) {
-            return wrap(Response.status(Status.PRECONDITION_FAILED.getStatusCode(), "Cannot find instance " + wrapper.instanceId)
+            return wrap(Response.status(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Cannot find instance " + wrapper.instanceId)
                     .build());
         }
 
@@ -123,7 +123,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
             }
         } catch (Exception e) {
             log.warn("Error in endpoint processing for {}/{}/{}", wrapper.group, wrapper.instanceId, wrapper.applicationId, e);
-            return wrap(Response.status(Status.PRECONDITION_FAILED.getStatusCode(),
+            return wrap(Response.status(Status.SERVICE_UNAVAILABLE.getStatusCode(),
                     "Failed to call endpoint " + wrapper.endpoint.id + " on target application " + wrapper.applicationId
                             + " for instance " + wrapper.instanceId + ": " + e.toString())
                     .build());
