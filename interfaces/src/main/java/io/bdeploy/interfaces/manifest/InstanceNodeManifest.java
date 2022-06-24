@@ -194,9 +194,10 @@ public class InstanceNodeManifest {
             Tree.Builder tb = new Tree.Builder();
             tb.add(new Tree.Key(InstanceNodeConfiguration.FILE_NAME, Tree.EntryType.BLOB), cfgId);
 
-            // there may be multiple config trees in case of client nodes. servers only use a single 'root' tree
-            // which is kept here just to have a reverence (avoid pruning). for client applications, the trees
-            // are actually read back and inspected later on.
+            // there may be multiple config trees in case of client nodes. servers only use a single 'root' tree.
+            // note that the DCU exports the complete manifest to disc, so changes in paths here need to be
+            // respected in DeploymentPathProvider!
+            // for client applications, the trees are actually read back and inspected later on.
             if (!configTrees.isEmpty()) {
                 Tree.Builder cfgT = new Tree.Builder();
                 for (Map.Entry<String, ObjectId> configEntry : configTrees.entrySet()) {

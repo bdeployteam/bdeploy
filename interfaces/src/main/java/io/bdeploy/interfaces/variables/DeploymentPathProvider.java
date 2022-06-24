@@ -15,7 +15,7 @@ public class DeploymentPathProvider {
     public enum SpecialDirectory {
 
         ROOT("root"),
-        CONFIG("config"),
+        CONFIG("config/root"),
         RUNTIME("runtime"),
         BIN("bin"),
         DATA("data"),
