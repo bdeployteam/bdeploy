@@ -105,7 +105,7 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
         if (activeTag == null) {
             throw new WebApplicationException(
                     "Endpoints are available only once there is an active version for " + wrapper.instanceId,
-                    Status.PRECONDITION_FAILED);
+                    Status.SERVICE_UNAVAILABLE);
         }
 
         InstanceManifest im = InstanceManifest.load(hive, wrapper.instanceId, activeTag);
@@ -131,7 +131,7 @@ public class CommonInstanceResourceImpl implements CommonInstanceResource {
             if (nodeName == null) {
                 throw new WebApplicationException(
                         "Cannot find application " + wrapper.applicationId + " in instance " + wrapper.instanceId,
-                        Status.PRECONDITION_FAILED);
+                        Status.SERVICE_UNAVAILABLE);
             }
 
             return nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProxyResource.class, context).forward(wrapper);

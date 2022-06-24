@@ -58,7 +58,7 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
 
         if (!ep.isPresent()) {
             throw new WebApplicationException("Endpoint " + endpointId + " not found for instance " + instanceId,
-                    Status.PRECONDITION_FAILED);
+                    Status.SERVICE_UNAVAILABLE);
         }
 
         return ep.get();
