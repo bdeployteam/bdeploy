@@ -17,11 +17,11 @@
   <app-bd-dialog-content>
     <div fxLayout="column" fxLayoutGap="10px">
       <app-config-process-header
-        (checkIsInvalid)="checkIsInvalid($event)"
+        (checkIsInvalid)="checkIsInvalid($event, true)"
       ></app-config-process-header>
       <app-config-process-param-group
         [dialog]="dialog"
-        (checkIsInvalid)="checkIsInvalid($event)"
+        (checkIsInvalid)="checkIsInvalid($event, false)"
       ></app-config-process-param-group>
     </div>
   </app-bd-dialog-content>

@@ -136,6 +136,7 @@ export class ConfigProcessHeaderComponent
         this.checkIsInvalid.emit(status !== 'VALID');
       })
     );
+    this.checkIsInvalid.emit(this.form.status !== 'VALID');
   }
 
   /* template */ onDirSelectorOpened(dirs: string) {

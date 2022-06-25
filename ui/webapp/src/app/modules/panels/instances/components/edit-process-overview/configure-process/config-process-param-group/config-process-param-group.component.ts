@@ -217,15 +217,20 @@ export class ConfigProcessParamGroupComponent
     if (!this.formsLoaded && this.forms && this.forms.length) {
       this.forms.forEach((form) => {
         this.subscription.add(
-          form.statusChanges.pipe(debounceTime(100)).subscribe(() => {
-            this.checkIsInvalid.emit(
-              this.forms.some((form) => !form.valid && !form.disabled)
-            );
-          })
+          form.statusChanges
+            .pipe(debounceTime(100))
+            .subscribe(() => this.emitIsInvalid())
         );
       });
       this.formsLoaded = true;
+      this.emitIsInvalid();
     }
+  }
+
+  private emitIsInvalid() {
+    this.checkIsInvalid.emit(
+      this.forms.some((form) => !form.valid && !form.disabled)
+    );
   }
 
   ngOnDestroy(): void {
