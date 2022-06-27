@@ -6,7 +6,7 @@ plugins {
     id "com.github.psxpaul.execfork" version "0.2.0"
     id "de.undercouch.download" version "5.1.0"
     id "jacoco"
-    id "com.github.breadmoirai.github-release" version "2.3.7"
+    id "com.github.breadmoirai.github-release" version "2.4.1"
 }
 
 ext {
