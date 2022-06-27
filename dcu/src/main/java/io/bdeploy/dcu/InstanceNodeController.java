@@ -26,7 +26,9 @@ import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
+import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.util.OsHelper;
@@ -237,8 +239,12 @@ public class InstanceNodeController {
         Path targetDir = paths.get(SpecialDirectory.BIN);
         PathHelper.deleteRecursive(targetDir);
 
-        // write all the manifest content (config only) to the according target location
-        syncOps.perform(targetDir, () -> hive.execute(new ExportOperation().setManifest(manifest.getKey()).setTarget(targetDir)));
+        // write root config tree to the according target location
+        ObjectId rootTree = manifest.getConfigTrees().get(InstanceNodeManifest.ROOT_CONFIG_NAME);
+        if (rootTree != null) {
+            syncOps.perform(targetDir, () -> hive.execute(new ExportTreeOperation().setSourceTree(rootTree)
+                    .setTargetPath(targetDir.resolve(SpecialDirectory.CONFIG.getDirName()))));
+        }
 
         // write all required applications to the pool
         SortedMap<Manifest.Key, Path> exportedPaths = installPooledApplicationsFor(dc);
