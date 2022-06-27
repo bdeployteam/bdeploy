@@ -89,7 +89,7 @@ class ValueResolverTest {
         // but the descriptor expand recursively.
         boolean found = false;
         for (String rendered : dd.applications.get(0).start) {
-            if (rendered.startsWith("--bak=") && rendered.replace("\\", "/").endsWith("config/root/file.json.bak")) {
+            if (rendered.startsWith("--bak=") && rendered.replace("\\", "/").endsWith("config/file.json.bak")) {
                 found = true;
             }
         }
