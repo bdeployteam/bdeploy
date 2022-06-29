@@ -18,6 +18,8 @@ export class ConfigureProcessComponent implements OnDestroy, DirtyableDialog {
 
   /* template */ hasPendingChanges: boolean;
   /* template */ isInvalid: boolean;
+  private isHeaderInvalid: boolean;
+  private isParamGroupInvalid: boolean;
 
   private subscription: Subscription;
 
@@ -37,6 +39,10 @@ export class ConfigureProcessComponent implements OnDestroy, DirtyableDialog {
     return this.instanceEdit.hasPendingChanges();
   }
 
+  public canSave(): boolean {
+    return !this.isInvalid;
+  }
+
   /* template */ onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
@@ -53,8 +59,13 @@ export class ConfigureProcessComponent implements OnDestroy, DirtyableDialog {
     );
   }
 
-  /* template */ checkIsInvalid(event) {
-    this.isInvalid = event;
+  /* template */ checkIsInvalid(event: boolean, isHeader: boolean) {
+    if (isHeader) {
+      this.isHeaderInvalid = event;
+    } else {
+      this.isParamGroupInvalid = event;
+    }
+    this.isInvalid = this.isHeaderInvalid || this.isParamGroupInvalid;
     this.hasPendingChanges = this.isDirty();
   }
 }
