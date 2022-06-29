@@ -56,7 +56,7 @@ export class InstanceBulkService {
           `${this.apiPath(
             this.groups.current$.value.name,
             inst.instanceConfiguration.uuid
-          )}/processes/start`
+          )}/processes/startAll`
         )
       )
     ).pipe(concatAll());
@@ -69,7 +69,7 @@ export class InstanceBulkService {
           `${this.apiPath(
             this.groups.current$.value.name,
             inst.instanceConfiguration.uuid
-          )}/processes/stop`
+          )}/processes/stopAll`
         )
       )
     ).pipe(concatAll());
