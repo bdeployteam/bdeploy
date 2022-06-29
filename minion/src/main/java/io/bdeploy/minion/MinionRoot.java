@@ -42,6 +42,8 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.LockableDatabase;
+import io.bdeploy.bhive.op.FsckOperation;
+import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TaskSynchronizer;
@@ -284,8 +286,18 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * manifest
      */
     private void updateMinionConfiguration() {
+        // first we'll want to make sure that minion manifests are in proper shape.
+        // they can break in case of power failure and prevent further startup.
+        hive.execute(new FsckOperation().setRepair(true)
+                .addManifests(hive.execute(new ManifestListOperation().setManifestName(MinionManifest.MANIFEST_NAME))));
+
+        // next it must be save to read the manifest.
         MinionManifest manifest = new MinionManifest(hive);
         MinionConfiguration minionConfig = manifest.read();
+
+        if (minionConfig == null) {
+            throw new RuntimeException("Minion Configuration has been corrupted.");
+        }
 
         // Check that the master flag is set on the correct entry
         boolean writeManifest = false;

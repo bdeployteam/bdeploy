@@ -1,5 +1,6 @@
 package io.bdeploy.bhive.op;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
@@ -63,10 +64,18 @@ public class FsckOperation extends BHive.Operation<Set<ElementView>> {
     }
 
     /**
-     * Add a {@link Manifest} to check.0
+     * Add a {@link Manifest} to check.
      */
     public FsckOperation addManifest(Manifest.Key key) {
         manifests.add(key);
+        return this;
+    }
+
+    /**
+     * Add multiple {@link Manifest} to check.
+     */
+    public FsckOperation addManifests(Collection<Manifest.Key> keys) {
+        manifests.addAll(keys);
         return this;
     }
 
