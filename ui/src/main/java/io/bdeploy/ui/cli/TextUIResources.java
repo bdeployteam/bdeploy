@@ -22,6 +22,7 @@ public class TextUIResources {
         tool.register(RemoteMasterTool.class);
         tool.register(RemoteCentralTool.class);
         tool.register(RemotePluginTool.class);
+        tool.register(RemoteDataFilesTool.class);
     }
 
 }
