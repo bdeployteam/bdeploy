@@ -205,7 +205,7 @@ export class ProcessEditService {
   }
 
   public preRenderParameter(desc: ParameterDescriptor, value: any): string[] {
-    const strValue = value ? value : '';
+    const strValue = value === null || value === undefined ? '' : value;
 
     if (!desc) {
       // custom parameter;
