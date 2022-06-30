@@ -26,6 +26,10 @@ import { OverallStatusColumnComponent } from './overall-status-column/overall-st
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
   initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
+    {
+      name: 'System',
+      group: (r) => this.instanceColumns.instanceSystemColumn.data(r),
+    },
     { name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose },
     {
       name: 'Product',
@@ -38,8 +42,12 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     },
   ];
   grouping: BdDataGroupingDefinition<InstanceDto>[];
-  defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [];
-  defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [];
+  defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [
+    { definition: this.initGrouping[0], selected: [] },
+  ];
+  defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [
+    { definition: this.initGrouping[0], selected: [] },
+  ];
   hasProducts$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
@@ -73,6 +81,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     this.instanceColumns.instanceTypeColumn,
     this.instanceColumns.instanceIdColumn,
     this.instanceColumns.instanceDescriptionColumn,
+    this.instanceColumns.instanceSystemColumn,
     this.instanceColumns.instanceProductColumn,
     this.instanceColumns.instanceProductVersionColumn,
     this.instanceColumns.instanceProductActiveColumn,

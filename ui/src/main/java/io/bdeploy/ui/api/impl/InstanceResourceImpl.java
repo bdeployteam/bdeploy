@@ -400,7 +400,7 @@ public class InstanceResourceImpl implements InstanceResource {
         return ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context);
     }
 
-    static void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
+    private void syncInstance(Minion minion, ResourceContext rc, String groupName, String instanceId) {
         if (minion.getMode() != MinionMode.CENTRAL) {
             return;
         }
@@ -532,7 +532,9 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         syncInstance(minion, rc, group, instanceId);
-        changes.remove(ObjectChangeType.INSTANCE, key);
+        if (minion.getMode() != MinionMode.CENTRAL) {
+            changes.remove(ObjectChangeType.INSTANCE, key);
+        }
     }
 
     @Override

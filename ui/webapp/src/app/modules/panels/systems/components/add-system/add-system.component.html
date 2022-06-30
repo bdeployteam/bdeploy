@@ -1,0 +1,42 @@
+<app-bd-dialog [loadingWhen$]="saving$">
+  <app-bd-dialog-toolbar
+    header="Add System"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <form #form="ngForm" (ngSubmit)="onSave()">
+      <div fxLayout="column" fxLayoutGap="10px">
+        <div>Creating system: <strong>{{ system.uuid }}</strong></div>
+        <app-bd-form-input
+          label="System Name"
+          name="name"
+          [(ngModel)]="system.name"
+          required
+        ></app-bd-form-input>
+        <app-bd-form-input
+          label="Description"
+          name="description"
+          [(ngModel)]="system.description"
+        ></app-bd-form-input>
+        <app-bd-form-select
+          *ngIf="isCentral"
+          label="Managed Server"
+          name="server"
+          [(ngModel)]="server"
+          [values]="serverList"
+          [labels]="serverNames"
+          required
+        ></app-bd-form-select>
+
+        <app-bd-button
+          color="primary"
+          [collapsed]="false"
+          text="Save"
+          icon="save"
+          [disabled]="form.invalid"
+        ></app-bd-button>
+      </div>
+    </form>
+  </app-bd-dialog-content>
+</app-bd-dialog>

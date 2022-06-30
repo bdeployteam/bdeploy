@@ -88,6 +88,7 @@
     [collapsed]="!expanded"
     [route]="['/groups', 'clients', areas.groupContext$.value]"
   ></app-main-nav-button>
+
   <app-main-nav-button
     *ngIf="(cfgService.isCentral$ | async) && !(authService.isCurrentScopedExclusiveReadClient$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
@@ -98,6 +99,15 @@
     [disabled]="!(authService.isCurrentScopeAdmin$ | async)"
     [matTooltip]="(authService.isCurrentScopeAdmin$ | async) ? null : 'Only administrators can maintain managed server configuration'"
     matTooltipPosition="right"
+  ></app-main-nav-button>
+
+  <app-main-nav-button
+    *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
+    [visible]="!!(areas.groupContext$ | async)"
+    icon="inventory_2"
+    text="Systems"
+    [collapsed]="!expanded"
+    [route]="['/systems', 'browser', areas.groupContext$.value]"
   ></app-main-nav-button>
 
   <!-- Instance -->

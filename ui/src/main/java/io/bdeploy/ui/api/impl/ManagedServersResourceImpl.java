@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -50,6 +51,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
@@ -63,6 +65,7 @@ import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
+import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
@@ -392,6 +395,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         InstanceGroupManifest igm = new InstanceGroupManifest(hive);
 
         List<InstanceManifest> removedInstances = new ArrayList<>();
+        List<SystemManifest> removedSystems = new ArrayList<>();
 
         // 1. Fetch information about updates, possibly required
         attached.update = getUpdates(svc);
@@ -444,6 +448,23 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 fetchOp.addManifest(keysToFetch);
             }
 
+            // 3c. Fetch all systems on the server. Systems which are in *use* by an instance would be fetched
+            // automatically, but we want *all* systems, even empty ones.
+            Set<String> systemIds = new TreeSet<>();
+            Set<Key> systems = new TreeSet<>();
+            try {
+                MasterSystemResource msr = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context)
+                        .getNamedMaster(groupName).getSystemResource();
+
+                msr.list().forEach((k, v) -> {
+                    systems.add(k);
+                    systemIds.add(v.uuid);
+                });
+                fetchOp.addManifest(systems);
+            } catch (Exception e) {
+                log.info("Cannot fetch systesm from {}: {}", serverName, e.toString());
+            }
+
             hive.execute(fetchOp);
 
             // 4. Remove local instances no longer available on the remote
@@ -460,14 +481,29 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 }
 
                 // Not OK: instance no longer on server.
-                Set<Key> allInstanceObjects = hive
-                        .execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
-                allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
-
+                Set<Key> allInstanceMfs = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
+                allInstanceMfs.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
                 removedInstances.add(im);
             }
 
-            // 5. for all the fetched manifests, if they are instances, associate the server with it, and send out a change
+            // 5 Remove local systems no longer available on the remote
+            SortedSet<Key> systemsOnCentral = SystemManifest.scan(hive);
+            for (Key k : systemsOnCentral) {
+                SystemManifest sm = SystemManifest.of(hive, k);
+                if (systemIds.contains(sm.getConfiguration().uuid)) {
+                    continue; // OK. system exists.
+                }
+
+                if (!serverName.equals(new ControllingMaster(hive, k).read().getName())) {
+                    continue; // OK. other server.
+                }
+
+                Set<Key> allSystemMfs = hive.execute(new ManifestListOperation().setManifestName(sm.getKey().getName())); // all versions
+                allSystemMfs.forEach(s -> hive.execute(new ManifestDeleteOperation().setToDelete(s)));
+                removedSystems.add(sm);
+            }
+
+            // 6. for all the fetched manifests, if they are instances, associate the server with it, and send out a change
             for (Manifest.Key instance : instances.keySet()) {
                 new ControllingMaster(hive, instance).associate(serverName);
 
@@ -481,7 +517,12 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 }
             }
 
-            // 6. try to sync instance group properties
+            // 7. repeat for all systems which should also be associated with a server.
+            for (Manifest.Key system : systems) {
+                new ControllingMaster(hive, system).associate(serverName);
+            }
+
+            // 8. try to sync instance group properties
             try {
                 MasterSettingsResource msr = ResourceProvider.getVersionedResource(svc, MasterSettingsResource.class, context);
                 msr.mergeInstanceGroupAttributesDescriptors(minion.getSettings().instanceGroup.attributes);
@@ -492,18 +533,21 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             attached.lastSync = Instant.now();
         }
 
-        // 7. Fetch minion information and store in the managed masters
+        // 9. Fetch minion information and store in the managed masters
         Map<String, MinionStatusDto> status = backendInfo.getNodeStatus();
         Map<String, MinionDto> config = status.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
         attached.minions = new MinionConfiguration(config);
 
-        // 8. update current information in the hive.
+        // 10. update current information in the hive.
         mm.attach(attached, true);
 
-        // 9. send out notifications after *all* is done.
+        // 11. send out notifications after *all* is done.
         for (var im : removedInstances) {
-            changes.remove(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName, im.getConfiguration().uuid));
+            changes.remove(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName));
+        }
+        for (var sm : removedSystems) {
+            changes.remove(ObjectChangeType.SYSTEM, sm.getKey(), new ObjectScope(groupName));
         }
 
         changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),

@@ -129,7 +129,7 @@ export class InstancesService {
         this.reload(this.group);
       }
 
-      update.subscribe((_) => {
+      update.subscribe(() => {
         // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
         // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
         this.activeLoadInterval = setInterval(

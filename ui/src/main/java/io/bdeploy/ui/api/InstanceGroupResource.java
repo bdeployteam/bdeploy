@@ -99,6 +99,10 @@ public interface InstanceGroupResource {
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
     public InstanceResource getInstanceResource(@ActivityScope @PathParam("group") String group);
 
+    @Path("/{group}/system")
+    @RequiredPermission(permission = Permission.CLIENT, scope = "group")
+    public SystemResource getSystemResource(@ActivityScope @PathParam("group") String group);
+
     @Path("/{group}/product")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
     public ProductResource getProductResource(@ActivityScope @PathParam("group") String group);

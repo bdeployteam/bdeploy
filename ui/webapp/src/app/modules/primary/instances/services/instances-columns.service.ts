@@ -4,11 +4,12 @@ import {
   BdDataColumnDisplay,
   BdDataColumnTypeHint,
 } from 'src/app/models/data';
-import { InstanceDto, MinionMode } from 'src/app/models/gen.dtos';
+import { InstanceDto, ManifestKey, MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { ProductsService } from '../../products/services/products.service';
 import { ServersService } from '../../servers/services/servers.service';
+import { SystemsService } from '../../systems/services/systems.service';
 import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
 import { InstancesService } from './instances.service';
@@ -47,6 +48,14 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.FOOTER,
     data: (r) => r.instanceConfiguration.description,
     showWhen: '(min-width: 1400px)',
+  };
+
+  instanceSystemColumn: BdDataColumn<InstanceDto> = {
+    id: 'system',
+    name: 'System',
+    hint: BdDataColumnTypeHint.DETAILS,
+    data: (r) => this.getSystemName(r.instanceConfiguration.system),
+    showWhen: '(min-width: 1900px)',
   };
 
   instanceProductColumn: BdDataColumn<InstanceDto> = {
@@ -114,11 +123,23 @@ export class InstancesColumnsService {
     private cfg: ConfigService,
     private instances: InstancesService,
     private servers: ServersService,
-    private products: ProductsService
+    private products: ProductsService,
+    private systems: SystemsService
   ) {
     if (cfg.config.mode !== MinionMode.CENTRAL) {
       this.instanceSyncColumn.display = BdDataColumnDisplay.NONE;
       this.instanceServerColumn.display = BdDataColumnDisplay.NONE;
     }
+  }
+
+  private getSystemName(system: ManifestKey): string {
+    if (!system) {
+      return 'None';
+    }
+    return (
+      this.systems.systems$.value?.find(
+        (s) => s.key?.name === system?.name && s.key?.tag === system?.tag
+      )?.config?.name || system?.name?.substring('meta/system/'.length)
+    );
   }
 }

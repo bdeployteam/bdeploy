@@ -1,15 +1,19 @@
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Observable, of, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
-import { InstancePurpose } from 'src/app/models/gen.dtos';
+import { InstancePurpose, ManifestKey } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import {
+  GlobalEditState,
+  InstanceEditService,
+} from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
   selector: 'app-edit-config',
@@ -31,13 +35,35 @@ export class EditConfigComponent
   ];
   /* template */ hasPendingChanges: boolean;
 
+  /* template */ systemKeys: ManifestKey[];
+  /* template */ systemLabels: string[];
+  /* template */ systemSel: ManifestKey;
+
   constructor(
     public cfg: ConfigService,
     public edit: InstanceEditService,
     public servers: ServersService,
+    public systems: SystemsService,
     areas: NavAreasService
   ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
+    this.subscription.add(
+      combineLatest([systems.systems$, edit.state$]).subscribe(([s, i]) => {
+        if (!s?.length || !i) {
+          return;
+        }
+        this.systemKeys = s.map((s) => s.key);
+        this.systemLabels = s.map(
+          (s) => `${s.config.name} (${s.config.description})`
+        );
+
+        if (i.config.config.system) {
+          this.systemSel = this.systemKeys.find(
+            (k) => k.name === i.config.config.system.name
+          );
+        }
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -65,6 +91,10 @@ export class EditConfigComponent
 
   /* template */ onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
+  }
+
+  /* template */ onSystemChange(state: GlobalEditState, value: ManifestKey) {
+    state.config.config.system = value;
   }
 
   public doSave(): Observable<any> {

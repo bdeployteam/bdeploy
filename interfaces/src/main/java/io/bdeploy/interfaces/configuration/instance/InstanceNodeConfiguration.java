@@ -61,6 +61,13 @@ public class InstanceNodeConfiguration {
     public Manifest.Key product;
 
     /**
+     * The key of the system this instance is associated with.
+     * <p>
+     * Redundant copy of the information from {@link InstanceConfiguration} for easier handling on the minion(s).
+     */
+    public Manifest.Key system;
+
+    /**
      * All application configurations.
      */
     public final List<ApplicationConfiguration> applications = new ArrayList<>();
@@ -107,5 +114,6 @@ public class InstanceNodeConfiguration {
         autoStart = cfg.autoStart;
         purpose = cfg.purpose;
         product = cfg.product;
+        system = cfg.system;
     }
 }

@@ -186,17 +186,6 @@ public interface MasterNamedResource {
     public ClientUsageData getClientUsage(@QueryParam("u") String instanceId);
 
     /**
-     * @param instanceId the instance id to retrieve configuration data for
-     * @return a ZIPed version of the configuration tree associated with the
-     *         instance
-     */
-    @POST
-    @WeakTokenAllowed
-    @Path("/client-instance-config")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public java.nio.file.Path getClientInstanceConfiguration(Manifest.Key instanceId);
-
-    /**
      * Starts all applications of the given instance having the start type
      * 'INSTANCE' configured.
      *
@@ -390,4 +379,10 @@ public interface MasterNamedResource {
     @Path("/launcher/streamZipConfig")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response getConfigZipSteam(@QueryParam("u") String instanceId, @QueryParam("a") String application);
+
+    /**
+     * @return the {@link MasterSystemResource} which can be used to manage systems in this instance group.
+     */
+    @Path("/systems")
+    public MasterSystemResource getSystemResource();
 }

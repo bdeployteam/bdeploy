@@ -1,0 +1,69 @@
+<ng-template #addTemplate>
+  <div>Provide an ID and a value for the new variable.</div>
+  <app-bd-form-input
+    [(ngModel)]="newId"
+    name="id"
+    label="Variable ID"
+    required
+    appTrimmed
+    appEditUniqueValueValidator
+    [disallowedValues]="newUsedIds"
+  ></app-bd-form-input>
+  <app-bd-form-input
+    [(ngModel)]="newValue"
+    name="value"
+    label="Value"
+    required
+  ></app-bd-form-input>
+</ng-template>
+
+<ng-template #editTemplate>
+  <div>Provide a new value for <strong>{{newId}}</strong>.</div>
+  <app-bd-form-input
+    [(ngModel)]="newValue"
+    name="value"
+    label="Value"
+    required
+  ></app-bd-form-input>
+</ng-template>
+
+<app-bd-dialog>
+  <app-bd-dialog-toolbar
+    [panel]="true"
+    header="System Variables"
+    [route]="['..']"
+  >
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button
+      text="Add"
+      icon="add"
+      [disabled]="(saving$ | async)"
+      (click)="onAdd(addTemplate)"
+    ></app-bd-button>
+    <app-bd-button
+      text="Save"
+      icon="save"
+      color="primary"
+      [collapsed]="false"
+      [loadingWhen$]="saving$"
+      [disabled]="!isDirty() || (saving$ | async)"
+      (click)="onSave()"
+    ></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="row" fxLayoutAlign="center">
+      <div
+        fxLayout="column"
+        fxFlex="1 0 auto"
+        fxLayoutGap="10px"
+        *ngIf="system"
+      >
+        <app-bd-data-table
+          [records]="records"
+          [columns]="columns"
+        ></app-bd-data-table>
+      </div>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

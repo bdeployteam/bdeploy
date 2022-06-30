@@ -83,16 +83,17 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.CommonDirectoryEntryResource;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
+import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.NodeDeploymentResource;
 import io.bdeploy.interfaces.remote.NodeProcessResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -107,6 +108,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     private final BHive hive;
     private final ActivityReporter reporter;
     private final MinionRoot root;
+
+    @Context
+    private ResourceContext rc;
 
     @Context
     private SecurityContext context;
@@ -749,12 +753,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    @DeleteAfterWrite
-    public Path getClientInstanceConfiguration(Manifest.Key instanceId) {
-        return null; // FIXME: DCS-396: client config shall not contain server config files.
-    }
-
-    @Override
     public void start(String instanceId) {
         InstanceStatusDto status = getStatus(instanceId);
 
@@ -1164,4 +1162,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
     }
 
+    @Override
+    public MasterSystemResource getSystemResource() {
+        return rc.initResource(new MasterSystemResourceImpl(hive));
+    }
 }

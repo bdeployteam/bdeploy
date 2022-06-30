@@ -1,0 +1,30 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar
+    [panel]="true"
+    header="Configure System"
+    [route]="['..']"
+  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="system">
+      <app-bd-form-input
+        name="name"
+        label="Name"
+        [(ngModel)]="system.config.name"
+      ></app-bd-form-input>
+      <app-bd-form-input
+        name="desc"
+        label="Description"
+        [(ngModel)]="system.config.description"
+      ></app-bd-form-input>
+      <app-bd-button
+        text="Save"
+        icon="save"
+        color="primary"
+        [collapsed]="false"
+        [loadingWhen$]="saving$"
+        [disabled]="!isDirty() || (saving$ | async)"
+        (click)="onSave()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

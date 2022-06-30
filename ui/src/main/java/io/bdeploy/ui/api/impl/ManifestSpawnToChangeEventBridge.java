@@ -19,6 +19,7 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
+import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
@@ -87,6 +88,11 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
                 log.debug("Software Repository update for {}", hiveName);
             }
             events.create(ObjectChangeType.SOFTWARE_REPO, swrKey, new ObjectScope(hiveName));
+        } else if (key.getName().startsWith(SystemManifest.MANIFEST_PREFIX)) {
+            if (log.isDebugEnabled()) {
+                log.debug("System update for {}: {}", hiveName, key);
+            }
+            events.create(ObjectChangeType.SYSTEM, key, new ObjectScope(hiveName));
         } else {
             Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
             if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {

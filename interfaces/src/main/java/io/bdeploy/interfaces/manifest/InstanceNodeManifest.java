@@ -21,6 +21,7 @@ import io.bdeploy.bhive.model.Tree.EntryType;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
+import io.bdeploy.bhive.op.InsertManifestRefOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
@@ -207,6 +208,13 @@ public class InstanceNodeManifest {
                 }
                 tb.add(new Tree.Key(CONFIG_TREE_NAME, Tree.EntryType.TREE),
                         hive.execute(new InsertArtificialTreeOperation().setTree(cfgT)));
+            }
+
+            // add a reference to the system manifest so configuration values of the system are available on
+            // the target node and do not need explicit pushing around.
+            if (cfg.system != null) {
+                tb.add(new Tree.Key("system", EntryType.MANIFEST),
+                        hive.execute(new InsertManifestRefOperation().setManifest(cfg.system)));
             }
 
             Manifest.Builder mfb = new Manifest.Builder(key);

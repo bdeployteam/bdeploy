@@ -1,0 +1,54 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar
+    [panel]="true"
+    header="System {{ (edit.current$ | async)?.config?.name }}"
+  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-notification-card
+        *ngIf="!isSynchronized()"
+        icon="history"
+        type="warning"
+        [dismissable]="false"
+        header="Server Not Synchronized"
+      >
+        <div [style.text-align]="'justify'">
+          The managed server responsible for this system is not synchronized,
+          details are unavailable. Please synchronize the server to enable
+          editing.
+        </div>
+      </app-bd-notification-card>
+      <app-bd-expand-button text="Used In" icon="settings_system_daydream">
+        <app-bd-data-table
+          [records]="instancesUsing$ | async"
+          [columns]="instancesUsingColumns"
+          [recordRoute]="getRecordRoute"
+        ></app-bd-data-table>
+      </app-bd-expand-button>
+      <app-bd-panel-button
+        [route]="['edit']"
+        [relative]="true"
+        [collapsed]="false"
+        text="Configure..."
+        icon="settings"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [route]="['variables']"
+        [relative]="true"
+        [collapsed]="false"
+        text="System Variables..."
+        icon="data_object"
+      ></app-bd-panel-button>
+      <app-bd-button
+        text="Delete"
+        [collapsed]="false"
+        icon="delete"
+        (click)="onDelete()"
+        [disabled]="!isSynchronized() || !!(instancesUsing$ | async)?.length"
+        [matTooltip]="!!(instancesUsing$ | async)?.length ? 'Cannot delete system while it is in use' : null"
+        matTooltipPosition="below"
+        matTooltipShowDelay="500"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

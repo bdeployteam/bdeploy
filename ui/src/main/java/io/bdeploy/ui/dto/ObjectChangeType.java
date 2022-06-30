@@ -19,4 +19,5 @@ public enum ObjectChangeType {
     USER,
     PLUGIN,
     NODES,                  // Bridged
+    SYSTEM,                 // Bridged
 }

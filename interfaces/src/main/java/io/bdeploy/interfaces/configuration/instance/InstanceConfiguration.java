@@ -50,6 +50,11 @@ public class InstanceConfiguration {
     public Manifest.Key product;
 
     /**
+     * The associated system for this instance.
+     */
+    public Manifest.Key system;
+
+    /**
      * The key of the tree which contains the current configuration file state.
      */
     public ObjectId configTree;

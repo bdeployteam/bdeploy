@@ -92,7 +92,7 @@ export class InstanceEdit implements Edit {
     this.state = cloneDeep(current);
   }
 
-  public apply(current: GlobalEditState): GlobalEditState {
+  public apply(): GlobalEditState {
     // clone state so following edits will not destroy what we stored
     return cloneDeep(this.state);
   }
@@ -520,6 +520,7 @@ export class InstanceEditService {
         product: instance.product,
         purpose: instance.purpose,
         uuid: instance.uuid,
+        system: instance.system,
         applications: [],
         controlGroups: [cloneDeep(DEF_CONTROL_GROUP)],
       },

@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
@@ -46,8 +47,10 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
+import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.cli.RemoteInstanceTool.InstanceConfig;
 import io.bdeploy.ui.dto.InstanceVersionDto;
+import io.bdeploy.ui.dto.SystemConfigurationDto;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
@@ -104,6 +107,9 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("The description to set for the created/updated instance")
         String description();
 
+        @Help("The system ID to set for the created/updated instance")
+        String system();
+
         @Help("The purpose to set for the created/updated instance")
         @ConfigurationValueMapping(ValueMapping.TO_UPPERCASE)
         InstancePurpose purpose();
@@ -158,8 +164,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             throw new IllegalArgumentException("Please use --updateTo instead of --update to change the product version");
         }
 
-        if (config.name() == null && config.purpose() == null && config.description() == null) {
-            helpAndFail("ERROR: Missing --name, --description or --purpose");
+        if (config.name() == null && config.purpose() == null && config.description() == null && config.system() == null) {
+            helpAndFail("ERROR: Missing --name, --description, --system or --purpose");
         }
 
         List<InstanceVersionDto> v = ir.listVersions(config.update());
@@ -190,6 +196,17 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             cfg.purpose = config.purpose();
             result.addField("New Purpose", config.purpose());
         }
+        if (config.system() != null) {
+            SystemResource sr = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
+                    .getSystemResource(config.instanceGroup());
+            Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.uuid.equals(config.system()))
+                    .findAny();
+            if (sys.isEmpty()) {
+                throw new IllegalArgumentException("Cannot find specified system on server: " + config.system());
+            }
+
+            cfg.system = sys.get().key;
+        }
         InstanceConfigurationDto dto = new InstanceConfigurationDto(cfg,
                 ir.getNodeConfigurations(config.update(), currentTag).nodeConfigDtos);
         ir.update(config.update(), new InstanceUpdateDto(dto, null), server != null ? server.hostName : null, currentTag);
@@ -207,6 +224,19 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             helpAndFailIfMissing(config.server(), "Missing --server");
         }
 
+        Manifest.Key system = null;
+        if (config.system() != null) {
+            SystemResource sr = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
+                    .getSystemResource(config.instanceGroup());
+            Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.uuid.equals(config.system()))
+                    .findAny();
+            if (sys.isEmpty()) {
+                throw new IllegalArgumentException("Cannot find specified system on server: " + config.system());
+            }
+
+            system = sys.get().key;
+        }
+
         InstanceConfiguration cfg = new InstanceConfiguration();
         cfg.uuid = config.uuid() == null ? UuidHelper.randomId() : config.uuid();
         cfg.autoUninstall = true;
@@ -215,6 +245,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         cfg.name = config.create();
         cfg.product = new Manifest.Key(config.product(), config.productVersion());
         cfg.purpose = config.purpose();
+        cfg.system = system;
 
         ir.create(cfg, config.server());
 
@@ -346,7 +377,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         table.column("UUID", 15).column("Name *", 20).column(new DataTableColumn("Version", "Ver.", 4)).column("Installed", 9)
                 .column("Active", 6).column("Purpose", 11).column("Product", 25).column("Product Version", 20)
-                .column("Description *", 40);
+                .column("System", 20).column("Description *", 40);
 
         if (central) {
             table.column("Target Server", 20);
@@ -383,7 +414,9 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
                 row.cell(instance.instanceConfiguration.uuid).cell(vCfg.name).cell(version.key.getTag())
                         .cell(isInstalled ? "*" : "").cell(isActive ? "*" : "").cell(vCfg.purpose.name())
-                        .cell(version.product.getName()).cell(version.product.getTag()).cell(vCfg.description);
+                        .cell(version.product.getName()).cell(version.product.getTag())
+                        .cell(instance.instanceConfiguration.system != null ? instance.instanceConfiguration.system : "None")
+                        .cell(vCfg.description);
 
                 if (central) {
                     ManagedMasterDto server = msr.getServerForInstance(config.instanceGroup(),

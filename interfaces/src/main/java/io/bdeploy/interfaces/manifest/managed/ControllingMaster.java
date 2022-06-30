@@ -5,15 +5,16 @@ import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
 
 /**
- * {@link MetaManifest} which keeps track of which attached managed server is responsible for (controlling) a certain instance.
+ * {@link MetaManifest} which keeps track of which attached managed server is responsible for (controlling) a certain asset
+ * (instance, system).
  */
 public class ControllingMaster {
 
     private final MetaManifest<ControllingMasterConfiguration> meta;
     private final BHive hive;
 
-    public ControllingMaster(BHive hive, Manifest.Key instanceKey) {
-        this.meta = new MetaManifest<>(instanceKey, false, ControllingMasterConfiguration.class);
+    public ControllingMaster(BHive hive, Manifest.Key assetKey) {
+        this.meta = new MetaManifest<>(assetKey, false, ControllingMasterConfiguration.class);
         this.hive = hive;
     }
 

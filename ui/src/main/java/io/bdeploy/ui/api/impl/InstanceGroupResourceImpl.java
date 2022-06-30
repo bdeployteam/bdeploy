@@ -59,6 +59,7 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -394,6 +395,12 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         }
 
         return rc.initResource(new InstanceResourceImpl(group, groupHive));
+    }
+
+    @Override
+    public SystemResource getSystemResource(String group) {
+        BHive groupHive = getGroupHive(group);
+        return rc.initResource(new SystemResourceImpl(group, groupHive));
     }
 
     @Override

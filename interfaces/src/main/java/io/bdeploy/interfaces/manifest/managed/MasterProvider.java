@@ -4,7 +4,6 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.interfaces.manifest.InstanceManifest;
 
 @FunctionalInterface
 public interface MasterProvider {
@@ -14,10 +13,10 @@ public interface MasterProvider {
      *
      * @param hive
      *            {@link BHive} hosting the instance
-     * @param instanceManifestKey the
-     *            {@link Manifest} {@link Key} of the root {@link InstanceManifest}.
+     * @param assetKey the
+     *            {@link Manifest} {@link Key} of the asset which is controlled by a managed master.
      * @return a {@link RemoteService} to communicate with the master.
      */
-    public RemoteService getControllingMaster(BHive hive, Manifest.Key instanceManifestKey);
+    public RemoteService getControllingMaster(BHive hive, Manifest.Key assetKey);
 
 }

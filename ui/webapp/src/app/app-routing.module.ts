@@ -102,6 +102,23 @@ const routes: Routes = [
     canActivate: [AuthGuard, ScopedReadGuard],
   },
   {
+    path: 'systems',
+    loadChildren: () =>
+      import('./modules/primary/systems/systems.module').then(
+        (x) => x.SystemsModule
+      ),
+    canActivate: [AuthGuard, ScopedReadGuard],
+  },
+  {
+    path: 'panels/systems',
+    outlet: 'panel',
+    loadChildren: () =>
+      import('./modules/panels/systems/systems.module').then(
+        (x) => x.SystemsModule
+      ),
+    canActivate: [AuthGuard, ScopedReadGuard],
+  },
+  {
     path: 'servers',
     loadChildren: () =>
       import('./modules/primary/servers/servers.module').then(

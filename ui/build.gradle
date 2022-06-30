@@ -351,6 +351,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.ObjectChangeDetails',
         'io.bdeploy.ui.dto.NodeAttachDto',
         'io.bdeploy.ui.dto.MinionSyncResultDto',
+        'io.bdeploy.ui.dto.SystemConfigurationDto',
         // Other, generic
         'io.bdeploy.common.Version',
         'io.bdeploy.common.ActivitySnapshot',

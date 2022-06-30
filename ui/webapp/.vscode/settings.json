@@ -15,5 +15,6 @@
   "javascript.preferences.quoteStyle": "single",
   "typescript.preferences.quoteStyle": "single",
   "prettier.useEditorConfig": false,
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "eslint.alwaysShowStatus": false
 }

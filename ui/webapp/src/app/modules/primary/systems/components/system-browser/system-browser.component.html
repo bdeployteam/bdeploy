@@ -1,0 +1,42 @@
+<app-bd-dialog [loadingWhen$]="systems.loading$">
+  <app-bd-dialog-toolbar
+    header="Systems of {{ (groups.current$ | async)?.name }}"
+  >
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button
+      [isToggle]="true"
+      icon="grid_view"
+      text="Toggle Card Mode"
+      [(toggle)]="dataTable.grid"
+      tooltip="below"
+    ></app-bd-button>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button
+      text="Add System"
+      icon="add"
+      [route]="['panels', 'systems', 'add']"
+      tooltip="below"
+    ></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-data-display
+      #dataTable
+      [records]="systems.systems$ | async"
+      [columns]="sysCols"
+      [recordRoute]="getRecordRoute"
+    >
+      <app-bd-no-data>
+        <p>No systems have been created yet.</p>
+        <ng-container *ngIf="(authService.isCurrentScopeWrite$ | async)">
+          <p>Start by creating a new one.</p>
+          <app-bd-panel-button
+            icon="add"
+            text="Add System..."
+            [collapsed]="false"
+            [route]="['panels', 'systems', 'add']"
+          ></app-bd-panel-button>
+        </ng-container>
+      </app-bd-no-data>
+    </app-bd-data-display>
+  </app-bd-dialog-content>
+</app-bd-dialog>
