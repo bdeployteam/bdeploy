@@ -229,6 +229,10 @@ export class ProcessEditService {
     return [desc.parameter];
   }
 
+  /**
+   * Applies each global parameter *from* the given application to all other applications which
+   * refer to the same global parameter.
+   */
   public alignGlobalParameters(
     appDto: ApplicationDto,
     process: ApplicationConfiguration
@@ -323,7 +327,7 @@ export class ProcessEditService {
     return {
       executable: descriptor.launcherPath,
       parameters: mandatoryParams.filter((p) =>
-        this.internalMeetsCondition(
+        this.meetsConditionOnGiven(
           descriptor.parameters.find((x) => x.uid === p.uid),
           descriptor.parameters,
           mandatoryParams
@@ -351,11 +355,13 @@ export class ProcessEditService {
     return value;
   }
 
-  public meetsCondition(param: ParameterDescriptor): Observable<boolean> {
+  public meetsConditionOnCurrent(
+    param: ParameterDescriptor
+  ): Observable<boolean> {
     return combineLatest([this.application$, this.process$]).pipe(
       skipWhile(([a, c]) => !a || !c),
       map(([app, cfg]) => {
-        return this.internalMeetsCondition(
+        return this.meetsConditionOnGiven(
           param,
           app.descriptor.startCommand.parameters,
           cfg.start.parameters
@@ -365,7 +371,7 @@ export class ProcessEditService {
     );
   }
 
-  private internalMeetsCondition(
+  public meetsConditionOnGiven(
     param: ParameterDescriptor,
     allDescriptors: ParameterDescriptor[],
     allConfigs: ParameterConfiguration[]
@@ -380,7 +386,7 @@ export class ProcessEditService {
     const depCfg = allConfigs.find((p) => p.uid === param.condition.parameter);
     if (
       !depDesc ||
-      !this.internalMeetsCondition(depDesc, allDescriptors, allConfigs)
+      !this.meetsConditionOnGiven(depDesc, allDescriptors, allConfigs)
     ) {
       return false; // parameter not found?!
     }

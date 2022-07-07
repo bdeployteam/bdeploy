@@ -60,14 +60,6 @@ const colAppName: BdDataColumn<AppRow> = {
   tooltipDelay: 120000, // effectively disable: tooltip after two minutes.
 };
 
-// const colType: BdDataColumn<AppRow> = {
-//   id: 'type',
-//   name: 'Type',
-//   data: (r) => (!r.template ? null : 'auto_fix_normal'),
-//   width: '30px',
-//   component: BdDataIconCellComponent,
-// };
-
 @Component({
   selector: 'app-add-process',
   templateUrl: './add-process.component.html',
@@ -268,8 +260,29 @@ export class AddProcessComponent implements OnInit, OnDestroy {
             appConfig.application.tag = product.key.tag;
             appConfig.uid = uid;
 
-            // Update parameters for pasted app
-            // TODO: update parameters according to current config
+            // no need to update mandatory (etc.) parameters here. the normal validation
+            // will trigger according errors which need to be manually fixed by the user.
+
+            // Update parameters for pasted app to avoid overwriting existing values.
+            // there is no need to align global parameters in other apps, since no global
+            // should have a value different from the ones in the instances already after
+            // this alignment code.
+            const globals = app.descriptor.startCommand.parameters.filter(
+              (p) => p.global
+            );
+            for (const global of globals) {
+              const existing = this.edit.getGlobalParameter(global.uid);
+              const own = appConfig.start.parameters.find(
+                (p) => p.uid === global.uid
+              );
+              if (existing && own) {
+                own.value = existing.value;
+                own.preRendered = this.edit.preRenderParameter(
+                  global,
+                  own.value
+                );
+              }
+            }
 
             this.clipBoardCfg$.next(appConfig);
           });
