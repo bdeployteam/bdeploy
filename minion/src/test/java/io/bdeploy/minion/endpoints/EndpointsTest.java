@@ -71,8 +71,8 @@ class EndpointsTest {
         assertEquals(1, httpEndpoints.size());
         assertEquals("test", httpEndpoints.get(0).id);
 
-        // start a server which actually provides the endpoint at the generated port
-        Response response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test", "");
+        // try to actually access the endpoint
+        Response response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test");
         log.info("Result: {}", response.getStatusInfo());
         assertEquals(200, response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -81,6 +81,17 @@ class EndpointsTest {
 
         assertNotNull(result);
         assertEquals("world", result.hello);
+
+        // try to access sub-resource
+        response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test/sub");
+        log.info("Result: {}", response.getStatusInfo());
+        assertEquals(200, response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        result = response.readEntity(HelloResult.class);
+
+        assertNotNull(result);
+        assertEquals("sub", result.hello);
 
         // manually construct request to be able to pass additional parameters
         WebTarget wt = ResourceProvider.of(remote).getBaseTarget().path("/master/common/proxy/test")

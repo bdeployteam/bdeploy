@@ -29,6 +29,16 @@ public class HelloEndpoint {
         return result;
     }
 
+    @Path("/path/sub")
+    @GET
+    @Unsecured
+    public HelloResult subHello() {
+        HelloResult result = new HelloResult();
+        result.hello = "sub";
+        result.time = System.currentTimeMillis();
+        return result;
+    }
+
     @Path("/path")
     @PUT
     @Unsecured

@@ -32,30 +32,30 @@ import jakarta.ws.rs.core.Response;
 public interface CommonProxyResource {
 
     @HEAD
-    @Path("{endpoint : [^/]+}{sub : (.+)?}")
-    public Response head(@PathParam("endpoint") String endpointId, @PathParam("sub") String sub);
+    @Path("{endpoint : .+}")
+    public Response head(@PathParam("endpoint") String path);
 
     @OPTIONS
-    @Path("{endpoint : [^/]+}{sub : (.+)?}")
-    public Response options(@PathParam("endpoint") String endpointId, @PathParam("sub") String sub);
+    @Path("{endpoint : .+}")
+    public Response options(@PathParam("endpoint") String path);
 
     @GET
-    @Path("{endpoint : [^/]+}{sub : (.+)?}")
-    public Response get(@PathParam("endpoint") String endpointId, @PathParam("sub") String sub);
+    @Path("{endpoint : .+}")
+    public Response get(@PathParam("endpoint") String path);
 
     @PUT
-    @Path("{endpoint : [^/]+}{sub : (.+)?}")
-    public Response put(@PathParam("endpoint") String endpointId, @PathParam("sub") String sub, byte[] body);
+    @Path("{endpoint : .+}")
+    public Response put(@PathParam("endpoint") String path, byte[] body);
 
     @POST
-    @Path("{endpoint : [^/]+}{sub : (.+)?}")
-    public Response post(@PathParam("endpoint") String endpointId, @PathParam("sub") String sub, byte[] body);
+    @Path("{endpoint : .+}")
+    public Response post(@PathParam("endpoint") String path, byte[] body);
 
     @DELETE
-    @Path("{endpoint : [^/]+}{sub : (.+)?}")
-    public Response delete(@PathParam("endpoint") String endpointId, @PathParam("sub") String sub);
+    @Path("{endpoint : .+}")
+    public Response delete(@PathParam("endpoint") String path);
 
     @PATCH
-    @Path("{endpoint : [^/]+}{sub : (.+)?}")
-    public Response patch(@PathParam("endpoint") String endpointId, @PathParam("sub") String sub, byte[] body);
+    @Path("{endpoint : .+}")
+    public Response patch(@PathParam("endpoint") String path, byte[] body);
 }

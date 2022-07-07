@@ -52,19 +52,19 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
         this.unwrapper = unwrapper != null ? unwrapper : ProxiedResponseWrapper::defaultUnwrap;
     }
 
-    private HttpEndpoint getEndpoint(String endpointId) {
+    private HttpEndpoint getEndpoint(String fullPath) {
         Optional<HttpEndpoint> ep = endpoints.entrySet().stream().flatMap(e -> e.getValue().http.stream())
-                .filter(e -> e.id.equals(endpointId)).findFirst();
+                .filter(e -> e.id.equals(fullPath) || fullPath.startsWith(e.id + '/')).findFirst();
 
         if (!ep.isPresent()) {
-            throw new WebApplicationException("Endpoint " + endpointId + " not found for instance " + instanceId,
+            throw new WebApplicationException("Endpoint " + fullPath + " not found for instance " + instanceId,
                     Status.SERVICE_UNAVAILABLE);
         }
 
         return ep.get();
     }
 
-    private ProxiedRequestWrapper wrap(String endpointId, String sub, byte[] body, String method) {
+    private ProxiedRequestWrapper wrap(String fullPath, byte[] body, String method) {
         Map<String, ProxiedRequestCookie> cookies = request.getCookies().entrySet().stream().filter(e -> !e.getKey().equals("st"))
                 .collect(Collectors.toMap(Entry::getKey, e -> {
                     Cookie k = e.getValue();
@@ -72,10 +72,16 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
                             k.getDomain());
                 }));
 
-        return new ProxiedRequestWrapper(group, instanceId, applicationId, method, getEndpoint(endpointId), sub,
-                request.getHeaders(), filterBDeployParameters(info.getQueryParameters()),
-                (body == null ? null : Base64.encodeBase64String(body)),
+        HttpEndpoint endpoint = getEndpoint(fullPath);
+        String sub = getSubPath(endpoint, fullPath);
+
+        return new ProxiedRequestWrapper(group, instanceId, applicationId, method, endpoint, sub, request.getHeaders(),
+                filterBDeployParameters(info.getQueryParameters()), (body == null ? null : Base64.encodeBase64String(body)),
                 request.getMediaType() == null ? null : request.getMediaType().toString(), cookies);
+    }
+
+    private String getSubPath(HttpEndpoint endpoint, String fullPath) {
+        return fullPath.substring(endpoint.id.length());
     }
 
     private Map<String, List<String>> filterBDeployParameters(MultivaluedMap<String, String> queryParameters) {
@@ -84,38 +90,38 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
     }
 
     @Override
-    public Response head(String endpointId, String sub) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, sub, null, HttpMethod.HEAD)));
+    public Response head(String endpointId) {
+        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.HEAD)));
     }
 
     @Override
-    public Response options(String endpointId, String sub) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, sub, null, HttpMethod.OPTIONS)));
+    public Response options(String endpointId) {
+        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.OPTIONS)));
     }
 
     @Override
-    public Response get(String endpointId, String sub) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, sub, null, HttpMethod.GET)));
+    public Response get(String endpointId) {
+        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.GET)));
     }
 
     @Override
-    public Response put(String endpointId, String sub, byte[] body) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, sub, body, HttpMethod.PUT)));
+    public Response put(String endpointId, byte[] body) {
+        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, body, HttpMethod.PUT)));
     }
 
     @Override
-    public Response post(String endpointId, String sub, byte[] body) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, sub, body, HttpMethod.POST)));
+    public Response post(String endpointId, byte[] body) {
+        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, body, HttpMethod.POST)));
     }
 
     @Override
-    public Response delete(String endpointId, String sub) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, sub, null, HttpMethod.DELETE)));
+    public Response delete(String endpointId) {
+        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, null, HttpMethod.DELETE)));
     }
 
     @Override
-    public Response patch(String endpointId, String sub, byte[] body) {
-        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, sub, body, HttpMethod.PATCH)));
+    public Response patch(String endpointId, byte[] body) {
+        return unwrapper.unwrap(forwarder.forward(wrap(endpointId, body, HttpMethod.PATCH)));
     }
 
 }
