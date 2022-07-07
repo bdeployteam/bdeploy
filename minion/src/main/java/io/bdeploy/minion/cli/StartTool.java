@@ -153,7 +153,10 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.setUserValidator(user -> {
             UserInfo info = r.getUsers().getUser(user);
             if (info == null) {
-                // FIXME: REMOVE this. Non-existent users should not be allowed!
+                if (user.startsWith("[") && user.endsWith("]")) {
+                    // on behalf of remote user (e.g. from central).
+                    return true;
+                }
                 log.error("User not available: {}. Allowing to support legacy tokens.", user);
                 return true;
             }
