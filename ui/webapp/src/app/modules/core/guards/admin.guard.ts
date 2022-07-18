@@ -14,17 +14,17 @@ export class AdminGuard implements CanActivate {
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    if (!this.authService.isGlobalAdmin()) {
-      this.snackbar.open(
-        `Unfortunately, ${route.url.join(
-          '/'
-        )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
-        'DISMISS',
-        { panelClass: 'error-snackbar' }
-      );
-      this.router.navigate(['/groups/browser']);
-      return false;
+    if (this.authService.isGlobalAdmin()) {
+      return true;
     }
-    return true;
+    this.snackbar.open(
+      `Unfortunately, ${route.url.join(
+        '/'
+      )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
+      'DISMISS',
+      { panelClass: 'error-snackbar' }
+    );
+    this.router.navigate(['/groups/browser']);
+    return false;
   }
 }
