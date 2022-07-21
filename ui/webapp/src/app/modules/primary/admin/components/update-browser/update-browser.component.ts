@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { SoftwareVersionBulkService } from 'src/app/modules/panels/admin/services/software-version-bulk.service';
 import {
   SoftwareUpdateService,
   SoftwareVersion,
@@ -54,7 +55,10 @@ export class UpdateBrowserComponent implements OnInit {
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(public software: SoftwareUpdateService) {}
+  constructor(
+    public software: SoftwareUpdateService,
+    public bulk: SoftwareVersionBulkService
+  ) {}
 
   ngOnInit() {
     this.software.load();

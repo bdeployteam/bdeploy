@@ -1,0 +1,21 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar
+    header="Bulk Software Manipulation"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px" *ngIf="selections">
+      <div>
+        <strong>{{ selections.length }}</strong> system versions selected.
+      </div>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selections.length || (deleting$ | async)"
+        [loadingWhen$]="deleting$"
+        text="Delete Selected Software Versions"
+        icon="delete"
+        (click)="onDelete()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

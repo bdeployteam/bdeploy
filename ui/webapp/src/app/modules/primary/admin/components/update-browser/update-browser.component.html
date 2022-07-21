@@ -1,6 +1,13 @@
 <app-bd-dialog [loadingWhen$]="software.loading$">
   <app-bd-dialog-toolbar header="System Software">
     <div fxFlex="1 0 auto"></div>
+    <app-bd-panel-button
+      #bulkMode
+      icon="library_add_check"
+      text="Bulk Manipulation"
+      [route]="['panels', 'admin', 'software', 'bulk-manipulation']"
+      tooltip="below"
+    ></app-bd-panel-button>
     <app-bd-button
       text="Restart Server"
       icon="restart_alt"
@@ -26,6 +33,9 @@
       [records]="software.software$ | async"
       [columns]="columns"
       [recordRoute]="getRecordRoute"
+      [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
+      [checkedFrozenWhen$]="bulk.frozen$"
+      (checkedChange)="bulk.selection$.next($event)"
     ></app-bd-data-table>
   </app-bd-dialog-content>
 </app-bd-dialog>
