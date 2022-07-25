@@ -16,12 +16,7 @@ export class ProductUpdateComponent implements OnDestroy {
     id: 'version',
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
-    data: (r) =>
-      `${r.key.tag}${
-        this.edit.state$.value.config.config.product.tag === r.key.tag
-          ? ' - current'
-          : ''
-      }`,
+    data: (r) => `${r.key.tag}${this.isCurrent(r) ? ' - current' : ''}`,
     tooltip: () => null,
     component: ProductVersionDetailsComponent,
   };
@@ -56,9 +51,31 @@ export class ProductUpdateComponent implements OnDestroy {
       }
 
       this.records$.next(
-        prods.filter((p) => p.key.name === state.config.config.product.name)
+        prods
+          .filter((p) => p.key.name === state.config.config.product.name)
+          .filter(
+            (p) =>
+              this.isCurrent(p) ||
+              this.matchesProductFilterRegex(
+                p.key.tag,
+                state.config.config.productFilterRegex
+              )
+          )
       );
     });
+  }
+
+  isCurrent(product: ProductDto): boolean {
+    return this.edit.state$.value.config.config.product.tag === product.key.tag;
+  }
+
+  matchesProductFilterRegex(
+    productTag: string,
+    productFilterRegex: string
+  ): boolean {
+    // if there is no filter, all products are eligible
+    if (!productFilterRegex) return true;
+    return new RegExp(productFilterRegex).test(productTag);
   }
 
   ngOnDestroy(): void {

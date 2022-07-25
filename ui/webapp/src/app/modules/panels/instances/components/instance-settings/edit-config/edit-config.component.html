@@ -63,6 +63,13 @@
           name="autoUninstall"
           [(ngModel)]="state.config.config.autoUninstall"
         ></app-bd-form-toggle>
+        <app-bd-form-input
+          label="Product Version Regular Expression"
+          matTooltip="Only product versions matching this regular expression will be presented when updating the product version"
+          matTooltipPosition="above"
+          name="productFilterRegex"
+          [(ngModel)]="state.config.config.productFilterRegex"
+        ></app-bd-form-input>
 
         <app-bd-button
           type="submit"
