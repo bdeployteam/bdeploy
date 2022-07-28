@@ -66,6 +66,7 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
@@ -110,6 +111,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private Scheduler scheduler;
     private PluginManager pluginManager;
     private boolean consoleLog;
+    private Version latestGitHubReleaseVersion;
 
     public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
@@ -430,6 +432,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             MasterCleanupJob.create(this, getState().cleanupSchedule);
         }
         CleanupDownloadDirJob.create(scheduler, downloadDir);
+
+        if (minionMode == MinionMode.STANDALONE) {
+            CheckLatestGitHubReleaseJob.create(this);
+        }
     }
 
     private void createJobScheduler() {
@@ -806,4 +812,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         SettingsManifest.write(hive, settings, getEncryptionKey());
     }
 
+    public void setLatestGitHubReleaseVersion(Version v) {
+        this.latestGitHubReleaseVersion = v;
+    }
+
+    @Override
+    public boolean isNewGitHubReleaseAvailable() {
+        Version currentVersion = VersionHelper.getVersion();
+        return currentVersion != null && this.latestGitHubReleaseVersion != null
+                && this.latestGitHubReleaseVersion.compareTo(currentVersion) > 0;
+    }
 }
