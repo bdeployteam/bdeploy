@@ -87,6 +87,7 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
     this.history.filter$.next({
       ...this.history.filter$.value,
       filterText: search,
+      startTag: null,
     });
   }
 
