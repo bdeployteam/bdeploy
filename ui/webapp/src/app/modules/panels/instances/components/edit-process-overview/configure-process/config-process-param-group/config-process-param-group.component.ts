@@ -466,7 +466,9 @@ export class ConfigProcessParamGroupComponent
         if (pair.descriptor?.condition?.parameter === uid) {
           // the parameter is conditional on the changed parameter.
           this.edit.meetsConditionOnCurrent(pair.descriptor).subscribe((ok) => {
-            if ((!ok && !!pair.value) || (ok && !pair.value)) {
+            const mustBeAdded = ok && !pair.value && pair.descriptor?.mandatory;
+            const mustBeRemoved = !ok && !!pair.value;
+            if (mustBeAdded || mustBeRemoved) {
               this.doAddRemoveParameter(grp, pair);
             }
           });
