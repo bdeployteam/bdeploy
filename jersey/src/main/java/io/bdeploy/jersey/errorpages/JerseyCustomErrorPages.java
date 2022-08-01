@@ -3,6 +3,8 @@ package io.bdeploy.jersey.errorpages;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.TreeMap;
 
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
@@ -11,6 +13,7 @@ public class JerseyCustomErrorPages {
 
     private static final String ERROR_TEMPLATE = readTemplate();
     private static final String LOGO_TEMPLATE = readLogo();
+    private static final Map<Integer, String> codeImages = new TreeMap<>();
 
     private JerseyCustomErrorPages() {
     }
@@ -23,6 +26,18 @@ public class JerseyCustomErrorPages {
         }
     }
 
+    private static String readErrorImage(int code) {
+        try (InputStream is = JerseyCustomErrorPages.class.getResourceAsStream("errors/" + code + ".svg")) {
+            return new String(StreamHelper.read(is), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private static synchronized String readErrorImageCached(int code) {
+        return codeImages.computeIfAbsent(code, k -> readErrorImage(k));
+    }
+
     private static String readLogo() {
         try (InputStream is = JerseyCustomErrorPages.class.getResourceAsStream("logo.svg")) {
             return new String(StreamHelper.read(is), StandardCharsets.UTF_8);
@@ -31,13 +46,24 @@ public class JerseyCustomErrorPages {
         }
     }
 
-    public static String getErrorHtml(String message) {
+    public static String getErrorHtml(int code, String message) {
         return TemplateHelper.process(ERROR_TEMPLATE, v -> {
             switch (v) {
                 case "ERROR":
                     return message;
                 case "LOGO":
-                    return LOGO_TEMPLATE;
+                    String img = readErrorImageCached(code);
+                    if (img != null) {
+                        return img;
+                    }
+                    return TemplateHelper.process(LOGO_TEMPLATE, vv -> {
+                        switch (vv) {
+                            case "CODE":
+                                return String.valueOf(code);
+                            default:
+                                return null;
+                        }
+                    });
                 default:
                     return null;
             }

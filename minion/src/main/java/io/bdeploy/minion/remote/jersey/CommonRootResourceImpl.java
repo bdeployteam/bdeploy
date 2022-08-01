@@ -270,7 +270,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
                     if (resp.responseCode == 503) {
                         // application not running, and similar errors. we keep the original response but add a custom error page to it.
                         return Response.fromResponse(resp.defaultUnwrap())
-                                .entity(JerseyCustomErrorPages.getErrorHtml(resp.responseReason)).build();
+                                .entity(JerseyCustomErrorPages.getErrorHtml(resp.responseCode, resp.responseReason)).build();
                     }
                     return resp.defaultUnwrap();
                 }));
