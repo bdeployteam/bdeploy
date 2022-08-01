@@ -24,7 +24,7 @@ export class BannerComponent
 {
   private readonly DEFAULT_BANNER = {
     text: 'Banner information goes here.',
-    user: this.auth.getUsername(),
+    user: this.auth.getCurrentUsername(),
     foregroundColor: '#000000',
     backgroundColor: '#ffffff',
     timestamp: Date.now(), // local time ok.

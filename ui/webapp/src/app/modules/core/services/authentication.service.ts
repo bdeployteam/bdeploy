@@ -1,8 +1,14 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  of,
+  ReplaySubject,
+} from 'rxjs';
+import { first, map, tap } from 'rxjs/operators';
 import {
   ApiAccessToken,
   CredentialsApi,
@@ -22,7 +28,12 @@ export class AuthenticationService {
     this.cookies.check('st') ? this.cookies.get('st') : null
   );
 
-  public userInfoSubject: BehaviorSubject<UserInfo> = new BehaviorSubject(null);
+  private userInfoSubject$: ReplaySubject<UserInfo> = new ReplaySubject(1);
+  private currentUserInfo = null; // possibly uninitialized value
+  get firstUserInfo$(): Observable<UserInfo> {
+    return this.userInfoSubject$.pipe(first());
+  }
+
   public isCurrentScopedExclusiveReadClient$: BehaviorSubject<boolean> =
     new BehaviorSubject(false);
   public isCurrentScopeWrite$: BehaviorSubject<boolean> = new BehaviorSubject(
@@ -41,6 +52,10 @@ export class AuthenticationService {
     private cookies: CookieService,
     private areas: NavAreasService
   ) {
+    this.userInfoSubject$.subscribe(
+      (userInfo) => (this.currentUserInfo = userInfo)
+    );
+
     combineLatest([areas.groupContext$, areas.repositoryContext$]).subscribe(
       ([groupContext, repositoryContext]) => {
         if (groupContext || repositoryContext) {
@@ -90,10 +105,10 @@ export class AuthenticationService {
           () => {
             this.http
               .get<UserInfo>(this.cfg.config.api + '/auth/user')
-              .pipe(tap((userInfo) => this.userInfoSubject.next(userInfo)));
+              .pipe(tap((userInfo) => this.userInfoSubject$.next(userInfo)));
           },
           () => {
-            this.userInfoSubject.next(null);
+            this.userInfoSubject$.next(null);
           }
         )
       );
@@ -119,9 +134,9 @@ export class AuthenticationService {
     return payload ? JSON.parse(atob(payload)) : null;
   }
 
-  getUsername(): string {
-    if (this.userInfoSubject.value) {
-      return this.userInfoSubject.value.name;
+  getCurrentUsername(): string {
+    if (this.currentUserInfo) {
+      return this.currentUserInfo.name;
     }
     const tokenPayload = this.getTokenPayload();
     return tokenPayload ? tokenPayload.it : null;
@@ -191,7 +206,7 @@ export class AuthenticationService {
     if (!scope) {
       throw new Error('No scope currently active');
     }
-    return this.isScopedAdmin(scope);
+    return this.isScopedAdmin(scope, this.currentUserInfo);
   }
 
   isCurrentScopeWrite(): boolean {
@@ -201,7 +216,7 @@ export class AuthenticationService {
     if (!scope) {
       throw new Error('No scope currently active');
     }
-    return this.isScopedWrite(scope);
+    return this.isScopedWrite(scope, this.currentUserInfo);
   }
 
   isCurrentScopeRead(): boolean {
@@ -211,7 +226,7 @@ export class AuthenticationService {
     if (!scope) {
       throw new Error('No scope currently active');
     }
-    return this.isScopedRead(scope);
+    return this.isScopedRead(scope, this.currentUserInfo);
   }
 
   isCurrentScopeExclusiveReadClient(): boolean {
@@ -221,49 +236,61 @@ export class AuthenticationService {
     return this.isScopedExclusiveReadClient(this.areas.groupContext$.value);
   }
 
-  isScopedAdmin(scope: string): boolean {
-    if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return !!this.userInfoSubject.value.permissions.find(
-        (sc) =>
-          (sc.scope === null || sc.scope === scope) &&
-          this.ge(sc.permission, Permission.ADMIN)
-      );
-    }
-    return false;
+  isScopedAdmin$(scope: string): Observable<boolean> {
+    return this.firstUserInfo$.pipe(
+      map((userInfo) => this.isScopedAdmin(scope, userInfo))
+    );
   }
 
-  isScopedWrite(scope: string): boolean {
-    if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return !!this.userInfoSubject.value.permissions.find(
-        (sc) =>
-          (sc.scope === null || sc.scope === scope) &&
-          this.ge(sc.permission, Permission.WRITE)
-      );
-    }
-    return false;
+  isScopedWrite$(scope: string): Observable<boolean> {
+    return this.firstUserInfo$.pipe(
+      map((userInfo) => this.isScopedWrite(scope, userInfo))
+    );
   }
 
-  isScopedRead(scope: string): boolean {
-    if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
-      return !!this.userInfoSubject.value.permissions.find(
+  isScopedRead$(scope: string): Observable<boolean> {
+    return this.firstUserInfo$.pipe(
+      map((userInfo) => this.isScopedRead(scope, userInfo))
+    );
+  }
+
+  private isScopedAdmin(scope: string, userInfo: UserInfo): boolean {
+    return this.isScoped(scope, userInfo, Permission.ADMIN);
+  }
+
+  private isScopedWrite(scope: string, userInfo: UserInfo): boolean {
+    return this.isScoped(scope, userInfo, Permission.WRITE);
+  }
+
+  private isScopedRead(scope: string, userInfo: UserInfo): boolean {
+    return this.isScoped(scope, userInfo, Permission.READ);
+  }
+
+  private isScoped(
+    scope: string,
+    userInfo: UserInfo,
+    permission: Permission
+  ): boolean {
+    if (userInfo && userInfo.permissions) {
+      return !!userInfo.permissions.find(
         (sc) =>
           (sc.scope === null || sc.scope === scope) &&
-          this.ge(sc.permission, Permission.READ)
+          this.ge(sc.permission, permission)
       );
     }
     return false;
   }
 
   isScopedExclusiveReadClient(scope: string): boolean {
-    if (this.userInfoSubject.value && this.userInfoSubject.value.permissions) {
+    if (this.currentUserInfo && this.currentUserInfo.permissions) {
       // We have either a global or scoped CLIENT permission,
-      const clientPerm = this.userInfoSubject.value.permissions.find(
+      const clientPerm = this.currentUserInfo.permissions.find(
         (sc) =>
           (sc.scope === null || sc.scope === scope) &&
           sc.permission === Permission.CLIENT
       );
       // ... and there is *NO* other permission on the user.
-      const nonClientPerm = this.userInfoSubject.value.permissions.find(
+      const nonClientPerm = this.currentUserInfo.permissions.find(
         (sc) =>
           (sc.scope === null || sc.scope === scope) &&
           sc.permission !== Permission.CLIENT
@@ -298,12 +325,12 @@ export class AuthenticationService {
   getUserInfo(): Observable<UserInfo> {
     this.http
       .get<UserInfo>(this.cfg.config.api + '/auth/user')
-      .subscribe((userInfo) => this.userInfoSubject.next(userInfo));
-    return this.userInfoSubject.asObservable();
+      .subscribe((userInfo) => this.userInfoSubject$.next(userInfo));
+    return this.userInfoSubject$.asObservable();
   }
 
   updateUserInfo(info: UserInfo): Observable<any> {
-    this.userInfoSubject.next(info);
+    this.userInfoSubject$.next(info);
     return this.http.post<UserInfo>(this.cfg.config.api + '/auth/user', info);
   }
 

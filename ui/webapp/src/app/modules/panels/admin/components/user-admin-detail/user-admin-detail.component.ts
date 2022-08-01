@@ -1,5 +1,4 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
@@ -9,7 +8,6 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
-import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 
 const COL_SCOPE: BdDataColumn<ScopedPermission> = {
   id: 'scope',
@@ -56,9 +54,7 @@ export class UserAdminDetailComponent implements OnDestroy {
   constructor(
     private areas: NavAreasService,
     private authAdmin: AuthAdminService,
-    private auth: AuthenticationService,
-    groups: GroupsService,
-    private router: Router
+    private auth: AuthenticationService
   ) {
     this.subscription = combineLatest([
       areas.panelRoute$,
@@ -70,7 +66,7 @@ export class UserAdminDetailComponent implements OnDestroy {
       }
       const user = users.find((u) => u.name === route.params['user']);
       this.user$.next(user);
-      this.isCurrentUser = user.name === this.auth.getUsername();
+      this.isCurrentUser = user.name === this.auth.getCurrentUsername();
     });
   }
 

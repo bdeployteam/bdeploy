@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AuthenticationService } from '../services/authentication.service';
 import { NavAreasService } from '../services/nav-areas.service';
 import { findParam } from './scoped-read.guard';
@@ -16,7 +18,7 @@ export class ScopedWriteGuard implements CanActivate {
     private areas: NavAreasService
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot): boolean {
+  canActivate(route: ActivatedRouteSnapshot): boolean | Observable<boolean> {
     const group =
       findParam('group', route) ||
       this.areas._tempNavGroupContext$.value ||
@@ -30,20 +32,25 @@ export class ScopedWriteGuard implements CanActivate {
     this.areas._tempNavGroupContext$.next(group);
     this.areas._tempNavRepoContext$.next(group);
 
-    if (
-      this.authService.isAuthenticated() &&
-      !this.authService.isScopedWrite(ctx)
-    ) {
-      this.snackbar.open(
-        `Unfortunately, ${route.url.join(
-          '/'
-        )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
-        'DISMISS',
-        { panelClass: 'error-snackbar' }
-      );
-      this.router.navigate(['/groups/browser']);
-      return false;
+    if (!this.authService.isAuthenticated()) {
+      return true;
     }
-    return true;
+
+    return this.authService.isScopedWrite$(ctx).pipe(
+      map((isScopedWrite) => {
+        if (isScopedWrite) {
+          return true;
+        }
+        this.snackbar.open(
+          `Unfortunately, ${route.url.join(
+            '/'
+          )} was not found (wrong URL or insufficient rights), we returned you to the safe-zone.`,
+          'DISMISS',
+          { panelClass: 'error-snackbar' }
+        );
+        this.router.navigate(['/groups/browser']);
+        return false;
+      })
+    );
   }
 }

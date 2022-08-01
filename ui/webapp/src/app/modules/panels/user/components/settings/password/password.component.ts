@@ -24,7 +24,7 @@ export class PasswordComponent {
     this.loading$.next(true);
     this.auth
       .changePassword({
-        user: this.auth.getUsername(),
+        user: this.auth.getCurrentUsername(),
         currentPassword: this.passOrig,
         newPassword: this.passNew,
       })
