@@ -25,6 +25,7 @@ import { NodeDetailsComponent } from './components/node-details/node-details.com
 import { NodeEditComponent } from './components/node-details/node-edit/node-edit.component';
 import { NodeMaintenanceComponent } from './components/node-details/node-maintenance/node-maintenance.component';
 import { NodeUpdateComponent } from './components/node-details/node-update/node-update.component';
+import { SoftwareBulkManipulationComponent } from './components/software-bulk-manipulation/software-bulk-manipulation.component';
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 import { UserAdminDetailComponent } from './components/user-admin-detail/user-admin-detail.component';
@@ -122,6 +123,11 @@ const routes: Routes = [
   {
     path: 'software/details/:version',
     component: SoftwareDetailsComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'software/bulk-manipulation',
+    component: SoftwareBulkManipulationComponent,
     canActivate: [AdminGuard],
   },
   {
