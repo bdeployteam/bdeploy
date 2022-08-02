@@ -267,10 +267,10 @@ public class CommonRootResourceImpl implements CommonRootResource {
         return rc.initResource(
                 new CommonProxyResourceImpl(group, instance, application, ir.getAllEndpoints(instance), ir::forward, resp -> {
                     // cannot process our own 401, as we're rejected *very* early in the framework in case we're not authorized.
-                    if (resp.responseCode == 412) {
+                    if (resp.responseCode == 503) {
                         // application not running, and similar errors. we keep the original response but add a custom error page to it.
                         return Response.fromResponse(resp.defaultUnwrap())
-                                .entity(JerseyCustomErrorPages.getErrorHtml(resp.responseReason)).build();
+                                .entity(JerseyCustomErrorPages.getErrorHtml(resp.responseCode, resp.responseReason)).build();
                     }
                     return resp.defaultUnwrap();
                 }));

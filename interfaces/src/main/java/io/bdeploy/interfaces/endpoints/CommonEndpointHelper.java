@@ -49,7 +49,9 @@ public class CommonEndpointHelper {
         p1 = p1 == null ? "" : p1;
         p2 = p2 == null ? "" : p2;
 
-        if (p1.endsWith("/") && p2.startsWith("/")) {
+        if (p2.isEmpty()) {
+            r = p1; // no second part.
+        } else if (p1.endsWith("/") && p2.startsWith("/")) {
             r = p1 + p2.substring(1); // both have the slash
         } else if (p1.endsWith("/") || p2.startsWith("/")) {
             r = p1 + p2; // one has the slash

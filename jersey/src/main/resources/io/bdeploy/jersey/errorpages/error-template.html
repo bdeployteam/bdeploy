@@ -16,6 +16,7 @@
 		  width: 100%;
 		  height: 100%;
 		  margin: 0px;
+		  background-color: white;
 		}
 		
 		.flex-container {
@@ -27,6 +28,7 @@
 		  height: 100%;
 		
 		  font-family: sans-serif;
+    	  font-size: smaller;
 		}
 		
 		.logo-container {
@@ -46,18 +48,30 @@
 		  border-radius: 2px;
 		  padding: 1px 3px;
 		}
+
+        .logo-intermediate {
+          display: flex;
+          flex-direction: row;
+
+          width: 100%;
+          height: 260px;
+        }
 		
 		.logo {
-		  width: 250px;
-		  margin-bottom: 10px;
+		  display: flex;
+		  justify-content: center;
+          flex: 1 0 auto;
+          margin-bottom: 10px;
 		}
 	</style>    
   </head>
   <body>
     <div class="flex-container">
       <div class="logo-container">
-        <div class="logo">
-        	{{LOGO}}
+        <div class="logo-intermediate">
+          <div class="logo">
+            {{LOGO}}
+          </div>
         </div>
         <span>{{ERROR}}</span>
       </div>

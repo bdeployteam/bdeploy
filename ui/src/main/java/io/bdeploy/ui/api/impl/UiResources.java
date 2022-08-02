@@ -65,7 +65,8 @@ public class UiResources {
 
             @Override
             public void service(Request request, Response response) throws Exception {
-                String html = JerseyCustomErrorPages.getErrorHtml("This server is a <code>NODE</code> and does not have a UI.");
+                String html = JerseyCustomErrorPages.getErrorHtml(404,
+                        "This server is a <code>NODE</code> and does not have a UI.");
                 response.setContentType(MediaType.TEXT_HTML);
                 response.setContentLength(html.length());
                 response.getWriter().write(html);

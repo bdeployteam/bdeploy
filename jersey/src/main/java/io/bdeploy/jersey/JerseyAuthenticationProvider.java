@@ -179,9 +179,9 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private void abortWithUnauthorized(ContainerRequestContext requestContext) {
         // Abort the filter chain with a 401 status code response
         // The WWW-Authenticate header is sent along with the response
-        requestContext.abortWith(
-                Response.status(Response.Status.UNAUTHORIZED).entity(JerseyCustomErrorPages.getErrorHtml("Not Authorized."))
-                        .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME + " realm=\"" + REALM + "\"").build());
+        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
+                .entity(JerseyCustomErrorPages.getErrorHtml(Response.Status.UNAUTHORIZED.getStatusCode(), "Not Authorized."))
+                .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME + " realm=\"" + REALM + "\"").build());
     }
 
     public static ApiAccessToken validateToken(String tokenValue, KeyStore ks) {

@@ -1,5 +1,8 @@
 .local-app-frame {
-  border: 2px dashed var(--bd-accent);
+  /* use outline instead of border to inherit bg-color of theme */
+  outline: 2px dashed var(--bd-accent);
+  margin: 2px;
+  border: none;
 }
 
 .local-group {
