@@ -59,4 +59,8 @@ public class InstanceConfiguration {
      */
     public boolean autoUninstall;
 
+    /**
+     * Regular expression to filter products before calculating newest available version
+     */
+    public String productFilterRegex;
 }

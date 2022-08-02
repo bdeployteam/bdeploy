@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -236,7 +237,8 @@ public class InstanceResourceImpl implements InstanceResource {
 
             // reverse order of comparison to get newest version first.
             Optional<String> newestProductVersion = scan.stream().filter(key -> key.getName().equals(productName))
-                    .map(Key::getTag).sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
+                    .map(Key::getTag).filter(tag -> this.matchesProductFilterRegex(tag, config.productFilterRegex))
+                    .sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
 
             if (newestProductVersion.isPresent()) {
                 String newestProductTag = newestProductVersion.get();
@@ -271,6 +273,18 @@ public class InstanceResourceImpl implements InstanceResource {
                     attributes, banner, im.getManifest(), activeVersion, overallState, configRoot));
         }
         return result;
+    }
+
+    private boolean matchesProductFilterRegex(String tag, String productFilterRegex) {
+        if (productFilterRegex == null || productFilterRegex.isEmpty()) {
+            return true;
+        }
+        try {
+            Pattern pattern = Pattern.compile(productFilterRegex);
+            return pattern.matcher(tag).find();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void readTree(ConfigDirDto parent, TreeView tv) {
