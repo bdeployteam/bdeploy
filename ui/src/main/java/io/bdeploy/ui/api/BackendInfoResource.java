@@ -2,16 +2,15 @@ package io.bdeploy.ui.api;
 
 import java.util.Map;
 
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.ui.dto.BackendInfoDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
-import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.BackendInfoDto;
 
 @Path("/backend-info")
 @Consumes(MediaType.APPLICATION_JSON)

@@ -48,6 +48,7 @@ export class ConfigService {
   isCentral$ = new BehaviorSubject<boolean>(false);
   isManaged$ = new BehaviorSubject<boolean>(false);
   isStandalone$ = new BehaviorSubject<boolean>(false);
+  isNewGitHubReleaseAvailable$ = new BehaviorSubject<boolean>(false);
 
   // prettier-ignore
   constructor(
@@ -96,6 +97,9 @@ export class ConfigService {
           console.log('API URL set to ' + this.config.api);
           console.log('WS URL set to ' + this.config.ws);
           console.log('Remote reports mode ' + this.config.mode);
+          this.isNewGitHubReleaseAvailable$.next(
+            bv.isNewGitHubReleaseAvailable
+          );
           this.isCentral$.next(this.config.mode === MinionMode.CENTRAL);
           this.isManaged$.next(this.config.mode === MinionMode.MANAGED);
           this.isStandalone$.next(this.config.mode === MinionMode.STANDALONE);
@@ -111,6 +115,7 @@ export class ConfigService {
   /** Check whether there is a new version running on the backend, show dialog if it is. */
   public checkServerVersion() {
     this.getBackendInfo(true).subscribe((bv) => {
+      this.isNewGitHubReleaseAvailable$.next(bv.isNewGitHubReleaseAvailable);
       this.doCheckVersion(bv);
     });
   }

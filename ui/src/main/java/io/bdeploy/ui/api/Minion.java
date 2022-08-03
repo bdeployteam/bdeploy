@@ -126,4 +126,8 @@ public interface Minion {
      */
     public void setSettings(SettingsConfiguration settings);
 
+    default boolean isNewGitHubReleaseAvailable() {
+        return false;
+    }
+
 }

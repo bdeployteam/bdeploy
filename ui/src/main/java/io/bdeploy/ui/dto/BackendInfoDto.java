@@ -15,14 +15,16 @@ public class BackendInfoDto {
     public MinionMode mode;
     public long time;
     public String name;
+    public boolean isNewGitHubReleaseAvailable;
 
     @JsonCreator
     public BackendInfoDto(@JsonProperty("version") Version version, @JsonProperty("mode") MinionMode mode,
-            @JsonProperty("name") String name) {
+            @JsonProperty("name") String name, @JsonProperty("isNewGitHubReleaseAvailable") boolean isNewGitHubReleaseAvailable) {
         this.version = version;
         this.mode = mode;
         this.time = System.currentTimeMillis();
         this.name = name;
+        this.isNewGitHubReleaseAvailable = isNewGitHubReleaseAvailable;
     }
 
 }

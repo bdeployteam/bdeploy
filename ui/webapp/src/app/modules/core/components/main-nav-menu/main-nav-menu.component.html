@@ -221,6 +221,18 @@
       <span>{{ cfgService?.config?.version | formatVersion }}</span>
     </div>
   </div>
+  <app-bd-button
+    *ngIf="cfgService.isNewGitHubReleaseAvailable$ | async"
+    fxFlexAlign="center center"
+    icon="system_update"
+    text="New Release"
+    color="toolbar"
+    [collapsed]="!expanded"
+    tooltip="right"
+    [isToggle]="true"
+    [toggleOnClick]="false"
+    (click)="goToGitHub()"
+  ></app-bd-button>
   <mat-divider class="local-divider"></mat-divider>
   <app-main-nav-button
     [style.padding-top.px]="5"

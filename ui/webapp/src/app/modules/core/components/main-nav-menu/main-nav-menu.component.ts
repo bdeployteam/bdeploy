@@ -71,4 +71,10 @@ export class MainNavMenuComponent {
   @HostBinding('@menuOpenClose') get animationState() {
     return this.expanded ? 'open' : 'closed';
   }
+
+  goToGitHub(): void {
+    window
+      .open('https://github.com/bdeployteam/bdeploy/releases/latest', '_blank')
+      .focus();
+  }
 }
