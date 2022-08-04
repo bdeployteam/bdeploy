@@ -1,5 +1,8 @@
 package io.bdeploy.interfaces.configuration.instance;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -68,4 +71,9 @@ public class InstanceConfiguration {
      * Regular expression to filter products before calculating newest available version
      */
     public String productFilterRegex;
+
+    /**
+     * Collection of instance variables which can be used to provide values to parameters.
+     */
+    public Map<String, String> instanceVariables = new TreeMap<>();
 }

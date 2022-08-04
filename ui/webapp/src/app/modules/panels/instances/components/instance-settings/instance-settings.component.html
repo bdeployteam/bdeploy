@@ -16,6 +16,15 @@
         [disabled]="!(auth.isCurrentScopeWrite$ | async) || !(edit.hasCurrentProduct$ | async)"
       ></app-bd-panel-button>
       <app-bd-panel-button
+        text="Instance Variables..."
+        icon="data_object"
+        [collapsed]="false"
+        [toggle]="false"
+        [route]="['variables']"
+        [relative]="true"
+        [disabled]="!(auth.isCurrentScopeWrite$ | async) || !(edit.hasCurrentProduct$ | async)"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
         text="Configuration Files"
         icon="attachment"
         [collapsed]="false"

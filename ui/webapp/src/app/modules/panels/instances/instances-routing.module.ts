@@ -32,6 +32,7 @@ import { EditConfigComponent } from './components/instance-settings/edit-config/
 import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
+import { InstanceVariablesComponent } from './components/instance-settings/instance-variables/instance-variables.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
 import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
@@ -97,6 +98,13 @@ const INSTANCES_ROUTES: Route[] = [
     component: NodesComponent,
     canActivate: [ScopedWriteGuard],
     canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'settings/variables',
+    component: InstanceVariablesComponent,
+    canActivate: [ScopedWriteGuard],
+    canDeactivate: [DirtyDialogGuard],
+    data: { max: true },
   },
   {
     path: 'settings/templates',
