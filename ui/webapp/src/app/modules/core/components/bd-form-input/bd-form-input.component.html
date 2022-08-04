@@ -22,6 +22,9 @@
         {{ suggestedValue }}
       </mat-option>
     </mat-autocomplete>
+    <div *ngIf="prefix" matPrefix>
+      <ng-container *ngTemplateOutlet="prefix"></ng-container>
+    </div>
     <div matSuffix class="bd-form-input-suffix">
       <ng-content></ng-content>
     </div>

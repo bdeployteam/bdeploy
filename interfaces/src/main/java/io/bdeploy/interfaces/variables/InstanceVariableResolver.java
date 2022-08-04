@@ -36,6 +36,9 @@ public class InstanceVariableResolver extends PrefixResolver {
             case "PRODUCT_TAG":
                 return incf.product == null ? "" : incf.product.getTag();
             case "DEPLOYMENT_INFO_FILE":
+                if (paths == null) {
+                    return InstanceDeploymentInformationApi.FILE_NAME; // used during validation
+                }
                 return paths.get(SpecialDirectory.ROOT).resolve(InstanceDeploymentInformationApi.FILE_NAME).toAbsolutePath()
                         .toString();
             default:

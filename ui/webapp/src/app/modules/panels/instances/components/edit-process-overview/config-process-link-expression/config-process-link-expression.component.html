@@ -1,0 +1,45 @@
+<mat-card
+  [style.padding.px]="10"
+  [style.max-width.px]="750"
+  class="mat-typography"
+  fxLayout="column"
+  fxLayoutGap="5px"
+>
+  <div fxLayout="column" fxLayoutGap="10px" fxFill>
+    <mat-tab-group [style.height.px]="400" [animationDuration]="0">
+      <mat-tab
+        label="Instance & System Variables"
+        [disabled]="!varRecords?.length"
+      >
+        <app-bd-data-table
+          [records]="varRecords"
+          [columns]="varColumns"
+          (recordClick)="onSelect($event)"
+        ></app-bd-data-table>
+      </mat-tab>
+      <mat-tab label="Process Parameters" [disabled]="!paramRecords?.length">
+        <app-bd-data-table
+          [records]="paramRecords"
+          [columns]="varColumns"
+          [grouping]="paramGrouping"
+          [expandGroups]="false"
+          (recordClick)="onSelect($event)"
+        ></app-bd-data-table>
+      </mat-tab>
+      <mat-tab label="Paths" [disabled]="!pathRecords?.length">
+        <app-bd-data-table
+          [records]="pathRecords"
+          [columns]="varColumns"
+          (recordClick)="onSelect($event)"
+        ></app-bd-data-table>
+      </mat-tab>
+      <mat-tab label="Special" [disabled]="!specialRecords?.length">
+        <app-bd-data-table
+          [records]="specialRecords"
+          [columns]="varColumns"
+          (recordClick)="onSelect($event)"
+        ></app-bd-data-table>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</mat-card>

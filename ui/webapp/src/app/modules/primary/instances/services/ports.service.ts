@@ -7,12 +7,15 @@ import {
   InstanceNodeConfigurationListDto,
   MinionStatusDto,
   ParameterType,
+  SystemConfigurationDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { NO_LOADING_BAR_CONTEXT } from 'src/app/modules/core/utils/loading-bar.util';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { GroupsService } from '../../groups/services/groups.service';
+import { SystemsService } from '../../systems/services/systems.service';
 import { InstancesService } from './instances.service';
 import { ProcessesService } from './processes.service';
 
@@ -39,27 +42,43 @@ export class PortsService {
     private http: HttpClient,
     private groups: GroupsService,
     private instances: InstancesService,
-    private processes: ProcessesService
+    private processes: ProcessesService,
+    private systems: SystemsService
   ) {
     combineLatest([
       this.instances.active$,
       this.instances.activeNodeCfgs$,
       this.processes.processStates$,
       this.instances.activeNodeStates$,
-    ]).subscribe(([instance, nodes, states, nodeStates]) => {
-      if (!instance || !nodes || !states || !nodeStates) {
+      this.systems.systems$,
+    ]).subscribe(([instance, nodes, states, nodeStates, systems]) => {
+      if (
+        !instance ||
+        !nodes ||
+        !states ||
+        !nodeStates ||
+        (instance?.instanceConfiguration?.system && !systems?.length)
+      ) {
         this.activePortStates$.next(null);
         return;
       }
 
-      this.loadActivePorts(instance, nodes, nodeStates);
+      this.loadActivePorts(
+        instance,
+        nodes,
+        nodeStates,
+        systems?.find(
+          (s) => s.key.name === instance?.instanceConfiguration?.system?.name
+        )
+      );
     });
   }
 
   private loadActivePorts(
     instance: InstanceDto,
     cfgs: InstanceNodeConfigurationListDto,
-    nodeStates: { [key: string]: MinionStatusDto }
+    nodeStates: { [key: string]: MinionStatusDto },
+    system: SystemConfigurationDto
   ) {
     if (!instance || !cfgs) {
       this.activePortStates$.next(null);
@@ -104,7 +123,17 @@ export class PortsService {
             appName: app.name,
             paramUid: param.uid,
             paramName: paramDesc.name,
-            port: Number(param.value),
+            port: Number(
+              getRenderPreview(
+                param.value,
+                app,
+                {
+                  config: instance.instanceConfiguration,
+                  nodeDtos: cfgs.nodeConfigDtos,
+                },
+                system?.config
+              )
+            ),
             state: false,
           });
         }

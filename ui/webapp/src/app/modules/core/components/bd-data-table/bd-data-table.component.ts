@@ -211,6 +211,9 @@ export class BdDataTableComponent<T>
   /** Hide the headers, shows only the contents area */
   @Input() headerHidden = false;
 
+  /** Implicitly expand all groups when updating content */
+  @Input() expandGroups = true;
+
   /** The current search/filter string given by onBdSearch */
   private search: string;
 
@@ -362,10 +365,12 @@ export class BdDataTableComponent<T>
       this.sort
     );
 
-    // TODO: Saving of expansion state on update. To achieve this, every BdDataGrouping must
-    // have a unique ID. This ID, along with the group name (which is shown in the first column)
-    // can be used to remember the expansion state, using a SelectionModel just like check selection.
-    this.treeControl.expandAll();
+    if (this.expandGroups) {
+      // TODO: Saving of expansion state on update. To achieve this, every BdDataGrouping must
+      // have a unique ID. This ID, along with the group name (which is shown in the first column)
+      // can be used to remember the expansion state, using a SelectionModel just like check selection.
+      this.treeControl.expandAll();
+    }
   }
 
   /**

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpAuthenticationType;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
@@ -39,7 +40,8 @@ public class CommonEndpointHelper {
     }
 
     public static String initUri(HttpEndpoint endpoint, String hostname, String subPath) {
-        return (endpoint.secure ? "https://" : "http://") + hostname + (endpoint.port != null ? (":" + endpoint.port) : "")
+        return ((Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE) ? "https://" : "http://") + hostname
+                + (endpoint.port != null ? (":" + endpoint.port.getPreRenderable()) : "")
                 + concatWithSlashes(endpoint.path, subPath);
     }
 
@@ -69,18 +71,19 @@ public class CommonEndpointHelper {
     public static WebTarget initClient(HttpEndpoint endpoint, String subPath) throws GeneralSecurityException {
         ClientBuilder client = ClientBuilder.newBuilder();
 
-        if (endpoint.secure && endpoint.trustAll) {
+        if (Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE && endpoint.trustAll) {
             SSLContext sslcontext = SSLContext.getInstance("TLS");
 
             sslcontext.init(null, new TrustManager[] { new TrustAllServersTrustManager() }, new java.security.SecureRandom());
 
             client.sslContext(sslcontext).hostnameVerifier((s1, s2) -> true);
-        } else if (endpoint.secure && endpoint.trustStore != null && !endpoint.trustStore.isEmpty()) {
-            Path ksPath = Paths.get(endpoint.trustStore);
+        } else if (Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE && endpoint.trustStore != null
+                && !endpoint.trustStore.getPreRenderable().isEmpty()) {
+            Path ksPath = Paths.get(endpoint.trustStore.getPreRenderable());
 
             char[] pp = null;
-            if (endpoint.trustStorePass != null && !endpoint.trustStorePass.isEmpty()) {
-                pp = endpoint.trustStorePass.toCharArray();
+            if (endpoint.trustStorePass != null && !endpoint.trustStorePass.getPreRenderable().isEmpty()) {
+                pp = endpoint.trustStorePass.getPreRenderable().toCharArray();
             }
 
             KeyStore ks;
@@ -98,9 +101,11 @@ public class CommonEndpointHelper {
         }
 
         if (endpoint.authType == HttpAuthenticationType.BASIC) {
-            client.register(HttpAuthenticationFeature.basic(endpoint.authUser, endpoint.authPass));
+            client.register(
+                    HttpAuthenticationFeature.basic(endpoint.authUser.getPreRenderable(), endpoint.authPass.getPreRenderable()));
         } else if (endpoint.authType == HttpAuthenticationType.DIGEST) {
-            client.register(HttpAuthenticationFeature.digest(endpoint.authUser, endpoint.authPass));
+            client.register(
+                    HttpAuthenticationFeature.digest(endpoint.authUser.getPreRenderable(), endpoint.authPass.getPreRenderable()));
         }
 
         // client is always used locally, so we use localhost as hostname to avoid contacting somebody else unintentionally.
@@ -115,17 +120,24 @@ public class CommonEndpointHelper {
         processed.id = rawEndpoint.id;
         processed.path = rawEndpoint.path;
         processed.contextPath = rawEndpoint.contextPath;
-        processed.port = p.apply(rawEndpoint.port);
-        processed.secure = rawEndpoint.secure;
+        processed.port = process(rawEndpoint.port, p);
+        processed.secure = process(rawEndpoint.secure, p);
         processed.trustAll = rawEndpoint.trustAll;
-        processed.trustStore = p.apply(rawEndpoint.trustStore);
-        processed.trustStorePass = p.apply(rawEndpoint.trustStorePass);
+        processed.trustStore = process(rawEndpoint.trustStore, p);
+        processed.trustStorePass = process(rawEndpoint.trustStorePass, p);
         processed.authType = rawEndpoint.authType;
-        processed.authUser = p.apply(rawEndpoint.authUser);
-        processed.authPass = p.apply(rawEndpoint.authPass);
+        processed.authUser = process(rawEndpoint.authUser, p);
+        processed.authPass = process(rawEndpoint.authPass, p);
         processed.proxying = rawEndpoint.proxying;
 
         return processed;
+    }
+
+    private static LinkedValueConfiguration process(LinkedValueConfiguration value, UnaryOperator<String> p) {
+        if (value == null) {
+            return new LinkedValueConfiguration(null);
+        }
+        return new LinkedValueConfiguration(p.apply(value.getPreRenderable()));
     }
 
 }

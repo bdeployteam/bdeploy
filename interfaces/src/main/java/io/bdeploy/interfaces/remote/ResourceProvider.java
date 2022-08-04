@@ -1,12 +1,12 @@
 package io.bdeploy.interfaces.remote;
 
-import jakarta.ws.rs.core.SecurityContext;
-
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration.LVCModule;
 import io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Provides a {@link JerseyClientFactory} with all required configurations applied.
@@ -22,6 +22,7 @@ public class ResourceProvider {
     public static JerseyClientFactory of(RemoteService svc) {
         JerseyClientFactory jcf = JerseyClientFactory.get(svc);
         jcf.register(JerseyRemoteBHive.HIVE_JACKSON_MODULE);
+        jcf.register(LVCModule.LVC_MODULE); // we ONLY want this module when we are REST client.
         return jcf;
     }
 

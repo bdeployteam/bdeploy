@@ -141,7 +141,11 @@ export class BdPopupDirective implements OnDestroy {
   }
 
   @HostListener('mouseenter') onMouseEnter() {
-    if (this.appBdPopupTrigger === 'hover' && !!this.appBdPopup) {
+    if (
+      this.appBdPopupTrigger === 'hover' &&
+      !!this.appBdPopup &&
+      !this.popupService.getOverlay('click') // only if no click-overlay is open
+    ) {
       this.delayTimer = setTimeout(() => {
         this.canClosePopover = true;
         this.openOverlay();
@@ -196,7 +200,7 @@ export class BdPopupDirective implements OnDestroy {
     const portal = new TemplatePortal(this.appBdPopup, this.viewContainerRef);
     this.overlayRef.attach(portal);
 
-    this.popupService.setOverlay(this.overlayRef);
+    this.popupService.setOverlay(this.overlayRef, this.appBdPopupTrigger);
 
     this.appBdPopupOpened.emit(this);
   }
@@ -243,13 +247,13 @@ export class BdPopupDirective implements OnDestroy {
 
   /** Closes the overlay if present */
   public closeOverlay() {
-    if (this.popupService.getOverlay()) {
-      this.overlayRef = this.popupService.getOverlay();
+    if (this.popupService.getOverlay(this.appBdPopupTrigger)) {
+      this.overlayRef = this.popupService.getOverlay(this.appBdPopupTrigger);
       this.overlayRef.detach();
       this.overlayRef.dispose();
       this.overlayRef = null;
     }
-    this.popupService.setOverlay(this.overlayRef);
+    this.popupService.setOverlay(this.overlayRef, this.appBdPopupTrigger);
   }
 
   /** Keeps popup open if mouse is over of popup */

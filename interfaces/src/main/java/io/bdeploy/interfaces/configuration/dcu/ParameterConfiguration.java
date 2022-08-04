@@ -3,8 +3,6 @@ package io.bdeploy.interfaces.configuration.dcu;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
-
 /**
  * Describes a single parameter as configured in a configuration UI.
  */
@@ -28,31 +26,12 @@ public class ParameterConfiguration {
      * it redundantly is solely lookup and expansion of other parameter's
      * references.
      */
-    public String value;
+    public LinkedValueConfiguration value;
 
     /**
      * The pre-rendered complete parameter as it should be appended to the command
      * line, but with variables still in place.
      */
     public List<String> preRendered = new ArrayList<>();
-
-    public void preRender(ParameterDescriptor desc) {
-        preRendered.clear();
-
-        if (desc.hasValue) {
-            if (desc.parameter == null) {
-                preRendered.add(value);
-            } else {
-                if (desc.valueAsSeparateArg) {
-                    preRendered.add(desc.parameter);
-                    preRendered.add(value);
-                } else {
-                    preRendered.add(desc.parameter + desc.valueSeparator + value);
-                }
-            }
-        } else {
-            preRendered.add(desc.parameter);
-        }
-    }
 
 }

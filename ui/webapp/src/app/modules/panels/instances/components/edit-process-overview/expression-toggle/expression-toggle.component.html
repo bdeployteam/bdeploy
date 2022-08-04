@@ -1,0 +1,22 @@
+<mat-button-toggle-group
+  class="local-toggle-group"
+  [value]="link ? '2' : '1'"
+  (change)="linkChanged.emit($event.value === '1')"
+  [disabled]="disabled"
+  [style.margin-right.px]="5"
+  appClickStopPropagation
+>
+  <mat-button-toggle
+    value="1"
+    matTooltip="Provide a value for the parameter"
+    matTooltipShowDelay="1000"
+  >
+    <mat-icon>border_color</mat-icon></mat-button-toggle
+  >
+  <mat-button-toggle
+    value="2"
+    matTooltip="Link to variables and parameters using an expression"
+    matTooltipShowDelay="1000"
+    ><mat-icon>data_object</mat-icon></mat-button-toggle
+  >
+</mat-button-toggle-group>

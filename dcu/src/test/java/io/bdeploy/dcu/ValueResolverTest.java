@@ -21,6 +21,7 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
@@ -100,7 +101,7 @@ class ValueResolverTest {
         ParameterConfiguration f = new ParameterConfiguration();
 
         f.uid = id;
-        f.value = value;
+        f.value = new LinkedValueConfiguration(value);
         f.preRendered.addAll(Arrays.asList(preRendered));
 
         return f;

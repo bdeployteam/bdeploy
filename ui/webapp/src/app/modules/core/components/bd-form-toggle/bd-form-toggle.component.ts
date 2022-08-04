@@ -3,6 +3,7 @@ import {
   Input,
   Optional,
   Self,
+  TemplateRef,
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
@@ -21,6 +22,7 @@ export class BdFormToggleComponent implements ControlValueAccessor {
   @Input() name: string;
   @Input() disabled: boolean;
   @Input() appearance: 'slide' | 'checkbox' = 'checkbox';
+  @Input() prefix: TemplateRef<any>;
 
   @ViewChild(MatCheckbox, { static: false }) private checkbox: MatCheckbox;
   @ViewChild(MatSlideToggle, { static: false }) private slide: MatSlideToggle;

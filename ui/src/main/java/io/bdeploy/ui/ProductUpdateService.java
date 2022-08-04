@@ -13,12 +13,15 @@ import java.util.stream.Stream;
 import org.jvnet.hk2.annotations.Service;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.URLish;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
@@ -28,6 +31,14 @@ import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.Paramete
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
+import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.DeploymentPathValidationDummyResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
+import io.bdeploy.interfaces.variables.InstanceVariableResolver;
+import io.bdeploy.interfaces.variables.ManifestSelfResolver;
+import io.bdeploy.interfaces.variables.ManifestVariableValidationDummyResolver;
 
 @Service
 public class ProductUpdateService {
@@ -251,7 +262,7 @@ public class ProductUpdateService {
     }
 
     private void preRenderParameter(ParameterConfiguration val, ParameterDescriptor desc) {
-        String strValue = val.value != null ? val.value : "";
+        String strValue = val.value != null && val.value.getPreRenderable() != null ? val.value.getPreRenderable() : "";
 
         if (desc == null) {
             // custom parameter
@@ -337,7 +348,8 @@ public class ProductUpdateService {
         return result;
     }
 
-    public List<ApplicationValidationDto> validate(InstanceUpdateDto instance, List<ApplicationManifest> applications) {
+    public List<ApplicationValidationDto> validate(InstanceUpdateDto instance, List<ApplicationManifest> applications,
+            SystemConfiguration system) {
         List<ApplicationValidationDto> result = new ArrayList<>();
 
         // there is nothing in the base config which requires excessive validation right now. mandatory fields are
@@ -365,9 +377,22 @@ public class ProductUpdateService {
                             "The process name " + process.name + " is not unique."));
                 }
 
+                // update variables in case we modified them in the instance config.
+                node.nodeConfiguration.mergeVariables(instance.config.config, system);
+
+                CompositeResolver res = new CompositeResolver();
+                res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
+                res.add(new InstanceVariableResolver(node.nodeConfiguration, null, "1"));
+                res.add(new ApplicationVariableResolver(process));
+                res.add(new ApplicationParameterValueResolver(process.uid, node.nodeConfiguration));
+                ManifestVariableValidationDummyResolver dummy = new ManifestVariableValidationDummyResolver();
+                res.add(new ManifestSelfResolver(process.application, dummy));
+                res.add(new DeploymentPathValidationDummyResolver());
+                res.add(dummy);
+
                 // check all parameters
-                result.addAll(validateCommand(process, desc.get(), process.start, desc.get().startCommand));
-                result.addAll(validateCommand(process, desc.get(), process.stop, desc.get().stopCommand));
+                result.addAll(validateCommand(process, desc.get(), process.start, desc.get().startCommand, res));
+                result.addAll(validateCommand(process, desc.get(), process.stop, desc.get().stopCommand, res));
             }
         }
 
@@ -375,7 +400,7 @@ public class ProductUpdateService {
     }
 
     private List<ApplicationValidationDto> validateCommand(ApplicationConfiguration process, ApplicationDescriptor appDesc,
-            CommandConfiguration command, ExecutableDescriptor desc) {
+            CommandConfiguration command, ExecutableDescriptor desc, VariableResolver resolver) {
         List<ApplicationValidationDto> result = new ArrayList<>();
 
         if (command == null || desc == null) {
@@ -390,14 +415,15 @@ public class ProductUpdateService {
         for (var paramDesc : desc.parameters) {
             var value = command.parameters.stream().filter(p -> p.uid.equals(paramDesc.uid)).findFirst().orElse(null);
 
-            validateParameter(process, appDesc, value, paramDesc, result);
+            validateParameter(process, appDesc, value, paramDesc, result, resolver);
         }
 
         return result;
     }
 
     private void validateParameter(ApplicationConfiguration process, ApplicationDescriptor appDesc,
-            ParameterConfiguration paramValue, ParameterDescriptor paramDesc, List<ApplicationValidationDto> result) {
+            ParameterConfiguration paramValue, ParameterDescriptor paramDesc, List<ApplicationValidationDto> result,
+            VariableResolver resolver) {
         // check condition.
         if (!meetsCondition(process, appDesc, paramDesc)) {
             if (paramValue != null && paramValue.value != null) {
@@ -416,12 +442,22 @@ public class ProductUpdateService {
             return;
         }
 
-        var stringVal = paramValue.value;
+        var rawExpr = paramValue.value.linkExpression;
 
         // check syntax of variable substitutions.
-        if ((stringVal.contains("{{") || stringVal.contains("}}"))
-                && (!stringVal.contains("{{") || !stringVal.contains("}}") || !stringVal.contains(":"))) {
+        if (rawExpr != null && (rawExpr.contains("{{") || rawExpr.contains("}}"))
+                && (!rawExpr.contains("{{") || !rawExpr.contains("}}") || !rawExpr.contains(":"))) {
             result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Invalid variable substitution syntax"));
+        }
+
+        String stringVal;
+        try {
+            stringVal = rawExpr == null ? paramValue.value.value : TemplateHelper.process(rawExpr, resolver);
+        } catch (IllegalArgumentException e) {
+            // some expansion was not good;
+            result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
+                    "Cannot resolve link expressions: " + e.getMessage()));
+            return;
         }
 
         // check allowed values per type.
@@ -467,7 +503,7 @@ public class ProductUpdateService {
                         process.stop != null ? process.stop.parameters.stream() : Stream.of())
                 .filter(p -> p.uid.equals(param.condition.parameter)).findFirst().orElse(null);
         if (target != null) {
-            value = target.value;
+            value = target.value.getPreRenderable();
         }
 
         var targetDesc = Stream

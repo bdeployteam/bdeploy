@@ -76,7 +76,7 @@ public class ApplicationParameterProvider {
         }
 
         // IF the value is a parameter reference, we need to make sure it is scoped to the current application!
-        return TemplateHelper.updateReferences(params.get(0).value, r -> updateReference(app, r));
+        return TemplateHelper.updateReferences(params.get(0).value.getPreRenderable(), r -> updateReference(app, r));
     }
 
     private String updateReference(ApplicationConfiguration app, String templateRef) {

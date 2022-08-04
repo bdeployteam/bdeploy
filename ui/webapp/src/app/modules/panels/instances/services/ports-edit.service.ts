@@ -6,6 +6,10 @@ import {
   ParameterDescriptor,
   ParameterType,
 } from 'src/app/models/gen.dtos';
+import {
+  createLinkedValue,
+  getPreRenderable,
+} from 'src/app/modules/core/utils/linked-values.utils';
 import { URLish } from 'src/app/modules/core/utils/url.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from './process-edit.service';
@@ -55,7 +59,7 @@ export class PortsEditService {
                   p.desc.uid === paramDesc.uid &&
                   p.desc.global &&
                   paramDesc.global &&
-                  p.params[0].value === param.value
+                  p.port === this.getPortValue(param, paramDesc)
               );
               if (!ppg) {
                 portParams.push({
@@ -107,22 +111,23 @@ export class PortsEditService {
   private getPortValue(
     param: ParameterConfiguration,
     desc: ParameterDescriptor
-  ) {
+  ): string {
+    const v = getPreRenderable(param.value);
     if (desc.type === ParameterType.URL) {
       // the instance-edit-ports component will give us only parameters where this is valid!
-      return new URLish(param.value).port;
+      return new URLish(v).port;
     }
-    return param.value;
+    return v;
   }
 
   private setPortValue(group: PortParmGroup, value: string) {
     for (const param of group.params) {
       if (group.desc.type === ParameterType.URL) {
-        const u = new URLish(param.value);
+        const u = new URLish(getPreRenderable(param.value));
         u.port = value;
-        param.value = u.toString();
+        param.value = createLinkedValue(u.toString());
       } else {
-        param.value = value;
+        param.value = createLinkedValue(value);
       }
 
       param.preRendered = this.procEdit.preRenderParameter(

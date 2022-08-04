@@ -38,6 +38,16 @@
         [values]="purposes"
         required
       ></app-bd-form-select>
+      <app-bd-form-select
+        #system
+        label="System"
+        name="system"
+        [(ngModel)]="systemSel"
+        [values]="systemKeys"
+        [labels]="systemLabels"
+        [allowNone]="true"
+        (ngModelChange)="onSystemChange(system.value)"
+      ></app-bd-form-select>
       <app-bd-form-toggle
         label="Automatic Startup"
         name="autoStart"

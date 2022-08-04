@@ -4,6 +4,7 @@ import {
   OnInit,
   Optional,
   Self,
+  TemplateRef,
   ViewEncapsulation,
 } from '@angular/core';
 import {
@@ -32,6 +33,7 @@ export class BdFormInputComponent
   @Input() suggested: string[];
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
   @Input() passwordLock = false;
+  @Input() prefix: TemplateRef<any>;
 
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 

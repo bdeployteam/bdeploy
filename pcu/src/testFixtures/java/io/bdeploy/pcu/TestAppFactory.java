@@ -16,6 +16,7 @@ import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
@@ -123,8 +124,8 @@ public class TestAppFactory {
             HttpEndpoint fakeEndpoint = new HttpEndpoint();
             fakeEndpoint.id = "test";
             fakeEndpoint.path = "/api/test/with/path"; // must match HelloEndpoint
-            fakeEndpoint.port = String.valueOf(port);
-            fakeEndpoint.secure = true;
+            fakeEndpoint.port = new LinkedValueConfiguration(String.valueOf(port));
+            fakeEndpoint.secure = new LinkedValueConfiguration("true");
             fakeEndpoint.trustAll = true;
 
             cfg.endpoints.http.add(fakeEndpoint);
@@ -158,7 +159,7 @@ public class TestAppFactory {
         c.name = desc;
         c.groupName = "Generated Group";
         c.longDescription = "[Long description] :" + desc;
-        c.defaultValue = def;
+        c.defaultValue = new LinkedValueConfiguration(def);
         return c;
     }
 

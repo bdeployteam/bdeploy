@@ -27,6 +27,9 @@
         </mat-option>
       </ng-container>
     </mat-select>
+    <div *ngIf="prefix" matPrefix>
+      <ng-container *ngTemplateOutlet="prefix"></ng-container>
+    </div>
     <mat-error *ngIf="ngControl && ngControl.invalid"
       >{{ getErrorMessage() }}</mat-error
     >

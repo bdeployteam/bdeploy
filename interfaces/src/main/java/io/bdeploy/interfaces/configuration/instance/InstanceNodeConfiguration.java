@@ -2,6 +2,8 @@ package io.bdeploy.interfaces.configuration.instance;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.VariableResolver;
@@ -10,10 +12,12 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.Instan
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
+import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 
 /**
@@ -61,13 +65,6 @@ public class InstanceNodeConfiguration {
     public Manifest.Key product;
 
     /**
-     * The key of the system this instance is associated with.
-     * <p>
-     * Redundant copy of the information from {@link InstanceConfiguration} for easier handling on the minion(s).
-     */
-    public Manifest.Key system;
-
-    /**
      * All application configurations.
      */
     public final List<ApplicationConfiguration> applications = new ArrayList<>();
@@ -76,6 +73,11 @@ public class InstanceNodeConfiguration {
      * Process control groups on this node.
      */
     public final List<ProcessControlGroupConfiguration> controlGroups = new ArrayList<>();
+
+    /**
+     * A merged map of variables available to the instance through both system and instance variables.
+     */
+    public final Map<String, String> variables = new TreeMap<>();
 
     /**
      * Render this {@link InstanceNodeConfiguration} to a {@link ProcessGroupConfiguration}
@@ -94,6 +96,7 @@ public class InstanceNodeConfiguration {
         // reference parameter values of parameters in the same scope.
         for (ApplicationConfiguration app : applications) {
             CompositeResolver list = new CompositeResolver();
+            list.add(new InstanceAndSystemVariableResolver(dc));
             list.add(new ApplicationVariableResolver(app));
             list.add(new ApplicationParameterValueResolver(app.uid, dc));
             list.add(new ManifestSelfResolver(app.application, valueResolver));
@@ -114,6 +117,23 @@ public class InstanceNodeConfiguration {
         autoStart = cfg.autoStart;
         purpose = cfg.purpose;
         product = cfg.product;
-        system = cfg.system;
+    }
+
+    /**
+     * @param instance the instance to pick variables from. instance variables have precedence over system variables.
+     * @param system the system to pick variables from.
+     */
+    public void mergeVariables(InstanceConfiguration instance, SystemConfiguration system) {
+        variables.clear();
+
+        // pick system first, so instance can overrule values later on.
+        if (system != null && system.configVariables != null) {
+            variables.putAll(system.configVariables);
+        }
+
+        // now potentially overwrite system variables with instance ones.
+        if (instance != null && instance.instanceVariables != null) {
+            variables.putAll(instance.instanceVariables);
+        }
     }
 }

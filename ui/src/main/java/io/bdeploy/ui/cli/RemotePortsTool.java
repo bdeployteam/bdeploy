@@ -172,8 +172,9 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                         if (paramDesc != null
                                 && (paramDesc.type == ParameterType.CLIENT_PORT || paramDesc.type == ParameterType.SERVER_PORT)) {
                             try {
+                                // FIXME: param.value might need processing for linkExpression! this was broken before.
                                 result.add(new NodePort(node.nodeName, config.name, config.uid, paramDesc.type, paramDesc.name,
-                                        Integer.valueOf(param.value)));
+                                        Integer.valueOf(param.value.getPreRenderable())));
                             } catch (NumberFormatException e) {
                                 out().println("Illegal port value configured for " + param.uid + " on application " + config.uid);
                             }

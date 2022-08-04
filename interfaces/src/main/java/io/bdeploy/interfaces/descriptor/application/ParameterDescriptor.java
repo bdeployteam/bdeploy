@@ -8,6 +8,7 @@ import javax.annotation.processing.Generated;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 
 /**
  * Describes a single parameter accepted by an application.
@@ -89,7 +90,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * Default value for the parameter. This value is used as template for
      * configuration UI(s).
      */
-    public String defaultValue = null;
+    public LinkedValueConfiguration defaultValue = null;
 
     /**
      * Whether the parameter should be configured globally (once per deployment,

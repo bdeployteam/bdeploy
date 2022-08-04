@@ -22,7 +22,7 @@ export class PinnedParameterValueComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.ports.activePortStates$.subscribe((a) => {
-      const port = a.find(
+      const port = a?.find(
         (p) =>
           p.appUid === this.record.appUid && p.paramUid === this.record.paramUid
       );

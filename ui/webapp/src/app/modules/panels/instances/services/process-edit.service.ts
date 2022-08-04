@@ -9,6 +9,7 @@ import {
   CommandConfiguration,
   ExecutableDescriptor,
   InstanceNodeConfigurationDto,
+  LinkedValueConfiguration,
   ParameterConditionType,
   ParameterConfiguration,
   ParameterDescriptor,
@@ -20,6 +21,10 @@ import {
   TemplateParameter,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  createLinkedValue,
+  getPreRenderable,
+} from 'src/app/modules/core/utils/linked-values.utils';
 import { expandVar } from 'src/app/modules/core/utils/object.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -204,8 +209,12 @@ export class ProcessEditService {
     );
   }
 
-  public preRenderParameter(desc: ParameterDescriptor, value: any): string[] {
-    const strValue = value === null || value === undefined ? '' : value;
+  public preRenderParameter(
+    desc: ParameterDescriptor,
+    value: LinkedValueConfiguration
+  ): string[] {
+    const lvv = getPreRenderable(value);
+    const strValue = lvv === null || lvv === undefined ? '' : lvv;
 
     if (!desc) {
       // custom parameter;
@@ -244,7 +253,7 @@ export class ProcessEditService {
       return;
     }
 
-    const values: { [key: string]: string } = {};
+    const values: { [key: string]: LinkedValueConfiguration } = {};
     for (const g of globals) {
       const v = process.start.parameters.find((p) => p.uid === g.uid);
       if (v) {
@@ -307,7 +316,9 @@ export class ProcessEditService {
 
         let val = p.defaultValue;
         if (!!tpl && tpl.value !== undefined && tpl.value !== null) {
-          val = this.performVariableSubst(tpl.value, values, status);
+          val = createLinkedValue(
+            this.performVariableSubst(tpl.value, values, status)
+          );
         } else if (p.global) {
           const gp = this.getGlobalParameter(p.uid);
           if (gp) {
@@ -398,7 +409,10 @@ export class ProcessEditService {
       return false;
     }
 
-    const value = depCfg.value;
+    // TODO: expand value as var as possible if expression?
+    const value = depCfg.value.linkExpression
+      ? depCfg.value.linkExpression
+      : depCfg.value.value;
 
     switch (param.condition.must) {
       case ParameterConditionType.EQUAL:

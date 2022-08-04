@@ -4,11 +4,14 @@ import { combineLatest, first, skipWhile, Subscription } from 'rxjs';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import {
   ClientApp,
   ClientsService,
 } from 'src/app/modules/primary/groups/services/clients.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
   selector: 'app-process-ui-inline',
@@ -33,21 +36,32 @@ export class ProcessUiInlineComponent implements OnDestroy {
     cfg: ConfigService,
     nav: NavAreasService,
     groups: GroupsService,
-    sanitizer: DomSanitizer
+    sanitizer: DomSanitizer,
+    instances: InstancesService,
+    systems: SystemsService
   ) {
     this.subscription = combineLatest([
       nav.panelRoute$,
       groups.current$,
       clients.apps$,
+      instances.active$,
+      systems.systems$,
+      instances.activeNodeCfgs$,
     ])
       .pipe(
         skipWhile(
-          ([r, g, a]) =>
-            !r?.params?.endpoint || !r?.params?.app || !g || !a?.length
+          ([r, g, a, i, s, n]) =>
+            !r?.params?.endpoint ||
+            !r?.params?.app ||
+            !g ||
+            !a?.length ||
+            !i ||
+            (i?.instanceConfiguration?.system && !s?.length) ||
+            !n?.nodeConfigDtos?.length
         ),
         first() // only calculate this *ONCE* when all data is there.
       )
-      .subscribe(([route, group, apps]) => {
+      .subscribe(([route, group, apps, instance, systems, nodes]) => {
         if (route.params.returnPanel) {
           let panel: string = route.params.returnPanel;
           if (panel.startsWith('/')) {
@@ -70,11 +84,32 @@ export class ProcessUiInlineComponent implements OnDestroy {
           this.directUri = url;
         });
 
+        const system = systems?.find(
+          (s) => s.key.name === instance?.instanceConfiguration?.system.name
+        );
+        const process = nodes?.nodeConfigDtos
+          ?.map((n) =>
+            n.nodeConfiguration?.applications?.find(
+              (a) => a.uid === this.app.client.uuid
+            )
+          )
+          .find((a) => a);
+
         this.rawUrl = `${cfg.config.api}/master/upx/${group.name}/${
           this.app.instance.uuid
         }/${this.app.endpoint.uuid}/${
           this.app.endpoint.endpoint.id
-        }${this.cpWithSlash(this.app.endpoint.endpoint.contextPath)}`;
+        }${this.cpWithSlash(
+          getRenderPreview(
+            this.app.endpoint.endpoint.contextPath,
+            process,
+            {
+              config: instance?.instanceConfiguration,
+              nodeDtos: nodes.nodeConfigDtos,
+            },
+            system?.config
+          )
+        )}`;
         this.url = sanitizer.bypassSecurityTrustResourceUrl(this.rawUrl);
       });
   }

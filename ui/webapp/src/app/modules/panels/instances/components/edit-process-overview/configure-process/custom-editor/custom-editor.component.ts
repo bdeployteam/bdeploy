@@ -27,6 +27,7 @@ import {
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { EditorPlugin } from 'src/app/modules/core/plugins/plugin.editor';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
+import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
 
@@ -41,7 +42,7 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() dialog: BdDialogComponent;
   @Input() readonly: boolean;
 
-  @Output() valueConfirmed: EventEmitter<any> = new EventEmitter<any>();
+  @Output() valueConfirmed: EventEmitter<string> = new EventEmitter<string>();
   @Output() pluginLoaded: EventEmitter<CustomEditor> =
     new EventEmitter<CustomEditor>();
 
@@ -50,7 +51,7 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
   /* template */ plugin: PluginInfoDto;
   /* template */ error: HttpErrorResponse;
 
-  private currentValue: any;
+  private currentValue: string;
   private valid = false;
   private subscription: Subscription;
 
@@ -94,7 +95,7 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
           setTimeout(() =>
             elem.nativeElement.appendChild(
               this.editor.bind(
-                () => this.value.value,
+                () => getPreRenderable(this.value.value),
                 (v) => (this.currentValue = v),
                 (s) => (this.valid = s)
               )
@@ -117,7 +118,7 @@ export class CustomEditorComponent implements OnInit, OnDestroy, AfterViewInit {
       this.editor = new m.default(
         this.plugins.getApi(this.plugin)
       ) as EditorPlugin;
-      this.currentValue = this.value.value;
+      this.currentValue = getPreRenderable(this.value.value);
 
       this.dialog
         .message({

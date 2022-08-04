@@ -6,7 +6,10 @@
   fxLayout="column"
   fxLayoutGap="5px"
 >
-  <div>Parameter <strong>{{ descriptor.name }}</strong></div>
+  <div>
+    Parameter <strong>{{ descriptor.name }}</strong
+    ><em *ngIf="descriptor.fixed"> (fixed)</em>
+  </div>
   <div
     gdColumns="100px auto"
     gdGap="5px"
@@ -31,11 +34,18 @@
     </div>
     <strong><div>Default Value:</div></strong>
     <div class="local-break">
-      <code
+      <code *ngIf="!!descriptor?.defaultValue?.value; else defaultIsExpression"
         >{{ descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ?
-        '*'.repeat(descriptor?.defaultValue?.length) : descriptor?.defaultValue)
-        : '(none)' }}</code
+        '*'.repeat(descriptor?.defaultValue?.value?.length) :
+        descriptor?.defaultValue?.value) : '(none)' }}</code
       >
+      <ng-template #defaultIsExpression>
+        <code
+          >{{ descriptor?.defaultValue ? (descriptor?.type === 'PASSWORD' ?
+          '*'.repeat(descriptor?.defaultValue?.linkExpression?.length) :
+          descriptor?.defaultValue?.linkExpression) : '(none)' }}</code
+        >
+      </ng-template>
     </div>
     <ng-container *ngIf="!!descriptor.condition?.parameter">
       <strong><div>Condition:</div></strong>

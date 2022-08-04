@@ -135,6 +135,9 @@ public class InstanceImportExportHelper {
         icfg.configTree = cfgId;
         icfg.uuid = uuid;
 
+        // system is explicitly cleared out - will have to be associated later on manually.
+        icfg.system = null;
+
         // if there is an existing instance, re-use the configured target server, name & description, etc. to avoid confusion!
         String rootName = InstanceManifest.getRootName(uuid);
         Optional<Long> latest = target.execute(new ManifestMaxIdOperation().setManifestName(rootName));
@@ -161,6 +164,7 @@ public class InstanceImportExportHelper {
 
             // align redundant copies of certain flags
             nodeCfg.copyRedundantFields(icfg);
+            nodeCfg.mergeVariables(icfg, null); // no system.
             reAssignAppUuids(uuidPool, nodeCfg);
 
             String minionName = node.getKey();

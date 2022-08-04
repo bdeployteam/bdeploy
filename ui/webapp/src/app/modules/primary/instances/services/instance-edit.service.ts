@@ -520,9 +520,9 @@ export class InstanceEditService {
         product: instance.product,
         purpose: instance.purpose,
         uuid: instance.uuid,
-        system: instance.system,
         applications: [],
         controlGroups: [cloneDeep(DEF_CONTROL_GROUP)],
+        variables: {},
       },
     };
   }

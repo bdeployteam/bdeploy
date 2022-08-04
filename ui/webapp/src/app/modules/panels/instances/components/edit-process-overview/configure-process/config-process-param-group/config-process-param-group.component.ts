@@ -24,19 +24,30 @@ import {
   ApplicationConfiguration,
   ApplicationDto,
   CustomEditor,
+  InstanceConfigurationDto,
+  LinkedValueConfiguration,
   ParameterConfiguration,
   ParameterDescriptor,
   ParameterType,
+  SystemConfiguration,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
   ACTION_OK,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
 import {
   BdSearchable,
   SearchService,
 } from 'src/app/modules/core/services/search.service';
+import {
+  createLinkedValue,
+  getPreRenderable,
+  getRenderPreview,
+} from 'src/app/modules/core/utils/linked-values.utils';
+import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
 import { HistoryProcessConfigComponent } from '../../../history-process-config/history-process-config.component';
 
@@ -75,6 +86,10 @@ export class ConfigProcessParamGroupComponent
   /* template */ process: ApplicationConfiguration;
   /* template */ app: ApplicationDto;
 
+  /* template */ instance: InstanceConfigurationDto;
+  /* template */ system: SystemConfiguration;
+  /* template */ linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
+
   @Input() dialog: BdDialogComponent;
 
   @ViewChild(HistoryProcessConfigComponent)
@@ -99,7 +114,9 @@ export class ConfigProcessParamGroupComponent
   constructor(
     public edit: ProcessEditService,
     bop: BreakpointObserver,
-    private searchService: SearchService
+    private searchService: SearchService,
+    systems: SystemsService,
+    instances: InstanceEditService
   ) {
     this.subscription = combineLatest([
       this.edit.process$,
@@ -140,7 +157,7 @@ export class ConfigProcessParamGroupComponent
         if (val) {
           pair.value = val;
           if (pd.type === ParameterType.BOOLEAN) {
-            pair.booleanValue = val.value === 'true';
+            pair.booleanValue = val.value.value === 'true';
           }
         }
       }
@@ -208,6 +225,25 @@ export class ConfigProcessParamGroupComponent
       bop.observe('(max-width: 800px)').subscribe((bs) => {
         this.narrow$.next(bs.matches);
       })
+    );
+
+    this.subscription.add(
+      combineLatest([instances.state$, systems.systems$]).subscribe(
+        ([i, s]) => {
+          this.instance = i?.config;
+
+          if (!i?.config?.config?.system || !s?.length) {
+            this.system = null;
+            return;
+          }
+
+          this.system = s.find(
+            (x) =>
+              x.key.name === i.config.config.system.name &&
+              x.key.tag === i.config.config.system.tag
+          )?.config;
+        }
+      )
     );
 
     this.subscription.add(this.searchService.register(this));
@@ -331,12 +367,13 @@ export class ConfigProcessParamGroupComponent
     param: ParameterPair,
     template: TemplateRef<any>
   ) {
+    // TODO: make sure this is only called when not linkExpression
     const parameters = this.edit.process$.value.start.parameters;
     const paramIndex = parameters.findIndex((p) => p.uid === param.value.uid);
     this.customTemp = {
       predecessor: paramIndex > 0 ? parameters[paramIndex - 1].uid : null,
       uid: param.value.uid,
-      value: param.value.value,
+      value: param.value.value.value,
       isEdit: true,
     };
     this.dialog
@@ -413,7 +450,7 @@ export class ConfigProcessParamGroupComponent
       descriptor: null,
       value: {
         uid: this.customTemp.uid,
-        value: this.customTemp.value,
+        value: createLinkedValue(this.customTemp.value),
         pinned: false,
         preRendered: [],
       },
@@ -447,8 +484,62 @@ export class ConfigProcessParamGroupComponent
     }
   }
 
-  /* template */ doChangeValue(p: ParameterPair, val: any) {
-    p.value.value = val;
+  /* template */ getDefaultAsString(val: LinkedValueConfiguration) {
+    return getPreRenderable(val);
+  }
+
+  /* template */ doChangeParam(
+    p: ParameterPair,
+    val: LinkedValueConfiguration
+  ) {
+    p.value.value.value = val.value;
+    p.value.value.linkExpression = val.linkExpression;
+    this.doPreRender(p);
+
+    // need to make sure we add/remove parameters which meet/don't meet their condition.
+    this.doUpdateConditionals(p);
+  }
+
+  /* template */ doChangeValue(p: ParameterPair, val: string) {
+    let reset = false;
+
+    // check type;
+    if (p.descriptor) {
+      switch (p.descriptor.type) {
+        case ParameterType.BOOLEAN:
+          if (val !== 'true' && val !== 'false') {
+            console.log(
+              `Parameter ${p.descriptor.name} is a boolean, but the value is not true or false, resetting to default.`
+            );
+            reset = true;
+          }
+          break;
+        case ParameterType.NUMERIC:
+        case ParameterType.CLIENT_PORT:
+        case ParameterType.SERVER_PORT:
+          if (isNaN(Number(val))) {
+            console.log(
+              `Parameter ${p.descriptor.name} value is not a number: ${val}, resetting to default.`
+            );
+            reset = true;
+          }
+          break;
+      }
+    }
+
+    if (reset) {
+      p.value.value = p.descriptor.defaultValue; // descriptor cannot be null;
+    } else {
+      p.value.value = { value: val, linkExpression: null };
+    }
+    this.doPreRender(p);
+
+    // need to make sure we add/remove parameters which meet/don't meet their condition.
+    this.doUpdateConditionals(p);
+  }
+
+  /* template */ doChangeLink(p: ParameterPair, val: string) {
+    p.value.value = { value: null, linkExpression: val ? val : '' };
     this.doPreRender(p);
 
     // need to make sure we add/remove parameters which meet/don't meet their condition.
@@ -486,7 +577,7 @@ export class ConfigProcessParamGroupComponent
   }
 
   /* template */ doPreRenderBoolean(p: ParameterPair) {
-    p.value.value = !p.booleanValue ? 'false' : 'true';
+    p.value.value = createLinkedValue(!p.booleanValue ? 'false' : 'true');
     this.doPreRender(p);
 
     this.doUpdateConditionals(p);
@@ -593,5 +684,44 @@ export class ConfigProcessParamGroupComponent
 
       return ida.localeCompare(idb);
     });
+  }
+
+  /* template */ makeValueLink(p: ParameterPair) {
+    if (p.descriptor?.type === ParameterType.PASSWORD) {
+      this.doChangeLink(p, ''); // DON'T ever apply a password to the plain text editor, rather clear it.
+    }
+    this.doChangeLink(p, p.value?.value?.value);
+  }
+
+  /* template */ makeValuePlain(p: ParameterPair) {
+    if (p.descriptor?.type === ParameterType.PASSWORD) {
+      this.doChangeValue(p, '');
+      return;
+    }
+
+    if (p.value?.value?.linkExpression?.indexOf('{{') >= 0) {
+      this.doChangeValue(
+        p,
+        getRenderPreview(
+          p.value.value,
+          this.process,
+          this.instance,
+          this.system
+        )
+      );
+    } else {
+      this.doChangeValue(p, p.value?.value?.linkExpression);
+    }
+  }
+
+  /* template */ isLink(p: ParameterPair) {
+    return (
+      p.value?.value?.linkExpression !== null &&
+      p.value?.value?.linkExpression !== undefined
+    );
+  }
+
+  /* template */ appendLink(p: ParameterPair, v: string) {
+    this.doChangeLink(p, p.value?.value?.linkExpression + v);
   }
 }

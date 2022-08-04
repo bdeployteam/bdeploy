@@ -61,6 +61,7 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
@@ -69,6 +70,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
@@ -364,6 +366,12 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         builder.setInstanceConfiguration(config);
         builder.setKey(target);
 
+        // load system if we have one.
+        SystemConfiguration system = null;
+        if (config.system != null) {
+            system = SystemManifest.of(hive, config.system).getConfiguration();
+        }
+
         for (Entry<String, InstanceNodeConfiguration> entry : nodes.entrySet()) {
             InstanceNodeConfiguration inc = entry.getValue();
             if (inc == null) {
@@ -377,6 +385,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
 
             inc.copyRedundantFields(config);
+            inc.mergeVariables(config, system);
 
             // make sure every application has an ID. NEW applications might have a null ID
             // to be filled out.

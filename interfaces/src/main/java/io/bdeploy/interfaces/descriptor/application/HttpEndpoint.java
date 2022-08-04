@@ -1,6 +1,10 @@
 package io.bdeploy.interfaces.descriptor.application;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
+
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 
 public class HttpEndpoint {
 
@@ -40,19 +44,22 @@ public class HttpEndpoint {
      * Using contextPath instead of path can be important to applications which use relative paths to resolve additional
      * resources.
      */
-    public String contextPath;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration contextPath = new LinkedValueConfiguration(null);
 
     /**
      * The port running the service. This is usually a reference to a configuration parameter of the hosting application
      * <p>
      * This is a candidate for <b>actual</b> configuration on the application, right now this cannot be configured
      */
-    public String port;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration port = new LinkedValueConfiguration(null);
 
     /**
      * Use HTTPS to connect
      */
-    public boolean secure = false;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration secure = new LinkedValueConfiguration("false");
 
     /**
      * Trust all HTTPS certificates
@@ -64,12 +71,14 @@ public class HttpEndpoint {
      * <p>
      * The trust store must be in JKS format
      */
-    public String trustStore;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration trustStore = new LinkedValueConfiguration(null);
 
     /**
      * Password for the trust store.
      */
-    public String trustStorePass;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration trustStorePass = new LinkedValueConfiguration(null);
 
     /**
      * The authentication type to use when performing the request
@@ -79,12 +88,14 @@ public class HttpEndpoint {
     /**
      * The user to use to perform authentication of any request
      */
-    public String authUser;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration authUser = new LinkedValueConfiguration(null);
 
     /**
      * The password to use to perform authentication of any request
      */
-    public String authPass;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration authPass = new LinkedValueConfiguration(null);
 
     /**
      * The type of the endpoint.

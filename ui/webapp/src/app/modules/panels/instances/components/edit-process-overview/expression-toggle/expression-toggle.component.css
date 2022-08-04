@@ -1,0 +1,25 @@
+.local-toggle-group {
+  height: 21px;
+}
+
+.local-toggle-group .mat-button-toggle-label-content {
+  padding: 2px 5px !important;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.local-toggle-group
+  .mat-button-toggle-checked:not(.mat-button-toggle-disabled) {
+  background-color: var(--bd-accent);
+  color: var(--bd-accent-contrast) !important;
+}
+
+.local-toggle-group mat-icon {
+  font-size: 16px !important;
+  width: 16px;
+  height: 16px;
+}

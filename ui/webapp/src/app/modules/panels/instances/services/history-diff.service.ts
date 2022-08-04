@@ -15,6 +15,7 @@ import {
   ParameterType,
   ProcessControlConfiguration,
 } from 'src/app/models/gen.dtos';
+import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 
 /** The type of a difference, typically propagated from simple attributes to complex diffs. */
@@ -69,7 +70,11 @@ export class Difference {
   /** The type of difference to render */
   public type: DiffType;
 
-  constructor(private base: any, private compare: any, valueOverride?: any) {
+  constructor(
+    private base: string | number | boolean,
+    private compare: string | number | boolean,
+    valueOverride?: any
+  ) {
     this.value = valueOverride
       ? valueOverride
       : base === null || base === undefined
@@ -169,12 +174,14 @@ export class ParameterDiff {
     public descriptor: ParameterDescriptor
   ) {
     // in case we KNOW this is a PASSWORD parameter, we want to pre-mask the value in each actual value.
-    const maskingValue =
+    const maskingLV =
       descriptor?.type === ParameterType.PASSWORD
         ? base?.value === null || base?.value === undefined
           ? compare?.value
           : base.value
         : null;
+
+    const maskingValue = getPreRenderable(maskingLV);
 
     if (base?.preRendered?.length) {
       if (base.preRendered.length !== compare?.preRendered?.length) {
@@ -183,7 +190,9 @@ export class ParameterDiff {
           const masked = maskingValue
             ? val.replace(maskingValue, '*'.repeat(maskingValue.length))
             : val;
-          this.values.push(new Difference(val, compare?.value, masked));
+          this.values.push(
+            new Difference(val, getPreRenderable(compare?.value), masked)
+          );
         }
       } else {
         for (let i = 0; i < base.preRendered.length; ++i) {
@@ -259,17 +268,32 @@ export class HttpEndpointDiff {
 
   constructor(base: HttpEndpoint, compare: HttpEndpoint) {
     this.path = new Difference(base?.path, compare?.path);
-    this.port = new Difference(base?.port, compare?.port);
-    this.secure = new Difference(base?.secure, compare?.secure);
+    this.port = new Difference(
+      getPreRenderable(base?.port),
+      getPreRenderable(compare?.port)
+    );
+    this.secure = new Difference(
+      getPreRenderable(base?.secure),
+      getPreRenderable(compare?.secure)
+    );
     this.trustAll = new Difference(base?.trustAll, compare?.trustAll);
-    this.trustStore = new Difference(base?.trustStore, compare?.trustStore);
+    this.trustStore = new Difference(
+      getPreRenderable(base?.trustStore),
+      getPreRenderable(compare?.trustStore)
+    );
     this.trustStorePass = new Difference(
-      base?.trustStorePass,
-      compare?.trustStorePass
+      getPreRenderable(base?.trustStorePass),
+      getPreRenderable(compare?.trustStorePass)
     );
     this.authType = new Difference(base?.authType, compare?.authType);
-    this.authUser = new Difference(base?.authUser, compare?.authUser);
-    this.authPass = new Difference(base?.authPass, compare?.authPass);
+    this.authUser = new Difference(
+      getPreRenderable(base?.authUser),
+      getPreRenderable(compare?.authUser)
+    );
+    this.authPass = new Difference(
+      getPreRenderable(base?.authPass),
+      getPreRenderable(compare?.authPass)
+    );
 
     this.type = getParentChangeType(
       base,

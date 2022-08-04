@@ -30,6 +30,7 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -138,7 +139,7 @@ class SpecialManifestsTest {
 
             ParameterConfiguration pcfg = new ParameterConfiguration();
             pcfg.uid = "--param2";
-            pcfg.value = "TestValue";
+            pcfg.value = new LinkedValueConfiguration("TestValue");
             appCfg.start.parameters.add(pcfg);
 
             InstanceNodeConfiguration cfg = new InstanceNodeConfiguration();

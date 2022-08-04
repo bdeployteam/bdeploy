@@ -31,8 +31,10 @@
             <div class="bd-default-padding">
               Endpoint
               <strong
-                >{{ endpoint.id }} - {{ endpoint.path }} {{ endpoint.contextPath
-                ? ('(' + endpoint.contextPath + ')') : '' }}</strong
+                >{{ endpoint.id }} - {{ endpoint.path }} {{
+                endpoint.contextPath.value ? ('(' + endpoint.contextPath.value +
+                ')') : '' }}{{ endpoint.contextPath.linkExpression ? ('(' +
+                endpoint.contextPath.linkExpression + ')') : '' }}</strong
               >
             </div>
             <div fxFlex="1 0 auto"></div>
@@ -42,65 +44,277 @@
           </div>
           <div class="bd-default-padding">
             <div>
+              <ng-template #popupLink>
+                <app-config-process-link-expression
+                  [process]="process"
+                  [instance]="instance"
+                  [system]="system"
+                  [popup]="linkEditorPopup$ | async"
+                  (linkSelected)="appendLink($event)"
+                ></app-config-process-link-expression>
+              </ng-template>
               <div
                 [style.padding-top.px]="20"
                 gdColumns.sm="100%"
                 [gdColumns.gt-sm]="'calc(50% - 5px) calc(50% - 5px)'"
                 gdGap="5px 10px"
               >
+                <ng-template #linkTogglePort>
+                  <app-expression-toggle
+                    [link]="isLink(endpoint.port)"
+                    (linkChanged)="toggleLink(endpoint.port, $event, false)"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-input
-                  name="epPort{{ i }}"
-                  label="Port"
-                  [(ngModel)]="endpoint.port"
+                  [name]="'epPort'+ i + (isLink(endpoint.port) ? 'l' : 'p')"
+                  [label]="'Port' + (isLink(endpoint.port) ? ' (Link Expression)' : '')"
+                  [ngModel]="isLink(endpoint.port) ? endpoint.port.linkExpression : endpoint.port.value"
+                  (ngModelChange)="isLink(endpoint.port)? endpoint.port.linkExpression = $event : endpoint.port.value = $event"
                   required
-                ></app-bd-form-input>
+                  errorDisplay="immediate"
+                  [prefix]="linkTogglePort"
+                  [appLinkExpressionInputValidator]="isLink(endpoint.port)"
+                  [appLinkExpressionInputValidatorProcess]="process"
+                  [appLinkExpressionInputValidatorInstance]="instance"
+                  [appLinkExpressionInputValidatorSystem]="system"
+                  [appLinkExpressionInputValidatorType]="TYPE_PORT"
+                >
+                  <div fxLayout="row">
+                    <mat-icon
+                      *ngIf="isLink(endpoint.port)"
+                      [appBdPopup]="popupLink"
+                      appBdPopupTrigger="click"
+                      (appBdPopupOpened)="linkEditorPopup$.next($event); currentInput = endpoint.port"
+                      [style.cursor]="'pointer'"
+                      matTooltip="Insert Link"
+                      matTooltipShowDelay="1000"
+                      appClickStopPropagation
+                      >data_object</mat-icon
+                    >
+                  </div>
+                </app-bd-form-input>
+
+                <ng-template #linkToggleAuthType>
+                  <app-expression-toggle
+                    [style.opacity]="'0.3'"
+                    [link]="false"
+                    [disabled]="true"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-select
                   name="epAuthType{{ i }}"
                   label="Authentication"
                   [(ngModel)]="endpoint.authType"
                   [values]="authTypeValues"
                   [labels]="authTypeLabels"
+                  [prefix]="linkToggleAuthType"
                 ></app-bd-form-select>
+
+                <ng-template #linkToggleUser>
+                  <app-expression-toggle
+                    [link]="isLink(endpoint.authUser)"
+                    (linkChanged)="toggleLink(endpoint.authUser, $event, false)"
+                    [disabled]="endpoint.authType === 'NONE'"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-input
-                  name="epUser{{ i }}"
-                  label="User"
-                  [(ngModel)]="endpoint.authUser"
+                  [name]="'epUser'+ i + (isLink(endpoint.authUser) ? 'l' : 'p')"
+                  [label]="'User' + (isLink(endpoint.authUser) ? ' (Link Expression)' : '')"
+                  [ngModel]="isLink(endpoint.authUser) ? endpoint.authUser.linkExpression : endpoint.authUser.value"
+                  (ngModelChange)="isLink(endpoint.authUser)? endpoint.authUser.linkExpression = $event : endpoint.authUser.value = $event"
+                  errorDisplay="immediate"
+                  [prefix]="linkToggleUser"
+                  [appLinkExpressionInputValidator]="isLink(endpoint.authUser)"
+                  [appLinkExpressionInputValidatorProcess]="process"
+                  [appLinkExpressionInputValidatorInstance]="instance"
+                  [appLinkExpressionInputValidatorSystem]="system"
+                  [appLinkExpressionInputValidatorType]="TYPE_STRING"
                   [disabled]="endpoint.authType === 'NONE'"
                   [required]="endpoint.authType !== 'NONE'"
-                ></app-bd-form-input>
+                >
+                  <div fxLayout="row">
+                    <mat-icon
+                      *ngIf="isLink(endpoint.authUser)"
+                      [appBdPopup]="popupLink"
+                      appBdPopupTrigger="click"
+                      (appBdPopupOpened)="linkEditorPopup$.next($event); currentInput = endpoint.authUser"
+                      [style.cursor]="'pointer'"
+                      matTooltip="Insert Link"
+                      matTooltipShowDelay="1000"
+                      appClickStopPropagation
+                      >data_object</mat-icon
+                    >
+                  </div>
+                </app-bd-form-input>
+
+                <ng-template #linkTogglePass>
+                  <app-expression-toggle
+                    [link]="isLink(endpoint.authPass)"
+                    (linkChanged)="toggleLink(endpoint.authPass, $event, true)"
+                    [disabled]="endpoint.authType === 'NONE'"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-input
-                  name="epPass{{ i }}"
-                  label="Password"
-                  [(ngModel)]="endpoint.authPass"
+                  [name]="'epPass'+ i + (isLink(endpoint.authPass) ? 'l' : 'p')"
+                  [label]="'Password' + (isLink(endpoint.authPass) ? ' (Link Expression)' : '')"
+                  [ngModel]="isLink(endpoint.authPass) ? endpoint.authPass.linkExpression : endpoint.authPass.value"
+                  (ngModelChange)="isLink(endpoint.authPass)? endpoint.authPass.linkExpression = $event : endpoint.authPass.value = $event"
+                  errorDisplay="immediate"
+                  [type]="isLink(endpoint.authPass) ? undefined : 'password'"
+                  [prefix]="linkTogglePass"
+                  [appLinkExpressionInputValidator]="isLink(endpoint.authPass)"
+                  [appLinkExpressionInputValidatorProcess]="process"
+                  [appLinkExpressionInputValidatorInstance]="instance"
+                  [appLinkExpressionInputValidatorSystem]="system"
+                  [appLinkExpressionInputValidatorType]="TYPE_STRING"
                   [disabled]="endpoint.authType === 'NONE'"
                   [required]="endpoint.authType !== 'NONE'"
-                  type="password"
-                ></app-bd-form-input>
+                >
+                  <div fxLayout="row">
+                    <mat-icon
+                      *ngIf="isLink(endpoint.authPass)"
+                      [appBdPopup]="popupLink"
+                      appBdPopupTrigger="click"
+                      (appBdPopupOpened)="linkEditorPopup$.next($event); currentInput = endpoint.authPass"
+                      [style.cursor]="'pointer'"
+                      matTooltip="Insert Link"
+                      matTooltipShowDelay="1000"
+                      appClickStopPropagation
+                      >data_object</mat-icon
+                    >
+                  </div>
+                </app-bd-form-input>
+
+                <ng-template #linkToggleSecure>
+                  <app-expression-toggle
+                    [link]="isLink(endpoint.secure)"
+                    (linkChanged)="toggleLink(endpoint.secure, $event, false)"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-toggle
-                  name="epSecure{{ i }}"
+                  *ngIf="!isLink(endpoint.secure)"
+                  name="epSecure{{ i }}p"
                   label="Secure (Use HTTPS)"
-                  [(ngModel)]="endpoint.secure"
+                  [ngModel]="endpoint.secure.value === 'true' ? true : false"
+                  (ngModelChange)="endpoint.secure.value = $event === true ? 'true' : 'false'"
+                  [prefix]="linkToggleSecure"
                 ></app-bd-form-toggle>
+                <app-bd-form-input
+                  *ngIf="isLink(endpoint.secure)"
+                  name="epSecure{{ i }}l"
+                  label="Secure (Use HTTPS) (Link Expression)"
+                  [(ngModel)]="endpoint.secure.linkExpression"
+                  errorDisplay="immediate"
+                  [prefix]="linkToggleSecure"
+                  [appLinkExpressionInputValidator]="true"
+                  [appLinkExpressionInputValidatorProcess]="process"
+                  [appLinkExpressionInputValidatorInstance]="instance"
+                  [appLinkExpressionInputValidatorSystem]="system"
+                  [appLinkExpressionInputValidatorType]="TYPE_BOOLEAN"
+                >
+                  <div fxLayout="row">
+                    <mat-icon
+                      *ngIf="isLink(endpoint.secure)"
+                      [appBdPopup]="popupLink"
+                      appBdPopupTrigger="click"
+                      (appBdPopupOpened)="linkEditorPopup$.next($event); currentInput = endpoint.secure"
+                      [style.cursor]="'pointer'"
+                      matTooltip="Insert Link"
+                      matTooltipShowDelay="1000"
+                      appClickStopPropagation
+                      >data_object</mat-icon
+                    >
+                  </div>
+                </app-bd-form-input>
+
+                <ng-template #linkToggleTrust>
+                  <app-expression-toggle
+                    [style.opacity]="'0.3'"
+                    [link]="false"
+                    [disabled]="true"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-toggle
                   name="epTrustAll{{ i }}"
                   label="Trust All Certificates"
                   [(ngModel)]="endpoint.trustAll"
+                  [prefix]="linkToggleTrust"
                 ></app-bd-form-toggle>
+
+                <ng-template #linkToggleTsPath>
+                  <app-expression-toggle
+                    [link]="isLink(endpoint.trustStore)"
+                    (linkChanged)="toggleLink(endpoint.trustStore, $event, false)"
+                    [disabled]="!isSecure(endpoint) || endpoint.trustAll"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-input
-                  name="tsPath{{ i }}"
-                  label="Trust Store Path"
-                  [(ngModel)]="endpoint.trustStore"
-                  [disabled]="!endpoint.secure || endpoint.trustAll"
-                  [required]="endpoint.secure && !endpoint.trustAll"
-                ></app-bd-form-input>
+                  [name]="'tsPath'+ i + (isLink(endpoint.trustStore) ? 'l' : 'p')"
+                  [label]="'Trust Store Path' + (isLink(endpoint.trustStore) ? ' (Link Expression)' : '')"
+                  [ngModel]="isLink(endpoint.trustStore) ? endpoint.trustStore.linkExpression : endpoint.trustStore.value"
+                  (ngModelChange)="isLink(endpoint.trustStore)? endpoint.trustStore.linkExpression = $event : endpoint.trustStore.value = $event"
+                  errorDisplay="immediate"
+                  [prefix]="linkToggleTsPath"
+                  [appLinkExpressionInputValidator]="isLink(endpoint.trustStore)"
+                  [appLinkExpressionInputValidatorProcess]="process"
+                  [appLinkExpressionInputValidatorInstance]="instance"
+                  [appLinkExpressionInputValidatorSystem]="system"
+                  [appLinkExpressionInputValidatorType]="TYPE_STRING"
+                  [disabled]="!isSecure(endpoint) || endpoint.trustAll"
+                  [required]="isSecure(endpoint) && !endpoint.trustAll"
+                >
+                  <div fxLayout="row">
+                    <mat-icon
+                      *ngIf="isLink(endpoint.trustStore)"
+                      [appBdPopup]="popupLink"
+                      appBdPopupTrigger="click"
+                      (appBdPopupOpened)="linkEditorPopup$.next($event); currentInput = endpoint.trustStore"
+                      [style.cursor]="'pointer'"
+                      matTooltip="Insert Link"
+                      matTooltipShowDelay="1000"
+                      appClickStopPropagation
+                      >data_object</mat-icon
+                    >
+                  </div>
+                </app-bd-form-input>
+
+                <ng-template #linkToggleTsPass>
+                  <app-expression-toggle
+                    [link]="isLink(endpoint.trustStorePass)"
+                    (linkChanged)="toggleLink(endpoint.trustStorePass, $event, true)"
+                    [disabled]="!isSecure(endpoint) || endpoint.trustAll"
+                  ></app-expression-toggle>
+                </ng-template>
                 <app-bd-form-input
-                  name="tsPass{{ i }}"
-                  label="Trust Store Password"
-                  [(ngModel)]="endpoint.trustStorePass"
-                  [disabled]="!endpoint.secure || endpoint.trustAll"
-                  [required]="endpoint.secure && !endpoint.trustAll"
-                  type="password"
-                ></app-bd-form-input>
+                  [name]="'tsPass'+ i + (isLink(endpoint.trustStorePass) ? 'l' : 'p')"
+                  [label]="'Trust Store Password' + (isLink(endpoint.trustStorePass) ? ' (Link Expression)' : '')"
+                  [ngModel]="isLink(endpoint.trustStorePass) ? endpoint.trustStorePass.linkExpression : endpoint.trustStorePass.value"
+                  (ngModelChange)="isLink(endpoint.trustStorePass)? endpoint.trustStorePass.linkExpression = $event : endpoint.trustStorePass.value = $event"
+                  errorDisplay="immediate"
+                  [type]="isLink(endpoint.trustStorePass) ? undefined : 'password'"
+                  [prefix]="linkToggleTsPass"
+                  [appLinkExpressionInputValidator]="isLink(endpoint.trustStorePass)"
+                  [appLinkExpressionInputValidatorProcess]="process"
+                  [appLinkExpressionInputValidatorInstance]="instance"
+                  [appLinkExpressionInputValidatorSystem]="system"
+                  [appLinkExpressionInputValidatorType]="TYPE_STRING"
+                  [disabled]="!isSecure(endpoint) || endpoint.trustAll"
+                  [required]="isSecure(endpoint) && !endpoint.trustAll"
+                >
+                  <div fxLayout="row">
+                    <mat-icon
+                      *ngIf="isLink(endpoint.trustStorePass)"
+                      [appBdPopup]="popupLink"
+                      appBdPopupTrigger="click"
+                      (appBdPopupOpened)="linkEditorPopup$.next($event); currentInput = endpoint.trustStorePass"
+                      [style.cursor]="'pointer'"
+                      matTooltip="Insert Link"
+                      matTooltipShowDelay="1000"
+                      appClickStopPropagation
+                      >data_object</mat-icon
+                    >
+                  </div>
+                </app-bd-form-input>
               </div>
             </div>
           </div>

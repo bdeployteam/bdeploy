@@ -91,6 +91,7 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
@@ -886,6 +887,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // General resolvers
         CompositeResolver resolvers = new CompositeResolver();
+        resolvers.add(new InstanceAndSystemVariableResolver(clientCfg.instanceConfig));
         resolvers.add(new ApplicationVariableResolver(appCfg));
         resolvers.add(new DelayedVariableResolver(resolvers));
         resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, pathProvider, clientCfg.activeTag));

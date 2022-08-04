@@ -20,10 +20,12 @@ import {
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
 import { PinnedParameterValueComponent } from './pinned-parameter-value/pinned-parameter-value.component';
 
@@ -93,7 +95,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     public instances: InstancesService,
     public servers: ServersService,
     private cfg: ConfigService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private systems: SystemsService
   ) {}
 
   ngOnInit(): void {
@@ -102,7 +105,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.details.processConfig$,
       this.instances.active$,
       this.instances.activeNodeCfgs$,
-    ]).subscribe(([detail, config, active, nodes]) => {
+      this.systems.systems$,
+    ]).subscribe(([detail, config, active, nodes, systems]) => {
       this.clearIntervals();
       this.outdated$.next(false);
       this.processConfig = config;
@@ -116,6 +120,9 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
           a.key.tag === config?.application?.tag
       );
       if (app) {
+        const system = systems?.find(
+          (s) => s.key.name === active?.instanceConfiguration?.system?.name
+        );
         this.pinnedParameters = config.start.parameters
           .filter((p) => p.pinned)
           .map((p) => {
@@ -126,7 +133,15 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
               appUid: config.uid,
               paramUid: p.uid,
               name: desc.name,
-              value: p.value,
+              value: getRenderPreview(
+                p.value,
+                config,
+                {
+                  config: active.instanceConfiguration,
+                  nodeDtos: nodes?.nodeConfigDtos,
+                },
+                system?.config
+              ),
               type: desc.type,
             };
           });

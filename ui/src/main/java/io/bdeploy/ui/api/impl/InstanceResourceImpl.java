@@ -72,6 +72,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
+import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.EntryChunk;
@@ -82,6 +83,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
@@ -103,6 +105,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
@@ -762,7 +765,12 @@ public class InstanceResourceImpl implements InstanceResource {
         ProductManifest pm = ProductManifest.of(hive, state.config.config.product);
         List<ApplicationManifest> am = pm.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).toList();
 
-        return pus.validate(state, am);
+        SystemConfiguration system = null;
+        if (state.config.config.system != null) {
+            system = SystemManifest.of(hive, state.config.config.system).getConfiguration();
+        }
+
+        return pus.validate(state, am, system);
     }
 
     @Override
@@ -1260,11 +1268,12 @@ public class InstanceResourceImpl implements InstanceResource {
 
         // note that we cannot resolve deployment paths here, but this *should* not matter for calculating a URI.
         CompositeResolver list = new CompositeResolver();
+        list.add(new InstanceAndSystemVariableResolver(ic));
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.uid, ic));
 
         HttpEndpoint processed = CommonEndpointHelper.processEndpoint(list, ep.get());
-        return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath);
+        return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath.getPreRenderable());
     }
 
 }

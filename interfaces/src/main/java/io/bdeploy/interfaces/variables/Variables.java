@@ -39,6 +39,11 @@ public enum Variables {
     APP_VALUE("A:"),
 
     /**
+     * A value which is provided by system or instance variables.
+     */
+    SYSTEM_INSTANCE_VARIABLE("X:"),
+
+    /**
      * References an environmental variable of the operating system. The value
      * is the name of the variable as present in the OS.
      */

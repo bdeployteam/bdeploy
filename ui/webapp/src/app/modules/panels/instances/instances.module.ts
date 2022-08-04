@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
@@ -8,7 +9,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatTreeModule } from '@angular/material/tree';
 import { CoreModule } from '../../core/core.module';
 import { InstancesModule as PrimaryInstancesModule } from '../../primary/instances/instances.module';
@@ -26,12 +29,14 @@ import { DataFileEditorComponent } from './components/data-file-editor/data-file
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { DataFilesBulkManipulationComponent } from './components/data-files-buld-maipulation/data-files-bulk-manipulation.component';
 import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
+import { ConfigProcessLinkExpressionComponent } from './components/edit-process-overview/config-process-link-expression/config-process-link-expression.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigProcessHeaderComponent } from './components/edit-process-overview/configure-process/config-process-header/config-process-header.component';
 import { ConfigProcessParamGroupComponent } from './components/edit-process-overview/configure-process/config-process-param-group/config-process-param-group.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
 import { CustomEditorComponent } from './components/edit-process-overview/configure-process/custom-editor/custom-editor.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
+import { ExpressionToggleComponent } from './components/edit-process-overview/expression-toggle/expression-toggle.component';
 import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
 import { HistoryCompareSelectComponent } from './components/history-compare-select/history-compare-select.component';
 import { HistoryCompareComponent } from './components/history-compare/history-compare.component';
@@ -56,6 +61,7 @@ import { ImportInstanceComponent } from './components/instance-settings/import-i
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
 import { InstanceTemplatesComponent } from './components/instance-settings/instance-templates/instance-templates.component';
 import { TemplateMessageDetailsComponent } from './components/instance-settings/instance-templates/template-message-details/template-message-details.component';
+import { InstanceVariablesComponent } from './components/instance-settings/instance-variables/instance-variables.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
 import { PortShiftComponent } from './components/instance-settings/ports/port-shift/port-shift.component';
 import { PortsComponent } from './components/instance-settings/ports/ports.component';
@@ -78,7 +84,7 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { InstanceVariablesComponent } from './components/instance-settings/instance-variables/instance-variables.component';
+import { LinkExpressionInputValidatorDirective } from './validators/link-expression-input-validator.directive';
 
 @NgModule({
   declarations: [
@@ -149,6 +155,9 @@ import { InstanceVariablesComponent } from './components/instance-settings/insta
     CustomNodeFilterPipe,
     PinnedParameterValueComponent,
     InstanceVariablesComponent,
+    ConfigProcessLinkExpressionComponent,
+    LinkExpressionInputValidatorDirective,
+    ExpressionToggleComponent,
   ],
   imports: [
     CommonModule,
@@ -165,6 +174,9 @@ import { InstanceVariablesComponent } from './components/instance-settings/insta
     MatStepperModule,
     MatTreeModule,
     MatButtonModule,
+    MatRadioModule,
+    MatTabsModule,
+    MatButtonToggleModule,
   ],
 })
 export class InstancesModule {}

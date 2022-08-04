@@ -3,10 +3,15 @@ import {
   Input,
   Optional,
   Self,
+  TemplateRef,
   Type,
   ViewEncapsulation,
 } from '@angular/core';
-import { ControlValueAccessor, UntypedFormControl, NgControl } from '@angular/forms';
+import {
+  ControlValueAccessor,
+  NgControl,
+  UntypedFormControl,
+} from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
 
@@ -28,6 +33,7 @@ export class BdFormSelectComponent
   @Input() allowNone = false;
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
   @Input() component: Type<any>;
+  @Input() prefix: TemplateRef<any>;
 
   /* template */ get value() {
     return this.internalValue;

@@ -7,6 +7,7 @@ import {
   InstanceConfiguration,
   InstancePurpose,
   ManagedMasterDto,
+  ManifestKey,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -16,6 +17,7 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 interface ProductRow {
   id: string;
@@ -51,6 +53,10 @@ export class AddInstanceComponent
   /* template */ productNames: string[] = [];
   /* template */ serverNames: string[] = [];
 
+  /* template */ systemKeys: ManifestKey[];
+  /* template */ systemLabels: string[];
+  /* template */ systemSel: ManifestKey;
+
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
@@ -61,6 +67,7 @@ export class AddInstanceComponent
     private areas: NavAreasService,
     public servers: ServersService,
     public cfg: ConfigService,
+    public systems: SystemsService,
     private router: Router
   ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
@@ -116,6 +123,18 @@ export class AddInstanceComponent
         );
       })
     );
+
+    this.subscription.add(
+      this.systems.systems$.subscribe((s) => {
+        if (!s?.length) {
+          return;
+        }
+        this.systemKeys = s.map((s) => s.key);
+        this.systemLabels = s.map(
+          (s) => `${s.config.name} (${s.config.description})`
+        );
+      })
+    );
   }
 
   isDirty(): boolean {
@@ -152,5 +171,9 @@ export class AddInstanceComponent
   /* template */ updateProduct() {
     this.config.product.name = this.selectedProduct.id;
     this.config.product.tag = null;
+  }
+
+  /* template */ onSystemChange(value: ManifestKey) {
+    this.config.system = value;
   }
 }

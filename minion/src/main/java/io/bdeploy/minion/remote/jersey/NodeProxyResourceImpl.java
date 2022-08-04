@@ -32,6 +32,7 @@ import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.minion.MinionRoot;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
@@ -79,6 +80,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
                 .filter(a -> a.uid.equals(wrapper.applicationId)).findFirst().orElseThrow();
 
         CompositeResolver list = new CompositeResolver();
+        list.add(new InstanceAndSystemVariableResolver(inm.getConfiguration()));
         list.add(new DeploymentPathResolver(dpp));
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.uid, inm.getConfiguration()));

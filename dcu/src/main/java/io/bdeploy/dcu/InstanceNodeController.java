@@ -52,6 +52,7 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
@@ -95,6 +96,7 @@ public class InstanceNodeController {
 
         // Setup default resolvers for this node
         InstanceNodeConfiguration config = manifest.getConfiguration();
+        this.resolvers.add(new InstanceAndSystemVariableResolver(manifest.getConfiguration()));
         this.resolvers.add(new InstanceVariableResolver(config, paths, manifest.getKey().getTag()));
         this.resolvers.add(new DelayedVariableResolver(resolvers));
         this.resolvers.add(new OsVariableResolver());

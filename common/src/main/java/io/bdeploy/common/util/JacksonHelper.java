@@ -14,9 +14,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class JacksonHelper {
 
-    private static final ObjectMapper JSON_MAPPER = createObjectMapper((JsonFactory) null);
-    private static final ObjectMapper YAML_MAPPER = createObjectMapper(new YAMLFactory());
-
     public enum MapperType {
         JSON,
         YAML
@@ -51,9 +48,9 @@ public class JacksonHelper {
 
     public static ObjectMapper createObjectMapper(MapperType type) {
         if (type == MapperType.JSON) {
-            return JSON_MAPPER;
+            return createObjectMapper((JsonFactory) null);
         } else {
-            return YAML_MAPPER;
+            return createObjectMapper(new YAMLFactory());
         }
     }
 

@@ -2,6 +2,7 @@ package io.bdeploy.pcu;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointType;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
@@ -38,8 +39,8 @@ public class StartupProbe {
         probe.id = "startup";
         probe.type = HttpEndpointType.PROBE_STARTUP;
         probe.path = "/api/startup";
-        probe.port = Integer.toString(server.getPort());
-        probe.secure = true;
+        probe.port = new LinkedValueConfiguration(Integer.toString(server.getPort()));
+        probe.secure = new LinkedValueConfiguration("true");
         probe.trustAll = true;
         return probe;
     }
