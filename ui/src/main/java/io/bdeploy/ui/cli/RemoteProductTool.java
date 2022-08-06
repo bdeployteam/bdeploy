@@ -134,11 +134,10 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
     }
 
     private DataResult copy(RemoteService remote, ProductConfig config) {
-
         ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getProductResource(config.instanceGroup());
         Manifest.Key pkey = Manifest.Key.parse(config.product());
-        pr.copyProduct(config.repository(), pkey.getName() + "/product", pkey.getTag());
+        pr.copyProduct(config.repository(), pkey.getName() + "/product", List.of(pkey.getTag()));
 
         return createSuccess();
     }

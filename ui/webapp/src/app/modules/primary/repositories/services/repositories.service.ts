@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
 import {
   ObjectChangeDetails,
@@ -30,9 +30,8 @@ export class RepositoriesService {
   loading$ = new BehaviorSubject<boolean>(true);
 
   /** All software repositories */
-  repositories$ = new BehaviorSubject<SoftwareRepositoryConfiguration[]>(
-    INIT_REPOSITORIES
-  );
+  repositories$ = new ReplaySubject<SoftwareRepositoryConfiguration[]>(1);
+  currentRepositores: SoftwareRepositoryConfiguration[] = INIT_REPOSITORIES;
 
   /** The *current* repository based on the current route context */
   current$ = new BehaviorSubject<SoftwareRepositoryConfiguration>(null);
@@ -45,6 +44,7 @@ export class RepositoriesService {
     private snackbar: MatSnackBar,
     private router: Router
   ) {
+    this.repositories$.subscribe((repos) => (this.currentRepositores = repos));
     this.areas.repositoryContext$.subscribe((r) => this.setCurrent(r));
     this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
     this.changes.subscribe(
@@ -87,7 +87,7 @@ export class RepositoriesService {
   }
 
   private setCurrent(repository: string) {
-    const repositories = this.repositories$.value;
+    const repositories = this.currentRepositores;
 
     const currentRepository = repositories.find((r) => r.name === repository);
 

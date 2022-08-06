@@ -15,6 +15,7 @@ import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard'
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { ProductsService } from '../../../products/services/products.service';
 import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceEditService } from '../../services/instance-edit.service';
@@ -97,7 +98,8 @@ export class ConfigurationComponent
     private media: BreakpointObserver,
     private products: ProductsService,
     private router: Router,
-    public auth: AuthenticationService
+    public auth: AuthenticationService,
+    private groups: GroupsService
   ) {
     this.subscription = this.media
       .observe('(max-width:700px)')
@@ -215,5 +217,17 @@ export class ConfigurationComponent
     }
 
     return cfg.name;
+  }
+
+  /* template */ goToProductImport() {
+    const repo = this.edit.current$.value?.newerVersionAvailableInRepository;
+    const product =
+      this.edit.current$.value?.instanceConfiguration.product.name;
+    this.areas.navigateBoth(
+      ['products', 'browser', this.groups.current$.value.name],
+      ['panels', 'products', 'transfer'],
+      {},
+      { queryParams: { product, repo } }
+    );
   }
 }

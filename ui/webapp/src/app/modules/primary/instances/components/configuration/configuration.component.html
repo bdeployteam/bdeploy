@@ -41,6 +41,17 @@
         <mat-divider [vertical]="true"></mat-divider>
       </ng-container>
     </ng-container>
+    <app-bd-button
+      *ngIf="
+        (edit.current$ | async)?.newerVersionAvailableInRepository &&
+        (edit.current$ | async)?.instanceConfiguration.product.tag === (edit.state$ | async)?.config.config.product.tag
+      "
+      text="Product Update Available For Import"
+      icon="drive_file_move"
+      [collapsed]="narrow$ | async"
+      color="accent"
+      (click)="goToProductImport()"
+    ></app-bd-button>
     <app-bd-panel-button
       *ngIf="
         (edit.current$ | async)?.newerVersionAvailable &&

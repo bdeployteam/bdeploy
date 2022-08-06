@@ -52,11 +52,11 @@ export class ProductsService {
     this.load(this.group);
   }
 
-  public importProduct(prod: ProductDto, repo: string) {
+  public importProduct(products: ProductDto[], repo: string) {
     const params = {
       repo: repo,
-      name: prod.key.name,
-      tag: prod.key.tag,
+      name: products[0].key.name, // products array contains different versions of the same product, so its fine
+      tags: products.map((prod) => prod.key.tag),
     };
     return this.http
       .post(`${this.apiPath(this.group)}/copy`, null, { params })

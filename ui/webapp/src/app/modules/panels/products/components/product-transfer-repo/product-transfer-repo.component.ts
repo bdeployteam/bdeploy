@@ -2,7 +2,7 @@ import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { groupBy } from 'lodash-es';
-import { BehaviorSubject, combineLatest, finalize, forkJoin, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ProductDto,
@@ -40,6 +40,9 @@ export class ProductTransferRepoComponent implements OnInit {
   ]).pipe(map(([a, b]) => a || b));
   /* template */ importing$ = new BehaviorSubject<boolean>(false);
 
+  private queryRepo: string = null;
+  private queryProduct: string = null;
+
   @ViewChild(MatStepper) stepper: MatStepper;
 
   constructor(
@@ -51,10 +54,37 @@ export class ProductTransferRepoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const snap = this.areas.panelRoute$.value;
+    this.queryProduct = snap.queryParamMap.get('product');
+    this.queryRepo = snap.queryParamMap.get('repo');
+
     this.repositories.repositories$.subscribe((repos) => {
       this.repos = repos;
       this.repoLabels = repos.map((r) => r.name);
+      this.preselectRepo();
     });
+  }
+
+  private preselectRepo(): void {
+    if (!this.queryRepo) return;
+    this.selectedRepo = this.repos.find((repo) => repo.name === this.queryRepo);
+    this.queryRepo = null;
+    if (!this.selectedRepo) return;
+    setTimeout(() => {
+      this.stepper.selected.completed = true;
+      this.stepper.next();
+    });
+  }
+
+  private preselectProduct(products: ProductDto[]): void {
+    if (!this.queryProduct) return;
+    this.selectedProductId = products.find(
+      (p) => !!this.queryProduct && p.key.name === this.queryProduct
+    )?.product;
+    this.queryProduct = null;
+    if (!this.selectedProductId) return;
+    this.stepper.selected.completed = true;
+    this.stepper.next();
   }
 
   /* template */ onStepSelectionChange(event: StepperSelectionEvent) {
@@ -82,6 +112,7 @@ export class ProductTransferRepoComponent implements OnInit {
             this.prodLabels = this.prodIds.map(
               (k) => this.prodsById[k][0].name
             ); // first is the one with the highest version as well
+            this.preselectProduct(filtered);
           });
         break;
     }
@@ -94,11 +125,8 @@ export class ProductTransferRepoComponent implements OnInit {
     }
 
     this.importing$.next(true);
-    forkJoin(
-      this.selectedVersions.map((p) =>
-        this.products.importProduct(p, this.selectedRepo.name)
-      )
-    )
+    this.products
+      .importProduct(this.selectedVersions, this.selectedRepo.name)
       .pipe(finalize(() => this.importing$.next(false)))
       .subscribe(() => this.areas.closePanel());
   }

@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.configuration.instance;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.settings.CustomAttributeDescriptor;
@@ -50,11 +51,6 @@ public class InstanceGroupConfiguration {
     public List<CustomAttributeDescriptor> instanceAttributes = new ArrayList<>();
 
     /**
-     * The name of the default grouping attribute in the instance overview UI.
-     */
-    public String defaultInstanceGroupingAttribute;
-
-    /**
      * The name of the default multiple data grouping for the instance group overview UI.
      */
     public List<CustomDataGrouping> groupingMultiplePreset = new ArrayList<>();
@@ -63,4 +59,10 @@ public class InstanceGroupConfiguration {
      * The name of the default single data grouping for the instance group overview UI.
      */
     public List<CustomDataGrouping> groupingSinglePreset = new ArrayList<>();
+
+    /**
+     * Keeps track of which product was imported from which repository
+     */
+    public Map<String, String> productToRepo;
+
 }

@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -64,6 +66,7 @@ import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
@@ -115,6 +118,7 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.api.ProcessResource;
+import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.ApplicationDto;
 import io.bdeploy.ui.dto.ConfigDirDto;
@@ -231,19 +235,10 @@ public class InstanceResourceImpl implements InstanceResource {
                 log.error("Cannot contact master for {}.", config.uuid, e);
             }
 
-            boolean newerVersionAvailable = false;
-            String productName = config.product.getName();
-            String productTag = config.product.getTag();
+            boolean newerVersionAvailable = this.isNewerVersionAvailable(scan, config, productVersionComparator);
 
-            // reverse order of comparison to get newest version first.
-            Optional<String> newestProductVersion = scan.stream().filter(key -> key.getName().equals(productName))
-                    .map(Key::getTag).filter(tag -> this.matchesProductFilterRegex(tag, config.productFilterRegex))
-                    .sorted((a, b) -> productVersionComparator.compare(b, a)).findFirst();
-
-            if (newestProductVersion.isPresent()) {
-                String newestProductTag = newestProductVersion.get();
-                newerVersionAvailable = productVersionComparator.compare(productTag, newestProductTag) < 0;
-            }
+            String newerVersionAvailableInRepository = this.getNewerVersionAvailableInRepository(config, scan,
+                    productVersionComparator);
 
             ManagedMasterDto managedMaster = null;
             if (minion.getMode() == MinionMode.CENTRAL) {
@@ -269,10 +264,46 @@ public class InstanceResourceImpl implements InstanceResource {
             }
 
             // Clear security token before sending via REST
-            result.add(InstanceDto.create(imKey, config, hasProduct, activeProduct, newerVersionAvailable, managedMaster,
-                    attributes, banner, im.getManifest(), activeVersion, overallState, configRoot));
+            result.add(InstanceDto.create(imKey, config, hasProduct, activeProduct, newerVersionAvailable,
+                    newerVersionAvailableInRepository, managedMaster, attributes, banner, im.getManifest(), activeVersion,
+                    overallState, configRoot));
         }
         return result;
+    }
+
+    private String getNewerVersionAvailableInRepository(InstanceConfiguration config, Set<Key> instanceGroupProductKeys,
+            Comparator<String> productVersionComparator) {
+        try {
+            Key productKey = config.product;
+            InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
+            InstanceGroupConfiguration igc = igr.read(group);
+            if (igc.productToRepo == null) {
+                return null;
+            }
+            String repo = igc.productToRepo.get(productKey.getName());
+            BHive repoHive = reg.get(repo);
+            ProductResource pr = rc.initResource(new ProductResourceImpl(repoHive, repo));
+
+            List<Key> productKeys = pr.list(productKey.getName()).stream().map(p -> p.key)
+                    .filter(key -> !instanceGroupProductKeys.contains(key)) // filter out product keys already imported/uploaded to instance group
+                    .collect(Collectors.toList());
+
+            return this.isNewerVersionAvailable(productKeys, config, productVersionComparator) ? repo : null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private boolean isNewerVersionAvailable(Collection<Key> keys, InstanceConfiguration config,
+            Comparator<String> productVersionComparator) {
+        String productName = config.product.getName();
+        String productTag = config.product.getTag();
+        String productFilterRegex = config.productFilterRegex;
+        return keys.stream().filter(key -> key.getName().equals(productName)).map(Key::getTag)
+                .filter(tag -> this.matchesProductFilterRegex(tag, productFilterRegex))
+                .filter(tag -> productVersionComparator.compare(tag, productTag) > 0) // filter out older or current versions
+                .findFirst().isPresent();
     }
 
     private boolean matchesProductFilterRegex(String tag, String productFilterRegex) {
