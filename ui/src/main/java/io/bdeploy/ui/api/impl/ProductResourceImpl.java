@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,11 +45,13 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.ApplicationResource;
+import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.InstanceUsageDto;
@@ -321,17 +324,27 @@ public class ProductResourceImpl implements ProductResource {
     }
 
     @Override
-    public void copyProduct(String softwareRepository, String productName, String productTag) {
+    public void copyProduct(String softwareRepository, String productName, List<String> productTags) {
         BHive repoHive = registry.get(softwareRepository);
         if (repoHive == null) {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
-        Manifest.Key key = new Manifest.Key(productName, productTag);
+        for (String productTag : productTags) {
+            Manifest.Key key = new Manifest.Key(productName, productTag);
 
-        Set<ObjectId> objectIds = repoHive.execute(new ObjectListOperation().addManifest(key));
-        CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
-        objectIds.forEach(copy::addObject);
-        repoHive.execute(copy);
+            Set<ObjectId> objectIds = repoHive.execute(new ObjectListOperation().addManifest(key));
+            CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
+            objectIds.forEach(copy::addObject);
+            repoHive.execute(copy);
+        }
+
+        InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
+        InstanceGroupConfiguration igc = igr.read(this.group);
+        if (igc.productToRepo == null) {
+            igc.productToRepo = new HashMap<>();
+        }
+        igc.productToRepo.put(productName, softwareRepository);
+        igr.update(this.group, igc);
     }
 
     @Override

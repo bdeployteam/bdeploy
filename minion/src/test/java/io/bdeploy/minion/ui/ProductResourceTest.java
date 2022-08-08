@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,7 +71,7 @@ class ProductResourceTest {
         Key prod = TestFactory.pushProduct(repo.name, remote, tmp).getKey();
 
         ProductResource productResource = root.getProductResource("Demo");
-        productResource.copyProduct("Repo", prod.getName(), prod.getTag());
+        productResource.copyProduct("Repo", prod.getName(), List.of(prod.getTag()));
 
         assertEquals(1, productResource.list(null).size());
         assertEquals(prod, productResource.list(null).get(0).key);

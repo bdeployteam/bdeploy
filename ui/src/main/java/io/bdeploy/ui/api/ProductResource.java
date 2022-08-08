@@ -65,7 +65,7 @@ public interface ProductResource {
     @Path("/copy")
     @RequiredPermission(permission = Permission.WRITE)
     public void copyProduct(@QueryParam("repo") String softwareRepository, @QueryParam("name") String productName,
-            @QueryParam("tag") String productTag);
+            @QueryParam("tags") List<String> productTag);
 
     @GET
     @Path("/{name : .+}/{tag}/config/{file: .+}")

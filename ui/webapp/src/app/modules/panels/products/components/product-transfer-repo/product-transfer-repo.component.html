@@ -59,6 +59,7 @@
               [columns]="prodVersionColumns"
               [checkMode]="true"
               [(checked)]="selectedVersions"
+              [checkedFrozenWhen$]="importing$"
               [headerHidden]="true"
             ></app-bd-data-table>
             <app-bd-button
