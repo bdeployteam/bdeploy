@@ -21,8 +21,10 @@ the `etc` directory and is named `bdeploy-service-install.bat`
 The script must be called with administrative privileges and it expects the following arguments:
 
  --master | --node      Start a master or node (only controls the name of the service.)
- <Path-to-minion>       Absolute path of the bdeploy executable
- <Path-to-store-files>  Absolute path of the data directory
+ <Path-to-minion-bat>   Absolute path to the bdeploy batch file. 
+                        Sample: C:\BDeploy\server\bin\bdeploy.bat
+ <Path-to-store-files>  Absolute path to the data directory.  
+                        Sample: C:\BDeploy\data\
 
 [WARNING]
 By default the service runs as _Local System_ but you can and should change that afterwards by using the services.msc application. Simply configure the desired account in the _Log On_ tab of the services management console. We *strongly* recommend to use a non-priviledged user to run the *BDeploy* service.
