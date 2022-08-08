@@ -65,6 +65,13 @@
         [values]="selectedProduct?.versions"
         required
       ></app-bd-form-select>
+      <app-bd-form-input
+        label="Product Version Regular Expression"
+        matTooltip="Only product versions matching this regular expression will be presented when updating the product version"
+        matTooltipPosition="above"
+        name="productFilterRegex"
+        [(ngModel)]="config.productFilterRegex"
+      ></app-bd-form-input>
       <app-bd-form-select
         *ngIf="isCentral"
         label="Managed Server"
