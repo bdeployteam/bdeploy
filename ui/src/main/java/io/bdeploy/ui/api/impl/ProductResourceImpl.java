@@ -28,7 +28,7 @@ import io.bdeploy.api.product.v1.DependencyFetcher;
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductManifestBuilder;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
-import io.bdeploy.api.product.v1.impl.LocalDependencyFetcher;
+import io.bdeploy.api.product.v1.impl.MultiLocalDependencyFetcher;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -46,8 +46,10 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
+import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.ApplicationResource;
@@ -239,7 +241,7 @@ public class ProductResourceImpl implements ProductResource {
      * Limitations:
      * <ul>
      * <li>All paths within product-info.yaml and product-version.yaml <b>MUST</b> be relative and may not contain '..'.
-     * <li>All external dependencies must already exist in the target instance group. Software repositories cannot be queried.
+     * <li>All external dependencies must already exist in the target instance group or in local software repository.
      * </ul>
      *
      * @param targetFile the ZIP file uploaded by the user.
@@ -248,8 +250,7 @@ public class ProductResourceImpl implements ProductResource {
      */
     private List<Manifest.Key> importFromUploadedProductInfo(Path targetFile) throws IOException {
         try (FileSystem zfs = PathHelper.openZip(targetFile)) {
-            // If we ever want to resolve dependencies from software repos, we need a master URL here (RemoteService).
-            DependencyFetcher fetcher = new LocalDependencyFetcher();
+            DependencyFetcher fetcher = new MultiLocalDependencyFetcher(this.getLocalSoftwareRepositories());
 
             // validate paths, etc. neither product-info.yaml, nor product-version.yaml are allowed to use '..' in paths.
             Path desc = ProductManifestBuilder.getDescriptorPath(zfs.getPath("/"));
@@ -273,6 +274,17 @@ public class ProductResourceImpl implements ProductResource {
 
             return Collections.singletonList(ProductManifestBuilder.importFromDescriptor(desc, hive, fetcher, false));
         }
+    }
+
+    private List<BHive> getLocalSoftwareRepositories() {
+        List<BHive> result = new ArrayList<>();
+        for (Map.Entry<String, BHive> entry : registry.getAll().entrySet()) {
+            SoftwareRepositoryConfiguration cfg = new SoftwareRepositoryManifest(entry.getValue()).read();
+            if (cfg != null) {
+                result.add(entry.getValue());
+            }
+        }
+        return result;
     }
 
     private void assertNullOrRelativePath(String p) {
