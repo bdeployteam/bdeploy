@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -437,6 +438,38 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
     }
 
+    /** Validate that homeDir is specified the same way as it was the first time */
+    private void validateBDeployHome() {
+        Path bdeployHomePath = rootDir.resolve("bdeploy.home");
+        if (bdeployHomePath.toFile().exists()) {
+            validateBDeployHome(bdeployHomePath);
+        } else if (!readOnlyRootDir) {
+            saveBDeployHome(bdeployHomePath);
+        }
+    }
+
+    /** Validate content of bdeploy.home file is the same as current value of homeDir */
+    private void validateBDeployHome(Path bdeployHomePath) {
+        try {
+            Path storedPath = Path.of(Files.readString(bdeployHomePath, StandardCharsets.UTF_8));
+            if (!rootDir.equals(storedPath)) {
+                throw new IllegalStateException(
+                        "BDeploy home directory has changed. Expected: " + storedPath + " Got: " + rootDir);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read from " + bdeployHomePath.toAbsolutePath());
+        }
+    }
+
+    /** Save homeDir value into bdeploy.home file */
+    private void saveBDeployHome(Path bdeployHomePath) {
+        try {
+            Files.write(bdeployHomePath, config.homeDir().getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to save BDEPLOY_HOME value into file");
+        }
+    }
+
     /** Initializes all parameters based on the given configuration */
     private void doInit(LauncherConfig config) {
         if (config.launch() == null) {
@@ -454,6 +487,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Check for inconsistent file and folder permissions
         Path versionsFile = rootDir.resolve(ClientPathHelper.LAUNCHER_DIR).resolve("version.properties");
         readOnlyRootDir = PathHelper.isReadOnly(rootDir, versionsFile);
+
+        // Check that the launcher was not moved
+        validateBDeployHome();
 
         // Try to get a user-area if the root is readonly
         if (readOnlyRootDir) {

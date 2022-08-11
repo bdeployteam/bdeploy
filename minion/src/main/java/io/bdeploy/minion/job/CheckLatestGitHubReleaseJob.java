@@ -79,9 +79,11 @@ public class CheckLatestGitHubReleaseJob implements Job {
             mr.setLatestGitHubReleaseVersion(latestRelease);
             log.info("Latest GitHub Release Version {}", latestRelease);
         } catch (Exception e) {
-            log.warn("Failed to check latest release version", e);
+            log.warn("Failed to check latest release version: {}", e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("Error", e);
+            }
         }
-
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

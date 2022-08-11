@@ -46,6 +46,7 @@ public class MessageDialogs {
         dialog.setSummary("<html>A required software update is available " +  //
                 "but cannot be installed due to insufficient permissions. " + //
                 "Contact the system administrator.</html>");
+        dialog.setDetailsSummary(ex.getMessage());
         dialog.setDetails(getDetailedErrorMessage(config, ex));
         dialog.setVisible(true);
         dialog.waitForExit();
@@ -60,6 +61,7 @@ public class MessageDialogs {
         dialog.setHeaderText("Application could not be launched");
         dialog.setSummary("<html>Unexpected error occurred while launching the application. " + //
                 "If the problem persists, contact the system administrator.</html>");
+        dialog.setDetailsSummary(ex.getMessage());
         dialog.setDetails(getDetailedErrorMessage(config, ex));
         dialog.setVisible(true);
         dialog.waitForExit();
@@ -74,6 +76,7 @@ public class MessageDialogs {
         dialog.setHeaderText("Application could not be uninstalled");
         dialog.setSummary("<html>Unexpected error occurred while uninstalling the application. " + //
                 "If the problem persists, contact the system administrator.</html>");
+        dialog.setDetailsSummary(ex.getMessage());
         dialog.setDetails(getDetailedErrorMessage(config, ex));
         dialog.setVisible(true);
     }
@@ -108,9 +111,6 @@ public class MessageDialogs {
     private static String getDetailedErrorMessage(ClickAndStartDescriptor config, Throwable ex) {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("*** Date: ").append(FormatHelper.format(new Date())).append("\n");
-        builder.append("\n");
-
         StringWriter writer = new StringWriter();
         ex.printStackTrace(new PrintWriter(writer));
         builder.append("*** Stacktrace: \n").append(writer);
@@ -126,6 +126,9 @@ public class MessageDialogs {
             builder.append("Host=").append(config.host.getUri()).append("\n");
             builder.append("Token=").append(config.host.getAuthPack()).append("\n");
         }
+        builder.append("\n");
+
+        builder.append("*** Date: \n").append(FormatHelper.format(new Date())).append("\n");
         builder.append("\n");
 
         builder.append("*** System properties: \n");
