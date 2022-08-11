@@ -159,14 +159,14 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help(value = "Makes the launcher quit immediately after updating and launching the application.", arg = false)
         boolean dontWait() default false;
 
-        @Help(value = "Terminate the application when an error occurs instead of opening an error dialog.", arg = false)
-        boolean exitOnError() default false;
-
         @Help(value = "Opens a dialog that allows to modify the arguments passed to the application.", arg = false)
         boolean customizeArgs() default false;
 
         @Help(value = "Update the launcher and application and then terminate without launching the application.", arg = false)
         boolean updateOnly() default false;
+
+        @Help(value = "Run the launcher in unattended mode where no splash screen and error dialog is shown.", arg = false)
+        boolean unattended() default false;
     }
 
     /** The currently running launcher version */
@@ -217,7 +217,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
             // Show splash and progress of operations
             LauncherSplash splash = new LauncherSplash(appDir);
-            splash.show();
+            if (!config.unattended()) {
+                splash.show();
+            }
 
             // Write audit logs to the user area if set
             if (userArea != null) {
@@ -231,13 +233,13 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             doExit(-1);
         } catch (SoftwareUpdateException ex) {
             log.error("Software update cannot be installed.", ex);
-            if (config.exitOnError()) {
+            if (config.unattended()) {
                 helpAndFail(ex.getMessage());
             }
             MessageDialogs.showUpdateRequired(clickAndStart, ex);
         } catch (Exception ex) {
             log.error("Failed to launch application.", ex);
-            if (config.exitOnError()) {
+            if (config.unattended()) {
                 helpAndFail(ex.getMessage());
             }
             MessageDialogs.showLaunchFailed(clickAndStart, ex);
@@ -297,25 +299,20 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     log.warn("Migrated node detected, cannot continue");
                     return;
                 }
-
                 doInstall(hive, reporter, splash);
-                if (config.updateOnly()) {
-                    log.info("Application successfully installed/updated.");
-                    return;
-                }
 
                 // Launch the application
-                try (Activity info = reporter.start("Launching...")) {
-                    process = launchApplication(clientAppCfg);
+                if (!config.updateOnly()) {
+                    try (Activity info = reporter.start("Launching...")) {
+                        process = launchApplication(clientAppCfg);
+                    }
+                    log.info("Application successfully launched. PID={}", process.pid());
                 }
-                log.info("Application successfully launched. PID={}", process.pid());
             }
 
-            // Hide progress reporting
             reporter.stop();
             splash.dismiss();
 
-            // Cleanup the installation directory and the hive.
             if (!readOnlyRootDir) {
                 log.info("Cleaning unused launchers and applications ...");
                 doExecuteLocked(hive, reporter, () -> {
@@ -325,11 +322,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 });
             }
 
-            // Wait until the process terminates
-            if (config.dontWait()) {
+            if (config.updateOnly() || config.dontWait()) {
                 log.info("Detaching and terminating.");
                 return;
             }
+
             int exitCode = doMonitorProcess(process);
 
             // The delegated launcher launcher has already evaluated the exit

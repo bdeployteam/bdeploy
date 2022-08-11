@@ -26,7 +26,7 @@ namespace Bdeploy.Installer {
             if (unattended) {
                 int setupCode = await Task.Run(() => installer.SetupAsync());
                 if (setupCode == 0 && config.CanInstallApp()) {
-                    setupCode = installer.Launch(new string[] { "--updateOnly" }, true);
+                    setupCode = installer.Launch(new string[] { "--updateOnly", "--unattended" }, true);
                 }
                 Current.Shutdown(setupCode);
                 return;

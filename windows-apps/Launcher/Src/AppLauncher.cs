@@ -83,7 +83,7 @@ namespace Bdeploy.Launcher {
             int argSeparator = Array.IndexOf(args, "--");
             if (argSeparator != -1) {
                 launcherArgs.AddRange(args.Take(argSeparator));
-                appArgs.AddRange(args.Skip(argSeparator+1));
+                appArgs.AddRange(args.Skip(argSeparator + 1));
             } else {
                 launcherArgs = args.ToList();
             }
@@ -218,9 +218,17 @@ namespace Bdeploy.Launcher {
         /// <summary>
         /// Restarts the launcher application.
         /// </summary>
-        public bool Restart() {
+        public bool Restart(string[] args) {
             string executable = Process.GetCurrentProcess().MainModule.FileName;
-            string argument = string.Format("\"{0}\"", clickAndStartFile);
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat("\"{0}\" ", clickAndStartFile);
+            foreach (string appArg in args)
+            {
+                builder.AppendFormat("\"{0}\" ", appArg);
+            }
+
+            string argument = builder.ToString();
             Log.Information("Restarting launcher: {0} {1}", executable, argument);
 
             try {

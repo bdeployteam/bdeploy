@@ -81,7 +81,7 @@ namespace Bdeploy.Launcher {
             }
 
             // Startup launcher with original arguments
-            if (!launcher.Restart()) {
+            if (!launcher.Restart(args)) {
                 return -1;
             }
             return 0;
