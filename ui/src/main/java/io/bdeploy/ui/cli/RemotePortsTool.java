@@ -14,6 +14,8 @@ import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.TemplateHelper;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
@@ -22,6 +24,12 @@ import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.Paramete
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
+import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
+import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -165,6 +173,8 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                             + " for configuration " + config.name);
                 }
 
+                VariableResolver resolver = createResolver(node, config);
+
                 if (desc.descriptor.startCommand != null) {
                     for (var param : config.start.parameters) {
                         var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.uid.equals(param.uid))
@@ -172,9 +182,12 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                         if (paramDesc != null
                                 && (paramDesc.type == ParameterType.CLIENT_PORT || paramDesc.type == ParameterType.SERVER_PORT)) {
                             try {
-                                // FIXME: param.value might need processing for linkExpression! this was broken before.
+                                var val = param.value.value;
+                                if (param.value.linkExpression != null) {
+                                    val = TemplateHelper.process(param.value.linkExpression, resolver);
+                                }
                                 result.add(new NodePort(node.nodeName, config.name, config.uid, paramDesc.type, paramDesc.name,
-                                        Integer.valueOf(param.value.getPreRenderable())));
+                                        Integer.valueOf(val)));
                             } catch (NumberFormatException e) {
                                 out().println("Illegal port value configured for " + param.uid + " on application " + config.uid);
                             }
@@ -188,6 +201,16 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         Collections.sort(result, Comparator.comparing(NodePort::getPort));
 
         return result;
+    }
+
+    private VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
+        // limited to resolvers which could yield a valid port value, considering potential cross-references.
+        CompositeResolver res = new CompositeResolver();
+        res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
+        res.add(new ApplicationParameterValueResolver(process.uid, node.nodeConfiguration));
+        res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
+        res.add(new OsVariableResolver());
+        return res;
     }
 
     private static class NodePort {

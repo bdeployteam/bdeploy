@@ -40,6 +40,8 @@ import { BdActivitiesComponent } from './components/bd-activities/bd-activities.
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
+import { BdContentAssistMenuComponent } from './components/bd-content-assist-menu/bd-content-assist-menu.component';
+import { BdContentAssistDirective } from './components/bd-content-assist/bd-content-assist.directive';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataComponentCellComponent } from './components/bd-data-component-cell/bd-data-component-cell.component';
 import { BdDataDateCellComponent } from './components/bd-data-date-cell/bd-data-date-cell.component';
@@ -174,6 +176,8 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataPopoverCellComponent,
     PortValueValidatorDirective,
     EditItemInListValidatorDirective,
+    BdContentAssistDirective,
+    BdContentAssistMenuComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -284,6 +288,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataPermissionLevelCellComponent,
     BdDataSizeCellComponent,
     BdDataPopoverCellComponent,
+    BdContentAssistDirective,
 
     // validators
     IdentifierValidator,

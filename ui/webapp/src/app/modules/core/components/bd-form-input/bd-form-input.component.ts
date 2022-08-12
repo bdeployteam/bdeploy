@@ -1,5 +1,6 @@
 import {
   Component,
+  ElementRef,
   Input,
   OnInit,
   Optional,
@@ -15,6 +16,7 @@ import {
 import { ErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { bdValidationMessage } from '../../validators/messages';
+import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 
 @Component({
   selector: 'app-bd-form-input',
@@ -34,6 +36,8 @@ export class BdFormInputComponent
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
   @Input() passwordLock = false;
   @Input() prefix: TemplateRef<any>;
+  @Input() assistValues: ContentCompletion[];
+  @Input() assistPrefixes: ContentCompletion[];
 
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
@@ -55,7 +59,10 @@ export class BdFormInputComponent
     /* intentionally empty */
   };
 
-  constructor(@Optional() @Self() public ngControl: NgControl) {
+  constructor(
+    @Optional() @Self() public ngControl: NgControl,
+    public elementRef: ElementRef
+  ) {
     if (ngControl) {
       ngControl.valueAccessor = this;
     }

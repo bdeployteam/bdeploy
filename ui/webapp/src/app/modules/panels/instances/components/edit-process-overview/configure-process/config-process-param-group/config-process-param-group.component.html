@@ -334,6 +334,8 @@
                   [appLinkExpressionInputValidatorInstance]="instance"
                   [appLinkExpressionInputValidatorSystem]="system"
                   [appLinkExpressionInputValidatorType]="p.descriptor?.type"
+                  [assistValues]="completions"
+                  [assistPrefixes]="completionPrefixes"
                 >
                   <div fxLayout="row" class="local-form-input-actions">
                     <ng-container *ngIf="p?.value && !group.isSelectMode">
