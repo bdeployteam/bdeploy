@@ -91,7 +91,8 @@
               class="bd-small-icon"
               [matTooltip]="detail.description ? detail.description : detail.name"
               [matTooltipShowDelay]="1000"
-              >{{ detail.icon(record) }}</mat-icon
+              >{{ detail.icon ? detail.icon(record) : 'error_outline'
+              }}</mat-icon
             >
             <span *ngIf="!detail.component" class="bd-text-ellipsis"
               >{{ detail.data(record) }}</span

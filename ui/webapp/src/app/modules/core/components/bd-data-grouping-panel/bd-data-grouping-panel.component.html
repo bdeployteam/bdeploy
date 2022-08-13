@@ -1,15 +1,24 @@
 <div fxLayout="row" fxLayoutGap="5px" [style.height]="'100%'">
   <div fxLayout="column" fxLayoutGap="5px" [style.minWidth.px]="220">
-    <div>
-      <span
-        class="local-grouping-header bd-description-text"
-        [matBadge]="index + 1"
-        matBadgePosition="after"
-        matBadgeSize="small"
-        [matBadgeOverlap]="false"
-      >
-        Grouping Level
-      </span>
+    <div fxLayout="row" fxLayoutAlign="space-between baseline">
+      <div>
+        <span
+          class="local-grouping-header bd-description-text"
+          [matBadge]="index + 1"
+          matBadgePosition="after"
+          matBadgeSize="small"
+          [matBadgeOverlap]="false"
+        >
+          Grouping Level
+        </span>
+      </div>
+      <app-bd-button
+        text="Remove"
+        icon="close"
+        tooltip="above"
+        [disabled]="removeDisabled"
+        (click)="removeGrouping()"
+      ></app-bd-button>
     </div>
     <mat-divider
       [style.position]="'relative'"
@@ -51,6 +60,7 @@
       <mat-checkbox
         *ngFor="let group of groupingValues"
         [checked]="!grouping?.selected?.length || grouping.selected.includes(group)"
+        [disabled]="grouping?.selected?.length === 1 && grouping.selected.includes(group)"
         (change)="groupCheckChanged(group, $event)"
         >{{ !!group ? group : noGroup }}</mat-checkbox
       >

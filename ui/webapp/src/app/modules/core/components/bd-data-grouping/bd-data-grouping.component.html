@@ -14,15 +14,24 @@
   >
     <div fxLayout="row" fxLayoutGap="5px">
       <!-- a grouping panel per grouping -->
-      <div fxLayout="row wrap" fxLayoutGap="5px">
+      <div
+        fxLayout="row"
+        fxLayoutGap="5px"
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        (cdkDropListDropped)="onDrop($event)"
+      >
         <app-bd-data-grouping-panel
           *ngFor="let grp of groupings; let i = index"
+          cdkDrag
           [definitions]="definitions"
           [records]="records"
           [index]="i"
           [(grouping)]="groupings[i]"
           (groupingChange)="fireUpdate()"
           [popupEmitter]="popup.popupOpened"
+          [removeDisabled]="groupings.length === 1 && !groupings[0].definition"
+          (removeClicked)="removeGrouping($event)"
         ></app-bd-data-grouping-panel>
       </div>
 
@@ -35,13 +44,6 @@
             tooltip="above"
             (click)="addGrouping()"
             [disabled]="groupings.length >= 5"
-          ></app-bd-button>
-          <app-bd-button
-            text="Remove"
-            icon="remove"
-            tooltip="above"
-            (click)="removeGrouping()"
-            [disabled]="groupings.length === 1 && !groupings[0].definition"
           ></app-bd-button>
           <mat-divider
             [style.position]="'relative'"
