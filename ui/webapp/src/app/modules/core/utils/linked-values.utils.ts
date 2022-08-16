@@ -1,3 +1,4 @@
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -95,7 +96,7 @@ export function gatherVariableExpansions(
         return {
           name: k,
           description: `Instance Variable - ${instance?.config?.name}`,
-          preview: instance.config.instanceVariables[k],
+          preview: instance.config.instanceVariables[k]?.value,
           link: `{{X:${k}}}`,
           group: null,
         };
@@ -105,13 +106,13 @@ export function gatherVariableExpansions(
       });
   }
 
-  if (system?.configVariables) {
-    Object.keys(system.configVariables)
+  if (system?.systemVariables) {
+    Object.keys(system.systemVariables)
       .map((k) => {
         return {
           name: k,
           description: `System Variable - ${system?.name}`,
-          preview: system.configVariables[k],
+          preview: system.systemVariables[k]?.value,
           link: `{{X:${k}}}`,
           group: null,
         };
@@ -138,10 +139,18 @@ export function gatherProcessExpansions(
   const result: LinkVariable[] = [];
   for (const node of instance.nodeDtos) {
     for (const app of node.nodeConfiguration.applications) {
+      if (
+        node.nodeName === CLIENT_NODE_NAME &&
+        app.name === process.name &&
+        app.uid !== process.uid
+      ) {
+        // client app for different OS - this is actually not well supported, we cannot resolve parameters of this.
+        continue;
+      }
       for (const param of app.start.parameters) {
         let link = `{{V:${app.name}:${param.uid}}}`;
         let group = app.name;
-        if (app.name === process.name) {
+        if (app.uid === process.uid) {
           link = `{{V:${param.uid}}}`;
           group = `${app.name} (This Application)`;
         }
@@ -252,6 +261,7 @@ export function gatherSpecialExpansions(
     preview: '/deploy/pool/example_1.0.0',
     link: '{{M:<manifest-name>}}',
     group: null,
+    matches: (s) => s.startsWith('{{M:') && s.endsWith('}}'),
   });
   result.push({
     name: 'ENV',
@@ -259,6 +269,7 @@ export function gatherSpecialExpansions(
     preview: '<env-value>',
     link: '{{ENV:<env-name>}}',
     group: null,
+    matches: (s) => s.startsWith('{{ENV:') && s.endsWith('}}'),
   });
   result.push({
     name: 'DELAYED',
@@ -267,6 +278,7 @@ export function gatherSpecialExpansions(
     preview: '<delayed-value>',
     link: '{{DELAYED:<link-expression>}}',
     group: null,
+    matches: (s) => s.startsWith('{{DELAYED:') && s.endsWith('}}'),
   });
 
   result.push({

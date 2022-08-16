@@ -93,7 +93,7 @@
             [completed]="firstStepCompleted && secondStepCompleted"
           >
             <div class="instance-templates-top-space">
-              <ng-container *ngFor="let v of template?.variables">
+              <ng-container *ngFor="let v of template?.templateVariables">
                 <app-bd-form-input
                   *ngIf="firstStepCompleted && secondStepCompleted"
                   [(ngModel)]="variables[v.uid]"

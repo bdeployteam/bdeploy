@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.interfaces.configuration.VariableValue;
 
 /**
  * Represents a single instance within an InstanceGroup.
@@ -75,5 +76,5 @@ public class InstanceConfiguration {
     /**
      * Collection of instance variables which can be used to provide values to parameters.
      */
-    public Map<String, String> instanceVariables = new TreeMap<>();
+    public Map<String, VariableValue> instanceVariables = new TreeMap<>();
 }

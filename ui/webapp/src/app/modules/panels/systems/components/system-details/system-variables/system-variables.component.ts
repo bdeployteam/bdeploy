@@ -28,6 +28,7 @@ const MAGIC_ABORT = 'abort_save';
 class ConfigVariable {
   name: string;
   value: string;
+  description: string;
 }
 
 const colName: BdDataColumn<ConfigVariable> = {
@@ -41,6 +42,12 @@ const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
   data: (r) => r.value,
+};
+
+const colDesc: BdDataColumn<ConfigVariable> = {
+  id: 'description',
+  name: 'Description',
+  data: (r) => r.description,
 };
 
 @Component({
@@ -77,12 +84,14 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   /* template */ columns: BdDataColumn<ConfigVariable>[] = [
     colName,
     colValue,
+    colDesc,
     this.colEdit,
     this.colDelete,
   ];
 
   /* template */ newId: string;
   /* template */ newValue: string;
+  /* template */ newDescription: string;
   /* template */ newUsedIds: string[] = [];
 
   private subscription: Subscription;
@@ -131,9 +140,10 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     if (!this.system?.config) {
       return;
     }
-    this.records = Object.keys(this.system.config.configVariables).map((k) => ({
+    this.records = Object.keys(this.system.config.systemVariables).map((k) => ({
       name: k,
-      value: this.system.config.configVariables[k],
+      value: this.system.config.systemVariables[k]?.value,
+      description: this.system.config.systemVariables[k]?.description,
     }));
   }
 
@@ -194,13 +204,17 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        const desc = this.newDescription;
+        this.newId = this.newValue = this.newDescription = null;
 
         if (!r) {
           return;
         }
 
-        this.system.config.configVariables[id] = value;
+        this.system.config.systemVariables[id] = {
+          value: value,
+          description: desc,
+        };
         this.buildVariables();
       });
   }
@@ -208,6 +222,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   /* template */ onEdit(variable: ConfigVariable) {
     this.newId = variable.name;
     this.newValue = variable.value;
+    this.newDescription = variable.description;
     this.dialog
       .message({
         header: 'Edit Variable',
@@ -218,19 +233,23 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        const desc = this.newDescription;
+        this.newId = this.newValue = this.newDescription = null;
 
         if (!r) {
           return;
         }
 
-        this.system.config.configVariables[id] = value;
+        this.system.config.systemVariables[id] = {
+          value: value,
+          description: desc,
+        };
         this.buildVariables();
       });
   }
 
   private onDelete(r: ConfigVariable) {
-    delete this.system.config.configVariables[r.name];
+    delete this.system.config.systemVariables[r.name];
     this.buildVariables();
   }
 }

@@ -12,6 +12,7 @@ import io.bdeploy.common.cli.data.DataTableRowBuilder;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.configuration.VariableValue;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -117,7 +118,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             result.addField("Description", cfg.description);
             result.addField(" -- Config Variables --", "");
 
-            for (var entry : cfg.configVariables.entrySet()) {
+            for (var entry : cfg.systemVariables.entrySet()) {
                 result.addField(" " + entry.getKey(), entry.getValue());
             }
 
@@ -153,11 +154,11 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             result.addField("New Description", config.description());
         }
         if (config.removeVariable() != null) {
-            cfg.configVariables.remove(config.removeVariable());
+            cfg.systemVariables.remove(config.removeVariable());
             result.addField("Remove Variable", config.removeVariable());
         }
         if (config.setVariable() != null) {
-            cfg.configVariables.put(config.setVariable(), config.setValue());
+            cfg.systemVariables.put(config.setVariable(), new VariableValue(config.setValue()));
             result.addField("Set Variable", config.setVariable());
         }
 

@@ -14,6 +14,7 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
 class ConfigVariable {
   name: string;
   value: string;
+  description: string;
 }
 
 const colName: BdDataColumn<ConfigVariable> = {
@@ -27,6 +28,12 @@ const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
   data: (r) => r.value,
+};
+
+const colDesc: BdDataColumn<ConfigVariable> = {
+  id: 'description',
+  name: 'Description',
+  data: (r) => r.description,
 };
 
 @Component({
@@ -60,12 +67,14 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
   /* template */ columns: BdDataColumn<ConfigVariable>[] = [
     colName,
     colValue,
+    colDesc,
     this.colEdit,
     this.colDelete,
   ];
 
   /* template */ newId: string;
   /* template */ newValue: string;
+  /* template */ newDescription: string;
   /* template */ newUsedIds: string[] = [];
 
   private subscription: Subscription;
@@ -103,7 +112,9 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
       this.edit.state$.value.config.config.instanceVariables
     ).map((k) => ({
       name: k,
-      value: this.edit.state$.value.config.config.instanceVariables[k],
+      value: this.edit.state$.value.config.config.instanceVariables[k]?.value,
+      description:
+        this.edit.state$.value.config.config.instanceVariables[k]?.description,
     }));
   }
 
@@ -136,7 +147,8 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        const desc = this.newDescription;
+        this.newId = this.newValue = this.newDescription = null;
 
         if (!r) {
           return;
@@ -146,7 +158,10 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
           this.edit.state$.value.config.config.instanceVariables = {};
         }
 
-        this.edit.state$.value.config.config.instanceVariables[id] = value;
+        this.edit.state$.value.config.config.instanceVariables[id] = {
+          value: value,
+          description: desc,
+        };
         this.buildVariables();
       });
   }
@@ -154,6 +169,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
   /* template */ onEdit(variable: ConfigVariable) {
     this.newId = variable.name;
     this.newValue = variable.value;
+    this.newDescription = variable.description;
     this.dialog
       .message({
         header: 'Edit Variable',
@@ -164,13 +180,17 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        const desc = this.newDescription;
+        this.newId = this.newValue = this.newDescription = null;
 
         if (!r) {
           return;
         }
 
-        this.edit.state$.value.config.config.instanceVariables[id] = value;
+        this.edit.state$.value.config.config.instanceVariables[id] = {
+          value: value,
+          description: desc,
+        };
         this.buildVariables();
       });
   }

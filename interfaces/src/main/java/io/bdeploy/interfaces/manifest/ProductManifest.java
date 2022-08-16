@@ -194,7 +194,7 @@ public class ProductManifest {
             for (var group : itd.groups) {
                 for (var app : group.applications) {
                     try {
-                        resolveAppTemplate(app, appTemplates, itd.variables);
+                        resolveAppTemplate(app, appTemplates, itd.templateVariables);
                     } catch (Exception e) {
                         log.error("Cannot resolve application template {} from instance template {}", app.name, itd.name, e);
                     }

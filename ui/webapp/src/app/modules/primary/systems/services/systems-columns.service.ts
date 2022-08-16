@@ -57,7 +57,7 @@ export class SystemsColumnsService {
   public systemVarsColumn: BdDataColumn<SystemConfigurationDto> = {
     id: 'vars',
     name: '# Variables',
-    data: (r) => Object.keys(r.config.configVariables).length,
+    data: (r) => Object.keys(r.config.systemVariables).length,
     width: '100px',
     hint: BdDataColumnTypeHint.DETAILS,
   };

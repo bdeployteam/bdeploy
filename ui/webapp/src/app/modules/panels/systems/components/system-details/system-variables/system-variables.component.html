@@ -1,5 +1,7 @@
 <ng-template #addTemplate>
-  <div>Provide an ID and a value for the new variable.</div>
+  <div>
+    Provide an ID, a value and an optional description for the new variable.
+  </div>
   <app-bd-form-input
     [(ngModel)]="newId"
     name="id"
@@ -15,15 +17,29 @@
     label="Value"
     required
   ></app-bd-form-input>
+  <app-bd-form-input
+    [(ngModel)]="newDescription"
+    name="description"
+    label="Variable Description"
+    appTrimmed
+  ></app-bd-form-input>
 </ng-template>
 
 <ng-template #editTemplate>
-  <div>Provide a new value for <strong>{{newId}}</strong>.</div>
+  <div>
+    Provide a new value and/or description for <strong>{{newId}}</strong>.
+  </div>
   <app-bd-form-input
     [(ngModel)]="newValue"
     name="value"
     label="Value"
     required
+  ></app-bd-form-input>
+  <app-bd-form-input
+    [(ngModel)]="newDescription"
+    name="description"
+    label="Variable Description"
+    appTrimmed
   ></app-bd-form-input>
 </ng-template>
 

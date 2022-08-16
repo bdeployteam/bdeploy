@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.descriptor.template;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 /**
  * Describes a template which can be used to fill an instance with pre-configured applications.
  */
@@ -21,7 +23,8 @@ public class InstanceTemplateDescriptor {
     /**
      * A list of user-provided variables which can be used in the template.
      */
-    public List<TemplateVariable> variables = new ArrayList<>();
+    @JsonAlias("variables")
+    public List<TemplateVariable> templateVariables = new ArrayList<>();
 
     /**
      * A list of process control groups which should be created when applying the instance template.

@@ -168,7 +168,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     if (!this.template) {
       return;
     }
-    for (const v of this.template.variables) {
+    for (const v of this.template.templateVariables) {
       const value = this.variables[v.uid];
       if (value === '' || value === null || value === undefined) {
         this.hasAllVariables = false;
@@ -460,8 +460,8 @@ export class InstanceTemplatesComponent implements OnDestroy {
         this.secondStepCompleted = false;
         this.variables = {};
 
-        if (this.template.variables?.length) {
-          for (const v of this.template.variables) {
+        if (this.template.templateVariables?.length) {
+          for (const v of this.template.templateVariables) {
             this.variables[v.uid] = v.defaultValue;
           }
         }

@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.configuration.system;
 import java.util.Map;
 import java.util.TreeMap;
 
+import io.bdeploy.interfaces.configuration.VariableValue;
+
 /**
  * Represents a System, which is an encapsulation of instances within an instance group, e.g. "Productive System", "Test System",
  * etc.
@@ -29,6 +31,6 @@ public class SystemConfiguration {
     /**
      * The available globally addressable configuration variables
      */
-    public Map<String, String> configVariables = new TreeMap<>();
+    public Map<String, VariableValue> systemVariables = new TreeMap<>();
 
 }
