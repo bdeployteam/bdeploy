@@ -102,10 +102,13 @@ import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
@@ -1271,6 +1274,8 @@ public class InstanceResourceImpl implements InstanceResource {
         list.add(new InstanceAndSystemVariableResolver(ic));
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.uid, ic));
+        list.add(new ParameterValueResolver(new ApplicationParameterProvider(ic)));
+        list.add(new OsVariableResolver());
 
         HttpEndpoint processed = CommonEndpointHelper.processEndpoint(list, ep.get());
         return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath.getPreRenderable());

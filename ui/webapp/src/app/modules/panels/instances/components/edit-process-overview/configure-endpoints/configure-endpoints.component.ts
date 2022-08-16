@@ -24,11 +24,16 @@ import {
   ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  buildCompletionPrefixes,
+  buildCompletions,
+} from 'src/app/modules/core/utils/completion.utils';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
@@ -62,6 +67,9 @@ export class ConfigureEndpointsComponent
   /* template */ readonly TYPE_PORT = ParameterType.SERVER_PORT;
   /* template */ readonly TYPE_BOOLEAN = ParameterType.BOOLEAN;
 
+  /* template */ completionPrefixes = buildCompletionPrefixes();
+  /* template */ completions: ContentCompletion[];
+
   private subscription: Subscription;
 
   constructor(
@@ -80,14 +88,21 @@ export class ConfigureEndpointsComponent
 
       if (!i?.config?.config?.system || !s?.length) {
         this.system = null;
-        return;
+      } else {
+        this.system = s.find(
+          (x) =>
+            x.key.name === i.config.config.system.name &&
+            x.key.tag === i.config.config.system.tag
+        )?.config;
       }
 
-      this.system = s.find(
-        (x) =>
-          x.key.name === i.config.config.system.name &&
-          x.key.tag === i.config.config.system.tag
-      )?.config;
+      this.completions = buildCompletions(
+        this.completionPrefixes,
+        this.instance,
+        this.system,
+        this.process,
+        this.instanceEdit.stateApplications$.value
+      );
     });
 
     this.subscription.add(areas.registerDirtyable(this, 'panel'));

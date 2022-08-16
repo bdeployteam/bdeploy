@@ -78,6 +78,8 @@
                   [appLinkExpressionInputValidatorInstance]="instance"
                   [appLinkExpressionInputValidatorSystem]="system"
                   [appLinkExpressionInputValidatorType]="TYPE_PORT"
+                  [assistPrefixes]="isLink(endpoint.port) ? completionPrefixes : null"
+                  [assistValues]="isLink(endpoint.port) ? completions : null"
                 >
                   <div fxLayout="row">
                     <mat-icon
@@ -131,6 +133,8 @@
                   [appLinkExpressionInputValidatorType]="TYPE_STRING"
                   [disabled]="endpoint.authType === 'NONE'"
                   [required]="endpoint.authType !== 'NONE'"
+                  [assistPrefixes]="isLink(endpoint.authUser) ? completionPrefixes : null"
+                  [assistValues]="isLink(endpoint.authUser) ? completions : null"
                 >
                   <div fxLayout="row">
                     <mat-icon
@@ -169,6 +173,8 @@
                   [appLinkExpressionInputValidatorType]="TYPE_STRING"
                   [disabled]="endpoint.authType === 'NONE'"
                   [required]="endpoint.authType !== 'NONE'"
+                  [assistPrefixes]="isLink(endpoint.authPass) ? completionPrefixes : null"
+                  [assistValues]="isLink(endpoint.authPass) ? completions : null"
                 >
                   <div fxLayout="row">
                     <mat-icon
@@ -211,6 +217,8 @@
                   [appLinkExpressionInputValidatorInstance]="instance"
                   [appLinkExpressionInputValidatorSystem]="system"
                   [appLinkExpressionInputValidatorType]="TYPE_BOOLEAN"
+                  [assistPrefixes]="isLink(endpoint.secure) ? completionPrefixes : null"
+                  [assistValues]="isLink(endpoint.secure) ? completions : null"
                 >
                   <div fxLayout="row">
                     <mat-icon
@@ -262,6 +270,8 @@
                   [appLinkExpressionInputValidatorType]="TYPE_STRING"
                   [disabled]="!isSecure(endpoint) || endpoint.trustAll"
                   [required]="isSecure(endpoint) && !endpoint.trustAll"
+                  [assistPrefixes]="isLink(endpoint.trustStore) ? completionPrefixes : null"
+                  [assistValues]="isLink(endpoint.trustStore) ? completions : null"
                 >
                   <div fxLayout="row">
                     <mat-icon
@@ -300,6 +310,8 @@
                   [appLinkExpressionInputValidatorType]="TYPE_STRING"
                   [disabled]="!isSecure(endpoint) || endpoint.trustAll"
                   [required]="isSecure(endpoint) && !endpoint.trustAll"
+                  [assistPrefixes]="isLink(endpoint.trustStorePass) ? completionPrefixes : null"
+                  [assistValues]="isLink(endpoint.trustStorePass) ? completions : null"
                 >
                   <div fxLayout="row">
                     <mat-icon

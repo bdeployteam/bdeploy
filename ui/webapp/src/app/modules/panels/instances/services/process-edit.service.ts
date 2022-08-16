@@ -24,11 +24,13 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import {
   createLinkedValue,
   getPreRenderable,
+  getRenderPreview,
 } from 'src/app/modules/core/utils/linked-values.utils';
 import { expandVar } from 'src/app/modules/core/utils/object.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Injectable({
   providedIn: 'root',
@@ -46,7 +48,8 @@ export class ProcessEditService {
     private edit: InstanceEditService,
     private products: ProductsService,
     private areas: NavAreasService,
-    private groups: GroupsService
+    private groups: GroupsService,
+    private systems: SystemsService
   ) {
     combineLatest([
       this.areas.panelRoute$,
@@ -409,10 +412,21 @@ export class ProcessEditService {
       return false;
     }
 
-    // TODO: expand value as var as possible if expression?
-    const value = depCfg.value.linkExpression
-      ? depCfg.value.linkExpression
-      : depCfg.value.value;
+    const system =
+      this.edit.state$.value?.config?.config?.system &&
+      this.systems.systems$.value?.length
+        ? this.systems.systems$.value.find(
+            (s) =>
+              s.key.name === this.edit.state$.value.config.config.system.name
+          )
+        : null;
+
+    const value = getRenderPreview(
+      depCfg.value,
+      this.process$.value,
+      this.edit.state$.value?.config,
+      system?.config
+    );
 
     switch (param.condition.must) {
       case ParameterConditionType.EQUAL:

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -20,6 +21,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
@@ -31,6 +33,7 @@ import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.Paramete
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
+import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
@@ -39,6 +42,8 @@ import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 import io.bdeploy.interfaces.variables.ManifestVariableValidationDummyResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
 
 @Service
 public class ProductUpdateService {
@@ -54,22 +59,25 @@ public class ProductUpdateService {
             instance.config.config.configTree = targetProduct.getConfigTemplateTreeId();
         }
 
-        List<ApplicationConfiguration> allApps = new ArrayList<>();
-        for (var node : instance.config.nodeDtos) {
-            node.nodeConfiguration.product = targetProduct.getKey();
-
-            for (var app : node.nodeConfiguration.applications) {
-                allApps.add(app);
-            }
-        }
-
         if (currentApplications == null) {
             validationIssues.add(new ApplicationValidationDto(null, null,
                     "Source product not available, command line cannot be migrated. Please check parameters manually."));
         }
 
-        for (var app : allApps) {
-            updateApplication(app, allApps, targetProduct, currentApplications, targetApplications, validationIssues);
+        Map<ApplicationConfiguration, InstanceNodeConfigurationDto> allApps = new HashMap<>();
+        for (var node : instance.config.nodeDtos) {
+            node.nodeConfiguration.product = targetProduct.getKey();
+
+            for (var app : node.nodeConfiguration.applications) {
+                allApps.put(app, node);
+            }
+        }
+
+        for (var app : allApps.keySet()) {
+            var node = allApps.get(app);
+
+            updateApplication(app, allApps.keySet(), targetProduct, currentApplications, targetApplications, validationIssues,
+                    createResolver(node, app));
         }
 
         if (currentProduct == null) {
@@ -84,9 +92,10 @@ public class ProductUpdateService {
         return instance;
     }
 
-    private void updateApplication(ApplicationConfiguration app, List<ApplicationConfiguration> allApps,
+    private void updateApplication(ApplicationConfiguration app, Set<ApplicationConfiguration> allApps,
             ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
-            List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues) {
+            List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues,
+            VariableResolver resolver) {
         var current = currentApplications == null ? null
                 : currentApplications.stream().filter(a -> a.getKey().equals(app.application)).findFirst();
         var target = targetApplications.stream().filter(a -> a.getKey().getName().equals(app.application.getName())).findFirst();
@@ -122,7 +131,7 @@ public class ProductUpdateService {
             if (current != null) {
                 // update parameters, add missing, add validation notice for removed parameters
                 app.start.parameters = updateParameters(app, targetDesc, app.start.parameters, targetDesc.startCommand.parameters,
-                        current.get().getDescriptor().startCommand.parameters, allApps, validationIssues);
+                        current.get().getDescriptor().startCommand.parameters, allApps, validationIssues, resolver);
             }
         }
 
@@ -137,7 +146,7 @@ public class ProductUpdateService {
         if (targetDesc.stopCommand == null) {
             app.stop = null;
         } else {
-            app.stop = createCommand(targetDesc.stopCommand, app, targetDesc, allApps);
+            app.stop = createCommand(targetDesc.stopCommand, app, targetDesc, allApps, resolver);
         }
     }
 
@@ -201,7 +210,7 @@ public class ProductUpdateService {
 
     private List<ParameterConfiguration> updateParameters(ApplicationConfiguration app, ApplicationDescriptor appDesc,
             List<ParameterConfiguration> values, List<ParameterDescriptor> descriptors, List<ParameterDescriptor> oldDescriptors,
-            List<ApplicationConfiguration> allApps, List<ApplicationValidationDto> validation) {
+            Set<ApplicationConfiguration> allApps, List<ApplicationValidationDto> validation, VariableResolver resolver) {
 
         // 1) find parameters which have a value but are no longer in the descriptor, remove them, issue validation warning.
         Map<ParameterConfiguration, ParameterDescriptor> toReset = new HashMap<>();
@@ -230,7 +239,7 @@ public class ProductUpdateService {
 
         for (var entry : toReset.entrySet()) {
             values.remove(entry.getKey());
-            if (entry.getValue() != null && meetsCondition(app, appDesc, entry.getValue())) {
+            if (entry.getValue() != null && meetsCondition(app, appDesc, entry.getValue(), resolver)) {
                 createParameter(entry.getValue(), descriptors, values, allApps);
             }
         }
@@ -242,7 +251,7 @@ public class ProductUpdateService {
             }
 
             var val = values.stream().filter(p -> p.uid.equals(desc.uid)).findFirst();
-            if (val.isEmpty() && meetsCondition(app, appDesc, desc)) {
+            if (val.isEmpty() && meetsCondition(app, appDesc, desc, resolver)) {
                 // need one.
                 createParameter(desc, descriptors, values, allApps);
 
@@ -282,7 +291,7 @@ public class ProductUpdateService {
     }
 
     private void createParameter(ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
-            List<ParameterConfiguration> values, List<ApplicationConfiguration> allApps) {
+            List<ParameterConfiguration> values, Set<ApplicationConfiguration> allApps) {
         ParameterConfiguration cfg = new ParameterConfiguration();
         cfg.uid = desc.uid;
         cfg.value = desc.defaultValue;
@@ -333,14 +342,14 @@ public class ProductUpdateService {
     }
 
     private CommandConfiguration createCommand(ExecutableDescriptor desc, ApplicationConfiguration app,
-            ApplicationDescriptor appDesc, List<ApplicationConfiguration> allApps) {
+            ApplicationDescriptor appDesc, Set<ApplicationConfiguration> allApps, VariableResolver resolver) {
         CommandConfiguration result = new CommandConfiguration();
 
         result.executable = desc.launcherPath;
 
         for (var para : desc.parameters) {
             // same as in the TS code, this assumes that the parameter referenced in the condition is *before* the conditional.
-            if (para.mandatory && meetsCondition(app, appDesc, para)) {
+            if (para.mandatory && meetsCondition(app, appDesc, para, resolver)) {
                 createParameter(para, desc.parameters, result.parameters, allApps);
             }
         }
@@ -380,15 +389,7 @@ public class ProductUpdateService {
                 // update variables in case we modified them in the instance config.
                 node.nodeConfiguration.mergeVariables(instance.config.config, system);
 
-                CompositeResolver res = new CompositeResolver();
-                res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
-                res.add(new InstanceVariableResolver(node.nodeConfiguration, null, "1"));
-                res.add(new ApplicationVariableResolver(process));
-                res.add(new ApplicationParameterValueResolver(process.uid, node.nodeConfiguration));
-                ManifestVariableValidationDummyResolver dummy = new ManifestVariableValidationDummyResolver();
-                res.add(new ManifestSelfResolver(process.application, dummy));
-                res.add(new DeploymentPathValidationDummyResolver());
-                res.add(dummy);
+                VariableResolver res = createResolver(node, process);
 
                 // check all parameters
                 result.addAll(validateCommand(process, desc.get(), process.start, desc.get().startCommand, res));
@@ -397,6 +398,22 @@ public class ProductUpdateService {
         }
 
         return result;
+    }
+
+    private VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
+        CompositeResolver res = new CompositeResolver();
+        res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
+        res.add(new InstanceVariableResolver(node.nodeConfiguration, null, "1"));
+        res.add(new ApplicationVariableResolver(process));
+        res.add(new ApplicationParameterValueResolver(process.uid, node.nodeConfiguration));
+        ManifestVariableValidationDummyResolver dummy = new ManifestVariableValidationDummyResolver();
+        res.add(new ManifestSelfResolver(process.application, dummy));
+        res.add(new DeploymentPathValidationDummyResolver());
+        res.add(dummy);
+        res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
+        res.add(new OsVariableResolver());
+
+        return res;
     }
 
     private List<ApplicationValidationDto> validateCommand(ApplicationConfiguration process, ApplicationDescriptor appDesc,
@@ -425,7 +442,7 @@ public class ProductUpdateService {
             ParameterConfiguration paramValue, ParameterDescriptor paramDesc, List<ApplicationValidationDto> result,
             VariableResolver resolver) {
         // check condition.
-        if (!meetsCondition(process, appDesc, paramDesc)) {
+        if (!meetsCondition(process, appDesc, paramDesc, resolver)) {
             if (paramValue != null && paramValue.value != null) {
                 result.add(
                         new ApplicationValidationDto(process.uid, paramDesc.uid, "Parameter does not meet required condition"));
@@ -492,7 +509,8 @@ public class ProductUpdateService {
         }
     }
 
-    private boolean meetsCondition(ApplicationConfiguration process, ApplicationDescriptor desc, ParameterDescriptor param) {
+    private boolean meetsCondition(ApplicationConfiguration process, ApplicationDescriptor desc, ParameterDescriptor param,
+            VariableResolver resolver) {
         if (param.condition == null || param.condition.parameter == null) {
             return true;
         }
@@ -502,8 +520,12 @@ public class ProductUpdateService {
                 .concat(process.start != null ? process.start.parameters.stream() : Stream.of(),
                         process.stop != null ? process.stop.parameters.stream() : Stream.of())
                 .filter(p -> p.uid.equals(param.condition.parameter)).findFirst().orElse(null);
-        if (target != null) {
-            value = target.value.getPreRenderable();
+        if (target != null && target.value != null) {
+            if (target.value.linkExpression != null) {
+                value = TemplateHelper.process(target.value.linkExpression, resolver);
+            } else {
+                value = target.value.value;
+            }
         }
 
         var targetDesc = Stream
@@ -511,7 +533,7 @@ public class ProductUpdateService {
                         desc.stopCommand != null ? desc.stopCommand.parameters.stream() : Stream.of())
                 .filter(p -> p.uid.equals(param.condition.parameter)).findFirst().orElse(null);
 
-        if (targetDesc == null || !meetsCondition(process, desc, targetDesc)) {
+        if (targetDesc == null || !meetsCondition(process, desc, targetDesc, resolver)) {
             return false; // target parameter does not meet condition, so we can't either.
         }
 

@@ -31,6 +31,7 @@ import {
   ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
   ACTION_OK,
@@ -41,6 +42,10 @@ import {
   BdSearchable,
   SearchService,
 } from 'src/app/modules/core/services/search.service';
+import {
+  buildCompletionPrefixes,
+  buildCompletions,
+} from 'src/app/modules/core/utils/completion.utils';
 import {
   createLinkedValue,
   getPreRenderable,
@@ -90,6 +95,10 @@ export class ConfigProcessParamGroupComponent
   /* template */ system: SystemConfiguration;
   /* template */ linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
 
+  /* template */ completions: ContentCompletion[];
+  /* template */ completionPrefixes: ContentCompletion[] =
+    buildCompletionPrefixes();
+
   @Input() dialog: BdDialogComponent;
 
   @ViewChild(HistoryProcessConfigComponent)
@@ -113,6 +122,7 @@ export class ConfigProcessParamGroupComponent
 
   constructor(
     public edit: ProcessEditService,
+    private instanceEdit: InstanceEditService,
     bop: BreakpointObserver,
     private searchService: SearchService,
     systems: SystemsService,
@@ -206,6 +216,7 @@ export class ConfigProcessParamGroupComponent
       r.push(this.custom);
 
       this.groups$.next(r);
+      this.completions = this.buildCompletions();
     });
 
     this.subscription.add(
@@ -234,6 +245,7 @@ export class ConfigProcessParamGroupComponent
 
           if (!i?.config?.config?.system || !s?.length) {
             this.system = null;
+            this.completions = this.buildCompletions();
             return;
           }
 
@@ -242,11 +254,22 @@ export class ConfigProcessParamGroupComponent
               x.key.name === i.config.config.system.name &&
               x.key.tag === i.config.config.system.tag
           )?.config;
+          this.completions = this.buildCompletions();
         }
       )
     );
 
     this.subscription.add(this.searchService.register(this));
+  }
+
+  private buildCompletions(): ContentCompletion[] {
+    return buildCompletions(
+      this.completionPrefixes,
+      this.instance,
+      this.system,
+      this.process,
+      this.instanceEdit.stateApplications$.value
+    );
   }
 
   private checkFormsStatus() {
@@ -346,6 +369,9 @@ export class ConfigProcessParamGroupComponent
       p.value = null;
     }
     this.updatePreview$.next(true);
+
+    // rebuild completions if parameters changed.
+    this.completions = this.buildCompletions();
   }
 
   /* template */ getAllValueUids() {
@@ -367,7 +393,7 @@ export class ConfigProcessParamGroupComponent
     param: ParameterPair,
     template: TemplateRef<any>
   ) {
-    // TODO: make sure this is only called when not linkExpression
+    // may not be (and is not) called for linkExpression (different editor).
     const parameters = this.edit.process$.value.start.parameters;
     const paramIndex = parameters.findIndex((p) => p.uid === param.value.uid);
     this.customTemp = {
@@ -553,6 +579,16 @@ export class ConfigProcessParamGroupComponent
   private doUpdateConditionals(p: ParameterPair) {
     const uid = p.descriptor ? p.descriptor.uid : p.value.uid;
     for (const grp of this.groups$.value) {
+      for (const pair of grp.pairs) {
+        // in case the value of a parameter is *referencing* this parameter, we need to update conditionals for the other parameter as well.
+        if (
+          pair.value?.value?.linkExpression &&
+          pair.value?.value?.linkExpression?.indexOf(':' + uid + '}}') > 0
+        ) {
+          // MIGHT be a reference to another application, but we update just in case.
+          this.doUpdateConditionals(pair);
+        }
+      }
       for (const pair of grp.pairs) {
         if (pair.descriptor?.condition?.parameter === uid) {
           // the parameter is conditional on the changed parameter.

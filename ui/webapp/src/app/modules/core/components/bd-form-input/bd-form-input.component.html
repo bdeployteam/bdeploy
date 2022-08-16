@@ -1,6 +1,17 @@
 <div fxLayout="column">
-  <mat-form-field appearance="fill" class="bd-form-input-form-field">
+  <mat-form-field
+    #formField
+    appearance="fill"
+    class="bd-form-input-form-field"
+    appClickStopPropagation
+  >
     <mat-label>{{ label }}</mat-label>
+    <app-bd-content-assist-menu
+      #assistContent
+      [attachTo]="elementRef.nativeElement"
+      [values]="assistValues"
+      [prefixes]="assistPrefixes"
+    ></app-bd-content-assist-menu>
     <input
       matInput
       [matAutocomplete]="auto"
@@ -13,6 +24,7 @@
       [disabled]="disabled || passwordLock"
       [type]="type"
       [errorStateMatcher]="this"
+      [appBdContentAssist]="assistContent"
     />
     <mat-autocomplete #auto="matAutocomplete">
       <mat-option

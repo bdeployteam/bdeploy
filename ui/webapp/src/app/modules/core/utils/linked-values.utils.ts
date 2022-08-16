@@ -3,9 +3,11 @@ import {
   ApplicationDto,
   InstanceConfigurationDto,
   LinkedValueConfiguration,
+  OperatingSystem,
   ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
+import { getAppOs } from './manifest.utils';
 
 export function createLinkedValue(val: string): LinkedValueConfiguration {
   return !!val && val.indexOf('{{') != -1
@@ -23,6 +25,8 @@ export class LinkVariable {
   preview: string;
   link: string;
   group: string;
+  matches?: (string) => boolean;
+  expand?: (string) => string;
 }
 
 export function getRenderPreview(
@@ -48,19 +52,30 @@ export function getRenderPreview(
 
 export function expand(val: string, vars: LinkVariable[]) {
   let exp = val;
+  let count = 0;
 
   while (exp && exp.match(/{{[^}]+}}/)) {
     const match = exp.match(/{{[^}]+}}/);
     const varName = match[0];
-    const varVal = vars.find((v) => v.link == varName);
+    const varVal = vars.find((v) => {
+      if (v.matches) {
+        return v.matches(varName);
+      }
+      return v.link == varName;
+    });
 
     let x = exp;
     if (varVal) {
-      x = exp.replace(match[0], varVal.preview);
+      if (varVal.expand) {
+        x = exp.replace(match[0], varVal.expand(varName));
+      } else {
+        x = exp.replace(match[0], varVal.preview);
+      }
     }
 
-    // found *some* expansion but could not expand any further.
-    if (x === exp) {
+    // found *some* expansion but could not expand any further, either because no value
+    // was found, or because of a circular reference.
+    if (x === exp || count++ > 20) {
       return exp;
     }
     exp = x;
@@ -176,7 +191,7 @@ export function gatherPathExpansions(): LinkVariable[] {
     group: null,
   });
   result.push({
-    name: 'CONFIG',
+    name: 'P:CONFIG',
     description: 'Resolved path to the configuration folder.',
     preview: '/deploy/instance/bin/1/config',
     link: '{{P:CONFIG}}',
@@ -293,7 +308,7 @@ export function gatherSpecialExpansions(
     name: 'I:PRODUCT_TAG',
     description: `The instance's configured product version`,
     preview: instance?.config?.product?.tag,
-    link: '{{I:NAME}}',
+    link: '{{I:PRODUCT_TAG}}',
     group: null,
   });
   result.push({
@@ -324,6 +339,34 @@ export function gatherSpecialExpansions(
     preview: '<hostname>',
     link: '{{H:HOSTNAME}}',
     group: null,
+  });
+
+  result.push({
+    name: 'WINDOWS',
+    description:
+      'Expands to the provided value only in case of the target node running Windows.',
+    preview: '<windows-value>',
+    link: '{{WINDOWS:<windows-value>}}',
+    group: null,
+    matches: (s) => s.startsWith('{{WINDOWS:'),
+    expand: (s) =>
+      getAppOs(process.application) === OperatingSystem.WINDOWS
+        ? s.substring('{{WINDOWS:'.length, s.indexOf('}}'))
+        : '',
+  });
+
+  result.push({
+    name: 'LINUX',
+    description:
+      'Expands to the provided value only in case of the target node running Linux.',
+    preview: '<linux-value>',
+    link: '{{LINUX:<linux-value>}}',
+    group: null,
+    matches: (s) => s.startsWith('{{LINUX:'),
+    expand: (s) =>
+      getAppOs(process.application) === OperatingSystem.LINUX
+        ? s.substring('{{LINUX:'.length, s.indexOf('}}'))
+        : '',
   });
 
   return result;

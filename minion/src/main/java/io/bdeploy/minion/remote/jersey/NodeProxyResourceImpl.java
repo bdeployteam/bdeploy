@@ -27,12 +27,15 @@ import io.bdeploy.interfaces.remote.NodeProxyResource;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper;
 import io.bdeploy.interfaces.remote.ProxiedRequestWrapper.ProxiedRequestCookie;
 import io.bdeploy.interfaces.remote.ProxiedResponseWrapper;
+import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.minion.MinionRoot;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
@@ -84,6 +87,8 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
         list.add(new DeploymentPathResolver(dpp));
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.uid, inm.getConfiguration()));
+        list.add(new ParameterValueResolver(new ApplicationParameterProvider(inm.getConfiguration())));
+        list.add(new OsVariableResolver());
 
         HttpEndpoint processedEndpoint = CommonEndpointHelper.processEndpoint(list, wrapper.endpoint);
 
