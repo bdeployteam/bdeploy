@@ -67,6 +67,7 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.Threads;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.UpdateHelper;
@@ -93,6 +94,7 @@ import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
+import io.bdeploy.interfaces.variables.LocalHostnameResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 import io.bdeploy.interfaces.variables.ManifestVariableResolver;
@@ -781,6 +783,8 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // unzip the downloaded ZIP containing the configuration files.
         ZipHelper.unzip(cfgZip, cfgPath);
 
+        TemplateHelper.processFileTemplates(cfgPath, createResolver(clientAppCfg));
+
         try {
             // record the proper ID in the config check file.
             Files.write(cfgPath.resolve(CONFIG_DIR_CHECK_FILE), Collections.singletonList(clientAppCfg.configTree.getId()));
@@ -876,38 +880,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
     private Process launchApplication(ClientApplicationConfiguration clientCfg) {
         log.info("Launching application.");
         ApplicationConfiguration appCfg = clientCfg.appConfig;
-        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
 
         MasterRootResource master = ResourceProvider.getVersionedResource(clickAndStart.host, MasterRootResource.class, null);
         MasterNamedResource namedMaster = master.getNamedMaster(clickAndStart.groupId);
         namedMaster.logClientStart(clickAndStart.instanceId, clickAndStart.applicationId, getHostname("unknown"));
 
-        // General resolvers
-        CompositeResolver resolvers = new CompositeResolver();
-        resolvers.add(new InstanceAndSystemVariableResolver(clientCfg.instanceConfig));
-        resolvers.add(new ApplicationVariableResolver(appCfg));
-        resolvers.add(new DelayedVariableResolver(resolvers));
-        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, pathProvider, clientCfg.activeTag));
-        resolvers.add(new OsVariableResolver());
-        resolvers.add(new EnvironmentVariableResolver());
-        resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
-
-        // Enable resolving of path variables
-        resolvers.add(new DeploymentPathResolver(pathProvider));
-
-        // Enable resolving of manifest variables
-        Map<Key, Path> pooledSoftware = new HashMap<>();
-        pooledSoftware.put(appCfg.application, poolDir.resolve(appCfg.application.directoryFriendlyName()));
-        for (Manifest.Key key : clientCfg.resolvedRequires) {
-            pooledSoftware.put(key, poolDir.resolve(key.directoryFriendlyName()));
-        }
-        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(pathProvider, pooledSoftware)));
-
-        // Resolvers that are using the general ones to actually do the work
-        CompositeResolver appSpecificResolvers = new CompositeResolver();
-        appSpecificResolvers.add(new ApplicationParameterValueResolver(appCfg.uid, clientCfg.instanceConfig));
-        appSpecificResolvers.add(new ManifestSelfResolver(appCfg.application, resolvers));
-        appSpecificResolvers.add(resolvers);
+        VariableResolver appSpecificResolvers = createResolver(clientCfg);
 
         // Create the actual start command and replace all defined variables
         ProcessConfiguration pc = appCfg.renderDescriptor(appSpecificResolvers);
@@ -931,6 +909,42 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start " + appCfg.uid, e);
         }
+    }
+
+    private CompositeResolver createResolver(ClientApplicationConfiguration clientCfg) {
+        // General resolvers
+        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
+        CompositeResolver resolvers = new CompositeResolver();
+        resolvers.add(new InstanceAndSystemVariableResolver(clientCfg.instanceConfig));
+        resolvers.add(new ApplicationVariableResolver(clientCfg.appConfig));
+        resolvers.add(new DelayedVariableResolver(resolvers));
+        resolvers.add(new InstanceVariableResolver(clientCfg.instanceConfig, pathProvider, clientCfg.activeTag));
+        resolvers.add(new OsVariableResolver());
+        resolvers.add(new EnvironmentVariableResolver());
+        resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
+
+        // Enable resolving of path variables
+        resolvers.add(new DeploymentPathResolver(pathProvider));
+
+        // Enable resolving of manifest variables
+        Map<Key, Path> pooledSoftware = new HashMap<>();
+        pooledSoftware.put(clientCfg.appConfig.application,
+                poolDir.resolve(clientCfg.appConfig.application.directoryFriendlyName()));
+        for (Manifest.Key key : clientCfg.resolvedRequires) {
+            pooledSoftware.put(key, poolDir.resolve(key.directoryFriendlyName()));
+        }
+        resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(pathProvider, pooledSoftware)));
+
+        // Resolver for local hostname - with client warning enabled.
+        resolvers.add(new LocalHostnameResolver(true));
+
+        // Resolvers that are using the general ones to actually do the work
+        CompositeResolver appSpecificResolvers = new CompositeResolver();
+        appSpecificResolvers.add(new ApplicationParameterValueResolver(clientCfg.appConfig.uid, clientCfg.instanceConfig));
+        appSpecificResolvers.add(new ManifestSelfResolver(clientCfg.appConfig.application, resolvers));
+        appSpecificResolvers.add(resolvers);
+
+        return appSpecificResolvers;
     }
 
     /**

@@ -1,8 +1,6 @@
 package io.bdeploy.dcu;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +14,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,6 @@ import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
-import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
@@ -255,7 +251,7 @@ public class InstanceNodeController {
         resolvers.add(new ManifestVariableResolver(new ManifestRefPathProvider(paths, exportedPaths)));
 
         // render configuration files.
-        processConfigurationTemplates(paths.get(SpecialDirectory.CONFIG), resolvers);
+        TemplateHelper.processFileTemplates(paths.get(SpecialDirectory.CONFIG), resolvers);
 
         // render the PCU information.
         ProcessGroupConfiguration processGroupConfig = dc.renderDescriptor(resolvers, dc);
@@ -313,42 +309,6 @@ public class InstanceNodeController {
         }
 
         return result;
-    }
-
-    private void processConfigurationTemplates(Path path, VariableResolver resolver) {
-        if (!Files.isDirectory(path)) {
-            return; // nothing to do.
-        }
-
-        try (Stream<Path> allPaths = Files.walk(path)) {
-            allPaths.filter(Files::isRegularFile).forEach(p -> processConfigurationFile(p, resolver));
-        } catch (IOException e) {
-            log.error("Cannot walk configuration file tree", e);
-        }
-    }
-
-    private void processConfigurationFile(Path file, VariableResolver resolver) {
-        try (InputStream check = Files.newInputStream(file)) {
-            if (!StreamHelper.isTextFile(check)) {
-                return;
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot check if file is a text file: " + file, e);
-        }
-
-        try {
-            String content = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
-            String processed = TemplateHelper.process(content, resolver);
-            Files.write(file, processed.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
-        } catch (Exception e) {
-            // might have missing variable references, since we only 'see' what is on our
-            // node. Applications from other nodes are not available.
-            log.warn("Cannot process configuration file: {}: {}", file, e.toString());
-            if (log.isDebugEnabled()) {
-                log.debug("Error details", e);
-            }
-        }
     }
 
     /**

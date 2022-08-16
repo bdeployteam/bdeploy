@@ -1,12 +1,24 @@
 package io.bdeploy.common.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TemplateHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(TemplateHelper.class);
 
     private static final String PATTERN_START = "{{";
     private static final String PATTERN_END = "}}";
@@ -146,6 +158,46 @@ public class TemplateHelper {
         // Append remaining content of the input
         builder.append(value.substring(currentStart, value.length()));
         return builder.toString();
+    }
+
+    /**
+     * @param path a folder containing files to recursively read/expand templates/write.
+     * @param resolver the {@link VariableResolver} used to resolve all references.
+     */
+    public static void processFileTemplates(Path path, VariableResolver resolver) {
+        if (!Files.isDirectory(path)) {
+            return; // nothing to do.
+        }
+
+        try (Stream<Path> allPaths = Files.walk(path)) {
+            allPaths.filter(Files::isRegularFile).forEach(p -> processFileTemplate(p, resolver));
+        } catch (IOException e) {
+            log.error("Cannot walk configuration file tree", e);
+        }
+    }
+
+    private static void processFileTemplate(Path file, VariableResolver resolver) {
+        try (InputStream check = Files.newInputStream(file)) {
+            if (!StreamHelper.isTextFile(check)) {
+                return;
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot check if file is a text file: " + file, e);
+        }
+
+        try {
+            String content = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
+            String processed = TemplateHelper.process(content, resolver);
+            Files.write(file, processed.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
+        } catch (Exception e) {
+            // might have missing variable references, since we only 'see' what is on our
+            // node. Applications from other nodes are not available.
+            log.warn("Cannot process configuration file: {}: {}", file, e.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Error details", e);
+            }
+        }
     }
 
 }
