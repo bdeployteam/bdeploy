@@ -1,6 +1,16 @@
 import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { Observable, of, Subscription, tap } from 'rxjs';
+import { NgForm } from '@angular/forms';
+import { cloneDeep } from 'lodash-es';
+import { combineLatest, Observable, of, Subscription, tap } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
+import {
+  ApplicationDto,
+  InstanceConfigurationDto,
+  ParameterType,
+  SystemConfiguration,
+  VariableValue,
+} from 'src/app/models/gen.dtos';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
   ACTION_OK,
@@ -9,12 +19,19 @@ import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dia
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { PluginService } from 'src/app/modules/core/services/plugin.service';
+import {
+  buildCompletionPrefixes,
+  buildCompletions,
+} from 'src/app/modules/core/utils/completion.utils';
+import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 class ConfigVariable {
   name: string;
-  value: string;
-  description: string;
+  value: VariableValue;
 }
 
 const colName: BdDataColumn<ConfigVariable> = {
@@ -27,13 +44,13 @@ const colName: BdDataColumn<ConfigVariable> = {
 const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
-  data: (r) => r.value,
+  data: (r) => getPreRenderable(r.value.value),
 };
 
 const colDesc: BdDataColumn<ConfigVariable> = {
   id: 'description',
   name: 'Description',
-  data: (r) => r.description,
+  data: (r) => r.value.description,
 };
 
 @Component({
@@ -73,9 +90,17 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
   ];
 
   /* template */ newId: string;
-  /* template */ newValue: string;
-  /* template */ newDescription: string;
+  /* template */ newValue: VariableValue;
   /* template */ newUsedIds: string[] = [];
+
+  /* template */ instance: InstanceConfigurationDto;
+  /* template */ system: SystemConfiguration;
+  /* template */ apps: ApplicationDto[];
+  /* template */ typeValues: ParameterType[] = Object.values(ParameterType);
+  /* template */ editorValues: string[];
+
+  /* template */ completionPrefixes = buildCompletionPrefixes();
+  /* template */ completions: ContentCompletion[];
 
   private subscription: Subscription;
 
@@ -84,10 +109,49 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
 
   @ViewChild('editTemplate') editTemplate: TemplateRef<any>;
 
-  constructor(private edit: InstanceEditService, areas: NavAreasService) {
-    this.subscription = this.edit.state$.subscribe((c) => {
-      if (c) {
-        this.buildVariables();
+  @ViewChild('addForm', { static: false }) addForm: NgForm;
+  @ViewChild('editForm', { static: false }) editForm: NgForm;
+
+  constructor(
+    public edit: InstanceEditService,
+    public groups: GroupsService,
+    systems: SystemsService,
+    areas: NavAreasService,
+    plugins: PluginService
+  ) {
+    this.subscription = combineLatest([
+      this.edit.state$,
+      this.edit.stateApplications$,
+      systems.systems$,
+    ]).subscribe(([instance, apps, systems]) => {
+      if (instance?.config) {
+        this.buildVariables(instance.config);
+
+        this.instance = instance.config;
+        this.apps = apps;
+
+        if (instance?.config?.config?.system && systems?.length) {
+          this.system = systems.find(
+            (s) => s.key.name === instance.config.config.system.name
+          )?.config;
+        }
+
+        this.completions = buildCompletions(
+          this.completionPrefixes,
+          this.instance,
+          this.system,
+          null,
+          this.apps
+        );
+
+        plugins
+          .getAvailableEditorTypes(
+            groups.current$?.value?.name,
+            instance.config.config.product
+          )
+          .subscribe((editors) => {
+            this.editorValues = editors;
+          });
       }
     });
 
@@ -98,23 +162,18 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private buildVariables() {
+  private buildVariables(config: InstanceConfigurationDto) {
     if (
-      !this.edit.state$.value?.config?.config?.instanceVariables ||
-      !Object.keys(this.edit.state$.value.config.config.instanceVariables)
-        .length
+      !config?.config?.instanceVariables ||
+      !Object.keys(config.config.instanceVariables).length
     ) {
       this.records = [];
       return;
     }
 
-    this.records = Object.keys(
-      this.edit.state$.value.config.config.instanceVariables
-    ).map((k) => ({
+    this.records = Object.keys(config.config.instanceVariables).map((k) => ({
       name: k,
-      value: this.edit.state$.value.config.config.instanceVariables[k]?.value,
-      description:
-        this.edit.state$.value.config.config.instanceVariables[k]?.description,
+      value: config.config.instanceVariables[k],
     }));
   }
 
@@ -136,19 +195,24 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
 
   /* template */ onAdd(templ: TemplateRef<any>) {
     this.newUsedIds = this.records.map((r) => r.name);
+    this.newValue = {
+      type: ParameterType.STRING,
+      customEditor: null,
+      value: { value: '', linkExpression: null },
+      description: '',
+    };
     this.dialog
       .message({
         header: 'Add Variable',
         icon: 'add',
         template: templ,
-        validation: () => !!this.newId?.length,
+        validation: () => !!this.addForm && this.addForm.valid,
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        const desc = this.newDescription;
-        this.newId = this.newValue = this.newDescription = null;
+        this.newId = this.newValue = null;
 
         if (!r) {
           return;
@@ -158,45 +222,38 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
           this.edit.state$.value.config.config.instanceVariables = {};
         }
 
-        this.edit.state$.value.config.config.instanceVariables[id] = {
-          value: value,
-          description: desc,
-        };
-        this.buildVariables();
+        this.edit.state$.value.config.config.instanceVariables[id] = value;
+        this.buildVariables(this.edit.state$.value.config);
       });
   }
 
   /* template */ onEdit(variable: ConfigVariable) {
     this.newId = variable.name;
-    this.newValue = variable.value;
-    this.newDescription = variable.description;
+    this.newValue = cloneDeep(variable.value);
     this.dialog
       .message({
         header: 'Edit Variable',
         icon: 'edit',
         template: this.editTemplate,
+        validation: () => !!this.editForm && this.editForm.valid,
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        const desc = this.newDescription;
-        this.newId = this.newValue = this.newDescription = null;
+        this.newId = this.newValue = null;
 
         if (!r) {
           return;
         }
 
-        this.edit.state$.value.config.config.instanceVariables[id] = {
-          value: value,
-          description: desc,
-        };
-        this.buildVariables();
+        this.edit.state$.value.config.config.instanceVariables[id] = value;
+        this.buildVariables(this.edit.state$.value.config);
       });
   }
 
   private onDelete(r: ConfigVariable) {
     delete this.edit.state$.value.config.config.instanceVariables[r.name];
-    this.buildVariables();
+    this.buildVariables(this.edit.state$.value.config);
   }
 }

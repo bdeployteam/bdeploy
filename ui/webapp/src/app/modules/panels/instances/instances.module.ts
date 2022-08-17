@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
@@ -29,14 +28,11 @@ import { DataFileEditorComponent } from './components/data-file-editor/data-file
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { DataFilesBulkManipulationComponent } from './components/data-files-buld-maipulation/data-files-bulk-manipulation.component';
 import { EditControlGroupComponent } from './components/edit-control-group/edit-control-group.component';
-import { ConfigProcessLinkExpressionComponent } from './components/edit-process-overview/config-process-link-expression/config-process-link-expression.component';
 import { ConfigureEndpointsComponent } from './components/edit-process-overview/configure-endpoints/configure-endpoints.component';
 import { ConfigProcessHeaderComponent } from './components/edit-process-overview/configure-process/config-process-header/config-process-header.component';
 import { ConfigProcessParamGroupComponent } from './components/edit-process-overview/configure-process/config-process-param-group/config-process-param-group.component';
 import { ConfigureProcessComponent } from './components/edit-process-overview/configure-process/configure-process.component';
-import { CustomEditorComponent } from './components/edit-process-overview/configure-process/custom-editor/custom-editor.component';
 import { EditProcessOverviewComponent } from './components/edit-process-overview/edit-process-overview.component';
-import { ExpressionToggleComponent } from './components/edit-process-overview/expression-toggle/expression-toggle.component';
 import { MoveProcessComponent } from './components/edit-process-overview/move-process/move-process.component';
 import { HistoryCompareSelectComponent } from './components/history-compare-select/history-compare-select.component';
 import { HistoryCompareComponent } from './components/history-compare/history-compare.component';
@@ -84,7 +80,7 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { LinkExpressionInputValidatorDirective } from './validators/link-expression-input-validator.directive';
+import { PortTypeCellComponent } from './components/instance-settings/ports/port-type-cell/port-type-cell.component';
 
 @NgModule({
   declarations: [
@@ -123,7 +119,6 @@ import { LinkExpressionInputValidatorDirective } from './validators/link-express
     ConfigDescElementComponent,
     ConfigProcessParamGroupComponent,
     ParamDescCardComponent,
-    CustomEditorComponent,
     BannerComponent,
     MoveProcessComponent,
     ImportInstanceComponent,
@@ -155,9 +150,7 @@ import { LinkExpressionInputValidatorDirective } from './validators/link-express
     CustomNodeFilterPipe,
     PinnedParameterValueComponent,
     InstanceVariablesComponent,
-    ConfigProcessLinkExpressionComponent,
-    LinkExpressionInputValidatorDirective,
-    ExpressionToggleComponent,
+    PortTypeCellComponent,
   ],
   imports: [
     CommonModule,
@@ -176,7 +169,6 @@ import { LinkExpressionInputValidatorDirective } from './validators/link-express
     MatButtonModule,
     MatRadioModule,
     MatTabsModule,
-    MatButtonToggleModule,
   ],
 })
 export class InstancesModule {}

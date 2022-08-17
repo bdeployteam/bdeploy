@@ -28,7 +28,6 @@ import {
   LinkedValueConfiguration,
   ParameterConfiguration,
   ParameterDescriptor,
-  ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
@@ -49,8 +48,8 @@ import {
 import {
   createLinkedValue,
   getPreRenderable,
-  getRenderPreview,
 } from 'src/app/modules/core/utils/linked-values.utils';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../../services/process-edit.service';
@@ -63,8 +62,6 @@ interface ParameterPair {
   descriptor: ParameterDescriptor;
   value: ParameterConfiguration;
 
-  booleanValue: boolean;
-  passwordLock: boolean;
   editorEnabled: boolean;
 }
 
@@ -90,6 +87,7 @@ export class ConfigProcessParamGroupComponent
   /* template */ search: string;
   /* template */ process: ApplicationConfiguration;
   /* template */ app: ApplicationDto;
+  /* template */ globalsAllowed: boolean;
 
   /* template */ instance: InstanceConfigurationDto;
   /* template */ system: SystemConfiguration;
@@ -122,20 +120,22 @@ export class ConfigProcessParamGroupComponent
 
   constructor(
     public edit: ProcessEditService,
-    private instanceEdit: InstanceEditService,
     bop: BreakpointObserver,
     private searchService: SearchService,
     systems: SystemsService,
-    instances: InstanceEditService
+    private instances: InstanceEditService,
+    public groups: GroupsService
   ) {
     this.subscription = combineLatest([
       this.edit.process$,
       this.edit.application$,
-    ]).subscribe(([process, app]) => {
+      this.instances.globalsMigrated$,
+    ]).subscribe(([process, app, globalsMigrated]) => {
       if (!process || !app) {
         this.groups$.next(null);
         return;
       }
+      this.globalsAllowed = !globalsMigrated; // as long as not migrated, we allow globals
       this.process = process;
       this.app = app;
       // group all parameter descriptors and configurations together for simple iteration in the template.
@@ -156,8 +156,6 @@ export class ConfigProcessParamGroupComponent
         const pair: ParameterPair = {
           descriptor: pd,
           value: null,
-          booleanValue: null,
-          passwordLock: pd.type === ParameterType.PASSWORD,
           editorEnabled: true, // used to lock once custom editor is loaded.
         };
         grp.pairs.push(pair);
@@ -166,9 +164,6 @@ export class ConfigProcessParamGroupComponent
         const val = process.start?.parameters?.find((p) => p.uid === pd.uid);
         if (val) {
           pair.value = val;
-          if (pd.type === ParameterType.BOOLEAN) {
-            pair.booleanValue = val.value.value === 'true';
-          }
         }
       }
 
@@ -205,8 +200,6 @@ export class ConfigProcessParamGroupComponent
           this.custom.pairs.push({
             descriptor: null,
             value: pv,
-            booleanValue: null,
-            passwordLock: false,
             editorEnabled: true,
           });
         }
@@ -268,7 +261,7 @@ export class ConfigProcessParamGroupComponent
       this.instance,
       this.system,
       this.process,
-      this.instanceEdit.stateApplications$.value
+      this.instances.stateApplications$.value
     );
   }
 
@@ -312,7 +305,7 @@ export class ConfigProcessParamGroupComponent
         this.edit.application$.value.descriptor.startCommand.parameters;
 
       let initialValue = p.descriptor?.defaultValue;
-      if (p.descriptor.global) {
+      if (p.descriptor.global && this.globalsAllowed) {
         // need to lookup a potential already existing global value.
         const global = this.edit.getGlobalParameter(p.descriptor.uid);
         if (global) {
@@ -480,9 +473,7 @@ export class ConfigProcessParamGroupComponent
         pinned: false,
         preRendered: [],
       },
-      booleanValue: false,
       editorEnabled: true,
-      passwordLock: false,
     };
     this.doPreRender(param);
     this.custom.pairs.push(param);
@@ -518,54 +509,7 @@ export class ConfigProcessParamGroupComponent
     p: ParameterPair,
     val: LinkedValueConfiguration
   ) {
-    p.value.value.value = val.value;
-    p.value.value.linkExpression = val.linkExpression;
-    this.doPreRender(p);
-
-    // need to make sure we add/remove parameters which meet/don't meet their condition.
-    this.doUpdateConditionals(p);
-  }
-
-  /* template */ doChangeValue(p: ParameterPair, val: string) {
-    let reset = false;
-
-    // check type;
-    if (p.descriptor) {
-      switch (p.descriptor.type) {
-        case ParameterType.BOOLEAN:
-          if (val !== 'true' && val !== 'false') {
-            console.log(
-              `Parameter ${p.descriptor.name} is a boolean, but the value is not true or false, resetting to default.`
-            );
-            reset = true;
-          }
-          break;
-        case ParameterType.NUMERIC:
-        case ParameterType.CLIENT_PORT:
-        case ParameterType.SERVER_PORT:
-          if (isNaN(Number(val))) {
-            console.log(
-              `Parameter ${p.descriptor.name} value is not a number: ${val}, resetting to default.`
-            );
-            reset = true;
-          }
-          break;
-      }
-    }
-
-    if (reset) {
-      p.value.value = p.descriptor.defaultValue; // descriptor cannot be null;
-    } else {
-      p.value.value = { value: val, linkExpression: null };
-    }
-    this.doPreRender(p);
-
-    // need to make sure we add/remove parameters which meet/don't meet their condition.
-    this.doUpdateConditionals(p);
-  }
-
-  /* template */ doChangeLink(p: ParameterPair, val: string) {
-    p.value.value = { value: null, linkExpression: val ? val : '' };
+    p.value.value = val;
     this.doPreRender(p);
 
     // need to make sure we add/remove parameters which meet/don't meet their condition.
@@ -612,43 +556,11 @@ export class ConfigProcessParamGroupComponent
     this.updatePreview$.next(true);
   }
 
-  /* template */ doPreRenderBoolean(p: ParameterPair) {
-    p.value.value = createLinkedValue(!p.booleanValue ? 'false' : 'true');
-    this.doPreRender(p);
-
-    this.doUpdateConditionals(p);
-  }
-
   /* template */ doSetCustomEditorState(
     p: ParameterPair,
     editor: CustomEditor
   ) {
     p.editorEnabled = editor.allowDirectEdit;
-  }
-
-  /* template */ isBoolean(p: ParameterPair) {
-    return p.descriptor?.type === ParameterType.BOOLEAN;
-  }
-
-  /* template */ isPort(p: ParameterPair) {
-    return (
-      p.descriptor?.type === ParameterType.CLIENT_PORT ||
-      p.descriptor?.type === ParameterType.SERVER_PORT
-    );
-  }
-
-  /* template */ getInputType(p: ParameterPair) {
-    if (!p?.descriptor?.type) {
-      return undefined;
-    }
-    switch (p.descriptor.type) {
-      case ParameterType.CLIENT_PORT:
-      case ParameterType.SERVER_PORT:
-      case ParameterType.NUMERIC:
-        return 'number';
-      case ParameterType.PASSWORD:
-        return 'password';
-    }
   }
 
   /* template */ hasOptionals(g: ParameterGroup) {
@@ -720,44 +632,5 @@ export class ConfigProcessParamGroupComponent
 
       return ida.localeCompare(idb);
     });
-  }
-
-  /* template */ makeValueLink(p: ParameterPair) {
-    if (p.descriptor?.type === ParameterType.PASSWORD) {
-      this.doChangeLink(p, ''); // DON'T ever apply a password to the plain text editor, rather clear it.
-    }
-    this.doChangeLink(p, p.value?.value?.value);
-  }
-
-  /* template */ makeValuePlain(p: ParameterPair) {
-    if (p.descriptor?.type === ParameterType.PASSWORD) {
-      this.doChangeValue(p, '');
-      return;
-    }
-
-    if (p.value?.value?.linkExpression?.indexOf('{{') >= 0) {
-      this.doChangeValue(
-        p,
-        getRenderPreview(
-          p.value.value,
-          this.process,
-          this.instance,
-          this.system
-        )
-      );
-    } else {
-      this.doChangeValue(p, p.value?.value?.linkExpression);
-    }
-  }
-
-  /* template */ isLink(p: ParameterPair) {
-    return (
-      p.value?.value?.linkExpression !== null &&
-      p.value?.value?.linkExpression !== undefined
-    );
-  }
-
-  /* template */ appendLink(p: ParameterPair, v: string) {
-    this.doChangeLink(p, p.value?.value?.linkExpression + v);
   }
 }

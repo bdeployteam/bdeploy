@@ -33,10 +33,10 @@ startCommand:
     - uid: "param.global"
       name: "Global"
       longDescription: "A global parameter"
+      defaultValue: "{{X:param.global}}"
       groupName: "Test Parameters"
       parameter: "--text"
       mandatory: false
-      global: true
     - uid: "param.pass"
       name: "Password"
       longDescription: "A password parameter"

@@ -126,7 +126,12 @@ export class BdPopupDirective implements OnDestroy {
 
   private delayTimer;
   private overlayRef: OverlayRef;
-  private canClosePopover = false;
+
+  private mouseOverElement = false;
+  private mouseOverPopup = false;
+
+  private clearEnterListener: () => void;
+  private clearLeaveListener: () => void;
 
   constructor(
     private host: ElementRef,
@@ -141,30 +146,25 @@ export class BdPopupDirective implements OnDestroy {
   }
 
   @HostListener('mouseenter') onMouseEnter() {
+    this.mouseOverElement = true;
     if (
       this.appBdPopupTrigger === 'hover' &&
       !!this.appBdPopup &&
-      !this.popupService.getOverlay('click') // only if no click-overlay is open
+      !this.popupService.hasClickPopup() &&
+      !this.popupService.hasContentAssist() // only if no click-overlay or content-assist is open
     ) {
       this.delayTimer = setTimeout(() => {
-        this.canClosePopover = true;
         this.openOverlay();
-        setTimeout(() => {
-          this.keepPopupOpen();
-        }, 100);
       }, this.appBdPopupDelay);
     }
   }
 
   @HostListener('mouseleave') onMouseLeave() {
+    this.mouseOverElement = false;
     if (this.appBdPopupTrigger === 'hover' && !!this.appBdPopup) {
-      setTimeout(() => {
-        if (this.canClosePopover) {
-          clearTimeout(this.delayTimer);
-          this.closeOverlay();
-        }
-      }, 100);
+      clearTimeout(this.delayTimer);
     }
+    this.checkCloseOnLeave();
   }
 
   @HostListener('click') onMouseClick() {
@@ -200,9 +200,39 @@ export class BdPopupDirective implements OnDestroy {
     const portal = new TemplatePortal(this.appBdPopup, this.viewContainerRef);
     this.overlayRef.attach(portal);
 
-    this.popupService.setOverlay(this.overlayRef, this.appBdPopupTrigger);
+    this.hookOverlay();
 
+    if (this.appBdPopupTrigger === 'click') {
+      this.popupService.setClickPopup(this);
+    }
     this.appBdPopupOpened.emit(this);
+  }
+
+  private hookOverlay() {
+    this.clearEnterListener = this._render.listen(
+      this.overlayRef.hostElement,
+      'mouseenter',
+      () => {
+        this.mouseOverPopup = true;
+      }
+    );
+    this.clearLeaveListener = this._render.listen(
+      this.overlayRef.hostElement,
+      'mouseleave',
+      () => {
+        this.mouseOverPopup = false;
+        this.checkCloseOnLeave();
+      }
+    );
+  }
+
+  private unhookOverlay() {
+    if (this.clearEnterListener) {
+      this.clearEnterListener();
+    }
+    if (this.clearLeaveListener) {
+      this.clearLeaveListener();
+    }
   }
 
   private getPositions(): ConnectedPosition[] {
@@ -247,33 +277,26 @@ export class BdPopupDirective implements OnDestroy {
 
   /** Closes the overlay if present */
   public closeOverlay() {
-    if (this.popupService.getOverlay(this.appBdPopupTrigger)) {
-      this.overlayRef = this.popupService.getOverlay(this.appBdPopupTrigger);
+    if (this.overlayRef) {
+      this.unhookOverlay();
       this.overlayRef.detach();
       this.overlayRef.dispose();
       this.overlayRef = null;
+
+      if (this.appBdPopupTrigger === 'click') {
+        this.popupService.setClickPopup(null);
+      }
     }
-    this.popupService.setOverlay(this.overlayRef, this.appBdPopupTrigger);
   }
 
-  /** Keeps popup open if mouse is over of popup */
-  keepPopupOpen() {
-    const tempClasses = this.fixupPanelClasses(this.getPositions());
-
-    tempClasses.forEach((item) => {
-      const popover = window.document.querySelector(`.${item.panelClass}`);
-      if (popover) {
-        this._render.listen(popover, 'mouseover', () => {
-          this.canClosePopover = false;
-        });
-
-        this._render.listen(popover, 'mouseout', () => {
-          this.canClosePopover = true;
-          setTimeout(() => {
-            if (this.canClosePopover) this.closeOverlay();
-          }, 0);
-        });
-      }
-    });
+  private checkCloseOnLeave() {
+    if (this.overlayRef && this.appBdPopupTrigger === 'hover') {
+      setTimeout(() => {
+        if (this.mouseOverElement || this.mouseOverPopup) {
+          return;
+        }
+        this.closeOverlay();
+      }, 100);
+    }
   }
 }

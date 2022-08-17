@@ -97,7 +97,10 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * same value for all applications which have the same parameter) or locally
      * (configure value per application even if the name of the parameter is the
      * same).
+     *
+     * @deprecated since 4.6.0, replaced by system and instance variables.
      */
+    @Deprecated(forRemoval = true)
     public boolean global = false;
 
     /**

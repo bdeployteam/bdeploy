@@ -1,7 +1,14 @@
 import { Component, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  map,
+  Subscription,
+  switchMap,
+} from 'rxjs';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ProductVersionDetailsComponent } from './product-version-details/product-version-details.component';
@@ -35,11 +42,22 @@ export class ProductUpdateComponent implements OnDestroy {
     this.productUpdateAction,
   ];
 
+  /* template */ loading$ = combineLatest([
+    this.areas.primaryRoute$.pipe(
+      switchMap(
+        // "mildly" hacky interface to update action which shows a dialog on the primary panel.
+        () => this.areas.getDirtyable('primary').dialog.getMessage().message$
+      )
+    ),
+    this.products.loading$,
+  ]).pipe(map(([m, l]) => !!m || l));
+
   private subscription: Subscription;
 
   constructor(
     public products: ProductsService,
-    private edit: InstanceEditService
+    public edit: InstanceEditService,
+    public areas: NavAreasService
   ) {
     this.subscription = combineLatest([
       this.edit.state$,
@@ -65,20 +83,20 @@ export class ProductUpdateComponent implements OnDestroy {
     });
   }
 
-  isCurrent(product: ProductDto): boolean {
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  private isCurrent(product: ProductDto): boolean {
     return this.edit.state$.value.config.config.product.tag === product.key.tag;
   }
 
-  matchesProductFilterRegex(
+  private matchesProductFilterRegex(
     productTag: string,
     productFilterRegex: string
   ): boolean {
     // if there is no filter, all products are eligible
     if (!productFilterRegex) return true;
     return new RegExp(productFilterRegex).test(productTag);
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

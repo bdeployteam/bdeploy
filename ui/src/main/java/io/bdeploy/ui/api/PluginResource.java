@@ -2,15 +2,7 @@ package io.bdeploy.ui.api;
 
 import java.io.InputStream;
 import java.util.List;
-
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
+import java.util.Set;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -20,6 +12,14 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
 import io.bdeploy.jersey.ActivityScope;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/plugin-admin")
 @Produces(MediaType.APPLICATION_JSON)
@@ -63,6 +63,11 @@ public interface PluginResource {
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
     public PluginInfoDto getPluginForEditor(@ActivityScope @PathParam("group") String group, @PathParam("type") String type,
             Manifest.Key product);
+
+    @POST
+    @Path("/list-editor-types/{group}")
+    @RequiredPermission(scope = "group", permission = Permission.WRITE)
+    public Set<String> getEditorTypes(@ActivityScope @PathParam("group") String group, Manifest.Key product);
 
     /**
      * @param id unload a certain plugin.

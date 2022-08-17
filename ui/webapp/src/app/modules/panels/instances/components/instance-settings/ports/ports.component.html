@@ -20,11 +20,7 @@
     [route]="['..']"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      fxLayout="column"
-      fxLayoutGap="10px"
-      *ngIf="portEdit.ports$ | async as ports"
-    >
+    <div fxLayout="column" fxLayoutGap="10px">
       <div>
         This instance contains <strong>{{ ports.length }}</strong> distinct port
         parameters. You can use this panel to manipulate or view them all
@@ -47,7 +43,7 @@
       ></app-bd-button>
 
       <app-bd-data-table
-        [records]="portEdit.ports$ | async"
+        [records]="ports"
         [columns]="columns"
         [sort]="{ active: 'port', direction: 'asc' }"
         [checkMode]="true"

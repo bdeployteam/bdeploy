@@ -40,7 +40,7 @@
     <div matSuffix class="bd-form-input-suffix">
       <ng-content></ng-content>
     </div>
-    <mat-error *ngIf="ngControl && ngControl.invalid"
+    <mat-error *ngIf="errorFallback || (ngControl && ngControl.invalid)"
       >{{ getErrorMessage() }}</mat-error
     >
   </mat-form-field>

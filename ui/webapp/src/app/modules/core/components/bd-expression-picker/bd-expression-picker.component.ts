@@ -1,7 +1,14 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+} from '@angular/core';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
+  ApplicationDto,
   InstanceConfigurationDto,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
@@ -13,7 +20,6 @@ import {
   gatherVariableExpansions,
   LinkVariable,
 } from 'src/app/modules/core/utils/linked-values.utils';
-import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 const colVarName: BdDataColumn<LinkVariable> = {
   id: 'name',
@@ -39,13 +45,14 @@ const colVarDesc: BdDataColumn<LinkVariable> = {
 };
 
 @Component({
-  selector: 'app-config-process-link-expression',
-  templateUrl: './config-process-link-expression.component.html',
+  selector: 'app-bd-expression-picker',
+  templateUrl: './bd-expression-picker.component.html',
 })
-export class ConfigProcessLinkExpressionComponent implements OnInit {
+export class BdExpressionPickerComponent implements OnChanges {
   @Input() process: ApplicationConfiguration;
   @Input() instance: InstanceConfigurationDto;
   @Input() system: SystemConfiguration;
+  @Input() applications: ApplicationDto[];
   @Input() popup: BdPopupDirective;
 
   @Output() linkSelected = new EventEmitter<string>();
@@ -67,15 +74,13 @@ export class ConfigProcessLinkExpressionComponent implements OnInit {
     },
   ];
 
-  constructor(private edit: InstanceEditService) {}
-
-  ngOnInit(): void {
+  ngOnChanges(): void {
     // instance variables take precedence over system variables
     this.varRecords = gatherVariableExpansions(this.instance, this.system);
     this.paramRecords = gatherProcessExpansions(
       this.instance,
       this.process,
-      this.edit.stateApplications$.value
+      this.applications
     );
     this.pathRecords = gatherPathExpansions();
     this.specialRecords = gatherSpecialExpansions(this.instance, this.process);

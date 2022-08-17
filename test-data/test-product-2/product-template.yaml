@@ -10,12 +10,10 @@ templateVariables:
     - 'Another Suggested Value'
 
 instanceVariables:
-  io.bdeploy.test:
-    value: "Variable Value"
-    description: "Some test variable"
-  io.bdeploy.another:
-    value: "Another Variable Value"
-    description: "Yet another test variable"
+  param.global:
+    value: "{{T:text-param}}"
+    description: "The global parameter's global value"
+    type: "STRING"
 
 processControlGroups:
   - name: "First Group"
@@ -41,13 +39,13 @@ groups:
   - template: server-with-sleep
     startParameters:
     - uid: param.text
-      value: "{{X:io.bdeploy.test}}"
+      value: "{{X:param.global}}"
   - template: server-with-sleep
     name: "Another Server With Sleep"
     preferredProcessControlGroup: "Second Group"
     startParameters:
     - uid: param.text
-      value: "{{T:text-param}}"
+      value: "{{V:Server No Sleep:param.text}}"
     
 - name: "Client Apps"
   type: CLIENT

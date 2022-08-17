@@ -59,11 +59,12 @@ Cypress.Commands.add('fillFormInput', function (name, data) {
   cy.get(s).within(() => {
     cy.get('mat-form-field').should('exist').click();
     cy.get('input')
+      .not('[type=checkbox]') // skip "pin" checkbox in process parameter fields.
       .should('exist')
       .and('have.focus')
       .and('be.enabled')
       .clear()
-      .type(data);
+      .type(data, { parseSpecialCharSequences: false }); // required for variable literals.
   });
 });
 

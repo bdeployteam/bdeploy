@@ -1,4 +1,5 @@
 import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import {
   BehaviorSubject,
@@ -10,7 +11,13 @@ import {
   switchMap,
 } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
-import { InstanceDto, SystemConfigurationDto } from 'src/app/models/gen.dtos';
+import {
+  InstanceDto,
+  ParameterType,
+  SystemConfigurationDto,
+  VariableValue,
+} from 'src/app/models/gen.dtos';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
   ACTION_OK,
@@ -19,7 +26,12 @@ import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dia
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  buildCompletionPrefixes,
+  buildCompletions,
+} from 'src/app/modules/core/utils/completion.utils';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
+import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsEditService } from '../../../services/systems-edit.service';
 
@@ -27,8 +39,7 @@ const MAGIC_ABORT = 'abort_save';
 
 class ConfigVariable {
   name: string;
-  value: string;
-  description: string;
+  value: VariableValue;
 }
 
 const colName: BdDataColumn<ConfigVariable> = {
@@ -41,13 +52,13 @@ const colName: BdDataColumn<ConfigVariable> = {
 const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
-  data: (r) => r.value,
+  data: (r) => getPreRenderable(r.value.value),
 };
 
 const colDesc: BdDataColumn<ConfigVariable> = {
   id: 'description',
   name: 'Description',
-  data: (r) => r.description,
+  data: (r) => r.value.description,
 };
 
 @Component({
@@ -90,15 +101,22 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   ];
 
   /* template */ newId: string;
-  /* template */ newValue: string;
-  /* template */ newDescription: string;
+  /* template */ newValue: VariableValue;
   /* template */ newUsedIds: string[] = [];
+
+  /* template */ typeValues: ParameterType[] = Object.values(ParameterType);
+
+  /* template */ completionPrefixes = buildCompletionPrefixes();
+  /* template */ completions: ContentCompletion[];
 
   private subscription: Subscription;
   private instancesUsing: InstanceDto[];
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) tb: BdDialogToolbarComponent;
+
+  @ViewChild('addForm', { static: false }) addForm: NgForm;
+  @ViewChild('editForm', { static: false }) editForm: NgForm;
 
   @ViewChild('editTemplate') editTemplate: TemplateRef<any>;
 
@@ -108,8 +126,20 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     areas: NavAreasService
   ) {
     this.subscription = this.edit.current$.subscribe((c) => {
+      if (!c) {
+        return;
+      }
+
       this.system = cloneDeep(c);
       this.orig = cloneDeep(c);
+
+      this.completions = buildCompletions(
+        this.completionPrefixes,
+        null,
+        this.system.config,
+        null,
+        null
+      );
 
       this.buildVariables();
     });
@@ -142,8 +172,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     }
     this.records = Object.keys(this.system.config.systemVariables).map((k) => ({
       name: k,
-      value: this.system.config.systemVariables[k]?.value,
-      description: this.system.config.systemVariables[k]?.description,
+      value: this.system.config.systemVariables[k],
     }));
   }
 
@@ -193,57 +222,55 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
 
   /* template */ onAdd(templ: TemplateRef<any>) {
     this.newUsedIds = this.records.map((r) => r.name);
+    this.newValue = {
+      value: { value: '', linkExpression: null },
+      description: '',
+      type: ParameterType.STRING,
+      customEditor: null,
+    };
     this.dialog
       .message({
         header: 'Add Variable',
         icon: 'add',
         template: templ,
-        validation: () => !!this.newId?.length,
+        validation: () => !!this.addForm && this.addForm.valid,
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        const desc = this.newDescription;
-        this.newId = this.newValue = this.newDescription = null;
+        this.newId = this.newValue = null;
 
         if (!r) {
           return;
         }
 
-        this.system.config.systemVariables[id] = {
-          value: value,
-          description: desc,
-        };
+        this.system.config.systemVariables[id] = value;
         this.buildVariables();
       });
   }
 
   /* template */ onEdit(variable: ConfigVariable) {
     this.newId = variable.name;
-    this.newValue = variable.value;
-    this.newDescription = variable.description;
+    this.newValue = cloneDeep(variable.value);
     this.dialog
       .message({
         header: 'Edit Variable',
         icon: 'edit',
         template: this.editTemplate,
+        validation: () => !!this.editForm && this.editForm.valid,
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
         const id = this.newId;
         const value = this.newValue;
-        const desc = this.newDescription;
-        this.newId = this.newValue = this.newDescription = null;
+        this.newId = this.newValue = null;
 
         if (!r) {
           return;
         }
 
-        this.system.config.systemVariables[id] = {
-          value: value,
-          description: desc,
-        };
+        this.system.config.systemVariables[id] = value;
         this.buildVariables();
       });
   }

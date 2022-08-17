@@ -81,7 +81,6 @@ export class ConfigProcessHeaderComponent
   }
 
   dirTransformer = (node: ConfigDirDto, level: number): DirTreeNode => {
-    console.log({ node: node });
     return {
       name: node.name,
       level: level,

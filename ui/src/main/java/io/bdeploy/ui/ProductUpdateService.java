@@ -21,6 +21,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
@@ -77,8 +78,8 @@ public class ProductUpdateService {
         for (var app : allApps.keySet()) {
             var node = allApps.get(app);
 
-            updateApplication(app, allApps.keySet(), targetProduct, currentApplications, targetApplications, validationIssues,
-                    createResolver(node, app));
+            updateApplication(instance.config.config, app, allApps.keySet(), targetProduct, currentApplications,
+                    targetApplications, validationIssues, createResolver(node, app));
         }
 
         if (currentProduct == null) {
@@ -93,8 +94,8 @@ public class ProductUpdateService {
         return instance;
     }
 
-    private void updateApplication(ApplicationConfiguration app, Set<ApplicationConfiguration> allApps,
-            ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
+    private void updateApplication(InstanceConfiguration instance, ApplicationConfiguration app,
+            Set<ApplicationConfiguration> allApps, ProductManifest targetProduct, List<ApplicationManifest> currentApplications,
             List<ApplicationManifest> targetApplications, List<ApplicationValidationDto> validationIssues,
             VariableResolver resolver) {
         var current = currentApplications == null ? null
@@ -131,8 +132,9 @@ public class ProductUpdateService {
 
             if (current != null) {
                 // update parameters, add missing, add validation notice for removed parameters
-                app.start.parameters = updateParameters(app, targetDesc, app.start.parameters, targetDesc.startCommand.parameters,
-                        current.get().getDescriptor().startCommand.parameters, allApps, validationIssues, resolver);
+                app.start.parameters = updateParameters(instance, app, targetDesc, app.start.parameters,
+                        targetDesc.startCommand.parameters, current.get().getDescriptor().startCommand.parameters, allApps,
+                        validationIssues, resolver);
             }
         }
 
@@ -147,7 +149,7 @@ public class ProductUpdateService {
         if (targetDesc.stopCommand == null) {
             app.stop = null;
         } else {
-            app.stop = createCommand(targetDesc.stopCommand, app, targetDesc, allApps, resolver);
+            app.stop = createCommand(instance, targetDesc.stopCommand, app, targetDesc, allApps, resolver);
         }
     }
 
@@ -209,9 +211,10 @@ public class ProductUpdateService {
         return result;
     }
 
-    private List<ParameterConfiguration> updateParameters(ApplicationConfiguration app, ApplicationDescriptor appDesc,
-            List<ParameterConfiguration> values, List<ParameterDescriptor> descriptors, List<ParameterDescriptor> oldDescriptors,
-            Set<ApplicationConfiguration> allApps, List<ApplicationValidationDto> validation, VariableResolver resolver) {
+    private List<ParameterConfiguration> updateParameters(InstanceConfiguration instance, ApplicationConfiguration app,
+            ApplicationDescriptor appDesc, List<ParameterConfiguration> values, List<ParameterDescriptor> descriptors,
+            List<ParameterDescriptor> oldDescriptors, Set<ApplicationConfiguration> allApps,
+            List<ApplicationValidationDto> validation, VariableResolver resolver) {
 
         // 1) find parameters which have a value but are no longer in the descriptor, remove them, issue validation warning.
         Map<ParameterConfiguration, ParameterDescriptor> toReset = new HashMap<>();
@@ -241,7 +244,7 @@ public class ProductUpdateService {
         for (var entry : toReset.entrySet()) {
             values.remove(entry.getKey());
             if (entry.getValue() != null && meetsCondition(app, appDesc, entry.getValue(), resolver)) {
-                createParameter(entry.getValue(), descriptors, values, allApps);
+                createParameter(instance, entry.getValue(), descriptors, values, allApps);
             }
         }
 
@@ -254,9 +257,9 @@ public class ProductUpdateService {
             var val = values.stream().filter(p -> p.uid.equals(desc.uid)).findFirst();
             if (val.isEmpty() && meetsCondition(app, appDesc, desc, resolver)) {
                 // need one.
-                createParameter(desc, descriptors, values, allApps);
+                createParameter(instance, desc, descriptors, values, allApps);
 
-                if (desc.global) {
+                if (desc.global && !instance.globalsMigrated) {
                     if (validation.stream().filter(v -> v.appUid == null && desc.uid.equals(v.paramUid)).findFirst().isEmpty()) {
                         validation.add(0, new ApplicationValidationDto(null, desc.uid,
                                 "New global parameter '" + desc.name + "' has been added with its default value."));
@@ -291,13 +294,13 @@ public class ProductUpdateService {
         }
     }
 
-    private void createParameter(ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
+    private void createParameter(InstanceConfiguration instance, ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
             List<ParameterConfiguration> values, Set<ApplicationConfiguration> allApps) {
         ParameterConfiguration cfg = new ParameterConfiguration();
         cfg.uid = desc.uid;
         cfg.value = desc.defaultValue;
 
-        if (desc.global) {
+        if (desc.global && !instance.globalsMigrated) {
             for (var other : allApps) {
                 var para = getParameter(other, desc.uid);
                 if (para.isPresent()) {
@@ -342,8 +345,9 @@ public class ProductUpdateService {
         return para;
     }
 
-    private CommandConfiguration createCommand(ExecutableDescriptor desc, ApplicationConfiguration app,
-            ApplicationDescriptor appDesc, Set<ApplicationConfiguration> allApps, VariableResolver resolver) {
+    private CommandConfiguration createCommand(InstanceConfiguration instance, ExecutableDescriptor desc,
+            ApplicationConfiguration app, ApplicationDescriptor appDesc, Set<ApplicationConfiguration> allApps,
+            VariableResolver resolver) {
         CommandConfiguration result = new CommandConfiguration();
 
         result.executable = desc.launcherPath;
@@ -351,7 +355,7 @@ public class ProductUpdateService {
         for (var para : desc.parameters) {
             // same as in the TS code, this assumes that the parameter referenced in the condition is *before* the conditional.
             if (para.mandatory && meetsCondition(app, appDesc, para, resolver)) {
-                createParameter(para, desc.parameters, result.parameters, allApps);
+                createParameter(instance, para, desc.parameters, result.parameters, allApps);
             }
         }
 
@@ -388,7 +392,7 @@ public class ProductUpdateService {
                 }
 
                 // update variables in case we modified them in the instance config.
-                node.nodeConfiguration.mergeVariables(instance.config.config, system);
+                node.nodeConfiguration.mergeVariables(instance.config.config, system, null);
 
                 VariableResolver res = createResolver(node, process);
 
@@ -524,7 +528,12 @@ public class ProductUpdateService {
                 .filter(p -> p.uid.equals(param.condition.parameter)).findFirst().orElse(null);
         if (target != null && target.value != null) {
             if (target.value.linkExpression != null) {
-                value = TemplateHelper.process(target.value.linkExpression, resolver);
+                try {
+                    value = TemplateHelper.process(target.value.linkExpression, resolver);
+                } catch (Exception e) {
+                    // cannot resolve transitive... :|
+                    return false;
+                }
             } else {
                 value = target.value.value;
             }

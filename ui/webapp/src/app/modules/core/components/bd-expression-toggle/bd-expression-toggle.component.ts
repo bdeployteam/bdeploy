@@ -7,12 +7,12 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'app-expression-toggle',
-  templateUrl: './expression-toggle.component.html',
-  styleUrls: ['./expression-toggle.component.css'],
+  selector: 'app-bd-expression-toggle',
+  templateUrl: './bd-expression-toggle.component.html',
+  styleUrls: ['./bd-expression-toggle.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ExpressionToggleComponent {
+export class BdExpressionToggleComponent {
   @Input() link: boolean;
   @Input() disabled: boolean;
   @Output() linkChanged = new EventEmitter<boolean>();

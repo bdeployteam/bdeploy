@@ -9,6 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRippleModule } from '@angular/material/core';
@@ -42,6 +43,7 @@ import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-p
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdContentAssistMenuComponent } from './components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdContentAssistDirective } from './components/bd-content-assist/bd-content-assist.directive';
+import { BdCustomEditorComponent } from './components/bd-custom-editor/bd-custom-editor.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataComponentCellComponent } from './components/bd-data-component-cell/bd-data-component-cell.component';
 import { BdDataDateCellComponent } from './components/bd-data-date-cell/bd-data-date-cell.component';
@@ -64,6 +66,8 @@ import { BdDialogComponent } from './components/bd-dialog/bd-dialog.component';
 import { BdEditorDiffComponent } from './components/bd-editor-diff/bd-editor-diff.component';
 import { BdEditorComponent } from './components/bd-editor/bd-editor.component';
 import { BdExpandButtonComponent } from './components/bd-expand-button/bd-expand-button.component';
+import { BdExpressionPickerComponent } from './components/bd-expression-picker/bd-expression-picker.component';
+import { BdExpressionToggleComponent } from './components/bd-expression-toggle/bd-expression-toggle.component';
 import { BdFileDropComponent } from './components/bd-file-drop/bd-file-drop.component';
 import { BdFileUploadRawComponent } from './components/bd-file-upload-raw/bd-file-upload-raw.component';
 import { BdFileUploadComponent } from './components/bd-file-upload/bd-file-upload.component';
@@ -82,6 +86,7 @@ import { BdPopupDirective } from './components/bd-popup/bd-popup.directive';
 import { BdSearchFieldComponent } from './components/bd-search-field/bd-search-field.component';
 import { BdServerSyncButtonComponent } from './components/bd-server-sync-button/bd-server-sync-button.component';
 import { BdTerminalComponent } from './components/bd-terminal/bd-terminal.component';
+import { BdValueEditorComponent } from './components/bd-value-editor/bd-value-editor.component';
 import { ConnectionLostComponent } from './components/connection-lost/connection-lost.component';
 import { ConnectionVersionComponent } from './components/connection-version/connection-version.component';
 import { LoginComponent } from './components/login/login.component';
@@ -101,8 +106,10 @@ import { ConfigService } from './services/config.service';
 import { EditItemInListValidatorDirective } from './validators/edit-item-in-list';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { IdentifierValidator } from './validators/identifier.directive';
+import { LinkExpressionInputValidatorDirective } from './validators/link-expression-input-validator.directive';
 import { PasswordVerificationValidator } from './validators/password-verification.directive';
 import { PortValueValidatorDirective } from './validators/port-value.directive';
+import { PropagateErrorValidatorDirective } from './validators/propagate-error-validator.directive';
 import { TrimmedValidator } from './validators/trimmed.directive';
 
 export function loadAppConfig(cfgService: ConfigService) {
@@ -178,6 +185,12 @@ export function loadAppConfig(cfgService: ConfigService) {
     EditItemInListValidatorDirective,
     BdContentAssistDirective,
     BdContentAssistMenuComponent,
+    BdValueEditorComponent,
+    BdExpressionToggleComponent,
+    BdExpressionPickerComponent,
+    LinkExpressionInputValidatorDirective,
+    PropagateErrorValidatorDirective,
+    BdCustomEditorComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -220,6 +233,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatSortModule,
     MatTabsModule,
     MatExpansionModule,
+    MatButtonToggleModule,
 
     // angular base infrastructure used throughout the application.
     HttpClientModule,
@@ -289,6 +303,10 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataSizeCellComponent,
     BdDataPopoverCellComponent,
     BdContentAssistDirective,
+    BdValueEditorComponent,
+    BdExpressionToggleComponent,
+    BdExpressionPickerComponent,
+    BdCustomEditorComponent,
 
     // validators
     IdentifierValidator,
@@ -298,6 +316,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdExpandButtonComponent,
     PortValueValidatorDirective,
     EditItemInListValidatorDirective,
+    LinkExpressionInputValidatorDirective,
   ],
 })
 export class CoreModule {}

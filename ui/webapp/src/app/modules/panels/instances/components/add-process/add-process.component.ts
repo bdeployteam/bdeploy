@@ -267,6 +267,10 @@ export class AddProcessComponent implements OnInit, OnDestroy {
             // there is no need to align global parameters in other apps, since no global
             // should have a value different from the ones in the instances already after
             // this alignment code.
+
+            // TODO: REMOVE this code completely once global is removed. UNTIL then however
+            // we keep the logic as it is now, as this will correctly apply a potentially
+            // migrated value to those parameters on paste.
             const globals = app.descriptor.startCommand.parameters.filter(
               (p) => p.global
             );

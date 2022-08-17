@@ -164,16 +164,16 @@ public class InstanceImportExportHelper {
 
             // align redundant copies of certain flags
             nodeCfg.copyRedundantFields(icfg);
-            nodeCfg.mergeVariables(icfg, null); // no system.
+            nodeCfg.mergeVariables(icfg, null, null); // no system, don't resolve config files - client nodes don't have config on import anyway.
             reAssignAppUuids(uuidPool, nodeCfg);
 
             String minionName = node.getKey();
             if (!minionName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
                 MinionDto minionDto = minions.get(minionName);
                 reAssignApplications(target, nodeCfg, minionName, minionDto);
+                inmBuilder.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, cfgId);
             }
 
-            inmBuilder.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, cfgId);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
             inmBuilder.setMinionName(minionName);
 

@@ -2,10 +2,17 @@ import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
+import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  buildCompletionPrefixes,
+  buildCompletions,
+} from 'src/app/modules/core/utils/completion.utils';
+import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ConfigFilesService } from '../../../../services/config-files.service';
 
 @Component({
@@ -18,17 +25,34 @@ export class EditorComponent implements DirtyableDialog, OnDestroy {
   /* template */ content = '';
   /* template */ originalContent = '';
 
+  /* template */ completions: ContentCompletion[];
+
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
-  constructor(public cfgFiles: ConfigFilesService, areas: NavAreasService) {
+  constructor(
+    public cfgFiles: ConfigFilesService,
+    areas: NavAreasService,
+    edit: InstanceEditService,
+    systems: SystemsService
+  ) {
     this.subscription = combineLatest([
       this.cfgFiles.files$,
       areas.panelRoute$,
-    ]).subscribe(([f, r]) => {
-      if (!f || !r || !r.params['file']) {
+      edit.state$,
+      edit.stateApplications$,
+      systems.systems$,
+    ]).subscribe(([f, r, i, a, s]) => {
+      if (
+        !f ||
+        !r ||
+        !r.params['file'] ||
+        !i ||
+        !a ||
+        (i.config.config.system && !s?.length)
+      ) {
         this.file$.next(null);
         this.content = null;
         return;
@@ -43,6 +67,14 @@ export class EditorComponent implements DirtyableDialog, OnDestroy {
           this.content = Base64.decode(c);
           this.originalContent = this.content;
         });
+
+      this.completions = buildCompletions(
+        buildCompletionPrefixes(),
+        i.config,
+        s?.find((s) => s.key.name === i.config.config.system.name)?.config,
+        null,
+        a
+      );
     });
   }
 

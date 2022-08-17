@@ -64,6 +64,7 @@ export class ConfigureEndpointsComponent
   /* template */ currentInput: LinkedValueConfiguration;
 
   /* template */ readonly TYPE_STRING = ParameterType.STRING;
+  /* template */ readonly TYPE_PASSWORD = ParameterType.PASSWORD;
   /* template */ readonly TYPE_PORT = ParameterType.SERVER_PORT;
   /* template */ readonly TYPE_BOOLEAN = ParameterType.BOOLEAN;
 

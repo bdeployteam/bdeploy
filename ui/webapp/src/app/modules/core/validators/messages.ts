@@ -32,6 +32,11 @@ export function bdValidationMessage(
     return null;
   }
 
+  // transitive = passing through from another control;
+  if (errors['transitive']) {
+    return errors['transitive'];
+  }
+
   // commonly available validators
   if (errors['required']) {
     return `${label} is required.`;

@@ -120,10 +120,10 @@ describe('Instance Settings Tests', () => {
           'true'
         );
 
-        cy.get('app-bd-form-input[name="param.sleep"]')
+        cy.get('app-bd-form-input[name="param.sleep_val"]')
           .should('exist')
           .within(() => {
-            cy.get('input[name="param.sleep"]').should('have.value', '5');
+            cy.get('input[name="param.sleep_val"]').should('have.value', '5');
           });
       });
 
@@ -214,10 +214,10 @@ describe('Instance Settings Tests', () => {
           'true'
         );
 
-        cy.get('app-bd-form-input[name="param.sleep"]')
+        cy.get('app-bd-form-input[name="param.sleep_val"]')
           .should('exist')
           .within(() => {
-            cy.get('input[name="param.sleep"]').should('have.value', '7');
+            cy.get('input[name="param.sleep_val"]').should('have.value', '7');
           });
       });
       cy.pressToolbarButton('Back to Overview');

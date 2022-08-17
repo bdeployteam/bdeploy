@@ -1,0 +1,48 @@
+<ng-template #editorPopup>
+  <mat-card
+    [style.padding.px]="10"
+    [style.min-width.px]="500"
+    class="mat-typography"
+    fxLayout="column"
+    fxLayoutGap="10px"
+  >
+    <div class="bd-text-ellipsis">
+      <strong>Edit Value</strong>
+    </div>
+    <div #editorPanel *ngIf="editor" class="editorPanel"></div>
+    <div fxLayout="row" fxLayoutAlign="flex-end" fxLayoutGap="10px">
+      <app-bd-button
+        text="Cancel"
+        [collapsed]="false"
+        (click)="popup.closeOverlay()"
+      ></app-bd-button>
+      <app-bd-button
+        text="Apply"
+        color="primary"
+        [collapsed]="false"
+        [disabled]="!valid"
+        (click)="apply()"
+      ></app-bd-button>
+    </div>
+  </mat-card>
+</ng-template>
+
+<mat-icon
+  [style.cursor]="'pointer'"
+  (click)="prepareEditor()"
+  [appBdPopup]="editorPopup"
+  appBdPopupPosition="below-left"
+  appBdPopupTrigger="click"
+  (appBdPopupOpened)="popup = $event"
+  [class.bd-secondary-text]="!plugin"
+  [matTooltip]="
+    !plugin
+      ? !error
+        ? 'Required custom editor not (yet) loaded'
+        : 'Error loading custom editor: ' + error.statusText
+      : readonly
+      ? 'Open custom editor to see parameter value'
+      : 'Open custom editor to modify the parameter value'
+  "
+  >{{ readonly ? 'visibility' : 'edit' }}</mat-icon
+>

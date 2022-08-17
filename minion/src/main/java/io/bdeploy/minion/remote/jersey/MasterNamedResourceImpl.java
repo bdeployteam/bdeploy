@@ -3,13 +3,16 @@ package io.bdeploy.minion.remote.jersey;
 import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,20 +35,27 @@ import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
+import io.bdeploy.bhive.objects.view.TreeView;
+import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
 import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
+import io.bdeploy.bhive.op.ObjectLoadOperation;
+import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.TaskExecutor;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
@@ -385,7 +395,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
 
             inc.copyRedundantFields(config);
-            inc.mergeVariables(config, system);
 
             // make sure every application has an ID. NEW applications might have a null ID
             // to be filled out.
@@ -406,6 +415,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             // create dedicated configuration trees for client applications where required.
             if (entry.getKey().equals(InstanceManifest.CLIENT_NODE_NAME)) {
+                List<ObjectId> configTrees = new ArrayList<>();
                 // client applications *may* specify config directories.
                 for (var app : inc.applications) {
                     if (app.processControl == null || StringHelper.isNullOrEmpty(app.processControl.configDirs)) {
@@ -421,6 +431,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                     // record the config tree for this application.
                     inmb.addConfigTreeId(app.uid, appTree);
+                    configTrees.add(appTree);
+                }
+                inc.mergeVariables(config, system, (v) -> processConfigFilesInMemory(configTrees, v));
+            } else {
+                if (config.configTree != null) {
+                    inc.mergeVariables(config, system,
+                            (v) -> processConfigFilesInMemory(Collections.singletonList(config.configTree), v));
                 }
             }
 
@@ -430,6 +447,29 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Manifest.Key key = builder.insert(hive);
         InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.CREATE, context.getUserPrincipal().getName(), null);
         return key;
+    }
+
+    private void processConfigFilesInMemory(List<ObjectId> configTrees, VariableResolver resolver) {
+        if (configTrees == null || configTrees.isEmpty()) {
+            return;
+        }
+
+        // for each tree, process all files once.
+        for (ObjectId tree : configTrees) {
+            if (tree == null) {
+                continue;
+            }
+            TreeView scan = hive.execute(new ScanOperation().setTree(tree));
+            scan.visit(new TreeVisitor.Builder().onBlob(bv -> {
+                // this is a config file - need to process it.
+                try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(bv.getElementId()))) {
+                    // process whole files.
+                    TemplateHelper.process(new String(StreamHelper.read(is), StandardCharsets.UTF_8), resolver);
+                } catch (IOException ioe) {
+                    log.warn("Cannot process {}", bv.getPathString(), ioe);
+                }
+            }).build());
+        }
     }
 
     /**

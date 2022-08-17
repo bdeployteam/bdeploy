@@ -75,6 +75,10 @@ public class ApplicationParameterProvider {
                     "Cannot find unique parameter " + paramId + " for application " + app.name + ", found " + params.size());
         }
 
+        if (params.get(0).value == null) {
+            return null; // no actual value (yet).
+        }
+
         // IF the value is a parameter reference, we need to make sure it is scoped to the current application!
         return TemplateHelper.updateReferences(params.get(0).value.getPreRenderable(), r -> updateReference(app, r));
     }

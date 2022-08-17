@@ -1,0 +1,142 @@
+<ng-template #popupLink>
+  <app-bd-expression-picker
+    [process]="process"
+    [instance]="instance"
+    [system]="system"
+    [applications]="applications"
+    [popup]="linkEditorPopup$ | async"
+    (linkSelected)="appendLink($event)"
+  ></app-bd-expression-picker>
+</ng-template>
+
+<ng-template #linkToggle>
+  <app-bd-expression-toggle
+    [link]="isLink()"
+    [disabled]="disabled"
+    (linkChanged)="$event ? makeValuePlain() : makeValueLink()"
+  ></app-bd-expression-toggle>
+</ng-template>
+
+<ng-template #revertButton>
+  <mat-icon
+    class="local-hover-button"
+    *ngIf="!!defaultValue && (defaultValue.value || defaultValue.linkExpression) && !disabled"
+    matTooltip="Click to revert to the default value."
+    [matTooltipShowDelay]="500"
+    (click)="doRevert()"
+    [style.cursor]="'pointer'"
+    appClickStopPropagation
+    >restore</mat-icon
+  >
+</ng-template>
+
+<!-- Input for plain value (STRING, etc.) -->
+<app-bd-form-input
+  #valueEditor
+  *ngIf="!isBoolean() && !isLink()"
+  fxFlex="1 0 auto"
+  [label]="label"
+  [name]="name + '_val'"
+  [attr.name]="name + '_val'"
+  [type]="getInputType()"
+  [ngModel]="internalValue?.value"
+  (ngModelChange)="doChangeValue($event)"
+  errorDisplay="immediate"
+  [required]="required"
+  [disabled]="disabled || editorDisabled"
+  [passwordLock]="passwordLock"
+  [suggested]="suggested"
+  class="local-form-input"
+  [appPortValueValidator]="isPort()"
+  [prefix]="linkToggle"
+  [appLinkExpressionInputValidator]="false"
+  [errorFallback]="getErrorMessage()"
+>
+  <div fxLayout="row" class="local-form-input-actions">
+    <ng-container *ngIf="!disabled">
+      <ng-container *ngTemplateOutlet="revertButton"></ng-container>
+      <ng-container *ngTemplateOutlet="actions"></ng-container>
+      <mat-icon
+        *ngIf="passwordLock && !disabled"
+        matTooltip="Click to enable editing of password field."
+        [matTooltipShowDelay]="500"
+        (click)="passwordLock = false"
+        [style.cursor]="'pointer'"
+        >edit</mat-icon
+      >
+      <app-bd-custom-editor
+        *ngIf="!disabled && customEditor"
+        (valueConfirmed)="doChangeValue($event)"
+        (pluginLoaded)="customEditorLoaded.emit($event)"
+        [customEditor]="customEditor"
+        [value]="value"
+        [product]="product"
+        [group]="group"
+      ></app-bd-custom-editor>
+    </ng-container>
+  </div>
+</app-bd-form-input>
+
+<!-- Input for BOOLEAN -->
+<app-bd-form-toggle
+  *ngIf="isBoolean() && !isLink()"
+  fxFlex="1 0 auto"
+  class="local-form-input"
+  [label]="label"
+  [name]="name + '_bool'"
+  [attr.name]="name + '_bool'"
+  [(ngModel)]="booleanValue"
+  (ngModelChange)="doChangeBooleanValue()"
+  [disabled]="disabled"
+  [prefix]="linkToggle"
+>
+  <div fxLayout="row" class="local-form-input-actions">
+    <ng-container *ngTemplateOutlet="actions"></ng-container>
+    <ng-container *ngIf="!disabled">
+      <ng-container *ngTemplateOutlet="revertButton"></ng-container>
+    </ng-container>
+  </div>
+</app-bd-form-toggle>
+
+<!-- Input for LINK EXPRESSION -->
+<app-bd-form-input
+  #linkEditor
+  *ngIf="isLink()"
+  fxFlex="1 0 auto"
+  [label]="label + ' (Link Expression)'"
+  [name]="name + '_link'"
+  [attr.name]="name + '_link'"
+  [ngModel]="internalValue?.linkExpression"
+  (ngModelChange)="doChangeLink($event)"
+  errorDisplay="immediate"
+  [required]="required"
+  [disabled]="disabled"
+  class="local-form-input"
+  [prefix]="linkToggle"
+  [appLinkExpressionInputValidator]="true"
+  [appLinkExpressionInputValidatorProcess]="process"
+  [appLinkExpressionInputValidatorInstance]="instance"
+  [appLinkExpressionInputValidatorSystem]="system"
+  [appLinkExpressionInputValidatorType]="type"
+  [assistValues]="completions"
+  [assistPrefixes]="completionPrefixes"
+  [errorFallback]="getErrorMessage()"
+>
+  <div fxLayout="row" class="local-form-input-actions">
+    <ng-container *ngTemplateOutlet="actions"></ng-container>
+    <ng-container *ngIf="!disabled">
+      <ng-container *ngTemplateOutlet="revertButton"></ng-container>
+      <mat-icon
+        *ngIf="!disabled"
+        [appBdPopup]="popupLink"
+        appBdPopupTrigger="click"
+        (appBdPopupOpened)="linkEditorPopup$.next($event)"
+        [style.cursor]="'pointer'"
+        matTooltip="Insert Link"
+        matTooltipShowDelay="1000"
+        appClickStopPropagation
+        >data_object</mat-icon
+      >
+    </ng-container>
+  </div>
+</app-bd-form-input>

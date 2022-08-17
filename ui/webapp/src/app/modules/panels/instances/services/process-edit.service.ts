@@ -149,7 +149,11 @@ export class ProcessEditService {
       uid: null, // calculated later
       application: application.key,
       name: template?.name
-        ? this.performVariableSubst(template.name, variableValues, status)
+        ? this.performTemplateVariableSubst(
+            template.name,
+            variableValues,
+            status
+          )
         : application.name,
       pooling: application.descriptor.pooling,
       endpoints: cloneDeep(application.descriptor.endpoints),
@@ -188,7 +192,9 @@ export class ProcessEditService {
     }
 
     this.preliminary.push(process);
-    this.alignGlobalParameters(application, process);
+
+    // in case globals have been migrated, this does nothing.
+    this.alignGlobalParameters(application, process, true);
 
     return this.groups.newUuid().pipe(
       tap((uuid) => {
@@ -247,13 +253,30 @@ export class ProcessEditService {
    */
   public alignGlobalParameters(
     appDto: ApplicationDto,
-    process: ApplicationConfiguration
+    process: ApplicationConfiguration,
+    migrate: boolean
   ) {
     const globals = appDto.descriptor?.startCommand?.parameters?.filter(
       (p) => p.global
     );
     if (!globals?.length) {
       return;
+    }
+
+    if (this.edit.globalsMigrated$.value) {
+      if (migrate) {
+        for (const g of globals) {
+          const v = process.start.parameters.find((p) => p.uid === g.uid);
+          if (v) {
+            this.edit.migrateGlobalToVariable(
+              this.edit.state$.value.config.config,
+              v,
+              g
+            );
+          }
+        }
+      }
+      return; // skip the rest, as legacy globals are no longer supported.
     }
 
     const values: { [key: string]: LinkedValueConfiguration } = {};
@@ -320,9 +343,9 @@ export class ProcessEditService {
         let val = p.defaultValue;
         if (!!tpl && tpl.value !== undefined && tpl.value !== null) {
           val = createLinkedValue(
-            this.performVariableSubst(tpl.value, values, status)
+            this.performTemplateVariableSubst(tpl.value, values, status)
           );
-        } else if (p.global) {
+        } else if (p.global && !this.edit.globalsMigrated$.value) {
           const gp = this.getGlobalParameter(p.uid);
           if (gp) {
             val = gp.value;
@@ -350,7 +373,7 @@ export class ProcessEditService {
     };
   }
 
-  private performVariableSubst(
+  public performTemplateVariableSubst(
     value: string,
     variables: { [key: string]: string },
     status: StatusMessage[]

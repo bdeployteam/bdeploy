@@ -1,4 +1,4 @@
-<app-bd-dialog [loadingWhen$]="products.loading$">
+<app-bd-dialog [loadingWhen$]="loading$">
   <app-bd-dialog-toolbar
     header="Update Product"
     [panel]="true"
@@ -12,10 +12,12 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <app-bd-data-table
-      [sortData]="null"
-      [records]="records$ | async"
-      [columns]="columns"
-    ></app-bd-data-table>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <app-bd-data-table
+        [sortData]="null"
+        [records]="records$ | async"
+        [columns]="columns"
+      ></app-bd-data-table>
+    </div>
   </app-bd-dialog-content>
 </app-bd-dialog>

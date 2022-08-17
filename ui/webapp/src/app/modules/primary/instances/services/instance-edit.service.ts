@@ -25,11 +25,17 @@ import {
   InstanceNodeConfigurationDto,
   InstanceUpdateDto,
   MinionDto,
+  ParameterConfiguration,
+  ParameterDescriptor,
   ProcessControlGroupConfiguration,
   ProductDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  createLinkedValue,
+  getPreRenderable,
+} from 'src/app/modules/core/utils/linked-values.utils';
 import { mapObjToArray } from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import {
@@ -169,6 +175,8 @@ export class InstanceEditService {
 
   public state$ = new BehaviorSubject<GlobalEditState>(null);
   public nodes$ = new BehaviorSubject<{ [key: string]: MinionDto }>(null);
+  public serverSupportsVariables$ = new BehaviorSubject<boolean>(true);
+  public globalsMigrated$ = new BehaviorSubject<boolean>(true);
   public baseApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
   public stateApplications$ = new BehaviorSubject<ApplicationDto[]>(null);
 
@@ -230,6 +238,20 @@ export class InstanceEditService {
       .pipe(debounceTime(500))
       .subscribe(() => this.validate());
     this.issues$.subscribe((i) => this.issuesSubject$.next(i));
+
+    // keep the boolean updated when state changes (undo, redo, etc.)
+    combineLatest([this.state$, this.stateApplications$]).subscribe(
+      ([s, a]) => {
+        if (!s?.config?.config || !a) {
+          return;
+        }
+
+        // check whether globals need migration
+        this.globalsMigrated$.next(
+          !this.isMigrationRequired(s.config.config, a)
+        );
+      }
+    );
   }
 
   /** Creates a standard edit factory, capturing changes by diffing as well as the current update warnings */
@@ -379,9 +401,45 @@ export class InstanceEditService {
 
           this.base$.next({ config: base, files: [], warnings: [] });
           this.state$.next(cloneDeep(this.base$.value));
+
+          // check for old server versions which do not support variables yet.
+          if (nodes) {
+            for (const k of Object.keys(nodes)) {
+              const n = nodes[k];
+              if (n.master) {
+                this.serverSupportsVariables$.next(
+                  n.version.major === 0 || // dev version
+                    n.version.major > 4 || // 5.0+
+                    (n.version.major === 4 && n.version.minor >= 6) // 4.6+
+                );
+              }
+            }
+          }
+
           this.nodes$.next(minions);
         });
     }
+  }
+
+  private isMigrationRequired(
+    instance: InstanceConfiguration,
+    apps: ApplicationDto[]
+  ): boolean {
+    // if migration is already performed, not needed.
+    if (instance.globalsMigrated) {
+      return false;
+    }
+
+    // check all parameters for the global flag.
+    for (const app of apps) {
+      for (const param of app.descriptor.startCommand.parameters) {
+        if (param.global) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -440,6 +498,9 @@ export class InstanceEditService {
 
     const managedServer = this.current$.value.managedServer?.hostName;
     const expect = this.current$.value.instance.tag;
+
+    // improve check performance next time if no migration of the globals is required anymore.
+    state.config.config.globalsMigrated = this.globalsMigrated$.value;
 
     const update: InstanceUpdateDto = {
       config: state.config,
@@ -701,6 +762,83 @@ export class InstanceEditService {
       this.state$.value?.config?.nodeDtos,
       uid
     )?.nodeConfiguration.applications.find((a) => a.uid === uid);
+  }
+
+  public migrateGlobals(config: InstanceConfigurationDto) {
+    // first find all the parameters which are global right now.
+    for (const node of config.nodeDtos) {
+      for (const app of node.nodeConfiguration.applications) {
+        const desc = this.getApplicationDescriptor(app.application.name);
+        if (!desc) {
+          continue;
+        }
+
+        for (const param of app.start.parameters) {
+          const paramDesc = desc.startCommand.parameters.find(
+            (d) => d.uid === param.uid
+          );
+          if (!paramDesc || !paramDesc.global) {
+            continue;
+          }
+
+          // it's a global parameter :) need to change the value.
+          this.migrateGlobalToVariable(config.config, param, paramDesc);
+        }
+      }
+    }
+
+    // second create an instance variable using the parameter ID and the current value.
+    // third change the parameter value to point to the instance variable.
+
+    config.config.globalsMigrated = true;
+
+    // trigger reload in relevant places.
+    this.state$.next(this.state$.value);
+  }
+
+  public migrateGlobalToVariable(
+    instance: InstanceConfiguration,
+    param: ParameterConfiguration,
+    desc: ParameterDescriptor
+  ) {
+    const name = param.uid;
+    const value = getPreRenderable(param.value); // do not expand. if it is an expression it should stay so.
+    const description = `${desc.name}`;
+
+    // in any case, we need to update the value of the parameter to be a link expression to the instance variable.
+    param.value = { value: null, linkExpression: `{{X:${name}}}` };
+
+    // don't do ANYTHING if we're already migrated. also don't do anything if we don't have a value.
+    // ("worst case" is a good case: variable not defined, but parameter references it -> validation warning).
+    if (value === `{{X:${name}}}` || !value) {
+      return; // not even a notice.
+    }
+
+    if (
+      instance.instanceVariables &&
+      instance.instanceVariables[name]?.value &&
+      getPreRenderable(instance.instanceVariables[name]?.value)?.length
+    ) {
+      if (instance.instanceVariables[name].value.value !== value) {
+        console.warn(
+          'Unaligned global found in instance variables!',
+          param,
+          desc
+        );
+      }
+      // already migrated, no neet to do anything to the instance variables.
+    } else {
+      if (!instance.instanceVariables) {
+        instance.instanceVariables = {};
+      }
+
+      instance.instanceVariables[name] = {
+        value: createLinkedValue(value),
+        description,
+        customEditor: desc.customEditor,
+        type: desc.type,
+      };
+    }
   }
 
   /** Creates the current state from the base and all recorded edits. */

@@ -2,6 +2,7 @@ import { Component, HostListener, OnDestroy, TemplateRef } from '@angular/core';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
+import { PopupService } from '../../services/popup.service';
 
 export interface BdDialogMessageAction<T> {
   /** The name of the action is usually rendered as button text */
@@ -120,7 +121,7 @@ export class BdDialogMessageComponent implements OnDestroy {
     return this._userConfirmation;
   }
 
-  constructor() {
+  constructor(private popupService: PopupService) {
     // reset confirmation state whenever a new message arrives which requires confirmation.
     this.subscription = this.message$
       .pipe(filter((v) => !!v))
@@ -139,12 +140,25 @@ export class BdDialogMessageComponent implements OnDestroy {
     }
   }
 
-  @HostListener('window:keyup.Enter', ['$event'])
-  private onEnterPress(): void {
+  @HostListener('body:keydown.Enter', ['$event'])
+  private onEnterPress(event: KeyboardEvent): void {
+    // in case a content-assist is currently active, we do not want to trigger the default button;
+    if (event.defaultPrevented) {
+      return;
+    }
+
     // find single confirm action.
     const x = this.message$.value?.actions?.filter((a) => a.confirm);
     if (x?.length !== 1 || !this.confirmed$.value) {
       return; // do nothing, none or multiple confirming actions, don't know which to press :)
+    }
+
+    // check if valid!
+    if (
+      (this.message$.value?.validation && !this.message$.value?.validation()) ||
+      (!!x[0].disabled && x[0].disabled())
+    ) {
+      return; // not valid or enabled!
     }
 
     this.complete(x[0].result);

@@ -1,0 +1,11 @@
+.local-form-input .local-hover-button:not(.local-pin-active) {
+  display: none !important;
+}
+
+.local-form-input:hover .local-hover-button {
+  display: block !important;
+}
+
+.local-form-input-actions > * {
+  margin-left: 10px;
+}

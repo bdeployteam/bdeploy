@@ -38,6 +38,7 @@ export class BdFormInputComponent
   @Input() prefix: TemplateRef<any>;
   @Input() assistValues: ContentCompletion[];
   @Input() assistPrefixes: ContentCompletion[];
+  @Input() errorFallback: string;
 
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
@@ -92,6 +93,10 @@ export class BdFormInputComponent
   }
 
   isErrorState(control: UntypedFormControl | null): boolean {
+    if (this.errorFallback) {
+      return true;
+    }
+
     if (!this.isInvalid()) {
       return false;
     }
@@ -111,7 +116,15 @@ export class BdFormInputComponent
       return null;
     }
 
-    return bdValidationMessage(this.label, this.ngControl.errors);
+    const msg = bdValidationMessage(this.label, this.ngControl.errors);
+
+    if (msg) {
+      return msg;
+    }
+
+    if (this.errorFallback) {
+      return this.errorFallback;
+    }
   }
 
   private updateFilter() {

@@ -36,10 +36,7 @@ export class ControlGroupComponent implements OnInit, OnDestroy {
   /* template */ isTop: boolean;
   /* template */ isBottom: boolean;
 
-  constructor(
-    private edit: InstanceEditService,
-    private bop: BreakpointObserver
-  ) {
+  constructor(private edit: InstanceEditService, bop: BreakpointObserver) {
     this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
       this.narrow$.next(bs.matches);
     });
@@ -64,18 +61,18 @@ export class ControlGroupComponent implements OnInit, OnDestroy {
 
           const stateIndex = state.config.nodeDtos
             .find((n) => n.nodeName === node.nodeName)
-            .nodeConfiguration.controlGroups.findIndex(
+            ?.nodeConfiguration?.controlGroups?.findIndex(
               (g) => g.name === this.group.name
             );
           const baseIndex = base.config.nodeDtos
             .find((n) => n.nodeName === node.nodeName)
-            .nodeConfiguration.controlGroups.findIndex(
+            ?.nodeConfiguration?.controlGroups?.findIndex(
               (g) => g.name === this.group.name
             );
 
           this.isTop = stateIndex === 0;
           this.isBottom =
-            stateIndex === node.nodeConfiguration.controlGroups.length - 1;
+            stateIndex === node?.nodeConfiguration?.controlGroups?.length - 1;
 
           if (!baseGroup) {
             return;

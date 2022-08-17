@@ -77,4 +77,11 @@ public class InstanceConfiguration {
      * Collection of instance variables which can be used to provide values to parameters.
      */
     public Map<String, VariableValue> instanceVariables = new TreeMap<>();
+
+    /**
+     * Whether global parameters have been migrated to system/instance variables.
+     * <p>
+     * Effectively disables all global parameter handling on this instance.
+     */
+    public boolean globalsMigrated = false;
 }

@@ -22,7 +22,9 @@
         [toggle]="false"
         [route]="['variables']"
         [relative]="true"
-        [disabled]="!(auth.isCurrentScopeWrite$ | async) || !(edit.hasCurrentProduct$ | async)"
+        [matTooltip]="(edit.serverSupportsVariables$ | async) ? null : 'Server does not support instance variables.'"
+        matTooltipShowDelay="500"
+        [disabled]="!(auth.isCurrentScopeWrite$ | async) || !(edit.hasCurrentProduct$ | async) || !(edit.serverSupportsVariables$ | async)"
       ></app-bd-panel-button>
       <app-bd-panel-button
         text="Configuration Files"

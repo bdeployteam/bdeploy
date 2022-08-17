@@ -1,0 +1,23 @@
+.local-type {
+  text-transform: uppercase;
+  text-align: center;
+  font-size: smaller;
+  border-radius: 3px;
+  padding: 0px 5px;
+  width: 16px;
+}
+
+.local-type-S {
+  background-color: var(--bd-bg-grey);
+  color: var(--bd-main-bar-contrast);
+}
+
+.local-type-C {
+  background-color: var(--bd-bg-grey);
+  color: var(--bd-main-bar-contrast);
+}
+
+.local-type-U {
+  background-color: var(--bd-bg-grey);
+  color: var(--bd-main-bar-contrast);
+}

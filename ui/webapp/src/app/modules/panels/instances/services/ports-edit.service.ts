@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import {
   ApplicationConfiguration,
-  ParameterConfiguration,
-  ParameterDescriptor,
+  LinkedValueConfiguration,
   ParameterType,
 } from 'src/app/models/gen.dtos';
 import {
@@ -14,18 +13,23 @@ import { URLish } from 'src/app/modules/core/utils/url.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from './process-edit.service';
 
-export interface PortParmGroup {
-  apps: ApplicationConfiguration[];
-  params: ParameterConfiguration[];
-  desc: ParameterDescriptor;
+export interface PortParam {
+  source: string;
+  value: LinkedValueConfiguration;
+  type: ParameterType;
+  name: string;
+  description: string;
   port: string;
+  expression: boolean;
+  app: ApplicationConfiguration;
+  apply: (lv: LinkedValueConfiguration) => void;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class PortsEditService {
-  public ports$ = new BehaviorSubject<PortParmGroup[]>(null);
+  public ports$ = new BehaviorSubject<PortParam[]>(null);
 
   constructor(
     public edit: InstanceEditService,
@@ -38,7 +42,7 @@ export class PortsEditService {
           return;
         }
 
-        const portParams: PortParmGroup[] = [];
+        const portParams: PortParam[] = [];
 
         for (const node of s.config.nodeDtos) {
           for (const app of node.nodeConfiguration.applications) {
@@ -50,29 +54,52 @@ export class PortsEditService {
                 (p) => p.uid === param.uid
               );
 
-              if (!paramDesc || !this.isPortParam(paramDesc)) {
+              if (!this.isPort(paramDesc?.type)) {
                 continue;
               }
 
-              const ppg = portParams.find(
-                (p) =>
-                  p.desc.uid === paramDesc.uid &&
-                  p.desc.global &&
-                  paramDesc.global &&
-                  p.port === this.getPortValue(param, paramDesc)
-              );
-              if (!ppg) {
-                portParams.push({
-                  apps: [app],
-                  params: [param],
-                  desc: paramDesc,
-                  port: this.getPortValue(param, paramDesc),
-                });
-              } else {
-                ppg.params.push(param);
-                ppg.apps.push(app);
-              }
+              portParams.push({
+                value: param.value,
+                source: `${app.name}`,
+                type: paramDesc.type,
+                name: paramDesc.name,
+                description: paramDesc.longDescription,
+                expression: this.isPortExpression(param.value, paramDesc.type),
+                port: this.getPortValue(param.value, paramDesc.type),
+                app: app,
+                apply: (lv) =>
+                  (param.preRendered = this.procEdit.preRenderParameter(
+                    paramDesc,
+                    lv
+                  )),
+              });
             }
+          }
+        }
+
+        // Intentionally DON'T include system variables - we're not allowed to edit them from here!
+        if (s?.config?.config?.instanceVariables) {
+          // gather instance and system variables of type port.
+          for (const k of Object.keys(s.config.config.instanceVariables)) {
+            const val = s.config.config.instanceVariables[k];
+
+            if (!this.isPort(val.type)) {
+              continue;
+            }
+
+            portParams.push({
+              value: val.value,
+              source: `Instance Variables.`,
+              type: val.type,
+              name: k,
+              description: val.description,
+              port: this.getPortValue(val.value, val.type),
+              expression: this.isPortExpression(val.value, val.type),
+              app: null,
+              apply: (lv) => {
+                s.config.config.instanceVariables[k] = { ...val, value: lv };
+              },
+            });
           }
         }
 
@@ -81,22 +108,27 @@ export class PortsEditService {
     );
   }
 
-  public shiftPorts(ports: PortParmGroup[], amount: number): string[] {
+  public shiftPorts(ports: PortParam[], amount: number): string[] {
     if (!ports?.length) {
       return;
     }
 
     const errors: string[] = [];
 
-    for (const group of ports) {
-      const num = parseInt(group.port, 10) + amount;
-
-      if (num < 0 || num > 65535) {
-        errors.push(`${group.desc.name}: ${num} out of range.`);
+    for (const port of ports) {
+      if (port.expression) {
         continue;
       }
 
-      this.setPortValue(group, `${num}`);
+      const current = parseInt(port.port, 10);
+      const num = current + amount;
+
+      if (num < 0 || num > 65535) {
+        errors.push(`${port.name}: ${num} out of range.`);
+        continue;
+      }
+
+      this.setPortValue(port, `${num}`);
     }
 
     if (errors.length) {
@@ -109,42 +141,43 @@ export class PortsEditService {
   }
 
   private getPortValue(
-    param: ParameterConfiguration,
-    desc: ParameterDescriptor
+    value: LinkedValueConfiguration,
+    type: ParameterType
   ): string {
-    const v = getPreRenderable(param.value);
-    if (desc.type === ParameterType.URL) {
-      // the instance-edit-ports component will give us only parameters where this is valid!
-      return new URLish(v).port;
+    if (type === ParameterType.URL) {
+      return new URLish(getPreRenderable(value)).port;
     }
-    return v;
+    return value.value; // no link supported if not URL.
   }
 
-  private setPortValue(group: PortParmGroup, value: string) {
-    for (const param of group.params) {
-      if (group.desc.type === ParameterType.URL) {
-        const u = new URLish(getPreRenderable(param.value));
-        u.port = value;
-        param.value = createLinkedValue(u.toString());
-      } else {
-        param.value = createLinkedValue(value);
-      }
-
-      param.preRendered = this.procEdit.preRenderParameter(
-        group.desc,
-        param.value
-      );
+  private setPortValue(port: PortParam, value: string) {
+    if (port.type === ParameterType.URL) {
+      const u = new URLish(getPreRenderable(port.value));
+      u.port = value;
+      port.value = createLinkedValue(u.toString());
+    } else {
+      port.value.value = value;
     }
-    group.port = value;
+
+    port.apply(port.value);
+    port.port = value;
   }
 
-  private isPortParam(desc: ParameterDescriptor) {
-    switch (desc.type) {
-      case 'CLIENT_PORT':
-      case 'SERVER_PORT':
-      case 'URL':
+  private isPort(type: ParameterType) {
+    switch (type) {
+      case ParameterType.CLIENT_PORT:
+      case ParameterType.SERVER_PORT:
+      case ParameterType.URL:
         return true;
     }
     return false;
+  }
+
+  private isPortExpression(
+    value: LinkedValueConfiguration,
+    type: ParameterType
+  ) {
+    const num = parseInt(this.getPortValue(value, type));
+    return isNaN(num);
   }
 }

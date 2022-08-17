@@ -17,15 +17,23 @@ export class PluginService {
     product: ManifestKey,
     editorType: string
   ): Observable<PluginInfoDto> {
-    const url =
-      this.config.config.api +
-      '/plugin-admin/get-editor/' +
-      group +
-      '/' +
-      editorType;
-    return this.http.post<PluginInfoDto>(url, product, {
-      headers: suppressGlobalErrorHandling(new HttpHeaders()),
-    });
+    return this.http.post<PluginInfoDto>(
+      `${this.config.config.api}/plugin-admin/get-editor/${group}/${editorType}`,
+      product,
+      {
+        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      }
+    );
+  }
+
+  public getAvailableEditorTypes(
+    group: string,
+    product: ManifestKey
+  ): Observable<string[]> {
+    return this.http.post<string[]>(
+      `${this.config.config.api}/plugin-admin/list-editor-types/${group}`,
+      product
+    );
   }
 
   public load(plugin: PluginInfoDto, modulePath: string): Promise<any> {

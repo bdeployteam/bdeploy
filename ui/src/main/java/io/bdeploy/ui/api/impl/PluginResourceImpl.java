@@ -6,10 +6,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import io.bdeploy.api.plugin.v1.CustomEditor;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
@@ -148,6 +151,39 @@ public class PluginResourceImpl implements PluginResource {
         }
 
         throw new WebApplicationException("Cannot find editor plugin for " + type, Status.NOT_FOUND);
+    }
+
+    @Override
+    public Set<String> getEditorTypes(String group, Key product) {
+        Set<String> result = new TreeSet<>();
+
+        // check plugins from the product.
+        BHive hive = reg.get(group);
+        if (hive == null) {
+            throw new WebApplicationException("Instance Group not found: " + group, Status.NOT_FOUND);
+        }
+        ProductManifest pm = ProductManifest.of(hive, product);
+        for (ObjectId plugin : pm.getPlugins()) {
+            boolean wasLoaded = manager.isLoaded(plugin);
+            PluginInfoDto info = manager.load(hive, plugin, product);
+            if (info != null) {
+                if (!wasLoaded) {
+                    changes.change(ObjectChangeType.PLUGIN, Collections.singletonMap(ObjectChangeDetails.ID, plugin.toString()));
+                }
+                info.editors.forEach(e -> result.add(e.getTypeName()));
+            }
+        }
+
+        for (PluginInfoDto info : getLoadedPlugins()) {
+            if (!info.global) {
+                // only allow global plugins, not local ones from OTHER products which did not match the ID above already.
+                continue;
+            }
+
+            info.editors.forEach(e -> result.add(e.getTypeName()));
+        }
+
+        return result;
     }
 
     /**

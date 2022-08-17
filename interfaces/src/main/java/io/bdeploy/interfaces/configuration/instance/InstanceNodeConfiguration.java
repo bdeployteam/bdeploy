@@ -3,7 +3,10 @@ package io.bdeploy.interfaces.configuration.instance;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.function.Consumer;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.VariableResolver;
@@ -14,11 +17,16 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.DelayedVariableResolver;
+import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
+import io.bdeploy.interfaces.variables.OsVariableResolver;
+import io.bdeploy.interfaces.variables.ParameterValueResolver;
 
 /**
  * A {@link InstanceNodeConfiguration} marries each {@link ApplicationDescriptor}
@@ -122,18 +130,83 @@ public class InstanceNodeConfiguration {
     /**
      * @param instance the instance to pick variables from. instance variables have precedence over system variables.
      * @param system the system to pick variables from.
+     * @param cfgResolver an optional resolver which will apply the given {@link VariableResolver} to all configuration files
+     *            relevant for this node. if this is given, the resulting merge will *only* contain variables which are actually
+     *            used. This must be done when persisting an instance node.
+     * @implNote only variables which are actually used on this node shall be merged, since sensitive data may be present in
+     *           variables!.
      */
-    public void mergeVariables(InstanceConfiguration instance, SystemConfiguration system) {
+    public void mergeVariables(InstanceConfiguration instance, SystemConfiguration system,
+            Consumer<VariableResolver> cfgResolver) {
         variables.clear();
 
         // pick system first, so instance can overrule values later on.
         if (system != null && system.systemVariables != null) {
-            system.systemVariables.forEach((k, v) -> variables.put(k, v.value));
+            system.systemVariables.forEach((k, v) -> variables.put(k, v.value.getPreRenderable()));
         }
 
         // now potentially overwrite system variables with instance ones.
         if (instance != null && instance.instanceVariables != null) {
-            instance.instanceVariables.forEach((k, v) -> variables.put(k, v.value));
+            instance.instanceVariables.forEach((k, v) -> variables.put(k, v.value.getPreRenderable()));
         }
+
+        if (cfgResolver != null) {
+            // render the descriptor with as many resolvers as required, and a tracking resolver for variables, so we afterwards know which ones are required.
+            TrackingInstanceAndSystemVariableResolver tracker = new TrackingInstanceAndSystemVariableResolver(this);
+            CompositeResolver resolver = new CompositeResolver();
+            resolver.add(tracker);
+            resolver.add(new DelayedVariableResolver(resolver));
+            resolver.add(new OsVariableResolver());
+            resolver.add(new EnvironmentVariableResolver());
+            resolver.add(new ParameterValueResolver(new ApplicationParameterProvider(this)));
+
+            for (ApplicationConfiguration cfg : applications) {
+                CompositeResolver perApp = new CompositeResolver();
+                perApp.add(new ApplicationParameterValueResolver(cfg.uid, this));
+                perApp.add(resolver);
+                perApp.add(new EmptyVariableResolver()); // last one: ignore all other expansions. 
+
+                // this will update the tracking resolver with all required variables.
+                cfg.renderDescriptor(perApp);
+            }
+
+            resolver.add(new EmptyVariableResolver()); // last one: ignore all other expansions
+            cfgResolver.accept(resolver);
+
+            // now we should have all variables collected.
+            List<String> notRequired = variables.keySet().stream().filter(k -> !tracker.used.contains(k)).toList();
+            notRequired.forEach(k -> variables.remove(k));
+        }
+    }
+
+    private static final class TrackingInstanceAndSystemVariableResolver extends InstanceAndSystemVariableResolver {
+
+        Set<String> used = new TreeSet<>();
+
+        public TrackingInstanceAndSystemVariableResolver(InstanceNodeConfiguration node) {
+            super(node);
+        }
+
+        @Override
+        protected String doResolve(String variable) {
+            String val = super.doResolve(variable);
+            if (val != null) {
+                used.add(variable);
+            }
+            return val;
+        }
+
+    }
+
+    /**
+     * used for all expansions not required to determine which system variables are required.
+     */
+    private static final class EmptyVariableResolver implements VariableResolver {
+
+        @Override
+        public String apply(String t) {
+            return ""; // never null;
+        }
+
     }
 }

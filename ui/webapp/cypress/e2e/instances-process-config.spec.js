@@ -228,7 +228,7 @@ describe('Instance Process Config Tests', () => {
     cy.inMainNavFlyin('app-configure-process', () => {
       cy.contains('mat-expansion-panel', 'Sleep Configuration').within(() => {
         cy.get('[data-cy="param.sleep"]').within(() => {
-          cy.get('input[name="param.sleep"]').should('be.disabled');
+          cy.get('input[name="param.sleep_val"]').should('be.disabled');
           cy.contains('mat-icon', 'add').click();
 
           cy.contains('mat-icon', 'delete').should('exist');
@@ -237,10 +237,10 @@ describe('Instance Process Config Tests', () => {
         cy.get('button[data-cy^="Confirm"]').click();
 
         cy.get('[data-cy="param.sleep"]').within(() => {
-          cy.get('input[name="param.sleep"]')
+          cy.get('input[name="param.sleep_val"]')
             .should('be.enabled')
             .should('have.value', 10);
-          cy.get('input[name="param.sleep"]').clear().type('5');
+          cy.get('input[name="param.sleep_val"]').clear().type('5');
 
           // need to force this as it is hidden - there is no native hover support in cypress, so no way to show it.
           cy.contains('mat-icon', 'push_pin').click({ force: true });
@@ -458,6 +458,16 @@ describe('Instance Process Config Tests', () => {
     cy.inMainNavFlyin('app-product-update', () => {
       cy.contains('tr', '2.0.0').within(() => {
         cy.get('button[data-cy^="Use"]').click();
+      });
+    });
+
+    // there must be a popup in the main area querying for update of global parameters.
+    cy.inMainNavContent(() => {
+      cy.contains(
+        'app-bd-notification-card',
+        'Global Parameter Migration'
+      ).within(() => {
+        cy.get('button[data-cy^=Migrate]').click();
       });
     });
 

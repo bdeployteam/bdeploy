@@ -1,6 +1,7 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
+import { cloneDeep } from 'lodash-es';
 import {
   BehaviorSubject,
   combineLatest,
@@ -27,6 +28,10 @@ import {
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import {
+  createLinkedValue,
+  getPreRenderable,
+} from 'src/app/modules/core/utils/linked-values.utils';
 import {
   getAppKeyName,
   getTemplateAppKey,
@@ -206,7 +211,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
   public applyStageFinal() {
     this.loading$.next(true);
     this.messages = [];
-    const observables = [];
+    const observables: Observable<any>[] = [];
 
     // prepare available process control groups
     const pcgs = this.template.processControlGroups.map(
@@ -221,7 +226,26 @@ export class InstanceTemplatesComponent implements OnDestroy {
         if (!this.instanceEdit.state$.value.config.config.instanceVariables) {
           this.instanceEdit.state$.value.config.config.instanceVariables = {};
         }
-        this.instanceEdit.state$.value.config.config.instanceVariables[k] = v;
+        const processed = cloneDeep(v);
+        const status: StatusMessage[] = [];
+        processed.value = createLinkedValue(
+          this.edit.performTemplateVariableSubst(
+            getPreRenderable(processed.value),
+            this.variables,
+            status
+          )
+        );
+        status.forEach((e) =>
+          this.messages.push({
+            group: 'Global',
+            node: 'Global',
+            appname: null,
+            template: null,
+            message: e,
+          })
+        );
+        this.instanceEdit.state$.value.config.config.instanceVariables[k] =
+          processed;
       }
     }
 
@@ -281,7 +305,6 @@ export class InstanceTemplatesComponent implements OnDestroy {
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
         if (this.messages.length) {
-          console.log(this.messages);
           applyResult = this.dialog.message({
             header: 'Template Messages',
             template: this.tplMessages,

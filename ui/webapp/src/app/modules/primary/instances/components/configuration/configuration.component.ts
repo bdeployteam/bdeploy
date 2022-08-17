@@ -88,6 +88,7 @@ export class ConfigurationComponent
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   private subscription: Subscription;
+  private migrationWarningShown: boolean = null;
   public isCentral = false;
 
   constructor(

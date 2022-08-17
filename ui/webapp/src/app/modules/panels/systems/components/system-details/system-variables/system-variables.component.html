@@ -2,45 +2,70 @@
   <div>
     Provide an ID, a value and an optional description for the new variable.
   </div>
-  <app-bd-form-input
-    [(ngModel)]="newId"
-    name="id"
-    label="Variable ID"
-    required
-    appTrimmed
-    appEditUniqueValueValidator
-    [disallowedValues]="newUsedIds"
-  ></app-bd-form-input>
-  <app-bd-form-input
-    [(ngModel)]="newValue"
-    name="value"
-    label="Value"
-    required
-  ></app-bd-form-input>
-  <app-bd-form-input
-    [(ngModel)]="newDescription"
-    name="description"
-    label="Variable Description"
-    appTrimmed
-  ></app-bd-form-input>
+  <form #addForm="ngForm">
+    <app-bd-form-input
+      [(ngModel)]="newId"
+      name="id"
+      label="Variable ID"
+      required
+      appTrimmed
+      appEditUniqueValueValidator
+      [disallowedValues]="newUsedIds"
+      errorDisplay="immediate"
+    ></app-bd-form-input>
+    <app-bd-value-editor
+      [(ngModel)]="newValue.value"
+      name="value"
+      label="Value"
+      [required]="true"
+      [type]="newValue.type"
+      [system]="system.config"
+      [completionPrefixes]="completionPrefixes"
+      [completions]="completions"
+    ></app-bd-value-editor>
+    <app-bd-form-input
+      [(ngModel)]="newValue.description"
+      name="description"
+      label="Description"
+    ></app-bd-form-input>
+    <mat-divider></mat-divider>
+    <app-bd-form-select
+      [(ngModel)]="newValue.type"
+      [values]="typeValues"
+      name="type"
+      label="Value Type"
+    ></app-bd-form-select>
+  </form>
 </ng-template>
 
 <ng-template #editTemplate>
   <div>
     Provide a new value and/or description for <strong>{{newId}}</strong>.
   </div>
-  <app-bd-form-input
-    [(ngModel)]="newValue"
-    name="value"
-    label="Value"
-    required
-  ></app-bd-form-input>
-  <app-bd-form-input
-    [(ngModel)]="newDescription"
-    name="description"
-    label="Variable Description"
-    appTrimmed
-  ></app-bd-form-input>
+  <form #editForm="ngForm">
+    <app-bd-value-editor
+      [(ngModel)]="newValue.value"
+      name="value"
+      label="Value"
+      [required]="true"
+      [type]="newValue.type"
+      [system]="system.config"
+      [completionPrefixes]="completionPrefixes"
+      [completions]="completions"
+    ></app-bd-value-editor>
+    <app-bd-form-input
+      [(ngModel)]="newValue.description"
+      name="description"
+      label="Description"
+    ></app-bd-form-input>
+    <mat-divider></mat-divider>
+    <app-bd-form-select
+      [(ngModel)]="newValue.type"
+      [values]="typeValues"
+      name="type"
+      label="Value Type"
+    ></app-bd-form-select>
+  </form>
 </ng-template>
 
 <app-bd-dialog>

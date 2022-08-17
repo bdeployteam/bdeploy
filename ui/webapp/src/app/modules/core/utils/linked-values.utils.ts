@@ -96,7 +96,9 @@ export function gatherVariableExpansions(
         return {
           name: k,
           description: `Instance Variable - ${instance?.config?.name}`,
-          preview: instance.config.instanceVariables[k]?.value,
+          preview: getPreRenderable(
+            instance.config.instanceVariables[k]?.value
+          ), // explicitly the non-expanded value.
           link: `{{X:${k}}}`,
           group: null,
         };
@@ -112,7 +114,7 @@ export function gatherVariableExpansions(
         return {
           name: k,
           description: `System Variable - ${system?.name}`,
-          preview: system.systemVariables[k]?.value,
+          preview: getPreRenderable(system.systemVariables[k]?.value), // explicitly the non-expanded value.
           link: `{{X:${k}}}`,
           group: null,
         };
@@ -141,8 +143,8 @@ export function gatherProcessExpansions(
     for (const app of node.nodeConfiguration.applications) {
       if (
         node.nodeName === CLIENT_NODE_NAME &&
-        app.name === process.name &&
-        app.uid !== process.uid
+        app.name === process?.name &&
+        app.uid !== process?.uid
       ) {
         // client app for different OS - this is actually not well supported, we cannot resolve parameters of this.
         continue;
@@ -150,7 +152,7 @@ export function gatherProcessExpansions(
       for (const param of app.start.parameters) {
         let link = `{{V:${app.name}:${param.uid}}}`;
         let group = app.name;
-        if (app.uid === process.uid) {
+        if (app.uid === process?.uid) {
           link = `{{V:${param.uid}}}`;
           group = `${app.name} (This Application)`;
         }
@@ -170,7 +172,7 @@ export function gatherProcessExpansions(
               label = paramDesc.name;
               desc = paramDesc.longDescription;
               if (paramDesc.type === ParameterType.PASSWORD) {
-                value = '*'.repeat(value.length);
+                value = value ? '*'.repeat(value.length) : '';
               }
               break;
             }
@@ -330,20 +332,22 @@ export function gatherSpecialExpansions(
     link: '{{I:DEPLOYMENT_INFO_FILE}}',
     group: null,
   });
-  result.push({
-    name: 'A:NAME',
-    description: `The application name`,
-    preview: process?.name,
-    link: '{{A:NAME}}',
-    group: null,
-  });
-  result.push({
-    name: 'A:UUID',
-    description: `The application ID`,
-    preview: process?.uid,
-    link: '{{A:UUID}}',
-    group: null,
-  });
+  if (process) {
+    result.push({
+      name: 'A:NAME',
+      description: `The application name`,
+      preview: process.name,
+      link: '{{A:NAME}}',
+      group: null,
+    });
+    result.push({
+      name: 'A:UUID',
+      description: `The application ID`,
+      preview: process.uid,
+      link: '{{A:UUID}}',
+      group: null,
+    });
+  }
   result.push({
     name: 'H:HOSTNAME',
     description:
@@ -362,8 +366,10 @@ export function gatherSpecialExpansions(
     group: null,
     matches: (s) => s.startsWith('{{WINDOWS:'),
     expand: (s) =>
-      getAppOs(process.application) === OperatingSystem.WINDOWS
-        ? s.substring('{{WINDOWS:'.length, s.indexOf('}}'))
+      process
+        ? getAppOs(process.application) === OperatingSystem.WINDOWS
+          ? s.substring('{{WINDOWS:'.length, s.indexOf('}}'))
+          : ''
         : '',
   });
 
@@ -376,8 +382,10 @@ export function gatherSpecialExpansions(
     group: null,
     matches: (s) => s.startsWith('{{LINUX:'),
     expand: (s) =>
-      getAppOs(process.application) === OperatingSystem.LINUX
-        ? s.substring('{{LINUX:'.length, s.indexOf('}}'))
+      process
+        ? getAppOs(process.application) === OperatingSystem.LINUX
+          ? s.substring('{{LINUX:'.length, s.indexOf('}}'))
+          : ''
         : '',
   });
 
