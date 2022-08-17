@@ -214,6 +214,17 @@ export class InstanceTemplatesComponent implements OnDestroy {
     );
     pcgs.forEach((p) => (p.processOrder = []));
 
+    // apply instance variables if set.
+    if (this.template.instanceVariables) {
+      for (const k of Object.keys(this.template.instanceVariables)) {
+        const v = this.template.instanceVariables[k];
+        if (!this.instanceEdit.state$.value.config.config.instanceVariables) {
+          this.instanceEdit.state$.value.config.config.instanceVariables = {};
+        }
+        this.instanceEdit.state$.value.config.config.instanceVariables[k] = v;
+      }
+    }
+
     for (const groupName of Object.keys(this.groups)) {
       const nodeName = this.groups[groupName];
       if (!nodeName) {

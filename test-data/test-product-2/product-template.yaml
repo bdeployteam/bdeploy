@@ -1,13 +1,21 @@
 name: Default Configuration
 description: "Creates an instance with the default server and client configuration"
 
-variables:
+templateVariables:
   - uid: text-param
     name: "Text Value"
     description: "A text to set"
     suggestedValues:
     - 'Test Value'
     - 'Another Suggested Value'
+
+instanceVariables:
+  io.bdeploy.test:
+    value: "Variable Value"
+    description: "Some test variable"
+  io.bdeploy.another:
+    value: "Another Variable Value"
+    description: "Yet another test variable"
 
 processControlGroups:
   - name: "First Group"
@@ -31,6 +39,9 @@ groups:
     - uid: param.text
       value: "{{T:text-param}}"
   - template: server-with-sleep
+    startParameters:
+    - uid: param.text
+      value: "{{X:io.bdeploy.test}}"
   - template: server-with-sleep
     name: "Another Server With Sleep"
     preferredProcessControlGroup: "Second Group"
