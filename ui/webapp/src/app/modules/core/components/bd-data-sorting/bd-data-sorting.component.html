@@ -1,0 +1,54 @@
+<app-bd-button-popup
+  #popup
+  text="Card Sorting"
+  icon="sort"
+  tooltip="below"
+  [collapsed]="true"
+  [disabled]="disabled"
+>
+  <mat-card
+    [style.padding.px]="10"
+    class="mat-typography"
+    fxLayout="column"
+    fxLayoutGap="5px"
+  >
+    <div fxLayout="row" fxLayoutGap="5px" class="bd-type-text">
+      Sort Cards By
+    </div>
+    <div fxLayout="row" fxLayoutGap="5px">
+      <mat-radio-group
+        fxLayout="column"
+        aria-labelledby="example-radio-group-label"
+        class="example-radio-group"
+        [ngModel]="selectedColumn"
+        (ngModelChange)="updateSortColumn($event)"
+      >
+        <mat-radio-button
+          class="example-radio-button"
+          *ngFor="let column of _columns"
+          [value]="column"
+        >
+          {{column.name}}
+        </mat-radio-button>
+      </mat-radio-group>
+      <div fxLayout="column" fxLayoutGap="5px">
+        <app-bd-button
+          tooltip="above"
+          text="Ascending order"
+          icon="arrow_upward"
+          [isToggle]="true"
+          [toggle]="sort?.direction === 'asc'"
+          (click)="updateSortDirection('asc')"
+        ></app-bd-button>
+        <app-bd-button
+          tooltip="above"
+          text="Descending order"
+          icon="arrow_downward"
+          [isToggle]="true"
+          [toggle]="sort?.direction === 'desc'"
+          (click)="updateSortDirection('desc')"
+        ></app-bd-button>
+      </div>
+    </div>
+  </mat-card>
+</app-bd-button-popup>

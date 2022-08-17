@@ -4,6 +4,12 @@
 >
   <app-bd-dialog-toolbar header="Instances of {{ group.title }}">
     <div fxFlex="1 0 auto"></div>
+    <app-bd-data-sorting
+      [columns]="columns"
+      [sort]="sort"
+      [disabled]="!isCardView"
+      (sortChange)="dataTable.sort = $event"
+    ></app-bd-data-sorting>
     <app-bd-data-grouping
       [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"

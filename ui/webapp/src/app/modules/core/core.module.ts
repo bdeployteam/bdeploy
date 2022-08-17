@@ -21,6 +21,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -55,6 +56,7 @@ import { BdDataIconCellComponent } from './components/bd-data-icon-cell/bd-data-
 import { BdDataPermissionLevelCellComponent } from './components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { BdDataPopoverCellComponent } from './components/bd-data-popover-cell/bd-data-popover-cell.component';
 import { BdDataSizeCellComponent } from './components/bd-data-size-cell/bd-data-size-cell.component';
+import { BdDataSortingComponent } from './components/bd-data-sorting/bd-data-sorting.component';
 import { BdDataSvgIconCellComponent } from './components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { BdDataSyncCellComponent } from './components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { BdDataTableComponent } from './components/bd-data-table/bd-data-table.component';
@@ -140,6 +142,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdButtonPopupComponent,
     BdDataGroupingComponent,
     BdDataGroupingPanelComponent,
+    BdDataSortingComponent,
     BdLoadingOverlayComponent,
     BdDialogComponent,
     BdDialogToolbarComponent,
@@ -234,6 +237,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatTabsModule,
     MatExpansionModule,
     MatButtonToggleModule,
+    MatRadioModule,
 
     // angular base infrastructure used throughout the application.
     HttpClientModule,
@@ -275,6 +279,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdDataDisplayComponent,
     BdButtonPopupComponent,
     BdDataGroupingComponent,
+    BdDataSortingComponent,
     BdLoadingOverlayComponent,
     BdDialogComponent,
     BdDialogToolbarComponent,
