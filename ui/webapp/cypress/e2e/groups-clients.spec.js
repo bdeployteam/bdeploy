@@ -8,7 +8,11 @@ describe('Groups Tests (Clients)', () => {
 
   before(() => {
     cy.cleanAllGroups();
-    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client`, failOnStatusCode: false });
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client`,
+      failOnStatusCode: false,
+    });
   });
 
   beforeEach(() => {
@@ -29,9 +33,11 @@ describe('Groups Tests (Clients)', () => {
     cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
-        cy.get('button[data-cy^="Apply Instance Template"]').click();
-      });
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
+        () => {
+          cy.get('button[data-cy^="Apply Instance Template"]').click();
+        }
+      );
     });
 
     cy.waitUntilContentLoaded();
@@ -89,13 +95,21 @@ describe('Groups Tests (Clients)', () => {
 
     // current OS
     cy.inMainNavFlyin('app-client-detail', () => {
-      cy.get('button[data-cy="Download Installer"]').should('be.enabled').downloadByLocationAssign('test-installer.bin');
-      cy.get('button[data-cy^="Click"]').should('be.enabled').downloadByLinkClick('test-click-start.json');
-      cy.readFile(Cypress.config('downloadsFolder') + '/' + 'test-click-start.json')
+      cy.get('button[data-cy="Download Installer"]')
+        .should('be.enabled')
+        .downloadByLocationAssign('test-installer.bin');
+      cy.get('button[data-cy^="Click"]')
+        .should('be.enabled')
+        .downloadByLinkClick('test-click-start.json');
+      cy.readFile(
+        Cypress.config('downloadsFolder') + '/' + 'test-click-start.json'
+      )
         .its('groupId')
         .should('eq', groupName);
 
-      cy.get('button[data-cy="Download Launcher Installer"]').should('be.enabled').downloadByLocationAssign('test-launcher-installer.bin');
+      cy.get('button[data-cy="Download Launcher Installer"]')
+        .should('be.enabled')
+        .downloadByLocationAssign('test-launcher-installer.bin');
       // intentionally NOT downloading launcher as it is quite huge and downloading is slow even locally.
     });
 
@@ -105,7 +119,7 @@ describe('Groups Tests (Clients)', () => {
 
     // remove the second (OS) grouping level.
     cy.contains('mat-card', 'Grouping Level').within(() => {
-      cy.get('button[data-cy="Remove"]').click();
+      cy.get('button[data-cy="Remove"]').last().click();
     });
 
     cy.get('.cdk-overlay-backdrop-showing').click('top');
@@ -114,7 +128,11 @@ describe('Groups Tests (Clients)', () => {
   });
 
   it('Creates a local user', () => {
-    cy.authenticatedRequest({ method: 'PUT', url: `${Cypress.env('backendBaseUrl')}/auth/admin/local`, body: { name: 'client', password: 'client' } });
+    cy.authenticatedRequest({
+      method: 'PUT',
+      url: `${Cypress.env('backendBaseUrl')}/auth/admin/local`,
+      body: { name: 'client', password: 'client' },
+    });
   });
 
   it('Tests no group visible', () => {
@@ -149,7 +167,9 @@ describe('Groups Tests (Clients)', () => {
           cy.get('button[data-cy^="Modify permissions"]').click();
         });
 
-      cy.intercept({ method: 'GET', url: `/api/group/${groupName}/users` }).as('getUsers');
+      cy.intercept({ method: 'GET', url: `/api/group/${groupName}/users` }).as(
+        'getUsers'
+      );
 
       cy.waitForApi(() => {
         cy.contains('app-bd-notification-card', 'Modify').within(() => {
@@ -198,6 +218,9 @@ describe('Groups Tests (Clients)', () => {
 
   it('Deletes the group', () => {
     cy.deleteGroup(groupName);
-    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client` });
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client`,
+    });
   });
 });

@@ -1,3 +1,4 @@
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
   Component,
   EventEmitter,
@@ -249,14 +250,19 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     this.filteredGroups = this.getFilteredGroups();
   }
 
-  /* template */ removeGrouping() {
-    this.groupings.pop();
+  /* template */ removeGrouping(grouping: BdDataGrouping<T>) {
+    this.groupings.splice(this.groupings.indexOf(grouping), 1);
 
     // add an empty one, so there is always a panel visible.
     if (!this.groupings.length) {
       this.addGrouping();
     }
 
+    this.fireUpdate();
+  }
+
+  /* template */ onDrop(event: CdkDragDrop<BdDataGrouping<T>[]>) {
+    moveItemInArray(this.groupings, event.previousIndex, event.currentIndex);
     this.fireUpdate();
   }
 

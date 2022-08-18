@@ -40,8 +40,12 @@ export class BdDataGroupingPanelComponent<T>
   @Input() index: number;
   /** The actual grouping bound to the controls */
   @Input() grouping: BdDataGrouping<T> = { definition: null, selected: [] };
+  /** Whether grouping can be removed is calculated by the parent component */
+  @Input() removeDisabled: boolean;
   /** Emitted whenever the grouping is changed by the user. */
   @Output() groupingChange = new EventEmitter<BdDataGrouping<T>>();
+  /** Emitted whenever remove button is clicked by the user */
+  @Output() removeClicked = new EventEmitter<BdDataGrouping<T>>();
 
   /* template */ noGroup = UNMATCHED_GROUP;
   /* template */ groupingValues: string[];
@@ -131,5 +135,9 @@ export class BdDataGroupingPanelComponent<T>
     }
 
     this.groupingChange.emit(this.grouping);
+  }
+
+  /* template */ removeGrouping(): void {
+    this.removeClicked.emit(this.grouping);
   }
 }
