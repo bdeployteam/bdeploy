@@ -34,6 +34,7 @@ export class ObjectChangesService {
 
   constructor(private cfg: ConfigService, private auth: AuthenticationService) {
     this.ws = this.createWebSocket();
+    this.auth.getTokenSubject().subscribe(() => this.ws.reconnect());
   }
 
   private createWebSocket() {
@@ -69,6 +70,7 @@ export class ObjectChangesService {
       this.onErrorIncrease();
     });
     _socket.addEventListener('close', () => {
+      this._open$.next(false);
       // "close" is essentially an error, as we NEVER want to close the websocket as long as the application is alive.
       this.onErrorIncrease();
     });
