@@ -61,11 +61,9 @@ export class UpdateActionComponent implements OnInit {
     // this is a "mild" hack to get hold of the primary dialog to show a message.
     return this.areas.getDirtyable('primary').dialog.message({
       header: 'Global Parameter Migration',
-      message: `The concept of <strong>global parameters</strong> has been replaced by <strong>instance variables</strong>.<br/>
-                  The product version you are using is still using global parameters, and needs to be updated.<br/><br/>
-                  Until this is done, you can <strong>migrate this instance now</strong>.<br>
-                  You can also perform the migration at any time from the <em>Instance Variables</em> panel.<br/>
-                  Support for global parameters (and migration) will be removed in a future release.<br/><br/>`,
+      message: `The concept of <strong>global parameters</strong> has been replaced by <strong>instance variables</strong>.<br/><br/>
+                  This requires a migration step for each instance to use <strong>instance variables</strong>.<br/><br/>
+                  For more details, see <a target="_blank" href="https://bdeploy.io/user/index.html#_migration_from_global_parameters_to_instance_variables">the online documentation.</a>`,
       actions: [
         { name: `Migrate`, result: 'MIGRATE', confirm: false },
         { name: `Keep for now`, result: 'KEEP', confirm: true },

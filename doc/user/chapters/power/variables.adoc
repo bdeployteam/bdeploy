@@ -1,15 +1,20 @@
 === Variable Expansion
 
-*BDeploy* provides a mechanism for variable expansion. There is a set of predefined possibilities. Currently, it is not possible to define your own variables, only the predefined set is available. Variable expansion can happen on the following:
+*BDeploy* provides a mechanism for variable expansion, used in <<Link Expressions>> and <<Configuration Files>>. Variable expansion can happen on the following:
 
 * Launcher path specified in <<_app_info_yaml,`app-info.yaml`>>.
 * Any parameter value. Either user-set value or the `defaultValue` specified in <<_app_info_yaml,`app-info.yaml`>>.
 * Any configuration file content.
 * Most of the <<_supported_endpoints_http_attributes,HTTP Endpoints>> attributes.
+* Instance Variables.
+* System Variables (limited to certain expansions which are available globally).
 
 Any of the above will be processed _as late as possible_, i.e. on the target node, right before writing the final content to the target directories.
 
 The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. There are various types, usually denoted by a single character. The following section gives an overview of types, variables, and possible sub-variables.
+
+[NOTE]
+Since 4.6.0, *BDeploy* has a _link expression editor_ built in. All elements in the UI (except the configuration file editor) can be switched from _plain value_ editor to _link expression_ editor, which gives rich content assist for link expressions (which contain one or more variable expansions). The configuration file editor uses rich content assist by default on btn:[CTRL] + btn:[Space] if the current word starts with `{{`.
 
 ==== M: Manifest Reference
 
@@ -188,3 +193,11 @@ Variables are replaced with their actual values when the process is installed on
 Especially for client applications it can be useful to do the actual replacing when the process is launched. This is can be achieved by prefixing 
 the actual variable with the *DELAYED* prefix. This enables that different users of the client application are getting different parameter values 
 depending on the value of the environmental variable.
+
+==== X: Instance and System Variables
+
+Used to expand to instance and system variables. The same prefix is used for both. Instance Variables take precedence over System Variables in expansions, if an both have a variable with the same ID.
+
+ {{X:<VAR>}}
+
+<<Instance Variables>> are defined in the <<Instance Settings>> and <<System Variables>> are defined on <<Systems>> level in the *Instance Group*.
