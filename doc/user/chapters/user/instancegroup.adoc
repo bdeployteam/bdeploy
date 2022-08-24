@@ -99,3 +99,16 @@ image::images/Doc_GroupingPanel.png[Group by Global Attribute, align=center, wid
 Very similarly to the global attributes, each *Instance Group* may have its own *attributes*. These attributes are not global, but are only visible within the *Instance Group*. Each *Instance* can assign a value to each of these attributes. Again, similar to the *Instance Group* browser, the *Instance* browser can use the assigned values to group *Instances* by those values.
 
 The *attributes* are defined in the *Instance Group* settings. The *values* are assigned in the *Instance* settings.
+
+==== Systems
+
+*Systems* are a means of further grouping instances of different products inside a single *Instance Group*. *Systems* also provide means to apply shared configuration through <<System Variables>>.
+
+Once created, a *System* can be used by an *Instance* by configuring the in-use *System* in the <<Instance Configuration>> of each *Instance* which should _participate_ in this particular *System*.
+
+[NOTE]
+A *System* definition may be used by many *Instances*, but each *Instance* can only be part of one *System* (or none).
+
+===== System Variables
+
+*System Variables* can be configured on *Systems*. Those variables can then be used using _link expressions_ on <<Link Expressions>> (process parameters, endpoint configuration, instance variables, configuration files).

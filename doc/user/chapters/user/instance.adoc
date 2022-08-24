@@ -99,13 +99,22 @@ image::images/Doc_InstanceConfigAddCustomParam.png[Add Custom Parameter,align=ce
 
 *Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global parameters* are matched by their parameter UID, and marked with a globe icon in the *parameter configuration* panel.
 
+[WARNING]
+*Global Parameters* have been deprecated in favor of <<System Variables>> and <<Instance Variables>>.
+
 ===== Conditional Parameters
 
 *Conditional parameters* are parameters which are only configurable if a specific dependent parameter exists or has a certain value. These parameters are hidden until the dependent parameter meets the conditions requirements.
 
-===== Variables
+===== Link Expressions
 
-*BDeploy* provides a mechanism for defining that a parameter should hold a dynamically computed value instead of a fixed one. The general syntax for variables is `{{TYPE:VARNAME:SUBVAR}}`. With that mechanism it is possible to define that a certain parameter holds different values for different operating systems or to refer to parameters defined in a different process. See <<_variable_expansion,Variable Expansion>> for more details.
+Link expressions can be used on all process parameters (as well as for endpoint configuration, inside configuration files, etc.). The *BDeploy* UI provides content assis for link expressions once a parameter editor is switched to expression mode, which is done using the toggle in front of each parameter. Each parameter is _either_ a plain value or a link expression, depending on the toggle.
+
+image::images/Doc_InstVar_InParameter.png[Content Asssist for Link Expressions,align=center, width=480, link="images/Doc_InstVar_InParameter.png"]
+
+The content assist will propose categories of <<Variable Expansion>> first, and once the category is determined will continue to provide more detailed assistence.
+
+See <<_variable_expansion,Variable Expansion>> for more details.
 
 ===== Command Line Preview
 
@@ -126,6 +135,40 @@ image::images/Doc_InstanceConfig_ClientConfigDirs.png[Allowed Configuration Dire
 
 Select one or more directories to have those installed to the PC running the `CLIENT` application in addition to server nodes.
 
+==== Instance Variables
+
+*Instance Variables* have been introduced along with their even more global counterpart <<System Variables>>. *Instance Variables* replace the concept of <<Global Parameters>>. They offer a more flexible - and along with <<System Variables>> also a more powerful - way of achieving the same result.
+
+To add *Instance Variables*, use the btn:[Instance Variables...] option in the *Instance Settings* panel. Add a new *Instance Variable* using the btn:[+] button in the panels toolbar.
+
+image::images/Doc_InstVar_Plain.png[A new Instance Variable,align=center,width=480,link="images/Doc_InstVar_Plain.png"]
+
+The value of an *Instance Variable* can not only be a plain value of the selected type, but it can also be a _link expression_, which is a value consisting of a combination of plain text components and one or more <<Variable Expansions>>. In this mode, the editor will provide content assist for expansions and a dedicated variable list popup.
+
+image::images/Doc_InstVar_Link.png[A new Instance Variable (Link Expression),align=center,width=480,link="images/Doc_InstVar_Link.png"]
+
+Once created *Instance Variables* can be referenced from all other <<Link Expressions>>, e.g. on process parameters, configuration files, etc.
+
+===== Migration from Global Parameters to Instance Variables
+
+Since *Instance Variables* are the successor concept for *Global Parameters* (those have been deprecated), there is a migration path.
+
+Products need to be updated at some point to no longer have the `global` flag on parameters, and use *Instance Variables* in their <<Instance Templates>> instead. There is no automated migration for this, this has to be done manually by the respective maintainers.
+
+However, updating products will not "fix" existing instances, as templates are only used when creating instances, and also parameter values for existing processes will not be updated when changing the product.
+
+Thus, there is a btn:[Migrate Globals] button on the *Instance Variables* panel. Also, updating the product version will now (as long as migration has not been performed yet) prompt to perform the migration to *Instance Variables*. This migration will pick each `global` parameter in the *Instance* and:
+
+. Create and *Instance Variable* using the parameters UUID as variable name.
+. Set the current `global` value to the new *Instance Variable*.
+. Replace the current value for all instances of the `global` parameter in the *Instance* with a link expression referencing the new *Instance Variable*
+. Disable the use of `global` for *this Instance* only. All parameters will be treated as though the `global` flag was not set.
+
+This brings the instance into a state where it is safe to either update *BDeploy* to a version which no longer supports `global` (which does not exist yet), or update the product to a version where the `global` flag is no longer used on parameters.
+
+[WARNING]
+This migration must be done regardless of the product being updated. Without the migration, global parameters will turn into "normal" parameters at some point. If they still contain a plain value at that point in time (and not a <<_link_expressions,Link Expression>>) it will stay this way, and *each* of the formerly "connected" parameters (through the global mechanism) will have its own value and needs to be configured separately.
+
 ==== Configuration Files
 
 The *configuration files* of all *Processes* of an *Instance* are maintained together in one place. It can be opened by clicking on the btn:[Configuration Files] button in the *Instance Settings* panel. The initial set of *configuration files* is derived from the default set delivered with the product, see <<_product_info_yaml,`product-info.yaml`>>.
@@ -141,6 +184,8 @@ The btn:[Edit] button on each file can be used to edt the content of the file us
 image::images/Doc_InstanceConfigFilesEdit.png[Edit Instance Configuration Files,align=center,width=480,link="images/Doc_InstanceConfigFilesEdit.png"]
 
 Online editing is only possible for text files. Binary files like ZIP, PDF, etc. can not be edited online. Instead, you can download and later on replace them.
+
+<<Variable Expansion>> can be used in configuration files. The variables will be expanded when the file is written on disc on the target node. The editor for configuration files provides content assist for <<Variable Expansion>> on btn:[CTRL] + btn:[Space] if the current word in the editor contains `{{`.
 
 [NOTE]
 Changes done in configuration files must be *saved* and they result in a new *instance version* that must be *installed* and *activated* so that the changes have an impact, much the same as *any* other change in the <<Instance Configuration>>.

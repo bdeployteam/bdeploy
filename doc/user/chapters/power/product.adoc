@@ -243,7 +243,10 @@ The value of the parameter is not part of this definition, nor is any potential 
 |`global`
 |`false`
 |no
-|Whether this parameter is `global`. This means that inside a single *Instance*, every process requiring this parameter will receive the same value. The configuration UI will provide input fields for the parameter for every *Application* which requires the parameter, and propagate value changes to all other *Applications* requiring it.
+a|Whether this parameter is `global`. This means that inside a single *Instance*, every process requiring this parameter will receive the same value. The configuration UI will provide input fields for the parameter for every *Application* which requires the parameter, and propagate value changes to all other *Applications* requiring it.
+
+[WARNING]
+*Global Parameters* have been deprecated in favor of <<System Variables>> and <<Instance Variables>>.
 
 |`mandatory`
 |`false`
