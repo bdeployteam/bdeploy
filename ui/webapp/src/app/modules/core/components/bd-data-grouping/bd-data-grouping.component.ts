@@ -44,6 +44,7 @@ const ACTION_CANCEL: BdDialogMessageAction<ON_EMPTY_PRESET> = {
 @Component({
   selector: 'app-bd-data-grouping',
   templateUrl: './bd-data-grouping.component.html',
+  styleUrls: ['./bd-data-grouping.component.css'],
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /** whether mutiple groupings are supported */
