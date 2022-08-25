@@ -220,6 +220,9 @@ describe('Instance Dashboard Tests', () => {
         });
     });
 
+    // if we're too fast on checking the checkboxes, they are reset due to the init of the model.
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavContent(() => {
       cy.contains('app-instance-server-node', 'master').within(() => {
         cy.contains('tr', 'Server With Sleep').within(() => {
