@@ -403,9 +403,9 @@ export class InstanceEditService {
           this.state$.next(cloneDeep(this.base$.value));
 
           // check for old server versions which do not support variables yet.
-          if (nodes) {
-            for (const k of Object.keys(nodes)) {
-              const n = nodes[k];
+          if (minions) {
+            for (const k of Object.keys(minions)) {
+              const n = minions[k];
               if (n.master) {
                 this.serverSupportsVariables$.next(
                   n.version.major === 0 || // dev version

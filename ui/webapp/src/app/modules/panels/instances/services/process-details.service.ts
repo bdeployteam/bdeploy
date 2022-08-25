@@ -111,14 +111,13 @@ export class ProcessDetailsService implements OnDestroy {
 
   public getOutputEntry(): Observable<[RemoteDirectory, RemoteDirectoryEntry]> {
     const detail = this.processDetail$.value;
-    const instance = this.instances.active$.value;
 
     return this.http
       .get<RemoteDirectory>(
         `${this.apiPath(
           this.groups.current$.value.name,
-          instance.instanceConfiguration.uuid
-        )}/output/${instance.instance.tag}/${detail.status.appUid}`,
+          detail.status.instanceUid
+        )}/output/${detail.status.instanceTag}/${detail.status.appUid}`,
         NO_LOADING_BAR
       )
       .pipe(

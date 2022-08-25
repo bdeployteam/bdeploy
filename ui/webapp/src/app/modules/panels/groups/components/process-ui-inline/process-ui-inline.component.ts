@@ -90,7 +90,7 @@ export class ProcessUiInlineComponent implements OnDestroy {
         const process = nodes?.nodeConfigDtos
           ?.map((n) =>
             n.nodeConfiguration?.applications?.find(
-              (a) => a.uid === this.app.client.uuid
+              (a) => a.uid === this.app.client?.uuid
             )
           )
           .find((a) => a);
