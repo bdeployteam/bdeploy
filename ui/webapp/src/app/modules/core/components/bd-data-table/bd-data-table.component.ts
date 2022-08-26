@@ -34,7 +34,6 @@ import {
   UNMATCHED_GROUP,
 } from 'src/app/models/data';
 import { BdSearchable, SearchService } from '../../services/search.service';
-import { SettingsService } from '../../services/settings.service';
 
 // member ordering due to default implementation for callbacks.
 // tslint:disable: member-ordering
@@ -249,8 +248,7 @@ export class BdDataTableComponent<T>
   constructor(
     private searchService: SearchService,
     private media: BreakpointObserver,
-    private sanitizer: DomSanitizer,
-    private settings: SettingsService
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
