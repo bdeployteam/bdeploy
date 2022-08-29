@@ -8,12 +8,14 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
+import { SortDirection } from '@angular/material/sort';
 import { max } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
   bdDataDefaultSearch,
+  bdDataDefaultSort,
   BdDataGrouping,
   bdExtractGroups,
   UNMATCHED_GROUP,
@@ -60,6 +62,29 @@ export class BdDataGridComponent<T>
   @Input() searchable = true;
 
   /**
+   * Holds the search string from global filter
+   */
+  private search: string;
+
+  /**
+   * A callback for sorting data by a certain column in a given direction.
+   * This callback may be called multiple times for subsets of the data depending on the
+   * current grouping of the view.
+   *
+   * Sorting through header click is disabled all together if this callback is not given.
+   */
+  @Input() sortData: (
+    data: T[],
+    column: BdDataColumn<T>,
+    direction: SortDirection
+  ) => T[] = bdDataDefaultSort;
+
+  /**
+   * Which column to sort cards by
+   */
+  @Input() sort;
+
+  /**
    * A single grouping definition. The data will be grouped according to this definition.
    * Multiple grouping is not supported by the grid.
    */
@@ -82,7 +107,6 @@ export class BdDataGridComponent<T>
 
   /*template*/ recordsToDisplay$ = new BehaviorSubject<T[]>([]);
   /*template*/ groupValues: string[];
-  /*template*/ groupRecords;
   /*template*/ ltSm: string;
   /*template*/ sm: string;
   /*template*/ md: string;
@@ -118,55 +142,74 @@ export class BdDataGridComponent<T>
     if (changes.records || changes.grouping) {
       this.populateRecords();
     }
+    if (changes.sort) {
+      this.calculateRecordsToDisplay();
+    }
+  }
+
+  /* template */ onTabChange(event) {
+    this.activeGroup = event.tab?.textLabel;
+    this.calculateRecordsToDisplay();
   }
 
   private populateRecords(): void {
     // populate records to display with empty search by default.
-    this.bdOnSearch(null);
     if (this.grouping) {
       this.groupValues = bdExtractGroups(
         this.grouping.definition,
         this.records
       );
       this.activeGroup = this.groupValues[0];
-      this.groupRecords = this.getGroupRecords(this.activeGroup);
+    } else {
+      this.activeGroup = null;
     }
-  }
-
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.bdOnSearch(null);
   }
 
   public update(): void {
-    this.recordsToDisplay$.next(this.recordsToDisplay$.value);
+    this.calculateRecordsToDisplay();
   }
 
   bdOnSearch(search: string) {
-    this.recordsToDisplay$.next(
-      this.searchData(search, this.records, this._columns)
-    );
-    if (this.activeGroup) {
-      this.groupRecords = this.getGroupRecords(this.activeGroup);
-    }
+    this.search = search;
+    this.calculateRecordsToDisplay();
   }
 
-  private getGroupRecords(group) {
-    return this.recordsToDisplay$.value.filter((r) => {
-      const grp = this.grouping.definition.group(r);
+  private calculateRecordsToDisplay() {
+    let records = this.searchData(this.search, this.records, this._columns);
+    records = this.getGroupRecords(records, this.activeGroup);
+    records = this.sortRecords(records);
+    this.recordsToDisplay$.next(records);
+  }
+
+  private sortRecords(records: T[]): T[] {
+    if (
+      !this.sortData ||
+      !this.sort ||
+      !this.sort.active ||
+      !this.sort.direction
+    ) {
+      return records;
+    }
+    const col = this._columns.find((c) => c.id === this.sort.active);
+    if (!col) {
+      console.error('Cannot find active sort column ' + this.sort.active);
+      return records;
+    }
+    return this.sortData(records, col, this.sort.direction);
+  }
+
+  private getGroupRecords(records: T[], group: string): T[] {
+    if (!group) {
+      return records;
+    }
+    return records.filter((r) => {
+      const grp = this.grouping?.definition?.group(r);
       if (!grp && group === UNMATCHED_GROUP) {
         return true;
       }
-      return grp === group;
+      return !group || grp === group;
     });
-  }
-
-  /* template */ onTabChange(event) {
-    this.activeGroup = event.tab?.textLabel;
-    if (this.activeGroup) {
-      this.groupRecords = this.getGroupRecords(this.activeGroup);
-    }
   }
 
   private getFlexAmount(numCards: number, panelVisible: boolean) {
@@ -174,5 +217,11 @@ export class BdDataGridComponent<T>
       numCards = max([1, numCards - 1]);
     }
     return `0 0 ${100 / numCards}%`;
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 }

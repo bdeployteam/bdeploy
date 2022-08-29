@@ -21,6 +21,8 @@
   #grid
   *ngIf="_grid && !!records?.length"
   [columns]="columns"
+  [sortData]="sortData"
+  [sort]="sort"
   [searchData]="searchData"
   [searchable]="searchable"
   [grouping]="!!grouping && !!grouping.length ? grouping[0] : null"

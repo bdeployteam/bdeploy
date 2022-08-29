@@ -13,6 +13,7 @@ export class BdButtonPopupComponent {
   @Input() badge: number;
   @Input() collapsed = true;
   @Input() tooltip: TooltipPosition;
+  @Input() disabled = false;
 
   @Input() preferredPosition: PopupPosition = 'below-left';
   @Input() backdropClass: string;
