@@ -24,7 +24,7 @@ import {
   buildCompletionPrefixes,
   buildCompletions,
 } from 'src/app/modules/core/utils/completion.utils';
-import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
+import { getMaskedPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
@@ -44,7 +44,7 @@ const colName: BdDataColumn<ConfigVariable> = {
 const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
-  data: (r) => getPreRenderable(r.value.value),
+  data: (r) => getMaskedPreRenderable(r.value.value, r.value.type),
 };
 
 const colDesc: BdDataColumn<ConfigVariable> = {
@@ -250,6 +250,20 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
         this.edit.state$.value.config.config.instanceVariables[id] = value;
         this.buildVariables(this.edit.state$.value.config);
       });
+  }
+
+  /* template */ onTypeChange(value: ParameterType) {
+    // check if we need to clear the value in case we switch from password to *something*.
+    if (
+      this.newValue.type !== value &&
+      this.newValue.type === ParameterType.PASSWORD &&
+      !this.newValue.value.linkExpression
+    ) {
+      // type changed, it is not an expression and previously was password. clear the value.
+      this.newValue.value.value = '';
+    }
+
+    this.newValue.type = value;
   }
 
   private onDelete(r: ConfigVariable) {

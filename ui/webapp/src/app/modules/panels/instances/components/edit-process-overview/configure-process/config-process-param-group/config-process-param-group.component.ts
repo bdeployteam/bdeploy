@@ -123,7 +123,7 @@ export class ConfigProcessParamGroupComponent
     bop: BreakpointObserver,
     private searchService: SearchService,
     systems: SystemsService,
-    private instances: InstanceEditService,
+    public instances: InstanceEditService,
     public groups: GroupsService
   ) {
     this.subscription = combineLatest([

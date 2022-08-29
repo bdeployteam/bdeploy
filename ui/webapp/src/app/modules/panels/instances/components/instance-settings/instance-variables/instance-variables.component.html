@@ -35,10 +35,11 @@
     ></app-bd-form-input>
     <mat-divider></mat-divider>
     <app-bd-form-select
-      [(ngModel)]="newValue.type"
+      [ngModel]="newValue.type"
       [values]="typeValues"
       name="type"
       label="Value Type"
+      (ngModelChange)="onTypeChange($event)"
     ></app-bd-form-select>
     <app-bd-form-select
       [(ngModel)]="newValue.customEditor"
@@ -75,10 +76,11 @@
     ></app-bd-form-input>
     <mat-divider></mat-divider>
     <app-bd-form-select
-      [(ngModel)]="newValue.type"
+      [ngModel]="newValue.type"
       [values]="typeValues"
       name="type"
       label="Value Type"
+      (ngModelChange)="onTypeChange($event)"
     ></app-bd-form-select>
     <app-bd-form-select
       [(ngModel)]="newValue.customEditor"

@@ -20,6 +20,16 @@ export function getPreRenderable(val: LinkedValueConfiguration): string {
   return val?.linkExpression ? val?.linkExpression : val?.value;
 }
 
+/** returns the pre-renderable (non-expanded) value, but masks out passwords in case a direct value is used. */
+export function getMaskedPreRenderable(
+  val: LinkedValueConfiguration,
+  type: ParameterType
+): string {
+  return val?.linkExpression
+    ? val?.linkExpression
+    : maskIfPassword(val?.value, type);
+}
+
 export class LinkVariable {
   name: string;
   description: string;
@@ -96,8 +106,9 @@ export function gatherVariableExpansions(
         return {
           name: k,
           description: `Instance Variable - ${instance?.config?.name}`,
-          preview: getPreRenderable(
-            instance.config.instanceVariables[k]?.value
+          preview: getMaskedPreRenderable(
+            instance.config.instanceVariables[k]?.value,
+            instance.config.instanceVariables[k]?.type
           ), // explicitly the non-expanded value.
           link: `{{X:${k}}}`,
           group: null,
@@ -114,7 +125,10 @@ export function gatherVariableExpansions(
         return {
           name: k,
           description: `System Variable - ${system?.name}`,
-          preview: getPreRenderable(system.systemVariables[k]?.value), // explicitly the non-expanded value.
+          preview: getMaskedPreRenderable(
+            system.systemVariables[k]?.value,
+            system.systemVariables[k]?.type
+          ), // explicitly the non-expanded value.
           link: `{{X:${k}}}`,
           group: null,
         };
@@ -127,6 +141,14 @@ export function gatherVariableExpansions(
   }
 
   return result;
+}
+
+export function maskIfPassword(value: string, type: ParameterType) {
+  if (type === ParameterType.PASSWORD && value) {
+    return '*'.repeat(value.length);
+  }
+
+  return value ? value : '';
 }
 
 export function gatherProcessExpansions(
@@ -162,7 +184,7 @@ export function gatherProcessExpansions(
         let label = param.uid;
         let desc = '';
 
-        // mask out password in case it is one.
+        // process value according to type is possible and required.
         const appDesc = apps?.find(
           (a) => a.key.name === app.application.name
         )?.descriptor;
@@ -171,9 +193,7 @@ export function gatherProcessExpansions(
             if (paramDesc.uid === param.uid) {
               label = paramDesc.name;
               desc = paramDesc.longDescription;
-              if (paramDesc.type === ParameterType.PASSWORD) {
-                value = value ? '*'.repeat(value.length) : '';
-              }
+              value = getMaskedPreRenderable(param.value, paramDesc.type);
               break;
             }
           }

@@ -31,7 +31,7 @@ import {
   buildCompletions,
 } from 'src/app/modules/core/utils/completion.utils';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
-import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
+import { getMaskedPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsEditService } from '../../../services/systems-edit.service';
 
@@ -52,7 +52,7 @@ const colName: BdDataColumn<ConfigVariable> = {
 const colValue: BdDataColumn<ConfigVariable> = {
   id: 'value',
   name: 'Value',
-  data: (r) => getPreRenderable(r.value.value),
+  data: (r) => getMaskedPreRenderable(r.value.value, r.value.type),
 };
 
 const colDesc: BdDataColumn<ConfigVariable> = {
@@ -273,6 +273,20 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
         this.system.config.systemVariables[id] = value;
         this.buildVariables();
       });
+  }
+
+  /* template */ onTypeChange(value: ParameterType) {
+    // check if we need to clear the value in case we switch from password to *something*.
+    if (
+      this.newValue.type !== value &&
+      this.newValue.type === ParameterType.PASSWORD &&
+      !this.newValue.value.linkExpression
+    ) {
+      // type changed, it is not an expression and previously was password. clear the value.
+      this.newValue.value.value = '';
+    }
+
+    this.newValue.type = value;
   }
 
   private onDelete(r: ConfigVariable) {

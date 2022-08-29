@@ -212,6 +212,7 @@
                   [process]="process"
                   [instance]="instance"
                   [system]="system"
+                  [applications]="instances.stateApplications$ | async"
                   [type]="p.descriptor?.type"
                   [completionPrefixes]="completionPrefixes"
                   [completions]="completions"
