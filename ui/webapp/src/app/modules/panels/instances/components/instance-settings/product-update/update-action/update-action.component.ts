@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -41,13 +41,13 @@ export class UpdateActionComponent implements OnInit {
   }
 
   /* template */ doUpdate() {
-    let askMigration = of('KEEP');
+    let check = of(false);
     if (this.needMigration) {
-      askMigration = this.showMigrationWarning();
+      check = this.checkMigration();
     }
 
-    askMigration.subscribe((r) => {
-      if (r === 'MIGRATE') {
+    check.subscribe((r) => {
+      if (r) {
         this.edit.migrateGlobals(this.edit.state$.value.config);
         this.edit.conceal(`Migrate global parameters to instance variables.`);
       }
@@ -55,19 +55,15 @@ export class UpdateActionComponent implements OnInit {
     });
   }
 
-  /* template */ showMigrationWarning() {
-    // FIXME: link to documenation chapter describing migration impact, scenarios, etc.
-
-    // this is a "mild" hack to get hold of the primary dialog to show a message.
-    return this.areas.getDirtyable('primary').dialog.message({
-      header: 'Global Parameter Migration',
-      message: `The concept of <strong>global parameters</strong> has been replaced by <strong>instance variables</strong>.<br/><br/>
-                  This requires a migration step for each instance to use <strong>instance variables</strong>.<br/><br/>
-                  For more details, see <a target="_blank" href="https://bdeploy.io/user/index.html#_migration_from_global_parameters_to_instance_variables">the online documentation.</a>`,
-      actions: [
-        { name: `Migrate`, result: 'MIGRATE', confirm: false },
-        { name: `Keep for now`, result: 'KEEP', confirm: true },
-      ],
-    });
+  private checkMigration(): Observable<boolean> {
+    // actually check the new product version if it still has globals. if it "no longer" has globals,
+    // we migrate existing globals. If we did not have globals to start with, migration is a no-op.
+    return this.products.loadApplications(this.record).pipe(
+      map((a) => {
+        // check without instance state and new product's applications. if migration is NOT
+        // required, this means that the applications no longer have (or never had) globals.
+        return !this.edit.isMigrationRequired(null, a);
+      })
+    );
   }
 }

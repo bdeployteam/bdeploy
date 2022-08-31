@@ -461,16 +461,6 @@ describe('Instance Process Config Tests', () => {
       });
     });
 
-    // there must be a popup in the main area querying for update of global parameters.
-    cy.inMainNavContent(() => {
-      cy.contains(
-        'app-bd-notification-card',
-        'Global Parameter Migration'
-      ).within(() => {
-        cy.get('button[data-cy^=Migrate]').click();
-      });
-    });
-
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Instance Settings');
     });

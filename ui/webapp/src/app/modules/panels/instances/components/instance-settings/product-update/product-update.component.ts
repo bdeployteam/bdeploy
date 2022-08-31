@@ -1,11 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import {
-  BehaviorSubject,
-  combineLatest,
-  map,
-  Subscription,
-  switchMap,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -41,16 +35,6 @@ export class ProductUpdateComponent implements OnDestroy {
     this.productVersionColumn,
     this.productUpdateAction,
   ];
-
-  /* template */ loading$ = combineLatest([
-    this.areas.primaryRoute$.pipe(
-      switchMap(
-        // "mildly" hacky interface to update action which shows a dialog on the primary panel.
-        () => this.areas.getDirtyable('primary').dialog.getMessage().message$
-      )
-    ),
-    this.products.loading$,
-  ]).pipe(map(([m, l]) => !!m || l));
 
   private subscription: Subscription;
 

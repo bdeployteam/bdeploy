@@ -193,7 +193,7 @@ export class ProcessEditService {
 
     this.preliminary.push(process);
 
-    // in case globals have been migrated, this does nothing.
+    // align global parameters *OR* migrate globals to instance variables.
     this.alignGlobalParameters(application, process, true);
 
     return this.groups.newUuid().pipe(

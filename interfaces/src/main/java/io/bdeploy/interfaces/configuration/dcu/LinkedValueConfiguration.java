@@ -114,9 +114,10 @@ public class LinkedValueConfiguration {
      * New minions will promptly use {@link LVCInstatiator} to convert back. In the future we can remove this
      * bridge and everybody will use the new format.
      *
-     * @deprecated remove with 5.0.0.
+     * @deprecated this is here for compatibility of central with managed servers which run older releases. This should be removed
+     *             at the point where central servers are allowed to force managed servers to be newer than 4.6.0.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated(since = "4.6.0", forRemoval = true)
     public static final class LVCModule extends SimpleModule {
 
         private static final long serialVersionUID = 1L;

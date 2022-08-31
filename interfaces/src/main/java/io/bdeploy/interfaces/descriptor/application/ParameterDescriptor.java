@@ -98,9 +98,11 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * (configure value per application even if the name of the parameter is the
      * same).
      *
-     * @deprecated since 4.6.0, replaced by system and instance variables.
+     * @deprecated since 4.6.0, replaced by system and instance variables. Note that we need to keep this around for a long time
+     *             coming to support existing products. The logic to handle globals is all in the frontend in
+     *             process-edit.service.ts.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated(since = "4.6.0")
     public boolean global = false;
 
     /**

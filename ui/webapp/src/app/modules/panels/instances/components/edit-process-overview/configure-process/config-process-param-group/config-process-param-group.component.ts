@@ -119,10 +119,10 @@ export class ConfigProcessParamGroupComponent
   private formsLoaded = false;
 
   constructor(
-    public edit: ProcessEditService,
     bop: BreakpointObserver,
-    private searchService: SearchService,
     systems: SystemsService,
+    private searchService: SearchService,
+    public edit: ProcessEditService,
     public instances: InstanceEditService,
     public groups: GroupsService
   ) {

@@ -421,12 +421,12 @@ export class InstanceEditService {
     }
   }
 
-  private isMigrationRequired(
+  public isMigrationRequired(
     instance: InstanceConfiguration,
     apps: ApplicationDto[]
   ): boolean {
     // if migration is already performed, not needed.
-    if (instance.globalsMigrated) {
+    if (instance?.globalsMigrated) {
       return false;
     }
 
