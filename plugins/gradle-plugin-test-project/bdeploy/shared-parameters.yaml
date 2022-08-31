@@ -1,0 +1,8 @@
+id: test-params
+
+parameters:
+  - uid: test.param
+    name: "Test"
+    defaultValue: "test"
+    mandatory: true
+

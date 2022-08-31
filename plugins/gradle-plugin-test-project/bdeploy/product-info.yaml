@@ -6,4 +6,7 @@ applications:
   - test
 
 configTemplates: config
+parameterTemplates:
+  - "shared-parameters.yaml"
 versionFile: product-version.yaml
+
