@@ -37,6 +37,12 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
     public String uid;
 
     /**
+     * X-OR with {@link #uid}; use a parameter template to expand a set of one or more parameters
+     * defined in a parameter template in the product in place.
+     */
+    public String template;
+
+    /**
      * Human readable short description of the parameter. This is displayed in
      * configuration UI(s) as input field name to guide the user.
      */

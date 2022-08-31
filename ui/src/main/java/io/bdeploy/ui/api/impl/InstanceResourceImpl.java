@@ -629,8 +629,8 @@ public class InstanceResourceImpl implements InstanceResource {
         Key productKey = thisIm.getConfiguration().product;
         try {
             ProductManifest productManifest = ProductManifest.of(hive, productKey);
-            result.applications
-                    .addAll(productManifest.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).map(mf -> {
+            result.applications.addAll(productManifest.getApplications().stream()
+                    .map(k -> ApplicationManifest.of(hive, k, productManifest)).map(mf -> {
                         ApplicationDto descriptor = new ApplicationDto();
                         descriptor.key = mf.getKey();
                         descriptor.name = mf.getDescriptor().name;
@@ -753,11 +753,13 @@ public class InstanceResourceImpl implements InstanceResource {
         } catch (Exception e) {
             log.info("Missing source product on product update: {}", state.config.config.product);
         }
+
+        ProductManifest pm = current;
         List<ApplicationManifest> currentApps = current == null ? null
-                : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).toList();
+                : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm)).toList();
 
         ProductManifest target = ProductManifest.of(hive, new Manifest.Key(state.config.config.product.getName(), productTag));
-        List<ApplicationManifest> targetApps = target.getApplications().stream().map(k -> ApplicationManifest.of(hive, k))
+        List<ApplicationManifest> targetApps = target.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm))
                 .toList();
 
         return pus.update(state, target, current, targetApps, currentApps);
@@ -766,7 +768,7 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public List<ApplicationValidationDto> validate(String instanceId, InstanceUpdateDto state) {
         ProductManifest pm = ProductManifest.of(hive, state.config.config.product);
-        List<ApplicationManifest> am = pm.getApplications().stream().map(k -> ApplicationManifest.of(hive, k)).toList();
+        List<ApplicationManifest> am = pm.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm)).toList();
 
         SystemConfiguration system = null;
         if (state.config.config.system != null) {
@@ -966,7 +968,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public Response downloadIcon(String instanceId, String applicationId) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
-        ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application);
+        ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application, null);
         byte[] brandingIcon = appMf.readBrandingIcon(hive);
         if (brandingIcon == null) {
             return Response.serverError().status(Status.NOT_FOUND).build();
@@ -981,7 +983,7 @@ public class InstanceResourceImpl implements InstanceResource {
     public Response downloadSplash(String instanceId, String applicationId) {
         InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
         ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
-        ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application);
+        ApplicationManifest appMf = ApplicationManifest.of(hive, appConfig.application, null);
         byte[] brandingSplash = appMf.readBrandingSplashScreen(hive);
         if (brandingSplash == null) {
             return Response.serverError().status(Status.NOT_FOUND).build();

@@ -21,7 +21,7 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
     private ApplicationDescriptor desc;
     private Manifest manifest;
 
-    public static ApplicationManifest of(BHive hive, Manifest.Key key) {
+    public static ApplicationManifest of(BHive hive, Manifest.Key key, ProductManifest pm) {
         ApplicationManifest am = new ApplicationManifest();
 
         am.manifest = hive.execute(new ManifestLoadOperation().setManifest(key));
@@ -32,6 +32,9 @@ public class ApplicationManifest implements Comparable<ApplicationManifest> {
 
             // make sure configuration is consistent.
             am.desc.fixupDefaults();
+            if (pm != null) {
+                am.desc.fixupParameterExpansion(pm);
+            }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot load application descriptor from " + key, e);
         }

@@ -1,13 +1,20 @@
 package io.bdeploy.interfaces.descriptor.application;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.annotation.processing.Generated;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
+import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 
 /**
  * Top level element defining an application. The serialized form of this DTO
@@ -18,6 +25,8 @@ import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.Paramete
  * application imported into the system, and have the name {@value #FILE_NAME}.
  */
 public class ApplicationDescriptor extends ApplicationDescriptorApi implements Comparable<ApplicationDescriptor> {
+
+    private static final Logger log = LoggerFactory.getLogger(ApplicationDescriptor.class);
 
     /**
      * The type of application described.
@@ -117,6 +126,46 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
                 param.type = ParameterType.BOOLEAN;
             }
         }
+    }
+
+    public void fixupParameterExpansion(ProductManifest pm) {
+        List<ParameterTemplateDescriptor> templates = pm.getParameterTemplates();
+
+        if (templates == null) {
+            // in case of deserialization from old version.
+            templates = Collections.emptyList();
+        }
+
+        // replace each parameter definition which uses "shared" with the according shared block from the product
+        if (startCommand != null) {
+            fixupCommandExpansion(templates, startCommand.parameters);
+        }
+
+        if (stopCommand != null) {
+            fixupCommandExpansion(templates, stopCommand.parameters);
+        }
+    }
+
+    private void fixupCommandExpansion(List<ParameterTemplateDescriptor> templates, List<ParameterDescriptor> params) {
+        ParameterDescriptor toReplace = null;
+        do {
+            toReplace = params.stream().filter(p -> p.template != null).findFirst().orElse(null);
+            if (toReplace != null) {
+                // replace/expand it.
+                int index = params.indexOf(toReplace);
+                params.remove(index); // remove the original element.
+
+                String templateId = toReplace.template;
+                List<ParameterDescriptor> replacements = templates.stream().filter(t -> t.id.equals(templateId))
+                        .map(t -> t.parameters).findFirst().orElse(null);
+
+                if (replacements == null) {
+                    log.warn("No shared parameter replacement found for " + templateId);
+                } else {
+                    replacements.forEach(r -> params.add(index, r));
+                }
+            }
+        } while (toReplace != null);
     }
 
     @Override

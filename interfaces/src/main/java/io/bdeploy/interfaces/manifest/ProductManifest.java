@@ -37,6 +37,7 @@ import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCache;
@@ -59,10 +60,12 @@ public class ProductManifest {
     private final List<ObjectId> plugins;
     private final List<InstanceTemplateDescriptor> instanceTemplates;
     private final List<ApplicationTemplateDescriptor> applicationTemplates;
+    private final List<ParameterTemplateDescriptor> paramTemplates;
 
     private ProductManifest(String name, Manifest manifest, SortedSet<Manifest.Key> applications,
             SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId, List<ObjectId> plugins,
-            List<InstanceTemplateDescriptor> instanceTemplates, List<ApplicationTemplateDescriptor> applicationTemplates) {
+            List<InstanceTemplateDescriptor> instanceTemplates, List<ApplicationTemplateDescriptor> applicationTemplates,
+            List<ParameterTemplateDescriptor> paramTemplates) {
         this.prodName = name;
         this.manifest = manifest;
         this.applications = applications;
@@ -72,6 +75,7 @@ public class ProductManifest {
         this.plugins = plugins;
         this.instanceTemplates = instanceTemplates;
         this.applicationTemplates = applicationTemplates;
+        this.paramTemplates = paramTemplates;
     }
 
     /**
@@ -91,7 +95,7 @@ public class ProductManifest {
 
         if (cached != null) {
             return new ProductManifest(label, mf, cached.appRefs, cached.otherRefs, cached.desc, cached.cfgEntry, cached.plugins,
-                    cached.templates, cached.applicationTemplates);
+                    cached.templates, cached.applicationTemplates, cached.paramTemplates);
         }
 
         SortedSet<Key> allRefs = new TreeSet<>(
@@ -169,13 +173,28 @@ public class ProductManifest {
             }).build());
         }
 
+        List<ParameterTemplateDescriptor> paramTemplates = new ArrayList<>();
+        Tree.Key paramTemplateKey = new Tree.Key(ProductManifestBuilder.PARAM_TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(paramTemplateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(paramTemplateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        paramTemplates.add(StorageHelper.fromYamlStream(is, ParameterTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load application template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+
         // lazy, DFS resolving of all templates.
         resolveTemplates(templates, applicationTemplates);
         applicationTemplates.sort((a, b) -> a.name.compareTo(b.name));
 
         // store persistent information.
         try {
-            cacheStorage.store(appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates);
+            cacheStorage.store(appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates, paramTemplates);
         } catch (Exception e) {
             // there is a chance for a race condition here, which actually does not do any harm (except for a
             // tiny performance hit since two threads calculate this). in case two threads try to persist the
@@ -185,7 +204,8 @@ public class ProductManifest {
             }
         }
 
-        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates);
+        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates,
+                paramTemplates);
     }
 
     private static void resolveTemplates(List<InstanceTemplateDescriptor> instTemplates,
@@ -324,6 +344,13 @@ public class ProductManifest {
      */
     public List<ApplicationTemplateDescriptor> getApplicationTemplates() {
         return applicationTemplates;
+    }
+
+    /**
+     * @return a list of templates which provide re-usable definitions of parameters.
+     */
+    public List<ParameterTemplateDescriptor> getParameterTemplates() {
+        return paramTemplates;
     }
 
     /**

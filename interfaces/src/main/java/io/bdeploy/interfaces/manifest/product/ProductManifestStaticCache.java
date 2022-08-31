@@ -11,6 +11,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 
 /**
@@ -37,9 +38,9 @@ public class ProductManifestStaticCache {
 
     public void store(SortedSet<Key> appRefs, SortedSet<Key> otherRefs, ProductDescriptor desc, ObjectId cfgEntry,
             List<ObjectId> plugins, List<InstanceTemplateDescriptor> templates,
-            List<ApplicationTemplateDescriptor> applicationTemplates) {
+            List<ApplicationTemplateDescriptor> applicationTemplates, List<ParameterTemplateDescriptor> paramTemplates) {
         meta.write(hive, new ProductManifestStaticCacheRecord(appRefs, otherRefs, desc, cfgEntry, plugins, templates,
-                applicationTemplates));
+                applicationTemplates, paramTemplates));
     }
 
 }

@@ -299,7 +299,7 @@ public class CleanupHelper {
                     // delete applications in product: this assumes that no single application version is used in multiple products.
                     for (Key appKey : pm.getApplications()) {
                         context.addManifest4deletion(appKey);
-                        ApplicationManifest am = ApplicationManifest.of(context.getHive(), appKey);
+                        ApplicationManifest am = ApplicationManifest.of(context.getHive(), appKey, pm);
                         actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, appKey.toString(), "Delete Application \""
                                 + am.getDescriptor().name + "\", version \"" + am.getKey().getTag() + "\""));
                     }

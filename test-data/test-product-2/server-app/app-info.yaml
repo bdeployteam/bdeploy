@@ -60,6 +60,7 @@ startCommand:
       mandatory: true
       fixed: true
       type: STRING
+    - template: shared_parameters
     - uid: "param.subprocesses"
       name: "Subprocess Count"
       longDescription: "How many subprocesses should be started. Each sub-process stays alive for 60 seconds."

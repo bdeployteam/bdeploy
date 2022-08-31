@@ -124,8 +124,8 @@ public class TestFactory {
         ProductManifest pmf = ProductManifest.of(local, product);
 
         /* STEP 1b: read application(s) to configure */
-        ApplicationManifest amf = ApplicationManifest.of(local, serverApp);
-        ApplicationManifest camf = ApplicationManifest.of(local, clientApp);
+        ApplicationManifest amf = ApplicationManifest.of(local, serverApp, null);
+        ApplicationManifest camf = ApplicationManifest.of(local, clientApp, null);
 
         /* STEP 1c: create application configuration based on application descriptor */
         ApplicationConfiguration cfg = new ApplicationConfiguration();

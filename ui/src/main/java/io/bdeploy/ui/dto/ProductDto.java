@@ -34,6 +34,7 @@ public class ProductDto implements Comparable<ProductDto> {
         dto.configTree = manifest.getConfigTemplateTreeId();
         dto.instanceTemplates = manifest.getInstanceTemplates();
         dto.applicationTemplates = manifest.getApplicationTemplates();
+        // no parameter templates intentionally - they are expanded in ApplicationManifest
         dto.references = manifest.getReferences();
         return dto;
     }

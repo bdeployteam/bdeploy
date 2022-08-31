@@ -12,6 +12,9 @@ instanceTemplates:
 applicationTemplates:
 - "app-templates/server-with-sleep.yaml"
 
+parameterTemplates:
+- "param-templates/shared.yaml"
+
 versionFile: "product-version.yaml"
 
 

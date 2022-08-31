@@ -1,0 +1,17 @@
+id: shared_parameters
+
+parameters:
+  - uid: "param.shared.test"
+    name: "Shared Text"
+    longDescription: "A shared text parameter"
+    groupName: "Shared Parameters"
+    parameter: "--text"
+    mandatory: false
+  - uid: "param.shared.number"
+    name: "Shared Number"
+    longDescription: "A shared number parameter"
+    groupName: "Shared Parameters"
+    parameter: "--text"
+    mandatory: false
+    type: NUMERIC
+

@@ -50,6 +50,7 @@ public class ProductManifestBuilder {
     public static final String PLUGINS_ENTRY = "plugins";
     public static final String TEMPLATES_ENTRY = "templates";
     public static final String APP_TEMPLATES_ENTRY = "appTemplates";
+    public static final String PARAM_TEMPLATES_ENTRY = "paramTemplates";
 
     private final Map<String, Manifest.Key> applications = new TreeMap<>();
     private final Map<String, String> labels = new TreeMap<>();
@@ -58,6 +59,7 @@ public class ProductManifestBuilder {
     private Path pluginFolder;
     private final List<Path> instanceTemplates = new ArrayList<>();
     private final List<Path> appTemplates = new ArrayList<>();
+    private final List<Path> paramTemplates = new ArrayList<>();
 
     public ProductManifestBuilder(ProductDescriptor desc) {
         this.desc = desc;
@@ -90,6 +92,11 @@ public class ProductManifestBuilder {
 
     public synchronized ProductManifestBuilder addApplicationTemplate(Path tmplPath) {
         appTemplates.add(tmplPath);
+        return this;
+    }
+
+    public synchronized ProductManifestBuilder addParameterTemplate(Path tmplPath) {
+        paramTemplates.add(tmplPath);
         return this;
     }
 
@@ -163,6 +170,15 @@ public class ProductManifestBuilder {
         }
         tree.add(new Tree.Key(APP_TEMPLATES_ENTRY, EntryType.TREE),
                 hive.execute(new InsertArtificialTreeOperation().setTree(appTemplTree)));
+
+        // import parameter templates
+        Tree.Builder paramTemplTree = new Tree.Builder();
+        for (Path p : paramTemplates) {
+            ObjectId id = hive.execute(new ImportFileOperation().setFile(p));
+            paramTemplTree.add(new Tree.Key(id.toString() + ".yaml", EntryType.BLOB), id);
+        }
+        tree.add(new Tree.Key(PARAM_TEMPLATES_ENTRY, EntryType.TREE),
+                hive.execute(new InsertArtificialTreeOperation().setTree(paramTemplTree)));
 
         Manifest.Builder m = new Manifest.Builder(manifest);
         labels.forEach(m::addLabel);
@@ -258,7 +274,18 @@ public class ProductManifestBuilder {
             }
         }
 
-        // 11. generate product
+        // 11. parameter templates
+        if (prod.parameterTemplates != null && !prod.parameterTemplates.isEmpty()) {
+            for (String tmpl : prod.parameterTemplates) {
+                Path tmplPath = descriptorPath.getParent().resolve(tmpl);
+                if (!Files.isRegularFile(tmplPath)) {
+                    throw new IllegalStateException("Parameter Template descriptor not found: " + tmplPath);
+                }
+                builder.addParameterTemplate(tmplPath);
+            }
+        }
+
+        // 12. generate product
         builder.insert(hive, prodKey, prod.product);
 
         return prodKey;

@@ -34,7 +34,7 @@ public class ApplicationResourceImpl implements ApplicationResource {
         try {
             ProductManifest productManifest = ProductManifest.of(productBHive, productKey);
             SortedSet<Key> applications = productManifest.getApplications();
-            return applications.stream().map(k -> ApplicationManifest.of(productBHive, k)).map(mf -> {
+            return applications.stream().map(k -> ApplicationManifest.of(productBHive, k, productManifest)).map(mf -> {
                 ApplicationDto descriptor = new ApplicationDto();
                 descriptor.key = mf.getKey();
                 descriptor.name = mf.getDescriptor().name;
@@ -51,7 +51,8 @@ public class ApplicationResourceImpl implements ApplicationResource {
 
     @Override
     public ApplicationDescriptor getDescriptor(String name, String tag) {
-        ApplicationManifest manifest = ApplicationManifest.of(productBHive, new Manifest.Key(name, tag));
+        ProductManifest productManifest = ProductManifest.of(productBHive, productKey);
+        ApplicationManifest manifest = ApplicationManifest.of(productBHive, new Manifest.Key(name, tag), productManifest);
         return manifest.getDescriptor();
     }
 

@@ -286,7 +286,8 @@ public class InstanceNodeController {
                 pools.computeIfAbsent(noPoolRoot, k -> new TreeSet<>()).add(app.application);
             }
 
-            ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+            // no need for product, we only need to find the dependencies.
+            ApplicationManifest amf = ApplicationManifest.of(hive, app.application, null);
 
             // applications /must/ follow the ScopedManifestKey rules.
             ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
@@ -363,7 +364,7 @@ public class InstanceNodeController {
         for (InstanceNodeController inc : toKeep) {
             // add all applications and all of their dependencies as resolved locally.
             inc.getManifest().getConfiguration().applications.stream().peek(a -> {
-                SortedSet<String> deps = ApplicationManifest.of(source, a.application).getDescriptor().runtimeDependencies;
+                SortedSet<String> deps = ApplicationManifest.of(source, a.application, null).getDescriptor().runtimeDependencies;
                 if (deps == null) {
                     return;
                 }

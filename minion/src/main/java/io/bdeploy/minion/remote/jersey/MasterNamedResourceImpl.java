@@ -80,6 +80,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
@@ -173,7 +174,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             PushOperation pushOp = new PushOperation().setRemote(node.remote);
             for (ApplicationConfiguration app : inm.getConfiguration().applications) {
                 pushOp.addManifest(app.application);
-                ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+                ApplicationManifest amf = ApplicationManifest.of(hive, app.application, null);
 
                 // applications /must/ follow the ScopedManifestKey rules.
                 ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
@@ -761,7 +762,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
         cfg.instanceConfig = imf.getInstanceNodeConfiguration(hive, application);
 
-        ApplicationManifest amf = ApplicationManifest.of(hive, cfg.appConfig.application);
+        ProductManifest pmf = ProductManifest.of(hive, imf.getConfiguration().product);
+        ApplicationManifest amf = ApplicationManifest.of(hive, cfg.appConfig.application, pmf);
         cfg.appDesc = amf.getDescriptor();
 
         // application key MUST be a ScopedManifestKey. dependencies /must/ be present

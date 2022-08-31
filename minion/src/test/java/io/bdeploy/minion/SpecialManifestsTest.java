@@ -97,7 +97,7 @@ class SpecialManifestsTest {
         assertEquals(1, pm.getApplications().size());
         assertEquals(appKey, pm.getApplications().first());
 
-        ApplicationManifest am = ApplicationManifest.of(hive, appKey);
+        ApplicationManifest am = ApplicationManifest.of(hive, appKey, null);
         assertEquals("dummy", am.getDescriptor().name);
     }
 
@@ -115,7 +115,7 @@ class SpecialManifestsTest {
                 hive.execute(new ImportOperation().setSourcePath(app).setManifest(appKey));
                 hive.execute(new ImportOperation().setSourcePath(jdk).setManifest(jdkKey));
             }
-            ApplicationDescriptor desc = ApplicationManifest.of(hive, appKey).getDescriptor();
+            ApplicationDescriptor desc = ApplicationManifest.of(hive, appKey, null).getDescriptor();
 
             Path cfgs = tmp.resolve("config-templates");
             PathHelper.mkdirs(cfgs);

@@ -10,8 +10,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +33,7 @@ import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.remote.NodeCleanupResource;
 import io.bdeploy.minion.MinionRoot;
+import jakarta.inject.Inject;
 
 public class NodeCleanupResourceImpl implements NodeCleanupResource {
 
@@ -80,7 +79,7 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
                 for (ApplicationConfiguration app : inm.getConfiguration().applications) {
                     try {
                         // Try to load. This might fail if the application is no longer present - for whatever reason
-                        ApplicationManifest amf = ApplicationManifest.of(hive, app.application);
+                        ApplicationManifest amf = ApplicationManifest.of(hive, app.application, null);
 
                         // Add the application if it could be loaded
                         allRefs.add(app.application);
