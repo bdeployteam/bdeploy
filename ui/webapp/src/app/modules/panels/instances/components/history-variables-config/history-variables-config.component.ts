@@ -31,8 +31,6 @@ export class HistoryVariablesConfigComponent implements OnInit {
         this.compareConfig
       )
     );
-    console.log(this.diffSide);
-    console.log(this.diff$.value);
     this.borderClass = this.getBorderClass();
   }
 
