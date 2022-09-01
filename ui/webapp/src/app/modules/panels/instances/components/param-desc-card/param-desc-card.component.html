@@ -50,7 +50,14 @@
     <ng-container *ngIf="!!descriptor.condition?.parameter">
       <strong><div>Condition:</div></strong>
       <div class="local-break">
-        Parameter <code>{{ descriptor.condition.parameter }}</code> must
+        <ng-container *ngIf="descriptor.condition.parameter"
+          >Parameter
+          <code>{{ descriptor.condition.parameter }}</code> must</ng-container
+        >
+        <ng-container *ngIf="descriptor.condition.expression"
+          >Resolved Expression
+          <code>{{ descriptor.condition.expression }}</code> must</ng-container
+        >
         <code
           >{{ descriptor.condition.must }} {{ descriptor.condition.value
           }}</code

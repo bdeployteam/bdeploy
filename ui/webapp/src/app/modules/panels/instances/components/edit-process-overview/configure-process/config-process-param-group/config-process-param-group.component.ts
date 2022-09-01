@@ -19,7 +19,7 @@ import {
   of,
   Subscription,
 } from 'rxjs';
-import { debounceTime, skipWhile } from 'rxjs/operators';
+import { debounceTime, map, skipWhile } from 'rxjs/operators';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -614,7 +614,9 @@ export class ConfigProcessParamGroupComponent
 
     if (param?.descriptor?.mandatory) {
       // mandatory, cannot manually add/remove. triggering the condition on another parameter will automatically add/remove.
-      return of(false);
+      return this.edit
+        .meetsConditionOnCurrent(param.descriptor)
+        .pipe(map((b) => !b));
     } else {
       // optional
       return of(true);

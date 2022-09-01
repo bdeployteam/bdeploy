@@ -366,8 +366,13 @@ export class ProcessEditService {
       parameters: mandatoryParams.filter((p) =>
         this.meetsConditionOnGiven(
           descriptor.parameters.find((x) => x.uid === p.uid),
-          descriptor.parameters,
-          mandatoryParams
+          {
+            // dummy just so we can resolve from our own parameters during adding.
+            start: {
+              executable: descriptor.launcherPath,
+              parameters: mandatoryParams,
+            },
+          } as ApplicationConfiguration
         )
       ),
     };
@@ -398,11 +403,7 @@ export class ProcessEditService {
     return combineLatest([this.application$, this.process$]).pipe(
       skipWhile(([a, c]) => !a || !c),
       map(([app, cfg]) => {
-        return this.meetsConditionOnGiven(
-          param,
-          app.descriptor.startCommand.parameters,
-          cfg.start.parameters
-        );
+        return this.meetsConditionOnGiven(param, cfg);
       }),
       first()
     );
@@ -410,29 +411,18 @@ export class ProcessEditService {
 
   public meetsConditionOnGiven(
     param: ParameterDescriptor,
-    allDescriptors: ParameterDescriptor[],
-    allConfigs: ParameterConfiguration[]
+    process: ApplicationConfiguration
   ): boolean {
-    if (!param.condition || !param.condition.parameter) {
+    if (
+      !param.condition ||
+      (!param.condition.parameter && !param.condition.expression)
+    ) {
       return true; // no condition, all OK :)
     }
 
-    const depDesc = allDescriptors.find(
-      (p) => p.uid === param.condition.parameter
-    );
-    const depCfg = allConfigs.find((p) => p.uid === param.condition.parameter);
-    if (
-      !depDesc ||
-      !this.meetsConditionOnGiven(depDesc, allDescriptors, allConfigs)
-    ) {
-      return false; // parameter not found?!
-    }
-
-    if (!depCfg || !depCfg.value) {
-      if (param.condition.must === ParameterConditionType.BE_EMPTY) {
-        return true;
-      }
-      return false;
+    let expression = param.condition.expression;
+    if (param.condition.parameter) {
+      expression = `{{V:${param.condition.parameter}}}`;
     }
 
     const system =
@@ -445,11 +435,16 @@ export class ProcessEditService {
         : null;
 
     const value = getRenderPreview(
-      depCfg.value,
-      this.process$.value,
+      createLinkedValue(expression),
+      process,
       this.edit.state$.value?.config,
       system?.config
     );
+
+    // no value or value could not be resolved fully.
+    if (value === null || value === undefined || value.indexOf('{{') !== -1) {
+      return param.condition.must === ParameterConditionType.BE_EMPTY;
+    }
 
     switch (param.condition.must) {
       case ParameterConditionType.EQUAL:
@@ -461,15 +456,9 @@ export class ProcessEditService {
       case ParameterConditionType.END_WITH:
         return value.endsWith(param.condition.value);
       case ParameterConditionType.BE_EMPTY:
-        if (depDesc.type === ParameterType.BOOLEAN) {
-          return value.trim() === 'false';
-        }
-        return value.trim().length <= 0;
+        return value.trim().length <= 0 || value.trim() === 'false';
       case ParameterConditionType.BE_NON_EMPTY:
-        if (depDesc.type === ParameterType.BOOLEAN) {
-          return value.trim() === 'true';
-        }
-        return value.trim().length > 0;
+        return value.trim().length > 0 && value.trim() !== 'false';
     }
   }
 }

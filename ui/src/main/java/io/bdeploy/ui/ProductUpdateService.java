@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 
 import org.jvnet.hk2.annotations.Service;
 
@@ -517,35 +516,22 @@ public class ProductUpdateService {
 
     private boolean meetsCondition(ApplicationConfiguration process, ApplicationDescriptor desc, ParameterDescriptor param,
             VariableResolver resolver) {
-        if (param.condition == null || param.condition.parameter == null) {
+        if (param.condition == null || (param.condition.parameter == null && param.condition.expression == null)) {
             return true;
         }
 
         String value = null;
-        var target = Stream
-                .concat(process.start != null ? process.start.parameters.stream() : Stream.of(),
-                        process.stop != null ? process.stop.parameters.stream() : Stream.of())
-                .filter(p -> p.uid.equals(param.condition.parameter)).findFirst().orElse(null);
-        if (target != null && target.value != null) {
-            if (target.value.linkExpression != null) {
-                try {
-                    value = TemplateHelper.process(target.value.linkExpression, resolver);
-                } catch (Exception e) {
-                    // cannot resolve transitive... :|
-                    return false;
-                }
-            } else {
-                value = target.value.value;
-            }
+        String expression = param.condition.expression;
+
+        if (param.condition.parameter != null) {
+            expression = "{{V:" + param.condition.parameter + "}}"; // compat with older model.
         }
 
-        var targetDesc = Stream
-                .concat(desc.startCommand != null ? desc.startCommand.parameters.stream() : Stream.of(),
-                        desc.stopCommand != null ? desc.stopCommand.parameters.stream() : Stream.of())
-                .filter(p -> p.uid.equals(param.condition.parameter)).findFirst().orElse(null);
-
-        if (targetDesc == null || !meetsCondition(process, desc, targetDesc, resolver)) {
-            return false; // target parameter does not meet condition, so we can't either.
+        try {
+            value = TemplateHelper.process(expression, resolver);
+        } catch (Exception e) {
+            // that does not resolve, so it is not good :)
+            return false;
         }
 
         if (value == null) {
@@ -554,15 +540,9 @@ public class ProductUpdateService {
 
         switch (param.condition.must) {
             case BE_EMPTY:
-                if (targetDesc.type == ParameterType.BOOLEAN) {
-                    return value.trim().equals("false");
-                }
-                return value.isBlank();
+                return value.isBlank() || value.trim().equals("false");
             case BE_NON_EMPTY:
-                if (targetDesc.type == ParameterType.BOOLEAN) {
-                    return value.trim().equals("true");
-                }
-                return !value.isBlank();
+                return !value.isBlank() && !value.trim().equals("false");
             case CONTAIN:
                 return value.contains(param.condition.value);
             case END_WITH:

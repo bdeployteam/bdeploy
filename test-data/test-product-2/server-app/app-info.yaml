@@ -176,7 +176,15 @@ startCommand:
         parameter: "param.text"
         must: CONTAIN
         value: "test"
-
+    - uid: "param.cond.expression"
+      name: "Instance Variable Test is not empty"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      defaultValue: "{{X:Test}}"
+      mandatory: true
+      condition:
+        expression: "{{X:Test}}"
+        must: BE_NON_EMPTY
 
 
 endpoints:
