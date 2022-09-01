@@ -127,6 +127,11 @@ describe('Instance Settings Tests', () => {
           });
       });
 
+      // need to make sure no validation is running anymore.
+      cy.get('app-bd-dialog-toolbar').within(() => {
+        cy.get(`button[data-cy^="Apply"]`).should('be.enabled');
+      });
+
       // intentionally not using apply, should prompt to save on leave
       cy.pressToolbarButton('Back to Overview');
 
