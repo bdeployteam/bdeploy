@@ -165,6 +165,16 @@ public class BDeployBuildProductTask {
                         FileUtils.copyFile(source.toFile(), target.toFile());
                     }
                 }
+
+                if (pd.parameterTemplates != null && !pd.parameterTemplates.isEmpty()) {
+                    for (String tmpl : pd.parameterTemplates) {
+                        Path source = desc.productInfo.getParent().resolve(tmpl);
+                        Path target = prodInfoDir.toPath().resolve(desc.productInfo.getParent().relativize(source));
+
+                        FileUtils.mkdirs(target.getParent().toFile());
+                        FileUtils.copyFile(source.toFile(), target.toFile());
+                    }
+                }
             }
 
             // 2: create product and import into bhive
