@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.google.common.collect.ImmutableList;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
@@ -162,7 +163,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
                 if (replacements == null) {
                     log.warn("No shared parameter replacement found for " + templateId);
                 } else {
-                    replacements.forEach(r -> params.add(index, r));
+                    ImmutableList.copyOf(replacements).reverse().forEach(r -> params.add(index, r));
                 }
             }
         } while (toReplace != null);
