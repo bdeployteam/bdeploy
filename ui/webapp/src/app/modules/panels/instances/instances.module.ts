@@ -40,6 +40,7 @@ import { HistoryDiffFieldComponent } from './components/history-diff-field/histo
 import { HistoryEntryComponent } from './components/history-entry/history-entry.component';
 import { HistoryHeaderConfigComponent } from './components/history-header-config/history-header-config.component';
 import { HistoryProcessConfigComponent } from './components/history-process-config/history-process-config.component';
+import { HistoryVariablesConfigComponent } from './components/history-variables-config/history-variables-config.component';
 import { HistoryViewComponent } from './components/history-view/history-view.component';
 import { AttributesComponent } from './components/instance-settings/attributes/attributes.component';
 import { BannerComponent } from './components/instance-settings/banner/banner.component';
@@ -60,6 +61,7 @@ import { TemplateMessageDetailsComponent } from './components/instance-settings/
 import { InstanceVariablesComponent } from './components/instance-settings/instance-variables/instance-variables.component';
 import { NodesComponent } from './components/instance-settings/nodes/nodes.component';
 import { PortShiftComponent } from './components/instance-settings/ports/port-shift/port-shift.component';
+import { PortTypeCellComponent } from './components/instance-settings/ports/port-type-cell/port-type-cell.component';
 import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
 import { ProductVersionDetailsComponent } from './components/instance-settings/product-update/product-version-details/product-version-details.component';
@@ -80,7 +82,7 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { PortTypeCellComponent } from './components/instance-settings/ports/port-type-cell/port-type-cell.component';
+import { VariableDescCardComponent } from './components/variable-desc-card/variable-desc-card.component';
 
 @NgModule({
   declarations: [
@@ -96,6 +98,7 @@ import { PortTypeCellComponent } from './components/instance-settings/ports/port
     HistoryCompareComponent,
     HistoryViewComponent,
     HistoryProcessConfigComponent,
+    HistoryVariablesConfigComponent,
     HistoryDiffFieldComponent,
     ConfigDescCardsComponent,
     HistoryHeaderConfigComponent,
@@ -151,6 +154,7 @@ import { PortTypeCellComponent } from './components/instance-settings/ports/port
     PinnedParameterValueComponent,
     InstanceVariablesComponent,
     PortTypeCellComponent,
+    VariableDescCardComponent,
   ],
   imports: [
     CommonModule,

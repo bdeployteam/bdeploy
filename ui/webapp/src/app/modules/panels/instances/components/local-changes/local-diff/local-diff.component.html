@@ -47,6 +47,20 @@
               [compareConfig]="pair.header.base"
             ></app-history-header-config>
           </div>
+          <div fxLayout="row" fxLayoutGap="10px">
+            <app-history-variables-config
+              fxFlex="50%"
+              diffSide="left"
+              [baseConfig]="pair.header.base"
+              [compareConfig]="pair.header.compare"
+            ></app-history-variables-config>
+            <app-history-variables-config
+              fxFlex="50%"
+              diffSide="right"
+              [baseConfig]="pair.header.compare"
+              [compareConfig]="pair.header.base"
+            ></app-history-variables-config>
+          </div>
         </div>
       </div>
 

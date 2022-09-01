@@ -1,0 +1,26 @@
+<ng-container *ngIf="diff$ | async as diffs">
+  <div [ngClass]="borderClass" *ngIf="diffs.type !== 'not-in-base'">
+    <div class="local-padding local-header" fxLayout="column">
+      <div class="bd-description-text">Instance Variables:</div>
+      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+        <ng-container *ngFor="let diff of diffs.diffs; let i = index">
+          <ng-template #varPopup>
+            <app-variable-desc-card
+              [id]="diff.key"
+              [variable]="diff.base"
+            ></app-variable-desc-card>
+          </ng-template>
+          <div [style.margin-right.px]="3">{{diff.key}}:</div>
+          <strong>
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              [diff]="diff.value"
+              [popup]="varPopup"
+            ></app-history-diff-field>
+          </strong>
+          <div *ngIf="i !== diffs.diffs.length -1">,</div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</ng-container>

@@ -14,6 +14,7 @@ import {
   ParameterDescriptor,
   ParameterType,
   ProcessControlConfiguration,
+  VariableValue,
 } from 'src/app/models/gen.dtos';
 import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
@@ -398,6 +399,85 @@ export class InstanceConfigurationDiff {
   }
 }
 
+export class VariableValueDiff {
+  public diffType: DiffType;
+
+  public value: Difference;
+  public description: Difference;
+  public type: Difference;
+  public customEditor: Difference;
+
+  constructor(
+    public key: string,
+    public base: VariableValue,
+    public compare: VariableValue
+  ) {
+    this.value = new Difference(
+      getPreRenderable(base?.value),
+      getPreRenderable(compare?.value),
+      base?.type === ParameterType.PASSWORD ||
+      compare?.type === ParameterType.PASSWORD
+        ? '*'.repeat(getPreRenderable(base.value)?.length)
+        : null
+    );
+    this.description = new Difference(base?.description, compare?.description);
+    this.type = new Difference(
+      base?.type || ParameterType.STRING,
+      compare?.type || ParameterType.STRING
+    ); // default is STRING
+    this.customEditor = new Difference(
+      base?.customEditor,
+      compare?.customEditor
+    );
+
+    this.diffType = getParentChangeType(
+      base,
+      compare,
+      this.value.type,
+      this.description.type,
+      this.type.type,
+      this.customEditor.type
+    );
+  }
+}
+
+export class VariablesDiff {
+  public type: DiffType;
+  public diffs: VariableValueDiff[] = [];
+
+  constructor(
+    base: { [index: string]: VariableValue },
+    compare: { [index: string]: VariableValue }
+  ) {
+    const safeBase = base || {};
+    const safeCompare = compare || {};
+
+    // only look at base params.
+    if (Object.keys(safeBase).length) {
+      for (const k of Object.keys(safeBase)) {
+        this.diffs.push(new VariableValueDiff(k, safeBase[k], safeCompare[k]));
+      }
+    }
+
+    // check for variables not in base, which means its new, which means we're changed.
+    let newVarChange: DiffType = DiffType.UNCHANGED;
+    if (Object.keys(safeCompare).length) {
+      for (const k of Object.keys(safeCompare)) {
+        if (!safeBase[k]) {
+          newVarChange = DiffType.CHANGED;
+        }
+      }
+    }
+
+    this.type = getParentChangeType(
+      base,
+      compare,
+      newVarChange,
+      ...this.diffs.map((d) => d.diffType)
+    );
+  }
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -415,5 +495,12 @@ export class HistoryDiffService {
     compare: InstanceConfiguration
   ): InstanceConfigurationDiff {
     return new InstanceConfigurationDiff(base, compare);
+  }
+
+  public diffInstanceVariables(
+    base: InstanceConfiguration,
+    compare: InstanceConfiguration
+  ): VariablesDiff {
+    return new VariablesDiff(base.instanceVariables, compare.instanceVariables);
   }
 }

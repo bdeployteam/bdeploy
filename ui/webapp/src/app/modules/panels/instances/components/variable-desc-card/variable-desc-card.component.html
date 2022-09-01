@@ -1,0 +1,28 @@
+<mat-card
+  [style.padding.px]="10"
+  [style.max-width.px]="550"
+  class="mat-typography"
+  fxLayout="column"
+  fxLayoutGap="5px"
+>
+  <div>Variable <strong>{{ id }}</strong></div>
+  <div
+    gdColumns="100px auto"
+    gdGap="5px"
+    gdAlignColumns="start start"
+    [style.padding.px]="10"
+  >
+    <strong><div>Description:</div></strong>
+    <div>{{ variable?.description }}</div>
+    <strong><div>Type:</div></strong>
+    <div>
+      <code>{{ variable?.type || 'STRING' }}</code>
+    </div>
+    <ng-container *ngIf="variable?.customEditor">
+      <strong><div>Custom Editor:</div></strong>
+      <div>
+        <code>{{ variable?.customEditor }}</code>
+      </div>
+    </ng-container>
+  </div>
+</mat-card>
