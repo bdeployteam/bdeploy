@@ -85,7 +85,7 @@ export class ProcessUiInlineComponent implements OnDestroy {
         });
 
         const system = systems?.find(
-          (s) => s.key.name === instance?.instanceConfiguration?.system.name
+          (s) => s.key.name === instance?.instanceConfiguration?.system?.name
         );
         const process = nodes?.nodeConfigDtos
           ?.map((n) =>
