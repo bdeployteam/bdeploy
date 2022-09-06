@@ -523,8 +523,14 @@ public class ProductUpdateService {
         String value = null;
         String expression = param.condition.expression;
 
+        // we need a "target" type. in case of expression, this is our own type, in case of "parameter" it is the type of the target parameter
+        ParameterType targetType = param.type;
         if (param.condition.parameter != null) {
             expression = "{{V:" + param.condition.parameter + "}}"; // compat with older model.
+
+            // find a descriptor and it's type if possible, fall back to parameters own type.
+            targetType = desc.startCommand.parameters.stream().filter(d -> d.uid.equals(param.condition.parameter)).findFirst()
+                    .map(p -> p.type).orElse(param.type);
         }
 
         try {
@@ -540,9 +546,9 @@ public class ProductUpdateService {
 
         switch (param.condition.must) {
             case BE_EMPTY:
-                return value.isBlank() || value.trim().equals("false");
+                return value.isBlank() || (targetType == ParameterType.BOOLEAN && value.trim().equals("false"));
             case BE_NON_EMPTY:
-                return !value.isBlank() && !value.trim().equals("false");
+                return !value.isBlank() && !(targetType == ParameterType.BOOLEAN && value.trim().equals("false"));
             case CONTAIN:
                 return value.contains(param.condition.value);
             case END_WITH:

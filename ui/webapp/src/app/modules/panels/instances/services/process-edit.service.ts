@@ -366,8 +366,10 @@ export class ProcessEditService {
       parameters: mandatoryParams.filter((p) =>
         this.meetsConditionOnGiven(
           descriptor.parameters.find((x) => x.uid === p.uid),
+          descriptor,
           {
             // dummy just so we can resolve from our own parameters during adding.
+            // this may be problematic in case of "condition chains".
             start: {
               executable: descriptor.launcherPath,
               parameters: mandatoryParams,
@@ -403,14 +405,19 @@ export class ProcessEditService {
     return combineLatest([this.application$, this.process$]).pipe(
       skipWhile(([a, c]) => !a || !c),
       map(([app, cfg]) => {
-        return this.meetsConditionOnGiven(param, cfg);
+        return this.meetsConditionOnGiven(
+          param,
+          app.descriptor.startCommand,
+          cfg
+        );
       }),
       first()
     );
   }
 
-  public meetsConditionOnGiven(
+  private meetsConditionOnGiven(
     param: ParameterDescriptor,
+    descriptor: ExecutableDescriptor,
     process: ApplicationConfiguration
   ): boolean {
     if (
@@ -420,9 +427,13 @@ export class ProcessEditService {
       return true; // no condition, all OK :)
     }
 
+    let targetType = param.type;
     let expression = param.condition.expression;
     if (param.condition.parameter) {
       expression = `{{V:${param.condition.parameter}}}`;
+      targetType =
+        descriptor.parameters.find((p) => p.uid === param.condition.parameter)
+          ?.type || param.type;
     }
 
     const system =
@@ -456,9 +467,15 @@ export class ProcessEditService {
       case ParameterConditionType.END_WITH:
         return value.endsWith(param.condition.value);
       case ParameterConditionType.BE_EMPTY:
-        return value.trim().length <= 0 || value.trim() === 'false';
+        return (
+          value.trim().length <= 0 ||
+          (targetType === ParameterType.BOOLEAN && value.trim() === 'false')
+        );
       case ParameterConditionType.BE_NON_EMPTY:
-        return value.trim().length > 0 && value.trim() !== 'false';
+        return (
+          value.trim().length > 0 &&
+          !(targetType === ParameterType.BOOLEAN && value.trim() === 'false')
+        );
     }
   }
 }

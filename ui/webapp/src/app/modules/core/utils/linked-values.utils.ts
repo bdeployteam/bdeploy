@@ -5,6 +5,7 @@ import {
   InstanceConfigurationDto,
   LinkedValueConfiguration,
   OperatingSystem,
+  ParameterConfiguration,
   ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
@@ -161,6 +162,14 @@ export function gatherProcessExpansions(
   }
 
   const result: LinkVariable[] = [];
+
+  // need to fetch them *directly* as well as through nodes below in case the application has not yet
+  // been added to a node (i.e. resolving *while* creating an application).
+  for (const param of process.start.parameters) {
+    // process parameter, make sure we always use the unqualified version ("This Application")
+    processParameter(true, process, param, apps, result);
+  }
+
   for (const node of instance.nodeDtos) {
     for (const app of node.nodeConfiguration.applications) {
       if (
@@ -172,44 +181,60 @@ export function gatherProcessExpansions(
         continue;
       }
       for (const param of app.start.parameters) {
-        let link = `{{V:${app.name}:${param.uid}}}`;
-        let group = app.name;
-        if (app.uid === process?.uid) {
-          link = `{{V:${param.uid}}}`;
-          group = `${app.name} (This Application)`;
+        if (app.uid === process.uid) {
+          // we already have the unqualified version in the expansions.
+          continue;
         }
 
-        // just for display - this is OK as value and expression, no need to expand.
-        let value = getPreRenderable(param.value);
-        let label = param.uid;
-        let desc = '';
-
-        // process value according to type is possible and required.
-        const appDesc = apps?.find(
-          (a) => a.key.name === app.application.name
-        )?.descriptor;
-        if (appDesc) {
-          for (const paramDesc of appDesc.startCommand.parameters) {
-            if (paramDesc.uid === param.uid) {
-              label = paramDesc.name;
-              desc = paramDesc.longDescription;
-              value = getMaskedPreRenderable(param.value, paramDesc.type);
-              break;
-            }
-          }
-        }
-
-        result.push({
-          name: label,
-          description: desc,
-          preview: value,
-          link: link,
-          group: group,
-        });
+        // process parameter, always add full qualified name.
+        processParameter(false, app, param, apps, result);
       }
     }
   }
   return result;
+}
+
+function processParameter(
+  thisApp: boolean,
+  app: ApplicationConfiguration,
+  param: ParameterConfiguration,
+  apps: ApplicationDto[],
+  result: LinkVariable[]
+) {
+  let link = `{{V:${app.name}:${param.uid}}}`;
+  let group = app.name;
+  if (thisApp) {
+    link = `{{V:${param.uid}}}`;
+    group = `${app.name} (This Application)`;
+  }
+
+  // just for display - this is OK as value and expression, no need to expand.
+  let value = getPreRenderable(param.value);
+  let label = param.uid;
+  let desc = '';
+
+  // process value according to type is possible and required.
+  const appDesc = apps?.find(
+    (a) => a.key.name === app.application.name
+  )?.descriptor;
+  if (appDesc) {
+    for (const paramDesc of appDesc.startCommand.parameters) {
+      if (paramDesc.uid === param.uid) {
+        label = paramDesc.name;
+        desc = paramDesc.longDescription;
+        value = getMaskedPreRenderable(param.value, paramDesc.type);
+        break;
+      }
+    }
+  }
+
+  result.push({
+    name: label,
+    description: desc,
+    preview: value,
+    link: link,
+    group: group,
+  });
 }
 
 export function gatherPathExpansions(): LinkVariable[] {
