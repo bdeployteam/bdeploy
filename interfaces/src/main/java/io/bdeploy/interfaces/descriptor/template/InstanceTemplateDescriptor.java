@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
+import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfiguration;
 
 /**
  * Describes a template which can be used to fill an instance with pre-configured applications.
@@ -32,6 +33,11 @@ public class InstanceTemplateDescriptor {
      * A collection of variables to create when applying the instance template.
      */
     public List<TemplateableVariableConfiguration> instanceVariables = new ArrayList<>();
+
+    /**
+     * A collection of override values for {@link #instanceVariables}.
+     */
+    public List<TemplateableVariableDefaultConfiguration> instanceVariableDefaults = new ArrayList<>();
 
     /**
      * A list of process control groups which should be created when applying the instance template.

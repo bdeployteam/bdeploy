@@ -37,6 +37,7 @@ import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
+import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfiguration;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
@@ -230,7 +231,7 @@ public class ProductManifest {
             List<ApplicationTemplateDescriptor> appTemplates, List<InstanceVariableTemplateDescriptor> varTemplates) {
         for (var itd : instTemplates) {
             // inline resolve all variable templates to their expanded values.
-            resolveInstanceVariableTemplates(varTemplates, itd.instanceVariables);
+            resolveInstanceVariableTemplates(varTemplates, itd.instanceVariables, itd.instanceVariableDefaults);
 
             for (var group : itd.groups) {
                 for (var app : group.applications) {
@@ -264,7 +265,8 @@ public class ProductManifest {
     }
 
     private static void resolveInstanceVariableTemplates(List<InstanceVariableTemplateDescriptor> templates,
-            List<TemplateableVariableConfiguration> vars) {
+            List<TemplateableVariableConfiguration> vars,
+            List<TemplateableVariableDefaultConfiguration> instanceVariableDefaults) {
         TemplateableVariableConfiguration toReplace = null;
         do {
             toReplace = vars.stream().filter(v -> v.template != null).findFirst().orElse(null);
@@ -280,10 +282,25 @@ public class ProductManifest {
                 if (replacements == null) {
                     log.warn("No instance variable template found for " + templateId);
                 } else {
-                    ImmutableList.copyOf(replacements).reverse().forEach(r -> vars.add(index, r));
+                    // only apply things which are not already there for *whatever* reason.
+                    ImmutableList.copyOf(replacements).reverse().stream()
+                            .filter(p -> vars.stream().filter(x -> x.id != null && x.id.equals(p.id)).findFirst().isEmpty())
+                            .forEach(r -> vars.add(index, r));
                 }
             }
         } while (toReplace != null);
+
+        // now that all are resolved, fixup any default value overrides from the instance template.
+        if (instanceVariableDefaults != null && !instanceVariableDefaults.isEmpty()) {
+            for (var def : instanceVariableDefaults) {
+                var variable = vars.stream().filter(x -> x.id.equals(def.id)).findFirst();
+                if (variable.isEmpty()) {
+                    log.warn("Variable not found while applying override: {}", def.id);
+                } else {
+                    variable.get().value = def.value;
+                }
+            }
+        }
     }
 
     private static void resolveAppTemplate(TemplateApplication app, List<ApplicationTemplateDescriptor> appTemplates,

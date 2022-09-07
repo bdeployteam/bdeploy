@@ -8,6 +8,10 @@ templateVariables:
     suggestedValues:
     - 'Test Value'
     - 'Another Suggested Value'
+  - uid: sleep-timeout
+    name: "Sleep Timeout"
+    description: "The amount of time the server application should sleep"
+    defaultValue: 60
 
 instanceVariables:
   - id: param.global
@@ -15,6 +19,10 @@ instanceVariables:
     description: "The global parameter's global value"
     type: "STRING"
   - template: shared.vars
+
+instanceVariableDefaults:
+  - id: param.xshared
+    value: '{{T:sleep-timeout}}'
 
 processControlGroups:
   - name: "First Group"

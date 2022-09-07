@@ -153,7 +153,7 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-instance-variables', () => {
-      cy.contains('tr', '9') // the original sleep value. cannot search by var name as it is used in another expansion.
+      cy.contains('tr', '5') // template var sleep value. cannot search by var name as it is used in another expansion.
         .should('exist')
         .within(() => {
           cy.get('button[data-cy=Edit]').click();
