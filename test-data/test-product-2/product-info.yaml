@@ -15,6 +15,9 @@ applicationTemplates:
 parameterTemplates:
 - "param-templates/shared.yaml"
 
+instanceVariableTemplates:
+- "variable-template.yaml"
+
 versionFile: "product-version.yaml"
 
 

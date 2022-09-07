@@ -142,18 +142,18 @@ public class InstanceNodeConfiguration {
 
         // pick system first, so instance can overrule values later on.
         if (system != null && system.systemVariables != null) {
-            system.systemVariables.forEach((k, v) -> {
+            system.systemVariables.forEach(v -> {
                 if (v.value != null) {
-                    variables.put(k, v.value.getPreRenderable());
+                    variables.put(v.id, v.value.getPreRenderable());
                 }
             });
         }
 
         // now potentially overwrite system variables with instance ones.
         if (instance != null && instance.instanceVariables != null) {
-            instance.instanceVariables.forEach((k, v) -> {
+            instance.instanceVariables.forEach(v -> {
                 if (v.value != null) {
-                    variables.put(k, v.value.getPreRenderable());
+                    variables.put(v.id, v.value.getPreRenderable());
                 }
             });
         }

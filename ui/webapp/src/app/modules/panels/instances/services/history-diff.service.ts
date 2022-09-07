@@ -14,10 +14,10 @@ import {
   ParameterDescriptor,
   ParameterType,
   ProcessControlConfiguration,
-  VariableValue,
 } from 'src/app/models/gen.dtos';
 import { getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
+import { VariableConfiguration } from './../../../../models/gen.dtos';
 
 /** The type of a difference, typically propagated from simple attributes to complex diffs. */
 export enum DiffType {
@@ -409,8 +409,8 @@ export class VariableValueDiff {
 
   constructor(
     public key: string,
-    public base: VariableValue,
-    public compare: VariableValue
+    public base: VariableConfiguration,
+    public compare: VariableConfiguration
   ) {
     this.value = new Difference(
       getPreRenderable(base?.value),
@@ -445,25 +445,25 @@ export class VariablesDiff {
   public type: DiffType;
   public diffs: VariableValueDiff[] = [];
 
-  constructor(
-    base: { [index: string]: VariableValue },
-    compare: { [index: string]: VariableValue }
-  ) {
-    const safeBase = base || {};
-    const safeCompare = compare || {};
-
+  constructor(base: VariableConfiguration[], compare: VariableConfiguration[]) {
     // only look at base params.
-    if (Object.keys(safeBase).length) {
-      for (const k of Object.keys(safeBase)) {
-        this.diffs.push(new VariableValueDiff(k, safeBase[k], safeCompare[k]));
+    if (base?.length) {
+      for (const v of base) {
+        this.diffs.push(
+          new VariableValueDiff(
+            v.id,
+            v,
+            compare.find((x) => x.id === v.id)
+          )
+        );
       }
     }
 
     // check for variables not in base, which means its new, which means we're changed.
     let newVarChange: DiffType = DiffType.UNCHANGED;
-    if (Object.keys(safeCompare).length) {
-      for (const k of Object.keys(safeCompare)) {
-        if (!safeBase[k]) {
+    if (compare?.length) {
+      for (const v of compare) {
+        if (!base?.find((x) => x.id === v.id)) {
           newVarChange = DiffType.CHANGED;
         }
       }

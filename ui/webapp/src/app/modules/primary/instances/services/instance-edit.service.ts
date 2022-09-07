@@ -44,6 +44,7 @@ import {
 } from 'src/app/modules/panels/instances/utils/instance-utils';
 import { GroupsService } from '../../groups/services/groups.service';
 import { ProductsService } from '../../products/services/products.service';
+import { VariableConfiguration } from './../../../../models/gen.dtos';
 import { InstancesService } from './instances.service';
 
 export interface GlobalEditState {
@@ -814,12 +815,10 @@ export class InstanceEditService {
       return; // not even a notice.
     }
 
-    if (
-      instance.instanceVariables &&
-      instance.instanceVariables[name]?.value &&
-      getPreRenderable(instance.instanceVariables[name]?.value)?.length
-    ) {
-      if (instance.instanceVariables[name].value.value !== value) {
+    const val = instance.instanceVariables?.find((x) => x.id === name);
+
+    if (val && getPreRenderable(val.value)?.length) {
+      if (val.value.value !== value) {
         console.warn(
           'Unaligned global found in instance variables!',
           param,
@@ -829,15 +828,28 @@ export class InstanceEditService {
       // already migrated, no neet to do anything to the instance variables.
     } else {
       if (!instance.instanceVariables) {
-        instance.instanceVariables = {};
+        instance.instanceVariables = [];
       }
 
-      instance.instanceVariables[name] = {
+      const newVar: VariableConfiguration = {
+        id: name,
         value: createLinkedValue(value),
         description,
         customEditor: desc.customEditor,
         type: desc.type,
       };
+
+      // we have one but without any value, rather use this one.
+      if (val) {
+        instance.instanceVariables.splice(
+          instance.instanceVariables.indexOf(val),
+          1,
+          newVar
+        );
+      } else {
+        instance.instanceVariables.push(newVar);
+      }
+      instance.instanceVariables.sort((a, b) => a.id.localeCompare(b.id));
     }
   }
 

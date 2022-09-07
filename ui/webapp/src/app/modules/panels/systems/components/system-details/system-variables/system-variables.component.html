@@ -4,7 +4,7 @@
   </div>
   <form #addForm="ngForm">
     <app-bd-form-input
-      [(ngModel)]="newId"
+      [(ngModel)]="newValue.id"
       name="id"
       label="Variable ID"
       required
@@ -41,7 +41,7 @@
 
 <ng-template #editTemplate>
   <div>
-    Provide a new value and/or description for <strong>{{newId}}</strong>.
+    Provide a new value and/or description for <strong>{{newValue.id}}</strong>.
   </div>
   <form #editForm="ngForm">
     <app-bd-value-editor

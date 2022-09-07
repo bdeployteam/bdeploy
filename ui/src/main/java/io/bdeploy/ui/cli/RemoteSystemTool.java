@@ -1,5 +1,6 @@
 package io.bdeploy.ui.cli;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
@@ -12,7 +13,7 @@ import io.bdeploy.common.cli.data.DataTableRowBuilder;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
-import io.bdeploy.interfaces.configuration.VariableValue;
+import io.bdeploy.interfaces.configuration.VariableConfiguration;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -118,8 +119,8 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             result.addField("Description", cfg.description);
             result.addField(" -- Config Variables --", "");
 
-            for (var entry : cfg.systemVariables.entrySet()) {
-                result.addField(" " + entry.getKey(), entry.getValue());
+            for (var entry : cfg.systemVariables) {
+                result.addField(" " + entry.id, entry.value != null ? entry.value.getPreRenderable() : "");
             }
 
             break;
@@ -154,11 +155,21 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             result.addField("New Description", config.description());
         }
         if (config.removeVariable() != null) {
-            cfg.systemVariables.remove(config.removeVariable());
+            var existing = cfg.systemVariables.stream().filter(v -> v.id.equals(config.setVariable())).findFirst().orElse(null);
+            if (existing != null) {
+                cfg.systemVariables.remove(existing);
+            }
             result.addField("Remove Variable", config.removeVariable());
         }
         if (config.setVariable() != null) {
-            cfg.systemVariables.put(config.setVariable(), new VariableValue(config.setValue()));
+            var existing = cfg.systemVariables.stream().filter(v -> v.id.equals(config.setVariable())).findFirst().orElse(null);
+            if (existing != null) {
+                cfg.systemVariables.set(cfg.systemVariables.indexOf(existing),
+                        new VariableConfiguration(config.setVariable(), config.setValue()));
+            } else {
+                cfg.systemVariables.add(new VariableConfiguration(config.setVariable(), config.setValue()));
+            }
+            Collections.sort(cfg.systemVariables, (v1, v2) -> v1.id.compareTo(v2.id));
             result.addField("Set Variable", config.setVariable());
         }
 

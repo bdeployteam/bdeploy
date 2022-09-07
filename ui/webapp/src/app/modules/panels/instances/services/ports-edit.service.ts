@@ -78,11 +78,9 @@ export class PortsEditService {
         }
 
         // Intentionally DON'T include system variables - we're not allowed to edit them from here!
-        if (s?.config?.config?.instanceVariables) {
-          // gather instance and system variables of type port.
-          for (const k of Object.keys(s.config.config.instanceVariables)) {
-            const val = s.config.config.instanceVariables[k];
-
+        if (s?.config?.config?.instanceVariables?.length) {
+          // gather instance variables of type port.
+          for (const val of s.config.config.instanceVariables) {
             if (!this.isPort(val.type)) {
               continue;
             }
@@ -91,13 +89,13 @@ export class PortsEditService {
               value: val.value,
               source: `Instance Variables.`,
               type: val.type,
-              name: k,
+              name: val.id,
               description: val.description,
               port: this.getPortValue(val.value, val.type),
               expression: this.isPortExpression(val.value, val.type),
               app: null,
               apply: (lv) => {
-                s.config.config.instanceVariables[k] = { ...val, value: lv };
+                val.value = lv;
               },
             });
           }

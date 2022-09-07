@@ -120,10 +120,13 @@ describe('Instance Settings Tests', () => {
           'true'
         );
 
-        cy.get('app-bd-form-input[name="param.sleep_val"]')
+        cy.get('app-bd-form-input[name="param.sleep_link"]')
           .should('exist')
           .within(() => {
-            cy.get('input[name="param.sleep_val"]').should('have.value', '5');
+            cy.get('input[name="param.sleep_link"]').should(
+              'have.value',
+              '{{X:param.shared.exp}}'
+            );
           });
       });
 
@@ -138,6 +141,32 @@ describe('Instance Settings Tests', () => {
       cy.contains('app-bd-notification-card', 'Save Changes').within(() => {
         cy.get('button[data-cy="Save"]').click();
       });
+    });
+
+    // the param.shared instance variable should have been created by the template - adapt it to '7'.
+    cy.inMainNavContent(() => {
+      cy.pressToolbarButton('Instance Settings');
+    });
+
+    cy.inMainNavFlyin('app-instance-settings', () => {
+      cy.get('button[data-cy^="Instance Variables"]').click();
+    });
+
+    cy.inMainNavFlyin('app-instance-variables', () => {
+      cy.contains('tr', '9') // the original sleep value. cannot search by var name as it is used in another expansion.
+        .should('exist')
+        .within(() => {
+          cy.get('button[data-cy=Edit]').click();
+        });
+
+      cy.contains('app-bd-notification-card', 'Edit Variable').within(() => {
+        cy.fillFormInput('value_val', '7');
+        cy.fillFormInput('description', 'Modified shared instance variable');
+
+        cy.get('button[data-cy^=OK]').click();
+      });
+
+      cy.get('button[data-cy^="Apply"]').click();
     });
 
     cy.inMainNavContent(() => {

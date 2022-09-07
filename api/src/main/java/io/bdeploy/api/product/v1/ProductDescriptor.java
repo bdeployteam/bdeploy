@@ -70,6 +70,11 @@ public class ProductDescriptor {
     public List<String> parameterTemplates = new ArrayList<>();
 
     /**
+     * A list of relative paths to YAML files containing instance variable templates.
+     */
+    public List<String> instanceVariableTemplates = new ArrayList<>();
+
+    /**
      * Relative path to a file containing the {@link ProductVersionDescriptor} which may be generated or static.
      */
     public String versionFile;

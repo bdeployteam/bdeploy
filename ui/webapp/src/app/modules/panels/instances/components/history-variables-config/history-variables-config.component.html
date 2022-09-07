@@ -6,7 +6,6 @@
         <ng-container *ngFor="let diff of diffs.diffs; let i = index">
           <ng-template #varPopup>
             <app-variable-desc-card
-              [id]="diff.key"
               [variable]="diff.base"
             ></app-variable-desc-card>
           </ng-template>

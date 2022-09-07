@@ -15,7 +15,6 @@ import {
   InstanceDto,
   ParameterType,
   SystemConfigurationDto,
-  VariableValue,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
@@ -34,12 +33,13 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { getMaskedPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsEditService } from '../../../services/systems-edit.service';
+import { VariableConfiguration } from './../../../../../../models/gen.dtos';
 
 const MAGIC_ABORT = 'abort_save';
 
 class ConfigVariable {
   name: string;
-  value: VariableValue;
+  value: VariableConfiguration;
 }
 
 const colName: BdDataColumn<ConfigVariable> = {
@@ -100,8 +100,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     this.colDelete,
   ];
 
-  /* template */ newId: string;
-  /* template */ newValue: VariableValue;
+  /* template */ newValue: VariableConfiguration;
   /* template */ newUsedIds: string[] = [];
 
   /* template */ typeValues: ParameterType[] = Object.values(ParameterType);
@@ -167,12 +166,13 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   }
 
   private buildVariables() {
-    if (!this.system?.config) {
+    if (!this.system?.config?.systemVariables?.length) {
+      this.records = [];
       return;
     }
-    this.records = Object.keys(this.system.config.systemVariables).map((k) => ({
-      name: k,
-      value: this.system.config.systemVariables[k],
+    this.records = this.system.config.systemVariables.map((v) => ({
+      name: v.id,
+      value: v,
     }));
   }
 
@@ -223,6 +223,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   /* template */ onAdd(templ: TemplateRef<any>) {
     this.newUsedIds = this.records.map((r) => r.name);
     this.newValue = {
+      id: '',
       value: { value: '', linkExpression: null },
       description: '',
       type: ParameterType.STRING,
@@ -237,21 +238,22 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
-        const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        this.newValue = null;
 
         if (!r) {
           return;
         }
 
-        this.system.config.systemVariables[id] = value;
+        this.system.config.systemVariables.push(value);
+        this.system.config.systemVariables.sort((a, b) =>
+          a.id.localeCompare(b.id)
+        );
         this.buildVariables();
       });
   }
 
   /* template */ onEdit(variable: ConfigVariable) {
-    this.newId = variable.name;
     this.newValue = cloneDeep(variable.value);
     this.dialog
       .message({
@@ -262,15 +264,20 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
-        const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        this.newValue = null;
 
         if (!r) {
           return;
         }
 
-        this.system.config.systemVariables[id] = value;
+        this.system.config.systemVariables.splice(
+          this.system.config.systemVariables.findIndex(
+            (x) => x.id === value.id
+          ),
+          1,
+          value
+        );
         this.buildVariables();
       });
   }
@@ -290,7 +297,10 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   }
 
   private onDelete(r: ConfigVariable) {
-    delete this.system.config.systemVariables[r.name];
+    this.system.config.systemVariables.splice(
+      this.system.config.systemVariables.findIndex((x) => x.id === r.name),
+      1
+    );
     this.buildVariables();
   }
 }

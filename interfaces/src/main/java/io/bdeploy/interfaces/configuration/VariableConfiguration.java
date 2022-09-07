@@ -9,7 +9,9 @@ import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.Paramete
 /**
  * Used as value object for instance and system variables alike.
  */
-public class VariableValue {
+public class VariableConfiguration {
+
+    public String id;
 
     public LinkedValueConfiguration value;
 
@@ -19,13 +21,16 @@ public class VariableValue {
 
     public String customEditor;
 
-    public VariableValue(String value) {
+    public VariableConfiguration(String id, String value) {
+        this.id = id;
         this.value = new LinkedValueConfiguration(value);
     }
 
     @JsonCreator
-    public VariableValue(@JsonProperty("value") LinkedValueConfiguration value, @JsonProperty("description") String description,
-            @JsonProperty("type") ParameterType type, @JsonProperty("customEditor") String customEditor) {
+    public VariableConfiguration(@JsonProperty("id") String id, @JsonProperty("value") LinkedValueConfiguration value,
+            @JsonProperty("description") String description, @JsonProperty("type") ParameterType type,
+            @JsonProperty("customEditor") String customEditor) {
+        this.id = id;
         this.value = value;
         this.description = description;
         this.type = type;

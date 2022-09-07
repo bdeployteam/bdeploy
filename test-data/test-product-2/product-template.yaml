@@ -10,10 +10,11 @@ templateVariables:
     - 'Another Suggested Value'
 
 instanceVariables:
-  param.global:
+  - id: param.global
     value: "{{T:text-param}}"
     description: "The global parameter's global value"
     type: "STRING"
+  - template: shared.vars
 
 processControlGroups:
   - name: "First Group"
@@ -46,6 +47,8 @@ groups:
     startParameters:
     - uid: param.text
       value: "{{V:Server No Sleep:param.text}}"
+    - uid: param.sleep
+      value: "{{X:param.shared.exp}}"
     
 - name: "Client Apps"
   type: CLIENT

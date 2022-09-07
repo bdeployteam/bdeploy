@@ -8,7 +8,7 @@ import {
   InstanceConfigurationDto,
   ParameterType,
   SystemConfiguration,
-  VariableValue,
+  VariableConfiguration,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
@@ -31,7 +31,7 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
 
 class ConfigVariable {
   name: string;
-  value: VariableValue;
+  value: VariableConfiguration;
 }
 
 const colName: BdDataColumn<ConfigVariable> = {
@@ -89,8 +89,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
     this.colDelete,
   ];
 
-  /* template */ newId: string;
-  /* template */ newValue: VariableValue;
+  /* template */ newValue: VariableConfiguration;
   /* template */ newUsedIds: string[] = [];
 
   /* template */ instance: InstanceConfigurationDto;
@@ -163,17 +162,14 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
   }
 
   private buildVariables(config: InstanceConfigurationDto) {
-    if (
-      !config?.config?.instanceVariables ||
-      !Object.keys(config.config.instanceVariables).length
-    ) {
+    if (!config?.config?.instanceVariables?.length) {
       this.records = [];
       return;
     }
 
-    this.records = Object.keys(config.config.instanceVariables).map((k) => ({
-      name: k,
-      value: config.config.instanceVariables[k],
+    this.records = config.config.instanceVariables.map((v) => ({
+      name: v.id,
+      value: v,
     }));
   }
 
@@ -196,6 +192,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
   /* template */ onAdd(templ: TemplateRef<any>) {
     this.newUsedIds = this.records.map((r) => r.name);
     this.newValue = {
+      id: '',
       type: ParameterType.STRING,
       customEditor: null,
       value: { value: '', linkExpression: null },
@@ -210,25 +207,25 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
-        const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        this.newValue = null;
 
         if (!r) {
           return;
         }
 
-        if (!this.edit.state$.value.config.config.instanceVariables) {
-          this.edit.state$.value.config.config.instanceVariables = {};
+        const instance = this.edit.state$.value.config.config;
+        if (!instance.instanceVariables) {
+          instance.instanceVariables = [];
         }
 
-        this.edit.state$.value.config.config.instanceVariables[id] = value;
+        instance.instanceVariables.push(value);
+        instance.instanceVariables.sort((a, b) => a.id.localeCompare(b.id));
         this.buildVariables(this.edit.state$.value.config);
       });
   }
 
   /* template */ onEdit(variable: ConfigVariable) {
-    this.newId = variable.name;
     this.newValue = cloneDeep(variable.value);
     this.dialog
       .message({
@@ -239,16 +236,19 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
-        const id = this.newId;
         const value = this.newValue;
-        this.newId = this.newValue = null;
+        this.newValue = null;
 
         if (!r) {
           return;
         }
 
-        this.edit.state$.value.config.config.instanceVariables[id] = value;
-        this.buildVariables(this.edit.state$.value.config);
+        const vars = this.edit.state$.value.config.config.instanceVariables;
+        const index = vars.findIndex((x) => x.id === value.id);
+        if (index) {
+          vars.splice(index, 1, value);
+          this.buildVariables(this.edit.state$.value.config);
+        }
       });
   }
 
@@ -267,7 +267,11 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
   }
 
   private onDelete(r: ConfigVariable) {
-    delete this.edit.state$.value.config.config.instanceVariables[r.name];
+    const vars = this.edit.state$.value.config.config.instanceVariables;
+    vars.splice(
+      vars.findIndex((x) => x.id === r.name),
+      1
+    );
     this.buildVariables(this.edit.state$.value.config);
   }
 }

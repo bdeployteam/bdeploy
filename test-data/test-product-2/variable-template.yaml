@@ -1,0 +1,10 @@
+id: shared.vars
+
+instanceVariables:
+  - id: param.xshared
+    value: 9
+    type: NUMERIC
+  - id: param.shared.exp
+    value: "{{X:param.xshared}}"
+    type: NUMERIC
+

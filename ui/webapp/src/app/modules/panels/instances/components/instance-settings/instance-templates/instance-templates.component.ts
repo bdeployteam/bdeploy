@@ -220,11 +220,11 @@ export class InstanceTemplatesComponent implements OnDestroy {
     pcgs.forEach((p) => (p.processOrder = []));
 
     // apply instance variables if set.
-    if (this.template.instanceVariables) {
-      for (const k of Object.keys(this.template.instanceVariables)) {
-        const v = this.template.instanceVariables[k];
-        if (!this.instanceEdit.state$.value.config.config.instanceVariables) {
-          this.instanceEdit.state$.value.config.config.instanceVariables = {};
+    if (this.template.instanceVariables?.length) {
+      const instance = this.instanceEdit.state$.value.config.config;
+      for (const v of this.template.instanceVariables) {
+        if (!instance.instanceVariables) {
+          instance.instanceVariables = [];
         }
         const processed = cloneDeep(v);
         const status: StatusMessage[] = [];
@@ -244,9 +244,19 @@ export class InstanceTemplatesComponent implements OnDestroy {
             message: e,
           })
         );
-        this.instanceEdit.state$.value.config.config.instanceVariables[k] =
-          processed;
+
+        const index = instance.instanceVariables.findIndex(
+          (x) => x.id === v.id
+        );
+        if (index !== -1) {
+          // replace.
+          instance.instanceVariables.splice(index, 1, processed);
+        } else {
+          instance.instanceVariables.push(processed);
+        }
       }
+
+      instance.instanceVariables.sort((a, b) => a.id.localeCompare(b.id));
     }
 
     for (const groupName of Object.keys(this.groups)) {

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -35,8 +36,10 @@ import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
@@ -188,8 +191,23 @@ public class ProductManifest {
             }).build());
         }
 
+        List<InstanceVariableTemplateDescriptor> varTemplates = new ArrayList<>();
+        Tree.Key varTemplateKey = new Tree.Key(ProductManifestBuilder.VARIABLE_TEMPLATES_ENTRY, Tree.EntryType.TREE);
+        if (entries.containsKey(varTemplateKey)) {
+            TreeView tv = hive.execute(new ScanOperation().setTree(entries.get(varTemplateKey)));
+            tv.visit(new TreeVisitor.Builder().onBlob(b -> {
+                if (b.getName().toLowerCase().endsWith(".yaml")) {
+                    try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(b.getElementId()))) {
+                        varTemplates.add(StorageHelper.fromYamlStream(is, InstanceVariableTemplateDescriptor.class));
+                    } catch (Exception e) {
+                        log.warn("Cannot load instance variable template from {}, {}", manifest, b.getPathString(), e);
+                    }
+                }
+            }).build());
+        }
+
         // lazy, DFS resolving of all templates.
-        resolveTemplates(templates, applicationTemplates);
+        resolveTemplates(templates, applicationTemplates, varTemplates);
         applicationTemplates.sort((a, b) -> a.name.compareTo(b.name));
 
         // store persistent information.
@@ -209,8 +227,11 @@ public class ProductManifest {
     }
 
     private static void resolveTemplates(List<InstanceTemplateDescriptor> instTemplates,
-            List<ApplicationTemplateDescriptor> appTemplates) {
+            List<ApplicationTemplateDescriptor> appTemplates, List<InstanceVariableTemplateDescriptor> varTemplates) {
         for (var itd : instTemplates) {
+            // inline resolve all variable templates to their expanded values.
+            resolveInstanceVariableTemplates(varTemplates, itd.instanceVariables);
+
             for (var group : itd.groups) {
                 for (var app : group.applications) {
                     try {
@@ -240,6 +261,29 @@ public class ProductManifest {
         }
 
         appTemplates.removeIf(a -> !a.resolved);
+    }
+
+    private static void resolveInstanceVariableTemplates(List<InstanceVariableTemplateDescriptor> templates,
+            List<TemplateableVariableConfiguration> vars) {
+        TemplateableVariableConfiguration toReplace = null;
+        do {
+            toReplace = vars.stream().filter(v -> v.template != null).findFirst().orElse(null);
+            if (toReplace != null) {
+                // replace/expand it.
+                int index = vars.indexOf(toReplace);
+                vars.remove(index); // remove the original element.
+
+                String templateId = toReplace.template;
+                List<TemplateableVariableConfiguration> replacements = templates.stream().filter(t -> t.id.equals(templateId))
+                        .map(t -> t.instanceVariables).findFirst().orElse(null);
+
+                if (replacements == null) {
+                    log.warn("No instance variable template found for " + templateId);
+                } else {
+                    ImmutableList.copyOf(replacements).reverse().forEach(r -> vars.add(index, r));
+                }
+            }
+        } while (toReplace != null);
     }
 
     private static void resolveAppTemplate(TemplateApplication app, List<ApplicationTemplateDescriptor> appTemplates,

@@ -2,12 +2,10 @@ package io.bdeploy.interfaces.descriptor.template;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 
-import io.bdeploy.interfaces.configuration.VariableValue;
+import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 
 /**
  * Describes a template which can be used to fill an instance with pre-configured applications.
@@ -33,7 +31,7 @@ public class InstanceTemplateDescriptor {
     /**
      * A collection of variables to create when applying the instance template.
      */
-    public Map<String, VariableValue> instanceVariables = new TreeMap<>();
+    public List<TemplateableVariableConfiguration> instanceVariables = new ArrayList<>();
 
     /**
      * A list of process control groups which should be created when applying the instance template.
