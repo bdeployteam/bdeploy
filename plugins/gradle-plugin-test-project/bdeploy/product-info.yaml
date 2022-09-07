@@ -6,7 +6,14 @@ applications:
   - test
 
 configTemplates: config
+
+instanceTemplates:
+  - "template.yaml"
+
 parameterTemplates:
   - "shared-parameters.yaml"
+instanceVariableTemplates:
+  - "shared-vars.yaml"
+
 versionFile: product-version.yaml
 

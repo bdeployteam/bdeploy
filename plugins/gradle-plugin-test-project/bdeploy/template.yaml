@@ -1,0 +1,15 @@
+name: TestTempalte
+description: "A test template"
+
+instanceVariables:
+  - id: var1
+    value: var1
+    description: Inline
+  - template: shared.vars
+
+groups:
+  - name: Primary
+    description: The primary group
+
+    applications:
+      - application: test

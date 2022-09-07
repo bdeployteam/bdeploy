@@ -1,0 +1,8 @@
+id: shared.vars
+
+instanceVariables:
+  - id: test
+    value: 123
+    description: "Test Variable"
+    type: NUMERIC
+

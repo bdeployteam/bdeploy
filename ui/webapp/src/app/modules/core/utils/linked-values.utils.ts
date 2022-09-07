@@ -165,9 +165,11 @@ export function gatherProcessExpansions(
 
   // need to fetch them *directly* as well as through nodes below in case the application has not yet
   // been added to a node (i.e. resolving *while* creating an application).
-  for (const param of process.start.parameters) {
-    // process parameter, make sure we always use the unqualified version ("This Application")
-    processParameter(true, process, param, apps, result);
+  if (process?.start?.parameters?.length) {
+    for (const param of process.start.parameters) {
+      // process parameter, make sure we always use the unqualified version ("This Application")
+      processParameter(true, process, param, apps, result);
+    }
   }
 
   for (const node of instance.nodeDtos) {

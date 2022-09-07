@@ -5,6 +5,7 @@ package io.bdeploy.tea.plugin;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -147,33 +148,19 @@ public class BDeployBuildProductTask {
                 }
 
                 if (pd.instanceTemplates != null && !pd.instanceTemplates.isEmpty()) {
-                    for (String tmpl : pd.instanceTemplates) {
-                        Path source = desc.productInfo.getParent().resolve(tmpl);
-                        Path target = prodInfoDir.toPath().resolve(desc.productInfo.getParent().relativize(source));
-
-                        FileUtils.mkdirs(target.getParent().toFile());
-                        FileUtils.copyFile(source.toFile(), target.toFile());
-                    }
+                    copyRelatives(prodInfoDir, pd.instanceTemplates);
                 }
 
                 if (pd.applicationTemplates != null && !pd.applicationTemplates.isEmpty()) {
-                    for (String tmpl : pd.applicationTemplates) {
-                        Path source = desc.productInfo.getParent().resolve(tmpl);
-                        Path target = prodInfoDir.toPath().resolve(desc.productInfo.getParent().relativize(source));
-
-                        FileUtils.mkdirs(target.getParent().toFile());
-                        FileUtils.copyFile(source.toFile(), target.toFile());
-                    }
+                    copyRelatives(prodInfoDir, pd.applicationTemplates);
                 }
 
                 if (pd.parameterTemplates != null && !pd.parameterTemplates.isEmpty()) {
-                    for (String tmpl : pd.parameterTemplates) {
-                        Path source = desc.productInfo.getParent().resolve(tmpl);
-                        Path target = prodInfoDir.toPath().resolve(desc.productInfo.getParent().relativize(source));
+                    copyRelatives(prodInfoDir, pd.parameterTemplates);
+                }
 
-                        FileUtils.mkdirs(target.getParent().toFile());
-                        FileUtils.copyFile(source.toFile(), target.toFile());
-                    }
+                if (pd.instanceVariableTemplates != null && !pd.instanceVariableTemplates.isEmpty()) {
+                    copyRelatives(prodInfoDir, pd.instanceVariableTemplates);
                 }
             }
 
@@ -229,6 +216,16 @@ public class BDeployBuildProductTask {
             }
         }
 
+    }
+
+    private void copyRelatives(File prodInfoDir, List<String> paths) throws IOException {
+        for (String tmpl : paths) {
+            Path source = desc.productInfo.getParent().resolve(tmpl);
+            Path target = prodInfoDir.toPath().resolve(desc.productInfo.getParent().relativize(source));
+
+            FileUtils.mkdirs(target.getParent().toFile());
+            FileUtils.copyFile(source.toFile(), target.toFile());
+        }
     }
 
     public Manifest.Key getKey() {

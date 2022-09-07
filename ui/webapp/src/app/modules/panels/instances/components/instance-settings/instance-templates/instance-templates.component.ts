@@ -498,7 +498,10 @@ export class InstanceTemplatesComponent implements OnDestroy {
           for (const v of this.template.templateVariables) {
             this.variables[v.uid] = v.defaultValue;
           }
+        } else {
+          this.hasAllVariables = true;
         }
+
         break;
     }
   }
