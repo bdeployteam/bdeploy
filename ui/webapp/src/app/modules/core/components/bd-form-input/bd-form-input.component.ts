@@ -39,6 +39,7 @@ export class BdFormInputComponent
   @Input() assistValues: ContentCompletion[];
   @Input() assistPrefixes: ContentCompletion[];
   @Input() errorFallback: string;
+  @Input() statusMessage: string;
 
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 

@@ -21,3 +21,11 @@
   position: relative;
   top: 0.13em;
 }
+
+.bd-form-input-form-field.mat-focused mat-hint {
+  color: var(--bd-primary);
+}
+
+.bd-form-input-form-field:not(.mat-focused) mat-hint {
+  display: none;
+}

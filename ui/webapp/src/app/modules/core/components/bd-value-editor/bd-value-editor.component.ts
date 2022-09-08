@@ -72,6 +72,7 @@ export class BdValueEditorComponent
   /* template */ passwordLock = true;
   /* template */ linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
   /* template */ booleanValue;
+  /* template */ preview;
 
   /* template */ get value(): LinkedValueConfiguration {
     return this.internalValue;
@@ -79,7 +80,7 @@ export class BdValueEditorComponent
   /* template */ set value(v: LinkedValueConfiguration) {
     if (v !== this.internalValue) {
       this.writeValue(v);
-      this.onChangedCb(v);
+      this.fireChange(v);
     }
   }
 
@@ -118,6 +119,7 @@ export class BdValueEditorComponent
   writeValue(v: any): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
+      this.updatePreview(v);
     }
   }
 
@@ -127,6 +129,24 @@ export class BdValueEditorComponent
 
   registerOnTouched(fn: any): void {
     this.onTouchedCb = fn;
+  }
+
+  private fireChange(value: LinkedValueConfiguration) {
+    this.updatePreview(value);
+    this.onChangedCb(value);
+  }
+
+  private updatePreview(value: LinkedValueConfiguration) {
+    if (value?.linkExpression?.length) {
+      this.preview = getRenderPreview(
+        this.internalValue,
+        this.process,
+        this.instance,
+        this.system
+      );
+    } else {
+      this.preview = null;
+    }
   }
 
   isErrorState(): boolean {
@@ -210,7 +230,7 @@ export class BdValueEditorComponent
       this.booleanValue = this.internalValue.value === 'true';
     }
 
-    this.onChangedCb(this.internalValue);
+    this.fireChange(this.internalValue);
   }
 
   /* template */ doChangeValue(event: any) {
@@ -241,13 +261,13 @@ export class BdValueEditorComponent
       this.doRevert();
     } else {
       this.internalValue = { value: val, linkExpression: null };
-      this.onChangedCb(this.internalValue);
+      this.fireChange(this.internalValue);
     }
   }
 
   /* template */ doChangeLink(val: string) {
     this.internalValue = { value: null, linkExpression: val ? val : '' };
-    this.onChangedCb(this.internalValue);
+    this.fireChange(this.internalValue);
   }
 
   /* tempalte */ doChangeBooleanValue() {

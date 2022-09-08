@@ -43,5 +43,10 @@
     <mat-error *ngIf="errorFallback || (ngControl && ngControl.invalid)"
       >{{ getErrorMessage() }}</mat-error
     >
+    <mat-hint class="bd-text-ellipsis" *ngIf="statusMessage"
+      ><div fxLayout="row" fxLayoutAlign="center">
+        {{statusMessage}}
+      </div></mat-hint
+    >
   </mat-form-field>
 </div>

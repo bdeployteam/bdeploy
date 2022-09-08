@@ -46,6 +46,15 @@ export class BdContentAssistMenuComponent {
       return; // nothing to do.
     }
 
+    // if the word contains the same amount of {{ and }}, we are not needed.
+    if (
+      (word?.match(/{{/g) || []).length === (word?.match(/}}/g) || []).length
+    ) {
+      // same amount.
+      this.hide();
+      return;
+    }
+
     this.isPrefix = false;
     if (this.prefixes?.length) {
       const prefixes = this.prefixes.filter((p) => word.startsWith(p.value));

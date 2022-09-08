@@ -121,6 +121,7 @@
   [assistValues]="completions"
   [assistPrefixes]="completionPrefixes"
   [errorFallback]="getErrorMessage()"
+  [statusMessage]="'Expression Preview: \'' + preview + '\''"
 >
   <div fxLayout="row" class="local-form-input-actions">
     <ng-container *ngTemplateOutlet="actions"></ng-container>
