@@ -33,6 +33,7 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
 
     @NoAudit
     private InputStream input;
+    private boolean isSyncEnabled = false;
 
     @Override
     public TransferStatistics callTransacted() throws Exception {
@@ -72,8 +73,8 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
 
                 // Insert manifests as last operation - sorted by references they may have to each other.
                 manifests.stream().sorted(new SortManifestsByReferences()).forEach(mf -> {
-                    if (!getManifestDatabase().hasManifest(mf.getKey())) {
-                        getManifestDatabase().addManifest(mf);
+                    if (!getManifestDatabase().isManifestInSync(mf.getKey(), mf.getRoot(), isSyncEnabled)) {
+                        getManifestDatabase().addManifest(mf, isSyncEnabled);
                         result.sumManifests++;
                     }
                 });
@@ -102,6 +103,11 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
      */
     public ObjectReadOperation stream(InputStream input) {
         this.input = input;
+        return this;
+    }
+
+    public ObjectReadOperation setSyncEnabled(boolean isSyncEnabled) {
+        this.isSyncEnabled = isSyncEnabled;
         return this;
     }
 

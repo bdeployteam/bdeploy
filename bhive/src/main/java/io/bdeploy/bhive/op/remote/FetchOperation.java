@@ -35,6 +35,7 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
 
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
     private String hiveName;
+    private boolean isSyncEnabled = false;
 
     @Override
     public TransferStatistics callTransacted() throws Exception {
@@ -58,7 +59,8 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
                     if (!manifest2Tree.containsKey(key)) {
                         throw new IllegalArgumentException("Manifest not found: " + key);
                     }
-                    if (getManifestDatabase().hasManifest(key)) {
+                    ObjectId root = manifest2Tree.get(key);
+                    if (getManifestDatabase().isManifestInSync(key, root, isSyncEnabled)) {
                         continue;
                     }
                     requiredManifests.add(key);
@@ -116,6 +118,11 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
         return this;
     }
 
+    public FetchOperation setSyncEnabled(boolean isSyncEnabled) {
+        this.isSyncEnabled = isSyncEnabled;
+        return this;
+    }
+
     public SortedSet<Manifest.Key> getManifests() {
         return manifests;
     }
@@ -141,7 +148,7 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
 
     private TransferStatistics fetchAsStream(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) {
         InputStream stream = rh.fetchAsStream(objects, manifests);
-        return execute(new ObjectReadOperation().stream(stream));
+        return execute(new ObjectReadOperation().stream(stream).setSyncEnabled(this.isSyncEnabled));
     }
 
 }

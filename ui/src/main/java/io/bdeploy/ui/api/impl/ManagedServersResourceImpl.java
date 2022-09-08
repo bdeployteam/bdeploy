@@ -433,7 +433,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
             List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).toList();
 
-            FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName);
+            FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName).setSyncEnabled(true);
             try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
                 Set<Manifest.Key> keysToFetch = new LinkedHashSet<>();
 
