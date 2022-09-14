@@ -49,6 +49,15 @@ export class BdDataGroupingPanelComponent<T>
 
   /* template */ noGroup = UNMATCHED_GROUP;
   /* template */ groupingValues: string[];
+  /* template */ filter: string;
+  /* template */ get filteredGroupingValues(): string[] {
+    if (!this.filter) {
+      return this.groupingValues;
+    }
+    return this.groupingValues.filter(
+      (gv) => gv && gv.toLowerCase().includes(this.filter.toLowerCase())
+    );
+  }
 
   private subscription: Subscription;
 
@@ -91,6 +100,15 @@ export class BdDataGroupingPanelComponent<T>
           this.grouping.selected = [];
         }
       }
+
+      // selected values should show up first
+      this.groupingValues.sort((a, b) =>
+        this.grouping.selected.includes(a)
+          ? -1
+          : this.grouping.selected.includes(b)
+          ? 1
+          : 0
+      );
     }
   }
 
@@ -138,6 +156,22 @@ export class BdDataGroupingPanelComponent<T>
   }
 
   /* template */ removeGrouping(): void {
-    this.removeClicked.emit(this.grouping);
+    if (!this.removeDisabled) {
+      this.removeClicked.emit(this.grouping);
+    }
+  }
+
+  /* template */ groupingLevelNumber(level: number): string {
+    // level will never reach 21. So this should be ok
+    switch (level) {
+      case 1:
+        return '1st';
+      case 2:
+        return '2nd';
+      case 3:
+        return '3rd';
+      default:
+        return level + 'th';
+    }
   }
 }

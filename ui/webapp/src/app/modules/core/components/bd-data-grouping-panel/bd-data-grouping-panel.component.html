@@ -1,29 +1,32 @@
 <div
+  name="dataGroupingPanel"
   fxLayout="row"
   fxLayoutGap="5px"
   [style.height]="'100%'"
   [style.padding.px]="5"
 >
   <div fxLayout="column" fxLayoutGap="5px" [style.minWidth.px]="220">
-    <div fxLayout="row" fxLayoutAlign="space-between baseline">
-      <div>
-        <span
-          class="local-grouping-header bd-description-text"
-          [matBadge]="index + 1"
-          matBadgePosition="after"
-          matBadgeSize="small"
-          [matBadgeOverlap]="false"
-        >
-          Grouping Level
-        </span>
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <div fxLayoutAlign="start center">
+        <div fxLayoutAlign="start baseline">
+          <ng-content></ng-content>
+        </div>
+        <div>
+          <span class="grouping-level-number"
+            >{{ groupingLevelNumber(index + 1) }}
+          </span>
+          <span class="local-grouping-header bd-description-text">
+            Grouping Level
+          </span>
+        </div>
       </div>
-      <app-bd-button
-        text="Remove"
-        icon="close"
-        tooltip="above"
-        [disabled]="removeDisabled"
+      <mat-icon
+        class="grouping-remove-icon"
+        matTooltip="Remove"
+        matTooltipPosition="above"
         (click)="removeGrouping()"
-      ></app-bd-button>
+        >close</mat-icon
+      >
     </div>
     <mat-divider
       [style.position]="'relative'"
@@ -55,15 +58,22 @@
       from the dropdown.
     </div>
 
+    <div *ngIf="!!groupingValues?.length">
+      <mat-form-field appearance="standard">
+        <mat-label>Filter Options Below</mat-label>
+        <input matInput [(ngModel)]="filter" />
+      </mat-form-field>
+    </div>
     <div
       *ngIf="!!groupingValues?.length"
+      class="grouping-values-container"
       fxLayout="column"
       fxLayoutGap="5px"
       [style.paddingLeft.px]="10"
       [style.paddingBottom.px]="10"
     >
       <mat-checkbox
-        *ngFor="let group of groupingValues"
+        *ngFor="let group of filteredGroupingValues"
         [checked]="!grouping?.selected?.length || grouping.selected.includes(group)"
         [disabled]="grouping?.selected?.length === 1 && grouping.selected.includes(group)"
         (change)="groupCheckChanged(group, $event)"

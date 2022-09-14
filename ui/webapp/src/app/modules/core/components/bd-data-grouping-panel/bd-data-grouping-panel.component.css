@@ -2,3 +2,21 @@
   top: calc(50% - 9px);
   right: -20px;
 }
+
+.grouping-level-number {
+  font-weight: 500;
+}
+
+.grouping-remove-icon {
+  color: var(--bd-text-disabled);
+}
+
+.grouping-remove-icon:hover {
+  color: black;
+  cursor: pointer;
+}
+
+.grouping-values-container {
+  max-height: 40vh;
+  overflow-y: scroll;
+}
