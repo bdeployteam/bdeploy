@@ -16,7 +16,10 @@ import { GroupsService } from '../../services/groups.service';
 const clientNameColumn: BdDataColumn<ClientApp> = {
   id: 'name',
   name: 'Client Name',
-  data: (r) => (r.client ? r.client.description : r.endpoint.endpoint.id),
+  data: (r) =>
+    r.client
+      ? r.client.description
+      : `${r.endpoint.appName} - ${r.endpoint.endpoint.id}`,
   hint: BdDataColumnTypeHint.TITLE,
 };
 

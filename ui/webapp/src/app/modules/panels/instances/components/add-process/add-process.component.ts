@@ -302,9 +302,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
 
   private addProcess(row: AppRow) {
     let vars: Observable<{ [key: string]: string }> = of({});
-    if (!!row.template && !!row.template.variables?.length) {
+    if (!!row.template && !!row.template.templateVariables?.length) {
       this.response = {};
-      for (const v of row.template.variables) {
+      for (const v of row.template.templateVariables) {
         this.response[v.uid] = v.defaultValue;
       }
       this.selectedTemplate = row.template;
@@ -362,7 +362,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     template: ApplicationTemplateDescriptor,
     variables: { [key: string]: string }
   ) {
-    for (const v of template.variables) {
+    for (const v of template.templateVariables) {
       if (!variables[v.uid]) {
         return false;
       }

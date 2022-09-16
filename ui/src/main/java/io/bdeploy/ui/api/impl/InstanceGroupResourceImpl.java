@@ -366,6 +366,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
                         UiEndpointDto uiEp = new UiEndpointDto();
                         uiEp.uuid = appConfig.uid;
+                        uiEp.appName = appConfig.name;
                         uiEp.endpoint = configuredEp;
                         allInstEps.endpoints.add(uiEp);
                     }

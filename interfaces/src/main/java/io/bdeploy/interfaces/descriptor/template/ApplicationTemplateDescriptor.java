@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.descriptor.template;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public class ApplicationTemplateDescriptor extends TemplateApplication {
 
     /**
@@ -13,5 +15,6 @@ public class ApplicationTemplateDescriptor extends TemplateApplication {
     /**
      * Local variable declarations.
      */
-    public List<TemplateVariable> variables = new ArrayList<>();
+    @JsonAlias("variables")
+    public List<TemplateVariable> templateVariables = new ArrayList<>();
 }

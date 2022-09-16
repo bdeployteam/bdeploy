@@ -255,7 +255,7 @@ public class ProductManifest {
 
         for (ApplicationTemplateDescriptor atd : appTemplates) {
             try {
-                resolveAppTemplate(atd, appTemplates, atd.variables);
+                resolveAppTemplate(atd, appTemplates, atd.templateVariables);
             } catch (Exception e) {
                 log.error("Cannot resolve application template {}", atd.name, e);
             }
@@ -324,11 +324,11 @@ public class ProductManifest {
             }
             var parentDesc = parent.get();
             if (!parentDesc.resolved) {
-                resolveAppTemplate(parentDesc, appTemplates, parentDesc.variables);
+                resolveAppTemplate(parentDesc, appTemplates, parentDesc.templateVariables);
             }
 
             // add variables from parent template to next outer variables.
-            for (var variable : parentDesc.variables) {
+            for (var variable : parentDesc.templateVariables) {
                 var existing = varList.stream().filter(v -> v.uid.equals(variable.uid)).findAny();
                 if (!existing.isPresent()) {
                     varList.add(variable);
