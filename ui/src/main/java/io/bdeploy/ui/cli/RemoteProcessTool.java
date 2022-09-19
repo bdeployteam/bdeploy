@@ -41,10 +41,10 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
     public @interface RemoteProcessConfig {
 
-        @Help("UUID of the deployment to query/control")
+        @Help("ID of the instance to query/control")
         String uuid();
 
-        @Help("The name of the application to control, controls all applications for the given UUID if missing")
+        @Help("The name of the application to control, controls all applications of the instance if missing")
         String application();
 
         @Help("The name of the instance group to work on")
@@ -96,15 +96,14 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             return createAllProcessesTable(config, svc, ir, status);
         } else {
             ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(appId);
-            InstanceNodeConfigurationListDto cfg = ir.getNodeConfigurations(appStatus.status.instanceUid,
+            InstanceNodeConfigurationListDto cfg = ir.getNodeConfigurations(appStatus.status.instanceId,
                     appStatus.status.instanceTag);
             Optional<ApplicationConfiguration> app = findAppConfig(appStatus.status, Optional.ofNullable(cfg));
 
             DataResult result = createResultWithMessage(
                     "Details for " + appId + " of instance " + instanceId + " of instance group " + groupName)
-                            .addField("Name", appStatus.status.appName).addField("Application ID", appStatus.status.appUid)
-                            .addField("Exit Code", appStatus.status.exitCode)
-                            .addField("Instance ID", appStatus.status.instanceUid)
+                            .addField("Name", appStatus.status.appName).addField("Application ID", appStatus.status.appId)
+                            .addField("Exit Code", appStatus.status.exitCode).addField("Instance ID", appStatus.status.instanceId)
                             .addField("Instance Version", appStatus.status.instanceTag).addField("Main PID", appStatus.status.pid)
                             .addField("State", appStatus.status.processState)
                             .addField("Retries", appStatus.retryCount + "/" + appStatus.maxRetryCount)
@@ -153,7 +152,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         }
 
         for (var node : nodes.get().nodeConfigDtos) {
-            app = node.nodeConfiguration.applications.stream().filter(a -> a.uid.equals(processStatusDto.appUid)).findFirst();
+            app = node.nodeConfiguration.applications.stream().filter(a -> a.id.equals(processStatusDto.appId)).findFirst();
             if (app.isPresent()) {
                 break;
             }
@@ -224,11 +223,11 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
     private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
             Optional<InstanceConfiguration> instance, InstanceStateRecord deploymentStates,
             Optional<ApplicationConfiguration> cfg) {
-        ProcessDetailDto detail = pr.getDetails(process.appUid);
+        ProcessDetailDto detail = pr.getDetails(process.appId);
         ProcessHandleDto handle = detail.handle;
 
         table.row().cell(process.appName) //
-                .cell(process.appUid) //
+                .cell(process.appId) //
                 .cell(process.processState.name()) //
                 .cell(process.instanceTag + (process.instanceTag.equals(deploymentStates.activeTag) ? "" : "*")) //
                 .cell(instance.isPresent() ? instance.get().product.getTag() : "?") //

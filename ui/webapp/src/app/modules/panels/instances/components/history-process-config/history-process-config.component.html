@@ -30,14 +30,14 @@
             fxLayoutAlign="start center"
             class="bd-description-text"
           >
-            <ng-template #uidPopup>
-              <app-config-desc-cards field="cfg.uid"></app-config-desc-cards>
+            <ng-template #idPopup>
+              <app-config-desc-cards field="cfg.id"></app-config-desc-cards>
             </ng-template>
             <div [style.margin-right.px]="3">ID:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
-              [diff]="diff.uid"
-              [popup]="uidPopup"
+              [diff]="diff.id"
+              [popup]="idPopup"
             ></app-history-diff-field>
             <div>,</div>
           </div>

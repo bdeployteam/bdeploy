@@ -31,8 +31,8 @@ class InstanceProcessControllerTest {
 
         // Create controller with the two applications
         Map<String, String> variables = Collections.singletonMap("SLEEP_TIME", "600");
-        InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), variables::get, null, "1", group, null);
+        InstanceProcessController controller = new InstanceProcessController(group.id);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.id), variables::get, null, "1", group, null);
         controller.setActiveTag("1");
 
         // Start all applications with auto-start flags
@@ -69,14 +69,14 @@ class InstanceProcessControllerTest {
         ProcessConfiguration app1 = TestFactory.createConfig(path, "App1", true, "600");
         ProcessConfiguration app2 = TestFactory.createConfig(path, "App2", false, "600");
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
-        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, null, "1", group, null);
+        controller.createProcessControllers(new DeploymentPathProvider(path, group.id), null, null, "1", group, null);
 
         // Create two applications in version 2 and add to the controller
         path = tmp.resolve("2");
         app1 = TestFactory.createConfig(path, "App1", true, "600");
         app2 = TestFactory.createConfig(path, "App2", false, "600");
         group = TestFactory.createGroupConfig("MyInstance", app1, app2);
-        controller.createProcessControllers(new DeploymentPathProvider(path, group.uuid), null, null, "2", group, null);
+        controller.createProcessControllers(new DeploymentPathProvider(path, group.id), null, null, "2", group, null);
 
         // Activate and start version 1
         controller.setActiveTag("1");
@@ -121,8 +121,8 @@ class InstanceProcessControllerTest {
         group.autoStart = true;
 
         // Create controller with the two applications
-        InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, null, "1", group, null);
+        InstanceProcessController controller = new InstanceProcessController(group.id);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.id), null, null, "1", group, null);
         controller.setActiveTag("1");
 
         // Launch auto-start
@@ -135,8 +135,8 @@ class InstanceProcessControllerTest {
 
         // Detach first and create new controller (simulate restart)
         controller.detach();
-        controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, null, "1", group, null);
+        controller = new InstanceProcessController(group.id);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.id), null, null, "1", group, null);
         controller.setActiveTag("1");
 
         // Recover running applications
@@ -157,8 +157,8 @@ class InstanceProcessControllerTest {
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
 
         // Create controller with the two applications
-        InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, null, "1", group, null);
+        InstanceProcessController controller = new InstanceProcessController(group.id);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.id), null, null, "1", group, null);
         controller.setActiveTag("1");
 
         // create a control group and directly assign it - usually this comes from the configuration.
@@ -174,8 +174,8 @@ class InstanceProcessControllerTest {
         List<String> order = new ArrayList<>();
         ProcessController pc1 = processList.get("App1");
         ProcessController pc2 = processList.get("App2");
-        pc1.addStatusListener((s) -> order.add(pc1.getDescriptor().uid));
-        pc2.addStatusListener((s) -> order.add(pc2.getDescriptor().uid));
+        pc1.addStatusListener((s) -> order.add(pc1.getDescriptor().id));
+        pc2.addStatusListener((s) -> order.add(pc2.getDescriptor().id));
 
         StateListener pc1s = StateListener.createFor(pc1);
         StateListener pc2s = StateListener.createFor(pc2);

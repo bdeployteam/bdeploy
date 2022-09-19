@@ -50,7 +50,7 @@ export class BulkControlComponent {
 
       const result: string[] = [];
       Object.keys(s).forEach((k) => {
-        result.push(...s[k].map((c) => c.uid));
+        result.push(...s[k].map((c) => c.id));
       });
       this.bulkSelection = result;
     });

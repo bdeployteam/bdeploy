@@ -60,7 +60,7 @@ public interface NodeDeploymentResource {
     public InstanceStateRecord getInstanceState(@QueryParam("i") String instanceId);
 
     /**
-     * @param instanceId the instance UUID to fetch DATA directory content for
+     * @param instanceId the instance ID to fetch DATA directory content for
      * @return a list of the entries of the DATA directory.
      */
     @GET

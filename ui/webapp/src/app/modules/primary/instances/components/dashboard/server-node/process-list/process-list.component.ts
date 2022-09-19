@@ -35,7 +35,7 @@ export class NodeProcessListComponent implements OnInit {
   /* template */ getRecordRoute = (row: ApplicationConfiguration) => {
     return [
       '',
-      { outlets: { panel: ['panels', 'instances', 'process', row.uid] } },
+      { outlets: { panel: ['panels', 'instances', 'process', row.id] } },
     ];
   };
 
@@ -56,7 +56,7 @@ export class NodeProcessListComponent implements OnInit {
 
   getControlGroup(row: ApplicationConfiguration): string {
     return this.node.nodeConfiguration.controlGroups.find((cg) =>
-      cg.processOrder.includes(row.uid)
+      cg.processOrder.includes(row.id)
     )?.name;
   }
 }

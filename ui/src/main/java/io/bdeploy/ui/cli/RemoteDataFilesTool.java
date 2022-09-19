@@ -45,7 +45,7 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help("UUID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new UUID is generated.")
+        @Help("ID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new ID is generated.")
         String uuid();
 
         @Help("Filename pattern that will be matched against remote data files. Will match all files if not specified")

@@ -81,10 +81,10 @@ export class AddInstanceComponent
     );
     this.subscription.add(
       this.groups
-        .newUuid()
+        .newId()
         .pipe(finalize(() => this.loading$.next(false)))
         .subscribe((r) => {
-          this.config.uuid = r;
+          this.config.id = r;
           this.subscription.add(
             this.products.products$.subscribe((products) => {
               products?.forEach((p) => {
@@ -155,7 +155,7 @@ export class AddInstanceComponent
         'instances',
         'configuration',
         this.areas.groupContext$.value,
-        this.config.uuid,
+        this.config.id,
       ]);
       this.subscription.unsubscribe();
     });

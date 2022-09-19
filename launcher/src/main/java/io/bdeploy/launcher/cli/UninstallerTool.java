@@ -59,26 +59,26 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     }
 
     /** Uninstall the given application and removes all not required artifacts */
-    private void doUninstall(Path rootDir, BHive hive, String appUid) {
+    private void doUninstall(Path rootDir, BHive hive, String appId) {
         try {
             hive.execute(new LockDirectoryOperation().setDirectory(rootDir));
 
-            log.info("Removing application {}", appUid);
+            log.info("Removing application {}", appId);
             Path appsDir = rootDir.resolve("apps");
             Path poolDir = appsDir.resolve("pool");
 
             // Delegate removal to the delegated application
             ClientSoftwareManifest cmf = new ClientSoftwareManifest(hive);
-            ClientSoftwareConfiguration config = cmf.readNewest(appUid, false);
+            ClientSoftwareConfiguration config = cmf.readNewest(appId, false);
             if (config != null && config.launcher != null) {
                 Version version = VersionHelper.tryParse(config.launcher.getTag());
-                doUninstallVersioned(rootDir, version, appUid);
+                doUninstallVersioned(rootDir, version, appId);
             } else {
-                doUninstallApp(rootDir, appUid);
+                doUninstallApp(rootDir, appId);
             }
 
             // Remove the manifest which software is used by this application
-            if (cmf.remove(appUid)) {
+            if (cmf.remove(appId)) {
                 log.info("Removed software manifest.");
             }
 
@@ -93,24 +93,24 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
     /**
      * Removes the given application from this hive and from the pool
      */
-    private void doUninstallApp(Path rootDir, String appUid) {
+    private void doUninstallApp(Path rootDir, String appId) {
         Path appsDir = rootDir.resolve("apps");
-        Path appDir = appsDir.resolve(appUid);
+        Path appDir = appsDir.resolve(appId);
         if (PathHelper.exists(appDir)) {
             PathHelper.deleteRecursive(appDir);
             log.info("Removed application folder {}", appDir);
         } else {
-            log.info("Application {} is not installed.", appUid);
+            log.info("Application {} is not installed.", appId);
         }
     }
 
     /**
      * Removes the application stored in the given version specific directory
      */
-    private void doUninstallVersioned(Path rootDir, Version version, String appUid) {
+    private void doUninstallVersioned(Path rootDir, Version version, String appId) {
         Path versionedRoot = ClientPathHelper.getHome(rootDir, version);
         Path appsDir = versionedRoot.resolve("apps");
-        Path appDir = appsDir.resolve(appUid);
+        Path appDir = appsDir.resolve(appId);
         if (PathHelper.exists(appDir)) {
             PathHelper.deleteRecursive(appDir);
             log.info("Removed application folder {}", appDir);

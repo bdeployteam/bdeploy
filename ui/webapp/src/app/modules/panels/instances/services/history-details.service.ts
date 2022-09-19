@@ -43,7 +43,7 @@ export class HistoryDetailsService {
         this.http
           .get<InstanceVersionDto[]>(
             `${this.apiPath(group.name)}/${
-              instance.instanceConfiguration.uuid
+              instance.instanceConfiguration.id
             }/versions`
           )
           .pipe(
@@ -93,12 +93,12 @@ export class HistoryDetailsService {
             // this is a version we do not normally need, except for history viewing. load it from the server.
             loadConfig = this.http.get<InstanceConfiguration>(
               `${this.apiPath(group.name)}/${
-                instance.instanceConfiguration.uuid
+                instance.instanceConfiguration.id
               }/${version}`
             );
             loadNodes = this.http.get<InstanceNodeConfigurationListDto>(
               `${this.apiPath(group.name)}/${
-                instance.instanceConfiguration.uuid
+                instance.instanceConfiguration.id
               }/${version}/nodeConfiguration`
             );
           }

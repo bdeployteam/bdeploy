@@ -108,7 +108,7 @@ public class ProductUpdateService {
         if (target.isEmpty()) {
             // cannot update, application no longer exists. perform "dummy" update, so validation detects this.
             app.application = new Manifest.Key(app.application.getName(), "NOT_PRESENT");
-            validationIssues.add(new ApplicationValidationDto(app.uid, null, "Application " + app.application.getName()
+            validationIssues.add(new ApplicationValidationDto(app.id, null, "Application " + app.application.getName()
                     + " not available in product version " + targetProduct.getKey().getTag()));
             return;
         }
@@ -158,7 +158,7 @@ public class ProductUpdateService {
 
         // the descriptors dictate the order.
         for (var desc : descriptors) {
-            var val = values.stream().filter(p -> p.uid.equals(desc.uid)).findFirst();
+            var val = values.stream().filter(p -> p.id.equals(desc.id)).findFirst();
             if (val.isPresent()) {
                 // we have a value, so put it next.
                 reordered.add(val.get());
@@ -218,19 +218,19 @@ public class ProductUpdateService {
         // 1) find parameters which have a value but are no longer in the descriptor, remove them, issue validation warning.
         Map<ParameterConfiguration, ParameterDescriptor> toReset = new HashMap<>();
         for (var val : values) {
-            var oldDesc = oldDescriptors.stream().filter(p -> p.uid.equals(val.uid)).findFirst();
-            var desc = descriptors.stream().filter(p -> p.uid.equals(val.uid)).findFirst();
+            var oldDesc = oldDescriptors.stream().filter(p -> p.id.equals(val.id)).findFirst();
+            var desc = descriptors.stream().filter(p -> p.id.equals(val.id)).findFirst();
 
             if (oldDesc.isEmpty() && desc.isPresent()) {
                 // previously "custom" parameter now collides with a newly added one. need to re-create the parameter.
                 toReset.put(val, desc.get());
-                validation.add(new ApplicationValidationDto(app.uid, val.uid,
-                        "Previously custom parameter's id collides with newly added parameter: " + val.uid
+                validation.add(new ApplicationValidationDto(app.id, val.id,
+                        "Previously custom parameter's id collides with newly added parameter: " + val.id
                                 + ". Resetting to default value for '" + desc.get().name + "'."));
             } else if (oldDesc.isPresent() && desc.isEmpty()) {
                 // previously defined parameter is now undefined, we want to
                 toReset.put(val, null);
-                validation.add(new ApplicationValidationDto(app.uid, val.uid, "Parameter has been removed."));
+                validation.add(new ApplicationValidationDto(app.id, val.id, "Parameter has been removed."));
             }
 
             // 3) update the value of fixed parameters - if global fetch value from an existing global parameter.
@@ -253,18 +253,18 @@ public class ProductUpdateService {
                 continue; // don't care :)
             }
 
-            var val = values.stream().filter(p -> p.uid.equals(desc.uid)).findFirst();
+            var val = values.stream().filter(p -> p.id.equals(desc.id)).findFirst();
             if (val.isEmpty() && meetsCondition(app, appDesc, desc, resolver)) {
                 // need one.
                 createParameter(instance, desc, descriptors, values, allApps);
 
                 if (desc.global && !instance.globalsMigrated) {
-                    if (validation.stream().filter(v -> v.appUid == null && desc.uid.equals(v.paramUid)).findFirst().isEmpty()) {
-                        validation.add(0, new ApplicationValidationDto(null, desc.uid,
+                    if (validation.stream().filter(v -> v.appId == null && desc.id.equals(v.paramId)).findFirst().isEmpty()) {
+                        validation.add(0, new ApplicationValidationDto(null, desc.id,
                                 "New global parameter '" + desc.name + "' has been added with its default value."));
                     }
                 } else {
-                    validation.add(new ApplicationValidationDto(app.uid, desc.uid,
+                    validation.add(new ApplicationValidationDto(app.id, desc.id,
                             "New mandatory parameter '" + desc.name + "' has been added with its default value."));
                 }
             }
@@ -296,12 +296,12 @@ public class ProductUpdateService {
     private void createParameter(InstanceConfiguration instance, ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
             List<ParameterConfiguration> values, Set<ApplicationConfiguration> allApps) {
         ParameterConfiguration cfg = new ParameterConfiguration();
-        cfg.uid = desc.uid;
+        cfg.id = desc.id;
         cfg.value = desc.defaultValue;
 
         if (desc.global && !instance.globalsMigrated) {
             for (var other : allApps) {
-                var para = getParameter(other, desc.uid);
+                var para = getParameter(other, desc.id);
                 if (para.isPresent()) {
                     cfg.value = para.get().value;
                     break;
@@ -316,7 +316,7 @@ public class ProductUpdateService {
         Optional<ParameterConfiguration> successor = Optional.empty();
         for (int i = allDescs.indexOf(desc); i < allDescs.size(); ++i) {
             var possibleSuccessor = allDescs.get(i);
-            successor = values.stream().filter(p -> p.uid.equals(possibleSuccessor.uid)).findFirst();
+            successor = values.stream().filter(p -> p.id.equals(possibleSuccessor.id)).findFirst();
 
             if (successor.isPresent()) {
                 break;
@@ -330,15 +330,15 @@ public class ProductUpdateService {
         }
     }
 
-    private Optional<ParameterConfiguration> getParameter(ApplicationConfiguration config, String uid) {
+    private Optional<ParameterConfiguration> getParameter(ApplicationConfiguration config, String id) {
         Optional<ParameterConfiguration> para = Optional.empty();
 
         if (config != null && config.start != null && config.start.parameters != null) {
-            para = config.start.parameters.stream().filter(p -> p.uid.equals(uid)).findFirst();
+            para = config.start.parameters.stream().filter(p -> p.id.equals(id)).findFirst();
         }
 
         if (para.isEmpty() && config != null && config.stop != null && config.stop.parameters != null) {
-            para = config.stop.parameters.stream().filter(p -> p.uid.equals(uid)).findFirst();
+            para = config.stop.parameters.stream().filter(p -> p.id.equals(id)).findFirst();
         }
 
         return para;
@@ -376,15 +376,15 @@ public class ProductUpdateService {
                 var desc = applications.stream().filter(m -> m.getKey().getName().equals(process.application.getName()))
                         .map(ApplicationManifest::getDescriptor).findFirst();
                 if (desc.isEmpty()) {
-                    result.add(new ApplicationValidationDto(process.uid, null,
+                    result.add(new ApplicationValidationDto(process.id, null,
                             "Cannot find application " + process.application.getName()));
                     continue;
                 }
 
                 // check unique process names
-                var conflictUid = processNames.put(process.name, process.uid);
+                var conflictUid = processNames.put(process.name, process.id);
                 if (conflictUid != null && !node.nodeName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
-                    result.add(new ApplicationValidationDto(process.uid, null,
+                    result.add(new ApplicationValidationDto(process.id, null,
                             "The process name " + process.name + " is not unique."));
                     result.add(new ApplicationValidationDto(conflictUid, null,
                             "The process name " + process.name + " is not unique."));
@@ -409,7 +409,7 @@ public class ProductUpdateService {
         res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
         res.add(new InstanceVariableResolver(node.nodeConfiguration, null, "1"));
         res.add(new ApplicationVariableResolver(process));
-        res.add(new ApplicationParameterValueResolver(process.uid, node.nodeConfiguration));
+        res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
         ManifestVariableValidationDummyResolver dummy = new ManifestVariableValidationDummyResolver();
         res.add(new ManifestSelfResolver(process.application, dummy));
         res.add(new DeploymentPathValidationDummyResolver());
@@ -430,12 +430,12 @@ public class ProductUpdateService {
         }
 
         if (command.executable == null || !command.executable.equals(desc.launcherPath)) {
-            result.add(new ApplicationValidationDto(process.uid, null,
+            result.add(new ApplicationValidationDto(process.id, null,
                     "Assigned Exectuable does not match the required launcher path."));
         }
 
         for (var paramDesc : desc.parameters) {
-            var value = command.parameters.stream().filter(p -> p.uid.equals(paramDesc.uid)).findFirst().orElse(null);
+            var value = command.parameters.stream().filter(p -> p.id.equals(paramDesc.id)).findFirst().orElse(null);
 
             validateParameter(process, appDesc, value, paramDesc, result, resolver);
         }
@@ -449,15 +449,14 @@ public class ProductUpdateService {
         // check condition.
         if (!meetsCondition(process, appDesc, paramDesc, resolver)) {
             if (paramValue != null && paramValue.value != null) {
-                result.add(
-                        new ApplicationValidationDto(process.uid, paramDesc.uid, "Parameter does not meet required condition"));
+                result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Parameter does not meet required condition"));
             }
             return;
         }
 
         // check mandatory.
         if (paramDesc.mandatory && (paramValue == null || paramValue.value == null)) {
-            result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Mandatory parameter has no value."));
+            result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Mandatory parameter has no value."));
         }
 
         if (paramValue == null || paramValue.value == null) {
@@ -469,7 +468,7 @@ public class ProductUpdateService {
         // check syntax of variable substitutions.
         if (rawExpr != null && (rawExpr.contains("{{") || rawExpr.contains("}}"))
                 && (!rawExpr.contains("{{") || !rawExpr.contains("}}") || !rawExpr.contains(":"))) {
-            result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Invalid variable substitution syntax"));
+            result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Invalid variable substitution syntax"));
         }
 
         String stringVal;
@@ -477,8 +476,8 @@ public class ProductUpdateService {
             stringVal = rawExpr == null ? paramValue.value.value : TemplateHelper.process(rawExpr, resolver);
         } catch (IllegalArgumentException e) {
             // some expansion was not good;
-            result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
-                    "Cannot resolve link expressions: " + e.getMessage()));
+            result.add(
+                    new ApplicationValidationDto(process.id, paramDesc.id, "Cannot resolve link expressions: " + e.getMessage()));
             return;
         }
 
@@ -486,7 +485,7 @@ public class ProductUpdateService {
         switch (paramDesc.type) {
             case BOOLEAN:
                 if (!stringVal.equals("true") && !stringVal.equals("false")) {
-                    result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
+                    result.add(new ApplicationValidationDto(process.id, paramDesc.id,
                             "Boolean parameter should have value 'true' or 'false', has '" + stringVal + "' instead."));
                 }
                 break;
@@ -494,19 +493,18 @@ public class ProductUpdateService {
                 try {
                     long l = Long.parseLong(stringVal);
                     if (paramDesc.type != ParameterType.NUMERIC && (l < 0 || l > (Short.MAX_VALUE * 2))) {
-                        result.add(new ApplicationValidationDto(process.uid, paramDesc.uid,
+                        result.add(new ApplicationValidationDto(process.id, paramDesc.id,
                                 "Value for port parameter is out of range: " + l));
                     }
                 } catch (NumberFormatException e) {
-                    result.add(
-                            new ApplicationValidationDto(process.uid, paramDesc.uid, "Value must be numeric, is: " + stringVal));
+                    result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Value must be numeric, is: " + stringVal));
                 }
                 break;
             case URL:
                 try {
                     new URLish(stringVal);
                 } catch (IllegalArgumentException e) {
-                    result.add(new ApplicationValidationDto(process.uid, paramDesc.uid, "Value must be URL-like."));
+                    result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Value must be URL-like."));
                 }
                 break;
             default:
@@ -529,7 +527,7 @@ public class ProductUpdateService {
             expression = "{{V:" + param.condition.parameter + "}}"; // compat with older model.
 
             // find a descriptor and it's type if possible, fall back to parameters own type.
-            targetType = desc.startCommand.parameters.stream().filter(d -> d.uid.equals(param.condition.parameter)).findFirst()
+            targetType = desc.startCommand.parameters.stream().filter(d -> d.id.equals(param.condition.parameter)).findFirst()
                     .map(p -> p.type).orElse(param.type);
         }
 

@@ -58,7 +58,7 @@ export class ProcessStatusIconComponent
   }
 
   private update(ps: { [key: string]: ProcessStatusDto }) {
-    const state = ProcessesService.get(ps, this.record.uid);
+    const state = ProcessesService.get(ps, this.record.id);
     if (!state) {
       this.next('help', null, 'Unknown', 'local-unknown');
       return;

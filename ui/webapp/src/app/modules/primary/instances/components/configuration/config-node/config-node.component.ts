@@ -54,7 +54,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   /* template */ nodeType: string;
   /* template */ node: string;
   /* template */ groupExpansion: { [key: string]: boolean } = {};
-  /* template */ lastUid: string;
+  /* template */ lastId: string;
   /* template */ clientTableId =
     CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
 
@@ -79,7 +79,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
             'config',
             'process',
             this.nodeName,
-            row.uid,
+            row.id,
           ],
         },
       },
@@ -124,9 +124,9 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
           }
 
           // reset expansion state in case we switch the instance somehow.
-          if (this.lastUid !== nodeConfig.nodeConfiguration.uuid) {
+          if (this.lastId !== nodeConfig.nodeConfiguration.id) {
             this.groupExpansion = {};
-            this.lastUid = nodeConfig.nodeConfiguration.uuid;
+            this.lastId = nodeConfig.nodeConfiguration.id;
           }
 
           const grouped = {};
@@ -202,7 +202,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private getControlGroup(row: ApplicationConfiguration): string {
     return this.config$.value.nodeConfiguration.controlGroups.find((cg) =>
-      cg.processOrder.includes(row.uid)
+      cg.processOrder.includes(row.id)
     )?.name;
   }
 

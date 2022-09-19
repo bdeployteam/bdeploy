@@ -165,21 +165,21 @@ public class ProductResourceImpl implements ProductResource {
         Manifest.Key checkKey = new Manifest.Key(name, tag);
 
         // InstanceManifests using the product version grouped by instance
-        Map<String, Set<InstanceManifest>> uuid2imSet = InstanceManifest.scan(hive, false).stream()
+        Map<String, Set<InstanceManifest>> id2imSet = InstanceManifest.scan(hive, false).stream()
                 .map(k -> InstanceManifest.of(hive, k)).filter(im -> im.getConfiguration().product.equals(checkKey))
-                .collect(Collectors.groupingBy(im -> im.getConfiguration().uuid, Collectors.toSet()));
+                .collect(Collectors.groupingBy(im -> im.getConfiguration().id, Collectors.toSet()));
 
         List<InstanceUsageDto> result = new ArrayList<>();
 
-        for (Set<InstanceManifest> mfSet : uuid2imSet.values()) {
-            // grouped by UUID so we need to read the installed state only once per instance.
+        for (Set<InstanceManifest> mfSet : id2imSet.values()) {
+            // grouped by ID so we need to read the installed state only once per instance.
             Set<String> installedTags = mfSet.stream().findFirst().get().getState(hive).read().installedTags;
 
             mfSet.stream().filter(mf -> installedTags.contains(mf.getManifest().getTag())).sorted(
                     (a, b) -> Long.compare(Long.parseLong(a.getManifest().getTag()), Long.parseLong(b.getManifest().getTag())))
                     .forEach(mf -> {
                         InstanceUsageDto dto = new InstanceUsageDto();
-                        dto.uuid = mf.getConfiguration().uuid;
+                        dto.id = mf.getConfiguration().id;
                         dto.name = mf.getConfiguration().name;
                         dto.description = mf.getConfiguration().description;
                         dto.tag = mf.getManifest().getTag();

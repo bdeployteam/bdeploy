@@ -37,7 +37,7 @@ export class InstancesColumnsService {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
-    data: (r) => r.instanceConfiguration.uuid,
+    data: (r) => r.instanceConfiguration.id,
     width: '110px',
     showWhen: '(min-width: 1900px)',
   };

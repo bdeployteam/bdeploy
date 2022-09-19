@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.configuration.dcu;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 /**
  * Describes a single parameter as configured in a configuration UI.
  */
@@ -12,7 +14,8 @@ public class ParameterConfiguration {
      * The ID of the parameter, which can be used to reference it from other
      * parameters. This is only stored to allow lookup of parameters.
      */
-    public String uid;
+    @JsonAlias("uid")
+    public String id;
 
     /**
      * Whether this parameter is pinned. This information is used by the web UI to

@@ -118,7 +118,7 @@ public class TestFactory {
      */
     private static Manifest.Key createDemoInstance(BHive local, Manifest.Key product, Path tmp, Manifest.Key serverApp,
             Manifest.Key clientApp) throws IOException {
-        String uuid = "aaa-bbb-ccc";
+        String id = "aaa-bbb-ccc";
 
         /* STEP 1a: read available applications from product manifest */
         ProductManifest pmf = ProductManifest.of(local, product);
@@ -129,7 +129,7 @@ public class TestFactory {
 
         /* STEP 1c: create application configuration based on application descriptor */
         ApplicationConfiguration cfg = new ApplicationConfiguration();
-        cfg.uid = amf.getDescriptor().name;
+        cfg.id = amf.getDescriptor().name;
         cfg.name = amf.getDescriptor().name;
         cfg.start = new CommandConfiguration();
         cfg.start.executable = amf.getDescriptor().startCommand.launcherPath;
@@ -147,19 +147,19 @@ public class TestFactory {
 
         /* STEP 1d: configure parameters, usually in the UI based on information from the application descriptor */
         ParameterConfiguration sleepParam = new ParameterConfiguration();
-        sleepParam.uid = "sleepParam";
+        sleepParam.id = "sleepParam";
         sleepParam.preRendered.add("10");
         cfg.start.parameters.add(sleepParam);
 
         /* STEP 1e: setup the node configuration, which basically only references all application configs */
         InstanceNodeConfiguration inc = new InstanceNodeConfiguration();
         inc.name = "DemoInstance";
-        inc.uuid = uuid;
+        inc.id = id;
         inc.applications.add(cfg);
 
         /* STEP 1f: create application configuration based on application descriptor (client) */
         ApplicationConfiguration clientCfg = new ApplicationConfiguration();
-        clientCfg.uid = camf.getDescriptor().name;
+        clientCfg.id = camf.getDescriptor().name;
         clientCfg.name = camf.getDescriptor().name;
         clientCfg.start = new CommandConfiguration();
         clientCfg.start.executable = camf.getDescriptor().startCommand.launcherPath;
@@ -172,7 +172,7 @@ public class TestFactory {
         /* STEP 1h: node config for the clients */
         InstanceNodeConfiguration cinc = new InstanceNodeConfiguration();
         cinc.name = "DemoInstance";
-        cinc.uuid = uuid;
+        cinc.id = id;
         cinc.applications.add(clientCfg);
 
         /* STEP 2: create an node manifest per node which will participate (master & clients) */
@@ -190,7 +190,7 @@ public class TestFactory {
         ic.description = "Demo Instance";
         ic.purpose = InstancePurpose.TEST;
         ic.product = pmf.getKey();
-        ic.uuid = uuid;
+        ic.id = id;
         ic.configTree = pmf.getConfigTemplateTreeId();
 
         /* STEP 3: create an InstanceManifest with all instance node configurations. */
@@ -286,7 +286,7 @@ public class TestFactory {
     public static InstanceConfiguration createInstanceConfig(String name, ProductManifest product) {
         InstanceConfiguration instanceConfig = new InstanceConfiguration();
         instanceConfig.product = product.getKey();
-        instanceConfig.uuid = name;
+        instanceConfig.id = name;
         instanceConfig.name = name;
         return instanceConfig;
     }

@@ -46,7 +46,7 @@ class ConfigFileResourceTest {
         InstanceManifest im = InstanceManifest.of(local, instance);
 
         InstanceResource ir = igr.getInstanceResource("demo");
-        ConfigFileResource cfr = ir.getConfigResource(im.getConfiguration().uuid);
+        ConfigFileResource cfr = ir.getConfigResource(im.getConfiguration().id);
 
         List<ConfigFileDto> files = cfr.listConfigFiles(instance.getTag(), im.getConfiguration().product.getName(),
                 im.getConfiguration().product.getTag());
@@ -72,8 +72,8 @@ class ConfigFileResourceTest {
         updates.add(upd1);
         updates.add(upd2);
 
-        InstanceConfiguration cfg = ir.readVersion(im.getConfiguration().uuid, "1");
-        ir.update(im.getConfiguration().uuid, new InstanceUpdateDto(new InstanceConfigurationDto(cfg, null), updates), null, "1");
+        InstanceConfiguration cfg = ir.readVersion(im.getConfiguration().id, "1");
+        ir.update(im.getConfiguration().id, new InstanceUpdateDto(new InstanceConfigurationDto(cfg, null), updates), null, "1");
 
         String updatedTag = Long.toString(Long.valueOf(instance.getTag()) + 1);
 
@@ -89,8 +89,8 @@ class ConfigFileResourceTest {
         del1.file = "myconfig.json";
         del1.type = FileStatusType.DELETE;
 
-        cfg = ir.readVersion(im.getConfiguration().uuid, updatedTag);
-        ir.update(im.getConfiguration().uuid,
+        cfg = ir.readVersion(im.getConfiguration().id, updatedTag);
+        ir.update(im.getConfiguration().id,
                 new InstanceUpdateDto(new InstanceConfigurationDto(cfg, null), Collections.singletonList(del1)), null,
                 updatedTag);
 
@@ -104,15 +104,15 @@ class ConfigFileResourceTest {
 
         assertThrows(ClientErrorException.class, () -> {
             // wrong tag.
-            InstanceConfiguration cfg2 = ir.readVersion(im.getConfiguration().uuid, "1");
-            ir.update(im.getConfiguration().uuid,
+            InstanceConfiguration cfg2 = ir.readVersion(im.getConfiguration().id, "1");
+            ir.update(im.getConfiguration().id,
                     new InstanceUpdateDto(new InstanceConfigurationDto(cfg2, null), Collections.singletonList(del1)), null, "1");
         });
 
         assertThrows(InternalServerErrorException.class, () -> {
             // file does not exist.
-            InstanceConfiguration cfg3 = ir.readVersion(im.getConfiguration().uuid, updatedTag2);
-            ir.update(im.getConfiguration().uuid,
+            InstanceConfiguration cfg3 = ir.readVersion(im.getConfiguration().id, updatedTag2);
+            ir.update(im.getConfiguration().id,
                     new InstanceUpdateDto(new InstanceConfigurationDto(cfg3, null), Collections.singletonList(del1)), null,
                     updatedTag2);
         });

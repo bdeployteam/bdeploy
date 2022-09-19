@@ -179,13 +179,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private getControlGroupDesc(app: ApplicationConfiguration): string {
-    const node = getNodeOfApplication(this.serverNodes$.value, app.uid);
+    const node = getNodeOfApplication(this.serverNodes$.value, app.id);
     if (!node) {
       return null; // client apps
     }
     const grp = getProcessControlGroupOfApplication(
       node.nodeConfiguration?.controlGroups,
-      app.uid
+      app.id
     );
     return `${grp?.name} [${
       grp?.startType === ProcessControlGroupHandlingType.SEQUENTIAL ? 'S' : 'P'
@@ -205,7 +205,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       // grouping panel, etc.
       return a.localeCompare(b);
     }
-    const node = getNodeOfApplication(this.serverNodes$.value, entriesA[0].uid);
+    const node = getNodeOfApplication(this.serverNodes$.value, entriesA[0].id);
     if (!node) {
       return a.localeCompare(b); // client apps
     }

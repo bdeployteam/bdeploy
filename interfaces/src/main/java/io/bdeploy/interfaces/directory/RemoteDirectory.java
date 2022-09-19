@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.directory;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 /**
  * Represents a snapshot of an instances DATA directory on a minion.
  */
@@ -14,9 +16,10 @@ public class RemoteDirectory {
     public String minion;
 
     /**
-     * UUID of the instance this directory belongs to.
+     * ID of the instance this directory belongs to.
      */
-    public String uuid;
+    @JsonAlias("uuid")
+    public String id;
 
     /**
      * A description of any problem that happened contacting the minion. <code>null</code> if no problem.

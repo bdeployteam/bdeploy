@@ -53,7 +53,7 @@ export class EditProcessNameValidatorDirective
         continue;
       }
       for (const a of n.nodeConfiguration.applications) {
-        if (a.uid === this.appEditProcessNameValidator) {
+        if (a.id === this.appEditProcessNameValidator) {
           continue; // skip self.
         }
         if (a.name.toLowerCase() === name.toLowerCase()) {

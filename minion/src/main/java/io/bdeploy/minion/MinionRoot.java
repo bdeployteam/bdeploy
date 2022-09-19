@@ -681,7 +681,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             String tag = inm.getKey().getTag();
             ProcessGroupConfiguration pgc = inc.getProcessGroupConfiguration();
             if (pgc == null) {
-                String instanceId = inm.getConfiguration().uuid;
+                String instanceId = inm.getConfiguration().id;
                 log.warn("{} / {} - Cannot read persisted process configuration.", instanceId, tag);
                 return;
             }
@@ -691,11 +691,11 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             instanceController.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, tag, pgc,
                     inm.getRuntimeHistory(hive));
 
-            // fetch and remember the active version for this uuid.
-            if (!activeVersions.containsKey(inm.getUUID())) {
+            // fetch and remember the active version for this id.
+            if (!activeVersions.containsKey(inm.getId())) {
                 String active = inm.getState(hive).read().activeTag;
                 if (active != null) {
-                    activeVersions.put(inm.getUUID(), new Manifest.Key(inm.getKey().getName(), active));
+                    activeVersions.put(inm.getId(), new Manifest.Key(inm.getKey().getName(), active));
                 }
             }
         } catch (Exception e) {

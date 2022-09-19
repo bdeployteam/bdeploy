@@ -38,7 +38,7 @@ class ProbeTest {
         app1.processControl.startupProbe = new StartupProbeDescriptor();
         app1.processControl.startupProbe.endpoint = ep.id;
 
-        ProcessController controller = new ProcessController("Test", "V1", app1, tmp.resolve(app1.uid));
+        ProcessController controller = new ProcessController("Test", "V1", app1, tmp.resolve(app1.id));
 
         StateListener listener = StateListener.createFor(controller).expect(ProcessState.RUNNING_NOT_STARTED);
         fakeStart.set(false);

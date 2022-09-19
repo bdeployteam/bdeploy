@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.processing.Generated;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 
 /**
@@ -14,14 +16,15 @@ import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.App
 public class ProcessGroupConfiguration implements Comparable<ProcessGroupConfiguration> {
 
     /**
-     * The name of the deployment. E.g. "Test System", "Productive System", etc.
+     * The name of the instance. E.g. "Test System", "Productive System", etc.
      */
     public String name;
 
     /**
-     * The UUID of the deployment.
+     * The ID of the instance..
      */
-    public String uuid;
+    @JsonAlias("uuid")
+    public String id;
 
     /**
      * Whether to automatically start this deployment (any {@link ProcessConfiguration}s using start type
@@ -36,7 +39,7 @@ public class ProcessGroupConfiguration implements Comparable<ProcessGroupConfigu
 
     @Override
     public int compareTo(ProcessGroupConfiguration o) {
-        return uuid.compareTo(o.uuid);
+        return id.compareTo(o.id);
     }
 
     @Generated("Eclipse")
@@ -44,7 +47,7 @@ public class ProcessGroupConfiguration implements Comparable<ProcessGroupConfigu
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -61,11 +64,11 @@ public class ProcessGroupConfiguration implements Comparable<ProcessGroupConfigu
             return false;
         }
         ProcessGroupConfiguration other = (ProcessGroupConfiguration) obj;
-        if (uuid == null) {
-            if (other.uuid != null) {
+        if (id == null) {
+            if (other.id != null) {
                 return false;
             }
-        } else if (!uuid.equals(other.uuid)) {
+        } else if (!id.equals(other.id)) {
             return false;
         }
         return true;

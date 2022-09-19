@@ -50,18 +50,18 @@ export class NodePair {
       ? compare.nodeConfiguration.applications
       : [];
 
-    const compUids = compareApps.map((a) => a.uid);
-    const baseUids = baseApps.map((a) => a.uid);
+    const compIds = compareApps.map((a) => a.id);
+    const baseIds = baseApps.map((a) => a.id);
 
-    const compMatching = compUids?.filter((e) => !!baseUids.includes(e));
-    const baseMatching = baseUids?.filter((e) => !!compUids.includes(e));
+    const compMatching = compIds?.filter((e) => !!baseIds.includes(e));
+    const baseMatching = baseIds?.filter((e) => !!compIds.includes(e));
     this.isOrderChanged = !isEqual(compMatching, baseMatching);
 
-    const order = mergeOrdererd(compUids, baseUids, (x) => x);
+    const order = mergeOrdererd(compIds, baseIds, (x) => x);
 
-    for (const appUid of order) {
-      const baseApp = baseApps.find((a) => a.uid === appUid);
-      const compareApp = compareApps.find((a) => a.uid === appUid);
+    for (const appId of order) {
+      const baseApp = baseApps.find((a) => a.id === appId);
+      const compareApp = compareApps.find((a) => a.id === appId);
 
       this.applications.push(
         new ApplicationPair(

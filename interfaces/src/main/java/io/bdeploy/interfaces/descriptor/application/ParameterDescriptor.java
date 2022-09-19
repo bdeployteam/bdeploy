@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.processing.Generated;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -34,10 +35,11 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * Also used to assure ordering of parameters is the same in the {@link ApplicationConfiguration} as defined in the
      * {@link ApplicationDescriptor}.
      */
-    public String uid;
+    @JsonAlias("uid")
+    public String id;
 
     /**
-     * X-OR with {@link #uid}; use a parameter template to expand a set of one or more parameters
+     * X-OR with {@link #id}; use a parameter template to expand a set of one or more parameters
      * defined in a parameter template in the product in place.
      */
     public String template;
@@ -146,7 +148,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
 
     @Override
     public int compareTo(ParameterDescriptor o) {
-        return uid.compareTo(o.uid);
+        return id.compareTo(o.id);
     }
 
     @Generated("Eclipse")
@@ -154,7 +156,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -171,11 +173,11 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
             return false;
         }
         ParameterDescriptor other = (ParameterDescriptor) obj;
-        if (uid == null) {
-            if (other.uid != null) {
+        if (id == null) {
+            if (other.id != null) {
                 return false;
             }
-        } else if (!uid.equals(other.uid)) {
+        } else if (!id.equals(other.id)) {
             return false;
         }
         return true;

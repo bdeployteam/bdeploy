@@ -71,8 +71,8 @@ public class InstanceManifest {
         this.config = config;
     }
 
-    public static String getRootName(String uuid) {
-        return uuid + ROOT_SUFFIX;
+    public static String getRootName(String id) {
+        return id + ROOT_SUFFIX;
     }
 
     /**
@@ -175,7 +175,7 @@ public class InstanceManifest {
         for (Map.Entry<String, Manifest.Key> entry : getInstanceNodeManifests().entrySet()) {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
             for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
-                if (app.uid.equals(applicationId)) {
+                if (app.id.equals(applicationId)) {
                     return app;
                 }
             }
@@ -194,7 +194,7 @@ public class InstanceManifest {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
             InstanceNodeConfiguration inc = inmf.getConfiguration();
             for (ApplicationConfiguration app : inc.applications) {
-                if (app.uid.equals(applicationId)) {
+                if (app.id.equals(applicationId)) {
                     return inc;
                 }
             }
@@ -357,11 +357,11 @@ public class InstanceManifest {
 
         private Manifest.Key doInsertLocked(BHive hive) {
             RuntimeAssert.assertNotNull(config.name, "Missing description");
-            RuntimeAssert.assertNotNull(config.uuid, "Missing uuid");
+            RuntimeAssert.assertNotNull(config.id, "Missing id");
             RuntimeAssert.assertNotNull(config.product, "Missing product");
 
             if (key == null) {
-                String name = getRootName(config.uuid);
+                String name = getRootName(config.id);
                 Long next = hive.execute(new ManifestNextIdOperation().setManifestName(name));
                 key = new Manifest.Key(name, next.toString());
             }
@@ -382,8 +382,7 @@ public class InstanceManifest {
                     hive.execute(new InsertManifestRefOperation().setManifest(v))));
 
             Manifest.Builder mb = new Manifest.Builder(key)
-                    .setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(root)))
-                    .addLabel(INSTANCE_LABEL, config.uuid);
+                    .setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(root))).addLabel(INSTANCE_LABEL, config.id);
 
             hive.execute(new InsertManifestOperation().addManifest(mb.build(hive)));
             return key;

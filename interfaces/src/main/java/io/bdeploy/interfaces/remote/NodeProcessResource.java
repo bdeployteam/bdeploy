@@ -108,15 +108,15 @@ public interface NodeProcessResource {
      * Returns the full status of a single application.
      *
      * @param instanceId the unique id of the instance.
-     * @param appUid the application UID to query
+     * @param appId the application UID to query
      * @return the full detailed status of the process.
      */
     @GET
     @Path("/process-details")
-    public ProcessDetailDto getProcessDetails(@QueryParam("u") String instanceId, @QueryParam("a") String appUid);
+    public ProcessDetailDto getProcessDetails(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
 
     /**
-     * @param instanceId the instance UUID
+     * @param instanceId the instance ID
      * @param tag the tag for which to retrieve the output file entry.
      * @param applicationId the application ID for which to retrieve the output file entry.
      * @return an {@link RemoteDirectoryEntry}, can be used with

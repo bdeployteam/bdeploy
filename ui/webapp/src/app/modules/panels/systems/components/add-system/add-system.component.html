@@ -7,7 +7,7 @@
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()">
       <div fxLayout="column" fxLayoutGap="10px">
-        <div>Creating system: <strong>{{ system.uuid }}</strong></div>
+        <div>Creating system: <strong>{{ system.id }}</strong></div>
         <app-bd-form-input
           label="System Name"
           name="name"

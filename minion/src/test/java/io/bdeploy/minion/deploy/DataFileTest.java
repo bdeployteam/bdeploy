@@ -43,7 +43,7 @@ class DataFileTest {
             MinionRoot mr) throws IOException, InterruptedException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
-        String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
+        String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         master.getNamedMaster("demo").install(instance);
@@ -52,18 +52,18 @@ class DataFileTest {
         long beforeWrite = System.currentTimeMillis() - 10_000; // filesystem dependent resolution.
 
         // fake write a file to the data directory.
-        Path dataDir = mr.getDeploymentDir().resolve(uuid).resolve("data");
+        Path dataDir = mr.getDeploymentDir().resolve(id).resolve("data");
         PathHelper.mkdirs(dataDir); // just in case.
         Path testFile = dataDir.resolve("test.txt");
 
         Files.write(testFile, "Test".getBytes(StandardCharsets.UTF_8));
 
-        List<RemoteDirectory> dds = master.getNamedMaster("demo").getDataDirectorySnapshots(uuid);
+        List<RemoteDirectory> dds = master.getNamedMaster("demo").getDataDirectorySnapshots(id);
 
         assertEquals(1, dds.size()); // only master node
         RemoteDirectory idd = dds.get(0);
         assertEquals("master", idd.minion);
-        assertEquals(uuid, idd.uuid);
+        assertEquals(id, idd.id);
         assertEquals(1, idd.entries.size());
 
         assertEquals("test.txt", idd.entries.get(0).path);
@@ -75,12 +75,12 @@ class DataFileTest {
 
         Files.write(testFile2, "Test".getBytes(StandardCharsets.UTF_8));
 
-        dds = master.getNamedMaster("demo").getDataDirectorySnapshots(uuid);
+        dds = master.getNamedMaster("demo").getDataDirectorySnapshots(id);
 
         assertEquals(1, dds.size()); // only master node
         idd = dds.get(0);
         assertEquals("master", idd.minion);
-        assertEquals(uuid, idd.uuid);
+        assertEquals(id, idd.id);
         assertEquals(2, idd.entries.size());
 
         List<RemoteDirectoryEntry> sorted = new ArrayList<>(idd.entries);

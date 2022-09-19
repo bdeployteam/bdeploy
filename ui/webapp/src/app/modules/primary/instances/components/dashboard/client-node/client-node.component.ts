@@ -32,10 +32,7 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
   /* template */ columns = this.appCols.defaultProcessClientColumns;
 
   /* template */ getRecordRoute = (row: ApplicationConfiguration) => {
-    return [
-      '',
-      { outlets: { panel: ['panels', 'groups', 'client', row.uid] } },
-    ];
+    return ['', { outlets: { panel: ['panels', 'groups', 'client', row.id] } }];
   };
 
   /* template */ isCardView: boolean;
@@ -76,7 +73,7 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
                     'instances',
                     'configuration',
                     this.areas.groupContext$.value,
-                    this.node.nodeConfiguration.uuid,
+                    this.node.nodeConfiguration.id,
                   ],
                   ['panels', 'instances', 'settings', 'product']
                 );

@@ -20,7 +20,7 @@ export interface ClientUsagePerDay {
 }
 
 export interface ClientUsagePerApp {
-  appUid: string;
+  appId: string;
   usage: ClientUsagePerDay[];
 }
 
@@ -41,11 +41,11 @@ export class ClientsUsageService {
     private groups: GroupsService
   ) {}
 
-  public load(uuid: string): Observable<ClientUsagePerApp[]> {
+  public load(id: string): Observable<ClientUsagePerApp[]> {
     this.loading$.next(true);
     return this.http
       .get<ClientUsageData>(
-        `${this.apiPath(this.groups.current$.value.name)}/${uuid}/clientUsage`
+        `${this.apiPath(this.groups.current$.value.name)}/${id}/clientUsage`
       )
       .pipe(
         finalize(() => this.loading$.next(false)),
@@ -72,9 +72,9 @@ export class ClientsUsageService {
       }
 
       for (const app of Object.keys(perApp)) {
-        let appItem = result.find((i) => i.appUid === app);
+        let appItem = result.find((i) => i.appId === app);
         if (!appItem) {
-          appItem = { appUid: app, usage: [] };
+          appItem = { appId: app, usage: [] };
           result.push(appItem);
         }
 

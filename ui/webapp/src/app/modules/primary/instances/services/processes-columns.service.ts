@@ -39,10 +39,10 @@ export class ProcessesColumnsService {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
-    data: (r) => (r.uid ? r.uid : 'New Process'),
+    data: (r) => (r.id ? r.id : 'New Process'),
     width: '120px',
     showWhen: '(min-width:1000px)',
-    classes: (r) => (r.uid ? [] : ['bd-description-text']),
+    classes: (r) => (r.id ? [] : ['bd-description-text']),
   };
 
   processAvatarColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -97,7 +97,7 @@ export class ProcessesColumnsService {
     data: (r) => {
       const procTag = ProcessesService.get(
         this.processes.processStates$.value,
-        r.uid
+        r.id
       )?.instanceTag;
       const instTag = this.instances.active$.value?.instance?.tag;
       return procTag === instTag ? null : procTag;
@@ -112,7 +112,7 @@ export class ProcessesColumnsService {
     hint: BdDataColumnTypeHint.STATUS,
     component: ProcessStatusIconComponent,
     data: (r) =>
-      ProcessesService.get(this.processes.processStates$.value, r.uid)
+      ProcessesService.get(this.processes.processStates$.value, r.id)
         ?.processState,
     width: '40px',
   };
@@ -169,13 +169,13 @@ export class ProcessesColumnsService {
     const currentStates = this.ports.activePortStates$.value;
     const processState = ProcessesService.get(
       this.processes.processStates$.value,
-      r.uid
+      r.id
     );
     if (!currentStates || !processState) {
       return undefined;
     }
 
-    const appPorts = currentStates.filter((p) => p.appUid === r.uid);
+    const appPorts = currentStates.filter((p) => p.appId === r.id);
     if (ProcessesService.isRunning(processState.processState)) {
       // process running, all ports should be open.
       return appPorts.every((p) => p.state);
@@ -186,7 +186,7 @@ export class ProcessesColumnsService {
   }
 
   private getStateClass(r: ApplicationConfiguration) {
-    switch (this.edit.getProcessEditState(r.uid)) {
+    switch (this.edit.getProcessEditState(r.id)) {
       case ProcessEditState.ADDED:
         return ['bd-status-border-added'];
       case ProcessEditState.INVALID:

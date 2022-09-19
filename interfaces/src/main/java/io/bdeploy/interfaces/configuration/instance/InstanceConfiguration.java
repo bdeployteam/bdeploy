@@ -3,6 +3,7 @@ package io.bdeploy.interfaces.configuration.instance;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -26,7 +27,8 @@ public class InstanceConfiguration {
     /**
      * Globally unique identifier of the instance.
      */
-    public String uuid;
+    @JsonAlias("uuid")
+    public String id;
 
     /**
      * Short name of the instance.

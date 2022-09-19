@@ -46,7 +46,7 @@ public class PublicInstanceResourceImpl implements PublicInstanceResource {
                 .getInstanceResource(groupName).listInstanceConfigurations(latestOnly).entrySet()) {
 
             InstanceConfigurationApi ica = new InstanceConfigurationApi();
-            ica.uuid = ic.getValue().uuid;
+            ica.uuid = ic.getValue().id;
             ica.name = ic.getValue().name;
             ica.description = ic.getValue().description;
             if (ic.getValue().purpose != null) {

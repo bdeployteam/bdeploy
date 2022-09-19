@@ -46,10 +46,10 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
     );
 
     this.groups
-      .newUuid()
+      .newId()
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe((r) => {
-        this.system.uuid = r;
+        this.system.id = r;
       });
 
     this.subscription.add(

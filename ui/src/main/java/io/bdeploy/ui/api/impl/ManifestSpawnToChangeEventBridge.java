@@ -105,9 +105,9 @@ public class ManifestSpawnToChangeEventBridge implements MultiManifestSpawnListe
                 // it is an instance!
                 InstanceManifest im = InstanceManifest.of(hive, key);
                 if (log.isDebugEnabled()) {
-                    log.debug("Instance update for {}: {}", hiveName, im.getConfiguration().uuid);
+                    log.debug("Instance update for {}: {}", hiveName, im.getConfiguration().id);
                 }
-                events.create(ObjectChangeType.INSTANCE, key, new ObjectScope(hiveName, im.getConfiguration().uuid));
+                events.create(ObjectChangeType.INSTANCE, key, new ObjectScope(hiveName, im.getConfiguration().id));
             } else {
                 // we have no idea, and we don't care :)
                 log.trace("Unknown Manifest spawn in {}: {}", hiveName, key);

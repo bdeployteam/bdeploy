@@ -48,7 +48,7 @@ export class InstanceStateService {
       ? of(null)
       : this.http
           .get<InstanceStateRecord>(
-            `${this.apiPath(g.name)}/${i.instanceConfiguration.uuid}/state`
+            `${this.apiPath(g.name)}/${i.instanceConfiguration.id}/state`
           )
           .pipe(measure('Load Instance Version States'));
   }
@@ -57,12 +57,12 @@ export class InstanceStateService {
     return this.http
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
-          this.instances.current$.value.instanceConfiguration.uuid
+          this.instances.current$.value.instanceConfiguration.id
         }/${version}/install`
       )
       .pipe(
         measure(
-          `Install ${this.instances.current$.value.instanceConfiguration.uuid} Version ${version}`
+          `Install ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`
         )
       );
   }
@@ -71,12 +71,12 @@ export class InstanceStateService {
     return this.http
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
-          this.instances.current$.value.instanceConfiguration.uuid
+          this.instances.current$.value.instanceConfiguration.id
         }/${version}/uninstall`
       )
       .pipe(
         measure(
-          `Uninstall ${this.instances.current$.value.instanceConfiguration.uuid} Version ${version}`
+          `Uninstall ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`
         )
       );
   }
@@ -85,12 +85,12 @@ export class InstanceStateService {
     return this.http
       .get(
         `${this.apiPath(this.groups.current$.value.name)}/${
-          this.instances.current$.value.instanceConfiguration.uuid
+          this.instances.current$.value.instanceConfiguration.id
         }/${version}/activate`
       )
       .pipe(
         measure(
-          `Activate ${this.instances.current$.value.instanceConfiguration.uuid} Version ${version}`
+          `Activate ${this.instances.current$.value.instanceConfiguration.id} Version ${version}`
         )
       );
   }

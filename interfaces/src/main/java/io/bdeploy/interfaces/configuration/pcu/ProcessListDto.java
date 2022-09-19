@@ -19,9 +19,9 @@ public class ProcessListDto {
      */
     public void add(ProcessStatusDto data) {
         if (data.processState.isRunningOrScheduled()) {
-            runningOrScheduled.put(data.appUid, data);
+            runningOrScheduled.put(data.appId, data);
         }
-        deployed.put(data.appUid, data);
+        deployed.put(data.appId, data);
     }
 
     /**

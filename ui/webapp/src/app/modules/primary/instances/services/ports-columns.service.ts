@@ -58,7 +58,7 @@ export class PortsColumnsService {
 
   private getRating(r: NodeApplicationPort) {
     const currentStates = this.processes.processStates$.value;
-    const ps = ProcessesService.get(currentStates, r.appUid);
+    const ps = ProcessesService.get(currentStates, r.appId);
     const isRunning = ProcessesService.isRunning(ps.processState);
 
     if (!ps) {

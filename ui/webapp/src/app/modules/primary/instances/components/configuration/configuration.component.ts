@@ -31,15 +31,15 @@ export class ConfigurationComponent
   private readonly issueColApp: BdDataColumn<ApplicationValidationDto> = {
     id: 'app',
     name: 'Application',
-    data: (r) => this.getApplicationName(r.appUid),
+    data: (r) => this.getApplicationName(r.appId),
     width: '150px',
-    classes: (r) => (!r.appUid ? ['bd-hint-text'] : []),
+    classes: (r) => (!r.appId ? ['bd-hint-text'] : []),
   };
 
   private readonly issueColParam: BdDataColumn<ApplicationValidationDto> = {
     id: 'param',
     name: 'Parameter',
-    data: (r) => r.paramUid,
+    data: (r) => r.paramId,
     width: '200px',
   };
 
@@ -207,14 +207,14 @@ export class ConfigurationComponent
     return node.nodeName;
   }
 
-  /* template */ getApplicationName(uid: string) {
-    if (!uid) {
+  /* template */ getApplicationName(id: string) {
+    if (!id) {
       return 'Global';
     }
 
-    const cfg = this.edit.getApplicationConfiguration(uid);
+    const cfg = this.edit.getApplicationConfiguration(id);
     if (!cfg) {
-      return uid;
+      return id;
     }
 
     return cfg.name;

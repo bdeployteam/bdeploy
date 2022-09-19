@@ -110,7 +110,7 @@ export class ConfigProcessParamGroupComponent
   /* template */ customTemp: {
     isEdit: boolean;
     predecessor: string;
-    uid: string;
+    id: string;
     value: string;
   };
 
@@ -161,7 +161,7 @@ export class ConfigProcessParamGroupComponent
         grp.pairs.push(pair);
 
         // check if the param has a value (yet) - if yes, push it now to have the order right within the group (same as descriptor order).
-        const val = process.start?.parameters?.find((p) => p.uid === pd.uid);
+        const val = process.start?.parameters?.find((p) => p.id === pd.id);
         if (val) {
           pair.value = val;
         }
@@ -192,9 +192,7 @@ export class ConfigProcessParamGroupComponent
       // eslint-disable-next-line no-unsafe-optional-chaining
       for (const pv of process.start?.parameters) {
         if (
-          !app.descriptor?.startCommand?.parameters?.find(
-            (d) => d.uid === pv.uid
-          )
+          !app.descriptor?.startCommand?.parameters?.find((d) => d.id === pv.id)
         ) {
           // no descriptor -> custom
           this.custom.pairs.push({
@@ -307,15 +305,15 @@ export class ConfigProcessParamGroupComponent
       let initialValue = p.descriptor?.defaultValue;
       if (p.descriptor.global && this.globalsAllowed) {
         // need to lookup a potential already existing global value.
-        const global = this.edit.getGlobalParameter(p.descriptor.uid);
+        const global = this.edit.getGlobalParameter(p.descriptor.id);
         if (global) {
-          initialValue = this.edit.getGlobalParameter(p.descriptor.uid).value;
+          initialValue = this.edit.getGlobalParameter(p.descriptor.id).value;
         }
       }
 
       // create the new parameter.
       p.value = {
-        uid: p.descriptor.uid,
+        id: p.descriptor.id,
         value: initialValue,
         pinned: false,
         preRendered: [],
@@ -323,11 +321,11 @@ export class ConfigProcessParamGroupComponent
       this.doPreRender(p);
 
       // the correct insertion point is *before* the *succeeding* parameter definition, as custom parameters may succedd the *preceeding* one.
-      const myIndex = descriptors.findIndex((x) => x.uid === p.descriptor.uid);
+      const myIndex = descriptors.findIndex((x) => x.id === p.descriptor.id);
 
       // find the next descriptor which *has* a value *after* my own desciptor.
       const nextDesc = descriptors.find(
-        (v, i) => i > myIndex && !!paramList.find((x) => x.uid === v.uid)
+        (v, i) => i > myIndex && !!paramList.find((x) => x.id === v.id)
       );
 
       // if we don't have a next one, simply push it at the end of the list.
@@ -335,21 +333,21 @@ export class ConfigProcessParamGroupComponent
         paramList.push(p.value);
       } else {
         paramList.splice(
-          paramList.findIndex((x) => x.uid === nextDesc.uid),
+          paramList.findIndex((x) => x.id === nextDesc.id),
           0,
           p.value
         );
       }
     } else {
       paramList.splice(
-        paramList.findIndex((x) => x.uid === p.value.uid),
+        paramList.findIndex((x) => x.id === p.value.id),
         1
       );
 
       if (g.isCustom) {
         // COMPLETELY remove a custom parameter.
         const index = this.custom.pairs.findIndex(
-          (x) => x.value.uid === p.value.uid
+          (x) => x.value.id === p.value.id
         );
         this.custom.pairs.splice(index, 1);
 
@@ -367,17 +365,17 @@ export class ConfigProcessParamGroupComponent
     this.completions = this.buildCompletions();
   }
 
-  /* template */ getAllValueUids() {
+  /* template */ getAllValueIds() {
     return this.edit.process$.value.start.parameters
-      .map((x) => x.uid)
-      .filter((uid) => !this.customTemp.isEdit || uid !== this.customTemp.uid);
+      .map((x) => x.id)
+      .filter((id) => !this.customTemp.isEdit || id !== this.customTemp.id);
   }
 
-  /* template */ getAllValueUidLabels() {
-    return this.getAllValueUids().map(
+  /* template */ getAllValueIdLabels() {
+    return this.getAllValueIds().map(
       (u) =>
         this.edit.application$.value.descriptor.startCommand.parameters.find(
-          (x) => x.uid === u
+          (x) => x.id === u
         )?.name || u
     );
   }
@@ -388,10 +386,10 @@ export class ConfigProcessParamGroupComponent
   ) {
     // may not be (and is not) called for linkExpression (different editor).
     const parameters = this.edit.process$.value.start.parameters;
-    const paramIndex = parameters.findIndex((p) => p.uid === param.value.uid);
+    const paramIndex = parameters.findIndex((p) => p.id === param.value.id);
     this.customTemp = {
-      predecessor: paramIndex > 0 ? parameters[paramIndex - 1].uid : null,
-      uid: param.value.uid,
+      predecessor: paramIndex > 0 ? parameters[paramIndex - 1].id : null,
+      id: param.value.id,
       value: param.value.value.value,
       isEdit: true,
     };
@@ -412,7 +410,7 @@ export class ConfigProcessParamGroupComponent
       .subscribe((r) => {
         if (r) {
           // delete old parameter version
-          this.deleteCustomParameter(this.customTemp.uid);
+          this.deleteCustomParameter(this.customTemp.id);
           // insert updated parameter at the correct position.
           this.insertCustomParameterAtCorrectPosition();
         }
@@ -423,7 +421,7 @@ export class ConfigProcessParamGroupComponent
   /* template */ onAddCustomParameter(template: TemplateRef<any>) {
     this.customTemp = {
       predecessor: null,
-      uid: null,
+      id: null,
       value: null,
       isEdit: false,
     };
@@ -450,15 +448,15 @@ export class ConfigProcessParamGroupComponent
       });
   }
 
-  private deleteCustomParameter(uid: string) {
+  private deleteCustomParameter(id: string) {
     const pairIndex = this.custom.pairs.findIndex(
-      (pair) => pair.value.uid === uid
+      (pair) => pair.value.id === id
     );
     if (pairIndex >= 0) {
       this.custom.pairs.splice(pairIndex, 1);
     }
     const parameters = this.edit.process$.value.start.parameters;
-    const paramIndex = parameters.findIndex((p) => p.uid === uid);
+    const paramIndex = parameters.findIndex((p) => p.id === id);
     if (paramIndex >= 0) {
       parameters.splice(paramIndex, 1);
     }
@@ -468,7 +466,7 @@ export class ConfigProcessParamGroupComponent
     const param: ParameterPair = {
       descriptor: null,
       value: {
-        uid: this.customTemp.uid,
+        id: this.customTemp.id,
         value: createLinkedValue(this.customTemp.value),
         pinned: false,
         preRendered: [],
@@ -483,7 +481,7 @@ export class ConfigProcessParamGroupComponent
     } else {
       const predecessorIndex =
         this.edit.process$.value.start.parameters.findIndex(
-          (p) => p.uid === this.customTemp.predecessor
+          (p) => p.id === this.customTemp.predecessor
         );
       if (
         predecessorIndex ===
@@ -521,20 +519,20 @@ export class ConfigProcessParamGroupComponent
   }
 
   private doUpdateConditionals(p: ParameterPair) {
-    const uid = p.descriptor ? p.descriptor.uid : p.value.uid;
+    const id = p.descriptor ? p.descriptor.id : p.value.id;
     for (const grp of this.groups$.value) {
       for (const pair of grp.pairs) {
         // in case the value of a parameter is *referencing* this parameter, we need to update conditionals for the other parameter as well.
         if (
           pair.value?.value?.linkExpression &&
-          pair.value?.value?.linkExpression?.indexOf(':' + uid + '}}') > 0
+          pair.value?.value?.linkExpression?.indexOf(':' + id + '}}') > 0
         ) {
           // MIGHT be a reference to another application, but we update just in case.
           this.doUpdateConditionals(pair);
         }
       }
       for (const pair of grp.pairs) {
-        if (pair.descriptor?.condition?.parameter === uid) {
+        if (pair.descriptor?.condition?.parameter === id) {
           // the parameter is conditional on the changed parameter.
           this.edit.meetsConditionOnCurrent(pair.descriptor).subscribe((ok) => {
             const mustBeAdded = ok && !pair.value && pair.descriptor?.mandatory;
@@ -629,8 +627,8 @@ export class ConfigProcessParamGroupComponent
         return a.descriptor.name.localeCompare(b.descriptor.name);
       }
 
-      const ida = a.descriptor?.uid ? a.descriptor.uid : a.value.uid;
-      const idb = b.descriptor?.uid ? b.descriptor.uid : b.value.uid;
+      const ida = a.descriptor?.id ? a.descriptor.id : a.value.id;
+      const idb = b.descriptor?.id ? b.descriptor.id : b.value.id;
 
       return ida.localeCompare(idb);
     });

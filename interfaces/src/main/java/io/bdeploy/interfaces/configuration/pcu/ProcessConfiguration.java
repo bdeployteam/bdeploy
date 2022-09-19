@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.processing.Generated;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.configuration.dcu.EndpointsConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
@@ -26,7 +28,8 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
     /**
      * Globally unique identifier of the process configuration.
      */
-    public String uid;
+    @JsonAlias("uid")
+    public String id;
 
     /**
      * Name of the application, used for status reporting
@@ -59,7 +62,7 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
 
     @Override
     public int compareTo(ProcessConfiguration o) {
-        return uid.compareTo(o.uid);
+        return id.compareTo(o.id);
     }
 
     @Generated("Eclipse")
@@ -67,7 +70,7 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -84,11 +87,11 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
             return false;
         }
         ProcessConfiguration other = (ProcessConfiguration) obj;
-        if (uid == null) {
-            if (other.uid != null) {
+        if (id == null) {
+            if (other.id != null) {
                 return false;
             }
-        } else if (!uid.equals(other.uid)) {
+        } else if (!id.equals(other.id)) {
             return false;
         }
         return true;

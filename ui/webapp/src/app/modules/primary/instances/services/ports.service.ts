@@ -21,9 +21,9 @@ import { ProcessesService } from './processes.service';
 
 export interface NodeApplicationPort {
   node: string;
-  appUid: string;
+  appId: string;
   appName: string;
-  paramUid: string;
+  paramId: string;
   paramName: string;
   port: number;
   state: boolean;
@@ -110,7 +110,7 @@ export class PortsService {
             (a) => a.key.name === app.application.name
           )?.descriptor;
           const paramDesc = appDesc?.startCommand.parameters.find(
-            (p) => p.uid === param.uid
+            (p) => p.id === param.id
           );
 
           if (!paramDesc || paramDesc.type !== ParameterType.SERVER_PORT) {
@@ -119,9 +119,9 @@ export class PortsService {
 
           portsOfNode.push({
             node: node.nodeName,
-            appUid: app.uid,
+            appId: app.id,
             appName: app.name,
-            paramUid: param.uid,
+            paramId: param.id,
             paramName: paramDesc.name,
             port: Number(
               getRenderPreview(
@@ -145,7 +145,7 @@ export class PortsService {
             this.http
               .post<{ [key: number]: boolean }>(
                 `${this.apiPath(this.groups.current$.value.name)}/${
-                  instance.instanceConfiguration.uuid
+                  instance.instanceConfiguration.id
                 }/check-ports/${node.nodeName}`,
                 portsOfNode.map((na) => na.port),
                 {
@@ -155,7 +155,7 @@ export class PortsService {
               )
               .pipe(
                 measure(
-                  `Ports of ${instance.instanceConfiguration.uuid}/${node.nodeName}`
+                  `Ports of ${instance.instanceConfiguration.id}/${node.nodeName}`
                 )
               )
               .subscribe({

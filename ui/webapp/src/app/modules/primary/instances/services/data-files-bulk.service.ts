@@ -50,7 +50,7 @@ export class DataFilesBulkService {
   public downloadDataFile() {
     const path = this.apiPath(
       this.groups.current$.value.name,
-      this.instances.current$.value.instanceConfiguration.uuid
+      this.instances.current$.value.instanceConfiguration.id
     );
 
     const minion = this.selection[0]?.directory?.minion;

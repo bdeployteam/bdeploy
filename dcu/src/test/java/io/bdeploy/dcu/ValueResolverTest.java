@@ -53,12 +53,12 @@ class ValueResolverTest {
         DeploymentPathProvider dpp = new DeploymentPathProvider(fakeDeploy, "fakeId");
         InstanceNodeConfiguration dc = new InstanceNodeConfiguration();
         dc.name = "Fake Deployment";
-        dc.uuid = "fakeId";
+        dc.id = "fakeId";
 
         ApplicationConfiguration a1c = new ApplicationConfiguration();
         a1c.application = keyA1;
         a1c.name = "Application Number One";
-        a1c.uid = "fakeId";
+        a1c.id = "fakeId";
         a1c.start = new CommandConfiguration();
         a1c.start.executable = "rel/to/launcher.sh";
         a1c.start.parameters.add(fakeParam("a1p1", "a1p1-value", "--param=a1p1-value"));
@@ -100,7 +100,7 @@ class ValueResolverTest {
     private ParameterConfiguration fakeParam(String id, String value, String... preRendered) {
         ParameterConfiguration f = new ParameterConfiguration();
 
-        f.uid = id;
+        f.id = id;
         f.value = new LinkedValueConfiguration(value);
         f.preRendered.addAll(Arrays.asList(preRendered));
 

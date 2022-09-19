@@ -151,7 +151,7 @@ export class InstanceApplicationMoveEdit implements Edit {
       ...nodeConfig.controlGroups.map((cg) => cg.processOrder)
     );
     nodeConfig.applications.sort(
-      (a, b) => allApps.indexOf(a.uid) - allApps.indexOf(b.uid)
+      (a, b) => allApps.indexOf(a.id) - allApps.indexOf(b.id)
     );
 
     return current;
@@ -347,12 +347,12 @@ export class InstanceEditService {
       this.loading$.next(true);
       forkJoin({
         nodes: this.instances.loadNodes(
-          inst.instanceConfiguration.uuid,
+          inst.instanceConfiguration.id,
           inst.instance.tag
         ),
         minions: this.http.get<{ [key: string]: MinionDto }>(
           `${this.apiPath(this.groups.current$.value.name)}/${
-            inst.instanceConfiguration.uuid
+            inst.instanceConfiguration.id
           }/${inst.instance.tag}/minionConfiguration`
         ),
       })
@@ -512,7 +512,7 @@ export class InstanceEditService {
     return this.http
       .post(
         `${this.apiPath(this.groups.current$.value.name)}/${
-          state.config.config.uuid
+          state.config.config.id
         }/update`,
         update,
         { params: { managedServer, expect } }
@@ -581,7 +581,7 @@ export class InstanceEditService {
         autoStart: instance.autoStart,
         product: instance.product,
         purpose: instance.purpose,
-        uuid: instance.uuid,
+        id: instance.id,
         applications: [],
         controlGroups: [cloneDeep(DEF_CONTROL_GROUP)],
         variables: {},
@@ -589,8 +589,8 @@ export class InstanceEditService {
     };
   }
 
-  public getProcessEditState(uid: string): ProcessEditState {
-    // process UID must be unique across nodes, so we check all nodes for the process.
+  public getProcessEditState(id: string): ProcessEditState {
+    // process ID must be unique across nodes, so we check all nodes for the process.
     const baseNodes = this.base$.value?.config?.nodeDtos;
     const stateNodes = this.state$.value?.config?.nodeDtos;
 
@@ -598,25 +598,25 @@ export class InstanceEditService {
       return ProcessEditState.NONE;
     }
 
-    const baseNode = getNodeOfApplication(baseNodes, uid);
-    const stateNode = getNodeOfApplication(stateNodes, uid);
+    const baseNode = getNodeOfApplication(baseNodes, id);
+    const stateNode = getNodeOfApplication(stateNodes, id);
 
     const baseNodeApps = baseNode?.nodeConfiguration?.applications;
     const stateNodeApps = stateNode?.nodeConfiguration?.applications;
 
-    const baseAppIndex = baseNodeApps?.findIndex((a) => a.uid === uid);
-    const stateAppIndex = stateNodeApps?.findIndex((a) => a.uid === uid);
+    const baseAppIndex = baseNodeApps?.findIndex((a) => a.id === id);
+    const stateAppIndex = stateNodeApps?.findIndex((a) => a.id === id);
 
     const baseAppCg = baseNode?.nodeConfiguration?.controlGroups?.find((cg) =>
-      cg.processOrder.includes(uid)
+      cg.processOrder.includes(id)
     );
     const stateAppCg = stateNode?.nodeConfiguration?.controlGroups?.find((cg) =>
-      cg.processOrder.includes(uid)
+      cg.processOrder.includes(id)
     );
 
-    const baseAppCgIndex = baseAppCg?.processOrder?.findIndex((a) => a === uid);
+    const baseAppCgIndex = baseAppCg?.processOrder?.findIndex((a) => a === id);
     const stateAppCgIndex = stateAppCg?.processOrder?.findIndex(
-      (a) => a === uid
+      (a) => a === id
     );
 
     // if undefined, we just switch to "not found" - the node might not even exist.
@@ -628,7 +628,7 @@ export class InstanceEditService {
         : stateAppIndex;
 
     if (this.issues$.value?.length) {
-      const issues = this.issues$.value.filter((i) => i.appUid === uid);
+      const issues = this.issues$.value.filter((i) => i.appId === id);
       if (issues?.length) {
         return ProcessEditState.INVALID;
       }
@@ -691,7 +691,7 @@ export class InstanceEditService {
     this.http
       .post<ApplicationValidationDto[]>(
         `${this.apiPath(this.groups.current$.value.name)}/${
-          this.state$.value?.config.config.uuid
+          this.state$.value?.config.config.id
         }/validate`,
         upd
       )
@@ -712,7 +712,7 @@ export class InstanceEditService {
     forkJoin({
       update: this.http.post<InstanceUpdateDto>(
         `${this.apiPath(this.groups.current$.value.name)}/${
-          this.state$.value?.config.config.uuid
+          this.state$.value?.config.config.id
         }/updateProductVersion/${target.key.tag}`,
         upd
       ),
@@ -739,7 +739,7 @@ export class InstanceEditService {
   ): ProcessControlGroupConfiguration {
     if (!node.controlGroups?.length) {
       node.controlGroups = [cloneDeep(DEF_CONTROL_GROUP)];
-      node.controlGroups[0].processOrder = node.applications.map((a) => a.uid);
+      node.controlGroups[0].processOrder = node.applications.map((a) => a.id);
     }
     return node.controlGroups[node.controlGroups.length - 1];
   }
@@ -755,14 +755,14 @@ export class InstanceEditService {
         );
   }
 
-  public getApplicationConfiguration(uid: string) {
+  public getApplicationConfiguration(id: string) {
     if (!this.state$.value?.config?.nodeDtos?.length) {
       return null;
     }
     return getNodeOfApplication(
       this.state$.value?.config?.nodeDtos,
-      uid
-    )?.nodeConfiguration.applications.find((a) => a.uid === uid);
+      id
+    )?.nodeConfiguration.applications.find((a) => a.id === id);
   }
 
   public migrateGlobals(config: InstanceConfigurationDto) {
@@ -776,7 +776,7 @@ export class InstanceEditService {
 
         for (const param of app.start.parameters) {
           const paramDesc = desc.startCommand.parameters.find(
-            (d) => d.uid === param.uid
+            (d) => d.id === param.id
           );
           if (!paramDesc || !paramDesc.global) {
             continue;
@@ -802,7 +802,7 @@ export class InstanceEditService {
     param: ParameterConfiguration,
     desc: ParameterDescriptor
   ) {
-    const name = param.uid;
+    const name = param.id;
     const value = getPreRenderable(param.value); // do not expand. if it is an expression it should stay so.
     const description = `${desc.name}`;
 

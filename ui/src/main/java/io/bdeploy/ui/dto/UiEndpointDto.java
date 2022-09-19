@@ -1,5 +1,7 @@
 package io.bdeploy.ui.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 
 /**
@@ -8,7 +10,8 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 public class UiEndpointDto {
 
     /** Unique identifier of the application */
-    public String uuid;
+    @JsonAlias("uuid")
+    public String id;
 
     /** For display: the name of the application */
     public String appName;

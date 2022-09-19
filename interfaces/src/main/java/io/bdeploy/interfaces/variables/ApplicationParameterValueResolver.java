@@ -7,13 +7,13 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
  */
 public class ApplicationParameterValueResolver extends PrefixResolver {
 
-    private final String appUid;
+    private final String appId;
     private final ApplicationParameterProvider provider;
 
-    public ApplicationParameterValueResolver(String appUid, InstanceNodeConfiguration nodeConfig) {
+    public ApplicationParameterValueResolver(String appId, InstanceNodeConfiguration nodeConfig) {
         super(Variables.PARAMETER_VALUE);
         this.provider = new ApplicationParameterProvider(nodeConfig);
-        this.appUid = appUid;
+        this.appId = appId;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class ApplicationParameterValueResolver extends PrefixResolver {
         if (variable.contains(":")) {
             return null;
         }
-        return provider.getValueById(appUid, variable);
+        return provider.getValueById(appId, variable);
     }
 
 }

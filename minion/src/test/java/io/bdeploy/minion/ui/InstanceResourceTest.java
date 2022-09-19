@@ -138,7 +138,7 @@ class InstanceResourceTest {
         {
             InstanceNodeConfiguration nodeConfig = new InstanceNodeConfiguration();
             nodeConfig.applications.add(TestFactory.createAppConfig(product));
-            nodeConfig.uuid = instanceConfig.uuid;
+            nodeConfig.id = instanceConfig.id;
             nodeConfig.autoStart = true;
             // wrong name (intentionally). the backend must correct the name.
             nodeConfig.name = "DemoInstance-Node1-Config";
@@ -191,7 +191,7 @@ class InstanceResourceTest {
 
             for (String nodeName : nodeNames) {
                 InstanceNodeConfiguration nodeConfig = new InstanceNodeConfiguration();
-                nodeConfig.uuid = UuidHelper.randomId();
+                nodeConfig.id = UuidHelper.randomId();
                 nodeConfig.applications.add(TestFactory.createAppConfig(product));
 
                 Key instanceNodeKey = new InstanceNodeManifest.Builder().setInstanceNodeConfiguration(nodeConfig)
@@ -243,7 +243,7 @@ class InstanceResourceTest {
 
         InstanceConfiguration instance = new InstanceConfiguration();
         instance.product = product;
-        instance.uuid = root.createUuid(group.name);
+        instance.id = root.createId(group.name);
         instance.name = "My Instance";
         instance.purpose = InstancePurpose.PRODUCTIVE;
 
@@ -251,19 +251,19 @@ class InstanceResourceTest {
 
         assertEquals(1, res.list().size());
 
-        InstanceConfiguration read = res.read(instance.uuid);
+        InstanceConfiguration read = res.read(instance.id);
         assertEquals(product, read.product);
-        assertEquals(instance.uuid, read.uuid);
+        assertEquals(instance.id, read.id);
         assertEquals("My Instance", read.name);
         assertEquals(InstancePurpose.PRODUCTIVE, read.purpose);
 
         read.name = "New Desc";
-        res.update(instance.uuid, new InstanceUpdateDto(new InstanceConfigurationDto(read, null), null), null, "1");
+        res.update(instance.id, new InstanceUpdateDto(new InstanceConfigurationDto(read, null), null), null, "1");
 
-        InstanceConfiguration reread = res.read(instance.uuid);
+        InstanceConfiguration reread = res.read(instance.id);
         assertEquals("New Desc", reread.name);
 
-        res.delete(instance.uuid);
+        res.delete(instance.id);
         assertTrue(res.list().isEmpty());
     }
 
@@ -283,27 +283,27 @@ class InstanceResourceTest {
 
         InstanceConfiguration instance = new InstanceConfiguration();
         instance.product = product;
-        instance.uuid = root.createUuid(group.name);
+        instance.id = root.createId(group.name);
         instance.name = "My Instance";
         instance.purpose = InstancePurpose.PRODUCTIVE;
 
         res.create(instance, null);
 
         instance.name = "My modified Instance";
-        res.update(instance.uuid, new InstanceUpdateDto(new InstanceConfigurationDto(instance, null), null), null, "1");
+        res.update(instance.id, new InstanceUpdateDto(new InstanceConfigurationDto(instance, null), null), null, "1");
 
-        InstanceConfiguration read = res.read(instance.uuid);
+        InstanceConfiguration read = res.read(instance.id);
         assertEquals(read.name, instance.name);
 
-        List<InstanceVersionDto> listVersions = res.listVersions(instance.uuid);
+        List<InstanceVersionDto> listVersions = res.listVersions(instance.id);
         assertEquals(2, listVersions.size());
         assertEquals("1", listVersions.get(0).key.getTag());
         assertEquals("2", listVersions.get(1).key.getTag());
 
-        InstanceConfiguration readVersion = res.readVersion(instance.uuid, "1");
+        InstanceConfiguration readVersion = res.readVersion(instance.id, "1");
         assertEquals("My Instance", readVersion.name);
 
-        assertThrows(NotFoundException.class, () -> res.readVersion(instance.uuid, "3"));
+        assertThrows(NotFoundException.class, () -> res.readVersion(instance.id, "3"));
     }
 
     @Test
@@ -322,7 +322,7 @@ class InstanceResourceTest {
 
         InstanceConfiguration instance = new InstanceConfiguration();
         instance.product = product;
-        instance.uuid = root.createUuid(group.name);
+        instance.id = root.createId(group.name);
         instance.name = "My Instance";
         instance.purpose = InstancePurpose.PRODUCTIVE;
 
@@ -335,7 +335,7 @@ class InstanceResourceTest {
         }
 
         // it is free now
-        Map<Integer, Boolean> portStates = root.getInstanceResource("demo").getPortStates(instance.uuid, "master",
+        Map<Integer, Boolean> portStates = root.getInstanceResource("demo").getPortStates(instance.id, "master",
                 Collections.singletonList(port));
         assertEquals(1, portStates.size());
         assertEquals(Boolean.FALSE, portStates.get(port));
@@ -343,7 +343,7 @@ class InstanceResourceTest {
         try (ServerSocket ss = new ServerSocket(port)) {
             ss.setReuseAddress(true);
 
-            portStates = root.getInstanceResource("demo").getPortStates(instance.uuid, "master", Collections.singletonList(port));
+            portStates = root.getInstanceResource("demo").getPortStates(instance.id, "master", Collections.singletonList(port));
             assertEquals(1, portStates.size());
             assertEquals(Boolean.TRUE, portStates.get(port));
         }

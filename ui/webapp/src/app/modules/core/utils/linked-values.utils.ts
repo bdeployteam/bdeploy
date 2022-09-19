@@ -171,13 +171,13 @@ export function gatherProcessExpansions(
       if (
         node.nodeName === CLIENT_NODE_NAME &&
         app.name === process?.name &&
-        app.uid !== process?.uid
+        app.id !== process?.id
       ) {
         // client app for different OS - this is actually not well supported, we cannot resolve parameters of this.
         continue;
       }
       for (const param of app.start.parameters) {
-        if (app.uid === process.uid) {
+        if (app.id === process.id) {
           // we already have the unqualified version in the expansions.
           continue;
         }
@@ -197,16 +197,16 @@ function processParameter(
   apps: ApplicationDto[],
   result: LinkVariable[]
 ) {
-  let link = `{{V:${app.name}:${param.uid}}}`;
+  let link = `{{V:${app.name}:${param.id}}}`;
   let group = app.name;
   if (thisApp) {
-    link = `{{V:${param.uid}}}`;
+    link = `{{V:${param.id}}}`;
     group = `${app.name} (This Application)`;
   }
 
   // just for display - this is OK as value and expression, no need to expand.
   let value = getPreRenderable(param.value);
-  let label = param.uid;
+  let label = param.id;
   let desc = '';
 
   // process value according to type is possible and required.
@@ -215,7 +215,7 @@ function processParameter(
   )?.descriptor;
   if (appDesc) {
     for (const paramDesc of appDesc.startCommand.parameters) {
-      if (paramDesc.uid === param.uid) {
+      if (paramDesc.id === param.id) {
         label = paramDesc.name;
         desc = paramDesc.longDescription;
         value = getMaskedPreRenderable(param.value, paramDesc.type);
@@ -341,7 +341,7 @@ export function gatherSpecialExpansions(
   result.push({
     name: 'I:UUID',
     description: `The instance ID`,
-    preview: instance?.config?.uuid,
+    preview: instance?.config?.id,
     link: '{{I:UUID}}',
     group: null,
   });
@@ -384,7 +384,7 @@ export function gatherSpecialExpansions(
     result.push({
       name: 'A:UUID',
       description: `The application ID`,
-      preview: process.uid,
+      preview: process.id,
       link: '{{A:UUID}}',
       group: null,
     });

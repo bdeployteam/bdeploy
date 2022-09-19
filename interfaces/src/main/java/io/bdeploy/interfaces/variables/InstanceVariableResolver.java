@@ -25,8 +25,10 @@ public class InstanceVariableResolver extends PrefixResolver {
         switch (variable) {
             case "SYSTEM_PURPOSE":
                 return incf.purpose == null ? "" : incf.purpose.name();
-            case "UUID":
-                return incf.uuid;
+            case "ID":
+                return incf.id;
+            case "UUID": // deprecated/old
+                return incf.id;
             case "TAG":
                 return tag;
             case "NAME":

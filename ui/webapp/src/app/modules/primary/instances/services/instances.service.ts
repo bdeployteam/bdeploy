@@ -112,7 +112,7 @@ export class InstancesService {
       this.serversService.servers$,
     ]).subscribe(([cur, act, servers]) => {
       this.importURL$.next(
-        `${this.apiPath(this.group)}/${cur?.instanceConfiguration?.uuid}/import`
+        `${this.apiPath(this.group)}/${cur?.instanceConfiguration?.id}/import`
       );
       clearInterval(this.activeLoadInterval);
       clearInterval(this.activeCheckInterval);
@@ -187,7 +187,7 @@ export class InstancesService {
   public deleteVersion(version: string) {
     return this.http.delete(
       `${this.apiPath(this.group)}/${
-        this.current$.value.instanceConfiguration.uuid
+        this.current$.value.instanceConfiguration.id
       }/deleteVersion/${version}`
     );
   }
@@ -212,7 +212,7 @@ export class InstancesService {
     this.http
       .post(
         `${this.apiPath(this.group)}/${
-          origin.instanceConfiguration.uuid
+          origin.instanceConfiguration.id
         }/request/${dir.minion}`,
         entry,
         { responseType: 'text' }
@@ -220,7 +220,7 @@ export class InstancesService {
       .subscribe((token) => {
         this.downloads.download(
           `${this.apiPath(this.group)}/${
-            origin.instanceConfiguration.uuid
+            origin.instanceConfiguration.id
           }/stream/${token}`
         );
       });
@@ -239,9 +239,9 @@ export class InstancesService {
     }
 
     return this.http.post<StringEntryChunkDto>(
-      `${this.apiPath(this.group)}/${
-        origin.instanceConfiguration.uuid
-      }/content/${dir.minion}`,
+      `${this.apiPath(this.group)}/${origin.instanceConfiguration.id}/content/${
+        dir.minion
+      }`,
       entry,
       {
         params: { offset: offset.toString(), length: length.toString() },
@@ -256,7 +256,7 @@ export class InstancesService {
     return this.http
       .post<HistoryResultDto>(
         `${this.apiPath(this.group)}/${
-          this.current$.value.instanceConfiguration.uuid
+          this.current$.value.instanceConfiguration.id
         }/history`,
         filter
       )
@@ -276,7 +276,7 @@ export class InstancesService {
     return this.http
       .post(
         `${this.apiPath(this.group)}/${
-          this.current$.value.instanceConfiguration.uuid
+          this.current$.value.instanceConfiguration.id
         }/banner`,
         banner
       )
@@ -285,7 +285,7 @@ export class InstancesService {
 
   public export(tag: string) {
     const url = `${this.apiPath(this.group)}/${
-      this.current$.value.instanceConfiguration.uuid
+      this.current$.value.instanceConfiguration.id
     }/export/${tag}`;
     this.downloads.download(url);
   }
@@ -314,7 +314,7 @@ export class InstancesService {
         this.instances$.next(instances);
         this.overallStates$.next(
           instances.map((x) => ({
-            uuid: x.instanceConfiguration.uuid,
+            id: x.instanceConfiguration.id,
             ...x.overallState,
           }))
         );
@@ -338,7 +338,7 @@ export class InstancesService {
         measure('Sync and fetch instance state')
       )
       .subscribe((s) => {
-        // merge the result according to uuid in the existing list.
+        // merge the result according to id in the existing list.
         this.updateStatusDtos(s);
       });
   }
@@ -346,7 +346,7 @@ export class InstancesService {
   public updateStatusDtos(s: InstanceOverallStatusDto[]) {
     const old = this.overallStates$.value || [];
     s.forEach((x) => {
-      const i = old.findIndex((y) => y.uuid === x.uuid);
+      const i = old.findIndex((y) => y.id === x.id);
       if (i !== -1) {
         old.splice(i, 1, x);
       } else {
@@ -368,9 +368,9 @@ export class InstancesService {
         { scope: [group] },
         (change) => {
           if (
-            !!this.current$.value?.instanceConfiguration?.uuid &&
+            !!this.current$.value?.instanceConfiguration?.id &&
             !change.scope.scope.includes(
-              this.current$.value.instanceConfiguration.uuid
+              this.current$.value.instanceConfiguration.id
             )
           ) {
             this.othersNeedReload$.next(true); // when switching to another instance, we need to reload all.
@@ -388,7 +388,7 @@ export class InstancesService {
               this.http
                 .get<InstanceBannerRecord>(
                   `${this.apiPath(this.group)}/${
-                    this.active$.value.instanceConfiguration.uuid
+                    this.active$.value.instanceConfiguration.id
                   }/banner`
                 )
                 .subscribe((banner) => {
@@ -404,7 +404,7 @@ export class InstancesService {
 
   private loadCurrentAndActive(i: string) {
     const inst = this.instances$.value?.find(
-      (x) => x.instanceConfiguration.uuid === i
+      (x) => x.instanceConfiguration.id === i
     );
 
     // we can always set the *current* version.
@@ -421,7 +421,7 @@ export class InstancesService {
     }
 
     if (
-      i === this.active$.value?.instanceConfiguration?.uuid &&
+      i === this.active$.value?.instanceConfiguration?.id &&
       inst.activeVersion.tag === this.active$.value?.instance?.tag
     ) {
       // we already have the active version loaded, nothing to do.
@@ -433,7 +433,7 @@ export class InstancesService {
     if (inst.activeVersion.tag !== inst.instance.tag) {
       activeFetch = this.http
         .get<InstanceConfiguration>(
-          `${this.apiPath(this.group)}/${inst.instanceConfiguration.uuid}/${
+          `${this.apiPath(this.group)}/${inst.instanceConfiguration.id}/${
             inst.activeVersion.tag
           }`
         )
@@ -455,7 +455,7 @@ export class InstancesService {
     activeFetch.subscribe((act) => {
       this.httpReplayService
         .get<InstanceNodeConfigurationListDto>(
-          `${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/${
+          `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${
             act.activeVersion.tag
           }/nodeConfiguration`
         )
@@ -490,7 +490,7 @@ export class InstancesService {
 
     this.http
       .get<{ [minionName: string]: MinionStatusDto }>(
-        `${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/${
+        `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${
           act.activeVersion.tag
         }/minionState`
       )
@@ -507,7 +507,7 @@ export class InstancesService {
     };
     this.http
       .post<HistoryResultDto>(
-        `${this.apiPath(this.group)}/${act.instanceConfiguration.uuid}/history`,
+        `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/history`,
         historyFilter
       )
       .pipe(measure('Active Instance History'))

@@ -83,7 +83,7 @@ public class ProcessController {
     private static final String DEFAULT_USER = ApiAccessToken.SYSTEM_USER;
 
     private final Path processDir;
-    private final String instanceUid;
+    private final String instanceId;
     private final String instanceTag;
     private final ProcessConfiguration processConfig;
 
@@ -160,7 +160,7 @@ public class ProcessController {
     /**
      * Creates a new process controller for the given configuration.
      *
-     * @param instanceUid
+     * @param instanceId
      *            unique identifier of the parent instance
      * @param instanceTag
      *            unique identifier of the parent instance version
@@ -170,15 +170,15 @@ public class ProcessController {
      *            the "runtime" directory, used for data specific to this
      *            launch
      */
-    public ProcessController(String instanceUid, String instanceTag, ProcessConfiguration pc, Path processDir) {
-        this.logger.setMdcValue(instanceUid, instanceTag, pc.uid);
-        this.instanceUid = instanceUid;
+    public ProcessController(String instanceId, String instanceTag, ProcessConfiguration pc, Path processDir) {
+        this.logger.setMdcValue(instanceId, instanceTag, pc.id);
+        this.instanceId = instanceId;
         this.instanceTag = instanceTag;
         this.processConfig = pc;
         this.recoverAttempts = pc.processControl.noOfRetries;
         this.processDir = processDir;
         this.executorService = Executors.newSingleThreadScheduledExecutor(
-                new ThreadFactoryBuilder().setDaemon(true).setNameFormat(processConfig.uid).build());
+                new ThreadFactoryBuilder().setDaemon(true).setNameFormat(processConfig.id).build());
     }
 
     @Override
@@ -278,10 +278,10 @@ public class ProcessController {
     public ProcessStatusDto getStatus() {
         ProcessStatusDto dto = new ProcessStatusDto();
         dto.processState = processState;
-        dto.appUid = processConfig.uid;
+        dto.appId = processConfig.id;
         dto.appName = processConfig.name;
         dto.instanceTag = instanceTag;
-        dto.instanceUid = instanceUid;
+        dto.instanceId = instanceId;
         if (processHandle != null) {
             dto.pid = processHandle.pid();
         }
@@ -516,7 +516,7 @@ public class ProcessController {
     private void doStop() {
         // Do nothing if already stopped
         if (processState.isStopped()) {
-            logger.log(l -> l.debug("Process already in state {}: {} - doing nothing", processState, processConfig.uid));
+            logger.log(l -> l.debug("Process already in state {}: {} - doing nothing", processState, processConfig.id));
             return;
         }
 
@@ -1121,7 +1121,7 @@ public class ProcessController {
 
     /** Returns a new-instance of this controller without any runtime data */
     ProcessController newInstance() {
-        return new ProcessController(instanceUid, instanceTag, processConfig, processDir);
+        return new ProcessController(instanceId, instanceTag, processConfig, processDir);
     }
 
     /** Returns the future that is scheduled to recover a crashed application */

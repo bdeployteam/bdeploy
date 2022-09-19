@@ -65,11 +65,11 @@ public class ApplicationParameterProvider {
      * @return the value of the specified parameter.
      */
     public ApplicationConfiguration getAppById(String appId) {
-        return config.applications.stream().filter(a -> a.uid.equals(appId)).collect(MoreCollectors.onlyElement());
+        return config.applications.stream().filter(a -> a.id.equals(appId)).collect(MoreCollectors.onlyElement());
     }
 
     public String getParam(ApplicationConfiguration app, String paramId) {
-        List<ParameterConfiguration> params = app.start.parameters.stream().filter(p -> p.uid.equals(paramId)).toList();
+        List<ParameterConfiguration> params = app.start.parameters.stream().filter(p -> p.id.equals(paramId)).toList();
         if (params.size() != 1) {
             throw new IllegalArgumentException(
                     "Cannot find unique parameter " + paramId + " for application " + app.name + ", found " + params.size());

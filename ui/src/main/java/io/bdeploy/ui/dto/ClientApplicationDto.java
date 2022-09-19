@@ -1,5 +1,7 @@
 package io.bdeploy.ui.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 
 /**
@@ -8,7 +10,8 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 public class ClientApplicationDto {
 
     /** Unique identifier of the application */
-    public String uuid;
+    @JsonAlias("uuid")
+    public String id;
 
     /** Custom user defined description */
     public String description;

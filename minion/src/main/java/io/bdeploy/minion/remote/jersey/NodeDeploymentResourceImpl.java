@@ -125,7 +125,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         InstanceDeploymentInformationApi desc = new InstanceDeploymentInformationApi();
         InstanceNodeConfiguration cfg = inm.getConfiguration();
         desc.instance = new InstanceConfigurationApi();
-        desc.instance.uuid = cfg.uuid;
+        desc.instance.uuid = cfg.id;
         desc.instance.name = cfg.name;
         desc.instance.product = cfg.product;
         desc.instance.purpose = cfg.purpose == null ? null : InstancePurposeApi.valueOf(cfg.purpose.name());
@@ -193,7 +193,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         SortedSet<Key> manifests = InstanceNodeManifest.scan(root.getHive());
         for (Key key : manifests) {
             InstanceNodeManifest mf = InstanceNodeManifest.of(root.getHive(), key);
-            if (!mf.getUUID().equals(instanceId)) {
+            if (!mf.getId().equals(instanceId)) {
                 continue;
             }
             return mf;
@@ -240,7 +240,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
                 entry.lastModified = asFile.lastModified();
                 entry.size = asFile.length();
                 entry.root = SpecialDirectory.DATA;
-                entry.uuid = instanceId;
+                entry.id = instanceId;
                 entry.tag = activeKey.getTag(); // providing the tag of the active version here
 
                 result.add(entry);
@@ -253,8 +253,8 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     }
 
     @Override
-    public void updateDataEntries(String uuid, List<FileStatusDto> updates) {
-        Path dataDir = new DeploymentPathProvider(root.getDeploymentDir().resolve(uuid), null).get(SpecialDirectory.DATA);
+    public void updateDataEntries(String id, List<FileStatusDto> updates) {
+        Path dataDir = new DeploymentPathProvider(root.getDeploymentDir().resolve(id), null).get(SpecialDirectory.DATA);
 
         for (FileStatusDto update : updates) {
             Path actual = dataDir.resolve(update.file);
@@ -278,7 +278,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
                         break;
                 }
             } catch (IOException e) {
-                throw new WebApplicationException("Cannot update " + update.file + " in " + uuid, e, Status.BAD_REQUEST);
+                throw new WebApplicationException("Cannot update " + update.file + " in " + id, e, Status.BAD_REQUEST);
             }
         }
     }

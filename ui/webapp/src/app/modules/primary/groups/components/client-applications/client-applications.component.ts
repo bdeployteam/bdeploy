@@ -25,8 +25,8 @@ const clientNameColumn: BdDataColumn<ClientApp> = {
 
 const clientIdColumn: BdDataColumn<ClientApp> = {
   id: 'id',
-  name: 'App. UUID',
-  data: (r) => (r.client ? r.client.uuid : r.endpoint.uuid),
+  name: 'App. ID',
+  data: (r) => (r.client ? r.client.id : r.endpoint.id),
   hint: BdDataColumnTypeHint.DETAILS,
   icon: () => 'computer',
 };
@@ -81,7 +81,7 @@ export class ClientApplicationsComponent implements OnInit {
     if (row.client) {
       return [
         '',
-        { outlets: { panel: ['panels', 'groups', 'client', row.client.uuid] } },
+        { outlets: { panel: ['panels', 'groups', 'client', row.client.id] } },
       ];
     } else {
       return [
@@ -92,7 +92,7 @@ export class ClientApplicationsComponent implements OnInit {
               'panels',
               'groups',
               'endpoint',
-              row.endpoint.uuid,
+              row.endpoint.id,
               row.endpoint.endpoint.id,
             ],
           },

@@ -57,7 +57,7 @@ export class MoveProcessComponent implements OnDestroy {
 
       this.currentNode = state.config.nodeDtos.find(
         (n) =>
-          !!n.nodeConfiguration.applications.find((a) => a.uid === process.uid)
+          !!n.nodeConfiguration.applications.find((a) => a.id === process.id)
       );
 
       const result: NodeRow[] = [];
@@ -130,9 +130,7 @@ export class MoveProcessComponent implements OnDestroy {
     }
 
     targetApps.push(cfg);
-    this.instanceEdit
-      .getLastControlGroup(targetNode)
-      .processOrder.push(cfg.uid);
+    this.instanceEdit.getLastControlGroup(targetNode).processOrder.push(cfg.id);
     this.instanceEdit.conceal(
       `Move ${cfg.name} from ${this.niceName(this.currentNode.nodeName)} to ${
         node.name

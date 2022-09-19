@@ -183,7 +183,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     this.edit.node$.value.nodeConfiguration.applications.push(cfg);
     this.instanceEdit
       .getLastControlGroup(this.edit.node$.value.nodeConfiguration)
-      .processOrder.push(cfg.uid);
+      .processOrder.push(cfg.id);
     this.instanceEdit.conceal(`Paste ${cfg.name}`);
   }
 
@@ -256,9 +256,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
           }
 
           // Generate unique identifier
-          this.groups.newUuid().subscribe((uid) => {
+          this.groups.newId().subscribe((id) => {
             appConfig.application.tag = product.key.tag;
-            appConfig.uid = uid;
+            appConfig.id = id;
 
             // no need to update mandatory (etc.) parameters here. the normal validation
             // will trigger according errors which need to be manually fixed by the user.
@@ -275,9 +275,9 @@ export class AddProcessComponent implements OnInit, OnDestroy {
               (p) => p.global
             );
             for (const global of globals) {
-              const existing = this.edit.getGlobalParameter(global.uid);
+              const existing = this.edit.getGlobalParameter(global.id);
               const own = appConfig.start.parameters.find(
-                (p) => p.uid === global.uid
+                (p) => p.id === global.id
               );
               if (existing && own) {
                 own.value = existing.value;
@@ -305,7 +305,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     if (!!row.template && !!row.template.templateVariables?.length) {
       this.response = {};
       for (const v of row.template.templateVariables) {
-        this.response[v.uid] = v.defaultValue;
+        this.response[v.id] = v.defaultValue;
       }
       this.selectedTemplate = row.template;
 
@@ -363,7 +363,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     variables: { [key: string]: string }
   ) {
     for (const v of template.templateVariables) {
-      if (!variables[v.uid]) {
+      if (!variables[v.id]) {
         return false;
       }
     }

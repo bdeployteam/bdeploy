@@ -13,7 +13,7 @@
     <div fxLayout="column" fxLayoutGap="10px" *ngIf="app$ | async as app">
       <div gdColumns="80px auto" gdGap="5px">
         <strong>ID:</strong>
-        <div>{{ app.client.uuid }}</div>
+        <div>{{ app.client.id }}</div>
         <strong>Name:</strong>
         <div>{{ app.client.description }}</div>
         <strong>Instance:</strong>
@@ -27,8 +27,8 @@
         <div fxLayout="row" class="local-graph" fxFlex="1 0 100px">
           <app-client-usage-graph
             fxFlex="1 0 auto"
-            [appUid]="app.client.uuid"
-            [instanceUid]="app.instance.uuid"
+            [appId]="app.client.id"
+            [instanceId]="app.instance.id"
           ></app-client-usage-graph>
         </div>
       </app-bd-expand-button>

@@ -45,35 +45,35 @@ class DataFilesTest {
         InstanceManifest im = InstanceManifest.of(local, instance);
         InstanceResource ir = igr.getInstanceResource("demo");
 
-        ir.install(im.getConfiguration().uuid, instance.getTag());
-        ir.activate(im.getConfiguration().uuid, instance.getTag());
+        ir.install(im.getConfiguration().id, instance.getTag());
+        ir.activate(im.getConfiguration().id, instance.getTag());
 
         FileStatusDto newFile = new FileStatusDto();
         newFile.type = FileStatusType.ADD;
         newFile.file = "test.txt";
         newFile.content = Base64.getEncoder().encodeToString("Test String".getBytes(StandardCharsets.UTF_8));
 
-        ir.updateDataFiles(im.getConfiguration().uuid, "master", Collections.singletonList(newFile));
+        ir.updateDataFiles(im.getConfiguration().id, "master", Collections.singletonList(newFile));
 
         assertThrows(BadRequestException.class, () -> {
-            ir.updateDataFiles(im.getConfiguration().uuid, "master", Collections.singletonList(newFile));
+            ir.updateDataFiles(im.getConfiguration().id, "master", Collections.singletonList(newFile));
         });
 
-        List<RemoteDirectory> snapshot = ir.getProcessResource(im.getConfiguration().uuid).getDataDirSnapshot();
+        List<RemoteDirectory> snapshot = ir.getProcessResource(im.getConfiguration().id).getDataDirSnapshot();
         assertEquals(1, snapshot.size());
 
         RemoteDirectory dataDir = snapshot.get(0);
-        assertEquals(im.getConfiguration().uuid, dataDir.uuid);
+        assertEquals(im.getConfiguration().id, dataDir.id);
         assertEquals("master", dataDir.minion);
         assertEquals(1, dataDir.entries.size());
 
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            String token = ir.getContentStreamRequest(dataDir.uuid, dataDir.minion, dataDir.entries.get(0));
-            StreamHelper.copy(ir.getContentStream(dataDir.uuid, token).readEntity(InputStream.class), os);
+            String token = ir.getContentStreamRequest(dataDir.id, dataDir.minion, dataDir.entries.get(0));
+            StreamHelper.copy(ir.getContentStream(dataDir.id, token).readEntity(InputStream.class), os);
             assertEquals("Test String", os.toString(StandardCharsets.UTF_8)); // response stream NOT encoded!
         }
 
-        StringEntryChunkDto contentChunk = ir.getContentChunk(dataDir.uuid, dataDir.minion, dataDir.entries.get(0), 0, 4096);
+        StringEntryChunkDto contentChunk = ir.getContentChunk(dataDir.id, dataDir.minion, dataDir.entries.get(0), 0, 4096);
         assertNotNull(contentChunk.content);
         assertEquals("Test String", contentChunk.content);
 
@@ -82,26 +82,26 @@ class DataFilesTest {
         updateFile.file = "test.txt";
         updateFile.content = Base64.getEncoder().encodeToString("Another Test".getBytes(StandardCharsets.UTF_8));
 
-        ir.updateDataFiles(im.getConfiguration().uuid, "master", Collections.singletonList(updateFile));
+        ir.updateDataFiles(im.getConfiguration().id, "master", Collections.singletonList(updateFile));
 
-        snapshot = ir.getProcessResource(im.getConfiguration().uuid).getDataDirSnapshot();
+        snapshot = ir.getProcessResource(im.getConfiguration().id).getDataDirSnapshot();
         assertEquals(1, snapshot.size());
 
         dataDir = snapshot.get(0);
-        assertEquals(im.getConfiguration().uuid, dataDir.uuid);
+        assertEquals(im.getConfiguration().id, dataDir.id);
         assertEquals("master", dataDir.minion);
         assertEquals(1, dataDir.entries.size());
 
-        contentChunk = ir.getContentChunk(dataDir.uuid, dataDir.minion, dataDir.entries.get(0), 0, 4096);
+        contentChunk = ir.getContentChunk(dataDir.id, dataDir.minion, dataDir.entries.get(0), 0, 4096);
         assertEquals("Another Test", contentChunk.content);
 
         FileStatusDto deleteFile = new FileStatusDto();
         deleteFile.type = FileStatusType.DELETE;
         deleteFile.file = "test.txt";
 
-        ir.updateDataFiles(im.getConfiguration().uuid, "master", Collections.singletonList(deleteFile));
+        ir.updateDataFiles(im.getConfiguration().id, "master", Collections.singletonList(deleteFile));
 
-        snapshot = ir.getProcessResource(im.getConfiguration().uuid).getDataDirSnapshot();
+        snapshot = ir.getProcessResource(im.getConfiguration().id).getDataDirSnapshot();
         assertEquals(1, snapshot.size());
         assertEquals(0, snapshot.get(0).entries.size());
     }

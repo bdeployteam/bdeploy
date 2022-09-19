@@ -1,11 +1,14 @@
 package io.bdeploy.interfaces.descriptor.template;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public class TemplateParameter {
 
     /**
      * The UID of the parameter as defined in the applications app-info.yaml.
      */
-    public String uid;
+    @JsonAlias("uid")
+    public String id;
 
     /**
      * The value that should be assigned to the parameter.

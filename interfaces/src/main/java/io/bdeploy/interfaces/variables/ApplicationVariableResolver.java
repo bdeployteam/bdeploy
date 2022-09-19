@@ -14,8 +14,10 @@ public class ApplicationVariableResolver extends PrefixResolver {
     @Override
     protected String doResolve(String variable) {
         switch (variable) {
-            case "UUID":
-                return appConfig.uid;
+            case "ID":
+                return appConfig.id;
+            case "UUID": // deprecated/old
+                return appConfig.id;
             case "NAME":
                 return appConfig.name;
             default:

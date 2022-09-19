@@ -44,7 +44,7 @@ export class EditUniqueValueValidatorDirective
     const ok = !this.disallowedValues.includes(value);
 
     if (!ok) {
-      errors[this.id] = 'UID is not unique';
+      errors[this.id] = 'ID is not unique';
     }
 
     return errors;

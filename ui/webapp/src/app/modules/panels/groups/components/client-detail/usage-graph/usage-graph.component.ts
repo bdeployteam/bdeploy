@@ -12,8 +12,8 @@ const PERC_PER_DAY = 100 / 29;
   styleUrls: ['./usage-graph.component.css'],
 })
 export class ClientUsageGraphComponent implements OnChanges {
-  @Input() instanceUid: string;
-  @Input() appUid: string;
+  @Input() instanceId: string;
+  @Input() appId: string;
 
   private usage: ClientUsagePerApp[];
 
@@ -27,14 +27,14 @@ export class ClientUsageGraphComponent implements OnChanges {
   constructor(private clients: ClientsUsageService) {}
 
   ngOnChanges(): void {
-    this.clients.load(this.instanceUid).subscribe((usage) => {
+    this.clients.load(this.instanceId).subscribe((usage) => {
       this.usage = usage;
       this.update();
     });
   }
 
   private update() {
-    const usageOfApp = this.usage?.find((u) => u.appUid === this.appUid);
+    const usageOfApp = this.usage?.find((u) => u.appId === this.appId);
 
     if (!usageOfApp) {
       this.curve = null;

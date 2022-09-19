@@ -95,8 +95,8 @@ Used to expand to values related to the instance containing the parameter's proc
 | {{I:SYSTEM_PURPOSE}}
 | The purpose of the instance in upper case letters. (PRODUCTIVE, TEST, DEVELOPMENT)
 
-| {{I:UUID}}
-| UUID of the instance
+| {{I:ID}}
+| ID of the instance
 
 | {{I:NAME}}
 | Name of the instance
@@ -119,8 +119,8 @@ Used to expand to values related to the application containing the parameter's.
 | Variable
 | Description
 
-| {{A:UUID}}
-| UUID of the application
+| {{A:ID}}
+| ID of the application
 
 | {{A:NAME}}
 | Name of the application

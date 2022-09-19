@@ -103,7 +103,7 @@ class SpecialManifestsTest {
 
     @Test
     void instanceManifest(BHive hive, @TempDir Path tmp) throws IOException {
-        String uuid = UuidHelper.randomId();
+        String id = UuidHelper.randomId();
         Manifest.Key appKey = new Manifest.Key(ScopedManifestKey.createScopedName("app", OsHelper.getRunningOs()), "1.0");
         Path app = TestAppFactory.createDummyApp("dummy", tmp);
 
@@ -138,13 +138,13 @@ class SpecialManifestsTest {
             appCfg.start.executable = desc.startCommand.launcherPath;
 
             ParameterConfiguration pcfg = new ParameterConfiguration();
-            pcfg.uid = "--param2";
+            pcfg.id = "--param2";
             pcfg.value = new LinkedValueConfiguration("TestValue");
             appCfg.start.parameters.add(pcfg);
 
             InstanceNodeConfiguration cfg = new InstanceNodeConfiguration();
             cfg.name = "Test";
-            cfg.uuid = uuid;
+            cfg.id = id;
             cfg.applications.add(appCfg);
 
             Path cfgDir = tmp.resolve("config");
@@ -159,14 +159,14 @@ class SpecialManifestsTest {
             InstanceConfiguration ic = new InstanceConfiguration();
             ic.name = "Test";
             ic.product = ProductManifest.of(hive, prodKey).getKey();
-            ic.uuid = uuid;
+            ic.id = id;
 
             new InstanceManifest.Builder().setInstanceConfiguration(ic).addInstanceNodeManifest(Minion.DEFAULT_NAME, ifk)
                     .insert(hive);
         }
 
         {
-            String imName = uuid + "/root";
+            String imName = id + "/root";
             InstanceManifest im = InstanceManifest.of(hive, new Manifest.Key(imName,
                     hive.execute(new ManifestMaxIdOperation().setManifestName(imName)).get().toString()));
 

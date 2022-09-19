@@ -2,12 +2,15 @@ package io.bdeploy.interfaces.descriptor.template;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public class TemplateVariable {
 
     /**
      * A unique ID in the template
      */
-    public String uid;
+    @JsonAlias("uid")
+    public String id;
 
     /**
      * A short human readable name of the variable.

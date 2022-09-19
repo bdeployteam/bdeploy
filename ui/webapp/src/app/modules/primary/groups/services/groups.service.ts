@@ -92,14 +92,14 @@ export class GroupsService {
     return this.http.put(this.apiPath, group);
   }
 
-  public newUuid(): Observable<string> {
+  public newId(): Observable<string> {
     return new Observable<string>((s) => {
       const sub = this.current$.subscribe((r) => {
         if (r) {
           this.http
             .get(`${this.apiPath}/${r.name}/new-uuid`, { responseType: 'text' })
-            .subscribe((uuid) => {
-              s.next(uuid);
+            .subscribe((id) => {
+              s.next(id);
               s.complete();
               sub.unsubscribe();
             });

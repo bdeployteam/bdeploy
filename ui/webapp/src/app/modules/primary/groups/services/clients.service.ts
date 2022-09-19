@@ -215,8 +215,8 @@ export class ClientsService {
   public getDirectUiURI(app: ClientApp): Observable<string> {
     return this.http.get(
       `${this.apiInstancePath(this.groups.current$.value.name)}/${
-        app.instance.uuid
-      }/uiDirect/${app.endpoint.uuid}/${app.endpoint.endpoint.id}`,
+        app.instance.id
+      }/uiDirect/${app.endpoint.id}/${app.endpoint.endpoint.id}`,
       { responseType: 'text' }
     );
   }

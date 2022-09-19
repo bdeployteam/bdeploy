@@ -111,7 +111,7 @@ export class PortsComponent implements OnInit {
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     this.dl.downloadBlob(
-      'ports-' + this.edit.current$.value.instanceConfiguration.uuid + '.csv',
+      'ports-' + this.edit.current$.value.instanceConfiguration.id + '.csv',
       blob
     );
   }

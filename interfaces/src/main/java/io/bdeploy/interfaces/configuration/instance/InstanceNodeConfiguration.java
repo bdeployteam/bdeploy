@@ -8,6 +8,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -44,12 +46,13 @@ public class InstanceNodeConfiguration {
     public String name;
 
     /**
-     * A unique ID identifying this deployment, even if the name changes on the
+     * A unique ID identifying this instance, even if the name changes on the
      * server. Used to calculate the location where things are deployed.
      * <p>
      * Redundant copy of the information from {@link InstanceConfiguration} for easier handling on the minion(s).
      */
-    public String uuid;
+    @JsonAlias("uuid")
+    public String id;
 
     /**
      * Whether this instance should be automatically stated on startup of the minion.
@@ -97,7 +100,7 @@ public class InstanceNodeConfiguration {
     public ProcessGroupConfiguration renderDescriptor(VariableResolver valueResolver, InstanceNodeConfiguration dc) {
         ProcessGroupConfiguration pgc = new ProcessGroupConfiguration();
         pgc.name = name;
-        pgc.uuid = uuid;
+        pgc.id = id;
         pgc.autoStart = autoStart;
 
         // each downstream application has a scoped provider allowing to directly
@@ -106,7 +109,7 @@ public class InstanceNodeConfiguration {
             CompositeResolver list = new CompositeResolver();
             list.add(new InstanceAndSystemVariableResolver(dc));
             list.add(new ApplicationVariableResolver(app));
-            list.add(new ApplicationParameterValueResolver(app.uid, dc));
+            list.add(new ApplicationParameterValueResolver(app.id, dc));
             list.add(new ManifestSelfResolver(app.application, valueResolver));
             list.add(valueResolver);
             ProcessConfiguration pc = app.renderDescriptor(list);
@@ -120,7 +123,7 @@ public class InstanceNodeConfiguration {
      * Applies redundant copies of informative fields from the "parent" {@link InstanceConfiguration}
      */
     public void copyRedundantFields(InstanceConfiguration cfg) {
-        uuid = cfg.uuid;
+        id = cfg.id;
         name = cfg.name;
         autoStart = cfg.autoStart;
         purpose = cfg.purpose;
@@ -170,7 +173,7 @@ public class InstanceNodeConfiguration {
 
             for (ApplicationConfiguration cfg : applications) {
                 CompositeResolver perApp = new CompositeResolver();
-                perApp.add(new ApplicationParameterValueResolver(cfg.uid, this));
+                perApp.add(new ApplicationParameterValueResolver(cfg.id, this));
                 perApp.add(resolver);
                 perApp.add(new EmptyVariableResolver()); // last one: ignore all other expansions. 
 

@@ -76,13 +76,13 @@ import { ProcessPortsComponent } from './components/process-ports/process-ports.
 import { PinnedParameterValueComponent } from './components/process-status/pinned-parameter-value/pinned-parameter-value.component';
 import { ProbeStatusComponent } from './components/process-status/probe-status/probe-status.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
+import { VariableDescCardComponent } from './components/variable-desc-card/variable-desc-card.component';
 import { InstancesRoutingModule } from './instances-routing.module';
 import { CustomNodeFilterPipe, NodeFilterPipe } from './utils/filter-node';
 import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-validator.directive';
-import { EditCustomUidValidatorDirective } from './validators/edit-custom-uid-validator.directive';
+import { EditCustomIdValidatorDirective } from './validators/edit-custom-id-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { VariableDescCardComponent } from './components/variable-desc-card/variable-desc-card.component';
 
 @NgModule({
   declarations: [
@@ -116,7 +116,7 @@ import { VariableDescCardComponent } from './components/variable-desc-card/varia
     TemplateMessageDetailsComponent,
     ConfigProcessHeaderComponent,
     EditProcessNameValidatorDirective,
-    EditCustomUidValidatorDirective,
+    EditCustomIdValidatorDirective,
     EditServerIssuesValidatorDirective,
     CfgFileNameValidatorDirective,
     ConfigDescElementComponent,

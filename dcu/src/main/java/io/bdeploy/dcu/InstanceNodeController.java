@@ -88,7 +88,7 @@ public class InstanceNodeController {
         this.syncOps = syncOps;
         this.root = root;
         this.manifest = manifest;
-        this.paths = new DeploymentPathProvider(root.resolve(manifest.getUUID()), manifest.getKey().getTag());
+        this.paths = new DeploymentPathProvider(root.resolve(manifest.getId()), manifest.getKey().getTag());
 
         // Setup default resolvers for this node
         InstanceNodeConfiguration config = manifest.getConfiguration();
@@ -115,38 +115,17 @@ public class InstanceNodeController {
     }
 
     /**
-     * Install this manifest. It will create (or assume) the following structure in
-     * the given root:
+     * Installs the instance's content which is relevant to the current node.
      *
-     * <pre>
-     *  + root
-     *  +-- {@literal <deployment-uuid>/data} (shared data directory - only created if missing)
-     *  +-- {@literal <deployment-uuid>/deploy/<id-of-this-update>/<content-of-manifest>}
-     *  +-- {@literal <deployment-uuid>/deploy/<id-of-this-update>/runtime/pcu.json} (PCU configuration)
-     *  +-- {@literal <deployment-uuid>/deploy/<id-of-this-update>/runtime/*} (runtime dir (stdout log, ...) for each app).
-     * </pre>
-     *
-     * The manifest is expected to have this content structure:
-     *
-     * <pre>
-     *  + {@literal <content-of-manifest>}
-     *  +-- config/* (configuration files as configured centrally)
-     *  +-- manifests/* (manifestations of applications, additional manifests (e.g. JDK), ...)
-     *  +-- deployment.json (information about processes, parameters, ...)
-     * </pre>
-     *
-     * In case of any error during installation, the created directories and files
-     * are cleaned up.
-     *
-     * @return the UUID of the just installed manifest.
+     * @return the ID of the just installed instance.
      */
     public String install() {
         if (isInstalled()) {
-            return manifest.getUUID();
+            return manifest.getId();
         }
         try {
             installConfigurationTo(manifest.getConfiguration());
-            return manifest.getUUID();
+            return manifest.getId();
         } catch (Exception e) {
             PathHelper.deleteRecursive(paths.get(SpecialDirectory.BIN));
             throw e;
@@ -223,7 +202,7 @@ public class InstanceNodeController {
      * only be done if the node is fully deployed.
      */
     public ProcessGroupConfiguration getProcessGroupConfiguration() {
-        Path deploymentRoot = root.resolve(manifest.getUUID());
+        Path deploymentRoot = root.resolve(manifest.getId());
         DeploymentPathProvider dpp = new DeploymentPathProvider(deploymentRoot, manifest.getKey().getTag());
 
         Path processConfigFile = dpp.getAndCreate(SpecialDirectory.RUNTIME).resolve(PCU_JSON);
@@ -374,7 +353,7 @@ public class InstanceNodeController {
                 if (a.pooling == ApplicationPoolType.GLOBAL || a.pooling == null) {
                     requiredKeys.add(a.application.directoryFriendlyName());
                 } else if (a.pooling == ApplicationPoolType.LOCAL) {
-                    requiredInstanceKeys.computeIfAbsent(inc.getManifest().getUUID(), k -> new TreeSet<>())
+                    requiredInstanceKeys.computeIfAbsent(inc.getManifest().getId(), k -> new TreeSet<>())
                             .add(a.application.directoryFriendlyName());
                 } // type NONE is cleaned with the instance bin directory.
             });

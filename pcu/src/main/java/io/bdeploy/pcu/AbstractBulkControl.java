@@ -53,7 +53,7 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
         // if the process is not *planned* to start, we reject it. this is important in case
         // we use startAll and then stopAll to "abort" starting.
         if (controller.getState() != ProcessState.STOPPED_START_PLANNED) {
-            logger.log(l -> l.warn("Skipping start of {}, not in planned start state", config.uid));
+            logger.log(l -> l.warn("Skipping start of {}, not in planned start state", config.id));
             return false;
         }
 
@@ -81,10 +81,10 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
                         Thread.currentThread().interrupt();
                         return false;
                     } catch (TimeoutException e) {
-                        logger.log(l -> l.error("Timed out starting {}", config.uid));
+                        logger.log(l -> l.error("Timed out starting {}", config.id));
                         return false;
                     } catch (ExecutionException e) {
-                        logger.log(l -> l.warn("Failed to start {}: {}", config.uid, e.getCause().toString()));
+                        logger.log(l -> l.warn("Failed to start {}: {}", config.id, e.getCause().toString()));
                         return false;
                     }
                 }
@@ -105,12 +105,12 @@ public abstract class AbstractBulkControl implements BulkControlStrategy {
      */
     protected boolean doStopSingle(ProcessController process) {
         try {
-            logger.log(l -> l.debug("Stopping single application {}", process.getDescriptor().uid));
+            logger.log(l -> l.debug("Stopping single application {}", process.getDescriptor().id));
             process.stop(user);
             return true;
         } catch (Exception ex) {
             logger.log(l -> l.error("Failed to stop application.", ex), process.getStatus().instanceTag,
-                    process.getDescriptor().uid);
+                    process.getDescriptor().id);
             return false;
         }
     }

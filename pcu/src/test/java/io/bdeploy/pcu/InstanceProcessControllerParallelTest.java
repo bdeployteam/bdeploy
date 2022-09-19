@@ -52,8 +52,8 @@ class InstanceProcessControllerParallelTest {
         ProcessGroupConfiguration group = TestFactory.createGroupConfig("MyInstance", app1, app2);
 
         // Create controller with the two applications
-        InstanceProcessController controller = new InstanceProcessController(group.uuid);
-        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.uuid), null, null, "1", group, null);
+        InstanceProcessController controller = new InstanceProcessController(group.id);
+        controller.createProcessControllers(new DeploymentPathProvider(tmp, group.id), null, null, "1", group, null);
         controller.setActiveTag("1");
 
         // create a control group and directly assign it - usually this comes from the configuration.
@@ -73,12 +73,12 @@ class InstanceProcessControllerParallelTest {
         ProcessController pc2 = processList.get("App2");
         pc1.addStatusListener((s) -> {
             if (s.newState == ProcessState.RUNNING) {
-                order.add(pc1.getDescriptor().uid);
+                order.add(pc1.getDescriptor().id);
             }
         });
         pc2.addStatusListener((s) -> {
             if (s.newState == ProcessState.RUNNING) {
-                order.add(pc2.getDescriptor().uid);
+                order.add(pc2.getDescriptor().id);
 
                 // once process 2 actually completed startup, we allow app1 startup probe to continue.
                 fakeStart.set(true);

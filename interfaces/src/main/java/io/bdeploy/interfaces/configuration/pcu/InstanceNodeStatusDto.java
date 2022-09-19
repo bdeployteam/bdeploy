@@ -50,7 +50,7 @@ public class InstanceNodeStatusDto {
      */
     public void add(String tag, ProcessListDto listDto) {
         for (ProcessStatusDto dto : listDto.runningOrScheduled.values()) {
-            runningOrScheduled.put(dto.appUid, dto);
+            runningOrScheduled.put(dto.appId, dto);
         }
         deployed.put(tag, listDto);
     }

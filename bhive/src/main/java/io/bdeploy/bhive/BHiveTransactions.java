@@ -89,10 +89,10 @@ public class BHiveTransactions {
     public Transaction begin() {
         hive.execute(new AwaitDirectoryLockOperation().setDirectory(markerRoot));
 
-        String uuid = UuidHelper.randomId();
-        getOrCreate().push(uuid);
-        Path mdbPath = markerRoot.resolve(uuid);
-        dbs.put(uuid, new MarkerDatabase(mdbPath, reporter));
+        String txid = UuidHelper.randomId();
+        getOrCreate().push(txid);
+        Path mdbPath = markerRoot.resolve(txid);
+        dbs.put(txid, new MarkerDatabase(mdbPath, reporter));
 
         if (hive.getLockContentSupplier() != null) {
             String txValidationContent = hive.getLockContentSupplier().get();
@@ -104,7 +104,7 @@ public class BHiveTransactions {
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("Starting transaction {}", uuid, new RuntimeException("Starting Transaction"));
+            log.trace("Starting transaction {}", txid, new RuntimeException("Starting Transaction"));
         }
 
         return () -> {
@@ -116,16 +116,16 @@ public class BHiveTransactions {
             }
 
             String top = stack.peek();
-            if (!top.equals(uuid)) {
-                log.warn("Out-of-order transaction found: {}, expected: {}", top, uuid);
+            if (!top.equals(txid)) {
+                log.warn("Out-of-order transaction found: {}, expected: {}", top, txid);
             }
 
             if (log.isTraceEnabled()) {
-                log.trace("Ending transaction {}", uuid, new RuntimeException("Ending Transaction"));
+                log.trace("Ending transaction {}", txid, new RuntimeException("Ending Transaction"));
             }
 
-            stack.remove(uuid);
-            dbs.remove(uuid);
+            stack.remove(txid);
+            dbs.remove(txid);
 
             Path mdb = mdbPath;
             if (!Files.isDirectory(mdb)) {

@@ -23,10 +23,10 @@ export const DEF_CONTROL_GROUP: ProcessControlGroupConfiguration = {
 
 export function getNodeOfApplication(
   nodes: InstanceNodeConfigurationDto[],
-  uid: string
+  id: string
 ): InstanceNodeConfigurationDto {
   for (const node of nodes) {
-    const app = node.nodeConfiguration.applications.find((a) => a.uid === uid);
+    const app = node.nodeConfiguration.applications.find((a) => a.id === id);
     if (app) {
       return node;
     }
@@ -39,10 +39,10 @@ export function getNodeOfApplication(
  */
 export function getProcessControlGroupOfApplication(
   groups: ProcessControlGroupConfiguration[],
-  uid: string
+  id: string
 ): ProcessControlGroupConfiguration {
   for (const group of groups) {
-    const app = group.processOrder.find((a) => a === uid);
+    const app = group.processOrder.find((a) => a === id);
     if (app) {
       return group;
     }

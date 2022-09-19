@@ -329,7 +329,7 @@ public class ProductManifest {
 
             // add variables from parent template to next outer variables.
             for (var variable : parentDesc.templateVariables) {
-                var existing = varList.stream().filter(v -> v.uid.equals(variable.uid)).findAny();
+                var existing = varList.stream().filter(v -> v.id.equals(variable.id)).findAny();
                 if (!existing.isPresent()) {
                     varList.add(variable);
                 }
@@ -364,7 +364,7 @@ public class ProductManifest {
         if (parentDesc.startParameters != null) {
             // merge start parameters
             for (var param : parentDesc.startParameters) {
-                var existing = app.startParameters.stream().filter(p -> p.uid.equals(param.uid)).findAny();
+                var existing = app.startParameters.stream().filter(p -> p.id.equals(param.id)).findAny();
                 if (!existing.isPresent()) {
                     app.startParameters.add(param);
                 }

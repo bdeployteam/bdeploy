@@ -59,7 +59,7 @@ export class ProcessDetailsService implements OnDestroy {
           : []
       );
       const allApps: ApplicationConfiguration[] = [].concat(...appsPerNode);
-      const app = allApps.find((a) => a?.uid === process);
+      const app = allApps.find((a) => a?.id === process);
 
       this.processConfig$.next(app);
 
@@ -73,7 +73,7 @@ export class ProcessDetailsService implements OnDestroy {
         .get<ProcessDetailDto>(
           `${this.apiPath(
             this.groups.current$.value.name,
-            instance.instanceConfiguration.uuid
+            instance.instanceConfiguration.id
           )}/processes/${process}`,
           NO_LOADING_BAR
         )
@@ -102,8 +102,8 @@ export class ProcessDetailsService implements OnDestroy {
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instances.active$.value.instanceConfiguration.uuid
-        )}/processes/${detail.status.appUid}/stdin`,
+          this.instances.active$.value.instanceConfiguration.id
+        )}/processes/${detail.status.appId}/stdin`,
         value
       )
       .subscribe();
@@ -116,8 +116,8 @@ export class ProcessDetailsService implements OnDestroy {
       .get<RemoteDirectory>(
         `${this.apiPath(
           this.groups.current$.value.name,
-          detail.status.instanceUid
-        )}/output/${detail.status.instanceTag}/${detail.status.appUid}`,
+          detail.status.instanceId
+        )}/output/${detail.status.instanceTag}/${detail.status.appId}`,
         NO_LOADING_BAR
       )
       .pipe(

@@ -2,18 +2,17 @@ package io.bdeploy.api.remote.v1;
 
 import java.util.SortedMap;
 
+import io.bdeploy.api.remote.v1.dto.EndpointsConfigurationApi;
+import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi;
+import io.bdeploy.bhive.model.Manifest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.bdeploy.api.remote.v1.dto.EndpointsConfigurationApi;
-import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi;
-import io.bdeploy.bhive.model.Manifest;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,7 +39,7 @@ public interface PublicInstanceResource {
     @GET
     @Path("/endpoints")
     public SortedMap<String, EndpointsConfigurationApi> getAllEndpoints(
-            @Parameter(description = "The UUID of the instance to query") @QueryParam("BDeploy_instance") String instanceId);
+            @Parameter(description = "The ID of the instance to query") @QueryParam("BDeploy_instance") String instanceId);
 
     /**
      * Get a resource which allows to proxy various calls to the target application provided endpoint.
@@ -53,7 +52,7 @@ public interface PublicInstanceResource {
     @Operation
     @Path("/proxy")
     public PublicProxyResource getProxyResource(
-            @Parameter(description = "The UUID of the instance to proxy to") @QueryParam("BDeploy_instance") String instanceId,
-            @Parameter(description = "The UUID of the application to proxy to") @QueryParam("BDeploy_application") String applicationId);
+            @Parameter(description = "The ID of the instance to proxy to") @QueryParam("BDeploy_instance") String instanceId,
+            @Parameter(description = "The ID of the application to proxy to") @QueryParam("BDeploy_application") String applicationId);
 
 }

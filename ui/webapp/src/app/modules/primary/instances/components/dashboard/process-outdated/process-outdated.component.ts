@@ -22,7 +22,7 @@ export class ProcessOutdatedComponent implements OnInit {
 
   ngOnInit(): void {
     this.processes.processStates$.subscribe((s) => {
-      const status = ProcessesService.get(s, this.record.uid);
+      const status = ProcessesService.get(s, this.record.id);
       if (!status) {
         // no information about the process
         this.outdated$.next(false);

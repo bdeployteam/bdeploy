@@ -40,8 +40,8 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const appUid = route.paramMap.get('app');
-      const app = apps.find((a) => a.client.uuid === appUid);
+      const appId = route.paramMap.get('app');
+      const app = apps.find((a) => a.client.id === appId);
       this.app$.next(app);
       if (app && launcher) {
         this.hasLauncher = this.clients.hasLauncher(app.client.os);
@@ -60,7 +60,7 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   /* template */ downloadInstaller(app: ClientApp) {
     this.downloadingInstaller$.next(true);
     this.clients
-      .downloadInstaller(app.client.uuid, app.instance.uuid)
+      .downloadInstaller(app.client.id, app.instance.id)
       .pipe(finalize(() => this.downloadingInstaller$.next(false)))
       .subscribe();
   }
@@ -69,9 +69,9 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
     this.downloadingClickAndStart$.next(true);
     this.clients
       .downloadClickAndStart(
-        app.client.uuid,
+        app.client.id,
         app.client.description,
-        app.instance.uuid
+        app.instance.id
       )
       .pipe(finalize(() => this.downloadingClickAndStart$.next(false)))
       .subscribe();

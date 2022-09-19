@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.directory;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
 /**
@@ -30,9 +32,10 @@ public class RemoteDirectoryEntry {
     public long size;
 
     /**
-     * The instance UUID this entry belongs to
+     * The instance ID this entry belongs to
      */
-    public String uuid;
+    @JsonAlias("uuid")
+    public String id;
 
     /**
      * The instance tag this entry belongs to

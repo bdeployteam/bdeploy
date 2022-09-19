@@ -92,7 +92,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
                   'instances',
                   'configuration',
                   this.areas.groupContext$.value,
-                  this.node.nodeConfiguration.uuid,
+                  this.node.nodeConfiguration.id,
                 ],
                 ['panels', 'instances', 'settings', 'product']
               );
@@ -139,7 +139,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const state = ProcessesService.get(states, app.uid)?.processState;
+      const state = ProcessesService.get(states, app.id)?.processState;
       if (!ProcessesService.isRunning(state)) {
         stoppedApps++;
       } else if (state === ProcessState.RUNNING_NOT_ALIVE) {
@@ -187,14 +187,12 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
 
     const appPorts = ports.filter(
       (p) =>
-        !!this.node.nodeConfiguration.applications.find(
-          (a) => a.uid === p.appUid
-        )
+        !!this.node.nodeConfiguration.applications.find((a) => a.id === p.appId)
     );
 
     let badPorts = 0;
     appPorts.forEach((p) => {
-      const process = ProcessesService.get(states, p.appUid);
+      const process = ProcessesService.get(states, p.appId);
       if (ProcessesService.isRunning(process.processState) !== p.state) {
         badPorts++;
       }

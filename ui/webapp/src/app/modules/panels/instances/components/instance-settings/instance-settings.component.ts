@@ -33,14 +33,14 @@ export class InstanceSettingsComponent {
     this.dialog
       .confirm(
         `Delete ${inst.instanceConfiguration.name}`,
-        `Really delete the instance <strong>${inst.instanceConfiguration.name}</strong> with ID <strong>${inst.instanceConfiguration.uuid}</strong>? This cannot be undone and will delete all associated data files!`,
+        `Really delete the instance <strong>${inst.instanceConfiguration.name}</strong> with ID <strong>${inst.instanceConfiguration.id}</strong>? This cannot be undone and will delete all associated data files!`,
         'delete'
       )
       .subscribe((confirm) => {
         if (confirm) {
           this.deleting$.next(true);
           this.instances
-            .delete(inst.instanceConfiguration.uuid)
+            .delete(inst.instanceConfiguration.id)
             .pipe(finalize(() => this.deleting$.next(false)))
             .subscribe(() => {
               this.router.navigate([

@@ -73,10 +73,10 @@ public class InstanceNodeManifest {
     }
 
     /**
-     * @return the UUID of the manifest.
+     * @return the ID of the manifest.
      */
-    public String getUUID() {
-        return config.uuid;
+    public String getId() {
+        return config.id;
     }
 
     /**
@@ -157,7 +157,7 @@ public class InstanceNodeManifest {
         }
 
         /**
-         * @param name either {@link InstanceNodeManifest#ROOT_CONFIG_NAME} or the UUID of an application
+         * @param name either {@link InstanceNodeManifest#ROOT_CONFIG_NAME} or the ID of an application
          * @param configTree the dedicated config file tree used for this name.
          * @return this for chaining.
          */
@@ -184,7 +184,7 @@ public class InstanceNodeManifest {
             RuntimeAssert.assertNotNull(name, "Name not set");
             RuntimeAssert.assertNotNull(cfg, "Configuration not set");
 
-            String mfName = cfg.uuid + "/" + name;
+            String mfName = cfg.id + "/" + name;
 
             if (key == null) {
                 key = new Manifest.Key(mfName, hive.execute(new ManifestNextIdOperation().setManifestName(mfName)).toString());
@@ -211,7 +211,7 @@ public class InstanceNodeManifest {
 
             Manifest.Builder mfb = new Manifest.Builder(key);
             mfb.setRoot(hive.execute(new InsertArtificialTreeOperation().setTree(tb)));
-            mfb.addLabel(INSTANCE_NODE_LABEL, cfg.uuid);
+            mfb.addLabel(INSTANCE_NODE_LABEL, cfg.id);
 
             hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
             return key;

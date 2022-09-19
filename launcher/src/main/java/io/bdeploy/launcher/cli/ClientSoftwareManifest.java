@@ -47,8 +47,8 @@ public class ClientSoftwareManifest {
     /**
      * Returns the newest key that is available for the given application.
      */
-    public Manifest.Key getNewestKey(String appUid) {
-        String manifestName = MANIFEST_PREFIX + appUid;
+    public Manifest.Key getNewestKey(String appId) {
+        String manifestName = MANIFEST_PREFIX + appId;
         Optional<Long> max = hive.execute(new ManifestMaxIdOperation().setManifestName(manifestName));
         if (!max.isPresent()) {
             return null;
@@ -60,8 +60,8 @@ public class ClientSoftwareManifest {
      * Returns the newest version of the software configuration for the given application and optionally creates a new one if
      * nothing is stored or if the stored entry is broken.
      */
-    public ClientSoftwareConfiguration readNewest(String appUid, boolean createNew) {
-        Key key = getNewestKey(appUid);
+    public ClientSoftwareConfiguration readNewest(String appId, boolean createNew) {
+        Key key = getNewestKey(appId);
         ClientSoftwareConfiguration config = null;
         if (key != null) {
             config = read(key);
@@ -145,8 +145,8 @@ public class ClientSoftwareManifest {
     /**
      * Stores the given software configuration entry.
      */
-    public void update(String appUid, ClientSoftwareConfiguration config) {
-        String manifestName = MANIFEST_PREFIX + appUid;
+    public void update(String appId, ClientSoftwareConfiguration config) {
+        String manifestName = MANIFEST_PREFIX + appId;
 
         Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(manifestName));
         Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(manifestName, newId.toString()));
@@ -172,8 +172,8 @@ public class ClientSoftwareManifest {
     /**
      * Removes all manifest entries of the given application
      */
-    public boolean remove(String appUid) {
-        String manifestName = MANIFEST_PREFIX + appUid;
+    public boolean remove(String appId) {
+        String manifestName = MANIFEST_PREFIX + appId;
         Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(manifestName));
         if (keys.isEmpty()) {
             return false;

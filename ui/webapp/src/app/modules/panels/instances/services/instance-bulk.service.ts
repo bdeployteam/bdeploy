@@ -38,8 +38,7 @@ export class InstanceBulkService {
       const newSelection: InstanceDto[] = [];
       this.selection$.value.forEach((inst) => {
         const found = i.find(
-          (c) =>
-            c.instanceConfiguration.uuid === inst.instanceConfiguration.uuid
+          (c) => c.instanceConfiguration.id === inst.instanceConfiguration.id
         );
         if (found) {
           newSelection.push(found);
@@ -55,7 +54,7 @@ export class InstanceBulkService {
         this.http.get(
           `${this.apiPath(
             this.groups.current$.value.name,
-            inst.instanceConfiguration.uuid
+            inst.instanceConfiguration.id
           )}/processes/startAll`
         )
       )
@@ -68,7 +67,7 @@ export class InstanceBulkService {
         this.http.get(
           `${this.apiPath(
             this.groups.current$.value.name,
-            inst.instanceConfiguration.uuid
+            inst.instanceConfiguration.id
           )}/processes/stopAll`
         )
       )
@@ -80,7 +79,7 @@ export class InstanceBulkService {
       filter((i) => i.instanceConfiguration.product.tag !== target.key.tag),
       mergeMap((i) =>
         this.instance
-          .loadNodes(i.instanceConfiguration.uuid, i.instance.tag)
+          .loadNodes(i.instanceConfiguration.id, i.instance.tag)
           .pipe(
             map((nodes) => {
               const upd: InstanceUpdateDto = {
@@ -99,7 +98,7 @@ export class InstanceBulkService {
         this.http.post<InstanceUpdateDto>(
           `${this.apiPath(
             this.groups.current$.value.name,
-            u.config.config.uuid
+            u.config.config.id
           )}/updateProductVersion/${target.key.tag}`,
           u
         )
@@ -109,7 +108,7 @@ export class InstanceBulkService {
           .post<ApplicationValidationDto[]>(
             `${this.apiPath(
               this.groups.current$.value.name,
-              u.config.config.uuid
+              u.config.config.id
             )}/validate`,
             u
           )
@@ -126,14 +125,14 @@ export class InstanceBulkService {
     return of(...updates).pipe(
       mergeMap((u) => {
         const dto = this.selection$.value.find(
-          (i) => i.instanceConfiguration.uuid === u.config.config.uuid
+          (i) => i.instanceConfiguration.id === u.config.config.id
         );
         const managedServer = dto.managedServer?.hostName;
         const expect = dto.instance.tag;
         return this.http.post(
           `${this.apiPath(
             this.groups.current$.value.name,
-            u.config.config.uuid
+            u.config.config.id
           )}/update`,
           u,
           { params: { managedServer, expect } }
@@ -148,7 +147,7 @@ export class InstanceBulkService {
         this.http.delete(
           `${this.apiPath(
             this.groups.current$.value.name,
-            inst.instanceConfiguration.uuid
+            inst.instanceConfiguration.id
           )}/delete`
         )
       )
@@ -161,7 +160,7 @@ export class InstanceBulkService {
         this.http.get(
           `${this.apiPath(
             this.groups.current$.value.name,
-            inst.instanceConfiguration.uuid
+            inst.instanceConfiguration.id
           )}/${inst.instance.tag}/install`
         )
       )
@@ -174,7 +173,7 @@ export class InstanceBulkService {
         this.http.get(
           `${this.apiPath(
             this.groups.current$.value.name,
-            inst.instanceConfiguration.uuid
+            inst.instanceConfiguration.id
           )}/${inst.instance.tag}/activate`
         )
       )

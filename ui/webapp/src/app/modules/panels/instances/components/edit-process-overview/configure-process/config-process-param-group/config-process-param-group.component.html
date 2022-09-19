@@ -5,11 +5,11 @@
       #validateCustom
       name="id"
       label="Unique ID"
-      appEditCustomUidValidator
+      appEditCustomIdValidator
       appEditUniqueValueValidator
       [disabled]="customTemp.isEdit"
-      [disallowedValues]="getAllValueUids()"
-      [(ngModel)]="customTemp.uid"
+      [disallowedValues]="getAllValueIds()"
+      [(ngModel)]="customTemp.id"
       required
       appTrimmed
     ></app-bd-form-input>
@@ -21,8 +21,8 @@
     <app-bd-form-select
       label="Predecessor"
       name="predecessor"
-      [values]="getAllValueUids()"
-      [labels]="getAllValueUidLabels()"
+      [values]="getAllValueIds()"
+      [labels]="getAllValueIdLabels()"
       [allowNone]="true"
       [(ngModel)]="customTemp.predecessor"
     ></app-bd-form-select>
@@ -119,7 +119,7 @@
             <!-- Single parameter -->
             <ng-container *ngFor="let p of sortPairs(group.pairs)">
               <div
-                [attr.data-cy]="p.descriptor ? p.descriptor.uid : p.value.uid"
+                [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
                 fxLayout="row"
                 *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)"
               >
@@ -155,7 +155,7 @@
                     <!-- hidden input so that pinning is part of the form (validation, enablement, etc.) -->
                     <input
                       #pin
-                      [name]="'pin-' + (p.value ? p.value.uid : p.descriptor.uid)"
+                      [name]="'pin-' + (p.value ? p.value.id : p.descriptor.id)"
                       type="checkbox"
                       [(ngModel)]="p.value.pinned"
                       [style.display]="'none'"
@@ -194,8 +194,8 @@
                 <!-- editor for the linked value, including custom editor plugins, etc. -->
                 <app-bd-value-editor
                   fxFlex="1 0 auto"
-                  [label]="!!p.descriptor ? p.descriptor.name : p.value.uid"
-                  [name]="p.value ? p.value.uid : p.descriptor.uid"
+                  [label]="!!p.descriptor ? p.descriptor.name : p.value.id"
+                  [name]="p.value ? p.value.id : p.descriptor.id"
                   [ngModel]="p.value?.value"
                   (ngModelChange)="doChangeParam(p, $event)"
                   [defaultValue]="p.descriptor?.defaultValue"
@@ -220,7 +220,7 @@
                   (customEditorLoaded)="doSetCustomEditorState(p, $event)"
                   [product]="(edit.product$ | async)?.key"
                   [group]="(groups.current$ | async)?.name"
-                  [appServerIssuesValidator]="p.value ? p.value.uid : p.descriptor.uid"
+                  [appServerIssuesValidator]="p.value ? p.value.id : p.descriptor.id"
                   [actions]="actions"
                 >
                 </app-bd-value-editor>

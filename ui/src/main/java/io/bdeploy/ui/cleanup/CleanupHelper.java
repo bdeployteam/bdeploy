@@ -214,7 +214,7 @@ public class CleanupHelper {
             MasterRootResource root = ResourceProvider.getVersionedResource(
                     provider.getControllingMaster(context.getHive(), imKey), MasterRootResource.class, securityContext);
             MasterNamedResource namedMaster = root.getNamedMaster(context.getGroup());
-            Map<String, ProcessStatusDto> appStatus = namedMaster.getStatus(instanceManifest.getConfiguration().uuid)
+            Map<String, ProcessStatusDto> appStatus = namedMaster.getStatus(instanceManifest.getConfiguration().id)
                     .getAppStatus();
             Set<String> activeTags = appStatus.values().stream().map(p -> p.instanceTag).collect(Collectors.toSet());
 

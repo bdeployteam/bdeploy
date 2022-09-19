@@ -68,7 +68,7 @@ public class ParallelBulkControl extends AbstractBulkControl {
         // Execute shutdown in new thread so that the caller is not blocked
         Instant start = Instant.now();
         for (ProcessController process : toStop) {
-            tasks.add(parallelExec.submit(() -> new TaskResult(process.getDescriptor().uid, doStopSingle(process))));
+            tasks.add(parallelExec.submit(() -> new TaskResult(process.getDescriptor().id, doStopSingle(process))));
         }
 
         List<String> stopped = new ArrayList<>();
@@ -88,7 +88,7 @@ public class ParallelBulkControl extends AbstractBulkControl {
 
         // Check if we could stop all applications
         Duration duration = Duration.between(start, Instant.now());
-        boolean allStopped = toStop.stream().map(pc -> stopped.contains(pc.getDescriptor().uid)).noneMatch(b -> !b);
+        boolean allStopped = toStop.stream().map(pc -> stopped.contains(pc.getDescriptor().id)).noneMatch(b -> !b);
         if (allStopped) {
             logger.log(l -> l.info("Applications in Control Group {} have been stopped in {} ", controlGroup.name,
                     ProcessControllerHelper.formatDuration(duration)));

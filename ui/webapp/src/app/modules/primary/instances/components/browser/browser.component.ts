@@ -57,7 +57,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     name: 'Status',
     data: (r) =>
       this.instances.overallStates$.value?.find(
-        (x) => x.uuid === r.instanceConfiguration?.uuid
+        (x) => x.id === r.instanceConfiguration?.id
       ),
     component: OverallStatusColumnComponent,
     width: '90px',
@@ -70,7 +70,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
       '/instances',
       'dashboard',
       this.areas.groupContext$.value,
-      row.instanceConfiguration.uuid,
+      row.instanceConfiguration.id,
     ];
   };
 

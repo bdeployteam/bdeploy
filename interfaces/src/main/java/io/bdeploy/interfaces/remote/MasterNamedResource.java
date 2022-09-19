@@ -48,7 +48,7 @@ public interface MasterNamedResource {
      *            node as known to the master to install to, the {@link Manifest}
      *            reference references a {@link Manifest} suitable for the DCU.
      *            <li>Have a label with the key 'X-Instance'. The value must be the
-     *            UUID of the deployment this {@link Manifest} belongs to.
+     *            ID of the instance this {@link Manifest} belongs to.
      *            </ul>
      */
     @PUT
@@ -79,18 +79,18 @@ public interface MasterNamedResource {
     public Manifest.Key update(InstanceUpdateDto update, @QueryParam("e") String expectedTag);
 
     /**
-     * @param instanceUuid the instance to delete
+     * @param instanceId the instance to delete
      */
     @DELETE
     @Path("/delete")
-    public void delete(@QueryParam("u") String instanceUuid);
+    public void delete(@QueryParam("u") String instanceId);
 
     /**
-     * @param instanceUuid the instance to delete
+     * @param instanceId the instance to delete
      */
     @DELETE
     @Path("/deleteVersion")
-    public void deleteVersion(@QueryParam("u") String instanceUuid, @QueryParam("t") String tag);
+    public void deleteVersion(@QueryParam("u") String instanceId, @QueryParam("t") String tag);
 
     /**
      * Fetches the persistent state of a single instance.
@@ -103,7 +103,7 @@ public interface MasterNamedResource {
     public InstanceStateRecord getInstanceState(@QueryParam("i") String instance);
 
     /**
-     * @param instanceId the instance UUID to fetch directory content for
+     * @param instanceId the instance ID to fetch directory content for
      * @return a snapshot of the DATA directory for the given instance for each
      *         minion.
      */
@@ -157,7 +157,7 @@ public interface MasterNamedResource {
     public void deleteDataEntry(@QueryParam("m") String minion, RemoteDirectoryEntry entry);
 
     /**
-     * @param instanceId the deployment/instance uuid
+     * @param instanceId the instance ID
      * @param application the application id
      * @return the applications configuration
      */
@@ -168,7 +168,7 @@ public interface MasterNamedResource {
             @QueryParam("a") String application);
 
     /**
-     * @param instanceId the deployment/instance uuid
+     * @param instanceId the instance ID
      * @param application the application id
      */
     @GET
@@ -178,7 +178,7 @@ public interface MasterNamedResource {
             @QueryParam("h") String hostname);
 
     /**
-     * @param instanceId the instance uuid
+     * @param instanceId the instance ID
      * @return the usage data for client application associated with the given instance.
      */
     @GET
@@ -278,12 +278,12 @@ public interface MasterNamedResource {
      * Returns the full status of a single application.
      *
      * @param instanceId the unique id of the instance.
-     * @param appUid the application UID to query
+     * @param appId the application UID to query
      * @return the full detailed status of the process.
      */
     @GET
     @Path("/process-details")
-    public ProcessDetailDto getProcessDetails(@QueryParam("u") String instanceId, @QueryParam("a") String appUid);
+    public ProcessDetailDto getProcessDetails(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
 
     /**
      * @param principal the principal name to issue the token to.

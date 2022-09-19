@@ -51,7 +51,7 @@ export class PortsEditService {
                 app.application.name
               );
               const paramDesc = appDesc?.startCommand?.parameters?.find(
-                (p) => p.uid === param.uid
+                (p) => p.id === param.id
               );
 
               if (!this.isPort(paramDesc?.type)) {

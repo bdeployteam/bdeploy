@@ -141,9 +141,9 @@ export class EditControlGroupComponent
   public removeGroup() {
     const contained = this.group.processOrder;
     const apps = this.node.applications;
-    for (const uid of contained) {
+    for (const id of contained) {
       apps.splice(
-        apps.findIndex((a) => a.uid === uid),
+        apps.findIndex((a) => a.id === id),
         1
       );
     }

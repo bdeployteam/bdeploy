@@ -109,7 +109,7 @@
           errorDisplay="immediate"
           required
           appTrimmed
-          [appEditProcessNameValidator]="process.uid"
+          [appEditProcessNameValidator]="process.id"
         ></app-bd-form-input>
       </app-config-desc-element>
       <ng-container *ngIf="app.descriptor.type === 'SERVER'">

@@ -35,7 +35,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help(value = "UUID of the system. Used when updating existing system configuration.")
+        @Help(value = "ID of the system. Used when updating existing system configuration.")
         String uuid();
 
         @Help(value = "List systems on the remote", arg = false)
@@ -47,10 +47,10 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         @Help(value = "Create a system with a new ID", arg = false)
         boolean create() default false;
 
-        @Help(value = "Update the system with the given UUID", arg = false)
+        @Help(value = "Update the system with the given ID", arg = false)
         boolean update() default false;
 
-        @Help(value = "Delete the system with the given UUID", arg = false)
+        @Help(value = "Delete the system with the given ID", arg = false)
         boolean delete() default false;
 
         @Help("The name to set for the updated instance")
@@ -111,11 +111,11 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         for (var system : sr.list()) {
             var cfg = system.config;
 
-            if (!cfg.uuid.equals(config.uuid())) {
+            if (!cfg.id.equals(config.uuid())) {
                 continue;
             }
 
-            result.setMessage("Details for System " + cfg.uuid + " - " + cfg.name);
+            result.setMessage("Details for System " + cfg.id + " - " + cfg.name);
             result.addField("Description", cfg.description);
             result.addField(" -- Config Variables --", "");
 
@@ -138,9 +138,9 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             helpAndFail("ERROR: Got --setKey but missing --setVariable");
         }
 
-        Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.uuid.equals(config.uuid())).findAny();
+        Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(config.uuid())).findAny();
         if (sys.isEmpty()) {
-            throw new IllegalArgumentException("Cannot find system with UUID " + config.uuid());
+            throw new IllegalArgumentException("Cannot find system with ID " + config.uuid());
         }
 
         DataResult result = createSuccess();
@@ -188,7 +188,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         SystemConfiguration cfg = new SystemConfiguration();
 
-        cfg.uuid = UuidHelper.randomId();
+        cfg.id = UuidHelper.randomId();
         cfg.name = config.name();
         cfg.description = config.description();
 
@@ -198,7 +198,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         sr.update(dto);
 
-        return createSuccess().addField("System UUID", cfg.uuid);
+        return createSuccess().addField("System ID", cfg.id);
     }
 
     private DataTable list(RemoteService remote, SystemResource sr, SystemConfig config) {
@@ -211,20 +211,20 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         DataTable table = createDataTable();
         table.setCaption("Systems of " + config.instanceGroup() + " on " + remote.getUri());
 
-        table.column("UUID", 15).column("Name", 20).column("Description", 40);
+        table.column("ID", 15).column("Name", 20).column("Description", 40);
 
         if (central) {
             table.column("Target Server", 20);
         }
 
         for (var system : sr.list()) {
-            if (config.uuid() != null && !config.uuid().isBlank() && !system.config.uuid.equals(config.uuid())) {
+            if (config.uuid() != null && !config.uuid().isBlank() && !system.config.id.equals(config.uuid())) {
                 continue;
             }
 
             DataTableRowBuilder row = table.row();
 
-            row.cell(system.config.uuid).cell(system.config.name).cell(system.config.description);
+            row.cell(system.config.id).cell(system.config.name).cell(system.config.description);
 
             if (central) {
                 row.cell(system.minion);

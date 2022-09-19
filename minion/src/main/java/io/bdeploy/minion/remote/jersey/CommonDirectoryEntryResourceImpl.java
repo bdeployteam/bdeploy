@@ -81,7 +81,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
     static Path getEntryPath(MinionRoot root, RemoteDirectoryEntry entry) {
         Path rootDir;
         if (entry.root != null) {
-            DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.uuid), entry.tag);
+            DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(entry.id), entry.tag);
             rootDir = dpp.get(entry.root).toAbsolutePath();
         } else {
             rootDir = root.getRootDir();

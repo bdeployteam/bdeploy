@@ -23,7 +23,7 @@ public class RemoteDeploymentTool extends RemoteServiceTool<RemoteDeployConfig> 
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help("UUID of the instance to manipulate or list")
+        @Help("ID of the instance to manipulate or list")
         String uuid();
 
         @Help("Version of the instance to manipulate or list")

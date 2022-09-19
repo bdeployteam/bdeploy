@@ -15,8 +15,8 @@ import { ServersService } from '../../servers/services/servers.service';
 export class SystemsColumnsService {
   public systemIdColumn: BdDataColumn<SystemConfigurationDto> = {
     id: 'system',
-    name: 'UUID',
-    data: (r) => r.config.uuid,
+    name: 'ID',
+    data: (r) => r.config.id,
     width: '120px',
     hint: BdDataColumnTypeHint.FOOTER,
     showWhen: '(min-width: 1000px)',

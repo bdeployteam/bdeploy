@@ -12,20 +12,20 @@ import {
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 @Directive({
-  selector: '[appEditCustomUidValidator]',
+  selector: '[appEditCustomIdValidator]',
   providers: [
     {
       provide: NG_VALIDATORS,
-      useExisting: EditCustomUidValidatorDirective,
+      useExisting: EditCustomIdValidatorDirective,
       multi: true,
     },
   ],
 })
-export class EditCustomUidValidatorDirective
+export class EditCustomIdValidatorDirective
   implements Validator, BdValidationMessageExtractor
 {
-  public readonly id = 'edit-custom-uid';
-  private readonly uidRegExp = new RegExp(/^[A-Za-z][A-Za-z0-9_\\-\\.]*$/);
+  public readonly id = 'edit-custom-id';
+  private readonly idRegExp = new RegExp(/^[A-Za-z][A-Za-z0-9_\\-\\.]*$/);
 
   constructor(private edit: InstanceEditService) {
     bdValidationRegisterMessageExtractor(this);
@@ -40,10 +40,10 @@ export class EditCustomUidValidatorDirective
   validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     const errors = {};
-    const ok = this.uidRegExp.test(value);
+    const ok = this.idRegExp.test(value);
 
     if (!ok) {
-      errors[this.id] = 'Invalid UID Format';
+      errors[this.id] = 'Invalid ID Format';
     }
 
     return errors;

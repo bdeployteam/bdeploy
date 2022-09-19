@@ -72,7 +72,7 @@ export class ProcessUiInlineComponent implements OnDestroy {
 
         this.app = apps.find(
           (a) =>
-            a.endpoint?.uuid === route.params.app &&
+            a.endpoint?.id === route.params.app &&
             a.endpoint.endpoint.id === route.params.endpoint
         );
 
@@ -90,14 +90,14 @@ export class ProcessUiInlineComponent implements OnDestroy {
         const process = nodes?.nodeConfigDtos
           ?.map((n) =>
             n.nodeConfiguration?.applications?.find(
-              (a) => a.uid === this.app.client?.uuid
+              (a) => a.id === this.app.client?.id
             )
           )
           .find((a) => a);
 
         this.rawUrl = `${cfg.config.api}/master/upx/${group.name}/${
-          this.app.instance.uuid
-        }/${this.app.endpoint.uuid}/${
+          this.app.instance.id
+        }/${this.app.endpoint.id}/${
           this.app.endpoint.endpoint.id
         }${this.cpWithSlash(
           getRenderPreview(

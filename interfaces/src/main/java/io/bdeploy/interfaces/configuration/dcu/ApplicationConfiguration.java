@@ -3,6 +3,8 @@ package io.bdeploy.interfaces.configuration.dcu;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
@@ -24,7 +26,8 @@ public class ApplicationConfiguration {
     /**
      * Globally unique identifier of the application.
      */
-    public String uid;
+    @JsonAlias("uid")
+    public String id;
 
     /**
      * The human readable name of the application configuration (e.g. "My App 1").
@@ -73,7 +76,7 @@ public class ApplicationConfiguration {
         SkipDelayed skipDelayCallback = new SkipDelayed();
         ProcessConfiguration processConfig = new ProcessConfiguration();
 
-        processConfig.uid = uid;
+        processConfig.id = id;
         processConfig.name = name;
         processConfig.processControl = processControl;
 
@@ -91,7 +94,7 @@ public class ApplicationConfiguration {
         Path manifestInstallPath = Paths.get(path);
 
         if (start.executable == null) {
-            throw new IllegalStateException("No executable set for application '" + name + "' (" + uid + ")");
+            throw new IllegalStateException("No executable set for application '" + name + "' (" + id + ")");
         }
 
         String startCmd = TemplateHelper.process(start.executable, valueResolver, skipDelayCallback);

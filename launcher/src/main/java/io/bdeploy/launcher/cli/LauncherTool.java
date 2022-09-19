@@ -806,7 +806,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // NOTE: Directory is create before by the native installer
         Collection<String> missing = new ArrayList<>();
         if (!PathHelper.exists(appDir)) {
-            missing.add("Directory: " + clientAppCfg.appConfig.uid);
+            missing.add("Directory: " + clientAppCfg.appConfig.id);
         }
 
         // The software that we need must be in the pool
@@ -835,9 +835,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Meta-Manifest about the installation must be there
         // and must refer to what the application actually requires
         ClientSoftwareManifest manifest = new ClientSoftwareManifest(hive);
-        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.uid, false);
+        ClientSoftwareConfiguration clientConfig = manifest.readNewest(clientAppCfg.appConfig.id, false);
         if (clientConfig == null) {
-            missing.add("Meta-Manifest:" + clientAppCfg.appConfig.uid);
+            missing.add("Meta-Manifest:" + clientAppCfg.appConfig.id);
         } else {
             // Check that all required apps are listed
             applications.removeAll(clientConfig.requiredSoftware);
@@ -907,7 +907,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                     .redirectOutput(Redirect.INHERIT).directory(appDir.toFile());
             return b.start();
         } catch (IOException e) {
-            throw new IllegalStateException("Cannot start " + appCfg.uid, e);
+            throw new IllegalStateException("Cannot start " + appCfg.id, e);
         }
     }
 
@@ -940,7 +940,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
 
         // Resolvers that are using the general ones to actually do the work
         CompositeResolver appSpecificResolvers = new CompositeResolver();
-        appSpecificResolvers.add(new ApplicationParameterValueResolver(clientCfg.appConfig.uid, clientCfg.instanceConfig));
+        appSpecificResolvers.add(new ApplicationParameterValueResolver(clientCfg.appConfig.id, clientCfg.instanceConfig));
         appSpecificResolvers.add(new ManifestSelfResolver(clientCfg.appConfig.application, resolvers));
         appSpecificResolvers.add(resolvers);
 

@@ -97,7 +97,7 @@ export class ConfigFilesService {
   ): Observable<ConfigFileDto[]> {
     return this.http
       .get<ConfigFileDto[]>(
-        `${this.apiPath(group, instance.instanceConfiguration.uuid)}/${
+        `${this.apiPath(group, instance.instanceConfiguration.id)}/${
           instance.instance.tag
         }/${state.config.config.product.name}/${
           state.config.config.product.tag
@@ -222,7 +222,7 @@ export class ConfigFilesService {
       .get(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.editSvc.current$.value.instanceConfiguration.uuid
+          this.editSvc.current$.value.instanceConfiguration.id
         )}/load/${this.editSvc.current$.value.instance.tag}/${path}`,
         { responseType: 'text' }
       )
@@ -234,7 +234,7 @@ export class ConfigFilesService {
       .get(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.editSvc.current$.value.instanceConfiguration.uuid
+          this.editSvc.current$.value.instanceConfiguration.id
         )}/loadTemplate/${path}`,
         {
           responseType: 'text',

@@ -37,7 +37,7 @@ export class DataFilesService {
             .get<RemoteDirectory[]>(
               `${this.apiPath(
                 this.groups.current$.value.name,
-                i.instanceConfiguration.uuid
+                i.instanceConfiguration.id
               )}/processes/dataDirSnapshot`
             )
             .pipe(measure('Load Instance Data Files.'))
@@ -54,7 +54,7 @@ export class DataFilesService {
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instances.current$.value.instanceConfiguration.uuid
+          this.instances.current$.value.instanceConfiguration.id
         )}/delete/${rd.minion}`,
         rde
       )
@@ -66,7 +66,7 @@ export class DataFilesService {
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instances.current$.value.instanceConfiguration.uuid
+          this.instances.current$.value.instanceConfiguration.id
         )}/data/update/${rd.minion}`,
         [file]
       )

@@ -53,26 +53,26 @@ class EndpointsTest {
             MinionRoot mr) throws IOException, InterruptedException {
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true, server.getPort());
 
-        String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
+        String id = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         master.getNamedMaster("demo").install(instance);
-        assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+        assertFalse(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
 
-        assertThrows(ClientErrorException.class, () -> common.getInstanceResource("demo").getAllEndpoints(uuid).isEmpty());
+        assertThrows(ClientErrorException.class, () -> common.getInstanceResource("demo").getAllEndpoints(id).isEmpty());
 
         master.getNamedMaster("demo").activate(instance);
-        assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
+        assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(id).activeTag);
 
-        master.getNamedMaster("demo").start(uuid, List.of("app"));
+        master.getNamedMaster("demo").start(id, List.of("app"));
 
-        SortedMap<String, EndpointsConfiguration> allEndpoints = common.getInstanceResource("demo").getAllEndpoints(uuid);
+        SortedMap<String, EndpointsConfiguration> allEndpoints = common.getInstanceResource("demo").getAllEndpoints(id);
         List<HttpEndpoint> httpEndpoints = allEndpoints.entrySet().stream().flatMap(e -> e.getValue().http.stream()).toList();
         assertEquals(1, httpEndpoints.size());
         assertEquals("test", httpEndpoints.get(0).id);
 
         // try to actually access the endpoint
-        Response response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test");
+        Response response = common.getInstanceResource("demo").getProxyResource(id, "app").get("test");
         log.info("Result: {}", response.getStatusInfo());
         assertEquals(200, response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -83,7 +83,7 @@ class EndpointsTest {
         assertEquals("world", result.hello);
 
         // try to access sub-resource
-        response = common.getInstanceResource("demo").getProxyResource(uuid, "app").get("test/sub");
+        response = common.getInstanceResource("demo").getProxyResource(id, "app").get("test/sub");
         log.info("Result: {}", response.getStatusInfo());
         assertEquals(200, response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -95,7 +95,7 @@ class EndpointsTest {
 
         // manually construct request to be able to pass additional parameters
         WebTarget wt = ResourceProvider.of(remote).getBaseTarget().path("/master/common/proxy/test")
-                .queryParam("BDeploy_group", "demo").queryParam("BDeploy_instance", uuid)
+                .queryParam("BDeploy_group", "demo").queryParam("BDeploy_instance", id)
                 .queryParam("BDeploy_application", "app");
 
         HelloResult input = new HelloResult();

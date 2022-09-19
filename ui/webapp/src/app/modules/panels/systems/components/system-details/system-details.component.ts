@@ -26,7 +26,7 @@ export class SystemDetailsComponent implements OnDestroy {
       '/instances',
       'dashboard',
       this.areas.groupContext$.value,
-      row.instanceConfiguration.uuid,
+      row.instanceConfiguration.id,
     ];
   };
   private subscription: Subscription;
@@ -81,7 +81,7 @@ export class SystemDetailsComponent implements OnDestroy {
       .subscribe((confirmed) => {
         if (confirmed) {
           this.systems
-            .delete(this.edit.current$.value?.config.uuid)
+            .delete(this.edit.current$.value?.config.id)
             .subscribe(() => {
               this.areas.closePanel();
             });

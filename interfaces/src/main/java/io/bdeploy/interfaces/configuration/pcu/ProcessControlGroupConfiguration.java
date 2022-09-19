@@ -36,7 +36,7 @@ public class ProcessControlGroupConfiguration {
     /** How processes are stopped */
     public ProcessControlGroupHandlingType stopType = ProcessControlGroupHandlingType.SEQUENTIAL;
 
-    /** Process UUIDs in the order to be started. Stop always uses reverse order of this */
+    /** Process IDs in the order to be started. Stop always uses reverse order of this */
     public List<String> processOrder = new ArrayList<>();
 
 }

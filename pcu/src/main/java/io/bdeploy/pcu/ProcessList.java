@@ -36,7 +36,7 @@ public class ProcessList {
 
     /** Creates a new process list */
     public ProcessList(String instanceTag, ProcessGroupConfiguration processConfig) {
-        this.logger.setMdcValue(processConfig.uuid, instanceTag);
+        this.logger.setMdcValue(processConfig.id, instanceTag);
         this.instanceTag = instanceTag;
         this.processConfig = processConfig;
     }
@@ -58,7 +58,7 @@ public class ProcessList {
      *            the controller to add
      */
     public void add(ProcessController controller) {
-        controllers.put(controller.getDescriptor().uid, controller);
+        controllers.put(controller.getDescriptor().id, controller);
     }
 
     /**
@@ -82,8 +82,8 @@ public class ProcessList {
 
         for (ProcessConfiguration process : processConfig.applications) {
             // check if the application is in a control group, otherwise -> default.
-            if (groups.stream().filter(c -> c.processOrder.contains(process.uid)).findAny().isEmpty()) {
-                defaultGroup.processOrder.add(process.uid);
+            if (groups.stream().filter(c -> c.processOrder.contains(process.id)).findAny().isEmpty()) {
+                defaultGroup.processOrder.add(process.id);
             }
         }
 

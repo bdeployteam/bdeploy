@@ -68,7 +68,7 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     }
 
     @Override
-    public String createUuid() {
+    public String createId() {
         return UuidHelper.randomId();
     }
 

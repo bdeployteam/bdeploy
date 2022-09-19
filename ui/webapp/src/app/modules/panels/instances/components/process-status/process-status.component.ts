@@ -30,8 +30,8 @@ import { ProcessDetailsService } from '../../services/process-details.service';
 import { PinnedParameterValueComponent } from './pinned-parameter-value/pinned-parameter-value.component';
 
 export interface PinnedParameter {
-  appUid: string;
-  paramUid: string;
+  appId: string;
+  paramId: string;
   name: string;
   value: string;
   type: ParameterType;
@@ -127,11 +127,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
           .filter((p) => p.pinned)
           .map((p) => {
             const desc = app?.descriptor?.startCommand?.parameters?.find(
-              (x) => x.uid === p.uid
+              (x) => x.id === p.id
             );
             return {
-              appUid: config.uid,
-              paramUid: p.uid,
+              appId: config.id,
+              paramId: p.id,
               name: desc.name,
               value: getRenderPreview(
                 p.value,
@@ -157,7 +157,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.stopping$.next(false);
       this.restarting$.next(false);
 
-      if (!detail || detail?.status?.appUid !== config?.uid) {
+      if (!detail || detail?.status?.appId !== config?.id) {
         this.processDetail = null;
         this.isCrashedWaiting = false;
         this.isRunning = false;
@@ -203,11 +203,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         })
     );
 
-    // when processConfig$ emits value with new uid, confirmation dialog must be closed
+    // when processConfig$ emits value with new id, confirmation dialog must be closed
     this.subscription.add(
       this.details.processConfig$
         .pipe(
-          map((config) => config?.uid),
+          map((config) => config?.id),
           distinctUntilChanged()
         )
         .subscribe(() => {
@@ -274,7 +274,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         return;
       }
       this.processes
-        .start([this.processDetail.status.appUid])
+        .start([this.processDetail.status.appId])
         .pipe(finalize(() => this.starting$.next(false)))
         .subscribe();
     });
@@ -283,7 +283,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ stop() {
     this.stopping$.next(true);
     this.processes
-      .stop([this.processDetail.status.appUid])
+      .stop([this.processDetail.status.appId])
       .pipe(finalize(() => this.stopping$.next(false)))
       .subscribe();
   }
@@ -291,7 +291,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ restart() {
     this.restarting$.next(true);
     this.processes
-      .restart([this.processDetail.status.appUid])
+      .restart([this.processDetail.status.appId])
       .pipe(finalize(() => this.restarting$.next(false)))
       .subscribe();
   }
@@ -308,7 +308,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
             'panels',
             'groups',
             'endpoint',
-            this.processConfig.uid,
+            this.processConfig.id,
             r.id,
             {
               returnPanel: returnUrl,

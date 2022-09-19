@@ -50,7 +50,7 @@ class LoggingConfigTest {
         assertEquals(1, dirs.size());
         assertEquals("master", dirs.get(0).minion);
         assertNull(dirs.get(0).problem);
-        assertNull(dirs.get(0).uuid);
+        assertNull(dirs.get(0).id);
         assertEquals(3, dirs.get(0).entries.size()); // the two logs, audit.log, audit.json
 
         var entries = dirs.get(0).entries;

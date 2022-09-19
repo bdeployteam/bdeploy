@@ -58,15 +58,15 @@ public class InstanceProcessController {
     /** The currently active tag */
     private String activeTag;
 
-    /** The instance UUID */
-    private final String instanceUid;
+    /** The instance ID */
+    private final String instanceId;
 
     /**
      * Create a new instance controller.
      */
-    public InstanceProcessController(String instanceUid) {
-        this.instanceUid = instanceUid;
-        this.logger.setMdcValue(instanceUid);
+    public InstanceProcessController(String instanceId) {
+        this.instanceId = instanceId;
+        this.logger.setMdcValue(instanceId);
     }
 
     /**
@@ -95,11 +95,11 @@ public class InstanceProcessController {
 
             // Add a new controller for each application
             for (ProcessConfiguration config : groupConfig.applications) {
-                Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.uid);
-                ProcessController controller = new ProcessController(groupConfig.uuid, tag, config, processDir);
+                Path processDir = pathProvider.get(SpecialDirectory.RUNTIME).resolve(config.id);
+                ProcessController controller = new ProcessController(groupConfig.id, tag, config, processDir);
                 CompositeResolver resolverWithApp = new CompositeResolver();
                 if (inm != null) {
-                    resolverWithApp.add(new ApplicationParameterValueResolver(config.uid, inm.getConfiguration()));
+                    resolverWithApp.add(new ApplicationParameterValueResolver(config.id, inm.getConfiguration()));
                 }
                 resolverWithApp.add(resolver);
                 controller.setVariableResolver(resolverWithApp);
@@ -120,7 +120,7 @@ public class InstanceProcessController {
                 }
 
                 processList.add(controller);
-                logger.log(l -> l.debug("Creating new process controller."), tag, config.uid);
+                logger.log(l -> l.debug("Creating new process controller."), tag, config.id);
             }
         } finally {
             writeLock.unlock();
@@ -238,7 +238,7 @@ public class InstanceProcessController {
                 // Start all missing applications
                 logger.log(l -> l.info("Starting all applications."), activeTag);
 
-                BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
+                BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, list);
                 strategy.startAll(user, running, list.controllers.entrySet().stream()
                         .filter(e -> e.getValue().getDescriptor().processControl.startType == ApplicationStartType.INSTANCE)
                         .map(Entry::getKey).toList());
@@ -261,7 +261,7 @@ public class InstanceProcessController {
 
         logger.log(l -> l.info("Stopping all running applications."));
 
-        BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, processMap.get(activeTag));
+        BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, processMap.get(activeTag));
         strategy.stopAll(user, running, running.keySet());
     }
 
@@ -281,7 +281,7 @@ public class InstanceProcessController {
                 logger.log(l -> l.info("Starting applications: {}", applicationIds), activeTag);
 
                 // Let the desired strategy start all processes
-                BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, list);
+                BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, list);
                 strategy.startAll(user, running, applicationIds);
             });
         } finally {
@@ -302,7 +302,7 @@ public class InstanceProcessController {
 
         logger.log(l -> l.info("Stopping applications: {}", applicationIds));
 
-        BulkProcessController strategy = new BulkProcessController(instanceUid, activeTag, processMap.get(activeTag));
+        BulkProcessController strategy = new BulkProcessController(instanceId, activeTag, processMap.get(activeTag));
         strategy.stopAll(user, running, applicationIds);
     }
 

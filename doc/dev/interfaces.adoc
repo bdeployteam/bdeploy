@@ -62,7 +62,7 @@ a| * `CONFIG`: directory where all configuration files will be placed by deploym
 | `InstanceVariableResolver`
 | `{{I:VAR}}`
 a| * `SYSTEM_PURPOSE`: the purpose of the instance, see `InstancePurpose`
- * `UUID`: UUID of the instance
+ * `ID`: ID of the instance
  * `NAME`: name of the instance
  * `PRODUCT_ID`: name of the `MANIFEST` key's name of the configured product
  * `PRODUCT_TAG`: the tag (i.e. 'version') of the configured product

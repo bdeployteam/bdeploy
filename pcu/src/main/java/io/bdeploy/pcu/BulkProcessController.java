@@ -21,13 +21,13 @@ public class BulkProcessController {
     private final MdcLogger logger = new MdcLogger(BulkProcessController.class);
     private final ProcessList processes;
     private final String activeTag;
-    private final String instanceUuid;
+    private final String instanceId;
 
-    public BulkProcessController(String instanceUuid, String activeTag, ProcessList processes) {
-        this.instanceUuid = instanceUuid;
+    public BulkProcessController(String instanceId, String activeTag, ProcessList processes) {
+        this.instanceId = instanceId;
         this.processes = processes;
         this.activeTag = activeTag;
-        this.logger.setMdcValue(instanceUuid);
+        this.logger.setMdcValue(instanceId);
     }
 
     /**
@@ -79,7 +79,7 @@ public class BulkProcessController {
                     continue;
                 }
 
-                try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceUuid, activeTag, controlGroup, processes,
+                try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceId, activeTag, controlGroup, processes,
                         controlGroup.startType)) {
                     List<String> failed = bulk.startGroup(appsInGroup);
 
@@ -139,9 +139,9 @@ public class BulkProcessController {
                     } else {
                         process.prepareStop(user);
                     }
-                    leftOverApps.remove(process.getDescriptor().uid);
+                    leftOverApps.remove(process.getDescriptor().id);
                 } catch (Exception ex) {
-                    String appId = process.getDescriptor().uid;
+                    String appId = process.getDescriptor().id;
                     String tag = process.getStatus().instanceTag;
                     logger.log(l -> l.error("Failed to prepare stopping of application.", ex), tag, appId);
                 }
@@ -164,7 +164,7 @@ public class BulkProcessController {
                 continue;
             }
 
-            try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceUuid, activeTag, controlGroup, processes,
+            try (BulkControlStrategy bulk = BulkControlStrategy.create(user, instanceId, activeTag, controlGroup, processes,
                     controlGroup.stopType)) {
                 bulk.stopGroup(toStop);
             }

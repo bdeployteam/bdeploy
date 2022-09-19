@@ -113,7 +113,7 @@ export class AttributesComponent implements OnInit {
         this.loading$.next(true);
         this.instances
           .updateAttributes(
-            this.instance.instanceConfiguration.uuid,
+            this.instance.instanceConfiguration.id,
             this.attributes
           )
           .pipe(finalize(() => this.loading$.next(false)))
@@ -125,10 +125,7 @@ export class AttributesComponent implements OnInit {
     delete this.attributes.attributes[r.id];
     this.loading$.next(true);
     this.instances
-      .updateAttributes(
-        this.instance.instanceConfiguration.uuid,
-        this.attributes
-      )
+      .updateAttributes(this.instance.instanceConfiguration.id, this.attributes)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe();
   }

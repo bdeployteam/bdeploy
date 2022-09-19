@@ -225,7 +225,7 @@ public class InstanceResourceImpl implements InstanceResource {
             Key activeVersion = null;
             Key activeProduct = null;
             try {
-                InstanceStateRecord state = getDeploymentStates(config.uuid);
+                InstanceStateRecord state = getDeploymentStates(config.id);
 
                 if (state.activeTag != null) {
                     try {
@@ -238,7 +238,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
             } catch (Exception e) {
                 // in case the token is invalid, master not reachable, etc.
-                log.error("Cannot contact master for {}.", config.uuid, e);
+                log.error("Cannot contact master for {}.", config.id, e);
             }
 
             boolean newerVersionAvailable = this.isNewerVersionAvailable(scan, config, productVersionComparator);
@@ -250,9 +250,9 @@ public class InstanceResourceImpl implements InstanceResource {
             if (minion.getMode() == MinionMode.CENTRAL) {
                 ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
                 try {
-                    managedMaster = ms.getServerForInstance(group, config.uuid, imKey.getTag());
+                    managedMaster = ms.getServerForInstance(group, config.id, imKey.getTag());
                 } catch (WebApplicationException e) {
-                    log.warn("Cannot load managed server for group {}, instance {}", group, config.uuid);
+                    log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
                 }
             }
 
@@ -365,7 +365,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // for each instance, read the meta-manifest, and provide the recorded data.
         var result = new ArrayList<InstanceOverallStatusDto>();
         for (var inst : list.stream().filter(i -> instances.contains(i.instance)).toList()) {
-            result.add(new InstanceOverallStatusDto(inst.instanceConfiguration.uuid,
+            result.add(new InstanceOverallStatusDto(inst.instanceConfiguration.id,
                     new InstanceOverallState(inst.instance, hive).read()));
         }
 
@@ -858,7 +858,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // central server
         // so that installers can be shared and used regardless from where they have
         // been downloaded from
-        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().uuid, appConfig.uid);
+        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().id, appConfig.id);
         URI baseUri = clickAndStart.host.getUri();
 
         UriBuilder launcherUri = UriBuilder.fromUri(baseUri);
@@ -874,8 +874,8 @@ public class InstanceResourceImpl implements InstanceResource {
         splashUrl.path(InstanceResource.PATH_DOWNLOAD_APP_SPLASH);
 
         URI launcherLocation = launcherUri.build(new Object[] { applicationOs.name().toLowerCase() }, false);
-        URI iconLocation = iconUri.build(group, im.getConfiguration().uuid, appConfig.uid);
-        URI splashLocation = splashUrl.build(group, im.getConfiguration().uuid, appConfig.uid);
+        URI iconLocation = iconUri.build(group, im.getConfiguration().id, appConfig.id);
+        URI splashLocation = splashUrl.build(group, im.getConfiguration().id, appConfig.id);
 
         String fileName = "%1$s (%2$s - %3$s) - Installer";
         if (applicationOs == OperatingSystem.WINDOWS) {
@@ -914,7 +914,7 @@ public class InstanceResourceImpl implements InstanceResource {
         Map<String, String> values = new TreeMap<>();
         values.put("LAUNCHER_URL", launcherLocation.toString());
         values.put("ICON_URL", iconLocation.toString());
-        values.put("APP_UID", appConfig.uid);
+        values.put("APP_UID", appConfig.id);
         values.put("APP_NAME", appConfig.name + " (" + group + " - " + im.getConfiguration().name + ")");
         values.put("BDEPLOY_FILE", new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8));
         values.put("REMOTE_SERVICE_URL", ""); // not used, only in standalone
@@ -954,7 +954,7 @@ public class InstanceResourceImpl implements InstanceResource {
             config.splashUrl = splashLocation.toString();
             config.instanceGroupName = group;
             config.instanceName = im.getConfiguration().name;
-            config.applicationUid = appConfig.uid;
+            config.applicationUid = appConfig.id;
             config.applicationName = appConfig.name;
             config.applicationJson = new String(StorageHelper.toRawBytes(clickAndStart), StandardCharsets.UTF_8);
             config.productVendor = pm.getProductDescriptor().vendor;
@@ -1242,7 +1242,7 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceNodeConfiguration inc = inmf.getConfiguration();
 
             for (ApplicationConfiguration ac : inc.applications) {
-                if (ac.uid.equals(application)) {
+                if (ac.id.equals(application)) {
                     app = ac;
                     break;
                 }
@@ -1275,7 +1275,7 @@ public class InstanceResourceImpl implements InstanceResource {
         CompositeResolver list = new CompositeResolver();
         list.add(new InstanceAndSystemVariableResolver(ic));
         list.add(new ApplicationVariableResolver(app));
-        list.add(new ApplicationParameterValueResolver(app.uid, ic));
+        list.add(new ApplicationParameterValueResolver(app.id, ic));
         list.add(new ParameterValueResolver(new ApplicationParameterProvider(ic)));
         list.add(new OsVariableResolver());
 

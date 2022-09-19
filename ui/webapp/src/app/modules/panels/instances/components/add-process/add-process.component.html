@@ -3,7 +3,7 @@
   <ng-container *ngFor="let v of selectedTemplate.templateVariables">
     <app-bd-form-input
       [attr.name]="v.name"
-      [(ngModel)]="response[v.uid]"
+      [(ngModel)]="response[v.id]"
       [label]="v.name"
       [matTooltip]="v.description"
       [suggested]="v.suggestedValues"

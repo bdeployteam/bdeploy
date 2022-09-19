@@ -76,7 +76,7 @@ public class SystemResourceImpl implements SystemResource {
 
     @Override
     public void update(SystemConfigurationDto dto) {
-        SystemManifest sm = SystemManifest.load(hive, dto.config.uuid);
+        SystemManifest sm = SystemManifest.load(hive, dto.config.id);
         String target = dto.minion;
         RemoteService remote;
         if (sm == null) {

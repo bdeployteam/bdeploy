@@ -109,7 +109,7 @@ public class TestAppFactory {
 
         cfg.runtimeDependencies.add("jdk:1.8.0");
         ParameterDescriptor sleepParam = new ParameterDescriptor();
-        sleepParam.uid = "sleepParam";
+        sleepParam.id = "sleepParam";
         sleepParam.name = "Sleep Time";
         sleepParam.groupName = "Dummy Group";
         sleepParam.longDescription = "Long parameter description for sleep timeout";
@@ -154,7 +154,7 @@ public class TestAppFactory {
 
     private static ParameterDescriptor getParam(String param, String desc, String def) {
         ParameterDescriptor c = new ParameterDescriptor();
-        c.uid = param;
+        c.id = param;
         c.parameter = param;
         c.name = desc;
         c.groupName = "Generated Group";

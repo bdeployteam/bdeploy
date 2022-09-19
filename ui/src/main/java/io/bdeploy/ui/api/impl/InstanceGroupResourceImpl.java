@@ -119,15 +119,15 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 continue;
             }
 
-            // Fetch instance group's instance uuids and add them to searchable text
-            List<String> instanceUuids = new ArrayList<>();
+            // Fetch instance group's instance IDs and add them to searchable text
+            List<String> instanceIds = new ArrayList<>();
             SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
             for (Key imKey : imKeys) {
                 InstanceManifest im = InstanceManifest.of(hive, imKey);
                 InstanceConfiguration config = im.getConfiguration();
-                instanceUuids.add(config.uuid);
+                instanceIds.add(config.id);
             }
-            result.add(new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceUuids)));
+            result.add(new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceIds)));
         }
         return result;
     }
@@ -266,8 +266,8 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
-    public String createUuid(String group) {
-        // TODO: actually assure that the UUID is unique for the use in instance and application UUIDs.
+    public String createId(String group) {
+        // TODO: actually assure that the ID is unique for the use in instance and application IDs.
         return UuidHelper.randomId();
     }
 
@@ -278,7 +278,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         BHive hive = getGroupHive(group);
         InstanceResource resource = getInstanceResource(group);
         for (InstanceDto idto : resource.list()) {
-            String instanceId = idto.instanceConfiguration.uuid;
+            String instanceId = idto.instanceConfiguration.id;
 
             // Always use latest version to lookup remote service
             InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
@@ -307,7 +307,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, clientKey);
             for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
                 ClientApplicationDto clientApp = new ClientApplicationDto();
-                clientApp.uuid = appConfig.uid;
+                clientApp.id = appConfig.id;
                 clientApp.description = appConfig.name;
                 ScopedManifestKey scopedKey = ScopedManifestKey.parse(appConfig.application);
                 clientApp.os = scopedKey.getOperatingSystem();
@@ -333,7 +333,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         BHive hive = getGroupHive(group);
         InstanceResource resource = getInstanceResource(group);
         for (InstanceDto idto : resource.list()) {
-            String instanceId = idto.instanceConfiguration.uuid;
+            String instanceId = idto.instanceConfiguration.id;
 
             // Always use latest version to lookup remote service
             InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
@@ -365,7 +365,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                         }
 
                         UiEndpointDto uiEp = new UiEndpointDto();
-                        uiEp.uuid = appConfig.uid;
+                        uiEp.id = appConfig.id;
                         uiEp.appName = appConfig.name;
                         uiEp.endpoint = configuredEp;
                         allInstEps.endpoints.add(uiEp);

@@ -48,8 +48,8 @@ export class EditServerIssuesValidatorDirective
       map((iu) => {
         const validation = iu?.filter(
           (v) =>
-            v.appUid === this.edit.process$.value.uid &&
-            v.paramUid === this.appServerIssuesValidator
+            v.appId === this.edit.process$.value.id &&
+            v.paramId === this.appServerIssuesValidator
         );
         if (!validation?.length) {
           return null;

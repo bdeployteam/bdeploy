@@ -133,13 +133,13 @@ export class CommandDiff {
     if (!!base && !!base.parameters?.length) {
       for (const param of base.parameters) {
         const compareParam = compare?.parameters?.find(
-          (p) => p.uid === param.uid
+          (p) => p.id === param.id
         );
         this.parameters.push(
           new ParameterDiff(
             param,
             compareParam,
-            baseDescriptor?.parameters?.find((p) => p.uid === param.uid)
+            baseDescriptor?.parameters?.find((p) => p.id === param.id)
           )
         );
       }
@@ -147,7 +147,7 @@ export class CommandDiff {
     let newParamChange: DiffType = DiffType.UNCHANGED;
     if (!!compare && !!compare.parameters?.length) {
       for (const param of compare.parameters) {
-        const baseParam = base?.parameters?.find((p) => p.uid === param.uid);
+        const baseParam = base?.parameters?.find((p) => p.id === param.id);
         if (!baseParam) {
           newParamChange = DiffType.CHANGED;
         }
@@ -316,7 +316,7 @@ export class HttpEndpointDiff {
 export class ApplicationConfigurationDiff {
   public type: DiffType;
 
-  public uid: Difference;
+  public id: Difference;
   public name: Difference;
   public processControl: ProcessControlDiff;
   public start: CommandDiff;
@@ -328,7 +328,7 @@ export class ApplicationConfigurationDiff {
     compare: ApplicationConfiguration,
     public descriptor: ApplicationDescriptor
   ) {
-    this.uid = new Difference(base?.uid, compare?.uid);
+    this.id = new Difference(base?.id, compare?.id);
     this.name = new Difference(base?.name, compare?.name);
     if (descriptor?.type !== ApplicationType.CLIENT) {
       this.processControl = new ProcessControlDiff(

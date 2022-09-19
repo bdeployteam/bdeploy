@@ -27,7 +27,7 @@ class TestFactory {
     public static ProcessGroupConfiguration createGroupConfig(String name, ProcessConfiguration... apps) {
         ProcessGroupConfiguration config = new ProcessGroupConfiguration();
         config.name = name;
-        config.uuid = name;
+        config.id = name;
         config.applications.addAll(Arrays.asList(apps));
         return config;
     }
@@ -50,7 +50,7 @@ class TestFactory {
         Path script = TestAppFactory.genSleepScript("sleep", path);
 
         ProcessConfiguration config = new ProcessConfiguration();
-        config.uid = name;
+        config.id = name;
         config.name = name;
         config.processControl = new ProcessControlConfiguration();
         config.processControl.keepAlive = keepAlive;

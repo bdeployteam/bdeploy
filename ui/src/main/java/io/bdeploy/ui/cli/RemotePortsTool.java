@@ -48,7 +48,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
-        @Help(value = "UUID of the instance. The active tag of the instance will be queried.")
+        @Help(value = "ID of the instance. The active tag of the instance will be queried.")
         String uuid();
 
         @Help(value = "List server ports and their respective states on the individual nodes.", arg = false)
@@ -80,7 +80,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         DataTable table = createDataTable();
 
         table.setCaption("Ports of instance " + config.uuid() + " in instance group " + config.instanceGroup());
-        table.column("Node", 20).column(new DataTableColumn("ProcessUuid", "App. ID", 14)).column("Process", 30)
+        table.column("Node", 20).column(new DataTableColumn("ProcessId", "App. ID", 14)).column("Process", 30)
                 .column(new DataTableColumn("ProcessState", "P. State", 20)).column("Out of sync", 1).column("Description", 30)
                 .column("Port", 5).column("Type", 6).column("State", 6).column("Rating", 3);
 
@@ -108,12 +108,12 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
             }
 
             if (port.type == ParameterType.SERVER_PORT) {
-                table.row().cell(port.getNodeName()).cell(port.appUid).cell(port.appName).cell(port.processState)
+                table.row().cell(port.getNodeName()).cell(port.appId).cell(port.appName).cell(port.processState)
                         .cell(port.processState.isRunning() && !activeTag.equals(port.runningTag) ? "*" : "")
                         .cell(port.description).cell(port.port).cell("SERVER").cell(port.state ? "open" : "closed")
                         .cell(port.getRating() ? "OK" : "BAD").build();
             } else {
-                table.row().cell(port.getNodeName()).cell(port.appUid).cell(port.appName).cell(port.processState).cell("")
+                table.row().cell(port.getNodeName()).cell(port.appId).cell(port.appName).cell(port.processState).cell("")
                         .cell(port.description).cell(port.port).cell("CLIENT").cell("").cell("").build();
             }
         }
@@ -149,7 +149,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
                 for (var port : matchedPorts) {
                     port.state = portAndState.getValue();
-                    ProcessStatusDto processStatus = status.get(port.appUid);
+                    ProcessStatusDto processStatus = status.get(port.appId);
                     if (processStatus != null) {
                         port.processState = processStatus.processState;
                         port.runningTag = processStatus.instanceTag;
@@ -177,7 +177,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
                 if (desc.descriptor.startCommand != null) {
                     for (var param : config.start.parameters) {
-                        var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.uid.equals(param.uid))
+                        var paramDesc = desc.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(param.id))
                                 .findFirst().orElse(null);
                         if (paramDesc != null
                                 && (paramDesc.type == ParameterType.CLIENT_PORT || paramDesc.type == ParameterType.SERVER_PORT)) {
@@ -186,10 +186,10 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
                                 if (param.value.linkExpression != null) {
                                     val = TemplateHelper.process(param.value.linkExpression, resolver);
                                 }
-                                result.add(new NodePort(node.nodeName, config.name, config.uid, paramDesc.type, paramDesc.name,
+                                result.add(new NodePort(node.nodeName, config.name, config.id, paramDesc.type, paramDesc.name,
                                         Integer.valueOf(val)));
                             } catch (NumberFormatException e) {
-                                out().println("Illegal port value configured for " + param.uid + " on application " + config.uid);
+                                out().println("Illegal port value configured for " + param.id + " on application " + config.id);
                             }
                         }
                     }
@@ -207,7 +207,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         // limited to resolvers which could yield a valid port value, considering potential cross-references.
         CompositeResolver res = new CompositeResolver();
         res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
-        res.add(new ApplicationParameterValueResolver(process.uid, node.nodeConfiguration));
+        res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
         res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
         res.add(new OsVariableResolver());
         return res;
@@ -218,7 +218,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         final String nodeName;
 
         final String appName;
-        final String appUid;
+        final String appId;
 
         final ParameterType type;
         final String description;
@@ -228,10 +228,10 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         ProcessState processState;
         String runningTag;
 
-        public NodePort(String nodeName, String appName, String appUid, ParameterType type, String description, int port) {
+        public NodePort(String nodeName, String appName, String appId, ParameterType type, String description, int port) {
             this.nodeName = nodeName;
             this.appName = appName;
-            this.appUid = appUid;
+            this.appId = appId;
             this.type = type;
             this.description = description;
             this.port = port;

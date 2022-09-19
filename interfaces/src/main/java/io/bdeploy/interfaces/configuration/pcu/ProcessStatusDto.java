@@ -3,19 +3,23 @@ package io.bdeploy.interfaces.configuration.pcu;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 /**
  * DTO provided by the PCU with the status of the process.
  */
 public class ProcessStatusDto {
 
     /** The UID of the instance */
-    public String instanceUid;
+    @JsonAlias("instanceUid")
+    public String instanceId;
 
     /** Tag of the instance */
     public String instanceTag;
 
     /** Unique id of the application */
-    public String appUid;
+    @JsonAlias("appUid")
+    public String appId;
 
     /** Human readable name of the application */
     public String appName;
@@ -41,7 +45,7 @@ public class ProcessStatusDto {
      */
     public List<String> logStatusDetails() {
         List<String> logs = new ArrayList<>();
-        logs.add("ProcessController [" + instanceUid + " / " + instanceTag + " / " + appUid + "]");
+        logs.add("ProcessController [" + instanceId + " / " + instanceTag + " / " + appId + "]");
         logs.add("State: " + processState);
         return logs;
     }

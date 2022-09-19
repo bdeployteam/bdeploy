@@ -159,7 +159,7 @@ However, updating products will not "fix" existing instances, as templates are o
 
 Thus, there is a btn:[Migrate Globals] button on the *Instance Variables* panel. Also, updating the product version will now (as long as migration has not been performed yet) prompt to perform the migration to *Instance Variables*. This migration will pick each `global` parameter in the *Instance* and:
 
-. Create and *Instance Variable* using the parameters UUID as variable name.
+. Create and *Instance Variable* using the parameters ID as variable name.
 . Set the current `global` value to the new *Instance Variable*.
 . Replace the current value for all instances of the `global` parameter in the *Instance* with a link expression referencing the new *Instance Variable*
 . Disable the use of `global` for *this Instance* only. All parameters will be treated as though the `global` flag was not set.

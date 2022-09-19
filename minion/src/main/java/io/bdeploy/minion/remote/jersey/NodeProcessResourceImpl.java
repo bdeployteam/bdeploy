@@ -105,9 +105,9 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
     }
 
     @Override
-    public ProcessDetailDto getProcessDetails(String instanceId, String appUid) {
+    public ProcessDetailDto getProcessDetails(String instanceId, String appId) {
         MinionProcessController processController = root.getProcessController();
-        return processController.getDetails(instanceId, appUid);
+        return processController.getDetails(instanceId, appId);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
             ide.lastModified = file.lastModified();
             ide.size = file.length();
             ide.tag = tag;
-            ide.uuid = instanceId;
+            ide.id = instanceId;
 
             return ide;
         }

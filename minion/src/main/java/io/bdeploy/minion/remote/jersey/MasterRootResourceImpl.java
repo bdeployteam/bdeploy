@@ -136,7 +136,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                     toFetchForInstance.add(instance.activeVersion != null ? instance.activeVersion : instance.latestVersion);
                     toFetchForInstance.add(
                             instance.activeProduct != null ? instance.activeProduct : instance.instanceConfiguration.product);
-                    toFetch.put(instance.instanceConfiguration.uuid, toFetchForInstance);
+                    toFetch.put(instance.instanceConfiguration.id, toFetchForInstance);
                 }
             }
             finding.workAndCancelIfRequested(1);
@@ -207,7 +207,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             inmBuilder.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, existing.getConfiguration().configTree);
             inmBuilder.setInstanceNodeConfiguration(nodeCfg);
             inmBuilder.setMinionName(minionName);
-            inmBuilder.setKey(new Manifest.Key(nodeCfg.uuid + "/" + minionName, Long.toString(latest.get() + 1)));
+            inmBuilder.setKey(new Manifest.Key(nodeCfg.id + "/" + minionName, Long.toString(latest.get() + 1)));
 
             imfb.addInstanceNodeManifest(minionName, inmBuilder.insert(hive));
         }
@@ -322,7 +322,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
                     }
 
                     if (!ns.installed.isEmpty()) {
-                        ngs.instances.put(i.uuid, ns);
+                        ngs.instances.put(i.id, ns);
                     }
                 });
 

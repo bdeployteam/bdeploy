@@ -305,7 +305,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // delete all of the instances /LOCALLY/ on the central, but NOT using the remote master (we "just" detach).
         for (InstanceConfiguration cfg : controlled) {
-            Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.uuid));
+            Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.id));
             allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
         }
 
@@ -431,7 +431,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             CommonRootResource masterRoot = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);
             CommonInstanceResource master = masterRoot.getInstanceResource(groupName);
             SortedMap<Key, InstanceConfiguration> instances = master.listInstanceConfigurations(true);
-            List<String> instanceIds = instances.values().stream().map(ic -> ic.uuid).toList();
+            List<String> instanceIds = instances.values().stream().map(ic -> ic.id).toList();
 
             FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName).setSyncEnabled(true);
             try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
@@ -458,7 +458,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
                 msr.list().forEach((k, v) -> {
                     systems.add(k);
-                    systemIds.add(v.uuid);
+                    systemIds.add(v.id);
                 });
                 fetchOp.addManifest(systems);
             } catch (Exception e) {
@@ -471,7 +471,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             SortedSet<Key> keysOnCentral = InstanceManifest.scan(hive, true);
             for (Key key : keysOnCentral) {
                 InstanceManifest im = InstanceManifest.of(hive, key);
-                if (instanceIds.contains(im.getConfiguration().uuid)) {
+                if (instanceIds.contains(im.getConfiguration().id)) {
                     // MAYBE has been updated by the sync.
                     continue; // OK. instance exists
                 }
@@ -481,7 +481,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 }
 
                 // Not OK: instance no longer on server.
-                Set<Key> allInstanceMfs = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
+                Set<Key> allInstanceMfs = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().id));
                 allInstanceMfs.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
                 removedInstances.add(im);
             }
@@ -490,7 +490,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             SortedSet<Key> systemsOnCentral = SystemManifest.scan(hive);
             for (Key k : systemsOnCentral) {
                 SystemManifest sm = SystemManifest.of(hive, k);
-                if (systemIds.contains(sm.getConfiguration().uuid)) {
+                if (systemIds.contains(sm.getConfiguration().id)) {
                     continue; // OK. system exists.
                 }
 
@@ -510,7 +510,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 try {
                     // additionally also read the last known instance overall state and return it...
                     InstanceManifest im = InstanceManifest.of(hive, instance);
-                    result.states.add(new InstanceOverallStatusDto(im.getConfiguration().uuid, im.getOverallState(hive).read()));
+                    result.states.add(new InstanceOverallStatusDto(im.getConfiguration().id, im.getOverallState(hive).read()));
                 } catch (Exception e) {
                     // this is ignorable.
                     log.error("Cannot read instance overall state for {}: {}", instance, e.toString());
@@ -726,7 +726,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             Key newKey = master.update(update, k.getTag());
 
             // now remove all previous versions of the instance (and it's nodes by matching segments of the manifest name.)
-            Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().uuid));
+            Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().id));
 
             for (Key any : keys) {
                 if (any.getTag().equals(newKey.getTag())) {

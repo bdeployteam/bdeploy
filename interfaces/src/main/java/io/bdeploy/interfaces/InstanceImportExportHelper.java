@@ -87,23 +87,23 @@ public class InstanceImportExportHelper {
     }
 
     /**
-     * Imports a single instance from the given ZIP file into the given target hive. All existing UUIDs contained in the provided
-     * ZIP will be replaced by this UUID. The target {@link BHive} may already contain an {@link InstanceManifest} with the given
-     * UUID, in which case a new version will be created. If the UUID is not yet used, a new {@link InstanceManifest} will be
+     * Imports a single instance from the given ZIP file into the given target hive. All existing IDs contained in the provided
+     * ZIP will be replaced by this ID. The target {@link BHive} may already contain an {@link InstanceManifest} with the given
+     * ID, in which case a new version will be created. If the ID is not yet used, a new {@link InstanceManifest} will be
      * created instead.
      *
      * @param zipFilePath
      *            {@link Path} to the ZIP file to read from.
      * @param target
      *            target {@link BHive} to import to.
-     * @param uuid
-     *            target UUID for the instance.
+     * @param id
+     *            target ID for the instance.
      * @param minions
      *            available minions and their OS
      * @param context the {@link SecurityContext}
      * @return the resulting {@link Key} in the target {@link BHive}
      */
-    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String uuid, Map<String, MinionDto> minions,
+    public static Manifest.Key importFrom(Path zipFilePath, BHive target, String id, Map<String, MinionDto> minions,
             SecurityContext context) {
         try (FileSystem zfs = PathHelper.openZip(zipFilePath)) {
             Path zroot = zfs.getPath("/");
@@ -118,14 +118,14 @@ public class InstanceImportExportHelper {
                     cfgId = target.execute(new ImportTreeOperation().setSkipEmpty(true).setSourcePath(cfgDir));
                 }
 
-                return importFromData(target, cfg, cfgId, uuid, minions, context);
+                return importFromData(target, cfg, cfgId, id, minions, context);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read ZIP: " + zipFilePath, e);
         }
     }
 
-    private static Manifest.Key importFromData(BHive target, InstanceCompleteConfigDto dto, ObjectId cfgId, String uuid,
+    private static Manifest.Key importFromData(BHive target, InstanceCompleteConfigDto dto, ObjectId cfgId, String id,
             Map<String, MinionDto> minions, SecurityContext context) {
         if (!Objects.equals(dto.config.configTree, cfgId)) {
             log.warn("Configuration tree has unexpected ID: {} <-> {}", dto.config.configTree, cfgId);
@@ -133,26 +133,26 @@ public class InstanceImportExportHelper {
 
         InstanceConfiguration icfg = dto.config;
         icfg.configTree = cfgId;
-        icfg.uuid = uuid;
+        icfg.id = id;
 
         // system is explicitly cleared out - will have to be associated later on manually.
         icfg.system = null;
 
         // if there is an existing instance, re-use the configured target server, name & description, etc. to avoid confusion!
-        String rootName = InstanceManifest.getRootName(uuid);
+        String rootName = InstanceManifest.getRootName(id);
         Optional<Long> latest = target.execute(new ManifestMaxIdOperation().setManifestName(rootName));
-        Set<String> uuidPool = new TreeSet<>();
+        Set<String> idPool = new TreeSet<>();
         if (latest.isPresent()) {
             InstanceManifest existing = InstanceManifest.of(target, new Manifest.Key(rootName, String.valueOf(latest.get())));
             alignInstanceInformation(icfg, existing);
 
-            // gather all UUIDs for every artifact which has an UUID except for the instance itself (currently only applications).
-            // all UUIDs which are NOT yet known to the instance MUST be re-assigned to avoid clashes when "copying" an instance.
-            // in case there is no existing (latest) version yet, the pool stays empty and all UUIDs are re-assigned.
+            // gather all IDs for every artifact which has an ID except for the instance itself (currently only applications).
+            // all IDs which are NOT yet known to the instance MUST be re-assigned to avoid clashes when "copying" an instance.
+            // in case there is no existing (latest) version yet, the pool stays empty and all IDs are re-assigned.
             for (Manifest.Key inmfKey : existing.getInstanceNodeManifests().values()) {
                 InstanceNodeManifest inmf = InstanceNodeManifest.of(target, inmfKey);
                 for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
-                    uuidPool.add(app.uid);
+                    idPool.add(app.id);
                 }
             }
         }
@@ -165,7 +165,7 @@ public class InstanceImportExportHelper {
             // align redundant copies of certain flags
             nodeCfg.copyRedundantFields(icfg);
             nodeCfg.mergeVariables(icfg, null, null); // no system, don't resolve config files - client nodes don't have config on import anyway.
-            reAssignAppUuids(uuidPool, nodeCfg);
+            reAssignAppIds(idPool, nodeCfg);
 
             String minionName = node.getKey();
             if (!minionName.equals(InstanceManifest.CLIENT_NODE_NAME)) {
@@ -179,7 +179,7 @@ public class InstanceImportExportHelper {
 
             // if there is already a version, we need to align the inm version to the target version
             if (latest.isPresent()) {
-                inmBuilder.setKey(new Manifest.Key(nodeCfg.uuid + "/" + minionName, Long.toString(latest.get() + 1)));
+                inmBuilder.setKey(new Manifest.Key(nodeCfg.id + "/" + minionName, Long.toString(latest.get() + 1)));
             }
 
             imfb.addInstanceNodeManifest(minionName, inmBuilder.insert(target));
@@ -214,18 +214,18 @@ public class InstanceImportExportHelper {
         }
     }
 
-    private static void reAssignAppUuids(Set<String> uuidPool, InstanceNodeConfiguration nodeCfg) {
+    private static void reAssignAppIds(Set<String> idPool, InstanceNodeConfiguration nodeCfg) {
         for (ApplicationConfiguration app : nodeCfg.applications) {
-            if (uuidPool.contains(app.uid)) {
+            if (idPool.contains(app.id)) {
                 // all is well, this is an update for an existing application
                 continue;
             }
 
-            var oldUid = app.uid;
+            var oldUid = app.id;
 
             // need to re-assign ID, as this might be a copy of an application on the same server.
             // this would create various issues when installing (clash of IDs), especially on the client(s).
-            app.uid = UuidHelper.randomId();
+            app.id = UuidHelper.randomId();
 
             // need to swap the application UID in the control group's process order as well.
             var controlGroup = nodeCfg.controlGroups.stream().filter(g -> g.processOrder.contains(oldUid)).findAny();
@@ -233,7 +233,7 @@ public class InstanceImportExportHelper {
                 var order = controlGroup.get().processOrder;
                 var index = order.indexOf(oldUid);
 
-                order.set(index, app.uid);
+                order.set(index, app.id);
             }
         }
     }

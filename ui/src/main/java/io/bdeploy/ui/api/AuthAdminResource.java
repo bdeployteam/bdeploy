@@ -77,7 +77,7 @@ public interface AuthAdminResource {
 
     @GET
     @Path("/new-uuid")
-    public String createUuid();
+    public String createId();
 
     @POST
     @Path("/traceAuthentication")

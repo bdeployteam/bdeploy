@@ -81,52 +81,52 @@ class MinionDeployTest {
 
         Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
 
-        String uuid = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
+        String instanceId = local.execute(new ManifestLoadOperation().setManifest(instance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         /* STEP 5: deploy, activate on remote master */
-        assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+        assertTrue(master.getNamedMaster("demo").getInstanceState(instanceId).installedTags.isEmpty());
         master.getNamedMaster("demo").install(instance);
-        assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+        assertFalse(master.getNamedMaster("demo").getInstanceState(instanceId).installedTags.isEmpty());
 
         // test uninstall, re-install once
         master.getNamedMaster("demo").uninstall(instance);
-        assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+        assertTrue(master.getNamedMaster("demo").getInstanceState(instanceId).installedTags.isEmpty());
         master.getNamedMaster("demo").install(instance);
-        assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+        assertFalse(master.getNamedMaster("demo").getInstanceState(instanceId).installedTags.isEmpty());
 
         master.getNamedMaster("demo").activate(instance);
-        assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(uuid).activeTag);
+        assertEquals(instance.getTag(), master.getNamedMaster("demo").getInstanceState(instanceId).activeTag);
 
         // check the deployment info file for correct content
-        Path infoFile = mr.getDeploymentDir().resolve(uuid).resolve(InstanceDeploymentInformationApi.FILE_NAME);
+        Path infoFile = mr.getDeploymentDir().resolve(instanceId).resolve(InstanceDeploymentInformationApi.FILE_NAME);
         assertTrue(Files.exists(infoFile));
 
         InstanceDeploymentInformationApi info = StorageHelper.fromPath(infoFile, InstanceDeploymentInformationApi.class);
         assertEquals(instance.getTag(), info.activeInstanceVersion);
-        assertEquals(uuid, info.instance.uuid);
+        assertEquals(instanceId, info.instance.uuid);
 
         /* STEP 6: run/control processes on the remote */
-        master.getNamedMaster("demo").start(uuid, List.of("app"));
+        master.getNamedMaster("demo").start(instanceId, List.of("app"));
 
         InstanceStatusDto status;
         do {
             Thread.sleep(10);
-            status = master.getNamedMaster("demo").getStatus(uuid);
+            status = master.getNamedMaster("demo").getStatus(instanceId);
         } while (status.getAppStatus("app").processState != ProcessState.RUNNING);
 
         assertTrue(status.isAppRunningOrScheduled("app"));
         assertEquals(ProcessState.RUNNING, status.node2Applications.get("master").getStatus("app").processState);
 
-        ProcessDetailDto details = master.getNamedMaster("demo").getProcessDetails(uuid, "app");
+        ProcessDetailDto details = master.getNamedMaster("demo").getProcessDetails(instanceId, "app");
         assertNotNull(details);
         assertEquals(ProcessState.RUNNING, details.status.processState);
 
         // give the script a bit to write output
         Threads.sleep(200);
 
-        master.getNamedMaster("demo").stop(uuid, List.of("app"));
-        status = master.getNamedMaster("demo").getStatus(uuid);
+        master.getNamedMaster("demo").stop(instanceId, List.of("app"));
+        status = master.getNamedMaster("demo").getStatus(instanceId);
         System.out.println(status);
         assertFalse(status.isAppRunningOrScheduled("app"));
 
@@ -134,9 +134,9 @@ class MinionDeployTest {
         InstanceManifest imf = InstanceManifest.of(local, instance);
         Key nodeKey = imf.getInstanceNodeManifests().get("master");
         InstanceNodeManifest inmf = InstanceNodeManifest.of(local, nodeKey);
-        String appId = inmf.getConfiguration().applications.get(0).uid;
+        String appId = inmf.getConfiguration().applications.get(0).id;
 
-        RemoteDirectory id = master.getNamedMaster("demo").getOutputEntry(uuid, instance.getTag(), appId);
+        RemoteDirectory id = master.getNamedMaster("demo").getOutputEntry(instanceId, instance.getTag(), appId);
         assertNotNull(id);
         assertEquals(1, id.entries.size());
 
@@ -155,7 +155,7 @@ class MinionDeployTest {
         ClickAndStartDescriptor cdesc = new ClickAndStartDescriptor();
         cdesc.applicationId = "client";
         cdesc.groupId = "demo";
-        cdesc.instanceId = uuid;
+        cdesc.instanceId = instanceId;
         cdesc.host = new RemoteService(remote.getUri(), master.getNamedMaster("demo").generateWeakToken("Test"));
 
         Path bdeployFile = tmp.resolve("client.bdeploy");
@@ -228,10 +228,10 @@ class MinionDeployTest {
 
         // IDs may NEVER match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master2.getConfiguration().applications.get(0).name);
-        assertNotEquals(master1.getConfiguration().applications.get(0).uid, master2.getConfiguration().applications.get(0).uid);
+        assertNotEquals(master1.getConfiguration().applications.get(0).id, master2.getConfiguration().applications.get(0).id);
 
         // test re-import for same instance (new version) - applications UID must stay the same.
-        Manifest.Key importedVersion = InstanceImportExportHelper.importFrom(tmpZip, local, im1.getConfiguration().uuid,
+        Manifest.Key importedVersion = InstanceImportExportHelper.importFrom(tmpZip, local, im1.getConfiguration().id,
                 mr.getNodeManager().getAllNodes(), null);
         assertEquals("2", importedVersion.getTag()); // new version
         assertEquals(instance.getName(), importedVersion.getName());
@@ -241,18 +241,18 @@ class MinionDeployTest {
 
         // IDs MUST match.
         assertEquals(master1.getConfiguration().applications.get(0).name, master3.getConfiguration().applications.get(0).name);
-        assertEquals(master1.getConfiguration().applications.get(0).uid, master3.getConfiguration().applications.get(0).uid);
+        assertEquals(master1.getConfiguration().applications.get(0).id, master3.getConfiguration().applications.get(0).id);
 
         /* STEP 2: push to remote */
         local.execute(new PushOperation().setRemote(remote).setHiveName("demo").addManifest(importedInstance));
 
-        String uuid = local.execute(new ManifestLoadOperation().setManifest(importedInstance)).getLabels()
+        String id = local.execute(new ManifestLoadOperation().setManifest(importedInstance)).getLabels()
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         /* STEP 5: deploy, activate on remote master */
-        assertTrue(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+        assertTrue(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
         master.getNamedMaster("demo").install(importedInstance);
-        assertFalse(master.getNamedMaster("demo").getInstanceState(uuid).installedTags.isEmpty());
+        assertFalse(master.getNamedMaster("demo").getInstanceState(id).installedTags.isEmpty());
         master.getNamedMaster("demo").activate(importedInstance);
     }
 

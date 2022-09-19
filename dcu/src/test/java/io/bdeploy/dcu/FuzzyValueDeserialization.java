@@ -33,13 +33,13 @@ public class FuzzyValueDeserialization {
         ParameterConfiguration config1 = StorageHelper.fromRawBytes(V_OLD.getBytes(StandardCharsets.UTF_8),
                 ParameterConfiguration.class);
 
-        assertEquals("param1", config1.uid);
+        assertEquals("param1", config1.id);
         assertEquals("value1", config1.value.value);
 
         ParameterConfiguration config2 = StorageHelper.fromRawBytes(V_NEW.getBytes(StandardCharsets.UTF_8),
                 ParameterConfiguration.class);
 
-        assertEquals("param2", config2.uid);
+        assertEquals("param2", config2.id);
         assertEquals("value2", config2.value.value);
         assertEquals("expression2", config2.value.linkExpression);
     }

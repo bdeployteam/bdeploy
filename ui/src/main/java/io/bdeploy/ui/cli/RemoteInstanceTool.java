@@ -77,7 +77,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Validator(NonExistingPathValidator.class)
         String exportTo();
 
-        @Help(value = "UUID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new UUID is generated.")
+        @Help(value = "ID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new ID is generated.")
         String uuid();
 
         @Help(value = "When exporting, optional version of the existing instance. Otherwise the latest version is exported.")
@@ -98,7 +98,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("Create an instance with the given name")
         String create();
 
-        @Help("Update the instance with the given UUID")
+        @Help("Update the instance with the given ID")
         String update();
 
         @Help("The name to set for the updated instance")
@@ -199,8 +199,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         if (config.system() != null) {
             SystemResource sr = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
                     .getSystemResource(config.instanceGroup());
-            Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.uuid.equals(config.system()))
-                    .findAny();
+            Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(config.system())).findAny();
             if (sys.isEmpty()) {
                 throw new IllegalArgumentException("Cannot find specified system on server: " + config.system());
             }
@@ -228,8 +227,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         if (config.system() != null) {
             SystemResource sr = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
                     .getSystemResource(config.instanceGroup());
-            Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.uuid.equals(config.system()))
-                    .findAny();
+            Optional<SystemConfigurationDto> sys = sr.list().stream().filter(s -> s.config.id.equals(config.system())).findAny();
             if (sys.isEmpty()) {
                 throw new IllegalArgumentException("Cannot find specified system on server: " + config.system());
             }
@@ -238,7 +236,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         }
 
         InstanceConfiguration cfg = new InstanceConfiguration();
-        cfg.uuid = config.uuid() == null ? UuidHelper.randomId() : config.uuid();
+        cfg.id = config.uuid() == null ? UuidHelper.randomId() : config.uuid();
         cfg.autoUninstall = true;
         cfg.autoStart = false;
         cfg.description = config.description();
@@ -249,7 +247,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
         ir.create(cfg, config.server());
 
-        return createSuccess().addField("Instance UUID", cfg.uuid);
+        return createSuccess().addField("Instance ID", cfg.id);
     }
 
     private DataResult doImport(RemoteService svc, InstanceConfig config) {
@@ -343,8 +341,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                 result.addField("Update Warnings", "There have been update warnings.");
 
                 update.validation.forEach(val -> {
-                    String puid = val.paramUid == null ? "" : (" - " + val.paramUid);
-                    result.addField(" - " + (val.appUid == null ? "Global" : (val.appUid + puid)), val.message);
+                    String pid = val.paramId == null ? "" : (" - " + val.paramId);
+                    result.addField(" - " + (val.appId == null ? "Global" : (val.appId + pid)), val.message);
                 });
             }
 
@@ -353,8 +351,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             result.setMessage("Validation Issues");
 
             issues.forEach(val -> {
-                String puid = val.paramUid == null ? "" : (" - " + val.paramUid);
-                result.addField(" - " + (val.appUid == null ? "Global" : (val.appUid + puid)), val.message);
+                String pid = val.paramId == null ? "" : (" - " + val.paramId);
+                result.addField(" - " + (val.appId == null ? "Global" : (val.appId + pid)), val.message);
             });
 
             result.addField("Update Aborted", "Cannot perform update due to validation issues");
@@ -375,7 +373,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         DataTable table = createDataTable();
         table.setCaption("Instances of " + config.instanceGroup() + " on " + remote.getUri());
 
-        table.column("UUID", 15).column("Name *", 20).column(new DataTableColumn("Version", "Ver.", 4)).column("Installed", 9)
+        table.column("ID", 15).column("Name *", 20).column(new DataTableColumn("Version", "Ver.", 4)).column("Installed", 9)
                 .column("Active", 6).column("Purpose", 11).column("Product", 25).column("Product Version", 20)
                 .column("System", 20).column("Description *", 40);
 
@@ -386,12 +384,12 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         InstanceResource ir = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(config.instanceGroup());
         for (var instance : ir.list()) {
-            if (config.uuid() != null && !config.uuid().isBlank() && !instance.instanceConfiguration.uuid.equals(config.uuid())) {
+            if (config.uuid() != null && !config.uuid().isBlank() && !instance.instanceConfiguration.id.equals(config.uuid())) {
                 continue;
             }
 
-            var versions = ir.listVersions(instance.instanceConfiguration.uuid);
-            var state = ir.getDeploymentStates(instance.instanceConfiguration.uuid);
+            var versions = ir.listVersions(instance.instanceConfiguration.id);
+            var state = ir.getDeploymentStates(instance.instanceConfiguration.id);
             versions.sort((a, b) -> Long.compare(Long.parseLong(b.key.getTag()), Long.parseLong(a.key.getTag())));
             var limited = versions;
             if (config.limit() > 0 && config.limit() < versions.size()) {
@@ -409,18 +407,18 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                     continue;
                 }
 
-                InstanceConfiguration vCfg = ir.readVersion(instance.instanceConfiguration.uuid, version.key.getTag());
+                InstanceConfiguration vCfg = ir.readVersion(instance.instanceConfiguration.id, version.key.getTag());
                 DataTableRowBuilder row = table.row();
 
-                row.cell(instance.instanceConfiguration.uuid).cell(vCfg.name).cell(version.key.getTag())
+                row.cell(instance.instanceConfiguration.id).cell(vCfg.name).cell(version.key.getTag())
                         .cell(isInstalled ? "*" : "").cell(isActive ? "*" : "").cell(vCfg.purpose.name())
                         .cell(version.product.getName()).cell(version.product.getTag())
                         .cell(instance.instanceConfiguration.system != null ? instance.instanceConfiguration.system : "None")
                         .cell(vCfg.description);
 
                 if (central) {
-                    ManagedMasterDto server = msr.getServerForInstance(config.instanceGroup(),
-                            instance.instanceConfiguration.uuid, version.key.getTag());
+                    ManagedMasterDto server = msr.getServerForInstance(config.instanceGroup(), instance.instanceConfiguration.id,
+                            version.key.getTag());
 
                     row.cell(server.hostName);
                 }

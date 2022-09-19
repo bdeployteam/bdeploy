@@ -96,7 +96,7 @@ public class MinionProcessController {
      * @param inm the current instance node manifest
      */
     public InstanceProcessController getOrCreate(BHive hive, InstanceNodeManifest inm) {
-        String instanceId = inm.getUUID();
+        String instanceId = inm.getId();
         try {
             writeLock.lock();
             InstanceProcessController controller = instance2Controller.get(instanceId);
@@ -116,13 +116,13 @@ public class MinionProcessController {
      *
      * @param instanceId
      *            the instance ID
-     * @param appUid
+     * @param appId
      *            the application ID
      * @return the DTO containing the details
      */
-    public ProcessDetailDto getDetails(String instanceId, String appUid) {
+    public ProcessDetailDto getDetails(String instanceId, String appId) {
         InstanceProcessController ipc = get(instanceId);
-        return ipc.getDetails(appUid);
+        return ipc.getDetails(appId);
     }
 
 }

@@ -30,7 +30,7 @@ export class ProcessPortsComponent implements OnDestroy {
         return;
       }
 
-      this.ports$.next(states.filter((s) => s.appUid === config.uid));
+      this.ports$.next(states.filter((s) => s.appId === config.id));
     });
   }
 

@@ -96,7 +96,7 @@
               <ng-container *ngFor="let v of template?.templateVariables">
                 <app-bd-form-input
                   *ngIf="firstStepCompleted && secondStepCompleted"
-                  [(ngModel)]="variables[v.uid]"
+                  [(ngModel)]="variables[v.id]"
                   [attr.name]="v.name"
                   [label]="v.name"
                   [matTooltip]="v.description"

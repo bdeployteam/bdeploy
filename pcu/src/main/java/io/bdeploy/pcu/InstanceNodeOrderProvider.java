@@ -26,7 +26,7 @@ public class InstanceNodeOrderProvider implements Function<String, List<String>>
         Manifest.Key inmKey = new Manifest.Key(instanceNodeName, tag);
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, inmKey);
         List<ApplicationConfiguration> apps = inm.getConfiguration().applications;
-        return apps.stream().map(app -> app.uid).toList();
+        return apps.stream().map(app -> app.id).toList();
     }
 
 }

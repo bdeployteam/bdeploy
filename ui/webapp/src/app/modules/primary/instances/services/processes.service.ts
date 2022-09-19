@@ -116,7 +116,7 @@ export class ProcessesService {
     const group = this.groups.current$.value;
     this.http
       .get<{ [key: string]: ProcessStatusDto }>(
-        `${this.apiPath(group.name, this.instance.instanceConfiguration.uuid)}`,
+        `${this.apiPath(group.name, this.instance.instanceConfiguration.id)}`,
         NO_LOADING_BAR
       )
       .pipe(
@@ -134,7 +134,7 @@ export class ProcessesService {
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instance.instanceConfiguration.uuid
+          this.instance.instanceConfiguration.id
         )}/start`,
         pids
       )
@@ -146,7 +146,7 @@ export class ProcessesService {
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instance.instanceConfiguration.uuid
+          this.instance.instanceConfiguration.id
         )}/stop`,
         pids
       )
@@ -158,7 +158,7 @@ export class ProcessesService {
       .post(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instance.instanceConfiguration.uuid
+          this.instance.instanceConfiguration.id
         )}/restart`,
         pids
       )
@@ -170,7 +170,7 @@ export class ProcessesService {
       .get(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instance.instanceConfiguration.uuid
+          this.instance.instanceConfiguration.id
         )}/startAll`
       )
       .pipe(finalize(() => this.reload()));
@@ -181,7 +181,7 @@ export class ProcessesService {
       .get(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instance.instanceConfiguration.uuid
+          this.instance.instanceConfiguration.id
         )}/stopAll`
       )
       .pipe(finalize(() => this.reload()));
@@ -192,7 +192,7 @@ export class ProcessesService {
       .get(
         `${this.apiPath(
           this.groups.current$.value.name,
-          this.instance.instanceConfiguration.uuid
+          this.instance.instanceConfiguration.id
         )}/restartAll`
       )
       .pipe(finalize(() => this.reload()));

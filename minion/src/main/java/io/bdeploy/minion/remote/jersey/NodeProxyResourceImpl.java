@@ -76,17 +76,17 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
                     .build());
         }
 
-        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(inm.getUUID()),
+        DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(inm.getId()),
                 inm.getKey().getTag());
 
         ApplicationConfiguration app = inm.getConfiguration().applications.stream()
-                .filter(a -> a.uid.equals(wrapper.applicationId)).findFirst().orElseThrow();
+                .filter(a -> a.id.equals(wrapper.applicationId)).findFirst().orElseThrow();
 
         CompositeResolver list = new CompositeResolver();
         list.add(new InstanceAndSystemVariableResolver(inm.getConfiguration()));
         list.add(new DeploymentPathResolver(dpp));
         list.add(new ApplicationVariableResolver(app));
-        list.add(new ApplicationParameterValueResolver(app.uid, inm.getConfiguration()));
+        list.add(new ApplicationParameterValueResolver(app.id, inm.getConfiguration()));
         list.add(new ParameterValueResolver(new ApplicationParameterProvider(inm.getConfiguration())));
         list.add(new OsVariableResolver());
 
@@ -170,7 +170,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
                 continue;
             }
             InstanceNodeManifest mf = InstanceNodeManifest.of(root.getHive(), key);
-            if (!mf.getUUID().equals(instanceId)) {
+            if (!mf.getId().equals(instanceId)) {
                 continue;
             }
             return mf;

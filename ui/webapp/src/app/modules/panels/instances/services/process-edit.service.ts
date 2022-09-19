@@ -83,7 +83,7 @@ export class ProcessEditService {
       if (!!process && !!this.node$.value?.nodeConfiguration?.applications) {
         this.process$.next(
           this.node$.value.nodeConfiguration.applications.find(
-            (a) => a.uid === process
+            (a) => a.id === process
           )
         );
         this.application$.next(
@@ -110,14 +110,14 @@ export class ProcessEditService {
 
     const apps = this.node$.value.nodeConfiguration.applications;
     apps.splice(
-      apps.findIndex((a) => a.uid === this.process$.value.uid),
+      apps.findIndex((a) => a.id === this.process$.value.id),
       1
     );
 
     // remove from control group(s)
     for (const grp of this.node$.value.nodeConfiguration.controlGroups) {
       const idx = grp.processOrder.findIndex(
-        (uid) => uid === this.process$.value.uid
+        (id) => id === this.process$.value.id
       );
       if (idx !== -1) {
         grp.processOrder.splice(idx, 1);
@@ -146,7 +146,7 @@ export class ProcessEditService {
     );
 
     const process: ApplicationConfiguration = {
-      uid: null, // calculated later
+      id: null, // calculated later
       application: application.key,
       name: template?.name
         ? this.performTemplateVariableSubst(
@@ -196,9 +196,9 @@ export class ProcessEditService {
     // align global parameters *OR* migrate globals to instance variables.
     this.alignGlobalParameters(application, process, true);
 
-    return this.groups.newUuid().pipe(
-      tap((uuid) => {
-        process.uid = uuid;
+    return this.groups.newId().pipe(
+      tap((id) => {
+        process.id = id;
         node.nodeConfiguration.applications.push(process);
 
         const reqGrp = template?.preferredProcessControlGroup;
@@ -212,7 +212,7 @@ export class ProcessEditService {
           targetGroup = this.edit.getLastControlGroup(node.nodeConfiguration);
         }
 
-        targetGroup.processOrder.push(uuid);
+        targetGroup.processOrder.push(id);
         this.preliminary.splice(this.preliminary.indexOf(process), 1);
       })
     );
@@ -266,7 +266,7 @@ export class ProcessEditService {
     if (this.edit.globalsMigrated$.value) {
       if (migrate) {
         for (const g of globals) {
-          const v = process.start.parameters.find((p) => p.uid === g.uid);
+          const v = process.start.parameters.find((p) => p.id === g.id);
           if (v) {
             this.edit.migrateGlobalToVariable(
               this.edit.state$.value.config.config,
@@ -281,9 +281,9 @@ export class ProcessEditService {
 
     const values: { [key: string]: LinkedValueConfiguration } = {};
     for (const g of globals) {
-      const v = process.start.parameters.find((p) => p.uid === g.uid);
+      const v = process.start.parameters.find((p) => p.id === g.id);
       if (v) {
-        values[v.uid] = v.value;
+        values[v.id] = v.value;
       }
     }
 
@@ -293,12 +293,12 @@ export class ProcessEditService {
         ...node.nodeConfiguration.applications,
         ...this.preliminary,
       ]) {
-        for (const uid of Object.keys(values)) {
-          const p = app.start?.parameters?.find((x) => x.uid === uid);
+        for (const id of Object.keys(values)) {
+          const p = app.start?.parameters?.find((x) => x.id === id);
           if (p) {
-            p.value = values[uid];
+            p.value = values[id];
             p.preRendered = this.preRenderParameter(
-              globals.find((x) => x.uid === uid),
+              globals.find((x) => x.id === id),
               p.value
             );
           }
@@ -307,14 +307,14 @@ export class ProcessEditService {
     }
   }
 
-  public getGlobalParameter(uid: string): ParameterConfiguration {
+  public getGlobalParameter(id: string): ParameterConfiguration {
     // eslint-disable-next-line no-unsafe-optional-chaining
     for (const node of this.edit.state$.value?.config.nodeDtos) {
       for (const app of [
         ...node.nodeConfiguration.applications,
         ...this.preliminary,
       ]) {
-        const p = app.start?.parameters?.find((x) => x.uid === uid);
+        const p = app.start?.parameters?.find((x) => x.id === id);
         if (p) {
           return p;
         }
@@ -334,7 +334,7 @@ export class ProcessEditService {
 
     const mandatoryParams: ParameterConfiguration[] = descriptor.parameters
       .map((p) => {
-        const tpl = templates.find((t) => t.uid === p.uid);
+        const tpl = templates.find((t) => t.id === p.id);
 
         if (!p.mandatory && !tpl) {
           return null;
@@ -346,14 +346,14 @@ export class ProcessEditService {
             this.performTemplateVariableSubst(tpl.value, values, status)
           );
         } else if (p.global && !this.edit.globalsMigrated$.value) {
-          const gp = this.getGlobalParameter(p.uid);
+          const gp = this.getGlobalParameter(p.id);
           if (gp) {
             val = gp.value;
           }
         }
 
         return {
-          uid: p.uid,
+          id: p.id,
           value: val,
           pinned: false,
           preRendered: this.preRenderParameter(p, val),
@@ -365,7 +365,7 @@ export class ProcessEditService {
       executable: descriptor.launcherPath,
       parameters: mandatoryParams.filter((p) =>
         this.meetsConditionOnGiven(
-          descriptor.parameters.find((x) => x.uid === p.uid),
+          descriptor.parameters.find((x) => x.id === p.id),
           descriptor,
           {
             // dummy just so we can resolve from our own parameters during adding.
@@ -432,7 +432,7 @@ export class ProcessEditService {
     if (param.condition.parameter) {
       expression = `{{V:${param.condition.parameter}}}`;
       targetType =
-        descriptor.parameters.find((p) => p.uid === param.condition.parameter)
+        descriptor.parameters.find((p) => p.id === param.condition.parameter)
           ?.type || param.type;
     }
 

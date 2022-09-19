@@ -215,15 +215,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
         if (!isFullyDeployed(imf)) {
             throw new WebApplicationException(
-                    "Given manifest for UUID " + imf.getConfiguration().uuid + " is not fully deployed: " + key,
-                    Status.NOT_FOUND);
+                    "Given manifest for ID " + imf.getConfiguration().id + " is not fully deployed: " + key, Status.NOT_FOUND);
         }
 
         // record de-activation
         String activeTag = imf.getState(hive).read().activeTag;
         if (activeTag != null) {
             try {
-                InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().uuid, activeTag);
+                InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().id, activeTag);
                 oldIm.getHistory(hive).recordAction(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
 
                 // make sure all nodes which no longer participate are deactivated.
@@ -295,7 +294,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             return true;
         }
         // check all minions for their respective availability.
-        String instanceId = imf.getConfiguration().uuid;
+        String instanceId = imf.getConfiguration().id;
         for (Map.Entry<String, Manifest.Key> entry : imfs.entrySet()) {
             String nodeName = entry.getKey();
             if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
@@ -400,19 +399,19 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             // make sure every application has an ID. NEW applications might have a null ID
             // to be filled out.
             for (ApplicationConfiguration cfg : inc.applications) {
-                if (cfg.uid == null) {
-                    cfg.uid = UuidHelper.randomId();
-                    log.info("New Application {} received ID {}", cfg.name, cfg.uid);
+                if (cfg.id == null) {
+                    cfg.id = UuidHelper.randomId();
+                    log.info("New Application {} received ID {}", cfg.name, cfg.id);
                 }
             }
 
-            RuntimeAssert.assertEquals(inc.uuid, config.uuid, "Instance ID not set on nodes");
+            RuntimeAssert.assertEquals(inc.id, config.id, "Instance ID not set on nodes");
 
             InstanceNodeManifest.Builder inmb = new InstanceNodeManifest.Builder();
             inmb.addConfigTreeId(InstanceNodeManifest.ROOT_CONFIG_NAME, config.configTree);
             inmb.setMinionName(entry.getKey());
             inmb.setInstanceNodeConfiguration(inc);
-            inmb.setKey(new Manifest.Key(config.uuid + '/' + entry.getKey(), target.getTag()));
+            inmb.setKey(new Manifest.Key(config.id + '/' + entry.getKey(), target.getTag()));
 
             // create dedicated configuration trees for client applications where required.
             if (entry.getKey().equals(InstanceManifest.CLIENT_NODE_NAME)) {
@@ -431,7 +430,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     });
 
                     // record the config tree for this application.
-                    inmb.addConfigTreeId(app.uid, appTree);
+                    inmb.addConfigTreeId(app.id, appTree);
                     configTrees.add(appTree);
                 }
                 inc.mergeVariables(config, system, (v) -> processConfigFilesInMemory(configTrees, v));
@@ -512,13 +511,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         List<FileStatusDto> configUpdates = update.files;
 
         InstanceConfiguration instanceConfig = state.config;
-        String rootName = InstanceManifest.getRootName(instanceConfig.uuid);
+        String rootName = InstanceManifest.getRootName(instanceConfig.id);
         Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(rootName));
         InstanceManifest oldConfig = null;
         if (expectedTag == null && !existing.isEmpty()) {
-            throw new WebApplicationException("Instance already exists: " + instanceConfig.uuid, Status.CONFLICT);
+            throw new WebApplicationException("Instance already exists: " + instanceConfig.id, Status.CONFLICT);
         } else if (expectedTag != null) {
-            oldConfig = InstanceManifest.load(hive, instanceConfig.uuid, null);
+            oldConfig = InstanceManifest.load(hive, instanceConfig.id, null);
             if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
                 throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag
                         + ", current=" + oldConfig.getManifest().getTag(), Status.CONFLICT);
@@ -558,14 +557,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (nodeConfiguration.controlGroups.isEmpty()) {
             // nothing defined yet, fill it with the default - processes in configuration order.
             ProcessControlGroupConfiguration defGrp = new ProcessControlGroupConfiguration();
-            defGrp.processOrder.addAll(nodeConfiguration.applications.stream().map(a -> a.uid).toList());
+            defGrp.processOrder.addAll(nodeConfiguration.applications.stream().map(a -> a.id).toList());
 
             nodeConfiguration.controlGroups.add(defGrp);
         } else {
             // make sure that all processes are in *SOME* group. if not, we try to find or create a default group.
             for (ApplicationConfiguration app : nodeConfiguration.applications) {
                 Optional<ProcessControlGroupConfiguration> group = nodeConfiguration.controlGroups.stream()
-                        .filter(g -> g.processOrder.contains(app.uid)).findAny();
+                        .filter(g -> g.processOrder.contains(app.id)).findAny();
                 if (group.isEmpty()) {
                     ProcessControlGroupConfiguration defGrp = nodeConfiguration.controlGroups.stream()
                             .filter(g -> g.name.equals(ProcessControlGroupConfiguration.DEFAULT_GROUP)).findAny()
@@ -576,7 +575,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             });
 
                     // application not in any group.
-                    defGrp.processOrder.add(app.uid);
+                    defGrp.processOrder.add(app.id);
                 }
             }
         }
@@ -666,14 +665,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @WriteLock
     @Override
-    public void delete(String instanceUuid) {
-        Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceUuid));
+    public void delete(String instanceId) {
+        Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceId));
         allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
     }
 
     @Override
-    public void deleteVersion(String instanceUuid, String tag) {
-        Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceUuid), tag);
+    public void deleteVersion(String instanceId, String tag) {
+        Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
         InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.DELETE, context.getUserPrincipal().getName(), null);
         InstanceManifest.delete(hive, key);
     }
@@ -691,7 +690,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         for (String nodeName : status.getNodesWithApps()) {
             RemoteDirectory idd = new RemoteDirectory();
             idd.minion = nodeName;
-            idd.uuid = instanceId;
+            idd.id = instanceId;
 
             try {
                 MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
@@ -733,8 +732,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public void updateDataEntries(String uuid, String nodeName, List<FileStatusDto> updates) {
-        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeDeploymentResource.class, context).updateDataEntries(uuid, updates);
+    public void updateDataEntries(String id, String nodeName, List<FileStatusDto> updates) {
+        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeDeploymentResource.class, context).updateDataEntries(id, updates);
     }
 
     @Override
@@ -743,13 +742,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public ClientApplicationConfiguration getClientConfiguration(String uuid, String application) {
-        String activeTag = getInstanceState(uuid).activeTag;
+    public ClientApplicationConfiguration getClientConfiguration(String id, String application) {
+        String activeTag = getInstanceState(id).activeTag;
         if (activeTag == null) {
-            throw new WebApplicationException("No active deployment for " + uuid, Status.NOT_FOUND);
+            throw new WebApplicationException("No active deployment for " + id, Status.NOT_FOUND);
         }
 
-        InstanceManifest imf = InstanceManifest.load(hive, uuid, activeTag);
+        InstanceManifest imf = InstanceManifest.load(hive, id, activeTag);
         InstanceGroupConfiguration groupCfg = new InstanceGroupManifest(hive).read();
 
         ClientApplicationConfiguration cfg = new ClientApplicationConfiguration();
@@ -757,8 +756,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         cfg.instanceGroupTitle = groupCfg.title;
         cfg.appConfig = imf.getApplicationConfiguration(hive, application);
         if (cfg.appConfig == null) {
-            throw new WebApplicationException("Cannot find application " + application + " in instance " + uuid,
-                    Status.NOT_FOUND);
+            throw new WebApplicationException("Cannot find application " + application + " in instance " + id, Status.NOT_FOUND);
         }
         cfg.instanceConfig = imf.getInstanceNodeConfiguration(hive, application);
 
@@ -915,14 +913,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             InstanceNodeManifest inmf = InstanceNodeManifest.of(hive, entry.getValue());
 
             for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
-                if (!app.uid.equals(applicationId)) {
+                if (!app.id.equals(applicationId)) {
                     continue;
                 }
 
                 // this is our app
                 RemoteDirectory id = new RemoteDirectory();
                 id.minion = nodeName;
-                id.uuid = instanceId;
+                id.id = instanceId;
 
                 try {
                     RemoteDirectoryEntry oe = nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
@@ -978,14 +976,14 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public ProcessDetailDto getProcessDetails(String instanceId, String appUid) {
+    public ProcessDetailDto getProcessDetails(String instanceId, String appId) {
         // Check if the application is running on a node
         InstanceStatusDto status = getStatus(instanceId);
-        String nodeName = status.getNodeWhereAppIsRunning(appUid);
+        String nodeName = status.getNodeWhereAppIsRunning(appId);
 
         // Check if the application is deployed on a node
         if (nodeName == null) {
-            nodeName = status.getNodeWhereAppIsDeployed(appUid);
+            nodeName = status.getNodeWhereAppIsDeployed(appId);
         }
 
         // Application is nowhere deployed and nowhere running
@@ -996,10 +994,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         // Query process details
         try {
             return nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
-                    .getProcessDetails(instanceId, appUid);
+                    .getProcessDetails(instanceId, appId);
         } catch (Exception e) {
             throw new WebApplicationException(
-                    "Cannot fetch process status from " + nodeName + " for " + instanceId + ", " + appUid, e);
+                    "Cannot fetch process status from " + nodeName + " for " + instanceId + ", " + appId, e);
         }
     }
 
@@ -1089,7 +1087,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 InstanceConfiguration config = im.getConfiguration();
 
                 // get all node status of the responsible master.
-                InstanceStatusDto processStatus = getStatus(config.uuid);
+                InstanceStatusDto processStatus = getStatus(config.id);
                 List<InstanceNodeConfigurationDto> nodeConfigs = readExistingNodeConfigs(im);
 
                 List<String> stoppedApps = new ArrayList<>();
@@ -1118,13 +1116,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             continue;
                         }
 
-                        if (!statusOnNode.isAppDeployed(app.uid)) {
-                            log.warn("Expected application is not currently deployed: {}", app.uid);
+                        if (!statusOnNode.isAppDeployed(app.id)) {
+                            log.warn("Expected application is not currently deployed: {}", app.id);
                             continue;
                         }
 
                         // instance application, check status
-                        ProcessStatusDto status = statusOnNode.getStatus(app.uid);
+                        ProcessStatusDto status = statusOnNode.getStatus(app.id);
                         if (status.processState.isStopped()) {
                             stoppedApps.add(app.name);
                         } else {

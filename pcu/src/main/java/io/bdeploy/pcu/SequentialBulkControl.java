@@ -44,16 +44,16 @@ public class SequentialBulkControl extends AbstractBulkControl {
 
         // Execute shutdown in new thread so that the caller is not blocked
         Instant start = Instant.now();
-        for (ProcessController process : toStop.stream().sorted((a, b) -> controlGroup.processOrder.indexOf(b.getDescriptor().uid)
-                - controlGroup.processOrder.indexOf(a.getDescriptor().uid)).toList()) {
+        for (ProcessController process : toStop.stream().sorted((a, b) -> controlGroup.processOrder.indexOf(b.getDescriptor().id)
+                - controlGroup.processOrder.indexOf(a.getDescriptor().id)).toList()) {
             if (doStopSingle(process)) {
-                stopped.add(process.getDescriptor().uid);
+                stopped.add(process.getDescriptor().id);
             }
         }
 
         // Check if we could stop all applications
         Duration duration = Duration.between(start, Instant.now());
-        boolean allStopped = toStop.stream().map(pc -> stopped.contains(pc.getDescriptor().uid)).noneMatch(b -> !b);
+        boolean allStopped = toStop.stream().map(pc -> stopped.contains(pc.getDescriptor().id)).noneMatch(b -> !b);
         if (allStopped) {
             logger.log(l -> l.info("Applications in Control Group {} have been stopped in {} ", controlGroup.name,
                     ProcessControllerHelper.formatDuration(duration)));

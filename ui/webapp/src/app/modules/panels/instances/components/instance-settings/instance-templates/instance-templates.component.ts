@@ -174,7 +174,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
       return;
     }
     for (const v of this.template.templateVariables) {
-      const value = this.variables[v.uid];
+      const value = this.variables[v.id];
       if (value === '' || value === null || value === undefined) {
         this.hasAllVariables = false;
         return;
@@ -506,7 +506,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
 
         if (this.template.templateVariables?.length) {
           for (const v of this.template.templateVariables) {
-            this.variables[v.uid] = v.defaultValue;
+            this.variables[v.id] = v.defaultValue;
           }
         } else {
           this.hasAllVariables = true;
