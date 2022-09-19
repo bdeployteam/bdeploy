@@ -301,12 +301,12 @@ The fixed flag will cause the parameter to *always* use the defined default valu
 |no
 a|Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`
 
+The `CLIENT_PORT` and `SERVER_PORT` types are treated like `NUMERIC` parameters throughout the whole application, with the exception of the dialogs that deal with ports specifically.
+
 |`customEditor`
 |`STRING`
 |no
 a|The id of a custom editor to be used when editing this parameter through the *BDeploy* web UI. Custom editors can be contributed by <<Plugins>> which are either globally installed in the *BDeploy* server, or contributed dynamically by the product.
-
-The `CLIENT_PORT` and `SERVER_PORT` types are treated like `NUMERIC` parameters throughout the whole application, with the exception of the dialogs that deal with ports specifically.
 
 |`condition`
 |
