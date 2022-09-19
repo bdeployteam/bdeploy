@@ -118,11 +118,13 @@ describe('Groups Tests (Clients)', () => {
     });
 
     // remove the second (OS) grouping level.
-    cy.contains('mat-card', 'Grouping Level').within(() => {
-      cy.get('button[data-cy="Remove"]').last().click();
-    });
+    cy.get('div[name="dataGroupingPanel"]')
+      .last()
+      .within(() => {
+        cy.contains('mat-icon', 'close').click();
+      });
 
-    cy.get('.cdk-overlay-backdrop-showing').click('top');
+    cy.get('.cdk-overlay-backdrop-showing').click('top', { force: true });
 
     cy.get('tr:contains("Client Test")').should('have.length', 2);
   });

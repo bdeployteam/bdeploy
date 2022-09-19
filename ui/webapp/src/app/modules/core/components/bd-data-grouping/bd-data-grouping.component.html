@@ -24,7 +24,7 @@
         <app-bd-data-grouping-panel
           *ngFor="let grp of groupings; let i = index"
           cdkDrag
-          [definitions]="definitions"
+          [definitions]="availableDefinitions"
           [records]="records"
           [index]="i"
           [(grouping)]="groupings[i]"
@@ -32,7 +32,15 @@
           [popupEmitter]="popup.popupOpened"
           [removeDisabled]="groupings.length === 1 && !groupings[0].definition"
           (removeClicked)="removeGrouping($event)"
-        ></app-bd-data-grouping-panel>
+        >
+          <mat-icon
+            cdkDragHandle
+            [style.cursor]="'grab'"
+            [style.margin-bottom.px]="1"
+            class="local-drag-handle"
+            >drag_indicator</mat-icon
+          >
+        </app-bd-data-grouping-panel>
       </div>
 
       <!-- the management panel (add/remove/save) -->

@@ -73,6 +73,10 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   /* template */ groupings: BdDataGrouping<T>[] = [];
   /* template */ filteredGroups: BdDataGrouping<T>[];
+  /* template */ get availableDefinitions(): BdDataGroupingDefinition<T>[] {
+    const selectedDefinitions = this.groupings.map((g) => g.definition);
+    return this.definitions.filter((def) => !selectedDefinitions.includes(def));
+  }
 
   constructor(
     private snackBar: MatSnackBar,
