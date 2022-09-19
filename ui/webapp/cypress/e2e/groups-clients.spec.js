@@ -114,7 +114,7 @@ describe('Groups Tests (Clients)', () => {
     });
 
     cy.inMainNavContent(() => {
-      cy.pressToolbarButton('Data Grouping');
+      cy.pressToolbarButton('Group By');
     });
 
     // remove the second (OS) grouping level.

@@ -8,6 +8,7 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
@@ -15,36 +16,17 @@ import { CustomDataGrouping } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { calculateGrouping } from 'src/app/modules/core/utils/preset.utils';
-import { BdDialogMessageAction } from '../bd-dialog-message/bd-dialog-message.component';
 
-enum ON_EMPTY_PRESET {
-  SAVE_EMPTY_PRESET,
-  DELETE_PRESET,
-  CANCEL,
+enum PresetType {
+  PERSONAL = 'PERSONAL',
+  GLOBAL = 'GLOBAL',
 }
-
-const ACTION_SAVE_EMPTY_PRESET: BdDialogMessageAction<ON_EMPTY_PRESET> = {
-  name: 'Save',
-  result: ON_EMPTY_PRESET.SAVE_EMPTY_PRESET,
-  confirm: false,
-};
-
-const ACTION_DELETE_PRESET: BdDialogMessageAction<ON_EMPTY_PRESET> = {
-  name: 'Delete',
-  result: ON_EMPTY_PRESET.DELETE_PRESET,
-  confirm: false,
-};
-
-const ACTION_CANCEL: BdDialogMessageAction<ON_EMPTY_PRESET> = {
-  name: 'Cancel',
-  result: ON_EMPTY_PRESET.CANCEL,
-  confirm: false,
-};
 
 @Component({
   selector: 'app-bd-data-grouping',
   templateUrl: './bd-data-grouping.component.html',
   styleUrls: ['./bd-data-grouping.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /** whether mutiple groupings are supported */
@@ -72,10 +54,20 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   /* template */ groupings: BdDataGrouping<T>[] = [];
-  /* template */ filteredGroups: BdDataGrouping<T>[];
+  /* template */ presetType: PresetType;
+  /* template */ presetTypes = [PresetType.GLOBAL, PresetType.PERSONAL];
   /* template */ get availableDefinitions(): BdDataGroupingDefinition<T>[] {
     const selectedDefinitions = this.groupings.map((g) => g.definition);
     return this.definitions.filter((def) => !selectedDefinitions.includes(def));
+  }
+  /* template */ get groupBy(): string {
+    const groupings =
+      this.groupings
+        .map((g) => g.definition?.name)
+        .filter((item) => !!item)
+        .join(', ') || 'N/A';
+    const groupBy = `Group By: ${groupings}`;
+    return groupBy.length > 30 ? `${groupBy.substring(0, 30)}...` : groupBy;
   }
 
   constructor(
@@ -111,6 +103,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   private loadPreset() {
+    this.loadPresetType();
     // always start with a single entry with no grouping selected.
     if (this.defaultGrouping?.length) {
       this.groupings = [...this.defaultGrouping];
@@ -118,7 +111,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       this.groupings = [{ definition: null, selected: [] }];
     }
 
-    if (!this.presetKey) {
+    if (this.presetType === PresetType.GLOBAL || !this.presetKey) {
       return;
     }
 
@@ -143,7 +136,6 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     } catch (e) {
       console.error('Cannot load grouping preset', e);
     }
-    this.filteredGroups = this.getFilteredGroups();
   }
 
   private groupingToPreset(): CustomDataGrouping[] {
@@ -158,65 +150,45 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       );
   }
 
-  /* template */ savePreset() {
-    const preset = this.groupingToPreset();
-    if (preset.length === 0) {
-      this.onSaveEmptyPreset();
+  /* template */ capitalize(val: string): string {
+    return val[0].toUpperCase() + val.substring(1).toLowerCase();
+  }
+
+  /* template */ setPresetType(presetType: PresetType): void {
+    this.presetType = presetType;
+    localStorage.setItem(this.presetTypeKey(), this.presetType);
+    this.loadPreset();
+  }
+
+  private presetTypeKey(): string {
+    return 'preset-type-' + (this.multiple ? 'm-' : 's-') + this.presetKey;
+  }
+
+  private loadPresetType() {
+    const storedPresetType = localStorage.getItem(this.presetTypeKey());
+    const storedPreset = localStorage.getItem(this.getStorageKey());
+    if (storedPresetType) {
+      this.presetType = storedPresetType as PresetType;
+    } else if (storedPreset) {
+      this.presetType = PresetType.PERSONAL;
     } else {
-      this.savePresetToLocalStorage();
+      this.presetType = PresetType.GLOBAL;
     }
   }
 
-  private onSaveEmptyPreset() {
-    this.dialog
-      .message({
-        header: 'What do you mean?',
-        message: `(Save) empty grouping as local preset? Or (Delete) current local preset?`,
-        icon: 'warning',
-        actions: [
-          ACTION_CANCEL,
-          ACTION_DELETE_PRESET,
-          ACTION_SAVE_EMPTY_PRESET,
-        ],
-      })
-      .subscribe((r) => {
-        if (r === ON_EMPTY_PRESET.SAVE_EMPTY_PRESET) {
-          this.savePresetToLocalStorage();
-        } else if (r === ON_EMPTY_PRESET.DELETE_PRESET) {
-          this.deletePresetFromLocalStorage();
-        }
-      });
-  }
-
-  private savePresetToLocalStorage() {
-    localStorage.setItem(
-      this.getStorageKey(),
-      JSON.stringify(this.groupingToPreset())
-    );
-
-    this.snackBar.open('Preset saved in local browser.', null, {
-      duration: 1500,
-    });
-  }
-
-  private deletePresetFromLocalStorage() {
-    localStorage.removeItem(this.getStorageKey());
-
-    this.snackBar.open('Preset deleted from local browser.', null, {
-      duration: 1500,
-    });
-  }
-
-  /* template */ saveGlobalPreset() {
-    const preset = this.groupingToPreset();
-    if (preset.length) {
-      this.confirmSavingGlobalPreset(preset);
-    } else {
-      this.confirmSavingOrDeletingGlobalPreset();
+  /* template */ savePreset(): void {
+    switch (this.presetType) {
+      case PresetType.GLOBAL:
+        this.saveGlobalPreset();
+        break;
+      case PresetType.PERSONAL:
+        this.saveLocalPreset();
+        break;
     }
   }
 
-  private confirmSavingGlobalPreset(preset: CustomDataGrouping[]) {
+  private saveGlobalPreset() {
+    const preset = this.groupingToPreset();
     this.dialog
       .confirm(
         'Save global preset?',
@@ -229,30 +201,39 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       });
   }
 
-  private confirmSavingOrDeletingGlobalPreset() {
-    this.dialog
-      .message({
-        header: 'What do you mean?',
-        message: `(Save) empty grouping as global preset? Or (Delete) current global preset?`,
-        icon: 'warning',
-        actions: [
-          ACTION_CANCEL,
-          ACTION_DELETE_PRESET,
-          ACTION_SAVE_EMPTY_PRESET,
-        ],
-      })
-      .subscribe((r) => {
-        if (r === ON_EMPTY_PRESET.SAVE_EMPTY_PRESET) {
-          this.globalPresetSaved.emit([]);
-        } else if (r === ON_EMPTY_PRESET.DELETE_PRESET) {
-          this.globalPresetSaved.emit(null);
-        }
-      });
+  private saveLocalPreset() {
+    localStorage.setItem(
+      this.getStorageKey(),
+      JSON.stringify(this.groupingToPreset())
+    );
+
+    this.snackBar.open('Preset saved in local browser.', null, {
+      duration: 1500,
+    });
+  }
+
+  /* template */ deletePreset(): void {
+    switch (this.presetType) {
+      case PresetType.GLOBAL:
+        this.globalPresetSaved.emit(null);
+        break;
+      case PresetType.PERSONAL:
+        this.deletePresetFromLocalStorage();
+        this.setPresetType(PresetType.GLOBAL);
+        break;
+    }
+  }
+
+  private deletePresetFromLocalStorage() {
+    localStorage.removeItem(this.getStorageKey());
+
+    this.snackBar.open('Preset deleted from local browser.', null, {
+      duration: 1500,
+    });
   }
 
   /* template */ addGrouping() {
     this.groupings.push({ definition: null, selected: [] });
-    this.filteredGroups = this.getFilteredGroups();
   }
 
   /* template */ removeGrouping(grouping: BdDataGrouping<T>) {
@@ -272,11 +253,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   /* template */ fireUpdate() {
-    this.filteredGroups = this.getFilteredGroups();
-    this.groupingChange.emit(this.filteredGroups);
-  }
-
-  private getFilteredGroups(): BdDataGrouping<T>[] {
-    return this.groupings.filter((g) => !!g.definition);
+    const filteredGroups = this.groupings.filter((g) => !!g.definition);
+    this.groupingChange.emit(filteredGroups);
   }
 }

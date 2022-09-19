@@ -18,5 +18,33 @@
 
 .grouping-values-container {
   max-height: 40vh;
-  overflow-y: scroll;
+  overflow-y: auto;
+}
+
+.grouping-panel-filter .mat-form-field-infix {
+  padding: 0.25em 0;
+}
+
+.grouping-panel-filter .mat-form-field-wrapper {
+  padding-bottom: 0.5em;
+}
+
+.grouping-panel-filter:not(.mat-form-field-should-float) .mat-form-field-label {
+  top: 1.1em;
+}
+
+.grouping-panel-filter:not(.mat-focused) mat-icon {
+  color: var(--bd-text-secondary);
+}
+
+.grouping-panel-filter.mat-focused mat-icon {
+  color: var(--bd-primary);
+}
+
+.grouping-panel-filter input {
+  transform: translateY(-0.1em);
+}
+
+.grouping-panel-filter mat-icon {
+  transform: translateY(-0.1em);
 }

@@ -31,6 +31,7 @@ export class InstancesColumnsService {
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.instanceConfiguration.name,
+    sortCard: true,
   };
 
   instanceIdColumn: BdDataColumn<InstanceDto> = {
@@ -48,6 +49,7 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.FOOTER,
     data: (r) => r.instanceConfiguration.description,
     showWhen: '(min-width: 1400px)',
+    sortCard: true,
   };
 
   instanceSystemColumn: BdDataColumn<InstanceDto> = {
@@ -88,6 +90,7 @@ export class InstancesColumnsService {
     data: (r) => (r.activeProduct ? r.activeProduct.tag : null),
     icon: () => 'security_update_good',
     showWhen: '(min-width: 750px)',
+    sortCard: true,
   };
 
   instanceBannerColumn: BdDataColumn<InstanceDto> = {

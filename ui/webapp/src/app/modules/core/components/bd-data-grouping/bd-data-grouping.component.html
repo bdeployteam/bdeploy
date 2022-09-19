@@ -1,10 +1,8 @@
 <app-bd-button-popup
   #popup
-  text="Data Grouping"
-  icon="filter_alt"
+  [text]="groupBy"
   tooltip="below"
-  [collapsed]="true"
-  [badge]="filteredGroups.length"
+  [collapsed]="false"
 >
   <mat-card
     [style.padding.px]="10"
@@ -12,6 +10,37 @@
     fxLayout="column"
     fxLayoutGap="5px"
   >
+    <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="end center">
+      <mat-form-field class="preset-select" appearance="outline">
+        <mat-label>Favorite</mat-label>
+        <mat-select
+          placeholder="Select preset"
+          [value]="presetType"
+          (valueChange)="setPresetType($event)"
+        >
+          <mat-option *ngFor="let fav of presetTypes" [value]="fav"
+            >{{ capitalize(fav) }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+      <app-bd-button
+        tooltip="above"
+        text="Save preset"
+        icon="save"
+        (click)="savePreset()"
+      ></app-bd-button>
+      <app-bd-button
+        tooltip="above"
+        text="Reset preset"
+        icon="settings_backup_restore"
+        (click)="deletePreset()"
+      ></app-bd-button>
+    </div>
+    <mat-divider
+      [style.position]="'relative'"
+      [style.top.px]="5"
+      [style.padding-bottom.px]="10"
+    ></mat-divider>
     <div fxLayout="row" fxLayoutGap="5px">
       <!-- a grouping panel per grouping -->
       <div
@@ -43,9 +72,14 @@
         </app-bd-data-grouping-panel>
       </div>
 
-      <!-- the management panel (add/remove/save) -->
-      <div fxLayout="column" fxLayoutGap="5px" [style.padding-top.px]="5">
-        <ng-container *ngIf="multiple">
+      <!-- the management panel add new groupings -->
+      <div
+        fxLayout="column"
+        fxLayoutGap="5px"
+        [style.padding-top.px]="5"
+        *ngIf="multiple"
+      >
+        <ng-container>
           <app-bd-button
             text="Add"
             icon="add"
@@ -53,26 +87,7 @@
             (click)="addGrouping()"
             [disabled]="groupings.length >= 5"
           ></app-bd-button>
-          <mat-divider
-            [style.position]="'relative'"
-            [style.top.px]="5"
-            [style.padding-bottom.px]="10"
-          ></mat-divider>
         </ng-container>
-        <app-bd-button
-          *ngIf="presetKey"
-          tooltip="above"
-          text="Save as local preset"
-          icon="push_pin"
-          (click)="savePreset()"
-        ></app-bd-button>
-        <app-bd-button
-          *ngIf="presetKey && hasGlobalPreset && (auth.isCurrentScopeAdmin$ | async)"
-          tooltip="above"
-          text="Save as global preset"
-          svgIcon="global_pin"
-          (click)="saveGlobalPreset()"
-        ></app-bd-button>
         <app-bd-dialog></app-bd-dialog>
       </div>
     </div>

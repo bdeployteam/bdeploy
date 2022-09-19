@@ -34,9 +34,10 @@
       [style.padding-bottom.px]="10"
     ></mat-divider>
     <mat-select
+      name="grouping-select"
       [value]="grouping?.definition"
       (valueChange)="setGrouping($event)"
-      placeholder="Select Grouping"
+      [placeholder]="selectGroupingPlaceholder"
     >
       <mat-option>--</mat-option>
       <mat-option *ngFor="let def of definitions" [value]="def"
@@ -58,10 +59,15 @@
       from the dropdown.
     </div>
 
-    <div *ngIf="!!groupingValues?.length">
-      <mat-form-field appearance="standard">
-        <mat-label>Filter Options Below</mat-label>
+    <div *ngIf="!!groupingValues?.length" fxLayout="row">
+      <mat-form-field
+        class="grouping-panel-filter"
+        fxFlex="1 0 auto"
+        appearance="outline"
+      >
+        <mat-label>{{ filterPlaceholder }}</mat-label>
         <input matInput [(ngModel)]="filter" />
+        <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
     </div>
     <div
