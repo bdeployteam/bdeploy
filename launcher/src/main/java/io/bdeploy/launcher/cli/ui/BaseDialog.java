@@ -16,6 +16,9 @@ import io.bdeploy.common.util.Threads;
  */
 public class BaseDialog extends JFrame {
 
+    private final static String[] WINDOW_IMAGES = { "/logo16.png", "/logo24.png", "/logo32.png", "/logo48.png", "/logo64.png",
+            "/logo128.png", "/logo256.png" };
+
     private static final long serialVersionUID = 1L;
 
     static {
@@ -35,7 +38,7 @@ public class BaseDialog extends JFrame {
     public BaseDialog(Dimension dimension) {
         setSize(dimension);
         setLayout(new BorderLayout(10, 10));
-        setIconImage(WindowHelper.loadImage("/logo128.png"));
+        setIconImages(WindowHelper.loadImages(WINDOW_IMAGES));
         addWindowListener(new WindowAdapter() {
 
             @Override

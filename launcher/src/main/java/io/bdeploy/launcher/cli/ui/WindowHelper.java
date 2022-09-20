@@ -8,6 +8,8 @@ import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -39,6 +41,15 @@ public class WindowHelper {
         } catch (IOException ex) {
             throw new IllegalStateException(ex);
         }
+    }
+
+    /** Reads and returns the embedded images with the given name */
+    public static List<BufferedImage> loadImages(String... iconNames) {
+        List<BufferedImage> images = new ArrayList<>();
+        for (String iconName : iconNames) {
+            images.add(loadImage(iconName));
+        }
+        return images;
     }
 
     /** Reads and returns the embedded icon and scales it to the given resolution */
