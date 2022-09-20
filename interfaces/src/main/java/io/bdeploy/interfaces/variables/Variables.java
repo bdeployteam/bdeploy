@@ -63,7 +63,12 @@ public enum Variables {
     /**
      * A value that is resolved on the host where the application is running.
      */
-    HOST("H:");
+    HOST("H:"),
+
+    /**
+     * A conditional which evaluates a nested expression (must be boolean), and evaluates to one of two given values.
+     */
+    CONDITIONAL("IF:");
 
     private final String prefix;
 

@@ -27,6 +27,7 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
@@ -207,6 +208,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         // limited to resolvers which could yield a valid port value, considering potential cross-references.
         CompositeResolver res = new CompositeResolver();
         res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
+        res.add(new ConditionalExpressionResolver(res));
         res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
         res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
         res.add(new OsVariableResolver());

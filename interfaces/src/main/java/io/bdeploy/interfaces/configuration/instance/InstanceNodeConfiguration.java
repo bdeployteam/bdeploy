@@ -23,6 +23,7 @@ import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
@@ -108,6 +109,7 @@ public class InstanceNodeConfiguration {
         for (ApplicationConfiguration app : applications) {
             CompositeResolver list = new CompositeResolver();
             list.add(new InstanceAndSystemVariableResolver(dc));
+            list.add(new ConditionalExpressionResolver(list));
             list.add(new ApplicationVariableResolver(app));
             list.add(new ApplicationParameterValueResolver(app.id, dc));
             list.add(new ManifestSelfResolver(app.application, valueResolver));

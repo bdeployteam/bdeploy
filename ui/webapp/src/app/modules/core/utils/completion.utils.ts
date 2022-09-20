@@ -41,6 +41,11 @@ export function buildCompletionPrefixes(): ContentCompletion[] {
       description: 'Instance Properties',
     },
     {
+      value: '{{IF:',
+      icon: 'help',
+      description: 'Conditional Expression',
+    },
+    {
       value: '{{LINUX:',
       icon: 'devices_other',
       description: 'Linux specific value',
@@ -88,7 +93,7 @@ export function buildCompletions(
       icon: 'folder',
       description: l.description,
     })),
-    ...gatherSpecialExpansions(instance, process).map((l) => ({
+    ...gatherSpecialExpansions(instance, process, system).map((l) => ({
       value: l.link,
       icon: getPrefixIcon(l, prefixes),
       description: l.description,

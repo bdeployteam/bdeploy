@@ -37,6 +37,7 @@ import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathValidationDummyResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
@@ -407,6 +408,7 @@ public class ProductUpdateService {
     private VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
         CompositeResolver res = new CompositeResolver();
         res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
+        res.add(new ConditionalExpressionResolver(res));
         res.add(new InstanceVariableResolver(node.nodeConfiguration, null, "1"));
         res.add(new ApplicationVariableResolver(process));
         res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));

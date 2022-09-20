@@ -16,7 +16,8 @@ import {
   NgForm,
 } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
-import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash-es';
+import { BehaviorSubject, debounceTime, Subject } from 'rxjs';
 import {
   ApplicationConfiguration,
   ApplicationDto,
@@ -69,6 +70,8 @@ export class BdValueEditorComponent
   @ViewChild('valueEditor', { static: false })
   valueEditor: BdFormInputComponent;
 
+  private modelChanged = new Subject<LinkedValueConfiguration>();
+
   /* template */ passwordLock = true;
   /* template */ linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
   /* template */ booleanValue;
@@ -102,9 +105,9 @@ export class BdValueEditorComponent
   }
 
   ngOnInit(): void {
-    if (this.isBoolean()) {
-      this.booleanValue = this.internalValue?.value === 'true';
-    }
+    this.modelChanged.pipe(debounceTime(50)).subscribe((v) => {
+      this.updatePreview(v);
+    });
 
     // init with lock in case of password - which is the default to prevent timing issues, reset for all others.
     if (this.type !== ParameterType.PASSWORD || this.customEditor) {
@@ -119,7 +122,8 @@ export class BdValueEditorComponent
   writeValue(v: any): void {
     if (v !== this.internalValue) {
       this.internalValue = v;
-      this.updatePreview(v);
+      this.booleanValue = this.internalValue?.value === 'true';
+      this.modelChanged.next(v);
     }
   }
 
@@ -131,8 +135,11 @@ export class BdValueEditorComponent
     this.onTouchedCb = fn;
   }
 
+  onFocus() {
+    this.updatePreview(this.internalValue);
+  }
+
   private fireChange(value: LinkedValueConfiguration) {
-    this.updatePreview(value);
     this.onChangedCb(value);
   }
 
@@ -218,16 +225,12 @@ export class BdValueEditorComponent
 
   /* template */ doRevert() {
     if (!this.defaultValue) {
-      this.internalValue = {
+      this.writeValue({
         value: this.isBoolean() ? 'false' : '',
         linkExpression: null,
-      };
+      });
     } else {
-      this.internalValue = this.defaultValue;
-    }
-
-    if (this.isBoolean()) {
-      this.booleanValue = this.internalValue.value === 'true';
+      this.writeValue(cloneDeep(this.defaultValue));
     }
 
     this.fireChange(this.internalValue);
@@ -260,13 +263,13 @@ export class BdValueEditorComponent
     if (reset) {
       this.doRevert();
     } else {
-      this.internalValue = { value: val, linkExpression: null };
+      this.writeValue({ value: val, linkExpression: null });
       this.fireChange(this.internalValue);
     }
   }
 
   /* template */ doChangeLink(val: string) {
-    this.internalValue = { value: null, linkExpression: val ? val : '' };
+    this.writeValue({ value: null, linkExpression: val ? val : '' });
     this.fireChange(this.internalValue);
   }
 

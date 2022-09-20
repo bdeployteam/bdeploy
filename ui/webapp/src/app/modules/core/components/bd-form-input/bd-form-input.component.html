@@ -25,6 +25,7 @@
       [type]="type"
       [errorStateMatcher]="this"
       [appBdContentAssist]="assistContent"
+      (focus)="focus.emit(true)"
     />
     <mat-autocomplete #auto="matAutocomplete">
       <mat-option

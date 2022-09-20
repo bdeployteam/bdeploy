@@ -83,7 +83,11 @@ export class BdExpressionPickerComponent implements OnChanges {
       this.applications
     );
     this.pathRecords = gatherPathExpansions();
-    this.specialRecords = gatherSpecialExpansions(this.instance, this.process);
+    this.specialRecords = gatherSpecialExpansions(
+      this.instance,
+      this.process,
+      this.system
+    );
   }
 
   /* template */ onSelect(v: LinkVariable) {
