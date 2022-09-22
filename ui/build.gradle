@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.36.1070'
+        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:2.37.1128'
     }
 }
 
@@ -23,7 +23,7 @@ dependencies {
         project(":jersey"),
         project(":bhive"),
         project(":interfaces"),
-        'net.jsign:jsign-core:4.1'
+        'net.jsign:jsign-core:4.2'
     )
     commonTestDeps(testFixtures(project(":jersey")))
 }
