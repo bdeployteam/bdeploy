@@ -54,7 +54,7 @@ export function getRenderPreview(
     expansions.push(...gatherVariableExpansions(instance, system));
     expansions.push(...gatherProcessExpansions(instance, process));
     expansions.push(...gatherPathExpansions());
-    expansions.push(...gatherSpecialExpansions(instance, process));
+    expansions.push(...gatherSpecialExpansions(instance, process, system));
 
     // now expand the expression
     return expand(val.linkExpression, expansions);
@@ -294,7 +294,8 @@ export function gatherPathExpansions(): LinkVariable[] {
 
 export function gatherSpecialExpansions(
   instance: InstanceConfigurationDto,
-  process: ApplicationConfiguration
+  process: ApplicationConfiguration,
+  system: SystemConfiguration
 ): LinkVariable[] {
   const result: LinkVariable[] = [];
 
@@ -430,5 +431,50 @@ export function gatherSpecialExpansions(
         : '',
   });
 
+  result.push({
+    name: 'IF',
+    description:
+      'Conditionally expands to the first (true) or second (false) value depending on the result of the given condition expression.',
+    preview: '<result>',
+    link: '{{IF:condition?valueIfTrue:valueIfFalse}}',
+    group: null,
+    matches: (s) => s.startsWith('{{IF:'),
+    expand: (s) => expandCondition(s, instance, process, system),
+  });
+
   return result;
+}
+
+export function expandCondition(
+  condition: string,
+  instance: InstanceConfigurationDto,
+  process: ApplicationConfiguration,
+  system: SystemConfiguration
+) {
+  const match = condition.match(/{{IF:([^?]*)\?([^:]*):(.*)}}/);
+
+  if (!match) {
+    return condition; // no match, expression malformed? just don't expand it...
+  }
+
+  const expr = match[1];
+  const valIfTrue = match[2];
+  const valIfFalse = match[3];
+
+  const exprResult = getRenderPreview(
+    createLinkedValue(`{{${expr}}}`),
+    process,
+    instance,
+    system
+  );
+
+  if (
+    exprResult !== null &&
+    exprResult !== undefined &&
+    exprResult.trim() !== '' &&
+    exprResult.trim() !== 'false'
+  ) {
+    return valIfTrue;
+  }
+  return valIfFalse;
 }

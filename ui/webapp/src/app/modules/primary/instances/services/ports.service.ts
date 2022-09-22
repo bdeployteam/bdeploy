@@ -124,6 +124,7 @@ export class PortsService {
             paramId: param.id,
             paramName: paramDesc.name,
             port: Number(
+              // TODO: avoid calling this all the time. provide batched version to only gather stuff once in linked-values.utils.ts
               getRenderPreview(
                 param.value,
                 app,

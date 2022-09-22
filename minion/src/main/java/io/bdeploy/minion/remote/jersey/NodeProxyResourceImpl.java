@@ -31,6 +31,7 @@ import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
@@ -84,6 +85,7 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
 
         CompositeResolver list = new CompositeResolver();
         list.add(new InstanceAndSystemVariableResolver(inm.getConfiguration()));
+        list.add(new ConditionalExpressionResolver(list));
         list.add(new DeploymentPathResolver(dpp));
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.id, inm.getConfiguration()));

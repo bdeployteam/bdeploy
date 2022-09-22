@@ -106,6 +106,7 @@ import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
+import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
@@ -1274,6 +1275,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // note that we cannot resolve deployment paths here, but this *should* not matter for calculating a URI.
         CompositeResolver list = new CompositeResolver();
         list.add(new InstanceAndSystemVariableResolver(ic));
+        list.add(new ConditionalExpressionResolver(list));
         list.add(new ApplicationVariableResolver(app));
         list.add(new ApplicationParameterValueResolver(app.id, ic));
         list.add(new ParameterValueResolver(new ApplicationParameterProvider(ic)));

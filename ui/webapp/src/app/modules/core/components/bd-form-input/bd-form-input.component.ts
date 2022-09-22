@@ -1,9 +1,11 @@
 import {
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnInit,
   Optional,
+  Output,
   Self,
   TemplateRef,
   ViewEncapsulation,
@@ -40,6 +42,9 @@ export class BdFormInputComponent
   @Input() assistPrefixes: ContentCompletion[];
   @Input() errorFallback: string;
   @Input() statusMessage: string;
+
+  // eslint-disable-next-line @angular-eslint/no-output-native
+  @Output() focus = new EventEmitter<any>();
 
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
