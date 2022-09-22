@@ -286,7 +286,10 @@ export class HttpEndpointDiff {
       getPreRenderable(base?.trustStorePass),
       getPreRenderable(compare?.trustStorePass)
     );
-    this.authType = new Difference(base?.authType, compare?.authType);
+    this.authType = new Difference(
+      getPreRenderable(base?.authType),
+      getPreRenderable(compare?.authType)
+    );
     this.authUser = new Difference(
       getPreRenderable(base?.authUser),
       getPreRenderable(compare?.authUser)

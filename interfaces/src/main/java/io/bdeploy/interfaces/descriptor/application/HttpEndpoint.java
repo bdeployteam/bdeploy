@@ -81,9 +81,12 @@ public class HttpEndpoint {
     public LinkedValueConfiguration trustStorePass = new LinkedValueConfiguration(null);
 
     /**
-     * The authentication type to use when performing the request
+     * The authentication type to use when performing the request.
+     * <p>
+     * Should actually be {@link HttpAuthenticationType}, but need link expression on this as well.
      */
-    public HttpAuthenticationType authType = HttpAuthenticationType.NONE;
+    @JsonSetter(nulls = Nulls.SKIP)
+    public LinkedValueConfiguration authType = new LinkedValueConfiguration(HttpAuthenticationType.NONE.name());
 
     /**
      * The user to use to perform authentication of any request

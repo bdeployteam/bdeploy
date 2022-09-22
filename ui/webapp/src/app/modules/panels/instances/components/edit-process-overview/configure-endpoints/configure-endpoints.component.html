@@ -17,13 +17,13 @@
   <app-bd-dialog-content>
     <form form #epForm="ngForm">
       <div
-        *ngIf="edit.process$.value?.endpoints?.http?.length"
+        *ngIf="process?.endpoints?.http?.length"
         [style.padding-top.px]="2"
         fxLayout="column"
         fxLayoutGap="10px"
       >
         <div
-          *ngFor="let endpoint of edit.process$.value?.endpoints?.http; let i = index"
+          *ngFor="let endpoint of process.endpoints.http; let i = index"
           class="bd-rect-card"
           fxLayout="column"
         >
@@ -65,22 +65,22 @@
                   ></app-bd-value-editor>
                 </app-config-desc-element>
 
-                <ng-template #linkToggleAuthType>
-                  <app-bd-expression-toggle
-                    [style.opacity]="'0.3'"
-                    [link]="false"
-                    [disabled]="true"
-                  ></app-bd-expression-toggle>
-                </ng-template>
                 <app-config-desc-element card="cfg.ep.authType">
-                  <app-bd-form-select
-                    name="epAuthType{{ i }}"
+                  <app-bd-value-editor
+                    [name]="'epAuthType' + i"
                     label="Authentication"
                     [(ngModel)]="endpoint.authType"
-                    [values]="authTypeValues"
-                    [labels]="authTypeLabels"
-                    [prefix]="linkToggleAuthType"
-                  ></app-bd-form-select>
+                    [completionPrefixes]="completionPrefixes"
+                    [completions]="completions"
+                    [type]="TYPE_STRING"
+                    [process]="process"
+                    [instance]="instance"
+                    [system]="system"
+                    [suggested]="authTypeValues"
+                    (ngModelChange)="onChangeAuthType($event, i)"
+                    [appAllowedValuesValidator]="authTypeValues"
+                    [required]="true"
+                  ></app-bd-value-editor>
                 </app-config-desc-element>
 
                 <app-config-desc-element card="cfg.ep.authUser">
@@ -95,8 +95,8 @@
                     [process]="process"
                     [instance]="instance"
                     [system]="system"
-                    [disabled]="endpoint.authType === 'NONE'"
-                    [required]="endpoint.authType !== 'NONE'"
+                    [disabled]="authTypes[i] === 'NONE'"
+                    [required]="authTypes[i] !== 'NONE'"
                   ></app-bd-value-editor>
                 </app-config-desc-element>
 
@@ -112,8 +112,8 @@
                     [process]="process"
                     [instance]="instance"
                     [system]="system"
-                    [disabled]="endpoint.authType === 'NONE'"
-                    [required]="endpoint.authType !== 'NONE'"
+                    [disabled]="authTypes[i] === 'NONE'"
+                    [required]="authTypes[i] !== 'NONE'"
                   ></app-bd-value-editor>
                 </app-config-desc-element>
 

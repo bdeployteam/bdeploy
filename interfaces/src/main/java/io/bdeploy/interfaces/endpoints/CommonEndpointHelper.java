@@ -100,10 +100,18 @@ public class CommonEndpointHelper {
             }
         }
 
-        if (endpoint.authType == HttpAuthenticationType.BASIC) {
+        HttpAuthenticationType authType;
+        try {
+            authType = HttpAuthenticationType.valueOf(endpoint.authType.getPreRenderable());
+        } catch (Exception e) {
+            log.warn("Invalid authentication type on endpoint {}: {}", endpoint.id, endpoint.authType.getPreRenderable());
+            authType = HttpAuthenticationType.NONE;
+        }
+
+        if (authType == HttpAuthenticationType.BASIC) {
             client.register(
                     HttpAuthenticationFeature.basic(endpoint.authUser.getPreRenderable(), endpoint.authPass.getPreRenderable()));
-        } else if (endpoint.authType == HttpAuthenticationType.DIGEST) {
+        } else if (authType == HttpAuthenticationType.DIGEST) {
             client.register(
                     HttpAuthenticationFeature.digest(endpoint.authUser.getPreRenderable(), endpoint.authPass.getPreRenderable()));
         }
@@ -125,7 +133,7 @@ public class CommonEndpointHelper {
         processed.trustAll = rawEndpoint.trustAll;
         processed.trustStore = process(rawEndpoint.trustStore, p);
         processed.trustStorePass = process(rawEndpoint.trustStorePass, p);
-        processed.authType = rawEndpoint.authType;
+        processed.authType = process(rawEndpoint.authType, p);
         processed.authUser = process(rawEndpoint.authUser, p);
         processed.authPass = process(rawEndpoint.authPass, p);
         processed.proxying = rawEndpoint.proxying;

@@ -7,13 +7,7 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  of,
-  Subscription,
-} from 'rxjs';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 import {
   ApplicationConfiguration,
@@ -27,7 +21,6 @@ import {
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import {
@@ -50,18 +43,12 @@ export class ConfigureEndpointsComponent
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChildren('epForm') private forms: QueryList<NgForm>;
 
-  /* template */ authTypeValues = Object.keys(HttpAuthenticationType);
-  /* template */ authTypeLabels = Object.keys(HttpAuthenticationType).map(
-    (t) => t.substring(0, 1) + t.substring(1).toLowerCase()
-  );
   /* template */ hasPendingChanges: boolean;
   /* template */ isFromInvalid: boolean;
 
   /* template */ process: ApplicationConfiguration;
   /* template */ instance: InstanceConfigurationDto;
   /* template */ system: SystemConfiguration;
-  /* template */ linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
-  /* template */ currentInput: LinkedValueConfiguration;
 
   /* template */ readonly TYPE_STRING = ParameterType.STRING;
   /* template */ readonly TYPE_PASSWORD = ParameterType.PASSWORD;
@@ -70,6 +57,9 @@ export class ConfigureEndpointsComponent
 
   /* template */ completionPrefixes = buildCompletionPrefixes();
   /* template */ completions: ContentCompletion[];
+
+  /* template */ authTypeValues = Object.keys(HttpAuthenticationType);
+  /* template */ authTypes: HttpAuthenticationType[] = [];
 
   private subscription: Subscription;
 
@@ -104,6 +94,12 @@ export class ConfigureEndpointsComponent
         this.process,
         this.instanceEdit.stateApplications$.value
       );
+
+      if (p?.endpoints?.http?.length) {
+        for (let i = 0; i < p.endpoints.http.length; ++i) {
+          this.onChangeAuthType(p.endpoints.http[i].authType, i);
+        }
+      }
     });
 
     this.subscription.add(areas.registerDirtyable(this, 'panel'));
@@ -163,43 +159,22 @@ export class ConfigureEndpointsComponent
     return strVal === 'true';
   }
 
-  private makeValueLink(p: LinkedValueConfiguration, isPass: boolean) {
-    p.linkExpression = isPass ? '' : p.value || '';
-    p.value = null;
-  }
-
-  private makeValuePlain(p: LinkedValueConfiguration, isPass: boolean) {
-    if (p.linkExpression?.indexOf('{{') >= 0) {
-      p.value = isPass
-        ? ''
-        : getRenderPreview(p, this.process, this.instance, this.system);
-      p.linkExpression = null;
-    } else {
-      p.value = isPass ? '' : p.linkExpression || '';
-      p.linkExpression = null;
-    }
-  }
-
-  /* template */ isLink(p: LinkedValueConfiguration) {
-    return p?.linkExpression !== null;
-  }
-
-  /* template */ toggleLink(
-    p: LinkedValueConfiguration,
-    link: boolean,
-    isPass: boolean
+  /* template */ onChangeAuthType(
+    type: LinkedValueConfiguration,
+    index: number
   ) {
-    if (link) {
-      this.makeValuePlain(p, isPass);
-    } else {
-      this.makeValueLink(p, isPass);
+    const exp = getRenderPreview(
+      type,
+      this.process,
+      this.instance,
+      this.system
+    );
+    for (const x of Object.values(HttpAuthenticationType)) {
+      if (x === exp) {
+        this.authTypes[index] = x;
+        return;
+      }
     }
-  }
-
-  /* template */ appendLink(val: string) {
-    if (!this.currentInput) {
-      return;
-    }
-    this.currentInput.linkExpression += val;
+    this.authTypes[index] = HttpAuthenticationType.NONE;
   }
 }

@@ -311,6 +311,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor',
         'io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor',
         'io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor',
+        'io.bdeploy.interfaces.descriptor.application.HttpEndpoint$HttpAuthenticationType',
         // Configurations and their DTOs
         'io.bdeploy.interfaces.configuration.SettingsConfiguration',
         'io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration',

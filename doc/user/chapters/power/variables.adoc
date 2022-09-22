@@ -1,4 +1,4 @@
-=== Variable Expansion
+=== Variable Expansions
 
 *BDeploy* provides a mechanism for variable expansion, used in <<Link Expressions>> and <<Configuration Files>>. Variable expansion can happen on the following:
 
@@ -201,3 +201,16 @@ Used to expand to instance and system variables. The same prefix is used for bot
  {{X:<VAR>}}
 
 <<Instance Variables>> are defined in the <<Instance Settings>> and <<System Variables>> are defined on <<Systems>> level in the *Instance Group*.
+
+==== IF: Conditional Expansion
+
+The conditional expansion can be use to convert a boolean expression to any given value. The format of the conditional is
+
+ {{IF:condition?value-if-true:value-if-false}}
+
+The condition is any other variable expansion _without_ the curly braces, like for instance `X:MyVar` to resolve the instance variable `MyVar`. The result of the expression is expected to be boolean, however non-empty strings will be treated as `true` as well. The values the expression expands to can be of arbitrary type, and need to be plain values, i.e. they can _not_ contain variable expansions.
+
+Some examples:
+
+ {{IF:V:use-auth?SchemeBasic:SchemeNone}}
+ {{IF:X:instance-bool?ValueIfTrue:ValueIfFalse}}

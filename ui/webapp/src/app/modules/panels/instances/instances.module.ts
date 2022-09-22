@@ -83,6 +83,7 @@ import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-valida
 import { EditCustomIdValidatorDirective } from './validators/edit-custom-id-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
+import { AllowedValuesValidatorDirective } from './validators/allowed-values-validator.directive';
 
 @NgModule({
   declarations: [
@@ -155,6 +156,7 @@ import { EditServerIssuesValidatorDirective } from './validators/edit-server-iss
     InstanceVariablesComponent,
     PortTypeCellComponent,
     VariableDescCardComponent,
+    AllowedValuesValidatorDirective,
   ],
   imports: [
     CommonModule,
