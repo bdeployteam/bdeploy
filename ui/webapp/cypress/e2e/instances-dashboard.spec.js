@@ -50,6 +50,29 @@ describe('Instance Dashboard Tests', () => {
       cy.get('button[data-cy="Confirm"]').click();
     });
 
+    cy.waitUntilContentLoaded();
+
+    // change the name from Another Server With Sleep to Another Process for later tests.
+    cy.inMainNavContent(() => {
+      cy.contains('app-config-node', 'master').within(() => {
+        cy.contains('tr', 'Another Server With Sleep').should('exist').click();
+      });
+    });
+
+    cy.inMainNavFlyin('app-edit-process-overview', () => {
+      cy.get('button[data-cy^="Configure Parameters"]').click();
+    });
+
+    cy.inMainNavFlyin('app-configure-process', () => {
+      cy.get('app-bd-form-input[name="name"]').within(() => {
+        cy.get('input').should('have.value', 'Another Server With Sleep');
+        cy.get('input').clear().type('Another Process'); // avoid name problems in test.
+      });
+
+      // intentionally not using apply, should prompt to save on leave
+      cy.pressToolbarButton('Apply');
+    });
+
     cy.inMainNavContent(() => {
       cy.waitForApi(() => {
         cy.pressToolbarButton('Save');
@@ -133,13 +156,13 @@ describe('Instance Dashboard Tests', () => {
     cy.checkMainNavFlyinClosed();
 
     cy.inMainNavContent(() => {
-      cy.contains('tr', 'Another Server With Sleep').click();
+      cy.contains('tr', 'Another Process').click();
     });
 
     cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-process-status', () => {
-      cy.contains('Another Server').should('exist');
+      cy.contains('Another Process').should('exist');
       cy.contains('button', 'play_arrow').should('be.enabled');
       cy.get('button[data-cy="Process Port Status"]').click();
     });
@@ -184,7 +207,7 @@ describe('Instance Dashboard Tests', () => {
     cy.screenshot('Doc_DashboardProcessCrashPermanent');
 
     cy.inMainNavContent(() => {
-      cy.contains('tr', 'Another Server With Sleep').within(() => {
+      cy.contains('tr', 'Another Process').within(() => {
         cy.contains('mat-icon', 'error').should('exist');
       });
     });
@@ -228,7 +251,7 @@ describe('Instance Dashboard Tests', () => {
         cy.contains('tr', 'Server With Sleep').within(() => {
           cy.get('input[type="checkbox"]').check({ force: true });
         });
-        cy.contains('tr', 'Another Server With Sleep').within(() => {
+        cy.contains('tr', 'Another Process').within(() => {
           cy.get('input[type="checkbox"]').check({ force: true });
         });
       });

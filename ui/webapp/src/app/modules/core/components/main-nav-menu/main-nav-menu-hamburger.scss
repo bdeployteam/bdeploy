@@ -12,7 +12,7 @@ $hamburger-active-hover-opacity: $hamburger-hover-opacity !default;
 
 $hamburger-types: (arrow);
 
-@import '~hamburgers/_sass/hamburgers/hamburgers';
+@import "hamburgers/_sass/hamburgers/hamburgers";
 
 .local-hamburger-button {
   position: absolute;
