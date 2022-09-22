@@ -19,6 +19,8 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
+import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
 import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
@@ -181,6 +183,11 @@ public class InstanceNodeConfiguration {
 
                 // this will update the tracking resolver with all required variables.
                 cfg.renderDescriptor(perApp);
+
+                // now also process all endpoints to get hold of what they need later
+                for (HttpEndpoint ep : cfg.endpoints.http) {
+                    CommonEndpointHelper.processEndpoint(perApp, ep);
+                }
             }
 
             resolver.add(new EmptyVariableResolver()); // last one: ignore all other expansions
