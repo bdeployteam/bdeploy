@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.processing.Generated;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
 
@@ -25,6 +26,13 @@ public class ProcessGroupConfiguration implements Comparable<ProcessGroupConfigu
      */
     @JsonAlias("uuid")
     public String id;
+
+    // Compat with 4.x
+    @Deprecated(forRemoval = true)
+    @JsonProperty("uuid")
+    public String getUuid() {
+        return id;
+    };
 
     /**
      * Whether to automatically start this deployment (any {@link ProcessConfiguration}s using start type

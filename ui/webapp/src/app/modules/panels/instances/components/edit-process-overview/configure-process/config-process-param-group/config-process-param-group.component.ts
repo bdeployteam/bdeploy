@@ -314,6 +314,7 @@ export class ConfigProcessParamGroupComponent
       // create the new parameter.
       p.value = {
         id: p.descriptor.id,
+        uid: p.descriptor.id, // compat
         value: initialValue,
         pinned: false,
         preRendered: [],
@@ -467,6 +468,7 @@ export class ConfigProcessParamGroupComponent
       descriptor: null,
       value: {
         id: this.customTemp.id,
+        uid: this.customTemp.id, // compat
         value: createLinkedValue(this.customTemp.value),
         pinned: false,
         preRendered: [],

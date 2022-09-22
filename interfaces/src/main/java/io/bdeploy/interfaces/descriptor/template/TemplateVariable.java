@@ -3,6 +3,7 @@ package io.bdeploy.interfaces.descriptor.template;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TemplateVariable {
 
@@ -11,6 +12,13 @@ public class TemplateVariable {
      */
     @JsonAlias("uid")
     public String id;
+
+    // Compat with 4.x
+    @Deprecated(forRemoval = true)
+    @JsonProperty("uid")
+    public String getUid() {
+        return id;
+    };
 
     /**
      * A short human readable name of the variable.

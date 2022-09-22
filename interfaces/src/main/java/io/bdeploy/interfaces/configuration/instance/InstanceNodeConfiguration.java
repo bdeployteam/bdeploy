@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.VariableResolver;
@@ -56,6 +57,13 @@ public class InstanceNodeConfiguration {
      */
     @JsonAlias("uuid")
     public String id;
+
+    // Compat with 4.x
+    @Deprecated(forRemoval = true)
+    @JsonProperty("uuid")
+    public String getUuid() {
+        return id;
+    };
 
     /**
      * Whether this instance should be automatically stated on startup of the minion.

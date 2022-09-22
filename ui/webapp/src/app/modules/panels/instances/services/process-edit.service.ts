@@ -147,6 +147,7 @@ export class ProcessEditService {
 
     const process: ApplicationConfiguration = {
       id: null, // calculated later
+      uid: null, // compat
       application: application.key,
       name: template?.name
         ? this.performTemplateVariableSubst(
@@ -199,6 +200,7 @@ export class ProcessEditService {
     return this.groups.newId().pipe(
       tap((id) => {
         process.id = id;
+        process.uid = id; // compat
         node.nodeConfiguration.applications.push(process);
 
         const reqGrp = template?.preferredProcessControlGroup;
@@ -354,6 +356,7 @@ export class ProcessEditService {
 
         return {
           id: p.id,
+          uid: p.id, // compat
           value: val,
           pinned: false,
           preRendered: this.preRenderParameter(p, val),

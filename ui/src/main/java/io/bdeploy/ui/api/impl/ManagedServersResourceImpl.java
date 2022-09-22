@@ -462,7 +462,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 });
                 fetchOp.addManifest(systems);
             } catch (Exception e) {
-                log.info("Cannot fetch systesm from {}: {}", serverName, e.toString());
+                log.info("Cannot fetch systems from {}: {}", serverName, e.toString());
             }
 
             hive.execute(fetchOp);

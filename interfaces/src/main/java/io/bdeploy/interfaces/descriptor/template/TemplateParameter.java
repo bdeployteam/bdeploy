@@ -1,6 +1,7 @@
 package io.bdeploy.interfaces.descriptor.template;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TemplateParameter {
 
@@ -9,6 +10,13 @@ public class TemplateParameter {
      */
     @JsonAlias("uid")
     public String id;
+
+    // Compat with 4.x
+    @Deprecated(forRemoval = true)
+    @JsonProperty("uid")
+    public String getUid() {
+        return id;
+    };
 
     /**
      * The value that should be assigned to the parameter.

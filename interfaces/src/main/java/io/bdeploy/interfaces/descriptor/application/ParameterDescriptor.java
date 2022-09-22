@@ -7,6 +7,7 @@ import javax.annotation.processing.Generated;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
@@ -37,6 +38,13 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      */
     @JsonAlias("uid")
     public String id;
+
+    // Compat with 4.x
+    @Deprecated(forRemoval = true)
+    @JsonProperty("uid")
+    public String getUid() {
+        return id;
+    };
 
     /**
      * X-OR with {@link #id}; use a parameter template to expand a set of one or more parameters

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Describes a single parameter as configured in a configuration UI.
@@ -16,6 +17,13 @@ public class ParameterConfiguration {
      */
     @JsonAlias("uid")
     public String id;
+
+    // Compat with 4.x
+    @Deprecated(forRemoval = true)
+    @JsonProperty("uid")
+    public String getUid() {
+        return id;
+    };
 
     /**
      * Whether this parameter is pinned. This information is used by the web UI to

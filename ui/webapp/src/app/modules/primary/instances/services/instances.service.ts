@@ -315,6 +315,7 @@ export class InstancesService {
         this.overallStates$.next(
           instances.map((x) => ({
             id: x.instanceConfiguration.id,
+            uuid: x.instanceConfiguration.id, // compat
             ...x.overallState,
           }))
         );

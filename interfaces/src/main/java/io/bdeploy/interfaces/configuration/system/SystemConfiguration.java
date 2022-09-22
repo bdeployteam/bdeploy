@@ -3,8 +3,6 @@ package io.bdeploy.interfaces.configuration.system;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
 
 /**
@@ -18,7 +16,6 @@ public class SystemConfiguration {
     /**
      * The unique ID of the system.
      */
-    @JsonAlias("uuid")
     public String id;
 
     /**

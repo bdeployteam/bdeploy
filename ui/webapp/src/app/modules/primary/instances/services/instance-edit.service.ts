@@ -582,6 +582,7 @@ export class InstanceEditService {
         product: instance.product,
         purpose: instance.purpose,
         id: instance.id,
+        uuid: instance.id, // compat
         applications: [],
         controlGroups: [cloneDeep(DEF_CONTROL_GROUP)],
         variables: {},
