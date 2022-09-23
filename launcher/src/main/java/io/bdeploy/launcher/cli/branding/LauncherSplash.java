@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class LauncherSplash implements LauncherSplashDisplay {
         if (GraphicsEnvironment.isHeadless()) {
             return;
         }
-        splash = new Frame("Splash");
+        splash = new JFrame("Splash");
         splash.setUndecorated(true);
         splash.setSize(480, 280);
         splash.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));

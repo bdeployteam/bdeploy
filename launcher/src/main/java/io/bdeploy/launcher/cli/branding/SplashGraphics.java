@@ -12,13 +12,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.JPanel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 
-final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplashDisplay {
+final class SplashGraphics extends JPanel implements LauncherSplashDisplay {
 
     private static final Logger log = LoggerFactory.getLogger(SplashGraphics.class);
     private static final long serialVersionUID = 1L;
@@ -35,6 +37,10 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
     private int progressCurrent = 0;
     private Color progressColor = Color.WHITE;
     private Color textColor = Color.WHITE;
+
+    public SplashGraphics() {
+        setDoubleBuffered(true);
+    }
 
     public void setText(Rectangle text) {
         this.text = text;
@@ -95,7 +101,7 @@ final class SplashGraphics extends PanelDoubleBuffered implements LauncherSplash
     }
 
     @Override
-    public void paintBuffer(Graphics g) {
+    public void paint(Graphics g) {
         // Using hints on Windows leads to bold text which is hard to read
         Graphics2D g2d = (Graphics2D) g;
         if (OsHelper.getRunningOs() == OperatingSystem.LINUX) {
