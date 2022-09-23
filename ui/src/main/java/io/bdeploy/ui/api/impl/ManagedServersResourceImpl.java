@@ -591,6 +591,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 && managedVersion.getMinor() == 6) {
             // special case - 3.6.x -> 4.0.x - we do not force this update.
             updateDto.forceUpdate = false;
+        } else if (runningVersion.getMajor() == 5 && managedVersion.getMajor() == 4) {
+            // from 4.x -> 5.x also no forced update, data from 4.x servers can be read but is persisted in a new format.
+            updateDto.forceUpdate = false;
         }
 
         // Contact the remote service to find out all installed versions
