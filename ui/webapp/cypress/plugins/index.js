@@ -11,7 +11,6 @@
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
-const request = require('request');
 const fs = require('fs-extra');
 const { rmdir, rename } = require('fs');
 const AdmZip = require('adm-zip');
@@ -21,17 +20,23 @@ module.exports = (on, config) => {
     downloadFileFromUrl(args) {
       const fileName = args.fileName;
       return new Promise((resolve, reject) => {
-        request({ url: args.url, encoding: null, headers: {} }, function (err, res, body) {
-          if (!res) {
-            return reject(new Error('No response: ' + err));
-          }
-          if (res.statusCode !== 200) {
-            return reject(new Error('Bad status code: ' + res.statusCode));
-          }
+        import('got').then((got) =>
+          got
+            .got(args.url, { https: { rejectUnauthorized: false } })
+            .then((res) => {
+              if (!res || res?.statusCode !== 200) {
+                return reject(
+                  new Error('No or bad response: ' + res?.statusCode)
+                );
+              }
 
-          fs.outputFileSync(fileName, body);
-          resolve(body);
-        });
+              fs.outputFileSync(fileName, res.rawBody);
+              resolve(res.body); // *body* might make not much sense in case of binary files, only usable with text files.
+            })
+            .catch((err) => {
+              return reject(new Error('Error in request: ' + err));
+            })
+        );
       });
     },
 
@@ -76,7 +81,9 @@ module.exports = (on, config) => {
       console.log('zip file %s has entries %o', filename, names);
 
       if (expectedEntry && !names.find(expectedEntry)) {
-        throw new Error(`Expected Entry ${expectedEntry} not found in ${filename}`);
+        throw new Error(
+          `Expected Entry ${expectedEntry} not found in ${filename}`
+        );
       }
 
       return null;
