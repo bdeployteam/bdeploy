@@ -1,5 +1,4 @@
 import {
-  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -7,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  ViewEncapsulation,
 } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
@@ -26,6 +26,7 @@ import {
   selector: 'app-bd-data-grouping-panel',
   templateUrl: './bd-data-grouping-panel.component.html',
   styleUrls: ['./bd-data-grouping-panel.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class BdDataGroupingPanelComponent<T>
   implements OnInit, OnChanges, OnDestroy
@@ -58,10 +59,14 @@ export class BdDataGroupingPanelComponent<T>
       (gv) => gv && gv.toLowerCase().includes(this.filter.toLowerCase())
     );
   }
+  /* template */ get selectGroupingPlaceholder(): string {
+    return this.grouping?.definition?.name || 'Select Grouping';
+  }
+  /* template */ get filterPlaceholder(): string {
+    return this.grouping?.definition?.name || 'Filter Options Below';
+  }
 
   private subscription: Subscription;
-
-  constructor(private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.subscription = this.popupEmitter.subscribe(() => {

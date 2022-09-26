@@ -76,6 +76,8 @@ export class ConfigService {
     iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
     iconRegistry.addSvgIcon('WEB', sanitizer.bypassSecurityTrustResourceUrl('assets/web.svg'));
     iconRegistry.addSvgIcon('global_pin', sanitizer.bypassSecurityTrustResourceUrl('assets/global-pin.svg'));
+    iconRegistry.addSvgIcon('sort_asc', sanitizer.bypassSecurityTrustResourceUrl('assets/sort-asc.svg'));
+    iconRegistry.addSvgIcon('sort_desc', sanitizer.bypassSecurityTrustResourceUrl('assets/sort-desc.svg'));
 
     // check whether the server version changed every minute.
     // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.

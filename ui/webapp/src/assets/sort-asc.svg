@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<defs>
+<style>.cls-1,.cls-2{fill:#454545;}</style>
+</defs>
+<path class="cls-2" d="M11,17.32l-.99-1.13-2.5,2.79V2h-1.42V19s-2.5-2.79-2.5-2.79l-.99,1.11,4.2,4.68,4.2-4.68Z"/>
+<g>
+<path class="cls-1" d="M19.16,8.18h-2.98l-.67,1.86h-.97l2.71-7.11h.82l2.72,7.11h-.96l-.68-1.86Zm-2.7-.77h2.42l-1.21-3.33-1.21,3.33Z"/>
+<path class="cls-2" d="M15.94,19.28h4.07v.77h-5.18v-.7l3.9-5.64h-3.83v-.77h4.96v.68l-3.91,5.66Z"/>
+</g>
+</svg>

@@ -79,6 +79,9 @@ export interface BdDataColumn<T> {
 
   /** Override tooltip delay in milliseconds. */
   tooltipDelay?: number;
+
+  /** Set to true if you want to sort cards by this column */
+  sortCard?: boolean;
 }
 
 /** The group used if a record does not match any group when grouping. */

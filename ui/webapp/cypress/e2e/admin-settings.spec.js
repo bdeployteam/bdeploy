@@ -188,12 +188,12 @@ describe('Admin UI Tests (Settings)', () => {
     cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
-      cy.pressToolbarButton('Data Grouping');
+      cy.pressToolbarButton('Group By');
     });
 
     cy.contains('mat-card', 'Grouping Level').within(() => {
       // this is NOT a bd-form-select
-      cy.get('mat-select').should('exist').click();
+      cy.get('mat-select[name="grouping-select"]').should('exist').click();
       // escape all .within scopes to find the global overlay content
       cy.document()
         .its('body')
