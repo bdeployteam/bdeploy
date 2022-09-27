@@ -80,7 +80,7 @@
     <ng-container>
       <ng-container *ngIf="!!currentInstance?.hasProduct">
         <div
-          *ngIf="currentInstance?.instance.tag !== currentInstance?.activeVersion?.tag"
+          *ngIf="currentInstance?.instance.tag !== currentInstance?.activeVersion?.tag && (servers.isCurrentInstanceSynchronized$ | async)"
           class="bd-rect-card"
           fxLayout="column"
           [style.margin-bottom.px]="10"
