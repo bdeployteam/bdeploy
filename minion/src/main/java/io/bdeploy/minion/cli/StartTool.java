@@ -59,6 +59,7 @@ import io.bdeploy.minion.remote.jersey.NodeCleanupResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeDeploymentResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeProcessResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeProxyResourceImpl;
+import io.bdeploy.schema.SchemaResources;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -248,6 +249,8 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         srv.register(new MinionCommonBinder(root, ocws));
         srv.registerResource(r);
+
+        SchemaResources.register(srv);
 
         return r;
     }

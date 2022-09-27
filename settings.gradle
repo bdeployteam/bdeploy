@@ -13,5 +13,6 @@ include(
     'jersey',
     'doc',
     'launcher',
-    'test-data'
+    'test-data',
+    'schema'
 )

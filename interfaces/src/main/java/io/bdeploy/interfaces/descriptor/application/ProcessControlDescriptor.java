@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
  * Describes process control specific characteristics of an {@link ApplicationDescriptor application}.
@@ -28,46 +29,27 @@ public class ProcessControlDescriptor {
         INSTANCE
     }
 
-    /**
-     * The supported start type for the application.
-     */
+    @JsonPropertyDescription("The supported start types for the application. 'INSTANCE' processes are automatically started when an instance is (auto-)started. 'MANUAL_CONFIRM' processes require an additional user confirmation before being started.")
     public List<ApplicationStartType> supportedStartTypes = new ArrayList<>();
 
-    /**
-     * Keep-alive makes sure that the application is restarted once it exits.
-     */
+    @JsonPropertyDescription("Whether the application should be restarted once it exits (regardless of exit code). Defaults to 'false'.")
     public boolean supportsKeepAlive = false;
 
-    /**
-     * If {@link #supportsKeepAlive}, specifies the number of times the PCU will try to restart the process
-     * if it keeps exiting within a certain timeout.
-     */
+    @JsonPropertyDescription("In case supportsKeepAlive is 'true', defines the amount of retries within a certain timeframe this application will be restarted. The 'failure' count resets after a few minutes of the application running without exiting. Defaults to '5'.")
     public long noOfRetries = 5;
 
-    /**
-     * Specifies the time in milliseconds that the PCU will wait for the application to exit after sending it the stop command.
-     */
+    @JsonPropertyDescription("Specifies the time in milliseconds that the PCU will wait for the application to exit after sending it the stop command.")
     public long gracePeriod = 30000;
 
-    /**
-     * Specifies if a process expects input on stdin.
-     */
+    @JsonPropertyDescription("Specifies if a process expects (and can/wants to handle) input on stdin.")
     public boolean attachStdin = false;
 
-    /**
-     * A (comma separated) list of "allowed" paths in the config tree. Currently only used for client applications.
-     * <p>
-     * Only listed directories will be provisioned to the client.
-     */
+    @JsonPropertyDescription("Client applications only; Specifies a list of configuration sub-directories within the instance's configuration directory which should be made available on the client. Use with care. May expose security sensitive information to clients.")
     public String configDirs;
 
-    /**
-     * Optional startup probe which is queried to find out when a process completed startup.
-     */
+    @JsonPropertyDescription("Optional startup probe which is queried to find out when a process completed startup.")
     public StartupProbeDescriptor startupProbe;
 
-    /**
-     * Optional lifeness probe which is queried to check on a process whether it is (still) alive.
-     */
+    @JsonPropertyDescription("Optional lifeness probe which is queried to check on a process whether it is (still) alive.")
     public LifenessProbeDescriptor lifenessProbe;
 }

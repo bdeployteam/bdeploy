@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.configuration.dcu;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -25,11 +26,13 @@ public class LinkedValueConfiguration {
     /**
      * A plain value, must be valid for the associated data type (e.g. number, port, etc.).
      */
+    @JsonPropertyDescription("A plain value. May not contain expansions. Ignored if linkExpression is given.")
     public String value;
 
     /**
      * A link expression containing one or more variable expansions.
      */
+    @JsonPropertyDescription("A link expression containing one or more variable expansions (e.g. {{X:var}}).")
     public String linkExpression;
 
     /** Convenience and migration constructor which decides whether the value is a plain value or an expression */
