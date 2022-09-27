@@ -115,7 +115,7 @@ export class HistoryEntryComponent implements OnDestroy {
         this.instances
           .deleteVersion(this.entry$.value.instanceTag)
           .pipe(finalize(() => this.deleting$.next(false)))
-          .subscribe();
+          .subscribe(() => this.areas.closePanel(true));
       });
   }
 }
