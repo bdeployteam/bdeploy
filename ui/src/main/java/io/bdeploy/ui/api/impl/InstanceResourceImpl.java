@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -342,6 +343,7 @@ public class InstanceResourceImpl implements InstanceResource {
         // in case no instance IDs are given, sync and get all.
         List<InstanceDto> list = list();
         List<Manifest.Key> instances = (given == null || given.isEmpty()) ? list.stream().map(d -> d.instance).toList() : given;
+        Set<String> errors = new TreeSet<>();
 
         // on CENTRAL only, synchronize managed servers. only after that we know all instances.
         if (minion.getMode() == MinionMode.CENTRAL) {
@@ -353,7 +355,15 @@ public class InstanceResourceImpl implements InstanceResource {
             ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
             try (Activity sync = reporter.start("Synchronize Servers", toSync.size())) {
                 for (ManagedMasterDto host : toSync) {
-                    rs.synchronize(group, host.hostName);
+                    try {
+                        rs.synchronize(group, host.hostName);
+                    } catch (Exception e) {
+                        errors.add(host.hostName);
+                        log.warn("Could not synchronize managed server: {}: {}", host.hostName, e.toString());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Exception:", e);
+                        }
+                    }
                     sync.workAndCancelIfRequested(1);
                 }
             }
@@ -366,6 +376,9 @@ public class InstanceResourceImpl implements InstanceResource {
         // for each instance, read the meta-manifest, and provide the recorded data.
         var result = new ArrayList<InstanceOverallStatusDto>();
         for (var inst : list.stream().filter(i -> instances.contains(i.instance)).toList()) {
+            if (errors.contains(inst.managedServer.hostName)) {
+                continue; // no state as we could not sync.
+            }
             result.add(new InstanceOverallStatusDto(inst.instanceConfiguration.id,
                     new InstanceOverallState(inst.instance, hive).read()));
         }
