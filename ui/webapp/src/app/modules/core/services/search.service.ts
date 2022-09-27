@@ -14,6 +14,10 @@ export class SearchService {
   public enableSearch$ = new BehaviorSubject<boolean>(false);
 
   set search(value: string) {
+    if (!this.currentSearch?.length && !value?.length) {
+      // updating from empty to empty. ignore.
+      return;
+    }
     this.registrations.forEach((r) => {
       // try to update. in complex naviation cases, this may fail as widgets are in the process of being destroyed.
       try {

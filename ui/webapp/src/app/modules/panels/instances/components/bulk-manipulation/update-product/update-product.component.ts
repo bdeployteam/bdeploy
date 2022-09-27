@@ -69,7 +69,9 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
 
     const updates: InstanceUpdateDto[] = [];
     const errors = [];
-    this.bulk.prepareUpdate(product).subscribe({
+    const instances = this.bulk.selection$.value;
+
+    this.bulk.prepareUpdate(product, instances).subscribe({
       next: (u) => {
         updates.push(u);
       },
@@ -109,7 +111,7 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
           } else {
             // all is well, we can now save the updates.
             this.bulk
-              .saveUpdate(updates)
+              .saveUpdate(updates, instances)
               .pipe(
                 finalize(() => {
                   this.processing$.next(false);

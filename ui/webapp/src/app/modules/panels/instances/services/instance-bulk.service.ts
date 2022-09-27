@@ -74,8 +74,11 @@ export class InstanceBulkService {
     ).pipe(concatAll());
   }
 
-  public prepareUpdate(target: ProductDto): Observable<InstanceUpdateDto> {
-    return concat(this.selection$.value).pipe(
+  public prepareUpdate(
+    target: ProductDto,
+    instances: InstanceDto[]
+  ): Observable<InstanceUpdateDto> {
+    return concat(instances).pipe(
       filter((i) => i.instanceConfiguration.product.tag !== target.key.tag),
       mergeMap((i) =>
         this.instance
@@ -121,10 +124,13 @@ export class InstanceBulkService {
     );
   }
 
-  public saveUpdate(updates: InstanceUpdateDto[]): Observable<any> {
+  public saveUpdate(
+    updates: InstanceUpdateDto[],
+    instances: InstanceDto[]
+  ): Observable<any> {
     return of(...updates).pipe(
       mergeMap((u) => {
-        const dto = this.selection$.value.find(
+        const dto = instances.find(
           (i) => i.instanceConfiguration.id === u.config.config.id
         );
         const managedServer = dto.managedServer?.hostName;
