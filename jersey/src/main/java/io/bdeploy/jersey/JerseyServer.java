@@ -65,8 +65,10 @@ import io.bdeploy.jersey.monitoring.JerseyServerMonitor;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringResourceImpl;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringSamplerService;
 import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
+import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
@@ -186,7 +188,13 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     @Override
     public void register(Object provider) {
         if (provider instanceof Class<?>) {
-            rc.register((Class<?>) provider);
+            // unfortunately, priorities are not respected correctly in all cases later on from annotations.
+            Priority prio = ((Class<?>) provider).getAnnotation(Priority.class);
+            if (prio != null) {
+                rc.register((Class<?>) provider, prio.value());
+            } else {
+                rc.register((Class<?>) provider);
+            }
         } else {
             rc.register(provider);
         }
@@ -317,9 +325,12 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         config.register(JerseyObjectMapper.class);
         config.register(JacksonFeature.class);
         config.register(MultiPartFeature.class);
-        config.register(new JerseyAuthenticationProvider(store, userValidator));
-        config.register(JerseyAuthenticationUnprovider.class);
-        config.register(JerseyAuthenticationWeakenerProvider.class);
+
+        // unfortunately, priorities annotated on the providers are not always respected.
+        config.register(new JerseyAuthenticationProvider(store, userValidator), Priorities.AUTHENTICATION);
+        config.register(JerseyAuthenticationUnprovider.class, Priorities.AUTHENTICATION - 1);
+        config.register(JerseyAuthenticationWeakenerProvider.class, Priorities.AUTHENTICATION - 2);
+
         config.register(JerseyPathReader.class);
         config.register(JerseyPathWriter.class);
         config.register(JerseyMetricsFilter.class);

@@ -120,7 +120,7 @@ public interface ManagedServersResource {
     @GET
     @Path("/minion-state/{group}/{server:.+}")
     @Consumes(MediaType.TEXT_PLAIN)
-    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
+    @RequiredPermission(scope = "group", permission = Permission.WRITE)
     public Map<String, MinionStatusDto> getMinionStateOfManagedServer(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
@@ -133,18 +133,18 @@ public interface ManagedServersResource {
 
     @GET
     @Path("/list-products/{group}/{server:.+}")
-    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
+    @RequiredPermission(scope = "group", permission = Permission.WRITE)
     public List<ProductDto> listProducts(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @POST
     @Path("/transfer-products/{group}")
-    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
+    @RequiredPermission(scope = "group", permission = Permission.WRITE)
     public void transferProducts(@ActivityScope @PathParam("group") String groupName, ProductTransferDto transfer);
 
     @GET
     @Path("/active-transfers/{group}")
-    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
+    @RequiredPermission(scope = "group", permission = Permission.WRITE)
     public SortedSet<ProductDto> getActiveTransfers(@ActivityScope @PathParam("group") String groupName);
 
     @POST
@@ -164,15 +164,5 @@ public interface ManagedServersResource {
     @Path("/minion-ping/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public Version pingServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName);
-
-    @GET
-    @Path("/requires-data-migration/{group}")
-    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public Boolean isDataMigrationRequired(@ActivityScope @PathParam("group") String groupName);
-
-    @POST
-    @Path("/perform-data-migration/{group}")
-    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public void performDataMigration(@ActivityScope @PathParam("group") String groupname);
 
 }
