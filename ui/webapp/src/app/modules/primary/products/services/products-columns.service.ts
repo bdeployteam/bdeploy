@@ -5,6 +5,7 @@ import {
   BdDataColumnTypeHint,
 } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
+import { ProductVersionDetailsCellComponent } from 'src/app/modules/panels/instances/components/product-version-details-cell/product-version-details-cell.component';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +23,8 @@ export class ProductsColumnsService {
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.key.tag,
+    tooltip: () => null,
+    component: ProductVersionDetailsCellComponent,
   };
 
   productVendorColumn: BdDataColumn<ProductDto> = {

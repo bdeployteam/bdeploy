@@ -64,7 +64,6 @@ import { PortShiftComponent } from './components/instance-settings/ports/port-sh
 import { PortTypeCellComponent } from './components/instance-settings/ports/port-type-cell/port-type-cell.component';
 import { PortsComponent } from './components/instance-settings/ports/ports.component';
 import { ProductUpdateComponent } from './components/instance-settings/product-update/product-update.component';
-import { ProductVersionDetailsComponent } from './components/instance-settings/product-update/product-version-details/product-version-details.component';
 import { UpdateActionComponent } from './components/instance-settings/product-update/update-action/update-action.component';
 import { LocalChangesComponent } from './components/local-changes/local-changes.component';
 import { LocalDiffComponent } from './components/local-changes/local-diff/local-diff.component';
@@ -76,14 +75,15 @@ import { ProcessPortsComponent } from './components/process-ports/process-ports.
 import { PinnedParameterValueComponent } from './components/process-status/pinned-parameter-value/pinned-parameter-value.component';
 import { ProbeStatusComponent } from './components/process-status/probe-status/probe-status.component';
 import { ProcessStatusComponent } from './components/process-status/process-status.component';
+import { ProductVersionDetailsCellComponent } from './components/product-version-details-cell/product-version-details-cell.component';
 import { VariableDescCardComponent } from './components/variable-desc-card/variable-desc-card.component';
 import { InstancesRoutingModule } from './instances-routing.module';
 import { CustomNodeFilterPipe, NodeFilterPipe } from './utils/filter-node';
+import { AllowedValuesValidatorDirective } from './validators/allowed-values-validator.directive';
 import { CfgFileNameValidatorDirective } from './validators/cfg-file-name-validator.directive';
 import { EditCustomIdValidatorDirective } from './validators/edit-custom-id-validator.directive';
 import { EditProcessNameValidatorDirective } from './validators/edit-process-name-validator.directive';
 import { EditServerIssuesValidatorDirective } from './validators/edit-server-issues-validator.directive';
-import { AllowedValuesValidatorDirective } from './validators/allowed-values-validator.directive';
 
 @NgModule({
   declarations: [
@@ -144,7 +144,7 @@ import { AllowedValuesValidatorDirective } from './validators/allowed-values-val
     DataFileEditorComponent,
     ColorSelectComponent,
     ColorSelectGroupComponent,
-    ProductVersionDetailsComponent,
+    ProductVersionDetailsCellComponent,
     DataFilesBulkManipulationComponent,
     ProbeStatusComponent,
     AddControlGroupComponent,

@@ -5,7 +5,7 @@ import { ProductDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
-import { ProductVersionDetailsComponent } from './product-version-details/product-version-details.component';
+import { ProductVersionDetailsCellComponent } from '../../product-version-details-cell/product-version-details-cell.component';
 import { UpdateActionComponent } from './update-action/update-action.component';
 
 @Component({
@@ -19,7 +19,7 @@ export class ProductUpdateComponent implements OnDestroy {
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => `${r.key.tag}${this.isCurrent(r) ? ' - current' : ''}`,
     tooltip: () => null,
-    component: ProductVersionDetailsComponent,
+    component: ProductVersionDetailsCellComponent,
   };
 
   private readonly productUpdateAction: BdDataColumn<ProductDto> = {

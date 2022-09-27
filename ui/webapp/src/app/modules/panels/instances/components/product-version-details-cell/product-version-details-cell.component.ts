@@ -3,11 +3,11 @@ import { BdDataColumn } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 
 @Component({
-  selector: 'app-product-version-details',
-  templateUrl: './product-version-details.component.html',
-  styleUrls: ['./product-version-details.component.css'],
+  selector: 'app-product-version-details-cell',
+  templateUrl: './product-version-details-cell.component.html',
+  styleUrls: ['./product-version-details-cell.component.css'],
 })
-export class ProductVersionDetailsComponent implements OnInit {
+export class ProductVersionDetailsCellComponent implements OnInit {
   @Input() record: ProductDto;
   @Input() column: BdDataColumn<ProductDto>;
 

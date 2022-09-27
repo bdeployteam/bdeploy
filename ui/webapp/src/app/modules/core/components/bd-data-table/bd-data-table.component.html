@@ -182,8 +182,22 @@
                 appClickStopPropagation
                 [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
                 class="bd-text-ellipsis local-table-checkbox"
-                >{{ row.node.groupOrFirstColumn }}</mat-checkbox
               >
+                <div
+                  *ngIf="!col.component || row.expandable"
+                  class="bd-text-ellipsis"
+                  fxFlex="1 0 0"
+                  [style.text-align]="'left'"
+                >
+                  {{ row.node.groupOrFirstColumn }}
+                </div>
+                <app-bd-data-component-cell
+                  *ngIf="!!col.component && !row.expandable"
+                  [componentType]="col.component"
+                  [record]="row.node.item"
+                  [column]="col"
+                ></app-bd-data-component-cell>
+              </mat-checkbox>
             </div>
           </td>
         </ng-container>
