@@ -237,6 +237,10 @@ public class ProductUpdateService {
             // 3) update the value of fixed parameters - if global fetch value from an existing global parameter.
             if (desc.isPresent() && desc.get().fixed) {
                 val.value = desc.get().defaultValue;
+            }
+
+            // 4) ALWAYS pre-render the parameter to update if the descriptor's contents has changed
+            if (desc.isPresent()) {
                 preRenderParameter(val, desc.get());
             }
         }
