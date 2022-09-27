@@ -62,7 +62,12 @@ $(echo $cert | awk '{gsub(/.{64}/, "&\n")}1')
 EOF
 
   cert1="$(openssl x509 -in "${T}/cert")"
-  cert2="$(echo | openssl s_client -showcerts -connect $(echo "$url" | sed -e 's,.*/\([^/]*\)/api/*,\1,g') -prexit 2>/dev/null | openssl x509)"
+  cert2="$(echo | openssl s_client -showcerts -connect $(echo "$url" | sed -e 's,.*/\([^/]*\)/api/*,\1,g') -prexit | openssl x509)"
+
+  if [[ -z "$cert2" ]]; then
+    echo "Cannot fetch server certificate, server not reachable?"
+    exit 1
+  fi
 
   if [[ "$cert1" != "$cert2" ]]; then
     echo "Certificate Mismatch"
