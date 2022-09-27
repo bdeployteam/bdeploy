@@ -28,12 +28,14 @@
         text="Save preset"
         icon="save"
         (click)="savePreset()"
+        [disabled]="disabled"
       ></app-bd-button>
       <app-bd-button
         tooltip="above"
         text="Reset preset"
         icon="settings_backup_restore"
         (click)="deletePreset()"
+        [disabled]="disabled"
       ></app-bd-button>
     </div>
     <mat-divider
