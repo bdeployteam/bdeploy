@@ -1,3 +1,7 @@
 .local-user-hint {
   margin-top: -7px;
 }
+
+.local-dialog-spacer {
+  min-height: 10px;
+}
