@@ -1,19 +1,18 @@
-@use '@angular/material' as mat;
+@use "@angular/material" as mat;
 
 @include mat.core();
 
-@import 'app-common.scss';
-@import 'app-externals.scss';
-@import 'dragular.scss';
-@import 'app-ngx-charts-dark.scss';
-@import 'app-scrollbars.scss';
-@import 'app-palettes.scss';
+@import "app-common.scss";
+@import "app-externals.scss";
+@import "app-ngx-charts-dark.scss";
+@import "app-scrollbars.scss";
+@import "app-palettes.scss";
 
-@import 'app/modules/core/components/bd-popup/bd-popup-theme.scss';
-@import 'app/modules/core/components/bd-image-upload/bd-image-upload-theme.scss';
-@import 'app/modules/core/components/bd-form-toggle/bd-form-toggle-theme.scss';
+@import "app/modules/core/components/bd-popup/bd-popup-theme.scss";
+@import "app/modules/core/components/bd-image-upload/bd-image-upload-theme.scss";
+@import "app/modules/core/components/bd-form-toggle/bd-form-toggle-theme.scss";
 
-@import 'app/modules/primary/admin/components/admin-shell/admin-shell.theme.scss';
+@import "app/modules/primary/admin/components/admin-shell/admin-shell.theme.scss";
 
 @mixin all-themes($theme) {
   @include mat.all-component-themes($theme);
@@ -24,15 +23,15 @@
 
   @include settings-shell-theme($theme);
 
-  $dark: map-get($theme, 'is-dark');
-  $primary: map-get($theme, 'primary');
-  $accent: map-get($theme, 'accent');
-  $warn: map-get($theme, 'warn');
-  $bg: map-get($theme, 'background');
-  $fg: map-get($theme, 'foreground');
-  $maintb: map-get($theme, 'main-toolbar');
-  $maintb-dark: map-get($theme, 'main-toolbar-darker');
-  $success: map-get($theme, 'success');
+  $dark: map-get($theme, "is-dark");
+  $primary: map-get($theme, "primary");
+  $accent: map-get($theme, "accent");
+  $warn: map-get($theme, "warn");
+  $bg: map-get($theme, "background");
+  $fg: map-get($theme, "foreground");
+  $maintb: map-get($theme, "main-toolbar");
+  $maintb-dark: map-get($theme, "main-toolbar-darker");
+  $success: map-get($theme, "success");
 
   // general element themings
   .mat-badge-content {
@@ -53,12 +52,19 @@
   }
 
   a {
-    color: if($dark, mat.get-color-from-palette(mat.$blue-palette, 300), mat.get-color-from-palette(mat.$blue-palette, 800));
+    color: if(
+      $dark,
+      mat.get-color-from-palette(mat.$blue-palette, 300),
+      mat.get-color-from-palette(mat.$blue-palette, 800)
+    );
   }
 
   // Define scrollbar style on each element as it is not inherited in some cases.
   * {
-    @include scrollbars(mat.get-color-from-palette(map-get($theme, 'primary')), if($dark, #555555, #cccccc));
+    @include scrollbars(
+      mat.get-color-from-palette(map-get($theme, "primary")),
+      if($dark, #555555, #cccccc)
+    );
   }
 
   // Pseudo selector to define variables on the main theme class.
@@ -69,26 +75,43 @@
     --bd-warn-darker: #{mat.get-color-from-palette($warn, 900)};
     --bd-main-bar: #{mat.get-color-from-palette($maintb)};
 
-    --bd-text: #{mat.get-color-from-palette($fg, 'text')};
-    --bd-text-secondary: #{mat.get-color-from-palette($fg, 'secondary-text')};
+    --bd-text: #{mat.get-color-from-palette($fg, "text")};
+    --bd-text-secondary: #{mat.get-color-from-palette($fg, "secondary-text")};
     --bd-text-success: #{mat.get-color-from-palette($success)};
     --bd-text-very-light: #{if($dark, #aeaeae, #747474)};
-    --bd-text-disabled: #{mat.get-color-from-palette($fg, 'disabled-text')};
+    --bd-text-disabled: #{mat.get-color-from-palette($fg, "disabled-text")};
 
-    --bd-bg-dialog: #{mat.get-color-from-palette($bg, 'dialog')};
-    --bd-bg-toolbar: #{mat.get-color-from-palette($bg, 'app-bar')};
-    --bd-bg-hover: #{mat.get-color-from-palette($bg, 'hover')};
-    --bd-bg-disabled: #{mat.get-color-from-palette($fg, base, if($dark, 0.05, 0.02))};
+    --bd-bg-dialog: #{mat.get-color-from-palette($bg, "dialog")};
+    --bd-bg-toolbar: #{mat.get-color-from-palette($bg, "app-bar")};
+    --bd-bg-hover: #{mat.get-color-from-palette($bg, "hover")};
+    --bd-bg-disabled: #{mat.get-color-from-palette(
+        $fg,
+        base,
+        if($dark, 0.05, 0.02)
+      )};
     --bd-bg-grey: #{mat.get-color-from-palette($fg, base, if($dark, 0.2, 0.4))};
 
     --bd-main-bar-darker: #{mat.get-color-from-palette($maintb-dark)};
 
-    --bd-primary-contrast: #{mat.get-color-from-palette($primary, 'default-contrast')};
-    --bd-accent-contrast: #{mat.get-color-from-palette($accent, 'default-contrast')};
+    --bd-primary-contrast: #{mat.get-color-from-palette(
+        $primary,
+        "default-contrast"
+      )};
+    --bd-accent-contrast: #{mat.get-color-from-palette(
+        $accent,
+        "default-contrast"
+      )};
     --bd-warn-contrast: #{mat.get-contrast-color-from-palette($warn, 900)};
-    --bd-main-bar-contrast: #{mat.get-color-from-palette($maintb, 'default-contrast')};
+    --bd-main-bar-contrast: #{mat.get-color-from-palette(
+        $maintb,
+        "default-contrast"
+      )};
 
-    --bd-lighten-bg: #{if($dark, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5))};
+    --bd-lighten-bg: #{if(
+        $dark,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.5)
+      )};
   }
 
   .inline-code {
@@ -101,10 +124,10 @@
 }
 
 @mixin theme-chooser($theme) {
-  $theme-bg: map-get($theme, 'background');
-  $theme-primary: mat.get-color-from-palette(map-get($theme, 'primary'));
-  $theme-accent: mat.get-color-from-palette(map-get($theme, 'accent'));
-  $theme-main-tb: mat.get-color-from-palette(map-get($theme, 'main-toolbar'));
+  $theme-bg: map-get($theme, "background");
+  $theme-primary: mat.get-color-from-palette(map-get($theme, "primary"));
+  $theme-accent: mat.get-color-from-palette(map-get($theme, "accent"));
+  $theme-main-tb: mat.get-color-from-palette(map-get($theme, "main-toolbar"));
 
   .preview-background {
     cursor: pointer;
@@ -115,7 +138,7 @@
     height: 56px;
     box-sizing: border-box;
     border-radius: 4px;
-    background-color: map-get($theme-bg, 'background');
+    background-color: map-get($theme-bg, "background");
   }
 
   .preview-accent {
@@ -144,18 +167,29 @@
     width: 34px;
     height: 34px;
     border-radius: 25%;
-    background: linear-gradient(to right, $theme-main-tb 0%, $theme-main-tb 50%, $theme-primary 51%, $theme-primary 100%);
+    background: linear-gradient(
+      to right,
+      $theme-main-tb 0%,
+      $theme-main-tb 50%,
+      $theme-primary 51%,
+      $theme-primary 100%
+    );
   }
 }
 
 /* Theme definitions - keep in sync with ThemeService.Theme */
-@function add-custom-colors($theme, $toolbar-palette, $toolbar-darker-palette, $success-palette) {
+@function add-custom-colors(
+  $theme,
+  $toolbar-palette,
+  $toolbar-darker-palette,
+  $success-palette
+) {
   @return map-merge(
     $theme,
     (
-      'main-toolbar': $toolbar-palette,
-      'main-toolbar-darker': $toolbar-darker-palette,
-      'success': $success-palette,
+      "main-toolbar": $toolbar-palette,
+      "main-toolbar-darker": $toolbar-darker-palette,
+      "success": $success-palette,
     )
   );
 }
@@ -181,7 +215,11 @@ $app-light-primary: mat.define-palette($md-bdblue, 500);
 $app-light-accent: mat.define-palette($md-bdblue, 500);
 $app-light-warning: mat.define-palette($md-bdred, 500);
 $app-light-theme: add-custom-colors(
-  mat.define-light-theme($app-light-primary, $app-light-accent, $app-light-warning),
+  mat.define-light-theme(
+    $app-light-primary,
+    $app-light-accent,
+    $app-light-warning
+  ),
   $app-light-primary,
   mat.define-palette($md-bdblue, 700),
   mat.define-palette($md-bdgreen, 700)
