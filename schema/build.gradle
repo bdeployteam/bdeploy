@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation(
+        project(":common"),
+        project(":jersey"),
+        project(":interfaces"),
+        'com.github.victools:jsonschema-generator:4.26.0',
+        'com.github.victools:jsonschema-module-jackson:4.26.0'
+    )
+    commonTestDeps(testFixtures(project(":jersey")))
+}
+

@@ -5,9 +5,6 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.SortedMap;
 
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.client.ResponseProcessingException;
-
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
@@ -17,6 +14,8 @@ import io.bdeploy.bhive.remote.jersey.BHiveResource.ObjectListSpec;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.JerseyClientFactory;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.client.ResponseProcessingException;
 
 /**
  * Adapts a {@link BHiveResource} using the {@link JerseyClientFactory} to the {@link RemoteBHive} interface.
@@ -88,6 +87,7 @@ public class JerseyRemoteBHive implements RemoteBHive {
     public Path fetch(Set<ObjectId> objects, Set<Key> manifests) {
         FetchSpec spec = new FetchSpec();
         spec.requiredObjects = objects;
+
         spec.manifestsToFetch = manifests;
         return client.fetch(spec);
     }

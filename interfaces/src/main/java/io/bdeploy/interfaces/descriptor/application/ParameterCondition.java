@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 /**
  * A condition for a parameter
  */
@@ -17,27 +19,16 @@ public class ParameterCondition {
         BE_NON_EMPTY
     }
 
-    /**
-     * The referenced parameter (ID). Use {@link #expression} instead if you need more complex expressions or don't have a
-     * parameter to reference.
-     */
+    @JsonPropertyDescription("The ID of a parameter which this condition is checked against. The parameter must be in the same application. Only either 'parameter' or 'expression' is allowed.")
     public String parameter;
 
-    /**
-     * A link expression containing an arbitrary number of expansions. This will be resolved and used as value.
-     * <p>
-     * This can be used <b>instead</b> of {@link #parameter}.
-     */
+    @JsonPropertyDescription("An arbitrary link expression. The expression is resolved and matched against the condition. Only either 'parameter' or 'expression' is allowed.")
     public String expression;
 
-    /**
-     * The condition type.
-     */
+    @JsonPropertyDescription("The condition type, which specifies the relation between the parameter/expression and the passed value.")
     public ParameterConditionType must;
 
-    /**
-     * The value matched against. Depending on the type of condition this value is ignored.
-     */
+    @JsonPropertyDescription("The value matched against the parameter/expression in the way specified by the condition type ('must')")
     public String value;
 
 }

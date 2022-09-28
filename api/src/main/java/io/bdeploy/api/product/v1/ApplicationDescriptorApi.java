@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 
@@ -22,6 +24,7 @@ public class ApplicationDescriptorApi {
      * The purpose of this information is solely verification of product configuration
      * during creation of products which include platform specific applications.
      */
+    @JsonPropertyDescription("The supported operating systems this application can run on.")
     public List<OperatingSystem> supportedOperatingSystems = new ArrayList<>();
 
     /**
@@ -39,6 +42,7 @@ public class ApplicationDescriptorApi {
      * construct {@link ScopedManifestKey}s which are os specific, using the OS provided
      * by the current context.
      */
+    @JsonPropertyDescription("A set of dependencies which must be included in the product along with the application. These dependencies can be referenced from commands, parameters, etc. using variable expansion.")
     public SortedSet<String> runtimeDependencies = new TreeSet<>();
 
 }

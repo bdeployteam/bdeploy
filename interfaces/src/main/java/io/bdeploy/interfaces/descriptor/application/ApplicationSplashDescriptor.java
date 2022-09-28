@@ -1,8 +1,12 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 /**
  * Describes a splash screen for application branding (e.g. launcher).
  */
+@JsonClassDescription("Describes a splash screen for a client application.")
 public class ApplicationSplashDescriptor {
 
     /**
@@ -10,16 +14,13 @@ public class ApplicationSplashDescriptor {
      * <p>
      * Supported formats are all that are accepted by AWT's <code>ImageIO.read(byte[])<code>. (BMP is fine :)).
      */
+    @JsonPropertyDescription("A relative path (to app-info.yaml) to an image to be used as splash screen for the client application.")
     public String image;
 
-    /**
-     * Area where to display status text on the splash screen.
-     */
+    @JsonPropertyDescription("The area where text can be rendered on the splash screen.")
     public ApplicationSplashAreaDescriptor textRect;
 
-    /**
-     * Area where to display a progress bar on the splash screen.
-     */
+    @JsonPropertyDescription("The area where a progress bar can be rendered on the splash screen.")
     public ApplicationSplashAreaDescriptor progressRect;
 
 }

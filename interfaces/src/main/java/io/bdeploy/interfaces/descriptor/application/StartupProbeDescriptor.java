@@ -1,12 +1,10 @@
 package io.bdeploy.interfaces.descriptor.application;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 public class StartupProbeDescriptor {
 
-    /**
-     * The endpoint to query. Once the endpoint responds with code 200, the process is considered RUNNING.
-     * <p>
-     * The endpoint must be defined on the process using the PROBE_STARTUP type.
-     */
+    @JsonPropertyDescription("The ID of a defined HTTP endpoint of type 'PROBE_STARTUP' which to query. The application is considered started once this endpoint returns a status of 200.")
     public String endpoint;
 
 }

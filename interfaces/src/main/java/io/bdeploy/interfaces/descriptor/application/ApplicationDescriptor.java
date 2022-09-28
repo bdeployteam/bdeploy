@@ -9,7 +9,9 @@ import javax.annotation.processing.Generated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.google.common.collect.ImmutableList;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
@@ -25,6 +27,7 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
  * The serialized form of this DTO must reside in the top-level or any
  * application imported into the system, and have the name {@value #FILE_NAME}.
  */
+@JsonClassDescription("Describes an application, and all its properties.")
 public class ApplicationDescriptor extends ApplicationDescriptorApi implements Comparable<ApplicationDescriptor> {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationDescriptor.class);
@@ -32,6 +35,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
     /**
      * The type of application described.
      */
+    @JsonClassDescription("Whether the application is meant to run on a server node, or through the launcher on a client.")
     public enum ApplicationType {
         @JsonEnumDefaultValue
         SERVER,
@@ -49,6 +53,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
      * <li>NONE: No pooling, the application is reinstalled for every instance version, even for minor configuration changed</li>
      * </ol>
      */
+    @JsonClassDescription("Defines how strongly pooled the application can be in an installation. Applications that write data in their own installation directory should generally not be pooled.")
     public enum ApplicationPoolType {
         @JsonEnumDefaultValue
         GLOBAL,
@@ -56,53 +61,31 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
         NONE
     }
 
-    /**
-     * User friendly name of the application
-     */
+    @JsonPropertyDescription("The name of the application.")
     public String name;
 
-    /**
-     * Type of application.
-     */
+    @JsonPropertyDescription("The type of the application, defaults to SERVER")
     public ApplicationType type = ApplicationType.SERVER;
 
-    /**
-     * The type of pooling applicable.
-     */
+    @JsonPropertyDescription("The pooling policy for this application, defaults to GLOBAL")
     public ApplicationPoolType pooling = ApplicationPoolType.GLOBAL;
 
-    /**
-     * Provides information about exit codes of the application.
-     */
+    @JsonPropertyDescription("Defines application specific well known exit codes.")
     public ApplicationExitCodeDescriptor exitCodes = new ApplicationExitCodeDescriptor();
 
-    /**
-     * Provides branding information (splash, icon, ...).
-     * <p>
-     * This information is evaluated and used for instance by the client launcher, possibly by others.
-     */
+    @JsonPropertyDescription("Defines branding of a client application.")
     public ApplicationBrandingDescriptor branding = new ApplicationBrandingDescriptor();
 
-    /**
-     * Describes the process control specific properties of this application.
-     */
+    @JsonPropertyDescription("Defines the process control specific properties of this application.")
     public ProcessControlDescriptor processControl = new ProcessControlDescriptor();
 
-    /**
-     * Description of command used to start an application.
-     */
+    @JsonPropertyDescription("Description of possible individual components of the command used to start this application.")
     public ExecutableDescriptor startCommand;
 
-    /**
-     * Description of command used to stop and application. This is optional. If not
-     * given, the existing process is destroyed (which usually gives it chance to
-     * shut down properly).
-     */
+    @JsonPropertyDescription("Description of possible individual components of the command used to stop this application. If not configured, the application will be stopped using OS mechanisms instead.")
     public ExecutableDescriptor stopCommand;
 
-    /**
-     * All endpoints which are provided by the application.
-     */
+    @JsonPropertyDescription("Describes all endpoints which are provided by the application. Those endpoints can then be used via BDeploys proxy feature or as UI endpoints.")
     public EndpointsDescriptor endpoints = new EndpointsDescriptor();
 
     /**

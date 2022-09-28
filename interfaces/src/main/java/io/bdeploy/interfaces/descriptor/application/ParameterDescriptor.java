@@ -8,6 +8,7 @@ import javax.annotation.processing.Generated;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
@@ -37,6 +38,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * {@link ApplicationDescriptor}.
      */
     @JsonAlias("uid")
+    @JsonPropertyDescription("The ID of the parameter. This ID must be unique in a given application.")
     public String id;
 
     // Compat with 4.x
@@ -46,46 +48,22 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
         return id;
     };
 
-    /**
-     * X-OR with {@link #id}; use a parameter template to expand a set of one or more parameters
-     * defined in a parameter template in the product in place.
-     */
+    @JsonPropertyDescription("The ID of a parameter template registered for the containing product. The therein defined parameters will be inlined here. If template is given, no other attribute may be set.")
     public String template;
 
-    /**
-     * Human readable short description of the parameter. This is displayed in
-     * configuration UI(s) as input field name to guide the user.
-     */
+    @JsonPropertyDescription("The human readable short name of the parameter")
     public String name;
 
-    /**
-     * Optional human readable long description of the parameter. This is displayed
-     * in the configuration UI(s) as additional hint on demand.
-     */
+    @JsonPropertyDescription("A human readable description aiding humans in configuring this parameter's value.")
     public String longDescription;
 
-    /**
-     * Optional name of a group. This name is used to display parameters with the same
-     * group name together in the configuration UI. Parameters with the same group
-     * are not required to be adjacent within the descriptor, but can be scattered.
-     */
+    @JsonPropertyDescription("The arbitrary name of a group. Parameters with the same groupName are grouped in the UI to help the user in identifying parameters that belong together.")
     public String groupName;
 
-    /**
-     * The parameter string to use when rendering the parameter. Examples:
-     * <ul>
-     * <li>-v
-     * <li>--verbose
-     * <li>-Dproperty
-     * <li>--some-arg
-     * </ul>
-     * Note that no value and no value separator ('=') should be included.
-     */
+    @JsonPropertyDescription("The actual parameter as it should be put on the command line of a process, not including the value, e.g. '--myparam'")
     public String parameter;
 
-    /**
-     * Whether the parameter requires a value.
-     */
+    @JsonPropertyDescription("Whether this parameter has a value that needs to be configured by the user, defaults to 'true'.")
     public boolean hasValue = true;
 
     /**
@@ -93,6 +71,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * rendered as { '--arg', 'val' }. If <code>false</code> the same parameter
      * would be rendered as single argument '--arg=val' (the '=' is configurable).
      */
+    @JsonPropertyDescription("Whether the value of the parameter shall be passed as individual argument on the command line of the process, defaults to 'false'.")
     public boolean valueAsSeparateArg = false;
 
     /**
@@ -100,12 +79,10 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * with value 'val' will be rendered as { '--arg=val' }, using an enmpty String
      * can be used to create arguments like { '--argval' }.
      */
+    @JsonPropertyDescription("If valueAsSeparateArg is false (the default), defines the spearator between the parameter and the value, defaults to '='.")
     public String valueSeparator = "=";
 
-    /**
-     * Default value for the parameter. This value is used as template for
-     * configuration UI(s).
-     */
+    @JsonPropertyDescription("The default value for this parameter")
     public LinkedValueConfiguration defaultValue = null;
 
     /**
@@ -119,39 +96,25 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      *             process-edit.service.ts.
      */
     @Deprecated(since = "4.6.0")
+    @JsonPropertyDescription("DEPRECATED. Whether the parameter is global (i.e. all parameters with the same ID will always have the same value in a single instance). This has been deprecated in favor of instance variables.")
     public boolean global = false;
 
-    /**
-     * Whether the parameter is mandatory. If the parameter is {@link #mandatory}
-     * and not configured by the user, the {@link #defaultValue} must be used to
-     * render the parameter.
-     */
+    @JsonPropertyDescription("Whether this parameter is mandatory. Optional parameters (the default) need to be added by a template or by the user explicitly through the configuration UI. Defaults to 'false'")
     public boolean mandatory = false;
 
-    /**
-     * Whether this parameter defines a non-configurable (fixed) parameter which
-     * should be passed to the command as is.
-     */
+    @JsonPropertyDescription("Whether this parameter cannot be changed by the user (uses a fixed value). If set to true, a defaultValue must be specified if required. Defaults to 'false'.")
     public boolean fixed = false;
 
-    /**
-     * The type of the parameter. Used for validation purposes.
-     */
+    @JsonPropertyDescription("The type of the parameter. The parameter value is validated against the type, and proper type-specific editors are provided to users.")
     public ParameterType type = ParameterType.STRING;
 
-    /**
-     * Possible values for the parameter
-     */
+    @JsonPropertyDescription("A list of values suggested to the user when editing the value of this parameter.")
     public List<String> suggestedValues = new ArrayList<>();
 
-    /**
-     * If set, try to use a custom editor contributed by a plugin to edit this parameter.
-     */
+    @JsonPropertyDescription("The ID of a custom editor which is provided through a BDeploy Plugin. If available, this editor will be provided to the user instead of (or in addition to) the default one.")
     public String customEditor;
 
-    /**
-     * A condition which must be met to show/configure this parameter.
-     */
+    @JsonPropertyDescription("A condition which must be met for this parameter to be configurable/visible to the user.")
     public ParameterCondition condition;
 
     @Override
