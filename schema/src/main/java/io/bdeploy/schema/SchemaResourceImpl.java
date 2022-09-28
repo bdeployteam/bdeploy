@@ -1,5 +1,7 @@
 package io.bdeploy.schema;
 
+import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.product.v1.ProductVersionDescriptor;
 import io.bdeploy.api.schema.v1.PublicSchemaResource;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import jakarta.inject.Inject;
@@ -8,7 +10,9 @@ public class SchemaResourceImpl implements PublicSchemaResource {
 
     private enum InternalSchema {
 
-        APP_INFO(Schema.appInfoYaml, ApplicationDescriptor.class);
+        APP_INFO(Schema.appInfoYaml, ApplicationDescriptor.class),
+        PRODUCT_INFO(Schema.productInfoYaml, ProductDescriptor.class),
+        PRODUCT_VERSION(Schema.productVersionYaml, ProductVersionDescriptor.class);
 
         public final Schema apiSchema;
         public final Class<?> apiClass;

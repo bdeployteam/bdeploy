@@ -4,17 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.bhive.model.Manifest;
 
-/**
- * Describes a product (name, key, included applications, capabilities, ...)
- */
+@JsonClassDescription("Describes a product (name, key, included applications, capabilities, ...). Only includes the build/version independent configuration.")
 public class ProductDescriptor {
 
-    /**
-     * The human readable name of the product.
-     */
+    @JsonPropertyDescription("The human readable name of the product.")
     public String name;
 
     /**
@@ -25,58 +23,35 @@ public class ProductDescriptor {
      * "{product}/applications/{app}").
      * </ul>
      */
+    @JsonPropertyDescription("The (path-friendly) ID of the product, e.g. 'io.bdeploy/product'")
     public String product;
 
-    /**
-     * The name of the vendor of the product.
-     */
+    @JsonPropertyDescription("The name of the vendor of the product.")
     public String vendor;
 
-    /**
-     * A list of application names to include. Each of the mentioned applications
-     * <b>must</b> be configured in the {@link ProductVersionDescriptor}
-     */
+    @JsonPropertyDescription("A list of applications included in the product. Those applications must be available at build time, provided through 'product-version.yaml'.")
     public List<String> applications = new ArrayList<>();
 
-    /**
-     * Relative path to a directory containing configuration templates.
-     * <p>
-     * The directory's content is used as starting point for each instance's config directory
-     */
+    @JsonPropertyDescription("A relative path (from product-info.yaml) to a directory containing an arbitrary amount of configuration files used as templates for new instances.")
     public String configTemplates;
 
-    /**
-     * Relative path to a directory containing product-bound plugins.
-     * <p>
-     * These plugins are loaded into the server on demand when configuring applications for this product. They can define
-     * additional editor controls for certain parameters, etc.
-     */
+    @JsonPropertyDescription("A relative path (from product-info.yaml) to a directory containing plugins which are to be made available dynamically when configuring an instance using this product.")
     public String pluginFolder;
 
-    /**
-     * A list of relative paths to YAML files containing instance templates.
-     */
     @JsonAlias("templates") // compat, remove after 2.5.0
+    @JsonPropertyDescription("A list of relative paths to ('instance-template.yaml') YAML files containing instance templates.")
     public List<String> instanceTemplates = new ArrayList<>();
 
-    /**
-     * A list of relative paths to YAML files containing application templates.
-     */
+    @JsonPropertyDescription("A list of relative paths to ('application-template.yaml') YAML files containing application templates.")
     public List<String> applicationTemplates = new ArrayList<>();
 
-    /**
-     * A list of relative paths to YAML files containing parameter templates.
-     */
+    @JsonPropertyDescription("A list of relative paths to ('parameter-template.yaml') YAML files containing parameter templates.")
     public List<String> parameterTemplates = new ArrayList<>();
 
-    /**
-     * A list of relative paths to YAML files containing instance variable templates.
-     */
+    @JsonPropertyDescription("A list of relative paths to ('instance-variable-template.yaml') YAML files containing instance variable templates.")
     public List<String> instanceVariableTemplates = new ArrayList<>();
 
-    /**
-     * Relative path to a file containing the {@link ProductVersionDescriptor} which may be generated or static.
-     */
+    @JsonPropertyDescription("A relative path to the mandatory 'product-version.yaml' file which defines versions and available applications.")
     public String versionFile;
 
 }
