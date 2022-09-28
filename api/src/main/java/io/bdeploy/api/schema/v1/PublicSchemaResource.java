@@ -13,6 +13,10 @@ public interface PublicSchemaResource {
         appInfoYaml,
         productInfoYaml,
         productVersionYaml,
+        applicationTemplateYaml,
+        instanceTemplateYaml,
+        parameterTemplateYaml,
+        instanceVariableTemplateYaml,
     }
 
     @Operation(summary = "Get a YAML Schema", description = "Retrieve a JSON schema for various BDeploy YAML file formats.")

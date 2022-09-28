@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.descriptor.template;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.ProcessControlGroupHandlingType;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.ProcessControlGroupWaitType;
 
@@ -12,16 +14,16 @@ import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration.
  */
 public class InstanceTemplateControlGroup {
 
-    /** The name of the group */
+    @JsonPropertyDescription("The name of the group")
     public String name;
 
-    /** How processes are started */
+    @JsonPropertyDescription("Defines how processes are started within this group if multiple processes are started.")
     public ProcessControlGroupHandlingType startType = ProcessControlGroupHandlingType.PARALLEL;
 
-    /** Whether to wait for process startup or not */
+    @JsonPropertyDescription("Whether to wait for process startup to complete before proceeding or not")
     public ProcessControlGroupWaitType startWait = ProcessControlGroupWaitType.WAIT;
 
-    /** How processes are stopped */
+    @JsonPropertyDescription("Defines how processes are stopped within this group if multiple processes are stopped.")
     public ProcessControlGroupHandlingType stopType = ProcessControlGroupHandlingType.PARALLEL;
 
 }
