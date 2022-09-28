@@ -1,7 +1,15 @@
+.sort-toggle {
+  margin: 5px;
+}
+
 .sort-toggle .mat-button-toggle-checked svg path {
   fill: var(--bd-primary);
 }
 
 .sort-toggle svg path {
   fill: var(--bd-text);
+}
+
+.sort-column-radio-button {
+  padding: 3px;
 }

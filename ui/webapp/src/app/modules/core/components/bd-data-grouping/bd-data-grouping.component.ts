@@ -70,6 +70,12 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     return groupBy.length > 30 ? `${groupBy.substring(0, 30)}...` : groupBy;
   }
 
+  /* template */ get disabled(): boolean {
+    const isGlobalPreset = this.presetType === PresetType.GLOBAL;
+    const isAdmin = this.auth.isCurrentScopeAdmin$.value;
+    return isGlobalPreset && !isAdmin;
+  }
+
   constructor(
     private snackBar: MatSnackBar,
     public auth: AuthenticationService
@@ -188,7 +194,10 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   private saveGlobalPreset() {
+    if (!this.auth.isCurrentScopeAdmin$.value) return;
+
     const preset = this.groupingToPreset();
+
     this.dialog
       .confirm(
         'Save global preset?',

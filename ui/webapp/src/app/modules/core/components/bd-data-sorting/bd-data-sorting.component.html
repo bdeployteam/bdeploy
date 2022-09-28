@@ -13,20 +13,18 @@
   >
     <mat-radio-group
       fxLayout="column"
-      aria-labelledby="example-radio-group-label"
-      class="example-radio-group"
       [ngModel]="selectedColumn"
       (ngModelChange)="updateSortColumn($event)"
     >
       <mat-radio-button
-        class="example-radio-button"
+        class="sort-column-radio-button"
         *ngFor="let column of _columns"
         [value]="column"
       >
         {{column.name}}
       </mat-radio-button>
     </mat-radio-group>
-    <div>
+    <div fxLayout="row" fxLayoutAlign="center center">
       <mat-button-toggle-group
         class="sort-toggle"
         name="sortDirection"
