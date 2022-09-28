@@ -13,11 +13,7 @@
     <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="end center">
       <mat-form-field class="preset-select" appearance="outline">
         <mat-label>Favorite</mat-label>
-        <mat-select
-          placeholder="Select preset"
-          [value]="presetType"
-          (valueChange)="setPresetType($event)"
-        >
+        <mat-select [value]="presetType" (valueChange)="setPresetType($event)">
           <mat-option *ngFor="let fav of presetTypes" [value]="fav"
             >{{ capitalize(fav) }}</mat-option
           >

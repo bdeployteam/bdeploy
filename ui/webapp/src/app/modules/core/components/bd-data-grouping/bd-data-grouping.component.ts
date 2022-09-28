@@ -65,7 +65,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       this.groupings
         .map((g) => g.definition?.name)
         .filter((item) => !!item)
-        .join(', ') || 'N/A';
+        .join(', ') || 'None';
     const groupBy = `Group By: ${groupings}`;
     return groupBy.length > 30 ? `${groupBy.substring(0, 30)}...` : groupBy;
   }

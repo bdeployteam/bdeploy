@@ -36,7 +36,7 @@ export class BdDataSortingComponent<T> {
 
   get sortBy(): string {
     if (!this.selectedColumn || !this.sort?.direction) {
-      return 'Sort By: N/A';
+      return 'Sort By: None';
     }
     const column = this.selectedColumn.name;
     const direction = this.sort.direction === 'asc' ? '▴' : '▾';

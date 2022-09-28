@@ -28,28 +28,22 @@
         >close</mat-icon
       >
     </div>
-    <mat-divider
-      [style.position]="'relative'"
-      [style.top.px]="5"
-      [style.padding-bottom.px]="10"
-    ></mat-divider>
-    <mat-select
-      name="grouping-select"
-      [value]="grouping?.definition"
-      (valueChange)="setGrouping($event)"
-      [placeholder]="selectGroupingPlaceholder"
-    >
-      <mat-option>--</mat-option>
-      <mat-option *ngFor="let def of definitions" [value]="def"
-        >{{ def.name }}</mat-option
+    <mat-form-field class="grouping-select" appearance="outline">
+      <mat-label>{{ selectGroupingLabel }}</mat-label>
+      <mat-select
+        name="grouping-select"
+        [value]="grouping?.definition"
+        (valueChange)="setGrouping($event)"
       >
-    </mat-select>
-    <mat-divider
-      [style.position]="'relative'"
-      [style.top.px]="5"
-      [style.padding-bottom.px]="10"
-    ></mat-divider>
-
+        <mat-option>--</mat-option>
+        <mat-option *ngIf="grouping?.definition" [value]="grouping.definition"
+          >{{ grouping.definition.name }}</mat-option
+        >
+        <mat-option *ngFor="let def of definitions" [value]="def"
+          >{{ def.name }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
     <div
       *ngIf="!grouping?.definition"
       class="bd-hint-text"
