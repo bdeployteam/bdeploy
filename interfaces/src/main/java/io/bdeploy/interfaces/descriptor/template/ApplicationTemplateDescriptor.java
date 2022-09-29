@@ -23,6 +23,5 @@ public class ApplicationTemplateDescriptor extends TemplateApplication {
      */
     @JsonAlias("variables")
     @JsonPropertyDescription("Definition of variables available in this template.")
-    @JsonProperty(required = true)
     public List<TemplateVariable> templateVariables = new ArrayList<>();
 }
