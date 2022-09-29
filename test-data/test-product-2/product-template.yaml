@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/instanceTemplateYaml
+
 name: Default Configuration
 description: "Creates an instance with the default server and client configuration"
 
@@ -11,7 +13,7 @@ templateVariables:
   - uid: sleep-timeout
     name: "Sleep Timeout"
     description: "The amount of time the server application should sleep"
-    defaultValue: 60
+    defaultValue: "60"
 
 instanceVariables:
   - id: param.global
