@@ -36,6 +36,20 @@ public class PublicSchemaGenerator {
             return allowedTypes.stream().map(t -> field.getContext().resolve(t)).toList();
         });
 
+        // respect the @Deprecated annotation on methods (which are compatibility wrappers only right now).
+        cfgBuilder.forMethods().withInstanceAttributeOverride((node, method, context) -> {
+            if (method.getAnnotation(Deprecated.class) != null) {
+                node.put("deprecated", true);
+            }
+        });
+
+        // and also for fields.
+        cfgBuilder.forFields().withInstanceAttributeOverride((node, field, context) -> {
+            if (field.getAnnotation(Deprecated.class) != null) {
+                node.put("deprecated", true);
+            }
+        });
+
         generator = new SchemaGenerator(cfgBuilder.build());
     }
 
