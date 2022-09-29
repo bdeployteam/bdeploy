@@ -59,8 +59,8 @@ export class BdDataGroupingPanelComponent<T>
       (gv) => gv && gv.toLowerCase().includes(this.filter.toLowerCase())
     );
   }
-  /* template */ get selectGroupingPlaceholder(): string {
-    return this.grouping?.definition?.name || 'Select Grouping';
+  /* template */ get selectGroupingLabel(): string {
+    return this.grouping?.definition?.name ? 'Grouping' : 'Select Grouping';
   }
   /* template */ get filterPlaceholder(): string {
     return this.grouping?.definition?.name || 'Filter Options Below';
