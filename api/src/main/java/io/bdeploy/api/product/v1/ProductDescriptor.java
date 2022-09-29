@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -13,6 +14,7 @@ import io.bdeploy.bhive.model.Manifest;
 public class ProductDescriptor {
 
     @JsonPropertyDescription("The human readable name of the product.")
+    @JsonProperty(required = true)
     public String name;
 
     /**
@@ -24,12 +26,14 @@ public class ProductDescriptor {
      * </ul>
      */
     @JsonPropertyDescription("The (path-friendly) ID of the product, e.g. 'io.bdeploy/product'")
+    @JsonProperty(required = true)
     public String product;
 
     @JsonPropertyDescription("The name of the vendor of the product.")
     public String vendor;
 
     @JsonPropertyDescription("A list of applications included in the product. Those applications must be available at build time, provided through 'product-version.yaml'.")
+    @JsonProperty(required = true)
     public List<String> applications = new ArrayList<>();
 
     @JsonPropertyDescription("A relative path (from product-info.yaml) to a directory containing an arbitrary amount of configuration files used as templates for new instances.")

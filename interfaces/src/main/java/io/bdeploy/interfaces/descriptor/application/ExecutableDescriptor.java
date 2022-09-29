@@ -3,6 +3,7 @@ package io.bdeploy.interfaces.descriptor.application;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
@@ -17,6 +18,7 @@ public class ExecutableDescriptor {
      * Alternatively may reference another manifest, e.g. {{M:jdk}}/bin/java.
      */
     @JsonPropertyDescription("The relative path (from app-info.yaml) to the executable to be launched. Can also reference other manifests (e.g. runtime dependencies) using e.g. '{{M:manifest-name}}/executable.exe'")
+    @JsonProperty(required = true)
     public String launcherPath;
 
     /**

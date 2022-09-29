@@ -10,8 +10,13 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
 
+import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
 import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 
 public class PublicSchemaGenerator {
 
@@ -26,6 +31,9 @@ public class PublicSchemaGenerator {
 
         // include all methods which are there for compatibility mapping of properties. jackson module filters only those with annotation.
         cfgBuilder.with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS);
+
+        // don't allow additional properties apart from those defined in the schema.
+        cfgBuilder.with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT);
 
         // custom definition for LinkedValueConfiguration which allows basic types in addition to the actual type.
         cfgBuilder.forFields().withTargetTypeOverridesResolver(field -> {
@@ -50,11 +58,33 @@ public class PublicSchemaGenerator {
             }
         });
 
+        cfgBuilder.forTypesInGeneral().withTypeAttributeOverride((node, scope, context) -> {
+            // need to do this fully custom, to make variable id/uid & template "primary keys" required.
+            if (scope.getType().isInstanceOf(ParameterDescriptor.class)) {
+                var arr = node.putArray("oneOf");
+                arr.addObject().putArray("required").add("id");
+                arr.addObject().putArray("required").add("uid");
+                arr.addObject().putArray("required").add("template");
+            }
+
+            if (scope.getType().isInstanceOf(TemplateParameter.class) || scope.getType().isInstanceOf(TemplateVariable.class)) {
+                var arr = node.putArray("oneOf");
+                arr.addObject().putArray("required").add("id");
+                arr.addObject().putArray("required").add("uid");
+            }
+
+            if (scope.getType().isInstanceOf(TemplateableVariableConfiguration.class)) {
+                var arr = node.putArray("oneOf");
+                arr.addObject().putArray("required").add("id");
+                arr.addObject().putArray("required").add("template");
+            }
+        });
+
         generator = new SchemaGenerator(cfgBuilder.build());
     }
 
-    public String generateSchema(Class<?> clazz) {
-        return generator.generateSchema(clazz).toPrettyString();
+    public String generateSchema(Schema schema) {
+        return generator.generateSchema(InternalSchema.get(schema).apiClass).toPrettyString();
     }
 
 }

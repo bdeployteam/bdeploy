@@ -3,6 +3,7 @@ package io.bdeploy.interfaces.descriptor.template;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.ApplicationType;
@@ -10,6 +11,7 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.Applic
 public class InstanceTemplateGroup {
 
     @JsonPropertyDescription("The name of the group.")
+    @JsonProperty(required = true)
     public String name;
 
     @JsonPropertyDescription("A description of the contents of this group.")
@@ -19,6 +21,7 @@ public class InstanceTemplateGroup {
     public ApplicationType type;
 
     @JsonPropertyDescription("The applications which should be configured by this group.")
+    @JsonProperty(required = true)
     public List<TemplateApplication> applications = new ArrayList<>();
 
 }
