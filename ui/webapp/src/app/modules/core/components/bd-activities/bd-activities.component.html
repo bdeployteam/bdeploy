@@ -8,6 +8,9 @@
       (dismiss)="onDismiss(squashed)"
       [header]="squashed.header"
     >
+      <div class="local-dialog-spacer">
+        <app-bd-dialog></app-bd-dialog>
+      </div>
       <div fxLayout="column" fxLayoutGap="5px">
         <ng-container *ngIf="squashed.current.snapshot.max <= 0">
           <mat-progress-bar

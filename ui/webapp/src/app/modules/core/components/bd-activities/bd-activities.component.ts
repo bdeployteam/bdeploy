@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import {
   ActivitiesService,
   ActivitySnapshotTreeNode,
 } from '../../services/activities.service';
 import { AuthenticationService } from '../../services/authentication.service';
+import { BdDialogComponent } from '../bd-dialog/bd-dialog.component';
 
 interface SquashedActivity {
   current: ActivitySnapshotTreeNode;
@@ -18,6 +19,8 @@ interface SquashedActivity {
   styleUrls: ['./bd-activities.component.css'],
 })
 export class BdActivitiesComponent {
+  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+
   constructor(
     public activities: ActivitiesService,
     public auth: AuthenticationService
@@ -37,7 +40,15 @@ export class BdActivitiesComponent {
   }
 
   /* template */ onDismiss(squashed: SquashedActivity) {
-    this.activities.cancelActivity(squashed.current.snapshot.uuid).subscribe();
+    this.dialog
+      .confirm('Cancel', 'Are you sure you want to cancel this activity?')
+      .subscribe((r) => {
+        if (r) {
+          this.activities
+            .cancelActivity(squashed.current.snapshot.uuid)
+            .subscribe();
+        }
+      });
   }
 
   /* template */ doTrack(index: number) {
