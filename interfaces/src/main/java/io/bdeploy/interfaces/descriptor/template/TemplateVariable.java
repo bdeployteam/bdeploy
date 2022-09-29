@@ -4,40 +4,32 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 public class TemplateVariable {
 
-    /**
-     * A unique ID in the template
-     */
     @JsonAlias("uid")
+    @JsonPropertyDescription("The unique ID of the variable. Variables with matching ID are queried from the user only once when applying a template.")
     public String id;
 
     // Compat with 4.x
     @Deprecated(forRemoval = true)
     @JsonProperty("uid")
+    @JsonPropertyDescription("DEPRECATED: Use 'id' instead")
     public String getUid() {
         return id;
     };
 
-    /**
-     * A short human readable name of the variable.
-     */
+    @JsonPropertyDescription("A short human readable name of the variable.")
     public String name;
 
-    /**
-     * The description which is shown to the user when querying the parameter.
-     */
+    @JsonPropertyDescription("The description which is shown to the user when querying the parameter.")
     public String description;
 
-    /**
-     * Default value as string, can be interpreted as number, etc. depending on the target parameter type.
-     */
+    @JsonPropertyDescription("Default value as string, can be interpreted as number, etc. depending on the target parameter type.")
     public String defaultValue;
 
-    /**
-     * A list of values suggested by the variable input field in the UI.
-     */
+    @JsonPropertyDescription("A list of values suggested by the variable input field in the UI.")
     public List<String> suggestedValues;
 
 }

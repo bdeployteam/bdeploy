@@ -44,6 +44,7 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
     // Compat with 4.x
     @Deprecated(forRemoval = true)
     @JsonProperty("uid")
+    @JsonPropertyDescription("DEPRECATED: Use 'id' instead.")
     public String getUid() {
         return id;
     };

@@ -2,12 +2,14 @@ package io.bdeploy.interfaces.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 
 public class TemplateableVariableConfiguration extends VariableConfiguration {
 
+    @JsonPropertyDescription("References a variable template definition which must be included in the 'product-info.yaml' from an external file.")
     public String template;
 
     @JsonCreator
