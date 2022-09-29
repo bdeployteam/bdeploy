@@ -82,7 +82,7 @@ public class PublicSchemaGenerator {
 
             // we have 1, 2 places where Map is used instead of concrete objects to allow partials with config different from the original. This allows that.
             if (scope.getType().isInstanceOf(Map.class)) {
-                node.put("additionalProperties", "true");
+                node.put("additionalProperties", true);
             }
         });
 

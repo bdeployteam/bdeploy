@@ -41,6 +41,9 @@ public class SchemaTool extends ConfiguredCliTool<SchemaConfig> {
         @Help("Path to existing file to validate")
         @Validator(ExistingPathValidator.class)
         String validate();
+
+        @Help("List all known schemas")
+        boolean list() default false;
     }
 
     public SchemaTool() {
@@ -49,6 +52,13 @@ public class SchemaTool extends ConfiguredCliTool<SchemaConfig> {
 
     @Override
     protected RenderableResult run(SchemaConfig config) {
+        if (config.list()) {
+            for (var schema : Schema.values()) {
+                out().println(schema.name());
+            }
+            return createSuccess();
+        }
+
         helpAndFailIfMissing(config.schema(), "Schema must be given");
 
         if (config.generate() != null) {
@@ -76,7 +86,7 @@ public class SchemaTool extends ConfiguredCliTool<SchemaConfig> {
             }
         }
 
-        if (config.generate() == null && config.validate() == null) {
+        if (config.generate() == null && config.validate() == null && !config.list()) {
             // just print the schema to out().
             PublicSchemaGenerator generator = new PublicSchemaGenerator();
             out().println(generator.generateSchema(config.schema()));
