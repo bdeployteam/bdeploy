@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -22,11 +21,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@OpenAPIDefinition(info = @Info(title = "BDeploy Public Master API", description = "BDeploy backend APIs for public use. "
-        + "Callers must set the X-BDeploy-Authorization header to be able to access APIs. "
-        + "This token can be obtained through the CLI and the Web UI. "
-        + "The API is exposed on any BDeploy master (regardless of its mode) on the '/api' namespace (e.g. 'https://localhost:7701/api/public/v1/...')"),
-                   security = { @SecurityRequirement(name = "X-BDeploy-Authorization") })
+@OpenAPIDefinition(info = @Info(title = "BDeploy Public Master API", version = "1",
+                                description = "BDeploy backend APIs for public use. "
+                                        + "Callers must set the X-BDeploy-Authorization header to be able to access APIs. "
+                                        + "This token can be obtained through the CLI and the Web UI. "
+                                        + "The API is exposed on any BDeploy master (regardless of its mode) on the '/api' namespace (e.g. 'https://localhost:7701/api/public/v1/...')"))
 @Path("/public/v1")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
