@@ -1,6 +1,7 @@
 package io.bdeploy.schema;
 
 import java.util.List;
+import java.util.Map;
 
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
@@ -58,8 +59,8 @@ public class PublicSchemaGenerator {
             }
         });
 
+        // need to do this fully custom, to make variable id/uid & template "primary keys" required.
         cfgBuilder.forTypesInGeneral().withTypeAttributeOverride((node, scope, context) -> {
-            // need to do this fully custom, to make variable id/uid & template "primary keys" required.
             if (scope.getType().isInstanceOf(ParameterDescriptor.class)) {
                 var arr = node.putArray("oneOf");
                 arr.addObject().putArray("required").add("id");
@@ -77,6 +78,11 @@ public class PublicSchemaGenerator {
                 var arr = node.putArray("oneOf");
                 arr.addObject().putArray("required").add("id");
                 arr.addObject().putArray("required").add("template");
+            }
+
+            // we have 1, 2 places where Map is used instead of concrete objects to allow partials with config different from the original. This allows that.
+            if (scope.getType().isInstanceOf(Map.class)) {
+                node.put("additionalProperties", "true");
             }
         });
 
