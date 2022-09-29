@@ -177,7 +177,7 @@ export function gatherProcessExpansions(
         continue;
       }
       for (const param of app.start.parameters) {
-        if (app.id === process.id) {
+        if (app.id === process?.id) {
           // we already have the unqualified version in the expansions.
           continue;
         }
