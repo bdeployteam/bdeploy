@@ -32,7 +32,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
-import io.bdeploy.bhive.op.ManifestRefScanOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
@@ -46,9 +45,7 @@ import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
@@ -62,7 +59,6 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
-import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
@@ -689,55 +685,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         Set<Key> result = defaultHive.execute(operation);
         return result.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getTag().equals(runningVersion))
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Boolean isDataMigrationRequired(String groupName) {
-        BHive hive = getInstanceGroupHive(groupName);
-
-        SortedSet<Key> instances = InstanceManifest.scan(hive, false);
-        for (Key key : instances) {
-            InstanceManifest im = InstanceManifest.of(hive, key);
-
-            for (Key nodeKey : im.getInstanceNodeManifests().values()) {
-                if (hive.execute(new ManifestRefScanOperation().setManifest(nodeKey)).size() > 0) {
-                    // it has a manifest reference, which is not allowed... this is the hint that this
-                    // node still uses the old scheme which referenced applications. this will destroy
-                    // our sync as it would sync applications instead of config only.
-                    return Boolean.TRUE;
-                }
-            }
-        }
-        return Boolean.FALSE;
-    }
-
-    @Override
-    public void performDataMigration(String groupName) {
-        BHive hive = getInstanceGroupHive(groupName);
-
-        MasterNamedResource master = ResourceProvider.getVersionedResource(minion.getSelf(), MasterRootResource.class, context)
-                .getNamedMaster(groupName);
-
-        SortedSet<Key> scan = InstanceManifest.scan(hive, true);
-
-        for (Key k : scan) {
-            log.info("Migrating {}, using tag {}", k.getName(), k.getTag());
-            InstanceManifest im = InstanceManifest.of(hive, k);
-
-            // dummy update, re-use existing configuration. new manifests will be written without references
-            InstanceUpdateDto update = new InstanceUpdateDto(new InstanceConfigurationDto(im.getConfiguration(), null), null);
-            Key newKey = master.update(update, k.getTag());
-
-            // now remove all previous versions of the instance (and it's nodes by matching segments of the manifest name.)
-            Set<Key> keys = hive.execute(new ManifestListOperation().setManifestName(im.getConfiguration().id));
-
-            for (Key any : keys) {
-                if (any.getTag().equals(newKey.getTag())) {
-                    continue;
-                }
-                hive.execute(new ManifestDeleteOperation().setToDelete(any));
-            }
-        }
     }
 
 }

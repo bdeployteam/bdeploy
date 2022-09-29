@@ -97,7 +97,6 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     public JerseyAuthenticationProvider(KeyStore store, UserValidator userValidator) {
         this.store = store;
         this.userValidator = userValidator;
-
     }
 
     @Override

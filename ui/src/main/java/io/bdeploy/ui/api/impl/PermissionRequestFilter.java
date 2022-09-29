@@ -91,7 +91,6 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
                     .getAnnotation(NoScopeInheritance.class);
             if (noInherit != null) {
                 activeScope = null; // reset.
-
             }
 
             RequiredPermission requiredPermission = getRequiredPermission(uriInfo, resourceMethod);

@@ -70,7 +70,7 @@ public interface InstanceResource {
     public List<InstanceVersionDto> listVersions(@ActivityScope @PathParam("instance") String instanceId);
 
     @PUT
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.WRITE)
     public void create(InstanceConfiguration config, @QueryParam("managedServer") String managedServer);
 
     @GET
