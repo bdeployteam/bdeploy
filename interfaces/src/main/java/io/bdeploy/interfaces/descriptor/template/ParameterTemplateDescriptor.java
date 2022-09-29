@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
@@ -12,8 +13,10 @@ import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 public class ParameterTemplateDescriptor {
 
     @JsonPropertyDescription("A unique ID of the template which can be used to reference the template from an 'app-info.yaml' file.")
+    @JsonProperty(required = true)
     public String id;
 
     @JsonPropertyDescription("One or more parameter definitions which should be placed inline at the point where this template is referenced.")
+    @JsonProperty(required = true)
     public List<ParameterDescriptor> parameters = new ArrayList<>();
 }

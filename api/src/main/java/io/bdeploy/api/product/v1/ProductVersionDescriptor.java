@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -21,6 +22,7 @@ public class ProductVersionDescriptor {
      * associated with the product (the product's own {@link Manifest} and one {@link Manifest} per application created).
      */
     @JsonPropertyDescription("The 'version' of the product. This version is used for the product and all included applications. The format is product specific, although diversion from standard semantic versioning format may require contributing plugins with custom sorting logic.")
+    @JsonProperty(required = true)
     public String version;
 
     /**
@@ -30,6 +32,7 @@ public class ProductVersionDescriptor {
      * the product.
      */
     @JsonPropertyDescription("Mapping of application IDs as used in 'product-info.yaml' to paths to directories per supported operating system. Multiple operating systems may point to the same path. The path may point to the directory where the 'app-info.yaml' file is located, or to the 'app-info.yaml' file directly.")
+    @JsonProperty(required = true)
     public Map<String, Map<OperatingSystem, String>> appInfo = new TreeMap<>();
 
     /**

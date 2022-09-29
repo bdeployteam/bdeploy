@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.google.common.collect.ImmutableList;
 
@@ -62,6 +63,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
     }
 
     @JsonPropertyDescription("The name of the application.")
+    @JsonProperty(required = true)
     public String name;
 
     @JsonPropertyDescription("The type of the application, defaults to SERVER")
@@ -80,6 +82,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
     public ProcessControlDescriptor processControl = new ProcessControlDescriptor();
 
     @JsonPropertyDescription("Description of possible individual components of the command used to start this application.")
+    @JsonProperty(required = true)
     public ExecutableDescriptor startCommand;
 
     @JsonPropertyDescription("Description of possible individual components of the command used to stop this application. If not configured, the application will be stopped using OS mechanisms instead.")

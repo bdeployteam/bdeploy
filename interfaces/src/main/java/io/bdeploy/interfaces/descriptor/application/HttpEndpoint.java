@@ -1,6 +1,7 @@
 package io.bdeploy.interfaces.descriptor.application;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -25,9 +26,11 @@ public class HttpEndpoint {
     }
 
     @JsonPropertyDescription("The unique ID of the endpoint. This ID is later used to reference this endpoint when proxying.")
+    @JsonProperty(required = true)
     public String id;
 
     @JsonPropertyDescription("The root path of the endpoint on the server.")
+    @JsonProperty(required = true)
     public String path;
 
     /**

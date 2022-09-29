@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
@@ -14,6 +15,7 @@ import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfigurat
 public class InstanceTemplateDescriptor {
 
     @JsonPropertyDescription("Short name of the template")
+    @JsonProperty(required = true)
     public String name;
 
     @JsonPropertyDescription("Description of what this template will accomplish to set up.")
@@ -33,6 +35,7 @@ public class InstanceTemplateDescriptor {
     public List<InstanceTemplateControlGroup> processControlGroups = new ArrayList<>();
 
     @JsonPropertyDescription("A list of template groups. The use can select whether to, and where to (node) apply each group.")
+    @JsonProperty(required = true)
     public List<InstanceTemplateGroup> groups = new ArrayList<>();
 
 }
