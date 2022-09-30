@@ -14,12 +14,14 @@ public class UiEndpointDto {
     @JsonAlias("uuid")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uuid")
     public String getUuid() {
         return id;
-    };
+    }
 
     /** For display: the name of the application */
     public String appName;

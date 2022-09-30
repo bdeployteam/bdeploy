@@ -149,7 +149,7 @@ public class ProductUpdateService {
         if (targetDesc.stopCommand == null) {
             app.stop = null;
         } else {
-            app.stop = createCommand(instance, targetDesc.stopCommand, app, targetDesc, allApps, resolver);
+            app.stop = createCommand(instance, targetDesc.stopCommand, targetDesc, allApps, resolver);
         }
     }
 
@@ -247,7 +247,7 @@ public class ProductUpdateService {
 
         for (var entry : toReset.entrySet()) {
             values.remove(entry.getKey());
-            if (entry.getValue() != null && meetsCondition(app, appDesc, entry.getValue(), resolver)) {
+            if (entry.getValue() != null && meetsCondition(appDesc, entry.getValue(), resolver)) {
                 createParameter(instance, entry.getValue(), descriptors, values, allApps);
             }
         }
@@ -259,7 +259,7 @@ public class ProductUpdateService {
             }
 
             var val = values.stream().filter(p -> p.id.equals(desc.id)).findFirst();
-            if (val.isEmpty() && meetsCondition(app, appDesc, desc, resolver)) {
+            if (val.isEmpty() && meetsCondition(appDesc, desc, resolver)) {
                 // need one.
                 createParameter(instance, desc, descriptors, values, allApps);
 
@@ -350,15 +350,14 @@ public class ProductUpdateService {
     }
 
     private CommandConfiguration createCommand(InstanceConfiguration instance, ExecutableDescriptor desc,
-            ApplicationConfiguration app, ApplicationDescriptor appDesc, Set<ApplicationConfiguration> allApps,
-            VariableResolver resolver) {
+            ApplicationDescriptor appDesc, Set<ApplicationConfiguration> allApps, VariableResolver resolver) {
         CommandConfiguration result = new CommandConfiguration();
 
         result.executable = desc.launcherPath;
 
         for (var para : desc.parameters) {
             // same as in the TS code, this assumes that the parameter referenced in the condition is *before* the conditional.
-            if (para.mandatory && meetsCondition(app, appDesc, para, resolver)) {
+            if (para.mandatory && meetsCondition(appDesc, para, resolver)) {
                 createParameter(instance, para, desc.parameters, result.parameters, allApps);
             }
         }
@@ -453,7 +452,7 @@ public class ProductUpdateService {
             ParameterConfiguration paramValue, ParameterDescriptor paramDesc, List<ApplicationValidationDto> result,
             VariableResolver resolver) {
         // check condition.
-        if (!meetsCondition(process, appDesc, paramDesc, resolver)) {
+        if (!meetsCondition(appDesc, paramDesc, resolver)) {
             if (paramValue != null && paramValue.value != null) {
                 result.add(new ApplicationValidationDto(process.id, paramDesc.id, "Parameter does not meet required condition"));
             }
@@ -518,8 +517,7 @@ public class ProductUpdateService {
         }
     }
 
-    private boolean meetsCondition(ApplicationConfiguration process, ApplicationDescriptor desc, ParameterDescriptor param,
-            VariableResolver resolver) {
+    private boolean meetsCondition(ApplicationDescriptor desc, ParameterDescriptor param, VariableResolver resolver) {
         if (param.condition == null || (param.condition.parameter == null && param.condition.expression == null)) {
             return true;
         }

@@ -7,8 +7,7 @@ import io.bdeploy.common.util.VariableResolver;
 
 public class ConditionalExpressionResolver extends PrefixResolver {
 
-    private final Pattern EXPR_PATTERN = Pattern.compile("([^?]*)\\?([^:]*):(.*)");
-
+    private static final Pattern EXPR_PATTERN = Pattern.compile("([^?]*)\\?([^:]*):(.*)");
     private final VariableResolver parent;
 
     /**
@@ -33,7 +32,7 @@ public class ConditionalExpressionResolver extends PrefixResolver {
             String exprResult = parent.apply(expr);
 
             // don't use boolean parsing. we want "null", "empty", and "false" to be false, all others are true.
-            if (exprResult != null && !exprResult.isBlank() && !"false".equals(exprResult.toLowerCase())) {
+            if (exprResult != null && !exprResult.isBlank() && !"false".equalsIgnoreCase(exprResult)) {
                 return valueIfTrue;
             } else {
                 return valueIfFalse;

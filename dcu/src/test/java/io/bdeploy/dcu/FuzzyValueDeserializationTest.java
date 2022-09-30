@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 
-public class FuzzyValueDeserialization {
+class FuzzyValueDeserializationTest {
 
     private static final String V_OLD = """
             {

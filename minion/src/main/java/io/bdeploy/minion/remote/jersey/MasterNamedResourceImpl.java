@@ -433,11 +433,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     inmb.addConfigTreeId(app.id, appTree);
                     configTrees.add(appTree);
                 }
-                inc.mergeVariables(config, system, (v) -> processConfigFilesInMemory(configTrees, v));
+                inc.mergeVariables(config, system, v -> processConfigFilesInMemory(configTrees, v));
             } else {
                 if (config.configTree != null) {
                     inc.mergeVariables(config, system,
-                            (v) -> processConfigFilesInMemory(Collections.singletonList(config.configTree), v));
+                            v -> processConfigFilesInMemory(Collections.singletonList(config.configTree), v));
                 }
             }
 

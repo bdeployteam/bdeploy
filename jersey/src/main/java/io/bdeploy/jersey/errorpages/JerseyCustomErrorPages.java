@@ -35,7 +35,7 @@ public class JerseyCustomErrorPages {
     }
 
     private static synchronized String readErrorImageCached(int code) {
-        return codeImages.computeIfAbsent(code, k -> readErrorImage(k));
+        return codeImages.computeIfAbsent(code, JerseyCustomErrorPages::readErrorImage);
     }
 
     private static String readLogo() {
@@ -57,11 +57,10 @@ public class JerseyCustomErrorPages {
                         return img;
                     }
                     return TemplateHelper.process(LOGO_TEMPLATE, vv -> {
-                        switch (vv) {
-                            case "CODE":
-                                return String.valueOf(code);
-                            default:
-                                return null;
+                        if (vv.equals("CODE")) {
+                            return String.valueOf(code);
+                        } else {
+                            return null;
                         }
                     });
                 default:

@@ -22,12 +22,14 @@ public class RemoteDirectory {
     @JsonAlias("uuid")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uuid")
     public String getUuid() {
         return id;
-    };
+    }
 
     /**
      * A description of any problem that happened contacting the minion. <code>null</code> if no problem.

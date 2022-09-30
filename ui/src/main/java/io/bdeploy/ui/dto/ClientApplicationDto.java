@@ -14,12 +14,14 @@ public class ClientApplicationDto {
     @JsonAlias("uuid")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uuid")
     public String getUuid() {
         return id;
-    };
+    }
 
     /** Custom user defined description */
     public String description;

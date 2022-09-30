@@ -5,9 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -26,8 +23,6 @@ import io.bdeploy.schema.PublicSchemaValidator;
 @ToolCategory(MinionServerCli.UTIL_TOOLS)
 @CliName(value = "schema")
 public class SchemaTool extends ConfiguredCliTool<SchemaConfig> {
-
-    private static final Logger log = LoggerFactory.getLogger(SchemaTool.class);
 
     public @interface SchemaConfig {
 

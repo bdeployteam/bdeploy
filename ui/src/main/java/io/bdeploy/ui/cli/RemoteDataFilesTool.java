@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -115,17 +114,17 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
             helpAndFail("exportTo must be a directory: " + exportTo);
         }
 
-        for (var dirSnapshot : matchingFiles.keySet()) {
-            List<RemoteDirectoryEntry> entries = matchingFiles.get(dirSnapshot);
+        for (var entry : matchingFiles.entrySet()) {
+            List<RemoteDirectoryEntry> entries = entry.getValue();
 
             if (entries.isEmpty()) {
                 continue;
             }
 
-            String token = ir.getContentMultiZipStreamRequest(config.uuid(), dirSnapshot.minion, entries);
+            String token = ir.getContentMultiZipStreamRequest(config.uuid(), entry.getKey().minion, entries);
             Response response = ir.getContentMultiZipStream(config.uuid(), token);
 
-            Path target = exportTo.resolve(dirSnapshot.minion + ".zip");
+            Path target = exportTo.resolve(entry.getKey().minion + ".zip");
             if (Files.isRegularFile(target)) {
                 helpAndFail("Target file already exists: " + target);
             }
@@ -141,9 +140,9 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
 
     private DataResult doDelete(Map<RemoteDirectory, List<RemoteDirectoryEntry>> matchingFiles, DataFilesConfig config,
             InstanceResource ir) {
-        for (var dirSnapshot : matchingFiles.keySet()) {
-            for (var entry : matchingFiles.get(dirSnapshot)) {
-                ir.deleteDataFile(config.uuid(), dirSnapshot.minion, entry);
+        for (var dirSnapshot : matchingFiles.entrySet()) {
+            for (var entry : dirSnapshot.getValue()) {
+                ir.deleteDataFile(config.uuid(), dirSnapshot.getKey().minion, entry);
             }
         }
         return createSuccess().addField("Delete files", "Successfully deleted " + countFiles(matchingFiles) + " files");
@@ -156,11 +155,11 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
 
         table.column("Path", 30).column("minion", 30);
 
-        for (var dirSnapshot : matchingFiles.keySet()) {
-            for (var entry : matchingFiles.get(dirSnapshot)) {
+        for (var dirSnapshot : matchingFiles.entrySet()) {
+            for (var entry : dirSnapshot.getValue()) {
                 DataTableRowBuilder row = table.row();
                 row.cell(entry.path);
-                row.cell(dirSnapshot.minion);
+                row.cell(dirSnapshot.getKey().minion);
                 row.build();
             }
         }
@@ -172,7 +171,7 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
         var result = new HashMap<RemoteDirectory, List<RemoteDirectoryEntry>>();
         for (var dirSnapshot : processResource.getDataDirSnapshot()) {
             var list = dirSnapshot.entries.stream().filter(entry -> matches(config.filter(), entry.path, config.regex()))
-                    .collect(Collectors.toList());
+                    .toList();
             if (!list.isEmpty()) {
                 result.put(dirSnapshot, list);
             }
@@ -181,7 +180,7 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
     }
 
     private int countFiles(Map<RemoteDirectory, List<RemoteDirectoryEntry>> matchingFiles) {
-        return matchingFiles.values().stream().mapToInt(entries -> entries.size()).sum();
+        return matchingFiles.values().stream().mapToInt(List::size).sum();
     }
 
     private boolean matches(String filter, String path, boolean isRegex) {

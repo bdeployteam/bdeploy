@@ -298,7 +298,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         MinionConfiguration minionConfig = manifest.read();
 
         if (minionConfig == null) {
-            throw new RuntimeException("Minion Configuration has been corrupted.");
+            throw new IllegalStateException("Minion Configuration has been corrupted.");
         }
 
         // Check that the master flag is set on the correct entry

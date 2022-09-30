@@ -22,7 +22,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -281,26 +280,21 @@ public class InstanceResourceImpl implements InstanceResource {
 
     private String getNewerVersionAvailableInRepository(InstanceConfiguration config, Set<Key> instanceGroupProductKeys,
             Comparator<String> productVersionComparator) {
-        try {
-            Key productKey = config.product;
-            InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
-            InstanceGroupConfiguration igc = igr.read(group);
-            if (igc.productToRepo == null) {
-                return null;
-            }
-            String repo = igc.productToRepo.get(productKey.getName());
-            BHive repoHive = reg.get(repo);
-            ProductResource pr = rc.initResource(new ProductResourceImpl(repoHive, repo));
-
-            List<Key> productKeys = pr.list(productKey.getName()).stream().map(p -> p.key)
-                    .filter(key -> !instanceGroupProductKeys.contains(key)) // filter out product keys already imported/uploaded to instance group
-                    .collect(Collectors.toList());
-
-            return this.isNewerVersionAvailable(productKeys, config, productVersionComparator) ? repo : null;
-        } catch (Exception e) {
-            e.printStackTrace();
+        Key productKey = config.product;
+        InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
+        InstanceGroupConfiguration igc = igr.read(group);
+        if (igc.productToRepo == null || !igc.productToRepo.containsKey(productKey.getName())) {
             return null;
         }
+        String repo = igc.productToRepo.get(productKey.getName());
+        BHive repoHive = reg.get(repo);
+        ProductResource pr = rc.initResource(new ProductResourceImpl(repoHive, repo));
+
+        List<Key> productKeys = pr.list(productKey.getName()).stream().map(p -> p.key)
+                .filter(key -> !instanceGroupProductKeys.contains(key)) // filter out product keys already imported/uploaded to instance group
+                .toList();
+
+        return this.isNewerVersionAvailable(productKeys, config, productVersionComparator) ? repo : null;
     }
 
     private boolean isNewerVersionAvailable(Collection<Key> keys, InstanceConfiguration config,
@@ -310,8 +304,7 @@ public class InstanceResourceImpl implements InstanceResource {
         String productFilterRegex = config.productFilterRegex;
         return keys.stream().filter(key -> key.getName().equals(productName)).map(Key::getTag)
                 .filter(tag -> this.matchesProductFilterRegex(tag, productFilterRegex))
-                .filter(tag -> productVersionComparator.compare(tag, productTag) > 0) // filter out older or current versions
-                .findFirst().isPresent();
+                .anyMatch(tag -> productVersionComparator.compare(tag, productTag) > 0); // filter out older or current versions
     }
 
     private boolean matchesProductFilterRegex(String tag, String productFilterRegex) {

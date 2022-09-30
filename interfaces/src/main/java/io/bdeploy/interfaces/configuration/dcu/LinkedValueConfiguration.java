@@ -135,7 +135,7 @@ public class LinkedValueConfiguration {
                 public void serialize(LinkedValueConfiguration value, JsonGenerator gen, SerializerProvider provider)
                         throws IOException {
                     gen.writeString(value.getPreRenderable());
-                };
+                }
             });
         }
     }

@@ -25,6 +25,7 @@ import io.bdeploy.common.Version;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.minion.MinionRoot;
+import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 
@@ -69,9 +70,8 @@ public class CheckLatestGitHubReleaseJob implements Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         log.info("GitHub check latest release job started");
 
-        try {
-            LatestGitHubReleaseDto resp = ClientBuilder.newClient()
-                    .target("https://api.github.com/repos/bdeployteam/bdeploy/releases/latest")
+        try (Client client = ClientBuilder.newClient()) {
+            LatestGitHubReleaseDto resp = client.target("https://api.github.com/repos/bdeployteam/bdeploy/releases/latest")
                     .request(MediaType.APPLICATION_JSON).get(LatestGitHubReleaseDto.class);
             String v = resp.tagName.startsWith("v") ? resp.tagName.substring(1) : resp.tagName;
             Version latestRelease = VersionHelper.parse(v);

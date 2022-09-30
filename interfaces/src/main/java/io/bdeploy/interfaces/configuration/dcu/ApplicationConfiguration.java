@@ -30,12 +30,14 @@ public class ApplicationConfiguration {
     @JsonAlias("uid")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uid")
     public String getUid() {
         return id;
-    };
+    }
 
     /**
      * The human readable name of the application configuration (e.g. "My App 1").

@@ -89,24 +89,24 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             return doCreate(remote, sr, config);
         } else if (config.details()) {
             helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doShowDetails(remote, sr, config);
+            return doShowDetails(sr, config);
         } else if (config.update()) {
             helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doUpdate(remote, sr, config);
+            return doUpdate(sr, config);
         } else if (config.delete()) {
             helpAndFailIfMissing(config.uuid(), "--uuid missing");
-            return doDelete(remote, sr, config);
+            return doDelete(sr, config);
         }
 
         return createNoOp();
     }
 
-    private RenderableResult doDelete(RemoteService remote, SystemResource sr, SystemConfig config) {
+    private RenderableResult doDelete(SystemResource sr, SystemConfig config) {
         sr.delete(config.uuid());
         return createSuccess();
     }
 
-    private RenderableResult doShowDetails(RemoteService remote, SystemResource sr, SystemConfig config) {
+    private RenderableResult doShowDetails(SystemResource sr, SystemConfig config) {
         var result = createEmptyResult();
         for (var system : sr.list()) {
             var cfg = system.config;
@@ -128,7 +128,7 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
         return result;
     }
 
-    private DataResult doUpdate(RemoteService remote, SystemResource sr, SystemConfig config) {
+    private DataResult doUpdate(SystemResource sr, SystemConfig config) {
         if (config.name() == null && config.description() == null && config.setVariable() == null
                 && config.removeVariable() == null) {
             helpAndFail("ERROR: Missing --name, --description, --setKey or --removeKey");

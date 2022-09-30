@@ -5,7 +5,6 @@ import { ProductDto } from 'src/app/models/gen.dtos';
 @Component({
   selector: 'app-product-version-details-cell',
   templateUrl: './product-version-details-cell.component.html',
-  styleUrls: ['./product-version-details-cell.component.css'],
 })
 export class ProductVersionDetailsCellComponent implements OnInit {
   @Input() record: ProductDto;

@@ -280,7 +280,7 @@ public class ProductManifest {
                         .map(t -> t.instanceVariables).findFirst().orElse(null);
 
                 if (replacements == null) {
-                    log.warn("No instance variable template found for " + templateId);
+                    log.warn("No instance variable template found for {}", templateId);
                 } else {
                     // only apply things which are not already there for *whatever* reason.
                     ImmutableList.copyOf(replacements).reverse().stream()

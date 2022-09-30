@@ -147,7 +147,7 @@ public class ApplicationDescriptor extends ApplicationDescriptorApi implements C
                         .map(t -> t.parameters).findFirst().orElse(null);
 
                 if (replacements == null) {
-                    log.warn("No shared parameter replacement found for " + templateId);
+                    log.warn("No shared parameter replacement found for {}", templateId);
                 } else {
                     ImmutableList.copyOf(replacements).reverse().forEach(r -> params.add(index, r));
                 }

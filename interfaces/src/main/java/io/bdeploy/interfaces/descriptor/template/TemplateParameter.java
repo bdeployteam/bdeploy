@@ -10,13 +10,15 @@ public class TemplateParameter {
     @JsonPropertyDescription("The ID of the referenced parameter definition from the applications app-info.yaml.")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uid")
     @JsonPropertyDescription("DEPRECATED: Use 'id' instead")
     public String getUid() {
         return id;
-    };
+    }
 
     @JsonPropertyDescription("The value that should be assigned to the parameter. The value can be omitted to add an optional parameter with its default value to the resulting process configuration.")
     public String value;

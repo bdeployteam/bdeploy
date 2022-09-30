@@ -41,13 +41,15 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
     @JsonPropertyDescription("The ID of the parameter. This ID must be unique in a given application.")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uid")
     @JsonPropertyDescription("DEPRECATED: Use 'id' instead.")
     public String getUid() {
         return id;
-    };
+    }
 
     @JsonPropertyDescription("The ID of a parameter template registered for the containing product. The therein defined parameters will be inlined here. If template is given, no other attribute may be set.")
     public String template;

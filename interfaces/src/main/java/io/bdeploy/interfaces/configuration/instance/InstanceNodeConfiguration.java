@@ -58,12 +58,14 @@ public class InstanceNodeConfiguration {
     @JsonAlias("uuid")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uuid")
     public String getUuid() {
         return id;
-    };
+    }
 
     /**
      * Whether this instance should be automatically stated on startup of the minion.
@@ -203,7 +205,7 @@ public class InstanceNodeConfiguration {
 
             // now we should have all variables collected.
             List<String> notRequired = variables.keySet().stream().filter(k -> !tracker.used.contains(k)).toList();
-            notRequired.forEach(k -> variables.remove(k));
+            notRequired.forEach(variables::remove);
         }
     }
 
@@ -233,7 +235,7 @@ public class InstanceNodeConfiguration {
 
         @Override
         public String apply(String t) {
-            return ""; // never null;
+            return ""; // always resolve to *something* (non-null);
         }
 
     }

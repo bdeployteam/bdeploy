@@ -330,7 +330,12 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 return;
             }
 
-            int exitCode = doMonitorProcess(process);
+            int exitCode = -1;
+            if (process != null) {
+                exitCode = doMonitorProcess(process);
+            } else {
+                log.warn("No process handle found after launching.");
+            }
 
             // The delegated launcher launcher has already evaluated the exit
             // code and translated the application specific exit code

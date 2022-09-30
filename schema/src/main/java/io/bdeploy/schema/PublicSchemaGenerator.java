@@ -21,6 +21,11 @@ import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 
 public class PublicSchemaGenerator {
 
+    private static final String PROP_ADDITIONAL_PROPERTIES = "additionalProperties";
+    private static final String PROP_REQUIRED = "required";
+    private static final String PROP_ONE_OF = "oneOf";
+    private static final String PROP_DEPRECATED = "deprecated";
+
     private final SchemaGenerator generator;
 
     public PublicSchemaGenerator() {
@@ -48,41 +53,41 @@ public class PublicSchemaGenerator {
         // respect the @Deprecated annotation on methods (which are compatibility wrappers only right now).
         cfgBuilder.forMethods().withInstanceAttributeOverride((node, method, context) -> {
             if (method.getAnnotation(Deprecated.class) != null) {
-                node.put("deprecated", true);
+                node.put(PROP_DEPRECATED, true);
             }
         });
 
         // and also for fields.
         cfgBuilder.forFields().withInstanceAttributeOverride((node, field, context) -> {
             if (field.getAnnotation(Deprecated.class) != null) {
-                node.put("deprecated", true);
+                node.put(PROP_DEPRECATED, true);
             }
         });
 
         // need to do this fully custom, to make variable id/uid & template "primary keys" required.
         cfgBuilder.forTypesInGeneral().withTypeAttributeOverride((node, scope, context) -> {
             if (scope.getType().isInstanceOf(ParameterDescriptor.class)) {
-                var arr = node.putArray("oneOf");
-                arr.addObject().putArray("required").add("id");
-                arr.addObject().putArray("required").add("uid");
-                arr.addObject().putArray("required").add("template");
+                var arr = node.putArray(PROP_ONE_OF);
+                arr.addObject().putArray(PROP_REQUIRED).add("id");
+                arr.addObject().putArray(PROP_REQUIRED).add("uid");
+                arr.addObject().putArray(PROP_REQUIRED).add("template");
             }
 
             if (scope.getType().isInstanceOf(TemplateParameter.class) || scope.getType().isInstanceOf(TemplateVariable.class)) {
-                var arr = node.putArray("oneOf");
-                arr.addObject().putArray("required").add("id");
-                arr.addObject().putArray("required").add("uid");
+                var arr = node.putArray(PROP_ONE_OF);
+                arr.addObject().putArray(PROP_REQUIRED).add("id");
+                arr.addObject().putArray(PROP_REQUIRED).add("uid");
             }
 
             if (scope.getType().isInstanceOf(TemplateableVariableConfiguration.class)) {
-                var arr = node.putArray("oneOf");
-                arr.addObject().putArray("required").add("id");
-                arr.addObject().putArray("required").add("template");
+                var arr = node.putArray(PROP_ONE_OF);
+                arr.addObject().putArray(PROP_REQUIRED).add("id");
+                arr.addObject().putArray(PROP_REQUIRED).add("template");
             }
 
             // we have 1, 2 places where Map is used instead of concrete objects to allow partials with config different from the original. This allows that.
             if (scope.getType().isInstanceOf(Map.class)) {
-                node.put("additionalProperties", true);
+                node.put(PROP_ADDITIONAL_PROPERTIES, true);
             }
         });
 

@@ -12,13 +12,15 @@ public class TemplateVariable {
     @JsonPropertyDescription("The unique ID of the variable. Variables with matching ID are queried from the user only once when applying a template.")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uid")
     @JsonPropertyDescription("DEPRECATED: Use 'id' instead")
     public String getUid() {
         return id;
-    };
+    }
 
     @JsonPropertyDescription("A short human readable name of the variable.")
     public String name;

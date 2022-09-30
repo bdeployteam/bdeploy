@@ -18,12 +18,14 @@ public class ParameterConfiguration {
     @JsonAlias("uid")
     public String id;
 
-    // Compat with 4.x
+    /**
+     * @deprecated Compat with 4.x
+     */
     @Deprecated(forRemoval = true)
     @JsonProperty("uid")
     public String getUid() {
         return id;
-    };
+    }
 
     /**
      * Whether this parameter is pinned. This information is used by the web UI to
