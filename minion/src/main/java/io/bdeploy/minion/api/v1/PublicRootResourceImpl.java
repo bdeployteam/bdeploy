@@ -2,17 +2,25 @@ package io.bdeploy.minion.api.v1;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
 
 import io.bdeploy.api.remote.v1.PublicInstanceResource;
 import io.bdeploy.api.remote.v1.PublicRootResource;
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
+import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
+import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.minion.remote.jersey.CommonRootResourceImpl;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.impl.AuthResourceImpl;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -30,6 +38,9 @@ public class PublicRootResourceImpl implements PublicRootResource {
 
     @Context
     private UriInfo ui;
+
+    @Inject
+    private BHiveRegistry registry;
 
     @Override
     public String getVersion() {
@@ -93,15 +104,24 @@ public class PublicRootResourceImpl implements PublicRootResource {
             throw new WebApplicationException("No instance group parameter given", Status.BAD_REQUEST);
         }
 
-        for (InstanceGroupConfigurationApi instanceGroup : this.getInstanceGroups()) {
-
-            boolean containsInstance = getInstanceResource(instanceGroup.name).listInstanceConfigurations(false).values().stream()
-                    .map(instance -> instance.uuid).filter(uuid -> instanceId.equals(uuid)).findAny().isPresent();
-
-            if (containsInstance) {
-                return instanceGroup;
+        for (BHive hive : registry.getAll().values()) {
+            InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
+            if (cfg == null) {
+                continue;
             }
 
+            SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
+            for (Key imKey : imKeys) {
+                InstanceManifest im = InstanceManifest.of(hive, imKey);
+                InstanceConfiguration config = im.getConfiguration();
+                if (instanceId.equals(config.id)) {
+                    InstanceGroupConfigurationApi instanceGroup = new InstanceGroupConfigurationApi();
+                    instanceGroup.name = cfg.name;
+                    instanceGroup.title = cfg.title;
+                    instanceGroup.description = cfg.description;
+                    return instanceGroup;
+                }
+            }
         }
 
         throw new WebApplicationException("No instance group found for instance ID " + instanceId, Status.NOT_FOUND);
