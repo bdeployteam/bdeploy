@@ -65,6 +65,7 @@ ext {
 
 allprojects {
     version = new File(rootProject.projectDir, "/bdeploy.version").text
+    group = 'io.bdeploy'
 
     repositories {
         mavenCentral()
