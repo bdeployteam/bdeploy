@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+import io.bdeploy.interfaces.JsonSchemaAllowedTypes;
+
 public class TemplateVariable {
 
     @JsonAlias("uid")
@@ -29,6 +31,7 @@ public class TemplateVariable {
     public String description;
 
     @JsonPropertyDescription("Default value as string, can be interpreted as number, etc. depending on the target parameter type.")
+    @JsonSchemaAllowedTypes({ String.class, Number.class, Boolean.class })
     public String defaultValue;
 
     @JsonPropertyDescription("A list of values suggested by the variable input field in the UI.")

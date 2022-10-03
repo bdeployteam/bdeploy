@@ -1,18 +1,24 @@
 package io.bdeploy.schema;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
 
 import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
 import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.interfaces.JsonSchemaAllowedTypes;
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
@@ -21,9 +27,6 @@ import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 
 public class PublicSchemaGenerator {
 
-    private static final String PROP_ADDITIONAL_PROPERTIES = "additionalProperties";
-    private static final String PROP_REQUIRED = "required";
-    private static final String PROP_ONE_OF = "oneOf";
     private static final String PROP_DEPRECATED = "deprecated";
 
     private final SchemaGenerator generator;
@@ -43,6 +46,12 @@ public class PublicSchemaGenerator {
 
         // custom definition for LinkedValueConfiguration which allows basic types in addition to the actual type.
         cfgBuilder.forFields().withTargetTypeOverridesResolver(field -> {
+            JsonSchemaAllowedTypes allowed = field
+                    .getAnnotationConsideringFieldAndGetterIfSupported(JsonSchemaAllowedTypes.class);
+            if (allowed != null) {
+                return Arrays.asList(allowed.value()).stream().map(c -> field.getContext().resolve(c)).toList();
+            }
+
             if (!field.getType().isInstanceOf(LinkedValueConfiguration.class)) {
                 return null;
             }
@@ -67,35 +76,46 @@ public class PublicSchemaGenerator {
         // need to do this fully custom, to make variable id/uid & template "primary keys" required.
         cfgBuilder.forTypesInGeneral().withTypeAttributeOverride((node, scope, context) -> {
             if (scope.getType().isInstanceOf(ParameterDescriptor.class)) {
-                var arr = node.putArray(PROP_ONE_OF);
-                arr.addObject().putArray(PROP_REQUIRED).add("id");
-                arr.addObject().putArray(PROP_REQUIRED).add("uid");
-                arr.addObject().putArray(PROP_REQUIRED).add("template");
+                var arr = node.putArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
+                exlusiveField(arr, context, "id", "uid", "template");
+                exlusiveField(arr, context, "uid", "id", "template");
+                exlusiveField(arr, context, "template", "id", "uid");
             }
 
             if (scope.getType().isInstanceOf(TemplateParameter.class) || scope.getType().isInstanceOf(TemplateVariable.class)) {
-                var arr = node.putArray(PROP_ONE_OF);
-                arr.addObject().putArray(PROP_REQUIRED).add("id");
-                arr.addObject().putArray(PROP_REQUIRED).add("uid");
+                var arr = node.putArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
+                exlusiveField(arr, context, "id", "uid");
+                exlusiveField(arr, context, "uid", "id");
             }
 
             if (scope.getType().isInstanceOf(TemplateableVariableConfiguration.class)) {
-                var arr = node.putArray(PROP_ONE_OF);
-                arr.addObject().putArray(PROP_REQUIRED).add("id");
-                arr.addObject().putArray(PROP_REQUIRED).add("template");
+                var arr = node.putArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
+                exlusiveField(arr, context, "id", "template");
+                exlusiveField(arr, context, "template", "id");
             }
 
             // we have 1, 2 places where Map is used instead of concrete objects to allow partials with config different from the original. This allows that.
             if (scope.getType().isInstanceOf(Map.class)) {
-                node.put(PROP_ADDITIONAL_PROPERTIES, true);
+                node.put(context.getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES), true);
             }
         });
 
         generator = new SchemaGenerator(cfgBuilder.build());
     }
 
+    private void exlusiveField(ArrayNode oneOf, SchemaGenerationContext context, String prop, String... excludes) {
+        ObjectNode obj = oneOf.addObject();
+        obj.putArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(prop);
+        var excl = obj.putObject(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+        Arrays.stream(excludes).forEach(e -> excl.put(e, false));
+    }
+
     public String generateSchema(Schema schema) {
         return generator.generateSchema(InternalSchema.get(schema).apiClass).toPrettyString();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new PublicSchemaGenerator().generator.generateSchema(ParameterDescriptor.class).toPrettyString());
     }
 
 }
