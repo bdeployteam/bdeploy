@@ -21,7 +21,6 @@ buildscript {
     dependencies {
         classpath 'com.adarshr:gradle-test-logger-plugin:3.2.0'
         classpath 'gradle.plugin.net.ossindex:ossindex-gradle-plugin:0.4.11'
-        classpath 'org.cyclonedx:cyclonedx-gradle-plugin:1.6.1'
     }
 }
 
@@ -30,9 +29,8 @@ plugins {
     id 'jacoco'
     id 'com.github.ben-manes.versions' version '0.42.0'
     id "org.sonarqube" version "3.4.0.2513"
+    id 'org.cyclonedx.bom' version '1.7.1'
 }
-
-apply plugin: 'org.cyclonedx.bom'
 
 cyclonedxBom {
     includeConfigs = ["runtimeClasspath"]

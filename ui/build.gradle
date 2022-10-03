@@ -1,20 +1,9 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'cz.habarta.typescript-generator:typescript-generator-gradle-plugin:3.0.1157'
-    }
-}
-
 plugins {
     id "com.github.psxpaul.execfork" version "0.2.0"
+    id "cz.habarta.typescript-generator" version "3.0.1157"
 }
 
-apply plugin: 'cz.habarta.typescript-generator'
-
 def webappDir = "$projectDir/webapp"
-
 
 dependencies {
     implementation(
