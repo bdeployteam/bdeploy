@@ -164,6 +164,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     this.presetType = presetType;
     localStorage.setItem(this.presetTypeKey(), this.presetType);
     this.loadPreset();
+    this.fireUpdate();
   }
 
   private presetTypeKey(): string {
@@ -191,6 +192,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
         this.saveLocalPreset();
         break;
     }
+    this.fireUpdate();
   }
 
   private saveGlobalPreset() {
@@ -231,6 +233,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
         this.setPresetType(PresetType.GLOBAL);
         break;
     }
+    this.fireUpdate();
   }
 
   private deletePresetFromLocalStorage() {
