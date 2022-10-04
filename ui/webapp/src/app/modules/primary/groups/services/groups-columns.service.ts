@@ -26,6 +26,7 @@ export class GroupsColumnsService {
     data: (r) => r.instanceGroupConfiguration.name,
     width: '200px',
     showWhen: '(min-width: 700px)',
+    sortCard: true,
   };
 
   groupTitleColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
@@ -33,6 +34,7 @@ export class GroupsColumnsService {
     name: 'Title',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.instanceGroupConfiguration.title,
+    sortCard: true,
   };
 
   groupDescriptionColumn: BdDataColumn<InstanceGroupConfigurationDto> = {

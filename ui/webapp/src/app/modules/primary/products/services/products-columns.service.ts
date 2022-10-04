@@ -16,6 +16,7 @@ export class ProductsColumnsService {
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.name,
+    sortCard: true,
   };
 
   productVersionColumn: BdDataColumn<ProductDto> = {
@@ -25,6 +26,7 @@ export class ProductsColumnsService {
     data: (r) => r.key.tag,
     tooltip: () => null,
     component: ProductVersionDetailsCellComponent,
+    sortCard: true,
   };
 
   productVendorColumn: BdDataColumn<ProductDto> = {

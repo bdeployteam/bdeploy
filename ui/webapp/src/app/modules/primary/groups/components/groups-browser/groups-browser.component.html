@@ -1,6 +1,12 @@
 <app-bd-dialog [loadingWhen$]="groups.loading$">
   <app-bd-dialog-toolbar header="Instance Groups">
     <div fxFlex="1 0 auto"></div>
+    <app-bd-data-sorting
+      [columns]="groupColumns.defaultGroupColumns"
+      [sort]="sort"
+      [disabled]="!isCardView"
+      (sortChange)="dataTable.sort = $event"
+    ></app-bd-data-sorting>
     <app-bd-data-grouping
       [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"

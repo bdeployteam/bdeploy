@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { combineLatest, Subscription } from 'rxjs';
 import {
   BdDataColumn,
@@ -25,12 +26,13 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
   private isCentral = false;
-  /* template */ public isManaged = false;
+  /* template */ isManaged = false;
   private isStandalone = false;
-  /* template */ public isAddAllowed = false;
-  /* template */ public isAttachAllowed = false;
-  /* template */ public isCardView: boolean;
-  /* template */ public presetKeyValue = 'instanceGroups';
+  /* template */ isAddAllowed = false;
+  /* template */ isAttachAllowed = false;
+  /* template */ isCardView: boolean;
+  /* template */ presetKeyValue = 'instanceGroups';
+  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 

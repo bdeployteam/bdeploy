@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -34,6 +35,7 @@ export class ProductsBrowserComponent implements OnInit {
 
   /* template */ isCardView: boolean;
   /* template */ presetKeyValue = 'products';
+  /* template */ sort: Sort = { active: 'version', direction: 'desc' };
 
   constructor(
     public cfg: ConfigService,
