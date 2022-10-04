@@ -4,12 +4,14 @@
     [panel]="true"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div fxLayout="column" fxLayoutGap="10px" [style.height]="'100%'">
       <mat-stepper
         #stepper
         [linear]="true"
         orientation="vertical"
         (selectionChange)="onStepSelectionChange($event)"
+        [style.overflow]="'auto'"
+        fxFlex="1 0 0"
       >
         <mat-step label="Choose Source Repository" [completed]="!!selectedRepo">
           <div fxLayout="column" fxLayoutGap="5px">
@@ -62,18 +64,18 @@
               [checkedFrozenWhen$]="importing$"
               [headerHidden]="true"
             ></app-bd-data-table>
-            <app-bd-button
-              text="Import"
-              icon="drive_file_move"
-              color="primary"
-              [collapsed]="false"
-              (click)="importVersions()"
-              [disabled]="!selectedVersions?.length || (importing$ | async)"
-              [loadingWhen$]="importing$"
-            ></app-bd-button>
           </div>
         </mat-step>
       </mat-stepper>
+      <app-bd-button
+        text="Import"
+        icon="drive_file_move"
+        color="primary"
+        [collapsed]="false"
+        (click)="importVersions()"
+        [disabled]="!selectedVersions?.length || (importing$ | async)"
+        [loadingWhen$]="importing$"
+      ></app-bd-button>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>
