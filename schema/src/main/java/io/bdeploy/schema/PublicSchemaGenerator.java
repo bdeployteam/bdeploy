@@ -114,8 +114,4 @@ public class PublicSchemaGenerator {
         return generator.generateSchema(InternalSchema.get(schema).apiClass).toPrettyString();
     }
 
-    public static void main(String[] args) {
-        System.out.println(new PublicSchemaGenerator().generator.generateSchema(ParameterDescriptor.class).toPrettyString());
-    }
-
 }
