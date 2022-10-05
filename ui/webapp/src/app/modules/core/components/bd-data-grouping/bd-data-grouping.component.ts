@@ -7,15 +7,14 @@ import {
   OnInit,
   Output,
   SimpleChanges,
-  ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { CustomDataGrouping } from 'src/app/models/gen.dtos';
-import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { calculateGrouping } from 'src/app/modules/core/utils/preset.utils';
+import { ConfirmationService } from '../../services/confirmation.service';
 
 enum PresetType {
   PERSONAL = 'PERSONAL',
@@ -51,8 +50,6 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   @Output() globalPresetSaved = new EventEmitter<CustomDataGrouping[]>();
 
-  @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-
   /* template */ groupings: BdDataGrouping<T>[] = [];
   /* template */ presetType: PresetType;
   /* template */ presetTypes = [PresetType.GLOBAL, PresetType.PERSONAL];
@@ -78,7 +75,8 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   constructor(
     private snackBar: MatSnackBar,
-    public auth: AuthenticationService
+    public auth: AuthenticationService,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
@@ -103,7 +101,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       }
     }
     if (changes['defaultGrouping']) {
-      // if global preset was deleted, default grouping would change
+      // if global preset was updated, default grouping would change
       if (
         changes['defaultGrouping'].currentValue !==
         changes['defaultGrouping'].previousValue
@@ -209,7 +207,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
     const preset = this.groupingToPreset();
 
-    this.dialog
+    this.confirmationService
       .confirm(
         'Save global preset?',
         'This grouping will be set as the global default preset for all users.'
@@ -245,7 +243,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   private deleteGlobalPreset() {
-    this.dialog
+    this.confirmationService
       .confirm(
         'Delete global preset?',
         'Default grouping will be set as the global default preset for all users.'

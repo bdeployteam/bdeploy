@@ -13,6 +13,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRippleModule } from '@angular/material/core';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -42,6 +43,7 @@ import { BdActivitiesComponent } from './components/bd-activities/bd-activities.
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
+import { BdConfirmationComponent } from './components/bd-confirmation/bd-confirmation.component';
 import { BdContentAssistMenuComponent } from './components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdContentAssistDirective } from './components/bd-content-assist/bd-content-assist.directive';
 import { BdCustomEditorComponent } from './components/bd-custom-editor/bd-custom-editor.component';
@@ -194,6 +196,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     LinkExpressionInputValidatorDirective,
     PropagateErrorValidatorDirective,
     BdCustomEditorComponent,
+    BdConfirmationComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -238,6 +241,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     MatExpansionModule,
     MatButtonToggleModule,
     MatRadioModule,
+    MatDialogModule,
 
     // angular base infrastructure used throughout the application.
     HttpClientModule,
@@ -312,6 +316,7 @@ export function loadAppConfig(cfgService: ConfigService) {
     BdExpressionToggleComponent,
     BdExpressionPickerComponent,
     BdCustomEditorComponent,
+    BdConfirmationComponent,
 
     // validators
     IdentifierValidator,

@@ -1,0 +1,24 @@
+<app-bd-notification-card
+  [header]="data.header"
+  [collapsed]="true"
+  [dismissable]="false"
+  icon="info"
+  class="mat-typography mat-elevation-z3"
+>
+  <div fxLayout="column" fxLayoutGap="10px">
+    <div>{{ data.message }}</div>
+    <app-bd-action-row>
+      <app-bd-button
+        text="No"
+        [collapsed]="false"
+        (click)="confirm(false)"
+      ></app-bd-button>
+      <app-bd-button
+        text="Yes"
+        [collapsed]="false"
+        color="primary"
+        (click)="confirm(true)"
+      ></app-bd-button>
+    </app-bd-action-row>
+  </div>
+</app-bd-notification-card>

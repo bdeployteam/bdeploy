@@ -38,3 +38,7 @@ body {
 .mat-tooltip-panel {
   pointer-events: none;
 }
+
+.bd-dialog-container .mat-dialog-container {
+  padding: 0;
+}
