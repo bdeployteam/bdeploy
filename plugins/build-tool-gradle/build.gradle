@@ -21,7 +21,7 @@ repositories {
     }
 }
 
-version = "4.6.0"
+version = "5.0.0"
 group = "io.bdeploy"
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -33,7 +33,7 @@ dependencies {
     testImplementation gradleTestKit()
 
     implementation (
-        'io.bdeploy:api:5.0.0-SNAPSHOT'
+        'io.bdeploy:api:5.0.0'
     )
 }
 
