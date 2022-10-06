@@ -6,7 +6,11 @@ import {
   BdDataGrouping,
   BdDataGroupingDefinition,
 } from 'src/app/models/data';
-import { CustomDataGrouping, InstanceDto } from 'src/app/models/gen.dtos';
+import {
+  CustomDataGrouping,
+  InstanceDto,
+  InstanceGroupConfiguration,
+} from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -134,16 +138,20 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
           });
         }
 
-        this.defaultSingleGrouping =
-          g.groupingSinglePreset === null
-            ? this.generateDefaultGrouping()
-            : calculateGrouping(this.grouping, g.groupingSinglePreset);
-        this.defaultMultipleGrouping =
-          g.groupingMultiplePreset === null
-            ? this.generateDefaultGrouping()
-            : calculateGrouping(this.grouping, g.groupingMultiplePreset);
+        this.calculateDefaultGrouping(g);
       })
     );
+  }
+
+  private calculateDefaultGrouping(g: InstanceGroupConfiguration): void {
+    this.defaultSingleGrouping =
+      g.groupingSinglePreset === null
+        ? this.generateDefaultGrouping()
+        : calculateGrouping(this.grouping, g.groupingSinglePreset);
+    this.defaultMultipleGrouping =
+      g.groupingMultiplePreset === null
+        ? this.generateDefaultGrouping()
+        : calculateGrouping(this.grouping, g.groupingMultiplePreset);
   }
 
   private generateDefaultGrouping(): BdDataGrouping<InstanceDto>[] {
@@ -166,8 +174,16 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   }
 
   saveGlobalPreset(preset: CustomDataGrouping[]) {
-    const group = this.groups.current$.value.name;
-    this.groups.updatePreset(group, preset, !this.isCardView).subscribe();
+    const group = this.groups.current$.value;
+    const multiple = !this.isCardView;
+    this.groups.updatePreset(group.name, preset, multiple).subscribe();
+    // reset global preset immediately for smoother ux
+    if (multiple) {
+      group.groupingMultiplePreset = preset;
+    } else {
+      group.groupingSinglePreset = preset;
+    }
+    this.calculateDefaultGrouping(group);
   }
 
   ngOnDestroy(): void {

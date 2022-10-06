@@ -73,7 +73,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /* template */ get disabled(): boolean {
     const isGlobalPreset = this.presetType === PresetType.GLOBAL;
     const isAdmin = this.auth.isCurrentScopeAdmin$.value;
-    return isGlobalPreset && !isAdmin;
+    return isGlobalPreset && (!isAdmin || !this.hasGlobalPreset);
   }
 
   constructor(
@@ -98,6 +98,16 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       // in case the previous set of records was completely empty, we need to reload
       // default grouping (etc.) for the stored values to be available (potentially).
       if (!changes['records'].previousValue?.length) {
+        this.loadPreset();
+        this.fireUpdate();
+      }
+    }
+    if (changes['defaultGrouping']) {
+      // if global preset was deleted, default grouping would change
+      if (
+        changes['defaultGrouping'].currentValue !==
+        changes['defaultGrouping'].previousValue
+      ) {
         this.loadPreset();
         this.fireUpdate();
       }
@@ -192,18 +202,17 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
         this.saveLocalPreset();
         break;
     }
-    this.fireUpdate();
   }
 
   private saveGlobalPreset() {
-    if (!this.auth.isCurrentScopeAdmin$.value) return;
+    if (!this.auth.isCurrentScopeAdmin$.value || !this.hasGlobalPreset) return;
 
     const preset = this.groupingToPreset();
 
     this.dialog
       .confirm(
         'Save global preset?',
-        'This will grouping will be set as the global default preset for all users.'
+        'This grouping will be set as the global default preset for all users.'
       )
       .subscribe((confirmed) => {
         if (confirmed) {
@@ -226,14 +235,27 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   /* template */ deletePreset(): void {
     switch (this.presetType) {
       case PresetType.GLOBAL:
-        this.globalPresetSaved.emit(null);
+        this.deleteGlobalPreset();
         break;
       case PresetType.PERSONAL:
         this.deletePresetFromLocalStorage();
         this.setPresetType(PresetType.GLOBAL);
         break;
     }
-    this.fireUpdate();
+  }
+
+  private deleteGlobalPreset() {
+    this.dialog
+      .confirm(
+        'Delete global preset?',
+        'Default grouping will be set as the global default preset for all users.'
+      )
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.globalPresetSaved.emit(null);
+          this.defaultGrouping = null;
+        }
+      });
   }
 
   private deletePresetFromLocalStorage() {
