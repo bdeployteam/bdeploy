@@ -31,7 +31,7 @@ export class SoftwareDetailsService implements OnDestroy {
   private softwareSubscription: Subscription;
 
   private productApiPath = () =>
-    `${this.cfg.config.api}/group/${this.areas.repositoryContext$.value}/product/${this.manifestKey$.value}/${this.manifestTag$.value}`;
+    `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/product/${this.manifestKey$.value}/${this.manifestTag$.value}`;
   private softwareApiPath = () =>
     `${this.cfg.config.api}/softwarerepository/${this.areas.repositoryContext$.value}/content/${this.manifestKey$.value}/${this.manifestTag$.value}`;
   private pluginApiPath = () =>
