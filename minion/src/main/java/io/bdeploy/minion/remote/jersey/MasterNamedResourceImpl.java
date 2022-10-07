@@ -465,8 +465,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 try (InputStream is = hive.execute(new ObjectLoadOperation().setObject(bv.getElementId()))) {
                     // process whole files.
                     TemplateHelper.process(new String(StreamHelper.read(is), StandardCharsets.UTF_8), resolver);
-                } catch (IOException ioe) {
-                    log.warn("Cannot process {}", bv.getPathString(), ioe);
+                } catch (Exception e) {
+                    log.warn("Cannot process {}", bv.getPathString(), e);
                 }
             }).build());
         }
