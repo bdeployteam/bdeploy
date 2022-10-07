@@ -288,6 +288,9 @@ public class InstanceResourceImpl implements InstanceResource {
         }
         String repo = igc.productToRepo.get(productKey.getName());
         BHive repoHive = reg.get(repo);
+        if (repoHive == null) {
+            return null;
+        }
         ProductResource pr = rc.initResource(new ProductResourceImpl(repoHive, repo));
 
         List<Key> productKeys = pr.list(productKey.getName()).stream().map(p -> p.key)
