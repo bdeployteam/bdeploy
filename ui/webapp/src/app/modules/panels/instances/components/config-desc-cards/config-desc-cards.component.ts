@@ -27,7 +27,9 @@ export type InstFields =
   | 'inst.productTag'
   | 'inst.autoStart'
   | 'inst.autoUninstall'
-  | 'inst.configTree';
+  | 'inst.configTree'
+  | 'inst.systemId'
+  | 'inst.systemTag';
 
 export type AllFields =
   | AppBaseFields

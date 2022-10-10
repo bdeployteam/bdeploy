@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -22,6 +25,8 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response.Status;
 
 public class MasterSystemResourceImpl implements MasterSystemResource {
+
+    private static final Logger log = LoggerFactory.getLogger(MasterSystemResourceImpl.class);
 
     private final BHive hive;
 
@@ -59,8 +64,13 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
             if (config.system != null && config.system.getName().equals(newKey.getName())) {
                 // update instance reference to system;
                 config.system = newKey;
-                var update = new InstanceUpdateDto(new InstanceConfigurationDto(config, null), null);
-                ir.update(update, key.getTag());
+                try {
+                    var update = new InstanceUpdateDto(new InstanceConfigurationDto(config, null), null);
+                    ir.update(update, key.getTag());
+                } catch (Exception e) {
+                    // in case a single instance can not be updated, issue a warning.
+                    log.warn("Cannot update system {} on instance {}: {}", newKey, config.id, e.toString());
+                }
             }
         }
     }

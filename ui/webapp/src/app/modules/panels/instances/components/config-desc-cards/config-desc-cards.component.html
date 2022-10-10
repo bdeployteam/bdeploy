@@ -118,4 +118,10 @@
     The internal ID of the configuration files. A change in this ID will show
     that <em>any</em> configuration file has changed.
   </div>
+  <div *ngIf="field === 'inst.systemId'">
+    The internal ID of the system used by this instance.
+  </div>
+  <div *ngIf="field === 'inst.systemTag'">
+    The version of the system in use. This changes when the system is modified.
+  </div>
 </mat-card>

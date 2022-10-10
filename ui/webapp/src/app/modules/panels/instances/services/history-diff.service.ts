@@ -372,6 +372,8 @@ export class InstanceConfigurationDiff {
   public productTag: Difference;
   public configTree: Difference;
   public autoUninstall: Difference;
+  public system: Difference;
+  public systemTag: Difference;
 
   constructor(base: InstanceConfiguration, compare: InstanceConfiguration) {
     this.name = new Difference(base?.name, compare?.name);
@@ -387,6 +389,8 @@ export class InstanceConfigurationDiff {
       base?.autoUninstall,
       compare?.autoUninstall
     );
+    this.system = new Difference(base?.system?.name, compare?.system?.name);
+    this.systemTag = new Difference(base?.system?.tag, compare?.system?.tag);
 
     this.type = getParentChangeType(
       base,
@@ -397,7 +401,9 @@ export class InstanceConfigurationDiff {
       this.purpose.type,
       this.productTag.type,
       this.configTree.type,
-      this.autoUninstall.type
+      this.autoUninstall.type,
+      this.system.type,
+      this.systemTag.type
     );
   }
 }

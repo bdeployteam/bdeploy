@@ -121,6 +121,40 @@
             [popup]="instCfgPopup"
           ></app-history-diff-field>
         </div>
+        <div
+          fxLayout="row"
+          fxLayoutAlign="start center"
+          class="bd-description-text"
+        >
+          <ng-template #instSysPopup>
+            <app-config-desc-cards
+              field="inst.systemId"
+            ></app-config-desc-cards>
+          </ng-template>
+          <div [style.margin-right.px]="3">System ID:</div>
+          <app-history-diff-field
+            [diffSide]="diffSide"
+            [diff]="diff.system"
+            [popup]="instSysPopup"
+          ></app-history-diff-field>
+        </div>
+        <div
+          fxLayout="row"
+          fxLayoutAlign="start center"
+          class="bd-description-text"
+        >
+          <ng-template #instSysTagPopup>
+            <app-config-desc-cards
+              field="inst.systemTag"
+            ></app-config-desc-cards>
+          </ng-template>
+          <div [style.margin-right.px]="3">System Ver.:</div>
+          <app-history-diff-field
+            [diffSide]="diffSide"
+            [diff]="diff.systemTag"
+            [popup]="instSysTagPopup"
+          ></app-history-diff-field>
+        </div>
       </div>
     </div>
   </div>
