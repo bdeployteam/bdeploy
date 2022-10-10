@@ -36,7 +36,7 @@ public class SystemResourceImpl implements SystemResource {
     private final String group;
     private final BHive hive;
 
-    @Context
+    @Inject
     private Minion minion;
 
     @Context

@@ -372,7 +372,8 @@ public class InstanceResourceImpl implements InstanceResource {
         // for each instance, read the meta-manifest, and provide the recorded data.
         var result = new ArrayList<InstanceOverallStatusDto>();
         for (var inst : list.stream().filter(i -> instances.contains(i.instance)).toList()) {
-            if (errors.contains(inst.managedServer.hostName)) {
+            if (inst.managedServer != null && inst.managedServer.hostName != null
+                    && errors.contains(inst.managedServer.hostName)) {
                 continue; // no state as we could not sync.
             }
             result.add(new InstanceOverallStatusDto(inst.instanceConfiguration.id,
