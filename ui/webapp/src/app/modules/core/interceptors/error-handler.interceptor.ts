@@ -8,6 +8,7 @@ import {
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import * as he from 'he';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NO_ERROR_HANDLING_HDR } from 'src/app/models/consts';
@@ -69,8 +70,9 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
               } catch (error) {
                 // silent.
               }
+              // response status texts are HTML encoded, so we need to decode that here manually.
               this.snackbar.open(
-                e.status + ': ' + e.statusText + ': ' + displayPath,
+                e.status + ': ' + he.decode(e.statusText) + ': ' + displayPath,
                 'DISMISS',
                 { panelClass: 'error-snackbar' }
               );
