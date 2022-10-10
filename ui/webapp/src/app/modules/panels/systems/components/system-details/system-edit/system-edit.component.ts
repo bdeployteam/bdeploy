@@ -48,6 +48,7 @@ export class SystemEditComponent implements OnDestroy, DirtyableDialog {
 
   /* template */ onSave(): void {
     this.doSave().subscribe(() => {
+      this.orig = this.system;
       this.tb.closePanel();
     });
   }
