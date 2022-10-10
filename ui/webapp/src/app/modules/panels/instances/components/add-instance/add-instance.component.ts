@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { AbstractControl, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -175,5 +175,9 @@ export class AddInstanceComponent
 
   /* template */ onSystemChange(value: ManifestKey) {
     this.config.system = value;
+  }
+
+  /* template */ delayRevalidateSystem(control: AbstractControl) {
+    setTimeout(() => control.updateValueAndValidity());
   }
 }

@@ -48,21 +48,29 @@ export class EditConfigComponent
   ) {
     this.subscription = areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([systems.systems$, edit.state$]).subscribe(([s, i]) => {
-        if (!s?.length || !i) {
-          return;
-        }
-        this.systemKeys = s.map((s) => s.key);
-        this.systemLabels = s.map(
-          (s) => `${s.config.name} (${s.config.description})`
-        );
+      combineLatest([systems.systems$, edit.state$, edit.current$]).subscribe(
+        ([s, i, dto]) => {
+          if (!s?.length || !i) {
+            return;
+          }
 
-        if (i.config.config.system) {
-          this.systemSel = this.systemKeys.find(
-            (k) => k.name === i.config.config.system.name
+          const serverName = dto?.managedServer?.hostName;
+          const filtered = s.filter(
+            (x) => !x.minion || x.minion === serverName
           );
+
+          this.systemKeys = filtered.map((s) => s.key);
+          this.systemLabels = filtered.map(
+            (s) => `${s.config.name} (${s.config.description})`
+          );
+
+          if (i.config.config.system) {
+            this.systemSel = this.systemKeys.find(
+              (k) => k.name === i.config.config.system.name
+            );
+          }
         }
-      })
+      )
     );
   }
 
