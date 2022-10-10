@@ -48,7 +48,7 @@ public class ApplicationParameterProvider {
         Collection<ApplicationConfiguration> apps = config.applications.stream().filter(a -> a.name.equals(appName)).toList();
         if (apps.isEmpty()) {
             throw new IllegalArgumentException("Unable to resolve parameter value. Application with the " + "name '" + appName
-                    + "' is not existing in this instance.");
+                    + "' is not existing on target node '" + config.name + "'.");
         }
         if (apps.size() != 1) {
             throw new IllegalArgumentException(
