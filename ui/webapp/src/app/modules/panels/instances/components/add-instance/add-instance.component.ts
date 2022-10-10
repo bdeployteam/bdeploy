@@ -80,39 +80,39 @@ export class AddInstanceComponent
       })
     );
     this.subscription.add(
-      this.groups
-        .newId()
-        .pipe(finalize(() => this.loading$.next(false)))
-        .subscribe((r) => {
-          this.config.id = r;
-          this.subscription.add(
-            this.products.products$.subscribe((products) => {
-              products?.forEach((p) => {
-                let item = this.prodList.find((x) => x.id === p.key.name);
-                if (!item) {
-                  item = { id: p.key.name, name: p.name, versions: [] };
-                  this.prodList.push(item);
-                }
-                item.versions.push(p.key.tag);
-              });
-              this.productNames = this.prodList.map((p) => p.name);
-            })
-          );
-
-          const snap = this.areas.panelRoute$.value;
-          const prodKey = snap.queryParamMap.get('productKey');
-          const prodTag = snap.queryParamMap.get('productTag');
-          if (!!prodKey && !!prodTag) {
-            const prod = this.prodList.find((p) => p.id === prodKey);
-            if (prod) {
-              if (prod.versions.find((v) => v === prodTag)) {
-                this.selectedProduct = prod;
-                this.config.product.name = prodKey;
-                this.config.product.tag = prodTag;
+      this.groups.newId().subscribe((r) => {
+        this.config.id = r;
+        this.config.uuid = r; // compat;
+        this.subscription.add(
+          this.products.products$.subscribe((products) => {
+            products?.forEach((p) => {
+              let item = this.prodList.find((x) => x.id === p.key.name);
+              if (!item) {
+                item = { id: p.key.name, name: p.name, versions: [] };
+                this.prodList.push(item);
               }
+              item.versions.push(p.key.tag);
+            });
+            this.productNames = this.prodList.map((p) => p.name);
+          })
+        );
+
+        const snap = this.areas.panelRoute$.value;
+        const prodKey = snap.queryParamMap.get('productKey');
+        const prodTag = snap.queryParamMap.get('productTag');
+        if (!!prodKey && !!prodTag) {
+          const prod = this.prodList.find((p) => p.id === prodKey);
+          if (prod) {
+            if (prod.versions.find((v) => v === prodTag)) {
+              this.selectedProduct = prod;
+              this.config.product.name = prodKey;
+              this.config.product.tag = prodTag;
             }
           }
-        })
+        }
+
+        this.loading$.next(false);
+      })
     );
 
     this.subscription.add(

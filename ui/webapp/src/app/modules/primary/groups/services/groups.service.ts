@@ -4,7 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
-import { debounceTime, finalize } from 'rxjs/operators';
+import { debounceTime, finalize, skipWhile, switchMap } from 'rxjs/operators';
 import {
   CustomAttributeDescriptor,
   CustomAttributesRecord,
@@ -93,19 +93,14 @@ export class GroupsService {
   }
 
   public newId(): Observable<string> {
-    return new Observable<string>((s) => {
-      const sub = this.current$.subscribe((r) => {
-        if (r) {
-          this.http
-            .get(`${this.apiPath}/${r.name}/new-uuid`, { responseType: 'text' })
-            .subscribe((id) => {
-              s.next(id);
-              s.complete();
-              sub.unsubscribe();
-            });
-        }
-      });
-    });
+    return this.current$.pipe(
+      skipWhile((g) => !g),
+      switchMap((g) =>
+        this.http.get(`${this.apiPath}/${g.name}/new-uuid`, {
+          responseType: 'text',
+        })
+      )
+    );
   }
 
   public updateImage(group: string, file: File) {

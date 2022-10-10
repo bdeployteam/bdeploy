@@ -259,6 +259,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
           this.groups.newId().subscribe((id) => {
             appConfig.application.tag = product.key.tag;
             appConfig.id = id;
+            appConfig.uid = id; // compat
 
             // no need to update mandatory (etc.) parameters here. the normal validation
             // will trigger according errors which need to be manually fixed by the user.

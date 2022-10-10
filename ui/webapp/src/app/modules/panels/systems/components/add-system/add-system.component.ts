@@ -45,12 +45,10 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
       })
     );
 
-    this.groups
-      .newId()
-      .pipe(finalize(() => this.loading$.next(false)))
-      .subscribe((r) => {
-        this.system.id = r;
-      });
+    this.groups.newId().subscribe((r) => {
+      this.system.id = r;
+      this.loading$.next(false);
+    });
 
     this.subscription.add(
       this.servers.servers$.subscribe((s) => {
