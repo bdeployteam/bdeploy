@@ -3,7 +3,6 @@ import { Route, RouterModule } from '@angular/router';
 import { AdminGuard } from '../../core/guards/admin.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { ScopedAdminGuard } from '../../core/guards/scoped-admin.guard';
-import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { setRouteId } from '../../core/utils/routeId-generator';
 import { AddRepositoryComponent } from './components/add-repository/add-repository.component';
@@ -45,7 +44,6 @@ const REPOSITORIES_ROUTES: Route[] = [
   {
     path: 'details/:key/:tag',
     component: SoftwareDetailsComponent,
-    canActivate: [ScopedReadGuard],
   },
 ];
 

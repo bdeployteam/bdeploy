@@ -19,7 +19,8 @@ export class RepositoryService {
   private repository: string;
   private subscription: Subscription;
 
-  private productsApiPath = (r) => `${this.cfg.config.api}/group/${r}/product`;
+  private productsApiPath = (r) =>
+    `${this.cfg.config.api}/softwarerepository/${r}/product`;
   private softwareRepositoryApiPath = (r) =>
     `${this.cfg.config.api}/softwarerepository/${r}/content`;
   public uploadUrl$ = new BehaviorSubject<string>(null);
