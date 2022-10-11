@@ -38,7 +38,9 @@ import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
+import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathValidationDummyResolver;
+import io.bdeploy.interfaces.variables.EnvironmentVariableDummyResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.LocalHostnameResolver;
@@ -422,6 +424,8 @@ public class ProductUpdateService {
         res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
         res.add(new OsVariableResolver());
         res.add(new LocalHostnameResolver(false));
+        res.add(new EnvironmentVariableDummyResolver());
+        res.add(new DelayedVariableResolver(res));
 
         return res;
     }
