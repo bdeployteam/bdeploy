@@ -56,19 +56,24 @@ export class AuthenticationService {
       (userInfo) => (this.currentUserInfo = userInfo)
     );
 
-    combineLatest([areas.groupContext$, areas.repositoryContext$]).subscribe(
-      ([groupContext, repositoryContext]) => {
-        if (groupContext || repositoryContext) {
-          this.isCurrentScopeAdmin$.next(this.isCurrentScopeAdmin());
-          this.isCurrentScopeWrite$.next(this.isCurrentScopeWrite());
-        }
-        if (groupContext) {
-          this.isCurrentScopedExclusiveReadClient$.next(
-            this.isCurrentScopeExclusiveReadClient()
-          );
-        }
+    combineLatest([
+      areas.groupContext$,
+      areas.repositoryContext$,
+      this.tokenSubject, // just used as trigger
+    ]).subscribe(([groupContext, repositoryContext]) => {
+      if (groupContext || repositoryContext) {
+        this.isCurrentScopeAdmin$.next(this.isCurrentScopeAdmin());
+        this.isCurrentScopeWrite$.next(this.isCurrentScopeWrite());
+      } else {
+        this.isCurrentScopeAdmin$.next(this.isGlobalAdmin());
+        this.isCurrentScopeWrite$.next(this.isGlobalWrite());
       }
-    );
+      if (groupContext) {
+        this.isCurrentScopedExclusiveReadClient$.next(
+          this.isCurrentScopeExclusiveReadClient()
+        );
+      }
+    });
 
     this.tokenSubject.subscribe(() => {
       this.isGlobalAdmin$.next(this.isGlobalAdmin());
@@ -156,7 +161,7 @@ export class AuthenticationService {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
       return !!tokenPayload.c.find(
-        (c) => c.scope === null && c.permission === Permission.ADMIN
+        (c) => c.scope === null && this.ge(c.permission, Permission.ADMIN)
       );
     }
     return false;
@@ -166,7 +171,7 @@ export class AuthenticationService {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
       return !!tokenPayload.c.find(
-        (c) => c.scope === null && c.permission === Permission.WRITE
+        (c) => c.scope === null && this.ge(c.permission, Permission.WRITE)
       );
     }
     return false;
@@ -176,7 +181,7 @@ export class AuthenticationService {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
       return !!tokenPayload.c.find(
-        (c) => c.scope === null && c.permission === Permission.READ
+        (c) => c.scope === null && this.ge(c.permission, Permission.READ)
       );
     }
     return false;
