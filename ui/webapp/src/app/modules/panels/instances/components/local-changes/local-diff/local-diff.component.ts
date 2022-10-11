@@ -2,7 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
-import { ConfigPair } from '../../../utils/diff-utils';
+import {
+  ApplicationPair,
+  ConfigPair,
+  NodePair,
+} from '../../../utils/diff-utils';
 
 @Component({
   selector: 'app-local-diff',
@@ -11,6 +15,7 @@ import { ConfigPair } from '../../../utils/diff-utils';
 export class LocalDiffComponent implements OnInit, OnDestroy {
   /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
   /* template */ clientNodeName = CLIENT_NODE_NAME;
+  /* template */ showOnlyDifferences = true;
 
   private subscription: Subscription;
 
@@ -48,6 +53,17 @@ export class LocalDiffComponent implements OnInit, OnDestroy {
 
       this.configPair$.next(new ConfigPair(baseCache, localCache));
     });
+  }
+
+  /* template */ showAppPair(appPair: ApplicationPair): boolean {
+    const showAll = !this.showOnlyDifferences;
+    return showAll || appPair.hasDifferences;
+  }
+
+  /* template */ showNodePair(nodePair: NodePair): boolean {
+    const hasApplications = !!nodePair?.applications?.length;
+    const showAll = !this.showOnlyDifferences;
+    return hasApplications && (showAll || nodePair.hasDifferences);
   }
 
   ngOnDestroy(): void {
