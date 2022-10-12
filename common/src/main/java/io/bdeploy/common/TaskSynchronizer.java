@@ -7,14 +7,27 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Performs tasks. When *another* Thread wants to perform the *same* operation, it instead waits for the first Thread to complete
  * the task.
  */
 public class TaskSynchronizer {
 
+    private static final Logger log = LoggerFactory.getLogger(TaskSynchronizer.class);
+
     @SuppressWarnings("unchecked")
     private final Map<Comparable<?>, Future<?>> tasks = new TreeMap<>((a, b) -> {
+        if (a == null && b == null) {
+            return 0;
+        }
+
+        if (a == null || b == null) {
+            return a == null ? 1 : -1;
+        }
+
         String clsAName = a.getClass().getName();
         String clsBName = b.getClass().getName();
 
@@ -44,6 +57,11 @@ public class TaskSynchronizer {
      */
     @SuppressWarnings("unchecked")
     public <T> T perform(Comparable<?> key, Callable<T> task) {
+        if (key == null) {
+            // accept for compat but write warning log.
+            log.warn("Null key not allowed in future", new IllegalStateException("Null key, task: " + task));
+        }
+
         Future<?> existing;
         CompletableFuture<?> tracker = null;
         synchronized (this) {
