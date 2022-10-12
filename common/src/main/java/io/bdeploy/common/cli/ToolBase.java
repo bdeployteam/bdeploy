@@ -431,13 +431,6 @@ public abstract class ToolBase {
             return result;
         }
 
-        protected DataResult createResultWithFields(String message, Map<String, String> fields) {
-            DataResult result = dataFormat.createResult(output);
-            result.setMessage(message);
-            fields.entrySet().forEach(e -> result.addField(e.getKey(), e.getValue()));
-            return result;
-        }
-
         /**
          * Set an alternative output destination.
          */

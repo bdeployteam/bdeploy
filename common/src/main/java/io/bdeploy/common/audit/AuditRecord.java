@@ -4,13 +4,12 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.TreeMap;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.SecurityContext;
-import jakarta.ws.rs.core.UriInfo;
-
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 import io.bdeploy.common.cfg.Configuration;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Immutable object representing an audit entry.
@@ -122,11 +121,6 @@ public class AuditRecord {
 
         public Builder addParameters(Map<String, String> params) {
             parameters.putAll(params);
-            return this;
-        }
-
-        public Builder clobberParameter(String name) {
-            parameters.put(name, parameters.get(name).replaceAll(".", "*"));
             return this;
         }
 

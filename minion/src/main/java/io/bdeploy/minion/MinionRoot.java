@@ -504,15 +504,6 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
     }
 
-    /**
-     * Read the minions state.json with a non-default class. This can be used to
-     * read the state.json file with a custom class for state migration, which
-     * contains fields that are no longer in state.json.
-     */
-    public <T> T getPartialStateForMigration(Class<T> clazz) {
-        return readConfig(STATE_FILE, clazz);
-    }
-
     public MinionState getState() {
         AtomicReference<MinionState> ref = new AtomicReference<>(null);
         locked(() -> {

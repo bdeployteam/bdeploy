@@ -14,7 +14,6 @@ import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
-import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 
 /**
  * Contains helpers for the {@linkplain ProcessController}
@@ -120,16 +119,6 @@ class ProcessControllerHelper {
             return process.exitValue();
         }
         return null;
-    }
-
-    /**
-     * Returns the state depending on the given exit code.
-     */
-    public static ProcessState getForExitCode(Integer exitCode) {
-        if (exitCode == null || exitCode.intValue() == 0) {
-            return ProcessState.STOPPED;
-        }
-        return ProcessState.CRASHED_PERMANENTLY;
     }
 
     /**

@@ -20,8 +20,6 @@ import org.glassfish.grizzly.websockets.Broadcaster;
 import org.glassfish.grizzly.websockets.OptimizedBroadcaster;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,8 +33,6 @@ import jakarta.ws.rs.core.Response.Status;
 public class ObjectChangeWebSocket extends WebSocketApplication implements ObjectChangeBroadcaster {
 
     public static final String OCWS_PATH = "/object-changes";
-
-    static final Logger log = LoggerFactory.getLogger(ObjectChangeWebSocket.class);
 
     /** Used to send messages to all {@link WebSocket}s. */
     private final Broadcaster broadcaster;

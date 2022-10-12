@@ -447,18 +447,6 @@ public class ProductManifest {
     }
 
     /**
-     * @return the application with the given ID
-     */
-    public Manifest.Key getApplication(String appName) {
-        for (Manifest.Key app : applications) {
-            if (app.getName().equals(appName)) {
-                return app;
-            }
-        }
-        return null;
-    }
-
-    /**
      * @return additionally referenced non-application manifests (e.g. dependencies of applications).
      */
     public SortedSet<Manifest.Key> getReferences() {

@@ -14,7 +14,6 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
@@ -30,7 +29,6 @@ import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
-import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
@@ -144,19 +142,9 @@ public interface InstanceResource {
             InstanceUpdateDto state);
 
     @GET
-    @Path("/{instance}/{tag}/history")
-    @RequiredPermission(permission = Permission.READ)
-    public InstanceManifestHistoryDto getHistory(@ActivityScope @PathParam("instance") String instanceId,
-            @ActivityScope @PathParam("tag") String tag);
-
-    @GET
     @Path("/{instance}/state")
     @RequiredPermission(permission = Permission.READ)
     public InstanceStateRecord getDeploymentStates(@ActivityScope @PathParam("instance") String instanceId);
-
-    @GET
-    @Path("/purposes")
-    public List<InstancePurpose> getPurposes();
 
     @Path("/{instance}/processes")
     @RequiredPermission(permission = Permission.READ)

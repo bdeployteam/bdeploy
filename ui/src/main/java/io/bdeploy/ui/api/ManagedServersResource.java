@@ -10,7 +10,6 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
-import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.ui.dto.MinionSyncResultDto;
@@ -109,13 +108,6 @@ public interface ManagedServersResource {
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
     public void updateManagedServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
             ManagedMasterDto update);
-
-    @GET
-    @Path("/minion-config/{group}/{server:.+}")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public Map<String, MinionDto> getMinionsOfManagedServer(@ActivityScope @PathParam("group") String groupName,
-            @PathParam("server") String serverName);
 
     @GET
     @Path("/minion-state/{group}/{server:.+}")

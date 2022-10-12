@@ -46,9 +46,6 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
         @Help("Path to a launcher distribution (ZIP) which will be pushed to the master")
         String launcher();
 
-        @Help("OS of the remote master. If not specified it is assumed that the local and the remote OS are the same. ")
-        String masterOs();
-
         @Help(value = "Don't ask for confirmation before initiating the update process on the remote", arg = false)
         boolean yes() default false;
     }

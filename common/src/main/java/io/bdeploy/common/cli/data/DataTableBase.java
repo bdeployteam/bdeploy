@@ -58,18 +58,6 @@ public abstract class DataTableBase implements DataTable {
     /**
      * @param data the original data
      * @param limit the length limit
-     * @return the original data limited to the given length.
-     */
-    protected String limit(String data, int limit) {
-        if (data.length() <= limit) {
-            return data;
-        }
-        return data.substring(0, limit);
-    }
-
-    /**
-     * @param data the original data
-     * @param limit the length limit
      * @return the original data limited to the given length minus 3 characters plus '...' appended.
      */
     protected String ellipsis(String data, int limit) {

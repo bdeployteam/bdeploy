@@ -124,11 +124,6 @@ public class ProductResourceImpl implements ProductResource {
     }
 
     @Override
-    public Long count() {
-        return (long) ProductManifest.scan(hive).size();
-    }
-
-    @Override
     public void delete(String name, String tag) {
         Manifest.Key key = new Manifest.Key(name, tag);
         Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));

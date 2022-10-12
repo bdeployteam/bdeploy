@@ -163,20 +163,8 @@ public class PersistentManifestClassification<T> {
         hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(2).setToDelete(classificationName));
     }
 
-    /**
-     * Remove all existing classifications from disk.
-     */
-    public void remove() {
-        // remove them all
-        hive.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(0).setToDelete(classificationName));
-    }
-
     public SortedMap<Manifest.Key, T> getClassifications() {
         return classifications;
-    }
-
-    public T getClassification(Manifest.Key key) {
-        return classifications.get(key);
     }
 
     private static final class CfStorage<T> {

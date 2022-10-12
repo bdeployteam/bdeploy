@@ -1119,12 +1119,12 @@ public class ProcessController {
         }
     }
 
-    /** Returns a new-instance of this controller without any runtime data */
+    /** TESTING only: Returns a new-instance of this controller without any runtime data */
     ProcessController newInstance() {
         return new ProcessController(instanceId, instanceTag, processConfig, processDir);
     }
 
-    /** Returns the future that is scheduled to recover a crashed application */
+    /** TESTING only: Returns the future that is scheduled to recover a crashed application */
     Future<?> getRecoverTask() {
         return recoverTask;
     }

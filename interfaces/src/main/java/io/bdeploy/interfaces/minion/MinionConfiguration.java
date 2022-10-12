@@ -65,17 +65,6 @@ public class MinionConfiguration {
     }
 
     /**
-     * @param minionName the name of the minion.
-     * @param newConfig the new minion configuration.
-     */
-    public void replaceMinion(String minionName, MinionDto newConfig) {
-        if (!minions.containsKey(minionName)) {
-            throw new IllegalArgumentException("Minion with the given name does not exist.");
-        }
-        minions.put(minionName, newConfig);
-    }
-
-    /**
      * Returns a view of the minion mappings.
      */
     public Set<Entry<String, MinionDto>> entrySet() {

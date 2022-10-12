@@ -297,7 +297,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
     classes = [
         // Descriptors
         'io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor',
-        'io.bdeploy.interfaces.descriptor.client.ClickAndStartDescriptor',
         'io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor',
         'io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor',
         'io.bdeploy.interfaces.descriptor.application.HttpEndpoint$HttpAuthenticationType',
@@ -315,7 +314,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto',
         // UI only DTOs
         'io.bdeploy.ui.dto.ApplicationDto',
-        'io.bdeploy.ui.dto.AuditLogDto',
         'io.bdeploy.ui.dto.ClientApplicationDto',
         'io.bdeploy.ui.dto.InstanceDto',
         'io.bdeploy.ui.dto.InstanceClientAppsDto',
@@ -327,7 +325,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.InstanceVersionDto',
         'io.bdeploy.ui.dto.StringEntryChunkDto',
         'io.bdeploy.ui.dto.LauncherDto',
-        'io.bdeploy.ui.dto.InstanceManifestHistoryDto',
         'io.bdeploy.ui.dto.ConfigFileDto',
         'io.bdeploy.ui.dto.BackendInfoDto',
         'io.bdeploy.ui.dto.ProductTransferDto',

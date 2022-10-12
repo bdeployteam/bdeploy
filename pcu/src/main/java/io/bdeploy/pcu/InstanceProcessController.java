@@ -345,8 +345,7 @@ public class InstanceProcessController {
     }
 
     /**
-     * Detaches all running applications so that they cannot be controlled any more.
-     * Only useful in JUNIT tests.
+     * TESTING only: Detaches all running applications so that they cannot be controlled any more.
      */
     public void detach() {
         try {
@@ -363,7 +362,7 @@ public class InstanceProcessController {
     }
 
     /**
-     * Returns all process controllers belonging to the given tag.
+     * TESTING only: Returns all process controllers belonging to the given tag.
      */
     public ProcessList getProcessList(String tag) {
         return processMap.get(tag);

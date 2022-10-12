@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.ui.api.ApplicationResource;
@@ -47,13 +46,6 @@ public class ApplicationResourceImpl implements ApplicationResource {
             }
             throw new WebApplicationException("Cannot load product " + productKey, Status.NOT_FOUND);
         }
-    }
-
-    @Override
-    public ApplicationDescriptor getDescriptor(String name, String tag) {
-        ProductManifest productManifest = ProductManifest.of(productBHive, productKey);
-        ApplicationManifest manifest = ApplicationManifest.of(productBHive, new Manifest.Key(name, tag), productManifest);
-        return manifest.getDescriptor();
     }
 
 }

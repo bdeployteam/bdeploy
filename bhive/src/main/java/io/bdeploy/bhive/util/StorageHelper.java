@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.bhive.model.Tree;
@@ -89,17 +88,6 @@ public class StorageHelper {
     }
 
     /**
-     * De-serializes an Object of given type from a byte[].
-     */
-    public static <T> T fromRawBytes(byte[] bytes, TypeReference<T> ref) {
-        try {
-            return getMapper().readValue(bytes, ref);
-        } catch (IOException e) {
-            throw new IllegalStateException(JSON_READ_ERROR, e);
-        }
-    }
-
-    /**
      * De-serializes an Object of given type from a given file
      */
     public static <T> T fromPath(Path path, Class<T> clazz) {
@@ -121,17 +109,6 @@ public class StorageHelper {
         }
         try (InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
             return getMapper().readValue(is, clazz);
-        } catch (IOException e) {
-            throw new IllegalStateException(JSON_READ_ERROR, e);
-        }
-    }
-
-    /**
-     * De-serializes an Object of given type from a stream into memory using a generic type reference.
-     */
-    public static <T> T fromStream(InputStream is, TypeReference<T> ref) {
-        try (InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-            return getMapper().readValue(is, ref);
         } catch (IOException e) {
             throw new IllegalStateException(JSON_READ_ERROR, e);
         }

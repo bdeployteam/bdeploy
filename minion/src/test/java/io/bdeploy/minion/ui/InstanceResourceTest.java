@@ -1,7 +1,6 @@
 package io.bdeploy.minion.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,8 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +68,17 @@ class InstanceResourceTest {
         nmr.addNode(dto);
     }
 
+    /**
+     * Groups the given node descriptions by the target node name
+     */
+    private static Map<String, InstanceNodeConfigurationDto> groupByNode(Collection<InstanceNodeConfigurationDto> values) {
+        Map<String, InstanceNodeConfigurationDto> map = new HashMap<>();
+        for (InstanceNodeConfigurationDto value : values) {
+            map.put(value.nodeName, value);
+        }
+        return map;
+    }
+
     @Test
     void getConfiguration(InstanceGroupResource root, @TempDir Path tmpDir, RemoteService remote) throws Exception {
         addNodes(remote);
@@ -88,7 +99,7 @@ class InstanceResourceTest {
         // Verify Instance1
         InstanceNodeConfigurationListDto instanceConfig = instanceResource.getNodeConfigurations("Instance1", "1");
         List<InstanceNodeConfigurationDto> nodeConfigs = instanceConfig.nodeConfigDtos;
-        Map<String, InstanceNodeConfigurationDto> node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
+        Map<String, InstanceNodeConfigurationDto> node2NodeDto = groupByNode(nodeConfigs);
         assertEquals(2, node2NodeDto.size());
         verifyNodeDto(node2NodeDto.get("Node1"), true);
         verifyNodeDto(node2NodeDto.get("Node2"), true);
@@ -98,7 +109,7 @@ class InstanceResourceTest {
         // Verify Instance2
         instanceConfig = instanceResource.getNodeConfigurations("Instance2", "1");
         nodeConfigs = instanceConfig.nodeConfigDtos;
-        node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
+        node2NodeDto = groupByNode(nodeConfigs);
         assertEquals(1, node2NodeDto.size());
         verifyNodeDto(node2NodeDto.get("Node1"), false);
         verifyNodeDto(node2NodeDto.get("Node2"), true);
@@ -108,7 +119,7 @@ class InstanceResourceTest {
         // Verify Instance3
         instanceConfig = instanceResource.getNodeConfigurations("Instance3", "1");
         nodeConfigs = instanceConfig.nodeConfigDtos;
-        node2NodeDto = InstanceNodeConfigurationDto.groupByNode(nodeConfigs);
+        node2NodeDto = groupByNode(nodeConfigs);
         assertEquals(2, node2NodeDto.size());
         verifyNodeDto(node2NodeDto.get("Node1"), false);
         verifyNodeDto(node2NodeDto.get("Node2"), false);
@@ -151,7 +162,7 @@ class InstanceResourceTest {
         // Check node configuration
         InstanceNodeConfigurationListDto instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "2");
         List<InstanceNodeConfigurationDto> availableNodeConfigs = instanceConfigDto.nodeConfigDtos;
-        Map<String, InstanceNodeConfigurationDto> node2Config = InstanceNodeConfigurationDto.groupByNode(availableNodeConfigs);
+        Map<String, InstanceNodeConfigurationDto> node2Config = groupByNode(availableNodeConfigs);
         assertEquals(1, node2Config.size()); // one for each node available
 
         // Master should not have a configuration
@@ -175,7 +186,7 @@ class InstanceResourceTest {
         // Check the updated configuration
         instanceConfigDto = instanceResource.getNodeConfigurations("DemoInstance", "3");
         availableNodeConfigs = instanceConfigDto.nodeConfigDtos;
-        node2Config = InstanceNodeConfigurationDto.groupByNode(availableNodeConfigs);
+        node2Config = groupByNode(availableNodeConfigs);
 
         // Master should not have a configuration
         verifyNodeDto(node2Config.get(Minion.DEFAULT_NAME), false);
@@ -213,18 +224,6 @@ class InstanceResourceTest {
         } else {
             assertNull(nodeDto);
         }
-    }
-
-    @Test
-    void purposes(InstanceGroupResource root, RemoteService remote) {
-        addNodes(remote);
-
-        InstanceGroupConfiguration group = new InstanceGroupConfiguration();
-        group.name = "demo";
-        group.description = "Demo";
-        root.create(group);
-
-        assertIterableEquals(Arrays.asList(InstancePurpose.values()), root.getInstanceResource(group.name).getPurposes());
     }
 
     @Test
