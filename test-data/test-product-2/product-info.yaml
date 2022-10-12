@@ -10,9 +10,11 @@ configTemplates: config
 
 instanceTemplates:
 - "product-template.yaml"
+- "override-template.yaml"
 
 applicationTemplates:
 - "app-templates/server-with-sleep.yaml"
+- "app-templates/server-with-template.yaml"
 
 parameterTemplates:
 - "param-templates/shared.yaml"

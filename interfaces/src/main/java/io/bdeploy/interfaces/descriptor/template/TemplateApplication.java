@@ -30,9 +30,32 @@ public class TemplateApplication {
     @JsonPropertyDescription("A set of parameters to configure on the process resulting from this template.")
     public List<TemplateParameter> startParameters = new ArrayList<>();
 
-    /**
-     * Avoid multiple resolutions on multiple references. Internal.
-     */
-    public transient boolean resolved;
+    public List<TemplateVariableFixedValueOverride> fixedVariables = new ArrayList<>();
+
+    public TemplateApplication() {
+        // intentionally left blank
+    }
+
+    public TemplateApplication(TemplateApplication original) {
+        this.application = original.application;
+        this.template = original.template;
+        this.name = original.name;
+        this.description = original.description;
+        this.preferredProcessControlGroup = original.preferredProcessControlGroup;
+        this.processControl = original.processControl; // immutable, shallow OK
+        this.fixedVariables = original.fixedVariables;
+
+        // this one is the tricky one, as fixedVariables can transitively modify parameters.
+        for (var p : original.startParameters) {
+            var np = new TemplateParameter();
+            np.id = p.id;
+            np.value = p.value;
+            this.startParameters.add(np);
+        }
+    }
+
+    public TemplateApplication copy() {
+        return new TemplateApplication(this);
+    }
 
 }

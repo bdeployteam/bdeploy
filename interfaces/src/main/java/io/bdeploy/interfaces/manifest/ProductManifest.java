@@ -36,6 +36,7 @@ import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfiguration;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
@@ -44,8 +45,10 @@ import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescrip
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
+import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCache;
 import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCacheRecord;
+import io.bdeploy.interfaces.variables.TemplateOverrideResolver;
 
 /**
  * A special manifestation of a {@link Manifest} which must follow a certain layout and groups multiple applications together
@@ -234,16 +237,20 @@ public class ProductManifest {
             resolveInstanceVariableTemplates(varTemplates, itd.instanceVariables, itd.instanceVariableDefaults);
 
             for (var group : itd.groups) {
+                var appList = new ArrayList<TemplateApplication>();
                 for (var app : group.applications) {
                     try {
-                        resolveAppTemplate(app, appTemplates, itd.templateVariables);
+                        var res = resolveAppTemplate(app, appTemplates, itd.templateVariables, new ArrayList<>(),
+                                new ArrayList<>());
+                        if (res != null) {
+                            appList.add(res);
+                        }
                     } catch (Exception e) {
                         log.error("Cannot resolve application template {} from instance template {}", app.name, itd.name, e);
                     }
                 }
 
-                // remove unresolved things.
-                group.applications.removeIf(a -> !a.resolved);
+                group.applications = appList;
             }
 
             // remove group if no application resolved.
@@ -253,15 +260,20 @@ public class ProductManifest {
         // remove template if no application in any group resolved.
         instTemplates.removeIf(t -> t.groups.isEmpty());
 
+        var resApps = new ArrayList<ApplicationTemplateDescriptor>();
         for (ApplicationTemplateDescriptor atd : appTemplates) {
             try {
-                resolveAppTemplate(atd, appTemplates, atd.templateVariables);
+                var res = resolveAppTemplate(atd, appTemplates, atd.templateVariables, new ArrayList<>(), new ArrayList<>());
+                if (res != null) {
+                    resApps.add(res);
+                }
             } catch (Exception e) {
                 log.error("Cannot resolve application template {}", atd.name, e);
             }
         }
 
-        appTemplates.removeIf(a -> !a.resolved);
+        appTemplates.clear();
+        appTemplates.addAll(resApps);
     }
 
     private static void resolveInstanceVariableTemplates(List<InstanceVariableTemplateDescriptor> templates,
@@ -303,15 +315,47 @@ public class ProductManifest {
         }
     }
 
-    private static void resolveAppTemplate(TemplateApplication app, List<ApplicationTemplateDescriptor> appTemplates,
-            List<TemplateVariable> varList) {
-        if (app.resolved) {
-            return;
+    private static <T extends TemplateApplication> T resolveAppTemplate(T original,
+            List<ApplicationTemplateDescriptor> appTemplates, List<TemplateVariable> varList,
+            List<TemplateVariableFixedValueOverride> overrides, List<String> circleDetection) {
+
+        // we always work on a copy of the configuration just in case it is referenced from more than one place.
+        @SuppressWarnings("unchecked")
+        T app = (T) original.copy();
+
+        if (app instanceof ApplicationTemplateDescriptor desc) {
+            // *must* have an ID.
+            if (circleDetection.contains(desc.id)) {
+                // we already resolved this through *some* path - this is not ok.
+                throw new IllegalStateException("Circular definition found in application templates when processing: " + desc.id);
+            }
+
+            circleDetection.add(desc.id);
         }
 
         if (app.template == null && app.application == null) {
             // unfortunately no more information available...
             throw new IllegalArgumentException("Template without application and template reference found");
+        }
+
+        List<TemplateVariableFixedValueOverride> mergedOverrides = new ArrayList<>();
+        if (overrides != null && !overrides.isEmpty()) {
+            mergedOverrides.addAll(overrides);
+        }
+
+        if (app.fixedVariables != null && !app.fixedVariables.isEmpty()) {
+            // add only if overrides don't already contain a value.
+            for (var fixed : app.fixedVariables) {
+                if (mergedOverrides.stream().filter(o -> o.id.equals(fixed.id)).findAny().isEmpty()) {
+                    mergedOverrides.add(fixed);
+                }
+            }
+        }
+
+        // update variable values for all "our" parameters according to the present overrides.
+        app.name = processTemplateOverride(app.name, mergedOverrides);
+        for (var param : app.startParameters) {
+            param.value = processTemplateOverride(param.value, mergedOverrides);
         }
 
         if (app.template != null) {
@@ -320,38 +364,47 @@ public class ProductManifest {
                 if (log.isDebugEnabled()) {
                     log.debug("Template error. Cannot find template {}", app.template);
                 }
-                return;
+                return null;
             }
             var parentDesc = parent.get();
-            if (!parentDesc.resolved) {
-                resolveAppTemplate(parentDesc, appTemplates, parentDesc.templateVariables);
-            }
+            var parentApp = resolveAppTemplate(parentDesc, appTemplates, parentDesc.templateVariables, mergedOverrides,
+                    circleDetection);
 
             // add variables from parent template to next outer variables.
             for (var variable : parentDesc.templateVariables) {
                 var existing = varList.stream().filter(v -> v.id.equals(variable.id)).findAny();
-                if (!existing.isPresent()) {
+                var override = overrides.stream().filter(o -> o.id.equals(variable.id)).findAny();
+                if (!existing.isPresent() && !override.isPresent()) {
                     varList.add(variable);
                 }
             }
 
             // merge all kinds of attributes, so that 'app' contains a complete template in the end.
-            mergeParentIntoTemplate(app, parentDesc);
+            mergeParentIntoTemplate(app, parentApp);
         }
 
-        app.resolved = true;
+        return app;
     }
 
-    private static void mergeParentIntoTemplate(TemplateApplication app, ApplicationTemplateDescriptor parentDesc) {
+    private static String processTemplateOverride(String value, List<TemplateVariableFixedValueOverride> overrides) {
+        if (overrides == null || overrides.isEmpty()) {
+            return value;
+        }
+
+        TemplateOverrideResolver res = new TemplateOverrideResolver(overrides);
+        return TemplateHelper.process(value, res, res::canResolve);
+    }
+
+    private static void mergeParentIntoTemplate(TemplateApplication app, TemplateApplication parentApp) {
         // merge simple attributes
-        app.application = resolveStringValue(app.application, parentDesc.application);
-        app.name = resolveStringValue(app.name, parentDesc.name);
-        app.description = resolveStringValue(app.description, parentDesc.description);
+        app.application = resolveStringValue(app.application, parentApp.application);
+        app.name = resolveStringValue(app.name, parentApp.name);
+        app.description = resolveStringValue(app.description, parentApp.description);
         app.preferredProcessControlGroup = resolveStringValue(app.preferredProcessControlGroup,
-                parentDesc.preferredProcessControlGroup);
+                parentApp.preferredProcessControlGroup);
 
         // merge process control partial object as map
-        for (var entry : parentDesc.processControl.entrySet()) {
+        for (var entry : parentApp.processControl.entrySet()) {
             if (!app.processControl.containsKey(entry.getKey())) {
                 app.processControl.put(entry.getKey(), entry.getValue());
             }
@@ -361,9 +414,9 @@ public class ProductManifest {
             app.startParameters = new ArrayList<>();
         }
 
-        if (parentDesc.startParameters != null) {
+        if (parentApp.startParameters != null) {
             // merge start parameters
-            for (var param : parentDesc.startParameters) {
+            for (var param : parentApp.startParameters) {
                 var existing = app.startParameters.stream().filter(p -> p.id.equals(param.id)).findAny();
                 if (!existing.isPresent()) {
                     app.startParameters.add(param);

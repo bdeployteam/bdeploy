@@ -48,6 +48,9 @@ groups:
     - uid: param.text
       value: "{{T:text-param}}"
   - template: server-with-sleep
+    fixedVariables:
+      - id: sleep-timeout
+        value: 10
     startParameters:
     - uid: param.text
       value: "{{X:param.global}}"

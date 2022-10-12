@@ -24,4 +24,20 @@ public class ApplicationTemplateDescriptor extends TemplateApplication {
     @JsonAlias("variables")
     @JsonPropertyDescription("Definition of variables available in this template.")
     public List<TemplateVariable> templateVariables = new ArrayList<>();
+
+    public ApplicationTemplateDescriptor() {
+        // intentionally left blank
+    }
+
+    public ApplicationTemplateDescriptor(ApplicationTemplateDescriptor original) {
+        super(original);
+
+        this.id = original.id;
+        this.templateVariables.addAll(original.templateVariables); // shallow is ok - template variables are immutable.
+    }
+
+    @Override
+    public ApplicationTemplateDescriptor copy() {
+        return new ApplicationTemplateDescriptor(this);
+    }
 }

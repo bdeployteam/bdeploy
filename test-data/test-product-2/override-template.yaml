@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/instanceTemplateYaml
+
+name: Test Overrides
+description: "Test template variable overrides"
+
+groups:
+- name: "No Override"
+  description: "Server application should query"
+
+  applications:
+  - template: server-with-template
+
+- name: "With Override"
+  description: "Server application should query"
+
+  applications:
+  - template: server-with-template
+    fixedVariables:
+      - id: template-var
+        value: 10
+    startParameters:
+    - uid: param.text
+      value: "{{T:template-var:+10}}"
+   

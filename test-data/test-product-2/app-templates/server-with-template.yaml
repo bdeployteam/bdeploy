@@ -1,16 +1,16 @@
 # yaml-language-server: $schema=https://localhost:7701/api/public/v1/schema/applicationTemplateYaml
 
-id: server-with-sleep
+id: server-with-template
 application: server-app
-name: Server With Sleep
+name: Server With Template
 description: A Server Application with the sleep parameter set to a given value.
 
 templateVariables:
-  - uid: sleep-timeout
-    name: "Sleep Timeout"
+  - uid: template-var
+    name: "Numeric Variable"
     description: "The amount of time the server application should sleep"
-    defaultValue: "60"
+    defaultValue: "20"
 
 startParameters:
 - uid: param.sleep
-  value: "{{T:sleep-timeout}}"
+  value: "{{T:template-var}}"
