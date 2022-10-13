@@ -70,17 +70,6 @@ public class InstanceStatusDto {
     }
 
     /**
-     * Returns whether or not an application with the given UID is running on any node.
-     *
-     * @param applicationId
-     *            the application identifier
-     * @return {@code true} if it is running and {@code false} otherwise
-     */
-    public boolean isAppRunning(String applicationId) {
-        return getNodeWhereAppIsRunning(applicationId) != null;
-    }
-
-    /**
      * Returns whether or not an application with the given UID is running or scheduled on any node.
      *
      * @param applicationId
@@ -158,22 +147,6 @@ public class InstanceStatusDto {
             InstanceNodeStatusDto nodeDto = entry.getValue();
             if (nodeDto.isAppDeployed(applicationId)) {
                 return nodeName;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the status of the given application.
-     *
-     * @param applicationId the application identifier
-     * @return the status or {@code null} if the application is not deployed on any node
-     */
-    public ProcessStatusDto getAppStatus(String applicationId) {
-        for (Map.Entry<String, InstanceNodeStatusDto> entry : node2Applications.entrySet()) {
-            InstanceNodeStatusDto nodeDto = entry.getValue();
-            if (nodeDto.isAppDeployed(applicationId)) {
-                return nodeDto.getStatus(applicationId);
             }
         }
         return null;

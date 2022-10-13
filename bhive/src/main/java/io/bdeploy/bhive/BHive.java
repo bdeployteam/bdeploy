@@ -364,13 +364,6 @@ public class BHive implements AutoCloseable, BHiveExecution {
             this.retryCount = retryCount;
             return this;
         }
-
-        /**
-         * Returns the number of times the operation should be executed until giving up.
-         */
-        protected int getRetryCount() {
-            return retryCount;
-        }
     }
 
     /**

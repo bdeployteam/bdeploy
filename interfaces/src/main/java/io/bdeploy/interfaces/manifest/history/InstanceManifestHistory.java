@@ -49,17 +49,6 @@ public class InstanceManifestHistory {
     }
 
     /**
-     * Finds the timestamp of the most recent record of the given {@link Action}.
-     *
-     * @param action the action to look up.
-     * @return the record, or <code>null</code> if none has been found.
-     */
-    public InstanceManifestHistoryRecord findMostRecent(Action action) {
-        return readOrCreate().records.stream().filter(a -> a.action == action)
-                .sorted((a, b) -> Long.compare(b.timestamp, a.timestamp)).findFirst().orElse(null);
-    }
-
-    /**
      * @return all of the history attached to the {@link InstanceManifest}.
      */
     public List<InstanceManifestHistoryRecord> getFullHistory() {

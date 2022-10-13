@@ -66,11 +66,6 @@ public class ApiAccessToken {
             return this;
         }
 
-        public Builder setValidUntil(long timestamp) {
-            token.vu = timestamp;
-            return this;
-        }
-
         public Builder setWeak(boolean weak) {
             token.wt = weak;
             return this;

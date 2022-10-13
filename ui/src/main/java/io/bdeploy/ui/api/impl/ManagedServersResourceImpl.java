@@ -339,15 +339,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     }
 
     @Override
-    public Map<String, MinionDto> getMinionsOfManagedServer(String groupName, String serverName) {
-        BHive hive = getInstanceGroupHive(groupName);
-
-        ManagedMasters mm = new ManagedMasters(hive);
-        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        return attached.minions.values();
-    }
-
-    @Override
     public Map<String, MinionStatusDto> getMinionStateOfManagedServer(String groupName, String serverName) {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
@@ -640,9 +631,14 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         Collection<Key> keys = updates.packagesToInstall;
         Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
 
+        BHive hive = getInstanceGroupHive(groupName);
+
+        ManagedMasters mm = new ManagedMasters(hive);
+        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+        Map<String, MinionDto> allMinions = attached.minions.values();
+
         // Determine OS of the master
-        Optional<MinionDto> masterDto = getMinionsOfManagedServer(groupName, serverName).values().stream()
-                .filter(dto -> dto.master).findFirst();
+        Optional<MinionDto> masterDto = allMinions.values().stream().filter(dto -> dto.master).findFirst();
         if (!masterDto.isPresent()) {
             throw new WebApplicationException("Cannot determine master node");
         }
@@ -652,9 +648,6 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         UpdateHelper.update(svc, server, true, context);
 
         // update the information in the hive.
-        BHive hive = getInstanceGroupHive(groupName);
-        ManagedMasters mm = new ManagedMasters(hive);
-        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
         attached.update = getUpdates(svc);
         mm.attach(attached, true);
 

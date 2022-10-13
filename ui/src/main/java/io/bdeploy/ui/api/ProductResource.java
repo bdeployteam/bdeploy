@@ -35,10 +35,6 @@ public interface ProductResource {
     @Path("/list")
     public List<ProductDto> list(@QueryParam("name") String name);
 
-    @GET
-    @Path("/count")
-    public Long count();
-
     @DELETE
     @Path("/{name : .+}/{tag}")
     @RequiredPermission(permission = Permission.ADMIN)

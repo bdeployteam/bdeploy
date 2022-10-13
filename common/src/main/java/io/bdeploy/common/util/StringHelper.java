@@ -16,20 +16,6 @@ public class StringHelper {
     }
 
     /**
-     * Returns whether the given strings are NOT equal
-     */
-    public static boolean notEqual(String a, String b) {
-        return a != null && !a.equals(b);
-    }
-
-    /**
-     * Removes all line breaks from the given string
-     */
-    public static String removeLineBreaks(String s) {
-        return s.replace("\n", "").replace("\r", "");
-    }
-
-    /**
      * Checks if the string contains only lowercase characters.
      */
     public static boolean isAllLowerCase(String s) {

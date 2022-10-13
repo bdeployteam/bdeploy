@@ -209,10 +209,6 @@ public class JerseyClientFactory {
         }
     }
 
-    public static String getProxyUuid() {
-        return proxyUuid.get();
-    }
-
     /**
      * @return a client that is capable of providing a WebSocket connection to the given service. The caller is responsible for
      *         closing the client once done!

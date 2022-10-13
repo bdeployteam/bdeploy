@@ -150,9 +150,6 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         @Help("Directory where the launcher stores the hive as well as all applications.")
         String homeDir();
 
-        @Help("Directory where the launcher stores essential runtime data.")
-        String userArea();
-
         @Help("Set by the launcher script to determine the directory where to put updates for automatic application.")
         String updateDir();
 

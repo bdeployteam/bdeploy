@@ -27,7 +27,6 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
-import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.remote.CommonUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -239,13 +238,6 @@ public class UpdateHelper {
         }
 
         return new ScopedManifestKey(SW_META_PREFIX + name, os, version).getKey();
-    }
-
-    /**
-     * @return the {@link Key} representing the currently running version of the BDeploy minion.
-     */
-    public static Key getCurrentKey() {
-        return calculateKeyFromProperties(VersionHelper.getProperties(), OsHelper.getRunningOs());
     }
 
     /**

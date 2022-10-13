@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,7 +63,6 @@ import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto.FileStatusType;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
@@ -86,7 +84,6 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
-import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
@@ -132,7 +129,6 @@ import io.bdeploy.ui.dto.ConfigDirDto;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
-import io.bdeploy.ui.dto.InstanceManifestHistoryDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
 import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
@@ -586,11 +582,6 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public List<InstancePurpose> getPurposes() {
-        return Arrays.asList(InstancePurpose.values());
-    }
-
-    @Override
     public Map<String, MinionDto> getMinionConfiguration(String instance, String versionTag) {
         if (minion.getMode() != MinionMode.CENTRAL) {
             return nodes.getAllNodes();
@@ -787,17 +778,6 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         return pus.validate(state, am, system);
-    }
-
-    @Override
-    public InstanceManifestHistoryDto getHistory(String instanceId, String tag) {
-        InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
-        InstanceManifestHistory history = instance.getHistory(hive);
-
-        InstanceManifestHistoryDto dto = new InstanceManifestHistoryDto();
-        dto.records.addAll(history.getFullHistory());
-
-        return dto;
     }
 
     @Override
