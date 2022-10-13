@@ -116,7 +116,7 @@ import { PortValueValidatorDirective } from './validators/port-value.directive';
 import { PropagateErrorValidatorDirective } from './validators/propagate-error-validator.directive';
 import { TrimmedValidator } from './validators/trimmed.directive';
 
-export function loadAppConfig(cfgService: ConfigService) {
+function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
 }
 
