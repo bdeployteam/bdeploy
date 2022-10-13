@@ -84,7 +84,9 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory;
 import io.bdeploy.interfaces.manifest.history.InstanceManifestHistory.Action;
+import io.bdeploy.interfaces.manifest.history.InstanceManifestHistoryRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord.OverallStatus;
@@ -532,7 +534,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             }
 
             // calculate target key.
-            String rootTag = hive.execute(new ManifestNextIdOperation().setManifestName(rootName)).toString();
+            String rootTag = this.getNextRootTag(rootName);
             Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
 
             if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
@@ -551,6 +553,23 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             return createInstanceVersion(rootKey, state.config, nodeMap);
         }
+    }
+
+    private String getNextRootTag(String rootName) {
+        Long next = hive.execute(new ManifestNextIdOperation().setManifestName(rootName));
+
+        // Keep incrementing next until number with no historical records is found
+        for (int i = 0; i < 100; i++) {
+            Manifest.Key key = new Manifest.Key(rootName, next.toString());
+            List<InstanceManifestHistoryRecord> events = new InstanceManifestHistory(key, hive).getFullHistory();
+            if (events.isEmpty()) {
+                return next.toString();
+            }
+            next++;
+        }
+
+        log.warn("Failed to find instance version without historical records. Returning {} ", next.toString());
+        return next.toString();
     }
 
     private InstanceNodeConfiguration updateControlGroups(InstanceNodeConfiguration nodeConfiguration) {
