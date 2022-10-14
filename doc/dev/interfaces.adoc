@@ -47,7 +47,7 @@ Expansion of variables happens for launcher paths and parameter values. Addition
 | `{{V:[APP:]PARAM}}`
 a| * `APP`: _(optional)_ The name of the application to reference. If not given, the parameter is referenced within the same application as the referencing parameter
  * `PARAM`: The name of the parameter
-| `{{V:MyServer:my.param.uid}}`
+| `{{V:MyServer:my.param.id}}`
 | Expand the value of another parameter inline into the value of this parameter.
 
 | `DeploymentPathProvider`

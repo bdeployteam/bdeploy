@@ -80,14 +80,14 @@ processControl: <6>
 startCommand: <10>
   launcherPath: "{{WINDOWS:launch.bat}}{{LINUX:launch.sh}}"
   parameters:
-    - uid: "my.param.1"
+    - id: "my.param.1"
       name: "My numeric parameter"
       longDescription: "This is a numeric parameter"
       groupName: "My Parameters"
       parameter: "--number"
       defaultValue: "{{X:instance-number}}"  <11>
       type: NUMERIC
-    - uid: "my.param.2"
+    - id: "my.param.2"
       name: "My textual parameter"
       longDescription: "This is a textual parameter"
       groupName: "My Parameters"
@@ -96,7 +96,7 @@ startCommand: <10>
       suggestedValues:
         - "Value 1"
         - "Value 2"
-    - uid: "my.param.3"
+    - id: "my.param.3"
       name: "My conditional parameter"
       longDescription: "This is only visible and configurable if my.param.2 has value 'Value 1'"
       parameter: "--conditional"
@@ -193,7 +193,7 @@ Parameters appear on the final command line in *exact* the order as they appear 
 |Mandatory
 |Description
 
-|`uid`
+|`id`
 |
 |yes
 |A unique ID of the parameter within the whole product which will contain the *Application* described by this `app-info.yaml`.
@@ -281,11 +281,11 @@ In this case you will want the user to be able to edit the value of `-Dmy.prop` 
 startCommand:
   launcherPath: "{{M:openjdk/jre:1.8.0_u202-b08}}/bin/java{{WINDOWS:w.exe}}"
   parameters:
-    - uid: "my.prop"
+    - id: "my.prop"
       name: "My Property"
       parameter: "-Dmy.prop"
       mandatory: true
-    - uid: "my.jar"
+    - id: "my.jar"
       name: "Application JAR"
       parameter: "-jar"
       defaultValue: "application.jar"
@@ -343,7 +343,7 @@ The condition block understands the following fields:
 !Description
 
 !`parameter`
-!The referenced parameters UID.
+!The referenced parameters ID.
 
 !`expression`
 a!A <<_link_expressions,Link Expression>> which is resolved and matched against the condition.
@@ -532,7 +532,7 @@ description: "Server application which sleeps before exiting"
 preferredProcessControlGroup: "First Group" <2>
 
 templateVariables: <3>
-  - uid: sleep-timeout
+  - id: sleep-timeout
     name: "Sleep Timeout"
     description: "The amount of time the server application should sleep"
     defaultValue: 60
@@ -548,7 +548,7 @@ processControl: <4>
   attachStdin: true
 
 startParameters: <5>
-- uid: param.sleep
+- id: param.sleep
   value: "{{T:sleep-timeout}}"
 ----
 
@@ -556,7 +556,24 @@ startParameters: <5>
 <2> The preferred process control group is used to determine which process control group to use when applying the application template. This is only used if a *Process Control Group* with this name exists in the instance configuration. *Process Control Groups* can be pre-configured in an <<_instance_template_yaml,`instance-template.yaml`>>.
 <3> A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
 <4> A template can define arbitrary process control parameters to further control the default process control settings.
-<5> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+<5> Start command parameters are referenced by their ID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+
+[NOTE]
+An *Application Template* can also _extend_ another previously defined template. This works the same as the `template` specifier in <<_instance_template_yaml,`instance-template.yaml`>> and also allows for `fixedVariables`.
+
+[source,yaml]
+----
+id: fixed-sleep
+name: "Server With 10 Seconds Sleep"
+template: server-with-sleep <1>
+
+fixedVariables: <2>
+  - id: sleep-timeout
+    value: 10
+----
+
+<1> The `template` attribute specifies another application template (which must be registered in the product) to extend. All properties of that other template are merged into this application template. Properties of this template take precedence in case of a conflict.
+<2> `fixedVariables`, as also described for <<_instance_template_yaml,`instance-template.yaml`>>, allow to override the value of a specific template variable in _this and the base template_. Values queried from the user when applying this template will be ignored for any variable which has an _overridden_, _fixed_ value.
 
 ===== Supported `templateVariables` Attributes
 
@@ -565,7 +582,7 @@ startParameters: <5>
 |Attribute
 |Description
 
-|`uid`
+|`id`
 |The unique ID of the template variable. If multiple applications (or instances) define the same variable ID, it is queried from the user only once.
 
 |`name`
@@ -582,6 +599,23 @@ startParameters: <5>
 
 |===
 
+===== Supported `fixedVariables` Attributes
+
+Fixed variables allow overriding template variable input from the user to a _fixed_ value.
+
+[%header,cols="25,75"]
+|===
+|Attribute
+|Description
+
+|`id`
+|The unique ID of the template variable. The variable may be declared in either this or any parent template.
+
+|`value`
+|The target fixed value for the variable to be used in this and any parent template. This value overrides any user input.
+
+|===
+
 ===== Supported `startParameters` Attributes
 
 The list of `startParameters` provides control over the parameters in the resulting process. This is different from the parameter _definition_ in <<_app_info_yaml,`app-info.yaml`>> as this list only provides information about presence and value of parameters when applying this template.
@@ -591,7 +625,7 @@ The list of `startParameters` provides control over the parameters in the result
 |Attribute
 |Description
 
-|`uid`
+|`id`
 |The unique ID of the parameter. A definition of a parameter with this ID *must* exist in the <<_app_info_yaml,`app-info.yaml`>> file of the referenced `application`. If the parameter is optional, it will be added to the process when applying the template.
 
 |`value`
@@ -612,7 +646,7 @@ name: Default Configuration <1>
 description: "Creates an instance with the default server and client configuration"
 
 templateVariables: <2>
-  - uid: sleep-timeout
+  - id: sleep-timeout
     name: "Sleep Timeout"
     description: "The amount of time the server application should sleep"
     defaultValue: 60
@@ -643,16 +677,19 @@ groups: <7>
     name: "Server No Sleep"
     description: "Server application which immediately exits"
   - template: server-with-sleep <8>
-  - application: server-app <9>
+    fixedVariables: <9>
+      - id: sleep-timeout
+        value: 10
+  - application: server-app <10>
     name: "Server With Sleep"
     description: "Server application which sleeps before exiting"
     processControl:
       startType: MANUAL_CONFIRM
-    startParameters: <10>
-    - uid: param.sleep
+    startParameters: <11>
+    - id: param.sleep
       value: "{{T:sleep-timeout}}"
 - name: "Client Apps"
-  type: CLIENT <11>
+  type: CLIENT <12>
   description: "All client applications"
   
   applications:
@@ -668,9 +705,10 @@ groups: <7>
 <6> *Process Control Groups* can be pre-configured for an instance template. If an application template later on wishes to be put into a certain *Process Control Group*, the group is created based on the template provided in the instance template. Note that the defaults for a *Process Control Group* in a template are slightly different from the implicit 'Default' *Process Control Group* in *BDeploy*. The defaults are: `startType`: `PARALLEL`, `startWait`: `WAIT`, `stopType`: `PARALLEL`.
 <7> A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
 <8> *Instance Templates* can reference *Application Templates* by their `id`. The *Instance Templates* can further refine an *Application Template* by setting any of the valid application fields in addition to the template reference.
-<9> A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for *Application Tempaltes* - except for the `id` which is not required.
-<10> Start command parameters are referenced by their UID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
-<11> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
+<9> When referencing an application template, it is possible to define _overrides_ for the template variables (`{{X:...}}`) used in the template. Use provided values will *not* be taken into account for this variable when applying the template, instead the _fixed_ value will be used.
+<10> A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for *Application Tempaltes* - except for the `id` which is not required.
+<11> Start command parameters are referenced by their ID, defined in <<_app_info_yaml,`app-info.yaml`>>. If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+<12> A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
 
 An instance template will be presented to the user when visiting an <<Instance Templates,Empty Instance>>.
 
@@ -777,7 +815,7 @@ A `parameter-template.yaml` allows products to define re-usable blocks of parame
 id: param.template <1>
 
 parameters: <2>
-  - uid: tpl-param
+  - id: tpl-param
     name: "Template Parameter"
     defaultValue: "x"
     longDescription: "A parameter defined in a template"

@@ -97,7 +97,7 @@ image::images/Doc_InstanceConfigAddCustomParam.png[Add Custom Parameter,align=ce
 
 ===== Global Parameters
 
-*Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global parameters* are matched by their parameter UID, and marked with a globe icon in the *parameter configuration* panel.
+*Global Parameters* are valid for all *Processes* of an *Instance*. They are also configured in the *Process*, but changes are copied to all other processes that also use this parameter. *Global parameters* are matched by their parameter ID, and marked with a globe icon in the *parameter configuration* panel.
 
 [WARNING]
 *Global Parameters* have been deprecated in favor of <<System Variables>> and <<Instance Variables>>.

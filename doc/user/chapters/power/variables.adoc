@@ -71,11 +71,11 @@ Used to reference a parameter within the same application or withing any other a
 | Variable
 | Description
 
-| {{V:my.param.uid}}
-| Takes the value from the _my.param.uid_ parameter defined in the same application.
+| {{V:my.param.id}}
+| Takes the value from the _my.param.id_ parameter defined in the same application.
 
-| {{V:MyServer:my.param.uid}}
-| Takes the value from the parameter _my.param.uid_ that is defined in the _MyServer_ application.
+| {{V:MyServer:my.param.id}}
+| Takes the value from the parameter _my.param.id_ that is defined in the _MyServer_ application.
 
 |===
 
