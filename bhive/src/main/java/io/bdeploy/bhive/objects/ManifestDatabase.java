@@ -33,7 +33,6 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.bdeploy.bhive.ManifestSpawnListener;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.PathHelper;
@@ -147,23 +146,6 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
 
     /**
      * @param key the manifest key to check
-     * @param root the manifest root to check
-     * @param isSyncEnabled flag denotes whether method should check if manifests are in sync. If set to false, method will do
-     *            only hasManifest(key) check.
-     * @return whether the {@link Manifest} exists in the database and is in sync.
-     */
-    public boolean isManifestInSync(Manifest.Key key, ObjectId root, boolean isSyncEnabled) {
-        if (!hasManifest(key)) {
-            return false;
-        }
-        if (!isSyncEnabled) {
-            return true;
-        }
-        return getManifest(key).getRoot().equals(root);
-    }
-
-    /**
-     * @param key the manifest key to check
      * @return whether the {@link Manifest} exists in the database.
      */
     public boolean hasManifest(Manifest.Key key) {
@@ -171,26 +153,13 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
     }
 
     /**
-     * Concurrent-save add a {@link Manifest} to the database.
-     * Sync is disabled, will throw exception if manifest already exists.
+     * Concurrent-save adds a {@link Manifest} to the database.
      *
      * @param manifest the manifest to store in the database.
      */
     public void addManifest(Manifest manifest) {
-        addManifest(manifest, false);
-    }
-
-    /**
-     * Concurrent-save adds or updates a {@link Manifest} to the database.
-     * If manifest already exists and isSyncEnabled = true then manifest will be rewritten.
-     * If manifest already exists and isSyncEnabled = false then exception will be thrown.
-     *
-     * @param manifest the manifest to store in the database.
-     * @param isSyncEnabled flag to control behavior when manifest already exists.
-     */
-    public void addManifest(Manifest manifest, boolean isSyncEnabled) {
         locked(() -> {
-            if (hasManifest(manifest.getKey()) && !isSyncEnabled) {
+            if (hasManifest(manifest.getKey())) {
                 throw new IllegalArgumentException("Manifest " + manifest.getKey() + " already present.");
             }
             Path pathForKey = getPathForKey(manifest.getKey());
