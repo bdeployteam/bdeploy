@@ -8,6 +8,7 @@ import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.SystemTemplateDescriptor;
 
 enum InternalSchema {
 
@@ -17,7 +18,8 @@ enum InternalSchema {
     APPLICATION_TEMPLATE(Schema.applicationTemplateYaml, ApplicationTemplateDescriptor.class),
     INSTANCE_TEMPLATE(Schema.instanceTemplateYaml, InstanceTemplateDescriptor.class),
     PARAMETER_TEMPLATE(Schema.parameterTemplateYaml, ParameterTemplateDescriptor.class),
-    INSTANCE_VAR_TEMPLATE(Schema.instanceVariableTemplateYaml, InstanceVariableTemplateDescriptor.class);
+    INSTANCE_VAR_TEMPLATE(Schema.instanceVariableTemplateYaml, InstanceVariableTemplateDescriptor.class),
+    SYSTEM_TEMPLATE(Schema.systemTemplateYaml, SystemTemplateDescriptor.class);
 
     public final Schema apiSchema;
     public final Class<?> apiClass;
