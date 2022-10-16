@@ -14,6 +14,7 @@ public abstract class DataTableBase implements DataTable {
     private final PrintStream output;
 
     private String caption;
+    private int exitCode = ExitCode.OK;
 
     private final List<DataTableColumn> columns = new ArrayList<>();
     private final List<List<DataTableCell>> rows = new ArrayList<>();
@@ -147,6 +148,17 @@ public abstract class DataTableBase implements DataTable {
     public DataTable addFooter(String footer) {
         footers.add(footer);
         return this;
+    }
+
+    @Override
+    public DataTable setExitCode(int exitCode) {
+        this.exitCode = exitCode;
+        return this;
+    }
+
+    @Override
+    public int getExitCode() {
+        return this.exitCode;
     }
 
 }

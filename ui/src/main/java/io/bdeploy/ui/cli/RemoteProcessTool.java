@@ -100,7 +100,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     appStatus.status.instanceTag);
             Optional<ApplicationConfiguration> app = findAppConfig(appStatus.status, Optional.ofNullable(cfg));
 
-            DataResult result = createResultWithMessage(
+            DataResult result = createResultWithSuccessMessage(
                     "Details for " + appId + " of instance " + instanceId + " of instance group " + groupName)
                             .addField("Name", appStatus.status.appName).addField("Application ID", appStatus.status.appId)
                             .addField("Exit Code", appStatus.status.exitCode).addField("Instance ID", appStatus.status.instanceId)

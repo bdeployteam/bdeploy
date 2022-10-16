@@ -67,7 +67,7 @@ public class FsckTool extends ConfiguredCliTool<FsckConfig> {
                 return createSuccess();
             }
 
-            DataResult result = createResultWithMessage("Found " + broken.size() + " damaged objects!");
+            DataResult result = createResultWithSuccessMessage("Found " + broken.size() + " damaged objects!");
             for (ElementView ele : broken) {
                 result.addField(ele.getElementId().toString(),
                         (ele instanceof DamagedObjectView ? (((DamagedObjectView) ele).getType() + " ") : "")

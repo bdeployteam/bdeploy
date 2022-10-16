@@ -100,7 +100,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
             if (config.list()) {
                 SortedMap<Manifest.Key, ObjectId> mfs = rh.getManifestInventory();
                 if (mfs.isEmpty()) {
-                    return createResultWithMessage("No manifests found");
+                    return createResultWithErrorMessage("No manifests found");
                 } else {
                     DataTable table = createDataTable();
                     table.column("Key", 50).column("Root", 40);
@@ -121,7 +121,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
             if (config.list()) {
                 Set<Manifest.Key> manifests = hive.execute(new ManifestListOperation());
                 if (manifests.isEmpty()) {
-                    return createResultWithMessage("No manifests found");
+                    return createResultWithErrorMessage("No manifests found");
                 } else {
                     DataTable table = createDataTable();
                     table.column("Key", 50).column("Root", 40);

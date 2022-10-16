@@ -42,7 +42,7 @@ public class VerifySignatureTool extends ConfiguredCliTool<VerifyConfig> {
             Path exe = Paths.get(config.executable());
             WindowsExecutableUtils.verify(exe);
         } catch (IOException e) {
-            return createResultWithMessage("Cannot verify executable").setException(e);
+            return createResultWithErrorMessage("Cannot verify executable").setException(e);
         }
 
         return createSuccess();

@@ -7,12 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status.Family;
-
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 
@@ -31,6 +25,11 @@ import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.PluginResource;
 import io.bdeploy.ui.cli.RemotePluginTool.RemotePluginConfig;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
 
 @Help("Investigate a remote master's plugins")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -104,7 +103,7 @@ public class RemotePluginTool extends RemoteServiceTool<RemotePluginConfig> {
     private DataResult addPlugin(RemoteService svc, String file, boolean replace) throws IOException {
         Path plugin = Paths.get(file);
         if (!Files.isRegularFile(plugin)) {
-            return createResultWithMessage("Not a file: " + file);
+            return createResultWithErrorMessage("Not a file: " + file);
         }
 
         try (InputStream is = Files.newInputStream(plugin)) {

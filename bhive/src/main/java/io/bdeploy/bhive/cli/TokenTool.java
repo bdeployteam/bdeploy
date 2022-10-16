@@ -125,12 +125,12 @@ public class TokenTool extends ConfiguredCliTool<TokenConfig> {
             KeyStore ks = helper.loadPrivateKeyStore(keystore, passphrase);
             ApiAccessToken pl = helper.getVerifiedPayload(token, ApiAccessToken.class, ks);
             if (pl == null) {
-                return createResultWithMessage("Invalid signature.");
+                return createResultWithErrorMessage("Invalid signature.");
             } else {
                 if (!pl.isValid()) {
-                    return createResultWithMessage("Signature valid, but token expired");
+                    return createResultWithErrorMessage("Signature valid, but token expired");
                 } else {
-                    return createResultWithMessage("Signature valid. Issued to " + pl.getIssuedTo() + ".");
+                    return createResultWithSuccessMessage("Signature valid. Issued to " + pl.getIssuedTo() + ".");
                 }
             }
         } catch (Exception e) {
