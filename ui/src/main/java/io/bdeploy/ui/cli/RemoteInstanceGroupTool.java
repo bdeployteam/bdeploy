@@ -137,7 +137,7 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
                 client.delete(config.delete());
                 return createSuccess();
             } else {
-                return createResultWithMessage("Aborted, no confirmation");
+                return createResultWithErrorMessage("Aborted, no confirmation");
             }
         } else {
             return createNoOp();

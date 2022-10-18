@@ -50,7 +50,7 @@ public class PayloadTool extends ConfiguredCliTool<PayloadConfig> {
             WindowsExecutableUtils.embed(exe, Files.readAllBytes(payload));
             return createSuccess();
         } catch (IOException e) {
-            return createResultWithMessage("Cannot attach payload").setException(e);
+            return createResultWithErrorMessage("Cannot attach payload").setException(e);
         }
 
     }

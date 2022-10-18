@@ -13,6 +13,11 @@ public interface DataResult extends RenderableResult {
     public DataResult setMessage(String message);
 
     /**
+     * @param exitCode indicates whether operation was successful or had any errors.
+     */
+    public DataResult setExitCode(int exitCode);
+
+    /**
      * @param t the exception in case one happened.
      */
     public DataResult setException(Throwable t);

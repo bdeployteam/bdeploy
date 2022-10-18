@@ -62,7 +62,7 @@ public class SchemaTool extends ConfiguredCliTool<SchemaConfig> {
             try {
                 Files.writeString(Paths.get(config.generate()), schema);
             } catch (IOException e) {
-                return createResultWithMessage("Cannot write " + config.generate()).setException(e);
+                return createResultWithErrorMessage("Cannot write " + config.generate()).setException(e);
             }
         }
 

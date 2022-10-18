@@ -148,7 +148,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
                 return createSuccess().addField("Server Version", v).addField("Full Roundtrip Time",
                         (System.currentTimeMillis() - start) + "ms");
             } catch (WebApplicationException e) {
-                return createResultWithMessage("Could not contact server " + config.server()).setException(e);
+                return createResultWithErrorMessage("Could not contact server " + config.server()).setException(e);
             }
         } else if (config.update() != null) {
             return updateManagedServer(config, msr);
@@ -217,7 +217,7 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
         if (!config.offline()) {
             msr.tryAutoAttach(config.instanceGroup(), mmd);
 
-            return createResultWithMessage("Managed Server has been automatically attached.")
+            return createResultWithSuccessMessage("Managed Server has been automatically attached.")
                     .addField("Instance Group", config.instanceGroup()).addField("Managed Server", mmd.hostName);
         } else {
             helpAndFailIfMissing(config.output(), "Missing --output");
@@ -232,9 +232,10 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
                 throw new IllegalArgumentException("Cannot write central identification to " + target);
             }
 
-            return createResultWithMessage("Server has been manually attached to the Instance Group " + config.instanceGroup())
-                    .addField("Hint", "Please use the `remote-central --attachCentral` command with the file " + target
-                            + " on the managed server now to complete offline attach.");
+            return createResultWithSuccessMessage(
+                    "Server has been manually attached to the Instance Group " + config.instanceGroup()).addField("Hint",
+                            "Please use the `remote-central --attachCentral` command with the file " + target
+                                    + " on the managed server now to complete offline attach.");
         }
     }
 

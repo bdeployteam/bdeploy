@@ -35,6 +35,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.data.DataFormat;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
+import io.bdeploy.common.cli.data.ExitCode;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.metrics.Metrics;
 import io.bdeploy.common.metrics.Metrics.MetricGroup;
@@ -108,6 +109,7 @@ public abstract class ToolBase {
         PrintStream output = null;
         PrintStream reporterOutput = null;
         DataFormat dataMode = DataFormat.TEXT;
+        RenderableResult result = null;
 
         boolean verbose = false;
         boolean closeOutput = false;
@@ -211,7 +213,7 @@ public abstract class ToolBase {
                 if (failWithException || testMode) {
                     throw new IllegalArgumentException("Wrong number of arguments");
                 } else {
-                    System.exit(1);
+                    System.exit(ExitCode.ERROR);
                 }
             }
 
@@ -251,7 +253,7 @@ public abstract class ToolBase {
 
             try (Timer.Context timer = Metrics.getMetric(MetricGroup.CLI)
                     .timer(instance.getClass().getSimpleName() + "/" + args[toolArgNum]).time()) {
-                RenderableResult result = instance.run();
+                result = instance.run();
 
                 if (result != null) {
                     result.render();
@@ -282,13 +284,17 @@ public abstract class ToolBase {
         // explicit exit, otherwise non-daemon async jersey threads block.
         // The reason is not jersey itself, but it's usage of ForkJoinPool.commonPool.
         if (exc != null) {
-            DataResult result = dataMode.createResult(output);
-            result.setException(exc);
-            result.render();
+            DataResult res = dataMode.createResult(output);
+            res.setException(exc);
+            res.render();
 
-            System.exit(1);
+            System.exit(ExitCode.ERROR);
         }
-        System.exit(0);
+        if (result == null) {
+            System.exit(ExitCode.OK);
+        } else {
+            System.exit(result.getExitCode());
+        }
     }
 
     private String getToolCategory(Class<? extends CliTool> clazz) {
@@ -414,20 +420,28 @@ public abstract class ToolBase {
         }
 
         protected DataResult createSuccess() {
-            return createResultWithMessage("Success");
+            return createResultWithSuccessMessage("Success");
         }
 
         protected DataResult createNoOp() {
-            return createResultWithMessage("Nothing to do (missing arguments?)");
+            return createResultWithSuccessMessage("Nothing to do (missing arguments?)");
         }
 
         protected DataResult createEmptyResult() {
             return dataFormat.createResult(output);
         }
 
-        protected DataResult createResultWithMessage(String message) {
+        protected DataResult createResultWithSuccessMessage(String message) {
             DataResult result = dataFormat.createResult(output);
             result.setMessage(message);
+            result.setExitCode(ExitCode.OK);
+            return result;
+        }
+
+        protected DataResult createResultWithErrorMessage(String message) {
+            DataResult result = dataFormat.createResult(output);
+            result.setMessage(message);
+            result.setExitCode(ExitCode.ERROR);
             return result;
         }
 
@@ -597,7 +611,7 @@ public abstract class ToolBase {
             if (failWithException || testMode) {
                 throw new IllegalArgumentException(message);
             } else {
-                System.exit(1);
+                System.exit(ExitCode.ERROR);
             }
         }
 

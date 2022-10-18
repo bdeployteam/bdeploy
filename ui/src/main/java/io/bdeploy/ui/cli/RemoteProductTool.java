@@ -145,7 +145,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
     private DataResult transferToManaged(RemoteService remote, ProductConfig config) {
         BackendInfoResource bir = ResourceProvider.getResource(remote, BackendInfoResource.class, getLocalContext());
         if (bir.getVersion().mode != MinionMode.CENTRAL) {
-            return createResultWithMessage("Action only available on CENTRAL server.");
+            return createResultWithErrorMessage("Action only available on CENTRAL server.");
         }
 
         ManagedServersResource msr = ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext());
@@ -160,7 +160,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
                 .findFirst();
 
         if (dto.isEmpty()) {
-            return createResultWithMessage("Product not found on central server");
+            return createResultWithErrorMessage("Product not found on central server");
         }
 
         ProductTransferDto ptd = new ProductTransferDto();

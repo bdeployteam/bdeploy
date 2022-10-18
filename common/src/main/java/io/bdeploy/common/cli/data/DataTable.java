@@ -13,6 +13,11 @@ public interface DataTable extends RenderableResult {
     public DataTable setCaption(String caption);
 
     /**
+     * @param exitCode indicates whether operation was successful or had any errors.
+     */
+    public DataTable setExitCode(int exitCode);
+
+    /**
      * Adds a column to the table. All columns must be added before adding actual data.
      *
      * @param label the label of the column, used for human readable formats.

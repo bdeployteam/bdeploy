@@ -4,10 +4,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
-import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -60,7 +60,7 @@ public class StorageTool extends ConfiguredCliTool<StorageConfig> {
             if (config.add() != null) {
                 Path p = Paths.get(config.add());
                 if (original.contains(p)) {
-                    return createResultWithMessage(p + " already registered.");
+                    return createResultWithErrorMessage(p + " already registered.");
                 }
                 PathHelper.mkdirs(p);
                 r.getAuditor().audit(
