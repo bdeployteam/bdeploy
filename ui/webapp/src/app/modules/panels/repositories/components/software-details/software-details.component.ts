@@ -3,8 +3,8 @@ import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import {
-  ApplicationTemplateDescriptor,
-  InstanceTemplateDescriptor,
+  FlattenedApplicationTemplateConfiguration,
+  FlattenedInstanceTemplateConfiguration,
   PluginInfoDto,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -32,19 +32,21 @@ const labelValueColumn: BdDataColumn<LabelRecord> = {
   width: '190px',
 };
 
-const appTemplateNameColumn: BdDataColumn<ApplicationTemplateDescriptor> = {
-  id: 'name',
-  name: 'Name',
-  data: (r) => r.name,
-  tooltip: (r) => r.description,
-};
+const appTemplateNameColumn: BdDataColumn<FlattenedApplicationTemplateConfiguration> =
+  {
+    id: 'name',
+    name: 'Name',
+    data: (r) => r.name,
+    tooltip: (r) => r.description,
+  };
 
-const instTemplateNameColumn: BdDataColumn<InstanceTemplateDescriptor> = {
-  id: 'name',
-  name: 'Name',
-  data: (r) => r.name,
-  tooltip: (r) => r.description,
-};
+const instTemplateNameColumn: BdDataColumn<FlattenedInstanceTemplateConfiguration> =
+  {
+    id: 'name',
+    name: 'Name',
+    data: (r) => r.name,
+    tooltip: (r) => r.description,
+  };
 
 const pluginNameColumn: BdDataColumn<PluginInfoDto> = {
   id: 'name',
@@ -79,9 +81,9 @@ export class SoftwareDetailsComponent implements OnInit {
     labelKeyColumn,
     labelValueColumn,
   ];
-  /* template */ appTemplColumns: BdDataColumn<ApplicationTemplateDescriptor>[] =
+  /* template */ appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] =
     [appTemplateNameColumn];
-  /* template */ instTemplColumns: BdDataColumn<InstanceTemplateDescriptor>[] =
+  /* template */ instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] =
     [instTemplateNameColumn];
   /* template */ pluginColumns: BdDataColumn<PluginInfoDto>[] = [
     pluginNameColumn,

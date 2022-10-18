@@ -19,8 +19,8 @@ import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   ApplicationDto,
-  ApplicationTemplateDescriptor,
   ApplicationType,
+  FlattenedApplicationTemplateConfiguration,
   InstanceNodeConfigurationDto,
   MinionDto,
   OperatingSystem,
@@ -41,7 +41,7 @@ import { AppTemplateNameComponent } from './app-template-name/app-template-name.
 export interface AppRow {
   app: AppGroup;
   node: InstanceNodeConfigurationDto;
-  template: ApplicationTemplateDescriptor;
+  template: FlattenedApplicationTemplateConfiguration;
 }
 
 interface AppGroup {
@@ -49,7 +49,7 @@ interface AppGroup {
   appDisplayName: string;
   availableOs: OperatingSystem[];
   applications: ApplicationDto[];
-  templates: ApplicationTemplateDescriptor[];
+  templates: FlattenedApplicationTemplateConfiguration[];
 }
 
 const colAppName: BdDataColumn<AppRow> = {
@@ -83,7 +83,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   /* template */ records$ = new BehaviorSubject<AppRow[]>([]);
   /* template */ columns: BdDataColumn<AppRow>[] = [colAppName, this.colAdd];
 
-  /* template */ selectedTemplate: ApplicationTemplateDescriptor;
+  /* template */ selectedTemplate: FlattenedApplicationTemplateConfiguration;
   /* template */ response: { [key: string]: string };
 
   /* template */ clipBoardCfg$ = new BehaviorSubject<ApplicationConfiguration>(
@@ -360,7 +360,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   }
 
   private validateHasAllVariables(
-    template: ApplicationTemplateDescriptor,
+    template: FlattenedApplicationTemplateConfiguration,
     variables: { [key: string]: string }
   ) {
     for (const v of template.templateVariables) {

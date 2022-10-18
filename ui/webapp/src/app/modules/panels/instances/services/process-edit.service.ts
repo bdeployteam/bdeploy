@@ -8,6 +8,7 @@ import {
   ApplicationDto,
   CommandConfiguration,
   ExecutableDescriptor,
+  FlattenedApplicationTemplateConfiguration,
   InstanceNodeConfigurationDto,
   LinkedValueConfiguration,
   ParameterConditionType,
@@ -17,7 +18,6 @@ import {
   ProcessControlConfiguration,
   ProcessControlGroupConfiguration,
   ProductDto,
-  TemplateApplication,
   TemplateParameter,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -128,7 +128,7 @@ export class ProcessEditService {
   public addProcess(
     node: InstanceNodeConfigurationDto,
     application: ApplicationDto,
-    template: TemplateApplication,
+    template: FlattenedApplicationTemplateConfiguration,
     variableValues: { [key: string]: string },
     status: StatusMessage[]
   ): Observable<string> {

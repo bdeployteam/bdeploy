@@ -6,9 +6,9 @@ import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationValidationDto,
+  FlattenedInstanceTemplateConfiguration,
   InstanceConfiguration,
   InstanceNodeConfigurationDto,
-  InstanceTemplateDescriptor,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -80,9 +80,9 @@ export class ConfigurationComponent
   /* template */ clientNode$ =
     new BehaviorSubject<InstanceNodeConfigurationDto>(null);
 
-  /* template */ templates$ = new BehaviorSubject<InstanceTemplateDescriptor[]>(
-    null
-  );
+  /* template */ templates$ = new BehaviorSubject<
+    FlattenedInstanceTemplateConfiguration[]
+  >(null);
   /* template */ isEmptyInstance$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;

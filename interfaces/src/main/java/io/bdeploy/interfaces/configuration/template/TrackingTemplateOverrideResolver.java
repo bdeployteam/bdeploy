@@ -1,12 +1,14 @@
-package io.bdeploy.interfaces.variables;
+package io.bdeploy.interfaces.configuration.template;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 
-public class TemplateOverrideResolver implements VariableResolver {
+public class TrackingTemplateOverrideResolver implements VariableResolver {
 
     /**
      * this is intentionally not a Variables prefix and PrefixResolver to keep things apart. templates are resolved at a totally
@@ -14,10 +16,16 @@ public class TemplateOverrideResolver implements VariableResolver {
      */
     private static final String TEMPLATE_PREFIX = "T:";
 
+    private final Set<String> requestedVariables = new TreeSet<>();
+
     private final List<TemplateVariableFixedValueOverride> overrides;
 
-    public TemplateOverrideResolver(List<TemplateVariableFixedValueOverride> overrides) {
+    public TrackingTemplateOverrideResolver(List<TemplateVariableFixedValueOverride> overrides) {
         this.overrides = overrides;
+    }
+
+    public Set<String> getRequestedVariables() {
+        return requestedVariables;
     }
 
     @Override
@@ -73,6 +81,11 @@ public class TemplateOverrideResolver implements VariableResolver {
         String finVarName = varName;
         Optional<TemplateVariableFixedValueOverride> override = overrides.stream().filter(o -> o.id.equals(finVarName))
                 .findFirst();
+
+        if (override.isEmpty()) {
+            // need to query the user later, no fixed value.
+            requestedVariables.add(finVarName);
+        }
 
         return override.isPresent();
     }

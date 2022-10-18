@@ -8,8 +8,8 @@ import javax.annotation.Generated;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
-import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
+import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
+import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 
 public class ProductDto implements Comparable<ProductDto> {
@@ -20,8 +20,8 @@ public class ProductDto implements Comparable<ProductDto> {
     public Manifest.Key key;
     public Map<String, String> labels;
     public ObjectId configTree;
-    public List<InstanceTemplateDescriptor> instanceTemplates;
-    public List<ApplicationTemplateDescriptor> applicationTemplates;
+    public List<FlattenedInstanceTemplateConfiguration> instanceTemplates;
+    public List<FlattenedApplicationTemplateConfiguration> applicationTemplates;
     public SortedSet<Manifest.Key> references;
 
     public static ProductDto create(ProductManifest manifest) {

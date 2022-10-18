@@ -1,9 +1,9 @@
 import {
+  FlattenedApplicationTemplateConfiguration,
   ManifestKey,
   MinionDto,
   OperatingSystem,
   ProductDto,
-  TemplateApplication,
 } from '../../../models/gen.dtos';
 
 /**
@@ -18,7 +18,7 @@ export function getAppKeyName(appKey: ManifestKey) {
 /** Returns the full target application key for a given template in a given product for application to the given node. */
 export function getTemplateAppKey(
   product: ProductDto,
-  template: TemplateApplication,
+  template: FlattenedApplicationTemplateConfiguration,
   node: MinionDto
 ) {
   return (

@@ -8,6 +8,7 @@ import {
   Output,
   Self,
   TemplateRef,
+  ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
 import {
@@ -15,6 +16,7 @@ import {
   NgControl,
   UntypedFormControl,
 } from '@angular/forms';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
 import { bdValidationMessage } from '../../validators/messages';
@@ -45,6 +47,8 @@ export class BdFormInputComponent
 
   // eslint-disable-next-line @angular-eslint/no-output-native
   @Output() focus = new EventEmitter<any>();
+
+  @ViewChild(MatAutocompleteTrigger) private trigger: MatAutocompleteTrigger;
 
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
@@ -81,6 +85,16 @@ export class BdFormInputComponent
 
   onBlur() {
     this.onTouchedCb();
+
+    // make sure that the panel is closed at some point...
+    // this may not be immediately, and it may not even be on
+    // the next event loop (timeout = 0ms), and it maybe NOT EVEN
+    // be within the first 100ms. Otherwise selection via mouse
+    // is no longer working :| 200ms is percieved near immediate
+    // and this exists MAINLY for UI tests to make sure the suggestion
+    // panel does not get in the way, so this is an acceptable
+    // (although not nice) workaround.
+    setTimeout(() => this.trigger.closePanel(), 200);
   }
 
   writeValue(v: any): void {

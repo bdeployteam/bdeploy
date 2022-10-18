@@ -3,9 +3,11 @@ package io.bdeploy.interfaces.manifest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -16,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableList;
 
 import io.bdeploy.api.product.v1.ApplicationDescriptorApi;
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -36,19 +37,14 @@ import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.util.TemplateHelper;
-import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
-import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfiguration;
+import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
+import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
-import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
-import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
-import io.bdeploy.interfaces.descriptor.template.TemplateVariableFixedValueOverride;
 import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCache;
-import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCacheRecord;
-import io.bdeploy.interfaces.variables.TemplateOverrideResolver;
+import io.bdeploy.interfaces.manifest.product.ProductManifestStaticCacheRecordV2;
 
 /**
  * A special manifestation of a {@link Manifest} which must follow a certain layout and groups multiple applications together
@@ -65,13 +61,14 @@ public class ProductManifest {
     private final Manifest manifest;
     private final ObjectId cfgTreeId;
     private final List<ObjectId> plugins;
-    private final List<InstanceTemplateDescriptor> instanceTemplates;
-    private final List<ApplicationTemplateDescriptor> applicationTemplates;
+    private final List<FlattenedInstanceTemplateConfiguration> instanceTemplates;
+    private final List<FlattenedApplicationTemplateConfiguration> applicationTemplates;
     private final List<ParameterTemplateDescriptor> paramTemplates;
 
     private ProductManifest(String name, Manifest manifest, SortedSet<Manifest.Key> applications,
             SortedSet<Manifest.Key> references, ProductDescriptor desc, ObjectId cfgTreeId, List<ObjectId> plugins,
-            List<InstanceTemplateDescriptor> instanceTemplates, List<ApplicationTemplateDescriptor> applicationTemplates,
+            List<FlattenedInstanceTemplateConfiguration> instanceTemplates,
+            List<FlattenedApplicationTemplateConfiguration> applicationTemplates,
             List<ParameterTemplateDescriptor> paramTemplates) {
         this.prodName = name;
         this.manifest = manifest;
@@ -98,11 +95,18 @@ public class ProductManifest {
         }
 
         ProductManifestStaticCache cacheStorage = new ProductManifestStaticCache(manifest, hive);
-        ProductManifestStaticCacheRecord cached = cacheStorage.read();
+        try {
+            ProductManifestStaticCacheRecordV2 cached = cacheStorage.read();
 
-        if (cached != null) {
-            return new ProductManifest(label, mf, cached.appRefs, cached.otherRefs, cached.desc, cached.cfgEntry, cached.plugins,
-                    cached.templates, cached.applicationTemplates, cached.paramTemplates);
+            if (cached != null) {
+                return new ProductManifest(label, mf, cached.appRefs, cached.otherRefs, cached.desc, cached.cfgEntry,
+                        cached.plugins, cached.templates, cached.applicationTemplates, cached.paramTemplates);
+            }
+        } catch (Exception e) {
+            // ignore, format changed...? will write updated version later.
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to read cached product manifest", e);
+            }
         }
 
         SortedSet<Key> allRefs = new TreeSet<>(
@@ -211,12 +215,14 @@ public class ProductManifest {
         }
 
         // lazy, DFS resolving of all templates.
-        resolveTemplates(templates, applicationTemplates, varTemplates);
-        applicationTemplates.sort((a, b) -> a.name.compareTo(b.name));
+        List<FlattenedApplicationTemplateConfiguration> resolvedAppTemplates = resolveApplicationTemplates(applicationTemplates);
+        List<FlattenedInstanceTemplateConfiguration> resolvedInstanceTemplates = resolveInstanceTemplates(templates,
+                applicationTemplates, varTemplates);
 
         // store persistent information.
         try {
-            cacheStorage.store(appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates, paramTemplates);
+            cacheStorage.store(appRefs, otherRefs, desc, cfgEntry, plugins, resolvedInstanceTemplates, resolvedAppTemplates,
+                    paramTemplates);
         } catch (Exception e) {
             // there is a chance for a race condition here, which actually does not do any harm (except for a
             // tiny performance hit since two threads calculate this). in case two threads try to persist the
@@ -226,210 +232,41 @@ public class ProductManifest {
             }
         }
 
-        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, templates, applicationTemplates,
-                paramTemplates);
+        return new ProductManifest(label, mf, appRefs, otherRefs, desc, cfgEntry, plugins, resolvedInstanceTemplates,
+                resolvedAppTemplates, paramTemplates);
     }
 
-    private static void resolveTemplates(List<InstanceTemplateDescriptor> instTemplates,
-            List<ApplicationTemplateDescriptor> appTemplates, List<InstanceVariableTemplateDescriptor> varTemplates) {
-        for (var itd : instTemplates) {
-            // inline resolve all variable templates to their expanded values.
-            resolveInstanceVariableTemplates(varTemplates, itd.instanceVariables, itd.instanceVariableDefaults);
-
-            for (var group : itd.groups) {
-                var appList = new ArrayList<TemplateApplication>();
-                for (var app : group.applications) {
-                    try {
-                        var res = resolveAppTemplate(app, appTemplates, itd.templateVariables, new ArrayList<>(),
-                                new ArrayList<>());
-                        if (res != null) {
-                            appList.add(res);
-                        }
-                    } catch (Exception e) {
-                        log.error("Cannot resolve application template {} from instance template {}", app.name, itd.name, e);
-                    }
-                }
-
-                group.applications = appList;
-            }
-
-            // remove group if no application resolved.
-            itd.groups.removeIf(g -> g.applications.isEmpty());
-        }
-
-        // remove template if no application in any group resolved.
-        instTemplates.removeIf(t -> t.groups.isEmpty());
-
-        var resApps = new ArrayList<ApplicationTemplateDescriptor>();
-        for (ApplicationTemplateDescriptor atd : appTemplates) {
+    private static List<FlattenedInstanceTemplateConfiguration> resolveInstanceTemplates(
+            List<InstanceTemplateDescriptor> instTemplates, List<ApplicationTemplateDescriptor> applicationTemplates,
+            List<InstanceVariableTemplateDescriptor> varTemplates) {
+        return instTemplates.stream().map(t -> {
             try {
-                var res = resolveAppTemplate(atd, appTemplates, atd.templateVariables, new ArrayList<>(), new ArrayList<>());
-                if (res != null) {
-                    resApps.add(res);
-                }
+                return new FlattenedInstanceTemplateConfiguration(t, varTemplates, applicationTemplates);
             } catch (Exception e) {
-                log.error("Cannot resolve application template {}", atd.name, e);
-            }
-        }
-
-        appTemplates.clear();
-        appTemplates.addAll(resApps);
-    }
-
-    private static void resolveInstanceVariableTemplates(List<InstanceVariableTemplateDescriptor> templates,
-            List<TemplateableVariableConfiguration> vars,
-            List<TemplateableVariableDefaultConfiguration> instanceVariableDefaults) {
-        TemplateableVariableConfiguration toReplace = null;
-        do {
-            toReplace = vars.stream().filter(v -> v.template != null).findFirst().orElse(null);
-            if (toReplace != null) {
-                // replace/expand it.
-                int index = vars.indexOf(toReplace);
-                vars.remove(index); // remove the original element.
-
-                String templateId = toReplace.template;
-                List<TemplateableVariableConfiguration> replacements = templates.stream().filter(t -> t.id.equals(templateId))
-                        .map(t -> t.instanceVariables).findFirst().orElse(null);
-
-                if (replacements == null) {
-                    log.warn("No instance variable template found for {}", templateId);
-                } else {
-                    // only apply things which are not already there for *whatever* reason.
-                    ImmutableList.copyOf(replacements).reverse().stream()
-                            .filter(p -> vars.stream().filter(x -> x.id != null && x.id.equals(p.id)).findFirst().isEmpty())
-                            .forEach(r -> vars.add(index, r));
-                }
-            }
-        } while (toReplace != null);
-
-        // now that all are resolved, fixup any default value overrides from the instance template.
-        if (instanceVariableDefaults != null && !instanceVariableDefaults.isEmpty()) {
-            for (var def : instanceVariableDefaults) {
-                var variable = vars.stream().filter(x -> x.id.equals(def.id)).findFirst();
-                if (variable.isEmpty()) {
-                    log.warn("Variable not found while applying override: {}", def.id);
-                } else {
-                    variable.get().value = def.value;
-                }
-            }
-        }
-    }
-
-    private static <T extends TemplateApplication> T resolveAppTemplate(T original,
-            List<ApplicationTemplateDescriptor> appTemplates, List<TemplateVariable> varList,
-            List<TemplateVariableFixedValueOverride> overrides, List<String> circleDetection) {
-
-        // we always work on a copy of the configuration just in case it is referenced from more than one place.
-        @SuppressWarnings("unchecked")
-        T app = (T) original.copy();
-
-        if (app instanceof ApplicationTemplateDescriptor desc) {
-            // *must* have an ID.
-            if (circleDetection.contains(desc.id)) {
-                // we already resolved this through *some* path - this is not ok.
-                throw new IllegalStateException("Circular definition found in application templates when processing: " + desc.id);
-            }
-
-            circleDetection.add(desc.id);
-        }
-
-        if (app.template == null && app.application == null) {
-            // unfortunately no more information available...
-            throw new IllegalArgumentException("Template without application and template reference found");
-        }
-
-        List<TemplateVariableFixedValueOverride> mergedOverrides = new ArrayList<>();
-        if (overrides != null && !overrides.isEmpty()) {
-            mergedOverrides.addAll(overrides);
-        }
-
-        if (app.fixedVariables != null && !app.fixedVariables.isEmpty()) {
-            // add only if overrides don't already contain a value.
-            for (var fixed : app.fixedVariables) {
-                if (mergedOverrides.stream().filter(o -> o.id.equals(fixed.id)).findAny().isEmpty()) {
-                    mergedOverrides.add(fixed);
-                }
-            }
-        }
-
-        // update variable values for all "our" parameters according to the present overrides.
-        app.name = processTemplateOverride(app.name, mergedOverrides);
-        for (var param : app.startParameters) {
-            param.value = processTemplateOverride(param.value, mergedOverrides);
-        }
-
-        if (app.template != null) {
-            var parent = appTemplates.stream().filter(t -> app.template.equals(t.id)).findFirst();
-            if (!parent.isPresent()) {
+                log.warn("Cannot resolve instance template {}: {}", t.name, e.toString());
                 if (log.isDebugEnabled()) {
-                    log.debug("Template error. Cannot find template {}", app.template);
+                    log.debug("Exception:", e);
                 }
                 return null;
             }
-            var parentDesc = parent.get();
-            var parentApp = resolveAppTemplate(parentDesc, appTemplates, parentDesc.templateVariables, mergedOverrides,
-                    circleDetection);
+        }).filter(Objects::nonNull).sorted((a, b) -> a.name.compareToIgnoreCase(b.name)).toList();
+    }
 
-            // add variables from parent template to next outer variables.
-            for (var variable : parentDesc.templateVariables) {
-                var existing = varList.stream().filter(v -> v.id.equals(variable.id)).findAny();
-                var override = overrides.stream().filter(o -> o.id.equals(variable.id)).findAny();
-                if (!existing.isPresent() && !override.isPresent()) {
-                    varList.add(variable);
+    private static List<FlattenedApplicationTemplateConfiguration> resolveApplicationTemplates(
+            List<ApplicationTemplateDescriptor> applicationTemplates) {
+        Comparator<String> nullSafeStringComp = Comparator.nullsFirst(String::compareToIgnoreCase);
+
+        return applicationTemplates.stream().map(a -> {
+            try {
+                return new FlattenedApplicationTemplateConfiguration(a, applicationTemplates, null);
+            } catch (Exception e) {
+                log.warn("Cannot resolve standalone application template {}: {}", a.name, e.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Exception:", e);
                 }
+                return null;
             }
-
-            // merge all kinds of attributes, so that 'app' contains a complete template in the end.
-            mergeParentIntoTemplate(app, parentApp);
-        }
-
-        return app;
-    }
-
-    private static String processTemplateOverride(String value, List<TemplateVariableFixedValueOverride> overrides) {
-        if (overrides == null || overrides.isEmpty()) {
-            return value;
-        }
-
-        TemplateOverrideResolver res = new TemplateOverrideResolver(overrides);
-        return TemplateHelper.process(value, res, res::canResolve);
-    }
-
-    private static void mergeParentIntoTemplate(TemplateApplication app, TemplateApplication parentApp) {
-        // merge simple attributes
-        app.application = resolveStringValue(app.application, parentApp.application);
-        app.name = resolveStringValue(app.name, parentApp.name);
-        app.description = resolveStringValue(app.description, parentApp.description);
-        app.preferredProcessControlGroup = resolveStringValue(app.preferredProcessControlGroup,
-                parentApp.preferredProcessControlGroup);
-
-        // merge process control partial object as map
-        for (var entry : parentApp.processControl.entrySet()) {
-            if (!app.processControl.containsKey(entry.getKey())) {
-                app.processControl.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (app.startParameters == null) {
-            app.startParameters = new ArrayList<>();
-        }
-
-        if (parentApp.startParameters != null) {
-            // merge start parameters
-            for (var param : parentApp.startParameters) {
-                var existing = app.startParameters.stream().filter(p -> p.id.equals(param.id)).findAny();
-                if (!existing.isPresent()) {
-                    app.startParameters.add(param);
-                }
-            }
-        }
-    }
-
-    private static String resolveStringValue(String ours, String theirs) {
-        if (ours != null) {
-            return ours;
-        }
-        return theirs;
+        }).filter(Objects::nonNull).sorted((a, b) -> nullSafeStringComp.compare(a.name, b.name)).toList();
     }
 
     /**
@@ -449,14 +286,14 @@ public class ProductManifest {
     /**
      * @return a list of instance templates which can be used to populate empty instances.
      */
-    public List<InstanceTemplateDescriptor> getInstanceTemplates() {
+    public List<FlattenedInstanceTemplateConfiguration> getInstanceTemplates() {
         return instanceTemplates;
     }
 
     /**
      * @return a list of application templates which can be used when creating applications.
      */
-    public List<ApplicationTemplateDescriptor> getApplicationTemplates() {
+    public List<FlattenedApplicationTemplateConfiguration> getApplicationTemplates() {
         return applicationTemplates;
     }
 

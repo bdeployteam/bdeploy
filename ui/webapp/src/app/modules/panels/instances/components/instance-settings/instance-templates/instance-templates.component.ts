@@ -15,12 +15,13 @@ import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationType,
+  FlattenedApplicationTemplateConfiguration,
+  FlattenedInstanceTemplateConfiguration,
+  FlattenedInstanceTemplateGroupConfiguration,
   InstanceNodeConfigurationDto,
-  InstanceTemplateDescriptor,
-  InstanceTemplateGroup,
   ProcessControlGroupConfiguration,
   ProductDto,
-  TemplateApplication,
+  TemplateVariable,
 } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
@@ -46,7 +47,7 @@ export interface TemplateMessage {
   group: string;
   node: string;
   appname: string;
-  template: TemplateApplication;
+  template: FlattenedApplicationTemplateConfiguration;
   message: StatusMessage;
 }
 
@@ -72,10 +73,10 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
 export class InstanceTemplatesComponent implements OnDestroy {
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ records: InstanceTemplateDescriptor[];
+  /* template */ records: FlattenedInstanceTemplateConfiguration[];
   /* template */ recordsLabel: string[];
 
-  /* template */ template: InstanceTemplateDescriptor;
+  /* template */ template: FlattenedInstanceTemplateConfiguration;
   /* template */ variables: { [key: string]: string }; // key is var name, value is value.
   /* template */ groups: { [key: string]: string }; // key is group name, value is target node name.
   /* template */ messages: TemplateMessage[];
@@ -87,6 +88,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
   /* template */ hasAllVariables = false;
   /* template */ firstStepCompleted = false;
   /* template */ secondStepCompleted = false;
+  /* template */ requiredVariables: TemplateVariable[] = [];
 
   /* template */ groupNodes: { [key: string]: string[] };
   /* template */ groupLabels: { [key: string]: string[] };
@@ -130,7 +132,9 @@ export class InstanceTemplatesComponent implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private getNodesFor(group: InstanceTemplateGroup): string[] {
+  private getNodesFor(
+    group: FlattenedInstanceTemplateGroupConfiguration
+  ): string[] {
     if (group.type === ApplicationType.CLIENT) {
       return [null, CLIENT_NODE_NAME];
     } else {
@@ -144,7 +148,9 @@ export class InstanceTemplatesComponent implements OnDestroy {
     }
   }
 
-  private getLabelsFor(group: InstanceTemplateGroup): string[] {
+  private getLabelsFor(
+    group: FlattenedInstanceTemplateGroupConfiguration
+  ): string[] {
     const nodeValues = this.getNodesFor(group);
 
     return nodeValues.map((n) => {
@@ -173,7 +179,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     if (!this.template) {
       return;
     }
-    for (const v of this.template.templateVariables) {
+    for (const v of this.requiredVariables) {
       const value = this.variables[v.id];
       if (value === '' || value === null || value === undefined) {
         this.hasAllVariables = false;
@@ -338,7 +344,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
   }
 
   private applyClientGroup(
-    group: InstanceTemplateGroup,
+    group: FlattenedInstanceTemplateGroupConfiguration,
     observables: Observable<string>[],
     node: InstanceNodeConfigurationDto,
     groupName: string,
@@ -374,7 +380,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
   }
 
   private applyServerGroup(
-    group: InstanceTemplateGroup,
+    group: FlattenedInstanceTemplateGroupConfiguration,
     node: InstanceNodeConfigurationDto,
     pcgs: ProcessControlGroupConfiguration[],
     groupName: string,
@@ -405,11 +411,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
                 group: groupName,
                 node: nodeName,
                 template: app,
-                appname: app?.name
-                  ? app.name
-                  : app.template
-                  ? app.template
-                  : app.application,
+                appname: app?.name ? app.name : app.application,
                 message: {
                   icon: 'warning',
                   message: 'Cannot find application in product for target OS.',
@@ -446,7 +448,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
    * Prepare process control groups for the given application on the node.
    */
   private prepareProcessControlGroups(
-    app: TemplateApplication,
+    app: FlattenedApplicationTemplateConfiguration,
     node: InstanceNodeConfigurationDto,
     pcgs: ProcessControlGroupConfiguration[],
     groupName: string,
@@ -502,10 +504,35 @@ export class InstanceTemplatesComponent implements OnDestroy {
         break;
       case 1:
         this.secondStepCompleted = false;
+        this.requiredVariables = [];
+        this.hasAllVariables = false;
+        break;
+      case 2:
         this.variables = {};
+        this.requiredVariables = [];
 
-        if (this.template.templateVariables?.length) {
-          for (const v of this.template.templateVariables) {
+        if (this.template.instanceVariableTemplateVars?.length) {
+          this.requiredVariables.push(
+            ...this.template.instanceVariableTemplateVars
+          );
+        }
+
+        for (const grp of Object.keys(this.groups)) {
+          const grpDef = this.template.groups.find((g) => g.name === grp);
+          if (!grpDef || !this.groups[grp] || !grpDef.groupVariables?.length) {
+            continue;
+          }
+
+          for (const v of grpDef.groupVariables) {
+            if (this.requiredVariables.findIndex((t) => t.id === v.id) === -1) {
+              // not yet there, add.
+              this.requiredVariables.push(v);
+            }
+          }
+        }
+
+        if (this.requiredVariables.length) {
+          for (const v of this.requiredVariables) {
             this.variables[v.id] = v.defaultValue;
           }
         } else {

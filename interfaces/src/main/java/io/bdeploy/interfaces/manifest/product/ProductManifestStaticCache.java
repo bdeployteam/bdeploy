@@ -9,8 +9,8 @@ import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
-import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
+import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
+import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 
@@ -19,17 +19,17 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
  */
 public class ProductManifestStaticCache {
 
-    private final MetaManifest<ProductManifestStaticCacheRecord> meta;
+    private final MetaManifest<ProductManifestStaticCacheRecordV2> meta;
     private final BHiveExecution hive;
 
     public ProductManifestStaticCache(Manifest.Key product, BHiveExecution hive) {
         this.hive = hive;
-        this.meta = new MetaManifest<>(product, true, ProductManifestStaticCacheRecord.class);
+        this.meta = new MetaManifest<>(product, true, ProductManifestStaticCacheRecordV2.class);
     }
 
     /** Reads existing cached information if available. Returns <code>null</code> in case no information is available. */
-    public ProductManifestStaticCacheRecord read() {
-        ProductManifestStaticCacheRecord stored = meta.read(hive);
+    public ProductManifestStaticCacheRecordV2 read() {
+        ProductManifestStaticCacheRecordV2 stored = meta.read(hive);
         if (stored == null) {
             return null;
         }
@@ -37,9 +37,10 @@ public class ProductManifestStaticCache {
     }
 
     public void store(SortedSet<Key> appRefs, SortedSet<Key> otherRefs, ProductDescriptor desc, ObjectId cfgEntry,
-            List<ObjectId> plugins, List<InstanceTemplateDescriptor> templates,
-            List<ApplicationTemplateDescriptor> applicationTemplates, List<ParameterTemplateDescriptor> paramTemplates) {
-        meta.write(hive, new ProductManifestStaticCacheRecord(appRefs, otherRefs, desc, cfgEntry, plugins, templates,
+            List<ObjectId> plugins, List<FlattenedInstanceTemplateConfiguration> templates,
+            List<FlattenedApplicationTemplateConfiguration> applicationTemplates,
+            List<ParameterTemplateDescriptor> paramTemplates) {
+        meta.write(hive, new ProductManifestStaticCacheRecordV2(appRefs, otherRefs, desc, cfgEntry, plugins, templates,
                 applicationTemplates, paramTemplates));
     }
 

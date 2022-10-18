@@ -93,7 +93,7 @@
             [completed]="firstStepCompleted && secondStepCompleted"
           >
             <div class="instance-templates-top-space">
-              <ng-container *ngFor="let v of template?.templateVariables">
+              <ng-container *ngFor="let v of requiredVariables">
                 <app-bd-form-input
                   *ngIf="firstStepCompleted && secondStepCompleted"
                   [(ngModel)]="variables[v.id]"
@@ -106,7 +106,7 @@
                   (ngModelChange)="validateHasAllVariables()"
                 ></app-bd-form-input>
               </ng-container>
-              <ng-container *ngIf="!template?.templateVariables?.length">
+              <ng-container *ngIf="!requiredVariables.length">
                 <div class="bd-description-text" [style.padding-bottom.px]="20">
                   No template variables.
                 </div>
