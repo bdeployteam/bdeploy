@@ -20,6 +20,7 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.jersey.JerseySecurityContext;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.api.AuthService;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
@@ -45,6 +46,7 @@ import jakarta.ws.rs.core.UriInfo;
 public class PermissionRequestFilter implements ContainerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionRequestFilter.class);
+    public static final String PERM_SCOPE = "PermissionScope";
 
     @Inject
     private AuthService authService;
@@ -56,11 +58,13 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         UriInfo plainInfo = requestContext.getUriInfo();
         if (!(plainInfo instanceof ExtendedUriInfo)) {
+            requestContext.setProperty(PERM_SCOPE, ObjectScope.EMPTY);
             return;
         }
         // Authorization requires a user to be set.
         SecurityContext plainSecurityContext = requestContext.getSecurityContext();
         if (plainSecurityContext == null || plainSecurityContext.getUserPrincipal() == null) {
+            requestContext.setProperty(PERM_SCOPE, ObjectScope.EMPTY);
             return;
         }
 
@@ -84,6 +88,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
         }
 
         String activeScope = null;
+        List<String> scopes = new ArrayList<>();
 
         // Check if the user has the permissions declared on each involved method
         for (ResourceMethod resourceMethod : methods) {
@@ -95,6 +100,20 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
 
             RequiredPermission requiredPermission = getRequiredPermission(uriInfo, resourceMethod);
             if (requiredPermission == null) {
+                // even if there is not usable permission found, check if we can still find a scope on the method. no dynamics here.
+                RequiredPermission check = resourceMethod.getInvocable().getDefinitionMethod()
+                        .getAnnotation(RequiredPermission.class);
+
+                if (check == null) {
+                    continue;
+                }
+
+                String methodScope = getScopedValue(uriInfo, check.scope());
+                if (methodScope != null) {
+                    activeScope = methodScope;
+                    scopes.add(methodScope);
+                }
+
                 continue;
             }
 
@@ -102,6 +121,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
             String methodScope = getScopedValue(uriInfo, requiredPermission.scope());
             if (methodScope != null) {
                 activeScope = methodScope;
+                scopes.add(methodScope);
             }
 
             // Check if the user has global permissions
@@ -115,6 +135,9 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
                 throw new ForbiddenException("User '" + userName + "' is not authorized to access requested resource.");
             }
         }
+
+        ObjectScope authScope = new ObjectScope(scopes);
+        requestContext.setProperty(PERM_SCOPE, authScope);
     }
 
     /**
