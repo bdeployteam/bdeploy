@@ -5,10 +5,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatTabsModule } from '@angular/material/tabs';
 import { CoreModule } from '../../core/core.module';
 import { InstancesBrowserComponent } from './components/browser/browser.component';
 import { InstanceBannerHintComponent } from './components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from './components/browser/instance-product-version/instance-product-version.component';
+import { OverallStatusColumnComponent } from './components/browser/overall-status-column/overall-status-column.component';
 import { ConfigNodeComponent } from './components/configuration/config-node/config-node.component';
 import { ControlGroupComponent } from './components/configuration/config-node/control-group/control-group.component';
 import { ConfigurationComponent } from './components/configuration/configuration.component';
@@ -27,8 +29,8 @@ import { PortStatusColumnComponent } from './components/port-status-column/port-
 import { ProcessNameAndOsComponent } from './components/process-name-and-os/process-name-and-os.component';
 import { RatingStatusColumnComponent } from './components/rating-status-column/rating-status-column.component';
 import { StateStatusColumnComponent } from './components/state-status-column/state-status-column.component';
+import { SystemTemplateComponent } from './components/system-template/system-template.component';
 import { InstancesRoutingModule } from './instances-routing.module';
-import { OverallStatusColumnComponent } from './components/browser/overall-status-column/overall-status-column.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +56,7 @@ import { OverallStatusColumnComponent } from './components/browser/overall-statu
     StateStatusColumnComponent,
     ControlGroupComponent,
     OverallStatusColumnComponent,
+    SystemTemplateComponent,
   ],
   exports: [
     // for panels.
@@ -69,6 +72,7 @@ import { OverallStatusColumnComponent } from './components/browser/overall-statu
     MatButtonToggleModule,
     MatProgressSpinnerModule,
     MatExpansionModule,
+    MatTabsModule,
   ],
 })
 export class InstancesModule {}

@@ -53,7 +53,7 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
     }
 
     @Override
-    public void update(SystemConfiguration system) {
+    public Manifest.Key update(SystemConfiguration system) {
         var newKey = new SystemManifest.Builder().setSystemId(system.id).setConfiguration(system).insert(hive);
         var ir = rc.initResource(new MasterNamedResourceImpl(root, hive, reporter));
 
@@ -73,6 +73,8 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
                 }
             }
         }
+
+        return newKey;
     }
 
     @Override

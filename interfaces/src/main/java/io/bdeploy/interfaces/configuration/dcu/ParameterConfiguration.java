@@ -1,10 +1,13 @@
 package io.bdeploy.interfaces.configuration.dcu;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 
 /**
  * Describes a single parameter as configured in a configuration UI.
@@ -46,5 +49,29 @@ public class ParameterConfiguration {
      * line, but with variables still in place.
      */
     public List<String> preRendered = new ArrayList<>();
+
+    /**
+     * Updates the {@link #preRendered} representation of the parameter using the given descriptor (can be <code>null</code> for
+     * custom parameters).
+     */
+    public void preRender(ParameterDescriptor desc) {
+        String strValue = value != null && value.getPreRenderable() != null ? value.getPreRenderable() : "";
+
+        if (desc == null) {
+            // custom parameter
+            preRendered = Collections.singletonList(strValue);
+            return;
+        }
+
+        if (desc.hasValue) {
+            if (desc.valueAsSeparateArg) {
+                preRendered = List.of(desc.parameter, strValue);
+            } else {
+                preRendered = List.of(desc.parameter + desc.valueSeparator + strValue);
+            }
+        } else {
+            preRendered = Collections.singletonList(desc.parameter);
+        }
+    }
 
 }

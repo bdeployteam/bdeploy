@@ -20,8 +20,16 @@ public class TrackingTemplateOverrideResolver implements VariableResolver {
 
     private final List<TemplateVariableFixedValueOverride> overrides;
 
+    private final TrackingTemplateOverrideResolver parent;
+
     public TrackingTemplateOverrideResolver(List<TemplateVariableFixedValueOverride> overrides) {
+        this(overrides, null);
+    }
+
+    public TrackingTemplateOverrideResolver(List<TemplateVariableFixedValueOverride> overrides,
+            TrackingTemplateOverrideResolver parent) {
         this.overrides = overrides;
+        this.parent = parent;
     }
 
     public Set<String> getRequestedVariables() {
@@ -46,6 +54,9 @@ public class TrackingTemplateOverrideResolver implements VariableResolver {
         Optional<TemplateVariableFixedValueOverride> override = overrides.stream().filter(o -> o.id.equals(finVarName))
                 .findFirst();
         if (!override.isPresent()) {
+            if (parent != null) {
+                return parent.apply(t);
+            }
             return null;
         }
 
@@ -83,11 +94,20 @@ public class TrackingTemplateOverrideResolver implements VariableResolver {
                 .findFirst();
 
         if (override.isEmpty()) {
-            // need to query the user later, no fixed value.
-            requestedVariables.add(finVarName);
+            boolean parentCanResolve = false;
+            if (parent != null) {
+                parentCanResolve = parent.canResolve(t);
+            }
+
+            if (!parentCanResolve) {
+                // need to query the user later, no fixed value.
+                requestedVariables.add(finVarName);
+            }
+
+            return parentCanResolve;
         }
 
-        return override.isPresent();
+        return true;
     }
 
 }

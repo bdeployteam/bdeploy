@@ -19,6 +19,9 @@ public class SystemTemplateDescriptor {
     @JsonPropertyDescription("A short but thorough description of what the template will create.")
     public String description;
 
+    @JsonPropertyDescription("A list of user-provided variables which can be used in the template. All variables are queried when applying the template.")
+    public List<TemplateVariable> templateVariables = new ArrayList<>();
+
     @JsonPropertyDescription("A set of system variable definitions included in this template.")
     public List<VariableConfiguration> systemVariables;
 

@@ -80,6 +80,7 @@
     --bd-text-success: #{mat.get-color-from-palette($success)};
     --bd-text-very-light: #{if($dark, #aeaeae, #747474)};
     --bd-text-disabled: #{mat.get-color-from-palette($fg, "disabled-text")};
+    --bd-text-validation: #dc000f;
 
     --bd-bg-dialog: #{mat.get-color-from-palette($bg, "dialog")};
     --bd-bg-toolbar: #{mat.get-color-from-palette($bg, "app-bar")};

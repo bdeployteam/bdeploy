@@ -54,6 +54,13 @@
     ></app-bd-panel-button>
 
     <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-button
+      text="Apply System Template..."
+      icon="auto_awesome"
+      tooltip="below"
+      [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
+      [disabled]="!(authService.isCurrentScopeWrite$ | async)"
+    ></app-bd-button>
     <app-bd-panel-button
       icon="add"
       text="Add Instance..."
@@ -84,12 +91,21 @@
           *ngIf="(authService.isCurrentScopeWrite$ | async) && (hasProducts$ | async)"
         >
           <p>Start by creating a new one.</p>
-          <app-bd-panel-button
-            icon="add"
-            text="Add Instance..."
-            [collapsed]="false"
-            [route]="['panels', 'instances', 'add']"
-          ></app-bd-panel-button>
+          <div fxLayout="row" fxLayoutGap="10px">
+            <app-bd-button
+              text="Apply System Template..."
+              icon="auto_awesome"
+              [collapsed]="false"
+              [routerLink]="['/instances', 'system-template', areas.groupContext$.value]"
+              [disabled]="!(authService.isCurrentScopeWrite$ | async)"
+            ></app-bd-button>
+            <app-bd-panel-button
+              icon="add"
+              text="Add Instance..."
+              [collapsed]="false"
+              [route]="['panels', 'instances', 'add']"
+            ></app-bd-panel-button>
+          </div>
         </ng-container>
         <ng-container *ngIf="!(hasProducts$ | async)">
           <p>No product is available yet to create one.</p>

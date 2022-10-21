@@ -3,4 +3,8 @@ product: "io.bdeploy/chat-app"
 vendor: BDeploy Team
 applications:
 - "chat-app"
+
+instanceTemplates:
+- "product-template.yaml"
+
 versionFile: "product-version.yaml"

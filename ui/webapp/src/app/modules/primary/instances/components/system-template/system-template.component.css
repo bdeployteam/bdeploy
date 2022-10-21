@@ -1,0 +1,26 @@
+.local-required-label {
+  color: var(--bd-text-validation);
+}
+
+.local-required-label::after {
+  content: '*';
+  color: var(--bd-text-validation);
+}
+
+.mat-stepper-horizontal-line {
+  min-width: 8px !important;
+}
+
+@media (max-width: 800px) {
+  .mat-horizontal-stepper-header {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .mat-horizontal-stepper-header .mat-step-icon,
+  .mat-horizontal-stepper-header .mat-step-icon-not-touched {
+    margin-right: 0 !important;
+  }
+  .mat-step-label {
+    display: none !important;
+  }
+}

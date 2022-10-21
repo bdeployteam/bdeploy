@@ -4,6 +4,8 @@ import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
 import {
   ObjectChangeType,
   SystemConfigurationDto,
+  SystemTemplateRequestDto,
+  SystemTemplateResultDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
@@ -41,14 +43,27 @@ export class SystemsService {
 
   public create(system: SystemConfigurationDto): Observable<any> {
     return this.http
-      .post(`${this.apiPath(this.groups.current$?.value.name)}`, system)
+      .post(`${this.apiPath(this.groups.current$.value?.name)}`, system)
       .pipe(measure(`Create system ${system.config.name}`));
   }
 
   public delete(id: string): Observable<any> {
     return this.http
-      .delete(`${this.apiPath(this.groups.current$?.value.name)}/${id}`)
+      .delete(`${this.apiPath(this.groups.current$.value?.name)}/${id}`)
       .pipe(measure(`Delete system ${id}`));
+  }
+
+  public getTemplateUploadUrl(): string {
+    return this.apiPath(this.groups.current$.value?.name);
+  }
+
+  public apply(
+    request: SystemTemplateRequestDto
+  ): Observable<SystemTemplateResultDto> {
+    return this.http.post<SystemTemplateResultDto>(
+      `${this.apiPath(this.groups.current$.value?.name)}/apply`,
+      request
+    );
   }
 
   private load(group: string): Observable<SystemConfigurationDto[]> {

@@ -243,7 +243,7 @@ public class ProductUpdateService {
 
             // 4) ALWAYS pre-render the parameter to update if the descriptor's contents has changed
             if (desc.isPresent()) {
-                preRenderParameter(val, desc.get());
+                val.preRender(desc.get());
             }
         }
 
@@ -280,26 +280,6 @@ public class ProductUpdateService {
         return values;
     }
 
-    private void preRenderParameter(ParameterConfiguration val, ParameterDescriptor desc) {
-        String strValue = val.value != null && val.value.getPreRenderable() != null ? val.value.getPreRenderable() : "";
-
-        if (desc == null) {
-            // custom parameter
-            val.preRendered = Collections.singletonList(strValue);
-            return;
-        }
-
-        if (desc.hasValue) {
-            if (desc.valueAsSeparateArg) {
-                val.preRendered = List.of(desc.parameter, strValue);
-            } else {
-                val.preRendered = List.of(desc.parameter + desc.valueSeparator + strValue);
-            }
-        } else {
-            val.preRendered = Collections.singletonList(desc.parameter);
-        }
-    }
-
     private void createParameter(InstanceConfiguration instance, ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
             List<ParameterConfiguration> values, Set<ApplicationConfiguration> allApps) {
         ParameterConfiguration cfg = new ParameterConfiguration();
@@ -316,7 +296,7 @@ public class ProductUpdateService {
             }
         }
 
-        preRenderParameter(cfg, desc);
+        cfg.preRender(desc);
 
         // find the first successor descriptor which has a value. we want to add *before* that to keep
         // custom parameter order intact.
@@ -410,7 +390,7 @@ public class ProductUpdateService {
         return result;
     }
 
-    private VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
+    public static VariableResolver createResolver(InstanceNodeConfigurationDto node, ApplicationConfiguration process) {
         CompositeResolver res = new CompositeResolver();
         res.add(new InstanceAndSystemVariableResolver(node.nodeConfiguration));
         res.add(new ConditionalExpressionResolver(res));
@@ -521,7 +501,7 @@ public class ProductUpdateService {
         }
     }
 
-    private boolean meetsCondition(ApplicationDescriptor desc, ParameterDescriptor param, VariableResolver resolver) {
+    public static boolean meetsCondition(ApplicationDescriptor desc, ParameterDescriptor param, VariableResolver resolver) {
         if (param.condition == null || (param.condition.parameter == null && param.condition.expression == null)) {
             return true;
         }

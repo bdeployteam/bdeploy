@@ -9,6 +9,7 @@ import { ConfigurationComponent } from './components/configuration/configuration
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { DataFilesComponent } from './components/data-files/data-files.component';
 import { HistoryComponent } from './components/history/history.component';
+import { SystemTemplateComponent } from './components/system-template/system-template.component';
 
 const INSTANCES_ROUTES: Route[] = [
   {
@@ -39,6 +40,12 @@ const INSTANCES_ROUTES: Route[] = [
     path: 'data-files/:group/:instance',
     component: DataFilesComponent,
     canActivate: [ScopedReadGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'system-template/:group',
+    component: SystemTemplateComponent,
+    canActivate: [ScopedWriteGuard],
     canDeactivate: [DirtyDialogGuard],
   },
 ];

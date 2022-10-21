@@ -1,0 +1,279 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar
+    [header]="'Apply System Template in ' + (groups.current$ | async)?.name"
+  >
+    <div fxFlex="1 0 auto"></div>
+    <app-bd-button
+      text="Back to Instance Browser"
+      icon="arrow_back"
+      tooltip="below"
+      [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
+    ></app-bd-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div fxLayout="column" fxLayoutGap="10px">
+      <mat-stepper
+        #stepper
+        [linear]="true"
+        orientation="horizontal"
+        (selectionChange)="onStepSelectionChange($event)"
+        [selectedIndex]="(cfg.isCentral$ | async) ? 0 : 1"
+        labelPosition="bottom"
+        animationDuration="200"
+      >
+        <mat-step label="Target Server" [completed]="serverSelectionCompleted">
+          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+            <div *ngIf="!isCentral; else selectManaged">
+              Choosing a target server is not required for your setup.
+            </div>
+            <ng-template #selectManaged>
+              <div>
+                Choose the target server. The system and all instances will be
+                created on the selected server.
+              </div>
+              <app-bd-form-select
+                [values]="serverDtos"
+                [labels]="serverLabels"
+                label="Choose Server"
+                name="managedServer"
+                [(ngModel)]="selectedServer"
+                (ngModelChange)="serverSelectionCompleted = !!selectedServer"
+              ></app-bd-form-select>
+            </ng-template>
+            <div fxLayout="row">
+              <app-bd-button
+                color="primary"
+                [collapsed]="false"
+                text="Next"
+                [disabled]="!serverSelectionCompleted"
+                (click)="stepper.next()"
+              ></app-bd-button>
+            </div>
+          </div>
+        </mat-step>
+        <mat-step label="System Template" [completed]="!!this.template">
+          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+            <app-bd-file-drop
+              *ngIf="!file"
+              [types]="['.yaml']"
+              hintText="Drop System Template"
+              (fileAdded)="readSystemTemplate($event)"
+            ></app-bd-file-drop>
+            <app-bd-file-upload
+              *ngIf="file"
+              [url]="systems.getTemplateUploadUrl()"
+              [file]="file"
+              [resultEvaluator]="onUploadResult"
+              [parameters]="[{id: 'server', name: 'server', type: 'string', value: selectedServer?.hostName}]"
+              (dismiss)="onDismiss()"
+            ></app-bd-file-upload>
+            <div fxLayout="row">
+              <app-bd-button
+                color="primary"
+                [collapsed]="false"
+                text="Next"
+                [disabled]="!template"
+                (click)="stepper.next()"
+              ></app-bd-button>
+            </div>
+          </div>
+        </mat-step>
+        <mat-step label="Name and Purpose" [completed]="name && purpose">
+          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+            <app-bd-form-input
+              errorDisplay="immediate"
+              [required]="true"
+              name="name"
+              label="System Name"
+              [(ngModel)]="name"
+            ></app-bd-form-input>
+            <app-bd-form-select
+              label="Purpose"
+              name="purpose"
+              [(ngModel)]="purpose"
+              [values]="purposes"
+              required
+            ></app-bd-form-select>
+            <div fxLayout="row">
+              <app-bd-button
+                color="primary"
+                [collapsed]="false"
+                text="Next"
+                [disabled]="!name || !purpose"
+                (click)="stepper.next()"
+              ></app-bd-button>
+            </div>
+          </div>
+        </mat-step>
+        <mat-step
+          label="System Template Variables"
+          [completed]="isAllSystemVariablesSet"
+        >
+          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+            <ng-container *ngFor="let v of requiredSystemVariables">
+              <app-bd-form-input
+                [(ngModel)]="systemVariables[v.id]"
+                [attr.name]="v.name"
+                [label]="v.name"
+                [matTooltip]="v.description"
+                matTooltipPosition="above"
+                [suggested]="v.suggestedValues"
+                required
+                (ngModelChange)="validateHasAllSystemVariables()"
+                errorDisplay="immediate"
+              ></app-bd-form-input>
+            </ng-container>
+            <ng-container *ngIf="!requiredSystemVariables.length">
+              <div class="bd-description-text" [style.padding-bottom.px]="20">
+                No system template variables.
+              </div>
+            </ng-container>
+            <div fxLayout="row">
+              <app-bd-button
+                color="primary"
+                [collapsed]="false"
+                text="Next"
+                [disabled]="!isAllSystemVariablesSet"
+                (click)="stepper.next();"
+              ></app-bd-button>
+            </div>
+          </div>
+        </mat-step>
+        <mat-step
+          label="Instance Templates"
+          [completed]="isAllTemplateGroupsSelected && isAllVariablesSet"
+        >
+          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+            <mat-tab-group #tabGroup animationDuration="0ms">
+              <mat-tab *ngFor="let tpl of templates">
+                <ng-template matTabLabel>
+                  <div
+                    [class.local-required-label]="tpl.isApplyInstance && (!tpl.isAnyGroupSelected || !tpl.isAllVariablesSet)"
+                  >
+                    {{ tpl.expandedName }}
+                  </div>
+                </ng-template>
+                <div fxLayout="row" fxLayoutGap="5px">
+                  <div
+                    fxFlex="1 0 auto"
+                    fxLayout="column"
+                    fxLayoutGap="10px"
+                    [style.padding.px]="10"
+                  >
+                    <app-bd-form-toggle
+                      label="Apply this instance"
+                      [(ngModel)]="tpl.isApplyInstance"
+                      (ngModelChange)="toggleSkipInstance($event, tpl)"
+                    ></app-bd-form-toggle>
+                    <ng-container *ngIf="tpl.isApplyInstance">
+                      <app-bd-form-select
+                        *ngFor="let group of tpl.tpl.groups"
+                        [label]="'Group \'' + group.name + '\''"
+                        [matTooltip]="group.description"
+                        matTooltipPosition="above"
+                        [attr.name]="group.name"
+                        [values]="tpl.nodeNames[group.name]"
+                        [labels]="tpl.nodeLabels[group.name]"
+                        [(ngModel)]="tpl.groups[group.name]"
+                        (ngModelChange)="validateAnyGroupSelected(tpl)"
+                      ></app-bd-form-select>
+                    </ng-container>
+                  </div>
+                  <mat-divider
+                    [vertical]="true"
+                    [style.width.px]="5"
+                  ></mat-divider>
+                  <div
+                    fxFlex="2 0 auto"
+                    fxLayout="column"
+                    fxLayoutGap="10px"
+                    [style.padding.px]="10"
+                  >
+                    <ng-container *ngIf="tpl.isApplyInstance; else: noApply">
+                      <ng-container *ngFor="let v of tpl.requiredVariables">
+                        <app-bd-form-input
+                          [(ngModel)]="tpl.variables[v.id]"
+                          [attr.name]="v.name"
+                          [label]="v.name"
+                          [matTooltip]="v.description"
+                          matTooltipPosition="above"
+                          [suggested]="v.suggestedValues"
+                          required
+                          (ngModelChange)="validateHasAllVariables(tpl)"
+                          errorDisplay="immediate"
+                        ></app-bd-form-input>
+                      </ng-container>
+                      <ng-container *ngIf="!tpl.requiredVariables.length">
+                        <div
+                          class="bd-description-text"
+                          [style.padding-top.px]="13"
+                          [style.padding-bottom.px]="13"
+                        >
+                          No template variables.
+                        </div>
+                      </ng-container>
+                    </ng-container>
+                    <ng-template #noApply>
+                      <div
+                        class="bd-description-text"
+                        [style.padding-top.px]="13"
+                        [style.padding-bottom.px]="13"
+                      >
+                        This instance will not be applied.
+                      </div>
+                    </ng-template>
+                  </div>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+            <div fxLayout="row">
+              <app-bd-button
+                color="primary"
+                [collapsed]="false"
+                text="Next"
+                [disabled]="!isAllTemplateGroupsSelected || !isAllVariablesSet"
+                (click)="stepper.next()"
+              ></app-bd-button>
+            </div>
+          </div>
+        </mat-step>
+        <mat-step label="Applying">
+          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="20">
+            <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+              <mat-spinner [diameter]="24"></mat-spinner>
+              <div>Working on it...</div>
+            </div>
+          </div>
+        </mat-step>
+        <mat-step label="Done">
+          <div
+            fxLayout="column"
+            fxLayoutGap="10px"
+            [style.padding.px]="20"
+            *ngIf="result"
+          >
+            <div *ngIf="resultIsSuccess">
+              Applying is done. You may now head back to the
+              <a
+                [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
+                >Instance Browser</a
+              >
+              to start using the created instances.
+            </div>
+            <div *ngIf="!resultIsSuccess">
+              Applying was not fully successful. You can find details about the
+              problem(s) encountered below. Note that some instance may still
+              have been created successfully. Please make sure to create the
+              remaining instances manually.
+            </div>
+            <app-bd-data-table
+              [records]="result.results"
+              [columns]="resultCols"
+              [sortData]="null"
+            ></app-bd-data-table>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

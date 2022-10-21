@@ -1,5 +1,7 @@
 package io.bdeploy.interfaces.descriptor.template;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -25,5 +27,11 @@ public class SystemTemplateInstanceReference {
     @JsonPropertyDescription("The name of the instance template to use when creating the instance of the product.")
     @JsonProperty(required = true)
     public String templateName;
+
+    @JsonPropertyDescription("A list of proposed default mappings from groups to nodes. If a node does not exist, the mapping is disregarded and the user needs to choose.")
+    public List<SystemTemplateInstanceTemplateGroupMapping> defaultMappings;
+
+    @JsonPropertyDescription("A list of fixed values which should be used instead of querying values from the user.")
+    public List<TemplateVariableFixedValueOverride> fixedVariables;
 
 }

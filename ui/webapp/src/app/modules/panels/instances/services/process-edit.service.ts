@@ -26,7 +26,7 @@ import {
   getPreRenderable,
   getRenderPreview,
 } from 'src/app/modules/core/utils/linked-values.utils';
-import { expandVar } from 'src/app/modules/core/utils/object.utils';
+import { performTemplateVariableSubst } from 'src/app/modules/core/utils/object.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
@@ -150,11 +150,7 @@ export class ProcessEditService {
       uid: null, // compat
       application: application.key,
       name: template?.name
-        ? this.performTemplateVariableSubst(
-            template.name,
-            variableValues,
-            status
-          )
+        ? performTemplateVariableSubst(template.name, variableValues, status)
         : application.name,
       pooling: application.descriptor.pooling,
       endpoints: cloneDeep(application.descriptor.endpoints),
@@ -345,7 +341,7 @@ export class ProcessEditService {
         let val = p.defaultValue;
         if (!!tpl && tpl.value !== undefined && tpl.value !== null) {
           val = createLinkedValue(
-            this.performTemplateVariableSubst(tpl.value, values, status)
+            performTemplateVariableSubst(tpl.value, values, status)
           );
         } else if (p.global && !this.edit.globalsMigrated$.value) {
           const gp = this.getGlobalParameter(p.id);
@@ -381,25 +377,6 @@ export class ProcessEditService {
         )
       ),
     };
-  }
-
-  public performTemplateVariableSubst(
-    value: string,
-    variables: { [key: string]: string },
-    status: StatusMessage[]
-  ): string {
-    if (!!value && value.indexOf('{{T:') !== -1) {
-      let found = true;
-      while (found) {
-        const rex = new RegExp(/{{T:([^}]*)}}/).exec(value);
-        if (rex) {
-          value = value.replace(rex[0], expandVar(rex[1], variables, status));
-        } else {
-          found = false;
-        }
-      }
-    }
-    return value;
   }
 
   public meetsConditionOnCurrent(

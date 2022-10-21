@@ -66,3 +66,22 @@ export function expandVar(
 
   return val;
 }
+
+export function performTemplateVariableSubst(
+  value: string,
+  variables: { [key: string]: string },
+  status: StatusMessage[]
+): string {
+  if (!!value && value.indexOf('{{T:') !== -1) {
+    let found = true;
+    while (found) {
+      const rex = new RegExp(/{{T:([^}]*)}}/).exec(value);
+      if (rex) {
+        value = value.replace(rex[0], expandVar(rex[1], variables, status));
+      } else {
+        found = false;
+      }
+    }
+  }
+  return value;
+}

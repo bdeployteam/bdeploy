@@ -34,7 +34,7 @@ public class FlattenedInstanceTemplateConfiguration {
     public List<InstanceTemplateControlGroup> processControlGroups;
     public List<FlattenedInstanceTemplateGroupConfiguration> groups;
 
-    public List<TemplateVariable> instanceVariableTemplateVars = new ArrayList<>();
+    public List<TemplateVariable> directlyUsedTemplateVars = new ArrayList<>();
 
     FlattenedInstanceTemplateConfiguration() {
         // intentionally left empty for deserialization.
@@ -45,10 +45,6 @@ public class FlattenedInstanceTemplateConfiguration {
         this.name = original.name;
         this.description = original.description;
         this.processControlGroups = original.processControlGroups;
-
-        resolveInstanceVariablesAndTemplateVariables(varTpl, original.instanceVariables, original.instanceVariableDefaults,
-                original.templateVariables);
-
         this.groups = original.groups.stream()
                 .map(g -> new FlattenedInstanceTemplateGroupConfiguration(g, appTpl, original.templateVariables)).filter(g -> {
                     if (g.applications.isEmpty()) {
@@ -57,6 +53,9 @@ public class FlattenedInstanceTemplateConfiguration {
                     }
                     return true;
                 }).toList();
+
+        resolveInstanceVariablesAndTemplateVariables(varTpl, original.instanceVariables, original.instanceVariableDefaults,
+                original.templateVariables);
     }
 
     private void resolveInstanceVariablesAndTemplateVariables(List<InstanceVariableTemplateDescriptor> templates,
@@ -98,6 +97,7 @@ public class FlattenedInstanceTemplateConfiguration {
             }
         }
 
+        // determine which variables are *actually* used, and only provide those in the end.
         TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList()); // no overrides on this level.
         this.instanceVariables = vars.stream()
                 .map(v -> new VariableConfiguration(v.id,
@@ -105,7 +105,18 @@ public class FlattenedInstanceTemplateConfiguration {
                         v.description, v.type, v.customEditor))
                 .toList();
 
-        this.instanceVariableTemplateVars = res.getRequestedVariables().stream()
+        // we allow template variables to be used directly in the template YAML in various places, especially when configuring applications.
+        for (var group : this.groups) {
+            for (var app : group.applications) {
+                TemplateHelper.process(app.name, res, res::canResolve);
+                TemplateHelper.process(app.description, res, res::canResolve);
+                for (var param : app.startParameters) {
+                    TemplateHelper.process(param.value, res, res::canResolve);
+                }
+            }
+        }
+
+        this.directlyUsedTemplateVars = res.getRequestedVariables().stream()
                 .map(k -> templateVars.stream().filter(x -> x.id.equals(k)).findAny().orElse(null)).filter(Objects::nonNull)
                 .toList();
     }

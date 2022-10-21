@@ -29,7 +29,7 @@ public interface MasterSystemResource {
      * @param system the updated or new system
      */
     @POST
-    public void update(SystemConfiguration system);
+    public Manifest.Key update(SystemConfiguration system);
 
     /**
      * @param id the system to delete

@@ -37,6 +37,7 @@ import {
   getAppKeyName,
   getTemplateAppKey,
 } from 'src/app/modules/core/utils/manifest.utils';
+import { performTemplateVariableSubst } from 'src/app/modules/core/utils/object.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
@@ -235,7 +236,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
         const processed = cloneDeep(v);
         const status: StatusMessage[] = [];
         processed.value = createLinkedValue(
-          this.edit.performTemplateVariableSubst(
+          performTemplateVariableSubst(
             getPreRenderable(processed.value),
             this.variables,
             status
@@ -511,9 +512,9 @@ export class InstanceTemplatesComponent implements OnDestroy {
         this.variables = {};
         this.requiredVariables = [];
 
-        if (this.template.instanceVariableTemplateVars?.length) {
+        if (this.template.directlyUsedTemplateVars?.length) {
           this.requiredVariables.push(
-            ...this.template.instanceVariableTemplateVars
+            ...this.template.directlyUsedTemplateVars
           );
         }
 

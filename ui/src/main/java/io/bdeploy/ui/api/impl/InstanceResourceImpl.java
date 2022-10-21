@@ -417,7 +417,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         root.getNamedMaster(group)
                 .update(new InstanceUpdateDto(new InstanceConfigurationDto(instanceConfig, Collections.emptyList()),
-                        getUpdatesFromTree("", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
+                        getUpdatesFromTree(hive, "", new ArrayList<>(), product.getConfigTemplateTreeId())), null);
 
         // immediately fetch back so we have it to create the association. don't use
         // #syncInstance here,
@@ -454,7 +454,7 @@ public class InstanceResourceImpl implements InstanceResource {
         rs.synchronize(groupName, server.hostName);
     }
 
-    private List<FileStatusDto> getUpdatesFromTree(String path, List<FileStatusDto> target, ObjectId cfgTree) {
+    public static List<FileStatusDto> getUpdatesFromTree(BHive hive, String path, List<FileStatusDto> target, ObjectId cfgTree) {
         if (cfgTree == null) {
             return target;
         }
@@ -478,7 +478,7 @@ public class InstanceResourceImpl implements InstanceResource {
                     target.add(fsd);
                     break;
                 case TREE:
-                    getUpdatesFromTree(path + entry.getKey().getName() + "/", target, entry.getValue());
+                    getUpdatesFromTree(hive, path + entry.getKey().getName() + "/", target, entry.getValue());
                     break;
                 default:
                     throw new IllegalStateException("Unsupported entry type in config tree: " + entry);

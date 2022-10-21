@@ -30,6 +30,7 @@ public class TemplateApplication {
     @JsonPropertyDescription("A set of parameters to configure on the process resulting from this template.")
     public List<TemplateParameter> startParameters = new ArrayList<>();
 
+    @JsonPropertyDescription("A set of fixed variable values to be used instead of querying the user.")
     public List<TemplateVariableFixedValueOverride> fixedVariables = new ArrayList<>();
 
 }
