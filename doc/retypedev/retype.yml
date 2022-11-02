@@ -1,0 +1,15 @@
+input: .
+output: ../../build/docs/dev
+url: https://bdeploy.io/ # Add your website address here
+favicon: /images/logo.ico
+branding:
+  title: BDeploy Developer Documentation
+editor:
+  enabled: false # Default is true
+footer:
+  copyright: "&copy; Copyright {{ year }}. All rights reserved."
+search:
+  preload: true
+generator:
+  directoryIndex:
+    append: true

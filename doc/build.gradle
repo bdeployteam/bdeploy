@@ -3,6 +3,40 @@ plugins {
     id 'org.asciidoctor.jvm.pdf' version '3.3.2'
 }
 
+ext.installRetype = { task -> 
+    configure(task) {
+        group = BasePlugin.BUILD_GROUP
+        if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            commandLine (["npm", "install", "retypeapp"])
+        } else {
+            commandLine (["npm.cmd", "install", "retypeapp"])
+        }
+    }
+}
+
+ext.buildRetype = { task ->
+    configure(task) {
+        group = BasePlugin.BUILD_GROUP
+	    if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+	        commandLine (["npx", "retypeapp", "build"])
+	    } else {
+	        commandLine (["npx.cmd", "retypeapp", "build"])
+	    }
+    }
+}
+
+task retypeDevDoc(type: Exec) { t ->
+    workingDir './retypedev'
+    installRetype(t)
+    buildRetype(t)
+}
+
+task retypeUserDoc(type: Exec) { t ->
+    workingDir './retypeuser'
+    installRetype(t)
+    buildRetype(t)
+}
+
 task developerDoc(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
     sourceDir = file('dev')
 
@@ -75,5 +109,7 @@ asciidoctorj {
     }
 }
 
-build.dependsOn developerDoc
-build.dependsOn userDoc
+build.dependsOn retypeDevDoc
+build.dependsOn retypeUserDoc
+// build.dependsOn developerDoc
+// build.dependsOn userDoc

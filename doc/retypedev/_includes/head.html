@@ -1,0 +1,54 @@
+<style>
+    table td {
+        vertical-align: top;
+    }
+
+    img {
+        position: relative;
+        transition: transform 0.25s ease;
+        cursor: zoom-in;
+        z-index: 7;
+    }
+    
+    img.preview {
+        -webkit-transform: scale(2);
+        transform: scale(2);
+        cursor: zoom-out;
+        z-index: 9;
+    }
+
+    .img-backdrop::after {
+        content: "";
+        display: block;
+        position: fixed;
+        background-color: black;
+        opacity: .7;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 8;
+    }
+
+</style>
+<script>
+document.addEventListener('click', function(event) {
+    if(event.target.tagName === 'IMG'){
+        const classList = event.target.classList;
+        if (classList.contains('preview')) {
+            classList.remove('preview');
+            document.body.classList.remove('img-backdrop')
+        } else {
+            classList.add('preview');
+            document.body.classList.add('img-backdrop')
+        }
+        event.target.parentElement
+    } else {
+        // if its not the image that was clicked, but backdrop is on, then cancel backdrop
+        if (document.body.classList.contains('img-backdrop')) {
+            document.body.classList.remove('img-backdrop')
+            document.getElementsByClassName('preview')[0].classList.remove('preview')
+        }
+    }
+});
+</script>

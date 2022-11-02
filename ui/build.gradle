@@ -203,7 +203,7 @@ task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
 
 task updateDocuScreenshots(type: Copy, dependsOn: runCypressHeadless) {
     from file("${webappDir}/cypress/screenshots/")
-    into new File(project(":doc").projectDir, "user/images")
+    into new File(project(":doc").projectDir, "retypeuser/images")
 
     include "**/*.png"
 
