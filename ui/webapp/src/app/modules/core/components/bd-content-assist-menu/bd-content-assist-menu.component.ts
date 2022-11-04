@@ -30,6 +30,7 @@ export class BdContentAssistMenuComponent {
   /* template */ matches: ContentCompletion[];
   /* template */ selected: number;
   /* template */ isPrefix = true;
+  /* template */ tooManyMatches = false;
 
   @ViewChild('menu') private menu: TemplateRef<any>;
   @ViewChild('itemContainer', { static: false, read: ElementRef })
@@ -55,6 +56,7 @@ export class BdContentAssistMenuComponent {
       return;
     }
 
+    this.tooManyMatches = false;
     this.isPrefix = false;
     if (this.prefixes?.length) {
       const prefixes = this.prefixes.filter((p) => word.startsWith(p.value));
@@ -74,6 +76,11 @@ export class BdContentAssistMenuComponent {
     if (!this.matches?.length) {
       this.hide();
       return;
+    }
+
+    if (this.matches?.length > 100) {
+      this.matches = this.matches.slice(0, 100);
+      this.tooManyMatches = true;
     }
 
     // reset on changes

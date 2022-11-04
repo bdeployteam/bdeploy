@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, NgZone } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { isEqual } from 'lodash-es';
@@ -56,7 +56,8 @@ export class ConfigService {
     private http: HttpClient,
     private overlay: Overlay,
     iconRegistry: MatIconRegistry,
-    sanitizer: DomSanitizer
+    sanitizer: DomSanitizer,
+    ngZone: NgZone,
   ) {
     // register all custom icons we want to use with <mat-icon>
     iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
@@ -80,8 +81,10 @@ export class ConfigService {
     iconRegistry.addSvgIcon('sort_desc', sanitizer.bypassSecurityTrustResourceUrl('assets/sort-desc.svg'));
 
     // check whether the server version changed every minute.
-    // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.
-    this.checkInterval = setInterval(() => this.checkServerVersion(), 60000);
+    ngZone.runOutsideAngular(() => {
+      // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.
+      this.checkInterval = setInterval(() => this.checkServerVersion(), 60000);
+    });
   }
 
   /** Used during application init to load the configuration. */

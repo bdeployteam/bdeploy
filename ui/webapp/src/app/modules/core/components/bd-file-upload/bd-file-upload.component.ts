@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -25,6 +26,7 @@ import {
   selector: 'app-bd-file-upload',
   templateUrl: './bd-file-upload.component.html',
   styleUrls: ['./bd-file-upload.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFileUploadComponent implements OnInit, OnDestroy {
   @Input() file: File;

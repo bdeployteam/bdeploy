@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   Input,
   Optional,
@@ -16,6 +17,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   templateUrl: './bd-form-toggle.component.html',
   styleUrls: ['./bd-form-toggle.component.css'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFormToggleComponent implements ControlValueAccessor {
   @Input() label: string;

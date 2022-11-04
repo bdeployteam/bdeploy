@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -20,7 +20,11 @@ export class BhiveLogViewerComponent implements OnDestroy {
   private followInterval;
   private offset = 0;
 
-  constructor(private hiveLogging: HiveLoggingService, areas: NavAreasService) {
+  constructor(
+    private hiveLogging: HiveLoggingService,
+    areas: NavAreasService,
+    ngZone: NgZone
+  ) {
     this.subscription = combineLatest([
       areas.panelRoute$,
       hiveLogging.directories$,
@@ -61,7 +65,9 @@ export class BhiveLogViewerComponent implements OnDestroy {
       this.follow$.subscribe((b) => {
         clearInterval(this.followInterval);
         if (b) {
-          this.followInterval = setInterval(() => hiveLogging.reload(), 2000);
+          ngZone.runOutsideAngular(() => {
+            this.followInterval = setInterval(() => hiveLogging.reload(), 2000);
+          });
         }
       })
     );

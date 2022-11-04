@@ -11,7 +11,7 @@
   [color]="color"
   [disabled]="disabled"
   [tooltip]="tooltip"
-  [routerLink]="['', { outlets: { panel: generatedRoute } }]"
+  [routerLink]="['', { outlets: { panel: generatedRoute$ | async } }]"
   routerLinkActive
   queryParamsHandling="preserve"
 >

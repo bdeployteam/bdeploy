@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, finalize, map } from 'rxjs/operators';
@@ -96,7 +102,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     public servers: ServersService,
     private cfg: ConfigService,
     private route: ActivatedRoute,
-    private systems: SystemsService
+    private systems: SystemsService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -353,6 +360,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         () => this.doCalculateUptimeString(detail),
         delay
       );
+
+      this.cd.detectChanges();
     } else {
       this.uptime$.next(null);
     }
@@ -367,6 +376,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       const remainingSeconds = Math.round(diff / 1000);
       this.restartProgress$.next(100 - 100 * (remainingSeconds / totalSeconds));
       this.restartProgressText$.next(remainingSeconds + ' seconds');
+      this.cd.detectChanges();
     }
   }
 }

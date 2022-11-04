@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -22,7 +22,8 @@ export class LogFileViewerComponent implements OnDestroy {
 
   constructor(
     private loggingAdmin: LoggingAdminService,
-    areas: NavAreasService
+    areas: NavAreasService,
+    ngZone: NgZone
   ) {
     this.subscription = combineLatest([
       areas.panelRoute$,
@@ -64,7 +65,12 @@ export class LogFileViewerComponent implements OnDestroy {
       this.follow$.subscribe((b) => {
         clearInterval(this.followInterval);
         if (b) {
-          this.followInterval = setInterval(() => loggingAdmin.reload(), 2000);
+          ngZone.runOutsideAngular(() => {
+            this.followInterval = setInterval(
+              () => loggingAdmin.reload(),
+              2000
+            );
+          });
         }
       })
     );

@@ -1,6 +1,6 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import {
   BehaviorSubject,
@@ -36,7 +36,10 @@ import {
   createLinkedValue,
   getPreRenderable,
 } from 'src/app/modules/core/utils/linked-values.utils';
-import { mapObjToArray } from 'src/app/modules/core/utils/object.utils';
+import {
+  mapObjToArray,
+  removeNullValues,
+} from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import {
   DEF_CONTROL_GROUP,
@@ -191,6 +194,7 @@ export class InstanceEditService {
   public hasCurrentProduct$ = new BehaviorSubject<boolean>(false);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
+  private updateSaveableChangesHandle;
 
   constructor(
     private http: HttpClient,
@@ -198,7 +202,8 @@ export class InstanceEditService {
     private groups: GroupsService,
     private instances: InstancesService,
     private products: ProductsService,
-    private areas: NavAreasService
+    private areas: NavAreasService,
+    private ngZone: NgZone
   ) {
     this.instances.current$.subscribe((instance) => {
       // ALWAYS update current$ to pick up updated global data (banner, etc.).
@@ -220,7 +225,17 @@ export class InstanceEditService {
       }
 
       combineLatest([this.undo$, this.redo$, this.state$]).subscribe(() => {
-        this.hasSaveableChanges$.next(this.hasSaveableChanges());
+        if (this.updateSaveableChangesHandle) {
+          clearTimeout(this.updateSaveableChangesHandle);
+          this.updateSaveableChangesHandle = null;
+        }
+
+        this.ngZone.runOutsideAngular(() => {
+          this.updateSaveableChangesHandle = setTimeout(() => {
+            this.hasSaveableChanges$.next(this.hasSaveableChanges());
+            this.updateSaveableChangesHandle = null;
+          }, 50);
+        });
       });
 
       this.state$.subscribe(() => {
@@ -341,6 +356,7 @@ export class InstanceEditService {
     this.baseApplications$.next(null);
     this.stateApplications$.next(null);
     this.issues$.next(null);
+    this.hasSaveableChanges$.next(false);
 
     const inst = this.current$.value;
     if (inst) {
@@ -485,17 +501,7 @@ export class InstanceEditService {
     }
 
     this.saving$.next(true);
-
     const state = this.reBuild();
-
-    if (!this.hasChanges(state, this.base$.value)) {
-      // we have literally undone all changes, so no need to save, we just reset.
-      console.warn(
-        'No changes detected, you have logically undone all changes, not saving'
-      );
-      this.reset();
-      return of(null);
-    }
 
     const managedServer = this.current$.value.managedServer?.hostName;
     const expect = this.current$.value.instance.tag;
@@ -882,34 +888,6 @@ export class InstanceEditService {
     }
 
     // since some code regards null/undefined as equivalent, objects may not have properties which were null previously as they are simply left out.
-    return !isEqual(
-      this.removeNullValues(object),
-      this.removeNullValues(original)
-    );
-  }
-
-  /**
-   * Creates a new object which contains all defined non-null properties of the original.
-   *
-   * @param obj the original object
-   * @returns an object which contains all properties which are not null or undefined.
-   */
-  private removeNullValues(obj: any): any {
-    if (typeof obj === 'object') {
-      return (
-        Object.entries(obj)
-          //eslint-disable-next-line @typescript-eslint/no-unused-vars
-          .filter(([k, v]) => ![null, undefined].includes(v))
-          .reduce(
-            (r, [key, value]) => ({
-              ...r,
-              [key]: this.removeNullValues(value),
-            }),
-            {}
-          )
-      );
-    } else {
-      return obj;
-    }
+    return !isEqual(removeNullValues(object), removeNullValues(original));
   }
 }

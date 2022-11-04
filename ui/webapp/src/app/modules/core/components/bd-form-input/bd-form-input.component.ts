@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
@@ -27,6 +28,7 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
   templateUrl: './bd-form-input.component.html',
   styleUrls: ['./bd-form-input.component.css'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFormInputComponent
   implements OnInit, ControlValueAccessor, ErrorStateMatcher

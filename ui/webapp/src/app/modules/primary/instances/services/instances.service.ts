@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import {
   BehaviorSubject,
@@ -84,7 +84,8 @@ export class InstancesService {
     private downloads: DownloadService,
     private httpReplayService: HttpReplayService,
     products: ProductsService,
-    groups: GroupsService
+    groups: GroupsService,
+    private ngZone: NgZone
   ) {
     // clear out stuff whenever the group is re-set.
     groups.current$.subscribe(() => {
@@ -132,14 +133,16 @@ export class InstancesService {
       update.subscribe(() => {
         // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
         // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
-        this.activeLoadInterval = setInterval(
-          () => this.reloadActiveStates(act),
-          10000
-        );
-        this.activeCheckInterval = setInterval(
-          () => this.checkActiveReloadState(act),
-          1000
-        );
+        ngZone.runOutsideAngular(() => {
+          this.activeLoadInterval = setInterval(
+            () => this.reloadActiveStates(act),
+            10000
+          );
+          this.activeCheckInterval = setInterval(
+            () => this.checkActiveReloadState(act),
+            1000
+          );
+        });
 
         // update in case the server has changed (e.g. synchronized update state).
         if (!!servers?.length && !!cur?.managedServer?.hostName) {

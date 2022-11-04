@@ -1,6 +1,6 @@
 import {
+  ChangeDetectorRef,
   Component,
-  ElementRef,
   EventEmitter,
   Input,
   OnDestroy,
@@ -20,11 +20,6 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   private monaco;
   private subscription: Subscription;
 
-  private cachedX = 0;
-  private cachedY = 0;
-
-  private relayoutInterval;
-
   @Input() originalContent: string;
   @Input() modifiedContent: string;
   @Input() path = '';
@@ -33,11 +28,15 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   /* template */ editorOptions = {
     theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
     language: 'plaintext',
+    automaticLayout: true,
   };
 
   /* template */ inited$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private themeService: ThemeService, private host: ElementRef) {}
+  constructor(
+    private themeService: ThemeService,
+    private cd: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.subscription = this.themeService.getThemeSubject().subscribe(() => {
@@ -60,24 +59,11 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     // wait for init to complete, otherwise we leak models.
     setTimeout(() => this.initMonaco(), 0);
 
-    // this is required sind monaco does not play well inside flex (changing) layouts.
-    this.relayoutInterval = setInterval(() => this.layoutCheck(), 100);
-
     // async init of monaco editor when the model changes - this is only for testing purposes.
     setTimeout(() => {
       this.inited$.next(true);
+      this.cd.detectChanges();
     }, 1000);
-  }
-
-  private layoutCheck() {
-    const x = this.host.nativeElement.offsetWidth;
-    const y = this.host.nativeElement.offsetHeight;
-
-    if (x !== this.cachedX || y != this.cachedY) {
-      this.cachedX = x;
-      this.cachedY = y;
-      this.monaco.layout();
-    }
   }
 
   initMonaco() {
@@ -103,6 +89,5 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-    clearInterval(this.relayoutInterval);
   }
 }

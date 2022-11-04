@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostBinding,
@@ -11,6 +12,7 @@ import { fromEvent } from 'rxjs';
   selector: 'app-bd-micro-icon-button',
   templateUrl: './bd-micro-icon-button.component.html',
   styleUrls: ['./bd-micro-icon-button.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdMicroIconButtonComponent implements AfterViewInit {
   @Input() disabled = false;

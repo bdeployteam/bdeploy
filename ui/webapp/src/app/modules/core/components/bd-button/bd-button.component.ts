@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
@@ -23,6 +24,7 @@ export type BdButtonColorMode =
   templateUrl: './bd-button.component.html',
   styleUrls: ['./bd-button.component.css'],
   animations: [scaleWidthFromZero, scaleWidthToZero],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdButtonComponent implements AfterViewInit {
   @Input() icon: string;

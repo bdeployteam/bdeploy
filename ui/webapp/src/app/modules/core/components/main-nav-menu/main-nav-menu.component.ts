@@ -8,7 +8,12 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { Component, HostBinding, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  Input,
+} from '@angular/core';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 import { ActivitiesService } from '../../services/activities.service';
@@ -23,6 +28,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
     './main-nav-menu.component.css',
     './main-nav-menu-hamburger.scss',
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     delayedFadeIn,
     delayedFadeOut,

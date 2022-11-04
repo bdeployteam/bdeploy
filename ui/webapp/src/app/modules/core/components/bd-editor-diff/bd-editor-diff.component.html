@@ -1,4 +1,9 @@
-<div fxFill fxLayout="column" [class.bd-editor-inited]="inited$ | async">
+<div
+  fxFill
+  fxLayout="column"
+  [class.bd-editor-initializing]="!(inited$ | async)"
+  class="local-max-width"
+>
   <ngx-monaco-diff-editor
     name="content"
     [style.height]="'100%'"

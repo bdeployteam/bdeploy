@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
@@ -30,7 +30,8 @@ export class DataFileViewerComponent implements OnDestroy {
     private instances: InstancesService,
     areas: NavAreasService,
     df: DataFilesService,
-    auth: AuthenticationService
+    auth: AuthenticationService,
+    ngZone: NgZone
   ) {
     this.subscription = combineLatest([
       areas.panelRoute$,
@@ -77,7 +78,9 @@ export class DataFileViewerComponent implements OnDestroy {
       this.follow$.subscribe((b) => {
         clearInterval(this.followInterval);
         if (b) {
-          this.followInterval = setInterval(() => df.load(), 2000);
+          ngZone.runOutsideAngular(() => {
+            this.followInterval = setInterval(() => df.load(), 2000);
+          });
         }
       })
     );

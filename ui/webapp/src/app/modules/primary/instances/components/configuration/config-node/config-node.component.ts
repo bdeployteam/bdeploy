@@ -106,6 +106,13 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.cols = [...this.columns.defaultProcessesConfigClientColumns];
       }
     });
+
+    this.subscription.add(
+      this.edit.issues$.subscribe(() => {
+        // update in case validation is run in the background.
+        this.data?.forEach((t) => t?.update());
+      })
+    );
   }
 
   ngAfterViewInit(): void {

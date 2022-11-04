@@ -1,5 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
+  ChangeDetectionStrategy,
   Component,
   Input,
   OnChanges,
@@ -15,6 +16,7 @@ import { BdPanelButtonComponent } from '../bd-panel-button/bd-panel-button.compo
 @Component({
   selector: 'app-bd-dialog-toolbar',
   templateUrl: './bd-dialog-toolbar.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
   /* template */ narrow$ = new BehaviorSubject<boolean>(true);

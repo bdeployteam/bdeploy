@@ -4,6 +4,7 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -62,7 +63,7 @@ export interface DragReorderEvent<T> {
   targetId: string;
 }
 
-const MAX_ROWS_PER_GROUP = 250;
+const MAX_ROWS_PER_GROUP = 500;
 
 /**
  * A table which renders generic data based on column descriptions. Supports:
@@ -79,6 +80,7 @@ const MAX_ROWS_PER_GROUP = 250;
   templateUrl: './bd-data-table.component.html',
   styleUrls: ['./bd-data-table.component.css'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdDataTableComponent<T>
   implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable

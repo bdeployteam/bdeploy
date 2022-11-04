@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -11,6 +12,7 @@ import {
   templateUrl: './bd-expression-toggle.component.html',
   styleUrls: ['./bd-expression-toggle.component.css'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdExpressionToggleComponent {
   @Input() link: boolean;

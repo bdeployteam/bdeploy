@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -18,7 +18,11 @@ export class CleanupService {
   private apiPath = () => `${this.cfg.config.api}/cleanUi`;
   private cdHandle;
 
-  constructor(private cfg: ConfigService, private http: HttpClient) {}
+  constructor(
+    private cfg: ConfigService,
+    private http: HttpClient,
+    private ngZone: NgZone
+  ) {}
 
   public calculateCleanup() {
     clearInterval(this.cdHandle);
@@ -35,16 +39,18 @@ export class CleanupService {
         this.cleanup$.next(g?.length ? g : null);
         this.countdown$.next(600);
 
-        this.cdHandle = setInterval(() => {
-          const countdown = this.countdown$.value - 1;
-          if (countdown > 0) {
-            this.countdown$.next(countdown);
-          } else {
-            clearInterval(this.cdHandle);
-            this.countdown$.next(-1);
-            this.cleanup$.next(null);
-          }
-        }, 1000);
+        this.ngZone.runOutsideAngular(() => {
+          this.cdHandle = setInterval(() => {
+            const countdown = this.countdown$.value - 1;
+            if (countdown > 0) {
+              this.countdown$.next(countdown);
+            } else {
+              clearInterval(this.cdHandle);
+              this.countdown$.next(-1);
+              this.cleanup$.next(null);
+            }
+          }, 1000);
+        });
       });
   }
 

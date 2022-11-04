@@ -1,7 +1,9 @@
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { OverlayRef } from '@angular/cdk/overlay';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -11,7 +13,6 @@ import {
   Output,
   QueryList,
   ViewChildren,
-  ViewContainerRef,
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {
@@ -29,6 +30,7 @@ import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
   selector: 'app-bd-custom-editor',
   templateUrl: './bd-custom-editor.component.html',
   styleUrls: ['./bd-custom-editor.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdCustomEditorComponent
   implements OnChanges, OnDestroy, AfterViewInit
@@ -57,11 +59,7 @@ export class BdCustomEditorComponent
 
   private overlayRef: OverlayRef;
 
-  constructor(
-    private plugins: PluginService,
-    private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef
-  ) {}
+  constructor(private plugins: PluginService, private cd: ChangeDetectorRef) {}
 
   ngOnChanges(): void {
     if (!this.group || !this.product || !this.customEditor) {
@@ -87,8 +85,14 @@ export class BdCustomEditorComponent
           elem.nativeElement.appendChild(
             this.editor.bind(
               () => getPreRenderable(this.value),
-              (v) => (this.currentValue = v),
-              (s) => (this.valid = s)
+              (v) => {
+                this.currentValue = v;
+                this.cd.markForCheck();
+              },
+              (s) => {
+                this.valid = s;
+                this.cd.markForCheck();
+              }
             )
           )
         );
@@ -109,6 +113,8 @@ export class BdCustomEditorComponent
       this.editor = new m.default(
         this.plugins.getApi(this.plugin)
       ) as EditorPlugin;
+
+      this.cd.markForCheck();
     });
   }
 

@@ -1,6 +1,6 @@
 import {
+  ChangeDetectorRef,
   Component,
-  ElementRef,
   EventEmitter,
   Input,
   OnChanges,
@@ -24,10 +24,6 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   private monaco;
   private subscription: Subscription;
   private editorPath = '';
-  private relayoutInterval;
-
-  private cachedX = 0;
-  private cachedY = 0;
 
   @Input() set content(v: string) {
     this.editorContent = v;
@@ -49,8 +45,8 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(
     private themeService: ThemeService,
-    private host: ElementRef,
-    private editorCompletions: MonacoCompletionsService
+    private editorCompletions: MonacoCompletionsService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +64,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
       readOnly: this.readonly,
       minimap: { enabled: false },
       autoClosingBrackets: false,
+      automaticLayout: true,
     };
   }
 
@@ -79,7 +76,6 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-    clearInterval(this.relayoutInterval);
   }
 
   /* template */ onMonacoInit(monaco) {
@@ -102,28 +98,15 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     // wait for init to complete, otherwise we leak models.
     setTimeout(() => this.onPathChange(), 0);
 
-    // this is required sind monaco does not play well inside flex (changing) layouts.
-    this.relayoutInterval = setInterval(() => this.layoutCheck(), 100);
-
     // async init of monaco editor when the model changes - this is only for testing purposes.
     setTimeout(() => {
       this.inited$.next(true);
+      this.cd.detectChanges();
     }, 1000);
   }
 
   /* template */ onModelChange(event: string) {
     this.contentChange.emit(event);
-  }
-
-  private layoutCheck() {
-    const x = this.host.nativeElement.offsetWidth;
-    const y = this.host.nativeElement.offsetHeight;
-
-    if (x !== this.cachedX || y != this.cachedY) {
-      this.cachedX = x;
-      this.cachedY = y;
-      this.monaco.layout();
-    }
   }
 
   private onPathChange() {

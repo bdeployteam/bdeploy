@@ -1,7 +1,8 @@
 <div
   fxFlex="1 0 auto"
   fxLayout="column"
-  [class.bd-editor-inited]="inited$ | async"
+  [class.bd-editor-initializing]="!(inited$ | async)"
+  class="local-max-width"
 >
   <ngx-monaco-editor
     name="content"

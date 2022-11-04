@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   HostBinding,
   Input,
@@ -10,6 +11,7 @@ import {
   templateUrl: './bd-expand-button.component.html',
   styleUrls: ['./bd-expand-button.component.css'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdExpandButtonComponent {
   @Input() icon: string;

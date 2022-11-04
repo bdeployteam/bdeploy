@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -39,6 +40,7 @@ import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
   templateUrl: './bd-value-editor.component.html',
   styleUrls: ['./bd-value-editor.component.css'],
   viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdValueEditorComponent
   implements OnInit, ControlValueAccessor, ErrorStateMatcher

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
@@ -68,7 +68,8 @@ export class ProcessesService {
     private http: HttpClient,
     private groups: GroupsService,
     private servers: ServersService,
-    private instances: InstancesService
+    private instances: InstancesService,
+    private ngZone: NgZone
   ) {
     this.cfg.isCentral$.subscribe((value) => {
       this.isCentral = value;
@@ -82,12 +83,14 @@ export class ProcessesService {
 
         this.instance = instance;
 
-        // we'll refresh every 30 seconds in case of central & synced, and every 5 seconds in case we're local.
-        this.loadInterval = setInterval(
-          () => this.reload(),
-          this.isCentral ? 30000 : 5000
-        );
-        this.checkInterval = setInterval(() => this.checkState(), 1000);
+        ngZone.runOutsideAngular(() => {
+          // we'll refresh every 30 seconds in case of central & synced, and every 5 seconds in case we're local.
+          this.loadInterval = setInterval(
+            () => this.reload(),
+            this.isCentral ? 30000 : 5000
+          );
+          this.checkInterval = setInterval(() => this.checkState(), 1000);
+        });
 
         this.reload();
       }

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   Input,
   OnChanges,
@@ -12,13 +13,14 @@ import {
   RouterLink,
   RouterLinkActive,
 } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdButtonColorMode } from '../bd-button/bd-button.component';
 
 @Component({
   selector: 'app-bd-panel-button',
   templateUrl: './bd-panel-button.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() icon: string;
@@ -37,18 +39,18 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
 
   private subscription: Subscription;
 
-  /* template */ generatedRoute;
+  /* template */ generatedRoute$ = new BehaviorSubject<any[]>([]);
 
   constructor(private areas: NavAreasService) {}
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((snap) => {
-      this.generatedRoute = this.getRoute(snap);
+      this.generatedRoute$.next(this.getRoute(snap));
     });
   }
 
   ngOnChanges(): void {
-    this.generatedRoute = this.getRoute(this.areas.panelRoute$.value);
+    this.generatedRoute$.next(this.getRoute(this.areas.panelRoute$.value));
   }
 
   ngOnDestroy(): void {

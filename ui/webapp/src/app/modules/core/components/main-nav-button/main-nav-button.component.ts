@@ -5,12 +5,18 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { Component, Input, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  ViewChild,
+} from '@angular/core';
 import { RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-main-nav-button',
   templateUrl: './main-nav-button.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('showHide', [
       state(

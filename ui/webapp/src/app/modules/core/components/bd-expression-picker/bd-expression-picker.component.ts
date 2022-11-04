@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -47,6 +48,7 @@ const colVarDesc: BdDataColumn<LinkVariable> = {
 @Component({
   selector: 'app-bd-expression-picker',
   templateUrl: './bd-expression-picker.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdExpressionPickerComponent implements OnChanges {
   @Input() process: ApplicationConfiguration;

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -27,14 +27,17 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
   constructor(
     private auth: AuthenticationService,
     private instances: InstancesService,
-    public details: ProcessDetailsService
+    public details: ProcessDetailsService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
     this.subscription = this.follow$.subscribe((b) => {
       clearInterval(this.followInterval);
       if (b) {
-        this.followInterval = setInterval(() => this.nextChunk(), 2000);
+        this.ngZone.runOutsideAngular(() => {
+          this.followInterval = setInterval(() => this.nextChunk(), 2000);
+        });
       }
     });
 

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   Input,
   Optional,
@@ -20,6 +21,7 @@ import { bdValidationMessage } from '../../validators/messages';
   templateUrl: './bd-form-select.component.html',
   styleUrls: ['./bd-form-select.component.css'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFormSelectComponent
   implements ControlValueAccessor, ErrorStateMatcher

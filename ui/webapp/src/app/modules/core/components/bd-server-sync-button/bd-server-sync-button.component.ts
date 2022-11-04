@@ -1,4 +1,12 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  NgZone,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
@@ -11,6 +19,7 @@ import { AuthenticationService } from '../../services/authentication.service';
   selector: 'app-bd-server-sync-button',
   templateUrl: './bd-server-sync-button.component.html',
   styleUrls: ['./bd-server-sync-button.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   @Input() server: ManagedMasterDto;
@@ -29,7 +38,9 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     private serverDetailsService: ServerDetailsService,
     private servers: ServersService,
     private auth: AuthenticationService,
-    private instancesService: InstancesService
+    private instancesService: InstancesService,
+    private ngZone: NgZone,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -37,8 +48,11 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
       this.update();
     });
 
-    // updating states ever second to reflect changes to the badge (second-wise countdown)
-    this.interval = setInterval(() => this.update(), 1000);
+    this.ngZone.runOutsideAngular(() => {
+      // updating states ever second to reflect changes to the badge (second-wise countdown)
+      this.interval = setInterval(() => this.update(), 1000);
+    });
+
     this.update();
   }
 
@@ -79,6 +93,8 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     if (!this.server) {
       return;
     }
+    const oldBadge = this.badge$.value;
+
     const isSynchronized = this.servers.isSynchronized(this.server);
     this.noPerm$.next(false);
     if (!isSynchronized && this.server?.update?.forceUpdate) {
@@ -119,5 +135,9 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
       this.noPerm$.next(true);
     }
     this.updateSyncState();
+
+    if (oldBadge !== this.badge$?.value) {
+      this.cd.detectChanges(); // marking is not enough, really force it now.
+    }
   }
 }
