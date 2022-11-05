@@ -1,5 +1,6 @@
 ---
 order: 4
+icon: device-desktop
 ---
 # Development Setup
 

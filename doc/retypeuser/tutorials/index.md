@@ -1,5 +1,6 @@
 ---
 order: 300
+icon: mortar-board
 ---
 # Tutorials
 

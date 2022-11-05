@@ -1,5 +1,6 @@
 ---
 order: 10
+icon: commit
 ---
 # Common
 
@@ -23,4 +24,4 @@ The `io.bdeploy.common.metrics` package contains an entry point to allow measure
 
 ## Troubleshooting
 
-1. The JUnit5 `@RegisterExtension` annotation allows to register **instances** of extensions (as opposed to `@ExtendWith`, which registers a class and manages it's lifecycle as apropriate). This means that the **instance** does not changed. This on the other hand means that the instance **fields** of this extension will keep their state throughout test methods. This is not dramatic, just something you need to be aware of. This is the reason why `TestMinion` calls `resetRegistrations()` in it's `beforeEach` method. Not doing so led to duplicate registrations of singleton services, where the server picked up the services for another test later on...
+1. The JUnit5 `@RegisterExtension` annotation allows to register **instances** of extensions (as opposed to `@ExtendWith`, which registers a class and manages it's lifecycle as appropriate). This means that the **instance** does not get changed. This on the other hand means that the instance **fields** of this extension will keep their state throughout test methods. This is not dramatic, just something you need to be aware of. This is the reason why `TestMinion` calls `resetRegistrations()` in it's `beforeEach` method. Not doing so led to duplicate registrations of singleton services, where the server picked up the services for another test later on...

@@ -1,5 +1,6 @@
 ---
 order: 3
+icon: terminal
 ---
 # Command Line Interface
 

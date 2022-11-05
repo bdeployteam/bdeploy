@@ -1,5 +1,6 @@
 ---
 order: 8
+icon: play
 ---
 # Client Launcher
 

@@ -1,5 +1,6 @@
 ---
 order: 400
+icon: rocket
 ---
 # Getting Started
 

@@ -1,5 +1,6 @@
 ---
 order: 12
+icon: dependabot
 ---
 # PCU (Process Control Unit)
 

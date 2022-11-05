@@ -1,5 +1,6 @@
 ---
 order: 7
+icon: rows
 ---
 # Instance Group
 

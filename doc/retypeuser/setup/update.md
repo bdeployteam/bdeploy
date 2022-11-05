@@ -1,5 +1,6 @@
 ---
 order: 6
+icon: versions
 ---
 # Update of existing Installations
 

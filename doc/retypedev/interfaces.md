@@ -1,6 +1,6 @@
 ---
-label: Interfaces
 order: 7
+icon: codescan
 ---
 # Interfaces
 

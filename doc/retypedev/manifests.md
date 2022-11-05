@@ -1,5 +1,6 @@
 ---
 order: 6
+icon: file-code
 ---
 # Manifests
 
@@ -29,7 +30,7 @@ Manifest Name | Purpose
 
 ## MetaManifests
 
-In addition to traditional **Manifest** there are **MetaManifest**. These allow to _attach_ certain information to other **Manifests**. This allows to update the attached **MetaManifest** independently of the _immutable_ **Manifest**, whilst keeping all benefits of a **Manifest** for the **MetaManifest** as well (versioning, history, ...).
+In addition to traditional **Manifests** there are **MetaManifests**. These allow to _attach_ certain information to other **Manifests**. This allows to update the attached **MetaManifest** independently of the _immutable_ **Manifest**, whilst keeping all benefits of a **Manifest** for the **MetaManifest** as well (versioning, history, ...).
 
 MetaManifest Name | Purpose
 ---               | ---

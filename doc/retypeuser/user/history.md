@@ -1,5 +1,6 @@
 ---
 order: 3
+icon: history
 ---
 # Instance History
 

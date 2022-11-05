@@ -1,5 +1,6 @@
 ---
 order: 1
+icon: gear
 ---
 # Central/Managed Specific Configuration
 The [Central/Managed Mode](/setup/master/#modes-of-operation) requires some configuration to attach `CENTRAL` and `MANAGED` servers.

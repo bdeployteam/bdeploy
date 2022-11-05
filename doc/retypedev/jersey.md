@@ -1,5 +1,6 @@
 ---
 order: 1
+icon: milestone
 ---
 # Jersey based remote infrastructure
 

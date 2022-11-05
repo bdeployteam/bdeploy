@@ -1,3 +1,6 @@
+---
+icon: home
+---
 # BDeploy End User Documentation
 
 :::{align=center}

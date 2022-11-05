@@ -1,5 +1,6 @@
 ---
 order: 3
+icon: gear
 ---
 # How can I change a process configuration?
 

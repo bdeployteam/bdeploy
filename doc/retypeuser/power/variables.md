@@ -1,5 +1,6 @@
 ---
 order: 2
+icon: arrow-both
 ---
 # Variable Expansions
 

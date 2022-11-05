@@ -1,5 +1,6 @@
 ---
 order: 13
+icon: stack
 ---
 # BHive
 
@@ -75,7 +76,7 @@ If you are interested, you can try to _import_ another folder which shares some 
 
 ### FSCK
 
-The _FSCK_ (short for 'filesystem check') will check consistency of all objects and manifests in e BHive. Run **Hive-FSCK** to execute a _FSCK_ on the sample BHive.
+The _FSCK_ (short for 'filesystem check') will check consistency of all objects and manifests in the BHive. Run **Hive-FSCK** to execute a _FSCK_ on the sample BHive.
 
 ### Delete
 

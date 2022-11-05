@@ -1,5 +1,6 @@
 ---
 order: 4
+icon: file-badge
 ---
 # Custom Certificate
 

@@ -1,5 +1,6 @@
 ---
 order: 2
+icon: hourglass
 ---
 # How can I see what's up and running?
 

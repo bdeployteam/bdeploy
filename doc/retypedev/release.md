@@ -1,6 +1,6 @@
 ---
-label: Release Procedure
 order: 2
+icon: package-dependents
 ---
 # Release Procedure
 
@@ -27,7 +27,7 @@ Prerequisites:
 * A GitHub account (i.e. `GH_USER`) and a token (i.e. `GH_TOKEN`) with the permission to create and update a release on the **BDeploy** GitHub repository.
 * A SonaType account (i.e. `SONATYPE_USER`) and a token (i.e. `SONATYPE_TOKEN`) with the permission to upload and release artifacts to `oss.sonatype.org` targeting maven central.
 * A GPG Key which is registered with sonatype which can be used to sign the application JAR files for upload to maven. You need the key file (i.e. `GPG_FILE`), the ID of the key (i.e. `GPG_ID`) and the password to the key file (i.e. `GPG_PASS`).
-* A clone of the repository - since right now a internal repository is used as well as the GitHub repository, you need a clone of the internal repository
+* A clone of the repository - since right now an internal repository is used as well as the GitHub repository, you need a clone of the internal repository
 * An empty directory where JDKs can be downloaded to. Set the path in the environment variable `JDK_DL_ROOT`
 
 Steps:
@@ -85,7 +85,7 @@ You need to:
 * In the lower part of the screen, go to **Content** and check whether the content of the repository looks complete and OK.
 * Select the repository in the upper part of the screen and click **Close**.
 * Wait a few minutes and refresh the view using the **Refresh** button.
-* Once enabled, click the **Release** button which having the repository selected. You can leave the "Drop automatically" checked, this way nothing has to be done after clicking OK anymore.
+* Once enabled, click the **Release** button while having the repository selected. You can leave the "Drop automatically" checked, this way nothing has to be done after clicking OK anymore.
 
 This will release the new version to maven central. This can take a few minutes, up to half an hour. Also the maven central index can take up to 24 hours to refresh - this is what is used to display data on the maven central homepage. Thus it may be that you cannot find the new version on the homepage, but can already download it using Maven/Gradle.
 
@@ -116,11 +116,11 @@ Copy the `dev` and `user` directories from the **BDeploy** source repositories `
 
 The **BDeploy** source repository also hosts various build tool integrations as well as test projects for some features (plugins, build tools). After the release they need to be updated as well.
 
-Since they need to maven artifacts published earlier, you need to make sure that those are already available from maven central.
+Since they need to have maven artifacts published earlier, you need to make sure that those are already available from maven central.
 
 * `plugins/build-tool-gradle` - the Gradle integration.
 * `plugins/gradle-plugin-test-project` - a test project for the Gradle integration.
-* `plugins/bdeploy-demo-plugin` a simple demo **BDeploy** plugin using the public API.
+* `plugins/bdeploy-demo-plugin` - a simple demo **BDeploy** plugin using the public API.
 
 Last but not least, there is also `plugins/build-tool-tea` - the Eclipse TEA integration. This needs to be updated separately in an Eclipse TEA enabled workspace.
 

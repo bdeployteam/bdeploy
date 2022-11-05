@@ -1,5 +1,6 @@
 ---
 order: 1
+icon: repo-push
 ---
 # How can I deploy a new product version?
 
