@@ -1,7 +1,7 @@
 input: .
-output: ../../build/docs/dev
+output: ../build/docs/dev
 url: https://bdeploy.io/ # Add your website address here
-favicon: /images/logo.ico
+favicon: /img/logo.ico
 branding:
   title: BDeploy Developer Documentation
 editor:

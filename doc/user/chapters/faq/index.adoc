@@ -1,6 +1,0 @@
-== FAQ
-
-[discrete]
-=== Q: Dummy Question
-
-Dummy Answer

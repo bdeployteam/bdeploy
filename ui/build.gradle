@@ -287,8 +287,8 @@ task installAngular(type:Exec) { t ->
 }
 
 evaluationDependsOn(':doc')
-task copyUserDoc(type:Copy, dependsOn:':doc:userDoc') {
-    from tasks.getByPath(':doc:userDoc').outputs
+task copyUserDoc(type:Copy, dependsOn:':doc:retypeUserDoc') {
+    from tasks.getByPath(':doc:retypeUserDoc').outputs
     into "$webappDir/dist/webapp/assets/doc"
 }
 
