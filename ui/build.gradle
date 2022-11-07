@@ -61,8 +61,11 @@ task updateFixtureProducts(type: Copy) {
     def prj = project(':test-data')
     from prj.product1Zip.outputs
     from prj.product2Zip.outputs
+    from prj.product3Zip.outputs
     from prj.externalSoftwareZip.outputs
     from prj.externalSoftware2Zip.outputs
+
+    from new File(prj.projectDir, "/system-template.yaml")
 
     into "${webappDir}/cypress/fixtures"
 
@@ -172,6 +175,7 @@ task runCypressHeadless(type: Exec, dependsOn: updateFixtures) {
 
     // required for bin-test-data update.
     outputs.file "${webappDir}/cypress/fixtures/instance-export.zip"
+    outputs.upToDateWhen { false }
 
     List<String> properties = getCypressConfig()
     if(project.hasProperty('cypressIgnoreExitValue')) {
