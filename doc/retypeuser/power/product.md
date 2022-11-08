@@ -6,33 +6,37 @@ icon: container
 
 This chapter is intended for those who want to integrate their own **Product** to be deployed with **BDeploy**. Therefore a couple of YAML files are required. These files describe your product and all its applications together with some additional meta-data. These artifacts are required:
 
-[app-info.yaml](/power/product/#app-infoyaml)
+[app-info.yaml](#app-infoyaml)
 :::
 &emsp;YAML file to describe one single **Application**. It is required once for every client and server **Application** of the product. 
 :::
-[product-info.yaml](/power/product/#product-infoyaml)
+[product-info.yaml](#product-infoyaml)
 :::
 &emsp;YAML file with meta-data for the whole product.
 :::
-[product-version.yaml](/power/product/#product-versionyaml)
+[product-version.yaml](#product-versionyaml)
 :::
 &emsp;YAML file required for every **Product Version**.
 :::
-[application-template.yaml](/power/product/#application-templateyaml)
+[application-template.yaml](#application-templateyaml)
 :::
 &emsp;optional YAML file(s) which can be used to define **Application Templates**
 :::
-[instance-template.yaml](/power/product/#instance-templateyaml)
+[instance-template.yaml](#instance-templateyaml)
 :::
 &emsp;optional YAML file(s) which can be used to define **Instance Templates**
 :::
-[parameter-template.yaml](/power/product/#parameter-templateyaml)
+[parameter-template.yaml](#parameter-templateyaml)
 :::
-&emsp;optional YAML file(s) which can be used to provide shared definitions for parameters which are re-usable in [app-info.yaml](/power/product/#app-infoyaml) files.
+&emsp;optional YAML file(s) which can be used to provide shared definitions for parameters which are re-usable in [app-info.yaml](#app-infoyaml) files.
 :::
-[instance-variable-template.yaml](/power/product/#instance-variable-templateyaml)
+[instance-variable-template.yaml](#instance-variable-templateyaml)
 :::
-&emsp;optional YAML file(s) which can be used to provide shared definitions for instance variables which are re-usable in [instance-template.yaml](/power/product/#instance-templateyaml) files.
+&emsp;optional YAML file(s) which can be used to provide shared definitions for instance variables which are re-usable in [instance-template.yaml](#instance-templateyaml) files.
+:::
+[system-template.yaml](#system-templateyaml)
+:::
+&emsp;Actually not part of any product itself. Freestanding description that can be used to create multiple instances of multiple products in one go.
 :::
 
 This chapter will walk you through these artifacs, what they are for and how to define them.
@@ -166,15 +170,15 @@ runtimeDependencies: <19>
 3. The supported pooling type for server applications. Supported values are `GLOBAL`, `LOCAL` and `NONE`. `GLOBAL` means that the application is fully poolable and may be installed once (per application version) and used by multiple instance versions of multiple instances. `LOCAL` means that there is limited pooling support, and the application may only be re-used inside a single instance (by multiple instance versions of that instance, e.g. when changin only configuration). `NONE` means that there is no pooling support and the application will be installed fresh per instance version, even if just configuration values changed. This gives some control on how to deploy applications which write data into their installation directory at runtime - which should be avoided of course for better pool-ability. This setting is currently ignored by the client application launcher. Client applications are always globally pooled.
 4. List of supported operating systems. This list is solely used to verify during import of the **Product**, that the **Application** actually supports the operating system under which it is listed in the `product-version.yaml`.
 5. Only relevant for `CLIENT` applications: The `branding` attribute controls the appearance of `CLIENT` type **Applications** when downloaded by the user. It can be used to specify an `icon` (used to decorate desktop links created by the _client installer_), and a `splash` screen. For the `splash`, you can fine tune the exact location used to display progress text and a progress bar while the application is downloaded to the client PC by the [Launcher CLI](/experts/cli/#launcher-cli). Paths are interpreted relative to the root folder of the **Application**.
-6. Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type **Applications** are started and kept alive by **BDeploy**. For details, see the list of [processControl](/power/product/#supported-processcontrol-attributes) attributes.
+6. Only relevant for `SERVER` applications: Process control parameters allow to fine tune how `SERVER` type **Applications** are started and kept alive by **BDeploy**. For details, see the list of [processControl](#supported-processcontrol-attributes) attributes.
 7. A _startup probe_ can specify an HTTP Endpoint of type `PROBE_STARTUP` which is queried by **BDeploy** if specified until the endpoint returns a status code >= 200 and < 400. Once this happens, the _startup probe_ is considered to be successful and the **Process** state advances from _starting_ to _running_. The exact response reported by the **Process** is available from the **Process** details panels **Process Probes** section.
 8. A _lifeness probe_ can specify an HTTP Endpoint of type `PROBE_ALIVE` along with an initial delay in seconds and an interval in which the probe is queried. **BDeploy** starts querying _lifeness probes_ only after the application entered _running_ state. This happens either automatically when the process is started (if no _startup probe_ is configured), or once the existing _startup probe_ succeeded. The _lifeness probe_ is queried every `periodSeconds` seconds, and the application is considered to be alive if the endpoint returns a status code >= 200 and < 400. If the probe fails, the **Process** status is updated to indicate the problem. The exact response reported by the **Process** is available from the **Process** details panels **Process Probes** section.
 9. Allowed Configuration Directories preset - only valid for `CLIENT` applications. These relative sub-directories of the configuration files directory tree will be made available to this application when run on a client PC. This can later also be configured per process using the [Allowable Configuration Directories](/user/instance/#allowable-configuration-directories) configuration.
-10. The start command of the **Application**. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of [parameter](/power/product/#supported-parameters-attributes) attributes. To apply e.g. instance-specific values, [Variable Expansion](/power/variables/#variable-expansions) is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
+10. The start command of the **Application**. Contains the path to the _executable_ to launch, as well as all known and supported parameters. For details, see the full list of [parameter](#supported-parameters-attributes) attributes. To apply e.g. instance-specific values, [Variable Expansion](/power/variables/#variable-expansions) is a powerful tool. It can be used for the `launcherPath` and each parameter's `defaultValue`. In the Web UI it can be used for the parameter values.
 11. [Variable Expansion](/power/variables/#variable-expansions) can also be used to expand to [Instance Variables](/user/instance/#instance-variables) in default values. These instance variables are required to exist once this application is configured in an instance. They can either be pre-provided using [Instance Templates](/user/instance/#instance-templates) or need to be manually created when required.
 12. A conditional parameter is a parameter with a condition on it. The condition always refers to another parameter on the same application. The parameter with the condition set will only be visible and configurable if the condition on the referenced parameter is met.
-13. A product can provide [parameter templates](/power/product/#parameter-templateyaml) which can be re-used by referencing their ID inline in applications parameter definitions. All parameter definitions in the template will be inlined at the place the template is referenced.
-14. The optional stop command can be specified to provide a mechanism for clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](/power/product/#supported-parameters-attributes) has expired.
+13. A product can provide [parameter templates](#parameter-templateyaml) which can be re-used by referencing their ID inline in applications parameter definitions. All parameter definitions in the template will be inlined at the place the template is referenced.
+14. The optional stop command can be specified to provide a mechanism for clean application shutdown once **BDeploy** tries to stop a process. This command may use [Variable Expansion](/power/variables/#variable-expansions) to access parameter values of the `startCommand` (e.g. configured 'stop port', etc.). It is **not** configurable through the Web UI though. All parameter values will have their (expanded) default values set when the command is run. If no `stopCommand` is specified, **BDeploy** will try to gracefully quit the process (i.e. `SIGTERM`). Both with and without `stopCommand`, **BDeploy** resorts to a `SIGKILL` after the [`gracePeriod`](#supported-parameters-attributes) has expired.
 15. Optional definition of provided endpoints. Currently only HTTP endpoints are supported. These endpoints can be configured on the application later, including additional information like authentication, certificates, etc. **BDeploy** can later on call these endpoints when instructed to do so by a third-party application.
 16. The ID of the endpoint can be used to call the endpoint remotely by tunneling through potentially multiple levels of **BDeploy** servers.
 17. [Variable Expansion](/power/variables/#variable-expansions) can be used on most of the endpoint properties.
@@ -462,10 +466,10 @@ versionFile: my-versions.yaml <11>
 4. The list of **Applications** which are part of the **Product**. These IDs can be anything, they just have to match the IDs used in the `product-version.yaml` referenced below.
 5. Optional: A relative path to a directory containing configuration file templates, which will be used as the default set of configuration files when creating an **Instance** from the resulting **Product**.
 6. Optioanl: A relative path to a directory containing one or more plugin JAR files. These plugins are loaded by the server on demand and provided for use when configuring applications which use this very product version.
-7. A reference to an application template YAML file which defines an [`application-template.yaml`](/power/product/#application-templateyaml).
-8. A reference to an instance template YAML file which defines an [`instance-template.yaml`](/power/product/#instance-templateyaml).
-9. A reference to a parameter template YAML file which defines a [`parameter-template.yaml`](/power/product/#parameter-templateyaml).
-10. A reference to a instance variable template YAML file which defines a [`instance-variable-template.yaml`](/power/product/#instance-variable-templateyaml).
+7. A reference to an application template YAML file which defines an [`application-template.yaml`](#application-templateyaml).
+8. A reference to an instance template YAML file which defines an [`instance-template.yaml`](#instance-templateyaml).
+9. A reference to a parameter template YAML file which defines a [`parameter-template.yaml`](#parameter-templateyaml).
+10. A reference to a instance variable template YAML file which defines a [`instance-variable-template.yaml`](#instance-variable-templateyaml).
 11. The `product-version.yaml` which associates the **Application** IDs (used above) with actual paths to **Applications** on the file system.
 
 ## product-version.yaml
@@ -500,7 +504,7 @@ appInfo:
 There is no actual requirement for the file to be named `application-template.yaml` as it is referenced from the `product-info.yaml` by relative path anyway. Multiple **Application Template** YAML files can exist and be referenced by `product-info.yaml`.
 !!!
 
-This file defines a single **Application Template**. A [`product-info.yaml`](/power/product/#product-infoyaml) can reference multiple templates, from which the user can choose.
+This file defines a single **Application Template**. A [`product-info.yaml`](#product-infoyaml) can reference multiple templates, from which the user can choose.
 
 ```yaml
 id: server-with-sleep <1>
@@ -531,13 +535,13 @@ startParameters: <5>
 ```
 
 1. An **Application Template** must have an ID. This can be used to reference it from an **Instance Template**.
-2. The preferred process control group is used to determine which process control group to use when applying the application template. This is only used if a **Process Control Group** with this name exists in the instance configuration. **Process Control Groups** can be pre-configured in an [`instance-template.yaml`](/power/product/#instance-templateyaml).
+2. The preferred process control group is used to determine which process control group to use when applying the application template. This is only used if a **Process Control Group** with this name exists in the instance configuration. **Process Control Groups** can be pre-configured in an [`instance-template.yaml`](#instance-templateyaml).
 3. A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
 4. A template can define arbitrary process control parameters to further control the default process control settings.
-5. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](/power/product/#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+5. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
 
 !!!info Note
-An **Application Template** can also _extend_ another previously defined template. This works the same as the `template` specifier in [`instance-template.yaml`](/power/product/#instance-templateyaml) and also allows for `fixedVariables`.
+An **Application Template** can also _extend_ another previously defined template. This works the same as the `template` specifier in [`instance-template.yaml`](#instance-templateyaml) and also allows for `fixedVariables`.
 !!!
 
 ```yaml
@@ -551,7 +555,7 @@ fixedVariables: <2>
 ```
 
 1. The `template` attribute specifies another application template (which must be registered in the product) to extend. All properties of that other template are merged into this application template. Properties of this template take precedence in case of a conflict.
-2. `fixedVariables`, as also described for [`instance-template.yaml`](/power/product/#instance-templateyaml), allow to override the value of a specific template variable in _this and the base template_. Values queried from the user when applying this template will be ignored for any variable which has an _overridden_, _fixed_ value.
+2. `fixedVariables`, as also described for [`instance-template.yaml`](#instance-templateyaml), allow to override the value of a specific template variable in _this and the base template_. Values queried from the user when applying this template will be ignored for any variable which has an _overridden_, _fixed_ value.
 
 ### Supported `templateVariables` Attributes
 
@@ -574,11 +578,11 @@ Attribute   | Description
 
 ### Supported `startParameters` Attributes
 
-The list of `startParameters` provides control over the parameters in the resulting process. This is different from the parameter _definition_ in [`app-info.yaml`](/power/product/#app-infoyaml) as this list only provides information about presence and value of parameters when applying this template.
+The list of `startParameters` provides control over the parameters in the resulting process. This is different from the parameter _definition_ in [`app-info.yaml`](#app-infoyaml) as this list only provides information about presence and value of parameters when applying this template.
 
 Attribute   | Description
 ---         | ---
-`id` | The unique ID of the parameter. A definition of a parameter with this ID **must** exist in the [`app-info.yaml`](/power/product/#app-infoyaml) file of the referenced `application`. If the parameter is optional, it will be added to the process when applying the template.
+`id` | The unique ID of the parameter. A definition of a parameter with this ID **must** exist in the [`app-info.yaml`](#app-infoyaml) file of the referenced `application`. If the parameter is optional, it will be added to the process when applying the template.
 `value` | The target value of the parameter. If no value is given, the `defaultValue` from the parameter's definition is applied.
 
 
@@ -588,7 +592,7 @@ Attribute   | Description
 There is no actual requirement for the file to be named `instance-template.yaml` as it is referenced from the `product-info.yaml` by relative path anyway. Multiple **Instance Template** YAML files can exist and be referenced by `product-info.yaml`.
 !!!
 
-This file defines a single **Instance Template**. A [`product-info.yaml`](/power/product/#product-infoyaml) can reference multiple templates, from which the user can choose.
+This file defines a single **Instance Template**. A [`product-info.yaml`](#product-infoyaml) can reference multiple templates, from which the user can choose.
 
 ```yaml
 name: Default Configuration <1>
@@ -649,14 +653,14 @@ groups: <7>
 1. Each **Instance Template** has a name and a description, which are shown on the **Instance Template** Wizard.
 2. A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
 3. [Instance Variables](/user/instance/#instance-variables) can be defined in an instance template. Those definitions will be applied to a new instance when this template is used. [Link Expressions](/user/instance/#link-expressions) can then be used to expand to the [Instance Variables](/user/instance/#instance-variables) values in parameters, configuration files, etc.
-4. [Instance Variables](/user/instance/#instance-variables) can also be defined in an [`instance-variable-template.yaml`](/power/product/#instance-variable-templateyaml) file externally, and referenced via its ID.
-5. `instanceVariableDefaults` allows to override the value of a previous [Instance Variables](/user/instance/#instance-variables) definition in the same template. This is most useful when applying [`instance-variable-template.yaml`](/power/product/#instance-variable-templateyaml) files using the `template` syntax in `instanceVariables`. The instance variable template can be shared more easily if instance templates have means of providing distinct values per instance template.
+4. [Instance Variables](/user/instance/#instance-variables) can also be defined in an [`instance-variable-template.yaml`](#instance-variable-templateyaml) file externally, and referenced via its ID.
+5. `instanceVariableDefaults` allows to override the value of a previous [Instance Variables](/user/instance/#instance-variables) definition in the same template. This is most useful when applying [`instance-variable-template.yaml`](#instance-variable-templateyaml) files using the `template` syntax in `instanceVariables`. The instance variable template can be shared more easily if instance templates have means of providing distinct values per instance template.
 6. **Process Control Groups** can be pre-configured for an instance template. If an application template later on wishes to be put into a certain **Process Control Group**, the group is created based on the template provided in the instance template. Note that the defaults for a **Process Control Group** in a template are slightly different from the implicit 'Default' **Process Control Group** in **BDeploy**. The defaults are: `startType`: `PARALLEL`, `startWait`: `WAIT`, `stopType`: `PARALLEL`.
 7. A template defines one or more groups of applications to configure. Each group can be assigned to a physical node available on the target system. Groups can be skipped by not assigning them to a node, so they provide a mechanism to provide logical groups of processes (as result of configuring the applications) that belong together and might be optional. It is up to the user whether a group is mapped to a node, or not. Multiple groups can be mapped to the same phsysical node.
 8. **Instance Templates** can reference **Application Templates** by their `id`. The **Instance Templates** can further refine an **Application Template** by setting any of the valid application fields in addition to the template reference.
 9. When referencing an application template, it is possible to define _overrides_ for the template variables (`{{X:...}}`) used in the template. Use provided values will **not** be taken into account for this variable when applying the template, instead the _fixed_ value will be used.
 10. A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for **Application Tempaltes** - except for the `id` which is not required.
-11. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](/power/product/#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+11. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
 12. A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
 
 An instance template will be presented to the user when visiting an [Empty Instance](/user/instance/#instance-templates).
@@ -664,50 +668,50 @@ An instance template will be presented to the user when visiting an [Empty Insta
 ### Supported `templateVariables` Attributes
 
 !!!info Note
-`templateVariables` follows the same scheme as [Supported `templateVariables` Attributes](/power/product/#supported-templatevariables-attributes) in [`application-template.yaml`](/power/product/#application-templateyaml) files.
+`templateVariables` follows the same scheme as [Supported `templateVariables` Attributes](#supported-templatevariables-attributes) in [`application-template.yaml`](#application-templateyaml) files.
 !!!
 
 ### Supported `instanceVariables` Attributes
 
 Attribute   | Description
 ---         | ---
-`template` | Allows referencing a collection of template instance variables defined in a single [`instance-variable-template.yaml`](/power/product/#instance-variable-templateyaml)<br/><br/>:information_source:**NOTE** If this attribute is given, no other attribute may be given, as this item is replaced by the definitions from the instance variable template.
+`template` | Allows referencing a collection of template instance variables defined in a single [`instance-variable-template.yaml`](#instance-variable-templateyaml)<br/><br/>:information_source:**NOTE** If this attribute is given, no other attribute may be given, as this item is replaced by the definitions from the instance variable template.
 `id` | The unique ID of the instance variable to be created.
-`value` | The value with which the instance variable should be created. This value can use template variables defined in the containing [`instance-template.yaml`](/power/product/#instance-templateyaml).
+`value` | The value with which the instance variable should be created. This value can use template variables defined in the containing [`instance-template.yaml`](#instance-templateyaml).
 `description` | A detailed description of the variable presented to the user in the [Instance Variables](/user/instance/#instance-variables) overview.
-`type` | The type of the variable, the same types as if defining a `parameter` can be used, see [Supported `parameters` attributes](/power/product/#supported-parameters-attributes).
-`customEditor` | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable, also see [Supported `parameters` attributes](/power/product/#supported-parameters-attributes).
+`type` | The type of the variable, the same types as if defining a `parameter` can be used, see [Supported `parameters` attributes](#supported-parameters-attributes).
+`customEditor` | A potentially required custom editor from a plug-in which needs to be used to edit the value of the instance variable, also see [Supported `parameters` attributes](#supported-parameters-attributes).
 
 ### Supported `instanceVariableDefaults` Attributes
 
 Attribute   | Description
 ---         | ---
-`id` | The unique ID of a previously defined instance variable (either directly in the same template, or through an applied [`instance-variable-template.yaml`](/power/product/#instance-variable-templateyaml)).
+`id` | The unique ID of a previously defined instance variable (either directly in the same template, or through an applied [`instance-variable-template.yaml`](#instance-variable-templateyaml)).
 `value` | The value to use when applying this instance template.
 
 ### Supported `processControlGroups` Attributes
 
 Attribute   | Description
 ---         | ---
-`name` | The name of the [Process Control Group]([Process Control Groups](/user/instance/#process-control-groups)) to create. This group can be referenced by [`application-template.yaml`](/power/product/#application-templateyaml) files `preferredProcessControlGroup` attribute.
+`name` | The name of the [Process Control Group]([Process Control Groups](/user/instance/#process-control-groups)) to create. This group can be referenced by [`application-template.yaml`](#application-templateyaml) files `preferredProcessControlGroup` attribute.
 `startType` | The initial **Start Type**, see [Process Control Groups](/user/instance/#process-control-groups)
 `startWait` | The initial **Start Wait**, see [Process Control Groups](/user/instance/#process-control-groups)
 `stopType` | The initial **Stop Type**, see [Process Control Groups](/user/instance/#process-control-groups)
 
 ### Supported `groups` Attributes
 
-`groups` is a list of _template groups_. This groups together a set of [Application Templates](/power/product/#application-templateyaml) or inline template definitions. Each group has a set of own attributes, as well as a list of templates:
+`groups` is a list of _template groups_. This groups together a set of [Application Templates](#application-templateyaml) or inline template definitions. Each group has a set of own attributes, as well as a list of templates:
 
 Attribute   | Description
 ---         | ---
 `name` | The name of the group. This will be presented to the user, and a user has the possibility to select which groups of the template should be applied to which node in an instance.
 `description` | A description which helps the user in deciding whether to apply a certain group or not.
 `type` | Either `SERVER` or `CLIENT` right now. The target node where the group is applied must match this type.
-`applications` | A list of templates. A template can either be a reference to an [`application-template.yaml`](/power/product/#application-templateyaml) defined template, or - alternatively - can be defined inline. In this case all attributes of an [`application-template.yaml`](/power/product/#application-templateyaml) apply to a single item in the `applications` list.
+`applications` | A list of templates. A template can either be a reference to an [`application-template.yaml`](#application-templateyaml) defined template, or - alternatively - can be defined inline. In this case all attributes of an [`application-template.yaml`](#application-templateyaml) apply to a single item in the `applications` list.
 
 ## parameter-template.yaml ##
 
-A `parameter-template.yaml` allows products to define re-usable blocks of parameters associated to a unique ID. These can then be applied in `app-info.yaml` files. For the user of **BDeploy**, those parameters will appear as if they were defined directly in the [`app-info.yaml`](/power/product/#app-infoyaml) of the application.
+A `parameter-template.yaml` allows products to define re-usable blocks of parameters associated to a unique ID. These can then be applied in `app-info.yaml` files. For the user of **BDeploy**, those parameters will appear as if they were defined directly in the [`app-info.yaml`](#app-infoyaml) of the application.
 
 ```yaml
 id: param.template <1>
@@ -719,20 +723,20 @@ parameters: <2>
     longDescription: "A parameter defined in a template"
 ```
 
-1. The ID can be used to reference the template afterwards from an [`app-info.yaml`](/power/product/#app-infoyaml).
-2. The `parameters` can contain an arbitrary amount of parameter definitions, which follow exactly the same schema as [Supported `parameters` attributes](/power/product/#supported-parameters-attributes) in [`app-info.yaml`](/power/product/#app-infoyaml).
+1. The ID can be used to reference the template afterwards from an [`app-info.yaml`](#app-infoyaml).
+2. The `parameters` can contain an arbitrary amount of parameter definitions, which follow exactly the same schema as [Supported `parameters` attributes](#supported-parameters-attributes) in [`app-info.yaml`](#app-infoyaml).
 
 !!!info Note
 Inlining of templates into applications happens **before** anything else. Parameter templates can also reference other parameters (e.g. `{{V:my-param}}`), even if they are not part of this very template. All applications using this parameter would then either have to have (directly or through another template) this `my-param` parameter, **or** will receive a validation warning and need to change the value.
 !!!
 
 !!!warning Warning
-To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](/power/product/#product-infoyaml) so it is included at build time.
+To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](#product-infoyaml) so it is included at build time.
 !!!
 
 ## instance-variable-template.yaml ##
 
-An `instance-variable-template.yaml` works the same as a `parameter-template.yaml` in that it provides common definitions for instance variables, which can be re-used in [`instance-template.yaml`](/power/product/#instance-templateyaml) files. Those definitions are inlined early on, so variables from `instance-variable-template.yaml` files can do exactly the same things as `instanceVariables` in a [`instance-template.yaml`](/power/product/#instance-templateyaml).
+An `instance-variable-template.yaml` works the same as a `parameter-template.yaml` in that it provides common definitions for instance variables, which can be re-used in [`instance-template.yaml`](#instance-templateyaml) files. Those definitions are inlined early on, so variables from `instance-variable-template.yaml` files can do exactly the same things as `instanceVariables` in a [`instance-template.yaml`](#instance-templateyaml).
 
 ```yaml
 id: var.template <1>
@@ -744,12 +748,84 @@ instanceVariables: <2>
     type: STRING
 ```
 
-1. The ID can be used to reference the template afterwards from an [`instance-template.yaml`](/power/product/#instance-templateyaml).
-2. An arbitrary amount of instance variable templates. The schema is the same as [Supported `instanceVariables` Attributes](/power/product/#supported-instancevariables-attributes) in [`instance-template.yaml`](/power/product/#instance-templateyaml)
+1. The ID can be used to reference the template afterwards from an [`instance-template.yaml`](#instance-templateyaml).
+2. An arbitrary amount of instance variable templates. The schema is the same as [Supported `instanceVariables` Attributes](#supported-instancevariables-attributes) in [`instance-template.yaml`](#instance-templateyaml)
 
 !!!warning Warning
-To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](/power/product/#product-infoyaml) so it is included at build time.
+To be able to use a template, the template needs to also be registered in the [`product-info.yaml`](#product-infoyaml) so it is included at build time.
 !!!
+
+## system-template.yaml ##
+
+A (freestanding) `system-template.yaml` allows you to specify a broader scoped template than a (product-bound) `instance-template.yaml`. A `system-template.yaml` can reference multiple products, and **Instance Templates** therin to create systems containing of many instances from different products.
+
+```yaml
+name: Test System
+description: 'A test system with both demo and chat product'
+
+systemVariables: <1>
+  - id: test.system.var
+    description: 'A test system variable'
+    value: testValue
+
+templateVariables: <2>
+  - id: node-base-name
+    name: "The node base name"
+    defaultValue: "Node"
+
+instances:
+  - name: 'Demo Instance' <3>
+    description: "The Test System's Demo Instance"
+    productId: 'io.bdeploy/demo'
+    productVersionRegex: "2\\..*"
+    templateName: 'Default Configuration'
+  - name: 'Chat Instance'
+    description: "The Test System's first Chat Instance"
+    productId: 'io.bdeploy/chat-app'
+    fixedVariables: <4>
+      - id: app-name
+        value: "{{T:node-base-name}}"
+    templateName: 'Default Configuration'
+    defaultMappings: <5>
+      - group: 'Chat App'
+        node: '{{T:cell-base-name}}'
+```
+
+1. The single core artifact created on **BDeploy** using a **System Template** is - of course - a **System**. It is possible to define an arbitrary amount of [System Variables](/user/instancegroup/#system-variables) using the template.
+2. Template variables in **System Templates** work similar to template variables in [`instance-template.yaml`](#instance-templateyaml). They can be used within the `system-template.yaml` in instance names, `fixedVariables` and `defaultMappings`.
+3. A simple instance reference **must** consist of a `name`, a `productId` and a `templateName`, meaning "create an instance with name `name`, from the product `productId` using the template `templateName`".
+4. `fixedVariables` allows you to specify a "fixed" value for template variables used in the referenced **Instance Template**. This will skip querying the user for a value for that variable, and instead use this fixed value.
+5. `defaultMappings` can be used to pre-assign **Instance Template** groups to available nodes. If a node with the specified name is not available during application of the **System Template**, no node will be preselected.
+
+### Supported `systemVariables` Attributes
+
+Attribute   | Description
+---         | ---
+`id` | The unique ID of the system variable to create.
+`value` | The pre-assigned value of the variable.
+`description` | A human readable description explaining the purpose of each variable.
+`type` | Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`.
+`customEditor` | Reserved, currently not supported.
+
+### Supported `templateVariables` Attributes
+
+!!!info Note
+`templateVariables` follows the same scheme as [Supported `templateVariables` Attributes](#supported-templatevariables-attributes) in [`application-template.yaml`](#application-templateyaml) files.
+!!!
+
+### Supported `instances` Attributes
+
+Each element provides a description of an instance to be created from a specific product and a specific instance template.
+
+Attribute   | Description
+---         | ---
+`name` | The name of the instance to create. May use **Template Variables** from the **System Template**.
+`description` | Describes the purpose or meaning of the to-be-created instance.
+`productId` | The **ID** of the product to be used. Note that this is not the **Name**. It corresponds to the `product` field in [`product-info.yaml`](#product-infoyaml).
+`productVersionRegex` | An optional regular expression which narrows down allowable versions of the specified product. Useful in case multiple major versions of a product exist on a server, and only a certain one is supported. Otherwise, the newest product version is selected.
+`templateName` | The name of the **Instance Template** to apply to create this instance. This template must exist in the selected product version.
+`defaultMappings` | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset.
+`fixedVariables` | Pairs of `id` and `value` attributes which set **Template Variables** of the referenced **Instance Template** to a fixed value instead of querying a value from the user during application.
 
 # Building a Product
 
@@ -763,7 +839,6 @@ The following conditions must be fulfilled for a successful import:
 
 * ZIP files must be self-contained, e.g. only relative paths are allowed and no leaving of the zipped structure via ".." paths.
 * YAML files must follow standard naming (product-info.yaml).
-* External dependencies must either be included in the ZIP or already be available in the **Instance Group**. **Software Repositories** are not (yet) supported.
 
 ## Via CLI
 
@@ -774,7 +849,7 @@ Once you have a `product-info.yaml` with it's `product-version.yaml` and all the
 
 ## Via Gradle
 
-**BDeploy** provides a https://plugins.gradle.org/plugin/io.bdeploy.gradle.plugin[**Gradle** plugin]. This plugin can be used to build a product out of your application.
+**BDeploy** provides a [**Gradle** plugin](https://plugins.gradle.org/plugin/io.bdeploy.gradle.plugin). This plugin can be used to build a product out of your application.
 
 Given a sample Java application which has been created from the default gradle template using `gradle init`, these are the changes you need to build a **BDeploy** product for this single application. For this demo, the application is named `test`.
 
@@ -842,9 +917,9 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 6. The `pushProduct` task can push required deltas to one or more configured target servers. When calling this task, you need to set according project properties, e.g. using `-Pserver=https://server:7701/api` or in `~/.gradle/gradle.properties`.
 7. Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
 
-Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](/power/product/#app-infoyaml) and [`product-info.yaml`](/power/product/#product-infoyaml) for all supported content.
+Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](#app-infoyaml) and [`product-info.yaml`](#product-infoyaml) for all supported content.
 
-Lets start off with the [`app-info.yaml`](/power/product/#app-infoyaml), which describes the `test` application. 
+Lets start off with the [`app-info.yaml`](#app-infoyaml), which describes the `test` application. 
 
 !!!info Note
 This file **must** be part of the binary distribution of an application and reside in its root directory. To achieve this, the most simple way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
@@ -865,10 +940,10 @@ startCommand:
 1. By default, the **BDeploy** plugin will make this application available for **all** the supported platforms specified in `app-info.yaml`. If required (usually it is not) you can configure a _different_ set of Operating Systems to build for in the `test` application configuration in `build.gradle` by adding a set of operating system literals (e.g. 'WINDOWS', 'LINUX') to the `os` list of the application.
 2. This demo `app-info.yaml` only defines the path to the launcher, which for this demo project (named `test`) is `bin/test` on `LINUX`, and `bin/test.bat` on `WINDOWS`.
 
-Finally, we need a [`product-info.yaml`](/power/product/#product-infoyaml) describing the product itself. We'll put this file into a `bdeploy` subfolder. This is not required, it can reside anywhere in the project. You just need to adapt the path to it in the `build.gradle`.
+Finally, we need a [`product-info.yaml`](#product-infoyaml) describing the product itself. We'll put this file into a `bdeploy` subfolder. This is not required, it can reside anywhere in the project. You just need to adapt the path to it in the `build.gradle`.
 
 !!!info Note
-The reason why you want to put this file into a separate folder is because it allows to reference various other files by relative path. Those files (and folders) must the reside next to the [`product-info.yaml`](/power/product/#product-infoyaml). Over time this can grow, and may clutter your source folders if you do not separate it.
+The reason why you want to put this file into a separate folder is because it allows to reference various other files by relative path. Those files (and folders) must the reside next to the [`product-info.yaml`](#product-infoyaml). Over time this can grow, and may clutter your source folders if you do not separate it.
 !!!
 
 `bdeploy/product-info.yaml`
@@ -884,7 +959,7 @@ versionFile: product-version.yaml <3>
 ```
 
 1. This is the unique ID of the product. This is basically a 'primary key' and should not change over time.
-2. The [`product-info.yaml`](/power/product/#product-infoyaml) needs to list included applications. These applications also need to be available from the `product-version.yaml`.
+2. The [`product-info.yaml`](#product-infoyaml) needs to list included applications. These applications also need to be available from the `product-version.yaml`.
 3. The `versionFile` parameter **must** be set. If the relative path given here does **not** exist, the **BDeploy** **Gradle** plugin will generate this file for you, using the given version and applications. Otherwise you can provide this file and have more manual control over applications. In case the plugin generates the file for you, it will be deleted right after the build.
 
 That's all that is required to build a product. You can now run `./gradlew zipProduct` on the CLI to try it out. The result will be a `build/product-1.0.0-XXX.zip` where `XXX` is the `buildDate` we set previously. The content of the ZIP file is a **BHive**, which is the internal data format used by **BDeploy**. You can upload this product to any **BDeploy** server using its Web UI.
@@ -939,7 +1014,7 @@ Since product builds are stored in the workspace, you can choose to re-push a pr
 There is no actual requirement for the file to be named `products.yaml`. This is just the default, but you can specify another name in the Eclipse TEA preferences.
 !!!
 
-This file is required and lists the [`product-build.yaml`](/power/product/#product-buildyaml) files which are available to the integration.
+This file is required and lists the [`product-build.yaml`](#product-buildyaml) files which are available to the integration.
 
 ```yaml
 products:
@@ -957,7 +1032,7 @@ The preferences also allow to configure a **BDeploy** server whos [Software Repo
 
 ### `product-build.yaml`
 
-This file references a [`product-info.yaml`](/power/product/#product-infoyaml) file and describes how to build the actual applications referenced in the `product-info.yaml`.
+This file references a [`product-info.yaml`](#product-infoyaml) file and describes how to build the actual applications referenced in the `product-info.yaml`.
 
 ```yaml
 productInfoYaml: my-prod-info.yaml

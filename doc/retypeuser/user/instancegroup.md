@@ -153,3 +153,27 @@ A **System** definition may be used by many **Instances**, but each **Instance**
 ### System Variables
 
 **System Variables** can be configured on **Systems**. Those variables can then be used using _link expressions_ on [Link Expressions](/user/instance/#link-expressions) (process parameters, endpoint configuration, instance variables, configuration files).
+
+### System Templates
+
+A **System Template** allows definition of complete systems. Since those templates life outside of any specific single product, they are single YAML files which have a separate lifecycle.
+
+A **System Template** will typically create multiple instances of multiple products in a to-be-created system. It can also create [System Variables](/user/instancegroup/#system-variables), and use template variable overrides to control in much detail how instances are created.
+
+:::{align=center}
+![System Template Wizard](/images/Doc_SystemTemplate_Wizard.png){width=480}
+:::
+
+The **System Template** Wizard will request you to upload a [`system-template.yaml`](/power/product/#system-templateyaml) file. Once this is done, you can specify template variable values for variables defined and used in the system template itself. These are not to be confused with template variables used in instance templates, which will be queried at a later stage in the process as required. **System Templates** can use template variables in their own YAML descriptor to provide very dynamic (pre-)configuration for instance templates, thus those variables need to be available before configuring instance templates.
+
+:::{align=center}
+![System Template Instance Configuration](/images/Doc_SystemTemplate_InstanceTemplates.png){width=480}
+:::
+
+The Wizard will now query each instance defined in the **System Template**. This allow users to skip instances, or configure intances in a way just "as if" they would apply the individual **Instance Templates** to a new, empty instance each.
+
+:::{align=center}
+![System Template Wizard - Done](/images/Doc_SystemTemplate_Done.png){width=480}
+:::
+
+Once done, the Wizard will show success confirmations along with potential warnings and errors that occured during application of the template(s).

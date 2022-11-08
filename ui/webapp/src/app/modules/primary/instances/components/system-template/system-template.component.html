@@ -22,7 +22,12 @@
         animationDuration="200"
       >
         <mat-step label="Target Server" [completed]="serverSelectionCompleted">
-          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+          <div
+            [attr.data-cy]="'step-server'"
+            fxLayout="column"
+            fxLayoutGap="10px"
+            [style.padding.px]="10"
+          >
             <div *ngIf="!isCentral; else selectManaged">
               Choosing a target server is not required for your setup.
             </div>
@@ -52,7 +57,12 @@
           </div>
         </mat-step>
         <mat-step label="System Template" [completed]="!!this.template">
-          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+          <div
+            [attr.data-cy]="'step-template-upload'"
+            fxLayout="column"
+            fxLayoutGap="10px"
+            [style.padding.px]="10"
+          >
             <app-bd-file-drop
               *ngIf="!file"
               [types]="['.yaml']"
@@ -79,7 +89,12 @@
           </div>
         </mat-step>
         <mat-step label="Name and Purpose" [completed]="name && purpose">
-          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+          <div
+            [attr.data-cy]="'step-name-purpose'"
+            fxLayout="column"
+            fxLayoutGap="10px"
+            [style.padding.px]="10"
+          >
             <app-bd-form-input
               errorDisplay="immediate"
               [required]="true"
@@ -109,7 +124,12 @@
           label="System Template Variables"
           [completed]="isAllSystemVariablesSet"
         >
-          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+          <div
+            [attr.data-cy]="'step-system-variables'"
+            fxLayout="column"
+            fxLayoutGap="10px"
+            [style.padding.px]="10"
+          >
             <ng-container *ngFor="let v of requiredSystemVariables">
               <app-bd-form-input
                 [(ngModel)]="systemVariables[v.id]"
@@ -143,7 +163,12 @@
           label="Instance Templates"
           [completed]="isAllTemplateGroupsSelected && isAllVariablesSet"
         >
-          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="10">
+          <div
+            [attr.data-cy]="'step-instance-templates'"
+            fxLayout="column"
+            fxLayoutGap="10px"
+            [style.padding.px]="10"
+          >
             <mat-tab-group #tabGroup animationDuration="0ms">
               <mat-tab *ngFor="let tpl of templates">
                 <ng-template matTabLabel>
@@ -153,7 +178,11 @@
                     {{ tpl.expandedName }}
                   </div>
                 </ng-template>
-                <div fxLayout="row" fxLayoutGap="5px">
+                <div
+                  [attr.data-cy]="'tab-' + tpl.expandedName"
+                  fxLayout="row"
+                  fxLayoutGap="5px"
+                >
                   <div
                     fxFlex="1 0 auto"
                     fxLayout="column"
@@ -238,7 +267,12 @@
           </div>
         </mat-step>
         <mat-step label="Applying">
-          <div fxLayout="column" fxLayoutGap="10px" [style.padding.px]="20">
+          <div
+            [attr.data-cy]="'step-applying'"
+            fxLayout="column"
+            fxLayoutGap="10px"
+            [style.padding.px]="20"
+          >
             <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
               <mat-spinner [diameter]="24"></mat-spinner>
               <div>Working on it...</div>
@@ -247,6 +281,7 @@
         </mat-step>
         <mat-step label="Done">
           <div
+            [attr.data-cy]="'step-done'"
             fxLayout="column"
             fxLayoutGap="10px"
             [style.padding.px]="20"
