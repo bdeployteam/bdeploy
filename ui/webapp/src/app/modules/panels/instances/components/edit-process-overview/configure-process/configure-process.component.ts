@@ -52,8 +52,7 @@ export class ConfigureProcessComponent implements OnDestroy, DirtyableDialog {
       tap(() => {
         this.edit.alignGlobalParameters(
           this.edit.application$.value,
-          this.edit.process$.value,
-          false // don't migrate globals automatically, we only do this when adding processes.
+          this.edit.process$.value
         );
         this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
       })

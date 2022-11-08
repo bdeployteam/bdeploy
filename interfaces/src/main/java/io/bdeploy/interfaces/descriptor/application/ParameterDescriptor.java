@@ -93,13 +93,8 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
      * same value for all applications which have the same parameter) or locally
      * (configure value per application even if the name of the parameter is the
      * same).
-     *
-     * @deprecated since 4.6.0, replaced by system and instance variables. Note that we need to keep this around for a long time
-     *             coming to support existing products. The logic to handle globals is all in the frontend in
-     *             process-edit.service.ts.
      */
-    @Deprecated(since = "4.6.0")
-    @JsonPropertyDescription("DEPRECATED. Whether the parameter is global (i.e. all parameters with the same ID will always have the same value in a single instance). This has been deprecated in favor of instance variables.")
+    @JsonPropertyDescription("Whether the parameter is global (i.e. all parameters with the same ID will always have the same value in a single instance). This has been deprecated in favor of instance variables.")
     public boolean global = false;
 
     @JsonPropertyDescription("Whether this parameter is mandatory. Optional parameters (the default) need to be added by a template or by the user explicitly through the configuration UI. Defaults to 'false'")

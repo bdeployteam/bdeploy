@@ -289,10 +289,6 @@ _Mandatory:_ no
 
 _Description:_ Whether this parameter is `global`. This means that inside a single **Instance**, every process requiring this parameter will receive the same value. The configuration UI will provide input fields for the parameter for every **Application** which requires the parameter, and propagate value changes to all other **Applications** requiring it. 
 
-!!!warning Warning
-**Global Parameters** have been deprecated in favor of [System Variables](/user/instancegroup/#system-variables) and [Instance Variables](/user/instance/#instance-variables).
-!!!
-
 === **Attribute**: `mandatory`
 _Default:_ `false`
 

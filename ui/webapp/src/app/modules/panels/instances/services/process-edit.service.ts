@@ -190,8 +190,8 @@ export class ProcessEditService {
 
     this.preliminary.push(process);
 
-    // align global parameters *OR* migrate globals to instance variables.
-    this.alignGlobalParameters(application, process, true);
+    // align global parameters.
+    this.alignGlobalParameters(application, process);
 
     return this.groups.newId().pipe(
       tap((id) => {
@@ -251,30 +251,13 @@ export class ProcessEditService {
    */
   public alignGlobalParameters(
     appDto: ApplicationDto,
-    process: ApplicationConfiguration,
-    migrate: boolean
+    process: ApplicationConfiguration
   ) {
     const globals = appDto.descriptor?.startCommand?.parameters?.filter(
       (p) => p.global
     );
     if (!globals?.length) {
       return;
-    }
-
-    if (this.edit.globalsMigrated$.value) {
-      if (migrate) {
-        for (const g of globals) {
-          const v = process.start.parameters.find((p) => p.id === g.id);
-          if (v) {
-            this.edit.migrateGlobalToVariable(
-              this.edit.state$.value.config.config,
-              v,
-              g
-            );
-          }
-        }
-      }
-      return; // skip the rest, as legacy globals are no longer supported.
     }
 
     const values: { [key: string]: LinkedValueConfiguration } = {};
@@ -343,7 +326,7 @@ export class ProcessEditService {
           val = createLinkedValue(
             performTemplateVariableSubst(tpl.value, values, status)
           );
-        } else if (p.global && !this.edit.globalsMigrated$.value) {
+        } else if (p.global) {
           const gp = this.getGlobalParameter(p.id);
           if (gp) {
             val = gp.value;

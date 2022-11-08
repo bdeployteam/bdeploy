@@ -102,14 +102,6 @@
   >
     <div fxFlex="1 0 auto"></div>
     <app-bd-button
-      *ngIf="!(edit.globalsMigrated$ | async)"
-      text="Migrate Globals"
-      icon="publish"
-      [collapsed]="false"
-      color="primary"
-      (click)="edit.migrateGlobals(edit.state$.value.config)"
-    ></app-bd-button>
-    <app-bd-button
       text="Add"
       icon="add"
       (click)="onAdd(addTemplate)"

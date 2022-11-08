@@ -87,7 +87,6 @@ export class ConfigProcessParamGroupComponent
   /* template */ search: string;
   /* template */ process: ApplicationConfiguration;
   /* template */ app: ApplicationDto;
-  /* template */ globalsAllowed: boolean;
 
   /* template */ instance: InstanceConfigurationDto;
   /* template */ system: SystemConfiguration;
@@ -129,13 +128,11 @@ export class ConfigProcessParamGroupComponent
     this.subscription = combineLatest([
       this.edit.process$,
       this.edit.application$,
-      this.instances.globalsMigrated$,
-    ]).subscribe(([process, app, globalsMigrated]) => {
+    ]).subscribe(([process, app]) => {
       if (!process || !app) {
         this.groups$.next(null);
         return;
       }
-      this.globalsAllowed = !globalsMigrated; // as long as not migrated, we allow globals
       this.process = process;
       this.app = app;
       // group all parameter descriptors and configurations together for simple iteration in the template.
@@ -303,7 +300,7 @@ export class ConfigProcessParamGroupComponent
         this.edit.application$.value.descriptor.startCommand.parameters;
 
       let initialValue = p.descriptor?.defaultValue;
-      if (p.descriptor.global && this.globalsAllowed) {
+      if (p.descriptor.global) {
         // need to lookup a potential already existing global value.
         const global = this.edit.getGlobalParameter(p.descriptor.id);
         if (global) {

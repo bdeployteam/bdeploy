@@ -265,14 +265,11 @@ public class ProductUpdateService {
                 // need one.
                 createParameter(instance, desc, descriptors, values, allApps);
 
-                if (desc.global && !instance.globalsMigrated) {
+                if (desc.global) {
                     if (validation.stream().filter(v -> v.appId == null && desc.id.equals(v.paramId)).findFirst().isEmpty()) {
                         validation.add(0, new ApplicationValidationDto(null, desc.id,
                                 "New global parameter '" + desc.name + "' has been added with its default value."));
                     }
-                } else {
-                    validation.add(new ApplicationValidationDto(app.id, desc.id,
-                            "New mandatory parameter '" + desc.name + "' has been added with its default value."));
                 }
             }
         }
@@ -286,7 +283,7 @@ public class ProductUpdateService {
         cfg.id = desc.id;
         cfg.value = desc.defaultValue;
 
-        if (desc.global && !instance.globalsMigrated) {
+        if (desc.global) {
             for (var other : allApps) {
                 var para = getParameter(other, desc.id);
                 if (para.isPresent()) {

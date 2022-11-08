@@ -90,10 +90,4 @@ public class InstanceConfiguration {
      */
     public List<VariableConfiguration> instanceVariables = new ArrayList<>();
 
-    /**
-     * Whether global parameters have been migrated to system/instance variables.
-     * <p>
-     * Effectively disables all global parameter handling on this instance.
-     */
-    public boolean globalsMigrated = false;
 }
