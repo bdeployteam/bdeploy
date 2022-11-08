@@ -24,6 +24,7 @@ public class TextUIResources {
         tool.register(RemoteCentralTool.class);
         tool.register(RemotePluginTool.class);
         tool.register(RemoteDataFilesTool.class);
+        tool.register(RemoteProductValidationTool.class);
     }
 
 }

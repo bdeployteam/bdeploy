@@ -43,6 +43,8 @@ public class UiResources {
 
         server.register(PermissionRequestFilter.class);
 
+        server.register(ProductValidationResourceImpl.class);
+
         // force immediate initialization of the manifest spawn bridge so it can attach to the hive registry.
         server.register(new JerseyEagerServiceInitializer<>(ManifestSpawnToChangeEventBridge.class));
 
