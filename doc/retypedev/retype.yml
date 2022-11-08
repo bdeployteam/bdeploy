@@ -1,11 +1,24 @@
 input: .
 output: ../build/docs/dev
-url: https://bdeploy.io/ # Add your website address here
-favicon: /img/logo.ico
+url: https://bdeploy.io/dev/
+favicon: images/logo.ico
 branding:
-  title: BDeploy Developer Documentation
+  title: BDeploy
+  label: Dev
+  logo: images/logo.svg
+  logoDark: images/logo-dark.svg
+cname: false
 editor:
   enabled: false # Default is true
+links:
+  - text: bdeploy.io
+    link: https://bdeploy.io
+    icon: home
+    target: blank
+  - text: GitHub
+    link: https://github.com/bdeployteam/bdeploy
+    icon: mark-github
+    target: blank
 footer:
   copyright: "&copy; Copyright {{ year }}. All rights reserved."
 search:

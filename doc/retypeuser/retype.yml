@@ -1,11 +1,24 @@
 input: .
 output: ../build/docs/user
-url: https://bdeploy.io/ # Add your website address here
-favicon: /img/logo.ico
+url: https://bdeploy.io/user/
+favicon: images/logo.ico
 branding:
-  title: BDeploy User Documentation
+  title: BDeploy
+  label: User
+  logo: images/logo.svg
+  logoDark: images/logo-dark.svg
+cname: false
 editor:
   enabled: false # Default is true
+links:
+  - text: bdeploy.io
+    link: https://bdeploy.io
+    icon: home
+    target: blank
+  - text: GitHub
+    link: https://github.com/bdeployteam/bdeploy
+    icon: mark-github
+    target: blank
 footer:
   copyright: "&copy; Copyright {{ year }}. All rights reserved."
 search:

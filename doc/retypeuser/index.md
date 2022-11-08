@@ -1,8 +1,10 @@
 ---
 icon: home
 ---
-# BDeploy End User Documentation
+# User Documentation
 
 :::{align=center}
-![TEA BDeploy Login](/images/logo.svg){width=200}
+![Logo](/images/logo.svg){width=200}
 :::
+
+Welcome to the **BDeploy User Documentation**. This documentation is intended for end users, not for developers. Find the current developer documentation [here](../dev/index.html).
