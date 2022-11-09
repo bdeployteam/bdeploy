@@ -5,6 +5,7 @@ import { FlatTreeControl } from '@angular/cdk/tree';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -23,7 +24,14 @@ import {
   MatTreeFlattener,
 } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
-import { BehaviorSubject, Observable, of, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+} from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
@@ -41,6 +49,7 @@ import { BdSearchable, SearchService } from '../../services/search.service';
 
 /** Represents the hirarchical presentation of the records after grouping/sorting/searching is applied. */
 interface Node<T> {
+  nodeId: any;
   item: T;
   groupOrFirstColumn: any;
   children: Node<T>[];
@@ -218,6 +227,9 @@ export class BdDataTableComponent<T>
   /** The current search/filter string given by onBdSearch */
   private search: string;
 
+  /** Emitted when a redraw is requested. */
+  private redrawRequest$ = new Subject<any>();
+
   /** The treeControl provides the hierarchy and flattened nodes rendered by the table */
   treeControl = new FlatTreeControl<FlatNode<T>>(
     (node) => node.level,
@@ -235,6 +247,10 @@ export class BdDataTableComponent<T>
   );
   private subscription: Subscription;
   private mediaSubscription: Subscription;
+
+  /** endless pseudo-id counter for created nodes to be used with trackBy in case no ID solumn is set. */
+  private nodeCnt = 0;
+
   /* template */ hasMoreData = false;
   /* template */ hasMoreDataText = '...';
 
@@ -250,7 +266,8 @@ export class BdDataTableComponent<T>
   constructor(
     private searchService: SearchService,
     private media: BreakpointObserver,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -258,6 +275,10 @@ export class BdDataTableComponent<T>
       // register this table as "searchable" in the global search service if requested.
       this.subscription = this.searchService.register(this);
     }
+
+    this.redrawRequest$.pipe(debounceTime(200)).subscribe(() => {
+      this.cd.detectChanges();
+    });
   }
 
   ngOnDestroy(): void {
@@ -371,6 +392,13 @@ export class BdDataTableComponent<T>
       // can be used to remember the expansion state, using a SelectionModel just like check selection.
       this.treeControl.expandAll();
     }
+
+    this.redraw();
+  }
+
+  /** Instructs Angular to detect changes in the underlying data *without* rebuilding the whole data. */
+  public redraw() {
+    this.redrawRequest$.next(true);
   }
 
   /**
@@ -447,6 +475,7 @@ export class BdDataTableComponent<T>
         const children = this.generateModel(value, grouping.slice(1), sort);
         if (children?.length) {
           result.push({
+            nodeId: key,
             item: null,
             groupOrFirstColumn: key,
             children: children,
@@ -469,14 +498,23 @@ export class BdDataTableComponent<T>
       }
     }
 
+    const idCols = this._columns?.filter((c) => c.isId);
+
     // last step is to transform the raw input data into Node<T> which is then further processed
     // by the transformer callback of treeControl.
     this.hasMoreData = sortedData.length > MAX_ROWS_PER_GROUP;
     return sortedData.slice(0, MAX_ROWS_PER_GROUP).map((i) => ({
+      nodeId: idCols?.length
+        ? idCols.map((c) => c.data(i)).join('_')
+        : this.nodeCnt++,
       item: i,
       groupOrFirstColumn: this._columns[0].data(i),
       children: [],
     }));
+  }
+
+  /* template */ trackNode(index: number, node: FlatNode<T>) {
+    return node.node.nodeId;
   }
 
   /* template */ getNoExpandIndent(level: number) {

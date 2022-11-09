@@ -17,6 +17,7 @@ const COL_PATH: BdDataColumn<RemoteDirectoryEntry> = {
   id: 'path',
   name: 'Path',
   data: (r) => r.path,
+  isId: true,
 };
 
 const COL_SIZE: BdDataColumn<RemoteDirectoryEntry> = {

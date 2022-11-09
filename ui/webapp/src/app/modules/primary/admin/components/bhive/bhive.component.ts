@@ -17,6 +17,7 @@ const COL_ID: BdDataColumn<string> = {
   id: 'id',
   name: 'BHive',
   data: (r) => r,
+  isId: true,
 };
 
 @Component({

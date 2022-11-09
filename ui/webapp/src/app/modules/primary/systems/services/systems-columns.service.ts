@@ -17,6 +17,7 @@ export class SystemsColumnsService {
     id: 'system',
     name: 'ID',
     data: (r) => r.config.id,
+    isId: true,
     width: '120px',
     hint: BdDataColumnTypeHint.FOOTER,
     showWhen: '(min-width: 1000px)',

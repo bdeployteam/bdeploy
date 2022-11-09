@@ -82,6 +82,9 @@ export interface BdDataColumn<T> {
 
   /** Set to true if you want to sort cards by this column */
   sortCard?: boolean;
+
+  /** Whether the data of this column can be used to uniquely identify rows. */
+  isId?: boolean;
 }
 
 /** The group used if a record does not match any group when grouping. */

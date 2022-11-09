@@ -9,7 +9,7 @@ import {
   QueryList,
   ViewChildren,
 } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -108,10 +108,12 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.subscription.add(
-      this.edit.issues$.subscribe(() => {
-        // update in case validation is run in the background.
-        this.data?.forEach((t) => t?.update());
-      })
+      combineLatest([this.edit.validating$, this.edit.issues$]).subscribe(
+        () => {
+          // update in case validation is run in the background - this means something may have changed
+          this.data?.forEach((t) => t?.redraw());
+        }
+      )
     );
   }
 

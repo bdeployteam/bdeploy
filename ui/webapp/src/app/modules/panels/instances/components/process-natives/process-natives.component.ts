@@ -10,6 +10,7 @@ const nativePidColumn: BdDataColumn<ProcessHandleDto> = {
   id: 'pid',
   name: 'PID',
   data: (r) => r.pid,
+  isId: true,
   width: '80px',
 };
 

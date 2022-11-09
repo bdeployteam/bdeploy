@@ -13,6 +13,7 @@
     [cdkDropListConnectedTo]="dragConnected"
     [cdkDropListDisabled]="!dragReorderMode"
     (cdkDropListDropped)="onDrop($event)"
+    [trackBy]="trackNode"
   >
     <caption style="display: none">
       {{ caption }}

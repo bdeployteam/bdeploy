@@ -22,6 +22,7 @@ const labelKeyColumn: BdDataColumn<LabelRecord> = {
   id: 'key',
   name: 'Label',
   data: (r) => r.key,
+  isId: true,
   width: '90px',
 };
 
@@ -37,6 +38,7 @@ const appTemplateNameColumn: BdDataColumn<FlattenedApplicationTemplateConfigurat
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
+    isId: true,
     tooltip: (r) => r.description,
   };
 
@@ -66,6 +68,7 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
   id: 'oid',
   name: 'OID',
   data: (r) => r.id.id,
+  isId: true,
   width: '50px',
 };
 

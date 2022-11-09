@@ -27,6 +27,7 @@ const clientIdColumn: BdDataColumn<ClientApp> = {
   id: 'id',
   name: 'App. ID',
   data: (r) => (r.client ? r.client.id : r.endpoint.id),
+  isId: true,
   hint: BdDataColumnTypeHint.DETAILS,
   icon: () => 'computer',
 };

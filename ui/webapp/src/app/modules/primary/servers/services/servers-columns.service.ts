@@ -12,6 +12,7 @@ export class ServersColumnsService {
     id: 'name',
     name: 'Name',
     data: (r) => r.hostName,
+    isId: true,
     hint: BdDataColumnTypeHint.TITLE,
   };
 

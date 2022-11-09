@@ -24,6 +24,7 @@ export class GroupsColumnsService {
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.instanceGroupConfiguration.name,
+    isId: true,
     width: '200px',
     showWhen: '(min-width: 700px)',
     sortCard: true,

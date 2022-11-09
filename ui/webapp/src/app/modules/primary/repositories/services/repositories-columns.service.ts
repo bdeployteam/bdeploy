@@ -24,6 +24,7 @@ export class RepositoriesColumnsService {
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.name,
+    isId: true,
     width: '200px',
   };
 

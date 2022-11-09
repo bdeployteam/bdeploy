@@ -24,6 +24,7 @@ const colNodeName: BdDataColumn<NodeRow> = {
   id: 'name',
   name: 'Node',
   data: (r) => r.name,
+  isId: true,
 };
 
 @Component({

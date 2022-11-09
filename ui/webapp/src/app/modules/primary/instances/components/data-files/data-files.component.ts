@@ -25,6 +25,7 @@ const colPath: BdDataColumn<FileListEntry> = {
   id: 'path',
   name: 'Name',
   data: (r) => r.entry.path,
+  isId: true,
 };
 
 const colSize: BdDataColumn<FileListEntry> = {

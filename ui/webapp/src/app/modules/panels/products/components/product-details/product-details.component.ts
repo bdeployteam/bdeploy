@@ -23,12 +23,14 @@ const instanceNameColumn: BdDataColumn<InstanceUsageDto> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
+  isId: true,
 };
 
 const instanceTagColumn: BdDataColumn<InstanceUsageDto> = {
   id: 'tag',
   name: 'Ver.',
   data: (r) => r.tag,
+  isId: true,
   width: '30px',
 };
 
@@ -36,6 +38,7 @@ const labelKeyColumn: BdDataColumn<LabelRecord> = {
   id: 'key',
   name: 'Label',
   data: (r) => r.key,
+  isId: true,
   width: '90px',
 };
 
@@ -51,6 +54,7 @@ const appTemplateNameColumn: BdDataColumn<FlattenedApplicationTemplateConfigurat
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
+    isId: true,
     tooltip: (r) => r.description,
   };
 
@@ -59,6 +63,7 @@ const instTemplateNameColumn: BdDataColumn<FlattenedInstanceTemplateConfiguratio
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
+    isId: true,
     tooltip: (r) => r.description,
   };
 
@@ -80,6 +85,7 @@ const pluginOIDColumn: BdDataColumn<PluginInfoDto> = {
   id: 'oid',
   name: 'OID',
   data: (r) => r.id.id,
+  isId: true,
   width: '50px',
 };
 
@@ -87,12 +93,14 @@ const refNameColumn: BdDataColumn<ManifestKey> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
+  isId: true,
 };
 
 const refTagColumn: BdDataColumn<ManifestKey> = {
   id: 'tag',
   name: 'Ver.',
   data: (r) => r.tag,
+  isId: true,
 };
 
 @Component({

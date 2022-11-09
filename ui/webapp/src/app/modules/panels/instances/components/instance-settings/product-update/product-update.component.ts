@@ -18,6 +18,7 @@ export class ProductUpdateComponent implements OnDestroy {
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => `${r.key.tag}${this.isCurrent(r) ? ' - current' : ''}`,
+    isId: true,
     tooltip: () => null,
     component: ProductVersionDetailsCellComponent,
   };

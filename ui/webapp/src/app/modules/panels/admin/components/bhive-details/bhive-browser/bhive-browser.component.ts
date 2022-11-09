@@ -37,6 +37,7 @@ export class BHiveBrowserComponent implements OnDestroy {
     id: 'name',
     name: 'Name',
     data: (r) => r.name,
+    isId: true,
   };
 
   private readonly colSize: BdDataColumn<HiveEntryDto> = {

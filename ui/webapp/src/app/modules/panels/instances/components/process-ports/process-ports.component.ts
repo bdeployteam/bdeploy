@@ -1,5 +1,6 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BdDataTableComponent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { PortsColumnsService } from 'src/app/modules/primary/instances/services/ports-columns.service';
 import {
   NodeApplicationPort,
@@ -13,6 +14,9 @@ import { ProcessDetailsService } from '../../services/process-details.service';
 })
 export class ProcessPortsComponent implements OnDestroy {
   /* template */ ports$ = new BehaviorSubject<NodeApplicationPort[]>(null);
+
+  @ViewChild(BdDataTableComponent)
+  table: BdDataTableComponent<NodeApplicationPort>;
 
   private subscription: Subscription;
 

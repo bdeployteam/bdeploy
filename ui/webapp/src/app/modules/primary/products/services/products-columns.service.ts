@@ -16,6 +16,7 @@ export class ProductsColumnsService {
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
     data: (r) => r.name,
+    isId: true,
     sortCard: true,
   };
 
@@ -24,6 +25,7 @@ export class ProductsColumnsService {
     name: 'Version',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.key.tag,
+    isId: true,
     tooltip: () => null,
     component: ProductVersionDetailsCellComponent,
     sortCard: true,

@@ -14,6 +14,7 @@ export class RepositoryColumnsService {
     id: 'name',
     name: 'Name',
     data: (r) => r.key.name,
+    isId: true,
   };
 
   productNameColumn: BdDataColumn<any> = {
@@ -26,6 +27,7 @@ export class RepositoryColumnsService {
     id: 'version',
     name: 'Version',
     data: (r) => r.key.tag,
+    isId: true,
   };
 
   productVendorColumn: BdDataColumn<any> = {

@@ -26,6 +26,7 @@ const colVarName: BdDataColumn<LinkVariable> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
+  isId: true,
   description: 'Name of the variable',
   width: '170px',
 };

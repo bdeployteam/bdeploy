@@ -143,4 +143,9 @@ export class BdDataDisplayComponent<T> {
     this.tableComp?.update();
     this.gridComp?.update();
   }
+
+  public redraw(): void {
+    this.tableComp?.redraw();
+    // no redraw for grid (yet).
+  }
 }

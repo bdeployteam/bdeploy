@@ -30,6 +30,7 @@ export class AttributeValuesComponent implements OnInit {
     id: 'attribute',
     name: 'Attribute',
     data: (r) => r.name,
+    isId: true,
   };
 
   private attrValCol: BdDataColumn<AttributeRow> = {

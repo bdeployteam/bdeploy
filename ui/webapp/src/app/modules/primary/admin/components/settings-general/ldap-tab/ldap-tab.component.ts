@@ -21,6 +21,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     id: 'server',
     name: 'Server',
     data: (r) => r.server,
+    isId: true,
   };
 
   private colDescription: BdDataColumn<LDAPSettingsDto> = {

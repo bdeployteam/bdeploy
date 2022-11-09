@@ -17,6 +17,7 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     id: 'id',
     name: 'ID',
     data: (r) => r.name,
+    isId: true,
   };
 
   private defDescCol: BdDataColumn<CustomAttributeDescriptor> = {
