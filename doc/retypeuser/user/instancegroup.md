@@ -66,7 +66,7 @@ Click on an **Instance Group** to open the **instance browser** of this group. H
 ![Empty Instance Browser](/images/Doc_DemoInstancesEmpty.png){width=480}
 :::
 
-Since an **Instance** requires a **Product**, an empty **Instance Group** will initially display a shortcut to the [products](#manage-products) page. If there is at least one **Product** available already, the shortcut changes to the help you to [create a new instance](#create-new-instances).
+Since an **Instance** requires a **Product**, an empty **Instance Group** will initially display a shortcut to the [products](#manage-products) page. If there is at least one **Product** available already, the shortcut changes to help you to [create a new instance](#create-new-instances).
 
 :::{align=center}
 ![Empty Instance Browser with Product available](/images/Doc_DemoInstancesNoInstance.png){width=480}
@@ -90,7 +90,7 @@ On the **Products** page, click the [ **Upload Product** ] button to upload new 
 ![Upload Product](/images/Doc_ProductsUploadPanel.png){width=480}
 :::
 
-Click browse and choose a **Product** _ZIP_ file to upload, or simply drop on on the highlighted drop zone. The **Product** will be uploaded immediately.
+Click browse and choose a **Product** _ZIP_ file to upload, or simply drop one on the highlighted drop zone. The **Product** will be uploaded immediately.
 
 :::{align=center}
 ![Upload Product (success)](/images/Doc_ProductsUploadSuccess.png){width=480}
@@ -104,7 +104,7 @@ Once a **Product** is available, you can click it to open the **Product** detail
 
 ## Create New Instances
 
-To create a new **Instance**, click the [ **+** ] button at the bottom of the page. After giving the new **Instance** a name, purpose and description, the most important thing is to select the **Product** you want to deploy. Additionally, The initial **product version** has to be chosen. It can be changed later at anytime (_up-_ and _downgrade_). 
+To create a new **Instance**, click the [ **+** ] button at the bottom of the page. After giving the new **Instance** a name, purpose and description, the most important thing is to select the **Product** you want to deploy. Additionally, the initial **product version** has to be chosen. It can be changed later at any time (_up-_ and _downgrade_). 
 
 :::{align=center}
 ![Create a new Instance](/images/Doc_InstanceAdd.png){width=480}
@@ -128,7 +128,7 @@ Click an **Instance** to proceed to the [Instance Dashboard](/user/instance/#ins
 ![Set Global Attribute Values](/images/Doc_SetGlobalAttributeValue.png){width=480}
 :::
 
-The value can then be used in grouping instance groups through the grouping panel.
+The value can then be used for grouping instance groups through the grouping panel.
 
 :::{align=center}
 ![Group by Global Attribute](/images/Doc_GroupingPanel.png){width=480}
@@ -136,7 +136,7 @@ The value can then be used in grouping instance groups through the grouping pane
 
 ## Instance Group Attributes
 
-Very similarly to the global attributes, each **Instance Group** may have its own **attributes**. These attributes are not global, but are only visible within the **Instance Group**. Each **Instance** can assign a value to each of these attributes. Again, similar to the **Instance Group** browser, the **Instance** browser can use the assigned values to group **Instances** by those values.
+Very similar to the global attributes, each **Instance Group** may have its own **attributes**. These attributes are not global, but are only visible within the **Instance Group**. Each **Instance** can assign a value to each of these attributes. Again, similar to the **Instance Group** browser, the **Instance** browser can use the assigned values to group **Instances** by those values.
 
 The **attributes** are defined in the **Instance Group** settings. The **values** are assigned in the **Instance** settings.
 

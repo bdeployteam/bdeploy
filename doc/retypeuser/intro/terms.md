@@ -33,7 +33,7 @@ Term   | Meaning
 **Minion** | Agent process provided by **BDeploy** that has to run on every **physical node** used by BDeploy. In a multi-node setup one minion takes the role of a master. All others act as headless nodes which are managed by the master.
 **Deployment** | The whole process of making one **Instance Version** up and running. This includes the major process steps: **Installation**, **Activation**, **Process Control**.
 **Installation** | The process of transferring the configured **Processes** of an **Instance Version** to all **Nodes** of that **Instance**. The **Installation** makes this **Instance Version** available for its **Activation**.
-**Activation** | The **Activation** marks an previously **Installed** **Instance Version** as the one to be started by the **Process Control**. Only one instance version can be active for one instance at the same time.
+**Activation** | The **Activation** marks a previously **Installed** **Instance Version** as the one to be started by the **Process Control**. Only one instance version can be active for one instance at the same time.
 **Process Control** | The **Process Control** is responsible for starting, keep-alive and stopping the **Processes** of the active **Instance Version**.
 **System** | A **System** is a bracket around multiple **Instances** using potentially different **Products**. A **System** is a logical group of individual pieces of deployed software.
 :::

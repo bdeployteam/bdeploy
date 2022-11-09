@@ -16,13 +16,13 @@ supported for testing, but not recommended for productive setups (as the **maste
 bdeploy init --root=/path/to/node/root --hostname=<hostname> --nodeIdentFile=node-ident.txt --port=7702 --mode=node
 ```
 
-Note the `--nodeIdentFile` parameter given to the `init` command. It will contain the required access information for this **node**. You need it to register the **node** with the **master**, so make sure you will have it available when doing so.
+Note the `--nodeIdentFile` parameter given to the `init` command: this file is created during `init`, and will contain the required access information for this **node**. You need it to register the **node** with the **master**, so make sure you will have it available when doing so.
 
 ## Launch
 After the initialization - which needs to be done only once - the **node** can be started with the following command:
 
 ```
-bdeploy start --root=/path/to/root
+bdeploy start --root=/path/to/node/root
 ```
 
 ## Administration
