@@ -35,4 +35,5 @@ Term   | Meaning
 **Installation** | The process of transferring the configured **Processes** of an **Instance Version** to all **Nodes** of that **Instance**. The **Installation** makes this **Instance Version** available for its **Activation**.
 **Activation** | The **Activation** marks an previously **Installed** **Instance Version** as the one to be started by the **Process Control**. Only one instance version can be active for one instance at the same time.
 **Process Control** | The **Process Control** is responsible for starting, keep-alive and stopping the **Processes** of the active **Instance Version**.
+**System** | A **System** is a bracket around multiple **Instances** using potentially different **Products**. A **System** is a logical group of individual pieces of deployed software.
 :::

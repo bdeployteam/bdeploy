@@ -8,6 +8,8 @@ branding:
   logo: images/logo.svg
   logoDark: images/logo-dark.svg
 cname: false
+templating:
+  enabled: false # Causes issues with our own documented variable syntax (warnings only)
 editor:
   enabled: false # Default is true
 links:

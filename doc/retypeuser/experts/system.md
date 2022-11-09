@@ -210,5 +210,4 @@ The **BDeploy Update** page from the **Administration** menu offers a mechanism 
 ![BDeploy System Software](/images/Doc_System_BDeploy_Update.png){width=480}
 :::
 
-It also offers a way to _upload_ **BDeploy Launcher** binaries. These binaries are required when [`CLIENT` **Applications**](/power/product/#app-infoyaml) are configured.
-Use the [ **Upload** ] button to upload full **BDeploy** versions or **Bdeploy Launcher** binaries from the binary distributions (_ZIP_). 
+It also offers a way to _upload_ **BDeploy Launcher** binaries. These binaries are included within a full **BDeploy** distribution and are required when [`CLIENT` **Applications**](/power/product/#app-infoyaml) are configured. Usually, a manual upload is not required. In case launchers have been removed by mistake, they can be re-added this way. Use the [ **Upload** ] button to upload full **BDeploy** versions or **Bdeploy Launcher** binaries from the binary distributions (_ZIP_). 
