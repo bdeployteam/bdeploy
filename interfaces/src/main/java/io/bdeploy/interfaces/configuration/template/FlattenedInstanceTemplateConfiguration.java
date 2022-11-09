@@ -99,11 +99,10 @@ public class FlattenedInstanceTemplateConfiguration {
 
         // determine which variables are *actually* used, and only provide those in the end.
         TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList()); // no overrides on this level.
-        this.instanceVariables = vars.stream()
-                .map(v -> new VariableConfiguration(v.id,
-                        new LinkedValueConfiguration(TemplateHelper.process(v.value.getPreRenderable(), res, res::canResolve)),
-                        v.description, v.type, v.customEditor))
-                .toList();
+        this.instanceVariables = vars.stream().map(v -> new VariableConfiguration(v.id,
+                v.value == null ? null
+                        : new LinkedValueConfiguration(TemplateHelper.process(v.value.getPreRenderable(), res, res::canResolve)),
+                v.description, v.type, v.customEditor)).toList();
 
         // we allow template variables to be used directly in the template YAML in various places, especially when configuring applications.
         for (var group : this.groups) {
