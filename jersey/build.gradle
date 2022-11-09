@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation(
-        'org.glassfish.jersey.ext:jersey-proxy-client:3.0.8',
+        'org.glassfish.jersey.ext:jersey-proxy-client:3.1.0',
         'javax.xml.bind:jaxb-api:2.3.1',
         'org.glassfish.jaxb:jaxb-runtime:4.0.1',
         'javax.activation:activation:1.1.1',
@@ -18,10 +18,10 @@ dependencies {
     commonTestDeps(project(":logging"))
 
     api(
-        'org.glassfish.jersey.media:jersey-media-json-jackson:3.0.8',
-        'org.glassfish.jersey.media:jersey-media-multipart:3.0.8',
-        'org.glassfish.jersey.inject:jersey-hk2:3.0.8',
-        'org.glassfish.jersey.containers:jersey-container-grizzly2-http:3.0.8',
+        'org.glassfish.jersey.media:jersey-media-json-jackson:3.1.0',
+        'org.glassfish.jersey.media:jersey-media-multipart:3.1.0',
+        'org.glassfish.jersey.inject:jersey-hk2:3.1.0',
+        'org.glassfish.jersey.containers:jersey-container-grizzly2-http:3.1.0',
         'org.glassfish.grizzly:grizzly-websockets:4.0.0',
         'org.glassfish.grizzly:grizzly-http-client:1.16',
     )
