@@ -21,7 +21,11 @@
         labelPosition="bottom"
         animationDuration="200"
       >
-        <mat-step label="Target Server" [completed]="serverSelectionCompleted">
+        <mat-step
+          label="Target Server"
+          [completed]="serverSelectionCompleted"
+          [editable]="!serverSelectionCompleted"
+        >
           <div
             [attr.data-cy]="'step-server'"
             fxLayout="column"
@@ -95,26 +99,31 @@
             fxLayoutGap="10px"
             [style.padding.px]="10"
           >
-            <app-bd-form-input
-              errorDisplay="immediate"
-              [required]="true"
-              name="name"
-              label="System Name"
-              [(ngModel)]="name"
-            ></app-bd-form-input>
-            <app-bd-form-select
-              label="Purpose"
-              name="purpose"
-              [(ngModel)]="purpose"
-              [values]="purposes"
-              required
-            ></app-bd-form-select>
+            <form #namePurposeForm="ngForm">
+              <app-bd-form-input
+                errorDisplay="immediate"
+                [required]="true"
+                name="name"
+                label="System Name"
+                [(ngModel)]="name"
+                appEditUniqueValueValidator
+                [disallowedValues]="systemNames$ | async"
+                appTrimmed
+              ></app-bd-form-input>
+              <app-bd-form-select
+                label="Purpose"
+                name="purpose"
+                [(ngModel)]="purpose"
+                [values]="purposes"
+                required
+              ></app-bd-form-select>
+            </form>
             <div fxLayout="row">
               <app-bd-button
                 color="primary"
                 [collapsed]="false"
                 text="Next"
-                [disabled]="!name || !purpose"
+                [disabled]="namePurposeForm.invalid"
                 (click)="stepper.next()"
               ></app-bd-button>
             </div>
@@ -266,7 +275,7 @@
             </div>
           </div>
         </mat-step>
-        <mat-step label="Applying">
+        <mat-step label="Application">
           <div
             [attr.data-cy]="'step-applying'"
             fxLayout="column"
@@ -279,7 +288,7 @@
             </div>
           </div>
         </mat-step>
-        <mat-step label="Done">
+        <mat-step label="Result">
           <div
             [attr.data-cy]="'step-done'"
             fxLayout="column"
@@ -288,24 +297,48 @@
             *ngIf="result"
           >
             <div *ngIf="resultIsSuccess">
-              Applying is done. You may now head back to the
-              <a
-                [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
-                >Instance Browser</a
+              <app-bd-notification-card
+                icon="check"
+                [type]="resultHasWarnings ? 'warning' : 'generic'"
+                [header]="'Instances have been created' + (resultHasWarnings ? ' (with warnings)' : '.')"
+                [dismissable]="false"
               >
-              to start using the created instances.
+                <div>
+                  You may now head back to the
+                  <a
+                    [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
+                    >Instance Browser</a
+                  >
+                  to start using the created instances, or inspect detailed
+                  results below.
+                </div>
+              </app-bd-notification-card>
             </div>
             <div *ngIf="!resultIsSuccess">
-              Applying was not fully successful. You can find details about the
-              problem(s) encountered below. Note that some instance may still
-              have been created successfully. Please make sure to create the
-              remaining instances manually.
+              <app-bd-notification-card
+                type="error"
+                header="Problems occured."
+                [dismissable]="false"
+              >
+                Applying was not fully successful. You can find details about
+                the problem(s) encountered below. Note that some instance may
+                still have been created successfully. Please make sure to create
+                the remaining instances manually.
+              </app-bd-notification-card>
             </div>
             <app-bd-data-table
               [records]="result.results"
               [columns]="resultCols"
               [sortData]="null"
             ></app-bd-data-table>
+            <div fxLayout="row">
+              <app-bd-button
+                text="Finish"
+                color="primary"
+                [collapsed]="false"
+                [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
+              ></app-bd-button>
+            </div>
           </div>
         </mat-step>
       </mat-stepper>

@@ -45,7 +45,7 @@ describe('System Template Tests', () => {
 
       cy.get('[data-cy=step-system-variables]').within(() => {
         cy.fillFormInput('The Node Number', '2');
-        cy.fillFormInput('The node base name', 'master');
+        cy.fillFormInput('The Node Base Name', 'master');
 
         cy.get('button[data-cy^=Next]').should('be.enabled').click();
       });
@@ -70,7 +70,7 @@ describe('System Template Tests', () => {
     cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.get('[data-cy=step-done]').within(() => {
-        cy.contains('Applying is done').should('exist');
+        cy.contains('Instances have been created').should('exist');
         cy.get('tr:contains("Successfully created instance")').should(
           'have.length',
           4

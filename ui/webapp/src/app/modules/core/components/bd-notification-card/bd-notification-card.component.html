@@ -44,23 +44,23 @@
       <div class="bd-text-ellipsis">
         <strong>{{ header }}</strong>
       </div>
-      <div
-        fxFlex="1 0 auto"
-        fxLayout="row"
-        fxLayoutGap="5px"
-        *ngIf="dismissable"
-      >
-        <div fxFlex="1 0 auto"></div>
-        <app-bd-micro-icon-button
-          data-cy="notification-dismiss"
-          (click)="dismiss.emit(null)"
-          [disabled]="disabled"
-          >close</app-bd-micro-icon-button
-        >
-      </div>
     </div>
     <div class="bd-scroll-container" fxLayout="column">
       <ng-content></ng-content>
     </div>
+  </div>
+  <div
+    fxFlex="0 0 auto"
+    fxLayout="row"
+    fxLayoutAlign="center center"
+    class="local-dismiss-area"
+    *ngIf="dismissable"
+  >
+    <app-bd-micro-icon-button
+      data-cy="notification-dismiss"
+      (click)="dismiss.emit(null)"
+      [disabled]="disabled"
+      >close</app-bd-micro-icon-button
+    >
   </div>
 </div>

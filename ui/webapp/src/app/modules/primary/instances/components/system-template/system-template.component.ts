@@ -1,6 +1,7 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
+import { map, Observable } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
@@ -108,11 +109,14 @@ export class SystemTemplateComponent {
     colInstanceMsg,
   ];
   /* template */ resultIsSuccess: boolean;
+  /* template */ resultHasWarnings: boolean;
   /* template */ purposes: InstancePurpose[] = [
     InstancePurpose.PRODUCTIVE,
     InstancePurpose.DEVELOPMENT,
     InstancePurpose.TEST,
   ];
+
+  /* template */ systemNames$: Observable<string[]>;
 
   /* template */ onUploadResult: (status: UploadStatus) => string = (s) => {
     if (s.state === UploadState.FAILED) {
@@ -132,6 +136,10 @@ export class SystemTemplateComponent {
     public systems: SystemsService,
     public servers: ServersService
   ) {
+    this.systemNames$ = this.systems.systems$.pipe(
+      map((s) => s.map((x) => x.config.name))
+    );
+
     cfg.isCentral$.subscribe((b) => {
       this.isCentral = b;
       this.serverSelectionCompleted = !this.isCentral;
@@ -164,15 +172,19 @@ export class SystemTemplateComponent {
         this.onChooseTargetStep();
         break;
       case 1:
+        this.stepper.steps.get(0).editable = false; // no back.
         this.onSelectTemplateStep();
         break;
       case 2:
+        this.stepper.steps.get(1).editable = false; // no back.
         this.onSelectNameAndPurposeStep();
         break;
       case 3:
+        this.stepper.steps.get(2).editable = false; // no back.
         this.onQuerySystemTemplateVariablesStep();
         break;
       case 4:
+        this.stepper.steps.get(3).editable = false; // no back.
         this.onConfigureInstanceTemplatesStep();
         break;
       case 5:
@@ -205,6 +217,11 @@ export class SystemTemplateComponent {
           r.results
             .map((r) => r.status)
             .findIndex((s) => s === SystemTemplateInstanceStatus.ERROR) === -1;
+        this.resultHasWarnings =
+          r.results
+            .map((r) => r.status)
+            .findIndex((s) => s === SystemTemplateInstanceStatus.WARNING) !==
+          -1;
         this.stepper.next();
       });
     }

@@ -14,7 +14,7 @@ templateVariables:
     description: "The Node ID Base"
     defaultValue: 0
   - id: cell-base-name
-    name: "The node base name"
+    name: "The Node Base Name"
     defaultValue: "Node"
 
 instances:
