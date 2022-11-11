@@ -67,7 +67,7 @@ public class ObjectListOperation extends BHive.Operation<Set<ObjectId>> {
                         continue;
                     }
 
-                    throw e;
+                    throw new IllegalStateException("Cannot read manifest even though it exists", e);
                 }
             }
 
