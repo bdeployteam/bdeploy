@@ -444,7 +444,7 @@ public class SystemResourceImpl implements SystemResource {
             }
 
             InstanceNodeConfigurationDto node = result.stream().filter(n -> n.nodeName.equals(mappedToNode)).findFirst()
-                    .or(() -> {
+                    .orElseGet(() -> {
                         var r = new InstanceNodeConfigurationDto(mappedToNode);
 
                         r.nodeConfiguration = new InstanceNodeConfiguration();
@@ -455,8 +455,8 @@ public class SystemResourceImpl implements SystemResource {
                         r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, mappings, ttor));
 
                         result.add(r);
-                        return Optional.of(r);
-                    }).get();
+                        return r;
+                    });
 
             if (group.type == ApplicationType.CLIENT) {
                 createApplicationsForClientGroup(node, group, apps, ttor, appFilter, globalLookup);
