@@ -1,6 +1,7 @@
 package io.bdeploy.common.util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
@@ -50,7 +51,7 @@ public class JacksonHelper {
         if (type == MapperType.JSON) {
             return createObjectMapper((JsonFactory) null);
         } else {
-            return createObjectMapper(new YAMLFactory());
+            return createObjectMapper(new YAMLFactory()).setSerializationInclusion(Include.NON_NULL);
         }
     }
 
