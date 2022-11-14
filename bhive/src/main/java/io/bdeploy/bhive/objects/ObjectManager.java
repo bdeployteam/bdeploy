@@ -199,6 +199,10 @@ public class ObjectManager {
                         throw new IllegalStateException("Location must not exist or be empty: " + location);
                     }
                 }
+
+                // anyway we must delete the target location if it is empty, so we can rename the result to the
+                // target name after writing retryably.
+                PathHelper.deleteRecursive(location);
             }
 
             Path tempLocation = location.toAbsolutePath().getParent().resolve(location.getFileName().toString() + ".xtmp");
