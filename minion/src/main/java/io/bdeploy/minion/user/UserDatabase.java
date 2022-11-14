@@ -263,6 +263,7 @@ public class UserDatabase implements AuthService {
             return null;
         }
 
+        // find out if there is a responsible authenticator, and check it. in case this does not work
         for (Authenticator auth : authenticators) {
             boolean isResponsible = auth.isResponsible(u, settings);
             trace.log("Authenticator: " + auth.getClass().getSimpleName() + ", responsible: " + isResponsible);
@@ -274,6 +275,24 @@ public class UserDatabase implements AuthService {
                     logSuccess(trace, authenticated);
                     return authenticated;
                 }
+            }
+        }
+
+        // the associated authentication method did not work. to support "moving" users from one system to another,
+        // we will treat this as if the user was a fresh one.
+        trace.log("User known but unable to use existing authentication association. Trying all authenticators.");
+        for (Authenticator auth : authenticators) {
+            trace.log("Authenticator: " + auth.getClass().getSimpleName());
+            UserInfo newU = auth.getInitialInfo(user, pw.toCharArray(), settings, trace);
+            if (newU != null) {
+                // apply permissions from existing user to keep them intact.
+                newU.permissions = u.permissions;
+                newU.inactive = u.inactive;
+
+                newU.lastActiveLogin = System.currentTimeMillis();
+                internalUpdate(user, newU);
+                logSuccess(trace, newU);
+                return newU;
             }
         }
 
