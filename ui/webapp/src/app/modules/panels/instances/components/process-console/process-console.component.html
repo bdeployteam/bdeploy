@@ -38,7 +38,25 @@
       (userInput)="onUserInput($event)"
     ></app-bd-terminal>
     <app-bd-no-data *ngIf="!(available$ | async)">
-      Process details are unavailable.
+      <p>Process details are unavailable.</p>
+      <p
+        [style.text-align]="'center'"
+        *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
+      >
+        <strong
+          >{{ (instances.current$ | async)?.instanceConfiguration.name
+          }}</strong
+        >
+        is not synchronized with the controlling server
+        <strong
+          >{{ (instances.current$ | async).managedServer.hostName }}</strong
+        >
+      </p>
+      <p>Synchronize the instance to (re-)enable editing.</p>
+      <app-bd-server-sync-button
+        [collapsed]="false"
+        [server]="(instances.current$ | async).managedServer"
+      ></app-bd-server-sync-button>
     </app-bd-no-data>
   </app-bd-dialog-content>
 </app-bd-dialog>

@@ -4,6 +4,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
+import { ServersService } from './../../../../primary/servers/services/servers.service';
 
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 
@@ -26,8 +27,9 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
 
   constructor(
     private auth: AuthenticationService,
-    private instances: InstancesService,
+    public instances: InstancesService,
     public details: ProcessDetailsService,
+    public servers: ServersService,
     private ngZone: NgZone
   ) {}
 
