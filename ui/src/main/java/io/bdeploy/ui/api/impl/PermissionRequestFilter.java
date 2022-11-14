@@ -108,7 +108,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
                     continue;
                 }
 
-                String methodScope = getScopedValue(uriInfo, check.scope());
+                String methodScope = getScopedValue(uriInfo, check.scope(), check.scopeOptional());
                 if (methodScope != null) {
                     activeScope = methodScope;
                     scopes.add(methodScope);
@@ -118,7 +118,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
             }
 
             // Try to find the parameter holding the actual scoped value
-            String methodScope = getScopedValue(uriInfo, requiredPermission.scope());
+            String methodScope = getScopedValue(uriInfo, requiredPermission.scope(), requiredPermission.scopeOptional());
             if (methodScope != null) {
                 activeScope = methodScope;
                 scopes.add(methodScope);
@@ -163,7 +163,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
         }
 
         // check on a method which returns the actual permission.
-        String scopeValue = getScopedValue(uriInfo, perm.scope());
+        String scopeValue = getScopedValue(uriInfo, perm.scope(), perm.scopeOptional());
 
         MethodHandler handler = resourceMethod.getInvocable().getHandler();
         Method dynamicPermMethod;
@@ -212,6 +212,11 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
             }
 
             @Override
+            public boolean scopeOptional() {
+                return false;
+            }
+
+            @Override
             public Permission permission() {
                 return dynPerm;
             }
@@ -230,7 +235,7 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
      * @param scopeParam the name of the parameter to find
      * @return the actual value
      */
-    private String getScopedValue(ExtendedUriInfo uriInfo, String scopeParam) {
+    private String getScopedValue(ExtendedUriInfo uriInfo, String scopeParam, boolean optional) {
         if (scopeParam == null || scopeParam.isEmpty()) {
             return null;
         }
@@ -247,6 +252,10 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
         String queryValue = queryParams.getFirst(scopeParam);
         if (queryValue != null) {
             return queryValue;
+        }
+
+        if (optional) {
+            return null;
         }
 
         // We cannot find a parameter with the given name. Thats an error and the annotation must be fixed

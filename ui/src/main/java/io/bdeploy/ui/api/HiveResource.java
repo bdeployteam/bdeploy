@@ -15,7 +15,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 @Path("/hive")
-@RequiredPermission(permission = Permission.ADMIN)
+@RequiredPermission(permission = Permission.WRITE, scope = "hive", scopeOptional = true)
 public interface HiveResource {
 
     @GET
@@ -45,10 +45,12 @@ public interface HiveResource {
 
     @GET
     @Path("/fsck")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "hive")
     public Map<String, String> fsck(@ActivityScope @QueryParam("hive") String hive, @QueryParam("fix") boolean fix);
 
     @DELETE
     @Path("/delete")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "hive")
     public void delete(@ActivityScope @QueryParam("hive") String hive, @QueryParam("name") String manifestName,
             @QueryParam("tag") String manifestTag);
 

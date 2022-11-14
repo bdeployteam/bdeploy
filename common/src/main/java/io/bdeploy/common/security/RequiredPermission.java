@@ -36,6 +36,12 @@ public @interface RequiredPermission {
     public String scope() default "";
 
     /**
+     * Whether the scope is optional. This can be used when the annotation is placed on the interface,
+     * and there are methods with and without the scope parameter.
+     */
+    public boolean scopeOptional() default false;
+
+    /**
      * References a method on the resource which accepts the scope as string, and returns the required minimum permission on that
      * scope.
      * <p>
