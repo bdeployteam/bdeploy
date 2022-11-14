@@ -199,8 +199,8 @@ public class InstanceImportExportHelper {
             Manifest.Key appKey = app.application;
             ScopedManifestKey smk = ScopedManifestKey.parse(appKey);
 
-            if (smk == null || smk.getOperatingSystem() == minion.os) {
-                continue; // not OS dependent, or OS already fine.
+            if (minion == null || smk == null || smk.getOperatingSystem() == minion.os) {
+                continue; // minion not found, not OS dependent, or OS already fine.
             }
 
             ScopedManifestKey newKey = new ScopedManifestKey(smk.getName(), minion.os, smk.getTag());

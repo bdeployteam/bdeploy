@@ -3,10 +3,7 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  InstanceNodeConfigurationDto,
-  MinionDto,
-} from 'src/app/models/gen.dtos';
+import { InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -16,7 +13,6 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
 
 interface NodeRow {
   name: string;
-  node: MinionDto;
   config: InstanceNodeConfigurationDto;
 }
 
@@ -60,13 +56,24 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
             return;
           }
 
+          // nodes which are configured on the server.
           for (const key of Object.keys(nodes)) {
             const config = state.config.nodeDtos.find(
               (n) => n.nodeName === key
             );
-            const row = { name: key, node: nodes[key], config: config };
+            const row = { name: key, config: config };
             this.records.push(row);
             if (config) {
+              this.checked.push(row);
+            }
+          }
+
+          // nodes which are not (no longer) present.
+          for (const node of state.config.nodeDtos) {
+            const hasNode = !!nodes[node.nodeName];
+            if (!hasNode && node.nodeName !== CLIENT_NODE_NAME) {
+              const row = { name: node.nodeName, config: node };
+              this.records.push(row);
               this.checked.push(row);
             }
           }
