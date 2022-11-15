@@ -127,6 +127,9 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
                     needPrune = true;
                     doDeleteManifest(root.getHive(), Key.parse(action.what));
                     break;
+                case TRUNCATE_META_MANIFEST:
+                    log.warn("Truncating history not supported on node");
+                    break;
                 default:
                     throw new IllegalStateException("CleanupType " + action.type + " not supported here");
             }

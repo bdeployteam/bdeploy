@@ -40,8 +40,8 @@ public class MetaManifest<T> {
     private static final Logger log = LoggerFactory.getLogger(MetaManifest.class);
 
     public static final String META_PREFIX = "._meta/";
+    public static final int META_HIST_SIZE = 2;
     private static final String META_DEFTAG = "/._meta";
-    private static final int META_HIST_SIZE = 2;
 
     private final Key parent;
     private final String metaName;

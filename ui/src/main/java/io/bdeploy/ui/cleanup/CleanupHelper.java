@@ -393,13 +393,33 @@ public class CleanupHelper {
         log.info("Calculate stale meta-manifests in group {}", context.getInstanceGroupConfiguration().name);
 
         List<CleanupAction> actions = new ArrayList<>();
-        Set<Key> allImKeys = context.getHive().execute(new ManifestListOperation());
-        for (Key key : allImKeys) {
-            if (MetaManifest.isMetaManifest(key)
-                    && !MetaManifest.isParentAlive(key, context.getHive(), context.getAllManifests4deletion())) {
+        Set<Key> allMMKeys = context.getHive().execute(new ManifestListOperation().setManifestName(MetaManifest.META_PREFIX));
+        Set<String> toTruncateMetas = new TreeSet<>();
+        for (Key key : allMMKeys) {
+            // all meta manifest that are not attached anymore are fixed candidates to remove.
+            if (!MetaManifest.isParentAlive(key, context.getHive(), context.getAllManifests4deletion())) {
                 actions.add(new CleanupAction(CleanupType.DELETE_MANIFEST, key.toString(), "Delete manifest " + key));
+                continue;
+            }
+
+            if (toTruncateMetas.contains(key.getName())) {
+                // no need to check again, especially if it has more than META_HIST_SIZE tags.
+                continue;
+            }
+
+            // list all tags of the given meta-manifest, to see how many there are.
+            if (context.getHive().execute(new ManifestListOperation().setManifestName(key.getName()))
+                    .size() > MetaManifest.META_HIST_SIZE) {
+                // truncate the history of each meta manifest, so they don't amass.
+                toTruncateMetas.add(key.getName());
             }
         }
+
+        // this *should* only happen on central, but we still perform the check on each server.
+        toTruncateMetas.forEach(m -> {
+            actions.add(new CleanupAction(CleanupType.TRUNCATE_META_MANIFEST, m, "Truncate meta manifest " + m));
+        });
+
         return actions;
     }
 
