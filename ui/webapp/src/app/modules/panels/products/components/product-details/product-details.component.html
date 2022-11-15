@@ -26,7 +26,18 @@
           [columns]="instanceColumns"
         >
           <app-bd-no-data>
-            <div>This version is not used in any instance.</div>
+            <div
+              *ngIf="singleProduct.usedInLoading$ | async; else notUsed"
+              fxLayout="row"
+              fxLayoutAlign="center center"
+              fxLayoutGap="10px"
+            >
+              <mat-spinner [diameter]="24"></mat-spinner>
+              <div>Calculating...</div>
+            </div>
+            <ng-template #notUsed>
+              <div>This version is not used in any instance.</div>
+            </ng-template>
           </app-bd-no-data>
         </app-bd-data-display>
       </app-bd-expand-button>
@@ -117,6 +128,7 @@
         text="Delete"
         icon="delete"
         (click)="doDelete(prod)"
+        [loadingWhen$]="singleProduct.usedInLoading$"
         [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (singleProduct.usedInLoading$ | async) || !!(singleProduct.getUsedIn() | async).length"
       ></app-bd-button>
     </div>

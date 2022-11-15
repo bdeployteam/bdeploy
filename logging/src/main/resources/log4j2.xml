@@ -48,6 +48,11 @@
 		<Logger name="io.bdeploy.ui" additivity="false" level="info" >
 			<AppenderRef ref="GlobalRoute" />
 		</Logger>
+		
+		<!-- Cleanup -->
+		<Logger name="io.bdeploy.ui.cleanup" additivity="false" level="info" >
+			<AppenderRef ref="GlobalRoute" />
+		</Logger>
 
 		<!-- Poor man's profiling by observing activities in the logs -->
 		<Logger name="io.bdeploy.jersey.JerseySseActivity" additivity="false" level="info">

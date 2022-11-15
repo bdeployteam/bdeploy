@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { CoreModule } from '../../core/core.module';
 import { ProductBulkComponent } from './components/product-bulk/product-bulk.component';
@@ -21,6 +22,12 @@ import { ProductsRoutingModule } from './products-routing.module';
     ProductBulkComponent,
     ProductTransferRepoComponent,
   ],
-  imports: [CommonModule, CoreModule, ProductsRoutingModule, MatStepperModule],
+  imports: [
+    CommonModule,
+    CoreModule,
+    ProductsRoutingModule,
+    MatStepperModule,
+    MatProgressSpinnerModule,
+  ],
 })
 export class ProductsModule {}

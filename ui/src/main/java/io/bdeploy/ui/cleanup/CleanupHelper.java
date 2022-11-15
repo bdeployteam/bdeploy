@@ -90,6 +90,7 @@ public class CleanupHelper {
 
         // master cleanup (clean instance groups, skip otherwise (software repositories))
         for (String group : registry.getAll().keySet()) {
+            log.info("Checking group {}...", group);
             CleanupInstanceGroupContext context = new CleanupInstanceGroupContext(group, registry.get(group), vss);
             if (context.getInstanceGroupConfiguration() != null) {
                 CleanupGroup cleanupGroup = calculateInstanceGroup(context);
@@ -120,7 +121,7 @@ public class CleanupHelper {
                 }
             }
         }
-        log.info("Cleanup done.");
+        log.info("Cleanup calculation done.");
         return groups;
     }
 
@@ -210,6 +211,9 @@ public class CleanupHelper {
         InstanceManifest instanceManifest = InstanceManifest.of(context.getHive(), imKey);
 
         if (instanceManifest.getConfiguration().autoUninstall) {
+            log.debug("Auto-delete is requested, checking for old versions of {} in group {}", imKey,
+                    context.getInstanceGroupConfiguration().name);
+
             // find active tags from app status (what's up running)
             MasterRootResource root = ResourceProvider.getVersionedResource(
                     provider.getControllingMaster(context.getHive(), imKey), MasterRootResource.class, securityContext);
@@ -217,6 +221,8 @@ public class CleanupHelper {
             Map<String, ProcessStatusDto> appStatus = namedMaster.getStatus(instanceManifest.getConfiguration().id)
                     .getAppStatus();
             Set<String> activeTags = appStatus.values().stream().map(p -> p.instanceTag).collect(Collectors.toSet());
+
+            log.info("Applications are running from tags: {}", activeTags);
 
             // get instance state (what's configured and installed)
             InstanceStateRecord state = instanceManifest.getState(context.getHive()).read();
@@ -228,6 +234,8 @@ public class CleanupHelper {
                     .filter(im -> state.installedTags.contains(im.getTag())) //
                     .filter(im -> !activeTags.contains(im.getTag())) //
                     .collect(Collectors.toCollection(TreeSet::new));
+
+            log.info("Found old versions to uninstall: {}", result);
 
             // add to context for later cleanup steps...
             context.addInstanceVersions(imKey.getName(), result);
@@ -251,6 +259,8 @@ public class CleanupHelper {
                         "Uninstall instance version \"" + imConfig.name + "\", version \"" + key.getTag() + "\""));
             }
         } else {
+            log.debug("No auto-delete for {} configured, skipping", imKey);
+
             // keep all InstanceNodeManifests on minion
             SortedSet<Key> inmfs = context.getAllInstanceManifests().stream() //
                     .filter(im -> im.getName().equals(imKey.getName())) // 
@@ -279,17 +289,26 @@ public class CleanupHelper {
             List<Key> pInst = productsInUseMap.get(pName);
             Key oldestToKeep = pInst != null && !pInst.isEmpty() ? pInst.get(0) : pAll.get(pAll.size() - 1); // oldest Installed or newest
 
+            log.info("Oldest product to keep for product {}, older will be removed if possible: {}", pName, oldestToKeep);
+
             Comparator<Key> comparator = context.getComparator(pAll.get(0));
             for (Key pKey : pAll) {
                 // oldestToKeep can be a version that doesn't exist any more and therefore is not in pAll!
                 // note: comparison here works "name asc"/"tag desc"!
                 if (oldestToKeep != null && comparator.compare(oldestToKeep, pKey) >= 0) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Version is newer, will keep: {}", pKey);
+                    }
                     break;
                 }
 
                 // Check if the version isn't installed. Should never be true at this point but in cases where the product sort order isn't correct,
                 // this check will at least protect installed versions
                 if (pInst == null || !pInst.contains(pKey)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Version is older and not used, will remove: {}", pKey);
+                    }
+
                     // prepare actions for removing the product all together.
                     ProductManifest pm = ProductManifest.of(context.getHive(), pKey);
                     context.addManifest4deletion(pKey);
@@ -322,18 +341,30 @@ public class CleanupHelper {
         Map<String, Set<String>> installedTagsMap = context.getLatestInstanceManifests().stream()
                 .collect(Collectors.toMap(Key::getName,
                         imKey -> InstanceManifest.of(context.getHive(), imKey).getState(context.getHive()).read().installedTags));
+
         // remove all to-be-uninstalled versions
         context.getLatestInstanceManifests().stream()
                 .forEach(imKey -> Optional.ofNullable(context.getInstanceVersions4Uninstall(imKey.getName()))
                         .ifPresent(keys -> keys.stream().forEach(k -> installedTagsMap.get(imKey.getName()).remove(k.getTag()))));
+
+        if (log.isDebugEnabled()) {
+            for (Map.Entry<String, Set<String>> entry : installedTagsMap.entrySet()) {
+                log.debug("Considering remaining installed for instance {}: {}", entry.getKey(), entry.getValue());
+            }
+        }
+
         // create a map with the oldest installed instance version (instanceKeyName -> tag)
         Map<String, String> oldestTagMap = new HashMap<>();
         for (Map.Entry<String, Set<String>> entry : installedTagsMap.entrySet()) {
             Optional<String> min = entry.getValue().stream().min(intTagComparator);
             oldestTagMap.put(entry.getKey(), min.isPresent() ? min.get() : "0");
+
+            log.info("Considering as oldest protected instance version for {}: {}", entry.getKey(),
+                    oldestTagMap.get(entry.getKey()));
         }
+
         // create a map with the corresponding products (productKeyName -> set of productKeys)
-        return context.getAllInstanceManifests().stream()
+        Map<String, List<Key>> result = context.getAllInstanceManifests().stream()
                 .filter(imKey -> intTagComparator.compare(imKey.getTag(), oldestTagMap.get(imKey.getName())) >= 0)
                 .map(imKey -> InstanceManifest.of(context.getHive(), imKey).getConfiguration().product)
                 .collect(Collectors.toSet()).stream().collect(Collectors.groupingBy(Key::getName,
@@ -342,6 +373,14 @@ public class CleanupHelper {
                             return l;
                         })));
 
+        if (log.isDebugEnabled()) {
+            for (Map.Entry<String, List<Key>> entry : result.entrySet()) {
+                log.debug("Product versions kept alive by versions of {}, newer than oldest protected version: {}",
+                        entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     /**
