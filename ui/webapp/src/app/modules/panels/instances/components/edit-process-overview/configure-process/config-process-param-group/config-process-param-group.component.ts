@@ -560,7 +560,7 @@ export class ConfigProcessParamGroupComponent
     p.editorEnabled = editor.allowDirectEdit;
   }
 
-  /* template */ hasOptionals(g: ParameterGroup) {
+  /* template */ hasOptionals(g: ParameterGroup): boolean {
     if (g.isCustom) {
       return !!g.pairs.length;
     }
@@ -570,6 +570,16 @@ export class ConfigProcessParamGroupComponent
         .filter((p) => !!p.descriptor)
         .map((p) => p.descriptor.mandatory)
         .filter((m) => !m).length > 0
+    );
+  }
+
+  /* template */ hasMissingRequired(g: ParameterGroup): boolean {
+    if (g.isCustom) {
+      return false;
+    }
+    return (
+      g.pairs.filter((p) => p.descriptor?.mandatory && !p.value?.value)
+        ?.length > 0
     );
   }
 

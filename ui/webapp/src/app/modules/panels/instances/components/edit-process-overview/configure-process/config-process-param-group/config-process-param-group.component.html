@@ -60,7 +60,7 @@
               >Configured or optional parameters match search.</span
             >
             <span
-              *ngIf="groupForm.invalid && !panel.expanded"
+              *ngIf="(groupForm.invalid || hasMissingRequired(group)) && !panel.expanded"
               class="bd-warning-text"
               [style.font-size]="'smaller'"
               >Validation Failed</span
@@ -77,7 +77,7 @@
                 [text]="group.isSelectMode ? 'Confirm Selection' : 'Select Parameters'"
                 [icon]="group.isSelectMode ? 'check' : 'tune'"
                 tooltip="below"
-                [disabled]="!hasOptionals(group)"
+                [disabled]="!hasOptionals(group) && !hasMissingRequired(group) && !group.isSelectMode"
                 [isToggle]="true"
                 [(toggle)]="group.isSelectMode"
                 appClickStopPropagation
@@ -102,6 +102,15 @@
               <mat-icon>check</mat-icon> button to confirm.
             </span>
           </div>
+          <span
+            class="bd-hint-text bd-warning-text"
+            *ngIf="hasMissingRequired(group) && !group.isSelectMode"
+          >
+            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px">
+              Use the <mat-icon>tune</mat-icon> buttons to add missing mandatory
+              parameter(s).
+            </div>
+          </span>
           <div
             [style.padding-top.px]="20"
             gdColumns.sm="100%"
@@ -145,6 +154,7 @@
                     matRipple
                     [style.cursor]="'pointer'"
                     class="local-add-remove"
+                    [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value"
                     >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add'
                     }}</mat-icon
                   >
