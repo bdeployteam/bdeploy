@@ -73,6 +73,7 @@ import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlGroupConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ProcessControlDescriptor.ApplicationStartType;
@@ -926,8 +927,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         for (var applicationId : applicationIds) {
             // Find node where the application is running
             Optional<String> node = status.node2Applications.entrySet().stream()
-                    .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null).map(Entry::getKey)
-                    .findFirst();
+                    .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
+                            && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
+                    .map(Entry::getKey).findFirst();
 
             if (node.isEmpty()) {
                 continue; // ignore - not deployed.
