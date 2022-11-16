@@ -263,7 +263,16 @@ export class BdValueEditorComponent
     }
 
     if (reset) {
-      this.doRevert();
+      // we can only revert to the default value if it is a plain value here - otherwise we would "snap" back
+      // to link expression mode in case we're switching mode on number or boolean with an invalida value currently
+      // in the input field.
+      if (this.defaultValue.value && !this.defaultValue.linkExpression) {
+        this.doRevert();
+      } else {
+        // in case the default value is a link expression, we must resort to the empty value.
+        this.writeValue({ value: '', linkExpression: null });
+        this.fireChange(this.internalValue);
+      }
     } else {
       this.writeValue({ value: val, linkExpression: null });
       this.fireChange(this.internalValue);
