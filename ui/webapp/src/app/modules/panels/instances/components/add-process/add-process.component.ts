@@ -24,7 +24,6 @@ import {
   InstanceNodeConfigurationDto,
   MinionDto,
   OperatingSystem,
-  ProductDto,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import {
@@ -168,7 +167,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.readFromClipboard(node, prod, apps, nodeConfigs[node.nodeName]);
+      this.readFromClipboard(node, nodeConfigs[node.nodeName]);
 
       this.records$.next(recs);
       this.loading$.next(false);
@@ -180,17 +179,11 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   }
 
   /* template */ doPaste(cfg: ApplicationConfiguration) {
-    this.edit.node$.value.nodeConfiguration.applications.push(cfg);
-    this.instanceEdit
-      .getLastControlGroup(this.edit.node$.value.nodeConfiguration)
-      .processOrder.push(cfg.id);
-    this.instanceEdit.conceal(`Paste ${cfg.name}`);
+    this.edit.addProcessPaste(cfg);
   }
 
   private readFromClipboard(
     node: InstanceNodeConfigurationDto,
-    product: ProductDto,
-    apps: ApplicationDto[],
     minion: MinionDto
   ) {
     this.clipBoardCfg$.next(null);
@@ -255,42 +248,8 @@ export class AddProcessComponent implements OnInit, OnDestroy {
             return; // not an error, just not suitable to paste
           }
 
-          // Generate unique identifier
-          this.groups.newId().subscribe((id) => {
-            appConfig.application.tag = product.key.tag;
-            appConfig.id = id;
-            appConfig.uid = id; // compat
-
-            // no need to update mandatory (etc.) parameters here. the normal validation
-            // will trigger according errors which need to be manually fixed by the user.
-
-            // Update parameters for pasted app to avoid overwriting existing values.
-            // there is no need to align global parameters in other apps, since no global
-            // should have a value different from the ones in the instances already after
-            // this alignment code.
-
-            // TODO: REMOVE this code completely once global is removed. UNTIL then however
-            // we keep the logic as it is now, as this will correctly apply a potentially
-            // migrated value to those parameters on paste.
-            const globals = app.descriptor.startCommand.parameters.filter(
-              (p) => p.global
-            );
-            for (const global of globals) {
-              const existing = this.edit.getGlobalParameter(global.id);
-              const own = appConfig.start.parameters.find(
-                (p) => p.id === global.id
-              );
-              if (existing && own) {
-                own.value = existing.value;
-                own.preRendered = this.edit.preRenderParameter(
-                  global,
-                  own.value
-                );
-              }
-            }
-
-            this.clipBoardCfg$.next(appConfig);
-          });
+          // raw, unprocessed.
+          this.clipBoardCfg$.next(appConfig);
         },
         error: (err) => console.log(`Error when reading clipboard: ${err}`),
       });

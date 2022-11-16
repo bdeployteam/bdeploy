@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { first, map, skipWhile, tap } from 'rxjs/operators';
@@ -26,6 +27,10 @@ import {
   getPreRenderable,
   getRenderPreview,
 } from 'src/app/modules/core/utils/linked-values.utils';
+import {
+  getAppKeyName,
+  getAppOs,
+} from 'src/app/modules/core/utils/manifest.utils';
 import { performTemplateVariableSubst } from 'src/app/modules/core/utils/object.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -49,7 +54,8 @@ export class ProcessEditService {
     private products: ProductsService,
     private areas: NavAreasService,
     private groups: GroupsService,
-    private systems: SystemsService
+    private systems: SystemsService,
+    private snackbar: MatSnackBar
   ) {
     combineLatest([
       this.areas.panelRoute$,
@@ -123,6 +129,91 @@ export class ProcessEditService {
         grp.processOrder.splice(idx, 1);
       }
     }
+  }
+
+  public addProcessPaste(appConfig: ApplicationConfiguration) {
+    // need to find the proper application (linux vs. windows).
+    const state = this.edit.nodes$.value[this.node$.value.nodeName];
+    const appOs = getAppOs(appConfig.application);
+    if (appOs && state.os !== appOs) {
+      // different OS with OS bound application - need to find a more suitable one :)
+      const keyName = getAppKeyName(appConfig.application);
+      const replacement = this.applications$.value?.find(
+        (a) => getAppKeyName(a.key) === keyName && getAppOs(a.key) === state.os
+      );
+
+      if (!replacement) {
+        // cannot find suitable application, cannot continue;
+        this.snackbar.open(
+          'Cannot find suitable application while pasting.',
+          'DISMISS'
+        );
+        return;
+      }
+
+      appConfig.application = replacement.key;
+    }
+
+    const app = this.applications$.value.find(
+      (a) => appConfig.application.name === a.key.name
+    );
+
+    // Generate unique identifier
+    this.groups.newId().subscribe((id) => {
+      appConfig.application.tag = this.product$.value.key.tag;
+      appConfig.id = id;
+      appConfig.uid = id; // compat
+
+      // no need to update mandatory (etc.) parameters here. the normal validation
+      // will trigger according errors which need to be manually fixed by the user.
+
+      // Update parameters for pasted app to avoid overwriting existing values.
+      // there is no need to align global parameters in other apps, since no global
+      // should have a value different from the ones in the instances already after
+      // this alignment code.
+      const globals = app.descriptor.startCommand.parameters.filter(
+        (p) => p.global
+      );
+      for (const global of globals) {
+        const existing = this.getGlobalParameter(global.id);
+        const own = appConfig.start.parameters.find((p) => p.id === global.id);
+        if (existing && own) {
+          own.value = existing.value;
+        }
+      }
+
+      const fixed = app.descriptor.startCommand.parameters.filter(
+        (p) => p.fixed
+      );
+      for (const f of fixed) {
+        const own = appConfig.start.parameters.find((p) => p.id === f.id);
+        if (own) {
+          own.value = f.defaultValue;
+        }
+      }
+
+      // always pre-render all parameters.
+      for (const param of app.descriptor.startCommand.parameters) {
+        const own = appConfig.start.parameters.find((p) => p.id === param.id);
+        if (own) {
+          own.preRendered = this.preRenderParameter(param, own.value);
+        }
+      }
+
+      // always fully re-calculate stop command.
+      appConfig.stop = this.calculateInitialCommand(
+        app.descriptor.stopCommand,
+        [],
+        {},
+        []
+      );
+
+      this.node$.value.nodeConfiguration.applications.push(appConfig);
+      this.edit
+        .getLastControlGroup(this.node$.value.nodeConfiguration)
+        .processOrder.push(appConfig.id);
+      this.edit.conceal(`Paste ${appConfig.name}`);
+    });
   }
 
   public addProcess(
