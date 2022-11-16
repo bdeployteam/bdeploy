@@ -316,6 +316,9 @@ public class InstanceNodeController {
             InstanceNodeController inc = new InstanceNodeController(source, root, inmf, new TaskSynchronizer());
 
             if (inc.isInstalled()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Instance locally installed, keeping alive: {}", key);
+                }
                 toKeep.add(inc);
             }
         }
@@ -361,6 +364,10 @@ public class InstanceNodeController {
             });
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("Pool cleanup determined {} required pool keys from dependencies", requiredKeys.size());
+        }
+
         // clean global pool
         Path poolDir = root.resolve(SpecialDirectory.MANIFEST_POOL.getDirName());
         cleanPoolDir(toRemove, requiredKeys, poolDir);
@@ -382,6 +389,10 @@ public class InstanceNodeController {
                 if (!requiredKeys.contains(pooled.getFileName().toString())) {
                     toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, pooled.toAbsolutePath().toString(),
                             "Remove stale pooled application"));
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Removing no longer required pooled artifact: {}", pooled);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -398,6 +409,7 @@ public class InstanceNodeController {
         if (!Files.isDirectory(binDir)) {
             toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, dir.toAbsolutePath().toString(),
                     "Remove spurious directory (no binary directory found)"));
+            log.warn("Spurious non-deployment directory found, will be removed: {}", dir);
             return;
         }
 
@@ -412,6 +424,10 @@ public class InstanceNodeController {
                     // delete AT LEAST this bin directory.
                     toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, tagPath.toAbsolutePath().toString(),
                             "Delete stale binary folder"));
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Removing bin folder where no installed tag was found: {}", tagPath);
+                    }
                 }
             }
         }
@@ -421,6 +437,10 @@ public class InstanceNodeController {
             // logs, etc.
             toRemove.add(new CleanupAction(CleanupType.DELETE_FOLDER, dir.toAbsolutePath().toString(),
                     "Delete instance data (no more instance versions available)"));
+
+            if (log.isDebugEnabled()) {
+                log.debug("No installed tags remain, removing {}", dir);
+            }
         }
     }
 

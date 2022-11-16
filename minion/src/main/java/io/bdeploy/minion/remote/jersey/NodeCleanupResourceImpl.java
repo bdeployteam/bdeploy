@@ -71,6 +71,10 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
             allRefs.add(keep);
             allRefs.addAll(refs.values());
 
+            if (log.isDebugEnabled()) {
+                log.debug("Keeping {} alive, refs implictly kept alive: {}", keep, refs);
+            }
+
             // if the manifest is an InstanceNodeManifest, check all attached (indirectly referenced applications).
             if (hive.execute(new ManifestLoadOperation().setManifest(keep)).getLabels()
                     .containsKey(InstanceNodeManifest.INSTANCE_NODE_LABEL)) {
@@ -88,7 +92,13 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
                         ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
 
                         // The dependencies must be local. They have been pushed here together with the application.
-                        allRefs.addAll(localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem()));
+                        var deps = localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem());
+                        allRefs.addAll(deps);
+
+                        if (log.isTraceEnabled()) {
+                            log.trace(" - Additionally keeping application {} alive with dependencies: {}", app.application,
+                                    deps);
+                        }
                     } catch (Exception e) {
                         log.warn("Cannot read application {} while protecting {}", app.application, keep, e);
                     }
@@ -102,6 +112,10 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
                 continue;
             }
             notExecuted.add(new CleanupAction(CleanupType.DELETE_MANIFEST, clean.toString(), "Delete manifest " + clean));
+
+            if (log.isTraceEnabled()) {
+                log.trace("Cleaning manifest {}, not kept alive through anchors", clean);
+            }
         }
 
         // after manifests, cleanup dist (deployment dir, temp, download, ...).
