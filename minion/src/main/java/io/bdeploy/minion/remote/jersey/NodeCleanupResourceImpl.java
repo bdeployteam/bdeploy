@@ -72,7 +72,7 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
             allRefs.addAll(refs.values());
 
             if (log.isDebugEnabled()) {
-                log.debug("Keeping {} alive, refs implictly kept alive: {}", keep, refs);
+                log.debug("Keeping {} alive, refs implicitly kept alive: {}", keep, refs);
             }
 
             // if the manifest is an InstanceNodeManifest, check all attached (indirectly referenced applications).
