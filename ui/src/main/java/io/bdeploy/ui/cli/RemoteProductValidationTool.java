@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,18 +28,17 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
-import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
-import io.bdeploy.ui.cli.RemoteProductValidationTool.ProductValidationDescriptorConfig;
+import io.bdeploy.ui.cli.RemoteProductValidationTool.RemoteProductValidationConfig;
 import io.bdeploy.ui.dto.ProductValidationDescriptor;
 import io.bdeploy.ui.dto.ProductValidationResponseDto;
+import io.bdeploy.ui.dto.ProductValidationResponseDto.ProductValidationIssueDto;
+import io.bdeploy.ui.dto.ProductValidationResponseDto.ProductValidationSeverity;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
@@ -51,39 +48,58 @@ import jakarta.ws.rs.core.Response.Status.Family;
 @Help("Validate product config")
 @ToolCategory(TextUIResources.UI_CATEGORY)
 @CliName("remote-product-validation")
-public class RemoteProductValidationTool extends RemoteServiceTool<ProductValidationDescriptorConfig> {
+public class RemoteProductValidationTool extends RemoteServiceTool<RemoteProductValidationConfig> {
 
-    public @interface ProductValidationDescriptorConfig {
+    public @interface RemoteProductValidationConfig {
 
         @Help("Descriptor file path")
-        String descriptorFile();
+        String descriptor();
     }
 
     public RemoteProductValidationTool() {
-        super(ProductValidationDescriptorConfig.class);
+        super(RemoteProductValidationConfig.class);
     }
 
     @Override
-    protected RenderableResult run(ProductValidationDescriptorConfig config, RemoteService remote) {
-        helpAndFailIfMissing(config.descriptorFile(), "--descriptorFile path missing");
+    protected RenderableResult run(RemoteProductValidationConfig config, RemoteService remote) {
+        helpAndFailIfMissing(config.descriptor(), "--descriptor path missing");
 
-        var descriptor = Paths.get(config.descriptorFile());
+        var descriptor = Paths.get(config.descriptor());
         if (!Files.exists(descriptor)) {
             throw new IllegalStateException("File " + descriptor + " does not exist");
         }
 
-        var yaml = parseDescriptorFile(descriptor);
+        var result = validate(descriptor, remote);
 
-        var zipFile = zipFiles(descriptor.getParent(), yaml);
+        if (result.issues == null || result.issues.isEmpty()) {
+            return createSuccess();
+        }
+
+        var table = createDataTable().column("ID", 4).column("Severity", 8).column("Message", 110);
+        for (int i = 0; i < result.issues.size(); ++i) {
+            ProductValidationIssueDto issue = result.issues.get(i);
+            table.row().cell(i).cell(issue.severity.name()).cell(issue.message).build();
+
+            if (issue.severity == ProductValidationSeverity.ERROR) {
+                table.setExitCode(1);
+            }
+        }
+        return table;
+    }
+
+    // FIXME: move code from here on to helper in API as much as possible.
+    public ProductValidationResponseDto validate(Path descriptor, RemoteService remote) {
+        ProductValidationDescriptor desc = parseDescriptor(descriptor);
+        Path zipFile = zipFiles(descriptor.toAbsolutePath().getParent(), desc);
 
         try {
-            return validate(remote, zipFile);
+            return validateRemote(remote, zipFile);
         } finally {
             PathHelper.deleteRecursive(zipFile);
         }
     }
 
-    private ProductValidationDescriptor parseDescriptorFile(Path descriptor) {
+    private ProductValidationDescriptor parseDescriptor(Path descriptor) {
         try (InputStream is = Files.newInputStream(descriptor)) {
             return StorageHelper.fromYamlStream(is, ProductValidationDescriptor.class);
         } catch (Exception e) {
@@ -94,18 +110,18 @@ public class RemoteProductValidationTool extends RemoteServiceTool<ProductValida
     private Path zipFiles(Path dir, ProductValidationDescriptor originalDescriptor) {
         Path zipFile;
         try {
-            zipFile = Files.createTempFile("cli_validation_", ".zip");
+            zipFile = Files.createTempFile("validation_", ".zip");
         } catch (IOException e) {
             throw new IllegalStateException("Filed to create temp file", e);
         }
-        var zippedDescriptor = new ProductValidationDescriptor();
-        Function<String, Path> toPath = (filename) -> dir.resolve(filename).toAbsolutePath();
 
-        var dirEntries = new HashSet<String>();
+        ProductValidationDescriptor zippedDescriptor = new ProductValidationDescriptor();
+        Function<String, Path> toPath = (filename) -> dir.resolve(filename).toAbsolutePath();
+        Set<String> dirEntries = new HashSet<>();
 
         try (OutputStream fos = Files.newOutputStream(zipFile); ZipOutputStream zos = new ZipOutputStream(fos)) {
             // zip product-info.yaml
-            var productSrcFile = toPath.apply(originalDescriptor.product);
+            Path productSrcFile = toPath.apply(originalDescriptor.product);
             zippedDescriptor.product = copyIntoZip(productSrcFile, zos, dirEntries);
 
             // zip references from product-info.yaml
@@ -115,17 +131,15 @@ public class RemoteProductValidationTool extends RemoteServiceTool<ProductValida
             Map<String, String> applications = originalDescriptor.applications == null ? Collections.emptyMap()
                     : originalDescriptor.applications;
             for (String application : applications.keySet()) {
-                var applicationSrcFile = toPath.apply(applications.get(application));
-                var applicationTargetFilename = UUID.randomUUID().toString() + "_" + applicationSrcFile.getFileName();
-                var applicationTargetFile = copyIntoZip(applicationSrcFile, applicationTargetFilename, zos, dirEntries);
+                Path applicationSrcFile = toPath.apply(applications.get(application));
+                String applicationTargetFilename = application + "_" + applicationSrcFile.getFileName();
+                String applicationTargetFile = copyIntoZip(applicationSrcFile, applicationTargetFilename, zos, dirEntries);
                 zippedDescriptor.applications.put(application, applicationTargetFile);
             }
 
-            String descriptorStr = JacksonHelper.createObjectMapper(MapperType.YAML).writeValueAsString(zippedDescriptor);
-
-            InputStream descriptorInputStream = new ByteArrayInputStream(descriptorStr.getBytes(Charset.forName("UTF-8")));
-
-            copyIntoZip(descriptorInputStream, ProductValidationDescriptor.FILE_NAME, zos, dirEntries);
+            try (InputStream is = new ByteArrayInputStream(StorageHelper.toRawYamlBytes(zippedDescriptor))) {
+                copyIntoZip(is, ProductValidationDescriptor.FILE_NAME, zos, dirEntries);
+            }
 
             return zipFile;
         } catch (IOException e) {
@@ -199,7 +213,7 @@ public class RemoteProductValidationTool extends RemoteServiceTool<ProductValida
         return targetFilename;
     }
 
-    private DataResult validate(RemoteService svc, Path zipFile) {
+    private ProductValidationResponseDto validateRemote(RemoteService svc, Path zipFile) {
         if (!Files.isRegularFile(zipFile)) {
             helpAndFail("zip file is not a regular file");
         }
@@ -215,14 +229,11 @@ public class RemoteProductValidationTool extends RemoteServiceTool<ProductValida
                         .path("/product-validation");
                 Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
                 if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                    return createResultWithErrorMessage("Failed to validate. " + response.getStatusInfo().getReasonPhrase());
+                    return new ProductValidationResponseDto(Collections.singletonList(new ProductValidationIssueDto(
+                            ProductValidationSeverity.ERROR, "Cannot validate: " + response.getStatusInfo().getReasonPhrase())));
                 }
                 ProductValidationResponseDto validationResult = response.readEntity(ProductValidationResponseDto.class);
-                if (validationResult.errors.isEmpty()) {
-                    return createResultWithSuccessMessage("Product is valid");
-                } else {
-                    return createResultWithErrorMessage("Product is invalid. " + String.join(" ", validationResult.errors));
-                }
+                return validationResult;
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot upload zip file", e);

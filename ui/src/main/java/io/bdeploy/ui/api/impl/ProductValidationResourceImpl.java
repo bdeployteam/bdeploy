@@ -18,6 +18,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
@@ -28,6 +29,8 @@ import io.bdeploy.ui.api.ProductValidationResource;
 import io.bdeploy.ui.dto.ProductValidationConfigDescriptor;
 import io.bdeploy.ui.dto.ProductValidationDescriptor;
 import io.bdeploy.ui.dto.ProductValidationResponseDto;
+import io.bdeploy.ui.dto.ProductValidationResponseDto.ProductValidationIssueDto;
+import io.bdeploy.ui.dto.ProductValidationResponseDto.ProductValidationSeverity;
 import jakarta.inject.Inject;
 
 public class ProductValidationResourceImpl implements ProductValidationResource {
@@ -42,31 +45,76 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     }
 
     private ProductValidationResponseDto validate(ProductValidationConfigDescriptor config) {
-        List<String> errors = new ArrayList<>();
+        List<ProductValidationIssueDto> issues = new ArrayList<>();
         for (Map.Entry<String, ApplicationDescriptor> appEntry : config.applications.entrySet()) {
             var app = appEntry.getKey();
             var applicationDescriptor = appEntry.getValue();
             if (applicationDescriptor.startCommand != null) {
-                var startIds = new HashSet<String>();
-                for (ParameterDescriptor param : applicationDescriptor.startCommand.parameters) {
-                    if (startIds.contains(param.id)) {
-                        errors.add(app + " has start command parameters with duplicate id " + param.id);
-                    }
-                    startIds.add(param.id);
-                }
+                validateCommand(issues, app, applicationDescriptor.startCommand, config.parameterTemplates);
             }
 
             if (applicationDescriptor.stopCommand != null) {
-                var stopIds = new HashSet<String>();
-                for (ParameterDescriptor param : applicationDescriptor.stopCommand.parameters) {
-                    if (stopIds.contains(param.id)) {
-                        errors.add(app + " has stop command parameters with duplicate id " + param.id);
-                    }
-                    stopIds.add(param.id);
-                }
+                validateCommand(issues, app, applicationDescriptor.stopCommand, config.parameterTemplates);
             }
         }
-        return new ProductValidationResponseDto(errors);
+        return new ProductValidationResponseDto(issues);
+    }
+
+    private void validateCommand(List<ProductValidationIssueDto> issues, String app, ExecutableDescriptor command,
+            List<ParameterTemplateDescriptor> parameterTemplates) {
+
+        // expand and verify parameter templates
+        var expanded = new ArrayList<ParameterDescriptor>();
+        for (var param : command.parameters) {
+            if (param.id == null) {
+                if (param.template == null) {
+                    issues.add(new ProductValidationIssueDto(ProductValidationSeverity.WARNING,
+                            app + " has parameter without id or template"));
+                    continue;
+                }
+
+                expanded.addAll(expandTemplateRecursive(app, param, parameterTemplates, issues));
+            } else {
+                expanded.add(param);
+            }
+        }
+
+        // now check all parameters.
+        var startIds = new HashSet<String>();
+        for (var param : expanded) {
+            if (startIds.contains(param.id)) {
+                issues.add(new ProductValidationIssueDto(ProductValidationSeverity.ERROR,
+                        app + " has parameters with duplicate id " + param.id));
+            }
+            startIds.add(param.id);
+        }
+    }
+
+    private List<ParameterDescriptor> expandTemplateRecursive(String app, ParameterDescriptor param,
+            List<ParameterTemplateDescriptor> parameterTemplates, List<ProductValidationIssueDto> issues) {
+        List<ParameterTemplateDescriptor> templates = parameterTemplates.stream().filter(t -> t.id.equals(param.template))
+                .toList();
+        if (templates.size() != 1) {
+            issues.add(new ProductValidationIssueDto(ProductValidationSeverity.ERROR, app + " references parameter template "
+                    + param.template + " which was found " + templates.size() + " times"));
+            return Collections.emptyList();
+        }
+
+        var expanded = new ArrayList<ParameterDescriptor>();
+        for (var p : templates.get(0).parameters) {
+            if (p.id == null) {
+                if (p.template != null) {
+                    expanded.addAll(expandTemplateRecursive(app, p, parameterTemplates, issues));
+                } else {
+                    issues.add(new ProductValidationIssueDto(ProductValidationSeverity.WARNING,
+                            "parameter template " + param.template + " has parameter without id or template"));
+                }
+            } else {
+                expanded.add(p);
+            }
+        }
+
+        return expanded;
     }
 
     private ProductValidationConfigDescriptor parse(InputStream inputStream) {
@@ -88,36 +136,37 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private ProductValidationConfigDescriptor parse(Path dir) {
         ProductValidationConfigDescriptor config = new ProductValidationConfigDescriptor();
 
-        config.productValidation = parse(dir.resolve(ProductValidationDescriptor.FILE_NAME), ProductValidationDescriptor.class);
-        config.product = parse(dir.resolve(config.productValidation.product), ProductDescriptor.class);
-        config.applicationTemplates = parse(dir, config.product.applicationTemplates, ApplicationTemplateDescriptor.class);
-        config.instanceTemplates = parse(dir, config.product.instanceTemplates, InstanceTemplateDescriptor.class);
-        config.instanceVariableTemplates = parse(dir, config.product.instanceVariableTemplates,
+        config.productValidation = parse(dir, dir.resolve(ProductValidationDescriptor.FILE_NAME),
+                ProductValidationDescriptor.class);
+        config.product = parse(dir, dir.resolve(config.productValidation.product), ProductDescriptor.class);
+        config.applicationTemplates = parse(dir, dir, config.product.applicationTemplates, ApplicationTemplateDescriptor.class);
+        config.instanceTemplates = parse(dir, dir, config.product.instanceTemplates, InstanceTemplateDescriptor.class);
+        config.instanceVariableTemplates = parse(dir, dir, config.product.instanceVariableTemplates,
                 InstanceVariableTemplateDescriptor.class);
-        config.parameterTemplates = parse(dir, config.product.parameterTemplates, ParameterTemplateDescriptor.class);
+        config.parameterTemplates = parse(dir, dir, config.product.parameterTemplates, ParameterTemplateDescriptor.class);
 
         config.applications = new HashMap<>();
         var apps = Optional.ofNullable(config.productValidation.applications).orElseGet(Collections::emptyMap);
         for (String app : apps.keySet()) {
             Path appPath = dir.resolve(apps.get(app));
-            var appDescriptor = parse(appPath, ApplicationDescriptor.class);
+            var appDescriptor = parse(dir, appPath, ApplicationDescriptor.class);
             config.applications.put(app, appDescriptor);
         }
 
         return config;
     }
 
-    private <T> List<T> parse(Path dir, List<String> filenames, Class<T> klass) {
+    private <T> List<T> parse(Path root, Path dir, List<String> filenames, Class<T> klass) {
         return filenames == null ? Collections.emptyList()
-                : filenames.stream().map(filename -> dir.resolve(filename)).map(path -> parse(path, klass))
+                : filenames.stream().map(filename -> dir.resolve(filename)).map(path -> parse(root, path, klass))
                         .collect(Collectors.toList());
     }
 
-    private <T> T parse(Path path, Class<T> klass) {
+    private <T> T parse(Path root, Path path, Class<T> klass) {
         try (InputStream is = Files.newInputStream(path)) {
             return StorageHelper.fromYamlStream(is, klass);
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot parse " + path, e);
+            throw new IllegalStateException("Cannot parse " + root.relativize(path), e);
         }
     }
 
