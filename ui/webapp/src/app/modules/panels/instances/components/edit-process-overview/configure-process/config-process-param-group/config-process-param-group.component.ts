@@ -578,8 +578,16 @@ export class ConfigProcessParamGroupComponent
       return false;
     }
     return (
-      g.pairs.filter((p) => p.descriptor?.mandatory && !p.value?.value)
-        ?.length > 0
+      g.pairs.filter(
+        (p) =>
+          p.descriptor?.mandatory &&
+          !p.value?.value &&
+          this.edit.meetsConditionOnGiven(
+            p.descriptor,
+            this.app.descriptor.startCommand,
+            this.process
+          )
+      )?.length > 0
     );
   }
 

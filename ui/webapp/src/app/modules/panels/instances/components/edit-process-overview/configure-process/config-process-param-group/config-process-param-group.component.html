@@ -104,7 +104,7 @@
           </div>
           <span
             class="bd-hint-text bd-warning-text"
-            *ngIf="hasMissingRequired(group) && !group.isSelectMode"
+            *ngIf="hasMissingRequired(group) && !group.isSelectMode && groupForm.valid"
           >
             <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px">
               Use the <mat-icon>tune</mat-icon> buttons to add missing mandatory
@@ -154,7 +154,7 @@
                     matRipple
                     [style.cursor]="'pointer'"
                     class="local-add-remove"
-                    [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value"
+                    [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value && edit.meetsConditionOnGiven(p.descriptor, app.descriptor.startCommand, process)"
                     >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add'
                     }}</mat-icon
                   >

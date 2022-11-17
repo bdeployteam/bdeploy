@@ -469,7 +469,7 @@ export class ProcessEditService {
     );
   }
 
-  private meetsConditionOnGiven(
+  public meetsConditionOnGiven(
     param: ParameterDescriptor,
     descriptor: ExecutableDescriptor,
     process: ApplicationConfiguration
