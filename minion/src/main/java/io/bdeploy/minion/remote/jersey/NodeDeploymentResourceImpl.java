@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -231,7 +232,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         Path dataRoot = inc.getDeploymentPathProvider().get(SpecialDirectory.DATA);
 
-        try (Stream<Path> paths = Files.walk(dataRoot)) {
+        try (Stream<Path> paths = Files.walk(dataRoot, FileVisitOption.FOLLOW_LINKS)) {
             paths.filter(Files::isRegularFile).forEach(f -> {
                 RemoteDirectoryEntry entry = new RemoteDirectoryEntry();
                 File asFile = f.toFile();

@@ -156,3 +156,7 @@ Data Files can also be manually added and edited online. Use the [ **Add File** 
 :::{align=center}
 ![Edit Data File](/images/Doc_DataFilesEdit.png){width=480}
 :::
+
+!!!warning Caution
+It is possible to put symbolic links inside the data directory, to access directories **not** directly within the data directory through the **BDeploy** UI. This possibility must be used with care. It is the responsibility of the user to assure that manually created symlinks will be safe to read _and_ write by **BDeploy** and/or its controlled applications.
+!!!
