@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
@@ -62,7 +62,7 @@ export class DataFileEditorComponent implements DirtyableDialog, OnDestroy {
                   .getContentChunk(dir, f, 0, 0) // no limit, load all
                   .pipe(finalize(() => this.loading$.next(false)))
                   .subscribe((chunk) => {
-                    this.binary$.next(chunk.binary);
+                    this.binary$.next(chunk?.binary);
                     this.content = chunk?.content;
                     this.originalContent = chunk?.content;
                   });
@@ -104,5 +104,11 @@ export class DataFileEditorComponent implements DirtyableDialog, OnDestroy {
         this.originalContent = '';
       })
     );
+  }
+
+  @HostListener('window:keydown.control.s', ['$event'])
+  public onCtrlS(event: KeyboardEvent) {
+    this.onSave();
+    event.preventDefault();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -41,5 +41,11 @@ export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
 
   /* template */ onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
+  }
+
+  @HostListener('window:keydown.control.s', ['$event'])
+  public onCtrlS(event: KeyboardEvent) {
+    this.onSave();
+    event.preventDefault();
   }
 }

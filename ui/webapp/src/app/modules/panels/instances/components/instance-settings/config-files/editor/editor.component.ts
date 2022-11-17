@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
@@ -99,5 +99,11 @@ export class EditorComponent implements DirtyableDialog, OnDestroy {
         this.originalContent = '';
       })
     );
+  }
+
+  @HostListener('window:keydown.control.s', ['$event'])
+  public onCtrlS(event: KeyboardEvent) {
+    this.onSave();
+    event.preventDefault();
   }
 }
