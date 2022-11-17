@@ -14,6 +14,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
+import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi;
+import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidationSeverity;
+import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.ZipHelper;
@@ -27,10 +31,6 @@ import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductValidationResource;
 import io.bdeploy.ui.dto.ProductValidationConfigDescriptor;
-import io.bdeploy.ui.dto.ProductValidationDescriptor;
-import io.bdeploy.ui.dto.ProductValidationResponseDto;
-import io.bdeploy.ui.dto.ProductValidationResponseDto.ProductValidationIssueDto;
-import io.bdeploy.ui.dto.ProductValidationResponseDto.ProductValidationSeverity;
 import jakarta.inject.Inject;
 
 public class ProductValidationResourceImpl implements ProductValidationResource {
@@ -39,13 +39,13 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private Minion root;
 
     @Override
-    public ProductValidationResponseDto validate(InputStream inputStream) {
+    public ProductValidationResponseApi validate(InputStream inputStream) {
         ProductValidationConfigDescriptor config = parse(inputStream);
         return validate(config);
     }
 
-    private ProductValidationResponseDto validate(ProductValidationConfigDescriptor config) {
-        List<ProductValidationIssueDto> issues = new ArrayList<>();
+    private ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
+        List<ProductValidationIssueApi> issues = new ArrayList<>();
         for (Map.Entry<String, ApplicationDescriptor> appEntry : config.applications.entrySet()) {
             var app = appEntry.getKey();
             var applicationDescriptor = appEntry.getValue();
@@ -57,10 +57,10 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                 validateCommand(issues, app, applicationDescriptor.stopCommand, config.parameterTemplates);
             }
         }
-        return new ProductValidationResponseDto(issues);
+        return new ProductValidationResponseApi(issues);
     }
 
-    private void validateCommand(List<ProductValidationIssueDto> issues, String app, ExecutableDescriptor command,
+    private void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,
             List<ParameterTemplateDescriptor> parameterTemplates) {
 
         // expand and verify parameter templates
@@ -68,7 +68,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         for (var param : command.parameters) {
             if (param.id == null) {
                 if (param.template == null) {
-                    issues.add(new ProductValidationIssueDto(ProductValidationSeverity.WARNING,
+                    issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
                             app + " has parameter without id or template"));
                     continue;
                 }
@@ -83,7 +83,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         var startIds = new HashSet<String>();
         for (var param : expanded) {
             if (startIds.contains(param.id)) {
-                issues.add(new ProductValidationIssueDto(ProductValidationSeverity.ERROR,
+                issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                         app + " has parameters with duplicate id " + param.id));
             }
             startIds.add(param.id);
@@ -91,11 +91,11 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     }
 
     private List<ParameterDescriptor> expandTemplateRecursive(String app, ParameterDescriptor param,
-            List<ParameterTemplateDescriptor> parameterTemplates, List<ProductValidationIssueDto> issues) {
+            List<ParameterTemplateDescriptor> parameterTemplates, List<ProductValidationIssueApi> issues) {
         List<ParameterTemplateDescriptor> templates = parameterTemplates.stream().filter(t -> t.id.equals(param.template))
                 .toList();
         if (templates.size() != 1) {
-            issues.add(new ProductValidationIssueDto(ProductValidationSeverity.ERROR, app + " references parameter template "
+            issues.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, app + " references parameter template "
                     + param.template + " which was found " + templates.size() + " times"));
             return Collections.emptyList();
         }
@@ -106,7 +106,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                 if (p.template != null) {
                     expanded.addAll(expandTemplateRecursive(app, p, parameterTemplates, issues));
                 } else {
-                    issues.add(new ProductValidationIssueDto(ProductValidationSeverity.WARNING,
+                    issues.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
                             "parameter template " + param.template + " has parameter without id or template"));
                 }
             } else {
@@ -136,8 +136,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private ProductValidationConfigDescriptor parse(Path dir) {
         ProductValidationConfigDescriptor config = new ProductValidationConfigDescriptor();
 
-        config.productValidation = parse(dir, dir.resolve(ProductValidationDescriptor.FILE_NAME),
-                ProductValidationDescriptor.class);
+        config.productValidation = parse(dir, dir.resolve(ProductValidationDescriptorApi.FILE_NAME),
+                ProductValidationDescriptorApi.class);
         config.product = parse(dir, dir.resolve(config.productValidation.product), ProductDescriptor.class);
         config.applicationTemplates = parse(dir, dir, config.product.applicationTemplates, ApplicationTemplateDescriptor.class);
         config.instanceTemplates = parse(dir, dir, config.product.instanceTemplates, InstanceTemplateDescriptor.class);

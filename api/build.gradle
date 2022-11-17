@@ -44,6 +44,7 @@ resolve {
     resourceClasses = [
         'io.bdeploy.api.remote.v1.PublicRootResource',
         'io.bdeploy.api.schema.v1.PublicSchemaResource',
+        'io.bdeploy.api.validation.v1.PublicProductValidationResource',
     ]
 }
 

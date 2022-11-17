@@ -25,6 +25,8 @@ import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.InstanceConfigurationApi.InstancePurposeApi;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
+import io.bdeploy.api.validation.v1.ProductValidationHelper;
+import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.TestHive;
@@ -39,6 +41,7 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
+import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -158,6 +161,13 @@ class PublicApiV1Test {
 
         Files.write(prodVer,
                 List.of("version: \"1.0.1\"", "appInfo:", " myApp:", "  " + OsHelper.getRunningOs() + ": \"" + appPath + "\""));
+
+        // validate product.
+        Path valDesc = prod.resolve("product-validation.yaml");
+        Files.write(valDesc, List.of("product: product-info.yaml", "applications:",
+                " myApp: " + pathToApp.resolve(ApplicationDescriptor.FILE_NAME).toString().replace('\\', '/')));
+        ProductValidationResponseApi resp = ProductValidationHelper.validate(valDesc, remote);
+        assertEquals(0, resp.issues.size());
 
         // try with parallel import as well, even though this does not have much impact with one application to cover the code path.
         Key prod2Key = ProductManifestBuilder.importFromDescriptor(prodInfo, local, new LocalDependencyFetcher(), true);

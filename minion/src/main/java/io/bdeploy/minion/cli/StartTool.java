@@ -43,6 +43,7 @@ import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
+import io.bdeploy.minion.api.v1.PublicProductValidationResourceImpl;
 import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
 import io.bdeploy.minion.cli.StartTool.MasterConfig;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdownImpl;
@@ -190,6 +191,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         srv.register(CommonRootResourceImpl.class);
         srv.register(PublicRootResourceImpl.class);
+        srv.register(PublicProductValidationResourceImpl.class);
         srv.register(MasterSettingsResourceImpl.class);
         srv.register(new ChangeEventManagerToNodeManagerInitializer(minionRoot.getNodeManager()));
 
