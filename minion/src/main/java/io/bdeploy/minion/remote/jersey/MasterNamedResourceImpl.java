@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
@@ -58,6 +59,8 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
@@ -405,6 +408,10 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     cfg.id = UuidHelper.randomId();
                     log.info("New Application {} received ID {}", cfg.name, cfg.id);
                 }
+
+                // also make sure that every parameter is present in the command line only once.
+                cleanCommandDuplicates(cfg.start);
+                cleanCommandDuplicates(cfg.stop);
             }
 
             RuntimeAssert.assertEquals(inc.id, config.id, "Instance ID not set on nodes");
@@ -449,6 +456,24 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         Manifest.Key key = builder.insert(hive);
         InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.CREATE, context.getUserPrincipal().getName(), null);
         return key;
+    }
+
+    private void cleanCommandDuplicates(CommandConfiguration command) {
+        if (command == null || command.parameters == null || command.parameters.isEmpty()) {
+            return;
+        }
+
+        Set<String> idCache = new TreeSet<>();
+        List<ParameterConfiguration> deduped = new ArrayList<>();
+        for (ParameterConfiguration cfg : command.parameters) {
+            if (idCache.contains(cfg.id)) {
+                continue; // skip.
+            }
+            idCache.add(cfg.id);
+            deduped.add(cfg);
+        }
+
+        command.parameters = deduped;
     }
 
     private void processConfigFilesInMemory(List<ObjectId> configTrees, VariableResolver resolver) {
