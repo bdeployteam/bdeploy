@@ -319,8 +319,7 @@ public class SystemResourceImpl implements SystemResource {
 
             TrackingTemplateOverrideResolver ittor = new TrackingTemplateOverrideResolver(perInstanceValues, ttor);
 
-            result.results
-                    .add(createInstanceFromTemplateRequest(key, inst, mappings.get(), ittor, request.minion, request.purpose));
+            result.results.add(createInstanceFromTemplateRequest(key, inst, mappings.get(), ittor, request.purpose));
         }
 
         // 3. sync after we created everything.
@@ -331,7 +330,7 @@ public class SystemResourceImpl implements SystemResource {
 
     private SystemTemplateInstanceResultDto createInstanceFromTemplateRequest(Manifest.Key systemKey,
             SystemTemplateInstanceReference inst, SystemTemplateGroupMapping mappings, TrackingTemplateOverrideResolver ttor,
-            String minion, InstancePurpose purpose) {
+            InstancePurpose purpose) {
 
         String expandedName = TemplateHelper.process(inst.name, ttor, ttor::canResolve);
         ProductManifest pmf = ProductManifest.of(hive, mappings.productKey);
@@ -372,16 +371,15 @@ public class SystemResourceImpl implements SystemResource {
 
         List<InstanceNodeConfigurationDto> nodes;
         try {
-            nodes = createInstanceNodesFromTemplate(cfg, smf, instTemplate.get(), mappings, apps, ttor, nodeStates,
-                    (n, o) -> (a) -> {
-                        if (o != null) {
-                            // need to check OS as well.
-                            var smk = ScopedManifestKey.parse(a.getKey());
-                            return o.equals(smk.getOperatingSystem()) && smk.getName().equals(pmf.getProduct() + "/" + n);
-                        } else {
-                            return a.getKey().getName().startsWith(pmf.getProduct() + "/" + n); // may or may not have *any* OS in the key.
-                        }
-                    });
+            nodes = createInstanceNodesFromTemplate(cfg, instTemplate.get(), mappings, apps, ttor, nodeStates, (n, o) -> a -> {
+                if (o != null) {
+                    // need to check OS as well.
+                    var smk = ScopedManifestKey.parse(a.getKey());
+                    return o.equals(smk.getOperatingSystem()) && smk.getName().equals(pmf.getProduct() + "/" + n);
+                } else {
+                    return a.getKey().getName().startsWith(pmf.getProduct() + "/" + n); // may or may not have *any* OS in the key.
+                }
+            });
         } catch (Exception e) {
             log.warn("Exception while creating instance {} through instance template {} from system template", cfg.name,
                     inst.templateName, e);
@@ -418,7 +416,7 @@ public class SystemResourceImpl implements SystemResource {
                 "Successfully created instance with ID " + cfg.id);
     }
 
-    private List<InstanceNodeConfigurationDto> createInstanceNodesFromTemplate(InstanceConfiguration config, SystemManifest smf,
+    private List<InstanceNodeConfigurationDto> createInstanceNodesFromTemplate(InstanceConfiguration config,
             FlattenedInstanceTemplateConfiguration tpl, SystemTemplateGroupMapping mappings, List<ApplicationManifest> apps,
             TrackingTemplateOverrideResolver ttor, Map<String, MinionStatusDto> nodeStates,
             BiFunction<String, OperatingSystem, Predicate<ApplicationManifest>> appFilter) {
@@ -437,10 +435,10 @@ public class SystemResourceImpl implements SystemResource {
             return null;
         };
 
-        for (var group : tpl.groups) {
-            String mappedToNode = mappings.groupToNode.get(group.name);
+        for (var tgroup : tpl.groups) {
+            String mappedToNode = mappings.groupToNode.get(tgroup.name);
             if (mappedToNode == null || mappedToNode.isBlank()) {
-                continue; // nope;
+                continue; // nope
             }
 
             InstanceNodeConfigurationDto node = result.stream().filter(n -> n.nodeName.equals(mappedToNode)).findFirst()
@@ -452,16 +450,17 @@ public class SystemResourceImpl implements SystemResource {
 
                         // NO need to care about (redundant!) instance variables, etc. This is done when saving the instance.
 
-                        r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, mappings, ttor));
+                        r.nodeConfiguration.controlGroups.addAll(createControlGroupsFromTemplate(tpl, ttor));
 
                         result.add(r);
                         return r;
                     });
 
-            if (group.type == ApplicationType.CLIENT) {
-                createApplicationsForClientGroup(node, group, apps, ttor, appFilter, globalLookup);
+            if (tgroup.type == ApplicationType.CLIENT) {
+                createApplicationsForClientGroup(node, tgroup, apps, ttor, appFilter, globalLookup);
             } else {
-                createApplicationsForServerGroup(node, group, apps, ttor, nodeStates.get(node.nodeName), appFilter, globalLookup);
+                createApplicationsForServerGroup(node, tgroup, apps, ttor, nodeStates.get(node.nodeName), appFilter,
+                        globalLookup);
             }
         }
 
@@ -520,23 +519,7 @@ public class SystemResourceImpl implements SystemResource {
         cfg.pooling = appDesc.pooling;
         cfg.processControl = new ProcessControlConfiguration();
 
-        {
-            cfg.processControl.attachStdin = appDesc.processControl.attachStdin;
-
-            if (appDesc.processControl.supportedStartTypes != null && !appDesc.processControl.supportedStartTypes.isEmpty()) {
-                cfg.processControl.startType = appDesc.processControl.supportedStartTypes.get(0);
-            } else {
-                cfg.processControl.startType = ApplicationStartType.MANUAL;
-            }
-
-            cfg.processControl.keepAlive = appDesc.processControl.supportsKeepAlive;
-            cfg.processControl.noOfRetries = (int) appDesc.processControl.noOfRetries;
-            cfg.processControl.gracePeriod = appDesc.processControl.gracePeriod;
-            cfg.processControl.attachStdin = appDesc.processControl.attachStdin;
-            cfg.processControl.configDirs = appDesc.processControl.configDirs;
-            cfg.processControl.startupProbe = appDesc.processControl.startupProbe;
-            cfg.processControl.lifenessProbe = appDesc.processControl.lifenessProbe;
-        }
+        applyProcessControl(cfg, appDesc);
 
         // each application's endpoints start out as copy of the default. no need to copy as the template
         // was sent through REST already.
@@ -552,6 +535,22 @@ public class SystemResourceImpl implements SystemResource {
         }
 
         return cfg;
+    }
+
+    private void applyProcessControl(ApplicationConfiguration cfg, ApplicationDescriptor appDesc) {
+        cfg.processControl.attachStdin = appDesc.processControl.attachStdin;
+        if (appDesc.processControl.supportedStartTypes != null && !appDesc.processControl.supportedStartTypes.isEmpty()) {
+            cfg.processControl.startType = appDesc.processControl.supportedStartTypes.get(0);
+        } else {
+            cfg.processControl.startType = ApplicationStartType.MANUAL;
+        }
+        cfg.processControl.keepAlive = appDesc.processControl.supportsKeepAlive;
+        cfg.processControl.noOfRetries = (int) appDesc.processControl.noOfRetries;
+        cfg.processControl.gracePeriod = appDesc.processControl.gracePeriod;
+        cfg.processControl.attachStdin = appDesc.processControl.attachStdin;
+        cfg.processControl.configDirs = appDesc.processControl.configDirs;
+        cfg.processControl.startupProbe = appDesc.processControl.startupProbe;
+        cfg.processControl.lifenessProbe = appDesc.processControl.lifenessProbe;
     }
 
     private CommandConfiguration createCommand(ExecutableDescriptor command, List<TemplateParameter> tplParameters,
@@ -608,7 +607,7 @@ public class SystemResourceImpl implements SystemResource {
     }
 
     private List<ProcessControlGroupConfiguration> createControlGroupsFromTemplate(FlattenedInstanceTemplateConfiguration tpl,
-            SystemTemplateGroupMapping mappings, TrackingTemplateOverrideResolver ttor) {
+            TrackingTemplateOverrideResolver ttor) {
         List<ProcessControlGroupConfiguration> pcgcs = new ArrayList<>();
 
         for (var g : tpl.processControlGroups) {

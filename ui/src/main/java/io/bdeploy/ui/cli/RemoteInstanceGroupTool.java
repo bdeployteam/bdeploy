@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
@@ -120,8 +119,7 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
             table.column("Name", 20).column("Title", 20).column(new DataTableColumn("instanceCount", "# Ins.", 6))
                     .column("Description", 50);
 
-            List<InstanceGroupConfiguration> cfgList = client.list().stream().map(cfg -> cfg.instanceGroupConfiguration)
-                    .collect(Collectors.toList());
+            List<InstanceGroupConfiguration> cfgList = client.list().stream().map(cfg -> cfg.instanceGroupConfiguration).toList();
             for (InstanceGroupConfiguration cfg : cfgList) {
                 List<InstanceDto> ics = client.getInstanceResource(cfg.name).list();
                 table.row().cell(cfg.name).cell(cfg.title).cell(ics.size()).cell(cfg.description).build();

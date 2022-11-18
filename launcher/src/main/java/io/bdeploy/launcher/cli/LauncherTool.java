@@ -867,7 +867,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
                 }
 
                 String check = lines.get(0);
-                if (clientAppCfg.configTree.getId().equals(check)) {
+                if (configTree.getId().equals(check)) {
                     return true;
                 }
             } catch (Exception e) {

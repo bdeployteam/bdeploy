@@ -9,6 +9,7 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidat
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
+import io.bdeploy.common.cli.data.ExitCode;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
@@ -50,7 +51,7 @@ public class RemoteProductValidationTool extends RemoteServiceTool<RemoteProduct
             table.row().cell(i).cell(issue.severity.name()).cell(issue.message).build();
 
             if (issue.severity == ProductValidationSeverity.ERROR) {
-                table.setExitCode(1);
+                table.setExitCode(ExitCode.ERROR);
             }
         }
         return table;

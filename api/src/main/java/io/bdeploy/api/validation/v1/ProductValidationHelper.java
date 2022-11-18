@@ -43,6 +43,9 @@ import jakarta.ws.rs.core.Response.Status.Family;
  */
 public class ProductValidationHelper {
 
+    private ProductValidationHelper() {
+    }
+
     /**
      * @param descriptor the path to a {@link ProductValidationDescriptorApi}
      * @param remote the remote server to validate on.
@@ -76,7 +79,7 @@ public class ProductValidationHelper {
         }
 
         ProductValidationDescriptorApi zippedDescriptor = new ProductValidationDescriptorApi();
-        Function<String, Path> toPath = (filename) -> dir.resolve(filename).toAbsolutePath();
+        Function<String, Path> toPath = f -> dir.resolve(f).toAbsolutePath();
         Set<String> dirEntries = new HashSet<>();
 
         try (OutputStream fos = Files.newOutputStream(zipFile); ZipOutputStream zos = new ZipOutputStream(fos)) {
@@ -95,8 +98,10 @@ public class ProductValidationHelper {
             // zip applications mentioned in descriptor file
             Map<String, String> applications = originalDescriptor.applications == null ? Collections.emptyMap()
                     : originalDescriptor.applications;
-            for (String application : applications.keySet()) {
-                Path applicationSrcFile = toPath.apply(applications.get(application));
+            for (Map.Entry<String, String> entry : applications.entrySet()) {
+                String application = entry.getKey();
+                String appFileName = entry.getValue();
+                Path applicationSrcFile = toPath.apply(appFileName);
 
                 if (!Files.isRegularFile(applicationSrcFile)) {
                     throw new IllegalStateException(
@@ -159,14 +164,16 @@ public class ProductValidationHelper {
 
         // Create directory entries for target file
         String[] dirs = targetFilename.replace("\\", "/").split("/");
-        String dirname = "";
+        StringBuilder dirname = new StringBuilder();
         for (int i = 0; i < dirs.length - 1; i++) {
-            dirname += dirs[i] + "/";
-            if (dirEntries.contains(dirname)) {
+            dirname.append(dirs[i]).append("/");
+            String level = dirname.toString();
+
+            if (dirEntries.contains(level)) {
                 continue;
             }
-            zos.putNextEntry(new ZipEntry(dirname));
-            dirEntries.add(dirname);
+            zos.putNextEntry(new ZipEntry(level));
+            dirEntries.add(level);
         }
 
         // Start writing a new file entry
@@ -207,8 +214,7 @@ public class ProductValidationHelper {
                     return new ProductValidationResponseApi(Collections.singletonList(new ProductValidationIssueApi(
                             ProductValidationSeverity.ERROR, "Cannot validate: " + response.getStatusInfo().getReasonPhrase())));
                 }
-                ProductValidationResponseApi validationResult = response.readEntity(ProductValidationResponseApi.class);
-                return validationResult;
+                return response.readEntity(ProductValidationResponseApi.class);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot upload zip file", e);

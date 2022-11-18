@@ -18,7 +18,7 @@ public class FixedParameterListValueResolver extends PrefixResolver {
     @Override
     protected String doResolve(String variable) {
         if (variable.contains(":")) {
-            return null; // scoped is non of our business;
+            return null; // scoped is none of our business
         }
 
         Optional<ParameterConfiguration> match = parameters.stream().filter(p -> p.id.equals(variable)).findAny();

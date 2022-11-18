@@ -7,6 +7,6 @@ public interface RenderableResult {
 
     public void render();
 
-    int getExitCode();
+    public ExitCode getExitCode();
 
 }

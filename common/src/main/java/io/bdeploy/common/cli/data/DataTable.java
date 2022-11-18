@@ -15,7 +15,7 @@ public interface DataTable extends RenderableResult {
     /**
      * @param exitCode indicates whether operation was successful or had any errors.
      */
-    public DataTable setExitCode(int exitCode);
+    public DataTable setExitCode(ExitCode exitCode);
 
     /**
      * Adds a column to the table. All columns must be added before adding actual data.

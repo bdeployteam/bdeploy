@@ -1,6 +1,8 @@
 package io.bdeploy.minion.user.oauth2;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
@@ -18,6 +20,7 @@ import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.RefreshTokenGrant;
 import com.nimbusds.oauth2.sdk.ResourceOwnerPasswordCredentialsGrant;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -166,7 +169,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
     }
 
     private OIDCTokenResponse performRequest(UserInfo user, OIDCSettingsDto server, AuthorizationGrant grant, AuthTrace trace)
-            throws Exception {
+            throws URISyntaxException, ParseException, IOException {
         // Configured credentials which allow BDeploy to connect to the OIDC endpoint.
         ClientID clientID = new ClientID(server.client);
         Secret clientSecret = new Secret(server.secret);

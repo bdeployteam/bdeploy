@@ -433,10 +433,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                     // we have directories set, and need to create a dedicated config tree for the application.
                     String[] allowedPaths = app.processControl.configDirs.split(",");
-                    ObjectId appTree = applyConfigUpdates(config.configTree, p -> {
-                        // remove unwanted paths from p.
-                        applyConfigRestrictions(allowedPaths, p, p);
-                    });
+
+                    // remove unwanted paths from p.
+                    ObjectId appTree = applyConfigUpdates(config.configTree, p -> applyConfigRestrictions(allowedPaths, p, p));
 
                     // record the config tree for this application.
                     inmb.addConfigTreeId(app.id, appTree);
@@ -593,7 +592,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             next++;
         }
 
-        log.warn("Failed to find instance version without historical records. Returning {} ", next.toString());
+        log.warn("Failed to find instance version without historical records. Returning {} ", next);
+
         return next.toString();
     }
 

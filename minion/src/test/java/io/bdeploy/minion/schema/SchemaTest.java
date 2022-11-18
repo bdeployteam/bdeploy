@@ -21,7 +21,7 @@ import io.bdeploy.minion.TestMinion;
 import io.bdeploy.schema.PublicSchemaValidator;
 
 @ExtendWith(TestMinion.class)
-public class SchemaTest {
+class SchemaTest {
 
     @Test
     void generateSchemasTest(PublicSchemaResource rsrc) {

@@ -45,9 +45,7 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
     @Override
     public void convertToNode() {
         // convert to type node.
-        root.modifyState((s) -> {
-            s.mode = MinionMode.NODE;
-        });
+        root.modifyState((s) -> s.mode = MinionMode.NODE);
 
         // we cannot delete (or rename) them here and now, as still in use.
         // after re-launch we can no longer determine whether (and what) we should move/delete.

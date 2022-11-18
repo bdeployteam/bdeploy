@@ -15,7 +15,7 @@ public interface DataResult extends RenderableResult {
     /**
      * @param exitCode indicates whether operation was successful or had any errors.
      */
-    public DataResult setExitCode(int exitCode);
+    public DataResult setExitCode(ExitCode exitCode);
 
     /**
      * @param t the exception in case one happened.

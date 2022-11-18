@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
@@ -147,8 +146,10 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
         config.applications = new HashMap<>();
         var apps = Optional.ofNullable(config.productValidation.applications).orElseGet(Collections::emptyMap);
-        for (String app : apps.keySet()) {
-            Path appPath = dir.resolve(apps.get(app));
+        for (Map.Entry<String, String> entry : apps.entrySet()) {
+            String app = entry.getKey();
+            String relApp = entry.getValue();
+            Path appPath = dir.resolve(relApp);
             var appDescriptor = parse(dir, appPath, ApplicationDescriptor.class);
             config.applications.put(app, appDescriptor);
         }
@@ -158,8 +159,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
     private <T> List<T> parse(Path root, Path dir, List<String> filenames, Class<T> klass) {
         return filenames == null ? Collections.emptyList()
-                : filenames.stream().map(filename -> dir.resolve(filename)).map(path -> parse(root, path, klass))
-                        .collect(Collectors.toList());
+                : filenames.stream().map(dir::resolve).map(path -> parse(root, path, klass)).toList();
     }
 
     private <T> T parse(Path root, Path path, Class<T> klass) {

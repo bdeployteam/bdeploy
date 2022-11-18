@@ -1,8 +1,18 @@
 package io.bdeploy.common.cli.data;
 
-public class ExitCode {
+public enum ExitCode {
 
-    public static final int OK = 0;
-    public static final int ERROR = 1;
+    OK(0),
+    ERROR(1);
+
+    private int code;
+
+    private ExitCode(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
 
 }

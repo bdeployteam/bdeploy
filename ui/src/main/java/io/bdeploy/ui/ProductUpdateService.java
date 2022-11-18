@@ -250,7 +250,7 @@ public class ProductUpdateService {
         for (var entry : toReset.entrySet()) {
             values.remove(entry.getKey());
             if (entry.getValue() != null && meetsCondition(appDesc, entry.getValue(), resolver)) {
-                createParameter(instance, entry.getValue(), descriptors, values, allApps);
+                createParameter(entry.getValue(), descriptors, values, allApps);
             }
         }
 
@@ -263,13 +263,12 @@ public class ProductUpdateService {
             var val = values.stream().filter(p -> p.id.equals(desc.id)).findFirst();
             if (val.isEmpty() && meetsCondition(appDesc, desc, resolver)) {
                 // need one.
-                createParameter(instance, desc, descriptors, values, allApps);
+                createParameter(desc, descriptors, values, allApps);
 
-                if (desc.global) {
-                    if (validation.stream().filter(v -> v.appId == null && desc.id.equals(v.paramId)).findFirst().isEmpty()) {
-                        validation.add(0, new ApplicationValidationDto(null, desc.id,
-                                "New global parameter '" + desc.name + "' has been added with its default value."));
-                    }
+                if (desc.global
+                        && validation.stream().filter(v -> v.appId == null && desc.id.equals(v.paramId)).findFirst().isEmpty()) {
+                    validation.add(0, new ApplicationValidationDto(null, desc.id,
+                            "New global parameter '" + desc.name + "' has been added with its default value."));
                 }
             }
         }
@@ -277,7 +276,7 @@ public class ProductUpdateService {
         return values;
     }
 
-    private void createParameter(InstanceConfiguration instance, ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
+    private void createParameter(ParameterDescriptor desc, List<ParameterDescriptor> allDescs,
             List<ParameterConfiguration> values, Set<ApplicationConfiguration> allApps) {
         ParameterConfiguration cfg = new ParameterConfiguration();
         cfg.id = desc.id;
@@ -337,7 +336,7 @@ public class ProductUpdateService {
         for (var para : desc.parameters) {
             // same as in the TS code, this assumes that the parameter referenced in the condition is *before* the conditional.
             if (para.mandatory && meetsCondition(appDesc, para, resolver)) {
-                createParameter(instance, para, desc.parameters, result.parameters, allApps);
+                createParameter(para, desc.parameters, result.parameters, allApps);
             }
         }
 

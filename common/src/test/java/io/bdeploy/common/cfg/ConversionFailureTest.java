@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.Test;
 
-public class ConversionFailureTest {
+class ConversionFailureTest {
 
     @Test
     void testStringParameter() {
@@ -13,9 +13,10 @@ public class ConversionFailureTest {
         c.add("--instanceGroup");
 
         ConfigValidationException e = assertThrowsExactly(ConfigValidationException.class, () -> c.get(TestStringConfig.class));
-        assertEquals(e.getMessage(), "Validation Issues Detected");
-        assertEquals(e.getSuppressed()[0].getMessage(),
-                "Could not resolve instanceGroup parameter. Please specify parameter like this: instanceGroup=<value>. Illegal conversion from non-string object to different type: class java.lang.Boolean to class java.lang.String");
+        assertEquals("Validation Issues Detected", e.getMessage());
+        assertEquals(
+                "Could not resolve instanceGroup parameter. Please specify parameter like this: instanceGroup=<value>. Illegal conversion from non-string object to different type: class java.lang.Boolean to class java.lang.String",
+                e.getSuppressed()[0].getMessage());
     }
 
     @Test
@@ -24,9 +25,10 @@ public class ConversionFailureTest {
         c.add("--instanceGroup");
 
         ConfigValidationException e = assertThrowsExactly(ConfigValidationException.class, () -> c.get(TestArrayConfig.class));
-        assertEquals(e.getMessage(), "Validation Issues Detected");
-        assertEquals(e.getSuppressed()[0].getMessage(),
-                "Could not resolve instanceGroup parameter. Please specify parameter like this: instanceGroup=<value1> instanceGroup=<value2>... or like this: instanceGroup=<value1>,<value2>... Illegal conversion from non-string object to different type: class java.lang.Boolean to class [Ljava.lang.String;");
+        assertEquals("Validation Issues Detected", e.getMessage());
+        assertEquals(
+                "Could not resolve instanceGroup parameter. Please specify parameter like this: instanceGroup=<value1> instanceGroup=<value2>... or like this: instanceGroup=<value1>,<value2>... Illegal conversion from non-string object to different type: class java.lang.Boolean to class [Ljava.lang.String;",
+                e.getSuppressed()[0].getMessage());
     }
 
     private @interface TestStringConfig {

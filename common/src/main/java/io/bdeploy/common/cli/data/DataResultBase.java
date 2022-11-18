@@ -7,7 +7,7 @@ import java.util.Map;
 public abstract class DataResultBase implements DataResult {
 
     private String message;
-    private int exitCode = ExitCode.OK;
+    private ExitCode exitCode = ExitCode.OK;
     private Throwable throwable;
     private final Map<String, String> fields = new LinkedHashMap<>(); // preserve order.
     private final PrintStream output;
@@ -53,13 +53,13 @@ public abstract class DataResultBase implements DataResult {
     }
 
     @Override
-    public DataResult setExitCode(int exitCode) {
+    public DataResult setExitCode(ExitCode exitCode) {
         this.exitCode = exitCode;
         return this;
     }
 
     @Override
-    public int getExitCode() {
+    public ExitCode getExitCode() {
         return this.exitCode;
     }
 

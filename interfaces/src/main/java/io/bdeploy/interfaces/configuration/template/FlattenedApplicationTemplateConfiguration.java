@@ -38,7 +38,7 @@ public class FlattenedApplicationTemplateConfiguration {
     public List<TemplateParameter> startParameters = new ArrayList<>();
 
     @JsonIgnore
-    private transient List<String> children;
+    private List<String> children;
 
     FlattenedApplicationTemplateConfiguration() {
         // intentionally left empty for deserialization.
@@ -134,13 +134,13 @@ public class FlattenedApplicationTemplateConfiguration {
         }
 
         // now we can filter the variable definitions to only have those left which we *really* need.
-        for (TemplateVariable var : variables) {
-            if (!res.getRequestedVariables().contains(var.id)) {
+        for (TemplateVariable variable : variables) {
+            if (!res.getRequestedVariables().contains(variable.id)) {
                 // not requested. skip.
                 continue;
             }
 
-            this.templateVariables.add(var);
+            this.templateVariables.add(variable);
         }
     }
 

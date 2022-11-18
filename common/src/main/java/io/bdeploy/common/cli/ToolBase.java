@@ -213,7 +213,7 @@ public abstract class ToolBase {
                 if (failWithException || testMode) {
                     throw new IllegalArgumentException("Wrong number of arguments");
                 } else {
-                    System.exit(ExitCode.ERROR);
+                    System.exit(ExitCode.ERROR.getCode());
                 }
             }
 
@@ -288,12 +288,12 @@ public abstract class ToolBase {
             res.setException(exc);
             res.render();
 
-            System.exit(ExitCode.ERROR);
+            System.exit(ExitCode.ERROR.getCode());
         }
         if (result == null) {
-            System.exit(ExitCode.OK);
+            System.exit(ExitCode.OK.getCode());
         } else {
-            System.exit(result.getExitCode());
+            System.exit(result.getExitCode().getCode());
         }
     }
 
@@ -611,7 +611,7 @@ public abstract class ToolBase {
             if (failWithException || testMode) {
                 throw new IllegalArgumentException(message);
             } else {
-                System.exit(ExitCode.ERROR);
+                System.exit(ExitCode.ERROR.getCode());
             }
         }
 

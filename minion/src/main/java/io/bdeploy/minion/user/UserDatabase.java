@@ -303,10 +303,8 @@ public class UserDatabase implements AuthService {
     public boolean isAuthenticationValid(UserInfo info) {
         AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
         for (Authenticator auth : authenticators) {
-            if (auth.isResponsible(info, settings)) {
-                if (auth.isAuthenticationValid(info, settings)) {
-                    return true;
-                }
+            if (auth.isResponsible(info, settings) && auth.isAuthenticationValid(info, settings)) {
+                return true;
             }
         }
         return false;

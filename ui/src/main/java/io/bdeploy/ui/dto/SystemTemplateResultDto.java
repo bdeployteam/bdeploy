@@ -10,7 +10,7 @@ public class SystemTemplateResultDto {
 
     public List<SystemTemplateInstanceResultDto> results = new ArrayList<>();
 
-    public static enum SystemTemplateInstanceStatus {
+    public enum SystemTemplateInstanceStatus {
         OK,
         WARNING,
         ERROR

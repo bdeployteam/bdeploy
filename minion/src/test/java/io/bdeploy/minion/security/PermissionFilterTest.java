@@ -22,7 +22,7 @@ import io.bdeploy.ui.api.AuthResource;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.core.Response;
 
-public class PermissionFilterTest {
+class PermissionFilterTest {
 
     private static final String NO_PERM = "no-perm";
     private static final String GLOBAL_READ = "global-read";

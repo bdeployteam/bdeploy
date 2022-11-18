@@ -416,9 +416,8 @@ public class CleanupHelper {
         }
 
         // this *should* only happen on central, but we still perform the check on each server.
-        toTruncateMetas.forEach(m -> {
-            actions.add(new CleanupAction(CleanupType.TRUNCATE_META_MANIFEST, m, "Truncate meta manifest " + m));
-        });
+        toTruncateMetas.forEach(
+                m -> actions.add(new CleanupAction(CleanupType.TRUNCATE_META_MANIFEST, m, "Truncate meta manifest " + m)));
 
         return actions;
     }
