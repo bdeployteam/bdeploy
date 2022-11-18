@@ -3,12 +3,17 @@ package io.bdeploy.api.validation.v1.dto;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 /**
  * This descriptor references all files which should be validated during raw product validation.
  * <p>
  * Applications (`app-info.yaml` files) are not directly referenced from `product-info.yaml` files, thus this descriptor creates
  * the required association.
  */
+@JsonClassDescription("This descriptor references all files which should be validated during raw product validation.")
 public class ProductValidationDescriptorApi {
 
     /**
@@ -21,6 +26,8 @@ public class ProductValidationDescriptorApi {
     /**
      * Path to the `product-info.yaml` file which defines the root product to be validated.
      */
+    @JsonPropertyDescription("The relative or absolute path to the product-info.yaml for the product to validate.")
+    @JsonProperty(required = true)
     public String product;
 
     /**
@@ -28,6 +35,7 @@ public class ProductValidationDescriptorApi {
      * application is referenced here, however they need not match the application IDs in the `product-info.yaml`. This is to
      * allow specifying the same application multiple times for different OS in case they have different descriptors per OS.
      */
+    @JsonPropertyDescription("Relative or absolute paths to the individual app-info.yaml files for each application.")
     public Map<String, String> applications = new HashMap<>();
 
 }

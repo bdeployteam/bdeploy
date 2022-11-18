@@ -3,6 +3,7 @@ package io.bdeploy.schema;
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.product.v1.ProductVersionDescriptor;
 import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
+import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
@@ -19,7 +20,8 @@ enum InternalSchema {
     INSTANCE_TEMPLATE(Schema.instanceTemplateYaml, InstanceTemplateDescriptor.class),
     PARAMETER_TEMPLATE(Schema.parameterTemplateYaml, ParameterTemplateDescriptor.class),
     INSTANCE_VAR_TEMPLATE(Schema.instanceVariableTemplateYaml, InstanceVariableTemplateDescriptor.class),
-    SYSTEM_TEMPLATE(Schema.systemTemplateYaml, SystemTemplateDescriptor.class);
+    SYSTEM_TEMPLATE(Schema.systemTemplateYaml, SystemTemplateDescriptor.class),
+    PRODUCT_VALIDATION(Schema.productValidationYaml, ProductValidationDescriptorApi.class);
 
     public final Schema apiSchema;
     public final Class<?> apiClass;
@@ -37,4 +39,5 @@ enum InternalSchema {
         }
         throw new IllegalArgumentException("No internal schema definition for " + apiSchema);
     }
+
 }

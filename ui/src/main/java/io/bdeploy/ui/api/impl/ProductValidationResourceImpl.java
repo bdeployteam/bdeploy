@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
+import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
 import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
 import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi;
 import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidationSeverity;
@@ -27,6 +28,7 @@ import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
+import io.bdeploy.schema.PublicSchemaValidator;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductValidationResource;
 import io.bdeploy.ui.dto.ProductValidationConfigDescriptor;
@@ -39,8 +41,12 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
     @Override
     public ProductValidationResponseApi validate(InputStream inputStream) {
-        ProductValidationConfigDescriptor config = parse(inputStream);
-        return validate(config);
+        try {
+            return validate(parse(inputStream));
+        } catch (SchemaValidationException ex) {
+            return new ProductValidationResponseApi(ex.errors.stream()
+                    .map(e -> new ProductValidationIssueApi(ProductValidationSeverity.ERROR, ex.path + ": " + e)).toList());
+        }
     }
 
     private ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
@@ -124,7 +130,10 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             Path unzipped = tmpDir.resolve("unzipped_product");
             Files.copy(inputStream, zip);
             ZipHelper.unzip(zip, unzipped);
-            return parse(unzipped);
+
+            PublicSchemaValidator validator = new PublicSchemaValidator();
+
+            return parse(unzipped, validator);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot import from uploaded ZIP", e);
         } finally {
@@ -132,17 +141,21 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         }
     }
 
-    private ProductValidationConfigDescriptor parse(Path dir) {
+    private ProductValidationConfigDescriptor parse(Path dir, PublicSchemaValidator validator) {
         ProductValidationConfigDescriptor config = new ProductValidationConfigDescriptor();
 
         config.productValidation = parse(dir, dir.resolve(ProductValidationDescriptorApi.FILE_NAME),
-                ProductValidationDescriptorApi.class);
-        config.product = parse(dir, dir.resolve(config.productValidation.product), ProductDescriptor.class);
-        config.applicationTemplates = parse(dir, dir, config.product.applicationTemplates, ApplicationTemplateDescriptor.class);
-        config.instanceTemplates = parse(dir, dir, config.product.instanceTemplates, InstanceTemplateDescriptor.class);
+                ProductValidationDescriptorApi.class, validator, Schema.productValidationYaml);
+        config.product = parse(dir, dir.resolve(config.productValidation.product), ProductDescriptor.class, validator,
+                Schema.productInfoYaml);
+        config.applicationTemplates = parse(dir, dir, config.product.applicationTemplates, ApplicationTemplateDescriptor.class,
+                validator, Schema.applicationTemplateYaml);
+        config.instanceTemplates = parse(dir, dir, config.product.instanceTemplates, InstanceTemplateDescriptor.class, validator,
+                Schema.instanceTemplateYaml);
         config.instanceVariableTemplates = parse(dir, dir, config.product.instanceVariableTemplates,
-                InstanceVariableTemplateDescriptor.class);
-        config.parameterTemplates = parse(dir, dir, config.product.parameterTemplates, ParameterTemplateDescriptor.class);
+                InstanceVariableTemplateDescriptor.class, validator, Schema.instanceVariableTemplateYaml);
+        config.parameterTemplates = parse(dir, dir, config.product.parameterTemplates, ParameterTemplateDescriptor.class,
+                validator, Schema.parameterTemplateYaml);
 
         config.applications = new HashMap<>();
         var apps = Optional.ofNullable(config.productValidation.applications).orElseGet(Collections::emptyMap);
@@ -150,24 +163,45 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             String app = entry.getKey();
             String relApp = entry.getValue();
             Path appPath = dir.resolve(relApp);
-            var appDescriptor = parse(dir, appPath, ApplicationDescriptor.class);
+            var appDescriptor = parse(dir, appPath, ApplicationDescriptor.class, validator, Schema.appInfoYaml);
             config.applications.put(app, appDescriptor);
         }
 
         return config;
     }
 
-    private <T> List<T> parse(Path root, Path dir, List<String> filenames, Class<T> klass) {
+    private <T> List<T> parse(Path root, Path dir, List<String> filenames, Class<T> klass, PublicSchemaValidator validator,
+            Schema schema) {
         return filenames == null ? Collections.emptyList()
-                : filenames.stream().map(dir::resolve).map(path -> parse(root, path, klass)).toList();
+                : filenames.stream().map(dir::resolve).map(path -> parse(root, path, klass, validator, schema)).toList();
     }
 
-    private <T> T parse(Path root, Path path, Class<T> klass) {
+    private <T> T parse(Path root, Path path, Class<T> klass, PublicSchemaValidator validator, Schema schema) {
+        if (schema != null) {
+            List<String> result = validator.validate(schema, path);
+            if (!result.isEmpty()) {
+                throw new SchemaValidationException(root.relativize(path), result);
+            }
+        }
+
         try (InputStream is = Files.newInputStream(path)) {
             return StorageHelper.fromYamlStream(is, klass);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot parse " + root.relativize(path), e);
         }
+    }
+
+    private static class SchemaValidationException extends RuntimeException {
+
+        private static final long serialVersionUID = 1L;
+        final List<String> errors;
+        final Path path;
+
+        public SchemaValidationException(Path path, List<String> errors) {
+            this.path = path;
+            this.errors = errors;
+        }
+
     }
 
 }
