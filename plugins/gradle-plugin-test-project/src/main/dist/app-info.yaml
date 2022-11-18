@@ -9,6 +9,10 @@ startCommand:
 
   parameters:
     - template: test-params
+      #    - id: test
+      #      defaultValue: test
+      #    - id: test
+      #      defaultValue: test
 
 #runtimeDependencies:
 #  - external/software:v1.0.0

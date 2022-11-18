@@ -62,6 +62,18 @@ test {
     useJUnitPlatform()
 }
 
+task validateProduct(type: io.bdeploy.gradle.BDeployValidationTask, dependsOn: installDist) {
+    // don't use 'token' so we don't need to configure instanceGroup (etc.) when just testing validation.
+    if(project.hasProperty('vtoken')) {
+        validationServer {
+            uri = 'https://localhost:7701/api'
+            token = project.getProperty('vtoken')
+        }
+    }
+
+    validationYaml = file('bdeploy/product-validation.yaml')
+}
+
 task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: installDist) {
     if(project.hasProperty('token')) {
         repositoryServer {

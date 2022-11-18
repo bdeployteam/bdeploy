@@ -1,0 +1,4 @@
+product: product-info.yaml
+
+applications:
+  test-app: ../src/main/dist/app-info.yaml
