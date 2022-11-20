@@ -53,12 +53,12 @@ public class InstanceGroupConfiguration {
     /**
      * The name of the default multiple data grouping for the instance group overview UI.
      */
-    public List<CustomDataGrouping> groupingMultiplePreset = new ArrayList<>();
+    public List<CustomDataGrouping> groupingMultiplePreset;
 
     /**
      * The name of the default single data grouping for the instance group overview UI.
      */
-    public List<CustomDataGrouping> groupingSinglePreset = new ArrayList<>();
+    public List<CustomDataGrouping> groupingSinglePreset;
 
     /**
      * Keeps track of which product was imported from which repository
