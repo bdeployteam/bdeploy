@@ -1,7 +1,6 @@
 input: .
 output: ../build/docs/dev
 url: https://bdeploy.io/dev/
-favicon: images/logo.ico
 branding:
   title: BDeploy
   label: Dev

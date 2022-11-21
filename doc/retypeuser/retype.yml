@@ -1,7 +1,6 @@
 input: .
 output: ../build/docs/user
 url: https://bdeploy.io/user/
-favicon: images/logo.ico
 branding:
   title: BDeploy
   label: User
