@@ -31,6 +31,7 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
     private String selected;
     private BDeployTargetSpec target;
     private boolean cleanup = true;
+    private boolean validate = true;
     private final BDeployProductListDescriptor products;
     private Runnable buttonUpdate;
     private final TaskingLog log;
@@ -52,6 +53,10 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
 
     public boolean getCleanup() {
         return cleanup;
+    }
+
+    public boolean getValidate() {
+        return validate;
     }
 
     @SuppressWarnings("unchecked")
@@ -110,6 +115,11 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
         checkCleanup.setText("Cleanup Temporary Data (Applications, Product Files) after build.");
         checkCleanup.setSelection(cleanup);
 
+        Button checkValidate = new Button(comp, SWT.CHECK);
+        GridDataFactory.fillDefaults().grab(true, false).applyTo(checkValidate);
+        checkValidate.setText("Validate Product before build.");
+        checkValidate.setSelection(validate);
+
         buttonUpdate = () -> {
             Button button = getButton(OK);
             if (button != null) {
@@ -149,6 +159,14 @@ public class BDeployChooseProductFileDialog extends TitleAreaDialog {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 cleanup = checkCleanup.getSelection();
+            }
+        });
+
+        checkValidate.addSelectionListener(new SelectionAdapter() {
+
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                validate = checkValidate.getSelection();
             }
         });
 

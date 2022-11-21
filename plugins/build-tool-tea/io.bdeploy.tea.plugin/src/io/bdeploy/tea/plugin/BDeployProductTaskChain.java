@@ -80,6 +80,7 @@ public class BDeployProductTaskChain implements TaskChain {
     private BDeployTargetSpec target;
     private BDeployTargetSpec source;
     private boolean cleanup;
+    private boolean validate;
 
     @TaskChainUiInit
     public void uiInit(Shell parent, BDeployConfig cfg, TaskingLog log, BuildDirectories dirs, TeaBuildVersionService bvs)
@@ -122,6 +123,7 @@ public class BDeployProductTaskChain implements TaskChain {
             target = dlg.getChosenTarget();
             bdeployProductFile = rootPath.resolve(dlg.getChosenFile());
             cleanup = dlg.getCleanup();
+            validate = dlg.getValidate();
 
             if (target == null) {
                 // that's OK - package instead of push.
@@ -276,9 +278,6 @@ public class BDeployProductTaskChain implements TaskChain {
 
         c.addTask(new BDeployCheckServerOnlineTask(target, source));
 
-        TaskInitJarCache cache = new TaskInitJarCache(dirs.getNewCacheDirectory("jar"));
-        c.addTask(cache);
-
         if (bdeployProductFile == null && cfg.bdeployProductFile != null) {
             bdeployProductFile = Paths.get(cfg.bdeployProductFile);
         }
@@ -296,6 +295,19 @@ public class BDeployProductTaskChain implements TaskChain {
         BDeployProductBuild pd = new BDeployProductBuild();
         pd.productInfo = bdeployProductFile.getParent().resolve(desc.productInfoYaml);
         pd.productTag = desc.productTag;
+
+        if (validate && desc.validationYaml != null) {
+            Path validationYaml = bdeployProductFile.getParent().resolve(desc.validationYaml);
+
+            if (!Files.exists(validationYaml)) {
+                throw new IllegalStateException("Validation YAML does not exist: " + validationYaml);
+            }
+
+            c.addTask(new BDeployValidateProductTask(target == null ? source : target, validationYaml));
+        }
+
+        TaskInitJarCache cache = new TaskInitJarCache(dirs.getNewCacheDirectory("jar"));
+        c.addTask(cache);
 
         for (BDeployApplicationDescriptor app : desc.applications) {
             Optional<BDeployApplicationService> handler = appServices.stream().filter(s -> s.canHandle(app.type)).findFirst();

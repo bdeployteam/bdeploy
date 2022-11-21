@@ -15,6 +15,8 @@ public class BDeployProductDescriptor {
 
     public String productInfoYaml;
 
+    public String validationYaml;
+
     public String productTag;
 
     public List<BDeployApplicationDescriptor> applications = new ArrayList<>();
