@@ -31,7 +31,6 @@ Command | Description
 `init` | Initializes a _root_ directory for running a server with the `start` command. The init command can be instructed to initialize the directory to run a **master** or a headless **node** when running the `start` command.
 `config` | Allows changes to the basic configuration like hostname, port or mode. The `init` command stores the given hostname, used later on for connections to self and also for variable expansion. If the hostname changed or is no longer valid, this tool can update it. Please refer to [Migrating between Modes](/user/central/#migrating-between-modes) in case you need to change the minion mode.
 `storage` | Manages available _storage locations_. A _storage location_ is a folder where the **BDeploy** _master_ puts the **BHives** required to store data for **Instance Groups** and **Software Repositories**.
-`node` | Manage **nodes** in attached to the **master** configuration in the given root directory. The given root must be an initialized (`init`) root directory using a **master** mode.
 
 ### Local session and scripting commands
 
@@ -51,14 +50,18 @@ Command | Description
 Command | Description
 ---     | ---
 `remote-central` | Manage remote configuration related to _managed_ servers on a _central_ server. Also allows to attach _managed_ servers to a _central_ server.
+`remote-data-files` | Remotely manage data files for a given instance.
 `remote-deployment` | Manage **Instance** deployment (_install_, _activate_, _uninstall_, _updateTo_ (product version)) on a remote **BDeploy** server.<br/><br/>:information_source:**NOTE** The `--updateTo` command will only work if the new product version can be updated to without manual changes. If for example a mandatory parameter is added, or a configured application is removed from the product, the update will fail.
 `remote-group` | Manage **Instance Groups** on a remote **BDeploy** server.
 `remote-instance` | Query and manage **Instances** on the remote **BDeploy** server. Can be used to **export** (to _ZIP_) and **import** (from _ZIP_) **Instances** locally.
 `remote-master` | Query and manage system information on a remote **BDeploy** server. Allows to update both the **BDeploy** system software as well as the **BDeploy** launcher binaries.
+`remote-node` | Manage **nodes** attached to the remote **BDeploy** server.
 `remote-plugin` | Manage plugins available on the remote **BDeploy** server or install new ones from local `jar` files.
 `remote-process` | Query and manage application processes managed by **BDeploy** on a remote **BDeploy** server.
 `remote-product` | Query and manage products available on the given **Instance Group** on a remote **BDeploy** server.
+`remote-product-validation` | Uses a [`product-validation.yaml`](/power/product/#product-validationyaml) file to perform a remote pre-validation of a product to be built in the future.
 `remote-repo` | Query and manage **Software Repositories** on a remote **BDeploy** server.
+`remote-system` | Manage systems on a remote **BDeploy** server.
 `remote-user` | Manages users on a remote **BDeploy** server.
 
 ### Server commands
@@ -71,7 +74,10 @@ Command | Description
 
 Command | Description
 ---     | ---
-`bhive` | Wraps around to the [BHive CLI](/experts/cli/#bhive-cli). Can be used to access **BHive** CLI commands if the **BHive** stand-alone binaries are not available. Usage: `bdeploy bhive <command>`
+`bhive` | Wraps around to the [BHive CLI](/experts/cli/#bhive-cli). Can be used to access **BHive** CLI commands if the **BHive** stand-alone binaries are not available. Usage: `bdeploy bhive <command>`.
+`payload` | Internal use only.
+`schema` | Used to generate YAML schemas and validate input files against those schemas.
+`verify-signature` | Verifies whether the signature on a signed executable is deemed valid.
 
 ## BHive CLI
 
