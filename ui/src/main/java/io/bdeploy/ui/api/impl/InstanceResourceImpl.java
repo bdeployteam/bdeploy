@@ -710,8 +710,13 @@ public class InstanceResourceImpl implements InstanceResource {
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
         try (Activity deploy = reporter.start("Uninstalling Ver. " + tag + " of " + instance.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
+            // 1: check that version is not active
+            String activeTag = getDeploymentStates(instanceId).activeTag;
+            if (tag.equals(activeTag)) {
+                throw new WebApplicationException("Cannot uninstall active version", Status.EXPECTATION_FAILED);
+            }
 
-            // 1: check for running or scheduled applications
+            // 2: check for running or scheduled applications
             MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
             MasterNamedResource namedMaster = master.getNamedMaster(group);
             InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
@@ -720,10 +725,10 @@ public class InstanceResourceImpl implements InstanceResource {
                     .filter(p -> tag.equals(p.instanceTag) && p.processState.isRunningOrScheduled()).findFirst();
             if (runningOrScheduledInVersion.isPresent()) {
                 throw new WebApplicationException("Cannot uninstall instance version " + instance.getConfiguration().name + ":"
-                        + tag + " because it has running or scheduled applications", Status.FORBIDDEN);
+                        + tag + " because it has running or scheduled applications", Status.EXPECTATION_FAILED);
             }
 
-            // 2: tell master to undeploy
+            // 3: tell master to undeploy
             master.getNamedMaster(group).uninstall(instance.getManifest());
         }
 
