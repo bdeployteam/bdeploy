@@ -38,6 +38,10 @@ This chapter is intended for those who want to integrate their own **Product** t
 :::
 &emsp;Actually not part of any product itself. Freestanding description that can be used to create multiple instances of multiple products in one go.
 :::
+[product-validation.yaml](#product-validationyaml)
+:::
+&emsp;A configuration file which references all the YAML files which should be part of a product pre-validation.
+:::
 
 This chapter will walk you through these artifacs, what they are for and how to define them.
 
@@ -823,6 +827,22 @@ Attribute   | Description
 `defaultMappings` | Pairs of `group` and `node` attributes which specify which **Instance Template** `group` should be applied to which node. In case the specified node does not exist on the target server, the mapping is unset.
 `fixedVariables` | Pairs of `id` and `value` attributes which set **Template Variables** of the referenced **Instance Template** to a fixed value instead of querying a value from the user during application.
 
+## product-validation.yaml ##
+
+The `product-validation.yaml` file contains references to all files that should be sent to the server when performing a product pre-validation. This validation can be used to verify that the product and all its applications contain valid **BDeploy** YAML.
+
+The content of this files is very straight forward:
+
+```yaml
+product: product-info.yaml
+
+applications:
+  my-application: app1/src/main/dist/app-info.yaml
+  other-application: app2/src/main/dist/app-info.yaml
+```
+
+This file can be passed to the `remote-product-validation` CLI command, as well as to the `BDeployValidationTask` Gradle Task. More tool support will follow.
+
 # Building a Product
 
 Now that you have a well-defined **Product** with one or more **Applications**, you will want to build/package that **Product** to be usable with **BDeploy**.
@@ -867,7 +887,19 @@ ext { <3>
   buildVersion = project.version.replaceAll('SNAPSHOT', buildDate)
 }
 
-task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: installDist) { <4>
+task validateProduct(type: io.bdeploy.gradle.BDeployValidationTask, dependsOn: installDist) { <4>
+  if(project.hasProperty('vtoken')) {
+    validationServer {
+      uri = 'https://localhost:7701/api'
+      token = project.getProperty('vtoken')
+    }
+  }   
+
+  validationYaml = file('bdeploy/product-validation.yaml')
+}
+
+
+task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: installDist) { <5>
   product {
     version = project.ext.buildVersion
     productInfo = file('bdeploy/product-info.yaml')
@@ -882,13 +914,13 @@ task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: install
   }
 }
 
-task zipProduct(type: io.bdeploy.gradle.BDeployZipTask, dependsOn: buildProduct) { <5>
+task zipProduct(type: io.bdeploy.gradle.BDeployZipTask, dependsOn: buildProduct) { <6>
   of buildProduct
   output = new File(buildDir, "product-" + project.ext.buildVersion + ".zip");
 }
 
 
-task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduct) { <6>
+task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduct) { <7>
   of buildProduct
 
   target.servers {
@@ -908,10 +940,11 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 1. Applies the plugin **BDeploy** gradle plugin.
 2. Sets the project version. **Gradle** does not strictly require a version, and uses 'unspecified' as default. **BDeploy** requires _some_ sort of version, and setting it for the whole project is good practice.
 3. Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plain use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
-4. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.
-5. If `buildProduct` built a product, this task will package it as a ZIP file. Note that a ZIP will always contain _all of_ the product, whereas `pushProduct` can push only required deltas which are not present on the target server.
-6. The `pushProduct` task can push required deltas to one or more configured target servers. When calling this task, you need to set according project properties, e.g. using `-Pserver=https://server:7701/api` or in `~/.gradle/gradle.properties`.
-7. Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
+4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files.
+5. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.
+6. If `buildProduct` built a product, this task will package it as a ZIP file. Note that a ZIP will always contain _all of_ the product, whereas `pushProduct` can push only required deltas which are not present on the target server.
+7. The `pushProduct` task can push required deltas to one or more configured target servers. When calling this task, you need to set according project properties, e.g. using `-Pserver=https://server:7701/api` or in `~/.gradle/gradle.properties`.
+8. Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
 
 Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](#app-infoyaml) and [`product-info.yaml`](#product-infoyaml) for all supported content.
 
