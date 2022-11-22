@@ -1,5 +1,14 @@
 @use "@angular/material" as mat;
 
+// TODO: Rework theme according to https://material.angular.io/guide/theming
+
+$mdc-typography-config: mat.define-typography-config(
+  $button: mat.define-typography-level(14px, 14px, 500, normal),
+);
+
+@include mat.all-component-typographies();
+
+@include mat.legacy-core(); // for checkbox
 @include mat.core();
 
 @import "app-common.scss";
@@ -16,12 +25,41 @@
 
 @mixin all-themes($theme) {
   @include mat.all-component-themes($theme);
+  @include mat.legacy-checkbox-theme($theme);
+
   @include common-classes($theme);
   @include bd-popup-theme($theme);
   @include bd-image-upload-theme($theme);
   @include bd-form-toggle-theme($theme);
 
   @include settings-shell-theme($theme);
+
+  $default-font-level: mat.define-typography-level(
+    $font-weight: 400,
+    $font-size: 14px,
+    $line-height: 1,
+    $letter-spacing: normal,
+  );
+
+  $button-font-level: mat.define-typography-level(
+    $font-weight: 500,
+    $font-size: 14px,
+    $line-height: 1,
+    $letter-spacing: normal,
+  );
+
+  $typography: mat.define-typography-config(
+    $body-1: $default-font-level,
+    $button: $button-font-level,
+  );
+  @include mat.all-component-typographies($typography);
+
+  // more than -1 will hide the floating labels.
+  @include mat.form-field-density(-1);
+
+  // -2 to achieve roughly the previous spacing.
+  @include mat.icon-button-density(-2);
+  @include mat.table-density(-2);
 
   $dark: map-get($theme, "is-dark");
   $primary: map-get($theme, "primary");
@@ -33,17 +71,20 @@
   $maintb-dark: map-get($theme, "main-toolbar-darker");
   $success: map-get($theme, "success");
 
+  .mat-mdc-form-field-focus-overlay {
+    pointer-events: none;
+  }
+
   // general element themings
   .mat-badge-content {
     background-color: rgb(194, 194, 194);
     color: black;
   }
-  .mat-row:hover,
-  .mat-card:hover {
+  .mat-mdc-row:hover,
+  .mat-mdc-card:hover {
     background-color: if($dark, #3e3e3e, #fafafa);
     transition: background-color 0.2s ease;
   }
-
   .mat-row-route-active,
   .mat-card-route-active,
   .mat-row-route-active:hover,

@@ -23,7 +23,6 @@
 }
 
 .local-server-type-wrapper-expanded {
-  transform: rotate(0deg);
   padding: 10px 0px;
 }
 
@@ -54,16 +53,6 @@
   width: 700px;
 
   position: relative;
-}
-
-.local-activity-collapsed {
-  top: 5px;
-  left: 5px;
-}
-
-.local-activity-expanded {
-  top: -5px;
-  left: -30px;
 }
 
 .local-nav-bar {

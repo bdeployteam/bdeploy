@@ -25,7 +25,6 @@ const COL_DESC: BdDataColumn<CleanupAction> = {
 @Component({
   selector: 'app-master-cleanup',
   templateUrl: './master-cleanup.component.html',
-  styleUrls: ['./master-cleanup.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
 export class MasterCleanupComponent {

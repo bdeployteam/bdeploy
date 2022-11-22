@@ -41,7 +41,7 @@ const colModTime: BdDataColumn<FileListEntry> = {
   id: 'lastMod',
   name: 'Last Modification',
   data: (r) => r.entry.lastModified,
-  width: '150px',
+  width: '155px',
   showWhen: '(min-width: 800px)',
   component: BdDataDateCellComponent,
 };

@@ -539,8 +539,7 @@ describe('Instance Process Config Tests', () => {
 
     cy.screenshot('Doc_InstanceConfig_EndpointsConfig');
 
-    // TODO: check endpoint after DCS-1428 is fixed
-    //cy.contains('div', 'myVersion - public/version').should('exist');
+    cy.contains('div', 'myVersion - public/version').should('exist');
   });
 
   it('Tests Client Config Whitelist', () => {

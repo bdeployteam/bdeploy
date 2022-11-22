@@ -19,7 +19,6 @@ import { bdValidationMessage } from '../../validators/messages';
 @Component({
   selector: 'app-bd-form-select',
   templateUrl: './bd-form-select.component.html',
-  styleUrls: ['./bd-form-select.component.css'],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

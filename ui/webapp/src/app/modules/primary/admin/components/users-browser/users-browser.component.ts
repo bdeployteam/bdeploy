@@ -45,6 +45,7 @@ export class UsersBrowserComponent {
     name: 'Last active login',
     data: (r) => r.lastActiveLogin,
     showWhen: '(min-width: 1600px)',
+    width: '155px',
     component: BdDataDateCellComponent,
   };
 

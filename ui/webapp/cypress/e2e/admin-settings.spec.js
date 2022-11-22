@@ -14,7 +14,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.inMainNavContent(() => {
-      cy.contains('.mat-tab-label', 'General').click();
+      cy.contains('.mat-mdc-tab', 'General').click();
 
       cy.contains('app-bd-form-toggle', 'Gravatar').within((toggle) => {
         cy.get('input[type="checkbox"]').should('not.be.checked');
@@ -87,7 +87,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.inMainNavContent(() => {
-      cy.contains('.mat-tab-label', 'LDAP Auth.').click();
+      cy.contains('.mat-mdc-tab', 'LDAP Auth.').click();
       cy.pressToolbarButton('New Server');
     });
     cy.inMainNavFlyin('add-ldap-server', () => {
@@ -135,7 +135,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.inMainNavContent(() => {
-      cy.contains('.mat-tab-label', 'Global Attributes').click();
+      cy.contains('.mat-mdc-tab', 'Global Attributes').click();
       cy.pressToolbarButton('New Attribute');
     });
 
@@ -223,7 +223,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.inMainNavContent(() => {
-      cy.contains('.mat-tab-label', 'Global Attributes').click();
+      cy.contains('.mat-mdc-tab', 'Global Attributes').click();
       cy.contains('tr', 'Attr1').within(() => {
         cy.get('button[data-cy^="Remove"]').click();
       });
@@ -241,7 +241,7 @@ describe('Admin UI Tests (Settings)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.inMainNavContent(() => {
-      cy.contains('.mat-tab-label', 'Plugins').click();
+      cy.contains('.mat-mdc-tab', 'Plugins').click();
       cy.pressToolbarButton('Upload Plugin');
     });
 

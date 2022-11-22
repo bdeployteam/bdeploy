@@ -130,7 +130,7 @@ Cypress.Commands.add('checkFileUpload', function (name) {
 Cypress.Commands.add('checkAndConfirmSnackbar', function (message) {
   cy.document()
     .its('body')
-    .find('snack-bar-container')
+    .find('mat-snack-bar-container')
     .within(() => {
       cy.contains('simple-snack-bar', message).should('exist');
       cy.contains('button', 'DISMISS').should('exist').click();

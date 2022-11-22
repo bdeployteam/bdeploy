@@ -8,7 +8,7 @@ import {
   Output,
   ViewEncapsulation,
 } from '@angular/core';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatLegacyCheckboxChange } from '@angular/material/legacy-checkbox';
 import { Subscription } from 'rxjs';
 import {
   BdDataGrouping,
@@ -128,7 +128,10 @@ export class BdDataGroupingPanelComponent<T>
     this.groupingChange.emit(this.grouping);
   }
 
-  /* template */ groupCheckChanged(group: string, change: MatCheckboxChange) {
+  /* template */ groupCheckChanged(
+    group: string,
+    change: MatLegacyCheckboxChange
+  ) {
     if (!this.grouping || !this.grouping.definition) {
       return;
     }

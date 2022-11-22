@@ -3,9 +3,10 @@
   mat-raised-button
   [attr.data-cy]="text"
   fxFlex="1 0 auto"
-  [ngClass]="isToggle && toggle ? 'bd-toggle-highlight' : color ? 'local-button-color-' + color : 'local-button-no-color'"
+  [ngClass]="disabled ? 'bd-button-disabled' : isToggle && toggle ? 'bd-toggle-highlight' : color ? 'local-button-color-' + color : 'local-button-no-color'"
   [class.local-button-expanded]="!collapsed"
   [class.local-button-collapsed]="collapsed"
+  [class.local-button-has-icon]="icon || svgIcon"
   [matTooltip]="tooltip ? text : ''"
   [matTooltipPosition]="tooltip"
   [disabled]="disabled"
@@ -19,7 +20,6 @@
   >
     <mat-icon
       *ngIf="icon && !svgIcon && !(loadingWhen$ | async)"
-      [fontSet]="fontSet"
       class="local-icon-position"
       [matBadge]="badge"
       [matBadgeHidden]="!badge"
@@ -46,7 +46,6 @@
       *ngIf="text && !collapsed"
       [ngClass]="(!!icon || !!svgIcon) && !(loadingWhen$ | async) ? 'local-label-position' : []"
       [fxFlex]="!icon && !svgIcon ? '1 0 auto' : '0 0 auto'"
-      [@scaleWidthFromZero]
       >{{ text }}</span
     >
     <ng-content></ng-content>

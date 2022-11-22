@@ -17,7 +17,7 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatLegacyCheckbox } from '@angular/material/legacy-checkbox';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import {
   MatTreeFlatDataSource,
@@ -267,7 +267,8 @@ export class BdDataTableComponent<T>
     private searchService: SearchService,
     private media: BreakpointObserver,
     private sanitizer: DomSanitizer,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private bp: BreakpointObserver
   ) {}
 
   ngOnInit(): void {
@@ -298,7 +299,7 @@ export class BdDataTableComponent<T>
       this.update();
     }
 
-    if (!!changes['checked'] && changes.checked.currentValue.length === 0) {
+    if (!!changes['checked'] && !changes.checked.currentValue?.length) {
       this.checkSelection.clear();
     }
   }
@@ -352,6 +353,8 @@ export class BdDataTableComponent<T>
         return true;
       })
       .map((c) => c.id);
+
+    this.cd.detectChanges();
   }
 
   bdOnSearch(value: string): void {
@@ -532,7 +535,7 @@ export class BdDataTableComponent<T>
     return 'help'; // default fallback.
   }
 
-  /* template */ toggleCheck(node: FlatNode<T>, cb: MatCheckbox) {
+  /* template */ toggleCheck(node: FlatNode<T>, cb: MatLegacyCheckbox) {
     if (!node.expandable) {
       const target = !this.checkSelection.isSelected(node);
       let confirm = of(true);

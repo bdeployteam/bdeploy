@@ -75,7 +75,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       } to selected node.`,
     icon: (r) => (r.template ? 'auto_fix_normal' : 'add'),
     action: (r) => this.addProcess(r),
-    width: '36px',
+    width: '42px',
   };
 
   /* template */ loading$ = new BehaviorSubject<boolean>(true);

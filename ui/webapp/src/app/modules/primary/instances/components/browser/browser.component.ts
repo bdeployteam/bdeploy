@@ -22,6 +22,7 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
 import { GroupsService } from '../../../groups/services/groups.service';
 import { InstancesColumnsService } from '../../services/instances-columns.service';
 import { InstancesService } from '../../services/instances.service';
+import { BdDataDisplayComponent } from './../../../../core/components/bd-data-display/bd-data-display.component';
 import { OverallStatusColumnComponent } from './overall-status-column/overall-status-column.component';
 
 @Component({
@@ -64,10 +65,12 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
         (x) => x.id === r.instanceConfiguration?.id
       ),
     component: OverallStatusColumnComponent,
-    width: '90px',
+    width: '110px',
   };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
+  @ViewChild(BdDataDisplayComponent)
+  private data: BdDataDisplayComponent<InstanceDto>;
 
   /* template */ getRecordRoute = (row: InstanceDto) => {
     return [
@@ -140,6 +143,10 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
         this.calculateDefaultGrouping(g);
       })
+    );
+
+    this.subscription.add(
+      this.instances.overallStates$.subscribe(() => this.data?.redraw())
     );
   }
 

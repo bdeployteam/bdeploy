@@ -1,27 +1,3 @@
-.bd-form-input-form-field .mat-form-field-flex {
-  padding: 0.25em 0.6em 0 0.6em !important;
-}
-
-.bd-form-input-form-field .mat-form-field-subscript-wrapper {
-  padding: 0 0.75em !important;
-  margin-top: 0.33em !important;
-}
-
-.bd-form-input-form-field .mat-form-field-label-wrapper {
-  top: -0.6em !important;
-  padding-top: 0.6em !important;
-}
-
-.bd-form-input-form-field .mat-input-element {
-  position: relative;
-  top: 0.33em;
-}
-
-.bd-form-input-suffix {
-  position: relative;
-  top: 0.13em;
-}
-
 .bd-form-input-form-field mat-hint {
   position: relative;
 
@@ -36,4 +12,11 @@
 .bd-form-input-form-field:not(.mat-focused) mat-hint {
   transform: translateY(-5px);
   opacity: 0;
+}
+
+.bd-form-input-prefix {
+  padding-left: 1.14em;
+}
+.bd-form-input-suffix {
+  padding-right: 1.14em;
 }

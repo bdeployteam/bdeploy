@@ -50,7 +50,7 @@ const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
   id: 'startTime',
   name: 'Started At',
   data: (r) => r.startTime,
-  width: '130px',
+  width: '155px',
   component: BdDataDateCellComponent,
 };
 

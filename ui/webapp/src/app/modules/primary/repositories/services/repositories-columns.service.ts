@@ -42,7 +42,7 @@ export class RepositoriesColumnsService {
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
     display: BdDataColumnDisplay.CARD,
-    data: () => '/assets/repository.svg',
+    data: () => '/assets/no-image.svg',
   };
 
   defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration>[] = [

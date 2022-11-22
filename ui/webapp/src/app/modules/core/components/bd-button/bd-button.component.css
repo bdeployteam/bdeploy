@@ -7,33 +7,23 @@
 }
 
 .local-button-color-toolbar {
-  background-color: var(--bd-main-bar);
-  color: var(--bd-main-bar-contrast);
+  background-color: var(--bd-main-bar) !important;
+  color: var(--bd-main-bar-contrast) !important;
 }
 
 .local-button-color-warn {
-  color: var(--bd-warn-contrast);
-  background-color: var(--bd-warn);
+  color: var(--bd-warn-contrast) !important;
+  background-color: var(--bd-warn) !important;
 }
 
 .local-button-color-accent {
-  color: var(--bd-accent-contrast);
-  background-color: var(--bd-accent);
+  color: var(--bd-accent-contrast) !important;
+  background-color: var(--bd-accent) !important;
 }
 
 .local-button-color-primary {
-  color: var(--bd-primary-contrast);
-  background-color: var(--bd-primary);
-}
-
-.local-icon-position {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-}
-
-.local-label-position {
-  padding-left: 26px;
+  color: var(--bd-primary-contrast) !important;
+  background-color: var(--bd-primary) !important;
 }
 
 .local-button-collapsed {
@@ -41,6 +31,17 @@
   padding: 0 6px;
   min-height: 36px;
   min-width: 36px;
+
+  place-content: flex-start;
+}
+
+.local-button-expanded .local-icon-position {
+  padding-right: 5px;
+  margin-left: -4px;
+}
+
+.local-button-expanded.local-button-has-icon {
+  place-content: flex-start;
 }
 
 .local-button-expanded {

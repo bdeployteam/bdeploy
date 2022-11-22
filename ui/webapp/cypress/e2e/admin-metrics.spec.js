@@ -13,11 +13,11 @@ describe('Admin UI Tests (Metrics)', () => {
     cy.contains('a', 'Metrics').click();
 
     cy.inMainNavContent(() => {
-      cy.contains('.mat-tab-label', 'HTTP').click();
-      cy.contains('.mat-tab-label', 'HIVE').click();
+      cy.contains('.mat-mdc-tab', 'HTTP').click();
+      cy.contains('.mat-mdc-tab', 'HIVE').click();
 
       cy.intercept({ method: 'GET', url: '/api/server-monitor' }).as('server');
-      cy.contains('.mat-tab-label', 'SERVER').click();
+      cy.contains('.mat-mdc-tab', 'SERVER').click();
       cy.wait('@server');
     });
   });

@@ -68,36 +68,44 @@
       >
         <mat-tab #generalTab fxLayout="column">
           <ng-template mat-tab-label
-            ><mat-icon [style.margin-right.px]="5">settings</mat-icon
-            >General</ng-template
+            ><div fxLayout="row" fxLayoutAlign="start center">
+              <mat-icon [style.margin-right.px]="5">settings</mat-icon>General
+            </div></ng-template
           >
           <app-general-tab></app-general-tab>
         </mat-tab>
         <mat-tab #oidcTab fxLayout="column">
           <ng-template mat-tab-label
-            ><mat-icon [style.margin-right.px]="5">security</mat-icon>OpenID
-            Connect</ng-template
+            ><div fxLayout="row" fxLayoutAlign="start center">
+              <mat-icon [style.margin-right.px]="5">security</mat-icon>OpenID
+              Connect
+            </div></ng-template
           >
           <app-oidc-tab #oidc></app-oidc-tab>
         </mat-tab>
         <mat-tab #ldapTab fxLayout="column">
           <ng-template mat-tab-label
-            ><mat-icon [style.margin-right.px]="5">security</mat-icon>LDAP
-            Auth.</ng-template
+            ><div fxLayout="row" fxLayoutAlign="start center">
+              <mat-icon [style.margin-right.px]="5">security</mat-icon>LDAP
+              Auth.
+            </div></ng-template
           >
           <app-ldap-tab #ldap></app-ldap-tab>
         </mat-tab>
         <mat-tab #attributeTab fxLayout="column">
           <ng-template mat-tab-label
-            ><mat-icon [style.margin-right.px]="5">more</mat-icon>Global
-            Attributes</ng-template
+            ><div fxLayout="row" fxLayoutAlign="start center">
+              <mat-icon [style.margin-right.px]="5">more</mat-icon>Global
+              Attributes
+            </div></ng-template
           >
           <app-attributes-tab #attributes></app-attributes-tab>
         </mat-tab>
         <mat-tab #pluginTab fxLayout="column">
           <ng-template mat-tab-label
-            ><mat-icon [style.margin-right.px]="5">extension</mat-icon
-            >Plugins</ng-template
+            ><div fxLayout="row" fxLayoutAlign="start center">
+              <mat-icon [style.margin-right.px]="5">extension</mat-icon>Plugins
+            </div></ng-template
           >
           <ng-template matTabContent>
             <app-plugins-tab></app-plugins-tab>

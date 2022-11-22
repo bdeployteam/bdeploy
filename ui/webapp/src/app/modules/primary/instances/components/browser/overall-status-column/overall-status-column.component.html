@@ -2,24 +2,21 @@
   <ng-container *ngIf="getStatus() as status; else noStatus">
     <mat-icon
       *ngIf="status.status === 'RUNNING'"
-      fontSet="material-icons-filled"
-      class="bd-success-text"
+      class="bd-success-text material-symbols-filled"
       matTooltip="Instance is running"
       matTooltipShowDelay="500"
       >play_arrow</mat-icon
     >
     <mat-icon
       *ngIf="status.status === 'STOPPED'"
-      fontSet="material-icons-filled"
-      class="bd-disabled-text"
+      class="bd-disabled-text material-symbols-filled"
       matTooltip="Instance is stopped"
       matTooltipShowDelay="500"
       >stop</mat-icon
     >
     <mat-icon
       *ngIf="status.status === 'WARNING'"
-      fontSet="material-icons-filled"
-      class="bd-warning-text"
+      class="bd-warning-text material-symbols-filled"
       [matTooltip]="status.messages?.join('\n')"
       matTooltipClass="tooltip-with-newline"
       matTooltipShowDelay="500"
@@ -35,8 +32,7 @@
   </ng-container>
   <ng-template #noStatus>
     <mat-icon
-      fontSet="material-icons-filled"
-      class="bd-disabled-text"
+      class="bd-disabled-text material-symbols-filled"
       matTooltip="No information available, or information timed out."
       matTooltipShowDelay="500"
       >help</mat-icon

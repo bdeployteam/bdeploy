@@ -9,7 +9,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatLegacyCheckbox } from '@angular/material/legacy-checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
@@ -26,7 +26,8 @@ export class BdFormToggleComponent implements ControlValueAccessor {
   @Input() appearance: 'slide' | 'checkbox' = 'checkbox';
   @Input() prefix: TemplateRef<any>;
 
-  @ViewChild(MatCheckbox, { static: false }) private checkbox: MatCheckbox;
+  @ViewChild(MatLegacyCheckbox, { static: false })
+  private checkbox: MatLegacyCheckbox;
   @ViewChild(MatSlideToggle, { static: false }) private slide: MatSlideToggle;
 
   /* template */ get value() {

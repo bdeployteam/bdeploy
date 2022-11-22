@@ -88,6 +88,6 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
 
   /** Manually trigger the configured navigation */
   public onClick(): boolean {
-    return this.rl.onClick();
+    return this.rl.onClick(0, false, false, false, false);
   }
 }

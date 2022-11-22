@@ -31,14 +31,14 @@ body {
  * screenshots, but they also cause tests to fail, since they may block clicks to elements
  * in cypress, even though they are invisible.
  */
-.ui-test .mat-tooltip-panel {
+.ui-test .mat-mdc-tooltip-panel {
   display: none;
 }
 
-.mat-tooltip-panel {
+.mat-mdc-tooltip-panel {
   pointer-events: none;
 }
 
-.bd-dialog-container .mat-dialog-container {
+.bd-dialog-container .mat-mdc-dialog-container {
   padding: 0;
 }

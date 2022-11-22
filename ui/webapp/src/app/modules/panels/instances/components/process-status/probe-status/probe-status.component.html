@@ -7,7 +7,7 @@
   >
     <div>{{ probe.type }}</div>
     <mat-icon
-      fontSet="material-icons-filled"
+      class="material-symbols-filled"
       [matTooltip]="'Status: ' + probe.status"
       [ngClass]="class"
       >{{ icon }}</mat-icon
@@ -15,6 +15,7 @@
     <div>{{ probe.time | date: 'HH:mm:ss' }}</div>
     <app-bd-button-popup text="Details" icon="info">
       <mat-card
+        appearance="outlined"
         [style.padding.px]="10"
         class="mat-typography"
         fxLayout="column"

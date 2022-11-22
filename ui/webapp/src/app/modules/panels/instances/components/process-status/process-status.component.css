@@ -6,3 +6,7 @@
   width: 64px;
   height: 64px;
 }
+
+.local-control-button > button {
+  height: 64px !important;
+}

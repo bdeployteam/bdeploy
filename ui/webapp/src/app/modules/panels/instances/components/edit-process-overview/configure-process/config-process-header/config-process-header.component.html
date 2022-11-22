@@ -1,5 +1,6 @@
 <ng-template #directorySelector>
   <mat-card
+    appearance="outlined"
     [style.padding.px]="10"
     [style.max-width.px]="300"
     class="mat-typography"
@@ -66,6 +67,7 @@
 
 <ng-template #directoryHelp>
   <mat-card
+    appearance="outlined"
     [style.padding.px]="10"
     [style.max-width.px]="1024"
     class="mat-typography"
@@ -157,7 +159,7 @@
         <app-config-desc-element
           card="cfg.control.attachStdin"
           class="local-field"
-          position="below-right"
+          position="left-below"
         >
           <app-bd-form-toggle
             label="Attach StdIn"

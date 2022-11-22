@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
@@ -60,6 +61,7 @@ const colPinnedValue: BdDataColumn<PinnedParameter> = {
   selector: 'app-process-status',
   templateUrl: './process-status.component.html',
   styleUrls: ['./process-status.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ uptime$ = new BehaviorSubject<string>(null);

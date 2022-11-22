@@ -37,6 +37,7 @@ export class ServersColumnsService {
     data: (r) => r.lastSync,
     icon: () => 'history',
     hint: BdDataColumnTypeHint.DETAILS,
+    width: '155px',
     component: BdDataDateCellComponent,
   };
 

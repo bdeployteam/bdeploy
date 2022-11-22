@@ -1,74 +1,37 @@
-/* Mirrored from https://fonts.googleapis.com/icon?family=Material+Icons+Outlined */
+@import "material-symbols";
 
-@font-face {
-  font-family: 'Material Icons Outlined';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(assets/gok-H7zzDkdnRel8-DQ6KAXJ69wP1tGnf4ZGhUce.woff2) format('woff2');
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
 }
 
-@font-face {
-  font-family: 'Material Icons Filled';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(assets/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
-}
-
-.material-icons {
-  font-family: 'Material Icons Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-}
-
-.material-icons-filled {
-  font-family: 'Material Icons Filled';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
+.material-symbols-filled {
+  font-variation-settings: "FILL" 1, "wght" 300, "GRAD" 0, "opsz" 24;
 }
 
 /* roboto-300 - latin */
 @font-face {
-  font-family: 'Roboto';
+  font-family: "Roboto";
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: local('Roboto Light'), local('Roboto-Light'), url('assets/roboto-v19-latin-300.woff2') format('woff2');
+  src: local("Roboto Light"), local("Roboto-Light"),
+    url("assets/roboto-v19-latin-300.woff2") format("woff2");
 }
 /* roboto-regular - latin */
 @font-face {
-  font-family: 'Roboto';
+  font-family: "Roboto";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local('Roboto'), local('Roboto-Regular'), url('assets/roboto-v19-latin-regular.woff2') format('woff2');
+  src: local("Roboto"), local("Roboto-Regular"),
+    url("assets/roboto-v19-latin-regular.woff2") format("woff2");
 }
 /* roboto-500 - latin */
 @font-face {
-  font-family: 'Roboto';
+  font-family: "Roboto";
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: local('Roboto Medium'), local('Roboto-Medium'), url('assets/roboto-v19-latin-500.woff2') format('woff2');
+  src: local("Roboto Medium"), local("Roboto-Medium"),
+    url("assets/roboto-v19-latin-500.woff2") format("woff2");
 }

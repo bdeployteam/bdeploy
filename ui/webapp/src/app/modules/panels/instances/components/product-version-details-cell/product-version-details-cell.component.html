@@ -1,17 +1,18 @@
 <ng-template #detailsPopup>
   <div fxLayout="row">
     <mat-card
+      appearance="outlined"
       [style.padding.px]="10"
       class="mat-typography local-details-popup-sizing"
       fxLayout="column"
       fxLayoutGap="5px"
     >
       <h2>Product Details</h2>
-      <mat-chip-list>
-        <mat-chip *ngFor="let label of labels"
-          ><strong>{{ label.a }}</strong>: {{ label.b }}</mat-chip
+      <mat-chip-listbox>
+        <mat-chip-option *ngFor="let label of labels"
+          ><strong>{{ label.a }}</strong>: {{ label.b }}</mat-chip-option
         >
-      </mat-chip-list>
+      </mat-chip-listbox>
     </mat-card>
   </div>
 </ng-template>

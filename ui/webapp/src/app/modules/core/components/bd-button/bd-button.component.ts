@@ -10,7 +10,6 @@ import {
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
-import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 
 export type BdButtonColorMode =
   | 'primary'
@@ -23,13 +22,11 @@ export type BdButtonColorMode =
   selector: 'app-bd-button',
   templateUrl: './bd-button.component.html',
   styleUrls: ['./bd-button.component.css'],
-  animations: [scaleWidthFromZero, scaleWidthToZero],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdButtonComponent implements AfterViewInit {
   @Input() icon: string;
   @Input() svgIcon: string;
-  @Input() fontSet: string;
   @Input() text: string;
   @Input() tooltip: TooltipPosition;
   @Input() badge: string | number;

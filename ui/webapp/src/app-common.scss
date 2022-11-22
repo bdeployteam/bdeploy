@@ -1,5 +1,5 @@
-@use '@angular/material' as mat;
-@import '@angular/material/theming';
+@use "@angular/material" as mat;
+@import "@angular/material/theming";
 
 /**
  * Classes required for every page's layout. A typical page should be built of three main divs as
@@ -61,7 +61,7 @@
  * The root style classes provide commonly used styling like highlights, non-theme coloring, shadows, etc.
  */
 @mixin root-style-classes($theme) {
-  $dark: map-get($theme, 'is-dark');
+  $dark: map-get($theme, "is-dark");
 
   /* A rectangular "card". This is different from mat-card in that it does not have rouded corners, *and* it does not have any spacing, margin or else associated. */
   .bd-rect-card {
@@ -75,8 +75,8 @@
   }
 
   .bd-toggle-highlight {
-    background-color: var(--bd-main-bar-darker);
-    color: var(--bd-main-bar-contrast);
+    background-color: var(--bd-main-bar-darker) !important;
+    color: var(--bd-main-bar-contrast) !important;
   }
 
   /* Use when wrapping a button in an <a> tag - will remove underlines on button contents */
@@ -167,22 +167,42 @@
   }
 
   .bd-glow-bg {
-    background: radial-gradient(circle, var(--bd-main-bar) 0%, var(--bd-main-bar-darker) 100%);
+    background: radial-gradient(
+      circle,
+      var(--bd-main-bar) 0%,
+      var(--bd-main-bar-darker) 100%
+    );
     color: var(--bd-main-bar-contrast);
   }
 
   .bd-glow-bg-warn {
-    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
+    background: radial-gradient(
+      circle,
+      var(--bd-warn) 0%,
+      var(--bd-warn-darker) 100%
+    );
     color: var(--bd-warn-contrast);
   }
 
   .bd-glow-bg-error {
-    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
+    background: radial-gradient(
+      circle,
+      var(--bd-warn) 0%,
+      var(--bd-warn-darker) 100%
+    );
     color: var(--bd-warn-contrast);
   }
 
-  $drag-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 800), mat.get-color-from-palette(mat.$yellow-palette, 200));
-  $border-color: if($dark, mat.get-color-from-palette(mat.$grey-palette, 300), mat.get-color-from-palette(mat.$grey-palette, 700));
+  $drag-color: if(
+    $dark,
+    mat.get-color-from-palette(mat.$grey-palette, 800),
+    mat.get-color-from-palette(mat.$yellow-palette, 200)
+  );
+  $border-color: if(
+    $dark,
+    mat.get-color-from-palette(mat.$grey-palette, 300),
+    mat.get-color-from-palette(mat.$grey-palette, 700)
+  );
   .bd-drag-card {
     background-color: $drag-color !important;
   }
@@ -222,24 +242,6 @@
   .bd-default-padding {
     margin-top: 10px;
     padding: 0px 10px 10px 10px;
-  }
-
-  th.mat-header-cell:not(last-of-type),
-  td.mat-cell:not(last-of-type),
-  td.mat-footer-cell:not(last-of-type) {
-    padding-right: 5px !important;
-  }
-
-  th.mat-header-cell:last-of-type,
-  td.mat-cell:last-of-type,
-  td.mat-footer-cell:last-of-type {
-    padding-right: 10px !important;
-  }
-
-  th.mat-header-cell:first-of-type,
-  td.mat-cell:first-of-type,
-  td.mat-footer-cell:first-of-type {
-    padding-left: 10px !important;
   }
 
   mat-stepper .mat-vertical-stepper-header {

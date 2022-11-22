@@ -14,12 +14,13 @@
     [cdkDropListDisabled]="!dragReorderMode"
     (cdkDropListDropped)="onDrop($event)"
     [trackBy]="trackNode"
+    [class.local-header-hidden]="headerHidden"
   >
     <caption style="display: none">
       {{ caption }}
     </caption>
 
-    <ng-container *ngIf="!headerHidden">
+    <ng-container>
       <tr mat-header-row *matHeaderRowDef="_visibleColumns; sticky: true"></tr>
     </ng-container>
 
@@ -49,9 +50,9 @@
     </ng-container>
 
     <!-- In case no data is available (empty data, filter, etc.)-->
-    <tr class="mat-row" *matNoDataRow>
+    <tr class="mdc-data-table__row" *matNoDataRow>
       <td
-        class="mat-cell"
+        class="mdc-data-table__cell"
         [attr.colspan]="_visibleColumns.length"
         class="bd-hint-text"
       >
@@ -137,6 +138,7 @@
               <button
                 *ngIf="row.expandable"
                 mat-icon-button
+                class="local-expand-button"
                 [style.marginLeft.px]="row.level * 24"
                 (click)="treeControl.toggle(row)"
                 aria-label="Expand / Collapse"

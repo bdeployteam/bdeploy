@@ -1,5 +1,5 @@
 .bd-form-toggle-form-field-wrapper {
-  padding: 0.86em 0.86em 0.86em 0.6em;
+  padding: 1.14em 1.14em 1.14em 1.14em;
 }
 
 .bd-form-toggle-slide-toggle {
@@ -16,17 +16,23 @@
   position: relative;
 }
 
+.bd-form-toggle-flex mat-checkbox {
+  position: relative;
+  top: -1px;
+  left: -4px;
+}
+
 .bd-form-toggle-suffix {
   white-space: nowrap;
   flex: none;
   position: relative;
 
-  top: -1px;
+  top: -3px;
   max-height: 20px;
-  padding-right: 14px;
+  padding-right: 18px;
 }
 
 .bd-form-toggle-suffix mat-icon {
-  font-size: 150%;
+  font-size: 24px;
   line-height: 1.125;
 }

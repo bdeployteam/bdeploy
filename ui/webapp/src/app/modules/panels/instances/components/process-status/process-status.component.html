@@ -131,7 +131,7 @@
         >
           <mat-icon
             fxFlex="1 0 auto"
-            fontSet="material-icons-filled"
+            class="material-symbols-filled"
             *ngIf="!(starting$ | async)"
             >play_arrow</mat-icon
           >
@@ -153,7 +153,7 @@
         >
           <mat-icon
             fxFlex="1 0 auto"
-            fontSet="material-icons-filled"
+            class="material-symbols-filled"
             *ngIf="!(stopping$ | async)"
             >stop</mat-icon
           >
@@ -175,7 +175,7 @@
         >
           <mat-icon
             fxFlex="1 0 auto"
-            fontSet="material-icons-filled"
+            class="material-symbols-filled"
             *ngIf="!(restarting$ | async)"
             >replay</mat-icon
           >
@@ -226,7 +226,7 @@
           [toggle]="false"
           [relative]="true"
           [route]="['console']"
-          icon="cast"
+          icon="terminal"
           text="Process Console"
         ></app-bd-panel-button>
         <ng-container *ngIf="uiEndpoints?.length">

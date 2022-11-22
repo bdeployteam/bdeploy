@@ -41,7 +41,7 @@ export class ProcessesColumnsService {
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => (r.id ? r.id : 'New Process'),
     isId: true,
-    width: '120px',
+    width: '135px',
     showWhen: '(min-width:1000px)',
     classes: (r) => (r.id ? [] : ['bd-description-text']),
   };

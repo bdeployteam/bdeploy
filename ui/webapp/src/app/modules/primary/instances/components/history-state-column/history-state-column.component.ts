@@ -18,7 +18,10 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
   /* template */ public stateIcon: string;
 
   constructor(private state: InstanceStateService) {
-    this.subscription = this.state.state$.subscribe((s) => (this.states = s));
+    this.subscription = this.state.state$.subscribe((s) => {
+      this.states = s;
+      this.ngOnInit(); // re-calculate
+    });
   }
 
   ngOnInit(): void {
@@ -55,7 +58,7 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
 
   private getStateClass(): string[] {
     if (this.states?.activeTag === this.record.instanceTag) {
-      return [];
+      return ['material-symbols-filled'];
     }
 
     if (

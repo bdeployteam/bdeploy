@@ -1,119 +1,161 @@
-@use '@angular/material' as mat;
-@import '@angular/material/theming';
+@use "@angular/material" as mat;
+@import "@angular/material/theming";
 
-@mixin _bd-popup-theme-colored($name, $card-color) {
-  .bd-popup-panel-below-left-#{$name} > *::after {
-    content: '';
+@mixin _bd-popup-theme-colored($name, $card-color, $outline-var) {
+  .bd-popup-panel-below-left-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
     transform: rotate(45deg);
     top: -6px;
     right: 12px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 
-  .bd-popup-panel-above-left-#{$name} > *::after {
-    content: '';
+  .bd-popup-panel-above-left-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
-    transform: rotate(45deg);
-    top: calc(100% - 6px);
+    transform: rotate(225deg);
+    top: calc(100% - 8px); // includes card border - kinda hacky but works.
     right: 12px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} 2px 2px 2px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 
-  .bd-popup-panel-below-right-#{$name} > *::after {
-    content: '';
+  .bd-popup-panel-below-right-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
     transform: rotate(45deg);
     top: -6px;
     left: 18px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 
-  .bd-popup-panel-above-right-#{$name} > *::after {
-    content: '';
+  .bd-popup-panel-above-right-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
-    transform: rotate(45deg);
-    top: calc(100% - 6px);
+    transform: rotate(225deg);
+    top: calc(100% - 8px); // includes card border - kinda hacky but works.
     left: 18px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} 2px 2px 2px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 
-  .bd-popup-panel-left-below-#{$name} > *::after {
-    content: '';
+  .bd-popup-panel-left-below-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
     transform: rotate(135deg);
     top: 12px;
     right: -6px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 
-  .bd-popup-panel-right-below-#{$name} > *::after {
-    content: '';
+  .bd-popup-panel-right-below-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
     transform: rotate(315deg);
     top: 12px;
     left: 0px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 
-  .bd-popup-panel-left-above-#{$name} > *::after {
-    content: '';
+  .bd-popup-panel-left-above-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
     transform: rotate(135deg);
     top: calc(100% - 25px);
     right: -6px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 
-  .bd-popup-panel-right-above-#{$name} > *::after {
-    content: '';
+  .bd-popup-panel-right-above-#{$name}::after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background-color: $card-color;
+    color: $card-color;
     position: absolute;
     transform: rotate(315deg);
     top: calc(100% - 25px);
     left: 0px;
     margin-left: -6px;
-    border-width: 6px;
+    border-width: 1px;
     border-style: solid;
-    border-color: $card-color $card-color $card-color $card-color;
-    box-shadow: #{rgba(#000, 1 * 0.12)} -2px -3px 4px;
+    border-color: $outline-var $card-color $card-color $outline-var;
   }
 }
 
 /** These classes are applied to the panel of the popup, thus they MUST be global */
 @mixin bd-popup-theme($theme) {
-  $dark: map-get($theme, 'is-dark');
-  $bg: map-get($theme, 'background');
+  $dark: map-get($theme, "is-dark");
+  $bg: map-get($theme, "background");
 
-  @include _bd-popup-theme-colored('default', map-get($bg, 'card'));
-  @include _bd-popup-theme-colored('primary', mat.get-color-from-palette(map-get($theme, 'primary')));
-  @include _bd-popup-theme-colored('accent', mat.get-color-from-palette(map-get($theme, 'accent')));
-  @include _bd-popup-theme-colored('warn', mat.get-color-from-palette(map-get($theme, 'warn')));
+  $outline: if(
+    $dark,
+    #595959,
+    #e0e0e0
+  ); // TODO: figure out better way to achieve this when re-writing themes.
+
+  @include _bd-popup-theme-colored("default", map-get($bg, "card"), $outline);
+  @include _bd-popup-theme-colored(
+    "primary",
+    mat.get-color-from-palette(map-get($theme, "primary")),
+    $outline
+  );
+  @include _bd-popup-theme-colored(
+    "accent",
+    mat.get-color-from-palette(map-get($theme, "accent")),
+    $outline
+  );
+  @include _bd-popup-theme-colored(
+    "warn",
+    mat.get-color-from-palette(map-get($theme, "warn")),
+    $outline
+  );
 }

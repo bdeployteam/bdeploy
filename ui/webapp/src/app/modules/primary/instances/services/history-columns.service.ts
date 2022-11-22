@@ -10,7 +10,7 @@ const historyTimestampColumn: BdDataColumn<HistoryEntryDto> = {
   id: 'timestamp',
   name: 'Date/Time',
   data: (r) => r.timestamp,
-  width: '135px',
+  width: '155px',
   showWhen: '(min-width: 900px)',
   component: BdDataDateCellComponent,
 };

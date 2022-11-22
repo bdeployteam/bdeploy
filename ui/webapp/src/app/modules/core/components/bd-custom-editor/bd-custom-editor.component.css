@@ -6,6 +6,6 @@
   background-color: white;
 }
 
-.mat-dialog-actions {
+.mat-mdc-dialog-actions {
   justify-content: flex-end;
 }

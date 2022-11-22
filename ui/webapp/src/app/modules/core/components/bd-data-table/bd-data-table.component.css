@@ -20,6 +20,15 @@
   display: none;
 }
 
+.local-expand-button {
+  width: 24px;
+  height: 24px;
+}
+
+.local-header-hidden thead {
+  display: none;
+}
+
 .cdk-drag-preview {
   display: inline-table;
   vertical-align: middle;

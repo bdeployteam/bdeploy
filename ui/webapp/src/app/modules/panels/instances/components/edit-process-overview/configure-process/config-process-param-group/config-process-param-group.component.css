@@ -17,7 +17,7 @@
   position: relative;
   top: 5px;
   width: 30px;
-  height: 34px;
+  height: 42px;
 
   background-color: var(--bd-bg-disabled);
 
@@ -63,29 +63,4 @@
 
 .local-form-input-actions > * {
   margin-left: 10px;
-}
-
-.local-toggle-group {
-  height: 21px;
-}
-
-.local-toggle-group .mat-button-toggle-label-content {
-  padding: 2px 5px !important;
-
-  display: flex;
-  flex-direction: column;
-
-  justify-content: center;
-  align-items: center;
-}
-
-.local-toggle-group .mat-button-toggle-checked {
-  background-color: var(--bd-accent);
-  color: var(--bd-accent-contrast) !important;
-}
-
-.local-toggle-group mat-icon {
-  font-size: 16px !important;
-  width: 16px;
-  height: 16px;
 }

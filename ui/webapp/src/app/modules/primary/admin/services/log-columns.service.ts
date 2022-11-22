@@ -24,7 +24,7 @@ const COL_SIZE: BdDataColumn<RemoteDirectoryEntry> = {
   id: 'size',
   name: 'Size',
   data: (r) => r.size,
-  width: '80px',
+  width: '100px',
   component: BdDataSizeCellComponent,
 };
 
@@ -32,7 +32,7 @@ const COL_MODIFIED: BdDataColumn<RemoteDirectoryEntry> = {
   id: 'modified',
   name: 'Last Modified',
   data: (r) => r.lastModified,
-  width: '130px',
+  width: '155px',
   component: BdDataDateCellComponent,
 };
 

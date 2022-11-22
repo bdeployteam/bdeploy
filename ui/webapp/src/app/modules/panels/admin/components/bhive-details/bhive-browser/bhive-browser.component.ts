@@ -44,7 +44,7 @@ export class BHiveBrowserComponent implements OnDestroy {
     id: 'size',
     name: 'Size',
     data: (r) => (r.size > 0 ? r.size : null),
-    width: '80px',
+    width: '120px',
     component: BdDataSizeCellComponent,
   };
 

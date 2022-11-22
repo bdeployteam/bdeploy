@@ -30,10 +30,10 @@
               class="local-config"
               *ngIf="!(narrow$ | async)"
             >
-              <mat-icon fontSet="material-icons-filled">play_arrow</mat-icon>
+              <mat-icon class="material-symbols-filled">play_arrow</mat-icon>
               <div>{{ group.startType }} - {{ group.startWait }}</div>
               <mat-divider [vertical]="true"></mat-divider>
-              <mat-icon fontSet="material-icons-filled">stop</mat-icon>
+              <mat-icon class="material-symbols-filled">stop</mat-icon>
               <div>{{ group.stopType }}</div>
             </div>
             <mat-divider [vertical]="true"></mat-divider>

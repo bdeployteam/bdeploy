@@ -22,7 +22,6 @@
       <div fxLayout="column" fxLayoutGap="10px">
         <app-bd-button
           [collapsed]="false"
-          fontSet="material-icons-filled"
           icon="play_arrow"
           text="Start Instance"
           (click)="doStart(instance)"
@@ -31,7 +30,6 @@
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
-          fontSet="material-icons-filled"
           icon="stop"
           text="Stop Instance"
           (click)="doStop(instance)"
@@ -40,7 +38,6 @@
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
-          fontSet="material-icons-filled"
           icon="replay"
           text="Restart Instance"
           (click)="doRestart(instance)"
@@ -66,7 +63,6 @@
         </div>
         <app-bd-button
           [collapsed]="false"
-          fontSet="material-icons-filled"
           icon="play_arrow"
           text="Start Selected Processes"
           (click)="doStartMulti(instance)"
@@ -75,7 +71,6 @@
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
-          fontSet="material-icons-filled"
           icon="stop"
           text="Stop Selected Processes"
           (click)="doStopMulti(instance)"
@@ -84,7 +79,6 @@
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
-          fontSet="material-icons-filled"
           icon="replay"
           text="Restart Selected Processes"
           (click)="doRestartMulti(instance)"

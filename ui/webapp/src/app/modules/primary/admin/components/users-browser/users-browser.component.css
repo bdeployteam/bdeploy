@@ -6,12 +6,12 @@
   position: absolute;
 }
 
-.mat-header-cell {
+.mat-mdc-header-cell {
   padding-left: 10px;
   padding-right: 10px;
 }
 
-.mat-cell {
+.mat-mdc-cell {
   padding-left: 10px;
   padding-right: 10px;
 }
