@@ -4,8 +4,20 @@
     header="Process {{ processConfig?.name }}"
   >
     <div fxFlex="1 0 auto"></div>
-    <app-process-status-icon [record]="processConfig"></app-process-status-icon>
+    <app-process-status-icon
+      [record]="processConfig"
+      fxLayout="row"
+      fxLayoutAlign="center center"
+    ></app-process-status-icon>
     <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-button
+      text="Jump to Configuration"
+      icon="settings"
+      tooltip="below"
+      (click)="
+          areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, instances.current$.value.instanceConfiguration.id], ['panels', 'instances', 'config', 'process', nodeCfg.nodeName, processConfig.id])
+        "
+    ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <app-bd-notification-card

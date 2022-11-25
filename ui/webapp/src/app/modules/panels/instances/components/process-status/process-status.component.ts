@@ -15,6 +15,7 @@ import {
   ApplicationStartType,
   HttpEndpoint,
   HttpEndpointType,
+  InstanceNodeConfigurationDto,
   ParameterType,
   ProcessDetailDto,
   ProcessProbeResultDto,
@@ -27,6 +28,7 @@ import {
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -78,6 +80,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   /* template */ isStartPlanned: boolean;
   /* template */ processDetail: ProcessDetailDto;
   /* template */ processConfig: ApplicationConfiguration;
+  /* template */ nodeCfg: InstanceNodeConfigurationDto;
   /* template */ startType: 'Instance' | 'Manual' | 'Confirmed Manual';
   /* template */ pinnedParameters: PinnedParameter[] = [];
   /* template */ pinnedColumns: BdDataColumn<PinnedParameter>[] = [
@@ -105,7 +108,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     private cfg: ConfigService,
     private route: ActivatedRoute,
     private systems: SystemsService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    public areas: NavAreasService
   ) {}
 
   ngOnInit(): void {
@@ -122,12 +126,19 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.startType = this.formatStartType(
         this.processConfig?.processControl.startType
       );
+      this.nodeCfg = nodes?.nodeConfigDtos?.find(
+        (n) =>
+          n.nodeConfiguration.applications.findIndex(
+            (a) => a.id === config?.id
+          ) !== -1
+      );
 
       const app = nodes?.applications?.find(
         (a) =>
           a.key.name === config?.application?.name &&
           a.key.tag === config?.application?.tag
       );
+
       if (app) {
         const system = systems?.find(
           (s) => s.key.name === active?.instanceConfiguration?.system?.name
