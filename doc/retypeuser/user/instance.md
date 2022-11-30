@@ -2,7 +2,9 @@
 order: 6
 icon: project
 ---
-# Instance Dashboard
+
+# Instances
+## Instance Dashboard
 
 The [Instance Dashboard](/user/instance/#instance-dashboard) is the central location for managing an instance. It provides an overview about all configured **Processes** and on which nodes they are running. Each **Process** is represented by an entry on the according node.
 
@@ -24,7 +26,7 @@ Once the instance has been [configured](/user/instance/#instance-configuration),
 For more information, see [Process Control](/user/processcontrol/#process-control)
 !!!
 
-# Instance Configuration
+## Instance Configuration
 
 The first step is to select the desired and required nodes used in the instance. The **master** node is enabled by default, the virtual **Client Applications** node is always present if client applications exist in the **product**. Additional nodes can be selected from the **Instance Settings**'s **Manage Nodes** section.
 
@@ -56,7 +58,7 @@ When changing configuration of processes, you will note a colored border next to
 ![Configuration Validation](/images/Doc_InstanceConfigValidation.png){width=480}
 :::
 
-## Local Changes
+### Local Changes
 
 **BDeploy** keeps track of any changes performed on any of the [Instance Configuration](/user/instance/#instance-configuration) pages panels. These changes can be viewed by pressing the [ **Local Changes** ] toolbar button.
 
@@ -70,7 +72,7 @@ You can [ **Undo** ] and [ **Redo** ] changes. Even dismissable messages (on pro
 ![Local Changes](/images/Doc_InstanceConfigCompareChanges.png){width=480}
 :::
 
-## Process Settings
+### Process Settings
 
 A **process** is started by executing the **start** command that is defined by the **application**. The parameters that are passed to the **process** are configured on the **Process Setting** panel. Click a **process** to access its settings panel.
 
@@ -98,7 +100,7 @@ Hovering the mouse over a parameter will show a small popup that contains a thor
 You can use the _Search Bar_ to search for and filter parameters even though they are not shown as table. Groups will be hidden from the page unless a parameter matches - this includes optional (not yet configured) parameters.
 !!!
 
-### Copy & Paste
+#### Copy & Paste
 
 You can copy a **process** configuration by accessing its **process settings** panel. Use the [ **Copy to Clipboard** ] button to copy the configuration to the clipboard. You can paste the configuration by accessing the [ **Add Application...** ] button of the desired **node**. Use the [ **Paste** ] button to paste the configuration from the clipboard.
 
@@ -110,7 +112,7 @@ You can copy a **process** configuration by accessing its **process settings** p
 You need to grant **BDeploy** access to the PCs Clipboard for the [ **Paste** ] button to appear in the **node**'s **application** panel.
 !!!
 
-### Optional Parameters
+#### Optional Parameters
 
 **Optional parameters** can be selected for each group using the [ **Select Parameters...** ] button present on the header of each parameter group.
 
@@ -120,7 +122,7 @@ You need to grant **BDeploy** access to the PCs Clipboard for the [ **Paste** ] 
 
 Add an optional parameter by clicking the [ **Add** ] button in front of it. You can also remove an optional parameter by clicking the [ **Remove** ] button in front of it.
 
-### Custom Parameters
+#### Custom Parameters
 
 **Custom parameters** can be maintained in a dedicated parameter group which is always present. Because all **parameters** must have a determined sequence, **custom parameters** must define a **predecessor** parameter after which they are put on the command line. If no **predecessor** is defined, the parameter will end up **first** on the command line.
 
@@ -130,7 +132,7 @@ Click the [ **Add** ] button in the **Custom Parameters** group to add a new **c
 ![Add Custom Parameter](/images/Doc_InstanceConfigAddCustomParam.png){width=480}
 :::
 
-### Global Parameters
+#### Global Parameters
 
 **Global Parameters** are valid for all **Processes** of an **Instance**. They are also configured in the **Process**, but changes are copied to all other processes that also use this parameter. **Global parameters** are matched by their parameter ID, and marked with a globe icon in the **parameter configuration** panel.
 
@@ -138,11 +140,11 @@ Click the [ **Add** ] button in the **Custom Parameters** group to add a new **c
 **Global Parameters** have been deprecated in favor of [System Variables](/user/instancegroup/#system-variables) and [Instance Variables](/user/instance/#instance-variables).
 !!!
 
-### Conditional Parameters
+#### Conditional Parameters
 
 **Conditional parameters** are parameters which are only configurable if a specific dependent parameter exists or has a certain value. These parameters are hidden until the dependent parameter meets the conditions requirements.
 
-### Link Expressions
+#### Link Expressions
 
 Link expressions can be used on all process parameters (as well as for endpoint configuration, inside configuration files, etc.). The **BDeploy** UI provides content assis for link expressions once a parameter editor is switched to expression mode, which is done using the toggle in front of each parameter. Each parameter is _either_ a plain value or a link expression, depending on the toggle.
 
@@ -154,7 +156,7 @@ The content assist will propose categories of [Variable Expansions](/power/varia
 
 See [Variable Expansions](/power/variables/#variable-expansions) for more details.
 
-### Command Line Preview
+#### Command Line Preview
 
 A preview of the command that is executed to launch this process can be viewed by expanding the **Command Line Preview** section. The preview is especially useful in case of custom parameters to ensure that they are added as expected in the correct order.
 
@@ -162,7 +164,7 @@ A preview of the command that is executed to launch this process can be viewed b
 ![Preview Command Line with Custom Parameter](/images/Doc_InstanceConfigPreview.png){width=480}
 :::
 
-### Allowable Configuration Directories
+#### Allowable Configuration Directories
 
 !!!info Note
 This section applies to `CLIENT` applications only.
@@ -178,7 +180,7 @@ Thus it is possible to **whitelist** certain configuration directories in the co
 
 Select one or more directories to have those installed to the PC running the `CLIENT` application in addition to server nodes.
 
-## Instance Variables
+### Instance Variables
 
 **Instance Variables** have been introduced along with their even more global counterpart [System Variables](/user/instancegroup/#system-variables). **Instance Variables** replace the concept of [Global Parameters](/user/instance/#global-parameters). They offer a more flexible - and along with [System Variables](/user/instancegroup/#system-variables) also a more powerful - way of achieving the same result.
 
@@ -196,7 +198,7 @@ The value of an **Instance Variable** can not only be a plain value of the selec
 
 Once created **Instance Variables** can be referenced from all other [Link Expressions](/user/instance/#link-expressions), e.g. on process parameters, configuration files, etc.
 
-### Migration from Global Parameters to Instance Variables
+#### Migration from Global Parameters to Instance Variables
 
 Since **Instance Variables** are the successor concept for **Global Parameters** (those have been deprecated), there is a migration path.
 
@@ -217,7 +219,7 @@ This brings the instance into a state where it is safe to either update **BDeplo
 This migration must be done regardless of the product being updated. Without the migration, global parameters will turn into "normal" parameters at some point. If they still contain a plain value at that point in time (and not a [Link Expression](/user/instance/#link-expressions)) it will stay this way, and **each** of the formerly "connected" parameters (through the global mechanism) will have its own value and needs to be configured separately.
 !!!
 
-## Configuration Files
+### Configuration Files
 
 The **configuration files** of all **Processes** of an **Instance** are maintained together in one place. It can be opened by clicking on the [ **Configuration Files** ] button in the **Instance Settings** panel. The initial set of **configuration files** is derived from the default set delivered with the product, see [`product-info.yaml`](/power/product/#product-infoyaml).
 
@@ -243,7 +245,7 @@ Online editing is only possible for text files. Binary files like ZIP, PDF, etc.
 Changes done in configuration files must be **saved** and they result in a new **instance version** that must be **installed** and **activated** so that the changes have an impact, much the same as **any** other change in the [Instance Configuration](/user/instance/#instance-configuration).
 !!!
 
-## Change Product Version
+### Change Product Version
 
 **Instances** are based on a **product version**. While the **Product** of the **Instance** cannot be changed afterwards, the **Version** can be chosen from the available **product versions** (upgrade to a newer version / downgrade to an older version). 
 
@@ -269,7 +271,7 @@ Changing the version can be done by clicking on the [ **Upgrade** ] or [ **Downg
 Changing the **product version** will never change the **Configuration Files** of the **Instance**. In case configuration file templates change from one product version to the other, an update hint will be shown. You can then manully update configuration files as needed, see chapter [Configuration Files](/user/instance/#configuration-files).
 !!!
 
-## Banner Message
+### Banner Message
 
 A banner message can be created for an **Instance**, which is displayed very clearly at the top of the overview dialog. You can choose from a series of predefined colors, so that depending on the urgency or content of the message a suitable color can be selected.
 
@@ -285,7 +287,7 @@ Banner messages are maintained on instance level and are not versioned, i.e. the
 
 The banner is shown in the [Instance Overview](/user/instancegroup/#create-new-instances) (as tooltip on the instance), in the [Instance Dashboard](/user/instance/#instance-dashboard) and in the [Instance Configuration](/user/instance/#instance-configuration) pages.
 
-## Import/Export
+### Import/Export
 
 Instance versions can be exported and downloaded from the [Instance History](/user/history/#instance-history). This will download this specific instance version's raw data as a _ZIP_. The _ZIP_ can be re-imported using the **Instance Settings** panel to create a new **instance version** which has that exported instances content.
 
@@ -293,7 +295,7 @@ Instance versions can be exported and downloaded from the [Instance History](/us
 This mechanism allows access to the most internal data structures of **BDeploy**. Great care has to be taken to not damage any of the data when manipulating the _ZIP_ files content manually.
 !!!
 
-## Application Templates
+### Application Templates
 
 A product may contain **Application Templates**. These are pre-defined configurations for applications, resulting in a more complete process configuration when added to the target node.
 
@@ -309,7 +311,7 @@ The process configuration is created from the application template using the giv
 You will notice that the name of the process now matches the name of the template, not the name of the underlying application.
 !!!
 
-## Instance Templates
+### Instance Templates
 
 A product can define and include **Instance Templates**. These templates can be applied on an instance (e.g. after creating a new instance). They can define processes just like **Application Templates**, in fact they typically include existing **Application Templates**.
 
@@ -347,7 +349,7 @@ Clicking [ **Confirm** ] will create the processes defined in the template. The 
 ![Applied Instance Templates](/images/Doc_InstanceTemplatesDone.png){width=480}
 :::
 
-## Network Ports
+### Network Ports
 
 The **Manage Network Ports** panel can be reached from the **Instance Settings** panel. This panel provides a concise overview of all ports (`CLIENT_PORT`, `SERVER_PORT` and `URL` parameters) used in the **Instance**.
 
@@ -355,7 +357,7 @@ The [ **Shift Ports** ] action allows to bulk edit selected port parameters and 
 
 The [ **Export CSV** ] action allows to export a CSV list of all ports configured in the system. This can be used to pass on information to external partners, for instance for further firewall configuration, etc.
 
-## Process Control Groups
+### Process Control Groups
 
 **Processes** can be grouped into **Process Control Groups**. Those groups dictate the order in which processes are started and stopped, as well as whether process startup is awaited - or not.
 
@@ -382,3 +384,7 @@ Each `SERVER` node automatically uses **Process Control Groups** and is initiali
 :::
 
 **Process Control Groups** themselves can be re-ordered using the [ **Move Up** ] and [ **Move Down** ] buttons.
+
+### Deleting an Instance
+
+An instance can be deleted from the **Instance Configuration** page, in the **Instance Settings** panel.
