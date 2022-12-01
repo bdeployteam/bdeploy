@@ -1,13 +1,15 @@
 package io.bdeploy.jersey;
 
-import jakarta.inject.Inject;
-import jakarta.ws.rs.ext.ContextResolver;
-import jakarta.ws.rs.ext.Provider;
+import java.util.Collections;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.JacksonHelper.MapperType;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ext.ContextResolver;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * Provides a properly configured {@link ObjectMapper} used for
@@ -19,11 +21,13 @@ public class JerseyObjectMapper implements ContextResolver<ObjectMapper> {
     @Inject
     Iterable<Module> additionalModules;
 
+    private final ObjectMapper mapper;
+
     /**
      * Constructor used on the server with injection
      */
     public JerseyObjectMapper() {
-        // nothing
+        this(Collections.emptyList());
     }
 
     /**
@@ -31,15 +35,16 @@ public class JerseyObjectMapper implements ContextResolver<ObjectMapper> {
      */
     public JerseyObjectMapper(Iterable<Module> additional) {
         additionalModules = additional;
+        mapper = createMapper();
     }
 
     @Override
     public ObjectMapper getContext(Class<?> type) {
-        return createDefaultMapper();
+        return mapper;
     }
 
-    private ObjectMapper createDefaultMapper() {
-        final ObjectMapper result = JacksonHelper.createDefaultObjectMapper();
+    private ObjectMapper createMapper() {
+        final ObjectMapper result = JacksonHelper.createObjectMapper(MapperType.JSON);
 
         for (Module m : additionalModules) {
             result.registerModule(m);

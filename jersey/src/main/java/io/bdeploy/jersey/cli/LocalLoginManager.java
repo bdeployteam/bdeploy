@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -59,7 +58,7 @@ public class LocalLoginManager {
 
             try (OutputStream os = Files.newOutputStream(getDataFile(), StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC)) {
-                JacksonHelper.createObjectMapper(MapperType.JSON).writeValue(os, data);
+                JacksonHelper.getDefaultJsonObjectMapper().writeValue(os, data);
             }
         } catch (IOException e) {
             log.error("Cannot write local login data to {}", getDataFile(), e);
@@ -73,7 +72,7 @@ public class LocalLoginManager {
             }
 
             try (InputStream is = Files.newInputStream(getDataFile())) {
-                return JacksonHelper.createObjectMapper(MapperType.JSON).readValue(is, LocalLoginData.class);
+                return JacksonHelper.getDefaultJsonObjectMapper().readValue(is, LocalLoginData.class);
             }
         } catch (IOException e) {
             log.error("Cannot read local login data from {}", getDataFile(), e);

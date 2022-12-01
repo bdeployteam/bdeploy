@@ -412,7 +412,7 @@ public class SecurityHelper {
     }
 
     private static ObjectMapper getMapper() {
-        return JacksonHelper.createDefaultObjectMapper();
+        return JacksonHelper.getDefaultJsonObjectMapper();
     }
 
     private static String encode(byte[] bytes) {

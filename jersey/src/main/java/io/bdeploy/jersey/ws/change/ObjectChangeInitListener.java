@@ -10,11 +10,8 @@ import org.glassfish.grizzly.websockets.WebSocketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.JerseyAuthenticationProvider;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeInitDto;
 import jakarta.ws.rs.core.Response.Status;
@@ -33,7 +30,6 @@ final class ObjectChangeInitListener extends WebSocketAdapter {
     private final KeyStore authStore;
     private final WebSocket socket;
     private final ScheduledFuture<?> kicker;
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     ObjectChangeInitListener(ObjectChangeWebSocket manager, KeyStore authStore, WebSocket socket, ScheduledFuture<?> kicker) {
         this.manager = manager;
@@ -46,7 +42,7 @@ final class ObjectChangeInitListener extends WebSocketAdapter {
     public void onMessage(WebSocket s, String text) {
         ObjectChangeInitDto init;
         try {
-            init = serializer.readValue(text, ObjectChangeInitDto.class);
+            init = JacksonHelper.getDefaultJsonObjectMapper().readValue(text, ObjectChangeInitDto.class);
         } catch (IOException e) {
             log.error("Cannot read init DTO", e);
             s.close(Status.UNAUTHORIZED.getStatusCode(), "Invalid Init Message");

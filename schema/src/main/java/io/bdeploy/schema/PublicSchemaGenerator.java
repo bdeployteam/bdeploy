@@ -35,7 +35,7 @@ public class PublicSchemaGenerator {
         JacksonModule jm = new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED,
                 JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS);
 
-        SchemaGeneratorConfigBuilder cfgBuilder = new SchemaGeneratorConfigBuilder(JacksonHelper.createDefaultObjectMapper(),
+        SchemaGeneratorConfigBuilder cfgBuilder = new SchemaGeneratorConfigBuilder(JacksonHelper.getDefaultJsonObjectMapper(),
                 SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON).with(jm);
 
         // include all methods which are there for compatibility mapping of properties. jackson module filters only those with annotation.

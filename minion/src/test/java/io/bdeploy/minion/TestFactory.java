@@ -21,7 +21,6 @@ import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -221,7 +220,7 @@ public class TestFactory {
         Path appPath = tmp.resolve("app");
         PathHelper.mkdirs(appPath);
         Files.write(appPath.resolve(ApplicationDescriptor.FILE_NAME),
-                JacksonHelper.createObjectMapper(MapperType.YAML).writeValueAsBytes(cfg));
+                JacksonHelper.getDefaultYamlObjectMapper().writeValueAsBytes(cfg));
 
         try (BHive hive = new BHive(tmp.resolve("hive").toUri(), null, new ActivityReporter.Null())) {
             try (Transaction t = hive.getTransactions().begin()) {

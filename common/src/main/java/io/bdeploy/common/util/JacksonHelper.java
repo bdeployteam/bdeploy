@@ -1,5 +1,10 @@
 package io.bdeploy.common.util;
 
+import java.util.concurrent.atomic.LongAdder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -14,6 +19,12 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class JacksonHelper {
+
+    private static final Logger log = LoggerFactory.getLogger(JacksonHelper.class);
+    private static final LongAdder globalMapperCount = new LongAdder();
+
+    private static final ObjectMapper DEF_JSON_MAPPER = createObjectMapper(MapperType.JSON);
+    private static final ObjectMapper DEF_YAML_MAPPER = createObjectMapper(MapperType.YAML);
 
     public enum MapperType {
         JSON,
@@ -44,6 +55,12 @@ public class JacksonHelper {
         result.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         result.registerModule(new Jdk8Module());
         result.registerModule(new JavaTimeModule());
+
+        globalMapperCount.increment();
+        if (log.isDebugEnabled()) {
+            log.debug("Globally created ObjectMappers: {}", globalMapperCount.sum());
+        }
+
         return result;
     }
 
@@ -55,8 +72,12 @@ public class JacksonHelper {
         }
     }
 
-    public static ObjectMapper createDefaultObjectMapper() {
-        return createObjectMapper(MapperType.JSON);
+    public static ObjectMapper getDefaultJsonObjectMapper() {
+        return DEF_JSON_MAPPER;
+    }
+
+    public static ObjectMapper getDefaultYamlObjectMapper() {
+        return DEF_YAML_MAPPER;
     }
 
 }

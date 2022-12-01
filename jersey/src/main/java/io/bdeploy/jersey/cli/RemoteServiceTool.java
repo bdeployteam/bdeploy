@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
@@ -31,7 +29,6 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.OnDiscKeyStore;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
@@ -79,8 +76,6 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
     @Target(ElementType.PARAMETER)
     protected @interface RemoteOptional {
     }
-
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     protected RemoteServiceTool(Class<T> configClass) {
         super(configClass);
@@ -178,7 +173,8 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
                     this.ws = JerseyClientFactory.get(remote).getObjectChangeWebSocket(c -> {
                         String serialized = c.details.get(JerseyBroadcastingActivityReporter.OCT_ACTIVIES);
                         try {
-                            onMessage.accept(serializer.readValue(serialized, ActivitySnapshot.LIST_TYPE));
+                            onMessage.accept(
+                                    JacksonHelper.getDefaultJsonObjectMapper().readValue(serialized, ActivitySnapshot.LIST_TYPE));
                         } catch (Exception e) {
                             out().println("Cannot read remote activities");
                             e.printStackTrace(out());

@@ -62,7 +62,9 @@ public class JerseyClientFactory {
     private String bearer;
     private final RemoteService svc;
     private ActivityReporter reporter = defaultReporter;
+
     private final Set<com.fasterxml.jackson.databind.Module> additionalModules = new HashSet<>();
+    private JerseyObjectMapper mapperFeature;
     private WebTarget cachedTarget;
 
     private static final ThreadLocal<String> proxyUuid = new ThreadLocal<>();
@@ -107,6 +109,9 @@ public class JerseyClientFactory {
 
         cachedTarget = null;
         additionalModules.add(o);
+
+        // reset.
+        mapperFeature = null;
     }
 
     /**
@@ -170,8 +175,12 @@ public class JerseyClientFactory {
 
         builder.sslContext(sslContext);
         builder.hostnameVerifier((h, s) -> true);
-        builder.register(new JerseyObjectMapper(additionalModules));
 
+        if (mapperFeature == null) {
+            mapperFeature = new JerseyObjectMapper(additionalModules);
+        }
+
+        builder.register(mapperFeature);
         builder.register(GZipEncoder.class);
         builder.register(JerseyGZipFilter.class);
 

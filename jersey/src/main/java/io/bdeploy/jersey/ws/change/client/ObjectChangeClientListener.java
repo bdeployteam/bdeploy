@@ -8,12 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ning.http.client.ws.DefaultWebSocketListener;
 import com.ning.http.client.ws.WebSocket;
 
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeInitDto;
@@ -26,7 +24,6 @@ public class ObjectChangeClientListener extends DefaultWebSocketListener {
     private static final Logger log = LoggerFactory.getLogger(ObjectChangeClientListener.class);
     private final String token;
     private final Consumer<ObjectChangeDto> onChanges;
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     public ObjectChangeClientListener(String token, Consumer<ObjectChangeDto> onChanges) {
         this.token = token;
@@ -39,7 +36,7 @@ public class ObjectChangeClientListener extends DefaultWebSocketListener {
         init.token = token;
 
         try {
-            websocket.sendMessage(JacksonHelper.createObjectMapper(MapperType.JSON).writeValueAsString(init));
+            websocket.sendMessage(JacksonHelper.getDefaultJsonObjectMapper().writeValueAsString(init));
         } catch (JsonProcessingException e) {
             log.error("Cannot send WebSocket initialization message", e);
             return;
@@ -55,7 +52,7 @@ public class ObjectChangeClientListener extends DefaultWebSocketListener {
 
     private void processMessage(byte[] message) {
         try {
-            onChanges.accept(serializer.readValue(message, ObjectChangeDto.class));
+            onChanges.accept(JacksonHelper.getDefaultJsonObjectMapper().readValue(message, ObjectChangeDto.class));
         } catch (IOException e) {
             log.error("Cannot process object change message", e);
         }

@@ -12,14 +12,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.Threads;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
@@ -33,7 +30,6 @@ import jakarta.ws.rs.Path;
 class WebSocketActivityTest {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketActivityTest.class);
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     @RegisterExtension
     TestMinion ext = new TestMinion();
@@ -49,7 +45,8 @@ class WebSocketActivityTest {
         try (ObjectChangeClientWebSocket ws = JerseyClientFactory.get(ext.getRemoteService()).getObjectChangeWebSocket(c -> {
             String serialized = c.details.get(JerseyBroadcastingActivityReporter.OCT_ACTIVIES);
             try {
-                List<ActivitySnapshot> acts = serializer.readValue(serialized, ActivitySnapshot.LIST_TYPE);
+                List<ActivitySnapshot> acts = JacksonHelper.getDefaultJsonObjectMapper().readValue(serialized,
+                        ActivitySnapshot.LIST_TYPE);
                 if (acts.stream().filter(a -> a.name.equals("Test")).findFirst().isPresent()) {
                     count.increment();
                 }

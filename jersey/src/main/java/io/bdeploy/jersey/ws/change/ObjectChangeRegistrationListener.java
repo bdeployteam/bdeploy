@@ -7,10 +7,7 @@ import org.glassfish.grizzly.websockets.WebSocketAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto.RegistrationAction;
 
@@ -22,7 +19,6 @@ public class ObjectChangeRegistrationListener extends WebSocketAdapter {
     private static final Logger log = LoggerFactory.getLogger(ObjectChangeRegistrationListener.class);
 
     private final ObjectChangeRegistration registration;
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     public ObjectChangeRegistrationListener(ObjectChangeRegistration registration) {
         this.registration = registration;
@@ -31,7 +27,8 @@ public class ObjectChangeRegistrationListener extends WebSocketAdapter {
     @Override
     public void onMessage(WebSocket socket, String text) {
         try {
-            ObjectChangeRegistrationDto change = serializer.readValue(text, ObjectChangeRegistrationDto.class);
+            ObjectChangeRegistrationDto change = JacksonHelper.getDefaultJsonObjectMapper().readValue(text,
+                    ObjectChangeRegistrationDto.class);
             if (change.action == RegistrationAction.ADD) {
                 registration.add(change.type, change.scope);
             } else if (change.action == RegistrationAction.REMOVE) {

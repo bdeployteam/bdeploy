@@ -22,10 +22,8 @@ import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import jakarta.ws.rs.core.Response.Status;
@@ -49,9 +47,6 @@ public class ObjectChangeWebSocket extends WebSocketApplication implements Objec
     /** Listeners hooked to each {@link ObjectChangeRegistration} as it is created, mainly for testing */
     private final List<Consumer<ObjectChangeRegistration>> listeners = new ArrayList<>();
 
-    /** A JSON mapper which is used to serialize and de-serialize communication DTOs */
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
-
     public ObjectChangeWebSocket(KeyStore authStore) {
         this.authStore = authStore;
         this.broadcaster = new OptimizedBroadcaster();
@@ -61,7 +56,7 @@ public class ObjectChangeWebSocket extends WebSocketApplication implements Objec
     public void send(ObjectChangeDto change) {
         try {
             Set<WebSocket> targets = getWebSockets(change);
-            this.broadcaster.broadcast(targets, serializer.writeValueAsString(change));
+            this.broadcaster.broadcast(targets, JacksonHelper.getDefaultJsonObjectMapper().writeValueAsString(change));
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Cannot write JSON to WebSocket", e);
         }
@@ -97,7 +92,8 @@ public class ObjectChangeWebSocket extends WebSocketApplication implements Objec
             }
 
             for (Map.Entry<ObjectChangeDto, List<WebSocket>> target : targets.entrySet()) {
-                this.broadcaster.broadcast(target.getValue(), serializer.writeValueAsString(target.getKey()));
+                this.broadcaster.broadcast(target.getValue(),
+                        JacksonHelper.getDefaultJsonObjectMapper().writeValueAsString(target.getKey()));
             }
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Cannot write JSON to WebSocket", e);

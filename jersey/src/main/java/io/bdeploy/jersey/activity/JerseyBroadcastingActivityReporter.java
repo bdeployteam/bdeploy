@@ -20,14 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.jersey.JerseyServer;
@@ -57,8 +55,6 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
     private static final List<JerseyRemoteActivity> globalActivities = new CopyOnWriteArrayList<>();
     private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
     private static final Set<ObjectScope> activeScopes = new TreeSet<>();
-
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     @Inject
     private JerseyScopeService jss;
@@ -140,7 +136,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
 
     private String serialize(List<ActivitySnapshot> snap) {
         try {
-            return serializer.writeValueAsString(snap);
+            return JacksonHelper.getDefaultJsonObjectMapper().writeValueAsString(snap);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Cannot serialize activities", e);
         }
