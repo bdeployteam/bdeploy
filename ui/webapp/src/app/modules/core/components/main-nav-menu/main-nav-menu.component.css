@@ -51,8 +51,8 @@
 .local-activity-popup-sizing {
   max-width: calc(100% - 10px);
   width: 700px;
-
   position: relative;
+  overflow-y: auto;
 }
 
 .local-nav-bar {
