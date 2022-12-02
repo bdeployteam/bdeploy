@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
@@ -21,6 +22,8 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.ZipHelper;
+import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
+import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
@@ -51,6 +54,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
     private ProductValidationResponseApi validate(ProductValidationConfigDescriptor config) {
         List<ProductValidationIssueApi> issues = new ArrayList<>();
+
+        // validate all application commands, parameters, etc.
         for (Map.Entry<String, ApplicationDescriptor> appEntry : config.applications.entrySet()) {
             var app = appEntry.getKey();
             var applicationDescriptor = appEntry.getValue();
@@ -62,7 +67,73 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                 validateCommand(issues, app, applicationDescriptor.stopCommand, config.parameterTemplates);
             }
         }
+
+        // validate all the templates.
+        issues.addAll(validateInstanceTemplates(config));
+        issues.addAll(validateApplicationTemplates(config));
+
         return new ProductValidationResponseApi(issues);
+    }
+
+    private List<ProductValidationIssueApi> validateInstanceTemplates(ProductValidationConfigDescriptor desc) {
+        return desc.instanceTemplates.stream().map(t -> {
+            try {
+                return validateFlatInstanceTemplate(
+                        new FlattenedInstanceTemplateConfiguration(t, desc.instanceVariableTemplates, desc.applicationTemplates),
+                        desc);
+            } catch (Exception e) {
+                return Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Cannot resolve instance template " + t.name + ": " + e.toString()));
+            }
+        }).flatMap(l -> l.stream()).filter(Objects::nonNull).toList();
+    }
+
+    private List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
+        return desc.applicationTemplates.stream().map(a -> {
+            try {
+                return validateFlatApplicationTemplate(
+                        new FlattenedApplicationTemplateConfiguration(a, desc.applicationTemplates, null), desc);
+            } catch (Exception e) {
+                return Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Cannot resolve application template " + a.name + ": " + e.toString()));
+            }
+        }).flatMap(l -> l.stream()).filter(Objects::nonNull).toList();
+    }
+
+    private List<ProductValidationIssueApi> validateFlatInstanceTemplate(FlattenedInstanceTemplateConfiguration tpl,
+            ProductValidationConfigDescriptor descriptor) {
+        List<String> controlGroupsInTemplate = tpl.processControlGroups.stream().map(c -> c.name).toList();
+        List<ProductValidationIssueApi> result = new ArrayList<>();
+
+        for (var grp : tpl.groups) {
+            for (var app : grp.applications) {
+                if (controlGroupsInTemplate != null && !controlGroupsInTemplate.isEmpty()) {
+                    if (app.preferredProcessControlGroup != null
+                            && !controlGroupsInTemplate.contains(app.preferredProcessControlGroup)) {
+                        result.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
+                                "Preferred process control group '" + app.preferredProcessControlGroup + "' for application "
+                                        + (app.name == null ? ("<anonymous> (" + app.application + ")") : app.name)
+                                        + " is not available in the instance template " + tpl.name));
+                    }
+                }
+
+                result.addAll(validateFlatApplicationTemplate(app, descriptor));
+            }
+        }
+
+        return result;
+    }
+
+    private List<ProductValidationIssueApi> validateFlatApplicationTemplate(FlattenedApplicationTemplateConfiguration tpl,
+            ProductValidationConfigDescriptor descriptor) {
+        List<ProductValidationIssueApi> result = new ArrayList<>();
+
+        if (!descriptor.applications.containsKey(tpl.application)) {
+            result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Application " + tpl.application
+                    + " not found for application template " + (tpl.name == null ? "<anonymous>" : tpl.name)));
+        }
+
+        return result;
     }
 
     private void validateCommand(List<ProductValidationIssueApi> issues, String app, ExecutableDescriptor command,
