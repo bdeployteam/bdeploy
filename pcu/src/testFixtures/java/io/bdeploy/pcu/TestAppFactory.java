@@ -12,7 +12,6 @@ import java.util.TreeMap;
 
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -133,7 +132,7 @@ public class TestAppFactory {
 
         try {
             Files.write(target.resolve(ApplicationDescriptor.FILE_NAME),
-                    JacksonHelper.createObjectMapper(MapperType.YAML).writeValueAsBytes(cfg));
+                    JacksonHelper.getDefaultYamlObjectMapper().writeValueAsBytes(cfg));
             return target;
         } catch (IOException ioe) {
             throw new RuntimeException("Failed to generate application.", ioe);

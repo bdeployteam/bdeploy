@@ -12,13 +12,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.bdeploy.common.ActivitySnapshot;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
@@ -37,7 +34,6 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
 
     private final Map<String, ActivityNode> proxiedActivities = new TreeMap<>();
     private final Map<String, String> uuidMapping = new TreeMap<>();
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
     private ObjectChangeClientWebSocket ws;
 
     public JerseyRemoteActivityProxy(RemoteService service, JerseyBroadcastingActivityReporter reporter) {
@@ -68,7 +64,7 @@ public class JerseyRemoteActivityProxy implements NoThrowAutoCloseable {
         List<ActivitySnapshot> activities;
         try {
             String serialized = change.details.get(JerseyBroadcastingActivityReporter.OCT_ACTIVIES);
-            activities = serializer.readValue(serialized, ActivitySnapshot.LIST_TYPE);
+            activities = JacksonHelper.getDefaultJsonObjectMapper().readValue(serialized, ActivitySnapshot.LIST_TYPE);
         } catch (IOException e) {
             log.error("Cannot read activities");
             if (log.isDebugEnabled()) {

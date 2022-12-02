@@ -15,7 +15,6 @@ import com.networknt.schema.ValidationMessage;
 
 import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 
 public class PublicSchemaValidator {
 
@@ -30,7 +29,7 @@ public class PublicSchemaValidator {
     }
 
     private List<String> validate(Schema schema, InputStream data) {
-        ObjectMapper om = JacksonHelper.createObjectMapper(MapperType.YAML);
+        ObjectMapper om = JacksonHelper.getDefaultYamlObjectMapper();
         JsonNode node;
         try {
             node = om.readTree(data);

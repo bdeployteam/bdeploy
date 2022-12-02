@@ -50,6 +50,9 @@ public class StorageHelper {
         customMappers.put(Tree.class, new SimpleTreeMapper());
     }
 
+    private static final ObjectMapper DEF_JSON_MAPPER_WITH_HIVE = createMapper(MapperType.JSON);
+    private static final ObjectMapper DEF_YAML_MAPPER_WITH_HIVE = createMapper(MapperType.YAML);
+
     /**
      * Serializes any in-memory Object to a stable storage-friendly byte[].
      */
@@ -59,7 +62,7 @@ public class StorageHelper {
             return m.write(o);
         }
         try {
-            return getMapper().writeValueAsBytes(o);
+            return getMapper(MapperType.JSON).writeValueAsBytes(o);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(JSON_WRITE_ERROR, e);
         }
@@ -108,7 +111,7 @@ public class StorageHelper {
             return (T) m.read(is);
         }
         try (InputStreamReader r = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-            return getMapper().readValue(is, clazz);
+            return getMapper(MapperType.JSON).readValue(is, clazz);
         } catch (IOException e) {
             throw new IllegalStateException(JSON_READ_ERROR, e);
         }
@@ -125,16 +128,22 @@ public class StorageHelper {
         }
     }
 
-    private static ObjectMapper getMapper() {
-        return getMapper(MapperType.JSON);
-    }
-
-    private static ObjectMapper getMapper(MapperType type) {
+    private static ObjectMapper createMapper(MapperType type) {
         ObjectMapper dm = JacksonHelper.createObjectMapper(type);
 
         dm.registerModule(new BHiveJacksonModule());
 
         return dm;
+    }
+
+    private static ObjectMapper getMapper(MapperType type) {
+        switch (type) {
+            case JSON:
+                return DEF_JSON_MAPPER_WITH_HIVE;
+            case YAML:
+                return DEF_YAML_MAPPER_WITH_HIVE;
+        }
+        return null;
     }
 
 }

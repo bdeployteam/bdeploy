@@ -5,13 +5,11 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.ws.WebSocket;
 
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.common.util.JacksonHelper.MapperType;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto;
 import io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto.RegistrationAction;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
@@ -25,7 +23,6 @@ public class ObjectChangeClientWebSocket implements NoThrowAutoCloseable {
 
     private final AsyncHttpClient client;
     private final WebSocket connection;
-    private final ObjectMapper serializer = JacksonHelper.createObjectMapper(MapperType.JSON);
 
     public ObjectChangeClientWebSocket(AsyncHttpClient client, WebSocket webSocket) {
         this.client = client;
@@ -59,7 +56,7 @@ public class ObjectChangeClientWebSocket implements NoThrowAutoCloseable {
             reg.type = type;
             reg.scope = scope;
 
-            connection.sendMessage(serializer.writeValueAsString(reg));
+            connection.sendMessage(JacksonHelper.getDefaultJsonObjectMapper().writeValueAsString(reg));
         } catch (IOException e) {
             log.error("Cannot subscribe to object changes", e);
         }

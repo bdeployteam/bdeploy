@@ -58,6 +58,11 @@
 		<Logger name="io.bdeploy.jersey.JerseySseActivity" additivity="false" level="info">
 			<AppenderRef ref="GlobalRoute" />
 		</Logger>
+		
+		<!-- Track the amount of ObjectMapper instances created using 'debug' - those are heavyweight and should be avoided. -->
+		<Logger name="io.bdeploy.common.util.JacksonHelper" additivity="false" level="info">
+			<AppenderRef ref="GlobalRoute" />
+		</Logger>
 
 		<!-- PCU -->
 		<Logger name="io.bdeploy.pcu" additivity="false" level="info" >
