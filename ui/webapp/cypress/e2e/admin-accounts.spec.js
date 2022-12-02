@@ -172,11 +172,6 @@ describe('Admin UI Tests (Accounts)', () => {
     // check edit
     cy.waitUntilContentLoaded();
     cy.inMainNavFlyin('app-user-admin-detail', () => {
-      cy.contains('tr', 'Global')
-        .should('exist')
-        .within(() => {
-          cy.contains('READ').should('exist');
-        });
       cy.get('button[data-cy^="Edit"]').click();
     });
 

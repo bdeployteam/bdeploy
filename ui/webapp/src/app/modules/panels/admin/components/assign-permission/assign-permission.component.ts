@@ -19,7 +19,7 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 export class AssignPermissionComponent implements OnInit, OnDestroy {
   /* template */ scopes$ = new BehaviorSubject<string[]>([null]);
   /* template */ labels$ = new BehaviorSubject<string[]>(['Global']);
-  /* template */ assignScope: string;
+  /* template */ assignScope: string = null;
   /* template */ assignPerm: Permission;
   /* template */ loading$ = new BehaviorSubject<boolean>(true);
   /* template */ allPerms: Permission[] = Object.keys(Permission).map(
