@@ -32,6 +32,7 @@
 
 .preset-select .mat-mdc-floating-label {
   top: 16px !important;
+  pointer-events: none !important;
 
   --mat-mdc-form-field-label-transform: translateY(-22px) scale(0.75) !important;
 }
