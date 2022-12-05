@@ -1,7 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { ParameterType } from 'src/app/models/gen.dtos';
-import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import {
   ACTION_CANCEL,
   ACTION_CONFIRM,
@@ -25,18 +24,10 @@ const colName: BdDataColumn<PortParam> = {
   tooltipDelay: 50,
 };
 
-const colExpr: BdDataColumn<PortParam> = {
-  id: 'expression',
-  name: 'Expr.',
-  data: (r) => (r.expression ? 'check' : null),
-  component: BdDataIconCellComponent,
-  width: '24px',
-};
-
 const colType: BdDataColumn<PortParam> = {
   id: 'type',
   name: 'Type',
-  data: (r) => r,
+  data: (r) => r.type,
   component: PortTypeCellComponent,
   width: '24px',
 };
@@ -44,7 +35,7 @@ const colType: BdDataColumn<PortParam> = {
 const colPort: BdDataColumn<PortParam> = {
   id: 'port',
   name: 'Port',
-  data: (r) => r.port,
+  data: (r) => (isNaN(Number(r.port)) ? r.port : Number(r.port)),
   width: '45px',
 };
 
@@ -55,7 +46,6 @@ const colPort: BdDataColumn<PortParam> = {
 export class PortsComponent implements OnInit {
   /* template */ columns: BdDataColumn<PortParam>[] = [
     colName,
-    colExpr,
     colType,
     colPort,
   ];
