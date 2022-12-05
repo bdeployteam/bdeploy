@@ -222,7 +222,7 @@ public interface InstanceResource {
 
     @POST
     @Path("/{instance}/delete/{minion}")
-    @RequiredPermission(permission = Permission.ADMIN)
+    @RequiredPermission(permission = Permission.WRITE)
     public void deleteDataFile(@ActivityScope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
             RemoteDirectoryEntry entry);
 

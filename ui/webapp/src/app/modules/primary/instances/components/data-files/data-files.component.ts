@@ -58,7 +58,6 @@ export class DataFilesComponent implements OnInit, OnDestroy {
     action: (r) => this.doDownload(r),
     icon: () => 'cloud_download',
     width: '50px',
-    actionDisabled: () => !this.authService.isCurrentScopeWrite(),
   };
 
   private readonly colDelete: BdDataColumn<FileListEntry> = {
