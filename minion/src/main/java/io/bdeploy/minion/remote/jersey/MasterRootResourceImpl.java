@@ -31,6 +31,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.RetryableScope;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -278,33 +279,21 @@ public class MasterRootResourceImpl implements MasterRootResource {
             JerseyClientFactory.invalidateCached(minion);
 
             // now wait for the server to be back up, max 100 seconds.
-            bir = ResourceProvider.getResource(minion, BackendInfoResource.class, context);
+            try {
+                BackendInfoResource newbir = ResourceProvider.getResource(minion, BackendInfoResource.class, context);
+                RetryableScope.create().withMaxRetries(100).withDelay(1_000).run(() -> {
+                    BackendInfoDto newinfo = newbir.getVersion();
 
-            boolean updated = false;
-            for (int i = 0; i < 100; ++i) {
-                BackendInfoDto newinfo;
-                try {
-                    newinfo = bir.getVersion();
-                } catch (Exception e) {
-                    // backend still offline, this is ok. we'll retry.
-                    if (log.isDebugEnabled()) {
-                        log.debug("Cannot contact backend of target server (yet) after update", e);
+                    if (VersionHelper.compare(newinfo.version, VersionHelper.getVersion()) == 0) {
+                        return; // we made it.
                     }
 
-                    waitASecond();
-                    continue;
-                }
-
-                if (VersionHelper.compare(newinfo.version, VersionHelper.getVersion()) == 0) {
-                    updated = true;
-                    break;
-                }
-
-                waitASecond();
-            }
-
-            if (!updated) {
-                throw new WebApplicationException("Cannot await update of target server(s) before migration.",
+                    throw new IllegalStateException("Target Server did not update to version " + VersionHelper.getVersion()
+                            + ", still has " + newinfo.version);
+                });
+                bir = newbir; // server is there, use the new resource.
+            } catch (Exception e) {
+                throw new WebApplicationException("Cannot await update of target server(s) before migration.", e,
                         Status.EXPECTATION_FAILED);
             }
         }

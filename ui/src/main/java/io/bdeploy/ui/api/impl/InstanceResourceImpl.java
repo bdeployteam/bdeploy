@@ -20,11 +20,17 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
+import org.glassfish.jersey.process.internal.RequestContext;
+import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +58,8 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
+import io.bdeploy.common.util.FutureHelper;
+import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
@@ -194,6 +202,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private ProductUpdateService pus;
+
+    @Inject
+    private RequestScope reqScope;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -346,18 +357,36 @@ public class InstanceResourceImpl implements InstanceResource {
 
             ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
             try (Activity sync = reporter.start("Synchronize Servers", toSync.size())) {
+                AtomicLong syncNo = new AtomicLong(0);
+                ExecutorService es = Executors.newFixedThreadPool(4,
+                        new NamedDaemonThreadFactory(() -> "Mass-Synchronizer " + syncNo.incrementAndGet()));
+                List<Future<?>> syncTasks = new ArrayList<>();
+                RequestContext scope = reqScope.referenceCurrent();
                 for (ManagedMasterDto host : toSync) {
-                    try {
-                        rs.synchronize(group, host.hostName);
-                    } catch (Exception e) {
-                        errors.add(host.hostName);
-                        log.warn("Could not synchronize managed server: {}: {}", host.hostName, e.toString());
-                        if (log.isDebugEnabled()) {
-                            log.debug("Exception:", e);
+                    syncTasks.add(es.submit(() -> {
+                        try {
+                            // we need to detach transactions to avoid races. otherwise transactions would be shared between all threads.
+                            reg.get(group).getTransactions().detachThread();
+
+                            if (log.isDebugEnabled()) {
+                                log.debug("Synchronize {}", host.hostName);
+                            }
+                            reqScope.runInScope(scope, () -> {
+                                rs.synchronize(group, host.hostName);
+                            });
+                        } catch (Exception e) {
+                            errors.add(host.hostName);
+                            log.warn("Could not synchronize managed server: {}: {}", host.hostName, e.toString());
+                            if (log.isDebugEnabled()) {
+                                log.debug("Exception:", e);
+                            }
                         }
-                    }
-                    sync.workAndCancelIfRequested(1);
+                        sync.workAndCancelIfRequested(1);
+                    }));
                 }
+
+                FutureHelper.awaitAll(syncTasks);
+                es.shutdown();
             }
         } else {
             // update the local stored state.

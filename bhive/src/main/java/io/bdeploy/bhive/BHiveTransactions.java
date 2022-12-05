@@ -44,6 +44,14 @@ public class BHiveTransactions {
         this.reporter = reporter;
     }
 
+    /**
+     * Transactions are inherited by default. If this is not desired, this method can be used
+     * to explicitly detach the current Thread from its parent (and potential sibling threads).
+     */
+    public void detachThread() {
+        transactions.set(new Stack<>());
+    }
+
     private Stack<String> getOrCreate() {
         Stack<String> result = transactions.get();
         if (result == null) {
