@@ -8,7 +8,6 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.common.security.NoScopeInheritance;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.instance.ApplicationValidationDto;
@@ -93,7 +92,6 @@ public interface InstanceResource {
 
     @DELETE
     @Path("/{instance}/deleteVersion/{tag}")
-    @NoScopeInheritance // don't inherit the instance group scope, global admin is required.
     @RequiredPermission(permission = Permission.ADMIN)
     public void deleteVersion(@ActivityScope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
 
