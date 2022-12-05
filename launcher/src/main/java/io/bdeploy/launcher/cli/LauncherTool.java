@@ -824,14 +824,21 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // configuration files need to be installed in the correct version
-        if (clientAppCfg.configTree != null) {
-            DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
-            Path cfgPath = pathProvider.get(SpecialDirectory.CONFIG);
+        DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
+        Path cfgPath = pathProvider.get(SpecialDirectory.CONFIG);
 
+        if (clientAppCfg.configTree != null) {
             boolean isCurrent = checkForCurrentConfigFiles(clientAppCfg.configTree, cfgPath);
 
             if (!isCurrent) {
                 missing.add("Configuration Files Version: " + clientAppCfg.configTree);
+            }
+        } else {
+            // in case we HAD a config directory, we might need to get rid of it.
+            boolean hasOldConfig = checkForExistingConfigFiles(cfgPath);
+
+            if (hasOldConfig) {
+                missing.add("Configuration Files must be removed.");
             }
         }
 
@@ -854,6 +861,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
             }
         }
         return missing;
+    }
+
+    private boolean checkForExistingConfigFiles(Path cfgPath) {
+        Path checkFile = cfgPath.resolve(CONFIG_DIR_CHECK_FILE);
+        return PathHelper.exists(checkFile);
     }
 
     private boolean checkForCurrentConfigFiles(ObjectId configTree, Path cfgPath) {
