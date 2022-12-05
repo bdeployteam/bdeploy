@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import io.bdeploy.common.Version;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.SortOneAsLastComparator;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -50,12 +52,14 @@ import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
+import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.BackendInfoDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import jakarta.inject.Inject;
@@ -246,15 +250,89 @@ public class MasterRootResourceImpl implements MasterRootResource {
                     Status.EXPECTATION_FAILED);
         }
 
-        Map<String, MinionStatusDto> allNodes = bir.getNodeStatus();
-        String oldMasterName = null;
-        for (Entry<String, MinionStatusDto> entry : allNodes.entrySet()) {
-            if (entry.getValue().offline) {
-                throw new WebApplicationException(
-                        "All nodes on target server must be online during conversion, offline node: " + entry.getKey(),
-                        Status.EXPECTATION_FAILED);
+        // update the target server to the same BDeploy version as we have running. we do this before conversion,
+        // so the server is responsible for updating individual nodes as well.
+        // NOTE: we do not need to push launchers, as they will not be required on nodes.
+        List<Manifest.Key> targets = getSystemManifest(SoftwareUpdateResource.BDEPLOY_MF_NAME).stream()
+                .map(ScopedManifestKey::getKey).toList();
+
+        // not possible to update if we do not have any update locally present to push.
+        if (!targets.isEmpty() && VersionHelper.compare(info.version, VersionHelper.getVersion()) != 0) {
+            log.info("Performing update to align BDeploy version ({} != {})", info.version, VersionHelper.getVersion());
+
+            // Push them to the default hive of the target server
+            PushOperation push = new PushOperation();
+            targets.forEach(push::addManifest);
+
+            // Updates are stored in the local default hive
+            BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+            defaultHive.execute(push.setRemote(minion));
+
+            // do it.
+            UpdateHelper.update(minion, targets, true, context);
+
+            // after the update, the server takes a second until it *begins* to perform a restart.
+            waitASecond();
+
+            // force a new RemoteService instance on next call
+            JerseyClientFactory.invalidateCached(minion);
+
+            // now wait for the server to be back up, max 100 seconds.
+            bir = ResourceProvider.getResource(minion, BackendInfoResource.class, context);
+
+            boolean updated = false;
+            for (int i = 0; i < 100; ++i) {
+                BackendInfoDto newinfo;
+                try {
+                    newinfo = bir.getVersion();
+                } catch (Exception e) {
+                    // backend still offline, this is ok. we'll retry.
+                    if (log.isDebugEnabled()) {
+                        log.debug("Cannot contact backend of target server (yet) after update", e);
+                    }
+
+                    waitASecond();
+                    continue;
+                }
+
+                if (VersionHelper.compare(newinfo.version, VersionHelper.getVersion()) == 0) {
+                    updated = true;
+                    break;
+                }
+
+                waitASecond();
             }
 
+            if (!updated) {
+                throw new WebApplicationException("Cannot await update of target server(s) before migration.",
+                        Status.EXPECTATION_FAILED);
+            }
+        }
+
+        boolean awaitedNodes = false;
+        Map<String, MinionStatusDto> allNodes = null;
+        outerCheckLoop: for (int i = 0; i < 100; ++i) {
+            allNodes = bir.getNodeStatus();
+
+            for (Entry<String, MinionStatusDto> entry : allNodes.entrySet()) {
+                if (entry.getValue().offline) {
+                    // this one is offline, we need to wait a little more.
+                    waitASecond();
+                    continue outerCheckLoop;
+                }
+            }
+
+            awaitedNodes = true; // all online! :)
+            break;
+        }
+
+        if (allNodes == null || !awaitedNodes) {
+            throw new WebApplicationException("All nodes must be online during migration, failed to await online state.",
+                    Status.EXPECTATION_FAILED);
+        }
+
+        String oldMasterName = null;
+        for (Entry<String, MinionStatusDto> entry : allNodes.entrySet()) {
             if (entry.getValue().config.master) {
                 if (oldMasterName != null) {
                     throw new WebApplicationException("Multiple master nodes found: " + entry.getKey() + ", " + oldMasterName,
@@ -272,6 +350,12 @@ public class MasterRootResourceImpl implements MasterRootResource {
             throw new WebApplicationException("No master node configuration found", Status.EXPECTATION_FAILED);
         }
 
+        if (!oldMasterName.equals(name) && allNodes.containsKey(name)) {
+            // we change the master name, but unfortunately to something that we already have in the nodes... ups.
+            throw new WebApplicationException("New provided master name is already used by one of its nodes: " + name,
+                    Status.EXPECTATION_FAILED);
+        }
+
         // update config, this could be a different URL/pack/etc (user provided).
         MinionStatusDto status = allNodes.remove(oldMasterName);
         status.config.remote = minion;
@@ -284,6 +368,25 @@ public class MasterRootResourceImpl implements MasterRootResource {
         result.allNodes = allNodes;
 
         return result;
+    }
+
+    private void waitASecond() {
+        try {
+            Thread.sleep(1_000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new WebApplicationException("Cannot await update on target server", Status.EXPECTATION_FAILED);
+        }
+    }
+
+    private Collection<ScopedManifestKey> getSystemManifest(String manifestName) {
+        String runningVersion = VersionHelper.getVersion().toString();
+
+        BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+        ManifestListOperation operation = new ManifestListOperation().setManifestName(manifestName);
+        Set<Key> result = defaultHive.execute(operation);
+        return result.stream().map(ScopedManifestKey::parse).filter(smk -> smk.getTag().equals(runningVersion))
+                .collect(Collectors.toSet());
     }
 
     @Override
