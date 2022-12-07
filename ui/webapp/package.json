@@ -63,7 +63,7 @@
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
     "adm-zip": "^0.5.9",
-    "cypress": "^11.0.0",
+    "cypress": "^11.2.0",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.4.0",
     "eslint-plugin-prettier": "^4.0.0",
