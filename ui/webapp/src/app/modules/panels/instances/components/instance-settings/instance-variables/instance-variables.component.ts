@@ -245,7 +245,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
 
         const vars = this.edit.state$.value.config.config.instanceVariables;
         const index = vars.findIndex((x) => x.id === value.id);
-        if (index) {
+        if (index !== -1) {
           vars.splice(index, 1, value);
           this.buildVariables(this.edit.state$.value.config);
         }
