@@ -15,7 +15,7 @@
             color="accent"
           ></mat-progress-bar>
           <div fxLayout="row">
-            <div fxFlex="1 0 auto"></div>
+            <div class="flex-auto"></div>
             <span><em>{{ formatDuration(squashed.parent) }}</em></span>
             <span>&nbsp;({{ formatDuration(squashed.current) }})</span>
           </div>
@@ -32,14 +32,14 @@
               >{{ squashed.current.snapshot.current }} of {{
               squashed.current.snapshot.max }}</span
             >
-            <div fxFlex="1 0 auto"></div>
+            <div class="flex-auto"></div>
             <span><em>{{ formatDuration(squashed.parent) }}</em></span>
             <span>&nbsp;({{ formatDuration(squashed.current) }})</span>
           </div>
         </ng-container>
 
         <div fxLayout="row" class="local-user-hint">
-          <div fxFlex="1 0 auto"></div>
+          <div class="flex-auto"></div>
           <div class="bd-hint-text">
             {{ squashed.current.snapshot.uuid }}, ~{{
             squashed.current.snapshot.user }}.

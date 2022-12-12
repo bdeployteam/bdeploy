@@ -11,7 +11,7 @@
         orientation="vertical"
         (selectionChange)="onStepSelectionChange($event)"
         [style.overflow]="'auto'"
-        fxFlex="1 0 0"
+        class="flex-auto"
       >
         <mat-step label="Choose Source Repository" [completed]="!!selectedRepo">
           <div fxLayout="column" fxLayoutGap="5px">

@@ -30,7 +30,7 @@
       <div *ngIf="(narrowWhen$ | async) === false">{{ item.name | async }}</div>
     </div>
   </ng-container>
-  <div fxFlex="1 0 auto"></div>
+  <div class="flex-auto"></div>
   <div
     fxLayout="row"
     *ngIf="lastRefreshAt$"

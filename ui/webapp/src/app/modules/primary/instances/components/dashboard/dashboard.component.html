@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar
     header="Dashboard - {{ !!activeInstance ? activeInstance.instanceConfiguration.name : currentInstance?.instanceConfiguration.name }}"
   >
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <div
       class="local-version-text"
       *ngIf="activeInstance"
@@ -86,7 +86,7 @@
           [style.margin-bottom.px]="10"
         >
           <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
-            <div fxLayout="column" fxFlex="1 0 0">
+            <div fxLayout="column" class="flex-auto">
               <div *ngIf="!!currentInstance?.activeVersion?.tag">
                 This instance has a newer configuration version available to be
                 activated ({{ currentInstance?.instance.tag }}). You can

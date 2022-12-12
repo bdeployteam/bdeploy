@@ -51,7 +51,7 @@
         ></app-bd-data-component-cell>
       </div>
     </div>
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <div
       *ngIf="!!colStatus"
       class="bd-text-ellipsis"
@@ -69,15 +69,14 @@
     </div>
   </div>
   <div
-    class="local-card-actions"
+    class="local-card-actions flex-auto"
     fxLayout="row"
     fxLayoutGap="5px"
-    fxFlex="1 0 auto"
     *ngIf="!!colActions?.length || !!colDetails?.length || !!colAvatar"
     [style.backgroundImage]="getImageUrl()"
     [style.backgroundBlendMode]="!!colActions?.length || !!colDetails?.length ? 'overlay' : undefined"
   >
-    <div fxFlex="1 0 0" fxLayout="column" fxLayoutAlign="center start">
+    <div class="grow basis-0" fxLayout="column" fxLayoutAlign="center start">
       <div
         *ngIf="!!colDetails?.length"
         gdColumns="16px auto"
@@ -155,7 +154,7 @@
 
 <mat-card
   appearance="outlined"
-  fxFlex="1 0 auto"
+  class="flex-auto"
   fxLayout="column"
   (click)="recordClick.emit(record)"
   *ngIf="!recordRoute"
@@ -166,13 +165,12 @@
 
 <mat-card
   appearance="outlined"
-  fxFlex="1 0 auto"
   fxLayout="column"
   *ngIf="!!recordRoute"
   [routerLink]="recordRoute(record)"
   routerLinkActive="mat-card-route-active"
   [style.cursor]="'pointer'"
-  class="local-route-card"
+  class="local-route-card flex-auto"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
 </mat-card>

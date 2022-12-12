@@ -4,7 +4,7 @@
     [panel]="true"
   >
     <mat-icon
-      [style.padding-left.px]="10"
+      [style.margin-left.px]="10"
       *ngIf="(app$ | async)?.client?.os"
       [svgIcon]="(app$ | async).client.os"
     ></mat-icon>
@@ -24,9 +24,9 @@
         icon="insights"
         [expanded]="true"
       >
-        <div fxLayout="row" class="local-graph" fxFlex="1 0 100px">
+        <div fxLayout="row" class="local-graph">
           <app-client-usage-graph
-            fxFlex="1 0 auto"
+            class="flex-auto"
             [appId]="app.client.id"
             [instanceId]="app.instance.id"
           ></app-client-usage-graph>

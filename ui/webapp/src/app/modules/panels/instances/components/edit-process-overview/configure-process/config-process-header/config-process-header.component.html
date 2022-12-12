@@ -187,7 +187,7 @@
       </ng-container>
       <ng-container *ngIf="app.descriptor.type === 'CLIENT'">
         <app-bd-form-input
-          class="local-field"
+          class="local-field grow-[2]"
           label="Allowed Configuration Directory Paths"
           name="configDirs"
           [(ngModel)]="process.processControl.configDirs"
@@ -196,7 +196,6 @@
           client application within the instance's configuration
           directory."
           matTooltipShowDelay="1000"
-          fxFlex="2 0 auto"
           appEditItemInListValidator
           [allowedValues]="dirFlatAllowedValues"
         >

@@ -7,12 +7,12 @@
       </div>
       <ng-container *ngIf="node$ | async as node">
         <mat-icon
-          [style.padding-left.px]="20"
+          [style.margin-left.px]="20"
           fxFlexAlign="center"
           [svgIcon]="node.os"
         ></mat-icon>
       </ng-container>
-      <div fxFlex="1 0 auto"></div>
+      <div class="flex-auto"></div>
       <div fxLayout="row" fxLayoutGap="5px">
         <app-bd-panel-button
           *ngIf="!isClientNode"

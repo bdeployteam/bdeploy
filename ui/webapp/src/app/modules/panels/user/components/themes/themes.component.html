@@ -15,13 +15,13 @@
         (click)="themeService.updateTheme(t)"
         [style.cursor]="'pointer'"
       >
-        <div [ngClass]="t + '-chooser'" fxFlex="56px">
+        <div [ngClass]="t + '-chooser'" class="basis-[56px]">
           <div class="preview-background">
             <div class="preview-circle"></div>
             <div class="preview-accent"></div>
           </div>
         </div>
-        <div fxFlex="1 0 auto">{{ themeService.getThemeDescription(t) }}</div>
+        <div class="flex-auto">{{ themeService.getThemeDescription(t) }}</div>
         <div
           [style.width.px]="36"
           fxLayout="column"

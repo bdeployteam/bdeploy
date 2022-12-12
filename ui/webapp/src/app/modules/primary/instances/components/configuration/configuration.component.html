@@ -1,6 +1,6 @@
 <app-bd-dialog [loadingWhen$]="edit.saving$">
   <app-bd-dialog-toolbar header="Configuration - {{ headerName$ | async }}">
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <div
       class="local-version-text"
       *ngIf="edit.current$ | async as inst"
@@ -181,7 +181,7 @@
             <div fxLayout="row" [style.padding.px]="20">
               <div
                 fxLayout="row"
-                fxFlex="1 0 auto"
+                class="flex-auto"
                 fxLayoutAlign="center center"
                 fxLayoutGap="5px"
               >

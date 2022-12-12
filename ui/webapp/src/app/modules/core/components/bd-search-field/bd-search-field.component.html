@@ -1,16 +1,14 @@
-<div fxFlex="1 0 auto" fxLayout="row" fxLayoutAlign="center center">
+<div class="flex-auto" fxLayout="row" fxLayoutAlign="center center">
   <div
-    class="local-search-group"
+    class="local-search-group flex-auto"
     [class.local-search-group-disabled]="disabled"
-    fxFlex="1 0 auto"
     fxLayout="row"
     fxLayoutAlign="start center"
   >
     <mat-icon>search</mat-icon>
     <input
       #searchField
-      fxFlex="1 0 auto"
-      class="local-search"
+      class="local-search flex-auto"
       type="text"
       [placeholder]="disabled ? 'Search not possible here' : 'Search current page'"
       [(ngModel)]="value"

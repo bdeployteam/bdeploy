@@ -4,7 +4,7 @@
     [panel]="true"
     [route]="['..']"
   >
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <app-bd-button
       text="Apply"
       color="primary"
@@ -21,7 +21,7 @@
       fxLayout="column"
     >
       <app-bd-editor
-        fxFlex="1 0 0"
+        class="grow basis-0"
         [(content)]="content"
         [path]="file"
         [completions]="completions"

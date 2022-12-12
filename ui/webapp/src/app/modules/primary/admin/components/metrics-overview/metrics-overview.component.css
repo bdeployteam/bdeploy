@@ -1,15 +1,4 @@
-.root-container {
-  display: flex;
-  flex-direction: column;
-
-  margin: 15px;
-
-  flex: 1 0 auto;
-}
-
 .charts-area {
-  flex: 1 0 auto;
-
   display: flex;
   flex-direction: row;
 }

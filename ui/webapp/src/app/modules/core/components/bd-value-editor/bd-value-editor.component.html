@@ -34,7 +34,6 @@
 <app-bd-form-input
   #valueEditor
   *ngIf="!isBoolean() && !isLink()"
-  fxFlex="1 0 auto"
   [label]="label"
   [name]="name + '_val'"
   [attr.name]="name + '_val'"
@@ -46,7 +45,7 @@
   [disabled]="disabled || editorDisabled"
   [passwordLock]="passwordLock"
   [suggested]="suggested"
-  class="local-form-input"
+  class="local-form-input flex-auto"
   [appPortValueValidator]="isPort()"
   [prefix]="linkToggle"
   [appLinkExpressionInputValidator]="false"
@@ -80,8 +79,7 @@
 <!-- Input for BOOLEAN -->
 <app-bd-form-toggle
   *ngIf="isBoolean() && !isLink()"
-  fxFlex="1 0 auto"
-  class="local-form-input"
+  class="local-form-input flex-auto"
   [label]="label"
   [name]="name + '_bool'"
   [attr.name]="name + '_bool'"
@@ -102,7 +100,6 @@
 <app-bd-form-input
   #linkEditor
   *ngIf="isLink()"
-  fxFlex="1 0 auto"
   [label]="label + ' (Link Expression)'"
   [name]="name + '_link'"
   [attr.name]="name + '_link'"
@@ -111,7 +108,7 @@
   errorDisplay="immediate"
   [required]="required"
   [disabled]="disabled"
-  class="local-form-input"
+  class="local-form-input flex-auto"
   [prefix]="linkToggle"
   [appLinkExpressionInputValidator]="true"
   [appLinkExpressionInputValidatorProcess]="process"

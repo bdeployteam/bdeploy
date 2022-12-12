@@ -1,14 +1,12 @@
 <app-bd-dialog [loadingWhen$]="loading$" [hideContentWhenLoading]="false">
   <app-bd-dialog-content>
     <div
-      class="local-sizing"
+      class="local-sizing flex-auto"
       fxLayout.gt-sm="row"
       fxLayout.lt-md="column"
-      fxFlex="1 0 auto"
     >
       <div
-        fxFlex="1 0 auto"
-        class="local-logo-area bd-glow-bg"
+        class="local-logo-area bd-glow-bg flex-auto"
         fxLayout="column"
         fxLayoutAlign="center center"
       >
@@ -18,7 +16,7 @@
           (click)="onLogoClick()"
         ></app-bd-logo>
       </div>
-      <div fxFlex="2 0 auto" fxLayout="column" fxLayoutAlign="center center">
+      <div class="grow-[2]" fxLayout="column" fxLayoutAlign="center center">
         <form
           #loginForm="ngForm"
           (ngSubmit)="onSubmit()"
@@ -44,7 +42,7 @@
             <div *ngIf="loginFailed">
               <mat-error>{{ loginFailedMessage }}</mat-error>
             </div>
-            <div fxFlex="1 0 auto"></div>
+            <div class="flex-auto"></div>
             <button
               mat-raised-button
               [disabled]="loginForm.invalid"

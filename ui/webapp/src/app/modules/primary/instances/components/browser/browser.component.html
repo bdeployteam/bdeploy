@@ -3,7 +3,7 @@
   *ngIf="groups.current$ | async as group"
 >
   <app-bd-dialog-toolbar header="Instances of {{ group.title }}">
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <app-bd-data-sorting
       [columns]="columns"
       [sort]="sort"

@@ -1,4 +1,4 @@
-<div fxFlex="1 0 auto" fxLayout="column">
+<div class="flex-auto" fxLayout="column">
   <table
     [id]="id"
     mat-table
@@ -6,7 +6,7 @@
     matSort
     [matSortActive]="sort ? sort.active : null"
     [matSortDirection]="sort ? sort.direction : null"
-    fxFlex="1 0 auto"
+    class="flex-auto"
     [style.width]="'100%'"
     cdkDropList
     [cdkDropListData]="records"
@@ -163,8 +163,7 @@
                 >
                 <div
                   *ngIf="!col.component || row.expandable"
-                  class="bd-text-ellipsis"
-                  fxFlex="1 0 0"
+                  class="bd-text-ellipsis grow basis-0"
                   [style.text-align]="'left'"
                 >
                   {{ row.node.groupOrFirstColumn }}
@@ -188,8 +187,7 @@
               >
                 <div
                   *ngIf="!col.component || row.expandable"
-                  class="bd-text-ellipsis"
-                  fxFlex="1 0 0"
+                  class="bd-text-ellipsis grow basis-0"
                   [style.text-align]="'left'"
                 >
                   {{ row.node.groupOrFirstColumn }}

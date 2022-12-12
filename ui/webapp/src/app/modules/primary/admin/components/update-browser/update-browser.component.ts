@@ -34,7 +34,6 @@ const COL_LAUNCHER: BdDataColumn<SoftwareVersion> = {
 @Component({
   selector: 'app-update-browser',
   templateUrl: './update-browser.component.html',
-  styleUrls: ['./update-browser.component.css'],
 })
 export class UpdateBrowserComponent implements OnInit {
   /* template */ columns: BdDataColumn<SoftwareVersion>[] = [

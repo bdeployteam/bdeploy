@@ -16,10 +16,7 @@
       <div *ngIf="prefix" [style.max-height.px]="21">
         <ng-container *ngTemplateOutlet="prefix"></ng-container>
       </div>
-      <div
-        fxFlex="1 0 auto"
-        class="bd-form-toggle-label mat-mdc-floating-label"
-      >
+      <div class="bd-form-toggle-label mat-mdc-floating-label flex-auto">
         {{ label }}
       </div>
       <div class="bd-form-toggle-suffix">

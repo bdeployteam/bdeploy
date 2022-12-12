@@ -13,7 +13,6 @@ import { LoggingAdminService } from '../../services/logging-admin.service';
 @Component({
   selector: 'app-log-files-browser',
   templateUrl: './log-files-browser.component.html',
-  styleUrls: ['./log-files-browser.component.css'],
 })
 export class LogFilesBrowserComponent implements OnInit {
   private readonly colDownload: BdDataColumn<RemoteDirectoryEntry> = {

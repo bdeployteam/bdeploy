@@ -5,7 +5,7 @@
     </ng-container>
     <ng-container *ngSwitchCase="'unsync'">
       <div>File differs from product.</div>
-      <div fxFlex="1 0 auto"></div>
+      <div class="flex-auto"></div>
       <app-bd-button
         *ngIf="!isText"
         text="Update from product template"
@@ -26,7 +26,7 @@
     </ng-container>
     <ng-container *ngSwitchCase="'missing'">
       <div>File only in product templates.</div>
-      <div fxFlex="1 0 auto"></div>
+      <div class="flex-auto"></div>
       <app-bd-button
         text="Create from product template"
         icon="add"

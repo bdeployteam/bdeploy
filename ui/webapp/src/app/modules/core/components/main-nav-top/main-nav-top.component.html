@@ -8,7 +8,7 @@
       <app-bd-logo [size]="logoSize" class="local-logo-position"></app-bd-logo>
     </div>
     <app-bd-search-field
-      fxFlex="1 0 auto"
+      class="flex-auto"
       [(value)]="search.search"
       [disabled]="!(search.enableSearch$ | async)"
     ></app-bd-search-field>

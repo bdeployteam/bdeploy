@@ -4,15 +4,14 @@
     [panel]="true"
     [route]="['..']"
   >
-    <div fxFlex="grow" fxLayoutAlign="end end">
-      <app-bd-button
-        text="Show only differences"
-        [(toggle)]="showOnlyDifferences"
-        [isToggle]="true"
-        [collapsed]="false"
-      >
-      </app-bd-button>
-    </div>
+    <div class="flex-auto"></div>
+    <app-bd-button
+      text="Show only differences"
+      [(toggle)]="showOnlyDifferences"
+      [isToggle]="true"
+      [collapsed]="false"
+    >
+    </app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div
@@ -35,22 +34,22 @@
         </div>
         <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
           <div fxLayout="row" fxLayoutGap="10px">
-            <div class="local-compare-header" fxFlex="50%" fxLayout="row">
+            <div class="local-compare-header basis-1/2">
               {{ pair.base.version }}
             </div>
-            <div class="local-compare-header" fxFlex="50%">
+            <div class="local-compare-header basis-1/2">
               {{ pair.compare.version }}
             </div>
           </div>
           <div fxLayout="row" fxLayoutGap="10px">
             <app-history-header-config
-              fxFlex="50%"
+              class="basis-1/2"
               diffSide="left"
               [baseConfig]="pair.header.base"
               [compareConfig]="pair.header.compare"
             ></app-history-header-config>
             <app-history-header-config
-              fxFlex="50%"
+              class="basis-1/2"
               diffSide="right"
               [baseConfig]="pair.header.compare"
               [compareConfig]="pair.header.base"
@@ -58,13 +57,13 @@
           </div>
           <div fxLayout="row" fxLayoutGap="10px">
             <app-history-variables-config
-              fxFlex="50%"
+              class="basis-1/2"
               diffSide="left"
               [baseConfig]="pair.header.base"
               [compareConfig]="pair.header.compare"
             ></app-history-variables-config>
             <app-history-variables-config
-              fxFlex="50%"
+              class="basis-1/2"
               diffSide="right"
               [baseConfig]="pair.header.compare"
               [compareConfig]="pair.header.base"
@@ -93,7 +92,7 @@
           </div>
           <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
             <div fxLayout="row" fxLayoutGap="10px">
-              <div class="local-compare-header" fxFlex="50%" fxLayout="row">
+              <div class="local-compare-header basis-1/2" fxLayout="row">
                 <div>{{ pair.base.version }}</div>
                 <div
                   class="bd-description-text local-order-changed"
@@ -103,7 +102,7 @@
                   configured in this version.
                 </div>
               </div>
-              <div class="local-compare-header" fxFlex="50%">
+              <div class="local-compare-header basis-1/2">
                 {{ pair.compare.version }}
               </div>
             </div>
@@ -116,7 +115,7 @@
             >
               <ng-container *ngIf="showAppPair(appPair)">
                 <app-history-process-config
-                  fxFlex="50%"
+                  class="basis-1/2"
                   [baseConfig]="appPair.base"
                   [compareConfig]="appPair.compare"
                   [baseDescriptor]="appPair.baseDesc"
@@ -124,7 +123,7 @@
                   diffSide="left"
                 ></app-history-process-config>
                 <app-history-process-config
-                  fxFlex="50%"
+                  class="basis-1/2"
                   [baseConfig]="appPair.compare"
                   [compareConfig]="appPair.base"
                   [baseDescriptor]="appPair.compareDesc"

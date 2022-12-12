@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar
     [header]="'Apply System Template in ' + (groups.current$ | async)?.name"
   >
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <app-bd-button
       text="Back to Instance Browser"
       icon="arrow_back"
@@ -193,7 +193,7 @@
                   fxLayoutGap="5px"
                 >
                   <div
-                    fxFlex="1 0 auto"
+                    class="flex-auto"
                     fxLayout="column"
                     fxLayoutGap="10px"
                     [style.padding.px]="10"
@@ -222,7 +222,7 @@
                     [style.width.px]="5"
                   ></mat-divider>
                   <div
-                    fxFlex="2 0 auto"
+                    class="grow-[2]"
                     fxLayout="column"
                     fxLayoutGap="10px"
                     [style.padding.px]="10"

@@ -1,3 +1,7 @@
+:host {
+  @apply flex;
+}
+
 .local-button-color-inherit {
   color: inherit !important;
 }
@@ -36,7 +40,6 @@
 }
 
 .local-button-expanded .local-icon-position {
-  padding-right: 5px;
   margin-left: -4px;
 }
 
@@ -62,4 +65,8 @@
 .local-spinner {
   position: relative;
   left: -4px;
+}
+
+.local-label-position {
+  margin-left: 5px;
 }

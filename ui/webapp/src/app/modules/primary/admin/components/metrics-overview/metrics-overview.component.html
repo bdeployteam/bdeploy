@@ -164,7 +164,7 @@
       >
         <mat-icon>lightbulb</mat-icon>Click a metric to view details
       </h3>
-      <div *ngIf="selectedGroup" class="charts-area">
+      <div *ngIf="selectedGroup" class="charts-area flex-auto">
         <div class="count-chart" [style.height.px]="countGraphHeight">
           <ngx-charts-bar-horizontal
             [results]="groupCounts"

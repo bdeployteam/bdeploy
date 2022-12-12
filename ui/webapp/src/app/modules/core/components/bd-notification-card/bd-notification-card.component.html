@@ -1,15 +1,13 @@
 <div
-  class="local-sizing"
+  class="local-sizing flex-auto"
   [class.local-bg-toolbar]="background === 'toolbar'"
   [class.local-bg-dialog]="background === 'dialog'"
   fxLayout="row"
-  fxFlex="1 0 auto"
 >
   <div
-    class="local-icon-area"
-    [class]="type === 'generic' ? 'bd-glow-bg' : type === 'error' ? 'bd-glow-bg-error' : 'bd-glow-bg-warn'"
+    class="local-icon-area flex-none"
+    [ngClass]="type === 'generic' ? 'bd-glow-bg' : type === 'error' ? 'bd-glow-bg-error' : 'bd-glow-bg-warn'"
     *ngIf="!collapsed"
-    fxFlex="0 0 auto"
     fxLayout="column"
     fxLayoutAlign="center center"
   >
@@ -23,7 +21,7 @@
     >
   </div>
   <div
-    fxFlex="2 0 0"
+    class="grow"
     fxLayout="column"
     fxLayoutGap="10px"
     fxLayoutAlign="center stretch"
@@ -50,10 +48,9 @@
     </div>
   </div>
   <div
-    fxFlex="0 0 auto"
     fxLayout="row"
     fxLayoutAlign="center center"
-    class="local-dismiss-area"
+    class="local-dismiss-area flex-none"
     *ngIf="dismissable"
   >
     <app-bd-micro-icon-button

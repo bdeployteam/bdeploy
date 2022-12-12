@@ -2,7 +2,7 @@
   [style.cursor]="'pointer'"
   mat-raised-button
   [attr.data-cy]="text"
-  fxFlex="1 0 auto"
+  class="flex-auto shrink-0"
   [ngClass]="disabled ? 'bd-button-disabled' : isToggle && toggle ? 'bd-toggle-highlight' : color ? 'local-button-color-' + color : 'local-button-no-color'"
   [class.local-button-expanded]="!collapsed"
   [class.local-button-collapsed]="collapsed"
@@ -45,7 +45,8 @@
     <span
       *ngIf="text && !collapsed"
       [ngClass]="(!!icon || !!svgIcon) && !(loadingWhen$ | async) ? 'local-label-position' : []"
-      [fxFlex]="!icon && !svgIcon ? '1 0 auto' : '0 0 auto'"
+      [class.flex-auto]="!icon && !svgIcon"
+      [class.flex-none]="icon || svgIcon"
       >{{ text }}</span
     >
     <ng-content></ng-content>

@@ -203,7 +203,6 @@
 
                 <!-- editor for the linked value, including custom editor plugins, etc. -->
                 <app-bd-value-editor
-                  fxFlex="1 0 auto"
                   [label]="!!p.descriptor ? p.descriptor.name : p.value.id"
                   [name]="p.value ? p.value.id : p.descriptor.id"
                   [ngModel]="p.value?.value"
@@ -218,7 +217,7 @@
                   [disabled]="group.isSelectMode || p.descriptor?.fixed"
                   [editorDisabled]="!p.editorEnabled"
                   [suggested]="p.descriptor?.suggestedValues"
-                  class="local-form-input"
+                  class="local-form-input flex-auto"
                   [process]="process"
                   [instance]="instance"
                   [system]="system"

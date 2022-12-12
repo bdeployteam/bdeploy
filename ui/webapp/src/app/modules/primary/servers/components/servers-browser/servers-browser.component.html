@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar
     header="Managed Servers of {{ (groups.current$ | async)?.title }}"
   >
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <app-bd-data-grouping
       [multiple]="!isCardView"
       (groupingChange)="dataTable.grouping = $event"

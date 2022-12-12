@@ -4,7 +4,7 @@
     fxLayout="row"
     fxLayoutAlign="start center"
   >
-    <span class="local-title" fxFlex="1 0 auto">Logo</span>
+    <span class="local-title flex-auto">Logo</span>
     <button
       aria-label="Browse"
       mat-icon-button
@@ -26,7 +26,7 @@
     <input type="file" hidden (change)="onImageChange($event)" #fileInput />
   </div>
 
-  <div class="local-preview-container">
+  <div class="local-preview-container flex-auto">
     <img class="logo" [src]="image" alt="logo" *ngIf="image" />
     <img
       class="logo-dummy"

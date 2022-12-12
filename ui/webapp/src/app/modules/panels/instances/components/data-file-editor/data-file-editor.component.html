@@ -5,7 +5,7 @@
     [route]="['..', 'view']"
     actionText="Back to Viewer"
   >
-    <div fxFlex="1 0 auto"></div>
+    <div class="flex-auto"></div>
     <app-bd-button
       text="Save"
       color="primary"
@@ -23,7 +23,7 @@
     >
       <app-bd-editor
         *ngIf="!(binary$ | async)"
-        fxFlex="1 0 0"
+        class="grow basis-0"
         [(content)]="content"
         [path]="file.path"
       ></app-bd-editor>

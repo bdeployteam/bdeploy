@@ -9,7 +9,6 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
-import { max } from 'lodash-es';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   BdDataColumn,
@@ -107,11 +106,6 @@ export class BdDataGridComponent<T>
 
   /*template*/ recordsToDisplay$ = new BehaviorSubject<T[]>([]);
   /*template*/ groupValues: string[];
-  /*template*/ ltSm: string;
-  /*template*/ sm: string;
-  /*template*/ md: string;
-  /*template*/ lg: string;
-  /*template*/ gtLg: string;
   private activeGroup: string;
 
   private subscription: Subscription;
@@ -126,16 +120,6 @@ export class BdDataGridComponent<T>
       // register this table as "searchable" in the global search service if requested.
       this.subscription = this.searchService.register(this);
     }
-
-    this.subscription.add(
-      this.areas.panelVisible$.subscribe((panelVisible) => {
-        this.ltSm = this.getFlexAmount(1, panelVisible);
-        this.sm = this.getFlexAmount(2, panelVisible);
-        this.md = this.getFlexAmount(3, panelVisible);
-        this.lg = this.getFlexAmount(4, panelVisible);
-        this.gtLg = this.getFlexAmount(5, panelVisible);
-      })
-    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -210,13 +194,6 @@ export class BdDataGridComponent<T>
       }
       return !group || grp === group;
     });
-  }
-
-  private getFlexAmount(numCards: number, panelVisible: boolean) {
-    if (panelVisible) {
-      numCards = max([1, numCards - 1]);
-    }
-    return `0 0 ${100 / numCards}%`;
   }
 
   ngOnDestroy(): void {

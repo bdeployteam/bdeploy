@@ -1,22 +1,22 @@
 <div #navRoot class="local-sizing" fxLayout="row">
   <app-main-nav-menu
-    fxFlex="0 0 auto"
+    class="flex-none"
     *ngIf="isAuth$ | async"
   ></app-main-nav-menu>
-  <div fxLayout="column" fxFlex="1 1 auto">
+  <div fxLayout="column" class="flex-auto">
     <app-main-nav-top
-      fxFlex="0 0 auto"
+      class="flex-none"
       *ngIf="isAuth$ | async"
     ></app-main-nav-top>
-    <div fxLayout="row" fxFlex="1 1 auto" class="local-content-sizing">
+    <div fxLayout="row" class="flex-auto" class="local-content-sizing">
       <app-main-nav-content
-        fxFlex="1 0 auto"
+        class="flex-auto"
         [ngClass]="!(isAuth$ | async) ? 'local-unauth-content' : null"
       >
         <ng-content></ng-content>
       </app-main-nav-content>
       <app-main-nav-flyin
-        fxFlex="0 0 auto"
+        class="flex-none"
         *ngIf="isAuth$ | async"
       ></app-main-nav-flyin>
     </div>
