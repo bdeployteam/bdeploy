@@ -1,18 +1,12 @@
-<div
-  class="local-state-panel"
-  fxLayout="row"
-  *ngIf="!!items?.length"
-  fxLayoutGap="20px"
->
+<div class="local-state-panel flex gap-5" *ngIf="!!items?.length">
   <ng-container *ngFor="let item of itemsToDisplay">
     <div
-      fxLayout="row"
-      fxLayoutGap="5px"
+      class="flex gap-1"
       [matTooltip]="item.tooltip ? (item.tooltip | async) : (item.name | async)"
       matTooltipClass="tooltip-with-newline"
       [matTooltipShowDelay]="300"
       matTooltipPosition="above"
-      [style.cursor]="item.click ? 'pointer' : null"
+      [class.cursor-pointer]="item.click"
       (click)="item.click ? item.click() : null"
     >
       <ng-container *ngIf="item.type | async as type">
@@ -32,11 +26,8 @@
   </ng-container>
   <div class="flex-auto"></div>
   <div
-    fxLayout="row"
     *ngIf="lastRefreshAt$"
-    fxLayoutAlign="start center"
-    fxLayoutGap="5px"
-    class="bd-secondary-text"
+    class="bd-secondary-text flex gap-1 justify-start items-center"
   >
     <div>
       Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}

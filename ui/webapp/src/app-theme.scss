@@ -60,6 +60,7 @@ $mdc-typography-config: mat.define-typography-config(
   // -2 to achieve roughly the previous spacing.
   @include mat.icon-button-density(-2);
   @include mat.table-density(-2);
+  @include mat.radio-density(-3);
 
   $dark: map-get($theme, "is-dark");
   $primary: map-get($theme, "primary");

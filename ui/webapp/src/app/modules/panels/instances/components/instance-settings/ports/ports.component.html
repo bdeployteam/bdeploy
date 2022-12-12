@@ -1,5 +1,5 @@
 <ng-template #shiftDlg>
-  <div fxLayout="column" fxLayoutGap="10px">
+  <div class="flex flex-col gap-2.5">
     <div>
       Specify the amount to shift all selected port values. The number can be
       negative.
@@ -20,7 +20,7 @@
     [route]="['..']"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <div>
         This instance contains <strong>{{ ports.length }}</strong> distinct port
         parameters. You can use this panel to manipulate or view them all

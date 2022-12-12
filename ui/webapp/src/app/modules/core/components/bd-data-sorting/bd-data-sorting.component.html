@@ -7,13 +7,10 @@
 >
   <mat-card
     appearance="outlined"
-    [style.padding.px]="10"
-    class="mat-typography"
-    fxLayout="column"
-    fxLayoutGap="5px"
+    class="mat-typography flex flex-col gap-1 p-2.5"
   >
     <mat-radio-group
-      fxLayout="column"
+      class="flex flex-col"
       [ngModel]="selectedColumn"
       (ngModelChange)="updateSortColumn($event)"
     >
@@ -25,7 +22,7 @@
         {{column.name}}
       </mat-radio-button>
     </mat-radio-group>
-    <div fxLayout="row" fxLayoutAlign="center center">
+    <div class="flex justify-center items-center">
       <mat-button-toggle-group
         class="sort-toggle"
         name="sortDirection"

@@ -1,13 +1,9 @@
 <ng-template #directorySelector>
   <mat-card
     appearance="outlined"
-    [style.padding.px]="10"
-    [style.max-width.px]="300"
-    class="mat-typography"
-    fxLayout="column"
-    fxLayoutGap="5px"
+    class="mat-typography flex flex-col gap-1 p-2.5 max-w-[300px]"
   >
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <span
         >Select the allowed configuration directories to be mirrored to the
         client installation.</span
@@ -15,8 +11,7 @@
       <mat-tree
         [dataSource]="dirDataSource"
         [treeControl]="dirTreeControl"
-        [style.max-height.px]="400"
-        [style.overflow]="'auto'"
+        class="overflow-auto max-h-[400px]"
       >
         <mat-tree-node
           *matTreeNodeDef="let node"
@@ -53,7 +48,7 @@
           >
         </mat-tree-node>
       </mat-tree>
-      <div fxLayout="row-reverse">
+      <div class="flex flex-row-reverse">
         <app-bd-button
           text="Apply"
           [collapsed]="false"
@@ -68,13 +63,9 @@
 <ng-template #directoryHelp>
   <mat-card
     appearance="outlined"
-    [style.padding.px]="10"
-    [style.max-width.px]="1024"
-    class="mat-typography"
-    fxLayout="column"
-    fxLayoutGap="5px"
+    class="mat-typography flex flex-col gap-1 p-2.5 max-w-[1024px]"
   >
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <p>
         <code>CLIENT</code> applications are not provided with potentially
         sensitive configuration files by default.
@@ -95,8 +86,7 @@
 <form #form="ngForm">
   <div class="local-header">
     <div
-      fxLayout="row wrap"
-      fxLayoutGap="10px grid"
+      class="flex flex-wrap gap-2.5"
       *ngIf="app && edit.process$ | async as process"
     >
       <app-config-desc-element
@@ -199,12 +189,12 @@
           appEditItemInListValidator
           [allowedValues]="dirFlatAllowedValues"
         >
-          <div fxLayout="row" fxLayoutGap="10px">
+          <div class="flex flex-col gap-2.5">
             <mat-icon
               matTooltip="Additional Information"
               [matTooltipShowDelay]="500"
               matRipple
-              [style.cursor]="'pointer'"
+              class="cursor-pointer"
               appClickStopPropagation
               [appBdPopup]="directoryHelp"
               appBdPopupTrigger="click"
@@ -215,7 +205,7 @@
               matTooltip="Select Directories..."
               [matTooltipShowDelay]="500"
               matRipple
-              [style.cursor]="'pointer'"
+              class="cursor-pointer"
               appClickStopPropagation
               #dirSelector="appBdPopup"
               [appBdPopup]="directorySelector"

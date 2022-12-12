@@ -3,7 +3,7 @@
   position: relative;
   top: 84px;
 
-  height: 100%;
+  height: calc(100% - 114px);
   max-width: 100%;
 
   overflow: hidden;

@@ -1,4 +1,4 @@
-<div fxLayout="row" fxLayoutAlign="center center">
+<div class="flex justify-center items-center">
   <app-bd-button-popup
     text="Details"
     icon="info"
@@ -12,7 +12,7 @@
       [style.min-width.px]="350"
       background="dialog"
     >
-      <div fxLayout="column" fxLayoutGap="5px" class="bd-default-padding">
+      <div class="bd-default-padding flex flex-col gap-1">
         <div>
           While applying <strong>{{ record.group }}</strong> to
           <strong>{{ record.node }}</strong

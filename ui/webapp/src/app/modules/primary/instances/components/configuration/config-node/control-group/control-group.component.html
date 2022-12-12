@@ -6,24 +6,16 @@
 >
   <mat-expansion-panel-header>
     <mat-panel-title>
-      <div
-        fxLayout="row"
-        class="flex-auto"
-        fxLayoutAlign="start center"
-        fxLayoutGap="5px"
-      >
-        <div class="local-padding local-header flex-auto" fxLayout="column">
-          <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
-            <div fxLayout="column">
+      <div class="flex-auto flex justify-start items-center gap-1">
+        <div class="local-padding local-header flex-auto flex flex-col">
+          <div class="flex gap-1 justify-start items-center">
+            <div class="flex flex-col">
               <div class="bd-type-text">Control Group</div>
               <div class="bd-title-text">{{ group.name }}</div>
             </div>
             <div class="flex-auto"></div>
             <div
-              fxLayout="row wrap"
-              fxLayoutAlign="start center"
-              fxLayoutGap="5px"
-              class="local-config"
+              class="local-config flex flex-wrap justify-start items-center gap-1"
               *ngIf="!(narrow$ | async)"
             >
               <mat-icon class="material-symbols-filled">play_arrow</mat-icon>
@@ -59,7 +51,7 @@
     </mat-panel-title>
   </mat-expansion-panel-header>
 
-  <div fxLayout="column">
+  <div class="flex flex-col">
     <ng-content></ng-content>
   </div>
 </mat-expansion-panel>

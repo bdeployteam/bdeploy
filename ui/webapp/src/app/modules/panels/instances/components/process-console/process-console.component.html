@@ -6,7 +6,7 @@
   >
     <div class="flex-auto"></div>
     <ng-container *ngIf="(hasStdin$ | async) && (available$ | async)">
-      <div fxLayout="row" fxLayoutAlign="center center">
+      <div class="flex justify-center items-center">
         <div
           class="local-stdin-badge"
           [ngClass]="(stdin$ | async) ? 'local-stdin-attached' : 'local-stdin-detached'"

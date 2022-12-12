@@ -4,11 +4,7 @@
     header="Node {{ nodeName$ | async }}"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      *ngIf="nodeState$ | async as state"
-      fxLayout="column"
-      fxLayoutGap="10px"
-    >
+    <div *ngIf="nodeState$ | async as state" class="flex flex-col gap-2.5">
       <app-bd-notification-card
         [svgIcon]="state.config.os"
         [dismissable]="false"

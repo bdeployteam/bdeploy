@@ -19,7 +19,7 @@
       </div>
     </app-bd-notification-card>
     <ng-template #currentInstanceSynchronized>
-      <div fxLayout="column" fxLayoutGap="10px">
+      <div class="flex flex-col gap-2.5">
         <app-bd-button
           [collapsed]="false"
           icon="play_arrow"
@@ -45,7 +45,7 @@
           [disabled]="restarting$ | async"
         ></app-bd-button>
         <mat-divider></mat-divider>
-        <div fxLayout="column" fxLayoutGap="10px">
+        <div class="flex flex-col gap-2.5">
           <div>
             Control
             <strong>{{ bulkSelection.length || 0 }}</strong>

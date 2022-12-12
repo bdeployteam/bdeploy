@@ -5,12 +5,7 @@
   ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form
-      fxLayout="column"
-      fxLayoutGap="10px"
-      #form="ngForm"
-      (ngSubmit)="onSave()"
-    >
+    <form class="flex flex-col gap-2.5" #form="ngForm" (ngSubmit)="onSave()">
       <div>Creating instance: <strong>{{ config.id }}</strong></div>
       <div class="bd-warning-text" *ngIf="!prodList?.length">
         No products are available. Upload a product first.

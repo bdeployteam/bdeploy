@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { CoreModule } from '../../core/core.module';
 import { AdminRoutingModule } from './admin-routing.module';
@@ -61,6 +62,12 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
     NodeMaintenanceComponent,
     NodeConversionComponent,
   ],
-  imports: [CommonModule, CoreModule, AdminRoutingModule, MatTabsModule],
+  imports: [
+    CommonModule,
+    CoreModule,
+    AdminRoutingModule,
+    MatTabsModule,
+    MatCardModule,
+  ],
 })
 export class AdminModule {}

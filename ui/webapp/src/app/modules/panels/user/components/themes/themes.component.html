@@ -2,18 +2,14 @@
   <app-bd-dialog-toolbar header="Theme" [panel]="true"> </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <div class="bd-description-text">
         The selected theme is stored in the browser's local storage.
       </div>
       <div
         *ngFor="let t of themeService.getThemes()"
-        fxLayout="row"
-        fxLayoutGap="10px"
-        fxLayoutAlign="start center"
-        class="local-theme-item"
+        class="local-theme-item cursor-pointer flex gap-2.5 justify-start items-center"
         (click)="themeService.updateTheme(t)"
-        [style.cursor]="'pointer'"
       >
         <div [ngClass]="t + '-chooser'" class="basis-[56px]">
           <div class="preview-background">
@@ -22,11 +18,7 @@
           </div>
         </div>
         <div class="flex-auto">{{ themeService.getThemeDescription(t) }}</div>
-        <div
-          [style.width.px]="36"
-          fxLayout="column"
-          fxLayoutAlign="center center"
-        >
+        <div [style.width.px]="36" class="flex justify-center items-center">
           <div
             class="preview-selected"
             *ngIf="t === themeService.getCurrentTheme()"

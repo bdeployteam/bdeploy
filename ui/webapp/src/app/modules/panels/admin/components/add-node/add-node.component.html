@@ -5,7 +5,7 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm">
-      <div fxLayout="column" fxLayoutGap="10px">
+      <div class="flex flex-col gap-2.5">
         <span
           >You can either manually enter node information below, or drop a
           <code>node-ident</code> file which is created during the
@@ -19,9 +19,7 @@
         >
         <mat-card
           appearance="outlined"
-          fxLayout="column"
-          fxLayoutAlign="center center"
-          class="bd-drag-card bd-drop-card"
+          class="bd-drag-card bd-drop-card flex flex-col justify-center items-center"
           (drop)="onDrop($event)"
           (dragover)="onOver($event)"
         >

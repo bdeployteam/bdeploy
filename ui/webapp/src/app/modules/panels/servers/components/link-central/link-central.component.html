@@ -4,7 +4,7 @@
     [panel]="true"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <div>
         Visit the central server you want to link from in a separate window now,
         and drag the <em>link information card</em> below to the
@@ -12,11 +12,9 @@
       </div>
       <mat-card
         appearance="outlined"
-        fxLayout="column"
-        fxLayoutAlign="center center"
         draggable="true"
         (dragstart)="onDragStart($event)"
-        class="bd-drag-card"
+        class="bd-drag-card flex flex-col justify-center items-center"
       >
         <div>Drag me to the central server!</div>
       </mat-card>
@@ -28,7 +26,7 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Manual and Offline Linking</mat-panel-title>
         </mat-expansion-panel-header>
-        <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="10">
+        <div class="flex flex-col gap-2.5 pt-2.5">
           <div>
             In case you do not have the possibility to drag the card to the
             central server now, you can download the information as a file, and
@@ -50,9 +48,7 @@
           </div>
           <mat-card
             appearance="outlined"
-            fxLayout="column"
-            fxLayoutAlign="center center"
-            class="bd-drag-card bd-drop-card"
+            class="bd-drag-card bd-drop-card flex flex-col justify-center items-center"
             (drop)="onDrop($event)"
             (dragover)="onOver($event)"
           >

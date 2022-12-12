@@ -1,12 +1,12 @@
 <mat-toolbar class="bd-page-toolbar">
-  <mat-toolbar-row fxLayoutGap="5px">
+  <mat-toolbar-row class="gap-2.5">
     <span
       [matTooltip]="header"
       [matTooltipShowDelay]="1000"
       class="bd-text-ellipsis"
       >{{ header }}</span
     >
-    <div fxLayout="row" fxLayoutGap="5px" class="flex-auto">
+    <div class="flex-auto flex gap-1">
       <ng-content></ng-content>
     </div>
     <app-bd-button

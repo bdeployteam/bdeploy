@@ -1,17 +1,13 @@
 <ng-template #editorPopup>
   <mat-card
     appearance="outlined"
-    [style.padding.px]="10"
-    [style.min-width.px]="500"
-    class="mat-typography"
-    fxLayout="column"
-    fxLayoutGap="10px"
+    class="mat-typography flex flex-col gap-2.5 p-2.5 min-w-[500px]"
   >
     <div class="bd-text-ellipsis">
       <strong>Edit Value</strong>
     </div>
     <div #editorPanel *ngIf="editor" class="editorPanel"></div>
-    <div fxLayout="row" fxLayoutAlign="flex-end" fxLayoutGap="10px">
+    <div class="flex gap-2.5 justify-end">
       <app-bd-button
         text="Cancel"
         [collapsed]="false"
@@ -29,7 +25,7 @@
 </ng-template>
 
 <mat-icon
-  [style.cursor]="'pointer'"
+  class="cursor-pointer"
   (click)="prepareEditor()"
   [appBdPopup]="editorPopup"
   appBdPopupPosition="below-left"

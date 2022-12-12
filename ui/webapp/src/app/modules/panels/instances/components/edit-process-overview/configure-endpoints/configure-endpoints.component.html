@@ -18,16 +18,13 @@
     <form form #epForm="ngForm">
       <div
         *ngIf="process?.endpoints?.http?.length"
-        [style.padding-top.px]="2"
-        fxLayout="column"
-        fxLayoutGap="10px"
+        class="flex flex-col gap-2.5 pt-0.5"
       >
         <div
           *ngFor="let endpoint of process.endpoints.http; let i = index"
-          class="bd-rect-card"
-          fxLayout="column"
+          class="bd-rect-card flex flex-col"
         >
-          <div class="bd-bg-toolbar" fxLayout="row">
+          <div class="bd-bg-toolbar flex">
             <div class="bd-default-padding">
               Endpoint
               <strong

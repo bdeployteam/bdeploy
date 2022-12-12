@@ -1,5 +1,5 @@
 <app-bd-expand-button text="Color Scheme" icon="palette">
-  <div fxLayout="column" fxLayoutGap="5px">
+  <div class="flex flex-col gap-1">
     <app-color-select
       *ngFor="let col of colors"
       [name]="col.name"

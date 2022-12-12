@@ -6,12 +6,7 @@
   ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form
-      #form="ngForm"
-      (ngSubmit)="onSave()"
-      fxLayout="column"
-      fxLayoutGap="10px"
-    >
+    <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-2.5">
       <app-bd-notification-card
         *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
         icon="history"
@@ -25,11 +20,7 @@
           editing.
         </div>
       </app-bd-notification-card>
-      <div
-        fxLayout="column"
-        fxLayoutGap="10px"
-        *ngIf="edit.state$ | async as state"
-      >
+      <div class="flex flex-col gap-2.5" *ngIf="edit.state$ | async as state">
         <div>Edit instance: <strong>{{ state.config.config.id }}</strong></div>
         <app-bd-form-input
           label="Name"

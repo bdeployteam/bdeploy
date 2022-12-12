@@ -4,8 +4,8 @@
     header="History Details"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="entry$ | async as entry" fxLayout="column" fxLayoutGap="10px">
-      <div fxLayout="row" fxLayoutGap="10px">
+    <div *ngIf="entry$ | async as entry" class="flex flex-col gap-2.5">
+      <div class="flex gap-2.5">
         <app-user-avatar
           [mail]="entry?.email"
           [hostSize]="64"

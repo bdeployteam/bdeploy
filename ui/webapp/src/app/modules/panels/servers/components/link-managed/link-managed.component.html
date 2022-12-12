@@ -4,7 +4,7 @@
     [panel]="true"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <div>
         Visit the managed server you want to link in a separate window now, and
         drag the <em>link information card</em> from the
@@ -12,9 +12,7 @@
       </div>
       <mat-card
         appearance="outlined"
-        fxLayout="column"
-        fxLayoutAlign="center center"
-        class="bd-drag-card bd-drop-card"
+        class="bd-drag-card bd-drop-card flex flex-col justify-center items-center"
         (drop)="onDrop($event)"
         (dragover)="onOver($event)"
       >
@@ -27,8 +25,7 @@
         data-cy="managed-ident"
       />
       <form
-        fxLayout="column"
-        fxLayoutGap="10px"
+        class="flex flex-col gap-2.5"
         *ngIf="!!payload"
         #form="ngForm"
         (ngSubmit)="onSave()"
@@ -61,7 +58,7 @@
           [collapsed]="false"
           [disabled]="form.invalid || form.submitted"
         ></app-bd-button>
-        <div fxLayout="column" fxLayoutGap="10px" *ngIf="manual">
+        <div class="flex flex-col gap-2.5" *ngIf="manual">
           <div>
             The managed server has been added, but unfortunately the managed
             server could not be informed about this fact.

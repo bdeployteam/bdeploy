@@ -1,4 +1,4 @@
-<div fxLayout="column" fxLayoutGap="5px">
+<div class="flex flex-col gap-1">
   <div *ngFor="let act of activities.activities$ | async; trackBy: doTrack">
     <app-bd-notification-card
       [collapsed]="true"
@@ -8,13 +8,13 @@
       (dismiss)="onDismiss(squashed)"
       [header]="squashed.header"
     >
-      <div fxLayout="column" fxLayoutGap="5px">
+      <div class="flex flex-col gap-1">
         <ng-container *ngIf="squashed.current.snapshot.max <= 0">
           <mat-progress-bar
             mode="indeterminate"
             color="accent"
           ></mat-progress-bar>
-          <div fxLayout="row">
+          <div class="flex">
             <div class="flex-auto"></div>
             <span><em>{{ formatDuration(squashed.parent) }}</em></span>
             <span>&nbsp;({{ formatDuration(squashed.current) }})</span>
@@ -27,7 +27,7 @@
             color="accent"
             [value]="calculatePercentDone(squashed)"
           ></mat-progress-bar>
-          <div fxLayout="row">
+          <div class="flex">
             <span
               >{{ squashed.current.snapshot.current }} of {{
               squashed.current.snapshot.max }}</span
@@ -38,7 +38,7 @@
           </div>
         </ng-container>
 
-        <div fxLayout="row" class="local-user-hint">
+        <div class="local-user-hint flex">
           <div class="flex-auto"></div>
           <div class="bd-hint-text">
             {{ squashed.current.snapshot.uuid }}, ~{{

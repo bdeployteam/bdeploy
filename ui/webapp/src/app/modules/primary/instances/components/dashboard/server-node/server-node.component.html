@@ -1,17 +1,12 @@
-<div fxLayout="column" class="bd-rect-card">
-  <app-node-header fxLayout="column" [node]="node">
-    <div fxLayout="row">
-      <div fxLayout="column">
+<div class="bd-rect-card flex flex-col">
+  <app-node-header class="flex flex-col" [node]="node">
+    <div class="flex">
+      <div class="flex flex-col">
         <div class="bd-type-text">NODE</div>
         <div class="bd-title-text">{{ node.nodeName }}</div>
       </div>
       <div class="flex-auto"></div>
-      <div
-        fxLayout="row"
-        fxLayoutGap="5px"
-        [style.pointer-events]="'all'"
-        fxLayoutAlign="center center"
-      >
+      <div class="flex gap-1 justify-center items-center pointer-events-auto">
         <app-bd-panel-button
           text="Details"
           icon="info"

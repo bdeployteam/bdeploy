@@ -1,8 +1,8 @@
 <ng-container *ngIf="diff$ | async as diffs">
   <div [ngClass]="borderClass" *ngIf="diffs.type !== 'not-in-base'">
-    <div class="local-padding local-header" fxLayout="column">
+    <div class="local-padding local-header flex flex-col">
       <div class="bd-description-text">Instance Variables:</div>
-      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+      <div class="flex flex-wrap gap-1 justify-start items-center">
         <ng-container *ngFor="let diff of diffs.diffs; let i = index">
           <ng-template #varPopup>
             <app-variable-desc-card

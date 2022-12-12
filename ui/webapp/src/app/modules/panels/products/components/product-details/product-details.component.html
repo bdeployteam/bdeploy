@@ -6,8 +6,7 @@
 
   <app-bd-dialog-content>
     <div
-      fxLayout="column"
-      fxLayoutGap="10px"
+      class="flex flex-col gap-2.5"
       *ngIf="singleProduct.product$ | async as prod"
     >
       <div gdColumns="70px auto" gdGap="5px">
@@ -28,9 +27,7 @@
           <app-bd-no-data>
             <div
               *ngIf="singleProduct.usedInLoading$ | async; else notUsed"
-              fxLayout="row"
-              fxLayoutAlign="center center"
-              fxLayoutGap="10px"
+              class="flex justify-center items-center gap-2.5"
             >
               <mat-spinner [diameter]="24"></mat-spinner>
               <div>Calculating...</div>

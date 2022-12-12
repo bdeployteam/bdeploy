@@ -1,4 +1,4 @@
-<div fxLayout="column" class="local-header-sizing">
+<div class="local-header-sizing flex flex-col">
   <svg width="100%" height="100%" class="local-graph-sizing">
     <!-- The NESTED SVG uses a viewBox and scaling to be able to use a 100x100 canvas, i.e. mapping coordinates to percent and vice versa. -->
     <!-- This is *required* as paths cannot position with percent values, only absolute is supported. We can still place *other* elements -->
@@ -88,17 +88,15 @@
     </g>
   </svg>
   <div
-    class="local-no-data-overlay bd-description-text"
+    class="local-no-data-overlay bd-description-text flex flex-col justify-center items-center"
     *ngIf="!hasVisiblePoint"
-    fxLayout="column"
-    fxLayoutAlign="center center"
   >
     <div><strong>No data available.</strong></div>
     <div *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)">
       The server is not synchronized. Please synchronize first.
     </div>
   </div>
-  <div class="local-content-sizing" fxLayout="column">
+  <div class="local-content-sizing flex flex-col">
     <ng-content></ng-content>
   </div>
 </div>

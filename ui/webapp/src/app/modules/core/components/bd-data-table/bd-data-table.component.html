@@ -1,4 +1,4 @@
-<div class="flex-auto" fxLayout="column">
+<div class="flex-auto flex flex-col">
   <table
     [id]="id"
     mat-table
@@ -6,8 +6,7 @@
     matSort
     [matSortActive]="sort ? sort.active : null"
     [matSortDirection]="sort ? sort.direction : null"
-    class="flex-auto"
-    [style.width]="'100%'"
+    class="flex-auto w-full"
     cdkDropList
     [cdkDropListData]="records"
     [cdkDropListConnectedTo]="dragConnected"
@@ -32,7 +31,8 @@
         (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
         [routerLink]="!!row.node.item ? recordRoute(row.node.item) : []"
         [routerLinkActive]="!!row.node.item ? 'mat-row-route-active' : []"
-        [style.cursor]="!!row.node.item ? 'pointer' : 'auto'"
+        [class.cursor-pointer]="!!row.node.item"
+        [class.cursor-auto]="!row.node.item"
         class="local-row"
         cdkDrag
       ></tr>
@@ -44,7 +44,8 @@
         mat-row
         *matRowDef="let row; columns: _visibleColumns"
         (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
-        [style.cursor]="!!row.node.item ? 'pointer' : 'auto'"
+        [class.cursor-pointer]="!!row.node.item"
+        [class.cursor-auto]="!row.node.item"
         cdkDrag
       ></tr>
     </ng-container>
@@ -106,10 +107,8 @@
       <td
         mat-footer-cell
         *matFooterCellDef
-        [style.width]="'auto'"
-        [style.maxWidth]="0"
         [attr.colspan]="_visibleColumns.length"
-        class="bd-hint-text"
+        class="bd-hint-text w-auto max-w-0"
       >
         Some data is hidden. Use the search and/or sort to find it.
       </td>
@@ -126,13 +125,11 @@
           >
             <!-- Text for the first column, either group name or item text -->
             <div
-              class="local-first-column"
+              class="local-first-column flex justify-start items-center"
               [style.marginLeft.px]="row.expandable ? 0 : getNoExpandIndent(row.level)"
               [style.fontWeight]="row.expandable ? 'bold' : 'normal'"
               [matTooltip]="!row.expandable ? (!!col.tooltip ? col.tooltip(row.node.item) : row.node.groupOrFirstColumn) : null"
               [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
-              fxLayout="row"
-              fxLayoutAlign="start center"
             >
               <!-- Button to expand or collapse a group -->
               <button
@@ -156,15 +153,12 @@
                 <mat-icon
                   *ngIf="dragReorderMode"
                   cdkDragHandle
-                  [style.cursor]="'grab'"
-                  [style.margin-bottom.px]="1"
-                  class="local-drag-handle"
+                  class="local-drag-handle cursor-grab mb-[1px]"
                   >drag_indicator</mat-icon
                 >
                 <div
                   *ngIf="!col.component || row.expandable"
-                  class="bd-text-ellipsis grow basis-0"
-                  [style.text-align]="'left'"
+                  class="bd-text-ellipsis grow basis-0 text-left"
                 >
                   {{ row.node.groupOrFirstColumn }}
                 </div>
@@ -187,8 +181,7 @@
               >
                 <div
                   *ngIf="!col.component || row.expandable"
-                  class="bd-text-ellipsis grow basis-0"
-                  [style.text-align]="'left'"
+                  class="bd-text-ellipsis grow basis-0 text-left"
                 >
                   {{ row.node.groupOrFirstColumn }}
                 </div>
@@ -209,7 +202,7 @@
             mat-cell
             [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
             [style.width]="col.width ? col.width : 'auto'"
-            [style.maxWidth]="0"
+            class="max-w-0"
           >
             <ng-container *ngIf="!row.expandable">
               <ng-container *ngIf="!isImageColumn(col)">
@@ -229,7 +222,7 @@
                 ></app-bd-data-component-cell>
               </ng-container>
               <ng-container *ngIf="isImageColumn(col)">
-                <div fxLayout="row" fxLayoutAlign="start center">
+                <div class="flex justify-start items-center">
                   <img
                     class="local-row-image"
                     [style.maxWidth]="col.width ? col.width : null"
@@ -248,9 +241,9 @@
           <td
             mat-cell
             [style.width]="col.width ? col.width : 'auto'"
-            [style.maxWidth]="0"
+            class="max-w-0"
           >
-            <div fxLayout="row" fxLayoutAlign="start center">
+            <div class="flex justify-start items-center">
               <app-bd-button
                 *ngIf="row.node.item"
                 [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"

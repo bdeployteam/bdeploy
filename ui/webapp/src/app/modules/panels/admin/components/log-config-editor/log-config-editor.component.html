@@ -11,7 +11,7 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div *ngIf="!(loading$ | async)" [style.height]="'100%'" fxLayout="column">
+    <div *ngIf="!(loading$ | async)" class="flex flex-col h-full">
       <app-bd-editor
         class="flex-auto"
         [(content)]="config"

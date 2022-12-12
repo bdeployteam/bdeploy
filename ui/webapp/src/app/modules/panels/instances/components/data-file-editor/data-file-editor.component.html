@@ -18,8 +18,7 @@
   <app-bd-dialog-content>
     <div
       *ngIf="!(loading$ | async) && file$ | async as file"
-      [style.height]="'100%'"
-      fxLayout="column"
+      class="flex flex-col h-full"
     >
       <app-bd-editor
         *ngIf="!(binary$ | async)"

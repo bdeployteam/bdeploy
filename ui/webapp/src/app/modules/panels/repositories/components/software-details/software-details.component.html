@@ -9,8 +9,7 @@
 
   <app-bd-dialog-content>
     <div
-      fxLayout="column"
-      fxLayoutGap="10px"
+      class="flex flex-col gap-2.5"
       *ngIf="detailsService.softwarePackage$ | async as software"
     >
       <ng-container *ngIf="software?.type === 'Product'">

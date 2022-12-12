@@ -1,14 +1,12 @@
 <div
-  class="bd-rect-card local-banner"
-  fxLayout="column"
-  fxLayoutGap="5px"
+  class="bd-rect-card local-banner flex flex-col gap-1"
   [style.color]="banner.foregroundColor"
   [style.background-color]="banner.backgroundColor"
 >
   <div class="local-banner-text">
     <pre>{{ banner.text }}</pre>
   </div>
-  <div class="local-banner-info" fxFlexAlign="end">
+  <div class="local-banner-info" class="self-end">
     {{ banner.user }}, {{ banner.timestamp | date: 'dd.MM.yyyy HH:mm:ss' }}
   </div>
 </div>

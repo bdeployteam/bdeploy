@@ -6,8 +6,7 @@
   <app-bd-dialog-content>
     <div
       *ngIf="nodeState$ | async as state; else noState"
-      fxLayout="column"
-      fxLayoutGap="10px"
+      class="flex flex-col gap-2.5"
     >
       <app-bd-notification-card
         [svgIcon]="state.config.os"

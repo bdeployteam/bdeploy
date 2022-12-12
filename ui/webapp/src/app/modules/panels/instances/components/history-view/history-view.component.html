@@ -6,32 +6,23 @@
   >
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      fxLayout="column"
-      fxLayoutGap="10px"
-      *ngIf="(config$ | async) as cfg"
-      [style.padding-top.px]="2"
-    >
-      <div class="bd-rect-card" fxLayout="column">
-        <div fxLayout="column">
-          <div
-            fxLayout="row"
-            class="bd-default-padding"
-            [style.padding-bottom.px]="0"
-          >
-            <div fxLayout="column">
+    <div class="flex flex-col gap-2.5 pt-0.5" *ngIf="(config$ | async) as cfg">
+      <div class="bd-rect-card flex flex-col">
+        <div class="flex flex-col">
+          <div class="bd-default-padding flex pb-0">
+            <div class="flex flex-col">
               <div class="bd-type-text">Instance Configuration</div>
             </div>
           </div>
         </div>
-        <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
+        <div class="bd-default-padding flex flex-col gap-2.5">
           <app-history-header-config
             class="basis-1/2"
             [baseConfig]="cfg.config"
             [compareConfig]="cfg.config"
           ></app-history-header-config>
         </div>
-        <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
+        <div class="bd-default-padding flex flex-col gap-2.5">
           <app-history-variables-config
             class="basis-1/2"
             [baseConfig]="cfg.config"
@@ -46,13 +37,9 @@
           class="bd-rect-card"
           *ngIf="!!node.nodeConfiguration?.applications?.length"
         >
-          <div fxLayout="column">
-            <div
-              fxLayout="row"
-              class="bd-default-padding"
-              [style.padding-bottom.px]="0"
-            >
-              <div fxLayout="column">
+          <div class="flex flex-col">
+            <div class="bd-default-padding flex pb-0">
+              <div class="flex flex-col">
                 <div class="bd-type-text">NODE</div>
                 <div class="bd-title-text">
                   {{ node?.nodeName === clientNodeName ? 'Client Applications' :
@@ -61,7 +48,7 @@
               </div>
             </div>
           </div>
-          <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
+          <div class="bd-default-padding flex flex-col gap-2.5">
             <app-history-process-config
               *ngFor="let app of node.nodeConfiguration.applications | nodeFilter: searchTerm"
               [baseConfig]="app"

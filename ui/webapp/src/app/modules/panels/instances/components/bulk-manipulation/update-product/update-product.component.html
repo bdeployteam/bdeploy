@@ -6,7 +6,7 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="bulk.selection$ | async as selection">
-      <div *ngIf="!!selection.length" fxLayout="column" fxLayoutGap="10px">
+      <div *ngIf="!!selection.length" class="flex flex-col gap-2.5">
         <div>
           Update <strong>{{ selection.length }}</strong> selected instances'
           product version.

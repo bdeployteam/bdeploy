@@ -6,9 +6,9 @@
   ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <form #form="ngForm" (ngSubmit)="onSave()">
-        <div fxLayout="column" fxLayoutGap="10px" *ngIf="repository">
+        <div class="flex flex-col gap-2.5" *ngIf="repository">
           <app-bd-form-input
             label="Description"
             name="description"

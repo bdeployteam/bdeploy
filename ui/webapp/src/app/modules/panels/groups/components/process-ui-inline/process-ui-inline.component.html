@@ -40,16 +40,13 @@
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxFill class="local-group">
+    <div class="local-group flex flex-col w-full h-full">
       <div class="local-loading" *ngIf="!app">
         Application or Endpoint not found.
       </div>
       <div
         *ngIf="!app?.endpoint?.endpoint?.proxying"
-        fxFill
-        fxLayout="column"
-        fxLayoutAlign="center center"
-        fxLayoutGap="10px"
+        class="flex flex-col gap-2.5 justify-center items-center w-full h-full"
       >
         <span
           >This endpoint does not support proxying, and can thus not be
@@ -69,9 +66,8 @@
         </div>
         <iframe
           #iframe
-          fxFill
           title="Inline Application"
-          class="local-app-frame"
+          class="local-app-frame w-full h-full"
           [src]="url ? url : 'about:blank'"
           [name]="app?.endpoint?.endpoint?.id"
           allowfullscreen="true"

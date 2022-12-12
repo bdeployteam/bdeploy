@@ -4,10 +4,8 @@
   *ngIf="show"
   [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
   [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
-  class="local-sizing"
+  class="local-sizing flex flex-col justify-center items-center"
   [class.bd-normal-backdrop]="show && mode === 'dim'"
-  fxLayout="column"
-  fxLayoutAlign="center center"
 >
   <mat-spinner [diameter]="48"></mat-spinner>
 </div>

@@ -3,10 +3,8 @@
   <mat-card
     appearance="outlined"
     #itemContainer
-    fxLayout="column"
     [style.width.px]="attachTo.offsetWidth"
-    [style.padding.px]="5"
-    class="mat-typography local-card"
+    class="mat-typography local-card flex flex-col p-1"
   >
     <div
       *ngFor="let match of matches; let i = index"
@@ -16,8 +14,8 @@
       (mouseenter)="setSelected(i)"
       (mousedown)="onClickSelect(select())"
     >
-      <div fxLayout="row" fxLayoutGap="5px">
-        <div [style.width.px]="18" [style.height.px]="18">
+      <div class="flex gap-1">
+        <div class="w-[18px] h-[18px]">
           <mat-icon *ngIf="match.icon" class="local-icon"
             >{{match.icon}}</mat-icon
           >

@@ -11,7 +11,7 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <mat-stepper
         #stepper
         [linear]="true"
@@ -28,9 +28,7 @@
         >
           <div
             [attr.data-cy]="'step-server'"
-            fxLayout="column"
-            fxLayoutGap="10px"
-            [style.padding.px]="10"
+            class="flex flex-col gap-2.5 p-2.5"
           >
             <div *ngIf="!isCentral; else selectManaged">
               Choosing a target server is not required for your setup.
@@ -49,7 +47,7 @@
                 (ngModelChange)="serverSelectionCompleted = !!selectedServer"
               ></app-bd-form-select>
             </ng-template>
-            <div fxLayout="row">
+            <div class="flex">
               <app-bd-button
                 color="primary"
                 [collapsed]="false"
@@ -63,9 +61,7 @@
         <mat-step label="System Template" [completed]="!!this.template">
           <div
             [attr.data-cy]="'step-template-upload'"
-            fxLayout="column"
-            fxLayoutGap="10px"
-            [style.padding.px]="10"
+            class="flex flex-col gap-2.5 p-2.5"
           >
             <app-bd-file-drop
               *ngIf="!file"
@@ -81,7 +77,7 @@
               [parameters]="[{id: 'server', name: 'server', type: 'string', value: selectedServer?.hostName}]"
               (dismiss)="onDismiss()"
             ></app-bd-file-upload>
-            <div fxLayout="row">
+            <div class="flex">
               <app-bd-button
                 color="primary"
                 [collapsed]="false"
@@ -95,9 +91,7 @@
         <mat-step label="Name and Purpose" [completed]="name && purpose">
           <div
             [attr.data-cy]="'step-name-purpose'"
-            fxLayout="column"
-            fxLayoutGap="10px"
-            [style.padding.px]="10"
+            class="flex flex-col gap-2.5 p-2.5"
           >
             <form #namePurposeForm="ngForm">
               <app-bd-form-input
@@ -118,7 +112,7 @@
                 required
               ></app-bd-form-select>
             </form>
-            <div fxLayout="row">
+            <div class="flex">
               <app-bd-button
                 color="primary"
                 [collapsed]="false"
@@ -135,9 +129,7 @@
         >
           <div
             [attr.data-cy]="'step-system-variables'"
-            fxLayout="column"
-            fxLayoutGap="10px"
-            [style.padding.px]="10"
+            class="flex flex-col gap-2.5 p-2.5"
           >
             <ng-container *ngFor="let v of requiredSystemVariables">
               <app-bd-form-input
@@ -157,7 +149,7 @@
                 No system template variables.
               </div>
             </ng-container>
-            <div fxLayout="row">
+            <div class="flex">
               <app-bd-button
                 color="primary"
                 [collapsed]="false"
@@ -174,9 +166,7 @@
         >
           <div
             [attr.data-cy]="'step-instance-templates'"
-            fxLayout="column"
-            fxLayoutGap="10px"
-            [style.padding.px]="10"
+            class="flex flex-col gap-2.5 p-2.5"
           >
             <mat-tab-group #tabGroup animationDuration="0ms">
               <mat-tab *ngFor="let tpl of templates">
@@ -189,15 +179,9 @@
                 </ng-template>
                 <div
                   [attr.data-cy]="'tab-' + tpl.expandedName"
-                  fxLayout="row"
-                  fxLayoutGap="5px"
+                  class="flex gap-1"
                 >
-                  <div
-                    class="flex-auto"
-                    fxLayout="column"
-                    fxLayoutGap="10px"
-                    [style.padding.px]="10"
-                  >
+                  <div class="flex-auto flex flex-col gap-2.5 p-2.5">
                     <app-bd-form-toggle
                       label="Apply this instance"
                       [(ngModel)]="tpl.isApplyInstance"
@@ -221,12 +205,7 @@
                     [vertical]="true"
                     [style.width.px]="5"
                   ></mat-divider>
-                  <div
-                    class="grow-[2]"
-                    fxLayout="column"
-                    fxLayoutGap="10px"
-                    [style.padding.px]="10"
-                  >
+                  <div class="grow-[2] flex flex-col gap-2.5 p-2.5">
                     <ng-container *ngIf="tpl.isApplyInstance; else: noApply">
                       <ng-container *ngFor="let v of tpl.requiredVariables">
                         <app-bd-form-input
@@ -264,7 +243,7 @@
                 </div>
               </mat-tab>
             </mat-tab-group>
-            <div fxLayout="row">
+            <div class="flex">
               <app-bd-button
                 color="primary"
                 [collapsed]="false"
@@ -278,11 +257,9 @@
         <mat-step label="Application">
           <div
             [attr.data-cy]="'step-applying'"
-            fxLayout="column"
-            fxLayoutGap="10px"
-            [style.padding.px]="20"
+            class="flex flex-col gap-2.5 p-5"
           >
-            <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+            <div class="flex gap-2.5 justify-start items-center">
               <mat-spinner [diameter]="24"></mat-spinner>
               <div>Working on it...</div>
             </div>
@@ -291,9 +268,7 @@
         <mat-step label="Result">
           <div
             [attr.data-cy]="'step-done'"
-            fxLayout="column"
-            fxLayoutGap="10px"
-            [style.padding.px]="20"
+            class="flex flex-col gap-2.5 p-5"
             *ngIf="result"
           >
             <div *ngIf="resultIsSuccess">
@@ -331,7 +306,7 @@
               [columns]="resultCols"
               [sortData]="null"
             ></app-bd-data-table>
-            <div fxLayout="row">
+            <div class="flex">
               <app-bd-button
                 text="Finish"
                 color="primary"

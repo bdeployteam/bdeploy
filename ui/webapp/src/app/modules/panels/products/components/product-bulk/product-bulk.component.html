@@ -5,8 +5,7 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div
-      fxLayout="column"
-      fxLayoutGap="10px"
+      class="flex flex-col gap-2.5"
       *ngIf="bulk.selection$ | async as selected"
     >
       <div><strong>{{ selected.length }}</strong> products selected.</div>

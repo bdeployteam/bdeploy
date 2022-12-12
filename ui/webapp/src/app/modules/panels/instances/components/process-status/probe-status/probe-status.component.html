@@ -1,4 +1,4 @@
-<div class="local-wrapper" fxLayout="row" fxLayoutAlign="start center">
+<div class="local-wrapper flex justify-start items-center">
   <div
     gdColumns="90px 36px auto 36px"
     gdGap="5px"
@@ -17,9 +17,7 @@
       <mat-card
         appearance="outlined"
         [style.padding.px]="10"
-        class="mat-typography"
-        fxLayout="column"
-        fxLayoutGap="5px"
+        class="mat-typography flex flex-col gap-1"
       >
         <div class="bd-description-text">
           {{ probe.type }} - Status {{ probe.status }}
@@ -27,12 +25,11 @@
         <mat-divider [style.position]="'relative'"></mat-divider>
         <div class="bd-description-text">Probe Response:</div>
         <div
-          [style.height.px]="400"
           [style.width.px]="(narrow$ | async) ? 400 : 800"
-          fxLayout="row"
+          class="flex h-[400px]"
         >
           <app-bd-editor
-            fxFill
+            class="w-full h-full"
             [readonly]="true"
             [content]="content$ | async"
           ></app-bd-editor>

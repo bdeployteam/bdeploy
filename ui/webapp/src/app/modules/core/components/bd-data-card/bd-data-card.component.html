@@ -1,6 +1,6 @@
 <ng-template #cardContents>
-  <div fxLayout="row">
-    <div fxLayout="column">
+  <div class="flex">
+    <div class="flex flex-col">
       <div
         *ngIf="!!colType"
         class="bd-type-text bd-text-ellipsis"
@@ -69,14 +69,12 @@
     </div>
   </div>
   <div
-    class="local-card-actions flex-auto"
-    fxLayout="row"
-    fxLayoutGap="5px"
+    class="local-card-actions flex-auto flex gap-1"
     *ngIf="!!colActions?.length || !!colDetails?.length || !!colAvatar"
     [style.backgroundImage]="getImageUrl()"
     [style.backgroundBlendMode]="!!colActions?.length || !!colDetails?.length ? 'overlay' : undefined"
   >
-    <div class="grow basis-0" fxLayout="column" fxLayoutAlign="center start">
+    <div class="grow basis-0 flex items-center">
       <div
         *ngIf="!!colDetails?.length"
         gdColumns="16px auto"
@@ -109,7 +107,7 @@
     </div>
 
     <ng-container *ngIf="!!colActions?.length">
-      <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="end center">
+      <div class="flex gap-1 items-center justify-end">
         <ng-container *ngFor="let action of colActions">
           <app-bd-button
             *ngIf="!action.component"
@@ -154,23 +152,19 @@
 
 <mat-card
   appearance="outlined"
-  class="flex-auto"
-  fxLayout="column"
+  class="flex-auto cursor-pointer flex flex-col"
   (click)="recordClick.emit(record)"
   *ngIf="!recordRoute"
-  [style.cursor]="'pointer'"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
 </mat-card>
 
 <mat-card
   appearance="outlined"
-  fxLayout="column"
   *ngIf="!!recordRoute"
   [routerLink]="recordRoute(record)"
   routerLinkActive="mat-card-route-active"
-  [style.cursor]="'pointer'"
-  class="local-route-card flex-auto"
+  class="local-route-card flex-auto cursor-pointer flex flex-col"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
 </mat-card>

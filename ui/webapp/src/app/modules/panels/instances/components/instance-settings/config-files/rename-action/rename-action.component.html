@@ -1,6 +1,6 @@
 <ng-template #renameDialog>
   <app-bd-form-input
-    [style.min-width.px]="300"
+    class="min-w-[300px]"
     label="New Name"
     name="newName"
     [(ngModel)]="newName"
@@ -11,7 +11,7 @@
   ></app-bd-form-input>
 </ng-template>
 
-<div fxLayout="row" fxLayoutAlign="start center">
+<div class="flex justify-start items-center">
   <app-bd-button
     text="Rename"
     icon="drive_file_rename_outline"

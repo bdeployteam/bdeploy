@@ -10,7 +10,7 @@
       class="metrics-tabs-group"
     >
       <mat-tab
-        fxLayout="column"
+        class="flex flex-col"
         *ngFor="let key of keys$ | async"
         [label]="key"
       >
@@ -156,12 +156,7 @@
       </ng-container>
 
       <!-- Metrics of selected group -->
-      <h3
-        *ngIf="selectedGroup"
-        fxLayout="row"
-        fxLayoutAlign="start center"
-        fxLayoutGap="5px"
-      >
+      <h3 *ngIf="selectedGroup" class="flex justify-start items-center gap-1">
         <mat-icon>lightbulb</mat-icon>Click a metric to view details
       </h3>
       <div *ngIf="selectedGroup" class="charts-area flex-auto">
@@ -232,7 +227,7 @@
                 [showYAxisLabel]="true"
               ></ngx-charts-line-chart>
             </div>
-            <h3 fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+            <h3 class="flex justify-start items-center gap-1">
               <mat-icon>lightbulb</mat-icon>Histogram values are sorted by
               value, not time.
             </h3>

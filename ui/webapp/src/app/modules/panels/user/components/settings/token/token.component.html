@@ -6,7 +6,7 @@
   ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <div>
         Use the following token to remotely access this server in your name,
         e.g. for pushing products. To do so, copy the complete content to the
@@ -30,7 +30,7 @@
         allows remote access under your name. Do not pass this token on to
         others.
       </div>
-      <div fxLayout="column">
+      <div class="flex flex-col">
         <textarea #inputTarget readonly class="local-large-text flex-auto">
 {{ pack$ | async }}</textarea
         >

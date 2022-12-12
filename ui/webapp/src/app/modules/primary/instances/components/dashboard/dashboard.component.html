@@ -81,12 +81,10 @@
       <ng-container *ngIf="!!currentInstance?.hasProduct">
         <div
           *ngIf="currentInstance?.instance.tag !== currentInstance?.activeVersion?.tag && (servers.isCurrentInstanceSynchronized$ | async)"
-          class="bd-rect-card"
-          fxLayout="column"
-          [style.margin-bottom.px]="10"
+          class="bd-rect-card flex flex-col mb-2.5"
         >
-          <div fxLayout="row" class="bd-default-padding" fxLayoutGap="5px">
-            <div fxLayout="column" class="flex-auto">
+          <div class="bd-default-padding flex gap-1">
+            <div class="flex-auto flex flex-col">
               <div *ngIf="!!currentInstance?.activeVersion?.tag">
                 This instance has a newer configuration version available to be
                 activated ({{ currentInstance?.instance.tag }}). You can
@@ -107,7 +105,6 @@
             </div>
             <ng-container *ngIf="states$ | async as state">
               <app-bd-button
-                fxFlexAlign="center"
                 color="primary"
                 text="Install"
                 icon="layers"
@@ -118,7 +115,6 @@
                 tooltip="below"
               ></app-bd-button>
               <app-bd-button
-                fxFlexAlign="center"
                 color="primary"
                 text="Activate"
                 icon="star"
@@ -133,7 +129,7 @@
         </div>
       </ng-container>
 
-      <div fxLayout="column" fxLayoutGap="10px" *ngIf="activeInstance">
+      <div class="flex flex-col gap-2.5" *ngIf="activeInstance">
         <app-bd-banner
           *ngIf="activeInstance.banner && activeInstance.banner.text"
           [banner]="activeInstance.banner"

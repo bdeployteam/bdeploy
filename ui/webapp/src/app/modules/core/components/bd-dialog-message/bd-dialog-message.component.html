@@ -1,21 +1,17 @@
 <div
   *ngIf="message$ | async as msg"
-  class="local-sizing bd-normal-backdrop"
-  fxLayout="column"
-  fxLayoutAlign="center center"
+  class="local-sizing bd-normal-backdrop flex flex-col justify-center items-center"
   [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
 >
   <app-bd-notification-card
     [collapsed]="true"
-    class="mat-typography mat-elevation-z3"
+    class="mat-typography mat-elevation-z3 max-h-[99%] max-w-[98%]"
     [dismissable]="msg.dismissResult !== undefined"
     (dismiss)="complete(msg.dismissResult)"
     [header]="msg.header"
     [icon]="msg.icon ? msg.icon : 'info'"
-    [style.max-height]="'99%'"
-    [style.max-width]="'98%'"
   >
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <ng-container *ngIf="msg.template">
         <ng-container *ngTemplateOutlet="msg.template"></ng-container>
       </ng-container>

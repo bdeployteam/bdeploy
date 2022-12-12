@@ -1,11 +1,8 @@
 <ng-template #detailsPopup>
-  <div fxLayout="row">
+  <div class="flex">
     <mat-card
       appearance="outlined"
-      [style.padding.px]="10"
-      class="mat-typography local-details-popup-sizing"
-      fxLayout="column"
-      fxLayoutGap="5px"
+      class="mat-typography local-details-popup-sizing flex flex-col gap-1 p-2.5"
     >
       <h2>Product Details</h2>
       <mat-chip-listbox>
@@ -17,7 +14,7 @@
   </div>
 </ng-template>
 
-<div fxLayout="row" fxLayoutAlign="start center">
+<div class="flext justify-start items-center">
   <div
     [appBdPopup]="detailsPopup"
     [appBdPopupDelay]="500"

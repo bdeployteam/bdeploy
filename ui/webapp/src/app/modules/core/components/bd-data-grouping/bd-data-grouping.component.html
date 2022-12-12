@@ -6,12 +6,9 @@
 >
   <mat-card
     appearance="outlined"
-    [style.padding.px]="10"
-    class="mat-typography"
-    fxLayout="column"
-    fxLayoutGap="5px"
+    class="mat-typography flex flex-col gap-1 p-2.5"
   >
-    <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="end center">
+    <div class="flex gap-1 justify-end items-center">
       <mat-form-field class="preset-select" appearance="outline">
         <mat-label>Favorite</mat-label>
         <mat-select [value]="presetType" (valueChange)="setPresetType($event)">
@@ -35,16 +32,11 @@
         [disabled]="disabled"
       ></app-bd-button>
     </div>
-    <mat-divider
-      [style.position]="'relative'"
-      [style.top.px]="5"
-      [style.padding-bottom.px]="10"
-    ></mat-divider>
-    <div fxLayout="row" fxLayoutGap="5px">
+    <mat-divider class="relative top-1 pb-2.5"></mat-divider>
+    <div class="flex gap-1">
       <!-- a grouping panel per grouping -->
       <div
-        fxLayout="row"
-        fxLayoutGap="5px"
+        class="flex gap-1 grow"
         cdkDropList
         cdkDropListOrientation="horizontal"
         (cdkDropListDropped)="onDrop($event)"
@@ -61,23 +53,14 @@
           [removeDisabled]="groupings.length === 1 && !groupings[0].definition"
           (removeClicked)="removeGrouping($event)"
         >
-          <mat-icon
-            cdkDragHandle
-            [style.cursor]="'grab'"
-            [style.margin-bottom.px]="1"
-            class="local-drag-handle"
+          <mat-icon cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]"
             >drag_indicator</mat-icon
           >
         </app-bd-data-grouping-panel>
       </div>
 
       <!-- the management panel add new groupings -->
-      <div
-        fxLayout="column"
-        fxLayoutGap="5px"
-        [style.padding-top.px]="5"
-        *ngIf="multiple"
-      >
+      <div class="flex flex-col gap-1 pt-1 items-center" *ngIf="multiple">
         <ng-container>
           <app-bd-button
             text="Add"

@@ -4,27 +4,15 @@
     [style.padding.px]="10"
     [class.local-activity-collapsed]="!expanded"
     [class.local-activity-expanded]="expanded"
-    class="mat-typography local-activity-popup-sizing"
-    fxLayout="column"
-    fxLayoutGap="5px"
+    class="mat-typography local-activity-popup-sizing flex flex-col gap-1"
   >
     <app-bd-activities></app-bd-activities>
   </mat-card>
 </ng-template>
 
-<div
-  class="bd-rect-card local-sizing local-nav-bar"
-  fxLayout="column"
-  fxLayoutGap="5px"
->
+<div class="bd-rect-card local-sizing local-nav-bar flex flex-col gap-1">
   <!-- Logo & Expand Button -->
-  <div
-    fxLayout="row"
-    [style.min-height.px]="100"
-    [style.height.px]="100"
-    [style.padding-bottom.px]="14"
-    fxLayoutAlign="center center"
-  >
+  <div class="flex justify-center items-center pb-4 min-h-[100px] h-[100px]">
     <div class="local-hamburger-button">
       <div
         class="hamburger hamburger--arrow"
@@ -38,7 +26,7 @@
     </div>
     <h2
       *ngIf="expanded"
-      class="local-header"
+      class="local-header text-2xl"
       [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
       [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
     >
@@ -168,14 +156,11 @@
   <div
     *ngIf="expanded"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-    fxLayout="row"
-    fxLayoutAlign="start center"
     [appBdPopup]="activitiesPopup"
     appBdPopupPosition="right-above"
-    [style.padding-bottom.px]="10"
     [class.bd-disabled-text]="!(activities.activities$ | async)?.length"
     [class.bd-accent-text]="!!(activities.activities$ | async)?.length"
-    [style.cursor]="'pointer'"
+    class="cursor-pointer flex justify-start items-center pb-2.5"
   >
     <mat-spinner
       class="bd-inherited-spinner"
@@ -202,12 +187,9 @@
   <div
     *ngIf="!expanded && !!(activities.activities$ | async)?.length"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-    fxLayout="row"
-    [style.padding-left.px]="6"
     [appBdPopup]="activitiesPopup"
     appBdPopupPosition="right-above"
-    class="bd-accent-text"
-    [style.cursor]="'pointer'"
+    class="bd-accent-text cursor-pointer flex pl-1.5"
   >
     <mat-spinner class="bd-inherited-spinner" [diameter]="24"></mat-spinner>
   </div>
@@ -221,10 +203,8 @@
     </div>
   </div>
   <div
-    fxLayout="column"
-    fxLayoutGap="5px"
     *ngIf="expanded"
-    class="local-footer"
+    class="local-footer flex flex-col gap-1"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
   >
     <div gdColumns="50px auto" gdGap="5px">
@@ -234,7 +214,6 @@
   </div>
   <app-bd-button
     *ngIf="cfgService.isNewGitHubReleaseAvailable$ | async"
-    fxFlexAlign="center center"
     icon="system_update"
     text="New Release"
     color="toolbar"

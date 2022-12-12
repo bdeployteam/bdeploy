@@ -1,6 +1,6 @@
 <!-- Dialog which shows result messages if there are any. -->
 <ng-template #msgTemplate>
-  <div fxLayout="column" fxLayoutGap="5px">
+  <div class="flex flex-col gap-1">
     <div>The following possible problems occured:</div>
     <app-bd-data-table
       [records]="messages"
@@ -23,8 +23,7 @@
   <app-bd-dialog-content>
     <div *ngIf="records && records.length; else noInstanceTemplates">
       <div
-        fxLayout="column"
-        fxLayoutGap="10px"
+        class="flex flex-col gap-2.5"
         *ngIf="servers.isCurrentInstanceSynchronized$ | async; else currentInstanceIsNotSynchronized"
       >
         <mat-stepper

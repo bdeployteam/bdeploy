@@ -5,7 +5,7 @@
     [route]="['..', '..']"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <app-bd-data-table
         [records]="records$ | async"
         [sortData]="null"

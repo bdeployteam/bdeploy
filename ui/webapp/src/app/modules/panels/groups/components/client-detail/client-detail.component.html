@@ -10,7 +10,7 @@
     ></mat-icon>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="app$ | async as app">
+    <div class="flex flex-col gap-2.5" *ngIf="app$ | async as app">
       <div gdColumns="80px auto" gdGap="5px">
         <strong>ID:</strong>
         <div>{{ app.client.id }}</div>
@@ -24,7 +24,7 @@
         icon="insights"
         [expanded]="true"
       >
-        <div fxLayout="row" class="local-graph">
+        <div class="local-graph flex">
           <app-client-usage-graph
             class="flex-auto"
             [appId]="app.client.id"

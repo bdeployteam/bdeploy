@@ -3,8 +3,8 @@
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" *ngIf="user$ | async as user">
-      <div fxLayout="row" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5" *ngIf="user$ | async as user">
+      <div class="flex gap-2.5">
         <app-user-avatar
           [mail]="user?.email"
           [hostSize]="64"

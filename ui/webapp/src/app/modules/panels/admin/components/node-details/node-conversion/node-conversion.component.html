@@ -6,7 +6,7 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm">
-      <div fxLayout="column" fxLayoutGap="10px">
+      <div class="flex flex-col gap-2.5">
         <span
           >Drag the <strong>identification card</strong> below to another
           <code>STANDALONE</code> or <code>MANAGED</code> server to convert this
@@ -20,11 +20,9 @@
         <mat-card
           appearance="outlined"
           *ngIf="data"
-          fxLayout="column"
-          fxLayoutAlign="center center"
           draggable="true"
           (dragstart)="onDragStart($event)"
-          class="bd-drag-card"
+          class="bd-drag-card flex flex-col justify-center items-center"
         >
           <div>Drag me to the target server!</div>
         </mat-card>

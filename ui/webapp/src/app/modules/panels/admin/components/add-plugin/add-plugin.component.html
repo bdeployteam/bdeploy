@@ -4,7 +4,7 @@
     [panel]="true"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
+    <div class="flex flex-col gap-2.5">
       <app-bd-file-drop
         (fileAdded)="fileAdded($event)"
         [types]="['.zip', '.jar']"

@@ -1,10 +1,6 @@
 <div class="local-sizing local-main-toolbar mat-elevation-z1">
-  <div class="local-item-bar" fxLayout="row" fxLayoutGap="8px">
-    <div
-      class="local-side-sizing"
-      fxLayout="column"
-      fxLayoutAlign="center center"
-    >
+  <div class="local-item-bar flex gap-2">
+    <div class="local-side-sizing flex flex-col justify-center items-center">
       <app-bd-logo [size]="logoSize" class="local-logo-position"></app-bd-logo>
     </div>
     <app-bd-search-field
@@ -12,12 +8,7 @@
       [(value)]="search.search"
       [disabled]="!(search.enableSearch$ | async)"
     ></app-bd-search-field>
-    <div
-      class="local-side-sizing"
-      fxLayout="row"
-      fxLayoutGap="8px"
-      fxLayoutAlign="center center"
-    >
+    <div class="local-side-sizing flex gap-2 justify-center items-center">
       <app-bd-panel-button
         icon="palette"
         text="Select Theme"

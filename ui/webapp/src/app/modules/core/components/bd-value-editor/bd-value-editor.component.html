@@ -19,12 +19,11 @@
 
 <ng-template #revertButton>
   <mat-icon
-    class="local-hover-button"
+    class="local-hover-button cursor-pointer"
     *ngIf="!!defaultValue && (defaultValue.value || defaultValue.linkExpression) && !disabled"
     matTooltip="Click to revert to the default value."
     [matTooltipShowDelay]="500"
     (click)="doRevert()"
-    [style.cursor]="'pointer'"
     appClickStopPropagation
     >restore</mat-icon
   >
@@ -51,7 +50,7 @@
   [appLinkExpressionInputValidator]="false"
   [errorFallback]="getErrorMessage()"
 >
-  <div fxLayout="row" class="local-form-input-actions">
+  <div class="local-form-input-actions flex">
     <ng-container *ngIf="!disabled">
       <ng-container *ngTemplateOutlet="revertButton"></ng-container>
       <ng-container *ngTemplateOutlet="actions"></ng-container>
@@ -60,7 +59,7 @@
         matTooltip="Click to enable editing of password field."
         [matTooltipShowDelay]="500"
         (click)="passwordLock = false"
-        [style.cursor]="'pointer'"
+        class="cursor-pointer"
         >edit</mat-icon
       >
       <app-bd-custom-editor
@@ -88,7 +87,7 @@
   [disabled]="disabled"
   [prefix]="linkToggle"
 >
-  <div fxLayout="row" class="local-form-input-actions">
+  <div class="local-form-input-actions flex">
     <ng-container *ngTemplateOutlet="actions"></ng-container>
     <ng-container *ngIf="!disabled">
       <ng-container *ngTemplateOutlet="revertButton"></ng-container>
@@ -121,7 +120,7 @@
   [statusMessage]="'Expression Preview: \'' + preview + '\''"
   (focus)="onFocus()"
 >
-  <div fxLayout="row" class="local-form-input-actions">
+  <div class="local-form-input-actions flex">
     <ng-container *ngTemplateOutlet="actions"></ng-container>
     <ng-container *ngIf="!disabled">
       <ng-container *ngTemplateOutlet="revertButton"></ng-container>
@@ -130,7 +129,7 @@
         [appBdPopup]="popupLink"
         appBdPopupTrigger="click"
         (appBdPopupOpened)="linkEditorPopup$.next($event)"
-        [style.cursor]="'pointer'"
+        class="cursor-pointer"
         matTooltip="Insert Link"
         matTooltipShowDelay="1000"
         appClickStopPropagation

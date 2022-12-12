@@ -115,13 +115,13 @@
   </app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" [style.padding-top.px]="2">
+    <div class="flex flex-col gap-2.5 pt-0.5">
       <ng-container *ngIf="edit.current$ | async as instance">
         <ng-container
           *ngIf="(servers.isCurrentInstanceSynchronized$ | async) && !!(edit.hasCurrentProduct$ | async)"
         >
           <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
-            <div fxLayout="column">
+            <div class="flex flex-col">
               <div class="bd-default-padding bd-warning-text">
                 <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes
                 on the server. You must reload the page to resume editing.
@@ -178,13 +178,8 @@
             *ngIf="(isEmptyInstance$ | async) && !!(templates$ | async)?.length"
             class="bd-rect-card"
           >
-            <div fxLayout="row" [style.padding.px]="20">
-              <div
-                fxLayout="row"
-                class="flex-auto"
-                fxLayoutAlign="center center"
-                fxLayoutGap="5px"
-              >
+            <div class="flex p-5">
+              <div class="flex-auto flex justify-center items-center gap-1">
                 <div>
                   The instance is currently empty. You can use templates to
                   quickly get started. Access the templates here:
@@ -249,7 +244,7 @@
               directly.
             </p>
           </ng-container>
-          <div fxLayout="row" fxLayoutGap="5px">
+          <div class="flex gap-1">
             <app-bd-button
               text="Products"
               icon="apps"

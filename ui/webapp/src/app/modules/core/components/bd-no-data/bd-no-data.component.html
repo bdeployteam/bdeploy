@@ -1,8 +1,4 @@
-<div
-  class="local-sizing flex-auto"
-  fxLayout="column"
-  fxLayoutAlign="center center"
->
+<div class="local-sizing flex-auto flex flex-col justify-center items-center">
   <app-bd-logo *ngIf="header" [size]="128"></app-bd-logo>
   <div class="local-header" *ngIf="header">{{ header }}</div>
   <ng-content></ng-content>

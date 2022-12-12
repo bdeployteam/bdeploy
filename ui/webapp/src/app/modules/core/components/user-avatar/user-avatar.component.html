@@ -1,4 +1,4 @@
-<div [ngStyle]="hostStyle" fxLayout="row" fxLayoutAlign="center center">
+<div [ngStyle]="hostStyle" class="flex justify-center items-center">
   <mat-icon
     [ngStyle]="avatarStyle"
     *ngIf="(settings.loading$ | async) || !(settings.settings$ | async)?.general?.enableGravatar || !mail"

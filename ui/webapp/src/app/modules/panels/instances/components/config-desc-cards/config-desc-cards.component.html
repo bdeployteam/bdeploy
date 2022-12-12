@@ -1,10 +1,6 @@
 <mat-card
   appearance="outlined"
-  [style.padding.px]="10"
-  [style.max-width.px]="400"
-  class="mat-typography"
-  fxLayout="column"
-  fxLayoutGap="5px"
+  class="mat-typography flex flex-col gap-1 p-2.5 max-w-[400px]"
 >
   <!-- not using switch intentionally as there is no type checking on it. ngIf has full type checking -->
 
@@ -19,7 +15,7 @@
   <div *ngIf="field === 'cfg.control.startType'">
     The start type of the process. This controls how a process can be started
     and whether it is considered <em>vital</em> for the instance.
-    <ul>
+    <ul class="list-disc list-inside">
       <li>
         <strong>INSTANCE</strong>: The process will be started/stopped when bulk
         controlling the instance, and is considered <em>vital</em>, i.e. the

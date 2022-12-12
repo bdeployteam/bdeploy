@@ -1,5 +1,5 @@
 <ng-template #addCustom>
-  <div fxLayout="column" fxLayoutGap="10px" [style.max-width.px]="500">
+  <div class="flex flex-col gap-2.5 max-w-[500px]">
     <div>Provide a unique ID for the custom parameter.</div>
     <app-bd-form-input
       #validateCustom
@@ -39,12 +39,7 @@
   </div>
 </ng-template>
 
-<div
-  class="bd-default-padding"
-  *ngIf="process && app"
-  fxLayout="column"
-  fxLayoutGap="10px"
->
+<div class="bd-default-padding flex flex-col gap-2.5" *ngIf="process && app">
   <!-- Single parameter group -->
   <mat-accordion [multi]="true" class="local-headers-align">
     <ng-container *ngFor="let group of groups$ | async; let i = index">
@@ -65,7 +60,7 @@
               [style.font-size]="'smaller'"
               >Validation Failed</span
             >
-            <div *ngIf="panel.expanded" fxLayout="row" fxLayoutGap="5px">
+            <div *ngIf="panel.expanded" class="flex gap-1">
               <app-bd-button
                 *ngIf="group.isCustom"
                 text="Add Custom Parameter"
@@ -85,14 +80,10 @@
             </div>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <form #groupForm="ngForm" fxLayout="column">
+        <form #groupForm="ngForm" class="flex flex-col">
           <div
-            fxFlexAlign="center"
             *ngIf="group.isSelectMode"
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            class="bd-hint-text"
-            [style.padding-top.px]="20"
+            class="flex justify-start items-center pt-5 self-center bd-hint-text"
           >
             <span class="local-edit-desc">
               Use the <mat-icon>add</mat-icon> and
@@ -106,7 +97,7 @@
             class="bd-hint-text bd-warning-text"
             *ngIf="hasMissingRequired(group) && !group.isSelectMode && groupForm.valid"
           >
-            <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="5px">
+            <div class="flex justify-center items-center gap-1">
               Use the <mat-icon>tune</mat-icon> buttons to add missing mandatory
               parameter(s).
             </div>
@@ -129,7 +120,7 @@
             <ng-container *ngFor="let p of sortPairs(group.pairs)">
               <div
                 [attr.data-cy]="p.descriptor ? p.descriptor.id : p.value.id"
-                fxLayout="row"
+                class="flex"
                 *ngIf="(!!p.value || group.isSelectMode) && hasPairSearchMatch(p)"
               >
                 <ng-template #popup>
@@ -140,10 +131,8 @@
 
                 <!-- Checkbox for select mode... -->
                 <div
-                  class="local-select-wrapper"
+                  class="local-select-wrapper flex flex-col justify-center items-center"
                   *ngIf="group.isSelectMode"
-                  fxLayout="column"
-                  fxLayoutAlign="center center"
                 >
                   <mat-icon
                     *ngFor="let canToggle of [canAddRemove(p) | async]"
@@ -152,8 +141,7 @@
                     [matTooltip]="!canToggle ? 'Parameter cannot be added or removed, see description.' : 'Click to add or remove this optional parameter'"
                     [matTooltipShowDelay]="500"
                     matRipple
-                    [style.cursor]="'pointer'"
-                    class="local-add-remove"
+                    class="local-add-remove cursor-pointer"
                     [class.bd-warning-text]="p.descriptor?.mandatory && !p.value?.value && edit.meetsConditionOnGiven(p.descriptor, app.descriptor.startCommand, process)"
                     >{{ !canToggle ? 'lock' : !!p.value ? 'delete' : 'add'
                     }}</mat-icon
@@ -171,23 +159,21 @@
                       [style.display]="'none'"
                     />
                     <mat-icon
-                      class="local-hover-button"
+                      class="local-hover-button cursor-pointer"
                       [class.local-pin-inactive]="!p.value.pinned"
                       [class.local-pin-active]="p.value.pinned"
                       matTooltip="Click to pin the parameter to the process details panel."
                       [matTooltipShowDelay]="500"
                       (click)="doTogglePin(p)"
-                      [style.cursor]="'pointer'"
                       appClickStopPropagation
                       >push_pin</mat-icon
                     >
                     <mat-icon
                       *ngIf="group.isCustom"
-                      class="local-hover-button"
+                      class="local-hover-button cursor-pointer"
                       matTooltip="Click to edit the parameter"
                       [matTooltipShowDelay]="500"
                       (click)="onEditCustomParameter(p, addCustom)"
-                      [style.cursor]="'pointer'"
                       appClickStopPropagation
                       >edit</mat-icon
                     >
@@ -247,7 +233,7 @@
     <mat-expansion-panel-header>
       <mat-panel-title> Command Line Preview </mat-panel-title>
     </mat-expansion-panel-header>
-    <div [style.padding-top.px]="20">
+    <div class="pt-5">
       <app-history-process-config
         [baseConfig]="edit.process$ | async"
         [baseDescriptor]="(edit.application$ | async).descriptor"

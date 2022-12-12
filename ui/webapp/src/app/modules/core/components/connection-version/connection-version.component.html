@@ -1,29 +1,20 @@
 <div class="local-dialog flex">
   <div
-    class="local-logo-area bd-glow-bg flex-auto"
-    fxLayout="column"
-    fxLayoutAlign="center center"
+    class="local-logo-area bd-glow-bg flex-auto flex flex-col justify-center items-center"
   >
     <app-bd-logo [size]="64" class="local-logo-pulse"></app-bd-logo>
   </div>
-  <div
-    class="grow-[2]"
-    fxLayout="column"
-    fxLayoutAlign="center center"
-    fxLayoutGap="30px"
-  >
+  <div class="grow-[2] flex flex-col justify-center items-center gap-7">
     <div class="local-header">Server Version Changed</div>
     <div
       *ngIf="mode === 'NODE'; else versionChange"
-      fxLayout="column"
-      fxLayoutGap="10px"
-      fxLayoutAlign="center center"
+      class="flex flex-col gap-2.5 justify-center items-center"
     >
       <div>The server version has changed to <code>NODE</code></div>
       <div>BDeploy must be reloaded to apply changes.</div>
     </div>
     <ng-template #versionChange>
-      <div fxLayout="column" fxLayoutGap="10px" fxLayoutAlign="center center">
+      <div class="flex flex-col gap-2.5 justify-center items-center">
         <div>The server version has changed to:</div>
         <div>
           <strong>{{ newVersion }}</strong>

@@ -15,25 +15,19 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div
-      fxLayout="column"
-      fxLayoutGap="10px"
+      class="flex flex-col gap-2.5 pt-0.5"
       *ngIf="configPair$ | async as pair"
-      [style.padding-top.px]="2"
     >
-      <div class="bd-rect-card" fxLayout="column">
-        <div fxLayout="column">
-          <div
-            fxLayout="row"
-            class="bd-default-padding"
-            [style.padding-bottom.px]="0"
-          >
-            <div fxLayout="column">
+      <div class="bd-rect-card flex flex-col">
+        <div class="flex flex-col">
+          <div class="bd-default-padding flex pb-0">
+            <div class="flex flex-col">
               <div class="bd-type-text">Instance Configuration</div>
             </div>
           </div>
         </div>
-        <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
-          <div fxLayout="row" fxLayoutGap="10px">
+        <div class="bd-default-padding flex flex-col gap-2.5">
+          <div class="flex gap-2.5">
             <div class="local-compare-header basis-1/2">
               {{ pair.base.version }}
             </div>
@@ -41,7 +35,7 @@
               {{ pair.compare.version }}
             </div>
           </div>
-          <div fxLayout="row" fxLayoutGap="10px">
+          <div class="flex gap-2.5">
             <app-history-header-config
               class="basis-1/2"
               diffSide="left"
@@ -55,7 +49,7 @@
               [compareConfig]="pair.header.base"
             ></app-history-header-config>
           </div>
-          <div fxLayout="row" fxLayoutGap="10px">
+          <div class="flex gap-2.5">
             <app-history-variables-config
               class="basis-1/2"
               diffSide="left"
@@ -75,13 +69,9 @@
       <!-- Nodes. -->
       <ng-container *ngFor="let nodePair of pair.nodes">
         <div class="bd-rect-card" *ngIf="showNodePair(nodePair)">
-          <div fxLayout="column">
-            <div
-              fxLayout="row"
-              class="bd-default-padding"
-              [style.padding-bottom.px]="0"
-            >
-              <div fxLayout="column">
+          <div class="flex flex-col">
+            <div class="bd-default-padding flex pb-0">
+              <div class="flex flex-col">
                 <div class="bd-type-text">NODE</div>
                 <div class="bd-title-text">
                   {{ nodePair.name === clientNodeName ? 'Client Applications' :
@@ -90,9 +80,9 @@
               </div>
             </div>
           </div>
-          <div fxLayout="column" fxLayoutGap="10px" class="bd-default-padding">
-            <div fxLayout="row" fxLayoutGap="10px">
-              <div class="local-compare-header basis-1/2" fxLayout="row">
+          <div class="bd-default-padding flex flex-col gap-2.5">
+            <div class="flex gap-2.5">
+              <div class="local-compare-header basis-1/2 flex">
                 <div>{{ pair.base.version }}</div>
                 <div
                   class="bd-description-text local-order-changed"
@@ -108,9 +98,7 @@
             </div>
 
             <div
-              fxLayout="row"
-              fxLayoutGap="10px"
-              fxLayoutAlign="stretch stretch"
+              class="flex gap-2.5 items-stretch"
               *ngFor="let appPair of nodePair.applications"
             >
               <ng-container *ngIf="showAppPair(appPair)">

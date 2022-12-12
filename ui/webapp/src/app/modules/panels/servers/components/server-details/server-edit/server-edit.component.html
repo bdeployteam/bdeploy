@@ -6,13 +6,8 @@
   ></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <form
-      #form="ngForm"
-      (ngSubmit)="onSave()"
-      fxLayout="column"
-      fxLayoutGap="10px"
-    >
-      <div *ngIf="server" fxLayout="column" fxLayoutGap="10px">
+    <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-2.5">
+      <div *ngIf="server" class="flex flex-col gap-2.5">
         <app-bd-form-input
           name="description"
           label="Description"

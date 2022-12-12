@@ -1,8 +1,8 @@
 <ng-container *ngIf="diff$ | async as diff">
   <div [ngClass]="borderClass" *ngIf="diff.type !== 'not-in-base'">
-    <div class="local-padding local-header" fxLayout="column">
-      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
-        <div fxLayout="row" fxLayoutAlign="start center">
+    <div class="local-padding local-header flex flex-col">
+      <div class="flex flex-wrap gap-1 justify-start items-center">
+        <div class="flex justify-start items-center">
           <ng-template #namePopup>
             <app-config-desc-cards field="inst.name"></app-config-desc-cards>
           </ng-template>
@@ -16,7 +16,7 @@
           </strong>
           <div>,</div>
         </div>
-        <div fxLayout="row" fxLayoutAlign="start center">
+        <div class="flex justify-start items-center">
           <ng-template #instProdPopup>
             <app-config-desc-cards
               field="inst.productTag"
@@ -32,12 +32,8 @@
           </strong>
         </div>
       </div>
-      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center"
-          class="bd-description-text"
-        >
+      <div class="flex flex-wrap gap-1 justify-start items-center">
+        <div class="bd-description-text flex justify-start items-center">
           <ng-template #instDescPopup>
             <app-config-desc-cards
               field="inst.description"
@@ -51,11 +47,7 @@
           ></app-history-diff-field>
           <div>,</div>
         </div>
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center"
-          class="bd-description-text"
-        >
+        <div class="bd-description-text flex justify-start items-center">
           <ng-template #instPurposePopup>
             <app-config-desc-cards field="inst.purpose"></app-config-desc-cards>
           </ng-template>
@@ -67,11 +59,7 @@
           ></app-history-diff-field>
           <div>,</div>
         </div>
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center"
-          class="bd-description-text"
-        >
+        <div class="bd-description-text flex justify-start items-center">
           <ng-template #instAutoStartPopup>
             <app-config-desc-cards
               field="inst.autoStart"
@@ -85,11 +73,7 @@
           ></app-history-diff-field>
           <div>,</div>
         </div>
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center"
-          class="bd-description-text"
-        >
+        <div class="bd-description-text flex justify-start items-center">
           <ng-template #instAutoUninstallPopup>
             <app-config-desc-cards
               field="inst.autoUninstall"
@@ -103,11 +87,7 @@
           ></app-history-diff-field>
           <div>,</div>
         </div>
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center"
-          class="bd-description-text"
-        >
+        <div class="bd-description-text flex justify-start items-center">
           <ng-template #instCfgPopup>
             <app-config-desc-cards
               field="inst.configTree"
@@ -121,11 +101,7 @@
             [popup]="instCfgPopup"
           ></app-history-diff-field>
         </div>
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center"
-          class="bd-description-text"
-        >
+        <div class="bd-description-text flex justify-start items-center">
           <ng-template #instSysPopup>
             <app-config-desc-cards
               field="inst.systemId"
@@ -138,11 +114,7 @@
             [popup]="instSysPopup"
           ></app-history-diff-field>
         </div>
-        <div
-          fxLayout="row"
-          fxLayoutAlign="start center"
-          class="bd-description-text"
-        >
+        <div class="bd-description-text flex justify-start items-center">
           <ng-template #instSysTagPopup>
             <app-config-desc-cards
               field="inst.systemTag"

@@ -3,14 +3,10 @@
     [ngClass]="getBorderClass(diff.type)"
     *ngIf="diff.type !== 'not-in-base'"
   >
-    <div
-      class="local-padding local-header"
-      fxLayout="column"
-      *ngIf="!onlyCommand"
-    >
-      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+    <div class="local-padding local-header flex flex-col" *ngIf="!onlyCommand">
+      <div class="flex flex-wrap gap-1 justify-start items-center">
         <mat-icon [svgIcon]="diff.os"></mat-icon>
-        <div fxLayout="row" fxLayoutAlign="start center">
+        <div class="flex justify-start items-center">
           <ng-template #namePopup>
             <app-config-desc-cards field="cfg.name"></app-config-desc-cards>
           </ng-template>
@@ -25,11 +21,7 @@
           <div class="bd-description-text" *ngIf="hasProcessControl">,</div>
         </div>
         <ng-container *ngIf="hasProcessControl">
-          <div
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            class="bd-description-text"
-          >
+          <div class="bd-description-text flex justify-start items-center">
             <ng-template #idPopup>
               <app-config-desc-cards field="cfg.id"></app-config-desc-cards>
             </ng-template>
@@ -41,11 +33,7 @@
             ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            class="bd-description-text"
-          >
+          <div class="bd-description-text flex justify-start items-center">
             <ng-template #ctrlStartTypePopup>
               <app-config-desc-cards
                 field="cfg.control.startType"
@@ -59,11 +47,7 @@
             ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            class="bd-description-text"
-          >
+          <div class="bd-description-text flex justify-start items-center">
             <ng-template #ctrlKeepAlivePopup>
               <app-config-desc-cards
                 field="cfg.control.keepAlive"
@@ -77,11 +61,7 @@
             ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            class="bd-description-text"
-          >
+          <div class="bd-description-text flex justify-start items-center">
             <ng-template #ctrlNoRetriesPopup>
               <app-config-desc-cards
                 field="cfg.control.noRetries"
@@ -95,11 +75,7 @@
             ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            class="bd-description-text"
-          >
+          <div class="bd-description-text flex justify-start items-center">
             <ng-template #ctrlGracePopup>
               <app-config-desc-cards
                 field="cfg.control.gracePeriod"
@@ -113,11 +89,7 @@
             ></app-history-diff-field>
             <div>,</div>
           </div>
-          <div
-            fxLayout="row"
-            fxLayoutAlign="start center"
-            class="bd-description-text"
-          >
+          <div class="bd-description-text flex justify-start items-center">
             <ng-template #ctrlAttachPopup>
               <app-config-desc-cards
                 field="cfg.control.attachStdin"
@@ -134,9 +106,9 @@
       </div>
     </div>
 
-    <div [class.local-padding]="!onlyCommand" fxLayout="column">
+    <div [class.local-padding]="!onlyCommand" class="flex flex-col">
       <div class="bd-description-text" *ngIf="!onlyCommand">Start Command:</div>
-      <div fxLayout="row wrap" fxLayoutGap="5px" fxLayoutAlign="start center">
+      <div class="flex flex-wrap gap-1 justify-start items-center">
         <ng-template #exePopup>
           <app-config-desc-cards field="cfg.executable"></app-config-desc-cards>
         </ng-template>
@@ -166,20 +138,15 @@
         </div>
         <div
           *ngFor="let epdiff of diff.endpoints.http"
-          fxLayout="column"
-          fxLayoutGap="5px"
+          class="flex flex-col gap-1"
         >
           <div
             [ngClass]="getBorderClass(epdiff.type)"
             *ngIf="epdiff.type !== 'not-in-base'"
             [style.padding-left.px]="5"
           >
-            <div
-              fxLayout="row wrap"
-              fxLayoutGap="5px"
-              fxLayoutAlign="start center"
-            >
-              <div fxLayout="row" fxLayoutAlign="start center">
+            <div class="flex flex-wrap gap-1 justify-start items-center">
+              <div class="flex justify-start items-center">
                 <ng-template #pathPopup>
                   <app-config-desc-cards
                     field="cfg.ep.path"
@@ -195,11 +162,7 @@
                 </strong>
                 <div class="bd-description-text">,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epPortPopup>
                   <app-config-desc-cards
                     field="cfg.ep.port"
@@ -213,11 +176,7 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epSecurePopup>
                   <app-config-desc-cards
                     field="cfg.ep.secure"
@@ -231,11 +190,7 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epTrustAllPopup>
                   <app-config-desc-cards
                     field="cfg.ep.trustAll"
@@ -249,11 +204,7 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epTrustStorePopup>
                   <app-config-desc-cards
                     field="cfg.ep.trustStore"
@@ -267,11 +218,7 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epTrustStorePassPopup>
                   <app-config-desc-cards
                     field="cfg.ep.trustStorePass"
@@ -286,11 +233,7 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epAuthTypePopup>
                   <app-config-desc-cards
                     field="cfg.ep.authType"
@@ -304,11 +247,7 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epAuthUserPopup>
                   <app-config-desc-cards
                     field="cfg.ep.authUser"
@@ -322,11 +261,7 @@
                 ></app-history-diff-field>
                 <div>,</div>
               </div>
-              <div
-                fxLayout="row"
-                fxLayoutAlign="start center"
-                class="bd-description-text"
-              >
+              <div class="bd-description-text flex justify-start items-center">
                 <ng-template #epAuthPassPopup>
                   <app-config-desc-cards
                     field="cfg.ep.authPass"

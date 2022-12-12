@@ -15,7 +15,6 @@ import { SettingsService } from '../../../../core/services/settings.service';
 @Component({
   selector: 'app-settings-general',
   templateUrl: './settings-general.component.html',
-  styleUrls: ['./settings-general.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
 export class SettingsGeneralComponent

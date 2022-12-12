@@ -1,14 +1,8 @@
-<div
-  name="dataGroupingPanel"
-  fxLayout="row"
-  fxLayoutGap="5px"
-  [style.height]="'100%'"
-  [style.padding.px]="5"
->
-  <div fxLayout="column" fxLayoutGap="5px" [style.minWidth.px]="220">
-    <div fxLayout="row" fxLayoutAlign="space-between center">
-      <div fxLayoutAlign="start center">
-        <div fxLayoutAlign="start baseline">
+<div name="dataGroupingPanel" class="flex gap-1 h-full p-1">
+  <div class="flex flex-col gap-1 min-w-[220px]">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center">
+        <div class="flex items-baseline">
           <ng-content></ng-content>
         </div>
         <div>
@@ -44,16 +38,12 @@
         >
       </mat-select>
     </mat-form-field>
-    <div
-      *ngIf="!grouping?.definition"
-      class="bd-hint-text"
-      [style.paddingBottom.px]="10"
-    >
+    <div *ngIf="!grouping?.definition" class="bd-hint-text pb-2.5">
       Choose an available grouping<br />
       from the dropdown.
     </div>
 
-    <div *ngIf="!!groupingValues?.length" fxLayout="row">
+    <div *ngIf="!!groupingValues?.length" class="flex">
       <mat-form-field
         class="grouping-panel-filter flex-auto"
         appearance="outline"
@@ -65,11 +55,7 @@
     </div>
     <div
       *ngIf="!!groupingValues?.length"
-      class="grouping-values-container"
-      fxLayout="column"
-      fxLayoutGap="5px"
-      [style.paddingLeft.px]="10"
-      [style.paddingBottom.px]="10"
+      class="grouping-values-container flex flex-col gap-1 pl-2.5 pb-2.5"
     >
       <mat-checkbox
         *ngFor="let group of filteredGroupingValues"

@@ -1,4 +1,4 @@
-<div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="3px">
+<div class="flex justify-start items-center gap-1">
   <ng-container *ngIf="getStatus() as status; else noStatus">
     <mat-icon
       *ngIf="status.status === 'RUNNING'"

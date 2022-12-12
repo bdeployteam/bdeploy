@@ -4,12 +4,7 @@
     [panel]="true"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <form
-      #form="ngForm"
-      (ngSubmit)="onSave()"
-      fxLayout="column"
-      fxLayoutGap="5px"
-    >
+    <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
       <app-bd-form-input
         label="Server URL"
         name="server"

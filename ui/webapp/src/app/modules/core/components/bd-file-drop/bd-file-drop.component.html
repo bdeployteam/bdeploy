@@ -1,16 +1,13 @@
 <div
-  class="local-drop-zone"
+  class="local-drop-zone flex flex-col gap-2.5 justify-center items-center"
   [ngClass]="disabled ? 'local-drop-zone-disabled' : active ? 'local-drop-zone-active' : []"
   appFileDrop
   (filesHovered)="active = $event"
   (filesDropped)="onFilesDropped($event)"
-  fxLayout="column"
-  fxLayoutAlign="center center"
-  fxLayoutGap="15px"
 >
-  <div fxLayout="row" fxLayoutAlign="center center">
+  <div class="flex justify-center items-center">
     <mat-icon class="local-drop-icon">cloud_upload</mat-icon>
-    <div class="local-drop-text" fxLayout="row">
+    <div class="local-drop-text flex">
       <div>{{ hintText }}, or&nbsp;</div>
       <button
         [disabled]="disabled"
@@ -32,13 +29,11 @@
   </div>
   <div
     *ngIf="validationError$ | async"
-    fxLayout="row"
-    fxLayoutAlign="center center"
-    class="local-error"
+    class="local-error flex justify-center items-center"
   >
     <mat-icon class="local-drop-icon">report</mat-icon>
     <div>Unsupported File Type.</div>
-    <div *ngIf="!!types" fxLayout="row">
+    <div *ngIf="!!types" class="flex">
       &nbsp;Supported:
       <div *ngFor="let type of types">&nbsp;<strong>{{ type }}</strong></div>
     </div>

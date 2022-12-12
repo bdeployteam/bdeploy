@@ -5,8 +5,8 @@
     [route]="['..']"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px">
-      <form #form="ngForm" fxLayout="column" fxLayoutGap="5px">
+    <div class="flex flex-col gap-2.5">
+      <form #form="ngForm" class="flex flex-col gap-1">
         <ng-container *ngIf="!(loading$ | async)">
           <app-bd-form-input
             name="fullName"

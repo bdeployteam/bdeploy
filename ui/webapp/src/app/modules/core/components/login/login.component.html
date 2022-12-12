@@ -1,14 +1,8 @@
 <app-bd-dialog [loadingWhen$]="loading$" [hideContentWhenLoading]="false">
   <app-bd-dialog-content>
-    <div
-      class="local-sizing flex-auto"
-      fxLayout.gt-sm="row"
-      fxLayout.lt-md="column"
-    >
+    <div class="local-sizing flex-auto flex flex-col md:flex-row">
       <div
-        class="local-logo-area bd-glow-bg flex-auto"
-        fxLayout="column"
-        fxLayoutAlign="center center"
+        class="local-logo-area bd-glow-bg flex-auto flex flex-col justify-center items-center"
       >
         <app-bd-logo
           [size]="256"
@@ -16,13 +10,11 @@
           (click)="onLogoClick()"
         ></app-bd-logo>
       </div>
-      <div class="grow-[2]" fxLayout="column" fxLayoutAlign="center center">
+      <div class="grow-[2] flex flex-col justify-center items-center">
         <form
           #loginForm="ngForm"
           (ngSubmit)="onSubmit()"
-          class="local-login-area"
-          fxLayout="column"
-          fxLayoutGap="10px"
+          class="local-login-area flex flex-col gap-2.5"
         >
           <div class="local-header">BDeploy Login</div>
           <app-bd-form-input
@@ -38,7 +30,7 @@
             type="password"
             required
           ></app-bd-form-input>
-          <div fxLayout="row" fxLayoutAlign="start center">
+          <div class="flex justify-start items-center">
             <div *ngIf="loginFailed">
               <mat-error>{{ loginFailedMessage }}</mat-error>
             </div>

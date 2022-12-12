@@ -4,7 +4,7 @@
     [panel]="true"
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div fxLayout="column" fxLayoutGap="10px" [style.height]="'100%'">
+    <div class="flex flex-col gap-2.5 h-full">
       <mat-stepper
         #stepper
         [linear]="true"
@@ -14,7 +14,7 @@
         class="flex-auto"
       >
         <mat-step label="Choose Source Repository" [completed]="!!selectedRepo">
-          <div fxLayout="column" fxLayoutGap="5px">
+          <div class="flex flex-col gap-1">
             <span>Choose the repository to import from.</span>
             <app-bd-form-select
               errorDisplay="immediate"
@@ -34,7 +34,7 @@
               [show]="productsLoading$ | async"
               mode="hide"
             >
-              <div fxLayout="column" fxLayoutGap="5px">
+              <div class="flex flex-col gap-1">
                 <span>Choose the product to import.</span>
                 <span class="bd-description-text"
                   >Only products with importable versions are shown.</span
@@ -54,7 +54,7 @@
           </div>
         </mat-step>
         <mat-step label="Import Version(s)" [completed]="!!selectedProductId">
-          <div fxLayout="column" fxLayoutGap="5px">
+          <div class="flex flex-col gap-1">
             <app-bd-data-table
               #versionTable
               [records]="prodsById[selectedProductId]"

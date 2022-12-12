@@ -1,15 +1,12 @@
 <div
-  class="local-sizing flex-auto"
+  class="local-sizing flex-auto flex"
   [class.local-bg-toolbar]="background === 'toolbar'"
   [class.local-bg-dialog]="background === 'dialog'"
-  fxLayout="row"
 >
   <div
-    class="local-icon-area flex-none"
+    class="local-icon-area flex-none flex flex-col justify-center items-center"
     [ngClass]="type === 'generic' ? 'bd-glow-bg' : type === 'error' ? 'bd-glow-bg-error' : 'bd-glow-bg-warn'"
     *ngIf="!collapsed"
-    fxLayout="column"
-    fxLayoutAlign="center center"
   >
     <mat-icon *ngIf="!!icon && type === 'generic'">{{ icon }}</mat-icon>
     <mat-icon
@@ -21,14 +18,11 @@
     >
   </div>
   <div
-    class="grow"
-    fxLayout="column"
-    fxLayoutGap="10px"
-    fxLayoutAlign="center stretch"
+    class="grow flex flex-col gap-2.5 justify-center items-stretch"
     [class.local-content-collapsed]="collapsed"
     [class.local-content-expanded]="!collapsed"
   >
-    <div fxLayout="row" fxLayoutGap="5px" fxLayoutAlign="start center">
+    <div class="flex gap-1 justify-start items-center">
       <ng-container *ngIf="collapsed">
         <mat-icon *ngIf="!!icon && type === 'generic'">{{ icon }}</mat-icon>
         <mat-icon
@@ -43,14 +37,12 @@
         <strong>{{ header }}</strong>
       </div>
     </div>
-    <div class="bd-scroll-container" fxLayout="column" [style.padding.px]="2">
+    <div class="bd-scroll-container flex flex-col p-0.5">
       <ng-content></ng-content>
     </div>
   </div>
   <div
-    fxLayout="row"
-    fxLayoutAlign="center center"
-    class="local-dismiss-area flex-none"
+    class="local-dismiss-area flex-none flex justify-center items-center"
     *ngIf="dismissable"
   >
     <app-bd-micro-icon-button
