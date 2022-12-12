@@ -133,6 +133,9 @@ public class FlattenedApplicationTemplateConfiguration {
             this.startParameters.add(processed);
         }
 
+        // name can also use template variables...
+        name = TemplateHelper.process(name, res, res::canResolve);
+
         // now we can filter the variable definitions to only have those left which we *really* need.
         for (TemplateVariable variable : variables) {
             if (!res.getRequestedVariables().contains(variable.id)) {
