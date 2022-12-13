@@ -4,7 +4,6 @@ import { CdkScrollableModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -246,7 +245,6 @@ function loadAppConfig(cfgService: ConfigService) {
     // angular base infrastructure used throughout the application.
     HttpClientModule,
     FormsModule,
-    FlexLayoutModule,
     RouterModule,
     LayoutModule,
 
@@ -260,7 +258,6 @@ function loadAppConfig(cfgService: ConfigService) {
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    FlexLayoutModule,
     LayoutModule,
 
     // angular material things we don't want to re-import in *every* module

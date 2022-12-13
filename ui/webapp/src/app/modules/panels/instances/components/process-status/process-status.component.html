@@ -26,7 +26,7 @@
       [dismissable]="false"
       [type]="'warning'"
     >
-      <div [style.text-align]="'justify'">
+      <div class="text-justify">
         The process is currently running from an instance version (<strong
           >{{ processDetail?.status.instanceTag }}</strong
         >) which is not the active version (<strong
@@ -42,7 +42,7 @@
       [dismissable]="false"
       header="Server Not Synchronized"
     >
-      <div [style.text-align]="'justify'">
+      <div class="text-justify">
         The managed server hosting this instance is not synchronized, runtime
         details are unavailable. Please synchronize the server to see additional
         details.
@@ -50,10 +50,7 @@
     </app-bd-notification-card>
     <div
       *ngIf="processConfig"
-      gdColumns="24px 90px auto"
-      gdGap="10px"
-      [style.padding.px]="20"
-      gdAlignColumns="start center"
+      class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center"
     >
       <mat-icon class="local-id-labels">fingerprint</mat-icon>
       <div class="local-id-labels">Process ID:</div>
@@ -120,8 +117,7 @@
     <mat-divider></mat-divider>
     <div
       *ngIf="!processDetail && !(details.loading$ | async)"
-      class="bd-hint-text"
-      [style.margin-top.px]="10"
+      class="bd-hint-text mt-2.5"
     >
       No process details available.
     </div>
@@ -193,10 +189,12 @@
           text="Process Probes"
           icon="network_check"
         >
-          <app-probe-status
-            *ngFor="let probe of processDetail?.lastProbes; trackBy: trackProbe"
-            [probe]="probe"
-          ></app-probe-status>
+          <ng-container
+            *ngFor="let probe of processDetail?.lastProbes; let isLast = last; trackBy: trackProbe"
+          >
+            <app-probe-status [probe]="probe"></app-probe-status>
+            <mat-divider *ngIf="!isLast"></mat-divider>
+          </ng-container>
           <app-bd-no-data *ngIf="!processDetail?.lastProbes?.length">
             No Probe Information.
           </app-bd-no-data>

@@ -135,10 +135,9 @@
             [dismissable]="true"
             header="Product Update"
             icon="lightbulb"
-            class="bd-rect-card"
+            class="bd-rect-card max-h-[450px]"
             background="dialog"
             (dismiss)="edit.dismissUpdateIssues()"
-            [style.max-height.px]="450"
           >
             <div>
               The following messages describe automatically performed update
@@ -157,9 +156,8 @@
             header="Validation Issues"
             icon="warning"
             [type]="'warning'"
-            class="bd-rect-card"
+            class="bd-rect-card max-h-[450px]"
             background="dialog"
-            [style.max-height.px]="450"
           >
             <app-bd-data-table
               [records]="issues"
@@ -212,7 +210,7 @@
       <app-bd-no-data
         *ngIf="!!(edit.hasCurrentProduct$ | async) && !(servers.isCurrentInstanceSynchronized$ | async)"
       >
-        <p [style.text-align]="'center'">
+        <p class="text-center">
           <strong
             >{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong
           >

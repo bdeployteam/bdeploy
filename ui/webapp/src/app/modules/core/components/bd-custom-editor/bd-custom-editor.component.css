@@ -5,7 +5,3 @@
   border: 1px dotted grey;
   background-color: white;
 }
-
-.mat-mdc-dialog-actions {
-  justify-content: flex-end;
-}

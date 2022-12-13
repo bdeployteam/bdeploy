@@ -12,7 +12,7 @@
       header="Server Not Synchronized"
       *ngIf="!(servers.isCurrentInstanceSynchronized$ | async); else currentInstanceSynchronized"
     >
-      <div [style.text-align]="'justify'">
+      <div class="text-justify">
         The managed server responsible for this instance is not synchronized,
         bulk controls are unavailable. Please synchronize the server to use
         these controls.

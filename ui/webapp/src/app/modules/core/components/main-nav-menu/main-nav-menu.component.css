@@ -19,7 +19,8 @@
 
 .local-header {
   color: var(--bd-primary);
-  padding-bottom: 3px;
+  padding-bottom: 8px;
+  margin-bottom: 0px;
 }
 
 .local-server-type-wrapper-expanded {

@@ -1,7 +1,5 @@
 <div class="flex justify-start items-center">
-  <div class="bd-text-ellipsis">
-    {{ record.instanceConfiguration.product.tag }}
-  </div>
+  <div class="truncate">{{ record.instanceConfiguration.product.tag }}</div>
   <mat-icon
     *ngIf="record.newerVersionAvailable"
     class="bd-small-icon"

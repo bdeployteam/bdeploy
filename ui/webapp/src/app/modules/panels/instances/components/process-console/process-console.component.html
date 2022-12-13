@@ -40,7 +40,7 @@
     <app-bd-no-data *ngIf="!(available$ | async)">
       <p>Process details are unavailable.</p>
       <p
-        [style.text-align]="'center'"
+        class="text-center"
         *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
       >
         <strong

@@ -145,7 +145,7 @@
               ></app-bd-form-input>
             </ng-container>
             <ng-container *ngIf="!requiredSystemVariables.length">
-              <div class="bd-description-text" [style.padding-bottom.px]="20">
+              <div class="bd-description-text pb-5">
                 No system template variables.
               </div>
             </ng-container>
@@ -201,10 +201,7 @@
                       ></app-bd-form-select>
                     </ng-container>
                   </div>
-                  <mat-divider
-                    [vertical]="true"
-                    [style.width.px]="5"
-                  ></mat-divider>
+                  <mat-divider [vertical]="true"></mat-divider>
                   <div class="grow-[2] flex flex-col gap-2.5 p-2.5">
                     <ng-container *ngIf="tpl.isApplyInstance; else: noApply">
                       <ng-container *ngFor="let v of tpl.requiredVariables">
@@ -221,21 +218,13 @@
                         ></app-bd-form-input>
                       </ng-container>
                       <ng-container *ngIf="!tpl.requiredVariables.length">
-                        <div
-                          class="bd-description-text"
-                          [style.padding-top.px]="13"
-                          [style.padding-bottom.px]="13"
-                        >
+                        <div class="bd-description-text py-4">
                           No template variables.
                         </div>
                       </ng-container>
                     </ng-container>
                     <ng-template #noApply>
-                      <div
-                        class="bd-description-text"
-                        [style.padding-top.px]="13"
-                        [style.padding-bottom.px]="13"
-                      >
+                      <div class="bd-description-text py-4">
                         This instance will not be applied.
                       </div>
                     </ng-template>

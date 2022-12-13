@@ -54,7 +54,7 @@
       (recordClick)="onRecordClick($event)"
     >
       <app-bd-no-data header="Welcome to BDeploy!">
-        <p [style.text-align]="'center'">
+        <p class="text-center">
           To get you started quickly, consider reading our
           <a
             rel="noopener noreferrer"
@@ -64,7 +64,7 @@
           >!
         </p>
         <ng-container *ngIf="isAddAllowed">
-          <p [style.text-align]="'center'">
+          <p class="text-center">
             No instance groups have been created yet. Start by creating a new
             one.
           </p>
@@ -76,7 +76,7 @@
           ></app-bd-panel-button>
         </ng-container>
         <ng-container *ngIf="isAttachAllowed">
-          <p [style.text-align]="'center'">
+          <p class="text-center">
             No instance groups have been linked yet. Start by linking one from a
             central server.
           </p>

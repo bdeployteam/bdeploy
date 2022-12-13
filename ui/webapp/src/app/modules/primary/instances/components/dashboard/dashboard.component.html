@@ -138,12 +138,12 @@
         <!-- Each node in the instance (the ones containing applications only) -->
         <ng-container *ngIf="instances.activeNodeCfgs$ | async as nodes">
           <app-bd-no-data *ngIf="!nodes?.nodeConfigDtos?.length">
-            <p [style.text-align]="'center'">
+            <p class="text-center">
               <strong>{{ currentInstance?.instanceConfiguration.name }}</strong>
               does not have any configured applications in the current instance
               version. Dashboard not available.
             </p>
-            <p [style.text-align]="'center'">
+            <p class="text-center">
               Configure, install and activate instance version first.
             </p>
             <app-bd-button
@@ -176,11 +176,11 @@
 
       <!-- Show hint if there is no active version. -->
       <app-bd-no-data *ngIf="!activeInstance">
-        <p [style.text-align]="'center'">
+        <p class="text-center">
           <strong>{{ currentInstance?.instanceConfiguration.name }}</strong>
           does not have an active version. Dashboard not yet available.
         </p>
-        <p [style.text-align]="'center'">
+        <p class="text-center">
           Configure, install and activate instance version first.
         </p>
         <app-bd-button

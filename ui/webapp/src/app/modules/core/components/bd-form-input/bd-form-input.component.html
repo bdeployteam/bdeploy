@@ -44,7 +44,7 @@
     <mat-error *ngIf="errorFallback || (ngControl && ngControl.invalid)"
       >{{ getErrorMessage() }}</mat-error
     >
-    <mat-hint class="bd-text-ellipsis" *ngIf="statusMessage">
+    <mat-hint class="truncate" *ngIf="statusMessage">
       {{statusMessage}}
     </mat-hint>
   </mat-form-field>

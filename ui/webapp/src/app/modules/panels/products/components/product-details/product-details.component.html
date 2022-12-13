@@ -9,7 +9,7 @@
       class="flex flex-col gap-2.5"
       *ngIf="singleProduct.product$ | async as prod"
     >
-      <div gdColumns="70px auto" gdGap="5px">
+      <div class="grid grid-cols-[70px_auto] gap-1">
         <strong>ID:</strong>
         <div>{{ prod.product }}</div>
         <strong>Name:</strong>

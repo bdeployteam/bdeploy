@@ -12,32 +12,20 @@
   ></mat-progress-bar>
   <div
     *ngIf="(isUploading$ | async) || (isUploadProcessing$ | async) || (isImporting$ | async)"
-    class="local-hint-text bd-description-text"
+    class="break-all bd-description-text"
   >
     {{ processingHint$ | async }}
   </div>
-  <div
-    *ngIf="isUploadFailed$ | async"
-    class="local-hint-text bd-description-text"
-  >
+  <div *ngIf="isUploadFailed$ | async" class="break-all bd-description-text">
     {{ uploadStatus.detail }}
   </div>
-  <div
-    *ngIf="isUploadFinished$ | async"
-    class="local-hint-text bd-description-text"
-  >
+  <div *ngIf="isUploadFinished$ | async" class="break-all bd-description-text">
     {{ this.uploadStatus?.detail?.details }}
   </div>
-  <div
-    *ngIf="isImportFailed$ | async"
-    class="local-hint-text bd-description-text"
-  >
+  <div *ngIf="isImportFailed$ | async" class="break-all bd-description-text">
     {{ importStatus?.detail }}
   </div>
-  <div
-    *ngIf="isImportFinished$ | async"
-    class="local-hint-text bd-description-text"
-  >
+  <div *ngIf="isImportFinished$ | async" class="break-all bd-description-text">
     {{ importStatus?.detail }}
   </div>
   <div

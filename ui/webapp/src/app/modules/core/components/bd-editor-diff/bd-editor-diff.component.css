@@ -1,8 +1,0 @@
-:host {
-  display: flex;
-  flex-direction: column;
-}
-
-.local-max-width {
-  max-width: 100%;
-}

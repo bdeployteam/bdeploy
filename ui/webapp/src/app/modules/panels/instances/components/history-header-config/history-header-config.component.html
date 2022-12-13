@@ -6,7 +6,7 @@
           <ng-template #namePopup>
             <app-config-desc-cards field="inst.name"></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Name:</div>
+          <div class="mr-1">Name:</div>
           <strong>
             <app-history-diff-field
               [diffSide]="diffSide"
@@ -22,7 +22,7 @@
               field="inst.productTag"
             ></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Product Version:</div>
+          <div class="mr-1">Product Version:</div>
           <strong>
             <app-history-diff-field
               [diffSide]="diffSide"
@@ -39,7 +39,7 @@
               field="inst.description"
             ></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Description:</div>
+          <div class="mr-1">Description:</div>
           <app-history-diff-field
             [diffSide]="diffSide"
             [diff]="diff.description"
@@ -51,7 +51,7 @@
           <ng-template #instPurposePopup>
             <app-config-desc-cards field="inst.purpose"></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Purpose:</div>
+          <div class="mr-1">Purpose:</div>
           <app-history-diff-field
             [diffSide]="diffSide"
             [diff]="diff.purpose"
@@ -65,7 +65,7 @@
               field="inst.autoStart"
             ></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Auto Start:</div>
+          <div class="mr-1">Auto Start:</div>
           <app-history-diff-field
             [diffSide]="diffSide"
             [diff]="diff.autoStart"
@@ -79,7 +79,7 @@
               field="inst.autoUninstall"
             ></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Auto Uninstall:</div>
+          <div class="mr-1">Auto Uninstall:</div>
           <app-history-diff-field
             [diffSide]="diffSide"
             [diff]="diff.autoUninstall"
@@ -93,7 +93,7 @@
               field="inst.configTree"
             ></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Config ID:</div>
+          <div class="mr-1">Config ID:</div>
           <app-history-diff-field
             [maxWidthPx]="60"
             [diffSide]="diffSide"
@@ -107,7 +107,7 @@
               field="inst.systemId"
             ></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">System ID:</div>
+          <div class="mr-1">System ID:</div>
           <app-history-diff-field
             [diffSide]="diffSide"
             [diff]="diff.system"
@@ -120,7 +120,7 @@
               field="inst.systemTag"
             ></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">System Ver.:</div>
+          <div class="mr-1">System Ver.:</div>
           <app-history-diff-field
             [diffSide]="diffSide"
             [diff]="diff.systemTag"

@@ -16,7 +16,6 @@ interface SquashedActivity {
 @Component({
   selector: 'app-bd-activities',
   templateUrl: './bd-activities.component.html',
-  styleUrls: ['./bd-activities.component.css'],
 })
 export class BdActivitiesComponent {
   constructor(

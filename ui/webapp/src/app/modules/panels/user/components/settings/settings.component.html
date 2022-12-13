@@ -10,15 +10,10 @@
           [hostSize]="64"
           [avatarSize]="64"
         ></app-user-avatar>
-        <div
-          class="flex-auto"
-          gdColumns="70px 180px"
-          gdGap="3px 5px"
-          [style.max-width.px]="250"
-        >
+        <div class="flex-auto grid grid-cols-[70px_auto] gap-1">
           <div><strong>Username:</strong></div>
           <div
-            class="bd-text-ellipsis"
+            class="truncate"
             [matTooltip]="user.name"
             [matTooltipShowDelay]="1000"
           >
@@ -26,7 +21,7 @@
           </div>
           <div><strong>Full Name:</strong></div>
           <div
-            class="bd-text-ellipsis"
+            class="truncate"
             [matTooltip]="user.fullName"
             [matTooltipShowDelay]="1000"
           >
@@ -34,7 +29,7 @@
           </div>
           <div><strong>E-Mail:</strong></div>
           <div
-            class="bd-text-ellipsis"
+            class="truncate"
             [matTooltip]="user.email"
             [matTooltipShowDelay]="1000"
           >

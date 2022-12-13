@@ -1,9 +1,3 @@
-.local-sizing {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
 .local-content-sizing {
   /* see main-nav-top which is 114px high */
   height: calc(100% - 114px);

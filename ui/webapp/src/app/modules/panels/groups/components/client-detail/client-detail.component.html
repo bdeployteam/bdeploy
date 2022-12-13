@@ -4,14 +4,14 @@
     [panel]="true"
   >
     <mat-icon
-      [style.margin-left.px]="10"
+      class="ml-2.5"
       *ngIf="(app$ | async)?.client?.os"
       [svgIcon]="(app$ | async).client.os"
     ></mat-icon>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="app$ | async as app">
-      <div gdColumns="80px auto" gdGap="5px">
+      <div class="grid grid-cols-[80px_auto] gap-1">
         <strong>ID:</strong>
         <div>{{ app.client.id }}</div>
         <strong>Name:</strong>
@@ -52,7 +52,7 @@
         [disabled]="downloadingClickAndStart$ | async"
       ></app-bd-button>
       <mat-divider></mat-divider>
-      <div class="bd-description-text" [style.text-align]="'justify'">
+      <div class="bd-description-text text-justify">
         For <em>Click & Start</em> to work, you need to have the
         <em>BDeploy Launcher</em> application installed. This is done by
         <strong>any</strong> installer automatically. If you still don't have

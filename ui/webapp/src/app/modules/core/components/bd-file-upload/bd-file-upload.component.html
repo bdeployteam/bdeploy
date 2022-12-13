@@ -12,13 +12,13 @@
   ></mat-progress-bar>
   <div
     *ngIf="(uploading$ | async) || (processing$ | async)"
-    class="local-hint-text bd-description-text"
+    class="break-all bd-description-text"
   >
     {{ processingHint$ | async }}
   </div>
   <div
     *ngIf="(failed$ | async) || (finished$ | async)"
-    class="local-hint-text bd-description-text"
+    class="break-all bd-description-text"
   >
     {{ (failed$ | async) ? status.detail : this.resultEvaluator(status) }}
   </div>

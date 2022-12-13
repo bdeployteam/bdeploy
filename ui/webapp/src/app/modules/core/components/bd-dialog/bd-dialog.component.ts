@@ -32,7 +32,6 @@ export enum BdDialogScrollEvent {
 @Component({
   selector: 'app-bd-dialog',
   templateUrl: './bd-dialog.component.html',
-  styleUrls: ['./bd-dialog.component.css'],
 })
 export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(

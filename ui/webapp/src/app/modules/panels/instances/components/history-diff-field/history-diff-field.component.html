@@ -10,7 +10,7 @@
   <div *ngIf="!maxWidthPx" class="local-text">{{ value }}</div>
   <div
     *ngIf="!!maxWidthPx"
-    class="local-text bd-text-ellipsis"
+    class="local-text truncate"
     [style.max-width.px]="maxWidthPx"
   >
     {{ value }}

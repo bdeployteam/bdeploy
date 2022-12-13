@@ -1,7 +1,7 @@
 <div>
   <mat-tab-group
     *ngIf="grouping"
-    [style.width]="'100%'"
+    class="w-full"
     animationDuration="0ms"
     (selectedTabChange)="onTabChange($event)"
   >
@@ -16,7 +16,7 @@
 </div>
 <div *ngIf="(recordsToDisplay$ | async) as recordsToDisplay">
   <div
-    class="local-sizing flex-auto flex flex-wrap justify-start"
+    class="flex-auto flex flex-wrap justify-start max-w-full"
     *ngIf="recordsToDisplay.length"
   >
     <app-bd-data-card
@@ -32,7 +32,7 @@
   </div>
   <div
     *ngIf="!recordsToDisplay.length"
-    class="bd-hint-text local-hint-text flex-auto flex flex-col justify-center items-center"
+    class="bd-hint-text mt-5 flex-auto flex flex-col justify-center items-center"
   >
     No data to show.
   </div>

@@ -25,7 +25,6 @@ import { BdSearchable, SearchService } from '../../services/search.service';
 @Component({
   selector: 'app-bd-data-grid',
   templateUrl: './bd-data-grid.component.html',
-  styleUrls: ['./bd-data-grid.component.css'],
 })
 export class BdDataGridComponent<T>
   implements OnInit, OnDestroy, BdSearchable, OnChanges

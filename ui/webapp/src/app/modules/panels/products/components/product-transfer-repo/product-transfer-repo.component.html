@@ -10,8 +10,7 @@
         [linear]="true"
         orientation="vertical"
         (selectionChange)="onStepSelectionChange($event)"
-        [style.overflow]="'auto'"
-        class="flex-auto"
+        class="flex-auto overflow-auto"
       >
         <mat-step label="Choose Source Repository" [completed]="!!selectedRepo">
           <div class="flex flex-col gap-1">
@@ -29,7 +28,7 @@
           </div>
         </mat-step>
         <mat-step label="Choose Product" [completed]="!!selectedProductId">
-          <div [style.min-height.px]="63">
+          <div class="min-h-[63px]">
             <app-bd-loading-overlay
               [show]="productsLoading$ | async"
               mode="hide"

@@ -10,7 +10,7 @@
           <ng-template #namePopup>
             <app-config-desc-cards field="cfg.name"></app-config-desc-cards>
           </ng-template>
-          <div [style.margin-right.px]="3">Process:</div>
+          <div class="mr-1">Process:</div>
           <strong>
             <app-history-diff-field
               [diffSide]="diffSide"
@@ -25,7 +25,7 @@
             <ng-template #idPopup>
               <app-config-desc-cards field="cfg.id"></app-config-desc-cards>
             </ng-template>
-            <div [style.margin-right.px]="3">ID:</div>
+            <div class="mr-1">ID:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
               [diff]="diff.id"
@@ -39,7 +39,7 @@
                 field="cfg.control.startType"
               ></app-config-desc-cards>
             </ng-template>
-            <div [style.margin-right.px]="3">Start Type:</div>
+            <div class="mr-1">Start Type:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
               [diff]="diff.processControl.startType"
@@ -53,7 +53,7 @@
                 field="cfg.control.keepAlive"
               ></app-config-desc-cards>
             </ng-template>
-            <div [style.margin-right.px]="3">Keep Alive:</div>
+            <div class="mr-1">Keep Alive:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
               [diff]="diff.processControl.keepAlive"
@@ -67,7 +67,7 @@
                 field="cfg.control.noRetries"
               ></app-config-desc-cards>
             </ng-template>
-            <div [style.margin-right.px]="3">Keep Alive Retries:</div>
+            <div class="mr-1">Keep Alive Retries:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
               [diff]="diff.processControl.noOfRetries"
@@ -81,7 +81,7 @@
                 field="cfg.control.gracePeriod"
               ></app-config-desc-cards>
             </ng-template>
-            <div [style.margin-right.px]="3">Stop Grace Period:</div>
+            <div class="mr-1">Stop Grace Period:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
               [diff]="diff.processControl.gracePeriod"
@@ -95,7 +95,7 @@
                 field="cfg.control.attachStdin"
               ></app-config-desc-cards>
             </ng-template>
-            <div [style.margin-right.px]="3">Attach Console:</div>
+            <div class="mr-1">Attach Console:</div>
             <app-history-diff-field
               [diffSide]="diffSide"
               [diff]="diff.processControl.attachStdin"
@@ -133,9 +133,7 @@
         </ng-container>
       </div>
       <ng-container *ngIf="diff.endpoints?.http?.length && !onlyCommand">
-        <div class="bd-description-text" [style.margin-top.px]="10">
-          Endpoints:
-        </div>
+        <div class="bd-description-text" class="mt-2.5">Endpoints:</div>
         <div
           *ngFor="let epdiff of diff.endpoints.http"
           class="flex flex-col gap-1"
@@ -143,7 +141,7 @@
           <div
             [ngClass]="getBorderClass(epdiff.type)"
             *ngIf="epdiff.type !== 'not-in-base'"
-            [style.padding-left.px]="5"
+            class="pl-1"
           >
             <div class="flex flex-wrap gap-1 justify-start items-center">
               <div class="flex justify-start items-center">
@@ -152,7 +150,7 @@
                     field="cfg.ep.path"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Path:</div>
+                <div class="mr-1">Path:</div>
                 <strong>
                   <app-history-diff-field
                     [diffSide]="diffSide"
@@ -168,7 +166,7 @@
                     field="cfg.ep.port"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Port:</div>
+                <div class="mr-1">Port:</div>
                 <app-history-diff-field
                   [diffSide]="diffSide"
                   [diff]="epdiff.port"
@@ -182,7 +180,7 @@
                     field="cfg.ep.secure"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Secure:</div>
+                <div class="mr-1">Secure:</div>
                 <app-history-diff-field
                   [diffSide]="diffSide"
                   [diff]="epdiff.secure"
@@ -196,7 +194,7 @@
                     field="cfg.ep.trustAll"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Trust All:</div>
+                <div class="mr-1">Trust All:</div>
                 <app-history-diff-field
                   [diffSide]="diffSide"
                   [diff]="epdiff.trustAll"
@@ -210,7 +208,7 @@
                     field="cfg.ep.trustStore"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Trust Store:</div>
+                <div class="mr-1">Trust Store:</div>
                 <app-history-diff-field
                   [diffSide]="diffSide"
                   [diff]="epdiff.trustStore"
@@ -224,7 +222,7 @@
                     field="cfg.ep.trustStorePass"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Trust Store PW:</div>
+                <div class="mr-1">Trust Store PW:</div>
                 <app-history-diff-field
                   [maskValue]="true"
                   [diffSide]="diffSide"
@@ -239,7 +237,7 @@
                     field="cfg.ep.authType"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Auth. Type:</div>
+                <div class="mr-1">Auth. Type:</div>
                 <app-history-diff-field
                   [diffSide]="diffSide"
                   [diff]="epdiff.authType"
@@ -253,7 +251,7 @@
                     field="cfg.ep.authUser"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Auth. User:</div>
+                <div class="mr-1">Auth. User:</div>
                 <app-history-diff-field
                   [diffSide]="diffSide"
                   [diff]="epdiff.authUser"
@@ -267,7 +265,7 @@
                     field="cfg.ep.authPass"
                   ></app-config-desc-cards>
                 </ng-template>
-                <div [style.margin-right.px]="3">Auth. PW:</div>
+                <div class="mr-1">Auth. PW:</div>
                 <app-history-diff-field
                   [maskValue]="true"
                   [diffSide]="diffSide"

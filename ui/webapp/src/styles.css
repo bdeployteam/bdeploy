@@ -14,14 +14,6 @@ body {
   margin: 0;
 }
 
-/* These styles cannot be on html and body elements, as *mobile* browsers ignore them there */
-.index-wrapper {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-}
-
 .error-snackbar {
   max-width: 100% !important;
 }

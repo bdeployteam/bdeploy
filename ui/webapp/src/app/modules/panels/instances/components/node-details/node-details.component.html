@@ -11,13 +11,10 @@
         header="{{ nodeName$ | async }} - {{ state.config.os }}"
       >
         <div
-          gdColumns="120px auto"
-          gdRows="repeat(4, 24px)"
-          gdGap="5px"
-          gdAlignColumns="start center"
+          class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1"
         >
           <div>BDeploy Version:</div>
-          <div class="bd-text-ellipsis">{{ nodeVersion }}</div>
+          <div class="truncate">{{ nodeVersion }}</div>
           <div>Number of CPUs:</div>
           <div>
             {{ !!state.monitoring?.availableProcessors ?
@@ -31,7 +28,7 @@
           </ng-container>
           <ng-container *ngIf="state.offline">
             <div>Status:</div>
-            <div class="bd-text-ellipsis">{{ state.infoText }}</div>
+            <div class="truncate">{{ state.infoText }}</div>
           </ng-container>
         </div>
       </app-bd-notification-card>
@@ -53,7 +50,7 @@
       [dismissable]="false"
       header="Server Not Synchronized"
     >
-      <div [style.text-align]="'justify'">
+      <div class="text-justify">
         The managed server responsible for this node is not synchronized,
         details are unavailable. Please synchronize the server to see additional
         details.

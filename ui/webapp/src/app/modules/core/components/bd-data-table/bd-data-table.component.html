@@ -85,7 +85,7 @@
       >
         <div
           [style.marginLeft.px]="i === 0 && !!grouping?.length ? '40' : null"
-          class="bd-text-ellipsis"
+          class="truncate"
           *ngIf="!checkMode || i !== 0"
         >
           {{ col.name }}
@@ -99,7 +99,7 @@
           (change)="toggleCheckAll()"
           appClickStopPropagation
           [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
-          class="bd-text-ellipsis local-table-checkbox"
+          class="truncate local-table-checkbox"
           >{{ col.name }}</mat-checkbox
         >
       </th>
@@ -120,7 +120,7 @@
             mat-cell
             [ngClass]="col.classes && row.node.item ? col.classes(row.node.item) : []"
             [style.width]="col.width ? col.width : 'auto'"
-            [style.maxWidth]="0"
+            class="max-w-0"
             [attr.colspan]="row.expandable ? _columns.length : 1"
           >
             <!-- Text for the first column, either group name or item text -->
@@ -158,7 +158,7 @@
                 >
                 <div
                   *ngIf="!col.component || row.expandable"
-                  class="bd-text-ellipsis grow basis-0 text-left"
+                  class="truncate grow basis-0 text-left"
                 >
                   {{ row.node.groupOrFirstColumn }}
                 </div>
@@ -177,11 +177,11 @@
                 (change)="toggleCheck(row, cb)"
                 appClickStopPropagation
                 [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
-                class="bd-text-ellipsis local-table-checkbox"
+                class="truncate local-table-checkbox"
               >
                 <div
                   *ngIf="!col.component || row.expandable"
-                  class="bd-text-ellipsis grow basis-0 text-left"
+                  class="truncate grow basis-0 text-left"
                 >
                   {{ row.node.groupOrFirstColumn }}
                 </div>
@@ -208,7 +208,7 @@
               <ng-container *ngIf="!isImageColumn(col)">
                 <div
                   *ngIf="!col.component"
-                  class="bd-text-ellipsis"
+                  class="truncate"
                   [matTooltip]="!!row.node.item ? (!!col.tooltip ? col.tooltip(row.node.item) : col.data(row.node.item)) : null"
                   [matTooltipShowDelay]="col.tooltipDelay ? col.tooltipDelay : 1000"
                 >

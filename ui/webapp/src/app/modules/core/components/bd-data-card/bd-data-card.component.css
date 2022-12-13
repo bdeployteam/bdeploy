@@ -1,15 +1,3 @@
-mat-card {
-  padding: 10px;
-}
-
-.local-card-description {
-  height: 16px;
-}
-
-.local-card-detail-text {
-  font-size: 0.75em;
-}
-
 .local-card-actions {
   min-height: 62px;
 
@@ -24,12 +12,4 @@ mat-card {
   margin: 10px -10px 10px -10px;
 
   padding: 5px 10px;
-}
-
-.local-card-footer {
-  font-size: smaller;
-}
-
-.local-route-card:focus {
-  outline: none;
 }

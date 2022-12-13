@@ -402,12 +402,12 @@ describe('Instance Settings Tests', () => {
         .click('top');
 
       cy.get('app-bd-banner').within(() => {
-        cy.get('.local-banner').should(
+        cy.get('[data-cy=banner]').should(
           'have.css',
           'background-color',
           'rgb(46, 125, 50)'
         );
-        cy.get('.local-banner').should(
+        cy.get('[data-cy=banner]').should(
           'have.css',
           'color',
           'rgb(255, 255, 255)'
@@ -424,12 +424,12 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-bd-banner').within(() => {
-        cy.get('.local-banner').should(
+        cy.get('[data-cy=banner]').should(
           'have.css',
           'background-color',
           'rgb(46, 125, 50)'
         );
-        cy.get('.local-banner').should(
+        cy.get('[data-cy=banner]').should(
           'have.css',
           'color',
           'rgb(255, 255, 255)'
@@ -449,7 +449,7 @@ describe('Instance Settings Tests', () => {
       cy.get('button[data-cy^="Remove"]').should('be.disabled');
 
       cy.get('app-bd-banner').within(() => {
-        cy.get('.local-banner').should(
+        cy.get('[data-cy=banner]').should(
           'not.have.css',
           'background-color',
           'rgb(46, 125, 50)'

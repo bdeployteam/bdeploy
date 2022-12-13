@@ -10,12 +10,11 @@
  *  | | class='bd-page-toolbar'               | |
  *  | +---------------------------------------+ |
  *  | +---------------------------------------| |
- *  | | class='bd-scroll-container'           | |
  *  | |                                       | |
  *  | +---------------------------------------+ |
  *  +-------------------------------------------+
  */
-@mixin root-layout-classes($theme) {
+@mixin root-layout-classes() {
   /* class for the top level <div> in each route-target component */
   .bd-page-root {
     position: absolute;
@@ -32,18 +31,6 @@
     z-index: 1000;
 
     @include mat.overridable-elevation(1);
-  }
-
-  /* A scrolling container, which means that content to large for the current size will be reachable with scrollbars */
-  .bd-scroll-container {
-    overflow: auto;
-  }
-
-  /* Text in the given element will not wrap and be ellipsized when overflowing */
-  .bd-text-ellipsis {
-    overflow: hidden; // ellipsis only works if overflow is hidden
-    white-space: nowrap;
-    text-overflow: ellipsis;
   }
 
   /* Layout helper for small icons displayed in table cells and card's detail section */
@@ -230,15 +217,7 @@
  * The root spacing classes provide generic spacing, margin, padding classes to be used for all spacing...
  * They need to be global for overlays (menus, etc.).
  */
-@mixin root-spacing-classes($theme) {
-  .bd-offset-top5px {
-    margin-top: 5px;
-  }
-
-  .bd-offset-bottom5px {
-    margin-bottom: 5px;
-  }
-
+@mixin root-spacing-classes() {
   .bd-default-padding {
     margin-top: 10px;
     padding: 0px 10px 10px 10px;
@@ -258,7 +237,7 @@
 }
 
 @mixin common-classes($theme) {
-  @include root-layout-classes($theme);
+  @include root-layout-classes();
   @include root-style-classes($theme);
-  @include root-spacing-classes($theme);
+  @include root-spacing-classes();
 }

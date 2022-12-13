@@ -56,8 +56,7 @@
             >
             <span
               *ngIf="(groupForm.invalid || hasMissingRequired(group)) && !panel.expanded"
-              class="bd-warning-text"
-              [style.font-size]="'smaller'"
+              class="bd-warning-text text-xs"
               >Validation Failed</span
             >
             <div *ngIf="panel.expanded" class="flex gap-1">
@@ -103,10 +102,8 @@
             </div>
           </span>
           <div
-            [style.padding-top.px]="20"
-            gdColumns.sm="100%"
-            [gdColumns.gt-sm]="getValueCount(group) <= 1 && !group.isSelectMode ? '100%' : 'calc(50% - 5px) calc(50% - 5px)'"
-            gdGap="5px 10px"
+            class="pt-5 grid grid-cols-1 gap-x-2.5 gap-y-1"
+            [ngClass]="getValueCount(group) <= 1 && !group.isSelectMode ? [] : ['md:grid-cols-2']"
           >
             <!-- Empty group hint -->
             <div
@@ -156,7 +153,7 @@
                       [name]="'pin-' + (p.value ? p.value.id : p.descriptor.id)"
                       type="checkbox"
                       [(ngModel)]="p.value.pinned"
-                      [style.display]="'none'"
+                      class="hidden"
                     />
                     <mat-icon
                       class="local-hover-button cursor-pointer"

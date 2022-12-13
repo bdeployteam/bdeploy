@@ -14,13 +14,10 @@
         header="{{ nodeName$ | async }} - {{ state.config.os }}"
       >
         <div
-          gdColumns="120px auto"
-          gdRows="repeat(4, 24px)"
-          gdGap="5px"
-          gdAlignColumns="start center"
+          class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1"
         >
           <div>BDeploy Version:</div>
-          <div class="bd-text-ellipsis">{{ nodeVersion }}</div>
+          <div class="truncate">{{ nodeVersion }}</div>
           <div>Number of CPUs:</div>
           <div>
             {{ !!state.monitoring?.availableProcessors ?
@@ -35,7 +32,7 @@
           <ng-container *ngIf="state.offline">
             <div>Status:</div>
             <div
-              class="bd-text-ellipsis"
+              class="truncate"
               [matTooltip]="state.infoText"
               [matTooltipShowDelay]="500"
             >
@@ -102,9 +99,7 @@
         [dismissable]="false"
         header="Server Details not available"
       >
-        <div [style.text-align]="'justify'">
-          Node details are not available.
-        </div>
+        <div class="text-justify">Node details are not available.</div>
       </app-bd-notification-card>
     </ng-template>
   </app-bd-dialog-content>

@@ -123,7 +123,7 @@ export class PortsComponent implements OnInit {
             this.dialog
               .message({
                 header: 'Failed to shift ports.',
-                message: `<ul>${errors
+                message: `<ul class="list-disc list-inside">${errors
                   .map((e) => `<li>${e}</li>`)
                   .join('')}</ul>`,
                 actions: [ACTION_CANCEL],

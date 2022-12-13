@@ -1,10 +1,9 @@
 <ng-template #activitiesPopup>
   <mat-card
     appearance="outlined"
-    [style.padding.px]="10"
     [class.local-activity-collapsed]="!expanded"
     [class.local-activity-expanded]="expanded"
-    class="mat-typography local-activity-popup-sizing flex flex-col gap-1"
+    class="local-activity-popup-sizing flex flex-col gap-1 p-2.5"
   >
     <app-bd-activities></app-bd-activities>
   </mat-card>
@@ -26,7 +25,7 @@
     </div>
     <h2
       *ngIf="expanded"
-      class="local-header text-2xl"
+      class="local-header"
       [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
       [@delayedFadeOut]="{ value: 'dummy', params: { delay: '0s' } }"
     >
@@ -52,7 +51,6 @@
 
   <mat-divider class="local-divider"></mat-divider>
   <app-main-nav-button
-    [style.padding-top.px]="5"
     *ngIf="!(authService.isCurrentScopedExclusiveReadClient$ | async)"
     [visible]="!!(areas.groupContext$ | async)"
     icon="settings_system_daydream"
@@ -109,7 +107,6 @@
   ></mat-divider>
 
   <app-main-nav-button
-    [style.padding-top.px]="5"
     [visible]="!!(areas.instanceContext$ | async)"
     icon="dashboard"
     text="Instance Dashboard"
@@ -170,15 +167,13 @@
     ></mat-spinner>
     <div
       *ngIf="!!(activities.activities$ | async)?.length"
-      [style.padding-left.px]="10"
-      class="bd-text"
+      class="bd-text pl-2.5"
     >
       {{ (activities.activities$ | async)?.length }} Activities.
     </div>
     <div
       *ngIf="!(activities.activities$ | async)?.length"
-      [style.padding-left.px]="10"
-      class="bd-disabled-text"
+      class="bd-disabled-text pl-2.5"
     >
       No Activities.
     </div>
@@ -196,7 +191,7 @@
 
   <div *ngIf="!expanded" class="local-short-version">
     <div
-      [style.width.px]="36"
+      class="w-9"
       [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
     >
       {{ cfgService.config.version | formatVersionShort }}
@@ -207,7 +202,7 @@
     class="local-footer flex flex-col gap-1"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
   >
-    <div gdColumns="50px auto" gdGap="5px">
+    <div class="grid grid-cols-[50px_auto] gap-1">
       <span>Version:</span>
       <span>{{ cfgService?.config?.version | formatVersion }}</span>
     </div>
@@ -225,7 +220,6 @@
   ></app-bd-button>
   <mat-divider class="local-divider"></mat-divider>
   <app-main-nav-button
-    [style.padding-top.px]="5"
     icon="settings"
     text="Administration"
     [collapsed]="!expanded"

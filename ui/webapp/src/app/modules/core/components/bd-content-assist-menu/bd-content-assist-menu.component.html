@@ -4,13 +4,13 @@
     appearance="outlined"
     #itemContainer
     [style.width.px]="attachTo.offsetWidth"
-    class="mat-typography local-card flex flex-col p-1"
+    class="overflow-y-auto flex flex-col p-1"
   >
     <div
       *ngFor="let match of matches; let i = index"
       id="completionItem{{i}}"
       [class.local-selected]="i === selected"
-      class="local-item"
+      class="p-1 cursor-pointer"
       (mouseenter)="setSelected(i)"
       (mousedown)="onClickSelect(select())"
     >
@@ -21,9 +21,7 @@
           >
         </div>
         <div>{{match.value}}</div>
-        <div
-          class="bd-description-text bd-text-ellipsis local-description grow basis-0"
-        >
+        <div class="bd-description-text truncate text-right grow basis-0">
           {{match.description}}
         </div>
       </div>

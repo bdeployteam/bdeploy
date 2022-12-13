@@ -23,8 +23,7 @@
         required
       ></app-bd-form-input>
       <app-bd-button
-        [style.position]="'relative'"
-        [style.top.px]="-10"
+        class="relative -top-2.5"
         text="Perform Test"
         [collapsed]="false"
         [disabled]="!testUser?.length || !testPass?.length"

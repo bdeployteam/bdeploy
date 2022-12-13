@@ -6,13 +6,13 @@
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="server">
-      <div gdColumns="110px auto" gdGap="5px">
+      <div class="grid grid-cols-[110px_auto] gap-1">
         <strong>Name:</strong>
-        <div class="bd-text-ellipsis">{{ server.hostName }}</div>
+        <div class="truncate">{{ server.hostName }}</div>
         <strong>Description:</strong>
-        <div class="bd-text-ellipsis">{{ server.description }}</div>
+        <div class="truncate">{{ server.description }}</div>
         <strong>URI:</strong>
-        <div class="bd-text-ellipsis">{{ server.uri }}</div>
+        <div class="truncate">{{ server.uri }}</div>
         <strong>Last Sync.:</strong>
         <div>{{ server.lastSync | date: 'dd.MM.yyyy HH:mm' }}</div>
         <ng-container *ngIf="server.update?.updateAvailable">
@@ -27,24 +27,20 @@
       </div>
       <ng-container *ngIf="server.update?.updateAvailable">
         <div
-          gdGap="10px"
-          gdColumns="24px auto"
-          gdAlignColumns="start center"
+          class="grid grid-cols-[24px_auto] gap-2.5 items-center"
           *ngIf="!(servers.isServerDetailsSynchronized$ | async) && !server.update.forceUpdate"
         >
           <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize
           to enable update related actions.
         </div>
         <div
-          gdGap="10px"
-          gdColumns="24px auto"
-          gdAlignColumns="start center"
+          class="grid grid-cols-[24px_auto] gap-2.5 items-center"
           *ngIf="!(servers.isServerDetailsSynchronized$ | async) && server.update.forceUpdate"
         >
           <mat-icon class="bd-warning-text">warning</mat-icon>A major version
           update must be installed to re-enable synchronizing.
         </div>
-        <div class="bd-description-text" [style.text-align]="'justify'">
+        <div class="bd-description-text text-justify">
           An update can be transfered without installing to prepare a future
           update up front. This option is only available if the update package
           is not yet present on the managed server.

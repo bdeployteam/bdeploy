@@ -5,12 +5,12 @@
       [checked]="booleanValue"
       disabled
     ></mat-checkbox>
-    <div *ngSwitchCase="'PASSWORD'" class="bd-text-ellipsis">
+    <div *ngSwitchCase="'PASSWORD'" class="truncate">
       {{ '*'.repeat(record.value?.length) }}
     </div>
     <div
       *ngSwitchDefault
-      class="bd-text-ellipsis"
+      class="truncate"
       [matTooltip]="record.value"
       matTooltipShowDelay="500"
     >

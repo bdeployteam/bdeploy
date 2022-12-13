@@ -5,7 +5,7 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
-      <div gdColumns="auto auto" gdGap="5px">
+      <div class="grid grid-cols-2 gap-1">
         <strong>Version:</strong>
         <span>{{ (software$ | async)?.version }}</span>
         <strong>System Supported OS:</strong>

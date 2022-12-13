@@ -13,7 +13,7 @@
       *ngIf="detailsService.softwarePackage$ | async as software"
     >
       <ng-container *ngIf="software?.type === 'Product'">
-        <div gdColumns="70px auto" gdGap="5px">
+        <div class="grid grid-cols-[70px_auto] gap-1">
           <strong>ID:</strong>
           <div>{{ software.product }}</div>
           <strong>Name:</strong>

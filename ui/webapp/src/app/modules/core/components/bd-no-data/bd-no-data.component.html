@@ -1,5 +1,7 @@
-<div class="local-sizing flex-auto flex flex-col justify-center items-center">
+<div
+  class="flex-auto flex flex-col justify-center items-center p-8 max-w-full text-center"
+>
   <app-bd-logo *ngIf="header" [size]="128"></app-bd-logo>
-  <div class="local-header" *ngIf="header">{{ header }}</div>
+  <div class="text-lg font-bold mb-4" *ngIf="header">{{ header }}</div>
   <ng-content></ng-content>
 </div>

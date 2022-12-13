@@ -11,7 +11,7 @@
         text="Update from product template"
         icon="file_upload"
         (click)="doRestoreFromTemplate()"
-        [style.padding-right.px]="30"
+        class="pr-8"
         tooltip="below"
       ></app-bd-button>
       <app-bd-panel-button
@@ -20,7 +20,7 @@
         *ngIf="isText"
         [route]="['compare', path]"
         [relative]="true"
-        [style.padding-right.px]="30"
+        class="pr-8"
         tooltip="below"
       ></app-bd-panel-button>
     </ng-container>
@@ -31,7 +31,7 @@
         text="Create from product template"
         icon="add"
         (click)="doAddFromTemplate()"
-        [style.padding-right.px]="30"
+        class="pr-8"
         tooltip="below"
       ></app-bd-button>
     </ng-container>

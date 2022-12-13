@@ -42,10 +42,7 @@
           <div class="bd-default-padding">
             <div>
               <div
-                [style.padding-top.px]="20"
-                gdColumns.sm="100%"
-                [gdColumns.gt-sm]="'calc(50% - 5px) calc(50% - 5px)'"
-                gdGap="5px 10px"
+                class="pt-5 grid grid-cols-1 sm:grid-cols-2 gap-x-2.5 gap-y-1"
               >
                 <app-config-desc-element card="cfg.ep.port">
                   <app-bd-value-editor
@@ -131,7 +128,7 @@
 
                 <ng-template #linkToggleTrust>
                   <app-bd-expression-toggle
-                    [style.opacity]="'0.3'"
+                    class="opacity-30"
                     [link]="false"
                     [disabled]="true"
                   ></app-bd-expression-toggle>

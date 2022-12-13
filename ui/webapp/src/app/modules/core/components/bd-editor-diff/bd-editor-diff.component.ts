@@ -13,7 +13,6 @@ import { ThemeService } from '../../services/theme.service';
 @Component({
   selector: 'app-bd-editor-diff',
   templateUrl: './bd-editor-diff.component.html',
-  styleUrls: ['./bd-editor-diff.component.css'],
 })
 export class BdEditorDiffComponent implements OnInit, OnDestroy {
   private globalMonaco;

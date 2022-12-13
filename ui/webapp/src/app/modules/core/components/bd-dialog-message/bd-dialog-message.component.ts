@@ -97,7 +97,6 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = {
 @Component({
   selector: 'app-bd-dialog-message',
   templateUrl: './bd-dialog-message.component.html',
-  styleUrls: ['./bd-dialog-message.component.css'],
   animations: [delayedFadeIn],
 })
 export class BdDialogMessageComponent implements OnDestroy {

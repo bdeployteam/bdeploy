@@ -1,12 +1,12 @@
 <ng-template #handlingTypeInfo>
   <mat-card
     appearance="outlined"
-    class="mat-typography local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]"
+    class="local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]"
   >
     <div>
       The handling type describes how starting or stopping is handled by the
       process control unit during bulk control.
-      <ul>
+      <ul class="list-disc list-inside">
         <li>
           <code>SEQUENTIAL</code>: Processes are started in sequence and stopped
           in reverse sequence. Each process start is awaited according to the
@@ -27,12 +27,12 @@
 <ng-template #waitTypeInfo>
   <mat-card
     appearance="outlined"
-    class="mat-typography local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]"
+    class="local-details-popup-sizing flex flex-col gap-1 p-2.5 max-w-[500px]"
   >
     <div>
       The wait type describes how a starting process is handled during bulk
       start.
-      <ul>
+      <ul class="list-disc list-inside">
         <li>
           <code>CONTINUE</code>: The process control unit will regard a process
           as started once the actual operating system process has been created.
@@ -64,7 +64,7 @@
         [dismissable]="false"
         header="Server Not Synchronized"
       >
-        <div [style.text-align]="'justify'">
+        <div class="text-justify">
           The managed server responsible for this instance is not synchronized,
           details are unavailable. Please synchronize the server to enable
           editing.

@@ -2,7 +2,6 @@
   <app-bd-dialog-toolbar header="Local Server Metrics"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <mat-tab-group
-      mat-align-tabs="start"
       dynamicHeight
       animationDuration="0ms"
       (selectedIndexChange)="doSelect($event)"
@@ -209,11 +208,7 @@
             </div>
             <mat-divider></mat-divider>
             Histogram weighted values:
-            <div
-              *ngIf="timerSeries"
-              [style.height.px]="300"
-              class="timer-chart"
-            >
+            <div *ngIf="timerSeries" class="timer-chart h-[300px]">
               <ngx-charts-line-chart
                 [referenceLines]="referenceLines"
                 [showRefLines]="true"

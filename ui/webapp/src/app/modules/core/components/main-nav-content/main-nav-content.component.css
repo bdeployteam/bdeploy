@@ -11,17 +11,3 @@
   display: flex;
   flex-direction: column;
 }
-
-.local-sizing-common {
-  overflow: hidden;
-
-  height: 100%;
-  z-index: 10;
-}
-
-.local-sizing-inner {
-  overflow: auto;
-
-  width: 100%;
-  height: 100%;
-}

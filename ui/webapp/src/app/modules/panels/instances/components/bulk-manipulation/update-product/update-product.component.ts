@@ -96,7 +96,7 @@ export class UpdateProductComponent implements OnInit, OnDestroy {
             this.dialog
               .info(
                 'Validation Issues',
-                `<p>Unfortunately there are validation issues, the bulk update cannot be performed.</p><mat-divider></mat-divider><ul>${problematic
+                `<p>Unfortunately there are validation issues, the bulk update cannot be performed.</p><mat-divider></mat-divider><ul class="list-disc list-inside">${problematic
                   .map(
                     (p) =>
                       `<li>${p.config.config.name}: ${

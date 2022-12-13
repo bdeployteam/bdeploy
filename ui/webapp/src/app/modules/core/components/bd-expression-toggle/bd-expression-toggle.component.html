@@ -1,9 +1,8 @@
 <mat-button-toggle-group
-  class="local-toggle-group"
+  class="local-toggle-group mr-1"
   [value]="link ? '2' : '1'"
   (change)="linkChanged.emit($event.value === '1')"
   [disabled]="disabled"
-  [style.margin-right.px]="5"
   appClickStopPropagation
 >
   <mat-button-toggle

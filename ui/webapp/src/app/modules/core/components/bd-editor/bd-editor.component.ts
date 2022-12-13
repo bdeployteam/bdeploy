@@ -17,7 +17,6 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
 @Component({
   selector: 'app-bd-editor',
   templateUrl: './bd-editor.component.html',
-  styleUrls: ['./bd-editor.component.css'],
 })
 export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   private globalMonaco;

@@ -1,12 +1,13 @@
 <div
-  class="bd-rect-card local-banner flex flex-col gap-1"
+  data-cy="banner"
+  class="bd-rect-card flex flex-col gap-1 whitespace-normal h-auto p-2.5 max-h-[30vh]"
   [style.color]="banner.foregroundColor"
   [style.background-color]="banner.backgroundColor"
 >
-  <div class="local-banner-text">
+  <div class="overflow-auto">
     <pre>{{ banner.text }}</pre>
   </div>
-  <div class="local-banner-info" class="self-end">
+  <div class="text-xs self-end">
     {{ banner.user }}, {{ banner.timestamp | date: 'dd.MM.yyyy HH:mm:ss' }}
   </div>
 </div>

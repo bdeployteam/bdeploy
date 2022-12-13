@@ -11,16 +11,10 @@
           [hostSize]="64"
           [avatarSize]="64"
         ></app-user-avatar>
-        <div
-          class="flex-auto"
-          gdColumns="70px 180px"
-          gdGap="3px 5px"
-          [style.max-width.px]="250"
-          gdAlignColumns="center center"
-        >
+        <div class="flex-auto grid grid-cols-[70px_auto] gap-1 items-center">
           <div><strong>Username:</strong></div>
           <div
-            class="bd-text-ellipsis"
+            class="truncate"
             [matTooltip]="entry.user"
             [matTooltipShowDelay]="1000"
           >
@@ -28,7 +22,7 @@
           </div>
           <div><strong>E-Mail:</strong></div>
           <div
-            class="bd-text-ellipsis"
+            class="truncate"
             [matTooltip]="entry.email"
             [matTooltipShowDelay]="1000"
           >
@@ -36,7 +30,7 @@
           </div>
         </div>
       </div>
-      <div gdColumns="100px auto" gdGap="5px" gdAlignColumns="start center">
+      <div class="grid gap-1 items-center grid-cols-[100px_auto]">
         <div>Occurred at:</div>
         <div>{{ entry.timestamp | date: 'dd.MM.yyy HH:mm:ss' }}</div>
         <div>Type:</div>
@@ -117,7 +111,7 @@
             header="Server Not Synchronized"
             *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
           >
-            <div [style.text-align]="'justify'">
+            <div class="text-justify">
               The managed server responsible for this instance is not
               synchronized, version controls are unavailable. Please synchronize
               the server to use these controls.
@@ -164,7 +158,7 @@
       [dismissable]="false"
       header="No Information"
     >
-      <div [style.text-align]="'justify'">
+      <div class="text-justify">
         The selected history entry cannot be retrieved. Please select another
         one from the list.
       </div>

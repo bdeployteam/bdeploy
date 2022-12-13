@@ -1,6 +1,6 @@
 <div class="flex justify-start" *ngIf="column.data(record) as item">
   <div
-    class="bd-text-ellipsis"
+    class="truncate"
     [appBdPopup]="popup"
     appBdPopupTrigger="hover"
     [appBdPopupDelay]="500"
@@ -10,9 +10,9 @@
     <ng-template #popup>
       <mat-card
         appearance="outlined"
-        class="mat-typography flex flex-col gap-1 p-2.5 max-w-[400px]"
+        class="flex flex-col gap-1 p-2.5 max-w-[400px]"
       >
-        <p [style.word-break]="'break-word'">{{ item }}</p>
+        <p class="break-words">{{ item }}</p>
       </mat-card>
     </ng-template>
   </div>

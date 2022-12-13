@@ -33,11 +33,11 @@
           {{ type === 'error' ? 'error' : 'warning' }}</mat-icon
         >
       </ng-container>
-      <div class="bd-text-ellipsis">
+      <div class="truncate">
         <strong>{{ header }}</strong>
       </div>
     </div>
-    <div class="bd-scroll-container flex flex-col p-0.5">
+    <div class="overflow-auto flex flex-col p-0.5">
       <ng-content></ng-content>
     </div>
   </div>

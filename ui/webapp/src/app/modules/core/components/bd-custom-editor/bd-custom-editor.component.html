@@ -1,9 +1,9 @@
 <ng-template #editorPopup>
   <mat-card
     appearance="outlined"
-    class="mat-typography flex flex-col gap-2.5 p-2.5 min-w-[500px]"
+    class="flex flex-col gap-2.5 p-2.5 min-w-[500px]"
   >
-    <div class="bd-text-ellipsis">
+    <div class="truncate">
       <strong>Edit Value</strong>
     </div>
     <div #editorPanel *ngIf="editor" class="editorPanel"></div>

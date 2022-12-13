@@ -1,9 +1,6 @@
 <div class="local-wrapper flex justify-start items-center">
   <div
-    gdColumns="90px 36px auto 36px"
-    gdGap="5px"
-    gdAlignColumns="start center"
-    class="flex-auto"
+    class="flex-auto grid grid-cols-[auto_24px_auto_36px] gap-1 items-center"
   >
     <div>{{ probe.type }}</div>
     <mat-icon
@@ -14,15 +11,11 @@
     >
     <div>{{ probe.time | date: 'HH:mm:ss' }}</div>
     <app-bd-button-popup text="Details" icon="info">
-      <mat-card
-        appearance="outlined"
-        [style.padding.px]="10"
-        class="mat-typography flex flex-col gap-1"
-      >
+      <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5">
         <div class="bd-description-text">
           {{ probe.type }} - Status {{ probe.status }}
         </div>
-        <mat-divider [style.position]="'relative'"></mat-divider>
+        <mat-divider class="relative"></mat-divider>
         <div class="bd-description-text">Probe Response:</div>
         <div
           [style.width.px]="(narrow$ | async) ? 400 : 800"
@@ -38,4 +31,3 @@
     </app-bd-button-popup>
   </div>
 </div>
-<mat-divider></mat-divider>

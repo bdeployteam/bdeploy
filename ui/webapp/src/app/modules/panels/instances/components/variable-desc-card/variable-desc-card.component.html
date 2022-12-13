@@ -1,14 +1,6 @@
-<mat-card
-  appearance="outlined"
-  class="mat-typography flex flex-col gap-1 p-2.5 max-w-[550px]"
->
+<mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[550px]">
   <div>Variable <strong>{{ variable?.id }}</strong></div>
-  <div
-    gdColumns="100px auto"
-    gdGap="5px"
-    gdAlignColumns="start start"
-    [style.padding.px]="10"
-  >
+  <div class="p-2.5 grid grid-cols-[100px_auto] gap-1">
     <strong><div>Description:</div></strong>
     <div>{{ variable?.description }}</div>
     <strong><div>Type:</div></strong>

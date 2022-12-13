@@ -1,11 +1,11 @@
 <div
   *ngIf="message$ | async as msg"
-  class="local-sizing bd-normal-backdrop flex flex-col justify-center items-center"
+  class="absolute top-0 left-0 w-full h-full z-[9999] bd-normal-backdrop flex flex-col justify-center items-center"
   [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0s' } }"
 >
   <app-bd-notification-card
     [collapsed]="true"
-    class="mat-typography mat-elevation-z3 max-h-[99%] max-w-[98%]"
+    class="mat-elevation-z3 max-h-[99%] max-w-[98%]"
     [dismissable]="msg.dismissResult !== undefined"
     (dismiss)="complete(msg.dismissResult)"
     [header]="msg.header"
