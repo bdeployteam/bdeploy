@@ -567,6 +567,10 @@ Attribute   | Description
 `defaultValue` | An optional default value which is pre-filled when querying the user for template variable values.
 `suggestedValues` | A list of values which will be suggested to the user once he begins providing a value for this variable.
 
+!!!info Note
+Defined `templateVariables` can be used in the `name` of the application template, as well as in each `startParameter`s `value` attribute.
+!!!
+
 ### Supported `fixedVariables` Attributes
 
 Fixed variables allow overriding template variable input from the user to a _fixed_ value.
@@ -669,6 +673,10 @@ An instance template will be presented to the user when visiting an [Empty Insta
 
 !!!info Note
 `templateVariables` follows the same scheme as [Supported `templateVariables` Attributes](#supported-templatevariables-attributes) in [`application-template.yaml`](#application-templateyaml) files.
+!!!
+
+!!!info Note
+Defined `templateVariables` can be used in each `instanceVariables` (and `instanceVariableDefaults`) `value` attribute, and per inline application in each field which is supported by [`application-template.yaml`](#application-templateyaml)s `templateVariables`.
 !!!
 
 ### Supported `instanceVariables` Attributes
@@ -811,6 +819,10 @@ Attribute   | Description
 
 !!!info Note
 `templateVariables` follows the same scheme as [Supported `templateVariables` Attributes](#supported-templatevariables-attributes) in [`application-template.yaml`](#application-templateyaml) files.
+!!!
+
+!!!info Note
+Defined `templateVariables` can be used in each `instances` `name`, `description` and `defaultMapping` `node` attributes. `fixedVariables` on each `instances` value can be used to propagate values further down the line into [`instance-template.yaml`](#instance-templateyaml).
 !!!
 
 ### Supported `instances` Attributes

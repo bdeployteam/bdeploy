@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import io.bdeploy.api.product.v1.ProductDescriptor;
 import io.bdeploy.api.schema.v1.PublicSchemaResource.Schema;
@@ -21,9 +23,12 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidat
 import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.ZipHelper;
+import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
+import io.bdeploy.interfaces.configuration.template.TrackingTemplateOverrideResolver;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
@@ -78,9 +83,13 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private List<ProductValidationIssueApi> validateInstanceTemplates(ProductValidationConfigDescriptor desc) {
         return desc.instanceTemplates.stream().map(t -> {
             try {
-                return validateFlatInstanceTemplate(
+                var issues = validateFlatInstanceTemplate(
                         new FlattenedInstanceTemplateConfiguration(t, desc.instanceVariableTemplates, desc.applicationTemplates),
                         desc);
+
+                issues.addAll(validateTemplateVariablesOnInstance(t, desc));
+
+                return issues;
             } catch (Exception e) {
                 return Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                         "Cannot resolve instance template " + t.name + ": " + e.toString()));
@@ -91,13 +100,117 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private List<ProductValidationIssueApi> validateApplicationTemplates(ProductValidationConfigDescriptor desc) {
         return desc.applicationTemplates.stream().map(a -> {
             try {
-                return validateFlatApplicationTemplate(
+                var issues = validateFlatApplicationTemplate(
                         new FlattenedApplicationTemplateConfiguration(a, desc.applicationTemplates, null), desc);
+
+                // need to validate variables directly on the original, as flattening moves/merges variables.
+                issues.addAll(validateTemplateVariablesOnApplication(a));
+
+                return issues;
             } catch (Exception e) {
                 return Collections.singletonList(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
                         "Cannot resolve application template " + a.name + ": " + e.toString()));
             }
         }).flatMap(l -> l.stream()).filter(Objects::nonNull).toList();
+    }
+
+    private Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnInstance(InstanceTemplateDescriptor t,
+            ProductValidationConfigDescriptor desc) {
+        List<ProductValidationIssueApi> result = new ArrayList<>();
+
+        // validate on instanceVariable values, application names and application startParameters
+        TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
+        for (var v : t.instanceVariables) {
+            visitSingleInstanceVariable(v, desc, res);
+        }
+        for (var v : t.instanceVariableDefaults) {
+            if (v.value != null) {
+                TemplateHelper.process(v.value.getPreRenderable(), res, res::canResolve);
+            }
+        }
+
+        for (var group : t.groups) {
+            for (var app : group.applications) {
+                TemplateHelper.process(app.name, res, res::canResolve);
+                for (var p : app.startParameters) {
+                    TemplateHelper.process(p.value, res, res::canResolve);
+                }
+            }
+        }
+
+        // now compare to the list of *defined* variables to find missing and/or too many definitions.
+        Set<String> requested = res.getRequestedVariables();
+        for (var r : requested) {
+            var tv = t.templateVariables.stream().filter(v -> v.id.equals(r)).findAny();
+            if (tv.isEmpty()) {
+                result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Missing definition for used template variable " + r + " in instance template " + t.name));
+            }
+        }
+
+        for (var d : t.templateVariables) {
+            if (!requested.contains(d.id)) {
+                result.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
+                        "Template variable " + d.id + " defined but never used in instance template " + t.name));
+            }
+        }
+
+        return result;
+    }
+
+    private List<ProductValidationIssueApi> visitSingleInstanceVariable(TemplateableVariableConfiguration var,
+            ProductValidationConfigDescriptor desc, TrackingTemplateOverrideResolver res) {
+        List<ProductValidationIssueApi> result = new ArrayList<>();
+
+        if (var.value != null) {
+            TemplateHelper.process(var.value.getPreRenderable(), res, res::canResolve);
+        } else if (var.template != null && !var.template.isBlank()) {
+            // find the template and validate each variable in there recursively.
+            var tpl = desc.instanceVariableTemplates.stream().filter(t -> t.id.equals(var.template)).findFirst();
+            if (!tpl.isPresent()) {
+                result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Cannot find instance variable template with ID " + var.template));
+            } else {
+                for (var tplv : tpl.get().instanceVariables) {
+                    result.addAll(visitSingleInstanceVariable(tplv, desc, res));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private Collection<? extends ProductValidationIssueApi> validateTemplateVariablesOnApplication(
+            ApplicationTemplateDescriptor a) {
+        List<ProductValidationIssueApi> result = new ArrayList<>();
+
+        String tplNiceName = (a.name == null ? ("<anonymous> (" + a.application + ")") : a.name);
+
+        // figure out which variables are requested in the template.
+        TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
+        TemplateHelper.process(a.name, res, res::canResolve);
+        for (var p : a.startParameters) {
+            TemplateHelper.process(p.value, res, res::canResolve);
+        }
+
+        // now compare to the list of *defined* variables to find missing and/or too many definitions.
+        Set<String> requested = res.getRequestedVariables();
+        for (var r : requested) {
+            var tv = a.templateVariables.stream().filter(v -> v.id.equals(r)).findAny();
+            if (tv.isEmpty()) {
+                result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                        "Missing definition for used template variable " + r + " in " + tplNiceName));
+            }
+        }
+
+        for (var d : a.templateVariables) {
+            if (!requested.contains(d.id)) {
+                result.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
+                        "Template variable " + d.id + " defined but never used in " + tplNiceName));
+            }
+        }
+
+        return result;
     }
 
     private List<ProductValidationIssueApi> validateFlatInstanceTemplate(FlattenedInstanceTemplateConfiguration tpl,
@@ -128,9 +241,11 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
             ProductValidationConfigDescriptor descriptor) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
+        String tplNiceName = (tpl.name == null ? ("<anonymous> (" + tpl.application + ")") : tpl.name);
+
         if (!descriptor.applications.containsKey(tpl.application)) {
-            result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR, "Application " + tpl.application
-                    + " not found for application template " + (tpl.name == null ? "<anonymous>" : tpl.name)));
+            result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
+                    "Application " + tpl.application + " not found for application template " + tplNiceName));
         }
 
         return result;
