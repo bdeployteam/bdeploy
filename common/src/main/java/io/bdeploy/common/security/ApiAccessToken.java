@@ -72,12 +72,15 @@ public class ApiAccessToken {
         }
 
         public Builder addPermission(ScopedPermission permission) {
+            if (!permission.isGlobal()) {
+                throw new IllegalArgumentException("Only global permissions are allowed in access tokens");
+            }
             token.c.add(permission);
             return this;
         }
 
         public Builder addPermission(Collection<ScopedPermission> permissions) {
-            token.c.addAll(permissions);
+            permissions.forEach(this::addPermission);
             return this;
         }
 

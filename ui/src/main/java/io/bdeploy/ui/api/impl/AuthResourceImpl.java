@@ -55,7 +55,7 @@ public class AuthResourceImpl implements AuthResource {
     private String doAuthenticate(CredentialsApi cred, boolean pack) {
         UserInfo info = auth.authenticate(cred.user, cred.password);
         if (info != null) {
-            return minion.createToken(cred.user, info.permissions, pack);
+            return minion.createToken(cred.user, info.getGlobalPermissions(), pack);
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
         }
