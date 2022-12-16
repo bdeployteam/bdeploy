@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 import org.junit.jupiter.api.Test;
 
-public class RetryableScopeTest {
+class RetryableScopeTest {
 
     @Test
     void testRetry() {

@@ -13,7 +13,7 @@ public class RetryableScope {
     private final AtomicLong iterationCountMax = new AtomicLong(10);
     private final AtomicLong iterationTimeoutMs = new AtomicLong(100);
 
-    private Consumer<Exception> onException = (e) -> {
+    private Consumer<Exception> onException = e -> {
         log.debug("Retriable scope received exception: ", e);
 
         try {
@@ -76,7 +76,11 @@ public class RetryableScope {
         }
 
         if (!madeIt) {
-            throw lastException;
+            if (lastException != null) {
+                throw lastException;
+            } else {
+                throw new IllegalStateException("Out of retries");
+            }
         }
     }
 
