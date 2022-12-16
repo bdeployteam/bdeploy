@@ -47,7 +47,7 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
       return !event.ctrlKey || 'cxv'.indexOf(event.key.toLowerCase()) === -1;
     });
 
-    this.term.underlying.setOption('fontSize', 12);
+    this.term.underlying.options.fontSize = 12;
 
     this.content$.subscribe((content) => {
       if (this.allowInput) {
