@@ -14,6 +14,7 @@
     ></app-bd-file-drop>
     <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
     <div *ngIf="tempFileError" class="bd-warning-text">{{ tempFileError }}</div>
+    <div *ngIf="tempFileContent">Loaded {{tempFileContent.length}} bytes</div>
   </div>
 </ng-template>
 

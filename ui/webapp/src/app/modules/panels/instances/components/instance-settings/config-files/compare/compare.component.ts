@@ -84,7 +84,11 @@ export class CompareComponent implements DirtyableDialog, OnDestroy {
   public doSave() {
     return of(true).pipe(
       tap(() => {
-        this.cfgFiles.edit(this.file$.value, Base64.encode(this.content));
+        this.cfgFiles.edit(
+          this.file$.value,
+          Base64.encode(this.content),
+          false // cannot be binary, we're editing it.
+        );
         this.content = '';
         this.originalContent = '';
       })

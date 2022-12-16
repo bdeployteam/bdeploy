@@ -2,10 +2,7 @@ import { Injectable } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { FileStatusType } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
-import { DeleteActionComponent } from '../components/instance-settings/config-files/delete-action/delete-action.component';
-import { EditActionComponent } from '../components/instance-settings/config-files/edit-action/edit-action.component';
-import { ProductSyncComponent } from '../components/instance-settings/config-files/product-sync/product-sync.component';
-import { RenameActionComponent } from '../components/instance-settings/config-files/rename-action/rename-action.component';
+import { ConfigFilesActionsComponent } from '../components/instance-settings/config-files/config-files-actions/config-files-actions.component';
 import { ConfigFile, ConfigFilesService } from './config-files.service';
 
 @Injectable({
@@ -30,43 +27,25 @@ export class ConfigFilesColumnsService {
   private readonly colProductState: BdDataColumn<ConfigFile> = {
     id: 'prodState',
     name: 'Sync. State',
-    data: (r) => r,
-    component: ProductSyncComponent,
+    data: (r) => this.getSyncStateText(r),
+    classes: (r) =>
+      this.cfgFiles.getStatus(r) === 'local' ? ['bd-secondary-text'] : [],
     showWhen: '(min-width: 800px)',
   };
 
-  private readonly colDelete: BdDataColumn<ConfigFile> = {
-    id: 'delete',
-    name: 'Delete',
+  private readonly colActions: BdDataColumn<ConfigFile> = {
+    id: 'actions',
+    name: 'Actions',
     data: (r) => r,
-    component: DeleteActionComponent,
-    width: '65px',
-  };
-
-  private readonly colRename: BdDataColumn<ConfigFile> = {
-    id: 'rename',
-    name: 'Rename',
-    data: (r) => r,
-    component: RenameActionComponent,
-    width: '65px',
-    showWhen: '(min-width: 600px)',
-  };
-
-  private readonly colEdit: BdDataColumn<ConfigFile> = {
-    id: 'edit',
-    name: 'Edit',
-    data: (r) => r,
-    component: EditActionComponent,
-    width: '65px',
+    component: ConfigFilesActionsComponent,
+    width: '230px',
   };
 
   public defaultColumns: BdDataColumn<ConfigFile>[] = [
     this.colFileName,
     this.colStatus,
     this.colProductState,
-    this.colDelete,
-    this.colRename,
-    this.colEdit,
+    this.colActions,
   ];
 
   constructor(private cfgFiles: ConfigFilesService) {}
@@ -87,5 +66,18 @@ export class ConfigFilesColumnsService {
       case FileStatusType.DELETE:
         return 'delete';
     }
+  }
+
+  private getSyncStateText(r: ConfigFile) {
+    const s = this.cfgFiles.getStatus(r);
+    switch (s) {
+      case 'local':
+        return 'File not in selected product version.';
+      case 'unsync':
+        return 'File differs from product.';
+      case 'missing':
+        return 'File only in product templates.';
+    }
+    return '';
   }
 }

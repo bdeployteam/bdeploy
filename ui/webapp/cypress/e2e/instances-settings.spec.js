@@ -241,7 +241,7 @@ describe('Instance Settings Tests', () => {
       cy.contains('tr', 'current product version').should('not.exist');
 
       cy.contains('tr', 'dummy2.cfg').within(() => {
-        cy.get('button[data-cy="Delete"]').click();
+        cy.get('button[data-cy="Delete"]').click({ force: true }); // .hidden
       });
 
       cy.contains('app-bd-notification-card', 'Delete dummy2.cfg').within(
@@ -256,7 +256,7 @@ describe('Instance Settings Tests', () => {
 
       cy.contains('tr', 'binary.cfg').within(() => {
         cy.get('button[data-cy="Edit"]').should('be.disabled');
-        cy.get('button[data-cy="Rename"]').click();
+        cy.get('button[data-cy="Rename"]').click({ force: true }); // .hidden
       });
 
       cy.contains('app-bd-notification-card', 'Rename binary.cfg').within(
@@ -313,12 +313,12 @@ describe('Instance Settings Tests', () => {
             cy.get('button[data-cy^="Create from product"]')
               .should('exist')
               .and('be.enabled')
-              .click();
+              .click({ force: true }); // .hidden
           });
       });
 
       cy.contains('tr', 'dummy1.cfg').within(() => {
-        cy.get('button[data-cy="Edit"]').click();
+        cy.get('button[data-cy="Edit"]').click({ force: true }); // .hidden
       });
     });
 
@@ -347,7 +347,7 @@ describe('Instance Settings Tests', () => {
       cy.contains('tr', 'test.json')
         .should('exist')
         .within(() => {
-          cy.get('button[data-cy="Edit"]').click();
+          cy.get('button[data-cy="Edit"]').click({ force: true }); // .hidden
         });
     });
 

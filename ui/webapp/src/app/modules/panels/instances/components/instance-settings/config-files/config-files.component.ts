@@ -40,7 +40,7 @@ export class ConfigFilesComponent implements OnDestroy {
   /* template */ tempFilePath: string;
   /* template */ tempFileError: string;
   /* template */ tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
-  private tempFileContent = '';
+  /* template */ tempFileContent = '';
   private tempFileIsBin = false;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;

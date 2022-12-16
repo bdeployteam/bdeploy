@@ -23,6 +23,14 @@ export interface ConfigFile {
   modification: FileStatusDto;
 }
 
+export type ConfigFileStatusType =
+  | 'new'
+  | 'modified'
+  | 'local'
+  | 'sync'
+  | 'unsync'
+  | 'missing';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -188,7 +196,7 @@ export class ConfigFilesService {
     delete this.moveCache[path];
   }
 
-  public edit(path: string, content: string) {
+  public edit(path: string, content: string, binary: boolean) {
     // find any existing modification and remove it.
     const mod = this.editSvc.state$.value.files?.find((m) => m.file === path);
     if (mod) {
@@ -207,6 +215,7 @@ export class ConfigFilesService {
           : FileStatusType.EDIT,
     };
 
+    this.binCache[path] = binary;
     this.editSvc.state$.value.files.push(edit);
     this.editSvc.conceal(`Edit file: ${path}`);
   }
@@ -245,6 +254,12 @@ export class ConfigFilesService {
   }
 
   public isText(f: ConfigFile) {
+    const path = this.getPath(f);
+
+    if (this.binCache[path] !== undefined) {
+      return !this.binCache[path];
+    }
+
     if (f.persistent?.isText) {
       return true;
     }
@@ -253,12 +268,6 @@ export class ConfigFilesService {
       if (!f.modification?.content) {
         return true; // literally no content, empty file -> text.
       }
-
-      const path = this.getPath(f);
-
-      if (this.binCache[path] !== undefined) {
-        return !this.binCache[path];
-      }
     }
 
     return false;
@@ -266,5 +275,37 @@ export class ConfigFilesService {
 
   public isMoved(f: ConfigFile) {
     return !!this.moveCache[this.getPath(f)];
+  }
+
+  public getStatus(file: ConfigFile): ConfigFileStatusType {
+    if (!file.persistent) {
+      return 'new';
+    }
+
+    if (
+      !file.persistent?.instanceId &&
+      !!file.persistent?.productId &&
+      !!file.modification?.file
+    ) {
+      return 'new';
+    }
+
+    if (file.modification?.file) {
+      return 'modified';
+    }
+
+    if (file.persistent.instanceId) {
+      if (!file.persistent.productId) {
+        return 'local';
+      }
+
+      if (file.persistent.instanceId.id === file.persistent.productId.id) {
+        return 'sync';
+      } else {
+        return 'unsync';
+      }
+    } else {
+      return 'missing';
+    }
   }
 }

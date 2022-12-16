@@ -1,8 +1,0 @@
-<div class="flex justify-start items-center">
-  <app-bd-button
-    text="Delete"
-    icon="delete"
-    (click)="onDelete()"
-    [disabled]="!!record.persistent && !record.persistent.instanceId && !record.modification?.file"
-  ></app-bd-button>
-</div>

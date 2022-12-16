@@ -47,12 +47,9 @@ import { BannerComponent } from './components/instance-settings/banner/banner.co
 import { ColorSelectGroupComponent } from './components/instance-settings/banner/color-select-group/color-select-group.component';
 import { ColorSelectComponent } from './components/instance-settings/banner/color-select/color-select.component';
 import { CompareComponent } from './components/instance-settings/config-files/compare/compare.component';
+import { ConfigFilesActionsComponent } from './components/instance-settings/config-files/config-files-actions/config-files-actions.component';
 import { ConfigFilesComponent } from './components/instance-settings/config-files/config-files.component';
-import { DeleteActionComponent } from './components/instance-settings/config-files/delete-action/delete-action.component';
-import { EditActionComponent } from './components/instance-settings/config-files/edit-action/edit-action.component';
 import { EditorComponent } from './components/instance-settings/config-files/editor/editor.component';
-import { ProductSyncComponent } from './components/instance-settings/config-files/product-sync/product-sync.component';
-import { RenameActionComponent } from './components/instance-settings/config-files/rename-action/rename-action.component';
 import { EditConfigComponent } from './components/instance-settings/edit-config/edit-config.component';
 import { ImportInstanceComponent } from './components/instance-settings/import-instance/import-instance.component';
 import { InstanceSettingsComponent } from './components/instance-settings/instance-settings.component';
@@ -130,11 +127,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     ProductUpdateComponent,
     UpdateActionComponent,
     ConfigFilesComponent,
-    DeleteActionComponent,
-    EditActionComponent,
     EditorComponent,
-    RenameActionComponent,
-    ProductSyncComponent,
     CompareComponent,
     DataFileViewerComponent,
     PortsComponent,
@@ -159,6 +152,7 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     VariableDescCardComponent,
     AllowedValuesValidatorDirective,
     SystemOnServerValidatorDirective,
+    ConfigFilesActionsComponent,
   ],
   imports: [
     CommonModule,

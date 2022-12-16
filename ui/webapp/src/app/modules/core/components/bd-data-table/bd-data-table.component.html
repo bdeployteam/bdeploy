@@ -33,7 +33,7 @@
         [routerLinkActive]="!!row.node.item ? 'mat-row-route-active' : []"
         [class.cursor-pointer]="!!row.node.item"
         [class.cursor-auto]="!row.node.item"
-        class="local-row"
+        class="local-row group"
         cdkDrag
       ></tr>
     </ng-container>
@@ -46,6 +46,7 @@
         (click)="!checkMode && row.node.item ? recordClick.emit(row.node.item) : undefined"
         [class.cursor-pointer]="!!row.node.item"
         [class.cursor-auto]="!row.node.item"
+        class="group"
         cdkDrag
       ></tr>
     </ng-container>
