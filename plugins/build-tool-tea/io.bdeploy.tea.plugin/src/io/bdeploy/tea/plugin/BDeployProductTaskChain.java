@@ -80,7 +80,7 @@ public class BDeployProductTaskChain implements TaskChain {
     private BDeployTargetSpec target;
     private BDeployTargetSpec source;
     private boolean cleanup;
-    private boolean validate;
+    private boolean validate = true;
 
     @TaskChainUiInit
     public void uiInit(Shell parent, BDeployConfig cfg, TaskingLog log, BuildDirectories dirs, TeaBuildVersionService bvs)
@@ -303,7 +303,17 @@ public class BDeployProductTaskChain implements TaskChain {
                 throw new IllegalStateException("Validation YAML does not exist: " + validationYaml);
             }
 
-            c.addTask(new BDeployValidateProductTask(target == null ? source : target, validationYaml));
+            BDeployTargetSpec server = target == null ? source : target;
+            if (server == null) {
+                // headless builds use the config to specify the server. either target/source or this must
+                // be set otherwise we failed earlier. the validation code only needs the uri and token
+                // to contact the server.
+                server = new BDeployTargetSpec();
+                server.uri = cfg.bdeployServer;
+                server.token = cfg.bdeployServerToken;
+            }
+
+            c.addTask(new BDeployValidateProductTask(server, validationYaml));
         }
 
         TaskInitJarCache cache = new TaskInitJarCache(dirs.getNewCacheDirectory("jar"));
