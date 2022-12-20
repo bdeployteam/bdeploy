@@ -395,6 +395,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             bind(JerseyBroadcastingActivityReporter.class).in(Singleton.class).to(JerseyBroadcastingActivityReporter.class);
             bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);
             bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
+            bind(JerseyRequestContext.class).in(Singleton.class).to(JerseyRequestContext.class);
             bind(FileSystemSpaceService.class).in(Singleton.class).to(FileSystemSpaceService.class);
 
             bind(startTime).named(START_TIME).to(Instant.class);
