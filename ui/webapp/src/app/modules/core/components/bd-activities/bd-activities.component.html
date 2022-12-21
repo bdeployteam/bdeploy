@@ -41,6 +41,9 @@
         <div class="flex -mt-2">
           <div class="flex-auto"></div>
           <div class="bd-hint-text">
+            <app-bd-activity-instance-footer
+              [scope]="squashed.parent.snapshot.scope"
+            ></app-bd-activity-instance-footer>
             {{ squashed.current.snapshot.uuid }}, ~{{
             squashed.current.snapshot.user }}.
           </div>

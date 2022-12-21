@@ -39,6 +39,7 @@ import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.component';
 import { BdActivitiesComponent } from './components/bd-activities/bd-activities.component';
+import { BdActivityInstanceFooterComponent } from './components/bd-activity-instance-footer/bd-activity-instance-footer.component';
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
@@ -177,6 +178,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdEditorComponent,
     BdEditorDiffComponent,
     BdActivitiesComponent,
+    BdActivityInstanceFooterComponent,
     BdDataUserAvatarCellComponent,
     BdFormSelectComponentOptionComponent,
     BdDataPermissionLevelCellComponent,
