@@ -4,7 +4,7 @@
   (expandedChange)="expandedChange.emit($event)"
   togglePosition="before"
 >
-  <mat-expansion-panel-header>
+  <mat-expansion-panel-header *ngIf="(group$ | async) as group">
     <mat-panel-title>
       <div class="flex-auto flex justify-start items-center gap-1">
         <div class="local-padding local-header flex-auto flex flex-col">
