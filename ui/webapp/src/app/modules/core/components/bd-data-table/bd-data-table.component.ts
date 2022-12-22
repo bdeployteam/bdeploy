@@ -380,13 +380,10 @@ export class BdDataTableComponent<T>
     // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
     this.hasMoreData = false;
     this.dataSource.data = this.generateModel(
-      this.searchData(
-        this.search,
-        this.records ? [...this.records] : [],
-        this._columns
-      ),
+      this.records ? [...this.records] : [],
       this.grouping,
-      this.sort
+      this.sort,
+      false
     );
 
     if (this.expandGroups) {
@@ -439,7 +436,8 @@ export class BdDataTableComponent<T>
   private generateModel(
     data: T[],
     grouping: BdDataGrouping<T>[],
-    sort: Sort
+    sort: Sort,
+    skipSearch: boolean
   ): Node<T>[] {
     // if there is grouping to be applied, apply the top-most level now, and recurse.
     if (!!grouping && grouping.length > 0) {
@@ -475,7 +473,15 @@ export class BdDataTableComponent<T>
       // create nodes for groups, recurse grouping.
       const result: Node<T>[] = [];
       for (const [key, value] of byGroupSorted) {
-        const children = this.generateModel(value, grouping.slice(1), sort);
+        const searchMatchesGroup =
+          this.search?.length > 0 &&
+          key.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
+        const children = this.generateModel(
+          value,
+          grouping.slice(1),
+          sort,
+          skipSearch || searchMatchesGroup
+        );
         if (children?.length) {
           result.push({
             nodeId: key,
@@ -489,15 +495,17 @@ export class BdDataTableComponent<T>
     }
 
     // There is no grouping left, so we can now create the nodes for the actual data records.
-    // The only thing left to do here is to apply the current sorting if given. Otherwise
+    // The only thing left to do here is to apply the current searching/sorting if given. Otherwise
     // data is presented in the given order.
-    let sortedData = data;
+    let sortedData = skipSearch
+      ? data
+      : this.searchData(this.search, data, this._columns);
     if (!!this.sortData && !!sort && !!sort.active && !!sort.direction) {
       const col = this._columns.find((c) => c.id === sort.active);
       if (!col) {
         console.error('Cannot find active sort column ' + sort.active);
       } else {
-        sortedData = this.sortData(data, col, sort.direction);
+        sortedData = this.sortData(sortedData, col, sort.direction);
       }
     }
 
