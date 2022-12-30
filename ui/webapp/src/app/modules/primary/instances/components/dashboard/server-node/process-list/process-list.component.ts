@@ -6,14 +6,20 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, filter, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   InstanceNodeConfigurationDto,
+  InstanceNodeConfigurationListDto,
+  ParameterConfiguration,
 } from 'src/app/models/gen.dtos';
 import { BdDataDisplayComponent } from 'src/app/modules/core/components/bd-data-display/bd-data-display.component';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
+import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
+import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
+import { InstanceEditService } from '../../../../services/instance-edit.service';
+import { InstancesService } from '../../../../services/instances.service';
 import { ProcessesBulkService } from '../../../../services/processes-bulk.service';
 import { ProcessesColumnsService } from '../../../../services/processes-columns.service';
 import { PortsService } from './../../../../services/ports.service';
@@ -21,6 +27,7 @@ import { PortsService } from './../../../../services/ports.service';
 @Component({
   selector: 'app-node-process-list',
   templateUrl: './process-list.component.html',
+  styleUrls: ['./process-list.component.css'],
 })
 export class NodeProcessListComponent
   implements OnInit, AfterViewInit, OnDestroy
@@ -56,18 +63,25 @@ export class NodeProcessListComponent
   @ViewChild(BdDataDisplayComponent)
   private data: BdDataDisplayComponent<ApplicationConfiguration>;
   private subscription: Subscription;
+  private nodes: InstanceNodeConfigurationListDto;
 
   constructor(
     private appCols: ProcessesColumnsService,
     private cardViewService: CardViewService,
     public bulk: ProcessesBulkService,
-    private ports: PortsService
+    private ports: PortsService,
+    private instances: InstancesService,
+    private edit: InstanceEditService,
+    private systems: SystemsService
   ) {
     this.columns.splice(2, 0, this.processCtrlGroupColumn);
   }
 
   ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
+    this.instances.activeNodeCfgs$
+      .pipe(filter((i) => !!i))
+      .subscribe((nodes) => (this.nodes = nodes));
   }
 
   ngAfterViewInit(): void {
@@ -85,5 +99,39 @@ export class NodeProcessListComponent
     return this.node.nodeConfiguration.controlGroups.find((cg) =>
       cg.processOrder.includes(row.id)
     )?.name;
+  }
+
+  getPinnedParameters(
+    record: ApplicationConfiguration
+  ): { name: string; value: string }[] {
+    const app = this.nodes?.applications?.find(
+      (a) =>
+        a.key.name === record.application?.name &&
+        a.key.tag === record.application?.tag
+    );
+    const params = app?.descriptor?.startCommand?.parameters;
+    return record.start.parameters
+      .filter((p) => p.pinned)
+      .map((p) => ({
+        name: params?.find((x) => x.id === p.id)?.name,
+        value: this.getPinnedParameterValue(record, p),
+      }));
+  }
+
+  getPinnedParameterValue(
+    record: ApplicationConfiguration,
+    p: ParameterConfiguration
+  ) {
+    const system = this.edit.state$?.value?.config?.config?.system
+      ? this.systems.systems$.value?.find(
+          (s) => s.key.name === this.edit.state$.value.config.config.system.name
+        )
+      : null;
+    return getRenderPreview(
+      p.value,
+      record,
+      this.edit.state$.value?.config,
+      system?.config
+    );
   }
 }

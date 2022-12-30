@@ -1,5 +1,6 @@
 import {
   Component,
+  ContentChild,
   EventEmitter,
   Input,
   OnChanges,
@@ -7,6 +8,7 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  TemplateRef,
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -123,6 +125,9 @@ export class BdDataGridComponent<T>
   private activeGroup: string;
 
   private subscription: Subscription;
+
+  @ContentChild('dataGridExtraCardContent')
+  dataGridExtraCardContent: TemplateRef<any>;
 
   constructor(
     private searchService: SearchService,

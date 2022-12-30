@@ -1,0 +1,8 @@
+.pinned-parameter {
+  display: flex;
+  font-size: 0.9em;
+}
+.pinned-parameters-list {
+  position: absolute;
+  bottom: 3px;
+}

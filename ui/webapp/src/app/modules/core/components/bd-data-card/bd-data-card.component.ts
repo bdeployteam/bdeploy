@@ -1,11 +1,13 @@
 import {
   Component,
+  ContentChild,
   EventEmitter,
   Input,
   OnChanges,
   OnInit,
   Output,
   SimpleChanges,
+  TemplateRef,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
@@ -51,6 +53,8 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
   colFooter: BdDataColumn<T>;
 
   avatar: string;
+
+  @ContentChild('extraCardContent') extraCardContent: TemplateRef<any>;
 
   constructor(private sanitizer: DomSanitizer) {}
 

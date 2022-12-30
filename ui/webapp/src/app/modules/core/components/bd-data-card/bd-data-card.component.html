@@ -155,6 +155,9 @@
   *ngIf="!recordRoute"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
+  <ng-container
+    *ngTemplateOutlet="extraCardContent; context: { record }"
+  ></ng-container>
 </mat-card>
 
 <mat-card
@@ -166,4 +169,7 @@
   class="local-route-card flex-auto cursor-pointer flex flex-col p-2.5"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
+  <ng-container
+    *ngTemplateOutlet="extraCardContent; context: { record }"
+  ></ng-container>
 </mat-card>
