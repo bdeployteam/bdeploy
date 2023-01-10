@@ -149,6 +149,7 @@
 
 <mat-card
   appearance="outlined"
+  [class.local-card-selected]="isSelected"
   class="flex-auto cursor-pointer flex flex-col p-2.5"
   (click)="recordClick.emit(record)"
   *ngIf="!recordRoute"
@@ -161,6 +162,7 @@
   *ngIf="!!recordRoute"
   [routerLink]="recordRoute(record)"
   routerLinkActive="mat-card-route-active"
+  [class.local-card-selected]="isSelected"
   class="local-route-card flex-auto cursor-pointer flex flex-col p-2.5"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>

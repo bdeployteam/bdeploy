@@ -32,6 +32,11 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
   @Input() recordRoute: (r: T) => any[];
 
   /**
+   * A flag that denotes whether a card was selected in bulk mode
+   */
+  @Input() isSelected = false;
+
+  /**
    * Event fired if a record is clicked.
    */
   @Output() recordClick = new EventEmitter<T>();

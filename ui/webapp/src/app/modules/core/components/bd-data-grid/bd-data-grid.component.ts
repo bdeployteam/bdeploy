@@ -94,9 +94,24 @@ export class BdDataGridComponent<T>
   @Input() records: T[];
 
   /**
+   * Whether the table should operate in checkbox-selection mode. Click events are not sent in this case.
+   */
+  @Input() checkMode = false;
+
+  /**
+   * Elements which should be checked.
+   */
+  @Input() checked: T[] = [];
+
+  /**
    * A callback which can provide a route for each row. If given, each row will behave like a router link
    */
   @Input() recordRoute: (r: T) => any[];
+
+  /**
+   * Fires when the user changes the checked elements
+   */
+  @Output() checkedChange = new EventEmitter<T[]>();
 
   /**
    * Event fired if a record is clicked.
@@ -133,6 +148,24 @@ export class BdDataGridComponent<T>
   /* template */ onTabChange(event) {
     this.activeGroup = event.tab?.textLabel;
     this.calculateRecordsToDisplay();
+  }
+
+  /* template */ onRecordClick(event: T) {
+    this.recordClick.emit(event);
+
+    if (!this.checkMode) return;
+
+    const isChecked = this.checked.some((record) => record === event);
+
+    const next = isChecked
+      ? this.checked.filter((record) => record !== event)
+      : [...this.checked, event];
+
+    this.checkedChange.emit(next);
+  }
+
+  /* template */ isSelected(record: T): boolean {
+    return this.checkMode && this.checked.some((r) => r === record);
   }
 
   private populateRecords(): void {

@@ -34,7 +34,7 @@
       text="Bulk Manipulation"
       [route]="['panels', 'instances', 'bulk-manip']"
       tooltip="below"
-      [disabled]="!(authService.isCurrentScopeWrite$ | async) || isCardView"
+      [disabled]="!(authService.isCurrentScopeWrite$ | async)"
     ></app-bd-panel-button>
     <app-bd-button
       svgIcon="sync-all"

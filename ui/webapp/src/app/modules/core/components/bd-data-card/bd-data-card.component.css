@@ -13,3 +13,7 @@
 
   padding: 5px 10px;
 }
+
+.local-card-selected {
+  border: 1px solid var(--bd-accent);
+}
