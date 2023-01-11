@@ -18,7 +18,6 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.history.runtime.MasterRuntimeHistoryDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
-import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -176,14 +175,6 @@ public interface MasterNamedResource {
     @Path("/client-start")
     public void logClientStart(@QueryParam("u") String instanceId, @QueryParam("a") String application,
             @QueryParam("h") String hostname);
-
-    /**
-     * @param instanceId the instance ID
-     * @return the usage data for client application associated with the given instance.
-     */
-    @GET
-    @Path("/client-usage")
-    public ClientUsageData getClientUsage(@QueryParam("u") String instanceId);
 
     /**
      * Starts all applications of the given instance having the start type

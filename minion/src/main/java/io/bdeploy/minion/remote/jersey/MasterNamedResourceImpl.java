@@ -842,11 +842,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     }
 
     @Override
-    public ClientUsageData getClientUsage(String instanceId) {
-        return InstanceManifest.load(hive, instanceId, null).getClientUsage(hive).read();
-    }
-
-    @Override
     public void start(String instanceId) {
         InstanceStatusDto status = getStatus(instanceId);
 

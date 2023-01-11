@@ -1247,9 +1247,9 @@ public class InstanceResourceImpl implements InstanceResource {
         if (im == null) {
             throw new WebApplicationException("Cannot load " + instanceId, Status.NOT_FOUND);
         }
-        RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
-        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        return root.getNamedMaster(group).getClientUsage(instanceId);
+
+        // locally - we either have it or the last sync gave it to us.
+        return im.getClientUsage(hive).read();
     }
 
     @Override
