@@ -126,8 +126,8 @@ export class BdDataGridComponent<T>
 
   private subscription: Subscription;
 
-  @ContentChild('dataGridExtraCardContent')
-  dataGridExtraCardContent: TemplateRef<any>;
+  @ContentChild('dataGridExtraCardDetails')
+  dataGridExtraCardDetails: TemplateRef<any>;
 
   constructor(
     private searchService: SearchService,

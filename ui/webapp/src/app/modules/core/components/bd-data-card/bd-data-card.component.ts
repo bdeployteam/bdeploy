@@ -54,7 +54,7 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
 
   avatar: string;
 
-  @ContentChild('extraCardContent') extraCardContent: TemplateRef<any>;
+  @ContentChild('extraCardDetails') extraCardDetails: TemplateRef<any>;
 
   constructor(private sanitizer: DomSanitizer) {}
 

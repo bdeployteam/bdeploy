@@ -27,7 +27,6 @@ import { PortsService } from './../../../../services/ports.service';
 @Component({
   selector: 'app-node-process-list',
   templateUrl: './process-list.component.html',
-  styleUrls: ['./process-list.component.css'],
 })
 export class NodeProcessListComponent
   implements OnInit, AfterViewInit, OnDestroy

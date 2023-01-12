@@ -33,9 +33,9 @@
   (checkedChange)="checkedChange.emit($event)"
   (recordClick)="recordClick.emit($event)"
 >
-  <ng-template #dataGridExtraCardContent let-record="record">
+  <ng-template #dataGridExtraCardDetails let-record="record">
     <ng-container
-      *ngTemplateOutlet="dataDisplayExtraCardContent; context: { record }"
+      *ngTemplateOutlet="dataDisplayExtraCardDetails; context: { record }"
     >
     </ng-container>
   </ng-template>
