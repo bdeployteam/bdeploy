@@ -29,6 +29,12 @@
       [recordRoute]="!checkMode ? recordRoute : undefined"
       (recordClick)="onRecordClick($event)"
     >
+      <ng-template #extraCardContent let-record="record">
+        <ng-container
+          *ngTemplateOutlet="dataGridExtraCardContent; context: { record }"
+        >
+        </ng-container>
+      </ng-template>
     </app-bd-data-card>
   </div>
   <div

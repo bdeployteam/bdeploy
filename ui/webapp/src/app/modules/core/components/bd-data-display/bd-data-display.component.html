@@ -32,6 +32,13 @@
   [recordRoute]="recordRoute"
   (checkedChange)="checkedChange.emit($event)"
   (recordClick)="recordClick.emit($event)"
-></app-bd-data-grid>
+>
+  <ng-template #dataGridExtraCardContent let-record="record">
+    <ng-container
+      *ngTemplateOutlet="dataDisplayExtraCardContent; context: { record }"
+    >
+    </ng-container>
+  </ng-template>
+</app-bd-data-grid>
 
 <ng-content *ngIf="!records?.length"></ng-content>
