@@ -27,6 +27,7 @@ import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.jersey.JerseyRequestContext;
 import io.bdeploy.jersey.JerseyScopeService;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
@@ -44,6 +45,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
 
     /** Needs to be in line with ObjectChangeType for the Web UI */
     public static final String OCT_ACTIVIES = "ACTIVITIES";
+    private static final String CURRENT_ACTIVITY = "CURRENT_ACTIVITY";
 
     private static final Logger log = LoggerFactory.getLogger(JerseyBroadcastingActivityReporter.class);
 
@@ -53,7 +55,6 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
      * registered as singleton in ANOTHER locator...
      */
     private static final List<JerseyRemoteActivity> globalActivities = new CopyOnWriteArrayList<>();
-    private static final ThreadLocal<JerseyRemoteActivity> currentActivity = new ThreadLocal<>();
     private static final Set<ObjectScope> activeScopes = new TreeSet<>();
 
     @Inject
@@ -62,6 +63,9 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
     @Inject
     @Optional
     private ObjectChangeBroadcaster bc;
+
+    @Inject
+    private JerseyRequestContext reqCtx;
 
     @Inject
     public JerseyBroadcastingActivityReporter(@Named(JerseyServer.BROADCAST_EXECUTOR) ScheduledExecutorService scheduler) {
@@ -180,7 +184,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         // wire activities by UUID. this is done so that serialization of activity "trees" stays
         // as flat as it is - otherwise too much traffic to clients would be produced. Clients
         // need to convert the flat list of activities to a tree representation when interested.
-        JerseyRemoteActivity parent = currentActivity.get();
+        JerseyRemoteActivity parent = getCurrentActivity();
         String parentUuid = null;
         if (parent != null) {
             parentUuid = parent.getUuid();
@@ -193,7 +197,7 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
             log.trace("Begin: [{}] {}", act.getUuid(), activity);
         }
 
-        currentActivity.set(act);
+        setCurrentActivity(act);
         globalActivities.add(act);
         return act;
     }
@@ -203,19 +207,19 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
             return; // already done.
         }
 
-        JerseyRemoteActivity current = currentActivity.get();
+        JerseyRemoteActivity current = getCurrentActivity();
         if (current != null && current.getUuid().equals(act.getUuid())) {
             // current is the one we're finishing
             if (act.getParentUuid() != null) {
                 JerseyRemoteActivity parent = getActivityById(act.getParentUuid());
                 if (parent != null) {
-                    currentActivity.set(parent);
+                    setCurrentActivity(parent);
                 } else {
                     log.warn("Parent activity no longer available: {} for {}", act.getParentUuid(), act);
                 }
             } else {
                 // no parent set - we are top-level.
-                currentActivity.remove();
+                resetCurrentActivity();
             }
         } else if (current != null) {
             // we're finishing something which is not current -> warn & ignore
@@ -251,11 +255,15 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
      * @return the current activity on the calling thread.
      */
     JerseyRemoteActivity getCurrentActivity() {
-        return currentActivity.get();
+        return (JerseyRemoteActivity) reqCtx.getProperty(CURRENT_ACTIVITY);
+    }
+
+    void setCurrentActivity(JerseyRemoteActivity act) {
+        reqCtx.setProperty(CURRENT_ACTIVITY, act);
     }
 
     void resetCurrentActivity() {
-        currentActivity.remove();
+        reqCtx.removeProperty(CURRENT_ACTIVITY);
     }
 
     JerseyRemoteActivity getActivityById(String uuid) {
