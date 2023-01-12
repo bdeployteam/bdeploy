@@ -29,9 +29,9 @@
       [recordRoute]="!checkMode ? recordRoute : undefined"
       (recordClick)="onRecordClick($event)"
     >
-      <ng-template #extraCardContent let-record="record">
+      <ng-template #extraCardDetails let-record="record">
         <ng-container
-          *ngTemplateOutlet="dataGridExtraCardContent; context: { record }"
+          *ngTemplateOutlet="dataGridExtraCardDetails; context: { record }"
         >
         </ng-container>
       </ng-template>

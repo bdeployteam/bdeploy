@@ -138,8 +138,8 @@ export class BdDataDisplayComponent<T> {
 
   @ViewChild('table', { static: false }) tableComp: BdDataTableComponent<T>;
   @ViewChild('grid', { static: false }) gridComp: BdDataGridComponent<T>;
-  @ContentChild('dataDisplayExtraCardContent')
-  dataDisplayExtraCardContent: TemplateRef<any>;
+  @ContentChild('dataDisplayExtraCardDetails')
+  dataDisplayExtraCardDetails: TemplateRef<any>;
 
   constructor(private cardViewService: CardViewService) {}
 

@@ -70,13 +70,13 @@
   </div>
   <div
     class="local-card-actions flex-auto flex gap-1"
-    *ngIf="!!colActions?.length || !!colDetails?.length || !!colAvatar"
+    *ngIf="!!colActions?.length || !!colDetails?.length || !!colAvatar || !!extraCardDetails"
     [style.backgroundImage]="getImageUrl()"
     [style.backgroundBlendMode]="!!colActions?.length || !!colDetails?.length ? 'overlay' : undefined"
   >
     <div class="grow basis-0 flex items-center">
       <div
-        *ngIf="!!colDetails?.length"
+        *ngIf="!!colDetails?.length || !!extraCardDetails"
         class="text-xs grid grid-cols-[16px_auto] items-center gap-0.5"
       >
         <ng-container *ngFor="let detail of colDetails">
@@ -100,6 +100,9 @@
             </div>
           </ng-container>
         </ng-container>
+        <ng-container
+          *ngTemplateOutlet="extraCardDetails; context: { record }"
+        ></ng-container>
       </div>
     </div>
 
@@ -156,7 +159,7 @@
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
   <ng-container
-    *ngTemplateOutlet="extraCardContent; context: { record }"
+    *ngTemplateOutlet="extraCardDetails; context: { record }"
   ></ng-container>
 </mat-card>
 
@@ -169,7 +172,4 @@
   class="local-route-card flex-auto cursor-pointer flex flex-col p-2.5"
 >
   <ng-container *ngTemplateOutlet="cardContents"></ng-container>
-  <ng-container
-    *ngTemplateOutlet="extraCardContent; context: { record }"
-  ></ng-container>
 </mat-card>

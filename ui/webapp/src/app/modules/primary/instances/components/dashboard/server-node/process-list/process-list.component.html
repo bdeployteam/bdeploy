@@ -11,15 +11,10 @@
   [checked]="(bulk.selection$ | async)[node.nodeName] || []"
   (checkedChange)="bulk.update(node.nodeName, $event)"
 >
-  <ng-template #dataDisplayExtraCardContent let-record="record">
-    <div class="pinned-parameters-list">
-      <div
-        *ngFor="let param of getPinnedParameters(record)"
-        class="pinned-parameter"
-      >
-        <mat-icon [inline]="true">push_pin</mat-icon>
-        {{ param.name }} = {{ param.value }}
-      </div>
-    </div>
+  <ng-template #dataDisplayExtraCardDetails let-record="record">
+    <ng-container *ngFor="let param of getPinnedParameters(record)">
+      <mat-icon class="bd-small-icon">push_pin</mat-icon>
+      <span class="truncate">{{ param.name }} = {{ param.value }}</span>
+    </ng-container>
   </ng-template>
 </app-bd-data-display>
