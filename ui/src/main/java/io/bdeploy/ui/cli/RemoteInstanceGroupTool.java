@@ -46,7 +46,7 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         @Help("Instance Group display name to be set on creation.")
         String title();
 
-        @Help("Description of the customer")
+        @Help("Description of the instance group")
         String description();
 
         @Help("Path to an icon file.")
@@ -58,6 +58,9 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
 
         @Help(value = "List existing instance groups on the remote", arg = false)
         boolean list() default false;
+
+        @Help(value = "Automatically cleanup old/unused product versions")
+        boolean autoCleanup() default true;
     }
 
     public RemoteInstanceGroupTool() {
@@ -69,8 +72,6 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
         InstanceGroupResource client = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext());
 
         if (config.create() != null) {
-            helpAndFailIfMissing(config.description(), "Missing description");
-
             Path iconPath = null;
             if (config.icon() != null && !config.icon().isBlank()) {
                 iconPath = Paths.get(config.icon());
@@ -83,6 +84,7 @@ public class RemoteInstanceGroupTool extends RemoteServiceTool<RemoteInstanceGro
             desc.name = config.create();
             desc.description = config.description();
             desc.title = config.title();
+            desc.autoDelete = config.autoCleanup();
 
             if (desc.title == null) {
                 // fallback - make sure a title is set.
