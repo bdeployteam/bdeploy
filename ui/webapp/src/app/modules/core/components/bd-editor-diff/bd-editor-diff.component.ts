@@ -70,12 +70,13 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     const model = {
       original: this.globalMonaco.editor.createModel(
         this.originalContent,
-        undefined
+        undefined,
+        this.globalMonaco.Uri.parse(`a/${this.path}`)
       ),
       modified: this.globalMonaco.editor.createModel(
         this.modifiedContent,
         undefined,
-        this.globalMonaco.Uri.parse(this.path)
+        this.globalMonaco.Uri.parse(`b/${this.path}`)
       ),
     };
     this.monaco.setModel(model);
