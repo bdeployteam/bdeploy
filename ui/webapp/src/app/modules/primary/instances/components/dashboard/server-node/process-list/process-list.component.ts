@@ -24,6 +24,11 @@ import { ProcessesBulkService } from '../../../../services/processes-bulk.servic
 import { ProcessesColumnsService } from '../../../../services/processes-columns.service';
 import { PortsService } from './../../../../services/ports.service';
 
+interface PinnedParameter {
+  name: string;
+  value: string;
+}
+
 @Component({
   selector: 'app-node-process-list',
   templateUrl: './process-list.component.html',
@@ -100,9 +105,9 @@ export class NodeProcessListComponent
     )?.name;
   }
 
-  getPinnedParameters(
+  /* template */ getPinnedParameters(
     record: ApplicationConfiguration
-  ): { name: string; value: string }[] {
+  ): PinnedParameter[] {
     const app = this.nodes?.applications?.find(
       (a) =>
         a.key.name === record.application?.name &&
@@ -120,7 +125,7 @@ export class NodeProcessListComponent
   getPinnedParameterValue(
     record: ApplicationConfiguration,
     p: ParameterConfiguration
-  ) {
+  ): string {
     const system = this.edit.state$?.value?.config?.config?.system
       ? this.systems.systems$.value?.find(
           (s) => s.key.name === this.edit.state$.value.config.config.system.name
@@ -132,5 +137,9 @@ export class NodeProcessListComponent
       this.edit.state$.value?.config,
       system?.config
     );
+  }
+
+  /* template */ doTrack(index: number, param: PinnedParameter) {
+    return param.name;
   }
 }
