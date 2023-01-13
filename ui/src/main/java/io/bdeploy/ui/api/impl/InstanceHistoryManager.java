@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.ManifestListOperation;
@@ -35,6 +38,8 @@ import io.bdeploy.ui.dto.HistoryResultDto;
 import jakarta.ws.rs.core.SecurityContext;
 
 public class InstanceHistoryManager {
+
+    private static final Logger log = LoggerFactory.getLogger(InstanceHistoryManager.class);
 
     private final BHive hive;
     private final AuthService auth;
@@ -124,7 +129,19 @@ public class InstanceHistoryManager {
         RemoteService svc = mp.getControllingMaster(hive, InstanceManifest.load(hive, instanceId, null).getManifest());
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         MasterNamedResource namedMaster = master.getNamedMaster(group);
-        return namedMaster.getRuntimeHistory(instanceId);
+
+        try {
+            return namedMaster.getRuntimeHistory(instanceId);
+        } catch (Exception e) {
+            var r = new MasterRuntimeHistoryDto();
+            r.addError("master", "Cannot contact master: " + e.toString());
+
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot contact master:", e);
+            }
+
+            return r;
+        }
     }
 
     private List<HistoryEntryDto> getRuntimeHistory(MasterRuntimeHistoryDto history, String tag) {

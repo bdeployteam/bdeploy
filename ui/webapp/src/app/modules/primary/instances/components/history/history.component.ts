@@ -24,6 +24,7 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
   /* template */ showCreate$ = new BehaviorSubject<boolean>(true);
   /* template */ showDeploy$ = new BehaviorSubject<boolean>(false);
   /* template */ showRuntime$ = new BehaviorSubject<boolean>(false);
+  /* template */ runtimeLocked$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
   /* template */ public isCentral = false;
@@ -65,6 +66,19 @@ export class HistoryComponent implements OnInit, BdSearchable, OnDestroy {
         showRuntimeEvents: runtime,
       });
     });
+
+    // runtime events rely on live data from the server which is not allowed if not synchronized.
+    this.subscription.add(
+      combineLatest([
+        this.servers.isCurrentInstanceSynchronized$,
+        this.showRuntime$,
+      ]).subscribe(([sync, show]) => {
+        if (!sync && show) {
+          this.showRuntime$.next(false);
+        }
+        this.runtimeLocked$.next(!sync);
+      })
+    );
 
     this.subscription.add(this.search.register(this));
     this.subscription.add(
