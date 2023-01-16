@@ -7,6 +7,7 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationDescriptorApi;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateDescriptor;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.descriptor.template.InstanceVariableTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.ParameterTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.SystemTemplateDescriptor;
@@ -21,7 +22,8 @@ enum InternalSchema {
     PARAMETER_TEMPLATE(Schema.parameterTemplateYaml, ParameterTemplateDescriptor.class),
     INSTANCE_VAR_TEMPLATE(Schema.instanceVariableTemplateYaml, InstanceVariableTemplateDescriptor.class),
     SYSTEM_TEMPLATE(Schema.systemTemplateYaml, SystemTemplateDescriptor.class),
-    PRODUCT_VALIDATION(Schema.productValidationYaml, ProductValidationDescriptorApi.class);
+    PRODUCT_VALIDATION(Schema.productValidationYaml, ProductValidationDescriptorApi.class),
+    INSTANCE_TEMPLATE_REFERENCE(Schema.instanceTemplateReferenceYaml, InstanceTemplateReferenceDescriptor.class);
 
     public final Schema apiSchema;
     public final Class<?> apiClass;

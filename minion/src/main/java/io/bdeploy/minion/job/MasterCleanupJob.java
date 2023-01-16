@@ -20,11 +20,15 @@ import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
+import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
@@ -120,12 +124,31 @@ public class MasterCleanupJob implements Job {
         try (BHiveRegistry registry = new BHiveRegistry(new ActivityReporter.Null(), null)) {
             mr.getStorageLocations().forEach(s -> registry.scanLocation(s, RollingFileAuditor.getFactory()));
 
-            CleanupHelper ch = new CleanupHelper(null, mr, registry, (h, i) -> mr.getSelf(),
+            CleanupHelper ch = new CleanupHelper(null, mr, registry, new SelfMasterProvider(mr.getSelf()),
                     new VersionSorterServiceImpl(mr.getPluginManager(), registry));
             ch.execute(ch.calculate());
 
             mr.modifyState(s -> s.cleanupLastRun = System.currentTimeMillis());
             log.info("Cleanup finished");
+        }
+    }
+
+    private static final class SelfMasterProvider implements MasterProvider {
+
+        private final RemoteService self;
+
+        public SelfMasterProvider(RemoteService self) {
+            this.self = self;
+        }
+
+        @Override
+        public RemoteService getControllingMaster(BHive hive, Key assetKey) {
+            return self;
+        }
+
+        @Override
+        public RemoteService getNamedMasterOrSelf(BHive hive, String name) {
+            return self;
         }
     }
 

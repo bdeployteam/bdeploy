@@ -26,6 +26,6 @@ public class SystemTemplateDescriptor {
     public List<VariableConfiguration> systemVariables;
 
     @JsonPropertyDescription("The list of instances to create when this template is applied.")
-    public List<SystemTemplateInstanceReference> instances = new ArrayList<>();
+    public List<InstanceTemplateReferenceDescriptor> instances = new ArrayList<>();
 
 }

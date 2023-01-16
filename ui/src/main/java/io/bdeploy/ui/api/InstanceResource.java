@@ -148,6 +148,10 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.READ)
     public ProcessResource getProcessResource(@ActivityScope @PathParam("instance") String instanceId);
 
+    @Path("/templates")
+    @RequiredPermission(permission = Permission.WRITE)
+    public InstanceTemplateResource getTemplateResource();
+
     @Path("/{instance}/cfgFiles")
     @RequiredPermission(permission = Permission.READ)
     public ConfigFileResource getConfigResource(@ActivityScope @PathParam("instance") String instanceId);

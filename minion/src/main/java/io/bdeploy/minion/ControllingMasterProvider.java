@@ -9,6 +9,7 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.ui.api.Minion;
+import io.bdeploy.ui.api.MinionMode;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
@@ -38,6 +39,21 @@ public class ControllingMasterProvider implements MasterProvider {
                 throw new UnsupportedOperationException("A node may never require remote communication with a master");
             default:
                 return minion.getSelf();
+        }
+    }
+
+    @Override
+    public RemoteService getNamedMasterOrSelf(BHive hive, String target) {
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
+            ManagedMasterDto server = masters.getManagedMaster(target);
+            if (server == null) {
+                throw new WebApplicationException("Managed server not found: " + target, Status.NOT_FOUND);
+            }
+
+            return new RemoteService(UriBuilder.fromUri(server.uri).build(), server.auth);
+        } else {
+            return minion.getSelf();
         }
     }
 

@@ -94,8 +94,6 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
-import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
-import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallState;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
@@ -125,6 +123,7 @@ import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
+import io.bdeploy.ui.api.InstanceTemplateResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -455,21 +454,7 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     private MasterRootResource getManagingRootResource(String managedServer) {
-        RemoteService remote;
-        if (minion.getMode() == MinionMode.CENTRAL && managedServer == null) {
-            throw new WebApplicationException("Managed server is not set on central", Status.EXPECTATION_FAILED);
-        } else if (minion.getMode() == MinionMode.CENTRAL) {
-            ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
-            ManagedMasterDto ident = masters.getManagedMaster(managedServer);
-            if (ident == null) {
-                throw new WebApplicationException("Managed server '" + managedServer + "' is not attached to this instance group",
-                        Status.EXPECTATION_FAILED);
-            }
-            remote = new RemoteService(UriBuilder.fromUri(ident.uri).build(), ident.auth);
-        } else {
-            remote = mp.getControllingMaster(hive, null);
-        }
-
+        RemoteService remote = mp.getNamedMasterOrSelf(hive, managedServer);
         return ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context);
     }
 
@@ -852,6 +837,11 @@ public class InstanceResourceImpl implements InstanceResource {
     @Override
     public ConfigFileResource getConfigResource(String instanceId) {
         return rc.initResource(new ConfigFileResourceImpl(hive, instanceId));
+    }
+
+    @Override
+    public InstanceTemplateResource getTemplateResource() {
+        return rc.initResource(new InstanceTemplateResourceImpl(group, hive));
     }
 
     @Override

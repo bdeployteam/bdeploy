@@ -5,7 +5,6 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.RemoteService;
 
-@FunctionalInterface
 public interface MasterProvider {
 
     /**
@@ -18,5 +17,15 @@ public interface MasterProvider {
      * @return a {@link RemoteService} to communicate with the master.
      */
     public RemoteService getControllingMaster(BHive hive, Manifest.Key assetKey);
+
+    /**
+     * Returns the {@link RemoteService} for a given named managed master on central, or a {@link RemoteService} to self for other
+     * scenarios.
+     *
+     * @param hive the {@link BHive} of the instance group where the server is configured.
+     * @param name the name of the server to lookup, may be <code>null</code> for self.
+     * @return a {@link RemoteService} for the target server.
+     */
+    public RemoteService getNamedMasterOrSelf(BHive hive, String name);
 
 }

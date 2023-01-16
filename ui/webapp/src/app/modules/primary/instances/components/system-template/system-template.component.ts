@@ -19,12 +19,12 @@ import {
   FlattenedInstanceTemplateConfiguration,
   FlattenedInstanceTemplateGroupConfiguration,
   InstancePurpose,
+  InstanceTemplateReferenceDescriptor,
+  InstanceTemplateReferenceResultDto,
+  InstanceTemplateReferenceStatus,
   ManagedMasterDto,
   ProductDto,
   SystemTemplateDto,
-  SystemTemplateInstanceReference,
-  SystemTemplateInstanceResultDto,
-  SystemTemplateInstanceStatus,
   SystemTemplateRequestDto,
   SystemTemplateResultDto,
   TemplateVariable,
@@ -32,7 +32,7 @@ import {
 import { GroupsService } from './../../../groups/services/groups.service';
 
 export class TemplateSelection {
-  public ref: SystemTemplateInstanceReference;
+  public ref: InstanceTemplateReferenceDescriptor;
   public product: ProductDto;
   public tpl: FlattenedInstanceTemplateConfiguration;
 
@@ -51,27 +51,27 @@ export class TemplateSelection {
   public isAllVariablesSet: boolean;
 }
 
-const colInstanceName: BdDataColumn<SystemTemplateInstanceResultDto> = {
+const colInstanceName: BdDataColumn<InstanceTemplateReferenceResultDto> = {
   id: 'name',
   name: 'Instance',
   data: (r) => r.name,
   width: '200px',
 };
 
-const colInstResIcon: BdDataColumn<SystemTemplateInstanceResultDto> = {
+const colInstResIcon: BdDataColumn<InstanceTemplateReferenceResultDto> = {
   id: 'status',
   name: 'Status',
   data: (r) =>
-    r.status === SystemTemplateInstanceStatus.OK
+    r.status === InstanceTemplateReferenceStatus.OK
       ? 'check'
-      : r.status === SystemTemplateInstanceStatus.ERROR
+      : r.status === InstanceTemplateReferenceStatus.ERROR
       ? 'error'
       : 'warning',
   component: BdDataIconCellComponent,
   width: '50px',
 };
 
-const colInstanceMsg: BdDataColumn<SystemTemplateInstanceResultDto> = {
+const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto> = {
   id: 'msg',
   name: 'Message',
   data: (r) => r.message,
@@ -103,11 +103,8 @@ export class SystemTemplateComponent {
   /* template */ isAllTemplateGroupsSelected = false;
   /* template */ isAllVariablesSet = false;
   /* template */ result: SystemTemplateResultDto;
-  /* template */ resultCols: BdDataColumn<SystemTemplateInstanceResultDto>[] = [
-    colInstResIcon,
-    colInstanceName,
-    colInstanceMsg,
-  ];
+  /* template */ resultCols: BdDataColumn<InstanceTemplateReferenceResultDto>[] =
+    [colInstResIcon, colInstanceName, colInstanceMsg];
   /* template */ resultIsSuccess: boolean;
   /* template */ resultHasWarnings: boolean;
   /* template */ purposes: InstancePurpose[] = [
@@ -216,11 +213,12 @@ export class SystemTemplateComponent {
         this.resultIsSuccess =
           r.results
             .map((r) => r.status)
-            .findIndex((s) => s === SystemTemplateInstanceStatus.ERROR) === -1;
+            .findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) ===
+          -1;
         this.resultHasWarnings =
           r.results
             .map((r) => r.status)
-            .findIndex((s) => s === SystemTemplateInstanceStatus.WARNING) !==
+            .findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !==
           -1;
         this.stepper.next();
       });

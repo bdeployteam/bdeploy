@@ -1,0 +1,12 @@
+# yaml-language-server: $schema= https://localhost:7701/api/public/v1/schema/instanceTemplateReferenceYaml
+
+name: 'Chat Master'
+description: "The Test System's third (master) Chat Instance"
+productId: 'io.bdeploy/chat-app'
+templateName: 'Default Configuration'
+defaultMappings:
+  - group: 'Chat App'
+    node: 'master'
+fixedVariables:
+  - id: app-name
+    value: Test

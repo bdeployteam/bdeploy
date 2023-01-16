@@ -15,6 +15,7 @@ import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.cfg.Configuration.ConfigurationValueMapping;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
@@ -37,6 +38,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
+import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
@@ -49,6 +51,8 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.cli.RemoteInstanceTool.InstanceConfig;
+import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
+import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
 import jakarta.ws.rs.client.Entity;
@@ -98,6 +102,10 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("Create an instance with the given name")
         String create();
 
+        @Help("When creating the instance, use the provided template YAML")
+        @Validator(ExistingPathValidator.class)
+        String template();
+
         @Help("Update the instance with the given ID")
         String update();
 
@@ -141,7 +149,11 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
                 .getInstanceResource(config.instanceGroup());
 
         if (config.create() != null) {
-            return doCreate(remote, ir, config);
+            if (config.template() != null) {
+                return doCreateFromTemplate(remote, ir, config);
+            } else {
+                return doCreate(remote, ir, config);
+            }
         } else if (config.update() != null) {
             return doUpdate(remote, ir, config);
         }
@@ -248,6 +260,32 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         ir.create(cfg, config.server());
 
         return createSuccess().addField("Instance ID", cfg.id);
+    }
+
+    private RenderableResult doCreateFromTemplate(RemoteService remote, InstanceResource ir, InstanceConfig config) {
+        helpAndFailIfMissing(config.purpose(), "Missing --purpose");
+
+        BackendInfoResource bir = ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, getLocalContext());
+        if (bir.getVersion().mode == MinionMode.CENTRAL) {
+            helpAndFailIfMissing(config.server(), "Missing --server");
+        }
+
+        Path template = Paths.get(config.template());
+        try (InputStream is = Files.newInputStream(template)) {
+            InstanceTemplateReferenceDescriptor desc = StorageHelper.fromYamlStream(is,
+                    InstanceTemplateReferenceDescriptor.class);
+
+            InstanceTemplateReferenceResultDto result = ir.getTemplateResource().createFromTemplate(desc, config.purpose(),
+                    config.server());
+
+            if (result.status != InstanceTemplateReferenceStatus.ERROR) {
+                return createSuccess().setMessage(result.status + ": " + result.message);
+            } else {
+                return createResultWithErrorMessage(result.status + ": " + result.message);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Cannot process " + config.template(), e);
+        }
     }
 
     private DataResult doImport(RemoteService svc, InstanceConfig config) {

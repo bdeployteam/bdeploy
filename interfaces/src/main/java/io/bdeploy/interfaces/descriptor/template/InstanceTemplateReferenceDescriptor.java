@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
-@JsonClassDescription("A reference to an instance template to create as part of a system template.")
-public class SystemTemplateInstanceReference {
+@JsonClassDescription("A reference to an instance template to create as part of a system template or standalone.")
+public class InstanceTemplateReferenceDescriptor {
 
     @JsonPropertyDescription("The name of the newly created instance.")
     @JsonProperty(required = true)
