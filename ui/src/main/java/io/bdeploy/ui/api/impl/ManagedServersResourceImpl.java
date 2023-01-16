@@ -365,6 +365,18 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         BHive hive = getInstanceGroupHive(groupName);
         try (Transaction t = hive.getTransactions().begin()) {
             return synchronizeTransacted(hive, groupName, serverName);
+        } catch (Exception e) {
+            log.warn("Cannot synchronize {}: {}", serverName, e.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("Error:", e);
+            }
+
+            // in case we have a dedicated status associated.
+            if (e instanceof WebApplicationException) {
+                throw e;
+            }
+
+            throw new WebApplicationException("Cannot synchronize " + serverName, e);
         }
     }
 

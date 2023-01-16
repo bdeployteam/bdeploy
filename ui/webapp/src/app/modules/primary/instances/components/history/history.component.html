@@ -39,7 +39,7 @@
       icon="run_circle"
       [text]="isCentral ? 'Show Runtime Events - requires connection to managed server' : 'Show Runtime Events'"
       tooltip="below"
-      [disabled]="!(servers.isCurrentInstanceSynchronized$ | async)"
+      [disabled]="runtimeLocked$ | async"
     ></app-bd-button>
   </app-bd-dialog-toolbar>
 

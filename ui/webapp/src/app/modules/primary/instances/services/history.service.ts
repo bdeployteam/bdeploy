@@ -64,6 +64,8 @@ export class HistoryService {
       .subscribe((result) => {
         const oldStart = filter.startTag;
 
+        // TODO: evaluate result.errors - how?
+
         // will continue loading next time.
         filter.startTag = result.next;
 

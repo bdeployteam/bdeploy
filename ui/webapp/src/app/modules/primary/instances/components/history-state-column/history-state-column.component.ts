@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HistoryEntryDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { InstanceStateService } from '../../services/instance-state.service';
@@ -8,7 +8,9 @@ import { InstanceStateService } from '../../services/instance-state.service';
   templateUrl: './history-state-column.component.html',
   styleUrls: ['./history-state-column.component.css'],
 })
-export class HistoryStateColumnComponent implements OnInit, OnDestroy {
+export class HistoryStateColumnComponent
+  implements OnInit, OnChanges, OnDestroy
+{
   @Input() record: HistoryEntryDto;
 
   private states: InstanceStateRecord;
@@ -20,14 +22,20 @@ export class HistoryStateColumnComponent implements OnInit, OnDestroy {
   constructor(private state: InstanceStateService) {
     this.subscription = this.state.state$.subscribe((s) => {
       this.states = s;
-      this.ngOnInit(); // re-calculate
+      this.ngOnChanges(); // re-calculate
     });
   }
 
   ngOnInit(): void {
-    this.stateTooltipText = this.getStateTooltip();
-    this.stateClass = this.getStateClass();
-    this.stateIcon = this.getStateIcon();
+    this.ngOnChanges();
+  }
+
+  ngOnChanges(): void {
+    if (this.record) {
+      this.stateTooltipText = this.getStateTooltip();
+      this.stateClass = this.getStateClass();
+      this.stateIcon = this.getStateIcon();
+    }
   }
 
   ngOnDestroy(): void {
