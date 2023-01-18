@@ -12,6 +12,7 @@ public class TextUIResources {
     public static void registerTextUi(ToolBase tool) {
         tool.register(RemoteInstanceGroupTool.class);
         tool.register(RemoteInstanceTool.class);
+        tool.register(RemoteConfigFilesTool.class);
         tool.register(RemotePortsTool.class);
         tool.register(RemoteProductTool.class);
         tool.register(RemoteDeploymentTool.class);
