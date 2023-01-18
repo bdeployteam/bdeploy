@@ -13,6 +13,7 @@ public class TextUIResources {
         tool.register(RemoteInstanceGroupTool.class);
         tool.register(RemoteInstanceTool.class);
         tool.register(RemoteConfigFilesTool.class);
+        tool.register(RemoteProcessConfigTool.class);
         tool.register(RemotePortsTool.class);
         tool.register(RemoteProductTool.class);
         tool.register(RemoteDeploymentTool.class);

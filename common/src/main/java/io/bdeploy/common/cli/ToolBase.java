@@ -194,7 +194,7 @@ public abstract class ToolBase {
 
                     DataTable table = DataFormat.TEXT.createTable(System.out);
                     table.setIndentHint(5).setHideHeadersHint(true).setLineWrapHint(true);
-                    table.column("Tool", 20).column("Description", 60);
+                    table.column("Tool", 30).column("Description", 60);
 
                     group.getValue().stream().forEach(e -> {
                         List<String> names = namesOf(e.getValue());
