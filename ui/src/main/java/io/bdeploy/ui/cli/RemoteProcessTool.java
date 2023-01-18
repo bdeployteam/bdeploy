@@ -1,8 +1,11 @@
 package io.bdeploy.ui.cli;
 
+import static io.bdeploy.common.util.StringHelper.isNullOrEmpty;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -47,6 +50,12 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         @Help("The name of the application to control, controls all applications of the instance if missing")
         String application();
 
+        @Help("The name of the process control group. Must be specified along with --controlGroupNodeName")
+        String controlGroupName();
+
+        @Help("The name of the node process control group belongs to. Must be specified along with --controlGroupName")
+        String controlGroupNodeName();
+
         @Help("The name of the instance group to work on")
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
@@ -76,24 +85,46 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         String groupName = config.instanceGroup();
         helpAndFailIfMissing(groupName, "Missing --instanceGroup");
 
-        if (!config.start() && !config.list() && !config.stop()) {
-            helpAndFailIfMissing(null, "Missing --start or --stop or --list");
+        int flagCount = (config.list() ? 1 : 0) + (config.start() ? 1 : 0) + (config.stop() ? 1 : 0);
+        if (flagCount == 0) {
+            helpAndFail("Missing --start or --stop or --list");
+        }
+        if (flagCount > 1) {
+            helpAndFail("You can enable only one flag at a time: --start, --stop or --list");
         }
 
-        if (config.join() && (!config.start() || config.application() == null || config.application().isEmpty())) {
+        if (config.join() && (!config.start() || isNullOrEmpty(config.application()))) {
             helpAndFail("--join is only possible when starting a single application");
+        }
+
+        boolean hasControlGroupName = !isNullOrEmpty(config.controlGroupName());
+        boolean hasControlGroupNodeName = !isNullOrEmpty(config.controlGroupNodeName());
+        boolean hasAppId = !isNullOrEmpty(config.application());
+        if (hasControlGroupName ^ hasControlGroupNodeName) {
+            helpAndFail("--controlGroupName cannot be specified without --controlGroupNodeName and vice versa");
+        }
+
+        if (hasControlGroupName && hasAppId) {
+            helpAndFail("specify either only --application or only --controlGroupName");
         }
 
         InstanceResource ir = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(groupName);
-        String appId = config.application();
-        if (config.start() || config.stop()) {
-            return doStartStop(config, instanceId, ir, appId);
-        }
 
-        Map<String, ProcessStatusDto> status = ir.getProcessResource(instanceId).getStatus();
+        if (config.list()) {
+            return doList(config, ir, svc);
+        } else if (config.start() || config.stop()) {
+            return doStartStop(config, instanceId, ir);
+        }
+        return createNoOp();
+    }
+
+    private RenderableResult doList(RemoteProcessConfig config, InstanceResource ir, RemoteService svc) {
+        String groupName = config.instanceGroup();
+        String instanceId = config.uuid();
+        String appId = config.application();
         if (appId == null) {
-            return createAllProcessesTable(config, svc, ir, status);
+            return createAllProcessesTable(config, svc, ir);
         } else {
             ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(appId);
             InstanceNodeConfigurationListDto cfg = ir.getNodeConfigurations(appStatus.status.instanceId,
@@ -118,24 +149,35 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         }
     }
 
-    private RenderableResult doStartStop(RemoteProcessConfig config, String instanceId, InstanceResource ir, String appId) {
+    private RenderableResult doStartStop(RemoteProcessConfig config, String instanceId, InstanceResource ir) {
+        boolean doAll = isNullOrEmpty(config.application()) && isNullOrEmpty(config.controlGroupName());
         if (config.start()) {
-            if (appId == null || appId.isEmpty()) {
+            if (doAll) {
                 ir.getProcessResource(instanceId).startAll();
             } else {
-                ir.getProcessResource(instanceId).startProcesses(List.of(appId));
+                ir.getProcessResource(instanceId).startProcesses(getAppIds(config, ir));
                 if (config.join()) {
-                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(appId).processState);
+                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(config.application()).processState);
                 }
             }
         } else if (config.stop()) {
-            if (appId == null || appId.isEmpty()) {
+            if (doAll) {
                 ir.getProcessResource(instanceId).stopAll();
             } else {
-                ir.getProcessResource(instanceId).stopProcesses(List.of(appId));
+                ir.getProcessResource(instanceId).stopProcesses(getAppIds(config, ir));
             }
         }
         return createSuccess();
+    }
+
+    private List<String> getAppIds(RemoteProcessConfig config, InstanceResource ir) {
+        String appId = config.application();
+        if (!isNullOrEmpty(appId)) {
+            return List.of(appId);
+        }
+        String instanceId = config.uuid();
+        String activeTag = ir.getDeploymentStates(instanceId).activeTag;
+        return getOrderedProcessEntries(config, ir, activeTag).stream().map(processEntry -> processEntry.appId).toList();
     }
 
     private void doJoin(long pollIntervalMs, Supplier<ProcessState> stateSupplier) {
@@ -169,8 +211,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         }
     }
 
-    private DataTable createAllProcessesTable(RemoteProcessConfig config, RemoteService svc, InstanceResource ir,
-            Map<String, ProcessStatusDto> status) {
+    private DataTable createAllProcessesTable(RemoteProcessConfig config, RemoteService svc, InstanceResource ir) {
         DataTable table = createDataTable();
         table.setCaption("Processes for Instance " + config.uuid() + " in Instance Group " + config.instanceGroup() + " on "
                 + svc.getUri());
@@ -185,12 +226,13 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         table.column("PID", 6);
         table.column(new DataTableColumn("ExitCode", "Exit", 4));
 
+        String instanceId = config.uuid();
         Map<String, Optional<InstanceConfiguration>> instanceInfos = new TreeMap<>();
         Map<String, Optional<InstanceNodeConfigurationListDto>> nodeDtos = new TreeMap<>();
-        InstanceStateRecord deploymentStates = ir.getDeploymentStates(config.uuid());
-
-        for (Entry<String, ProcessStatusDto> processEntry : status.entrySet()) {
-            String tag = processEntry.getValue().instanceTag;
+        InstanceStateRecord deploymentStates = ir.getDeploymentStates(instanceId);
+        List<ProcessStatusDto> processEntries = getOrderedProcessEntries(config, ir, deploymentStates.activeTag);
+        for (ProcessStatusDto processEntry : processEntries) {
+            String tag = processEntry.instanceTag;
             Optional<InstanceConfiguration> instance = instanceInfos.computeIfAbsent(tag, k -> {
                 try {
                     return Optional.of(ir.readVersion(config.uuid(), tag));
@@ -211,13 +253,40 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                     return Optional.ofNullable(null);
                 }
             });
-            Optional<ApplicationConfiguration> cfg = findAppConfig(processEntry.getValue(), nodes);
-            addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry.getValue(), instance, deploymentStates, cfg);
+            Optional<ApplicationConfiguration> cfg = findAppConfig(processEntry, nodes);
+            addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry, instance, deploymentStates, cfg);
         }
 
         table.addFooter(" * Versions marked with '*' are out-of-sync (not running from the active version)");
 
+        String controlGroupName = config.controlGroupName();
+        if (!isNullOrEmpty(controlGroupName)) {
+            long count = processEntries.stream().map(e -> e.processState).distinct().count();
+            String state = count == 1 ? processEntries.get(0).processState.name() : "MIXED";
+            table.addFooter(String.format(" * Applications in control group %s are in %s state", controlGroupName, state));
+        }
+
         return table;
+    }
+
+    private List<ProcessStatusDto> getOrderedProcessEntries(RemoteProcessConfig config, InstanceResource ir, String activeTag) {
+        String instanceId = config.uuid();
+        String controlGroupName = config.controlGroupName();
+        String controlGroupNodeName = config.controlGroupNodeName();
+
+        List<String> processOrderList = ir.getNodeConfigurations(instanceId, activeTag).nodeConfigDtos.stream()
+                .map(instanceNodeConfigurationDto -> instanceNodeConfigurationDto.nodeConfiguration).filter(Objects::nonNull)
+                .filter(nodeConfig -> isNullOrEmpty(controlGroupNodeName) || controlGroupNodeName.equals(nodeConfig.name))
+                .map(instanceNodeConfiguration -> instanceNodeConfiguration.controlGroups).filter(Objects::nonNull)
+                .flatMap(controlGroups -> controlGroups.stream())
+                .filter(controlGroup -> isNullOrEmpty(controlGroupName) || controlGroupName.equals(controlGroup.name))
+                .map(controlGroup -> controlGroup.processOrder).flatMap(processOrder -> processOrder.stream()).toList();
+
+        Map<String, ProcessStatusDto> status = ir.getProcessResource(instanceId).getStatus();
+
+        Comparator<ProcessStatusDto> comparator = (a, b) -> Integer.compare(processOrderList.indexOf(a.appId),
+                processOrderList.indexOf(b.appId));
+        return status.values().stream().sorted(comparator).toList();
     }
 
     private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
