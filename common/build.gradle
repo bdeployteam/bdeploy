@@ -24,6 +24,11 @@ dependencies {
     // this dep is not allowed, as logging depends on common - circle. it works for gradle,
     // but eclipse does not distinguish between real and test dependencies.
     //commonTestDeps(project(":logging"))
+
+    commonTestDeps (
+        // so we're able to use jackson in test code directly.
+        configurations.implementation
+    )
 }
 
 sourceCompatibility = JavaVersion.VERSION_11

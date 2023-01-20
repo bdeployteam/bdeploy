@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,8 +80,9 @@ class MasterCliTest {
         hiveTools.execute(TokenTool.class, "--keystore=" + tmpStore.toString(), "--passphrase=" + new String(pp), "--load",
                 "--pack=" + pack);
 
-        String[] token = hiveTools.execute(TokenTool.class, "--keystore=" + tmpStore.toString(), "--passphrase=" + new String(pp),
-                "--dump");
+        String[] token = hiveTools
+                .execute(TokenTool.class, "--keystore=" + tmpStore.toString(), "--passphrase=" + new String(pp), "--dump")
+                .getRawOutput();
 
         hiveTools.execute(TokenTool.class, "--keystore=" + ks.toString(), "--passphrase=" + new String(pp), "--check",
                 "--token=" + token[0]);
@@ -95,8 +95,8 @@ class MasterCliTest {
         }
 
         tools.execute(CleanupTool.class, "--root=" + root, "--setSchedule=1 0 0 * * ?");
-        String[] output = tools.execute(CleanupTool.class, "--root=" + root);
-        assertTrue(output[1].contains("1 0 0 * * ?"));
+        var output = tools.execute(CleanupTool.class, "--root=" + root);
+        assertTrue(output.get(0).get("Schedule").equals("1 0 0 * * ?"));
 
         // test certificate update with the same certificate
         try (MinionRoot mr = new MinionRoot(root, reporter)) {
@@ -142,14 +142,15 @@ class MasterCliTest {
             System.setProperty("user.home", tmp.toString());
 
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(2, output.length);
+            assertEquals(0, output.size());
 
             tools.execute(LocalLoginTool.class, "--add=MyServer", "--remote=https://localhost:" + port + "/api", "--user=test",
                     "--password=test");
 
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(3, output.length);
-            assertTrue(output[1].contains("MyServer"));
+            assertEquals(1, output.size());
+            assertEquals("MyServer", output.get(0).get("Name"));
+            assertTrue(output.get(0).get("Uri").contains("localhost"));
 
             tools.execute(LocalLoginTool.class, "--add=MyOtherServer", "--remote=https://localhost:" + port + "/api",
                     "--user=test", "--password=test");
@@ -158,8 +159,9 @@ class MasterCliTest {
 
             // no current tool now.
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(3, output.length);
-            assertFalse(output[1].contains("*"));
+            assertEquals(1, output.size());
+            assertEquals("MyOtherServer", output.get(0).get("Name"));
+            assertEquals("", output.get(0).get("Active"));
 
             // change current
             tools.execute(LocalLoginTool.class, "--use=MyOtherServer");
@@ -170,16 +172,17 @@ class MasterCliTest {
             tools.execute(RemoteUserTool.class, "--update=user1", "--admin");
             tools.execute(RemoteUserTool.class, "--update=user1", "--permission=WRITE", "--scope=IG");
             output = tools.execute(RemoteUserTool.class, "--list");
-            assertTrue(Arrays.stream(output).anyMatch(s -> s.contains("user1")));
+            assertEquals("test", output.get(0).get("Username"));
+            assertEquals("user1", output.get(1).get("Username"));
             ToolBase.setTestModeForLLM(true);
 
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(3, output.length);
-            assertTrue(output[1].contains("*"));
+            assertEquals(1, output.size());
+            assertEquals("*", output.get(0).get("Active"));
 
             tools.execute(LocalLoginTool.class, "--remove=MyOtherServer");
             output = tools.execute(LocalLoginTool.class, "--list");
-            assertEquals(2, output.length);
+            assertEquals(0, output.size());
         } finally {
             ResourceProvider.getResource(self, RemoteShutdown.class, null).shutdown(shutdown);
             master.join();
