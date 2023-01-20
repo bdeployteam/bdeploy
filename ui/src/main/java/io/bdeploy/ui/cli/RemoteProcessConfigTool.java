@@ -160,7 +160,9 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         int myIndex = CollectionHelper.indexOf(cfg.start.parameters, p -> p.id.equals(config.set()));
         int myDescIndex = CollectionHelper.indexOf(pdescs, p -> p.id.equals(config.set()));
 
-        checkCanSet(pdescs.get(myDescIndex), pdescs, cfg, dto.descriptor, findNodeForApp(nodecfg, cfg));
+        if (myDescIndex >= 0) {
+            checkCanSet(pdescs.get(myDescIndex), pdescs, cfg, dto.descriptor, findNodeForApp(nodecfg, cfg));
+        }
 
         if (myIndex == -1 && myDescIndex >= 0) {
             // not yet there, need to insert.

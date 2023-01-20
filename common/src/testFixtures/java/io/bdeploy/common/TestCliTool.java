@@ -1,5 +1,8 @@
 package io.bdeploy.common;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -7,6 +10,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -16,11 +22,15 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import io.bdeploy.common.cfg.ConfigValidationException;
 import io.bdeploy.common.cli.ToolBase;
 import io.bdeploy.common.cli.ToolBase.CliTool;
 import io.bdeploy.common.cli.data.DataFormat;
 import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.util.JacksonHelper;
 
 public class TestCliTool implements ParameterResolver {
 
@@ -61,11 +71,11 @@ public class TestCliTool implements ParameterResolver {
         return getTool(defaultReporter, (Class<? extends CliTool>) parameterContext.getParameter().getType(), arr);
     }
 
-    public <T extends CliTool> String[] execute(Class<T> tool, String... args) throws IOException {
+    public <T extends CliTool> StructuredOutput execute(Class<T> tool, String... args) throws IOException {
         return readOutput(getTool(defaultReporter, tool, args));
     }
 
-    private <T extends CliTool> String[] readOutput(T tool) throws IOException {
+    private <T extends CliTool> StructuredOutput readOutput(T tool) throws IOException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             tool.setOutput(new PrintStream(os));
             tool.setDataFormat(DataFormat.JSON);
@@ -86,7 +96,7 @@ public class TestCliTool implements ParameterResolver {
 
             log.info(tool.getClass().getSimpleName() + " output:\n" + plainOutput);
 
-            return plainOutput.split("\\r?\\n");
+            return new StructuredOutput(plainOutput);
         }
     }
 
@@ -107,6 +117,60 @@ public class TestCliTool implements ParameterResolver {
         } catch (Exception e) {
             throw new IllegalStateException("Cannot creat tool", e);
         }
+    }
+
+    public static final class StructuredOutputRow {
+
+        private final Map<String, String> data;
+
+        public StructuredOutputRow(Map<String, String> data) {
+            this.data = data;
+        }
+
+        public String get(String column) {
+            assertTrue(data.containsKey(column));
+            return data.get(column);
+        }
+
+    }
+
+    public static final class StructuredOutput {
+
+        private final String plain;
+        private final List<Map<String, String>> data;
+
+        public StructuredOutput(String plain) throws JsonProcessingException {
+            this.plain = plain;
+
+            if (plain.startsWith("[\n") || plain.startsWith("[\r\n")) {
+                data = JacksonHelper.getDefaultJsonObjectMapper().readValue(plain,
+                        new TypeReference<List<Map<String, String>>>() {
+                        });
+            } else if (plain.startsWith("{\n") || plain.startsWith("{\r\n")) {
+                data = Collections.singletonList(
+                        JacksonHelper.getDefaultJsonObjectMapper().readValue(plain, new TypeReference<Map<String, String>>() {
+                        }));
+            } else {
+                data = null; // cannot parse freestyle output, which exists :)
+            }
+
+        }
+
+        public String[] getRawOutput() {
+            return plain.split("\\r?\\n");
+        }
+
+        public StructuredOutputRow get(int index) {
+            assertNotNull(data);
+            assertTrue(data.size() > index);
+            return new StructuredOutputRow(data.get(index));
+        }
+
+        public int size() {
+            assertNotNull(data);
+            return data.size();
+        }
+
     }
 
 }

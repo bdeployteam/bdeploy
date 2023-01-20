@@ -1,6 +1,7 @@
 package io.bdeploy.bhive.cli;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,12 +69,12 @@ class BasicToolTest {
         }
 
         // check with tool whether the manifest is there
-        String[] output = tools.execute(ManifestTool.class, hiveArg, "--list", "--manifest=test:v1");
-        assertThat(output[1], containsString("test:v1"));
+        var output = tools.execute(ManifestTool.class, hiveArg, "--list", "--manifest=test:v1");
+        assertThat(output.get(0).get("Key"), containsString("test:v1"));
 
         // perform FSCK to check for broken database
         output = tools.execute(FsckTool.class, hiveArg, "--manifest=test:v1");
-        assertThat(output[1].trim(), containsString("Success"));
+        assertThat(output.get(0).get("message"), is(equalTo("Success")));
 
         // export to other directory and compare with original source.
         tools.execute(ExportTool.class, hiveArg, "--manifest=test:v1", "--target=" + expDir.toString());
@@ -88,12 +89,12 @@ class BasicToolTest {
         Files.write(smallSrc2Dir.resolve("another.txt"), Arrays.asList("Test Content"));
         tools.execute(ImportTool.class, hiveArg, "--source=" + smallSrc2Dir, "--manifest=" + anotherKey2);
 
-        output = tools.execute(TreeTool.class, hiveArg, "--list=" + anotherKey);
-        assertEquals(9, output.length);
+        var raw = tools.execute(TreeTool.class, hiveArg, "--list=" + anotherKey).getRawOutput();
+        assertEquals(9, raw.length);
 
-        output = tools.execute(TreeTool.class, hiveArg, "--diff=" + anotherKey, "--diff=" + anotherKey2);
+        raw = tools.execute(TreeTool.class, hiveArg, "--diff=" + anotherKey, "--diff=" + anotherKey2).getRawOutput();
         // one content diff (root), one only left (test.txt), one only right (another.txt).
-        assertEquals(7, output.length);
+        assertEquals(7, raw.length);
 
         tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=test:v1");
         tools.execute(ManifestTool.class, hiveArg, "--delete", "--manifest=another:v2");
