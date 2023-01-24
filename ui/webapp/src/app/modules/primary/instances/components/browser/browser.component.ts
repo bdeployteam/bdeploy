@@ -34,8 +34,13 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     {
       name: 'System',
       group: (r) => this.instanceColumns.instanceSystemColumn.data(r),
+      associatedColumn: this.instanceColumns.instanceSystemColumn.id,
     },
-    { name: 'Instance Purpose', group: (r) => r.instanceConfiguration.purpose },
+    {
+      name: 'Instance Purpose',
+      group: (r) => r.instanceConfiguration.purpose,
+      associatedColumn: this.instanceColumns.instanceTypeColumn.id,
+    },
     {
       name: 'Product',
       group: (r) =>
@@ -44,6 +49,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
             p.key.name === r.instanceConfiguration.product.name &&
             p.key.tag === r.instanceConfiguration.product.tag
         )?.name || r.instanceConfiguration.product.name,
+      associatedColumn: this.instanceColumns.instanceProductColumn.id,
     },
   ];
   grouping: BdDataGroupingDefinition<InstanceDto>[];
@@ -114,6 +120,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
         this.initGrouping.push({
           name: 'Managed Server',
           group: (r) => r.managedServer.hostName,
+          associatedColumn: this.instanceColumns.instanceServerColumn.id,
         });
       }
       this.grouping = [...this.initGrouping];

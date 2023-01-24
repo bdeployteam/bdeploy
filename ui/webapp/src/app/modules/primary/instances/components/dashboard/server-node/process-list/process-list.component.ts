@@ -29,6 +29,7 @@ interface PinnedParameter {
   value: string;
 }
 
+export const CONTROL_GROUP_COL_ID = 'ctrlGroup';
 @Component({
   selector: 'app-node-process-list',
   templateUrl: './process-list.component.html',
@@ -37,7 +38,7 @@ export class NodeProcessListComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
   private processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration> = {
-    id: 'ctrlGroup',
+    id: CONTROL_GROUP_COL_ID,
     name: 'Control Group',
     data: (r) => this.getControlGroup(r),
     width: '120px',

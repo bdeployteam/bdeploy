@@ -61,8 +61,16 @@ export class UsersBrowserComponent {
     this.colLastLogin,
   ];
   /* template */ grouping: BdDataGroupingDefinition<UserInfo>[] = [
-    { name: 'Authenticated By', group: (r) => this.getAuthenticatedBy(r) },
-    { name: 'Global Permission', group: (r) => this.getGlobalPermission(r) },
+    {
+      name: 'Authenticated By',
+      group: (r) => this.getAuthenticatedBy(r),
+      associatedColumn: this.colAuthBy.id,
+    },
+    {
+      name: 'Global Permission',
+      group: (r) => this.getGlobalPermission(r),
+      associatedColumn: this.colPermLevel.id,
+    },
   ];
   /* template */ sort: Sort = { active: 'name', direction: 'asc' };
 

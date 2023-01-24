@@ -350,6 +350,14 @@ export class BdDataTableComponent<T>
             return false;
           }
         }
+        if (
+          this.grouping &&
+          this.grouping.findIndex(
+            (g) => g.definition?.associatedColumn === c.id
+          ) !== -1
+        ) {
+          return false;
+        }
         return true;
       })
       .map((c) => c.id);
@@ -393,6 +401,8 @@ export class BdDataTableComponent<T>
       this.treeControl.expandAll();
     }
 
+    // columns may change due to grouping.
+    this.updateColumnsToDisplay();
     this.redraw();
   }
 

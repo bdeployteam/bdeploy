@@ -70,7 +70,11 @@ export class ClientApplicationsComponent implements OnInit {
   ];
 
   /* template */ grouping: BdDataGroupingDefinition<ClientApp>[] = [
-    { name: 'Instance Name', group: (r) => r.instance.name },
+    {
+      name: 'Instance Name',
+      group: (r) => r.instance.name,
+      associatedColumn: clientInstanceColumn.id,
+    },
     {
       name: 'Operating System',
       group: (r) => (r.client ? r.client.os : 'WEB'),

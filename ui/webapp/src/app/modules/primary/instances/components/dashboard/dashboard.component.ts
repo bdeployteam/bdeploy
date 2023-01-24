@@ -23,6 +23,8 @@ import {
 import { ServersService } from '../../../servers/services/servers.service';
 import { InstanceStateService } from '../../services/instance-state.service';
 import { InstancesService } from '../../services/instances.service';
+import { ProcessesColumnsService } from '../../services/processes-columns.service';
+import { CONTROL_GROUP_COL_ID } from './server-node/process-list/process-list.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -55,9 +57,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         name: 'Process Control Group',
         group: (a) => this.getControlGroupDesc(a),
         sort: (a, b, eA) => this.sortControlGroup(a, b, eA),
+        associatedColumn: CONTROL_GROUP_COL_ID,
       },
       { name: 'Start Type', group: (a) => a?.processControl?.startType },
-      { name: 'Application', group: (a) => a?.application?.name },
+      {
+        name: 'Application',
+        group: (a) => a?.application?.name,
+        associatedColumn: this.processesColumns.applicationNameColumn.id,
+      },
     ];
   /* template */ defaultGrouping: BdDataGrouping<ApplicationConfiguration>[] = [
     { definition: this.groupingDefinitions[0], selected: [] },
@@ -84,7 +91,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public servers: ServersService,
     public auth: AuthenticationService,
     private states: InstanceStateService,
-    private cardViewService: CardViewService
+    private cardViewService: CardViewService,
+    private processesColumns: ProcessesColumnsService
   ) {}
 
   ngOnInit(): void {

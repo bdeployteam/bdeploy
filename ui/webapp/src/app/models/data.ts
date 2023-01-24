@@ -94,6 +94,9 @@ export interface BdDataGroupingDefinition<T> {
   /** The name of the grouping, selectable by the user */
   name: string;
 
+  /** The ID of the associated column, which will be hidden when the grouping is active. */
+  associatedColumn?: string;
+
   /** determines the name of the group this grouping would put the record in. */
   group: (record: T) => string;
 
