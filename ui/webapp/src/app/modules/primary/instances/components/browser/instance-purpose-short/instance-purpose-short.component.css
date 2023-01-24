@@ -1,0 +1,20 @@
+.local-chip {
+  text-transform: uppercase;
+  font-size: smaller;
+  border-radius: 3px;
+  padding: 0px 5px;
+}
+
+.local-PRODUCTIVE {
+  background-color: var(--bd-warn);
+  color: var(--bd-warn-contrast);
+}
+
+.local-TEST {
+  background-color: var(--bd-primary);
+  color: var(--bd-primary-contrast);
+}
+
+.local-DEVELOPMENT {
+  background-color: var(--bd-bg-grey);
+}

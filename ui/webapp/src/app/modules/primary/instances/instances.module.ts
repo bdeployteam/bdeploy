@@ -31,6 +31,7 @@ import { RatingStatusColumnComponent } from './components/rating-status-column/r
 import { StateStatusColumnComponent } from './components/state-status-column/state-status-column.component';
 import { SystemTemplateComponent } from './components/system-template/system-template.component';
 import { InstancesRoutingModule } from './instances-routing.module';
+import { InstancePurposeShortComponent } from './components/browser/instance-purpose-short/instance-purpose-short.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { InstancesRoutingModule } from './instances-routing.module';
     ControlGroupComponent,
     OverallStatusColumnComponent,
     SystemTemplateComponent,
+    InstancePurposeShortComponent,
   ],
   exports: [
     // for panels.

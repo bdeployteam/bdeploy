@@ -12,6 +12,7 @@ import { ServersService } from '../../servers/services/servers.service';
 import { SystemsService } from '../../systems/services/systems.service';
 import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
+import { InstancePurposeShortComponent } from '../components/browser/instance-purpose-short/instance-purpose-short.component';
 import { InstancesService } from './instances.service';
 
 @Injectable({
@@ -23,7 +24,9 @@ export class InstancesColumnsService {
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
     data: (r) => r.instanceConfiguration.purpose,
+    width: '20px',
     showWhen: '(min-width: 1000px)',
+    component: InstancePurposeShortComponent,
   };
 
   instanceNameColumn: BdDataColumn<InstanceDto> = {
@@ -40,7 +43,7 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.instanceConfiguration.id,
     width: '110px',
-    showWhen: '(min-width: 1900px)',
+    showWhen: '(min-width: 2100px)',
   };
 
   instanceDescriptionColumn: BdDataColumn<InstanceDto> = {
@@ -110,7 +113,7 @@ export class InstancesColumnsService {
         ? `${r.managedServer.hostName} - ${r.managedServer.description}`
         : null,
     icon: () => 'dns',
-    showWhen: '(min-width: 650px)',
+    showWhen: '(min-width: 2000px)',
   };
 
   instanceSyncColumn: BdDataColumn<InstanceDto> = {

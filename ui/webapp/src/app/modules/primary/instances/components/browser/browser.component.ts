@@ -91,15 +91,15 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   /* template */ sort: Sort = { active: 'name', direction: 'asc' };
   /* template */ columns: BdDataColumn<InstanceDto>[] = [
     this.instanceColumns.instanceNameColumn,
-    this.instanceColumns.instanceTypeColumn,
     this.instanceColumns.instanceIdColumn,
     this.instanceColumns.instanceDescriptionColumn,
     this.instanceColumns.instanceSystemColumn,
     this.instanceColumns.instanceProductColumn,
     this.instanceColumns.instanceProductVersionColumn,
     this.instanceColumns.instanceProductActiveColumn,
-    this.instanceColumns.instanceBannerColumn,
     this.instanceColumns.instanceServerColumn,
+    this.instanceColumns.instanceTypeColumn,
+    this.instanceColumns.instanceBannerColumn,
     this.colOverallStatus,
     this.instanceColumns.instanceSyncColumn,
   ];
