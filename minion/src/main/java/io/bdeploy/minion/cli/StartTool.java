@@ -30,8 +30,11 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
+import io.bdeploy.interfaces.minion.MinionConfiguration;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -40,6 +43,7 @@ import io.bdeploy.jersey.RegistrationTarget;
 import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.minion.ConnectivityChecker;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
@@ -97,6 +101,9 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         @Help("Disable logging to file, instead log to console.")
         boolean consoleLog() default false;
+
+        @Help(value = "Skip the check for a valid host/port configuration", arg = false)
+        boolean skipConnectionCheck() default false;
     }
 
     public StartTool() {
@@ -113,6 +120,10 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
             out().println("Starting " + r.getMode() + "...");
 
+            if (!config.skipConnectionCheck()) {
+                conCheck(r);
+            }
+
             if (config.updateDir() != null) {
                 Path upd = Paths.get(config.updateDir());
                 r.setUpdateDir(upd);
@@ -121,6 +132,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             MinionState state = r.getState();
             SecurityHelper sh = SecurityHelper.getInstance();
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+
             try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
                 BHiveRegistry reg = setupServerCommon(delegate, r, srv, config);
 
@@ -145,6 +157,26 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         }
     }
 
+    private void conCheck(MinionRoot r) {
+        try {
+            // we're way earlier than any node manager, so we need to read information ourselves.
+            MinionManifest mm = new MinionManifest(r.getHive());
+            MinionConfiguration cfg = mm.read();
+
+            MinionDto minion = cfg.getMinion(r.getState().self);
+            if (minion == null) {
+                throw new IllegalStateException("Cannot find my own remote configuration in minion manifest");
+            }
+            ConnectivityChecker.checkOrThrow(minion.remote);
+        } catch (Exception e) {
+            log.error("ATTENTION: CANNOT CONNECT TO SELF", e);
+
+            // we anyhow continue just in case to not doom existing installations after update.
+            // the web UI will show a message to the user in case this happens.
+            r.markConnectionCheckFailed();
+        }
+    }
+
     private void setupServerNode(MasterConfig config, JerseyServer srv) {
         if (config.publishWebapp()) {
             UiResources.registerNode(srv);
@@ -164,7 +196,8 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             }
             return r.getUsers().isAuthenticationValid(info);
         });
-        registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv), getAuditorFactory());
+        registerMasterResources(srv, reg, config.publishWebapp(), r, r.createPluginManager(srv), getAuditorFactory(),
+                r.isInitialConnectionCheckFailed());
     }
 
     private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv,
@@ -181,7 +214,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     }
 
     public static void registerMasterResources(RegistrationTarget srv, BHiveRegistry reg, boolean webapp, MinionRoot minionRoot,
-            PluginManager pluginManager, Function<Path, Auditor> auditorFactory) {
+            PluginManager pluginManager, Function<Path, Auditor> auditorFactory, boolean conCheckFailed) {
 
         if (minionRoot.getMode() == MinionMode.CENTRAL) {
             srv.register(CentralUpdateResourceImpl.class);
@@ -211,7 +244,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         });
 
         if (webapp) {
-            UiResources.register(srv);
+            UiResources.register(srv, conCheckFailed);
         }
 
         // scan storage locations, register hives

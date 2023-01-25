@@ -74,6 +74,7 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
+import io.bdeploy.ui.dto.BackendInfoDto;
 import io.bdeploy.ui.dto.CentralIdentDto;
 import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.MinionSyncResultDto;
@@ -384,8 +385,15 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         RemoteService svc = getConfiguredRemote(groupName, serverName);
 
         BackendInfoResource backendInfo = ResourceProvider.getVersionedResource(svc, BackendInfoResource.class, context);
-        if (backendInfo.getVersion().mode != MinionMode.MANAGED) {
-            throw new WebApplicationException("Server is no longer in managed mode: " + serverName, Status.EXPECTATION_FAILED);
+        BackendInfoDto infoDto = backendInfo.getVersion();
+        if (infoDto.mode != MinionMode.MANAGED) {
+            throw new WebApplicationException("Server is no longer in managed mode: " + serverName, Status.SERVICE_UNAVAILABLE);
+        }
+
+        if (infoDto.isInitialConnectionCheckFailed) {
+            throw new WebApplicationException(
+                    "Server has internal connection issues. Please check on the target server: " + serverName,
+                    Status.SERVICE_UNAVAILABLE);
         }
 
         MinionSyncResultDto result = new MinionSyncResultDto();

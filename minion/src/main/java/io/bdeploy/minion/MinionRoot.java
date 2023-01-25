@@ -112,6 +112,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private PluginManager pluginManager;
     private boolean consoleLog;
     private Version latestGitHubReleaseVersion;
+    private boolean conCheckFailed = false;
 
     public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
@@ -132,6 +133,15 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         this.processController = new MinionProcessController();
         this.nodeManager = new NodeManagerImpl();
+    }
+
+    public void markConnectionCheckFailed() {
+        conCheckFailed = true;
+    }
+
+    @Override
+    public boolean isInitialConnectionCheckFailed() {
+        return conCheckFailed;
     }
 
     @Override

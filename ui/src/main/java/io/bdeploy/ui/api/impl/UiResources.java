@@ -21,8 +21,28 @@ public class UiResources {
     private UiResources() {
     }
 
-    public static void register(RegistrationTarget server) {
-        server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"), HttpHandlerRegistration.ROOT);
+    public static void register(RegistrationTarget server, boolean conCheckFailed) {
+
+        if (conCheckFailed) {
+            // we do not register the normal UI. instead, all requests will lead to an error page.
+            server.addHandler(new HttpHandler() {
+
+                @Override
+                public void service(Request request, Response response) throws Exception {
+                    String html = JerseyCustomErrorPages.getErrorHtml(503,
+                            "<center>This server has encountered <b>internal connection issues</b>. Please check the <code>server.log</code> for more information."
+                                    + "<br/>This problem is typically caused by a wrong hostname setting and/or network configuration issues."
+                                    + "<br/>Despite the issues, the backend has started, and auto-start instances were processed.</center>");
+                    response.setContentType(MediaType.TEXT_HTML);
+                    response.setContentLength(html.length());
+                    response.getWriter().write(html);
+                }
+            }, HttpHandlerRegistration.ROOT);
+        } else {
+            server.addHandler(new CLStaticHttpHandler(UiResources.class.getClassLoader(), "/webapp/"),
+                    HttpHandlerRegistration.ROOT);
+        }
+
         server.register(AuthResourceImpl.class);
         server.register(HiveResourceImpl.class);
         server.register(BackendInfoResourceImpl.class);
