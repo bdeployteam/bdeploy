@@ -21,7 +21,7 @@ import { InstancesService } from './instances.service';
 export class InstancesColumnsService {
   instanceTypeColumn: BdDataColumn<InstanceDto> = {
     id: 'type',
-    name: 'Type',
+    name: 'Purpose',
     hint: BdDataColumnTypeHint.TYPE,
     data: (r) => r.instanceConfiguration.purpose,
     width: '20px',
