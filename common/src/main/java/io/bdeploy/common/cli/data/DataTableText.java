@@ -3,6 +3,7 @@ package io.bdeploy.common.cli.data;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -83,6 +84,8 @@ public class DataTableText extends DataTableBase {
         List<DataTableColumn> columns = getColumns();
         List<List<DataTableCell>> rows = getRows();
 
+        adjustColumnsWidth();
+
         // caption
         if (getCaption() != null) {
             buffer.add(hr(HrMode.TOP));
@@ -138,6 +141,35 @@ public class DataTableText extends DataTableBase {
         processBuffer(buffer);
     }
 
+    private void adjustColumnsWidth() {
+        List<DataTableColumn> columns = getColumns();
+        List<List<DataTableCell>> rows = getRows();
+        Map<Integer, Integer> colIdxToMaxCellLength = new HashMap<>();
+
+        if (rows.isEmpty()) {
+            return;
+        }
+
+        // calculate column width
+        for (List<DataTableCell> row : rows) {
+            int colIdx = 0;
+            for (DataTableCell cell : row) {
+                for (int i = 0; i < cell.span; i++) {
+                    int cellLength = cell.data.length() / cell.span;
+                    int currentMax = colIdxToMaxCellLength.getOrDefault(colIdx, -1);
+                    colIdxToMaxCellLength.put(colIdx, Math.max(currentMax, cellLength));
+                    colIdx++;
+                }
+            }
+        }
+
+        // adjust column width
+        for (int i = 0; i < columns.size(); i++) {
+            DataTableColumn column = columns.get(i);
+            column.setMaxCellLength(colIdxToMaxCellLength.get(i));
+        }
+    }
+
     private List<List<DataTableCell>> wrapRow(List<DataTableCell> raw) {
         List<DataTableColumn> columns = getColumns();
         List<List<DataTableCell>> expandedRows = new ArrayList<>();
@@ -148,8 +180,7 @@ public class DataTableText extends DataTableBase {
             List<DataTableColumn> spanning = columns.subList(colIndex, colIndex + item.span);
 
             // width of text per column and space for separators (3 * (num columns - 1))
-            int width = spanning.stream().map(DataTableColumn::getPreferredWidth).reduce(0, Integer::sum)
-                    + (3 * (spanning.size() - 1));
+            int width = spanning.stream().map(DataTableColumn::getWidth).reduce(0, Integer::sum) + (3 * (spanning.size() - 1));
 
             String remaining = item.data;
             while (remaining.length() > width || remaining.contains("\n")) {
@@ -245,8 +276,7 @@ public class DataTableText extends DataTableBase {
         List<DataTableColumn> spanning = columns.subList(colIndex, colIndex + span);
 
         // width of text per column and space for separators (3 * (num columns - 1))
-        int width = spanning.stream().map(DataTableColumn::getPreferredWidth).reduce(0, Integer::sum)
-                + (3 * (spanning.size() - 1));
+        int width = spanning.stream().map(DataTableColumn::getWidth).reduce(0, Integer::sum) + (3 * (spanning.size() - 1));
 
         if (colIndex == 0) {
             // first column, print opening
@@ -273,7 +303,7 @@ public class DataTableText extends DataTableBase {
         for (int i = 0; i < columns.size(); ++i) {
             DataTableColumn column = columns.get(i);
 
-            builder.append(StringHelper.repeat(Character.toString(CELL_NONE), column.getPreferredWidth()));
+            builder.append(StringHelper.repeat(Character.toString(CELL_NONE), column.getWidth()));
             if (i != (columns.size() - 1)) {
                 builder.append(CELL_NONE).append(CELL_BOTH).append(CELL_NONE);
             } else {
