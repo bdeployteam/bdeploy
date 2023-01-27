@@ -1,6 +1,7 @@
 package io.bdeploy.minion.cli;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ import io.bdeploy.minion.TestMinion.AuthPack;
 import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.cli.RemoteDataFilesTool;
 import io.bdeploy.ui.cli.RemoteDeploymentTool;
+import jakarta.ws.rs.BadRequestException;
 
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
@@ -46,8 +48,10 @@ public class RemoteDataFilesCliTest {
     void testRemoteCli(BHive local, MasterRootResource master, CommonRootResource common, CleanupResource cr,
             RemoteService remote, @TempDir Path tmp, ActivityReporter reporter, MinionRoot mr, @AuthPack String auth)
             throws IOException {
-        Path tempFile = null;
-        Path tempDirectory = null;
+        /* create file for upload and directory for export */
+        Path tempFile = Files.createTempFile(null, null);
+        Path tempDirectory = Files.createTempDirectory(null);
+        Files.write(tempFile, "testing data files\n".getBytes(StandardCharsets.UTF_8));
         try {
 
             Manifest.Key instance = TestFactory.createApplicationsAndInstance(local, common, remote, tmp, true);
@@ -62,15 +66,28 @@ public class RemoteDataFilesCliTest {
                     "--uuid=" + id, "--version=" + instance.getTag(), "--activate");
 
             StructuredOutput result;
+            Exception ex;
             result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                     "--instanceGroup=demo", "--uuid=" + id, "--list");
 
+            /* must specify either --list, --export, --upload or --delete */
+            ex = assertThrows(IllegalArgumentException.class, () -> {
+                tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                        "--uuid=" + id);
+            });
+            assertEquals(
+                    "Please specify what you want to do by enabling one of the flags: --list, --export, --upload or --delete",
+                    ex.getMessage());
+
+            /* must specify only one flag. either --list, --export, --upload or --delete */
+            ex = assertThrows(IllegalArgumentException.class, () -> {
+                tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                        "--uuid=" + id, "--list", "--upload");
+            });
+            assertEquals("You can enable only one flag at a time: --list, --export, --upload or --delete", ex.getMessage());
+
             /* no data files are present yet */
             assertEquals(0, result.size());
-
-            /* create temp file for upload */
-            tempFile = Files.createTempFile(null, null);
-            Files.write(tempFile, "testing data files\n".getBytes(StandardCharsets.UTF_8));
 
             /* upload a data file as file1 */
             result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
@@ -80,15 +97,12 @@ public class RemoteDataFilesCliTest {
             assertEquals("file1", result.get(0).get("UploadedFileAs"));
 
             /* uploading existing file1 without --force will fail */
-            String reuploadError = "OK";
-            try {
-                result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
-                        "--instanceGroup=demo", "--uuid=" + id, "--upload", "--fileSource=" + tempFile.toString(),
-                        "--fileTarget=file1", "--targetNode=master");
-            } catch (Exception e) {
-                reuploadError = e.getMessage();
-            }
-            assertTrue(reuploadError.contains("Cannot update file1 in aaa-bbb-ccc"));
+            ex = assertThrows(BadRequestException.class, () -> {
+                tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
+                        "--uuid=" + id, "--upload", "--fileSource=" + tempFile.toString(), "--fileTarget=file1",
+                        "--targetNode=master");
+            });
+            assertTrue(ex.getMessage().contains("Cannot update file1 in aaa-bbb-ccc"));
 
             /* uploading existing file1 with --force will succeed */
             result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
@@ -118,7 +132,6 @@ public class RemoteDataFilesCliTest {
             assertEquals("file2", result.get(0).get("Path"));
 
             /* export */
-            tempDirectory = Files.createTempDirectory(null);
             result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                     "--instanceGroup=demo", "--uuid=" + id, "--export", "--exportTo=" + tempDirectory.toString());
             assertEquals("Success", result.get(0).get("message"));
