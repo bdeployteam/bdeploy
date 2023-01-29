@@ -71,7 +71,16 @@ module.exports = (on, config) => {
       });
     },
 
-    validateZipFile(filename, expectedEntry) {
+    validateZipFile(args) {
+      const { filename, expectedEntry } = args;
+
+      if (!filename) {
+        throw new Error(`filename not specified: ${filename}`);
+      }
+      if (!expectedEntry) {
+        throw new Error(`Expected entry not specified: ${expectedEntry}`);
+      }
+
       console.log('loading zip', filename);
       const zip = new AdmZip(filename);
       const zipEntries = zip.getEntries();
@@ -80,7 +89,7 @@ module.exports = (on, config) => {
 
       console.log('zip file %s has entries %o', filename, names);
 
-      if (expectedEntry && !names.find(expectedEntry)) {
+      if (!names.includes(expectedEntry)) {
         throw new Error(
           `Expected Entry ${expectedEntry} not found in ${filename}`
         );

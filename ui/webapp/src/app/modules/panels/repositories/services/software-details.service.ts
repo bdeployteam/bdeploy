@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -92,10 +92,14 @@ export class SoftwareDetailsService implements OnDestroy {
     return this.http.delete(this.getApiPath4Type());
   }
 
-  public download(): Observable<any> {
+  public download(original: boolean): Observable<any> {
+    const params = new HttpParams().set('original', original);
     return new Observable<any>((s) => {
       this.http
-        .get(`${this.getApiPath4Type()}/zip`, { responseType: 'text' })
+        .get(`${this.getApiPath4Type()}/zip`, {
+          params,
+          responseType: 'text',
+        })
         .subscribe((token) => {
           this.downloads.download(this.downloads.createDownloadUrl(token));
           s.next(token);

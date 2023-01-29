@@ -169,7 +169,7 @@ describe('Groups Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Download"]').downloadByLocationAssign(
+      cy.get('button[data-cy^="Download BHive"]').downloadByLocationAssign(
         'product-2.0.0.zip'
       );
       validateZip(

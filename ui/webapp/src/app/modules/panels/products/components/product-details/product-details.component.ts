@@ -174,10 +174,10 @@ export class ProductDetailsComponent implements OnInit {
       });
   }
 
-  /* template */ doDownload() {
+  /* template */ doDownload(original: boolean) {
     this.preparing$.next(true);
     this.singleProduct
-      .download()
+      .download(original)
       .pipe(finalize(() => this.preparing$.next(false)))
       .subscribe();
   }

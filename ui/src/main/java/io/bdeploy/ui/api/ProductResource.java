@@ -49,7 +49,8 @@ public interface ProductResource {
 
     @GET
     @Path("/{name : .+}/{tag}/zip")
-    public String createProductZipFile(@PathParam("name") String name, @PathParam("tag") String tag);
+    public String createProductZipFile(@PathParam("name") String name, @PathParam("tag") String tag,
+            @QueryParam("original") boolean original);
 
     @POST
     @Path("/upload")

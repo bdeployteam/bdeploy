@@ -1,7 +1,5 @@
 //@ts-check
 
-const { validateZip } = require('../support/utils');
-
 describe('Groups Tests (Clients)', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';

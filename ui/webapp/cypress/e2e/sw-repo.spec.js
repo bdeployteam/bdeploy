@@ -145,12 +145,20 @@ describe('Software Repository Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Download"]').downloadByLocationAssign(
-        'product-1.0.0.zip'
-      );
+      cy.get('button[data-cy^="Download BHive"]')
+        .first()
+        .downloadByLocationAssign('product-1.0.0.zip');
       validateZip(
         'product-1.0.0.zip',
         'manifests/io.bdeploy/demo/product/1.0.0'
+      );
+
+      cy.get('button[data-cy^="Download Content"]').downloadByLocationAssign(
+        'original-product-1.0.0.zip'
+      );
+      validateZip(
+        'original-product-1.0.0.zip',
+        'io.bdeploy-demo-product_1.0.0/product.json'
       );
 
       cy.get('button[data-cy^="Delete"]').click();

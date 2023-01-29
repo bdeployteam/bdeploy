@@ -122,9 +122,13 @@ public class SoftwareResourceImpl implements SoftwareResource {
     }
 
     @Override
-    public String createSoftwareZipFile(String name, String tag) {
+    public String createSoftwareZipFile(String name, String tag, boolean original) {
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        return ds.createManifestZipAndRegister(hive, name, tag);
+        if (original) {
+            return ds.createOriginalZipAndRegister(hive, name, tag);
+        } else {
+            return ds.createManifestZipAndRegister(hive, name, tag);
+        }
     }
 
     @Override

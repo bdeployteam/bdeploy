@@ -20,10 +20,12 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
+import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.ui.api.DownloadService;
 import io.bdeploy.ui.api.Minion;
 import jakarta.inject.Inject;
@@ -190,6 +192,38 @@ public class DownloadServiceImpl implements DownloadService {
         responeBuilder.header(HttpHeaders.CONTENT_DISPOSITION, builder.build());
         responeBuilder.header(HttpHeaders.CONTENT_LENGTH, file.toFile().length());
         return responeBuilder.build();
+    }
+
+    /**
+     * @param hive the {@link BHive} to use as source
+     * @param name the name of the manifest to export
+     * @param tag the tag of the manifest to export
+     * @return a registered token available for download
+     */
+    public String createOriginalZipAndRegister(BHive hive, String name, String tag) {
+        Manifest.Key key = new Manifest.Key(name, tag);
+        String token = createNewToken();
+        Path targetFile = getStoragePath(token);
+
+        try {
+            // build ZIP from key.
+            Path tmpFile = Files.createTempFile(minion.getTempDir(), "sw-", ".zip");
+            Path tmpFolder = minion.getTempDir().resolve(key.directoryFriendlyName());
+            try {
+                // add once more the directoryFriendlyName, as it should be included in the ZIP!
+                hive.execute(new ExportOperation().setManifest(key).setTarget(tmpFolder.resolve(key.directoryFriendlyName())));
+
+                ZipHelper.zip(tmpFile, tmpFolder);
+                Files.copy(tmpFile, targetFile);
+            } finally {
+                Files.deleteIfExists(tmpFile);
+                PathHelper.deleteRecursive(tmpFolder);
+            }
+        } catch (IOException e) {
+            throw new WebApplicationException("Error packaging download", e);
+        }
+        registerForDownload(token, key.directoryFriendlyName() + ".zip");
+        return token;
     }
 
     /**
