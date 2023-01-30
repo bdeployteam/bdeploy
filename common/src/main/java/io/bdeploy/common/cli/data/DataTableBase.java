@@ -65,6 +65,9 @@ public abstract class DataTableBase implements DataTable {
         if (data.length() <= limit) {
             return data;
         }
+        if (limit <= 3) {
+            return data.substring(0, limit);
+        }
         return data.substring(0, limit - 3) + "...";
     }
 
