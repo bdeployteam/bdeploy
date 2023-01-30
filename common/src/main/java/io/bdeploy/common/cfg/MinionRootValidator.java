@@ -17,7 +17,7 @@ public class MinionRootValidator implements ConfigValidator<String> {
             return false;
         }
 
-        return Files.isRegularFile(target.resolve("etc/state.json"));
+        return Files.isRegularFile(target.resolve("etc/state.json")) || Files.isRegularFile(target.resolve("etc/state.json.bak"));
     }
 
 }
