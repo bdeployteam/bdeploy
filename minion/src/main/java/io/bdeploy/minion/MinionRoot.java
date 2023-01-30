@@ -581,6 +581,16 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private <T> T readConfig(String name, Class<T> clazz) {
         Path cfg = config.resolve(name);
+        Path bakCfg = config.resolve(name + ".bak");
+
+        if (!Files.exists(cfg) && Files.exists(bakCfg)) {
+            log.warn("state.json is missing, restoring from state.json.bak");
+            try {
+                Files.move(bakCfg, cfg, StandardCopyOption.ATOMIC_MOVE);
+            } catch (IOException e) {
+                log.error("Cannot automatically restore " + cfg + " from " + bakCfg);
+            }
+        }
 
         if (!Files.exists(cfg)) {
             try {
