@@ -33,7 +33,7 @@ public class BackendInfoResourceImpl implements BackendInfoResource {
     @Override
     public BackendInfoDto getVersion() {
         return new BackendInfoDto(VersionHelper.getVersion(), minion.getMode(), minion.getHostName(),
-                minion.isNewGitHubReleaseAvailable());
+                minion.isNewGitHubReleaseAvailable(), minion.isInitialConnectionCheckFailed());
     }
 
     @Override

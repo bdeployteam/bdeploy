@@ -2,12 +2,10 @@ package io.bdeploy.minion.cli;
 
 import java.nio.file.Paths;
 
-import jakarta.ws.rs.core.UriBuilder;
-
+import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
-import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -17,9 +15,11 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.minion.ConnectivityChecker;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.ConfigTool.ConfigToolConfig;
 import io.bdeploy.ui.api.MinionMode;
+import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Manages storage locations.
@@ -44,6 +44,9 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
 
         @Help("The target mode of the minion.")
         MinionMode mode();
+
+        @Help(value = "Skip the check for a valid host/port configuration", arg = false)
+        boolean skipConnectionCheck() default false;
     }
 
     public ConfigTool() {
@@ -70,6 +73,11 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
 
                 minion.remote = new RemoteService(UriBuilder.fromUri(oldRemote.getUri()).host(hostname).port(port).build(),
                         oldRemote.getAuthPack());
+
+                if (!config.skipConnectionCheck()) {
+                    // make sure the new setting works.
+                    ConnectivityChecker.checkOrThrow(minion.remote);
+                }
 
                 mm.update(cfg);
                 r.modifyState(s -> {

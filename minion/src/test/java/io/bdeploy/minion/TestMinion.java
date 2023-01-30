@@ -84,7 +84,7 @@ public class TestMinion extends TestServer {
         PluginManager pm = cmr.mr
                 .createPluginManager(getExtensionStore(context).get(CloseableServer.class, CloseableServer.class).getServer());
         BHiveRegistry reg = StartTool.registerCommonResources(this, cmr.mr, new ActivityReporter.Null());
-        StartTool.registerMasterResources(this, reg, true, cmr.mr, pm, RollingFileAuditor.getFactory());
+        StartTool.registerMasterResources(this, reg, true, cmr.mr, pm, RollingFileAuditor.getFactory(), false);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class TestMinion extends TestServer {
             try {
                 root = Files.createTempDirectory("mr-");
                 mr = new MinionRoot(root, new ActivityReporter.Null());
-                InitTool.initMinionRoot(root, mr, "localhost", port, null, mode);
+                InitTool.initMinionRoot(root, mr, "localhost", port, null, mode, true);
                 mr.onStartup(true);
                 mr.setupServerTasks(mr.getMode());
             } catch (Exception e) {

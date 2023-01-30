@@ -16,15 +16,18 @@ public class BackendInfoDto {
     public long time;
     public String name;
     public boolean isNewGitHubReleaseAvailable;
+    public boolean isInitialConnectionCheckFailed;
 
     @JsonCreator
     public BackendInfoDto(@JsonProperty("version") Version version, @JsonProperty("mode") MinionMode mode,
-            @JsonProperty("name") String name, @JsonProperty("isNewGitHubReleaseAvailable") boolean isNewGitHubReleaseAvailable) {
+            @JsonProperty("name") String name, @JsonProperty("isNewGitHubReleaseAvailable") boolean isNewGitHubReleaseAvailable,
+            @JsonProperty("isInitialConnectionCheckFailed") boolean isInitialConnectionCheckFailed) {
         this.version = version;
         this.mode = mode;
         this.time = System.currentTimeMillis();
         this.name = name;
         this.isNewGitHubReleaseAvailable = isNewGitHubReleaseAvailable;
+        this.isInitialConnectionCheckFailed = isInitialConnectionCheckFailed;
     }
 
 }

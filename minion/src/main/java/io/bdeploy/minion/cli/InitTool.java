@@ -32,6 +32,7 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
+import io.bdeploy.minion.ConnectivityChecker;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.InitTool.InitConfig;
@@ -89,6 +90,9 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help("The password for the initial user to create.")
         String initPassword();
+
+        @Help(value = "Skip the check for a valid host/port configuration", arg = false)
+        boolean skipConnectionCheck() default false;
     }
 
     public InitTool() {
@@ -114,7 +118,8 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
             mr.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("init").build());
-            String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments(), config.mode());
+            String pack = initMinionRoot(root, mr, config.hostname(), config.port(), config.deployments(), config.mode(),
+                    config.skipConnectionCheck());
 
             if (config.tokenFile() != null) {
                 Files.write(Paths.get(config.tokenFile()), pack.getBytes(StandardCharsets.UTF_8));
@@ -163,15 +168,16 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
                 result.addField("Software Imported", keys);
             }
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (Exception e) {
+            PathHelper.deleteRecursive(root);
             throw new IllegalStateException("Cannot initialize minion root", e);
         }
 
         return result;
     }
 
-    public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments, MinionMode mode)
-            throws GeneralSecurityException, IOException {
+    public static String initMinionRoot(Path root, MinionRoot mr, String hostname, int port, String deployments, MinionMode mode,
+            boolean skipCheck) throws GeneralSecurityException, IOException {
         MinionState state = mr.initKeys();
 
         SecurityHelper helper = SecurityHelper.getInstance();
@@ -179,6 +185,11 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         String pack = helper.createSignaturePack(aat, state.keystorePath, state.keystorePass);
         RemoteService remote = new RemoteService(UriBuilder.fromUri("https://" + hostname + ":" + port + "/api").build(), pack);
+
+        if (!skipCheck) {
+            // abort in case the hostname/port combo does not work.
+            ConnectivityChecker.checkOrThrow(remote);
+        }
 
         MinionConfiguration minionConfiguration = new MinionConfiguration();
         minionConfiguration.addMinion(Minion.DEFAULT_NAME, MinionDto.create(mode != MinionMode.NODE, remote));

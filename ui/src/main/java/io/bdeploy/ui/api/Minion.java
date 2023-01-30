@@ -126,8 +126,13 @@ public interface Minion {
      */
     public void setSettings(SettingsConfiguration settings);
 
-    default boolean isNewGitHubReleaseAvailable() {
-        return false;
-    }
+    /**
+     * @return whether a newer release is available on GitHub for download.
+     */
+    public boolean isNewGitHubReleaseAvailable();
 
+    /**
+     * @return whether the initial connection check has failed during startup.
+     */
+    public boolean isInitialConnectionCheckFailed();
 }
