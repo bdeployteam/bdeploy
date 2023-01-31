@@ -15,9 +15,9 @@ dependencies {
     )
 
     implementation (
-        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.1',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.1',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.1',
+        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.14.2',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.2',
         'org.apache.commons:commons-compress:1.22',
     )
 
