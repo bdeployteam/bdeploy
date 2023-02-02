@@ -25,6 +25,7 @@ import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessHandleDto;
+import io.bdeploy.interfaces.configuration.pcu.ProcessProbeResultDto.ProcessProbeType;
 import io.bdeploy.interfaces.configuration.pcu.ProcessState;
 import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -139,7 +140,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                             .addField("State", appStatus.status.processState)
                             .addField("Retries", appStatus.retryCount + "/" + appStatus.maxRetryCount)
                             .addField("Start Type", app.isPresent() ? app.get().processControl.startType : "?")
-                            .addField("StdIn attached", (appStatus.hasStdin ? "Yes" : "No"));
+                            .addField("StdIn attached", (appStatus.hasStdin ? "Yes" : "No"))
+                            .addField("Startup Status", getLastProbeStatus(appStatus, ProcessProbeType.STARTUP))
+                            .addField("Lifeness Status", getLastProbeStatus(appStatus, ProcessProbeType.LIFENESS));
 
             if (appStatus.handle != null) {
                 addProcessDetails(result, appStatus.handle, "");
@@ -225,6 +228,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         table.column("OS User", 20);
         table.column("PID", 6);
         table.column(new DataTableColumn("ExitCode", "Exit", 4));
+        table.column("Startup Status", 5);
+        table.column("Lifeness Status", 5);
 
         String instanceId = config.uuid();
         Map<String, Optional<InstanceConfiguration>> instanceInfos = new TreeMap<>();
@@ -289,6 +294,14 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         return status.values().stream().sorted(comparator).toList();
     }
 
+    private String getLastProbeStatus(ProcessDetailDto appStatus, ProcessProbeType type) {
+        if (appStatus.lastProbes == null) {
+            return "";
+        }
+        return appStatus.lastProbes.stream().filter(probe -> probe.type == type).findFirst()
+                .map(probe -> String.valueOf(probe.status)).orElse("");
+    }
+
     private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
             Optional<InstanceConfiguration> instance, InstanceStateRecord deploymentStates,
             Optional<ApplicationConfiguration> cfg) {
@@ -304,7 +317,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .cell(handle == null ? "-" : FormatHelper.format(handle.startTime)) //
                 .cell(handle == null ? "-" : handle.user) //
                 .cell(handle == null ? "-" : Long.toString(handle.pid)) //
-                .cell(Integer.toString(process.exitCode)).build(); //
+                .cell(Integer.toString(process.exitCode)) //
+                .cell(getLastProbeStatus(detail, ProcessProbeType.STARTUP)) //
+                .cell(getLastProbeStatus(detail, ProcessProbeType.LIFENESS)).build(); //
     }
 
 }

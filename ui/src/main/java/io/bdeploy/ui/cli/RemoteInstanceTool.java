@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.descriptor.template.InstanceTemplateReferenceDescriptor;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
@@ -51,6 +53,7 @@ import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.cli.RemoteInstanceTool.InstanceConfig;
+import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.InstanceVersionDto;
@@ -84,17 +87,24 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help(value = "ID of the instance. When exporting must exist. When importing may exist (a new version is created). If not given, a random new ID is generated.")
         String uuid();
 
-        @Help(value = "When exporting, optional version of the existing instance. Otherwise the latest version is exported.")
+        @Help(value = "Version of the existing instance. When exporting must exist.")
         String version();
 
         @Help("Product version to update to")
         String updateTo();
 
-        @Help(value = "List instance versions on the remote", arg = false)
+        @Help(value = "List instance versions on the remote. By default will list active versions. If no active version is found for instance, will display its latest installed version. If no installed version is found for instance, will display its latest version",
+              arg = false)
         boolean list() default false;
 
         @Help(value = "List only active instance versions", arg = false)
         boolean active() default false;
+
+        @Help(value = "List only installed instance versions", arg = false)
+        boolean installed() default false;
+
+        @Help(value = "List all instance versions", arg = false)
+        boolean all() default false;
 
         @Help("List only a certain amount of versions per instance. Specify zero for no limit.")
         int limit() default 5;
@@ -142,7 +152,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         helpAndFailIfMissing(config.instanceGroup(), "--instanceGroup missing");
 
         if (config.list()) {
-            return list(remote, config);
+            return doList(remote, config);
         }
 
         InstanceResource ir = ResourceProvider.getVersionedResource(remote, InstanceGroupResource.class, getLocalContext())
@@ -399,7 +409,11 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         return result;
     }
 
-    private DataTable list(RemoteService remote, InstanceConfig config) {
+    private DataTable doList(RemoteService remote, InstanceConfig config) {
+        int flagCount = (config.all() ? 1 : 0) + (config.installed() ? 1 : 0) + (config.active() ? 1 : 0);
+        if (flagCount > 1) {
+            helpAndFail("You can enable only one flag at a time: --all, --installed or --active");
+        }
         BackendInfoResource bir = ResourceProvider.getVersionedResource(remote, BackendInfoResource.class, getLocalContext());
         boolean central = false;
         if (bir.getVersion().mode == MinionMode.CENTRAL) {
@@ -428,24 +442,13 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
             var versions = ir.listVersions(instance.instanceConfiguration.id);
             var state = ir.getDeploymentStates(instance.instanceConfiguration.id);
-            versions.sort((a, b) -> Long.compare(Long.parseLong(b.key.getTag()), Long.parseLong(a.key.getTag())));
-            var limited = versions;
-            if (config.limit() > 0 && config.limit() < versions.size()) {
-                limited = versions.subList(0, config.limit());
-            }
+            var limited = sortFilterLimit(versions, state, instance, config, ir);
             for (var version : limited) {
-                if (config.version() != null && !config.version().isBlank() && !version.key.getTag().equals(config.version())) {
-                    continue;
-                }
-
                 boolean isActive = version.key.getTag().equals(state.activeTag); // activeTag may be null.
                 boolean isInstalled = state.installedTags.contains(version.key.getTag());
 
-                if (config.active() && !isActive) {
-                    continue;
-                }
-
                 InstanceConfiguration vCfg = ir.readVersion(instance.instanceConfiguration.id, version.key.getTag());
+
                 DataTableRowBuilder row = table.row();
 
                 row.cell(instance.instanceConfiguration.id).cell(vCfg.name).cell(version.key.getTag())
@@ -465,6 +468,84 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             }
         }
         return table;
+    }
+
+    private List<InstanceVersionDto> sortFilterLimit(List<InstanceVersionDto> versions, InstanceStateRecord state,
+            InstanceDto instance, InstanceConfig config, InstanceResource ir) {
+        // sort versions in descending order (latest first)
+        versions.sort((a, b) -> Long.compare(Long.parseLong(b.key.getTag()), Long.parseLong(a.key.getTag())));
+
+        // filter instance versions by --all, --installed, --active flags
+        List<InstanceVersionDto> prefiltered = filterByAllInstalledOrActive(versions, state, config);
+
+        // filter instance versions by --version and --purpose
+        List<InstanceVersionDto> filtered = filterByVersionAndPurpose(prefiltered, state, instance, config, ir);
+
+        // return limited list
+        if (config.limit() > 0 && config.limit() < filtered.size()) {
+            return filtered.subList(0, config.limit());
+        } else {
+            return filtered;
+        }
+    }
+
+    private List<InstanceVersionDto> filterByAllInstalledOrActive(List<InstanceVersionDto> versions, InstanceStateRecord state,
+            InstanceConfig config) {
+        List<InstanceVersionDto> filtered = new ArrayList<>();
+        boolean isDefaultSearch = !config.all() && !config.installed() && !config.active();
+        InstanceVersionDto latestInstalled = null;
+        for (var version : versions) {
+            boolean searchForActive = isDefaultSearch || config.active();
+            boolean searchForInstalled = config.installed();
+            boolean isActive = version.key.getTag().equals(state.activeTag); // activeTag may be null.
+            boolean isInstalled = state.installedTags.contains(version.key.getTag());
+
+            if (isInstalled && latestInstalled == null) {
+                latestInstalled = version;
+            }
+
+            if (searchForActive && !isActive) {
+                continue;
+            }
+
+            if (searchForInstalled && !isInstalled) {
+                continue;
+            }
+
+            filtered.add(version);
+        }
+
+        // By default if no active version is found, we add latest installed version (or just latest version if nothing is installed)
+        if (filtered.isEmpty() && isDefaultSearch) {
+            if (latestInstalled != null) {
+                filtered.add(latestInstalled);
+            } else if (!versions.isEmpty()) {
+                filtered.add(versions.get(0));
+            }
+        }
+        return filtered;
+    }
+
+    private List<InstanceVersionDto> filterByVersionAndPurpose(List<InstanceVersionDto> versions, InstanceStateRecord state,
+            InstanceDto instance, InstanceConfig config, InstanceResource ir) {
+        List<InstanceVersionDto> filtered = new ArrayList<>();
+
+        for (var version : versions) {
+            if (config.version() != null && !config.version().isBlank() && !version.key.getTag().equals(config.version())) {
+                continue;
+            }
+
+            InstanceConfiguration vCfg = ir.readVersion(instance.instanceConfiguration.id, version.key.getTag());
+
+            if (config.purpose() != null && !config.purpose().equals(vCfg.purpose)) {
+                continue;
+            }
+
+            filtered.add(version);
+        }
+
+        return filtered;
+
     }
 
 }
