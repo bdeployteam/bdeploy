@@ -53,7 +53,7 @@ Command | Description
 `remote-data-files` | Remotely manage data files for a given instance.
 `remote-deployment` | Manage **Instance** deployment (_install_, _activate_, _uninstall_, _updateTo_ (product version)) on a remote **BDeploy** server.<br/><br/>:information_source:**NOTE** The `--updateTo` command will only work if the new product version can be updated to without manual changes. If for example a mandatory parameter is added, or a configured application is removed from the product, the update will fail.
 `remote-group` | Manage **Instance Groups** on a remote **BDeploy** server.
-`remote-instance` | Query and manage **Instances** on the remote **BDeploy** server. Can be used to **export** (to _ZIP_) and **import** (from _ZIP_) **Instances** locally.
+`remote-instance` | Query and manage **Instances** on the remote **BDeploy** server. Can be used to **create**, **export** (to _ZIP_) and **import** (from _ZIP_) **Instances** locally.<br/>:information_source:**NOTE** Creating instances from a template requires a response file. The format is the same as the [`instances` section of **System Templates**](/power/product/#supported-instances-attributes).
 `remote-master` | Query and manage system information on a remote **BDeploy** server. Allows to update both the **BDeploy** system software as well as the **BDeploy** launcher binaries.
 `remote-node` | Manage **nodes** attached to the remote **BDeploy** server.
 `remote-plugin` | Manage plugins available on the remote **BDeploy** server or install new ones from local `jar` files.
