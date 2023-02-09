@@ -50,6 +50,7 @@ Command | Description
 Command | Description
 ---     | ---
 `remote-central` | Manage remote configuration related to _managed_ servers on a _central_ server. Also allows to attach _managed_ servers to a _central_ server.
+`remote-config-files` | Remotely manage configuration files for a given instance.
 `remote-data-files` | Remotely manage data files for a given instance.
 `remote-deployment` | Manage **Instance** deployment (_install_, _activate_, _uninstall_, _updateTo_ (product version)) on a remote **BDeploy** server.<br/><br/>:information_source:**NOTE** The `--updateTo` command will only work if the new product version can be updated to without manual changes. If for example a mandatory parameter is added, or a configured application is removed from the product, the update will fail.
 `remote-group` | Manage **Instance Groups** on a remote **BDeploy** server.
@@ -57,7 +58,9 @@ Command | Description
 `remote-master` | Query and manage system information on a remote **BDeploy** server. Allows to update both the **BDeploy** system software as well as the **BDeploy** launcher binaries.
 `remote-node` | Manage **nodes** attached to the remote **BDeploy** server.
 `remote-plugin` | Manage plugins available on the remote **BDeploy** server or install new ones from local `jar` files.
+`remote-ports` | List ports configured for a specified instance.
 `remote-process` | Query and manage application processes managed by **BDeploy** on a remote **BDeploy** server.
+`remote-process-config` | Manipulate the process configuration (parameters) of a given instance remotely.
 `remote-product` | Query and manage products available on the given **Instance Group** on a remote **BDeploy** server.
 `remote-product-validation` | Uses a [`product-validation.yaml`](/power/product/#product-validationyaml) file to perform a remote pre-validation of a product to be built in the future.
 `remote-repo` | Query and manage **Software Repositories** on a remote **BDeploy** server.
