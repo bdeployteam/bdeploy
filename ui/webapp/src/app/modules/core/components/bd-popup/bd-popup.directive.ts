@@ -193,6 +193,7 @@ export class BdPopupDirective implements OnDestroy {
       scrollStrategy: this.overlay.scrollStrategies.close(),
       hasBackdrop: this.appBdPopupTrigger === 'click',
       backdropClass: this.appBdPopupBackdropClass,
+      panelClass: 'bd-text',
       disposeOnNavigation: true,
     });
     this.overlayRef.backdropClick().subscribe(() => this.closeOverlay());
