@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -122,8 +123,13 @@ public class RemoteDataFilesCliTest {
             result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                     "--instanceGroup=demo", "--uuid=" + id, "--list");
             assertEquals(2, result.size());
-            assertEquals("file1", result.get(0).get("Path"));
-            assertEquals("file2", result.get(1).get("Path"));
+
+            // don't assume order, might be locale dependent.
+            var x = new ArrayList<String>();
+            x.add(result.get(0).get("Path"));
+            x.add(result.get(1).get("Path"));
+            assertTrue(x.contains("file1"));
+            assertTrue(x.contains("file2"));
 
             /* list with --filter */
             result = tools.execute(RemoteDataFilesTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
