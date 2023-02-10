@@ -246,9 +246,13 @@ Cypress.Commands.add(
 Cypress.Commands.add('typeInMonacoEditor', function (text, clear = false) {
   if (clear) {
     const selectAllKeys = Cypress.platform == 'darwin' ? '{cmd}a' : '{ctrl}a';
-    cy.monacoEditor().click().focused().type(selectAllKeys).clear();
+    cy.monacoEditor()
+      .click({ force: true })
+      .focused()
+      .type(selectAllKeys)
+      .clear();
   }
-  cy.monacoEditor().click().focused().type(text);
+  cy.monacoEditor().click({ force: true }).focused().type(text);
 });
 
 Cypress.Commands.add('monacoEditor', function () {
