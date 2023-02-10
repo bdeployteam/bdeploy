@@ -21,6 +21,12 @@ public class JerseyScopeService {
         this.reqCtx.setProperty(BD_USER, user);
     }
 
+    public void clear() {
+        this.reqCtx.removeProperty(BD_SCOPES);
+        this.reqCtx.removeProperty(BD_USER);
+        this.reqCtx.clear();
+    }
+
     @SuppressWarnings("unchecked")
     public List<String> getScope() {
         return (List<String>) this.reqCtx.getProperty(BD_SCOPES);

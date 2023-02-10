@@ -18,13 +18,15 @@ import io.bdeploy.jersey.JerseyScopeService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
-public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFilter {
+public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     @Inject
     private jakarta.inject.Provider<MultivaluedParameterExtractorProvider> mpep;
@@ -71,6 +73,12 @@ public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFi
             }
             scopeService.setScope(scope, user);
         }
+    }
+
+    @Override
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+        // no matter the response, we want to clear out the current scope information.
+        scopeService.clear();
     }
 
     private List<String> getMethodScope(ExtendedUriInfo info, ResourceMethod m) {

@@ -96,7 +96,7 @@ class MasterCliTest {
 
         tools.execute(CleanupTool.class, "--root=" + root, "--setSchedule=1 0 0 * * ?");
         var output = tools.execute(CleanupTool.class, "--root=" + root);
-        assertTrue(output.get(0).get("Schedule").equals("1 0 0 * * ?"));
+        assertEquals("1 0 0 * * ?", output.get(0).get("Schedule"));
 
         // test certificate update with the same certificate
         try (MinionRoot mr = new MinionRoot(root, reporter)) {

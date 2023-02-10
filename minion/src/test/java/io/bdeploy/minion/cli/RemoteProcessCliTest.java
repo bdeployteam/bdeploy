@@ -34,7 +34,7 @@ import io.bdeploy.ui.cli.RemoteProcessTool;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class RemoteProcessCliTest {
+class RemoteProcessCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());

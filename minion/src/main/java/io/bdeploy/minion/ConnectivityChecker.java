@@ -44,13 +44,16 @@ public class ConnectivityChecker {
                 }, "Connection-Check-Server").start();
 
                 try (Socket c = new Socket(remote.getUri().getHost(), port)) {
-                    if (!c.isConnected() || !accepted.get(10, TimeUnit.SECONDS)) {
+                    if (!c.isConnected() || !Boolean.TRUE.equals(accepted.get(10, TimeUnit.SECONDS))) {
                         throw new IllegalStateException("Connection not established after connection attempt");
                     }
 
                     log.info("Connection check performed successfully.");
                 }
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Connection check to " + remote.getUri() + " was interrupted unexpectedly.", e);
         } catch (Exception e) {
             throw new IllegalStateException(
                     "Cannot verify connectivity to " + remote.getUri() + ". Correct the hostname or port if necessary.", e);

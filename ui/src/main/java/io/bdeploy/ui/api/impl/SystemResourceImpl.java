@@ -3,11 +3,7 @@ package io.bdeploy.ui.api.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.SortedSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
@@ -52,8 +48,6 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
 
 public class SystemResourceImpl implements SystemResource {
-
-    private static final Logger log = LoggerFactory.getLogger(SystemResourceImpl.class);
 
     private final String group;
     private final BHive hive;
@@ -191,8 +185,8 @@ public class SystemResourceImpl implements SystemResource {
             InstanceTemplateResourceImpl itr = rc.initResource(new InstanceTemplateResourceImpl(group, hive));
 
             for (InstanceTemplateReferenceDescriptor instance : template.instances) {
-                Optional<ProductDto> product = itr.findMatchingProductOrFail(instance, products);
-                result.products.add(product.get());
+                ProductDto product = itr.findMatchingProductOrFail(instance, products);
+                result.products.add(product);
             }
 
             result.template = template;

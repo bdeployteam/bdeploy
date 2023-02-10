@@ -40,7 +40,7 @@ import jakarta.ws.rs.BadRequestException;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class RemoteDataFilesCliTest {
+class RemoteDataFilesCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());

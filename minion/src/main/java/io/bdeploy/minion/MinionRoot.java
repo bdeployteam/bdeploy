@@ -588,7 +588,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             try {
                 Files.move(bakCfg, cfg, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException e) {
-                log.error("Cannot automatically restore " + cfg + " from " + bakCfg);
+                log.error("Cannot automatically restore {} from {}", cfg, bakCfg);
             }
         }
 

@@ -479,7 +479,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         List<InstanceVersionDto> prefiltered = filterByAllInstalledOrActive(versions, state, config);
 
         // filter instance versions by --version and --purpose
-        List<InstanceVersionDto> filtered = filterByVersionAndPurpose(prefiltered, state, instance, config, ir);
+        List<InstanceVersionDto> filtered = filterByVersionAndPurpose(prefiltered, instance, config, ir);
 
         // return limited list
         if (config.limit() > 0 && config.limit() < filtered.size()) {
@@ -526,8 +526,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         return filtered;
     }
 
-    private List<InstanceVersionDto> filterByVersionAndPurpose(List<InstanceVersionDto> versions, InstanceStateRecord state,
-            InstanceDto instance, InstanceConfig config, InstanceResource ir) {
+    private List<InstanceVersionDto> filterByVersionAndPurpose(List<InstanceVersionDto> versions, InstanceDto instance,
+            InstanceConfig config, InstanceResource ir) {
         List<InstanceVersionDto> filtered = new ArrayList<>();
 
         for (var version : versions) {

@@ -1,10 +1,8 @@
 console.log(navigator.userAgent);
 
-var isIE = !!document.documentMode;
-
-var isEdge = !isIE && !!window.StyleMedia;
-
-var isSafari = window.safari !== undefined;
+const isIE = !!document.documentMode;
+const isEdge = !isIE && !!window.StyleMedia;
+const isSafari = window.safari !== undefined;
 
 if (isIE || isEdge || isSafari) {
   window.location.assign('/badbrowser.html');

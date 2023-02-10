@@ -59,4 +59,9 @@ public class JerseyRequestContext {
             fallback.get().remove(name);
         }
     }
+
+    public void clear() {
+        // cleanup potential thread local state.
+        fallback.remove();
+    }
 }

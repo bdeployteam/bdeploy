@@ -2,6 +2,7 @@ package io.bdeploy.ui.cli;
 
 import static io.bdeploy.common.util.StringHelper.isNullOrEmpty;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -283,9 +284,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .map(instanceNodeConfigurationDto -> instanceNodeConfigurationDto.nodeConfiguration).filter(Objects::nonNull)
                 .filter(nodeConfig -> isNullOrEmpty(controlGroupNodeName) || controlGroupNodeName.equals(nodeConfig.name))
                 .map(instanceNodeConfiguration -> instanceNodeConfiguration.controlGroups).filter(Objects::nonNull)
-                .flatMap(controlGroups -> controlGroups.stream())
+                .flatMap(Collection::stream)
                 .filter(controlGroup -> isNullOrEmpty(controlGroupName) || controlGroupName.equals(controlGroup.name))
-                .map(controlGroup -> controlGroup.processOrder).flatMap(processOrder -> processOrder.stream()).toList();
+                .map(controlGroup -> controlGroup.processOrder).flatMap(Collection::stream).toList();
 
         Map<String, ProcessStatusDto> status = ir.getProcessResource(instanceId).getStatus();
 

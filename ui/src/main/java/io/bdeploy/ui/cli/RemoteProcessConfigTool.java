@@ -118,7 +118,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         ParameterDescriptor desc = dto.descriptor.startCommand.parameters.stream().filter(p -> p.id.equals(config.remove()))
                 .findFirst().orElse(null);
 
-        checkCanRemove(cfg.start.parameters.get(myIndex), desc);
+        checkCanRemove(desc);
         doRemoveParamterInternal(cfg, dto.descriptor, findNodeForApp(nodecfg, cfg), cfg.start.parameters.remove(myIndex));
         checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
 
@@ -143,7 +143,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private void checkCanRemove(ParameterConfiguration param, ParameterDescriptor desc) {
+    private void checkCanRemove(ParameterDescriptor desc) {
         if (desc == null) {
             return; // custom
         }
@@ -161,7 +161,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         int myDescIndex = CollectionHelper.indexOf(pdescs, p -> p.id.equals(config.set()));
 
         if (myDescIndex >= 0) {
-            checkCanSet(pdescs.get(myDescIndex), pdescs, cfg, dto.descriptor, findNodeForApp(nodecfg, cfg));
+            checkCanSet(pdescs.get(myDescIndex), cfg, dto.descriptor, findNodeForApp(nodecfg, cfg));
         }
 
         if (myIndex == -1 && myDescIndex >= 0) {
@@ -170,7 +170,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
 
             var param = new ParameterConfiguration();
             param.id = config.set();
-            doSetParameterInternal(cfg, dto.descriptor, param, pdescs.get(myDescIndex), config.value(), nodecfg);
+            doSetParameterInternal(param, pdescs.get(myDescIndex), config.value(), nodecfg);
 
             if (!insertLast) {
                 // lookup the next descriptor which has a value in the parameter list. insert the new parameter right *before* the
@@ -196,7 +196,7 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             // not found, and no descriptor - new custom parameter.
             var param = new ParameterConfiguration();
             param.id = config.set();
-            doSetParameterInternal(cfg, dto.descriptor, param, null, config.value(), nodecfg);
+            doSetParameterInternal(param, null, config.value(), nodecfg);
 
             // if no predecessor insert first.
             if (config.predecessor() != null) {
@@ -216,8 +216,8 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
             }
         } else {
             var existing = cfg.start.parameters.get(myIndex);
-            doSetParameterInternal(cfg, dto.descriptor, existing,
-                    pdescs.stream().filter(p -> p.id.equals(config.set())).findFirst().orElse(null), config.value(), nodecfg);
+            doSetParameterInternal(existing, pdescs.stream().filter(p -> p.id.equals(config.set())).findFirst().orElse(null),
+                    config.value(), nodecfg);
         }
 
         checkNoMandatoryConditionalChanges(cfg, dto.descriptor, nodecfg);
@@ -231,8 +231,8 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
                 .orElseThrow();
     }
 
-    private void doSetParameterInternal(ApplicationConfiguration app, ApplicationDescriptor appDesc, ParameterConfiguration param,
-            ParameterDescriptor desc, String value, InstanceNodeConfigurationListDto nodes) {
+    private void doSetParameterInternal(ParameterConfiguration param, ParameterDescriptor desc, String value,
+            InstanceNodeConfigurationListDto nodes) {
         param.value = new LinkedValueConfiguration(value);
         param.preRender(desc);
 
@@ -267,8 +267,8 @@ public class RemoteProcessConfigTool extends RemoteServiceTool<ProcessManipulati
         }
     }
 
-    private void checkCanSet(ParameterDescriptor desc, List<ParameterDescriptor> pdescs, ApplicationConfiguration app,
-            ApplicationDescriptor appDesc, InstanceNodeConfigurationDto node) {
+    private void checkCanSet(ParameterDescriptor desc, ApplicationConfiguration app, ApplicationDescriptor appDesc,
+            InstanceNodeConfigurationDto node) {
         if (desc.fixed) {
             throw new IllegalArgumentException("Cannot set fixed parameter value");
         }

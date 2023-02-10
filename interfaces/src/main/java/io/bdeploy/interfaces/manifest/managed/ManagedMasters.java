@@ -1,8 +1,5 @@
 package io.bdeploy.interfaces.manifest.managed;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.meta.MetaManifest;
 import io.bdeploy.bhive.model.Manifest;
@@ -14,8 +11,6 @@ import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
  * Encapsulates a {@link MetaManifest} which keeps track of attached servers
  */
 public class ManagedMasters {
-
-    private static final Logger log = LoggerFactory.getLogger(ManagedMasters.class);
 
     private final BHive hive;
     private final MetaManifest<ManagedMastersConfiguration> meta;

@@ -113,22 +113,22 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         // 1. find and verify product.
         ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
         List<ProductDto> products = pr.list(null);
-        Optional<ProductDto> product = findMatchingProductOrFail(instance, products);
+        ProductDto product = findMatchingProductOrFail(instance, products);
 
         // 2. find and verify all group mappings and whether all variables are set for each required group.
         Map<String, MinionStatusDto> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context)
                 .getNodes();
 
-        FlattenedInstanceTemplateConfiguration tpl = product.get().instanceTemplates.stream()
+        FlattenedInstanceTemplateConfiguration tpl = product.instanceTemplates.stream()
                 .filter(t -> t.name.equals(instance.templateName)).findFirst()
                 .orElseThrow(() -> new WebApplicationException("Cannot find specified instance template: " + instance.templateName
-                        + " in best matching product version " + product.get().key, Status.EXPECTATION_FAILED));
+                        + " in best matching product version " + product.key, Status.EXPECTATION_FAILED));
 
         Map<String, String> groupToNode = new TreeMap<>();
-        for (FlattenedInstanceTemplateGroupConfiguration group : tpl.groups) {
+        for (FlattenedInstanceTemplateGroupConfiguration grp : tpl.groups) {
             SystemTemplateInstanceTemplateGroupMapping mapping = instance.defaultMappings.stream()
-                    .filter(g -> g.group.equals(group.name)).findFirst().orElseThrow(() -> new WebApplicationException(
-                            "The template does not specify a mapping for group " + group.name, Status.EXPECTATION_FAILED));
+                    .filter(g -> g.group.equals(grp.name)).findFirst().orElseThrow(() -> new WebApplicationException(
+                            "The template does not specify a mapping for group " + grp.name, Status.EXPECTATION_FAILED));
 
             if (mapping == null) {
                 continue; // ignored
@@ -136,17 +136,17 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
             if (nodes.get(mapping.node) == null) {
                 throw new WebApplicationException(
-                        "Group " + group.name + " is mapped to node " + mapping.node + " but that node cannot be found",
+                        "Group " + grp.name + " is mapped to node " + mapping.node + " but that node cannot be found",
                         Status.EXPECTATION_FAILED);
             }
 
-            groupToNode.put(group.name, mapping.node);
+            groupToNode.put(grp.name, mapping.node);
 
             // otherwise check variables.
-            for (TemplateVariable tvar : group.groupVariables) {
+            for (TemplateVariable tvar : grp.groupVariables) {
                 instance.fixedVariables.stream().filter(v -> v.id.equals(tvar.id)).findFirst()
                         .orElseThrow(() -> new WebApplicationException(
-                                "Template Variable " + tvar.id + " not provided, required in group " + group.name,
+                                "Template Variable " + tvar.id + " not provided, required in group " + grp.name,
                                 Status.EXPECTATION_FAILED));
             }
         }
@@ -162,7 +162,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         TrackingTemplateOverrideResolver ttor = new TrackingTemplateOverrideResolver(instance.fixedVariables);
 
         // 4. finally create the instance on the target.
-        var result = createInstanceFromTemplateRequest(remote, null, instance, product.get().key, groupToNode, ttor, purpose);
+        var result = createInstanceFromTemplateRequest(remote, null, instance, product.key, groupToNode, ttor, purpose);
 
         if (result.status != InstanceTemplateReferenceStatus.ERROR) {
             // sync in case of central and success... :)
@@ -173,7 +173,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         return result;
     }
 
-    Optional<ProductDto> findMatchingProductOrFail(InstanceTemplateReferenceDescriptor instance, List<ProductDto> products) {
+    ProductDto findMatchingProductOrFail(InstanceTemplateReferenceDescriptor instance, List<ProductDto> products) {
         boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
                 || instance.productVersionRegex.equals(".*"));
 
@@ -200,7 +200,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
                     Status.NOT_ACCEPTABLE);
         }
 
-        return product;
+        return product.get();
     }
 
     InstanceTemplateReferenceResultDto createInstanceFromTemplateRequest(RemoteService remote, Manifest.Key systemKey,
