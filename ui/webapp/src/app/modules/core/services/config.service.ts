@@ -49,6 +49,7 @@ export class ConfigService {
   isManaged$ = new BehaviorSubject<boolean>(false);
   isStandalone$ = new BehaviorSubject<boolean>(false);
   isNewGitHubReleaseAvailable$ = new BehaviorSubject<boolean>(false);
+  isUpdateInstallSucceeded$ = new BehaviorSubject<boolean>(false);
 
   // prettier-ignore
   constructor(
