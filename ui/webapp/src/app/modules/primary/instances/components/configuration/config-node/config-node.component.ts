@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
-import { BdDataColumn } from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
   InstanceNodeConfigurationDto,
@@ -23,8 +23,12 @@ import {
   DragReorderEvent,
 } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { DEF_CONTROL_GROUP } from 'src/app/modules/panels/instances/utils/instance-utils';
-import { InstanceEditService } from '../../../services/instance-edit.service';
+import {
+  InstanceEditService,
+  ProcessEditState,
+} from '../../../services/instance-edit.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
+import { ProcessNameAndOsComponent } from '../../process-name-and-os/process-name-and-os.component';
 
 @Component({
   selector: 'app-config-node',
@@ -42,6 +46,25 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     showWhen: '(min-width:1000px)',
   };
 
+  private processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> =
+    {
+      id: 'name',
+      name: 'Name',
+      hint: BdDataColumnTypeHint.TITLE,
+      data: (r) => r.name,
+      classes: (r) => this.getStateClass(r),
+    };
+
+  private processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> =
+    {
+      id: 'name',
+      name: 'Name and OS',
+      hint: BdDataColumnTypeHint.TITLE,
+      data: (r) => r.name,
+      classes: (r) => this.getStateClass(r),
+      component: ProcessNameAndOsComponent,
+    };
+
   /* template */ node$ = new BehaviorSubject<MinionDto>(null);
   /* template */ config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(
     null
@@ -58,9 +81,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   /* template */ clientTableId =
     CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
 
-  /* template */ cols: BdDataColumn<ApplicationConfiguration>[] = [
-    ...this.columns.defaultProcessesConfigColumns,
-  ];
+  /* template */ cols: BdDataColumn<ApplicationConfiguration>[] = [];
 
   @ViewChildren(BdDataTableComponent) data: QueryList<
     BdDataTableComponent<ApplicationConfiguration>
@@ -103,7 +124,15 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.node = this.isClientNode ? 'Client Applications' : this.nodeName;
 
       if (this.isClientNode) {
-        this.cols = [...this.columns.defaultProcessesConfigClientColumns];
+        this.cols = [
+          this.processNameAndOsAndEditStatusColumn,
+          ...this.columns.defaultProcessesConfigColumns,
+        ];
+      } else {
+        this.cols = [
+          this.processNameAndEditStatusColumn,
+          ...this.columns.defaultProcessesConfigColumns,
+        ];
       }
     });
 
@@ -220,5 +249,17 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     group: ProcessControlGroupConfiguration
   ) {
     return group.name;
+  }
+
+  private getStateClass(r: ApplicationConfiguration) {
+    switch (this.edit.getProcessEditState(r.id)) {
+      case ProcessEditState.ADDED:
+        return ['bd-status-border-added'];
+      case ProcessEditState.INVALID:
+        return ['bd-status-border-invalid'];
+      case ProcessEditState.CHANGED:
+        return ['bd-status-border-changed'];
+    }
+    return ['bd-status-border-none'];
   }
 }

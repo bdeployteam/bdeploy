@@ -13,6 +13,7 @@
       text="Jump to Configuration"
       icon="settings"
       tooltip="below"
+      [disabled]="!(auth.isCurrentScopeWrite$ | async)"
       (click)="
           areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, instances.current$.value.instanceConfiguration.id], ['panels', 'instances', 'config', 'process', nodeCfg.nodeName, processConfig.id])
         "

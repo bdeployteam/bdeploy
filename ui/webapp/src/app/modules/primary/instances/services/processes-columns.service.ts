@@ -11,7 +11,6 @@ import { ProcessOutdatedComponent } from '../components/dashboard/process-outdat
 import { ProcessStatusIconComponent } from '../components/dashboard/process-status-icon/process-status-icon.component';
 import { PortStatusColumnComponent } from '../components/port-status-column/port-status-column.component';
 import { ProcessNameAndOsComponent } from '../components/process-name-and-os/process-name-and-os.component';
-import { InstanceEditService, ProcessEditState } from './instance-edit.service';
 import { InstancesService } from './instances.service';
 import { PortsService } from './ports.service';
 import { ProcessesService } from './processes.service';
@@ -54,24 +53,6 @@ export class ProcessesColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
-    id: 'name',
-    name: 'Name',
-    hint: BdDataColumnTypeHint.TITLE,
-    data: (r) => r.name,
-    classes: (r) => this.getStateClass(r),
-  };
-
-  processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> =
-    {
-      id: 'name',
-      name: 'Name and OS',
-      hint: BdDataColumnTypeHint.TITLE,
-      data: (r) => r.name,
-      classes: (r) => this.getStateClass(r),
-      component: ProcessNameAndOsComponent,
-    };
-
   processOsColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'os',
     name: 'OS',
@@ -83,7 +64,10 @@ export class ProcessesColumnsService {
   applicationNameColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'appName',
     name: 'Application Type',
-    data: (r) => this.edit.getApplicationDescriptor(r.application.name)?.name,
+    data: (r) =>
+      this.instances.activeNodeCfgs$.value?.applications?.find(
+        (app) => app.name === r.name
+      )?.descriptor?.name, // this.edit.getApplicationDescriptor(r.application.name)?.name,
     width: '200px',
     showWhen: '(min-width: 1180px)',
   };
@@ -145,25 +129,15 @@ export class ProcessesColumnsService {
   ];
 
   defaultProcessesConfigColumns: BdDataColumn<ApplicationConfiguration>[] = [
-    this.processNameAndEditStatusColumn,
     this.processIdColumn,
     this.processAvatarColumn,
     this.applicationNameColumn,
   ];
 
-  defaultProcessesConfigClientColumns: BdDataColumn<ApplicationConfiguration>[] =
-    [
-      this.processNameAndOsAndEditStatusColumn,
-      this.processIdColumn,
-      this.processAvatarColumn,
-      this.applicationNameColumn,
-    ];
-
   constructor(
     private processes: ProcessesService,
     private instances: InstancesService,
-    private ports: PortsService,
-    private edit: InstanceEditService
+    private ports: PortsService
   ) {}
 
   private getAllPortsRating(r: ApplicationConfiguration) {
@@ -184,17 +158,5 @@ export class ProcessesColumnsService {
       // process not running, all ports should be closed.
       return appPorts.every((p) => !p.state);
     }
-  }
-
-  private getStateClass(r: ApplicationConfiguration) {
-    switch (this.edit.getProcessEditState(r.id)) {
-      case ProcessEditState.ADDED:
-        return ['bd-status-border-added'];
-      case ProcessEditState.INVALID:
-        return ['bd-status-border-invalid'];
-      case ProcessEditState.CHANGED:
-        return ['bd-status-border-changed'];
-    }
-    return ['bd-status-border-none'];
   }
 }

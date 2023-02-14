@@ -18,7 +18,6 @@ import { BdDataDisplayComponent } from 'src/app/modules/core/components/bd-data-
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
-import { InstanceEditService } from '../../../../services/instance-edit.service';
 import { InstancesService } from '../../../../services/instances.service';
 import { ProcessesBulkService } from '../../../../services/processes-bulk.service';
 import { ProcessesColumnsService } from '../../../../services/processes-columns.service';
@@ -76,7 +75,6 @@ export class NodeProcessListComponent
     public bulk: ProcessesBulkService,
     private ports: PortsService,
     private instances: InstancesService,
-    private edit: InstanceEditService,
     private systems: SystemsService
   ) {
     this.columns.splice(2, 0, this.processCtrlGroupColumn);
@@ -127,15 +125,24 @@ export class NodeProcessListComponent
     record: ApplicationConfiguration,
     p: ParameterConfiguration
   ): string {
-    const system = this.edit.state$?.value?.config?.config?.system
+    const instanceConfiguration =
+      this.instances.active$.value?.instanceConfiguration;
+
+    const system = instanceConfiguration?.system
       ? this.systems.systems$.value?.find(
-          (s) => s.key.name === this.edit.state$.value.config.config.system.name
+          (s) => s.key.name === instanceConfiguration.system.name
         )
       : null;
+
+    const nodeDtos = this.instances.activeNodeCfgs$.value?.nodeConfigDtos;
+
     return getRenderPreview(
       p.value,
       record,
-      this.edit.state$.value?.config,
+      {
+        config: instanceConfiguration,
+        nodeDtos,
+      },
       system?.config
     );
   }
