@@ -48,7 +48,7 @@ public class ConnectivityChecker {
                         throw new IllegalStateException("Connection not established after connection attempt");
                     }
 
-                    log.info("Connection check performed successfully.");
+                    log.info("Connection check performed successfully: " + remote.getUri());
                 }
             }
         } catch (InterruptedException e) {

@@ -4,6 +4,7 @@ import { finalize } from 'rxjs/operators';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import {
@@ -29,7 +30,11 @@ export class SoftwareDetailsComponent implements OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(areas: NavAreasService, private software: SoftwareUpdateService) {
+  constructor(
+    areas: NavAreasService,
+    private software: SoftwareUpdateService,
+    public cfg: ConfigService
+  ) {
     this.subscription = combineLatest([
       areas.panelRoute$,
       software.software$,
@@ -88,6 +93,7 @@ export class SoftwareDetailsComponent implements OnDestroy {
           .updateBdeploy(this.software$.value.system)
           .pipe(finalize(() => this.installing$.next(false)))
           .subscribe(() => {
+            this.cfg.isUpdateInstallSucceeded$.next(true);
             this.software.load();
           });
       });

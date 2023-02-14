@@ -27,7 +27,7 @@
         [collapsed]="false"
         (click)="doInstall()"
         [loadingWhen$]="installing$"
-        [disabled]="!(software$ | async)?.system?.length || (software$ | async)?.current || (installing$ | async)"
+        [disabled]="!(software$ | async)?.system?.length || (software$ | async)?.current || (installing$ | async) || (cfg.isUpdateInstallSucceeded$ | async)"
       ></app-bd-button>
       <app-bd-button
         icon="delete"
