@@ -141,6 +141,12 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
         @Help("The version of the product to set for the created instance")
         String productVersion();
 
+        @Help(value = "Delete the given instance. This CANNOT BE UNDONE.", arg = false)
+        boolean delete() default false;
+
+        @Help(value = "Use this flag to avoid confirmation prompt when deleting instance.", arg = false)
+        boolean yes() default false;
+
     }
 
     public RemoteInstanceTool() {
@@ -176,6 +182,8 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
             return doImport(remote, config);
         } else if (config.updateTo() != null) {
             return doUpdateProduct(remote, ir, config);
+        } else if (config.delete()) {
+            return doDelete(config, ir);
         } else {
             return createNoOp();
         }
@@ -548,4 +556,19 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
 
     }
 
+    private DataResult doDelete(InstanceConfig config, InstanceResource ir) {
+        if (config.yes() || confirmDelete(config, ir)) {
+            ir.delete(config.uuid());
+            return createSuccess().addField("Deleted", config.uuid());
+        } else {
+            return createResultWithErrorMessage("Aborted, no confirmation");
+        }
+    }
+
+    private boolean confirmDelete(InstanceConfig config, InstanceResource ir) {
+        String instanceName = ir.read(config.uuid()).name;
+        String confirmation = System.console().readLine("Delete instance %1$s (%2$s)? This CANNOT be undone. (Y/N)? ",
+                config.uuid(), instanceName);
+        return "Y".equalsIgnoreCase(confirmation);
+    }
 }
