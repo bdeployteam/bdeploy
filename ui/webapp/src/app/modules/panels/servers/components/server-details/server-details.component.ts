@@ -68,7 +68,6 @@ export class ServerDetailsComponent implements OnInit {
     detailMasterCol,
     detailOsCol,
   ];
-  /* template */ synchronizing$ = new BehaviorSubject<boolean>(false);
   /* template */ version: string;
   /* template */ minions: MinionRow[];
   /* template */ server: ManagedMasterDto;
@@ -124,14 +123,6 @@ export class ServerDetailsComponent implements OnInit {
             .subscribe(() => this.areas.closePanel());
         }
       });
-  }
-
-  /* template */ doSynchronize(server: ManagedMasterDto) {
-    this.synchronizing$.next(true);
-    this.servers
-      .synchronize(server)
-      .pipe(finalize(() => this.synchronizing$.next(false)))
-      .subscribe();
   }
 
   /* template */ doUpdateTransfer(server: ManagedMasterDto) {

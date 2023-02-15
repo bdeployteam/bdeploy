@@ -130,7 +130,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (!this.auth.isCurrentScopeWrite()) {
+    if (!this.auth.isCurrentScopeRead()) {
       this.tooltip$.next('Insufficient permissions to synchronize.');
       this.noPerm$.next(true);
     }
