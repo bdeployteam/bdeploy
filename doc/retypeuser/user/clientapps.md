@@ -54,6 +54,14 @@ The _Start_ cmdlet with the _-Verb RunAs_ switch triggers a UAC prompt so that t
 Additional configuration might be required depending on the installation location. See [Multi-User Installations](/user/clientapps/#multi-user-installations) for more information.
 !!!
 
+#### Authenticode Signature
+
+All Windows binaries of **BDeploy** are signed using a _SSI Schaefer IT Solutions GmbH_ code signing certificate. The installers are built and signed at release time. However, due to the very dynamic nature of applications in **BDeploy**, the installer needs to be branded *after* being signed during the build (to make it know which server to contact, which application to install, etc.).
+
+**BDeploy** uses a technique commonly called *Signature Stuffing*. This technique is widely used in various installation programs, as many have the same requirements. Unfortunately, this technique can also be abused by malicious code and is thus regarded as potential security risk, see [the official Microsoft report](https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2013-3900). Microsoft does *not* enable the mitigation for this vulnerability by default, since this breaks signature validation on *many* installation programs.
+
+The effect of enabling the recommended settings as per the report above will have the effect, that all branded **BDeploy** binaries will be regarded *unsigned*. Those binaries will be shown (in properties dialogs and all other means of verification, e.g. `signtool verify`) as *unsigned*. No hint will be displayed, that the binary is, in fact, signed but does not meet the stricter security policy in place.
+
 ## Linux
 
 The **Installer** stores the **Launcher** and all **Client Applications** in _$HOME/.bdeploy_. This location can be changed by setting the environment variable **BDEPLOY_HOME**.
