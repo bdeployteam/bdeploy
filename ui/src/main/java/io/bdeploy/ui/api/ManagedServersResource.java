@@ -119,7 +119,7 @@ public interface ManagedServersResource {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server:.+}")
-    @RequiredPermission(scope = "group", permission = Permission.WRITE)
+    @RequiredPermission(scope = "group", permission = Permission.READ)
     public MinionSyncResultDto synchronize(@ActivityScope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
