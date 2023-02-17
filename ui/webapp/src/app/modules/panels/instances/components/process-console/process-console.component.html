@@ -56,6 +56,7 @@
       <app-bd-server-sync-button
         [collapsed]="false"
         [server]="(instances.current$ | async).managedServer"
+        (click)="content$.next(content$.value)"
       ></app-bd-server-sync-button>
     </app-bd-no-data>
   </app-bd-dialog-content>
