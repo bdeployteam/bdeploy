@@ -1,5 +1,5 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
@@ -14,7 +14,7 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
   styleUrls: ['./process-console.component.css'],
 })
 export class ProcessConsoleComponent implements OnInit, OnDestroy {
-  /* template */ content$ = new Subject<string>();
+  /* template */ content$ = new BehaviorSubject<string>('');
   /* template */ available$ = new BehaviorSubject<boolean>(false);
   /* template */ hasStdin$ = new BehaviorSubject<boolean>(false);
   /* template */ stdin$ = new BehaviorSubject<boolean>(false);
