@@ -1,0 +1,43 @@
+<app-bd-dialog>
+  <app-bd-dialog-toolbar [header]="header" [panel]="true">
+    <mat-icon class="ml-2.5" svgIcon="WEB"></mat-icon>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="flex flex-col gap-2.5" *ngIf="(app$ | async) as app">
+      <div class="grid grid-cols-[80px_auto] gap-1">
+        <strong>ID:</strong>
+        <div>{{ app.endpoint.id }}</div>
+        <strong>Name:</strong>
+        <div>{{ header }}</div>
+        <strong>Instance:</strong>
+        <div>{{ app.instance.name }}</div>
+      </div>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        text="Open inline"
+        icon="preview"
+        [collapsed]="false"
+        tooltip="left"
+        [routerLink]="getRouterLink()"
+      ></app-bd-button>
+      <app-bd-button
+        text="Open in new Tab"
+        icon="open_in_new"
+        [collapsed]="false"
+        tooltip="left"
+        (click)="openUiEndpoint()"
+        [disabled]="!app?.endpoint?.endpoint?.proxying || !rawUrl"
+      ></app-bd-button>
+      <app-bd-button
+        text="Open directly on host in new Tab"
+        icon="open_in_browser"
+        [collapsed]="false"
+        tooltip="left"
+        [disabled]="!directUri"
+        [matTooltip]="directUri ? null : 'Direct URI to application not available.'"
+        matTooltipPosition="left"
+        (click)="openUiEndpointDirect()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

@@ -1,6 +1,8 @@
-import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
+  BehaviorSubject,
+  catchError,
   combineLatest,
   first,
   map,
@@ -10,6 +12,7 @@ import {
   Subscription,
   switchMap,
 } from 'rxjs';
+import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
@@ -22,80 +25,88 @@ import { InstancesService } from 'src/app/modules/primary/instances/services/ins
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
 @Component({
-  selector: 'app-process-ui-inline',
-  templateUrl: './process-ui-inline.component.html',
-  styleUrls: ['./process-ui-inline.component.css'],
+  selector: 'app-endpoint-detail',
+  templateUrl: './endpoint-detail.component.html',
 })
-export class ProcessUiInlineComponent implements OnDestroy {
-  /* template */ app: ClientApp;
-  /* template */ url: SafeUrl;
+export class EndpointDetailComponent implements OnDestroy {
+  /* template */ app$ = new BehaviorSubject<ClientApp>(null);
+  /* template */ header: string;
   /* template */ directUri: string;
-  /* template */ frameLoaded = false;
-  /* template */ returnPanel: any[] = null;
+  /* template */ rawUrl: string;
 
-  private rawUrl: string;
   private subscription: Subscription;
 
-  @ViewChild('iframe', { static: false }) private iframe: ElementRef;
-
   constructor(
-    clients: ClientsService,
-    cfg: ConfigService,
-    nav: NavAreasService,
-    groups: GroupsService,
-    sanitizer: DomSanitizer,
+    private route: ActivatedRoute,
     private instances: InstancesService,
-    private systems: SystemsService
+    private systems: SystemsService,
+    private cfg: ConfigService,
+    areas: NavAreasService,
+    private clients: ClientsService,
+    groups: GroupsService
   ) {
     this.subscription = combineLatest([
-      nav.panelRoute$,
-      groups.current$,
+      areas.panelRoute$,
       clients.apps$,
-    ])
-      .pipe(
-        skipWhile(
-          ([r, g, a]) =>
-            !r?.params?.endpoint || !r?.params?.app || !g || !a?.length
-        ),
-        first() // only calculate this *ONCE* when all data is there.
-      )
-      .subscribe(([route, group, apps]) => {
-        if (route.params.returnPanel) {
-          let panel: string = route.params.returnPanel;
-          if (panel.startsWith('/')) {
-            panel = panel.substring(1);
-          }
-          this.returnPanel = panel.split('/');
-        }
+    ]).subscribe(([route, apps]) => {
+      this.header = '';
+      this.app$.next(null);
 
-        this.app = apps.find(
-          (a) =>
-            a.endpoint?.id === route.params.app &&
-            a.endpoint.endpoint.id === route.params.endpoint
-        );
+      if (!route || !apps || !route.paramMap.has('app')) {
+        return;
+      }
 
-        if (!this.app) {
-          return;
-        }
+      const appId = route.paramMap.get('app');
+      const app = apps.find((a) => a?.endpoint?.id === appId);
 
-        clients.getDirectUiURI(this.app).subscribe((url) => {
-          this.directUri = url;
-        });
+      if (!app) {
+        return;
+      }
 
-        this.contextPath$(this.app).subscribe((cp) => {
-          this.rawUrl = `${cfg.config.api}/master/upx/${group.name}/${
-            this.app.instance.id
-          }/${this.app.endpoint.id}/${
-            this.app.endpoint.endpoint.id
-          }${this.cpWithSlash(cp)}`;
+      this.header = `${app.endpoint.appName} - ${app.endpoint.endpoint.id}`;
+      this.app$.next(app);
+    });
 
-          this.url = sanitizer.bypassSecurityTrustResourceUrl(this.rawUrl);
-        });
-      });
+    this.subscription.add(
+      this.app$
+        .pipe(switchMap((app) => this.getDirectUiUri(app)))
+        .subscribe((url) => (this.directUri = url))
+    );
+
+    this.subscription.add(
+      combineLatest([this.app$, groups.current$])
+        .pipe(switchMap(([app, group]) => this.getRawUrl(app, group)))
+        .subscribe((url) => (this.rawUrl = url))
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  private getDirectUiUri(app: ClientApp): Observable<string> {
+    if (!app) {
+      return of(null);
+    }
+    return this.clients.getDirectUiURI(app).pipe(catchError(() => of(null)));
+  }
+
+  private getRawUrl(
+    app: ClientApp,
+    group: InstanceGroupConfiguration
+  ): Observable<string> {
+    if (!app || !group) {
+      return of(null);
+    }
+    return this.contextPath$(app).pipe(
+      map(
+        (cp) =>
+          `${this.cfg.config.api}/master/upx/${group.name}/${app.instance.id}/${
+            app.endpoint.id
+          }/${app.endpoint.endpoint.id}${this.cpWithSlash(cp)}`
+      ),
+      catchError(() => of(null))
+    );
   }
 
   private contextPath$(app: ClientApp): Observable<string> {
@@ -155,11 +166,28 @@ export class ProcessUiInlineComponent implements OnDestroy {
     );
   }
 
-  private cpWithSlash(cp: string) {
-    if (!cp) {
-      return '/';
-    }
-    return cp[0] === '/' ? cp : `/${cp}`;
+  /* template */ getRouterLink() {
+    const app = this.app$.value;
+    const returnUrl = this.route.snapshot.pathFromRoot
+      .map((s) => s.url.map((u) => u.toString()).join('/'))
+      .join('/');
+    return [
+      '',
+      {
+        outlets: {
+          panel: [
+            'panels',
+            'groups',
+            'endpoint',
+            app.endpoint.id,
+            app.endpoint.endpoint.id,
+            {
+              returnPanel: returnUrl,
+            },
+          ],
+        },
+      },
+    ];
   }
 
   /* template */ openUiEndpoint() {
@@ -170,16 +198,14 @@ export class ProcessUiInlineComponent implements OnDestroy {
     this.openUrl(this.directUri);
   }
 
-  /* template */ reloadIFrame() {
-    this.frameLoaded = false;
-    this.iframe?.nativeElement?.contentWindow?.location?.reload();
-  }
-
-  /* template */ setIFrameFullscreen() {
-    this.iframe?.nativeElement?.contentWindow?.document?.documentElement?.requestFullscreen();
-  }
-
   private openUrl(url: string) {
     window.open(url, '_blank', 'noreferrer,noopener');
+  }
+
+  private cpWithSlash(cp: string) {
+    if (!cp) {
+      return '/';
+    }
+    return cp[0] === '/' ? cp : `/${cp}`;
   }
 }

@@ -93,13 +93,7 @@ export class ClientApplicationsComponent implements OnInit {
         '',
         {
           outlets: {
-            panel: [
-              'panels',
-              'groups',
-              'endpoint',
-              row.endpoint.id,
-              row.endpoint.endpoint.id,
-            ],
+            panel: ['panels', 'groups', 'endpoint-detail', row.endpoint.id],
           },
         },
       ];

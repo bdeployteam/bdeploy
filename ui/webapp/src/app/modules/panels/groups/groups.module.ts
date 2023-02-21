@@ -4,6 +4,7 @@ import { CoreModule } from '../../core/core.module';
 import { AddGroupComponent } from './components/add-group/add-group.component';
 import { ClientDetailComponent } from './components/client-detail/client-detail.component';
 import { ClientUsageGraphComponent } from './components/client-detail/usage-graph/usage-graph.component';
+import { EndpointDetailComponent } from './components/endpoint-detail/endpoint-detail.component';
 import { ProcessUiInlineComponent } from './components/process-ui-inline/process-ui-inline.component';
 import { AttributeDefinitionsComponent } from './components/settings/attribute-definitions/attribute-definitions.component';
 import { AttributeValuesComponent } from './components/settings/attribute-values/attribute-values.component';
@@ -20,6 +21,7 @@ import { GroupsRoutingModule } from './groups-routing.module';
     AttributeValuesComponent,
     AttributeDefinitionsComponent,
     ClientDetailComponent,
+    EndpointDetailComponent,
     PermissionsComponent,
     ClientUsageGraphComponent,
     ProcessUiInlineComponent,
