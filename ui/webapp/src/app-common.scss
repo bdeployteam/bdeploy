@@ -44,6 +44,11 @@
   }
 }
 
+// hack to make bd-text apply to body element
+.bd-text {
+  color: var(--bd-text);
+}
+
 /**
  * The root style classes provide commonly used styling like highlights, non-theme coloring, shadows, etc.
  */
