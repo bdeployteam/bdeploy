@@ -14,6 +14,7 @@ import {
   first,
   map,
   skipWhile,
+  switchMap,
   tap,
 } from 'rxjs/operators';
 import {
@@ -239,6 +240,36 @@ export class InstancesService {
           }/stream/${token}`
         );
       });
+  }
+
+  public streamFile(
+    dir: RemoteDirectory,
+    entry: RemoteDirectoryEntry
+  ): Observable<ArrayBuffer> {
+    const origin = this.current$.value;
+
+    if (!origin) {
+      return of(null);
+    }
+
+    return this.http
+      .post(
+        `${this.apiPath(this.group)}/${
+          origin.instanceConfiguration.id
+        }/request/${dir.minion}`,
+        entry,
+        { responseType: 'text' }
+      )
+      .pipe(
+        switchMap((token) => {
+          return this.http.get(
+            `${this.apiPath(this.group)}/${
+              origin.instanceConfiguration.id
+            }/stream/${token}`,
+            { responseType: 'arraybuffer' }
+          );
+        })
+      );
   }
 
   public getContentChunk(

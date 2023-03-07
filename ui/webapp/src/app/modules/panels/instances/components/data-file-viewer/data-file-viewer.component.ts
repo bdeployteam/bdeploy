@@ -1,5 +1,20 @@
 import { Component, NgZone, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
+import { TextWriter, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
+import * as Pako from 'pako';
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  delay,
+  forkJoin,
+  from,
+  map,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+  switchMap,
+} from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -67,7 +82,21 @@ export class DataFileViewerComponent implements OnDestroy {
 
             this.oversized = f?.size > MAX_FILE_SIZE;
 
-            this.nextChunk(); // initial
+            const isGZip = f.path.endsWith('.gz') || f.path.endsWith('.gzip');
+            const isZip = f.path.endsWith('.zip');
+            const isArchived = isZip || isGZip;
+            if (isArchived && this.oversized) {
+              const message = `File ${f.path} is too large to display it here. Please download it`;
+              of(message) // hack to make bd-terminal receive event emission after resubscription
+                .pipe(delay(0))
+                .subscribe((content) => this.content$.next(content));
+            } else if (isZip) {
+              this.streamZip(dir, f);
+            } else if (isGZip) {
+              this.streamGZip(dir, f);
+            } else {
+              this.nextChunk(); // initial
+            }
             break;
           }
         }
@@ -93,6 +122,41 @@ export class DataFileViewerComponent implements OnDestroy {
 
   /* template */ doDownload() {
     this.instances.download(this.directory$.value, this.file$.value);
+  }
+
+  private streamGZip(dir: RemoteDirectory, file: RemoteDirectoryEntry) {
+    this.instances
+      .streamFile(dir, file)
+      .pipe(map((data) => this.ungzip(data)))
+      .subscribe((content) => this.content$.next(content));
+  }
+
+  private ungzip(buff: ArrayBuffer): string {
+    const data = new Uint8Array(buff);
+    try {
+      return Pako.ungzip(data, { to: 'string' });
+    } catch (e) {
+      return `failed to decompress. ${e}`;
+    }
+  }
+
+  private streamZip(dir: RemoteDirectory, file: RemoteDirectoryEntry) {
+    this.instances
+      .streamFile(dir, file)
+      .pipe(switchMap((buf) => this.unzip(buf)))
+      .subscribe((content) => this.content$.next(content));
+  }
+
+  private unzip(buf: ArrayBuffer): Observable<string> {
+    const data = new Uint8Array(buf);
+    const zipReader = new ZipReader(new Uint8ArrayReader(data));
+    return from(zipReader.getEntries()).pipe(
+      switchMap((es) =>
+        forkJoin(es.map((e) => e.getData<string>(new TextWriter())))
+      ),
+      map((ss) => ss.join('\n')),
+      catchError((e) => of(`failed to fetch content. ${e}`))
+    );
   }
 
   private nextChunk() {
