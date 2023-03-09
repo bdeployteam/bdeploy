@@ -288,7 +288,7 @@ public class InstanceResourceImpl implements InstanceResource {
             Comparator<String> productVersionComparator) {
         Key productKey = config.product;
         InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
-        InstanceGroupConfiguration igc = igr.read(group);
+        InstanceGroupConfiguration igc = igr.getInstanceGroupConfigurationDto(group).instanceGroupConfiguration;
         if (igc.productToRepo == null || !igc.productToRepo.containsKey(productKey.getName())) {
             return null;
         }

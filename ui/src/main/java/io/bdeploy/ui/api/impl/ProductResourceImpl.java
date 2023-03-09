@@ -350,7 +350,7 @@ public class ProductResourceImpl implements ProductResource {
         }
 
         InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
-        InstanceGroupConfiguration igc = igr.read(this.group);
+        InstanceGroupConfiguration igc = igr.getInstanceGroupConfigurationDto(this.group).instanceGroupConfiguration;
         if (igc.productToRepo == null) {
             igc.productToRepo = new HashMap<>();
         }

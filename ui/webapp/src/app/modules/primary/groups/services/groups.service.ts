@@ -4,7 +4,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
-import { debounceTime, finalize, skipWhile, switchMap } from 'rxjs/operators';
+import {
+  debounceTime,
+  finalize,
+  first,
+  skipWhile,
+  switchMap,
+} from 'rxjs/operators';
 import {
   CustomAttributeDescriptor,
   CustomAttributesRecord,
@@ -12,8 +18,10 @@ import {
   InstanceGroupConfiguration,
   InstanceGroupConfigurationDto,
   ObjectChangeDetails,
+  ObjectChangeDto,
   ObjectChangeHint,
   ObjectChangeType,
+  ObjectEvent,
   ObjectId,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -32,7 +40,7 @@ const INIT_GROUPS = [];
 })
 export class GroupsService {
   private apiPath = `${this.cfg.config.api}/group`;
-  private update$ = new BehaviorSubject<any>(null);
+  private update$ = new BehaviorSubject<ObjectChangeDto>(null);
 
   loading$ = new BehaviorSubject<boolean>(true);
 
@@ -63,7 +71,9 @@ export class GroupsService {
     private router: Router
   ) {
     this.areas.groupContext$.subscribe((r) => this.setCurrent(r));
-    this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
+    this.update$
+      .pipe(debounceTime(100))
+      .subscribe((change) => this.onGroupsChanged(change));
     this.changes.subscribe(
       ObjectChangeType.INSTANCE_GROUP,
       EMPTY_SCOPE,
@@ -78,6 +88,75 @@ export class GroupsService {
         this.update$.next(change);
       }
     );
+  }
+
+  private onGroupsChanged(change: ObjectChangeDto) {
+    const scopeLength = change?.scope?.scope.length;
+    if (!!change && scopeLength !== 1) {
+      console.warn(
+        `Unexpected instance group change scope length: ${scopeLength}. Reloading.`
+      );
+      this.reload();
+      return;
+    }
+
+    switch (change?.event) {
+      case ObjectEvent.CREATED:
+      case ObjectEvent.CHANGED:
+        this.onGroupUpdated(change.scope.scope[0]);
+        break;
+      case ObjectEvent.REMOVED:
+        this.onGroupDeleted(change.scope.scope[0]);
+        break;
+      default:
+        this.reload();
+    }
+  }
+
+  private onGroupUpdated(groupName: string) {
+    this.loading$.next(true);
+    forkJoin({
+      group: this.http.get<InstanceGroupConfigurationDto>(
+        `${this.apiPath}/${groupName}`
+      ),
+      attribute: this.http.get<CustomAttributesRecord>(
+        `${this.apiPath}/${groupName}/attributes`
+      ),
+    })
+      .pipe(finalize(() => this.loading$.next(false)))
+      .subscribe(({ group, attribute }) => {
+        const oldGroup = this.groups$.value.find(
+          (g) => g.instanceGroupConfiguration.name === groupName
+        );
+        const groups = this.groups$.value.filter((g) => g !== oldGroup);
+        groups.push(group);
+        groups.sort((a, b) =>
+          a.instanceGroupConfiguration.name.localeCompare(
+            b.instanceGroupConfiguration.name
+          )
+        );
+        this.groups$.next(groups);
+
+        const attr = this.attributeValues$.value;
+        attr[groupName] = attribute;
+        this.attributeValues$.next({ ...attr });
+
+        // last update the current$ subject to inform about changes
+        if (this.areas.groupContext$.value) {
+          this.setCurrent(this.areas.groupContext$.value);
+        }
+      });
+  }
+
+  private onGroupDeleted(groupName: string) {
+    const groups = this.groups$.value.filter(
+      (g) => g.instanceGroupConfiguration.name !== groupName
+    );
+    this.groups$.next(groups);
+
+    const attr = this.attributeValues$.value;
+    delete attr[groupName];
+    this.attributeValues$.next({ ...attr });
   }
 
   public getLogoUrlOrDefault(group: string, id: ObjectId, def: string) {
@@ -148,7 +227,7 @@ export class GroupsService {
         }
       });
 
-    this.settings.settings$.subscribe((s) => {
+    this.settings.settings$.pipe(first()).subscribe((s) => {
       if (s) {
         this.attributeDefinitions$.next(s?.instanceGroup?.attributes);
       }

@@ -59,14 +59,14 @@ class InstanceGroupResourceTest {
             assertEquals(204, response.getStatus());
         }
 
-        InstanceGroupConfiguration read = res.read("demo");
+        InstanceGroupConfiguration read = res.getInstanceGroupConfigurationDto("demo").instanceGroupConfiguration;
         assertEquals("demo", read.name);
         assertNotNull(read.logo);
 
         read.description = "Other description";
         res.update("demo", read);
 
-        InstanceGroupConfiguration reread = res.read("demo");
+        InstanceGroupConfiguration reread = res.getInstanceGroupConfigurationDto("demo").instanceGroupConfiguration;
         assertEquals("Other description", reread.description);
         assertEquals(read.logo, reread.logo);
 

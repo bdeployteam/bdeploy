@@ -48,7 +48,7 @@ public interface InstanceGroupResource {
     @GET
     @Path("/{group}")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public InstanceGroupConfiguration read(@ActivityScope @PathParam("group") String group);
+    public InstanceGroupConfigurationDto getInstanceGroupConfigurationDto(@ActivityScope @PathParam("group") String group);
 
     @POST
     @Path("/{group}")

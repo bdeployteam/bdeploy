@@ -109,27 +109,38 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     public List<InstanceGroupConfigurationDto> list() {
         List<InstanceGroupConfigurationDto> result = new ArrayList<>();
         for (BHive hive : registry.getAll().values()) {
-            InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
-            if (cfg == null) {
-                continue;
-            }
-            // The current user must have at least scoped client download permissions
-            ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.CLIENT);
-            if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
-                continue;
-            }
+            InstanceGroupConfigurationDto instanceGroupConfigurationDto = getInstanceGroupConfigurationDto(hive);
 
-            // Fetch instance group's instance IDs and add them to searchable text
-            List<String> instanceIds = new ArrayList<>();
-            SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
-            for (Key imKey : imKeys) {
-                InstanceManifest im = InstanceManifest.of(hive, imKey);
-                InstanceConfiguration config = im.getConfiguration();
-                instanceIds.add(config.id);
+            if (instanceGroupConfigurationDto != null) {
+                result.add(instanceGroupConfigurationDto);
             }
-            result.add(new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceIds)));
         }
         return result;
+    }
+
+    private InstanceGroupConfigurationDto getInstanceGroupConfigurationDto(BHive hive) {
+        InstanceGroupConfiguration cfg = new InstanceGroupManifest(hive).read();
+
+        if (cfg == null) {
+            return null;
+        }
+
+        // The current user must have at least scoped client download permissions
+        ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.CLIENT);
+        if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
+            return null;
+        }
+
+        // Fetch instance group's instance IDs and add them to searchable text
+        List<String> instanceIds = new ArrayList<>();
+        SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
+        for (Key imKey : imKeys) {
+            InstanceManifest im = InstanceManifest.of(hive, imKey);
+            InstanceConfiguration config = im.getConfiguration();
+            instanceIds.add(config.id);
+        }
+
+        return new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceIds));
     }
 
     @Override
@@ -160,6 +171,12 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         }
     }
 
+    @Override
+    public InstanceGroupConfigurationDto getInstanceGroupConfigurationDto(String group) {
+        BHive hive = getGroupHive(group);
+        return getInstanceGroupConfigurationDto(hive);
+    }
+
     private BHive getGroupHive(String group) {
         BHive hive = registry.get(group);
         if (hive == null) {
@@ -168,8 +185,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         return hive;
     }
 
-    @Override
-    public InstanceGroupConfiguration read(String group) {
+    private InstanceGroupConfiguration read(String group) {
         return new InstanceGroupManifest(getGroupHive(group)).read();
     }
 
