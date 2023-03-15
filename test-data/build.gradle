@@ -70,8 +70,8 @@ int randomServerPort() {
 void createProductTasks(String taskName, String prod) {
     task "${taskName}" (type: Zip) {
         from fileTree(dir: "${projectDir}/${prod}")
-        archiveName "${prod}-direct.zip"
-        destinationDir file("${buildDir}/distribution/")
+        archiveFileName = "${prod}-direct.zip"
+        destinationDirectory = file("${buildDir}/distribution/")
         inputs.dir file("${projectDir}/${prod}")
     }
 
@@ -112,6 +112,7 @@ task triggerStopBDeploy() {
 
 void createServerTasks(String name, String root, int port) {
     task "initTestBDeploy${name}"(type: JavaExec ) {
+        doNotTrackState("There is no state")
         setupBDeployJavaExec(it, root, port);
 
         def taskName = "";
@@ -137,6 +138,7 @@ void createServerTasks(String name, String root, int port) {
     }
 
     task "startTestBDeploy${name}"(type: com.github.psxpaul.task.JavaExecFork, dependsOn: "initTestBDeploy${name}") {
+        doNotTrackState("There is no state")
         setupBDeployEnv(it, root)
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
@@ -154,6 +156,7 @@ if(!project.hasProperty('cypressNoCentral')) {
 }
 
 task checkTestBDeploy(type: JavaExec, dependsOn: startTestBDeploy) {
+    doNotTrackState("There is no state")
     setupBDeployJavaExec(it, testServerRoot, testServerPort);
     args = [ "remote-master", "--minions" ]
 }
@@ -189,7 +192,7 @@ void createExternalSoftwareTasks(String os) {
 
 task externalSoftwareZip(type: Zip, dependsOn: [externalSoftwareWindows, externalSoftwareLinux]) {
     archiveFileName = "external-software-hive.zip"
-    destinationDir = file("${buildDir}/distribution/")
+    destinationDirectory = file("${buildDir}/distribution/")
     
     from "${buildDir}/external-software-hive"
 }
@@ -506,6 +509,7 @@ void setupBinServerTasks(String version) {
 getTestBinVersions().each { setupBinServerTasks(it) }
 
 // coverage for the rest of the tasks
+// FIXME: this leads to bad dependencies between the tasks being detected by gradle which do not actually exist
 jacoco {
     applyTo initTestBDeploy
     applyTo checkTestBDeploy
