@@ -4,6 +4,7 @@ import { cloneDeep, isEqual } from 'lodash-es';
 import {
   BehaviorSubject,
   combineLatest,
+  forkJoin,
   Observable,
   of,
   Subscription,
@@ -13,6 +14,7 @@ import {
   finalize,
   first,
   map,
+  skip,
   skipWhile,
   switchMap,
   tap,
@@ -29,8 +31,10 @@ import {
   ManifestKey,
   MinionStatusDto,
   ObjectChangeDetails,
+  ObjectChangeDto,
   ObjectChangeHint,
   ObjectChangeType,
+  ObjectEvent,
   RemoteDirectory,
   RemoteDirectoryEntry,
   StringEntryChunkDto,
@@ -57,7 +61,7 @@ export class InstancesService {
   );
 
   instances$ = new BehaviorSubject<InstanceDto[]>([]);
-  othersNeedReload$ = new BehaviorSubject<boolean>(false);
+  instancesChanges: ObjectChangeDto[] = [];
 
   /** the current instance version */
   current$ = new BehaviorSubject<InstanceDto>(null);
@@ -93,7 +97,7 @@ export class InstancesService {
     private httpReplayService: HttpReplayService,
     products: ProductsService,
     groups: GroupsService,
-    private ngZone: NgZone
+    ngZone: NgZone
   ) {
     // clear out stuff whenever the group is re-set.
     groups.current$.subscribe(() => {
@@ -103,6 +107,15 @@ export class InstancesService {
       this.listLoading$.next(true); // will load in a bit.
       this.instances$.next([]);
     });
+
+    // reload instances if products changed for central
+    // otherwise we might see N/A chip next to product version even after product has been downloaded to central
+    combineLatest([products.products$, this.cfg.isCentral$])
+      .pipe(skipWhile(([p, c]) => !p || !c))
+      .subscribe(() => {
+        this.listLoading$.next(true); // will be reloaded in combineLatest(groups.current$, products.products$)
+        this.instances$.next([]);
+      });
 
     // only do actual loading once BOTH group and products are ready.
     combineLatest([groups.current$, products.products$]).subscribe(
@@ -127,14 +140,8 @@ export class InstancesService {
       clearInterval(this.activeCheckInterval);
 
       let update: Observable<InstanceDto[]> = of(null);
-
-      if (this.othersNeedReload$.value) {
-        this.othersNeedReload$.next(false);
-        this.instances$.next(null);
-        update = this.instances$.pipe(
-          skipWhile((x) => !x),
-          first()
-        );
+      if (this.instancesChanges.length > 0) {
+        update = this.instances$.pipe(skip(1), first()); // wait for the next reloaded value
         this.reload(this.group);
       }
 
@@ -349,28 +356,124 @@ export class InstancesService {
     }
 
     this.group = group;
-    this.listLoading$.next(true);
-    this.http
-      .get<InstanceDto[]>(`${this.apiPath(group)}`)
-      .pipe(
-        finalize(() => this.listLoading$.next(false)),
-        measure('Instance Load')
-      )
-      .subscribe((instances) => {
-        this.instances$.next(instances);
-        this.overallStates$.next(
-          instances.map((x) => ({
-            id: x.instanceConfiguration.id,
-            uuid: x.instanceConfiguration.id, // compat
-            ...x.overallState,
-          }))
-        );
 
-        // last update the current$ subject to inform about changes
-        if (this.areas.instanceContext$.value) {
-          this.loadCurrentAndActive(this.areas.instanceContext$.value);
-        }
-      });
+    this.getInstances(group).subscribe((instances) => {
+      this.instances$.next(instances);
+      this.overallStates$.next(
+        instances.map((x) => ({
+          id: x.instanceConfiguration.id,
+          uuid: x.instanceConfiguration.id, // compat
+          ...x.overallState,
+        }))
+      );
+
+      // last update the current$ subject to inform about changes
+      if (this.areas.instanceContext$.value) {
+        this.loadCurrentAndActive(this.areas.instanceContext$.value);
+      }
+    });
+  }
+
+  private getInstances(group: string): Observable<InstanceDto[]> {
+    const fetchInstances$ = this.canPartiallyReloadInstances(group)
+      ? this.partiallyReloadInstances(group)
+      : this.reloadInstances(group);
+    this.instancesChanges = [];
+    this.listLoading$.next(true);
+    return fetchInstances$.pipe(finalize(() => this.listLoading$.next(false)));
+  }
+
+  private canPartiallyReloadInstances(group: string): boolean {
+    // if instances were reset or were not pulled yet we need to reload
+    if (!this.instances$.value?.length) {
+      return false;
+    }
+
+    const wrongScopeLength = this.instancesChanges.find(
+      (change) => change.scope.scope.length !== 2
+    );
+    if (wrongScopeLength) {
+      console.warn(
+        `Found instance change with scope length ${wrongScopeLength.scope.scope.length} instead of 2. Reloading.`
+      );
+      return false;
+    }
+
+    const wrongGroup = this.instancesChanges.find(
+      (change) => change.scope.scope[0] !== group
+    );
+    if (wrongGroup) {
+      console.warn(
+        `Found instance change that belongs to group ${wrongGroup.scope.scope[0]} instead of ${group}. Reloading`
+      );
+      return false;
+    }
+
+    // if more than 3 instances were changed, then let's reload all
+    if (this.getUpdatedInstanceIds().length > 3) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private partiallyReloadInstances(group: string): Observable<InstanceDto[]> {
+    const deletedInstanceIds = this.getDeletedInstanceIds();
+
+    const updatedInstanceIds = this.getUpdatedInstanceIds();
+
+    // remove changed instances. updated/created will be reloaded, and deleted should be excluded
+    const unchangedInstances = this.instances$.value.filter(
+      (i) =>
+        !deletedInstanceIds.includes(i.instanceConfiguration.id) &&
+        !updatedInstanceIds.includes(i.instanceConfiguration.id)
+    );
+
+    // if no instances were created/updated, we can return immediately (since deleted instances were already removed)
+    if (updatedInstanceIds.length === 0) {
+      return of(unchangedInstances);
+    }
+
+    const fetchUpdated = updatedInstanceIds.map((id) =>
+      this.http.get<InstanceDto>(`${this.apiPath(group)}/${id}`)
+    );
+
+    return forkJoin(fetchUpdated).pipe(
+      map((updated) => {
+        return [...unchangedInstances, ...updated].sort((a, b) =>
+          a.instanceConfiguration.name.localeCompare(
+            b.instanceConfiguration.name
+          )
+        );
+      }),
+      measure('Instance Partial Load')
+    );
+  }
+
+  private reloadInstances(group: string): Observable<InstanceDto[]> {
+    return this.http
+      .get<InstanceDto[]>(`${this.apiPath(group)}`)
+      .pipe(measure('Instance Load'));
+  }
+
+  private getDeletedInstanceIds(): string[] {
+    return this.instancesChanges
+      .filter((change) => change.event === ObjectEvent.REMOVED)
+      .map((change) => change.scope.scope[1]);
+  }
+
+  private getUpdatedInstanceIds(): string[] {
+    const deletedInstanceIds = this.getDeletedInstanceIds();
+
+    const updatedInstanceIds = this.instancesChanges
+      .filter(
+        (change) =>
+          change.event === ObjectEvent.CREATED ||
+          change.event === ObjectEvent.CHANGED
+      )
+      .map((change) => change.scope.scope[1])
+      .filter((id) => !deletedInstanceIds.includes(id)); // in case instance was created/updated and later removed, we don't care about that
+    return [...new Set(updatedInstanceIds)]; // removing duplicate ids
   }
 
   public syncAndFetchState(instances: ManifestKey[]): void {
@@ -409,44 +512,50 @@ export class InstancesService {
       this.subscription = null;
     }
 
-    if (group) {
-      this.subscription = this.changes.subscribe(
-        ObjectChangeType.INSTANCE,
-        { scope: [group] },
-        (change) => {
-          if (
-            !!this.current$.value?.instanceConfiguration?.id &&
-            !change.scope.scope.includes(
-              this.current$.value.instanceConfiguration.id
-            )
-          ) {
-            this.othersNeedReload$.next(true); // when switching to another instance, we need to reload all.
-            return;
-          }
+    this.instancesChanges = []; // if group has changed, then we don't want to track changes for prev group's instances
 
-          this.update$.next(group);
-          if (change.details[ObjectChangeDetails.CHANGE_HINT]) {
-            if (
-              change.details[ObjectChangeDetails.CHANGE_HINT] ===
-                ObjectChangeHint.BANNER &&
-              !!this.active$.value
-            ) {
-              // update banner in active version if it changes on the server.
-              this.http
-                .get<InstanceBannerRecord>(
-                  `${this.apiPath(this.group)}/${
-                    this.active$.value.instanceConfiguration.id
-                  }/banner`
-                )
-                .subscribe((banner) => {
-                  this.active$.value.banner = banner;
-                  this.active$.next(this.active$.value);
-                });
-            }
+    if (!group) {
+      return;
+    }
+
+    this.subscription = this.changes.subscribe(
+      ObjectChangeType.INSTANCE,
+      { scope: [group] },
+      (change) => {
+        this.instancesChanges.push(change);
+
+        // if it is not the current instance that changed, we can defer reload
+        if (
+          !!this.current$.value?.instanceConfiguration?.id &&
+          !change.scope.scope.includes(
+            this.current$.value.instanceConfiguration.id
+          )
+        ) {
+          return;
+        }
+
+        this.update$.next(group);
+        if (change.details[ObjectChangeDetails.CHANGE_HINT]) {
+          if (
+            change.details[ObjectChangeDetails.CHANGE_HINT] ===
+              ObjectChangeHint.BANNER &&
+            !!this.active$.value
+          ) {
+            // update banner in active version if it changes on the server.
+            this.http
+              .get<InstanceBannerRecord>(
+                `${this.apiPath(this.group)}/${
+                  this.active$.value.instanceConfiguration.id
+                }/banner`
+              )
+              .subscribe((banner) => {
+                this.active$.value.banner = banner;
+                this.active$.next(this.active$.value);
+              });
           }
         }
-      );
-    }
+      }
+    );
   }
 
   private loadCurrentAndActive(i: string) {

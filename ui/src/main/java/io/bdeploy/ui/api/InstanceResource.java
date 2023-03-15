@@ -72,7 +72,7 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}")
-    public InstanceConfiguration read(@ActivityScope @PathParam("instance") String instanceId);
+    public InstanceDto read(@ActivityScope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/{instance}/{versionTag}")

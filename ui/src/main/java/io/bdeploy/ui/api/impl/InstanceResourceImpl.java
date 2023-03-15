@@ -220,66 +220,7 @@ public class InstanceResourceImpl implements InstanceResource {
         SortedSet<Key> scan = ProductManifest.scan(hive);
 
         for (Key imKey : imKeys) {
-            InstanceManifest im = InstanceManifest.of(hive, imKey);
-            InstanceConfiguration config = im.getConfiguration();
-
-            // comparator only computed once per product (name), regardless of tag.
-            Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
-                    k -> vss.getTagComparator(group, im.getConfiguration().product));
-
-            boolean hasProduct = scan.contains(config.product);
-
-            Key activeVersion = null;
-            Key activeProduct = null;
-            try {
-                InstanceStateRecord state = getDeploymentStates(config.id);
-
-                if (state.activeTag != null) {
-                    try {
-                        InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
-                        activeVersion = mf.getManifest();
-                        activeProduct = mf.getConfiguration().product;
-                    } catch (Exception e) {
-                        // ignore: product of active version not found
-                    }
-                }
-            } catch (Exception e) {
-                // in case the token is invalid, master not reachable, etc.
-                log.error("Cannot contact master for {}.", config.id, e);
-            }
-
-            boolean newerVersionAvailable = this.isNewerVersionAvailable(scan, config, productVersionComparator);
-
-            String newerVersionAvailableInRepository = this.getNewerVersionAvailableInRepository(config, scan,
-                    productVersionComparator);
-
-            ManagedMasterDto managedMaster = null;
-            if (minion.getMode() == MinionMode.CENTRAL) {
-                ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
-                try {
-                    managedMaster = ms.getServerForInstance(group, config.id, imKey.getTag());
-                } catch (WebApplicationException e) {
-                    log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
-                }
-            }
-
-            CustomAttributesRecord attributes = im.getAttributes(hive).read();
-            InstanceBannerRecord banner = im.getBanner(hive).read();
-            InstanceOverallStateRecord overallState = im.getOverallState(hive).read();
-
-            // load config directories
-            ConfigDirDto configRoot = null;
-            if (config.configTree != null) {
-                TreeView rootTv = hive.execute(new ScanOperation().setTree(config.configTree));
-                configRoot = new ConfigDirDto();
-                configRoot.name = "/";
-                readTree(configRoot, rootTv);
-            }
-
-            // Clear security token before sending via REST
-            result.add(InstanceDto.create(imKey, config, hasProduct, activeProduct, newerVersionAvailable,
-                    newerVersionAvailableInRepository, managedMaster, attributes, banner, im.getManifest(), activeVersion,
-                    overallState, configRoot));
+            result.add(getInstanceDto(imKey, scan, comparators));
         }
         return result;
     }
@@ -502,13 +443,77 @@ public class InstanceResourceImpl implements InstanceResource {
         return target;
     }
 
-    @Override
-    public InstanceConfiguration read(String instance) {
-        return readInstance(instance).getConfiguration();
+    private InstanceDto getInstanceDto(Manifest.Key imKey, SortedSet<Key> pmScan, Map<String, Comparator<String>> comparators) {
+        InstanceManifest im = InstanceManifest.of(hive, imKey);
+        InstanceConfiguration config = im.getConfiguration();
+
+        // comparator only computed once per product (name), regardless of tag.
+        Comparator<String> productVersionComparator = comparators.computeIfAbsent(im.getConfiguration().product.getName(),
+                k -> vss.getTagComparator(group, im.getConfiguration().product));
+
+        boolean hasProduct = pmScan.contains(config.product);
+
+        Key activeVersion = null;
+        Key activeProduct = null;
+        try {
+            InstanceStateRecord state = getDeploymentStates(config.id);
+
+            if (state.activeTag != null) {
+                try {
+                    InstanceManifest mf = InstanceManifest.of(hive, new Manifest.Key(imKey.getName(), state.activeTag));
+                    activeVersion = mf.getManifest();
+                    activeProduct = mf.getConfiguration().product;
+                } catch (Exception e) {
+                    // ignore: product of active version not found
+                }
+            }
+        } catch (Exception e) {
+            // in case the token is invalid, master not reachable, etc.
+            log.error("Cannot contact master for {}.", config.id, e);
+        }
+
+        boolean newerVersionAvailable = this.isNewerVersionAvailable(pmScan, config, productVersionComparator);
+
+        String newerVersionAvailableInRepository = this.getNewerVersionAvailableInRepository(config, pmScan,
+                productVersionComparator);
+
+        ManagedMasterDto managedMaster = null;
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
+            try {
+                managedMaster = ms.getServerForInstance(group, config.id, imKey.getTag());
+            } catch (WebApplicationException e) {
+                log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
+            }
+        }
+
+        CustomAttributesRecord attributes = im.getAttributes(hive).read();
+        InstanceBannerRecord banner = im.getBanner(hive).read();
+        InstanceOverallStateRecord overallState = im.getOverallState(hive).read();
+
+        // load config directories
+        ConfigDirDto configRoot = null;
+        if (config.configTree != null) {
+            TreeView rootTv = hive.execute(new ScanOperation().setTree(config.configTree));
+            configRoot = new ConfigDirDto();
+            configRoot.name = "/";
+            readTree(configRoot, rootTv);
+        }
+
+        return InstanceDto.create(imKey, config, hasProduct, activeProduct, newerVersionAvailable,
+                newerVersionAvailableInRepository, managedMaster, attributes, banner, im.getManifest(), activeVersion,
+                overallState, configRoot);
     }
 
-    private InstanceManifest readInstance(String instance) {
-        return readInstance(instance, null);
+    @Override
+    public InstanceDto read(String instanceId) {
+        InstanceManifest im = readInstance(instanceId);
+        SortedSet<Key> pmScan = ProductManifest.scan(hive);
+        return getInstanceDto(im.getManifest(), pmScan, new TreeMap<>());
+    }
+
+    private InstanceManifest readInstance(String instanceId) {
+        return readInstance(instanceId, null);
     }
 
     private InstanceManifest readInstance(String instanceId, String versionTag) {
