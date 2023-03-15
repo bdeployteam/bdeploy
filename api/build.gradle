@@ -3,7 +3,7 @@ plugins {
   id 'java-library'
   id 'maven-publish'
   id 'signing'
-  id 'com.github.johnrengelman.shadow' version '7.1.2'
+  id 'com.github.johnrengelman.shadow' version '8.1.0'
   id "io.swagger.core.v3.swagger-gradle-plugin" version "2.2.8"
 }
 
@@ -31,8 +31,8 @@ build.dependsOn shadowJar
 build.dependsOn resolve
 
 shadowJar {
-	classifier = ''
-    baseName = 'bdeploy-api'
+	archiveClassifier = ''
+    archiveBaseName = 'bdeploy-api'
 }
 
 resolve {
@@ -54,7 +54,7 @@ evaluationDependsOn(':jersey')
 
 task allSourcesJar(type: Jar, dependsOn: classes) {
 	group = 'build'
-	classifier = 'sources'
+	archiveClassifier = 'sources'
 	from files([project, project(":bhive"), project(":jersey"), project(":common")].collect { it.sourceSets.main.allSource })
 }
 
@@ -69,7 +69,7 @@ task allJavadoc(type: Javadoc) {
 }
 
 task allJavadocJar(type: Jar, dependsOn: allJavadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from allJavadoc.destinationDir
 }
 

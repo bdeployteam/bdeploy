@@ -70,8 +70,8 @@ int randomServerPort() {
 void createProductTasks(String taskName, String prod) {
     task "${taskName}" (type: Zip) {
         from fileTree(dir: "${projectDir}/${prod}")
-        archiveName "${prod}-direct.zip"
-        destinationDir file("${buildDir}/distribution/")
+        archiveFileName = "${prod}-direct.zip"
+        destinationDirectory = file("${buildDir}/distribution/")
         inputs.dir file("${projectDir}/${prod}")
     }
 
@@ -134,9 +134,16 @@ void createServerTasks(String name, String root, int port) {
         } else {
             args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=admin" ]
         }
+
+        mustRunAfter("externalSoftwareZip")
+        mustRunAfter("externalSoftware2Zip")
+        mustRunAfter("product1Zip")
+        mustRunAfter("product2Zip")
+        mustRunAfter("product3Zip")
     }
 
     task "startTestBDeploy${name}"(type: com.github.psxpaul.task.JavaExecFork, dependsOn: "initTestBDeploy${name}") {
+        doNotTrackState("No State")
         setupBDeployEnv(it, root)
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
@@ -144,19 +151,27 @@ void createServerTasks(String name, String root, int port) {
         jvmArgs = [ '-Xmx128M' ] // all tests must fit :)
         waitForPort = port
         stopAfter = triggerStopBDeploy
+
+        mustRunAfter("initTestBDeploy${name}")
     }
 }
 
 createServerTasks("", testServerRoot, testServerPort);
-if(!project.hasProperty('cypressNoCentral')) {
-    createServerTasks("Central", testServerRootCentral, testServerPortCentral);
-    createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
-}
-
 task checkTestBDeploy(type: JavaExec, dependsOn: startTestBDeploy) {
     setupBDeployJavaExec(it, testServerRoot, testServerPort);
     args = [ "remote-master", "--minions" ]
+
+    mustRunAfter(startTestBDeploy)
 }
+
+if(!project.hasProperty('cypressNoCentral')) {
+    createServerTasks("Central", testServerRootCentral, testServerPortCentral);
+    createServerTasks("Managed", testServerRootManaged, testServerPortManaged);
+
+    startTestBDeployManaged.mustRunAfter(checkTestBDeploy)
+    startTestBDeployCentral.mustRunAfter(startTestBDeployManaged)
+}
+
 
 task cleanExternalSoftwareHive(type: Delete) {
     delete "${buildDir}/external-software-hive"
@@ -189,7 +204,7 @@ void createExternalSoftwareTasks(String os) {
 
 task externalSoftwareZip(type: Zip, dependsOn: [externalSoftwareWindows, externalSoftwareLinux]) {
     archiveFileName = "external-software-hive.zip"
-    destinationDir = file("${buildDir}/distribution/")
+    destinationDirectory = file("${buildDir}/distribution/")
     
     from "${buildDir}/external-software-hive"
 }
@@ -506,6 +521,7 @@ void setupBinServerTasks(String version) {
 getTestBinVersions().each { setupBinServerTasks(it) }
 
 // coverage for the rest of the tasks
+// FIXME: this leads to bad dependencies between the tasks being detected by gradle which do not actually exist
 jacoco {
     applyTo initTestBDeploy
     applyTo checkTestBDeploy

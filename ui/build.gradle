@@ -86,6 +86,8 @@ task runCoverageServerStandalone(type: com.github.psxpaul.task.ExecFork) {
     waitForOutput = "Compiled successfully"
     timeout = 240
     stopAfter = triggerStopCoverageStandalone
+    dependsOn 'buildAngular'
+    mustRunAfter(updateFixtureProducts)
 }
 
 task triggerStopCoverageCentral {
@@ -99,6 +101,8 @@ task runCoverageServerCentral(type: com.github.psxpaul.task.ExecFork) {
     waitForOutput = "Compiled successfully"
     timeout = 240
     stopAfter = triggerStopCoverageCentral
+    dependsOn 'buildAngular'
+    mustRunAfter(updateFixtureProducts)
 }
 
 task triggerStopCoverageManaged {
@@ -112,6 +116,8 @@ task runCoverageServerManaged(type: com.github.psxpaul.task.ExecFork) {
     waitForOutput = "Compiled successfully"
     timeout = 240
     stopAfter = triggerStopCoverageManaged
+    dependsOn 'buildAngular'
+    mustRunAfter(updateFixtureProducts)
 }
 
 task updateFixtures() {
@@ -282,6 +288,7 @@ task buildAngular(type:Exec) { t ->
     outputs.dir "$webappDir/dist"
     sharedNpmLogic(t, ["run", "--", "ng", "build", "-c", "production"])
 	dependsOn 'installAngular'
+    dependsOn 'copyUserDoc'
     dependsOn 'genDtos'
 }
 
