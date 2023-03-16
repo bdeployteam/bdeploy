@@ -48,7 +48,6 @@ public class RemoteInstanceCliTest {
                 .get(InstanceManifest.INSTANCE_LABEL);
 
         StructuredOutput result;
-        Exception ex;
 
         /*
          * At first we have only one version of instance aaa-bbb-ccc
