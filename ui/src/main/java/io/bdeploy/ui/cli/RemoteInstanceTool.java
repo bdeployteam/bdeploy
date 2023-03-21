@@ -566,7 +566,7 @@ public class RemoteInstanceTool extends RemoteServiceTool<InstanceConfig> {
     }
 
     private boolean confirmDelete(InstanceConfig config, InstanceResource ir) {
-        String instanceName = ir.read(config.uuid()).name;
+        String instanceName = ir.read(config.uuid()).instanceConfiguration.name;
         String confirmation = System.console().readLine("Delete instance %1$s (%2$s)? This CANNOT be undone. (Y/N)? ",
                 config.uuid(), instanceName);
         return "Y".equalsIgnoreCase(confirmation);

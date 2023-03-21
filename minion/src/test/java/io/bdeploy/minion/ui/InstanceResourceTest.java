@@ -250,7 +250,7 @@ class InstanceResourceTest {
 
         assertEquals(1, res.list().size());
 
-        InstanceConfiguration read = res.read(instance.id);
+        InstanceConfiguration read = res.read(instance.id).instanceConfiguration;
         assertEquals(product, read.product);
         assertEquals(instance.id, read.id);
         assertEquals("My Instance", read.name);
@@ -259,7 +259,7 @@ class InstanceResourceTest {
         read.name = "New Desc";
         res.update(instance.id, new InstanceUpdateDto(new InstanceConfigurationDto(read, null), null), null, "1");
 
-        InstanceConfiguration reread = res.read(instance.id);
+        InstanceConfiguration reread = res.read(instance.id).instanceConfiguration;
         assertEquals("New Desc", reread.name);
 
         res.delete(instance.id);
@@ -291,7 +291,7 @@ class InstanceResourceTest {
         instance.name = "My modified Instance";
         res.update(instance.id, new InstanceUpdateDto(new InstanceConfigurationDto(instance, null), null), null, "1");
 
-        InstanceConfiguration read = res.read(instance.id);
+        InstanceConfiguration read = res.read(instance.id).instanceConfiguration;
         assertEquals(read.name, instance.name);
 
         List<InstanceVersionDto> listVersions = res.listVersions(instance.id);

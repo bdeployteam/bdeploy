@@ -30,7 +30,7 @@ export class InstanceStateService {
       this.groups.current$,
       this.instances.instances$, // trigger to reload on changes.
     ]).pipe(
-      mergeMap(([i, g]) => this.getLoadCall(i, g)),
+      mergeMap(([i, g, is]) => this.getLoadCall(i, g, is)),
       share({
         connector: () => new ReplaySubject(1),
         resetOnError: true,
@@ -42,9 +42,16 @@ export class InstanceStateService {
 
   private getLoadCall(
     i: InstanceDto,
-    g: InstanceGroupConfiguration
+    g: InstanceGroupConfiguration,
+    is: InstanceDto[]
   ): Observable<InstanceStateRecord> {
-    return !i || !g
+    return !i ||
+      !g ||
+      !is ||
+      !is.some(
+        (instance) =>
+          instance.instanceConfiguration.id === i.instanceConfiguration.id
+      ) // sometimes instance is removed from instances$ faster than current$ is nulled
       ? of(null)
       : this.http
           .get<InstanceStateRecord>(
