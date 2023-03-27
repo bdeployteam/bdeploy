@@ -138,7 +138,8 @@ export class ProductDetailsComponent implements OnInit {
     this.deleting$,
     this.products.loading$,
   ]).pipe(map(([a, b]) => a || b));
-  /* template */ preparing$ = new BehaviorSubject<boolean>(false);
+  /* template */ preparingBHive$ = new BehaviorSubject<boolean>(false);
+  /* template */ preparingContent$ = new BehaviorSubject<boolean>(false);
   /* template */ singleProductPlugins$: Observable<PluginInfoDto[]>;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
@@ -175,10 +176,11 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   /* template */ doDownload(original: boolean) {
-    this.preparing$.next(true);
+    const preparing$ = original ? this.preparingContent$ : this.preparingBHive$;
+    preparing$.next(true);
     this.singleProduct
       .download(original)
-      .pipe(finalize(() => this.preparing$.next(false)))
+      .pipe(finalize(() => preparing$.next(false)))
       .subscribe();
   }
 }

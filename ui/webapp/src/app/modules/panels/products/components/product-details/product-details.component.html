@@ -103,16 +103,16 @@
         text="Download BHive"
         icon="cloud_download"
         (click)="doDownload(false)"
-        [loadingWhen$]="preparing$"
-        [disabled]="preparing$ | async"
+        [loadingWhen$]="preparingBHive$"
+        [disabled]="preparingBHive$ | async"
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
         text="Download Content"
         icon="cloud_download"
         (click)="doDownload(true)"
-        [loadingWhen$]="preparing$"
-        [disabled]="preparing$ | async"
+        [loadingWhen$]="preparingContent$"
+        [disabled]="preparingContent$ | async"
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"

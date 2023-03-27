@@ -98,7 +98,8 @@ export class SoftwareDetailsComponent implements OnInit {
     this.deleting$,
     this.repository.loading$,
   ]).pipe(map(([a, b]) => a || b));
-  /* template */ preparing$ = new BehaviorSubject<boolean>(false);
+  /* template */ preparingBHive$ = new BehaviorSubject<boolean>(false);
+  /* template */ preparingContent$ = new BehaviorSubject<boolean>(false);
   /* template */ softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
   isRequiredByProduct$ = combineLatest([
@@ -156,10 +157,11 @@ export class SoftwareDetailsComponent implements OnInit {
   }
 
   /* template */ doDownload(original: boolean) {
-    this.preparing$.next(true);
+    const preparing$ = original ? this.preparingContent$ : this.preparingBHive$;
+    preparing$.next(true);
     this.detailsService
       .download(original)
-      .pipe(finalize(() => this.preparing$.next(false)))
+      .pipe(finalize(() => preparing$.next(false)))
       .subscribe();
   }
 }
