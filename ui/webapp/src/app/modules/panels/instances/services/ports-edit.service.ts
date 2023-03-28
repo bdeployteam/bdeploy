@@ -148,11 +148,14 @@ export class PortsEditService {
     return value.value; // no link supported if not URL.
   }
 
+  // dont replace port.value as its a shared variable with the actual parameter
   private setPortValue(port: PortParam, value: string) {
     if (port.type === ParameterType.URL) {
       const u = new URLish(getPreRenderable(port.value));
       u.port = value;
-      port.value = createLinkedValue(u.toString());
+      const linkedValue = createLinkedValue(u.toString());
+      port.value.linkExpression = linkedValue.linkExpression;
+      port.value.value = linkedValue.value;
     } else {
       port.value.value = value;
     }
