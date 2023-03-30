@@ -141,8 +141,8 @@ export class GroupsService {
         attr[groupName] = attribute;
         this.attributeValues$.next({ ...attr });
 
-        // last update the current$ subject to inform about changes
-        if (this.areas.groupContext$.value) {
+        // last update the current$ subject to inform about changes if it was affected
+        if (this.areas.groupContext$.value === groupName) {
           this.setCurrent(this.areas.groupContext$.value);
         }
       });
@@ -157,6 +157,11 @@ export class GroupsService {
     const attr = this.attributeValues$.value;
     delete attr[groupName];
     this.attributeValues$.next({ ...attr });
+
+    // last update the current$ subject to inform about changes if it was affected
+    if (this.areas.groupContext$.value === groupName) {
+      this.setCurrent(this.areas.groupContext$.value);
+    }
   }
 
   public getLogoUrlOrDefault(group: string, id: ObjectId, def: string) {
