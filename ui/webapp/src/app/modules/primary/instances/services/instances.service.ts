@@ -128,6 +128,24 @@ export class InstancesService {
     areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
 
+    this.active$.subscribe((act) => {
+      clearInterval(this.activeLoadInterval);
+      clearInterval(this.activeCheckInterval);
+      // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
+      // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
+      ngZone.runOutsideAngular(() => {
+        this.activeLoadInterval = setInterval(
+          () => this.reloadActiveStates(act),
+          10000
+        );
+        this.activeCheckInterval = setInterval(
+          () => this.checkActiveReloadState(act),
+          1000
+        );
+      });
+      this.reloadActiveStates(act);
+    });
+
     combineLatest([
       this.current$,
       this.active$,
@@ -136,8 +154,6 @@ export class InstancesService {
       this.importURL$.next(
         `${this.apiPath(this.group)}/${cur?.instanceConfiguration?.id}/import`
       );
-      clearInterval(this.activeLoadInterval);
-      clearInterval(this.activeCheckInterval);
 
       let update: Observable<InstanceDto[]> = of(null);
       if (this.instancesChanges.length > 0) {
@@ -146,19 +162,6 @@ export class InstancesService {
       }
 
       update.subscribe(() => {
-        // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
-        // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
-        ngZone.runOutsideAngular(() => {
-          this.activeLoadInterval = setInterval(
-            () => this.reloadActiveStates(act),
-            10000
-          );
-          this.activeCheckInterval = setInterval(
-            () => this.checkActiveReloadState(act),
-            1000
-          );
-        });
-
         // update in case the server has changed (e.g. synchronized update state).
         if (!!servers?.length && !!cur?.managedServer?.hostName) {
           const s = servers.find(
@@ -179,8 +182,6 @@ export class InstancesService {
             this.active$.next(act);
           }
         }
-
-        this.reloadActiveStates(act);
       });
     });
   }
