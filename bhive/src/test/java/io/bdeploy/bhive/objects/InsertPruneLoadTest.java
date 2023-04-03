@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,21 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.bhive.BHiveTransactions.Transaction;
+import io.bdeploy.bhive.BHiveTestUtils;
 import io.bdeploy.bhive.TestHive;
-import io.bdeploy.bhive.model.Manifest;
-import io.bdeploy.bhive.model.ObjectId;
-import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.objects.view.ElementView;
 import io.bdeploy.bhive.op.FsckOperation;
-import io.bdeploy.bhive.op.ImportObjectOperation;
-import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
-import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOldByIdOperation;
-import io.bdeploy.bhive.op.ManifestMaxIdOperation;
-import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.PruneOperation;
-import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 
 /**
@@ -79,7 +69,7 @@ class InsertPruneLoadTest {
             threads.add(new Thread(() -> {
                 while (!stop.get()) {
                     try {
-                        produce(hive, errors, num);
+                        produce(hive, num);
                         productions.increment();
                     } catch (Exception e) {
                         errors.increment();
@@ -152,36 +142,12 @@ class InsertPruneLoadTest {
         }
     }
 
-    void produce(BHive hive, LongAdder errors, int num) {
-        long start = System.currentTimeMillis();
-
+    static void produce(BHive hive, int num) {
         String manifestName = System.getProperty("test.manifestName.override", "X") + num;
-        String content = "{" + start + "_" + num + "}";
 
-        Optional<Long> currentId = hive.execute(new ManifestMaxIdOperation().setManifestName(manifestName));
-        if (currentId.isPresent()) {
-            hive.execute(new FsckOperation().addManifest(new Manifest.Key(manifestName, currentId.get().toString())));
-        }
-
-        Long newId = hive.execute(new ManifestNextIdOperation().setManifestName(manifestName));
-        Manifest.Builder mfb = new Manifest.Builder(new Manifest.Key(manifestName, newId.toString()));
-
-        List<ObjectId> oids = new ArrayList<>();
-        try (Transaction t = hive.getTransactions().begin()) {
-            ObjectId descOid = hive.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(content)));
-            Tree.Builder tb = new Tree.Builder().add(new Tree.Key("file.x", Tree.EntryType.BLOB), descOid);
-            ObjectId treeOid = hive.execute(new InsertArtificialTreeOperation().setTree(tb));
-            mfb.setRoot(treeOid);
-
-            oids.add(descOid);
-            oids.add(treeOid);
-
-            hive.execute(new InsertManifestOperation().addManifest(mfb.build(hive)));
-        }
+        BHiveTestUtils.createManifest(hive, manifestName, false);
 
         hive.execute(new ManifestDeleteOldByIdOperation().setToDelete(manifestName).setAmountToKeep(1));
-
-        log.info("Producer: {} {} took {}ms.", newId, oids, System.currentTimeMillis() - start);
     }
 
 }

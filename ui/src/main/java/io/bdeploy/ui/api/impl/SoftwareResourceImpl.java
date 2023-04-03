@@ -94,12 +94,14 @@ public class SoftwareResourceImpl implements SoftwareResource {
                 continue;
             }
             // collect all non-products and all manifests that belong to products
-            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(k));
-            if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
-                ProductManifest pmf = ProductManifest.of(hive, k);
-                apps.addAll(pmf.getApplications());
-            } else {
-                result.add(k);
+            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(k).setNullOnError(true));
+            if (mf != null) {
+                if (mf.getLabels().containsKey(ProductManifestBuilder.PRODUCT_LABEL)) {
+                    ProductManifest pmf = ProductManifest.of(hive, k);
+                    apps.addAll(pmf.getApplications());
+                } else {
+                    result.add(k);
+                }
             }
         }
         result.removeIf(apps::contains); // remove all manifests that belong to a product

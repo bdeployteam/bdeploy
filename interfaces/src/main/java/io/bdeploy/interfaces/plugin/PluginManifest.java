@@ -49,8 +49,8 @@ public class PluginManifest {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation().setManifestName(PLUGIN_NS));
         for (Manifest.Key key : allKeys) {
-            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
-            if (mf.getLabels().containsKey(PLUGIN_LABEL)) {
+            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key).setNullOnError(true));
+            if (mf != null && mf.getLabels().containsKey(PLUGIN_LABEL)) {
                 result.add(key);
             }
         }

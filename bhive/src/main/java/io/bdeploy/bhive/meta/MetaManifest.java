@@ -99,16 +99,25 @@ public class MetaManifest<T> {
      * @return The current version of the metadata. <code>null</code> if no metadata for the given {@link Class} is present.
      */
     public T read(BHiveExecution source) {
-        Optional<Long> id = source.execute(new ManifestMaxIdOperation().setManifestName(metaName));
-        Manifest.Key key;
+        Manifest mf = null;
+        int retries = 0;
 
-        if (!id.isPresent()) {
-            return null;
-        } else {
-            key = new Manifest.Key(metaName, id.get().toString());
+        while (mf == null && retries++ < 10) {
+            Optional<Long> id = source.execute(new ManifestMaxIdOperation().setManifestName(metaName));
+            Manifest.Key key;
+
+            if (!id.isPresent()) {
+                return null;
+            } else {
+                key = new Manifest.Key(metaName, id.get().toString());
+            }
+
+            mf = source.execute(new ManifestLoadOperation().setManifest(key).setNullOnError(true));
         }
 
-        Manifest mf = source.execute(new ManifestLoadOperation().setManifest(key));
+        if (mf == null) {
+            throw new IllegalStateException("Could not load " + metaName + ", retries exceeded");
+        }
 
         try (InputStream is = source
                 .execute(new TreeEntryLoadOperation().setRootTree(mf.getRoot()).setRelativePath(metaFileName()))) {

@@ -94,7 +94,11 @@ public class LocalBHiveAdapter implements RemoteBHive {
         SortedMap<Manifest.Key, ObjectId> result = new TreeMap<>();
 
         for (Manifest.Key key : mfs) {
-            result.put(key, hive.execute(new ManifestLoadOperation().setManifest(key)).getRoot());
+            // manifests can be deleted at any time, so don't die if it has been *after* calling list.
+            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key).setNullOnError(true));
+            if (mf != null) {
+                result.put(key, mf.getRoot());
+            }
         }
 
         return result;

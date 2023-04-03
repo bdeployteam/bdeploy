@@ -27,6 +27,7 @@ import io.bdeploy.bhive.op.InsertArtificialTreeOperation;
 import io.bdeploy.bhive.op.InsertManifestOperation;
 import io.bdeploy.bhive.op.InsertManifestRefOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ManifestMaxIdOperation;
@@ -270,8 +271,12 @@ public class InstanceManifest {
         }
 
         for (Manifest.Key key : idKeys) {
-            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
-            if (mf.getLabels().containsKey(INSTANCE_LABEL)) {
+            if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
+                // might have been deleted meanwhile.
+                continue;
+            }
+            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key).setNullOnError(true));
+            if (mf != null && mf.getLabels().containsKey(INSTANCE_LABEL)) {
                 result.add(key);
             }
         }

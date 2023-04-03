@@ -60,8 +60,8 @@ public class InstanceNodeManifest {
         SortedSet<Manifest.Key> result = new TreeSet<>();
         Set<Manifest.Key> allKeys = hive.execute(new ManifestListOperation());
         for (Manifest.Key key : allKeys) {
-            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key));
-            if (mf.getLabels().containsKey(INSTANCE_NODE_LABEL)) {
+            Manifest mf = hive.execute(new ManifestLoadOperation().setManifest(key).setNullOnError(true));
+            if (mf != null && mf.getLabels().containsKey(INSTANCE_NODE_LABEL)) {
                 result.add(key);
             }
         }
