@@ -270,4 +270,22 @@ public class JerseyBroadcastingActivityReporter implements ActivityReporter {
         return globalActivities.stream().filter(Objects::nonNull).filter(a -> a.getUuid().equals(uuid)).findAny().orElse(null);
     }
 
+    /**
+     * Provides a closable context for the current thread, which will detach the threads activity handling from the one of the
+     * request itself. This is required to provide separated handling of activities for threads started from a request context.
+     * <p>
+     * The current branch will maintain the current activity as parent for all activities.
+     */
+    public NoThrowAutoCloseable branchThread() {
+        JerseyRemoteActivity currentActivity = getCurrentActivity();
+        List<String> scope = jss.getScope();
+        String user = jss.getUser();
+
+        NoThrowAutoCloseable c = reqCtx.branchThread();
+
+        setCurrentActivity(currentActivity);
+        jss.setScope(scope, user);
+        return c;
+    }
+
 }

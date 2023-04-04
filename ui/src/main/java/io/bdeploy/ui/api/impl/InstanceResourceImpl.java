@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
-import org.glassfish.jersey.process.internal.RequestContext;
 import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,13 +52,11 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.FutureHelper;
-import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
@@ -116,9 +113,11 @@ import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
+import io.bdeploy.ui.RequestScopedNamedDaemonThreadFactory;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -146,6 +145,7 @@ import io.bdeploy.ui.dto.StringEntryChunkDto;
 import io.bdeploy.ui.utils.WindowsInstaller;
 import io.bdeploy.ui.utils.WindowsInstallerConfig;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
@@ -173,7 +173,7 @@ public class InstanceResourceImpl implements InstanceResource {
     private AuthService auth;
 
     @Inject
-    private ActivityReporter reporter;
+    private JerseyBroadcastingActivityReporter reporter;
 
     @Inject
     private Minion minion;
@@ -203,7 +203,7 @@ public class InstanceResourceImpl implements InstanceResource {
     private ProductUpdateService pus;
 
     @Inject
-    private RequestScope reqScope;
+    private Provider<RequestScope> reqScope;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -298,22 +298,16 @@ public class InstanceResourceImpl implements InstanceResource {
             ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
             try (Activity sync = reporter.start("Synchronize Servers", toSync.size())) {
                 AtomicLong syncNo = new AtomicLong(0);
-                ExecutorService es = Executors.newFixedThreadPool(4,
-                        new NamedDaemonThreadFactory(() -> "Mass-Synchronizer " + syncNo.incrementAndGet()));
+                ExecutorService es = Executors.newFixedThreadPool(4, new RequestScopedNamedDaemonThreadFactory(reqScope,
+                        reg.get(group).getTransactions(), reporter, () -> "Mass-Synchronizer " + syncNo.incrementAndGet()));
                 List<Future<?>> syncTasks = new ArrayList<>();
-                RequestContext scope = reqScope.referenceCurrent();
                 for (ManagedMasterDto host : toSync) {
                     syncTasks.add(es.submit(() -> {
-                        try {
-                            // we need to detach transactions to avoid races. otherwise transactions would be shared between all threads.
-                            reg.get(group).getTransactions().detachThread();
-
+                        try (Activity singleSync = reporter.start("Synchronize " + host.hostName)) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Synchronize {}", host.hostName);
                             }
-                            reqScope.runInScope(scope, () -> {
-                                rs.synchronize(group, host.hostName);
-                            });
+                            rs.synchronize(group, host.hostName);
                         } catch (Exception e) {
                             errors.add(host.hostName);
                             log.warn("Could not synchronize managed server: {}: {}", host.hostName, e.toString());
@@ -326,7 +320,7 @@ public class InstanceResourceImpl implements InstanceResource {
                 }
 
                 FutureHelper.awaitAll(syncTasks);
-                es.shutdown();
+                es.shutdown(); // make all threads exit :)
             }
         } else {
             // update the local stored state.

@@ -7,6 +7,7 @@ import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.NoThrowAutoCloseable;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -25,9 +26,14 @@ public class JerseyRequestContext {
     @Inject
     private Provider<ContainerRequestContext> reqCtx;
 
+    private final ThreadLocal<Map<String, Object>> override = new ThreadLocal<>();
     private final ThreadLocal<Map<String, Object>> fallback = ThreadLocal.withInitial(() -> new TreeMap<>());
 
     public Object getProperty(String name) {
+        if (override.get() != null) {
+            return override.get().get(name);
+        }
+
         try {
             return this.reqCtx.get().getProperty(name);
         } catch (Exception e) {
@@ -39,6 +45,10 @@ public class JerseyRequestContext {
     }
 
     public void setProperty(String name, Object object) {
+        if (override.get() != null) {
+            override.get().put(name, object);
+        }
+
         try {
             this.reqCtx.get().setProperty(name, object);
         } catch (Exception e) {
@@ -50,6 +60,10 @@ public class JerseyRequestContext {
     }
 
     public void removeProperty(String name) {
+        if (override.get() != null) {
+            override.get().remove(name);
+        }
+
         try {
             reqCtx.get().removeProperty(name);
         } catch (Exception e) {
@@ -62,6 +76,22 @@ public class JerseyRequestContext {
 
     public void clear() {
         // cleanup potential thread local state.
+        override.remove();
         fallback.remove();
+    }
+
+    /**
+     * Branches the context for a new thread. This is used to avoid parallel manipulation of the same context with different
+     * information from multiple threads.
+     */
+    public NoThrowAutoCloseable branchThread() {
+        override.set(new TreeMap<>());
+        return new NoThrowAutoCloseable() {
+
+            @Override
+            public void close() {
+                override.remove();
+            }
+        };
     }
 }
