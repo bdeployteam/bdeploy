@@ -4,11 +4,12 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, skipWhile } from 'rxjs';
 import { Permission } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
+import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Component({
   // eslint-disable-next-line @angular-eslint/component-selector
@@ -31,23 +32,25 @@ export class AssignPermissionComponent implements OnInit, OnDestroy {
   constructor(
     private authAdmin: AuthAdminService,
     private areas: NavAreasService,
-    private groups: GroupsService
+    private groups: GroupsService,
+    private repositories: RepositoriesService
   ) {}
 
   ngOnInit(): void {
-    this.subscription = this.groups.groups$.subscribe((groups) => {
-      if (!groups) {
-        return;
-      }
+    this.subscription = combineLatest([
+      this.groups.groups$,
+      this.repositories.repositories$,
+    ])
+      .pipe(skipWhile(([g]) => !g))
+      .subscribe(([groups, repositories]) => {
+        const groupNames = groups.map((g) => g.instanceGroupConfiguration.name);
+        const repositoryNames = repositories.map((r) => r.name);
+        const sortedNames = [...groupNames, ...repositoryNames].sort();
 
-      const sortedNames = groups
-        .map((g) => g.instanceGroupConfiguration.name)
-        .sort();
-
-      this.scopes$.next([null, ...sortedNames]);
-      this.labels$.next(['Global', ...sortedNames]);
-      this.loading$.next(false);
-    });
+        this.scopes$.next([null, ...sortedNames]);
+        this.labels$.next(['Global', ...sortedNames]);
+        this.loading$.next(false);
+      });
   }
 
   /* template */ onSave() {
