@@ -3,11 +3,11 @@ import { Injectable, NgZone } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import {
   BehaviorSubject,
+  Observable,
+  Subscription,
   combineLatest,
   forkJoin,
-  Observable,
   of,
-  Subscription,
 } from 'rxjs';
 import {
   debounceTime,
@@ -391,11 +391,11 @@ export class InstancesService {
     }
 
     const wrongScopeLength = this.instancesChanges.find(
-      (change) => change.scope.scope.length !== 2
+      (change) => change.scope.scope.length < 2
     );
     if (wrongScopeLength) {
       console.warn(
-        `Found instance change with scope length ${wrongScopeLength.scope.scope.length} instead of 2. Reloading.`
+        `Found instance change with scope length ${wrongScopeLength.scope.scope.length} (less than 2). Reloading.`
       );
       return false;
     }
