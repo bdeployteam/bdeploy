@@ -51,6 +51,10 @@ final class PasswordAuthentication implements Authenticator {
      * @return a secure authentication token to be stored for later authentication
      */
     public static String hash(char[] password) {
+        if (password.length > 128) {
+            throw new IllegalArgumentException("Password too long.");
+        }
+
         byte[] salt = new byte[SIZE / 8];
         random.nextBytes(salt);
         byte[] dk = pbkdf2(password, salt, 1 << DEFAULT_COST);
