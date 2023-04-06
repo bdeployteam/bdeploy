@@ -23,11 +23,11 @@ No.   | Fullfilled | Description
 2.1.5 | Yes        | Users can change their password.
 2.1.6 | Yes        | Password change requires old and new password.
 2.1.7 | **No**     | New passwords checked against set of breached passwords.
-2.1.8 | **No**     | Strength meter for password stregth hint.
+2.1.8 | Yes        | Strength meter for password stregth hint.
 2.1.9 | Yes        | There should be no specific requirement for password composition.
 2.1.10| Yes        | No periodic credential rotation of password history requirements.
 2.1.11| Yes        | Pasting passwords from password manager should work.
-2.1.12| **No**     | Hidden password can be shown temporarily while entering it.
+2.1.12| Yes        | Hidden password can be shown temporarily while entering it.
 
 ## Certificates
 

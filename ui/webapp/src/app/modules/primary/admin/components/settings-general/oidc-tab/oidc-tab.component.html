@@ -26,6 +26,7 @@
   ></app-bd-form-input>
   <app-bd-form-input
     type="password"
+    [passwordShowable]="true"
     [(ngModel)]="settings.settings$.value.auth.oidcSettings.secret"
     label="Client Secret"
     [disabled]="!settings.settings$.value.auth.oidcSettings.enabled"

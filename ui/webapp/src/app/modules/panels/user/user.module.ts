@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
 import { CoreModule } from '../../core/core.module';
 import { EditComponent } from './components/settings/edit/edit.component';
 import { PasswordComponent } from './components/settings/password/password.component';
@@ -16,6 +17,11 @@ import { UserRoutingModule } from './user-routing.module';
     TokenComponent,
     PasswordComponent,
   ],
-  imports: [CommonModule, CoreModule, UserRoutingModule],
+  imports: [
+    CommonModule,
+    CoreModule,
+    UserRoutingModule,
+    PasswordStrengthMeterModule.forRoot(),
+  ],
 })
 export class UserModule {}

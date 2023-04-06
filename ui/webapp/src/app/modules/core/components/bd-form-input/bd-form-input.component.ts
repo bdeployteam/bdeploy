@@ -46,12 +46,14 @@ export class BdFormInputComponent
   @Input() assistPrefixes: ContentCompletion[];
   @Input() errorFallback: string;
   @Input() statusMessage: string;
+  @Input() passwordShowable = false;
 
   // eslint-disable-next-line @angular-eslint/no-output-native
   @Output() focus = new EventEmitter<any>();
 
   @ViewChild(MatAutocompleteTrigger) private trigger: MatAutocompleteTrigger;
 
+  /* template */ showPassword = false;
   /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
   /* template */ get value() {
