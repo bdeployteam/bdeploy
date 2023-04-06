@@ -14,14 +14,21 @@ public class StringEntryChunkDto {
 
     public String content;
 
+    public byte[] binaryContent;
+
     public long endPointer;
 
     public boolean binary;
 
     public StringEntryChunkDto(EntryChunk chunk) {
-        this.content = new String(chunk.content, StandardCharsets.UTF_8);
         this.endPointer = chunk.endPointer;
         this.binary = isBinary(chunk.content);
+
+        if (this.binary) {
+            this.binaryContent = chunk.content;
+        } else {
+            this.content = new String(chunk.content, StandardCharsets.UTF_8);
+        }
     }
 
     @JsonCreator
