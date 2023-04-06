@@ -27,6 +27,7 @@
         label="New Password"
         [(ngModel)]="addUser.password"
         type="password"
+        [passwordShowable]="true"
         required
       ></app-bd-form-input>
       <app-bd-form-input
@@ -34,9 +35,13 @@
         label="Confirm Password"
         [(ngModel)]="addConfirm"
         type="password"
+        [passwordShowable]="true"
         required
         [appPasswordVerification]="addUser.password"
       ></app-bd-form-input>
+      <password-strength-meter
+        [password]="addUser.password"
+      ></password-strength-meter>
       <app-bd-button
         color="primary"
         [collapsed]="false"

@@ -22,7 +22,7 @@
       autocomplete="off"
       [required]="required"
       [disabled]="disabled || passwordLock"
-      [type]="type"
+      [type]="showPassword ? 'text' : type"
       [errorStateMatcher]="this"
       [appBdContentAssist]="assistContent"
       (focus)="focus.emit(true)"
@@ -38,8 +38,13 @@
     <div *ngIf="prefix" matPrefix class="bd-form-input-prefix">
       <ng-container *ngTemplateOutlet="prefix"></ng-container>
     </div>
-    <div matSuffix class="bd-form-input-suffix">
+    <div *ngIf="!passwordShowable" matSuffix class="bd-form-input-suffix">
       <ng-content></ng-content>
+    </div>
+    <div *ngIf="passwordShowable" matSuffix class="bd-form-input-suffix">
+      <mat-icon (click)="showPassword = !showPassword" class="cursor-pointer"
+        >{{ showPassword ? 'visibility_off' : 'visibility'}}</mat-icon
+      >
     </div>
     <mat-error *ngIf="errorFallback || (ngControl && ngControl.invalid)"
       >{{ getErrorMessage() }}</mat-error

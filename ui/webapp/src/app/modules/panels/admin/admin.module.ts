@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
+import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
 import { CoreModule } from '../../core/core.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AddGlobalAttributeComponent } from './components/add-global-attribute/add-global-attribute.component';
@@ -68,6 +69,7 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
     AdminRoutingModule,
     MatTabsModule,
     MatCardModule,
+    PasswordStrengthMeterModule.forRoot(),
   ],
 })
 export class AdminModule {}

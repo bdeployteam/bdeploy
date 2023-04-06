@@ -26,16 +26,21 @@
               label="New Password"
               [(ngModel)]="tempUser.password"
               type="password"
+              [passwordShowable]="true"
             ></app-bd-form-input>
             <app-bd-form-input
               name="passConfirm"
               label="Confirm Password"
               [(ngModel)]="passConfirm"
               type="password"
+              [passwordShowable]="true"
               [appPasswordVerification]="tempUser.password"
               errorDisplay="immediate"
               [required]="!!tempUser.password?.length"
             ></app-bd-form-input>
+            <password-strength-meter
+              [password]="tempUser.password"
+            ></password-strength-meter>
           </ng-container>
         </ng-container>
       </form>
