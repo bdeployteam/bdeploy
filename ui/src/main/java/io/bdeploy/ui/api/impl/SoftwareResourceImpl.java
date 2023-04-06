@@ -225,6 +225,15 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
     @Override
     public UploadInfoDto importRawContent(UploadInfoDto dto) {
+        if (dto.tag != null && !dto.tag.equals(dto.tag.trim())) {
+            throw new WebApplicationException("Tag contains leading or trailing whitespace: '" + dto.tag + "'",
+                    Status.EXPECTATION_FAILED);
+        }
+        if (dto.name != null && !dto.name.equals(dto.name.trim())) {
+            throw new WebApplicationException("Name contains leading or trailing whitespace: '" + dto.name + "'",
+                    Status.EXPECTATION_FAILED);
+        }
+
         try {
             Path targetFile = minion.getDownloadDir().resolve(dto.tmpFilename);
             if (dto.isHive) {

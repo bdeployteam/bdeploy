@@ -4,68 +4,78 @@
   [disabled]="(isUploadProcessing$ | async) || (isImporting$ | async)"
   [type]="(isUploadFailed$ | async) || (isImportFailed$ | async) ? 'warning' : 'generic'"
   (dismiss)="onDismiss()"
+  [dismissable]="!(!!uploadStatus.detail && !(!!uploadStatus?.detail?.isHive || !!uploadStatus?.detail?.isProduct) && !!!importStatus)"
 >
-  <mat-progress-bar
-    *ngIf="(isUploadProcessing$ | async) || (isUploading$ | async) || (isImporting$ | async)"
-    [mode]="(isUploading$ | async) ? 'determinate' : 'indeterminate'"
-    [value]="uploadStatus.progressObservable | async"
-  ></mat-progress-bar>
-  <div
-    *ngIf="(isUploading$ | async) || (isUploadProcessing$ | async) || (isImporting$ | async)"
-    class="break-all bd-description-text"
-  >
-    {{ processingHint$ | async }}
-  </div>
-  <div *ngIf="isUploadFailed$ | async" class="break-all bd-description-text">
-    {{ uploadStatus.detail }}
-  </div>
-  <div *ngIf="isUploadFinished$ | async" class="break-all bd-description-text">
-    {{ this.uploadStatus?.detail?.details }}
-  </div>
-  <div *ngIf="isImportFailed$ | async" class="break-all bd-description-text">
-    {{ importStatus?.detail }}
-  </div>
-  <div *ngIf="isImportFinished$ | async" class="break-all bd-description-text">
-    {{ importStatus?.detail }}
-  </div>
-  <div
-    *ngIf="!!uploadStatus.detail && !(!!uploadStatus?.detail?.isHive || !!uploadStatus?.detail?.isProduct) && !!!importStatus"
-  >
-    <app-bd-form-input
-      label="Name"
-      name="name"
-      [(ngModel)]="uploadStatus.detail.name"
-      required
-    ></app-bd-form-input>
-    <app-bd-form-input
-      label="Version"
-      name="tag"
-      [(ngModel)]="uploadStatus.detail.tag"
-      required
-    ></app-bd-form-input>
-    <div class="package-os-buttons">
-      <app-bd-form-toggle
-        label="Operating System Independent"
-        name="allOs"
-        [(ngModel)]="supportAllOs"
-      ></app-bd-form-toggle>
-      <app-bd-form-toggle
-        label="Windows"
-        name="windows"
-        [(ngModel)]="supportWindows"
-      ></app-bd-form-toggle>
-      <app-bd-form-toggle
-        label="Linux"
-        name="linux"
-        [(ngModel)]="supportLinux"
-      ></app-bd-form-toggle>
+  <div class="flex flex-col p-1 gap-2">
+    <mat-progress-bar
+      *ngIf="(isUploadProcessing$ | async) || (isUploading$ | async) || (isImporting$ | async)"
+      [mode]="(isUploading$ | async) ? 'determinate' : 'indeterminate'"
+      [value]="uploadStatus.progressObservable | async"
+    ></mat-progress-bar>
+    <div
+      *ngIf="(isUploading$ | async) || (isUploadProcessing$ | async) || (isImporting$ | async)"
+      class="break-all bd-description-text"
+    >
+      {{ processingHint$ | async }}
     </div>
+    <div *ngIf="isUploadFailed$ | async" class="break-all bd-description-text">
+      {{ uploadStatus.detail }}
+    </div>
+    <div
+      *ngIf="isUploadFinished$ | async"
+      class="break-all bd-description-text"
+    >
+      {{ this.uploadStatus?.detail?.details }}
+    </div>
+    <div *ngIf="isImportFailed$ | async" class="break-all bd-description-text">
+      {{ importStatus?.detail }}
+    </div>
+    <div
+      *ngIf="isImportFinished$ | async"
+      class="break-all bd-description-text"
+    >
+      {{ importStatus?.detail }}
+    </div>
+    <ng-container
+      *ngIf="!!uploadStatus.detail && !(!!uploadStatus?.detail?.isHive || !!uploadStatus?.detail?.isProduct) && !!!importStatus"
+    >
+      <app-bd-form-input
+        label="Name"
+        name="name"
+        [(ngModel)]="uploadStatus.detail.name"
+        required
+        appTrimmed
+      ></app-bd-form-input>
+      <app-bd-form-input
+        label="Version"
+        name="tag"
+        [(ngModel)]="uploadStatus.detail.tag"
+        required
+        appTrimmed
+      ></app-bd-form-input>
+      <div class="package-os-buttons">
+        <app-bd-form-toggle
+          label="Operating System Independent"
+          name="allOs"
+          [(ngModel)]="supportAllOs"
+        ></app-bd-form-toggle>
+        <app-bd-form-toggle
+          label="Windows"
+          name="windows"
+          [(ngModel)]="supportWindows"
+        ></app-bd-form-toggle>
+        <app-bd-form-toggle
+          label="Linux"
+          name="linux"
+          [(ngModel)]="supportLinux"
+        ></app-bd-form-toggle>
+      </div>
 
-    <app-bd-button
-      color="primary"
-      [collapsed]="false"
-      text="Import"
-      [disabled]="
+      <app-bd-button
+        color="primary"
+        [collapsed]="false"
+        text="Import"
+        [disabled]="
         !(
           !!uploadStatus.detail &&
           uploadStatus?.detail?.name?.length > 0 &&
@@ -73,7 +83,13 @@
           (uploadStatus?.detail?.supportedOperatingSystems === undefined || uploadStatus?.detail?.supportedOperatingSystems.length > 0)
         )
       "
-      (click)="import()"
-    ></app-bd-button>
+        (click)="import()"
+      ></app-bd-button>
+      <app-bd-button
+        text="Cancel"
+        (click)="onDismiss()"
+        [collapsed]="false"
+      ></app-bd-button>
+    </ng-container>
   </div>
 </app-bd-notification-card>
