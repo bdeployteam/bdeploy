@@ -7,8 +7,16 @@ describe('Groups Tests (Permissions)', () => {
   before(() => {
     cy.cleanAllGroups();
 
-    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=read`, failOnStatusCode: false });
-    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=write`, failOnStatusCode: false });
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=read`,
+      failOnStatusCode: false,
+    });
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=write`,
+      failOnStatusCode: false,
+    });
   });
 
   beforeEach(() => {
@@ -32,13 +40,15 @@ describe('Groups Tests (Permissions)', () => {
     // create test users - CLIENT permission has its separate test.
     ['read', 'write'].forEach((perm) => {
       cy.pressToolbarButton('Create User');
-      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as('createUser');
+      cy.intercept({ method: 'PUT', url: '/api/auth/admin/local' }).as(
+        'createUser'
+      );
       cy.inMainNavFlyin('add-user', () => {
         cy.fillFormInput('name', perm);
         cy.fillFormInput('fullName', `${perm} User`);
         cy.fillFormInput('email', 'example@example.org');
-        cy.fillFormInput('pass', perm);
-        cy.fillFormInput('passConfirm', perm);
+        cy.fillFormInput('pass', perm.repeat(3));
+        cy.fillFormInput('passConfirm', perm.repeat(3));
         cy.get('button[data-cy="Save"]').should('be.enabled').click();
       });
 
@@ -80,7 +90,7 @@ describe('Groups Tests (Permissions)', () => {
     });
     cy.waitUntilContentLoaded();
     cy.fillFormInput('user', 'write');
-    cy.fillFormInput('pass', 'write');
+    cy.fillFormInput('pass', 'write'.repeat(3));
 
     cy.get('button[type="submit"]').click();
 
@@ -102,7 +112,7 @@ describe('Groups Tests (Permissions)', () => {
     });
     cy.waitUntilContentLoaded();
     cy.fillFormInput('user', 'read');
-    cy.fillFormInput('pass', 'read');
+    cy.fillFormInput('pass', 'read'.repeat(3));
 
     cy.get('button[type="submit"]').click();
 
@@ -169,7 +179,7 @@ describe('Groups Tests (Permissions)', () => {
     });
     cy.waitUntilContentLoaded();
     cy.fillFormInput('user', 'read');
-    cy.fillFormInput('pass', 'read');
+    cy.fillFormInput('pass', 'read'.repeat(3));
 
     cy.get('button[type="submit"]').click();
 
@@ -181,7 +191,15 @@ describe('Groups Tests (Permissions)', () => {
 
   it('Cleans up', () => {
     cy.deleteGroup(groupName);
-    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=read`, failOnStatusCode: false });
-    cy.authenticatedRequest({ method: 'DELETE', url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=write`, failOnStatusCode: false });
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=read`,
+      failOnStatusCode: false,
+    });
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=write`,
+      failOnStatusCode: false,
+    });
   });
 });

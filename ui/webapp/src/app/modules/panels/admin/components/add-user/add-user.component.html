@@ -28,6 +28,8 @@
         [(ngModel)]="addUser.password"
         type="password"
         [passwordShowable]="true"
+        minlength="12"
+        maxlength="128"
         required
       ></app-bd-form-input>
       <app-bd-form-input
@@ -36,6 +38,8 @@
         [(ngModel)]="addConfirm"
         type="password"
         [passwordShowable]="true"
+        minlength="12"
+        maxlength="128"
         required
         [appPasswordVerification]="addUser.password"
       ></app-bd-form-input>

@@ -14,6 +14,8 @@ import javax.crypto.spec.PBEKeySpec;
 
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Hash passwords for storage, and test passwords against password tokens.
@@ -51,8 +53,12 @@ final class PasswordAuthentication implements Authenticator {
      * @return a secure authentication token to be stored for later authentication
      */
     public static String hash(char[] password) {
+        if (password.length < 12) {
+            throw new WebApplicationException("Password too short. Minimum: 12 characters.", Status.EXPECTATION_FAILED);
+        }
+
         if (password.length > 128) {
-            throw new IllegalArgumentException("Password too long.");
+            throw new WebApplicationException("Password too long. Maximum: 128 characters.", Status.EXPECTATION_FAILED);
         }
 
         byte[] salt = new byte[SIZE / 8];

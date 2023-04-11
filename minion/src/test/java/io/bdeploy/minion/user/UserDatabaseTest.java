@@ -29,9 +29,9 @@ class UserDatabaseTest {
     void userRoles(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("JunitTest", "JunitTest", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+        db.createLocalUser("JunitTest", "JunitTestJunitTest", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
 
-        UserInfo info = db.authenticate("JunitTest", "JunitTest");
+        UserInfo info = db.authenticate("JunitTest", "JunitTestJunitTest");
         assertNotNull(info);
         assertNotNull(info.permissions);
         assertEquals(1, info.permissions.size());
@@ -42,7 +42,7 @@ class UserDatabaseTest {
         info.email = "JunitTest.user@example.com";
         db.updateUserInfo(info);
 
-        UserInfo updated = db.authenticate("JunitTest", "JunitTest");
+        UserInfo updated = db.authenticate("JunitTest", "JunitTestJunitTest");
         assertNotNull(updated);
         assertNotNull(updated.permissions);
         assertTrue(updated.permissions.isEmpty());
@@ -55,7 +55,7 @@ class UserDatabaseTest {
     void userCleanup(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("JunitTest", "JunitTest", null);
+        db.createLocalUser("JunitTest", "JunitTestJunitTest", null);
         for (int i = 0; i < 20; ++i) {
             UserInfo u = db.getUser("JunitTest");
             u.permissions.add(new ScopedPermission("Scope" + i, ScopedPermission.Permission.ADMIN));
@@ -70,10 +70,11 @@ class UserDatabaseTest {
     void crud(MinionRoot root) {
         UserDatabase db = root.getUsers();
 
-        db.createLocalUser("JunitTest", "JunitTest", Collections.singleton(new ScopedPermission("JunitTest", Permission.WRITE)));
-        db.updateLocalPassword("JunitTest", "newpw");
+        db.createLocalUser("JunitTest", "JunitTestJunitTest",
+                Collections.singleton(new ScopedPermission("JunitTest", Permission.WRITE)));
+        db.updateLocalPassword("JunitTest", "newpwnewpwnewpw");
 
-        UserInfo user = db.authenticate("JunitTest", "newpw");
+        UserInfo user = db.authenticate("JunitTest", "newpwnewpwnewpw");
         assertNotNull(user);
 
         user.fullName = "JunitTest User";
@@ -81,7 +82,7 @@ class UserDatabaseTest {
 
         db.updateUserInfo(user);
 
-        assertNotNull(db.authenticate("JunitTest", "newpw"));
+        assertNotNull(db.authenticate("JunitTest", "newpwnewpwnewpw"));
 
         user = db.getUser(user.name);
 
@@ -91,7 +92,7 @@ class UserDatabaseTest {
         db.deleteUser("JunitTest");
 
         assertNull(db.getUser("JunitTest"));
-        assertNull(db.authenticate("JunitTest", "newpw"));
+        assertNull(db.authenticate("JunitTest", "newpwnewpwnewpw"));
     }
 
     @Test
@@ -100,7 +101,7 @@ class UserDatabaseTest {
         int originalSize = db.getAllNames().size();
 
         ScopedPermission permission = new ScopedPermission("MyScope", Permission.ADMIN);
-        db.createLocalUser("jUNit", "junit", Collections.singleton(permission));
+        db.createLocalUser("jUNit", "junitjunitjunit", Collections.singleton(permission));
 
         // Ensure it is stored in lower-case
         BHive hive = root.getHive();
@@ -110,12 +111,12 @@ class UserDatabaseTest {
         }
 
         // Attempt to create users with different case
-        assertThrows(IllegalStateException.class, () -> db.createLocalUser("JUNIT", "JUNIT", Collections.emptyList()));
-        assertThrows(IllegalStateException.class, () -> db.createLocalUser("Junit", "Junit", Collections.emptyList()));
-        assertThrows(IllegalStateException.class, () -> db.createLocalUser("juniT", "juniT", Collections.emptyList()));
+        assertThrows(IllegalStateException.class, () -> db.createLocalUser("JUNIT", "JUNITJUNITJUNIT", Collections.emptyList()));
+        assertThrows(IllegalStateException.class, () -> db.createLocalUser("Junit", "JunitJunitJunit", Collections.emptyList()));
+        assertThrows(IllegalStateException.class, () -> db.createLocalUser("juniT", "juniTjuniTjuniT", Collections.emptyList()));
 
         // Attempt to authenticate with different case
-        assertNotNull(db.authenticate("JUNIT", "junit"));
+        assertNotNull(db.authenticate("JUNIT", "junitjunitjunit"));
 
         // Try to get with different case
         assertNotNull(db.getUser("Junit"));

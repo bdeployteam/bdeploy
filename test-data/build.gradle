@@ -130,9 +130,9 @@ void createServerTasks(String name, String root, int port) {
 
         if(name.equals("Central") || name.equals("Managed")) {
             // save some time on startup...
-            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=" + name, "--initUser=admin", "--initPassword=admin" ]
+            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=" + name, "--initUser=admin", "--initPassword=adminadminadmin" ]
         } else {
-            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=admin" ]
+            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin" ]
         }
 
         mustRunAfter("externalSoftwareZip")
@@ -317,7 +317,7 @@ void setupBinServerTasks(String version) {
         }
 
         if(!key.startsWith('1')) {
-            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone", "--initUser=admin", "--initPassword=admin" ]
+            args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin" ]
         } else {
             args = [ "init", "--port=${port}", "--dist=ignore", "--mode=standalone" ]
         }

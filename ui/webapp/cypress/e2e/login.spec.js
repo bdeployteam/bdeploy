@@ -10,8 +10,10 @@ describe('Login Tests', function () {
 
     cy.screenshot('Doc_Login');
 
-    cy.fillFormInput('user', 'admin');
-    cy.fillFormInput('pass', 'admin');
+    cy.fixture('login.json').then((user) => {
+      cy.fillFormInput('user', user.user);
+      cy.fillFormInput('pass', user.pass);
+    });
 
     cy.get('button[type="submit"]').click();
 
@@ -20,7 +22,9 @@ describe('Login Tests', function () {
 
     cy.getCookie('st').should('exist');
 
-    cy.screenshot('Doc_SearchBarDisabled', { clip: { x: 0, y: 0, height: 80, width: 1280 } });
+    cy.screenshot('Doc_SearchBarDisabled', {
+      clip: { x: 0, y: 0, height: 80, width: 1280 },
+    });
     cy.screenshot('Doc_EmptyGroups');
   });
 });

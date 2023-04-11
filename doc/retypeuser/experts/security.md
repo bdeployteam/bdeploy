@@ -12,11 +12,11 @@ As a consequence, a _security token_ is required for all CLI commands that commu
 
 ## Local account security
 
-**BDeploy** *mostly* implements the [OWASP ASVS Password Security Requirements](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v21-password-security).
+**BDeploy** implements the [OWASP ASVS Password Security Requirements](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v21-password-security) with a single exception.
 
-No.   | Fullfilled | Description
+No.   | Fulfilled | Description
 ---   | ---        | ---
-2.1.1 | **No**     | Minimum password length must be 12 characters.
+2.1.1 | Yes        | Minimum password length must be 12 characters.
 2.1.2 | Yes        | Permit >64 characters, but not >128.
 2.1.3 | Yes        | Password not truncated, consecutive spaces *may* be collapsed (they are not).
 2.1.4 | Yes        | Allow any printable Unicode character in password (emoji, spaces, etc.).

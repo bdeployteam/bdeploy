@@ -54,7 +54,7 @@ class MasterCliTest {
         Path root = tmp.resolve("root");
         Path storage = tmp.resolve("storage");
         tools.execute(InitTool.class, "--root=" + root, "--hostname=localhost", "--dist=ignore", "--mode=standalone",
-                "--initUser=test", "--initPassword=test", "--port=" + port);
+                "--initUser=test", "--initPassword=testtesttest", "--port=" + port);
         tools.execute(StorageTool.class, "--root=" + root, "--add=" + storage.toString());
 
         Path ks;
@@ -65,7 +65,7 @@ class MasterCliTest {
             assertEquals(2, mr.getStorageLocations().size());
             assertTrue(mr.getStorageLocations().contains(storage));
             assertTrue(mr.getUsers().getAllNames().contains("test"));
-            assertNotNull(mr.getUsers().authenticate("test", "test"));
+            assertNotNull(mr.getUsers().authenticate("test", "testtesttest"));
             assertNull(mr.getUsers().authenticate("test", "wrong"));
 
             ks = mr.getState().keystorePath;
@@ -145,7 +145,7 @@ class MasterCliTest {
             assertEquals(0, output.size());
 
             tools.execute(LocalLoginTool.class, "--add=MyServer", "--remote=https://localhost:" + port + "/api", "--user=test",
-                    "--password=test");
+                    "--password=testtesttest");
 
             output = tools.execute(LocalLoginTool.class, "--list");
             assertEquals(1, output.size());
@@ -153,7 +153,7 @@ class MasterCliTest {
             assertTrue(output.get(0).get("Uri").contains("localhost"));
 
             tools.execute(LocalLoginTool.class, "--add=MyOtherServer", "--remote=https://localhost:" + port + "/api",
-                    "--user=test", "--password=test");
+                    "--user=test", "--password=testtesttest");
             tools.execute(LocalLoginTool.class, "--use=MyServer");
             tools.execute(LocalLoginTool.class, "--remove=MyServer");
 
@@ -168,7 +168,7 @@ class MasterCliTest {
 
             // use the login, test the user tool
             ToolBase.setTestModeForLLM(false); // disable to allow local login manager.
-            tools.execute(RemoteUserTool.class, "--add=user1", "--password=user1");
+            tools.execute(RemoteUserTool.class, "--add=user1", "--password=user1user1user1");
             tools.execute(RemoteUserTool.class, "--update=user1", "--admin");
             tools.execute(RemoteUserTool.class, "--update=user1", "--permission=WRITE", "--scope=IG");
             output = tools.execute(RemoteUserTool.class, "--list");

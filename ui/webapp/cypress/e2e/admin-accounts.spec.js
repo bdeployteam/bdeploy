@@ -53,8 +53,8 @@ describe('Admin UI Tests (Accounts)', () => {
       cy.fillFormInput('name', 'test');
       cy.fillFormInput('fullName', 'Test User');
       cy.fillFormInput('email', 'example@example.org');
-      cy.fillFormInput('pass', 'pass');
-      cy.fillFormInput('passConfirm', 'pass');
+      cy.fillFormInput('pass', 'passpasspass');
+      cy.fillFormInput('passConfirm', 'passpasspass');
     });
 
     cy.screenshot('Doc_Admin_User_Accounts_Add');

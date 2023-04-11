@@ -131,7 +131,7 @@ describe('Groups Tests (Clients)', () => {
     cy.authenticatedRequest({
       method: 'PUT',
       url: `${Cypress.env('backendBaseUrl')}/auth/admin/local`,
-      body: { name: 'client', password: 'client' },
+      body: { name: 'client', password: 'clientclient' },
     });
   });
 
@@ -142,7 +142,7 @@ describe('Groups Tests (Clients)', () => {
     });
     cy.waitUntilContentLoaded();
     cy.fillFormInput('user', 'client');
-    cy.fillFormInput('pass', 'client');
+    cy.fillFormInput('pass', 'clientclient');
 
     cy.get('button[type="submit"]').click();
 
@@ -194,7 +194,7 @@ describe('Groups Tests (Clients)', () => {
     });
     cy.waitUntilContentLoaded();
     cy.fillFormInput('user', 'client');
-    cy.fillFormInput('pass', 'client');
+    cy.fillFormInput('pass', 'clientclient');
 
     cy.get('button[type="submit"]').click();
 

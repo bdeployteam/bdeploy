@@ -35,7 +35,7 @@ java configuration Master-Init : minion-base {
 	argument "--dist=ignore";
 	argument "--mode=STANDALONE";
 	argument "--initUser=admin";
-	argument "--initPassword=admin";
+	argument "--initPassword=adminadminadmin";
 	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
 }
 
@@ -63,7 +63,7 @@ java configuration Central-Init : minion-base {
 	argument "--dist=ignore";
 	argument "--mode=CENTRAL";
 	argument "--initUser=admin";
-	argument "--initPassword=admin";
+	argument "--initPassword=adminadminadmin";
 }
 
 /**
@@ -77,7 +77,7 @@ java configuration Managed-Init : minion-base {
 	argument "--dist=ignore";
 	argument "--mode=MANAGED";
 	argument "--initUser=admin";
-	argument "--initPassword=admin";
+	argument "--initPassword=adminadminadmin";
 	argument "--tokenFile=${workspace_loc}/runtime/token-managed.txt";
 }
 

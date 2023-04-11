@@ -31,7 +31,7 @@ class PermissionFilterTest {
     private static final String LOCAL_READ = "local-read";
     private static final String LOCAL_WRITE = "local-write";
     private static final String LOCAL_ADMIN = "local-admin";
-    private static final String PASSWORD = "p";
+    private static final String PASSWORD = "TheTestPassword";
 
     private static final String SCOPE = "X";
     private static final String OTHER_SCOPE = "Y";

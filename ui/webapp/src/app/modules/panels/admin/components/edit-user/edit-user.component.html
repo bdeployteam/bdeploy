@@ -26,6 +26,8 @@
               label="New Password"
               [(ngModel)]="tempUser.password"
               type="password"
+              minlength="12"
+              maxlength="128"
               [passwordShowable]="true"
             ></app-bd-form-input>
             <app-bd-form-input
@@ -33,6 +35,8 @@
               label="Confirm Password"
               [(ngModel)]="passConfirm"
               type="password"
+              minlength="12"
+              maxlength="128"
               [passwordShowable]="true"
               [appPasswordVerification]="tempUser.password"
               errorDisplay="immediate"

@@ -68,7 +68,7 @@ public class TestMinion extends TestServer {
 
         String userName = "Test";
         UserDatabase userDb = cmr.mr.getUsers();
-        userDb.createLocalUser(userName, userName, Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+        userDb.createLocalUser(userName, "TheTestPassword", Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
 
         serverStore = SecurityHelper.getInstance().loadPrivateKeyStore(state.keystorePath, state.keystorePass);
         storePass = state.keystorePass;
