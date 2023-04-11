@@ -1,7 +1,21 @@
 import { Component, NgZone, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  Subscription,
+  combineLatest,
+  delay,
+  of,
+  skipWhile,
+  switchMap,
+} from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  isArchived,
+  isOversized,
+  unwrap,
+} from 'src/app/modules/core/utils/file-viewer.utils';
 import { HiveLoggingService } from '../../../services/hive-logging.service';
 
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
@@ -83,6 +97,14 @@ export class BhiveLogViewerComponent implements OnDestroy {
     const dir = this.directory$.value;
     const entry = this.file$.value;
 
+    if (isArchived(entry) && isOversized(entry)) {
+      const message = `File ${entry.path} is too large to display it here. Please download it`;
+      of(message) // hack to make bd-terminal receive event emission after resubscription
+        .pipe(delay(0))
+        .subscribe((content) => this.content$.next(content));
+      return;
+    }
+
     if (!this.offset && entry.size > MAX_TAIL) {
       this.offset = entry.size - MAX_TAIL;
     }
@@ -94,11 +116,11 @@ export class BhiveLogViewerComponent implements OnDestroy {
 
     this.hiveLogging
       .getLogContentChunk(dir, entry, this.offset, 0, true)
+      .pipe(
+        skipWhile((chunk) => !chunk),
+        switchMap((chunk) => unwrap(entry, chunk))
+      )
       .subscribe((chunk) => {
-        if (!chunk) {
-          return;
-        }
-
         this.content$.next(chunk.content);
         this.offset = chunk.endPointer;
       });

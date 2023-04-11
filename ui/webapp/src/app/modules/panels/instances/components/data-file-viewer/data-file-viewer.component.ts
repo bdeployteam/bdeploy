@@ -1,27 +1,25 @@
 import { Component, NgZone, OnDestroy } from '@angular/core';
-import { TextWriter, Uint8ArrayReader, ZipReader } from '@zip.js/zip.js';
-import * as Pako from 'pako';
 import {
   BehaviorSubject,
-  catchError,
-  combineLatest,
-  delay,
-  forkJoin,
-  from,
-  map,
-  Observable,
-  of,
   Subject,
   Subscription,
+  combineLatest,
+  delay,
+  of,
+  skipWhile,
   switchMap,
 } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import {
+  isArchived,
+  isOversized,
+  unwrap,
+} from 'src/app/modules/core/utils/file-viewer.utils';
 import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
-const MAX_FILE_SIZE = 1048576; // 1 MB
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
 
 @Component({
@@ -79,24 +77,8 @@ export class DataFileViewerComponent implements OnDestroy {
           if (f.path === fileName) {
             this.directory$.next(dir);
             this.file$.next(f);
-
-            this.oversized = f?.size > MAX_FILE_SIZE;
-
-            const isGZip = f.path.endsWith('.gz') || f.path.endsWith('.gzip');
-            const isZip = f.path.endsWith('.zip');
-            const isArchived = isZip || isGZip;
-            if (isArchived && this.oversized) {
-              const message = `File ${f.path} is too large to display it here. Please download it`;
-              of(message) // hack to make bd-terminal receive event emission after resubscription
-                .pipe(delay(0))
-                .subscribe((content) => this.content$.next(content));
-            } else if (isZip) {
-              this.streamZip(dir, f);
-            } else if (isGZip) {
-              this.streamGZip(dir, f);
-            } else {
-              this.nextChunk(); // initial
-            }
+            this.oversized = isOversized(f);
+            this.nextChunk(); // initial
             break;
           }
         }
@@ -124,45 +106,18 @@ export class DataFileViewerComponent implements OnDestroy {
     this.instances.download(this.directory$.value, this.file$.value);
   }
 
-  private streamGZip(dir: RemoteDirectory, file: RemoteDirectoryEntry) {
-    this.instances
-      .streamFile(dir, file)
-      .pipe(map((data) => this.ungzip(data)))
-      .subscribe((content) => this.content$.next(content));
-  }
-
-  private ungzip(buff: ArrayBuffer): string {
-    const data = new Uint8Array(buff);
-    try {
-      return Pako.ungzip(data, { to: 'string' });
-    } catch (e) {
-      return `failed to decompress. ${e}`;
-    }
-  }
-
-  private streamZip(dir: RemoteDirectory, file: RemoteDirectoryEntry) {
-    this.instances
-      .streamFile(dir, file)
-      .pipe(switchMap((buf) => this.unzip(buf)))
-      .subscribe((content) => this.content$.next(content));
-  }
-
-  private unzip(buf: ArrayBuffer): Observable<string> {
-    const data = new Uint8Array(buf);
-    const zipReader = new ZipReader(new Uint8ArrayReader(data));
-    return from(zipReader.getEntries()).pipe(
-      switchMap((es) =>
-        forkJoin(es.map((e) => e.getData<string>(new TextWriter())))
-      ),
-      map((ss) => ss.join('\n')),
-      catchError((e) => of(`failed to fetch content. ${e}`))
-    );
-  }
-
   private nextChunk() {
     // these are current enough :) we're called when the size of a file was updated.
     const dir = this.directory$.value;
     const entry = this.file$.value;
+
+    if (isArchived(entry) && isOversized(entry)) {
+      const message = `File ${entry.path} is too large to display it here. Please download it`;
+      of(message) // hack to make bd-terminal receive event emission after resubscription
+        .pipe(delay(0))
+        .subscribe((content) => this.content$.next(content));
+      return;
+    }
 
     if (!this.offset && entry.size > MAX_TAIL) {
       this.offset = entry.size - MAX_TAIL;
@@ -175,11 +130,11 @@ export class DataFileViewerComponent implements OnDestroy {
 
     this.instances
       .getContentChunk(dir, entry, this.offset, 0)
+      .pipe(
+        skipWhile((chunk) => !chunk),
+        switchMap((chunk) => unwrap(entry, chunk))
+      )
       .subscribe((chunk) => {
-        if (!chunk) {
-          return;
-        }
-
         this.content$.next(chunk.content);
         this.offset = chunk.endPointer;
       });
