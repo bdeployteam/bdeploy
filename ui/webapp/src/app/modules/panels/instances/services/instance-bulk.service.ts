@@ -23,6 +23,9 @@ export class InstanceBulkService {
   private apiPath = (group, instance) =>
     `${this.cfg.config.api}/group/${group}/instance/${instance}`;
 
+  private bulkApiPath = (group) =>
+    `${this.cfg.config.api}/group/${group}/instance`;
+
   constructor(
     private cfg: ConfigService,
     private http: HttpClient,
@@ -161,16 +164,13 @@ export class InstanceBulkService {
   }
 
   public install(): Observable<any> {
-    return concat(
-      this.selection$.value.map((inst) =>
-        this.http.get(
-          `${this.apiPath(
-            this.groups.current$.value.name,
-            inst.instanceConfiguration.id
-          )}/${inst.instance.tag}/install`
-        )
-      )
-    ).pipe(concatAll());
+    const instanceIds = this.selection$.value.map(
+      (i) => i.instanceConfiguration.id
+    );
+    return this.http.post(
+      `${this.bulkApiPath(this.groups.current$.value.name)}/install-latest`,
+      instanceIds
+    );
   }
 
   public activate(): Observable<any> {

@@ -117,6 +117,11 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.WRITE)
     public void install(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
 
+    @POST
+    @Path("/install-latest")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void installLatestVersions(List<String> instanceids);
+
     @GET
     @Path("/{instance}/{tag}/uninstall")
     @RequiredPermission(permission = Permission.WRITE)

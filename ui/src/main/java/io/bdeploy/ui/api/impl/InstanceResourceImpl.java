@@ -687,10 +687,24 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
+    public void installLatestVersions(List<String> instanceIds) {
+        AtomicLong threadNum = new AtomicLong(0);
+        ExecutorService pool = Executors.newFixedThreadPool(4, new RequestScopedNamedDaemonThreadFactory(reqScope,
+                reg.get(group).getTransactions(), reporter, () -> "Instance-Bulk-Install-" + threadNum.incrementAndGet()));
+        List<Future<?>> tasks = new ArrayList<>();
+        for (String instanceId : instanceIds) {
+            tasks.add(pool.submit(() -> install(instanceId, null))); // passing null tag will load the latest version
+        }
+        FutureHelper.awaitAll(tasks);
+        pool.shutdown(); // make all threads exit :)
+    }
+
+    @Override
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Installing Ver. " + tag + " of " + instance.getConfiguration().name);
+        try (Activity deploy = reporter
+                .start("Installing Ver. " + instance.getManifest().getTag() + " of " + instance.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
             // 1. push config to remote (small'ish).
             hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
