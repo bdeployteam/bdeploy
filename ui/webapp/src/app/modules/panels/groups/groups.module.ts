@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatTabsModule } from '@angular/material/tabs';
 import { CoreModule } from '../../core/core.module';
 import { AddGroupComponent } from './components/add-group/add-group.component';
 import { ClientDetailComponent } from './components/client-detail/client-detail.component';
@@ -11,6 +12,8 @@ import { AttributeValuesComponent } from './components/settings/attribute-values
 import { EditComponent } from './components/settings/edit/edit.component';
 import { PermissionsComponent } from './components/settings/permissions/permissions.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { UserGroupPermissionsComponent } from './components/settings/user-group-permissions/user-group-permissions.component';
+import { UserPermissionsComponent } from './components/settings/user-permissions/user-permissions.component';
 import { GroupsRoutingModule } from './groups-routing.module';
 
 @NgModule({
@@ -23,9 +26,11 @@ import { GroupsRoutingModule } from './groups-routing.module';
     ClientDetailComponent,
     EndpointDetailComponent,
     PermissionsComponent,
+    UserPermissionsComponent,
+    UserGroupPermissionsComponent,
     ClientUsageGraphComponent,
     ProcessUiInlineComponent,
   ],
-  imports: [CommonModule, CoreModule, GroupsRoutingModule],
+  imports: [CommonModule, CoreModule, GroupsRoutingModule, MatTabsModule],
 })
 export class GroupsModule {}

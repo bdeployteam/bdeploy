@@ -1,0 +1,16 @@
+.avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 64px;
+}
+.local-chip {
+  text-transform: uppercase;
+  font-size: smaller;
+  border-radius: 3px;
+  padding: 0px 5px;
+}
+
+.local-inactive-chip {
+  background-color: var(--bd-warn);
+  color: var(--bd-warn-contrast);
+}

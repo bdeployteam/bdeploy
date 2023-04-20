@@ -77,6 +77,7 @@ import io.bdeploy.minion.migration.SystemUserMigration;
 import io.bdeploy.minion.nodes.NodeManagerImpl;
 import io.bdeploy.minion.plugin.PluginManagerImpl;
 import io.bdeploy.minion.user.UserDatabase;
+import io.bdeploy.minion.user.UserGroupDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
 import io.bdeploy.ui.api.Minion;
@@ -100,6 +101,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private final Path root;
     private final Path hiveDir;
     private final UserDatabase users;
+    private final UserGroupDatabase userGroups;
     private final Auditor auditor;
     private final Path logDir;
     private final Path tmpDir;
@@ -127,7 +129,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.updates = root.resolve("update");
         this.hiveDir = root.resolve("hive");
         this.hive = new BHive(hiveDir.toUri(), RollingFileAuditor.getFactory().apply(hiveDir), reporter);
-        this.users = new UserDatabase(this);
+        this.userGroups = new UserGroupDatabase(this);
+        this.users = new UserDatabase(this, userGroups);
         this.tmpDir = root.resolve("tmp");
 
         this.logDir = create(root.resolve("log"));
@@ -654,6 +657,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      */
     public UserDatabase getUsers() {
         return users;
+    }
+
+    /**
+     * @return the {@link UserGroupDatabase} used for holding permissions for groups of users
+     */
+    public UserGroupDatabase getUserGroups() {
+        return userGroups;
     }
 
     /**

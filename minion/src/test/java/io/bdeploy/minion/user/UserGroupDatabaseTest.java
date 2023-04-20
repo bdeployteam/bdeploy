@@ -1,0 +1,90 @@
+package io.bdeploy.minion.user;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Collections;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.UserGroupInfo;
+import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
+import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.TestMinion;
+
+@ExtendWith(TestMinion.class)
+public class UserGroupDatabaseTest {
+
+    @Test
+    void groupScopedPermission(MinionRoot root) {
+        UserDatabase users = root.getUsers();
+        UserGroupDatabase groups = root.getUserGroups();
+        String userName = "JunitTest";
+        String scope = "TestInstanceGroup";
+        ScopedPermission permission = new ScopedPermission(scope, Permission.ADMIN);
+
+        users.createLocalUser(userName, "JunitTestJunitTest", Collections.emptyList());
+
+        UserGroupInfo g = new UserGroupInfo();
+        g.name = "TestGroup";
+        assertNull(g.id); // group is not created yet
+        groups.createUserGroup(g);
+        assertNotNull(g.id); // group successfully created
+
+        UserGroupPermissionUpdateDto groupPermissionUpdateDto = new UserGroupPermissionUpdateDto(g.id, permission.permission);
+        groups.updatePermissions(scope, new UserGroupPermissionUpdateDto[] { groupPermissionUpdateDto });
+
+        g = groups.getUserGroup(g.id); // fetch group again to refresh permissions
+
+        // group has the permission
+        assertEquals(g.permissions.size(), 1);
+        assertEquals(g.permissions.stream().toList().get(0).scope, permission.scope);
+        assertEquals(g.permissions.stream().toList().get(0).permission, permission.permission);
+
+        // test user does not have a permission
+        assertFalse(users.isAuthorized(userName, permission));
+
+        // test user is added to group with needed permission
+        users.addUserToGroup(g.id, userName);
+
+        // test user does have a required permission
+        assertTrue(users.isAuthorized(userName, permission));
+    }
+
+    @Test
+    void groupGlobalPermission(MinionRoot root) {
+        UserDatabase users = root.getUsers();
+        UserGroupDatabase groups = root.getUserGroups();
+        String userName = "JunitTest";
+        ScopedPermission permission = new ScopedPermission(null, Permission.ADMIN);
+
+        users.createLocalUser(userName, "JunitTestJunitTest", Collections.emptyList());
+
+        UserGroupInfo g = new UserGroupInfo();
+        g.name = "TestGroup";
+        groups.createUserGroup(g);
+        UserGroupPermissionUpdateDto groupPermissionUpdateDto = new UserGroupPermissionUpdateDto(g.id, permission.permission);
+        groups.updatePermissions(null, new UserGroupPermissionUpdateDto[] { groupPermissionUpdateDto });
+
+        UserInfo info = users.getUser(userName);
+        // user info itself does not hold merged permissions
+        assertNull(info.mergedPermissions);
+        // merged permissions are empty
+        assertTrue(groups.getCloneWithMergedPermissions(info).mergedPermissions.isEmpty());
+
+        users.addUserToGroup(g.id, userName);
+
+        // user info itself does not hold merged permissions
+        assertNull(info.mergedPermissions);
+        // merged permissions have global permission from group
+        assertTrue(groups.getCloneWithMergedPermissions(info).mergedPermissions.contains(permission));
+
+    }
+}

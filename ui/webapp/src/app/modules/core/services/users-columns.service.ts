@@ -36,6 +36,11 @@ const colEmail: BdDataColumn<UserInfo> = {
   providedIn: 'root',
 })
 export class UsersColumnsService {
+  public userGroupAdminDetailsColumns: BdDataColumn<UserInfo>[] = [
+    colName,
+    colEmail,
+    colFullName,
+  ];
   public defaultUsersColumns: BdDataColumn<UserInfo>[] = [
     colAvatar,
     colName,

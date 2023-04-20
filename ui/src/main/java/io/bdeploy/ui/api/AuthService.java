@@ -87,7 +87,7 @@ public interface AuthService {
     public SortedSet<String> getAllNames();
 
     /**
-     * @return all users known to the system wit full user information
+     * @return all users known to the system with full user information
      */
     public SortedSet<UserInfo> getAll();
 
@@ -97,4 +97,16 @@ public interface AuthService {
      * @return whether the user with the given name has the given permission.
      */
     public boolean isAuthorized(String user, ScopedPermission required);
+
+    /**
+     * @param group group's id
+     * @param user user's name
+     */
+    public void addUserToGroup(String group, String user);
+
+    /**
+     * @param group group's id
+     * @param user user's name
+     */
+    public void removeUserFromGroup(String group, String user);
 }

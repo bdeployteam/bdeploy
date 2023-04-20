@@ -1,0 +1,30 @@
+<app-bd-dialog [loadingWhen$]="saving$">
+  <app-bd-dialog-toolbar
+    header="Add User Group"
+    [panel]="true"
+  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
+      <app-bd-form-input
+        name="name"
+        label="User Group Name"
+        [(ngModel)]="addUserGroup.name"
+        required
+        appIdentifier
+      ></app-bd-form-input>
+      <app-bd-form-input
+        name="description"
+        label="Description"
+        [(ngModel)]="addUserGroup.description"
+        required
+      ></app-bd-form-input>
+      <app-bd-button
+        color="primary"
+        [collapsed]="false"
+        text="Save"
+        icon="save"
+        [disabled]="form.invalid"
+      ></app-bd-button>
+    </form>
+  </app-bd-dialog-content>
+</app-bd-dialog>

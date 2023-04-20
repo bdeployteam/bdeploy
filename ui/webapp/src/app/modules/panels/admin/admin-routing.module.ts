@@ -7,8 +7,10 @@ import { AddGlobalAttributeComponent } from './components/add-global-attribute/a
 import { AddLdapServerComponent } from './components/add-ldap-server/add-ldap-server.component';
 import { AddNodeComponent } from './components/add-node/add-node.component';
 import { AddPluginComponent } from './components/add-plugin/add-plugin.component';
+import { AddUserGroupComponent } from './components/add-user-group/add-user-group.component';
 import { AddUserComponent } from './components/add-user/add-user.component';
 import { AssignPermissionComponent } from './components/assign-permission/assign-permission.component';
+import { AssignUserGroupPermissionComponent } from './components/assign-user-group-permission/assign-user-group-permission.component';
 import { AuthTestComponent } from './components/auth-test/auth-test.component';
 import { BHiveBrowserComponent } from './components/bhive-details/bhive-browser/bhive-browser.component';
 import { BhiveDetailsComponent as BHiveDetailsComponent } from './components/bhive-details/bhive-details.component';
@@ -17,6 +19,7 @@ import { BhiveLogViewerComponent } from './components/bhive-details/bhive-log-vi
 import { CheckLdapServerComponent } from './components/check-ldap-server/check-ldap-server.component';
 import { EditGlobalAttributeComponent } from './components/edit-global-attribute/edit-global-attribute.component';
 import { EditLdapServerComponent } from './components/edit-ldap-server/edit-ldap-server.component';
+import { EditUserGroupComponent } from './components/edit-user-group/edit-user-group.component';
 import { EditUserComponent } from './components/edit-user/edit-user.component';
 import { LogConfigEditorComponent } from './components/log-config-editor/log-config-editor.component';
 import { LogFileViewerComponent } from './components/log-file-viewer/log-file-viewer.component';
@@ -29,6 +32,7 @@ import { SoftwareBulkManipulationComponent } from './components/software-bulk-ma
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 import { UserAdminDetailComponent } from './components/user-admin-detail/user-admin-detail.component';
+import { UserGroupAdminDetailComponent } from './components/user-group-admin-detail/user-group-admin-detail.component';
 
 const routes: Routes = [
   {
@@ -39,6 +43,11 @@ const routes: Routes = [
   {
     path: 'user-detail/:user',
     component: UserAdminDetailComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'user-group-detail/:group',
+    component: UserGroupAdminDetailComponent,
     canActivate: [AdminGuard],
   },
   {
@@ -181,6 +190,24 @@ const routes: Routes = [
   {
     path: 'user-detail/:user/permission',
     component: AssignPermissionComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'add-user-group',
+    component: AddUserGroupComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'user-group-detail/:group/edit',
+    component: EditUserGroupComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'user-group-detail/:group/permission',
+    component: AssignUserGroupPermissionComponent,
     canActivate: [AdminGuard],
     canDeactivate: [DirtyDialogGuard],
   },

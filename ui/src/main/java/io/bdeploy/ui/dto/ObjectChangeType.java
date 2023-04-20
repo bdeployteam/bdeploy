@@ -17,6 +17,7 @@ public enum ObjectChangeType {
     INSTANCE,               // Bridged
     MANAGED_MASTER_ATTACH,
     USER,
+    USER_GROUP,
     PLUGIN,
     NODES,                  // Bridged
     SYSTEM,                 // Bridged

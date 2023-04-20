@@ -6,6 +6,7 @@ import {
   CredentialsApi,
   LDAPSettingsDto,
   ObjectChangeType,
+  UserGroupInfo,
   UserInfo,
 } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
@@ -22,25 +23,33 @@ import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 export class AuthAdminService {
   private apiPath = () => `${this.cfg.config.api}/auth/admin`;
 
-  public loading$ = new BehaviorSubject<boolean>(true);
+  public loadingUsers$ = new BehaviorSubject<boolean>(true);
+  public loadingUserGroups$ = new BehaviorSubject<boolean>(true);
   public users$ = new BehaviorSubject<UserInfo[]>(null);
+  public userGroups$ = new BehaviorSubject<UserGroupInfo[]>(null);
 
   constructor(
     private cfg: ConfigService,
     private http: HttpClient,
     changes: ObjectChangesService
   ) {
-    changes.subscribe(ObjectChangeType.USER, EMPTY_SCOPE, () => this.load());
-    this.load();
+    changes.subscribe(ObjectChangeType.USER, EMPTY_SCOPE, () =>
+      this.loadUsers()
+    );
+    changes.subscribe(ObjectChangeType.USER_GROUP, EMPTY_SCOPE, () =>
+      this.loadUserGroups()
+    );
+    this.loadUsers();
+    this.loadUserGroups();
   }
 
-  public load() {
-    this.loading$.next(true);
+  public loadUsers() {
+    this.loadingUsers$.next(true);
     this.http
       .get<UserInfo[]>(`${this.apiPath()}/users`)
       .pipe(
         measure('Get All Users'),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loadingUsers$.next(false))
       )
       .subscribe((users) => this.users$.next(users));
   }
@@ -61,6 +70,42 @@ export class AuthAdminService {
   public updateLocalUserPassword(user: string, password: string) {
     const options = { params: new HttpParams().set('user', user) };
     return this.http.post(`${this.apiPath()}/local/pw`, password, options);
+  }
+
+  public loadUserGroups() {
+    this.loadingUserGroups$.next(true);
+    this.http
+      .get<UserGroupInfo[]>(`${this.apiPath()}/user-groups`)
+      .pipe(
+        measure('Get All User Groups'),
+        finalize(() => this.loadingUserGroups$.next(false))
+      )
+      .subscribe((userGroups) => this.userGroups$.next(userGroups));
+  }
+
+  public createUserGroup(userGroupInfo: UserGroupInfo): Observable<any> {
+    return this.http.put(`${this.apiPath()}/user-groups`, userGroupInfo);
+  }
+
+  public updateUserGroup(userGroupInfo: UserGroupInfo) {
+    return this.http.post(`${this.apiPath()}/user-groups`, userGroupInfo);
+  }
+
+  public deleteUserGroup(group: string) {
+    return this.http.delete(`${this.apiPath()}/user-groups/${group}`);
+  }
+
+  public addUserToGroup(group: string, user: string) {
+    return this.http.post(
+      `${this.apiPath()}/user-groups/${group}/users/${user}`,
+      null
+    );
+  }
+
+  public removeUserFromGroup(group: string, user: string) {
+    return this.http.delete(
+      `${this.apiPath()}/user-groups/${group}/users/${user}`
+    );
   }
 
   public traceAuthentication(

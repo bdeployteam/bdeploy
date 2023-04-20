@@ -17,6 +17,15 @@
           <mat-icon class="nav-icon">account_circle</mat-icon>User Accounts
         </div></a
       >
+      <a
+        mat-list-item
+        [routerLink]="[{ outlets: { admin: ['user-groups'] } }]"
+        routerLinkActive="active-setting"
+        ><div class="flex justify-start items-center">
+          <mat-icon class="nav-icon">supervised_user_circle</mat-icon>User
+          Groups
+        </div></a
+      >
 
       <a
         *ngIf="!(cfg.isCentral$ | async)"

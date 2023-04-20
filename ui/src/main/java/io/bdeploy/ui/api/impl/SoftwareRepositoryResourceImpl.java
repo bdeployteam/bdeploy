@@ -14,11 +14,14 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
+import io.bdeploy.interfaces.UserGroupInfo;
+import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
@@ -44,6 +47,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Inject
     private AuthService auth;
+
+    @Inject
+    private AuthGroupService authGroup;
 
     @Inject
     private ChangeEventManager changes;
@@ -135,11 +141,29 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
     }
 
     @Override
-    public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
-        auth.updatePermissions(group, permissions);
-        Manifest.Key key = new SoftwareRepositoryManifest(registry.get(group)).getKey();
+    public SortedSet<UserGroupInfo> getUserGroups(String repo) {
+        BHive bHive = registry.get(repo);
+        if (bHive == null) {
+            throw new WebApplicationException("Hive '" + repo + "' does not exist");
+        }
+        return authGroup.getAll();
+    }
+
+    @Override
+    public void updateUserPermissions(String repo, UserPermissionUpdateDto[] permissions) {
+        auth.updatePermissions(repo, permissions);
+        Manifest.Key key = new SoftwareRepositoryManifest(registry.get(repo)).getKey();
         for (var perm : permissions) {
             changes.change(ObjectChangeType.USER, key, Map.of(ObjectChangeDetails.USER_NAME, perm.user));
+        }
+    }
+
+    @Override
+    public void updateUserGroupPermissions(String repo, UserGroupPermissionUpdateDto[] permissions) {
+        authGroup.updatePermissions(repo, permissions);
+        Manifest.Key key = new SoftwareRepositoryManifest(registry.get(repo)).getKey();
+        for (var perm : permissions) {
+            changes.change(ObjectChangeType.USER_GROUP, key, Map.of(ObjectChangeDetails.USER_GROUP_ID, perm.group));
         }
     }
 

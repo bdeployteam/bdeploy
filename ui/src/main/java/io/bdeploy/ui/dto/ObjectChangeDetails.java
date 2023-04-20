@@ -11,6 +11,7 @@ public enum ObjectChangeDetails {
     CHANGE_HINT,
     ACTIVITIES,
     USER_NAME,
+    USER_GROUP_ID,
     ID,
     NODE,
 }

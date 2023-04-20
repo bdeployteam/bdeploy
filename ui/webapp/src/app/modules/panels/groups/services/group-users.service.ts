@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
 import {
   InstanceGroupConfiguration,
   ObjectChangeType,
   Permission,
+  UserGroupInfo,
+  UserGroupPermissionUpdateDto,
   UserInfo,
   UserPermissionUpdateDto,
 } from 'src/app/models/gen.dtos';
@@ -21,8 +23,14 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
   providedIn: 'root',
 })
 export class GroupUsersService {
-  public loading$ = new BehaviorSubject<boolean>(false);
+  public loadingUsers$ = new BehaviorSubject<boolean>(false);
+  public loadingUserGroups$ = new BehaviorSubject<boolean>(false);
+  public loading$ = combineLatest({
+    u: this.loadingUsers$,
+    g: this.loadingUserGroups$,
+  }).pipe(map(({ u, g }) => u || g));
   public users$ = new BehaviorSubject<UserInfo[]>(null);
+  public userGroups$ = new BehaviorSubject<UserGroupInfo[]>(null);
 
   private group: InstanceGroupConfiguration;
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
@@ -36,26 +44,45 @@ export class GroupUsersService {
     this.groups.current$.subscribe((g) => {
       this.group = g;
       this.loadUsers();
+      this.loadUserGroups();
     });
     this.changes.subscribe(ObjectChangeType.USER, EMPTY_SCOPE, () => {
       this.loadUsers();
     });
+    this.changes.subscribe(ObjectChangeType.USER_GROUP, EMPTY_SCOPE, () => {
+      this.loadUserGroups();
+    });
   }
 
-  public loadUsers() {
+  private loadUsers() {
     if (!this.group) {
       return;
     }
-
-    this.loading$.next(true);
+    this.loadingUsers$.next(true);
     this.http
       .get<UserInfo[]>(`${this.apiPath(this.group.name)}/users`)
       .pipe(
         measure('Load Users'),
-        finalize(() => this.loading$.next(false))
+        finalize(() => this.loadingUsers$.next(false))
       )
-      .subscribe((res) => {
-        this.users$.next(res);
+      .subscribe((users) => {
+        this.users$.next(users);
+      });
+  }
+
+  private loadUserGroups() {
+    if (!this.group) {
+      return;
+    }
+    this.loadingUserGroups$.next(true);
+    this.http
+      .get<UserGroupInfo[]>(`${this.apiPath(this.group.name)}/user-groups`)
+      .pipe(
+        measure('Load User Groups'),
+        finalize(() => this.loadingUserGroups$.next(false))
+      )
+      .subscribe((groups) => {
+        this.userGroups$.next(groups);
       });
   }
 
@@ -65,7 +92,17 @@ export class GroupUsersService {
       permission: modPerm,
     };
     return this.http
-      .post(`${this.apiPath(this.group.name)}/permissions`, [upd])
+      .post(`${this.apiPath(this.group.name)}/user-permissions`, [upd])
       .pipe(measure('Update user permission'));
+  }
+
+  public updateUserGroupPermission(group: UserGroupInfo, modPerm: Permission) {
+    const upd: UserGroupPermissionUpdateDto = {
+      group: group.id,
+      permission: modPerm,
+    };
+    return this.http
+      .post(`${this.apiPath(this.group.name)}/user-group-permissions`, [upd])
+      .pipe(measure('Update user group permission'));
   }
 }

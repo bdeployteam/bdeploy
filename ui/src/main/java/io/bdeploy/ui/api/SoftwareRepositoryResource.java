@@ -5,6 +5,8 @@ import java.util.SortedSet;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.UserGroupInfo;
+import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
@@ -57,9 +59,20 @@ public interface SoftwareRepositoryResource {
     @RequiredPermission(permission = Permission.ADMIN)
     public SortedSet<UserInfo> getAllUser(@ActivityScope @PathParam("repo") String repo);
 
-    @POST
-    @Path("/{repo}/permissions")
+    @GET
+    @Path("/{repo}/user-groups")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void updatePermissions(@ActivityScope @PathParam("repo") String repo, UserPermissionUpdateDto[] permissions);
+    public SortedSet<UserGroupInfo> getUserGroups(@ActivityScope @PathParam("repo") String repo);
+
+    @POST
+    @Path("/{repo}/user-permissions")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void updateUserPermissions(@ActivityScope @PathParam("repo") String repo, UserPermissionUpdateDto[] permissions);
+
+    @POST
+    @Path("/{repo}/user-group-permissions")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public void updateUserGroupPermissions(@ActivityScope @PathParam("repo") String repo,
+            UserGroupPermissionUpdateDto[] permissions);
 
 }

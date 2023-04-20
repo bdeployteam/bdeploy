@@ -35,6 +35,8 @@ import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.UserGroupInfo;
+import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -52,6 +54,7 @@ import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -92,6 +95,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Inject
     private AuthService auth;
+
+    @Inject
+    private AuthGroupService authGroup;
 
     @Inject
     private PluginManager pm;
@@ -212,11 +218,20 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
-    public void updatePermissions(String group, UserPermissionUpdateDto[] permissions) {
+    public void updateUserPermissions(String group, UserPermissionUpdateDto[] permissions) {
         auth.updatePermissions(group, permissions);
         Manifest.Key key = new InstanceGroupManifest(registry.get(group)).getKey();
         for (var perm : permissions) {
             changes.change(ObjectChangeType.USER, key, Map.of(ObjectChangeDetails.USER_NAME, perm.user));
+        }
+    }
+
+    @Override
+    public void updateUserGroupPermissions(String group, UserGroupPermissionUpdateDto[] permissions) {
+        authGroup.updatePermissions(group, permissions);
+        Manifest.Key key = new InstanceGroupManifest(registry.get(group)).getKey();
+        for (var perm : permissions) {
+            changes.change(ObjectChangeType.USER_GROUP, key, Map.of(ObjectChangeDetails.USER_GROUP_ID, perm.group));
         }
     }
 
@@ -248,6 +263,15 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             throw new WebApplicationException("Hive '" + group + "' does not exist");
         }
         return auth.getAll();
+    }
+
+    @Override
+    public SortedSet<UserGroupInfo> getAllUserGroup(String group) {
+        BHive bHive = registry.get(group);
+        if (bHive == null) {
+            throw new WebApplicationException("Hive '" + group + "' does not exist");
+        }
+        return authGroup.getAll();
     }
 
     @Override

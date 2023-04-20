@@ -1,0 +1,82 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="User Group Details" [panel]="true">
+  </app-bd-dialog-toolbar>
+
+  <app-bd-dialog-content>
+    <div class="flex flex-col gap-2.5" *ngIf="group$ | async as group">
+      <div class="flex gap-2.5">
+        <div class="flex justify-center items-center">
+          <mat-icon class="avatar">supervised_user_circle</mat-icon>
+        </div>
+        <div class="flex-auto grid grid-cols-[80px_auto] gap-1">
+          <div><strong>Name:</strong></div>
+          <div
+            class="truncate"
+            [matTooltip]="group.name"
+            [matTooltipShowDelay]="1000"
+          >
+            {{ group.name }}
+          </div>
+          <div><strong>Description:</strong></div>
+          <div
+            class="truncate"
+            [matTooltip]="group.description"
+            [matTooltipShowDelay]="1000"
+          >
+            {{ group.description }}
+          </div>
+        </div>
+      </div>
+
+      <app-add-user-to-group
+        [group]="group.id"
+        [suggestedUsers]="suggestedUsers"
+        (userSelected)="addUser($event)"
+      ></app-add-user-to-group>
+      <app-bd-data-table
+        [records]="users"
+        [columns]="userColumns"
+      ></app-bd-data-table>
+
+      <mat-divider></mat-divider>
+
+      <app-bd-data-table
+        [records]="group.permissions"
+        [columns]="permColumns"
+      ></app-bd-data-table>
+
+      <app-bd-button
+        *ngIf="!group.inactive"
+        [collapsed]="false"
+        icon="person_off"
+        text="Deactivate Group"
+        (click)="onSetInactive(group, true)"
+      ></app-bd-button>
+      <app-bd-button
+        *ngIf="group.inactive"
+        [collapsed]="false"
+        icon="person"
+        text="Activate Group"
+        (click)="onSetInactive(group, false)"
+      ></app-bd-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Assign Permission..."
+        icon="security"
+        [route]="['panels', 'admin', 'user-group-detail', group.id, 'permission']"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        text="Edit Group..."
+        icon="edit"
+        [route]="['panels', 'admin', 'user-group-detail', group.id, 'edit']"
+      ></app-bd-panel-button>
+      <app-bd-button
+        icon="delete"
+        text="Delete Group"
+        [collapsed]="false"
+        (click)="onDelete(group)"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

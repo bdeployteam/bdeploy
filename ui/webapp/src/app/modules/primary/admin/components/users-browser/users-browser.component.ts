@@ -5,7 +5,6 @@ import { map } from 'rxjs/operators';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
 import {
   LDAPSettingsDto,
-  Permission,
   SpecialAuthenticators,
   UserInfo,
 } from 'src/app/models/gen.dtos';
@@ -14,6 +13,7 @@ import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { UsersColumnsService } from 'src/app/modules/core/services/users-columns.service';
+import { getGlobalPermission } from 'src/app/modules/panels/admin/utils/permission.utils';
 import { AuthAdminService } from '../../services/auth-admin.service';
 
 @Component({
@@ -25,7 +25,7 @@ export class UsersBrowserComponent {
   private colPermLevel: BdDataColumn<UserInfo> = {
     id: 'permLevel',
     name: 'Global Permission',
-    data: (r) => this.getGlobalPermission(r),
+    data: (r) => getGlobalPermission(r.permissions),
     component: BdDataPermissionLevelCellComponent,
     width: '100px',
   };
@@ -56,7 +56,7 @@ export class UsersBrowserComponent {
 
   /* template */ loading$ = combineLatest([
     this.settings.loading$,
-    this.authAdmin.loading$,
+    this.authAdmin.loadingUsers$,
   ]).pipe(map(([s, a]) => s || a));
   /* template */ columns: BdDataColumn<UserInfo>[] = [
     ...this.userColumns.defaultUsersColumns,
@@ -73,7 +73,7 @@ export class UsersBrowserComponent {
     },
     {
       name: 'Global Permission',
-      group: (r) => this.getGlobalPermission(r),
+      group: (r) => getGlobalPermission(r.permissions),
       associatedColumn: this.colPermLevel.id,
     },
   ];
@@ -115,27 +115,5 @@ export class UsersBrowserComponent {
     } else {
       return 'Local user management';
     }
-  }
-
-  public getGlobalPermission(userInfo: UserInfo): Permission {
-    let p = userInfo.permissions.find(
-      (sc) => sc.scope === null && sc.permission === Permission.ADMIN
-    );
-    p = p
-      ? p
-      : userInfo.permissions.find(
-          (sc) => sc.scope === null && sc.permission === Permission.WRITE
-        );
-    p = p
-      ? p
-      : userInfo.permissions.find(
-          (sc) => sc.scope === null && sc.permission === Permission.READ
-        );
-    p = p
-      ? p
-      : userInfo.permissions.find(
-          (sc) => sc.scope === null && sc.permission === Permission.CLIENT
-        );
-    return p ? p.permission : null;
   }
 }

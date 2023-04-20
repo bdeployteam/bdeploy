@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.SortedSet;
 
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
+import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 import jakarta.ws.rs.Consumes;
@@ -12,6 +13,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -74,6 +76,50 @@ public interface AuthAdminResource {
     @GET
     @Path("/users")
     public SortedSet<UserInfo> getAllUser();
+
+    /**
+     * @return a list of all known user groups.
+     */
+    @GET
+    @Path("/user-groups")
+    public SortedSet<UserGroupInfo> getAllUserGroups();
+
+    /**
+     * @param info the user group to create
+     */
+    @PUT
+    @Path("/user-groups")
+    public void createUserGroup(UserGroupInfo info);
+
+    /**
+     * @param info the new user group information
+     */
+    @POST
+    @Path("/user-groups")
+    public void updateUserGroup(UserGroupInfo info);
+
+    /**
+     * @param group the id of the user group to delete
+     */
+    @DELETE
+    @Path("/user-groups/{group}")
+    public void deleteUserGroups(@PathParam("group") String id);
+
+    /**
+     * @param group group's id
+     * @param user user's name
+     */
+    @POST
+    @Path("/user-groups/{group}/users/{user}")
+    public void addUserToGroup(@PathParam("group") String group, @PathParam("user") String user);
+
+    /**
+     * @param group group's id
+     * @param user user's name
+     */
+    @DELETE
+    @Path("/user-groups/{group}/users/{user}")
+    public void removeUserFromGroup(@PathParam("group") String group, @PathParam("user") String user);
 
     @GET
     @Path("/new-uuid")

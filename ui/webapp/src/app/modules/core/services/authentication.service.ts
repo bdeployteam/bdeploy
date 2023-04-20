@@ -345,8 +345,8 @@ export class AuthenticationService {
     userInfo: UserInfo,
     permission: Permission
   ): boolean {
-    if (userInfo && userInfo.permissions) {
-      return !!userInfo.permissions.find(
+    if (userInfo && userInfo.mergedPermissions) {
+      return !!userInfo.mergedPermissions.find(
         (sc) =>
           (sc.scope === null || sc.scope === scope) &&
           this.ge(sc.permission, permission)
@@ -356,15 +356,15 @@ export class AuthenticationService {
   }
 
   isScopedExclusiveReadClient(scope: string): boolean {
-    if (this.currentUserInfo && this.currentUserInfo.permissions) {
+    if (this.currentUserInfo && this.currentUserInfo.mergedPermissions) {
       // We have either a global or scoped CLIENT permission,
-      const clientPerm = this.currentUserInfo.permissions.find(
+      const clientPerm = this.currentUserInfo.mergedPermissions.find(
         (sc) =>
           (sc.scope === null || sc.scope === scope) &&
           sc.permission === Permission.CLIENT
       );
       // ... and there is *NO* other permission on the user.
-      const nonClientPerm = this.currentUserInfo.permissions.find(
+      const nonClientPerm = this.currentUserInfo.mergedPermissions.find(
         (sc) =>
           (sc.scope === null || sc.scope === scope) &&
           sc.permission !== Permission.CLIENT

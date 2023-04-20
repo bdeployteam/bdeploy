@@ -1,0 +1,33 @@
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="User Groups">
+    <div class="flex-auto"></div>
+    <app-bd-data-grouping
+      (groupingChange)="dataDisplay.grouping = $event"
+      [definitions]="grouping"
+      [records]="authAdmin.userGroups$ | async"
+      presetKey="userGroupAdmin"
+    ></app-bd-data-grouping>
+    <mat-divider [vertical]="true"></mat-divider>
+    <app-bd-panel-button
+      [collapsed]="false"
+      color="primary"
+      text="Create User Group..."
+      icon="add"
+      [route]="['panels', 'admin', 'add-user-group']"
+      [disabled]="(settings.settings$ | async)?.auth.disableBasic"
+      [matTooltip]="settings.settings$.value?.auth.disableBasic ? 'Local user management is disabled' : 'Create a local user account'"
+    ></app-bd-panel-button>
+  </app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="bd-default-padding">
+      <app-bd-data-table
+        #dataDisplay
+        [records]="authAdmin.userGroups$ | async"
+        [columns]="columns"
+        [recordRoute]="getRecordRoute"
+        [sort]="sort"
+      >
+      </app-bd-data-table>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

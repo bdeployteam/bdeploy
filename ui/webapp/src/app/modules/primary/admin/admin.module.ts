@@ -33,6 +33,7 @@ import { PluginLoadActionComponent } from './components/settings-general/plugins
 import { PluginsTabComponent } from './components/settings-general/plugins-tab/plugins-tab.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
+import { UserGroupsBrowserComponent } from './components/user-groups-browser/user-groups-browser.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
 
 @NgModule({
@@ -43,7 +44,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     MetricsOverviewComponent,
     AdminShellComponent,
     SettingsGeneralComponent,
-    UsersBrowserComponent,
+    UserGroupsBrowserComponent,
     UsersBrowserComponent,
     GeneralTabComponent,
     AttributesTabComponent,

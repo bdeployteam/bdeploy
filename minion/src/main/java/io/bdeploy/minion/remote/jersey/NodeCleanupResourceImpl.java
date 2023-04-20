@@ -126,7 +126,7 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
 
     private boolean isNotWellKnown(Key key) {
         return !((key.getName().startsWith("meta/") && !key.getName().startsWith("meta/launcher"))
-                || key.getName().startsWith("users/"));
+                || key.getName().startsWith("users/") || key.getName().startsWith("usergroups/"));
     }
 
     @Override

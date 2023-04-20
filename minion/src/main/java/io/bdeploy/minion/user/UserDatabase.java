@@ -78,10 +78,12 @@ public class UserDatabase implements AuthService {
     private final OpenIDConnectAuthenticator oidcAuthenticator = new OpenIDConnectAuthenticator();
     private final Auth0TokenAuthenticator auth0Authenticator = new Auth0TokenAuthenticator();
     private final OktaTokenAuthenticator oktaAuthenticator = new OktaTokenAuthenticator();
+    private final UserGroupDatabase userGroupDatabase;
 
-    public UserDatabase(MinionRoot root) {
+    public UserDatabase(MinionRoot root, UserGroupDatabase userGroupDatabase) {
         this.root = root;
         this.target = root.getHive();
+        this.userGroupDatabase = userGroupDatabase;
 
         this.authenticators.add(new PasswordAuthentication());
         this.authenticators.add(oidcAuthenticator);
@@ -185,6 +187,7 @@ public class UserDatabase implements AuthService {
     }
 
     private synchronized void internalUpdate(String user, UserInfo info) {
+        info.mergedPermissions = null;
         String normUser = UserInfo.normalizeName(user);
 
         try (Transaction t = target.getTransactions().begin()) {
@@ -404,13 +407,34 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
+    public void addUserToGroup(String group, String user) {
+        UserInfo info = getUser(user);
+        if (info == null) {
+            throw new IllegalStateException("Cannot find user " + user);
+        }
+        info.groups.add(group);
+        internalUpdate(info.name, info);
+    }
+
+    @Override
+    public void removeUserFromGroup(String group, String user) {
+        UserInfo info = getUser(user);
+        if (info == null) {
+            throw new IllegalStateException("Cannot find user " + user);
+        }
+        info.groups.remove(group);
+        internalUpdate(info.name, info);
+    }
+
+    @Override
     public boolean isAuthorized(String user, ScopedPermission required) {
         user = UserInfo.normalizeName(user);
         UserInfo info = getUser(user);
         if (info == null) {
             return false;
         }
-        for (ScopedPermission permission : info.permissions) {
+        UserInfo cloned = userGroupDatabase.getCloneWithMergedPermissions(info);
+        for (ScopedPermission permission : cloned.mergedPermissions) {
             if (permission.satisfies(required)) {
                 return true;
             }

@@ -11,6 +11,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
+import io.bdeploy.interfaces.UserGroupInfo;
+import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -56,9 +58,15 @@ public interface InstanceGroupResource {
     public void update(@ActivityScope @PathParam("group") String group, InstanceGroupConfiguration config);
 
     @POST
-    @Path("/{group}/permissions")
+    @Path("/{group}/user-permissions")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public void updatePermissions(@ActivityScope @PathParam("group") String group, UserPermissionUpdateDto[] permissions);
+    public void updateUserPermissions(@ActivityScope @PathParam("group") String group, UserPermissionUpdateDto[] permissions);
+
+    @POST
+    @Path("/{group}/user-group-permissions")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
+    public void updateUserGroupPermissions(@ActivityScope @PathParam("group") String group,
+            UserGroupPermissionUpdateDto[] permissions);
 
     @DELETE
     @Path("/{group}")
@@ -69,6 +77,11 @@ public interface InstanceGroupResource {
     @Path("/{group}/users")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
     public SortedSet<UserInfo> getAllUser(@ActivityScope @PathParam("group") String group);
+
+    @GET
+    @Path("/{group}/user-groups")
+    @RequiredPermission(permission = Permission.ADMIN, scope = "group")
+    public SortedSet<UserGroupInfo> getAllUserGroup(@ActivityScope @PathParam("group") String group);
 
     @POST
     @Path("/{group}/image")

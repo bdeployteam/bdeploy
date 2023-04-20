@@ -1,0 +1,16 @@
+<div class="flex">
+  <app-bd-form-input
+    name="addUser"
+    label="Add user to the group"
+    class="flex-auto"
+    [(ngModel)]="user"
+    [suggested]="suggestions"
+  ></app-bd-form-input>
+
+  <app-bd-button
+    text="Add"
+    [collapsed]="false"
+    (click)="addUserToGroup()"
+    [disabled]="!selectedUser"
+  ></app-bd-button>
+</div>

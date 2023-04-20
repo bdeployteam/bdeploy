@@ -65,6 +65,7 @@ import io.bdeploy.minion.remote.jersey.NodeDeploymentResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeProcessResourceImpl;
 import io.bdeploy.minion.remote.jersey.NodeProxyResourceImpl;
 import io.bdeploy.schema.SchemaResources;
+import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -305,6 +306,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             bind(root).to(MinionRoot.class);
             bind(root).to(Minion.class);
             bind(root.getUsers()).to(AuthService.class);
+            bind(root.getUserGroups()).to(AuthGroupService.class);
             bind(root.getState().storageMinFree).named(JerseyServer.FILE_SYSTEM_MIN_SPACE).to(Long.class);
             bind(ocws).to(ObjectChangeBroadcaster.class);
             bind(new TaskSynchronizer()).to(TaskSynchronizer.class);

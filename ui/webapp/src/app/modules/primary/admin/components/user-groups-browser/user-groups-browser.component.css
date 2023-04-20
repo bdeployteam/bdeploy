@@ -1,0 +1,62 @@
+.add-button {
+  top: auto !important;
+  right: 40px !important;
+  bottom: 40px !important;
+  left: auto !important;
+  position: absolute;
+}
+
+.mat-mdc-header-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.mat-mdc-cell {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.centered {
+  align-items: center;
+}
+
+.users-table {
+  width: 100%;
+}
+
+.col-wide {
+  flex: 1 1 25%;
+}
+
+.mat-column-gravatar {
+  width: 45px;
+}
+
+.mat-column-inactive {
+  width: 45px;
+}
+
+.mat-column-inactive mat-icon {
+  position: relative;
+  left: 10px;
+}
+
+.mat-column-globalPermissions mat-chip {
+  position: relative;
+  left: 25px;
+}
+
+.mat-column-actions {
+  width: 60px;
+}
+
+.permission {
+  min-height: 24px;
+  font-size: x-small;
+}

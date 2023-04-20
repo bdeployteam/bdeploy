@@ -11,6 +11,7 @@ import { MetricsOverviewComponent } from './components/metrics-overview/metrics-
 import { NodesComponent } from './components/nodes/nodes.component';
 import { SettingsGeneralComponent } from './components/settings-general/settings-general.component';
 import { UpdateBrowserComponent } from './components/update-browser/update-browser.component';
+import { UserGroupsBrowserComponent } from './components/user-groups-browser/user-groups-browser.component';
 import { UsersBrowserComponent } from './components/users-browser/users-browser.component';
 
 const ADMIN_ROUTES: Route[] = [
@@ -32,6 +33,12 @@ const ADMIN_ROUTES: Route[] = [
       {
         path: 'users',
         component: UsersBrowserComponent,
+        canDeactivate: [CanDeactivateGuard],
+        outlet: 'admin',
+      },
+      {
+        path: 'user-groups',
+        component: UserGroupsBrowserComponent,
         canDeactivate: [CanDeactivateGuard],
         outlet: 'admin',
       },

@@ -36,6 +36,12 @@ public class UserInfo implements Comparable<UserInfo> {
     @JsonAlias("capabilities") // renamed to permissions
     public Set<ScopedPermission> permissions = new HashSet<>();
 
+    /** User group ids the user belongs to */
+    public Set<String> groups = new HashSet<>();
+
+    /** Calculated set of user permissions and user's active groups permissions */
+    public Set<ScopedPermission> mergedPermissions;
+
     @JsonCreator
     public UserInfo(@JsonProperty("name") String name) {
         this.name = normalizeName(name);
@@ -56,7 +62,7 @@ public class UserInfo implements Comparable<UserInfo> {
      * @return the global permissions
      */
     public Collection<ScopedPermission> getGlobalPermissions() {
-        return permissions.stream().filter(ScopedPermission::isGlobal).toList();
+        return mergedPermissions.stream().filter(ScopedPermission::isGlobal).toList();
     }
 
     /**

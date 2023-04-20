@@ -6,9 +6,11 @@ import java.util.SortedSet;
 
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.common.util.UuidHelper;
+import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 import io.bdeploy.ui.api.AuthAdminResource;
+import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
@@ -18,6 +20,9 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
 
     @Inject
     private AuthService auth;
+
+    @Inject
+    private AuthGroupService authGroup;
 
     @Inject
     private ChangeEventManager cem;
@@ -80,5 +85,41 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     @Override
     public String testLdapServer(LDAPSettingsDto dto) {
         return auth.testLdapServer(dto);
+    }
+
+    @Override
+    public void addUserToGroup(String group, String user) {
+        auth.addUserToGroup(group, user);
+        cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_GROUP_ID, user));
+
+    }
+
+    @Override
+    public void removeUserFromGroup(String group, String user) {
+        auth.removeUserFromGroup(group, user);
+        cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_GROUP_ID, user));
+    }
+
+    @Override
+    public SortedSet<UserGroupInfo> getAllUserGroups() {
+        return authGroup.getAll();
+    }
+
+    @Override
+    public void createUserGroup(UserGroupInfo info) {
+        authGroup.createUserGroup(info);
+        cem.create(ObjectChangeType.USER_GROUP, Collections.singletonMap(ObjectChangeDetails.USER_GROUP_ID, info.id));
+    }
+
+    @Override
+    public void updateUserGroup(UserGroupInfo info) {
+        authGroup.updateUserGroup(info);
+        cem.change(ObjectChangeType.USER_GROUP, Collections.singletonMap(ObjectChangeDetails.USER_GROUP_ID, info.id));
+    }
+
+    @Override
+    public void deleteUserGroups(String group) {
+        authGroup.deleteUserGroup(group);
+        cem.remove(ObjectChangeType.USER_GROUP, Collections.singletonMap(ObjectChangeDetails.USER_GROUP_ID, group));
     }
 }
