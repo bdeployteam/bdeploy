@@ -77,7 +77,7 @@ public class LoggingAdminResourceImpl implements LoggingAdminResource {
         } catch (IOException e) {
             throw new WebApplicationException("Cannot read logging configuration", e);
         } finally {
-            PathHelper.deleteRecursive(temp);
+            PathHelper.deleteRecursiveRetry(temp);
         }
     }
 
@@ -94,7 +94,7 @@ public class LoggingAdminResourceImpl implements LoggingAdminResource {
             throw new WebApplicationException("Cannot store new logger config", e);
         } finally {
             if (temp != null) {
-                PathHelper.deleteRecursive(temp);
+                PathHelper.deleteRecursiveRetry(temp);
             }
         }
     }

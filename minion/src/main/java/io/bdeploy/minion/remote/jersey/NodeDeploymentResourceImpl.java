@@ -271,7 +271,11 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
                                 StandardOpenOption.SYNC);
                         break;
                     case DELETE:
-                        Files.delete(actual);
+                        if (!PathHelper.exists(actual)) {
+                            // this is an invalid operation!
+                            throw new IllegalStateException("Cannot delete non-existing path");
+                        }
+                        PathHelper.deleteIfExistsRetry(actual);
                         break;
                     case EDIT:
                         Files.write(actual, Base64.decodeBase64(update.content), StandardOpenOption.CREATE,
@@ -288,8 +292,8 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     public void deleteDataEntry(RemoteDirectoryEntry entry) {
         Path actual = CommonDirectoryEntryResourceImpl.getEntryPath(root, entry);
         try {
-            Files.delete(actual);
-        } catch (IOException e) {
+            PathHelper.deleteIfExistsRetry(actual);
+        } catch (Exception e) {
             throw new WebApplicationException("Could not delete data file " + entry.path, e);
         }
     }

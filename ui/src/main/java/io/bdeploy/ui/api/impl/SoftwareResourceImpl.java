@@ -179,7 +179,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             }
             return imported;
         } finally {
-            PathHelper.deleteRecursive(targetFile);
+            PathHelper.deleteRecursiveRetry(targetFile);
         }
     }
 
@@ -243,7 +243,7 @@ public class SoftwareResourceImpl implements SoftwareResource {
             } else {
                 doImport(dto, targetFile);
             }
-            PathHelper.deleteRecursive(targetFile);
+            PathHelper.deleteRecursiveRetry(targetFile);
 
             changes.create(ObjectChangeType.SOFTWARE_PACKAGE, Map.of(ObjectChangeDetails.CHANGE_HINT, this.repository));
 

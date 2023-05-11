@@ -166,8 +166,8 @@ class RemoteDataFilesCliTest {
                     "--instanceGroup=demo", "--uuid=" + id, "--list");
             assertEquals(0, result.size());
         } finally {
-            PathHelper.deleteRecursive(tempFile);
-            PathHelper.deleteRecursive(tempDirectory);
+            PathHelper.deleteRecursiveRetry(tempFile);
+            PathHelper.deleteRecursiveRetry(tempDirectory);
         }
     }
 

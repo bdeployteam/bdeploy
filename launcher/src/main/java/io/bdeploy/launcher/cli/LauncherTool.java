@@ -647,7 +647,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Check for a stale update marker
         if (System.currentTimeMillis() - Files.getLastModifiedTime(updateMarker).toMillis() > 60_000) {
             log.warn("Stale update marker found, removing.");
-            Files.delete(updateMarker);
+            PathHelper.deleteIfExistsRetry(updateMarker);
             return;
         }
 
@@ -732,7 +732,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         // Download and install the current configuration tree if required.
         DeploymentPathProvider pathProvider = new DeploymentPathProvider(appDir, "1");
         Path cfgPath = pathProvider.get(SpecialDirectory.CONFIG);
-        PathHelper.deleteRecursive(cfgPath); // get rid of *any* existing config
+        PathHelper.deleteRecursiveRetry(cfgPath); // get rid of *any* existing config
 
         if (clientAppCfg.configTree != null) {
             downloadAndInstallConfigFiles(clientAppCfg, cfgPath);
@@ -796,7 +796,7 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         }
 
         // remove the temporary download file.
-        PathHelper.deleteRecursive(cfgZip);
+        PathHelper.deleteRecursiveRetry(cfgZip);
     }
 
     /**

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -22,6 +23,8 @@ import java.util.stream.Stream;
 
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
+
+import io.bdeploy.common.RetryableScope;
 
 /**
  * Helps in handling different {@link String}s in the context of {@link Path}s.
@@ -78,7 +81,7 @@ public class PathHelper {
             PathHelper.mkdirs(path);
             Path testFile = path.resolve(UuidHelper.randomId());
             Files.newOutputStream(testFile).close();
-            Files.delete(testFile);
+            deleteIfExistsRetry(testFile);
             return false;
         } catch (Exception ioe) {
             return true;
@@ -115,7 +118,7 @@ public class PathHelper {
         // Check if we can delete the file
         if (canCreate) {
             try {
-                Files.delete(testFile);
+                PathHelper.deleteIfExistsRetry(testFile);
             } catch (Exception ioe) {
                 canDelete = false;
             }
@@ -174,29 +177,9 @@ public class PathHelper {
     /**
      * Renames the given file or directory and then attempts to delete it.
      */
-    public static boolean moveAndDelete(Path source, Path target) {
-        try {
-            Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
-        } catch (IOException e) {
-            return false;
-        }
-        deleteRecursive(target);
-        return true;
-    }
-
-    /**
-     * @param path the {@link Path} to delete recursively.
-     */
-    public static void deleteRecursive(Path path) {
-        if (!exists(path)) {
-            return;
-        }
-
-        try (Stream<Path> walk = Files.walk(path)) {
-            walk.map(Path::toFile).sorted(Comparator.reverseOrder()).forEach(File::delete);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot delete " + path, e);
-        }
+    public static void moveAndDelete(Path source, Path target) {
+        moveRetry(source, target, StandardCopyOption.ATOMIC_MOVE);
+        deleteRecursiveRetry(target);
     }
 
     /**
@@ -331,6 +314,41 @@ public class PathHelper {
         }
 
         return path.toFile().exists();
+    }
+
+    /**
+     * @param path the {@link Path} to delete recursively.
+     */
+    public static void deleteRecursiveRetry(Path path) {
+        if (!exists(path)) {
+            return;
+        }
+
+        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> {
+            try (Stream<Path> walk = Files.walk(path)) {
+                walk.map(Path::toFile).sorted(Comparator.reverseOrder()).forEach(File::delete);
+            }
+        });
+    }
+
+    /**
+     * @param path the {@link Path} to delete.
+     */
+    public static void deleteIfExistsRetry(Path path) {
+        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> {
+            Files.deleteIfExists(path);
+        });
+    }
+
+    /**
+     * @param source the {@link Path} which denotes the source file or directory.
+     * @param target the {@link Path} which denotes the target file or directory.
+     * @param options options as as accepted by {@link Files#move(Path, Path, CopyOption...)}
+     */
+    public static void moveRetry(Path source, Path target, CopyOption... options) {
+        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> {
+            Files.move(source, target, options);
+        });
     }
 
 }

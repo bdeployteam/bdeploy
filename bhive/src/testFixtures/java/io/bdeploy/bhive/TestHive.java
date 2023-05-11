@@ -70,7 +70,7 @@ public class TestHive implements ParameterResolver, BeforeEachCallback {
         @Override
         public void close() throws Throwable {
             hive.close();
-            PathHelper.deleteRecursive(path);
+            PathHelper.deleteRecursiveRetry(path);
         }
 
     }

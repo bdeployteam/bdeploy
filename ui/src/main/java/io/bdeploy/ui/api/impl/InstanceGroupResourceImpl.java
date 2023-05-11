@@ -166,7 +166,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             InstanceGroupManifest igm = new InstanceGroupManifest(h);
             igm.update(config);
         } catch (Exception e) {
-            PathHelper.deleteRecursive(hive);
+            PathHelper.deleteRecursiveRetry(hive);
             throw e;
         }
     }
@@ -237,7 +237,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
         auth.removePermissions(group);
         registry.unregister(group);
-        PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+        PathHelper.deleteRecursiveRetry(Paths.get(bHive.getUri()));
         changes.remove(ObjectChangeType.INSTANCE_GROUP, latestKey);
     }
 

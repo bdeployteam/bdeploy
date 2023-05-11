@@ -97,7 +97,7 @@ public class MinionStatusResourceImpl implements MinionStatusResource {
                 }
             });
         } finally {
-            PathHelper.deleteRecursive(file);
+            PathHelper.deleteRecursiveRetry(file);
         }
     }
 

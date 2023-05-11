@@ -175,9 +175,9 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
                 try {
                     Files.write(tmpFile, StorageHelper.toRawBytes(manifest), StandardOpenOption.SYNC, StandardOpenOption.CREATE,
                             StandardOpenOption.TRUNCATE_EXISTING);
-                    Files.move(tmpFile, pathForKey, StandardCopyOption.ATOMIC_MOVE);
+                    PathHelper.moveRetry(tmpFile, pathForKey, StandardCopyOption.ATOMIC_MOVE);
                 } catch (Throwable t) {
-                    PathHelper.deleteRecursive(tmpFile);
+                    PathHelper.deleteRecursiveRetry(tmpFile);
                     throw t;
                 }
             }
@@ -196,7 +196,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      */
     public void removeManifest(Manifest.Key key) {
         locked(() -> {
-            Files.deleteIfExists(getPathForKey(key));
+            PathHelper.deleteIfExistsRetry(getPathForKey(key));
             manifestCache.invalidate(key);
             manifestListCache.invalidateAll();
         });

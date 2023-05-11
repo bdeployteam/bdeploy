@@ -85,7 +85,7 @@ public class CleanupDownloadDirJob implements Job {
         if (file.lastModified() > oneHourAgo) {
             return;
         }
-        PathHelper.deleteRecursive(path);
+        PathHelper.deleteRecursiveRetry(path);
     }
 
 }

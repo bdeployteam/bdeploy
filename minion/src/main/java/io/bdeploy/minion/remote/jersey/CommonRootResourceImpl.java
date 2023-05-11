@@ -180,7 +180,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
             throw new WebApplicationException("Instance Group '" + name + "' does not exist", Status.NOT_FOUND);
         }
         registry.unregister(name);
-        PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+        PathHelper.deleteRecursiveRetry(Paths.get(bHive.getUri()));
     }
 
     @Override
@@ -214,7 +214,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
                 updating.workAndCancelIfRequested(1);
             }
         } finally {
-            PathHelper.deleteRecursive(config);
+            PathHelper.deleteRecursiveRetry(config);
         }
     }
 

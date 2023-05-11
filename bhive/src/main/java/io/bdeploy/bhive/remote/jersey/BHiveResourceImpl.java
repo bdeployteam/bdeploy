@@ -1,8 +1,6 @@
 package io.bdeploy.bhive.remote.jersey;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -15,6 +13,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.LocalBHiveAdapter;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
 
 public class BHiveResourceImpl implements BHiveResource {
@@ -63,8 +62,8 @@ public class BHiveResourceImpl implements BHiveResource {
             wrapper.push(zipedHive);
         } finally {
             try {
-                Files.delete(zipedHive);
-            } catch (IOException e) {
+                PathHelper.deleteIfExistsRetry(zipedHive);
+            } catch (Exception e) {
                 log.warn("cannot delete {}", zipedHive);
                 if (log.isDebugEnabled()) {
                     log.debug("Exception: ", e);

@@ -178,7 +178,7 @@ public class ManifestTool extends RemoteServiceTool<ManifestConfig> {
             throw new IllegalStateException("Failed to save manifest", ex);
         } finally {
             if (tmpFile != null) {
-                PathHelper.deleteRecursive(tmpFile);
+                PathHelper.deleteRecursiveRetry(tmpFile);
             }
         }
     }

@@ -86,7 +86,7 @@ public class UpdateHelper {
         Path updateTarget = updateDir.resolve(UpdateHelper.UPDATE_DIR);
         if (Files.isDirectory(updateTarget)) {
             log.warn("Removing stale update folder at {}", updateTarget);
-            PathHelper.deleteRecursive(updateTarget);
+            PathHelper.deleteRecursiveRetry(updateTarget);
         }
         return updateTarget;
     }
@@ -170,7 +170,7 @@ public class UpdateHelper {
                     }
 
                     // move single files as /tmp might be on different file system, and directory move is not possible.
-                    Files.move(launcherZip, tmpLaunchers.resolve(launcherZip.getFileName()));
+                    PathHelper.moveRetry(launcherZip, tmpLaunchers.resolve(launcherZip.getFileName()));
                 }
             }
 
@@ -185,7 +185,7 @@ public class UpdateHelper {
             if (tmpLaunchers != null) {
                 try (DirectoryStream<Path> allTmpLaunchers = Files.newDirectoryStream(tmpLaunchers)) {
                     for (Path launcher : allTmpLaunchers) {
-                        Files.move(launcher, launchers.resolve(launcher.getFileName()));
+                        PathHelper.moveRetry(launcher, launchers.resolve(launcher.getFileName()));
                     }
                 }
             }

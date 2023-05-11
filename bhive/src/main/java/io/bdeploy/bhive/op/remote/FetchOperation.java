@@ -15,6 +15,9 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -25,6 +28,7 @@ import io.bdeploy.bhive.op.ObjectExistsOperation.Result;
 import io.bdeploy.bhive.op.ObjectReadOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.util.PathHelper;
 import jakarta.ws.rs.core.UriBuilder;
 
 /**
@@ -32,6 +36,8 @@ import jakarta.ws.rs.core.UriBuilder;
  * manifests are given, all remotely available manifests are fetched.
  */
 public class FetchOperation extends TransactedRemoteOperation<TransferStatistics, FetchOperation> {
+
+    private static final Logger log = LoggerFactory.getLogger(FetchOperation.class);
 
     private final SortedSet<Manifest.Key> manifests = new TreeSet<>();
     private String hiveName;
@@ -135,7 +141,11 @@ public class FetchOperation extends TransactedRemoteOperation<TransferStatistics
             t.transferSize = Files.size(z); // transferred size != actual size.
             return t;
         } finally {
-            Files.deleteIfExists(z);
+            try {
+                PathHelper.deleteIfExistsRetry(z);
+            } catch (Exception e) {
+                log.warn("Cannot clean temporary file while fetching", e);
+            }
         }
     }
 

@@ -58,7 +58,7 @@ public class ProductValidationHelper {
         try {
             return validateRemote(remote, zipFile);
         } finally {
-            PathHelper.deleteRecursive(zipFile);
+            PathHelper.deleteRecursiveRetry(zipFile);
         }
     }
 

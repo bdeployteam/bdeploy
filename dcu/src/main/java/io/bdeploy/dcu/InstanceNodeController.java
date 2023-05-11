@@ -129,7 +129,7 @@ public class InstanceNodeController {
             installConfigurationTo(manifest.getConfiguration());
             return manifest.getId();
         } catch (Exception e) {
-            PathHelper.deleteRecursive(paths.get(SpecialDirectory.BIN));
+            PathHelper.deleteRecursiveRetry(paths.get(SpecialDirectory.BIN));
             throw e;
         }
     }
@@ -139,7 +139,7 @@ public class InstanceNodeController {
             return;
         }
         Path dir = getDeploymentDir();
-        PathHelper.deleteRecursive(dir);
+        PathHelper.deleteRecursiveRetry(dir);
     }
 
     /**
@@ -216,7 +216,7 @@ public class InstanceNodeController {
 
     private void installConfigurationTo(InstanceNodeConfiguration dc) {
         Path targetDir = paths.get(SpecialDirectory.BIN);
-        PathHelper.deleteRecursive(targetDir);
+        PathHelper.deleteRecursiveRetry(targetDir);
 
         // write root config tree to the according target location
         ObjectId rootTree = manifest.getConfigTrees().get(InstanceNodeManifest.ROOT_CONFIG_NAME);

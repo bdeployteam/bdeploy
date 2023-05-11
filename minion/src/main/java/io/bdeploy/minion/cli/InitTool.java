@@ -169,7 +169,7 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                 result.addField("Software Imported", keys);
             }
         } catch (Exception e) {
-            PathHelper.deleteRecursive(root);
+            PathHelper.deleteRecursiveRetry(root);
             throw new IllegalStateException("Cannot initialize minion root", e);
         }
 

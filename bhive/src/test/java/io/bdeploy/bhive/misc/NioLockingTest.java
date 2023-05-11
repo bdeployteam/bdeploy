@@ -20,6 +20,8 @@ import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.Test;
 
+import io.bdeploy.common.util.PathHelper;
+
 class NioLockingTest {
 
     @Test
@@ -37,7 +39,7 @@ class NioLockingTest {
             }
             System.out.println("raw time: " + (System.currentTimeMillis() - start) + "ms.");
         } finally {
-            Files.deleteIfExists(lockFile);
+            PathHelper.deleteIfExistsRetry(lockFile);
         }
     }
 
@@ -58,7 +60,7 @@ class NioLockingTest {
                 assertTrue(l <= System.currentTimeMillis());
             }
         } finally {
-            Files.deleteIfExists(lockFile);
+            PathHelper.deleteIfExistsRetry(lockFile);
         }
     }
 

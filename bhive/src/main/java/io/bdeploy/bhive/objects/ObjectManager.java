@@ -202,7 +202,7 @@ public class ObjectManager {
 
                 // anyway we must delete the target location if it is empty, so we can rename the result to the
                 // target name after writing retryably.
-                PathHelper.deleteRecursive(location);
+                PathHelper.deleteRecursiveRetry(location);
             }
 
             Path tempLocation = location.toAbsolutePath().getParent().resolve(location.getFileName().toString() + ".xtmp");
@@ -214,7 +214,7 @@ public class ObjectManager {
             }
 
             if (PathHelper.exists(tempLocation)) {
-                PathHelper.deleteRecursive(tempLocation);
+                PathHelper.deleteRecursiveRetry(tempLocation);
             }
 
             AtomicLong fileCount = new AtomicLong(0);
@@ -227,11 +227,11 @@ public class ObjectManager {
             Activity exporting = reporter.start("Exporting Files", fileCount.get());
             try {
                 internalExportTree(tree, tempLocation, tree, tempLocation, exporting, handler);
-                internalMoveRetrying(location, tempLocation);
+                PathHelper.moveRetry(tempLocation, location, StandardCopyOption.ATOMIC_MOVE);
             } catch (Throwable t) {
                 try {
                     if (PathHelper.exists(tempLocation)) {
-                        PathHelper.deleteRecursive(tempLocation);
+                        PathHelper.deleteRecursiveRetry(tempLocation);
                     }
                 } catch (Throwable it) {
                     t.addSuppressed(it);
@@ -242,27 +242,6 @@ public class ObjectManager {
             }
         } catch (IOException e) {
             throw new IllegalStateException("Cannot export to " + location, e);
-        }
-    }
-
-    private void internalMoveRetrying(Path location, Path tempLocation) throws IOException {
-        int retries = 1;
-        while (true) {
-            try {
-                Files.move(tempLocation, location, StandardCopyOption.ATOMIC_MOVE);
-                break;
-            } catch (Exception ex) {
-                log.warn("Retry {}: Cannot move: {}", retries, ex.toString());
-                if (retries++ > 40) {
-                    throw ex;
-                }
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e) {
-                    log.warn("Retrying rename operation has been interrupted", e);
-                    Thread.currentThread().interrupt();
-                }
-            }
         }
     }
 

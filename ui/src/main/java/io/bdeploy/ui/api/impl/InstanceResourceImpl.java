@@ -1012,7 +1012,7 @@ public class InstanceResourceImpl implements InstanceResource {
         Path zip;
         try {
             zip = Files.createTempFile(minion.getTempDir(), "exp-", ".zip");
-            Files.deleteIfExists(zip);
+            PathHelper.deleteIfExistsRetry(zip);
         } catch (IOException e) {
             throw new WebApplicationException("Cannot create temporary file", e);
         }
@@ -1071,7 +1071,7 @@ public class InstanceResourceImpl implements InstanceResource {
         } catch (IOException e) {
             throw new WebApplicationException("Cannot import from uploaded ZIP", e);
         } finally {
-            PathHelper.deleteRecursive(zip);
+            PathHelper.deleteRecursiveRetry(zip);
         }
     }
 

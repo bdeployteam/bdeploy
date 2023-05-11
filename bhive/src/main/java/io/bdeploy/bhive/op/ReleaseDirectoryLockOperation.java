@@ -21,7 +21,7 @@ public class ReleaseDirectoryLockOperation extends BHive.Operation<Void> {
     public Void call() throws Exception {
         assertNotNull(directory, "No directory to unlock.");
 
-        PathHelper.deleteRecursive(directory.resolve(LockDirectoryOperation.LOCK_FILE));
+        PathHelper.deleteRecursiveRetry(directory.resolve(LockDirectoryOperation.LOCK_FILE));
         return null;
     }
 

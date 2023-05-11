@@ -8,6 +8,12 @@ import org.slf4j.LoggerFactory;
 
 public class RetryableScope {
 
+    @FunctionalInterface
+    public interface RetryableRunnable {
+
+        public void run() throws Exception;
+    }
+
     private static final Logger log = LoggerFactory.getLogger(RetryableScope.class);
 
     private final AtomicLong iterationCountMax = new AtomicLong(10);
@@ -61,15 +67,15 @@ public class RetryableScope {
      * {@link #withDelay(long)} milliseconds between retries (given the exception and timeout handler has not been replaced
      * using {@link #withExceptionHandler(Consumer)}).
      */
-    public void run(Runnable action) {
+    public void run(RetryableRunnable action) {
         boolean madeIt = false;
-        RuntimeException lastException = null;
+        Exception lastException = null;
         for (long i = 0; i < iterationCountMax.get(); ++i) {
             try {
                 action.run();
                 madeIt = true;
                 break;
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 lastException = e;
                 onException.accept(e);
             }
@@ -77,7 +83,7 @@ public class RetryableScope {
 
         if (!madeIt) {
             if (lastException != null) {
-                throw lastException;
+                throw new IllegalStateException(lastException);
             } else {
                 throw new IllegalStateException("Out of retries");
             }

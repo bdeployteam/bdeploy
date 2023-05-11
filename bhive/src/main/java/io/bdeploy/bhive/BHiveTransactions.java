@@ -140,7 +140,7 @@ public class BHiveTransactions {
                 return; // nothing to clean.
             }
 
-            PathHelper.deleteRecursive(mdb);
+            PathHelper.deleteRecursiveRetry(mdb);
         };
     }
 
@@ -164,7 +164,7 @@ public class BHiveTransactions {
                         if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0))
                                 && !hive.getLockContentValidator().test(lines.get(0))) {
                             log.warn("Stale transaction detected, removing.");
-                            PathHelper.deleteRecursive(p);
+                            PathHelper.deleteRecursiveRetry(p);
                             amount.increment();
                         }
                     } catch (IOException e) {

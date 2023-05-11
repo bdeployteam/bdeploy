@@ -272,10 +272,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         if (backup != null) {
-            PathHelper.deleteRecursive(backup);
+            PathHelper.deleteRecursiveRetry(backup);
             try {
-                Files.move(cfgPath, backup);
-            } catch (IOException e) {
+                PathHelper.moveRetry(cfgPath, backup);
+            } catch (Exception e) {
                 log.warn("Cannot create backup of {} at {}", cfgPath, backup, e);
             }
         }
@@ -429,7 +429,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      */
     public void setupServerTasks(MinionMode minionMode) {
         // cleanup any stale things so periodic tasks don't get them wrong.
-        PathHelper.deleteRecursive(getTempDir());
+        PathHelper.deleteRecursiveRetry(getTempDir());
         PathHelper.mkdirs(getTempDir());
 
         if (minionMode != MinionMode.CENTRAL) {
@@ -586,8 +586,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         if (!Files.exists(cfg) && Files.exists(bakCfg)) {
             log.warn("state.json is missing, restoring from state.json.bak");
             try {
-                Files.move(bakCfg, cfg, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException e) {
+                PathHelper.moveRetry(bakCfg, cfg, StandardCopyOption.ATOMIC_MOVE);
+            } catch (Exception e) {
                 log.error("Cannot automatically restore {} from {}", cfg, bakCfg);
             }
         }
@@ -616,10 +616,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             Files.write(cfgTmpPath, StorageHelper.toRawBytes(cfg), StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
             if (Files.exists(cfgPath)) {
-                Files.move(cfgPath, cfgBakPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                PathHelper.moveRetry(cfgPath, cfgBakPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
             }
-            Files.move(cfgTmpPath, cfgPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
+            PathHelper.moveRetry(cfgTmpPath, cfgPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
             throw new IllegalStateException("Cannot save minion config " + name, e);
         }
     }

@@ -443,7 +443,7 @@ public class ProcessController {
 
         // Clean up any previous info file
         Path infoFile = processDir.resolve(JSON_FILE);
-        PathHelper.deleteRecursive(infoFile);
+        PathHelper.deleteRecursiveRetry(infoFile);
 
         // Cancel any pending restart tasks
         exitCode = null;
@@ -566,7 +566,7 @@ public class ProcessController {
             dto = StorageHelper.fromPath(pidFile, ProcessControllerDto.class);
             Optional<ProcessHandle> ph = ProcessHandle.of(dto.pid);
             if (!ph.isPresent()) {
-                PathHelper.deleteRecursive(pidFile);
+                PathHelper.deleteRecursiveRetry(pidFile);
                 return;
             }
 
@@ -574,7 +574,7 @@ public class ProcessController {
             processHandle = ph.get();
             processExit = processHandle.onExit();
         } catch (Exception e) {
-            PathHelper.deleteRecursive(pidFile);
+            PathHelper.deleteRecursiveRetry(pidFile);
             return;
         }
 
@@ -591,7 +591,7 @@ public class ProcessController {
         } else {
             logger.log(l -> l.info("Discarding existing process information due to start time mismatch. {} != {}, PID = {}.",
                     startTime, dto.startTime, dto.pid));
-            PathHelper.deleteRecursive(pidFile);
+            PathHelper.deleteRecursiveRetry(pidFile);
             cleanup();
         }
     }

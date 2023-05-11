@@ -133,8 +133,8 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
         } finally {
-            PathHelper.deleteRecursive(unpackTmp);
-            PathHelper.deleteRecursive(targetFile);
+            PathHelper.deleteRecursiveRetry(unpackTmp);
+            PathHelper.deleteRecursiveRetry(targetFile);
         }
     }
 
@@ -181,8 +181,12 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
                     ZipHelper.zip(tmpFile, tmpFolder);
                     Files.copy(tmpFile, targetFile);
                 } finally {
-                    Files.deleteIfExists(tmpFile);
-                    PathHelper.deleteRecursive(tmpFolder);
+                    try {
+                        PathHelper.deleteIfExistsRetry(tmpFile);
+                        PathHelper.deleteRecursiveRetry(tmpFolder);
+                    } catch (Exception e) {
+                        log.warn("Cannot clean temporary files after packaging download", e);
+                    }
                 }
             } catch (IOException e) {
                 throw new WebApplicationException("Error packaging download", e);

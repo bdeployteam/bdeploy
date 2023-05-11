@@ -39,6 +39,7 @@ import io.bdeploy.bhive.op.ObjectWriteOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.util.PathHelper;
 import jakarta.ws.rs.core.UriBuilder;
 
 /**
@@ -179,7 +180,7 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
 
     private TransferStatistics pushAsZip(RemoteBHive rh, Set<ObjectId> objects, Set<Key> manifests) throws IOException {
         Path tmpHive = Files.createTempFile("push-", ".zip");
-        Files.delete(tmpHive); // need to delete to re-create with ZipFileSystem
+        PathHelper.deleteIfExistsRetry(tmpHive); // need to delete to re-create with ZipFileSystem
 
         try {
             TransferStatistics s;
@@ -195,7 +196,11 @@ public class PushOperation extends RemoteOperation<TransferStatistics, PushOpera
             rh.push(tmpHive);
             return s;
         } finally {
-            Files.deleteIfExists(tmpHive);
+            try {
+                PathHelper.deleteIfExistsRetry(tmpHive);
+            } catch (Exception e) {
+                log.warn("Cannot clean temporary file while pushing", e);
+            }
         }
     }
 

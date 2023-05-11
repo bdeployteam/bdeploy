@@ -18,6 +18,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.bhive.BHiveTransactions;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.ActivityReporter;
@@ -36,6 +39,8 @@ import io.bdeploy.common.util.PathHelper;
  * </p>
  */
 public class ObjectDatabase extends LockableDatabase {
+
+    private static final Logger log = LoggerFactory.getLogger(ObjectDatabase.class);
 
     /**
      * The maximum size for any file to be fully loaded into memory. If this limit
@@ -180,11 +185,15 @@ public class ObjectDatabase extends LockableDatabase {
                 }
 
                 PathHelper.mkdirs(target.getParent());
-                Files.move(tmpFile, target);
+                PathHelper.moveRetry(tmpFile, target);
             });
             return id;
         } finally {
-            Files.deleteIfExists(tmpFile);
+            try {
+                PathHelper.deleteIfExistsRetry(tmpFile);
+            } catch (Exception e) {
+                log.warn("Cannot clean temporary file while adding object", e);
+            }
         }
     }
 
@@ -210,7 +219,7 @@ public class ObjectDatabase extends LockableDatabase {
             if (!hasObject(id)) {
                 return;
             }
-            Files.delete(file);
+            PathHelper.deleteIfExistsRetry(file);
         });
     }
 

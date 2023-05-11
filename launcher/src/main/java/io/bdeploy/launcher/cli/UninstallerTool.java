@@ -97,7 +97,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         Path appsDir = rootDir.resolve("apps");
         Path appDir = appsDir.resolve(appId);
         if (PathHelper.exists(appDir)) {
-            PathHelper.deleteRecursive(appDir);
+            PathHelper.deleteRecursiveRetry(appDir);
             log.info("Removed application folder {}", appDir);
         } else {
             log.info("Application {} is not installed.", appId);
@@ -112,7 +112,7 @@ public class UninstallerTool extends ConfiguredCliTool<UninstallerConfig> {
         Path appsDir = versionedRoot.resolve("apps");
         Path appDir = appsDir.resolve(appId);
         if (PathHelper.exists(appDir)) {
-            PathHelper.deleteRecursive(appDir);
+            PathHelper.deleteRecursiveRetry(appDir);
             log.info("Removed application folder {}", appDir);
         }
     }

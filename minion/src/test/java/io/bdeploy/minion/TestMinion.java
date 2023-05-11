@@ -145,7 +145,7 @@ public class TestMinion extends TestServer {
         @Override
         public void close() throws Throwable {
             mr.close();
-            PathHelper.deleteRecursive(root);
+            PathHelper.deleteRecursiveRetry(root);
         }
 
     }

@@ -30,6 +30,7 @@ import io.bdeploy.common.SlowTest;
 import io.bdeploy.common.TestActivityReporter;
 import io.bdeploy.common.TestCliTool;
 import io.bdeploy.common.cli.ToolBase;
+import io.bdeploy.common.util.PathHelper;
 
 /**
  * Tests a few of the basic tools.
@@ -85,7 +86,7 @@ class BasicToolTest {
         tools.execute(ImportTool.class, hiveArg, "--source=" + smallSrcDir, "--manifest=" + anotherKey);
 
         Manifest.Key anotherKey2 = new Manifest.Key("another", "v2");
-        Files.delete(smallSrc2Dir.resolve("test.txt"));
+        PathHelper.deleteIfExistsRetry(smallSrc2Dir.resolve("test.txt"));
         Files.write(smallSrc2Dir.resolve("another.txt"), Arrays.asList("Test Content"));
         tools.execute(ImportTool.class, hiveArg, "--source=" + smallSrc2Dir, "--manifest=" + anotherKey2);
 

@@ -98,7 +98,7 @@ public class DownloadServiceImpl implements DownloadService {
                 } finally {
                     // Cleanup token and file
                     tokenCache.remove(token);
-                    PathHelper.deleteRecursive(targetFile);
+                    PathHelper.deleteRecursiveRetry(targetFile);
                 }
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
@@ -183,7 +183,11 @@ public class DownloadServiceImpl implements DownloadService {
                 try (InputStream is = Files.newInputStream(file)) {
                     is.transferTo(output);
                 } finally {
-                    Files.deleteIfExists(file);
+                    try {
+                        PathHelper.deleteIfExistsRetry(file);
+                    } catch (Exception e) {
+                        log.warn("Cannot clean temporary file after transfer", e);
+                    }
                 }
             }
         }, MediaType.APPLICATION_OCTET_STREAM);
@@ -216,8 +220,12 @@ public class DownloadServiceImpl implements DownloadService {
                 ZipHelper.zip(tmpFile, tmpFolder);
                 Files.copy(tmpFile, targetFile);
             } finally {
-                Files.deleteIfExists(tmpFile);
-                PathHelper.deleteRecursive(tmpFolder);
+                try {
+                    PathHelper.deleteIfExistsRetry(tmpFile);
+                    PathHelper.deleteRecursiveRetry(tmpFolder);
+                } catch (Exception e) {
+                    log.warn("Cannot clean temporary files after packaging download", e);
+                }
             }
         } catch (IOException e) {
             throw new WebApplicationException("Error packaging download", e);

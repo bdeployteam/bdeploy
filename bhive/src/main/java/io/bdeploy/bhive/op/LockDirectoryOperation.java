@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.Threads;
 
@@ -93,7 +94,7 @@ public class LockDirectoryOperation extends BHive.Operation<Void> {
             List<String> lines = Files.readAllLines(lockFile);
             if (!lines.isEmpty() && !StringHelper.isNullOrEmpty(lines.get(0)) && !lockContentValidator.test(lines.get(0))) {
                 log.warn("Stale lock file detected, forcefully resolving...");
-                Files.delete(lockFile);
+                PathHelper.deleteIfExistsRetry(lockFile);
                 return false;
             }
             return true;

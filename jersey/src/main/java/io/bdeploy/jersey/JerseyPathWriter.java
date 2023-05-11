@@ -15,6 +15,9 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
@@ -23,9 +26,6 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
 import jakarta.ws.rs.ext.Providers;
-
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 
 /**
  * Allows serializing existing files by returning/accepting {@link Path}
@@ -78,7 +78,7 @@ public class JerseyPathWriter implements MessageBodyWriter<Path> {
         }
 
         if (delete) {
-            Files.deleteIfExists(t);
+            PathHelper.deleteIfExistsRetry(t);
         }
     }
 

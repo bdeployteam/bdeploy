@@ -40,9 +40,9 @@ class SnapshotAndDiffTest {
         Path file2Dir = ContentHelper.genSimpleTestTree(tmp, "s5");
 
         Files.write(newFile.resolve("new.txt"), Arrays.asList("Test Content"));
-        Files.delete(rmFile.resolve("test.txt"));
+        PathHelper.deleteIfExistsRetry(rmFile.resolve("test.txt"));
         Files.write(chFile.resolve("text.txt"), Arrays.asList("Changed Content"));
-        Files.delete(file2Dir.resolve("test.txt"));
+        PathHelper.deleteIfExistsRetry(file2Dir.resolve("test.txt"));
         PathHelper.mkdirs(file2Dir.resolve("test.txt"));
         Files.write(file2Dir.resolve("test.txt/file.txt"), Arrays.asList("New nested content"));
 

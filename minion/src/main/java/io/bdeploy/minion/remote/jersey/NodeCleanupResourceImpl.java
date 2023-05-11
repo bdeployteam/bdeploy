@@ -164,7 +164,7 @@ public class NodeCleanupResourceImpl implements NodeCleanupResource {
             throw new IllegalStateException("Path to delete is not under minion's control: " + path);
         }
 
-        PathHelper.deleteRecursive(path);
+        PathHelper.deleteRecursiveRetry(path);
     }
 
 }

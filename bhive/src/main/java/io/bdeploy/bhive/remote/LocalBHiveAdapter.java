@@ -140,7 +140,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
             // assume no manifests are present in the target. filtering must happen before
             // calling fetch.
             Path tmpHive = Files.createTempFile("fetch-", ".zip");
-            Files.delete(tmpHive); // need to delete to re-create with ZipFileSystem
+            PathHelper.deleteIfExistsRetry(tmpHive); // need to delete to re-create with ZipFileSystem
 
             try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), null, reporter)) {
                 CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);

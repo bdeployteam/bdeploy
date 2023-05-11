@@ -234,7 +234,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
             } catch (IOException e) {
                 log.warn("Cannot close ZIP FS: {}", uri, e);
             }
-            PathHelper.deleteRecursive(objTmp);
+            PathHelper.deleteRecursiveRetry(objTmp);
         }
         manifests.close();
         auditor.close();

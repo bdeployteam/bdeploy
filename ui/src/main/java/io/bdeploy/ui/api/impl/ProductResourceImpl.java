@@ -230,7 +230,7 @@ public class ProductResourceImpl implements ProductResource {
         } catch (IOException e) {
             throw new WebApplicationException("Failed to upload file: " + e.getMessage(), Status.BAD_REQUEST);
         } finally {
-            PathHelper.deleteRecursive(targetFile);
+            PathHelper.deleteRecursiveRetry(targetFile);
         }
     }
 

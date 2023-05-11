@@ -139,7 +139,7 @@ public class RemoteMasterTool extends RemoteServiceTool<RemoteMasterConfig> {
                 return keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
             }
         } finally {
-            PathHelper.deleteRecursive(tmpDir);
+            PathHelper.deleteRecursiveRetry(tmpDir);
         }
     }
 

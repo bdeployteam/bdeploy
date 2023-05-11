@@ -69,7 +69,7 @@ public class ObjectConsistencyCheckOperation extends BHive.Operation<Set<Element
             }
         } finally {
             scanning.done();
-            PathHelper.deleteRecursive(markerPath);
+            PathHelper.deleteRecursiveRetry(markerPath);
         }
 
         return broken;

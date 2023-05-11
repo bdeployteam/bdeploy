@@ -121,7 +121,7 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         }
         Manifest.Key key = new SoftwareRepositoryManifest(bHive).getKey();
         registry.unregister(repo);
-        PathHelper.deleteRecursive(Paths.get(bHive.getUri()));
+        PathHelper.deleteRecursiveRetry(Paths.get(bHive.getUri()));
         changes.remove(ObjectChangeType.SOFTWARE_REPO, key);
     }
 

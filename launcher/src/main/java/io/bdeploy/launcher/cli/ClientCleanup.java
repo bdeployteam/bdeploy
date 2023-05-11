@@ -102,8 +102,10 @@ public class ClientCleanup {
             // thus we first try to rename and then delete
             if (PathHelper.exists(launcherPath)) {
                 Path tmpPath = launcherPath.getParent().resolve(launcherPath.getFileName() + "_delete");
-                if (!PathHelper.moveAndDelete(launcherPath, tmpPath)) {
-                    log.warn("Unable to delete unused launcher.");
+                try {
+                    PathHelper.moveAndDelete(launcherPath, tmpPath);
+                } catch (Exception e) {
+                    log.warn("Unable to delete unused pooled application.", e);
                     return;
                 }
             }
@@ -111,6 +113,7 @@ public class ClientCleanup {
             // Delete manifest as last operation
             hive.execute(new ManifestDeleteOperation().setToDelete(key));
         }
+
     }
 
     /** Removes old application versions not required anymore */
@@ -143,8 +146,10 @@ public class ClientCleanup {
             Path pooledPath = poolDir.resolve(key.directoryFriendlyName());
             if (PathHelper.exists(pooledPath)) {
                 Path tmpPath = pooledPath.getParent().resolve(pooledPath.getFileName() + "_delete");
-                if (!PathHelper.moveAndDelete(pooledPath, tmpPath)) {
-                    log.warn("Unable to delete unused pooled application.");
+                try {
+                    PathHelper.moveAndDelete(pooledPath, tmpPath);
+                } catch (Exception e) {
+                    log.warn("Unable to delete unused pooled application.", e);
                     return;
                 }
             }
@@ -158,11 +163,11 @@ public class ClientCleanup {
     private void doCleanup() {
         // Remove pool and apps directory if they are empty
         if (PathHelper.exists(poolDir) && PathHelper.isDirEmpty(poolDir)) {
-            PathHelper.deleteRecursive(poolDir);
+            PathHelper.deleteRecursiveRetry(poolDir);
             log.info("Removed empty pool folder {}", poolDir);
         }
         if (PathHelper.exists(appsDir) && PathHelper.isDirEmpty(appsDir)) {
-            PathHelper.deleteRecursive(appsDir);
+            PathHelper.deleteRecursiveRetry(appsDir);
             log.info("Removed apps folder {}", appsDir);
         }
     }

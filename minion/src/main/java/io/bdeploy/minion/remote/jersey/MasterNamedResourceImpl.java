@@ -522,7 +522,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     }
 
                     if (!ok) {
-                        PathHelper.deleteRecursive(path);
+                        PathHelper.deleteRecursiveRetry(path);
                     }
                 }
             }
@@ -646,7 +646,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Cannot update configuration files", e);
         } finally {
             if (tmpDir != null) {
-                PathHelper.deleteRecursive(tmpDir);
+                PathHelper.deleteRecursiveRetry(tmpDir);
             }
         }
     }
@@ -681,7 +681,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                                 StandardOpenOption.SYNC);
                         break;
                     case DELETE:
-                        Files.delete(file);
+                        if (!PathHelper.exists(file)) {
+                            // this is an invalid operation!
+                            throw new IllegalStateException("Cannot delete non-existing path");
+                        }
+                        PathHelper.deleteIfExistsRetry(file);
                         break;
                     case EDIT:
                         Files.write(file, Base64.decodeBase64(update.content), StandardOpenOption.CREATE,
@@ -1247,7 +1251,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Cannot update configuration files", e);
         } finally {
             if (tmpDir != null) {
-                PathHelper.deleteRecursive(tmpDir);
+                PathHelper.deleteRecursiveRetry(tmpDir);
             }
         }
     }

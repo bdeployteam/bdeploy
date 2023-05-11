@@ -323,7 +323,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         } catch (IOException e) {
             throw new IllegalStateException("Cannot import from uploaded ZIP", e);
         } finally {
-            PathHelper.deleteRecursive(tmpDir);
+            PathHelper.deleteRecursiveRetry(tmpDir);
         }
     }
 
