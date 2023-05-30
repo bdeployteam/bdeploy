@@ -37,6 +37,10 @@ https://auth.example.com/auth/realms/realmName/protocol/openid-connect/token
 
 The Client ID and Client Secret are used to authenticate with the OpenID Connect provider, and need to be obtained from the OpenID Connect provider.
 
+### Auth0
+
+[Auth0](https://auth0.com/) is an OpenID Connect complient authentication provider. **BDeploy** can be configured to use it through the Authorization Code Flow. Configure an application as "Single Page Application" in the auth0 tenant, and provide the required information in the configuration page.
+
 ### LDAP Auth.
 
 On the **LDAP Auth** tab, you can configure a list of LDAP servers which are queried when authenticating a user. Use drag and drop to to specify the sort order in which the LDAP servers are queried for users that log on.

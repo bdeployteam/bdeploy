@@ -21,6 +21,7 @@ import { MetricsOverviewComponent } from './components/metrics-overview/metrics-
 import { NodesComponent } from './components/nodes/nodes.component';
 import { AttributeEditActionComponent } from './components/settings-general/attributes-tab/attribute-edit-action/attribute-edit-action.component';
 import { AttributesTabComponent } from './components/settings-general/attributes-tab/attributes-tab.component';
+import { Auth0TabComponent } from './components/settings-general/auth0-tab/auth0-tab.component';
 import { GeneralTabComponent } from './components/settings-general/general-tab/general-tab.component';
 import { LdapCheckActionComponent } from './components/settings-general/ldap-tab/ldap-check-action/ldap-check-action.component';
 import { LdapEditActionComponent } from './components/settings-general/ldap-tab/ldap-edit-action/ldap-edit-action.component';
@@ -55,6 +56,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     LdapCheckActionComponent,
     NodesComponent,
     OidcTabComponent,
+    Auth0TabComponent,
   ],
   imports: [
     CommonModule,

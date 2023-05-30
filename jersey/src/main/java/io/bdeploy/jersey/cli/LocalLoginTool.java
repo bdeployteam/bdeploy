@@ -11,7 +11,9 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.RenderableResult;
+import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.cli.LocalLoginTool.LoginConfig;
+import jakarta.ws.rs.core.UriBuilder;
 
 @Help("Manage local login sessions")
 @ToolCategory("Local session and scripting commands")
@@ -34,6 +36,9 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
 
         @Help("Password to use when logging in, read from console if not given")
         String password();
+
+        @Help("A full authentication pack which is used instead of user and password to authenticate")
+        String token();
 
         @Help("Remove the given stored login session")
         String remove();
@@ -78,6 +83,12 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
 
     private void addUser(LoginConfig config, LocalLoginManager llm) {
         helpAndFailIfMissing(config.remote(), "Missing --remote");
+
+        if (config.token() != null) {
+            RemoteService s = new RemoteService(UriBuilder.fromUri(config.remote()).build(), config.token());
+            llm.loginWithService(config.add(), s);
+            return;
+        }
 
         if (config.user() == null || config.password() == null) {
             out().println("Please specify user and password for " + config.remote());

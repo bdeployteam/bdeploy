@@ -1,6 +1,7 @@
 package io.bdeploy.jersey;
 
 import java.io.IOException;
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.Set;
@@ -90,9 +91,28 @@ public class JerseyClientFactory {
         }
     }
 
+    private JerseyClientFactory(RemoteService svc, String bearer) {
+        this.svc = svc;
+        this.bearer = bearer;
+        try {
+            sslContext = SSLContext.getDefault();
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Cannot initialize security", e);
+        }
+    }
+
     public static JerseyClientFactory get(RemoteService svc) {
         try {
             return factoryCache.get(svc, () -> new JerseyClientFactory(svc));
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("Cannot create/get client factory", e);
+        }
+    }
+
+    public static JerseyClientFactory get(URI uri, String bearer) {
+        RemoteService tmp = new RemoteService(uri, "");
+        try {
+            return factoryCache.get(tmp, () -> new JerseyClientFactory(tmp, bearer));
         } catch (ExecutionException e) {
             throw new IllegalStateException("Cannot create/get client factory", e);
         }

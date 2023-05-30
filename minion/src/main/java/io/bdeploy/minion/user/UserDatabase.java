@@ -2,9 +2,13 @@ package io.bdeploy.minion.user;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -42,8 +46,10 @@ import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.settings.AuthenticationSettingsDto;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
+import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.user.ldap.LdapAuthenticator;
+import io.bdeploy.minion.user.oauth2.Auth0TokenAuthenticator;
 import io.bdeploy.minion.user.oauth2.OpenIDConnectAuthenticator;
 import io.bdeploy.ui.api.AuthService;
 
@@ -65,8 +71,11 @@ public class UserDatabase implements AuthService {
     private final BHive target;
 
     private final List<Authenticator> authenticators = new ArrayList<>();
+    private final Map<SpecialAuthenticators, Authenticator> specialAuths = new EnumMap<>(SpecialAuthenticators.class);
+
     private final LdapAuthenticator ldapAuthenticator = new LdapAuthenticator();
     private final OpenIDConnectAuthenticator oidcAuthenticator = new OpenIDConnectAuthenticator();
+    private final Auth0TokenAuthenticator auth0Authenticator = new Auth0TokenAuthenticator();
 
     public UserDatabase(MinionRoot root) {
         this.root = root;
@@ -75,6 +84,8 @@ public class UserDatabase implements AuthService {
         this.authenticators.add(new PasswordAuthentication());
         this.authenticators.add(oidcAuthenticator);
         this.authenticators.add(ldapAuthenticator);
+
+        this.specialAuths.put(SpecialAuthenticators.AUTH0, auth0Authenticator);
     }
 
     @Override
@@ -217,14 +228,36 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public UserInfo authenticate(String user, String pw) {
-        return authenticateInternal(user, pw, new AuthTrace(false));
+    public UserInfo authenticate(String user, String pw, SpecialAuthenticators... auths) {
+        return authenticateInternal(user, pw, new AuthTrace(false), getAuthenticators(auths));
+    }
+
+    private List<Authenticator> getAuthenticators(SpecialAuthenticators... auths) {
+        if (!hasNonNull(auths)) {
+            return this.authenticators; // use all if not filtered
+        }
+
+        List<SpecialAuthenticators> alist = Arrays.asList(auths);
+        return specialAuths.entrySet().stream().filter(e -> alist.contains(e.getKey())).map(Entry::getValue).toList();
+    }
+
+    private <T> boolean hasNonNull(T[] ts) {
+        if (ts == null || ts.length == 0) {
+            return false;
+        }
+
+        for (T t : ts) {
+            if (t != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public List<String> traceAuthentication(String user, String pw) {
         AuthTrace trace = new AuthTrace(true);
-        authenticateInternal(user, pw, trace);
+        authenticateInternal(user, pw, trace, authenticators);
         return trace.getMessages();
     }
 
@@ -241,7 +274,7 @@ public class UserDatabase implements AuthService {
         return ldapAuthenticator.testLdapServer(dto);
     }
 
-    private UserInfo authenticateInternal(String user, String pw, AuthTrace trace) {
+    private UserInfo authenticateInternal(String user, String pw, AuthTrace trace, List<Authenticator> auths) {
         user = UserInfo.normalizeName(user);
         trace.log("normalized Username: \"" + user + "\"");
         AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
@@ -249,14 +282,10 @@ public class UserDatabase implements AuthService {
         UserInfo u = getUser(user);
         if (u == null) {
             trace.log("user unknown -> query all authenticators");
-            for (Authenticator auth : authenticators) {
-                trace.log("Authenticator: " + auth.getClass().getSimpleName());
-                u = auth.getInitialInfo(user, pw.toCharArray(), settings, trace);
-                if (u != null) {
-                    u.lastActiveLogin = System.currentTimeMillis();
-                    internalUpdate(user, u);
-                    logSuccess(trace, u);
-                    return u; // already successfully authenticated using the given password.
+            for (Authenticator auth : auths) {
+                UserInfo newU = internalInitialQuery(auth, null, user, pw, settings, trace);
+                if (newU != null) {
+                    return newU;
                 }
             }
             trace.log("FAILURE");
@@ -264,7 +293,7 @@ public class UserDatabase implements AuthService {
         }
 
         // find out if there is a responsible authenticator, and check it. in case this does not work
-        for (Authenticator auth : authenticators) {
+        for (Authenticator auth : auths) {
             boolean isResponsible = auth.isResponsible(u, settings);
             trace.log("Authenticator: " + auth.getClass().getSimpleName() + ", responsible: " + isResponsible);
             if (isResponsible) {
@@ -281,17 +310,9 @@ public class UserDatabase implements AuthService {
         // the associated authentication method did not work. to support "moving" users from one system to another,
         // we will treat this as if the user was a fresh one.
         trace.log("User known but unable to use existing authentication association. Trying all authenticators.");
-        for (Authenticator auth : authenticators) {
-            trace.log("Authenticator: " + auth.getClass().getSimpleName());
-            UserInfo newU = auth.getInitialInfo(user, pw.toCharArray(), settings, trace);
+        for (Authenticator auth : auths) {
+            UserInfo newU = internalInitialQuery(auth, u, user, pw, settings, trace);
             if (newU != null) {
-                // apply permissions from existing user to keep them intact.
-                newU.permissions = u.permissions;
-                newU.inactive = u.inactive;
-
-                newU.lastActiveLogin = System.currentTimeMillis();
-                internalUpdate(user, newU);
-                logSuccess(trace, newU);
                 return newU;
             }
         }
@@ -300,9 +321,34 @@ public class UserDatabase implements AuthService {
         return null;
     }
 
+    private UserInfo internalInitialQuery(Authenticator auth, UserInfo existing, String user, String pw,
+            AuthenticationSettingsDto settings, AuthTrace trace) {
+        trace.log("Authenticator: " + auth.getClass().getSimpleName());
+        UserInfo newU = auth.getInitialInfo(user, pw.toCharArray(), settings, trace);
+        if (newU != null) {
+            if (existing != null) {
+                // apply permissions from existing user to keep them intact.
+                newU.permissions = existing.permissions;
+                newU.inactive = existing.inactive;
+            }
+
+            newU.lastActiveLogin = System.currentTimeMillis();
+            internalUpdate(user, newU);
+            logSuccess(trace, newU);
+            return newU;
+        }
+
+        return null;
+    }
+
     public boolean isAuthenticationValid(UserInfo info) {
         AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
         for (Authenticator auth : authenticators) {
+            if (auth.isResponsible(info, settings) && auth.isAuthenticationValid(info, settings)) {
+                return true;
+            }
+        }
+        for (Authenticator auth : specialAuths.values()) {
             if (auth.isResponsible(info, settings) && auth.isAuthenticationValid(info, settings)) {
                 return true;
             }

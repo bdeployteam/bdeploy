@@ -15,7 +15,9 @@ import javax.net.ssl.TrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -109,6 +111,29 @@ public class LocalLoginManager {
 
             write(data);
         }
+    }
+
+    public void loginWithService(String serverName, RemoteService service) {
+        LocalLoginData data = read();
+
+        if (data.servers.containsKey(serverName)) {
+            throw new IllegalStateException("Server with name " + serverName + " already exists.");
+        }
+
+        LocalLoginServer s = new LocalLoginServer();
+        s.url = service.getUri().toString();
+        s.token = service.getAuthPack();
+        try {
+            s.user = SecurityHelper.getInstance().getSelfVerifiedPayloadFromPack(s.token, ApiAccessToken.class).getIssuedTo();
+        } catch (Exception e) {
+            log.warn("Cannot extract user from token", e);
+            s.user = "unknown";
+        }
+
+        data.servers.put(serverName, s);
+        data.current = serverName;
+
+        write(data);
     }
 
     public void remove(String serverName) {

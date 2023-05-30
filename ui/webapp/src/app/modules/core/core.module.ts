@@ -32,6 +32,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
+import { AuthModule } from '@auth0/auth0-angular';
 import { NgTerminalModule } from 'ng-terminal';
 import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
@@ -215,6 +216,7 @@ function loadAppConfig(cfgService: ConfigService) {
     CommonModule,
     DragDropModule,
     CdkScrollableModule,
+    AuthModule.forRoot(),
 
     // angular material components used in our own components.
     MatButtonModule,

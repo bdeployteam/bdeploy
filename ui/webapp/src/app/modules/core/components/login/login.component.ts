@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { AuthService } from '@auth0/auth0-angular';
+import { BehaviorSubject, Subscription, firstValueFrom, forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { SpecialAuthenticators } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
+import { ConfigService } from '../../services/config.service';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +28,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     public auth: AuthenticationService,
-    private snackBar: MatSnackBar
+    public cfg: ConfigService,
+    private auth0: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -52,7 +55,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           console.log(`User "${this.user}" successfully logged in`);
-          this.snackBar.dismiss(); // potentially open snackbar by error handler(s).
         },
         error: (error) => {
           if (error.status === 401) {
@@ -65,6 +67,36 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.loginFailed = true;
         },
       });
+  }
+
+  /* template */ loginAuth0() {
+    this.auth0.loginWithPopup().subscribe(() => {
+      forkJoin([
+        firstValueFrom(this.auth0.user$),
+        this.auth0.getAccessTokenSilently(),
+      ]).subscribe(([u, t]) => {
+        this.user = u.email;
+        this.loading$.next(true);
+        this.auth
+          .authenticate(u.email, t, SpecialAuthenticators.AUTH0)
+          .pipe(finalize(() => this.loading$.next(false)))
+          .subscribe({
+            next: () => {
+              console.log(`User "${u.email}" successfully logged in`);
+            },
+            error: (error) => {
+              if (error.status === 401) {
+                this.loginFailedMessage = `User "${this.user}" failed to authenticate`;
+              } else {
+                this.loginFailedMessage = `Error authenticating "${u.email}"`;
+              }
+
+              console.error(this.loginFailedMessage, error);
+              this.loginFailed = true;
+            },
+          });
+      });
+    });
   }
 
   /* template */ onLogoClick() {

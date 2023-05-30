@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.remote.MasterSettingsResource;
 import io.bdeploy.interfaces.settings.CustomAttributeDescriptor;
+import io.bdeploy.interfaces.settings.WebAuthSettingsDto;
 import io.bdeploy.ui.api.Minion;
 import jakarta.inject.Inject;
 
@@ -18,6 +19,18 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
     @Override
     public SettingsConfiguration getSettings() {
         return root.getSettings();
+    }
+
+    @Override
+    public WebAuthSettingsDto getAuthSettings() {
+        SettingsConfiguration settings = root.getSettings();
+
+        WebAuthSettingsDto dto = new WebAuthSettingsDto();
+
+        dto.auth0 = settings.auth.auth0Settings;
+        // TODO: add okta, etc.
+
+        return dto;
     }
 
     @Override

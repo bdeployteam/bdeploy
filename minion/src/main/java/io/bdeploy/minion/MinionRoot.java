@@ -64,6 +64,8 @@ import io.bdeploy.interfaces.manifest.SettingsManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.interfaces.settings.Auth0SettingsDto;
+import io.bdeploy.interfaces.settings.OIDCSettingsDto;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
@@ -815,7 +817,17 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     @Override
     public SettingsConfiguration getSettings() {
-        return SettingsManifest.read(hive, getEncryptionKey(), true);
+        SettingsConfiguration config = SettingsManifest.read(hive, getEncryptionKey(), true);
+
+        if (config.auth.oidcSettings == null) {
+            config.auth.oidcSettings = new OIDCSettingsDto();
+        }
+
+        if (config.auth.auth0Settings == null) {
+            config.auth.auth0Settings = new Auth0SettingsDto();
+        }
+
+        return config;
     }
 
     @Override

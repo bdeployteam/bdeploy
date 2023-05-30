@@ -81,6 +81,14 @@
           >
           <app-oidc-tab #oidc></app-oidc-tab>
         </mat-tab>
+        <mat-tab #auth0Tab class="flex flex-col">
+          <ng-template mat-tab-label
+            ><div class="flex justify-start items-center gap-1">
+              <mat-icon svgIcon="auth0"></mat-icon>Auth0
+            </div></ng-template
+          >
+          <app-auth0-tab #auth0></app-auth0-tab>
+        </mat-tab>
         <mat-tab #ldapTab class="flex flex-col">
           <ng-template mat-tab-label
             ><div class="flex justify-start items-center gap-1">

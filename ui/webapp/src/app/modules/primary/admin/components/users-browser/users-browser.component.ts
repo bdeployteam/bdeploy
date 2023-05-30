@@ -100,6 +100,8 @@ export class UsersBrowserComponent {
         return dto ? dto.description : 'All configured Servers';
       } else if (userInfo.externalSystem === 'OIDC') {
         return 'OpenID Connect';
+      } else if (userInfo.externalSystem === 'AUTH0') {
+        return 'OpenID Connect (Auth0)';
       } else {
         return userInfo.externalTag; // should not happen
       }

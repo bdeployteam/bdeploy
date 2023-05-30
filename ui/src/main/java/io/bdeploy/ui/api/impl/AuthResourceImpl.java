@@ -6,6 +6,7 @@ import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
+import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthResource;
 import io.bdeploy.ui.api.AuthService;
@@ -38,8 +39,8 @@ public class AuthResourceImpl implements AuthResource {
     private ResourceContext rc;
 
     @Override
-    public Response authenticate(CredentialsApi credentials) {
-        String token = doAuthenticate(credentials, false);
+    public Response authenticate(CredentialsApi credentials, SpecialAuthenticators auth) {
+        String token = doAuthenticate(credentials, false, auth);
         // cookie not set to 'secure' to allow sending during development.
         // cookie header set manually, as the NewCookie API does not support SameSite policies.
         return Response.ok().header("Set-Cookie", "st=" + token + ";Version=1;Path=/;Max-Age=365;SameSite=Strict").entity(token)
@@ -52,8 +53,8 @@ public class AuthResourceImpl implements AuthResource {
         return Response.ok().entity(tokenPack).build();
     }
 
-    private String doAuthenticate(CredentialsApi cred, boolean pack) {
-        UserInfo info = auth.authenticate(cred.user, cred.password);
+    private String doAuthenticate(CredentialsApi cred, boolean pack, SpecialAuthenticators... auths) {
+        UserInfo info = auth.authenticate(cred.user, cred.password, auths);
         if (info != null) {
             return minion.createToken(cred.user, info.getGlobalPermissions(), pack);
         } else {

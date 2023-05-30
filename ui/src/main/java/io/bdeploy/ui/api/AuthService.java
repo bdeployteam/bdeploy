@@ -8,15 +8,17 @@ import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
+import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 
 public interface AuthService {
 
     /**
      * @param user the user to verify
      * @param pw the password to verify
+     * @param authenticator optional specific authenticator(s) to use.
      * @return the {@link UserInfo} for this user if authenticated, <code>null</code> otherwise.
      */
-    public UserInfo authenticate(String user, String pw);
+    public UserInfo authenticate(String user, String pw, SpecialAuthenticators... authenticator);
 
     /**
      * @param user the user to trace

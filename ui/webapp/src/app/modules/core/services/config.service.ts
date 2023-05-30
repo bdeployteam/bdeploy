@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, Injector, NgZone } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { AuthClientConfig } from '@auth0/auth0-angular';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { catchError, delay, retryWhen, tap } from 'rxjs/operators';
@@ -13,6 +14,7 @@ import {
   MinionMode,
   PluginInfoDto,
   Version,
+  WebAuthSettingsDto,
 } from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import {
@@ -36,6 +38,7 @@ export interface AppConfig {
 })
 export class ConfigService {
   public config: AppConfig;
+  public webAuthCfg: WebAuthSettingsDto;
 
   private checkInterval;
   private isUnreachable = false;
@@ -56,6 +59,8 @@ export class ConfigService {
     private themes: ThemeService /* dummy: required to bootstrap theming early! */,
     private http: HttpClient,
     private overlay: Overlay,
+    private auth0: AuthClientConfig,
+    private injector: Injector,
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer,
     ngZone: NgZone,
@@ -68,6 +73,7 @@ export class ConfigService {
     iconRegistry.addSvgIcon('start-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg'));
     iconRegistry.addSvgIcon('stop-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
     iconRegistry.addSvgIcon('sync-all', sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg'));
+    iconRegistry.addSvgIcon('auth0', sanitizer.bypassSecurityTrustResourceUrl('assets/auth0.svg'));
 
     iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
     iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
@@ -105,7 +111,29 @@ export class ConfigService {
           this.isCentral$.next(this.config.mode === MinionMode.CENTRAL);
           this.isManaged$.next(this.config.mode === MinionMode.MANAGED);
           this.isStandalone$.next(this.config.mode === MinionMode.STANDALONE);
-          resolve(this.config);
+
+          this.http
+            .get<WebAuthSettingsDto>(
+              this.config.api + '/master/settings/web-auth'
+            )
+            .subscribe((cfg) => {
+              this.webAuthCfg = cfg;
+
+              // auth0 config.
+              if (cfg?.auth0?.enabled) {
+                this.auth0.set({
+                  clientId: cfg.auth0.clientId,
+                  domain: cfg.auth0.domain,
+                });
+              } else {
+                // avoid problems (crash) in auth0 servive.
+                this.auth0.set({
+                  clientId: '',
+                  domain: '',
+                });
+              }
+              resolve(this.config);
+            });
         },
         error: (err) => {
           console.error('Cannot load configuration', err);

@@ -368,6 +368,8 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.interfaces.UserPermissionUpdateDto',
         'io.bdeploy.interfaces.UserChangePasswordDto',
         'io.bdeploy.interfaces.plugin.PluginInfoDto',
+        'io.bdeploy.interfaces.settings.WebAuthSettingsDto',
+        'io.bdeploy.interfaces.settings.SpecialAuthenticators',
         'io.bdeploy.api.remote.v1.dto.CredentialsApi',
         'io.bdeploy.jersey.ws.change.msg.ObjectChangeDto',
         'io.bdeploy.jersey.ws.change.msg.ObjectChangeInitDto',

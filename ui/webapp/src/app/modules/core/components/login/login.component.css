@@ -10,11 +10,12 @@
 }
 
 .local-login-area {
-  width: 350px;
+  min-width: 250px;
+  max-width: 350px;
 }
 
 .local-logo-area {
-  min-width: 250px;
+  min-width: 200px;
 }
 
 .local-header {
@@ -23,6 +24,21 @@
   font-size: large;
   font-weight: bold;
   padding-bottom: 10px;
+}
+
+.local-divider {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid var(--bd-text-disabled);
+  color: var(--bd-text-disabled);
+  line-height: 0.1em;
+  margin: 10px 0 20px;
+}
+
+.local-divider span {
+  background-color: var(--bd-bg-dialog);
+  padding: 0 10px;
+  font-size: x-small;
 }
 
 .local-hinge {

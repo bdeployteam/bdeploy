@@ -5,47 +5,59 @@
         class="local-logo-area bd-glow-bg flex-auto flex flex-col justify-center items-center"
       >
         <app-bd-logo
-          [size]="256"
+          [size]="200"
           [ngClass]="logoClass"
           (click)="onLogoClick()"
         ></app-bd-logo>
       </div>
-      <div class="grow-[2] flex flex-col justify-center items-center">
-        <form
-          #loginForm="ngForm"
-          (ngSubmit)="onSubmit()"
-          class="local-login-area flex flex-col gap-2.5"
-        >
-          <div class="local-header">BDeploy Login</div>
-          <app-bd-form-input
-            [(ngModel)]="user"
-            name="user"
-            label="Username"
-            required
-          ></app-bd-form-input>
-          <app-bd-form-input
-            [(ngModel)]="pass"
-            name="pass"
-            label="Password"
-            type="password"
-            [passwordShowable]="true"
-            required
-          ></app-bd-form-input>
-          <div class="flex justify-start items-center">
-            <div *ngIf="loginFailed">
-              <mat-error>{{ loginFailedMessage }}</mat-error>
+      <div class="grow-[2] flex justify-center items-center">
+        <div class="local-login-area flex flex-col flex-auto gap-2.5 m-4">
+          <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
+            <div class="local-header">BDeploy Login</div>
+            <app-bd-form-input
+              [(ngModel)]="user"
+              name="user"
+              label="Username"
+              required
+            ></app-bd-form-input>
+            <app-bd-form-input
+              [(ngModel)]="pass"
+              name="pass"
+              label="Password"
+              type="password"
+              [passwordShowable]="true"
+              required
+            ></app-bd-form-input>
+            <div class="flex justify-start items-center">
+              <div *ngIf="loginFailed">
+                <mat-error>{{ loginFailedMessage }}</mat-error>
+              </div>
+              <div class="flex-auto"></div>
+              <button
+                mat-raised-button
+                [disabled]="loginForm.invalid"
+                type="submit"
+                color="accent"
+              >
+                Login
+              </button>
             </div>
-            <div class="flex-auto"></div>
-            <button
-              mat-raised-button
-              [disabled]="loginForm.invalid"
-              type="submit"
-              color="accent"
-            >
-              Login
-            </button>
-          </div>
-        </form>
+          </form>
+          <ng-container *ngIf="cfg.webAuthCfg?.auth0?.enabled">
+            <div class="local-divider">
+              <span>OR</span>
+            </div>
+            <div class="flex gap-2.5">
+              <app-bd-button
+                class="flex-auto"
+                svgIcon="auth0"
+                [text]="'Login using ' + cfg.webAuthCfg.auth0.displayName"
+                [collapsed]="false"
+                (click)="loginAuth0()"
+              ></app-bd-button>
+            </div>
+          </ng-container>
+        </div>
       </div>
     </div>
   </app-bd-dialog-content>

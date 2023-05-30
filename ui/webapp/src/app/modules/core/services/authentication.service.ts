@@ -1,18 +1,27 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
+import { AuthService } from '@auth0/auth0-angular';
 import { CookieService } from 'ngx-cookie-service';
 import {
   BehaviorSubject,
-  combineLatest,
   Observable,
-  of,
   ReplaySubject,
+  combineLatest,
+  of,
 } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import {
+  catchError,
+  finalize,
+  first,
+  map,
+  skipWhile,
+  tap,
+} from 'rxjs/operators';
 import {
   ApiAccessToken,
   CredentialsApi,
   Permission,
+  SpecialAuthenticators,
   UserChangePasswordDto,
   UserInfo,
 } from '../../../models/gen.dtos';
@@ -29,7 +38,7 @@ export class AuthenticationService {
   );
 
   private userInfoSubject$: ReplaySubject<UserInfo> = new ReplaySubject(1);
-  private currentUserInfo = null; // possibly uninitialized value
+  private currentUserInfo: UserInfo = null; // possibly uninitialized value
   get firstUserInfo$(): Observable<UserInfo> {
     return this.userInfoSubject$.pipe(first());
   }
@@ -50,11 +59,16 @@ export class AuthenticationService {
     private cfg: ConfigService,
     private http: HttpClient,
     private cookies: CookieService,
-    private areas: NavAreasService
+    private areas: NavAreasService,
+    private injector: Injector
   ) {
-    this.userInfoSubject$.subscribe(
-      (userInfo) => (this.currentUserInfo = userInfo)
-    );
+    this.userInfoSubject$.subscribe((userInfo) => {
+      const wasEmpty = !this.currentUserInfo;
+      this.currentUserInfo = userInfo;
+      if (wasEmpty) {
+        this.auth0Validate();
+      }
+    });
 
     combineLatest([
       areas.groupContext$,
@@ -83,7 +97,11 @@ export class AuthenticationService {
     });
   }
 
-  authenticate(username: string, password: string): Observable<any> {
+  authenticate(
+    username: string,
+    password: string,
+    auth?: SpecialAuthenticators
+  ): Observable<any> {
     return this.http
       .post(
         this.cfg.config.api + '/auth',
@@ -91,6 +109,7 @@ export class AuthenticationService {
         {
           responseType: 'text',
           headers: suppressGlobalErrorHandling(new HttpHeaders()),
+          params: auth ? new HttpParams().set('auth', auth) : undefined,
         }
       )
       .pipe(
@@ -147,10 +166,62 @@ export class AuthenticationService {
     return tokenPayload ? tokenPayload.it : null;
   }
 
+  auth0Validate() {
+    const svc = this.injector.get(AuthService);
+    svc.isLoading$.pipe(skipWhile((l) => l)).subscribe(() => {
+      if (this.currentUserInfo.externalSystem !== 'AUTH0') {
+        return;
+      }
+      svc
+        .getAccessTokenSilently()
+        .pipe(
+          catchError((err) => {
+            console.log('auth0 expired', err);
+            this.logout();
+            return of(null);
+          })
+        )
+        .subscribe((t) => {
+          // if we got one, we want to use it on the server as well.
+          this.authenticate(
+            this.currentUserInfo.name,
+            t,
+            SpecialAuthenticators.AUTH0
+          )
+            .pipe(
+              catchError((err) => {
+                console.log('cannot update auth0 token on server', err);
+                return of(err);
+              })
+            )
+            .subscribe(() => {
+              console.log('auth0 token updated on server');
+            });
+        });
+    });
+  }
+
+  private auth0Logout() {
+    if (
+      this.cfg.webAuthCfg?.auth0?.enabled &&
+      this.currentUserInfo?.externalSystem === 'AUTH0'
+    ) {
+      return this.injector.get(AuthService).logout();
+    }
+    return of(null);
+  }
+
   logout(): void {
     this.tokenSubject.next(null);
     this.cookies.delete('st', '/');
-    window.location.reload();
+
+    this.auth0Logout()
+      .pipe(
+        finalize(() => {
+          window.location.reload();
+        })
+      )
+      .subscribe();
   }
 
   getRecentInstanceGroups(): Observable<string[]> {
