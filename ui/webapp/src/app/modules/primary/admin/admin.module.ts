@@ -27,6 +27,7 @@ import { LdapCheckActionComponent } from './components/settings-general/ldap-tab
 import { LdapEditActionComponent } from './components/settings-general/ldap-tab/ldap-edit-action/ldap-edit-action.component';
 import { LdapTabComponent } from './components/settings-general/ldap-tab/ldap-tab.component';
 import { OidcTabComponent } from './components/settings-general/oidc-tab/oidc-tab.component';
+import { OktaTabComponent } from './components/settings-general/okta-tab/okta-tab.component';
 import { PluginDeleteActionComponent } from './components/settings-general/plugins-tab/plugin-delete-action/plugin-delete-action.component';
 import { PluginLoadActionComponent } from './components/settings-general/plugins-tab/plugin-load-action/plugin-load-action.component';
 import { PluginsTabComponent } from './components/settings-general/plugins-tab/plugins-tab.component';
@@ -57,6 +58,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     NodesComponent,
     OidcTabComponent,
     Auth0TabComponent,
+    OktaTabComponent,
   ],
   imports: [
     CommonModule,

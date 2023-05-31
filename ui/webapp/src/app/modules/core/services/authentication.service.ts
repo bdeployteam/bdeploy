@@ -211,17 +211,15 @@ export class AuthenticationService {
     return of(null);
   }
 
-  logout(): void {
+  logout(): Observable<void> {
     this.tokenSubject.next(null);
     this.cookies.delete('st', '/');
 
-    this.auth0Logout()
-      .pipe(
-        finalize(() => {
-          window.location.reload();
-        })
-      )
-      .subscribe();
+    return this.auth0Logout().pipe(
+      finalize(() => {
+        window.location.reload();
+      })
+    );
   }
 
   getRecentInstanceGroups(): Observable<string[]> {

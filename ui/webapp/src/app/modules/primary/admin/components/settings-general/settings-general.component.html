@@ -89,6 +89,14 @@
           >
           <app-auth0-tab #auth0></app-auth0-tab>
         </mat-tab>
+        <mat-tab #oktaTab class="flex flex-col">
+          <ng-template mat-tab-label
+            ><div class="flex justify-start items-center gap-1">
+              <mat-icon svgIcon="okta"></mat-icon>Okta
+            </div></ng-template
+          >
+          <app-okta-tab #okta></app-okta-tab>
+        </mat-tab>
         <mat-tab #ldapTab class="flex flex-col">
           <ng-template mat-tab-label
             ><div class="flex justify-start items-center gap-1">

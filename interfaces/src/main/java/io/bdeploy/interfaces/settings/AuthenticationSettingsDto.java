@@ -9,5 +9,6 @@ public class AuthenticationSettingsDto {
     public List<LDAPSettingsDto> ldapSettings = new ArrayList<>();
     public OIDCSettingsDto oidcSettings = new OIDCSettingsDto();
     public Auth0SettingsDto auth0Settings = new Auth0SettingsDto();
+    public OktaSettingsDto oktaSettings = new OktaSettingsDto();
 
 }

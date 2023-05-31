@@ -43,11 +43,14 @@
               </button>
             </div>
           </form>
-          <ng-container *ngIf="cfg.webAuthCfg?.auth0?.enabled">
+          <div
+            class="flex flex-col gap-2.5"
+            *ngIf="cfg.webAuthCfg?.auth0?.enabled || cfg.webAuthCfg?.okta?.enabled"
+          >
             <div class="local-divider">
               <span>OR</span>
             </div>
-            <div class="flex gap-2.5">
+            <ng-container *ngIf="cfg.webAuthCfg?.auth0?.enabled">
               <app-bd-button
                 class="flex-auto"
                 svgIcon="auth0"
@@ -55,8 +58,17 @@
                 [collapsed]="false"
                 (click)="loginAuth0()"
               ></app-bd-button>
-            </div>
-          </ng-container>
+            </ng-container>
+            <ng-container *ngIf="cfg.webAuthCfg?.auth0?.enabled">
+              <app-bd-button
+                class="flex-auto"
+                svgIcon="okta"
+                [text]="'Login using ' + cfg.webAuthCfg.okta.displayName"
+                [collapsed]="false"
+                (click)="loginOkta()"
+              ></app-bd-button>
+            </ng-container>
+          </div>
         </div>
       </div>
     </div>

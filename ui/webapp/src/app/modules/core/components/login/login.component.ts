@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import OktaAuth, { OktaAuthOptions } from '@okta/okta-auth-js';
 import { BehaviorSubject, Subscription, firstValueFrom, forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { SpecialAuthenticators } from 'src/app/models/gen.dtos';
@@ -29,7 +31,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private router: Router,
     public auth: AuthenticationService,
     public cfg: ConfigService,
-    private auth0: AuthService
+    private auth0: AuthService,
+    private snackbar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -41,6 +44,9 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.router.navigateByUrl(returnUrl);
       }
     });
+
+    // there might be snackbars open if being logged out due to insufficient permissions.
+    this.snackbar.dismiss();
   }
 
   ngOnDestroy(): void {
@@ -70,15 +76,64 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /* template */ loginAuth0() {
-    this.auth0.loginWithPopup().subscribe(() => {
-      forkJoin([
-        firstValueFrom(this.auth0.user$),
-        this.auth0.getAccessTokenSilently(),
-      ]).subscribe(([u, t]) => {
+    this.loading$.next(true);
+    this.auth0
+      .loginWithPopup()
+      .pipe(finalize(() => this.loading$.next(false)))
+      .subscribe(() => {
+        forkJoin([
+          firstValueFrom(this.auth0.user$),
+          this.auth0.getAccessTokenSilently(),
+        ]).subscribe(([u, t]) => {
+          this.user = u.email;
+          this.loading$.next(true);
+          this.auth
+            .authenticate(u.email, t, SpecialAuthenticators.AUTH0)
+            .pipe(finalize(() => this.loading$.next(false)))
+            .subscribe({
+              next: () => {
+                console.log(`User "${u.email}" successfully logged in`);
+              },
+              error: (error) => {
+                if (error.status === 401) {
+                  this.loginFailedMessage = `User "${u.email}" failed to authenticate`;
+                } else {
+                  this.loginFailedMessage = `Error authenticating "${u.email}"`;
+                }
+
+                console.error(this.loginFailedMessage, error);
+                this.loginFailed = true;
+              },
+            });
+        });
+      });
+  }
+
+  /* template */ loginOkta() {
+    const config: OktaAuthOptions = {
+      issuer: `https://${this.cfg.webAuthCfg.okta.domain}/`,
+      clientId: this.cfg.webAuthCfg.okta.clientId,
+    };
+
+    const client = new OktaAuth(config);
+    this.loading$.next(true);
+    client.token
+      .getWithPopup({ popupTitle: 'Login using Okta' })
+      .then(async (t) => {
+        console.log(t);
+        const u = await client.token.getUserInfo(
+          t.tokens.accessToken,
+          t.tokens.idToken
+        );
+
         this.user = u.email;
         this.loading$.next(true);
         this.auth
-          .authenticate(u.email, t, SpecialAuthenticators.AUTH0)
+          .authenticate(
+            u.email,
+            JSON.stringify(t.tokens.accessToken),
+            SpecialAuthenticators.OKTA
+          )
           .pipe(finalize(() => this.loading$.next(false)))
           .subscribe({
             next: () => {
@@ -86,7 +141,7 @@ export class LoginComponent implements OnInit, OnDestroy {
             },
             error: (error) => {
               if (error.status === 401) {
-                this.loginFailedMessage = `User "${this.user}" failed to authenticate`;
+                this.loginFailedMessage = `User "${u.email}" failed to authenticate`;
               } else {
                 this.loginFailedMessage = `Error authenticating "${u.email}"`;
               }
@@ -95,8 +150,13 @@ export class LoginComponent implements OnInit, OnDestroy {
               this.loginFailed = true;
             },
           });
-      });
-    });
+      })
+      .catch((err) => {
+        console.log(err);
+        this.loginFailedMessage = `Error authenticating with Okta`;
+        this.loginFailed = true;
+      })
+      .finally(() => this.loading$.next(false));
   }
 
   /* template */ onLogoClick() {

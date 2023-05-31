@@ -50,6 +50,7 @@ import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.user.ldap.LdapAuthenticator;
 import io.bdeploy.minion.user.oauth2.Auth0TokenAuthenticator;
+import io.bdeploy.minion.user.oauth2.OktaTokenAuthenticator;
 import io.bdeploy.minion.user.oauth2.OpenIDConnectAuthenticator;
 import io.bdeploy.ui.api.AuthService;
 
@@ -76,6 +77,7 @@ public class UserDatabase implements AuthService {
     private final LdapAuthenticator ldapAuthenticator = new LdapAuthenticator();
     private final OpenIDConnectAuthenticator oidcAuthenticator = new OpenIDConnectAuthenticator();
     private final Auth0TokenAuthenticator auth0Authenticator = new Auth0TokenAuthenticator();
+    private final OktaTokenAuthenticator oktaAuthenticator = new OktaTokenAuthenticator();
 
     public UserDatabase(MinionRoot root) {
         this.root = root;
@@ -86,6 +88,7 @@ public class UserDatabase implements AuthService {
         this.authenticators.add(ldapAuthenticator);
 
         this.specialAuths.put(SpecialAuthenticators.AUTH0, auth0Authenticator);
+        this.specialAuths.put(SpecialAuthenticators.OKTA, oktaAuthenticator);
     }
 
     @Override

@@ -29,14 +29,10 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
   }
 
   logout(): void {
-    this.router.navigate(['/login']).then(
-      () => {
-        this.auth.logout();
-      },
-      (r) => {
-        console.log(`Navigation to login rejected: ${r}`);
-        this.auth.logout();
-      }
-    );
+    this.auth.logout().subscribe(() => {
+      this.router
+        .navigate(['/login'])
+        .then(() => console.log('user logged out'));
+    });
   }
 }

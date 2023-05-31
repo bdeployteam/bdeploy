@@ -66,6 +66,7 @@ import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.settings.Auth0SettingsDto;
 import io.bdeploy.interfaces.settings.OIDCSettingsDto;
+import io.bdeploy.interfaces.settings.OktaSettingsDto;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
@@ -825,6 +826,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         if (config.auth.auth0Settings == null) {
             config.auth.auth0Settings = new Auth0SettingsDto();
+        }
+
+        if (config.auth.oktaSettings == null) {
+            config.auth.oktaSettings = new OktaSettingsDto();
         }
 
         return config;

@@ -74,6 +74,7 @@ export class ConfigService {
     iconRegistry.addSvgIcon('stop-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
     iconRegistry.addSvgIcon('sync-all', sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg'));
     iconRegistry.addSvgIcon('auth0', sanitizer.bypassSecurityTrustResourceUrl('assets/auth0.svg'));
+    iconRegistry.addSvgIcon('okta', sanitizer.bypassSecurityTrustResourceUrl('assets/okta.svg'));
 
     iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
     iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
@@ -132,6 +133,7 @@ export class ConfigService {
                   domain: '',
                 });
               }
+
               resolve(this.config);
             });
         },

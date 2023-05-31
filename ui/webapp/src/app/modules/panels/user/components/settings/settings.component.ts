@@ -34,10 +34,10 @@ export class SettingsComponent implements OnInit {
   }
 
   /* template */ logout(): void {
-    this.router.navigate(['/login']).then((result) => {
-      if (result) {
-        this.authService.logout();
-      }
+    this.authService.logout().subscribe(() => {
+      this.router.navigate(['/login']).then(() => {
+        console.log('user logged out');
+      });
     });
   }
 }

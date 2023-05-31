@@ -3,7 +3,12 @@ import { Sort } from '@angular/material/sort';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
-import { LDAPSettingsDto, Permission, UserInfo } from 'src/app/models/gen.dtos';
+import {
+  LDAPSettingsDto,
+  Permission,
+  SpecialAuthenticators,
+  UserInfo,
+} from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
@@ -100,8 +105,10 @@ export class UsersBrowserComponent {
         return dto ? dto.description : 'All configured Servers';
       } else if (userInfo.externalSystem === 'OIDC') {
         return 'OpenID Connect';
-      } else if (userInfo.externalSystem === 'AUTH0') {
-        return 'OpenID Connect (Auth0)';
+      } else if (userInfo.externalSystem === SpecialAuthenticators.AUTH0) {
+        return 'Auth0';
+      } else if (userInfo.externalSystem === SpecialAuthenticators.OKTA) {
+        return 'Okta';
       } else {
         return userInfo.externalTag; // should not happen
       }

@@ -24,6 +24,7 @@
     "@ngx-loading-bar/core": "^6.0.2",
     "@ngx-loading-bar/http-client": "^6.0.2",
     "@ngx-loading-bar/router": "^6.0.2",
+    "@okta/okta-auth-js": "^7.3.0",
     "@swimlane/ngx-charts": "^20.0.1",
     "@types/pako": "^2.0.0",
     "@zip.js/zip.js": "^2.6.75",

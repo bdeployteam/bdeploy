@@ -28,7 +28,7 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
         WebAuthSettingsDto dto = new WebAuthSettingsDto();
 
         dto.auth0 = settings.auth.auth0Settings;
-        // TODO: add okta, etc.
+        dto.okta = settings.auth.oktaSettings;
 
         return dto;
     }

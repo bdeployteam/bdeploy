@@ -6,5 +6,5 @@ package io.bdeploy.interfaces.settings;
 public class WebAuthSettingsDto {
 
     public Auth0SettingsDto auth0;
-    // TODO: add okta, etc.
+    public OktaSettingsDto okta;
 }
