@@ -237,7 +237,7 @@ public class ProductUpdateService {
             }
 
             // 3) update the value of fixed parameters - if global fetch value from an existing global parameter.
-            if (desc.isPresent() && desc.get().fixed) {
+            if (desc.isPresent() && desc.get().fixed && desc.get().defaultValue != null) {
                 val.value = desc.get().defaultValue;
             }
 
