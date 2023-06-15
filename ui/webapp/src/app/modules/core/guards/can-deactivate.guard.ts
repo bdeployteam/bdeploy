@@ -1,11 +1,6 @@
 import { Location } from '@angular/common';
 import { Injectable } from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  CanDeactivate,
-  Router,
-  RouterStateSnapshot,
-} from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -21,7 +16,7 @@ export interface CanComponentDeactivate {
   providedIn: 'root',
 })
 export class CanDeactivateGuard
-  implements CanDeactivate<CanComponentDeactivate>
+  
 {
   constructor(private location: Location, private router: Router) {}
 

@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { MinionMode } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../services/config.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ServerCentralGuard implements CanActivate {
+export class ServerCentralGuard  {
   constructor(
     private config: ConfigService,
     private snackbar: MatSnackBar,

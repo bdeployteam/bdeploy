@@ -1,6 +1,6 @@
 plugins {
     id "com.github.psxpaul.execfork" version "0.2.2"
-    id "cz.habarta.typescript-generator" version "3.1.1185"
+    id "cz.habarta.typescript-generator" version "3.2.1263"
 }
 
 def webappDir = "$projectDir/webapp"
@@ -13,7 +13,7 @@ dependencies {
         project(":bhive"),
         project(":interfaces"),
         project(":schema"),
-        'net.jsign:jsign-core:4.2'
+        'net.jsign:jsign-core:5.0'
     )
     commonTestDeps(testFixtures(project(":jersey")))
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanDeactivate, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import { BdDialogMessageAction } from '../components/bd-dialog-message/bd-dialog-message.component';
@@ -66,7 +66,7 @@ export interface DirtyableDialog {
 @Injectable({
   providedIn: 'root',
 })
-export class DirtyDialogGuard implements CanDeactivate<DirtyableDialog> {
+export class DirtyDialogGuard  {
   constructor(private areas: NavAreasService, private router: Router) {}
 
   canDeactivate(component: DirtyableDialog): Observable<boolean> {

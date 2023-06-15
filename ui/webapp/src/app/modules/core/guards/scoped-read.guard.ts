@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthenticationService } from '../services/authentication.service';
@@ -24,7 +24,7 @@ export function findParam(name: string, route: ActivatedRouteSnapshot): string {
 @Injectable({
   providedIn: 'root',
 })
-export class ScopedReadGuard implements CanActivate {
+export class ScopedReadGuard  {
   constructor(
     private authService: AuthenticationService,
     private snackbar: MatSnackBar,

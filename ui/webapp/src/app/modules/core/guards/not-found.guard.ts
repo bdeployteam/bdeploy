@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { NavAreasService } from '../services/nav-areas.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class NotFoundGuard implements CanActivate {
+export class NotFoundGuard  {
   constructor(
     private snackbar: MatSnackBar,
     private router: Router,

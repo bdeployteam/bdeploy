@@ -167,6 +167,9 @@ class PublicApiV1Test {
         Files.write(valDesc, List.of("product: product-info.yaml", "applications:",
                 " myApp: " + pathToApp.resolve(ApplicationDescriptor.FILE_NAME).toString().replace('\\', '/')));
         ProductValidationResponseApi resp = ProductValidationHelper.validate(valDesc, remote);
+        for (var i : resp.issues) {
+            System.err.println("Issue: " + i.severity + ": " + i.message);
+        }
         assertEquals(0, resp.issues.size());
 
         // try with parallel import as well, even though this does not have much impact with one application to cover the code path.

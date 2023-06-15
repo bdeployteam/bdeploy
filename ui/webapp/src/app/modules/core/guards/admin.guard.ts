@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AdminGuard implements CanActivate {
+export class AdminGuard  {
   constructor(
     private authService: AuthenticationService,
     private snackbar: MatSnackBar,
