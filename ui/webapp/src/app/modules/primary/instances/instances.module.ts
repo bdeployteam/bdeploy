@@ -9,7 +9,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { CoreModule } from '../../core/core.module';
 import { InstancesBrowserComponent } from './components/browser/browser.component';
 import { InstanceBannerHintComponent } from './components/browser/instance-banner-hint/instance-banner-hint.component';
+import { InstanceManagedServerComponent } from './components/browser/instance-managed-server/instance-managed-server.component';
 import { InstanceProductVersionComponent } from './components/browser/instance-product-version/instance-product-version.component';
+import { InstancePurposeShortComponent } from './components/browser/instance-purpose-short/instance-purpose-short.component';
 import { OverallStatusColumnComponent } from './components/browser/overall-status-column/overall-status-column.component';
 import { ConfigNodeComponent } from './components/configuration/config-node/config-node.component';
 import { ControlGroupComponent } from './components/configuration/config-node/control-group/control-group.component';
@@ -31,13 +33,13 @@ import { RatingStatusColumnComponent } from './components/rating-status-column/r
 import { StateStatusColumnComponent } from './components/state-status-column/state-status-column.component';
 import { SystemTemplateComponent } from './components/system-template/system-template.component';
 import { InstancesRoutingModule } from './instances-routing.module';
-import { InstancePurposeShortComponent } from './components/browser/instance-purpose-short/instance-purpose-short.component';
 
 @NgModule({
   declarations: [
     InstancesBrowserComponent,
     InstanceProductVersionComponent,
     InstanceBannerHintComponent,
+    InstanceManagedServerComponent,
     DashboardComponent,
     ServerNodeComponent,
     ClientNodeComponent,

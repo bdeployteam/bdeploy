@@ -11,6 +11,7 @@ import { ProductsService } from '../../products/services/products.service';
 import { ServersService } from '../../servers/services/servers.service';
 import { SystemsService } from '../../systems/services/systems.service';
 import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
+import { InstanceManagedServerComponent } from '../components/browser/instance-managed-server/instance-managed-server.component';
 import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
 import { InstancePurposeShortComponent } from '../components/browser/instance-purpose-short/instance-purpose-short.component';
 import { InstancesService } from './instances.service';
@@ -113,6 +114,7 @@ export class InstancesColumnsService {
         ? `${r.managedServer.hostName} - ${r.managedServer.description}`
         : null,
     icon: () => 'dns',
+    component: InstanceManagedServerComponent,
     showWhen: '(min-width: 2000px)',
   };
 
