@@ -17,10 +17,10 @@ import io.bdeploy.interfaces.manifest.history.runtime.MinionRuntimeHistoryDto;
 import io.bdeploy.interfaces.remote.NodeProcessResource;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
+import io.bdeploy.logging.process.RollingStreamGobbler;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
-import io.bdeploy.pcu.ProcessController;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
@@ -114,7 +114,7 @@ public class NodeProcessResourceImpl implements NodeProcessResource {
     public RemoteDirectoryEntry getOutputEntry(String instanceId, String tag, String applicationId) {
         DeploymentPathProvider dpp = new DeploymentPathProvider(root.getDeploymentDir().resolve(instanceId), tag);
         Path runtime = dpp.get(SpecialDirectory.RUNTIME);
-        Path out = runtime.resolve(applicationId).resolve(ProcessController.OUT_TXT);
+        Path out = runtime.resolve(applicationId).resolve(RollingStreamGobbler.OUT_TXT);
         File file = out.toFile();
 
         if (file.exists()) {

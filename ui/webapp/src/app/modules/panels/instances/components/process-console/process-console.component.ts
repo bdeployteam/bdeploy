@@ -1,5 +1,5 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
@@ -22,6 +22,8 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
   private followInterval;
+
+  private loadingChunk = false;
 
   private offset = 0;
 
@@ -81,8 +83,14 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
   }
 
   private nextChunk() {
+    if (this.loadingChunk) {
+      return;
+    }
+
+    this.loadingChunk = true;
     this.details.getOutputEntry().subscribe(([dir, entry]) => {
       if (!entry) {
+        this.loadingChunk = false;
         return;
       }
 
@@ -91,6 +99,7 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
       }
       this.instances
         .getContentChunk(dir, entry, this.offset, 0)
+        .pipe(finalize(() => (this.loadingChunk = false)))
         .subscribe((chunk) => {
           if (!chunk) {
             return;
