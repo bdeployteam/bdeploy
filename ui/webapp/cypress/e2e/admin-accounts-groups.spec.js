@@ -134,8 +134,8 @@ describe('Admin UI Tests (User Groups)', () => {
         .click();
     });
     cy.inMainNavFlyin('app-user-group-admin-detail', () => {
-      cy.fillFormInput('addUser', userName);
-      cy.get('button[data-cy^="Add"]').click();
+      cy.fillFormInput('addUserInput', userName);
+      cy.get('mat-icon[name="addUserButton"]').click();
       cy.waitUntilContentLoaded();
     });
     cy.screenshot('Doc_Admin_User_Groups_Test_User_Added_To_Group');

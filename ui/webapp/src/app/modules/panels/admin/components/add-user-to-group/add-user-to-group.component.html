@@ -1,16 +1,12 @@
 <div class="flex">
   <app-bd-form-input
-    name="addUser"
+    name="addUserInput"
     label="Add user to the group"
     class="flex-auto"
-    [(ngModel)]="user"
+    [(ngModel)]="userInput"
     [suggested]="suggestions"
-  ></app-bd-form-input>
-
-  <app-bd-button
-    text="Add"
-    [collapsed]="false"
-    (click)="addUserToGroup()"
-    [disabled]="!selectedUser"
-  ></app-bd-button>
+    (keydown.enter)="addUserToGroup()"
+  >
+    <mat-icon (click)="addUserToGroup()" name="addUserButton">add</mat-icon>
+  </app-bd-form-input>
 </div>

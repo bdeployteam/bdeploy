@@ -13,21 +13,21 @@ import { UserInfo } from 'src/app/models/gen.dtos';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddUserToGroupComponent {
-  @Input() group: string;
   @Input() suggestedUsers: UserInfo[];
   @Output() userSelected = new EventEmitter<UserInfo>();
 
-  /* template */ user: string;
+  /* template */ userInput: string;
 
   /* template */ public addUserToGroup(): void {
-    this.userSelected.emit(this.selectedUser);
+    const selectedUser = this.suggestedUsers.find(
+      (u) => u.name === this.userInput
+    );
+    if (!selectedUser) return;
+    this.userSelected.emit(selectedUser);
+    this.userInput = ''; // clear input
   }
 
   /* template */ get suggestions(): string[] {
     return this.suggestedUsers.map((u) => u.name);
-  }
-
-  /* template */ get selectedUser(): UserInfo {
-    return this.suggestedUsers.find((u) => u.name === this.user);
   }
 }
