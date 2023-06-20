@@ -88,7 +88,7 @@ public class CommonDirectoryEntryResourceImpl implements CommonDirectoryEntryRes
         }
         Path actual = rootDir.resolve(entry.path);
 
-        if (!actual.startsWith(rootDir)) {
+        if (!actual.normalize().startsWith(rootDir)) {
             throw new WebApplicationException("Trying to escape " + rootDir, Status.BAD_REQUEST);
         }
 

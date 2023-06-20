@@ -291,6 +291,11 @@ public class Manifest implements Serializable, Comparable<Manifest> {
             this.name = name;
             this.tag = tag;
 
+            if (name.contains("..")) {
+                throw new IllegalArgumentException(
+                        "Manifest key may not contain the '..' character sequence: " + name + " / " + tag);
+            }
+
             if (name.contains(":") || tag.contains(":")) {
                 throw new IllegalArgumentException("Manifest key may not contain the ':' character: " + name + " / " + tag);
             }

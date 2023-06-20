@@ -236,6 +236,9 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
         try {
             Path targetFile = minion.getDownloadDir().resolve(dto.tmpFilename);
+            if (!targetFile.normalize().startsWith(minion.getDownloadDir())) {
+                throw new WebApplicationException("Trying to escape download dir", Status.BAD_REQUEST);
+            }
             if (dto.isHive) {
                 doImportHive(dto, targetFile);
             } else if (dto.isProduct) {

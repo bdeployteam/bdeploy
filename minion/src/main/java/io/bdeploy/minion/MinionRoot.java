@@ -735,7 +735,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * @return whether the given {@link Path} "belongs" to the minion.
      */
     public boolean isManagedPath(Path toCheck) {
-        if (toCheck.startsWith(root)) {
+        if (toCheck.normalize().startsWith(root)) {
             return true;
         }
 

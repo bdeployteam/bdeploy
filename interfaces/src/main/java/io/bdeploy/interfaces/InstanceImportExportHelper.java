@@ -130,6 +130,7 @@ public class InstanceImportExportHelper {
         if (!Objects.equals(dto.config.configTree, cfgId)) {
             log.warn("Configuration tree has unexpected ID: {} <-> {}", dto.config.configTree, cfgId);
         }
+        validateId(id);
 
         InstanceConfiguration icfg = dto.config;
         icfg.configTree = cfgId;
@@ -152,6 +153,7 @@ public class InstanceImportExportHelper {
             for (Manifest.Key inmfKey : existing.getInstanceNodeManifests().values()) {
                 InstanceNodeManifest inmf = InstanceNodeManifest.of(target, inmfKey);
                 for (ApplicationConfiguration app : inmf.getConfiguration().applications) {
+                    validateId(app.id);
                     idPool.add(app.id);
                 }
             }
@@ -247,6 +249,16 @@ public class InstanceImportExportHelper {
         if (!icfg.product.getName().equals(existing.getConfiguration().product.getName())) {
             throw new IllegalStateException(
                     "Product switch not allowed: old=" + existing.getConfiguration().product + ", new=" + icfg.product);
+        }
+    }
+
+    /**
+     * Validates whether the given ID is valid - in this case this means it may not try
+     * to sneak in characters which could cause issues when using as path-component later.
+     */
+    private static void validateId(String id) {
+        if (id == null || id.contains("..") || id.contains("/") || id.contains("\\")) {
+            throw new IllegalStateException("Invalid ID found: " + id);
         }
     }
 
