@@ -98,6 +98,30 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
     private static final Logger log = LoggerFactory.getLogger(JerseyServer.class);
 
+    /**
+     * The enabled and supported cipher suites. This needs to be aligned with the "Intermediate compatibility"
+     * recommendation by Mozilla: https://wiki.mozilla.org/Security/Server_Side_TLS#Intermediate_compatibility_.28recommended.29
+     */
+    // @formatter:off
+    private static final String[] cipherSuites = {
+            "TLS_AES_128_GCM_SHA256",
+            "TLS_AES_256_GCM_SHA384",
+            "TLS_CHACHA20_POLY1305_SHA256",
+
+            "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+
+            "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+
+            "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+    };
+    // @formatter:on
+
     public static final String START_TIME = "StartTime";
     public static final String BROADCAST_EXECUTOR = "BcExecutor";
     public static final String FILE_SYSTEM_MIN_SPACE = "FileSystemMinSpace";
@@ -267,6 +291,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             SSLEngineConfigurator sslEngine = new SSLEngineConfigurator(ctx, false, false, false);
             sslEngine.setEnabledProtocols(new String[] { "TLSv1.2", "TLSv1.3" });
+            sslEngine.setEnabledCipherSuites(cipherSuites);
 
             // default features
             registerDefaultResources(rc);
