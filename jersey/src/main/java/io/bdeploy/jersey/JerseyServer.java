@@ -327,6 +327,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
                 // enable WebSockets on the listener
                 listener.registerAddOn(wsao);
+
+                // register content security policy (CSP) filter.
+                listener.registerAddOn(new JerseyCspFilter.JerseyCspAddOn());
             }
 
             // register all WebSocketApplications on their path.
