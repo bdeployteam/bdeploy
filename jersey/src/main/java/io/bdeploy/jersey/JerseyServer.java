@@ -119,6 +119,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
             "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
             "TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+
+            "TLS_EMPTY_RENEGOTIATION_INFO_SCSV",
     };
     // @formatter:on
 
