@@ -2,6 +2,7 @@ package io.bdeploy.ui.api.impl;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
@@ -9,6 +10,7 @@ import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.SpecialAuthenticators;
+import io.bdeploy.jersey.SessionManager;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthResource;
@@ -20,6 +22,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.NewCookie.SameSite;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
@@ -44,13 +49,13 @@ public class AuthResourceImpl implements AuthResource {
     @Context
     private ResourceContext rc;
 
+    @Inject
+    private SessionManager sm;
+
     @Override
-    public Response authenticate(CredentialsApi credentials, SpecialAuthenticators auth) {
-        String token = doAuthenticate(credentials, false, auth);
-        // cookie not set to 'secure' to allow sending during development.
-        // cookie header set manually, as the NewCookie API does not support SameSite policies.
-        return Response.ok().header("Set-Cookie", "st=" + token + ";Version=1;Path=/;Max-Age=365;SameSite=Strict").entity(token)
-                .build();
+    public Response authenticate(CredentialsApi credentials) {
+        String token = doAuthenticate(credentials, false);
+        return Response.ok().entity(token).build();
     }
 
     @Override
@@ -68,6 +73,37 @@ public class AuthResourceImpl implements AuthResource {
         } else {
             throw new WebApplicationException("Invalid credentials", Status.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public Response authenticateSession(CredentialsApi credentials, SpecialAuthenticators auth) {
+        String token = doAuthenticate(credentials, false, auth);
+        String sess = sm.createSession(token);
+        return Response.ok()
+                .cookie(buildSessionCookie(
+                        TimeUnit.SECONDS.convert(minion.getSessionConfiguration().sessionTimeout, TimeUnit.HOURS), sess))
+                .entity(token).build();
+    }
+
+    @Override
+    public String getSessionToken(Cookie session) {
+        if (session == null) {
+            throw new WebApplicationException(Status.UNAUTHORIZED);
+        }
+        return sm.getSessionToken(session.getValue());
+    }
+
+    @Override
+    public Response logout(Cookie session) {
+        if (session != null) {
+            sm.removeSession(session.getValue());
+        }
+        return Response.ok().cookie(buildSessionCookie(0, "")).build();
+    }
+
+    private NewCookie buildSessionCookie(long validitySeconds, String token) {
+        return new NewCookie.Builder(SessionManager.SESSION_COOKIE).value(token).version(1).path("/")
+                .maxAge((int) validitySeconds).sameSite(SameSite.STRICT).httpOnly(true).secure(true).build();
     }
 
     private void trimUserGroups(UserInfo info) {

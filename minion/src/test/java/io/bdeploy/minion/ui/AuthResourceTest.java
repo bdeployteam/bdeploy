@@ -20,10 +20,10 @@ class AuthResourceTest {
 
     @Test
     void testAuth(AuthResource auth, TestMinion backend) throws GeneralSecurityException {
-        Response notAuth = auth.authenticate(new CredentialsApi("some", "value"), null);
+        Response notAuth = auth.authenticate(new CredentialsApi("some", "value"));
         assertEquals(401, notAuth.getStatus());
 
-        Response resp = auth.authenticate(new CredentialsApi("Test", "TheTestPassword"), null);
+        Response resp = auth.authenticate(new CredentialsApi("Test", "TheTestPassword"));
         String token = resp.readEntity(String.class);
         ApiAccessToken decoded = SecurityHelper.getInstance().getVerifiedPayload(token, ApiAccessToken.class,
                 backend.getKeyStore());

@@ -1,7 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, Injector } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { CookieService } from 'ngx-cookie-service';
 import {
   BehaviorSubject,
   Observable,
@@ -15,6 +14,7 @@ import {
   first,
   map,
   skipWhile,
+  switchMap,
   tap,
 } from 'rxjs/operators';
 import {
@@ -33,9 +33,7 @@ import { NavAreasService } from './nav-areas.service';
   providedIn: 'root',
 })
 export class AuthenticationService {
-  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(
-    this.cookies.check('st') ? this.cookies.get('st') : null
-  );
+  private tokenSubject: BehaviorSubject<string> = new BehaviorSubject(null);
 
   private userInfoSubject$: ReplaySubject<UserInfo> = new ReplaySubject(1);
   private currentUserInfo: UserInfo = null; // possibly uninitialized value
@@ -58,10 +56,13 @@ export class AuthenticationService {
   constructor(
     private cfg: ConfigService,
     private http: HttpClient,
-    private cookies: CookieService,
     private areas: NavAreasService,
     private injector: Injector
   ) {
+    this.cfg.initialSession.subscribe((v) => {
+      this.tokenSubject.next(v);
+    });
+
     this.userInfoSubject$.subscribe((userInfo) => {
       const wasEmpty = !this.currentUserInfo;
       this.currentUserInfo = userInfo;
@@ -104,7 +105,7 @@ export class AuthenticationService {
   ): Observable<any> {
     return this.http
       .post(
-        this.cfg.config.api + '/auth',
+        this.cfg.config.api + '/auth/session',
         { user: username, password: password } as CredentialsApi,
         {
           responseType: 'text',
@@ -113,28 +114,26 @@ export class AuthenticationService {
         }
       )
       .pipe(
-        tap({
-          next: (result) => {
-            this.tokenSubject.next(result);
-            // this is required if the backend runs on a different server than the frontend (dev)
-            // - don't use secure, as this will fail in the development case (HTTP server only).
-            this.cookies.set('st', result, 365, '/', null, false, 'Strict');
-          },
-          error: () => {
-            this.tokenSubject.next(null);
-            this.cookies.delete('st', '/');
-          },
+        catchError((err) => {
+          this.tokenSubject.next(null);
+          throw err;
         }),
-        map(
-          () => {
-            this.http
-              .get<UserInfo>(this.cfg.config.api + '/auth/user')
-              .pipe(tap((userInfo) => this.userInfoSubject$.next(userInfo)));
-          },
-          () => {
-            this.userInfoSubject$.next(null);
-          }
-        )
+        switchMap((t) => {
+          return this.http
+            .get<UserInfo>(this.cfg.config.api + '/auth/user', {
+              headers: suppressGlobalErrorHandling(new HttpHeaders()),
+            })
+            .pipe(
+              catchError((err) => {
+                this.userInfoSubject$.next(null);
+                throw err;
+              }),
+              tap((userInfo) => {
+                this.userInfoSubject$.next(userInfo);
+                this.tokenSubject.next(t);
+              })
+            );
+        })
       );
   }
 
@@ -211,11 +210,15 @@ export class AuthenticationService {
     return of(null);
   }
 
-  logout(): Observable<void> {
+  logout(): Observable<any> {
     this.tokenSubject.next(null);
-    this.cookies.delete('st', '/');
 
-    return this.auth0Logout().pipe(
+    return combineLatest([
+      this.http.post(`${this.cfg.config.api}/auth/session/logout`, null, {
+        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      }),
+      this.auth0Logout(),
+    ]).pipe(
       finalize(() => {
         window.location.reload();
       })

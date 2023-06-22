@@ -134,7 +134,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             SecurityHelper sh = SecurityHelper.getInstance();
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
 
-            try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass)) {
+            try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass, r.getSessionConfiguration())) {
                 BHiveRegistry reg = setupServerCommon(delegate, r, srv, config);
 
                 if (r.getMode() != MinionMode.NODE) {

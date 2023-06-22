@@ -147,7 +147,6 @@ class MinionDeployTest {
         assertEquals(appId + "/" + RollingStreamGobbler.OUT_TXT, ide.path);
 
         // output may contain additional output, e.g. "demo-linux_1.0.0.1234/launch.sh: line 3: 29390 Terminated              sleep $1"
-        String expectedText = "Hello script" + System.lineSeparator();
         Pattern expectedHeader = Pattern.compile(".* | --- Starting output capture .*");
         Pattern expected = Pattern.compile(".* | Hello script");
         EntryChunk output = master.getNamedMaster("demo").getEntryContent(id.minion, ide, 0, ide.size);

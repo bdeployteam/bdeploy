@@ -68,6 +68,8 @@ import io.bdeploy.interfaces.settings.Auth0SettingsDto;
 import io.bdeploy.interfaces.settings.OIDCSettingsDto;
 import io.bdeploy.interfaces.settings.OktaSettingsDto;
 import io.bdeploy.jersey.JerseyServer;
+import io.bdeploy.jersey.JerseySessionConfiguration;
+import io.bdeploy.jersey.SessionStorage;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
@@ -93,6 +95,7 @@ import net.jsign.pe.PEFile;
 public class MinionRoot extends LockableDatabase implements Minion, AutoCloseable {
 
     private static final String STATE_FILE = "state.json";
+    private static final String SESSION_FILE = "ws.json";
 
     private static final Logger log = LoggerFactory.getLogger(MinionRoot.class);
 
@@ -174,6 +177,28 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public Auditor getAuditor() {
         return auditor;
+    }
+
+    public JerseySessionConfiguration getSessionConfiguration() {
+        var sessions = new SessionStorage() {
+
+            @Override
+            public void save(Map<String, String> data) {
+                MinionSessionState state = new MinionSessionState();
+                state.data = data;
+                storeConfig(SESSION_FILE, state);
+            }
+
+            @Override
+            public Map<String, String> load() {
+                var dto = readConfig(SESSION_FILE, MinionSessionState.class);
+                return dto.data;
+            }
+        };
+
+        var cfg = getState();
+
+        return JerseySessionConfiguration.withStorage(sessions, cfg.webSessionTimeoutHours, cfg.webSessionActiveTimeoutHours);
     }
 
     /**

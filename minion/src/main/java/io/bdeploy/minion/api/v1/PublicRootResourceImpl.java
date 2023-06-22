@@ -53,7 +53,7 @@ public class PublicRootResourceImpl implements PublicRootResource {
         if (full) {
             return auth.authenticatePacked(new CredentialsApi(user, pass));
         } else {
-            return auth.authenticate(new CredentialsApi(user, pass), null);
+            return auth.authenticate(new CredentialsApi(user, pass));
         }
     }
 
@@ -63,7 +63,7 @@ public class PublicRootResourceImpl implements PublicRootResource {
         if (full) {
             return auth.authenticatePacked(credentials);
         } else {
-            return auth.authenticate(credentials, null);
+            return auth.authenticate(credentials);
         }
     }
 

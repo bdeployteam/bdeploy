@@ -23,6 +23,7 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.jersey.JerseyServer;
+import io.bdeploy.jersey.JerseySessionConfiguration;
 import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 
@@ -93,7 +94,7 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
     }
 
     private void runServer(short port, Map<String, BHive> hives, KeyStore ks, char[] passphrase) {
-        try (JerseyServer server = new JerseyServer(port, ks, passphrase)) {
+        try (JerseyServer server = new JerseyServer(port, ks, passphrase, JerseySessionConfiguration.noSessions())) {
             BHiveRegistry reg = new BHiveRegistry(getActivityReporter(), null);
 
             for (Map.Entry<String, BHive> entry : hives.entrySet()) {

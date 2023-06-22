@@ -7,7 +7,7 @@ Cypress.Commands.add('waitUntilContentLoaded', function () {
       cy.get('ngx-loading-bar').children().should('not.exist');
       cy.get('span:contains("Loading Module...")').should('not.exist');
       cy.get('app-bd-loading-overlay[data-cy="loading"]').should('not.exist');
-      cy.get('button').find('mat-spinner').should('not.exist'); // no work-in-progress buttons
+      cy.document().its('body').find('button mat-spinner').should('not.exist'); // no work-in-progress buttons
     });
 });
 

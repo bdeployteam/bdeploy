@@ -92,6 +92,9 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Synchronizes product from managed', () => {
+    cy.visitCentral('/');
+    cy.enterGroup(groupName);
+
     cy.pressMainNavButton('Products');
 
     cy.inMainNavContent(() => {

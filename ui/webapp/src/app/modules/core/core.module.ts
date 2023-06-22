@@ -34,7 +34,6 @@ import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
 import { AuthModule } from '@auth0/auth0-angular';
 import { NgTerminalModule } from 'ng-terminal';
-import { CookieService } from 'ngx-cookie-service';
 import { GravatarModule } from 'ngx-gravatar';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
@@ -202,7 +201,6 @@ function loadAppConfig(cfgService: ConfigService) {
   ],
   providers: [
     httpInterceptorProviders,
-    CookieService,
     /* make sure that ConfigService and HistoryService are initialize always on startup */
     {
       provide: APP_INITIALIZER,

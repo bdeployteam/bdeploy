@@ -146,6 +146,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private Auditor auditor = new Slf4jAuditor();
     private final JerseyServerMonitor monitor = new JerseyServerMonitor();
     private final JerseyServerMonitoringSamplerService serverMonitoring = new JerseyServerMonitoringSamplerService(monitor);
+    private final JerseySessionManager sessionManager;
     private final Map<String, WebSocketApplication> wsApplications = new TreeMap<>();
 
     private UserValidator userValidator;
@@ -157,10 +158,11 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
      *            for SSL.
      * @param passphrase the passphrase for the keystore.
      */
-    public JerseyServer(int port, KeyStore store, char[] passphrase) {
+    public JerseyServer(int port, KeyStore store, char[] passphrase, JerseySessionConfiguration sessions) {
         this.port = port;
         this.store = store;
         this.passphrase = passphrase.clone();
+        this.sessionManager = new JerseySessionManager(sessions);
     }
 
     @Override
@@ -357,7 +359,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         config.register(MultiPartFeature.class);
 
         // unfortunately, priorities annotated on the providers are not always respected.
-        config.register(new JerseyAuthenticationProvider(store, userValidator), Priorities.AUTHENTICATION);
+        config.register(new JerseyAuthenticationProvider(store, userValidator, sessionManager), Priorities.AUTHENTICATION);
         config.register(JerseyAuthenticationUnprovider.class, Priorities.AUTHENTICATION - 1);
         config.register(JerseyAuthenticationWeakenerProvider.class, Priorities.AUTHENTICATION - 2);
 
@@ -399,6 +401,10 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             }
         }
         closeableResources.clear();
+
+        // stop the session manager (and allow it to persist stuff).
+        sessionManager.close();
+
         // Shutdown the server itself
         if (server != null) {
             server.shutdownNow();
@@ -431,6 +437,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             bind(startTime).named(START_TIME).to(Instant.class);
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
             bind(serverMonitoring).to(JerseyServerMonitoringSamplerService.class);
+            bind(sessionManager).to(SessionManager.class);
 
             // need to lazily access the auditor in case it is changed later.
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);

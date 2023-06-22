@@ -99,7 +99,7 @@ public interface AuthAdminResource {
     public void updateUserGroup(UserGroupInfo info);
 
     /**
-     * @param group the id of the user group to delete
+     * @param id the id of the user group to delete
      */
     @DELETE
     @Path("/user-groups/{group}")
