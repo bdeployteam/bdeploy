@@ -259,7 +259,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
 
         for (FileStatusDto update : updates) {
             Path actual = dataDir.resolve(update.file);
-            if (!actual.startsWith(dataDir)) {
+            if (!actual.normalize().startsWith(dataDir)) {
                 throw new WebApplicationException("Trying to escape " + dataDir, Status.BAD_REQUEST);
             }
 

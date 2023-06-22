@@ -59,6 +59,14 @@ class DataFilesTest {
             ir.updateDataFiles(im.getConfiguration().id, "master", Collections.singletonList(newFile));
         });
 
+        assertThrows(BadRequestException.class, () -> {
+            FileStatusDto badFile = new FileStatusDto();
+            badFile.type = FileStatusType.ADD;
+            badFile.file = "../../test.txt";
+            badFile.content = newFile.content;
+            ir.updateDataFiles(im.getConfiguration().id, "master", Collections.singletonList(badFile));
+        });
+
         List<RemoteDirectory> snapshot = ir.getProcessResource(im.getConfiguration().id).getDataDirSnapshot();
         assertEquals(1, snapshot.size());
 
@@ -76,6 +84,13 @@ class DataFilesTest {
         StringEntryChunkDto contentChunk = ir.getContentChunk(dataDir.id, dataDir.minion, dataDir.entries.get(0), 0, 4096);
         assertNotNull(contentChunk.content);
         assertEquals("Test String", contentChunk.content);
+
+        RemoteDirectory fdd = dataDir;
+        assertThrows(BadRequestException.class, () -> {
+            var entry = fdd.entries.get(0);
+            entry.path = "../../" + entry.path;
+            ir.getContentChunk(fdd.id, fdd.minion, entry, 0, 4096);
+        });
 
         FileStatusDto updateFile = new FileStatusDto();
         updateFile.type = FileStatusType.EDIT;

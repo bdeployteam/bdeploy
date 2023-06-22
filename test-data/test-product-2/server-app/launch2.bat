@@ -19,7 +19,11 @@ IF NOT "%1" == "" (
     IF "%1" == "--sleep" (
        powershell -command "sleep %2"
        SHIFT
-
+    )
+    IF "%1" == "--ping" (
+        echo "Pinging localhost endlessly"
+        ping -t localhost
+        SHIFT
     )
     IF "%1" == "--text" (
         echo "Got some text: %2"

@@ -669,7 +669,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     private void applyUpdates(List<FileStatusDto> updates, Path cfgDir) {
         for (FileStatusDto update : updates) {
             Path file = cfgDir.resolve(update.file);
-            if (!file.startsWith(cfgDir)) {
+            if (!file.normalize().startsWith(cfgDir)) {
                 throw new WebApplicationException("Update wants to write to file outside update directory", Status.BAD_REQUEST);
             }
 

@@ -3,7 +3,6 @@ package io.bdeploy.pcu;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -49,6 +48,7 @@ import io.bdeploy.interfaces.descriptor.application.HttpEndpoint.HttpEndpointTyp
 import io.bdeploy.interfaces.descriptor.application.LifenessProbeDescriptor;
 import io.bdeploy.interfaces.descriptor.application.StartupProbeDescriptor;
 import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
+import io.bdeploy.logging.process.RollingStreamGobbler;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 
@@ -71,10 +71,6 @@ import jakarta.ws.rs.core.Response;
 public class ProcessController {
 
     private final MdcLogger logger = new MdcLogger(ProcessController.class);
-
-    /** File that holds the standard out as well as standard error written by the process */
-    public static final String OUT_TXT = "out.txt";
-    private static final String OUT_TMP = "out.tmp";
 
     /** Name of the file stored on-disk. Holds information to re-attach to the process */
     private static final String JSON_FILE = "app.json";
@@ -113,6 +109,9 @@ public class ProcessController {
 
     /** The native process handle. Null if not running */
     private ProcessHandle processHandle;
+
+    /** The bridge which transfers output from the application stream to a log file */
+    private RollingStreamGobbler processLogger;
 
     /** The STDIN of process if available, null otherwise */
     private OutputStream processStdin;
@@ -453,15 +452,19 @@ public class ProcessController {
         doCancelProbeTasks();
 
         try {
-            process = launch(processConfig.start, false);
+            process = launch(processConfig.start);
             processHandle = process.toHandle();
             processStdin = process.getOutputStream();
+            processLogger = new RollingStreamGobbler(processDir, process, instanceId, processConfig.id);
             processExit = processHandle.onExit();
             startTime = processHandle.info().startInstant().orElseGet(() -> {
                 logger.log(l -> l.error("Start time of process not available, falling back to current time. PID = {}.",
                         processHandle.pid()));
                 return Instant.now();
             });
+
+            // start pumping the streams.
+            processLogger.start();
 
             // Persist the process that we just started to recover it if required
             ProcessControllerDto dto = new ProcessControllerDto();
@@ -573,6 +576,10 @@ public class ProcessController {
             // Remember handle and exit hook
             processHandle = ph.get();
             processExit = processHandle.onExit();
+
+            // use the logger to inform the user in the output file of the recovery and lost output.
+            // don't store the gobbler instance, as we cannot start pumping the streams ever again.
+            RollingStreamGobbler.logProcessRecovery(processDir, processHandle, instanceId, processConfig.id);
         } catch (Exception e) {
             PathHelper.deleteRecursiveRetry(pidFile);
             return;
@@ -612,6 +619,15 @@ public class ProcessController {
             processExit.cancel(false);
             processExit = null;
         }
+
+        // Cancel the logger, which is only set in case the process was started by us and not recovered.
+        if (processLogger != null) {
+            processLogger.close();
+            processLogger = null;
+        }
+
+        // On Windows, wait for the lock on the out.txt file to be released.
+        waitForLockRelease();
 
         // Cancel restart task and monitoring task
         doCancelMonitorTasks();
@@ -673,8 +689,8 @@ public class ProcessController {
 
         // We try for some time to rename the file. If that succeeds
         // the lock held by the process is gone.
-        File tmpFile = processDir.resolve(OUT_TMP).toFile();
-        File outFile = processDir.resolve(OUT_TXT).toFile();
+        File tmpFile = processDir.resolve(RollingStreamGobbler.OUT_TXT + ".tmp").toFile();
+        File outFile = processDir.resolve(RollingStreamGobbler.OUT_TXT).toFile();
 
         // Lock is typically held for up to 150ms, but *sometimes* a lot longer.
         int retry = 1;
@@ -852,7 +868,6 @@ public class ProcessController {
             logger.log(l -> l.info("Application remains stopped as stop was requested."));
             processState = ProcessState.STOPPED;
 
-            waitForLockRelease();
             cleanup();
             return;
         }
@@ -869,7 +884,6 @@ public class ProcessController {
                 processState = ProcessState.STOPPED;
             }
 
-            waitForLockRelease();
             cleanup();
             return;
         }
@@ -878,7 +892,6 @@ public class ProcessController {
         if (recoverAttempts > 0 && recoverCount >= recoverAttempts) {
             logger.log(l -> l.error("Application remains stopped. Tried to relaunch {} times without success.", recoverCount));
             processState = ProcessState.CRASHED_PERMANENTLY;
-            waitForLockRelease();
             cleanup();
             return;
         }
@@ -945,17 +958,13 @@ public class ProcessController {
      * @return the process handle
      * @throws IOException in case of an error starting the {@link Process}.
      */
-    private Process launch(List<String> cmd, boolean append) throws IOException {
+    private Process launch(List<String> cmd) throws IOException {
         List<String> command = replaceVariables(cmd);
         logger.log(l -> l.debug("Launching new process {}", command));
 
         ProcessBuilder b = new ProcessBuilder(command).directory(processDir.toFile());
         b.redirectErrorStream(true);
-        if (append) {
-            b.redirectOutput(Redirect.appendTo(processDir.resolve(OUT_TXT).toFile()));
-        } else {
-            b.redirectOutput(Redirect.to(processDir.resolve(OUT_TXT).toFile()));
-        }
+
         return b.start();
     }
 
@@ -1004,7 +1013,7 @@ public class ProcessController {
             logger.log(l -> l.info("Invoking configured stop command."));
             logger.log(l -> l.debug("Stop command: {}.", processConfig.stop));
 
-            Process stopProcess = launch(stopCommand, true);
+            Process stopProcess = launch(stopCommand);
 
             // Evaluate exit code of stop command
             boolean exited = stopProcess.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);

@@ -8,6 +8,7 @@ dependencies {
         project(":jersey"),
         project(":bhive"),
         project(":interfaces"),
+        project(":logging"),
     )
 
     commonTestDeps(project(":interfaces"))

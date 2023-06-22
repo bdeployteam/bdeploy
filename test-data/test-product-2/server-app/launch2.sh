@@ -12,6 +12,10 @@ while [[ $# -gt 0 ]]; do
             echo "Sleeping some (${TIMEOUT})"
             sleep ${TIMEOUT}
             ;;
+        --ping)
+            echo "Pinging localhost endlessly"
+            ping localhost
+            ;;
         --text=*)
             TEXT=${1##--text=}
             echo "Got some text: ${TEXT}"

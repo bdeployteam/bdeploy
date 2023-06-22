@@ -86,6 +86,11 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Override
     public void create(SoftwareRepositoryConfiguration config) {
+        if (config.name == null || config.name.contains("..")) {
+            // trying to escape the storage path.
+            throw new WebApplicationException("Invalid name: " + config.name, Status.BAD_REQUEST);
+        }
+
         // TODO: better storage location selection mechanism in the future.
         Path storage = registry.getLocations().iterator().next();
         Path hive = storage.resolve(config.name);

@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,10 +55,10 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.launcher.cli.LauncherCli;
 import io.bdeploy.launcher.cli.LauncherTool;
 import io.bdeploy.launcher.cli.UninstallerTool;
+import io.bdeploy.logging.process.RollingStreamGobbler;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
-import io.bdeploy.pcu.ProcessController;
 import io.bdeploy.ui.api.CleanupResource;
 import io.bdeploy.ui.api.Minion;
 
@@ -122,7 +123,8 @@ class MinionDeployTest {
         assertNotNull(details);
         assertEquals(ProcessState.RUNNING, details.status.processState);
 
-        // give the script a bit to write output
+        // give the script a bit to write output. we need a "rather long" timeout to give
+        // the log gobbler a chance to flush everything through the pipes.
         Threads.sleep(200);
 
         master.getNamedMaster("demo").stop(instanceId, List.of("app"));
@@ -142,14 +144,19 @@ class MinionDeployTest {
 
         RemoteDirectoryEntry ide = id.entries.get(0);
         assertEquals(SpecialDirectory.RUNTIME, ide.root);
-        assertEquals(appId + "/" + ProcessController.OUT_TXT, ide.path);
+        assertEquals(appId + "/" + RollingStreamGobbler.OUT_TXT, ide.path);
 
         // output may contain additional output, e.g. "demo-linux_1.0.0.1234/launch.sh: line 3: 29390 Terminated              sleep $1"
         String expectedText = "Hello script" + System.lineSeparator();
-        EntryChunk output = master.getNamedMaster("demo").getEntryContent(id.minion, ide, 0, expectedText.length());
+        Pattern expectedHeader = Pattern.compile(".* | --- Starting output capture .*");
+        Pattern expected = Pattern.compile(".* | Hello script");
+        EntryChunk output = master.getNamedMaster("demo").getEntryContent(id.minion, ide, 0, ide.size);
         assertNotNull(output);
         String content = new String(output.content, StandardCharsets.UTF_8);
-        assertEquals(expectedText, content);
+        String[] lines = content.split("\\r?\\n|\\r");
+        assertTrue(lines.length > 1);
+        assertTrue(expectedHeader.matcher(lines[0]).find());
+        assertTrue(expected.matcher(lines[1]).find());
 
         /* STEP 7: generate client .bdeploy file and feed launcher */
         ClickAndStartDescriptor cdesc = new ClickAndStartDescriptor();
