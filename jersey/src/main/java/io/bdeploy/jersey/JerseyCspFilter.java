@@ -8,6 +8,7 @@ import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.filterchain.NextAction;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.server.AddOn;
+import org.glassfish.grizzly.http.server.FileCacheFilter;
 import org.glassfish.grizzly.http.server.HttpServerFilter;
 import org.glassfish.grizzly.http.server.NetworkListener;
 
@@ -38,7 +39,9 @@ public class JerseyCspFilter extends BaseFilter {
 
             if (resp.getHttpHeader() != null && resp.getHttpHeader().getHeader(CSP_HDR) == null) {
                 resp.getHttpHeader().addHeader(CSP_HDR, String.join("; ", CSP_OPTS));
+
                 resp.getHttpHeader().addHeader("X-Frame-Options", "DENY"); // legacy browsers.
+                resp.getHttpHeader().addHeader("X-Content-Type-Options", "nosniff"); // prevent type sniffing.
             }
         }
 
@@ -50,11 +53,15 @@ public class JerseyCspFilter extends BaseFilter {
         @Override
         public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
             final int httpServerFilterIdx = builder.indexOfType(HttpServerFilter.class);
+            final int cacheFilterIdx = builder.indexOfType(FileCacheFilter.class);
 
-            // need to insert the filter before the http server, as it would otherwise never be asked to handle anything.
-            if (httpServerFilterIdx >= 0) {
-                builder.add(httpServerFilterIdx, new JerseyCspFilter());
-            }
+            final int insertIdx = Math.max(0, Math.min(httpServerFilterIdx, cacheFilterIdx));
+
+            // the filter needs to be in the correct position to always hit. this needs
+            // to be 1) before the actual http handlers, and 2) even before the handler
+            // which handles traffic out of the file cache - these requests *also* need
+            // our headers added.
+            builder.add(insertIdx, new JerseyCspFilter());
         }
 
     }
