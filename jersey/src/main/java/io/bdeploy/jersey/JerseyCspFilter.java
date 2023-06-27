@@ -7,6 +7,7 @@ import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.filterchain.NextAction;
 import org.glassfish.grizzly.http.HttpContent;
+import org.glassfish.grizzly.http.HttpContext;
 import org.glassfish.grizzly.http.server.AddOn;
 import org.glassfish.grizzly.http.server.FileCacheFilter;
 import org.glassfish.grizzly.http.server.HttpServerFilter;
@@ -36,8 +37,17 @@ public class JerseyCspFilter extends BaseFilter {
         Object msg = ctx.getMessage();
         if (msg instanceof HttpContent) {
             HttpContent resp = (HttpContent) msg;
+            HttpContext c = HttpContext.get(ctx);
 
-            if (resp.getHttpHeader() != null && resp.getHttpHeader().getHeader(CSP_HDR) == null) {
+            boolean needHdrs = resp.getHttpHeader() != null && resp.getHttpHeader().getHeader(CSP_HDR) == null;
+
+            // user interface proxy requests should not add those headers.
+            String uri = c.getRequest().getRequestURI();
+            if (uri.contains("/upx/") || uri.equals("/api/proxy")) {
+                needHdrs = false;
+            }
+
+            if (needHdrs) {
                 resp.getHttpHeader().addHeader(CSP_HDR, String.join("; ", CSP_OPTS));
 
                 resp.getHttpHeader().addHeader("X-Frame-Options", "DENY"); // legacy browsers.
