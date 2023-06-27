@@ -1,0 +1,35 @@
+<ng-template #detailsPopup>
+  <div class="flex">
+    <mat-card
+      appearance="outlined"
+      class="local-details-popup-sizing flex flex-col gap-1 p-2.5"
+    >
+      <div class="m-2">
+        <div class="grid grid-cols-[110px_auto] gap-1">
+          <strong>Name:</strong>
+          <div class="truncate">{{ record.managedServer.hostName }}</div>
+          <strong>Description:</strong>
+          <div class="truncate">{{ record.managedServer.description }}</div>
+          <strong>URI:</strong>
+          <div class="truncate">{{ record.managedServer.uri }}</div>
+          <strong>Last Sync.:</strong>
+          <div>
+            {{ record.managedServer.lastSync | date: 'dd.MM.yyyy HH:mm' }}
+          </div>
+          <div class="mt-2" *ngIf="(auth.isCurrentScopeAdmin$ | async)">
+            <a class="local-link" (click)="goToServerPage()">Configure</a>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</ng-template>
+
+<mat-icon
+  *ngIf="record.managedServer"
+  class="local-icon bd-accent-text"
+  [appBdPopup]="detailsPopup"
+  [appBdPopupDelay]="300"
+  appBdPopupTrigger="hover"
+  >dns</mat-icon
+>
