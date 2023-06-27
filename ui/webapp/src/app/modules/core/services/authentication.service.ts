@@ -219,6 +219,10 @@ export class AuthenticationService {
       }),
       this.auth0Logout(),
     ]).pipe(
+      catchError((err) => {
+        console.log('Error during logout', err);
+        return of(null); // just swallow it :)
+      }),
       finalize(() => {
         window.location.reload();
       })
