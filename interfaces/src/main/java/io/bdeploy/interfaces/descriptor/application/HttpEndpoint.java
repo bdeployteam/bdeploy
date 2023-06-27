@@ -77,6 +77,10 @@ public class HttpEndpoint {
     @JsonPropertyDescription("The password to pass using the specified authentication scheme.")
     public LinkedValueConfiguration authPass = new LinkedValueConfiguration(null);
 
+    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonPropertyDescription("The flag indicating whether endpoint is enabled. Typically this is using link expressions to tie it to existence of anther parameter, e.g. '{{V:http-port}}'")
+    public LinkedValueConfiguration enabled = new LinkedValueConfiguration("true");
+
     @JsonPropertyDescription("The type of the endpoint. Defaults to 'DEFAULT', i.e. a generic endpoint. 'UI' endpoints are presented to the user in a way similar to client applications. 'PROBE' endpoints are used internally to verify process state.")
     public HttpEndpointType type = HttpEndpointType.DEFAULT;
 
