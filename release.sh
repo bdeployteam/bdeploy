@@ -116,16 +116,15 @@ fi
 
 [[ -z "${NO_MAVEN}" ]] && ./gradlew publish -PsonatypeUser=$SONATYPE_USER -PsonatypeToken=$SONATYPE_TOKEN -Psigning.keyId=$GPG_ID -Psigning.password=$GPG_PASS -Psigning.secretKeyRingFile=$GPG_FILE "${GRADLE_ARG_ARR[@]}"
 
-git add bdeploy.version doc test-data
+git add bdeploy.version doc
 git commit -m "Release $REL_VER"
 git push https://$GH_USER:$GH_TOKEN@github.com/bdeployteam/bdeploy.git HEAD:master
 
 ./gradlew githubRelease -PgithubToken=$GH_TOKEN "${GRADLE_ARG_ARR[@]}"
 ./gradlew setVersion -PtargetVersion=$NEXT_VER "${GRADLE_ARG_ARR[@]}"
-./gradlew addTestVersion -PaddVersion=$REL_VER "${GRADLE_ARG_ARR[@]}"
 [[ -z "${NO_TESTS}" ]] && ./gradlew build releaseTest -x test -x runCypressHeadless "${GRADLE_ARG_ARR[@]}"
 
-git add bdeploy.version test-data
+git add bdeploy.version
 git commit -m "Update to $NEXT_VER"
 
 echo "Done."
