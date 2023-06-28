@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { BdDataColumn } from 'src/app/models/data';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -11,7 +10,6 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 })
 export class InstanceManagedServerComponent {
   @Input() record: InstanceDto;
-  @Input() column: BdDataColumn<InstanceDto>;
 
   constructor(
     public auth: AuthenticationService,
