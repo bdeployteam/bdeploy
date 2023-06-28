@@ -10,6 +10,7 @@ import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
+import io.bdeploy.jersey.JerseySessionConfiguration;
 
 /**
  * Represents a node.
@@ -135,4 +136,9 @@ public interface Minion {
      * @return whether the initial connection check has failed during startup.
      */
     public boolean isInitialConnectionCheckFailed();
+
+    /**
+     * @return the web session configuration.
+     */
+    public JerseySessionConfiguration getSessionConfiguration();
 }

@@ -42,6 +42,9 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
         @Help("Changes the port on which the minion hosts its services.")
         int port() default -1;
 
+        @Help("Changes the web session timeout, after which users need to re-login. Timeout is specified in hours.")
+        int sessionTimeout() default -1;
+
         @Help("The target mode of the minion.")
         MinionMode mode();
 
@@ -101,6 +104,11 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
                 }
 
                 r.modifyState(s -> s.mode = config.mode());
+            }
+            if (config.sessionTimeout() != -1) {
+                r.modifyState(s -> {
+                    s.webSessionTimeoutHours = config.sessionTimeout();
+                });
             }
         }
         return createSuccess();

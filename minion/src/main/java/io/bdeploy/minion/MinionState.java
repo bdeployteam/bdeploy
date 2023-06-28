@@ -80,4 +80,14 @@ public class MinionState {
      * The last known {@link ObjectId} of the built-in logging configuration.
      */
     public ObjectId logConfigId;
+
+    /**
+     * The timeout of web sessions in hours. Defaults to a week.
+     */
+    public Integer webSessionTimeoutHours = 24 * 7;
+
+    /**
+     * The timeout of web sessions within which a user needs to be active to have the session be kept alive.
+     */
+    public Integer webSessionActiveTimeoutHours = 24 * 1;
 }

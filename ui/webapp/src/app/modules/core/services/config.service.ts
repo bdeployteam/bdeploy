@@ -6,7 +6,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthClientConfig } from '@auth0/auth0-angular';
 import { isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest, of } from 'rxjs';
 import { catchError, delay, retryWhen, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import {
@@ -39,6 +39,7 @@ export interface AppConfig {
 export class ConfigService {
   public config: AppConfig;
   public webAuthCfg: WebAuthSettingsDto;
+  public initialSession = new Subject<string>();
 
   private checkInterval;
   private isUnreachable = false;
@@ -113,12 +114,16 @@ export class ConfigService {
           this.isManaged$.next(this.config.mode === MinionMode.MANAGED);
           this.isStandalone$.next(this.config.mode === MinionMode.STANDALONE);
 
-          this.http
-            .get<WebAuthSettingsDto>(
-              this.config.api + '/master/settings/web-auth'
-            )
-            .subscribe((cfg) => {
+          // trigger load of an existing session in case there is one on the server.
+          // finally load authentication setting.
+          const loadAuthSettings = this.http.get<WebAuthSettingsDto>(
+            this.config.api + '/master/settings/web-auth'
+          );
+
+          combineLatest([loadAuthSettings, this.loadSession()]).subscribe(
+            ([cfg, session]) => {
               this.webAuthCfg = cfg;
+              this.initialSession.next(session);
 
               // auth0 config.
               if (cfg?.auth0?.enabled) {
@@ -135,13 +140,28 @@ export class ConfigService {
               }
 
               resolve(this.config);
-            });
+            }
+          );
         },
         error: (err) => {
           console.error('Cannot load configuration', err);
         },
       });
     });
+  }
+
+  loadSession(): Observable<any> {
+    return this.http
+      .get(`${this.config.api}/auth/session`, {
+        responseType: 'text',
+        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      })
+      .pipe(
+        catchError((err) => {
+          console.log(`No existing session on the remote: ${err}`);
+          return of(null);
+        })
+      );
   }
 
   /** Check whether there is a new version running on the backend, show dialog if it is. */

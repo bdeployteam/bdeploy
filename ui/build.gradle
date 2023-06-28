@@ -52,7 +52,9 @@ ext.sharedCoverageServeLogic = { task, List<String> target ->
             executable "${projectDir}/.scripts/run.bat"
         }
 
-        args = ["npm", "run", "--", "ng", "serve", "--no-watch", "--no-live-reload"] + target
+        // we need --host in *some* network environments for unknown reason for cypress to be able
+        // to connect to the server(s).
+        args = ["npm", "run", "--", "ng", "serve", "--host", "0.0.0.0", "--no-watch", "--no-live-reload"] + target
     }
 }
 

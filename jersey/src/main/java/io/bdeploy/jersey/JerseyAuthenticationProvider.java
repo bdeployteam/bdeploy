@@ -93,10 +93,12 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private static final String WEAK_AUTH = "weak";
     private final KeyStore store;
     private final UserValidator userValidator;
+    private final JerseySessionManager sessionManager;
 
-    public JerseyAuthenticationProvider(KeyStore store, UserValidator userValidator) {
+    public JerseyAuthenticationProvider(KeyStore store, UserValidator userValidator, JerseySessionManager sessionManager) {
         this.store = store;
         this.userValidator = userValidator;
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -121,8 +123,14 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
         }
 
         // Check cookie.
-        if (authorizationHeader == null && requestContext.getCookies().containsKey("st")) {
-            authorizationHeader = AUTHENTICATION_SCHEME + " " + requestContext.getCookies().get("st").getValue();
+        if (authorizationHeader == null && requestContext.getCookies().containsKey(SessionManager.SESSION_COOKIE)) {
+            String sessionId = requestContext.getCookies().get(SessionManager.SESSION_COOKIE).getValue();
+            String token = sessionManager.getSessionToken(sessionId);
+            if (token == null) {
+                abortWithUnauthorized(requestContext);
+                return;
+            }
+            authorizationHeader = AUTHENTICATION_SCHEME + " " + token;
         }
 
         // Validate the Authorization header

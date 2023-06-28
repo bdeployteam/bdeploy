@@ -4,7 +4,7 @@ Cypress.Commands.add('login', function () {
   cy.fixture('login.json').then((user) => {
     cy.request({
       method: 'POST',
-      url: Cypress.env('backendBaseUrl') + '/auth',
+      url: Cypress.env('backendBaseUrl') + '/auth/session',
       body: { user: user.user, password: user.pass },
     });
     cy.getCookie('st').should('exist');
@@ -15,7 +15,7 @@ Cypress.Commands.add('loginCentral', function () {
   cy.fixture('login.json').then((user) => {
     cy.request({
       method: 'POST',
-      url: Cypress.env('backendBaseUrlCentral') + '/auth',
+      url: Cypress.env('backendBaseUrlCentral') + '/auth/session',
       body: { user: user.user, password: user.pass },
     });
     cy.getCookie('st').should('exist');
@@ -26,7 +26,7 @@ Cypress.Commands.add('loginManaged', function () {
   cy.fixture('login.json').then((user) => {
     cy.request({
       method: 'POST',
-      url: Cypress.env('backendBaseUrlManaged') + '/auth',
+      url: Cypress.env('backendBaseUrlManaged') + '/auth/session',
       body: { user: user.user, password: user.pass },
     });
     cy.getCookie('st').should('exist');
@@ -87,9 +87,6 @@ Cypress.Commands.add(
       cy.loginCentral();
     }
 
-    return cy.getCookie('st').then((cookie) => {
-      opts.headers = { Authorization: 'Bearer ' + cookie.value };
-      return cy.request(opts);
-    });
+    return cy.request(opts);
   }
 );

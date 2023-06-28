@@ -38,10 +38,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.tokenSubscription = this.auth.getTokenSubject().subscribe((token) => {
       if (token !== null) {
+        this.loading$.next(true);
         const ret = this.route.snapshot.queryParams['returnUrl'];
         const returnUrl = ret ? ret : '/';
 
         this.router.navigateByUrl(returnUrl);
+        this.snackbar.dismiss();
+        this.loading$.next(false);
       }
     });
 

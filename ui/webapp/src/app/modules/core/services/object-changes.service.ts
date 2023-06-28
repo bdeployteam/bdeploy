@@ -43,6 +43,9 @@ export class ObjectChangesService {
       this.getWebsocketUrl() + '/object-changes'
     );
     _socket.addEventListener('open', () => {
+      if (!this.auth.getToken()) {
+        return;
+      }
       const init: ObjectChangeInitDto = {
         token: this.auth.getToken(),
       };

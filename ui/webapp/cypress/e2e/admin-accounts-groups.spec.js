@@ -12,6 +12,8 @@ function login(cy, user, pass) {
 
   cy.get('button[type="submit"]').click();
 
+  cy.waitUntilContentLoaded();
+
   cy.inMainNavContent(() => {
     cy.contains('Welcome to BDeploy').should('exist');
   });

@@ -9,7 +9,7 @@ export default defineConfig({
   viewportWidth: 1280,
   viewportHeight: 720,
   videoCompression: 0,
-  numTestsKeptInMemory: 10,
+  numTestsKeptInMemory: 5,
   env: {
     backendBaseUrl: 'https://localhost:7707/api',
   },

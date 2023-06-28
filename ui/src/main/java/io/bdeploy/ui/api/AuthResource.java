@@ -7,12 +7,15 @@ import io.bdeploy.interfaces.UserChangePasswordDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.jersey.SessionManager;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -23,20 +26,46 @@ public interface AuthResource {
 
     /**
      * @param credentials the credentials to check
-     * @param auth a special authenticator to use or <code>null</code>.
      * @return a signed token if authentication succeeded
      */
     @POST
     @Unsecured
-    public Response authenticate(CredentialsApi credentials, @QueryParam("auth") SpecialAuthenticators auth);
+    public Response authenticate(CredentialsApi credentials);
 
     /**
-     * Same as {@link #authenticate(CredentialsApi)} but returns a authentication pack suitable for CLI and other tools.
+     * Same as {@link #authenticate(CredentialsApi)} but returns a authentication pack suitable for CLI and
+     * other tools.
      */
     @POST
     @Path("/packed")
     @Unsecured
     public Response authenticatePacked(CredentialsApi credentials);
+
+    /**
+     * Authenticates a user and begins a local web-session for that user.
+     *
+     * @param credentials the credentials to check
+     * @param auth a special authenticator to use or <code>null</code>.
+     * @return a signed token if authentication succeeded
+     */
+    @POST
+    @Path("/session")
+    @Unsecured
+    public Response authenticateSession(CredentialsApi credentials, @QueryParam("auth") SpecialAuthenticators auth);
+
+    /**
+     * @return the current session full token for the issued request.
+     */
+    @GET
+    @Path("/session")
+    public String getSessionToken(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session);
+
+    /**
+     * Terminates the current session and logs the use off.
+     */
+    @POST
+    @Path("/session/logout")
+    public Response logout(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session);
 
     /**
      * Retrieve the current user.
