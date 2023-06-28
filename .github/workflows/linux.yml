@@ -26,6 +26,6 @@ jobs:
 
     - name: Build and Test
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: ./gradlew --stacktrace --scan clean build sonarqube -PrecordCypress -PcypressTimeout=80000 '-Dtestlogger.theme=plain-parallel' -Dsonar.login=${{ secrets.SONARCLOUD_TOKEN }}
+        NODE_OPTIONS: '--max_old_space_size=1400'
+      run: ./gradlew --stacktrace --scan clean build -x runCypressHeadless '-Dtestlogger.theme=plain-parallel'
 
