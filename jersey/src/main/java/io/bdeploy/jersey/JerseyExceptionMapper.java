@@ -5,6 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import io.bdeploy.common.ActivityReporter.ActivityCancelledException;
 import io.bdeploy.common.util.ExceptionHelper;
 import jakarta.ws.rs.WebApplicationException;
@@ -14,12 +17,17 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
-public class JerseyExceptionMapper implements ExceptionMapper<RuntimeException> {
+public class JerseyExceptionMapper implements ExceptionMapper<Exception> {
 
     private static final Logger log = LoggerFactory.getLogger(JerseyExceptionMapper.class);
 
     @Override
-    public Response toResponse(RuntimeException exception) {
+    public Response toResponse(Exception exception) {
+        if (exception instanceof JsonMappingException || exception instanceof JsonParseException) {
+            log.warn("Internal JSON Mapping Exception", exception);
+            exception = new WebApplicationException("JSON processing error, see logs");
+        }
+
         if (exception instanceof WebApplicationException && (exception.getCause() == null || exception.getCause() == exception)) {
             WebApplicationException webEx = (WebApplicationException) exception;
 

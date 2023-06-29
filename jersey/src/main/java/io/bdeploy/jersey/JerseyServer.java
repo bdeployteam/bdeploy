@@ -60,6 +60,7 @@ import io.bdeploy.jersey.JerseyAuthenticationProvider.UserValidator;
 import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityResourceImpl;
 import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeServerFilter;
+import io.bdeploy.jersey.errorpages.JerseyGrizzlyErrorPageGenerator;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitor;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringResourceImpl;
@@ -308,6 +309,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             }
             monitor.setServer(server);
 
+            // register custom error page generator.
+            server.getServerConfiguration().setDefaultErrorPageGenerator(new JerseyGrizzlyErrorPageGenerator());
+
             WebSocketAddOn wsao = new WebSocketAddOn();
             for (NetworkListener listener : server.getListeners()) {
                 // we want to have unrestricted thread counts to allow ALL requests to be processed in parallel.
@@ -355,7 +359,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     public void registerDefaultResources(ResourceConfig config) {
         config.register(new ServerObjectBinder());
         config.register(JerseyObjectMapper.class);
-        config.register(JacksonFeature.class);
+        config.register(JacksonFeature.withoutExceptionMappers());
         config.register(MultiPartFeature.class);
 
         // unfortunately, priorities annotated on the providers are not always respected.

@@ -28,6 +28,9 @@ public class JerseyCustomErrorPages {
 
     private static String readErrorImage(int code) {
         try (InputStream is = JerseyCustomErrorPages.class.getResourceAsStream("errors/" + code + ".svg")) {
+            if (is == null) {
+                return null;
+            }
             return new String(StreamHelper.read(is), StandardCharsets.UTF_8);
         } catch (IOException e) {
             return null;
