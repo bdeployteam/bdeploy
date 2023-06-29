@@ -43,7 +43,7 @@ public class Auth0TokenAuthenticator implements Authenticator {
         }
 
         try {
-            var info = performRequest(user, settings.auth0Settings, user.externalTag, null);
+            var info = performRequest(settings.auth0Settings, user.externalTag, null);
             if (info == null) {
                 throw new IllegalStateException("Cannot verify login info");
             }
@@ -97,13 +97,13 @@ public class Auth0TokenAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, Auth0SettingsDto server, AuthTrace trace)
-            throws Exception {
+    private UserInfo performUserSearch(UserInfo user, char[] password, Auth0SettingsDto server, AuthTrace trace) {
         // Credentials of the user to be authenticated
-        return verifyAndUpdateSearchResult(user, String.valueOf(password), performRequest(user, server, String.valueOf(password), trace));
+        return verifyAndUpdateSearchResult(user, String.valueOf(password),
+                performRequest(server, String.valueOf(password), trace));
     }
 
-    private Auth0UserInfo performRequest(UserInfo user, Auth0SettingsDto settings, String token, AuthTrace trace) {
+    private Auth0UserInfo performRequest(Auth0SettingsDto settings, String token, AuthTrace trace) {
         try {
             var jcf = JerseyClientFactory.get(new URI("https://" + settings.domain + "/userinfo"), token);
             return jcf.getBaseTarget().request().get(Auth0UserInfo.class);

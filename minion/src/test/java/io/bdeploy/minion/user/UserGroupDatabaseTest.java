@@ -20,7 +20,7 @@ import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.TestMinion;
 
 @ExtendWith(TestMinion.class)
-public class UserGroupDatabaseTest {
+class UserGroupDatabaseTest {
 
     @Test
     void groupScopedPermission(MinionRoot root) {
@@ -44,9 +44,9 @@ public class UserGroupDatabaseTest {
         g = groups.getUserGroup(g.id); // fetch group again to refresh permissions
 
         // group has the permission
-        assertEquals(g.permissions.size(), 1);
-        assertEquals(g.permissions.stream().toList().get(0).scope, permission.scope);
-        assertEquals(g.permissions.stream().toList().get(0).permission, permission.permission);
+        assertEquals(1, g.permissions.size());
+        assertEquals(permission.scope, g.permissions.stream().toList().get(0).scope);
+        assertEquals(permission.permission, g.permissions.stream().toList().get(0).permission);
 
         // test user does not have a permission
         assertFalse(users.isAuthorized(userName, permission));

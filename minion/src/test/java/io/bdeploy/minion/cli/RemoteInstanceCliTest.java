@@ -33,7 +33,7 @@ import io.bdeploy.ui.cli.RemoteInstanceTool;
 @ExtendWith(TestMinion.class)
 @ExtendWith(TestHive.class)
 @ExtendWith(TestActivityReporter.class)
-public class RemoteInstanceCliTest {
+class RemoteInstanceCliTest {
 
     @RegisterExtension
     TestCliTool tools = new TestCliTool(new MinionServerCli());

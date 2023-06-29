@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
@@ -46,7 +47,7 @@ public class OktaTokenAuthenticator implements Authenticator {
         try {
             OktaAccessTokenInfo tokens = JacksonHelper.getDefaultJsonObjectMapper().readValue(String.valueOf(user.externalTag),
                     OktaAccessTokenInfo.class);
-            var info = performRequest(user, settings.oktaSettings, tokens, null);
+            var info = performRequest(settings.oktaSettings, tokens, null);
             if (info == null) {
                 throw new IllegalStateException("Cannot verify login info");
             }
@@ -100,14 +101,15 @@ public class OktaTokenAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, OktaSettingsDto server, AuthTrace trace) throws Exception {
+    private UserInfo performUserSearch(UserInfo user, char[] password, OktaSettingsDto server, AuthTrace trace)
+            throws JacksonException {
         // Credentials of the user to be authenticated
         OktaAccessTokenInfo info = JacksonHelper.getDefaultJsonObjectMapper().readValue(String.valueOf(password),
                 OktaAccessTokenInfo.class);
-        return verifyAndUpdateSearchResult(user, String.valueOf(password), performRequest(user, server, info, trace));
+        return verifyAndUpdateSearchResult(user, String.valueOf(password), performRequest(server, info, trace));
     }
 
-    private OktaUserInfo performRequest(UserInfo user, OktaSettingsDto settings, OktaAccessTokenInfo tokens, AuthTrace trace) {
+    private OktaUserInfo performRequest(OktaSettingsDto settings, OktaAccessTokenInfo tokens, AuthTrace trace) {
         try {
             var jcf = JerseyClientFactory.get(new URI(tokens.userinfoUrl), tokens.accessToken);
 

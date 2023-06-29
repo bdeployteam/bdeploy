@@ -160,7 +160,8 @@ public class OpenIDConnectAuthenticator implements Authenticator {
         return null;
     }
 
-    private UserInfo performUserSearch(UserInfo user, char[] password, OIDCSettingsDto server, AuthTrace trace) throws Exception {
+    private UserInfo performUserSearch(UserInfo user, char[] password, OIDCSettingsDto server, AuthTrace trace)
+            throws ParseException, IOException, URISyntaxException {
         // Credentials of the user to be authenticated
         Secret pwd = new Secret(String.valueOf(password));
         AuthorizationGrant grant = new ResourceOwnerPasswordCredentialsGrant(user.name, pwd);
@@ -169,7 +170,7 @@ public class OpenIDConnectAuthenticator implements Authenticator {
     }
 
     private OIDCTokenResponse performRequest(UserInfo user, OIDCSettingsDto server, AuthorizationGrant grant, AuthTrace trace)
-            throws URISyntaxException, ParseException, IOException {
+            throws ParseException, IOException, URISyntaxException {
         // Configured credentials which allow BDeploy to connect to the OIDC endpoint.
         ClientID clientID = new ClientID(server.client);
         Secret clientSecret = new Secret(server.secret);

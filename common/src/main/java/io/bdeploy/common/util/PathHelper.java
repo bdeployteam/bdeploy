@@ -335,9 +335,7 @@ public class PathHelper {
      * @param path the {@link Path} to delete.
      */
     public static void deleteIfExistsRetry(Path path) {
-        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> {
-            Files.deleteIfExists(path);
-        });
+        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> Files.deleteIfExists(path));
     }
 
     /**
@@ -346,9 +344,7 @@ public class PathHelper {
      * @param options options as as accepted by {@link Files#move(Path, Path, CopyOption...)}
      */
     public static void moveRetry(Path source, Path target, CopyOption... options) {
-        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> {
-            Files.move(source, target, options);
-        });
+        RetryableScope.create().withDelay(200).withMaxRetries(50).run(() -> Files.move(source, target, options));
     }
 
 }

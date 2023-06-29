@@ -86,12 +86,6 @@ public class JerseyRequestContext {
      */
     public NoThrowAutoCloseable branchThread() {
         override.set(new TreeMap<>());
-        return new NoThrowAutoCloseable() {
-
-            @Override
-            public void close() {
-                override.remove();
-            }
-        };
+        return override::remove;
     }
 }

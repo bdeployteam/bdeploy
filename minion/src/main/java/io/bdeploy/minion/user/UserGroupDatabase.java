@@ -158,7 +158,7 @@ public class UserGroupDatabase implements AuthGroupService {
         getAll().stream().filter(g -> !g.id.equalsIgnoreCase(info.id)) // exclude itself
                 .filter(g -> g.name.equalsIgnoreCase(info.name)) // find group with duplicate name
                 .findAny().ifPresent(g -> {
-                    throw new IllegalStateException(String.format("Duplicate name {} with group {} ", g.name, g.id));
+                    throw new IllegalStateException(String.format("Duplicate name %s for group %s", g.name, g.id));
                 });
 
     }

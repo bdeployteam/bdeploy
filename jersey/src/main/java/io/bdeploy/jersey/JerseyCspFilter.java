@@ -58,7 +58,7 @@ public class JerseyCspFilter extends BaseFilter {
         return ctx.getInvokeAction();
     }
 
-    final static class JerseyCspAddOn implements AddOn {
+    static final class JerseyCspAddOn implements AddOn {
 
         @Override
         public void setup(NetworkListener networkListener, FilterChainBuilder builder) {

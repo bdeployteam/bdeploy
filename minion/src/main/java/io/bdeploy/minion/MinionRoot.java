@@ -179,6 +179,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return auditor;
     }
 
+    @Override
     public JerseySessionConfiguration getSessionConfiguration() {
         var sessions = new SessionStorage() {
 
@@ -853,21 +854,21 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     @Override
     public SettingsConfiguration getSettings() {
-        SettingsConfiguration config = SettingsManifest.read(hive, getEncryptionKey(), true);
+        SettingsConfiguration s = SettingsManifest.read(hive, getEncryptionKey(), true);
 
-        if (config.auth.oidcSettings == null) {
-            config.auth.oidcSettings = new OIDCSettingsDto();
+        if (s.auth.oidcSettings == null) {
+            s.auth.oidcSettings = new OIDCSettingsDto();
         }
 
-        if (config.auth.auth0Settings == null) {
-            config.auth.auth0Settings = new Auth0SettingsDto();
+        if (s.auth.auth0Settings == null) {
+            s.auth.auth0Settings = new Auth0SettingsDto();
         }
 
-        if (config.auth.oktaSettings == null) {
-            config.auth.oktaSettings = new OktaSettingsDto();
+        if (s.auth.oktaSettings == null) {
+            s.auth.oktaSettings = new OktaSettingsDto();
         }
 
-        return config;
+        return s;
     }
 
     @Override

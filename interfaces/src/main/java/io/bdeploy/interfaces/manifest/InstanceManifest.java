@@ -271,7 +271,7 @@ public class InstanceManifest {
         }
 
         for (Manifest.Key key : idKeys) {
-            if (!hive.execute(new ManifestExistsOperation().setManifest(key))) {
+            if (!Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(key)))) {
                 // might have been deleted meanwhile.
                 continue;
             }

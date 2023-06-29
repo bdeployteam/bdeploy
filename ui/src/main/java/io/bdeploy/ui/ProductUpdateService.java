@@ -134,9 +134,8 @@ public class ProductUpdateService {
 
             if (current != null) {
                 // update parameters, add missing, add validation notice for removed parameters
-                app.start.parameters = updateParameters(instance, app, targetDesc, app.start.parameters,
-                        targetDesc.startCommand.parameters, current.get().getDescriptor().startCommand.parameters, allApps,
-                        validationIssues, resolver);
+                app.start.parameters = updateParameters(app, targetDesc, app.start.parameters, targetDesc.startCommand.parameters,
+                        current.get().getDescriptor().startCommand.parameters, allApps, validationIssues, resolver);
             }
         }
 
@@ -151,7 +150,7 @@ public class ProductUpdateService {
         if (targetDesc.stopCommand == null) {
             app.stop = null;
         } else {
-            app.stop = createCommand(instance, targetDesc.stopCommand, targetDesc, allApps, resolver);
+            app.stop = createCommand(targetDesc.stopCommand, targetDesc, allApps, resolver);
         }
     }
 
@@ -213,10 +212,9 @@ public class ProductUpdateService {
         return result;
     }
 
-    private List<ParameterConfiguration> updateParameters(InstanceConfiguration instance, ApplicationConfiguration app,
-            ApplicationDescriptor appDesc, List<ParameterConfiguration> values, List<ParameterDescriptor> descriptors,
-            List<ParameterDescriptor> oldDescriptors, Set<ApplicationConfiguration> allApps,
-            List<ApplicationValidationDto> validation, VariableResolver resolver) {
+    private List<ParameterConfiguration> updateParameters(ApplicationConfiguration app, ApplicationDescriptor appDesc,
+            List<ParameterConfiguration> values, List<ParameterDescriptor> descriptors, List<ParameterDescriptor> oldDescriptors,
+            Set<ApplicationConfiguration> allApps, List<ApplicationValidationDto> validation, VariableResolver resolver) {
 
         // 1) find parameters which have a value but are no longer in the descriptor, remove them, issue validation warning.
         Map<ParameterConfiguration, ParameterDescriptor> toReset = new HashMap<>();
@@ -327,8 +325,8 @@ public class ProductUpdateService {
         return para;
     }
 
-    private CommandConfiguration createCommand(InstanceConfiguration instance, ExecutableDescriptor desc,
-            ApplicationDescriptor appDesc, Set<ApplicationConfiguration> allApps, VariableResolver resolver) {
+    private CommandConfiguration createCommand(ExecutableDescriptor desc, ApplicationDescriptor appDesc,
+            Set<ApplicationConfiguration> allApps, VariableResolver resolver) {
         CommandConfiguration result = new CommandConfiguration();
 
         result.executable = desc.launcherPath;

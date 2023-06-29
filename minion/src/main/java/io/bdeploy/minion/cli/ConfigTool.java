@@ -106,9 +106,7 @@ public class ConfigTool extends ConfiguredCliTool<ConfigToolConfig> {
                 r.modifyState(s -> s.mode = config.mode());
             }
             if (config.sessionTimeout() != -1) {
-                r.modifyState(s -> {
-                    s.webSessionTimeoutHours = config.sessionTimeout();
-                });
+                r.modifyState(s -> s.webSessionTimeoutHours = config.sessionTimeout());
             }
         }
         return createSuccess();

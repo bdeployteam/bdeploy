@@ -158,18 +158,18 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         return result;
     }
 
-    private List<ProductValidationIssueApi> visitSingleInstanceVariable(TemplateableVariableConfiguration var,
+    private List<ProductValidationIssueApi> visitSingleInstanceVariable(TemplateableVariableConfiguration tvc,
             ProductValidationConfigDescriptor desc, TrackingTemplateOverrideResolver res) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
-        if (var.value != null) {
-            TemplateHelper.process(var.value.getPreRenderable(), res, res::canResolve);
-        } else if (var.template != null && !var.template.isBlank()) {
+        if (tvc.value != null) {
+            TemplateHelper.process(tvc.value.getPreRenderable(), res, res::canResolve);
+        } else if (tvc.template != null && !tvc.template.isBlank()) {
             // find the template and validate each variable in there recursively.
-            var tpl = desc.instanceVariableTemplates.stream().filter(t -> t.id.equals(var.template)).findFirst();
+            var tpl = desc.instanceVariableTemplates.stream().filter(t -> t.id.equals(tvc.template)).findFirst();
             if (!tpl.isPresent()) {
                 result.add(new ProductValidationIssueApi(ProductValidationSeverity.ERROR,
-                        "Cannot find instance variable template with ID " + var.template));
+                        "Cannot find instance variable template with ID " + tvc.template));
             } else {
                 for (var tplv : tpl.get().instanceVariables) {
                     result.addAll(visitSingleInstanceVariable(tplv, desc, res));
@@ -220,14 +220,13 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
 
         for (var grp : tpl.groups) {
             for (var app : grp.applications) {
-                if (controlGroupsInTemplate != null && !controlGroupsInTemplate.isEmpty()) {
-                    if (app.preferredProcessControlGroup != null
-                            && !controlGroupsInTemplate.contains(app.preferredProcessControlGroup)) {
-                        result.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
-                                "Preferred process control group '" + app.preferredProcessControlGroup + "' for application "
-                                        + (app.name == null ? ("<anonymous> (" + app.application + ")") : app.name)
-                                        + " is not available in the instance template " + tpl.name));
-                    }
+                if (controlGroupsInTemplate != null && !controlGroupsInTemplate.isEmpty()
+                        && app.preferredProcessControlGroup != null
+                        && !controlGroupsInTemplate.contains(app.preferredProcessControlGroup)) {
+                    result.add(new ProductValidationIssueApi(ProductValidationSeverity.WARNING,
+                            "Preferred process control group '" + app.preferredProcessControlGroup + "' for application "
+                                    + (app.name == null ? ("<anonymous> (" + app.application + ")") : app.name)
+                                    + " is not available in the instance template " + tpl.name));
                 }
 
                 result.addAll(validateFlatApplicationTemplate(app, descriptor));
@@ -380,8 +379,8 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     private static class SchemaValidationException extends RuntimeException {
 
         private static final long serialVersionUID = 1L;
-        final List<String> errors;
-        final Path path;
+        transient final List<String> errors;
+        transient final Path path;
 
         public SchemaValidationException(Path path, List<String> errors) {
             this.path = path;
