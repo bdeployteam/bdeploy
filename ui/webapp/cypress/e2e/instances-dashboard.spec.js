@@ -309,6 +309,9 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Tests card mode', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Toggle Card Mode');
 
@@ -319,6 +322,9 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Tests collapsed mode', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Collapsed Mode');
 
@@ -330,6 +336,9 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Tests node details', () => {
+    cy.enterInstance(groupName, instanceName);
+    cy.waitUntilContentLoaded();
+
     cy.inMainNavContent(() => {
       cy.contains('app-instance-server-node', 'master').within(() => {
         cy.get('button[data-cy="Details"]').click();
