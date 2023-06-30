@@ -311,6 +311,8 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             // register custom error page generator.
             server.getServerConfiguration().setDefaultErrorPageGenerator(new JerseyGrizzlyErrorPageGenerator());
+            server.getServerConfiguration().setHttpServerName("BDeploy");
+            server.getServerConfiguration().setHttpServerVersion(VersionHelper.getVersionAsString());
 
             WebSocketAddOn wsao = new WebSocketAddOn();
             for (NetworkListener listener : server.getListeners()) {
