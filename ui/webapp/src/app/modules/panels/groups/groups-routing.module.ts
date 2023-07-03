@@ -59,7 +59,7 @@ const GROUPS_ROUTES: Route[] = [
     data: { max: true },
   },
   {
-    path: 'endpoint-detail/:app',
+    path: 'endpoint-detail/:app/:endpoint',
     component: EndpointDetailComponent,
   },
 ];

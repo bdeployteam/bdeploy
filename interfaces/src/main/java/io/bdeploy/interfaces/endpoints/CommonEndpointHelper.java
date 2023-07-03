@@ -120,10 +120,33 @@ public class CommonEndpointHelper {
         return client.build().target(initUri(endpoint, "localhost", subPath));
     }
 
+    /**
+     * Processes and resolves all expressions on the endpoint.
+     *
+     * @param resolver the resolver to use.
+     * @param rawEndpoint the raw endpoint to process and resolve.
+     * @return the processed endpoint or null in case the endpoint cannot be enabled.
+     */
     public static HttpEndpoint processEndpoint(VariableResolver resolver, HttpEndpoint rawEndpoint) {
         HttpEndpoint processed = new HttpEndpoint();
 
         UnaryOperator<String> p = s -> TemplateHelper.process(s, resolver);
+
+        // check if the endpoint is enabled, otherwise return null.
+        try {
+            LinkedValueConfiguration enabled = process(rawEndpoint.enabled, p);
+            if (enabled == null) {
+                return null;
+            }
+
+            String pr = enabled.getPreRenderable();
+            if (pr == null || pr.isBlank() || pr.equals("false")) {
+                return null;
+            }
+        } catch (Exception e) {
+            // if we cannot process, we regard as *not* enabled.
+            return null;
+        }
 
         processed.id = rawEndpoint.id;
         processed.path = rawEndpoint.path;

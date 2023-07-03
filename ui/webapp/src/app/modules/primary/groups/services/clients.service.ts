@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, forkJoin, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
   ClientApplicationDto,
@@ -16,6 +16,7 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
+import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { GroupsService } from './groups.service';
 
 export interface ClientApp {
@@ -217,7 +218,10 @@ export class ClientsService {
       `${this.apiInstancePath(this.groups.current$.value.name)}/${
         app.instance.id
       }/uiDirect/${app.endpoint.id}/${app.endpoint.endpoint.id}`,
-      { responseType: 'text' }
+      {
+        responseType: 'text',
+        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      }
     );
   }
 }

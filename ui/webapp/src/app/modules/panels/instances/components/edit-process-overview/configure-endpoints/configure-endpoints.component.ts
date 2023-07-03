@@ -27,7 +27,10 @@ import {
   buildCompletionPrefixes,
   buildCompletions,
 } from 'src/app/modules/core/utils/completion.utils';
-import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
+import {
+  getPreRenderable,
+  getRenderPreview,
+} from 'src/app/modules/core/utils/linked-values.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
@@ -195,9 +198,14 @@ export class ConfigureEndpointsComponent
       this.instance,
       this.system
     );
-    const disabled = !enabledPreview || enabledPreview === 'false';
+    const disabled =
+      !enabledPreview ||
+      enabledPreview === 'false' ||
+      !!enabledPreview.match(/{{([^}]+)}}/g);
     const reason = disabled
-      ? `This endpoint is disabled. Enabled flag value: ${e.enabled.value}, expression: ${e.enabled.linkExpression}, preview ${enabledPreview}.`
+      ? `This endpoint is disabled due to a missing prerequisite (${getPreRenderable(
+          e.enabled
+        )}).`
       : undefined;
     this.endpointDisabledStatus.set(e, { disabled, reason });
   }

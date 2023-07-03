@@ -1309,6 +1309,12 @@ public class InstanceResourceImpl implements InstanceResource {
         list.add(new OsVariableResolver());
 
         HttpEndpoint processed = CommonEndpointHelper.processEndpoint(list, ep.get());
+        if (processed == null) {
+            throw new WebApplicationException(
+                    "Endpoint not enabled: " + endpoint + " for application " + application + " in instance " + instance,
+                    Status.PRECONDITION_FAILED);
+        }
+
         return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath.getPreRenderable());
     }
 

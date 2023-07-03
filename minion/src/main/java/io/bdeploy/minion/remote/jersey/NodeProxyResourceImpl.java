@@ -94,6 +94,10 @@ public class NodeProxyResourceImpl implements NodeProxyResource {
 
         HttpEndpoint processedEndpoint = CommonEndpointHelper.processEndpoint(list, wrapper.endpoint);
 
+        if (processedEndpoint == null) {
+            return wrap(Response.status(Status.SERVICE_UNAVAILABLE.getStatusCode(), "Endpoint not enabled").build());
+        }
+
         try {
             byte[] body = wrapper.base64body == null ? null : Base64.decodeBase64(wrapper.base64body);
             WebTarget target = CommonEndpointHelper.initClient(processedEndpoint, wrapper.subPath);

@@ -1,13 +1,14 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import {
+  Observable,
+  Subscription,
+  catchError,
   combineLatest,
   first,
   map,
-  Observable,
   of,
   skipWhile,
-  Subscription,
   switchMap,
 } from 'rxjs';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -78,9 +79,12 @@ export class ProcessUiInlineComponent implements OnDestroy {
           return;
         }
 
-        clients.getDirectUiURI(this.app).subscribe((url) => {
-          this.directUri = url;
-        });
+        clients
+          .getDirectUiURI(this.app)
+          .pipe(catchError(() => of(null)))
+          .subscribe((url) => {
+            this.directUri = url;
+          });
 
         this.contextPath$(this.app).subscribe((cp) => {
           this.rawUrl = `${cfg.config.api}/master/upx/${group.name}/${

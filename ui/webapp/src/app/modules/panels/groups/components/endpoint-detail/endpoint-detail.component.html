@@ -19,8 +19,8 @@
         [collapsed]="false"
         tooltip="left"
         [routerLink]="getRouterLink()"
-        [disabled]="!enabled"
-        [matTooltip]="openInlineDisabledReason(!enabled)"
+        [disabled]="!enabled || !app?.endpoint?.endpoint?.proxying || !rawUrl"
+        [matTooltip]="openUiEndpointDisabledReason(!enabled, !app?.endpoint?.endpoint?.proxying, !rawUrl)"
         matTooltipPosition="left"
       ></app-bd-button>
       <app-bd-button

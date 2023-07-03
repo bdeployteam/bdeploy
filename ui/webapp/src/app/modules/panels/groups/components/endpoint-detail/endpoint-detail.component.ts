@@ -56,12 +56,20 @@ export class EndpointDetailComponent implements OnDestroy {
       this.header = '';
       this.app$.next(null);
 
-      if (!route || !apps || !route.paramMap.has('app')) {
+      if (
+        !route ||
+        !apps ||
+        !route.paramMap.has('app') ||
+        !route.paramMap.has('endpoint')
+      ) {
         return;
       }
 
-      const appId = route.paramMap.get('app');
-      const app = apps.find((a) => a?.endpoint?.id === appId);
+      const app = apps.find(
+        (a) =>
+          a.endpoint?.id === route.params.app &&
+          a.endpoint.endpoint.id === route.params.endpoint
+      );
 
       if (!app) {
         return;
@@ -125,7 +133,7 @@ export class EndpointDetailComponent implements OnDestroy {
     }
     const expr = app.endpoint.endpoint.enabled;
     return this.renderPreview$(expr, app).pipe(
-      map((val) => !!val && val !== 'false'),
+      map((val) => !!val && val !== 'false' && !val.match(/{{([^}]+)}}/g)),
       catchError(() => of(false))
     );
   }
@@ -219,7 +227,7 @@ export class EndpointDetailComponent implements OnDestroy {
   }
 
   /* template */ openInlineDisabledReason(disabled: boolean): string {
-    return disabled ? 'Endpoint "enabled" configuration flag is disabled.' : '';
+    return disabled ? 'Endpoint precondition not fulfilled.' : '';
   }
 
   /* template */ openUiEndpointDisabledReason(
@@ -229,7 +237,7 @@ export class EndpointDetailComponent implements OnDestroy {
   ): string {
     let reason = '';
     if (disabled) {
-      reason += 'Endpoint "enabled" configuration flag is disabled. ';
+      reason += 'Endpoint precondition not fulfilled. ';
     }
     if (disabledProxying) {
       reason += 'Endpoint proxying is disabled. ';
@@ -246,7 +254,7 @@ export class EndpointDetailComponent implements OnDestroy {
   ): string {
     let reason = '';
     if (disabled) {
-      reason += 'Endpoint "enabled" configuration flag is disabled. ';
+      reason += 'Endpoint precondition not fulfilled. ';
     }
     if (noDirectUri) {
       reason += 'Direct URI to application not available.';
