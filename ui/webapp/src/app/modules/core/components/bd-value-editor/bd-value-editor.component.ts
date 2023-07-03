@@ -18,7 +18,7 @@ import {
 } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, debounceTime, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, debounceTime } from 'rxjs';
 import {
   ApplicationConfiguration,
   ApplicationDto,

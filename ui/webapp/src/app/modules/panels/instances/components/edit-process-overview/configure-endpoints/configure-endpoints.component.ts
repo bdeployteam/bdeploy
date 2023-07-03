@@ -7,7 +7,7 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 import {
   ApplicationConfiguration,
@@ -31,6 +31,11 @@ import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessEditService } from '../../../services/process-edit.service';
+
+interface HttpEndpointDisabledStatus {
+  disabled: boolean;
+  reason: string;
+}
 
 @Component({
   selector: 'app-configure-endpoints',
@@ -60,6 +65,10 @@ export class ConfigureEndpointsComponent
 
   /* template */ authTypeValues = Object.keys(HttpAuthenticationType);
   /* template */ authTypes: HttpAuthenticationType[] = [];
+  /* template */ endpointDisabledStatus = new Map<
+    HttpEndpoint,
+    HttpEndpointDisabledStatus
+  >();
 
   private subscription: Subscription;
 
@@ -98,6 +107,7 @@ export class ConfigureEndpointsComponent
       if (p?.endpoints?.http?.length) {
         for (let i = 0; i < p.endpoints.http.length; ++i) {
           this.onChangeAuthType(p.endpoints.http[i].authType, i);
+          this.calculateDisabledStatus(p.endpoints.http[i]);
         }
       }
     });
@@ -176,5 +186,19 @@ export class ConfigureEndpointsComponent
       }
     }
     this.authTypes[index] = HttpAuthenticationType.NONE;
+  }
+
+  private calculateDisabledStatus(e: HttpEndpoint) {
+    const enabledPreview = getRenderPreview(
+      e.enabled,
+      this.process,
+      this.instance,
+      this.system
+    );
+    const disabled = !enabledPreview || enabledPreview === 'false';
+    const reason = disabled
+      ? `This endpoint is disabled. Enabled flag value: ${e.enabled.value}, expression: ${e.enabled.linkExpression}, preview ${enabledPreview}.`
+      : undefined;
+    this.endpointDisabledStatus.set(e, { disabled, reason });
   }
 }

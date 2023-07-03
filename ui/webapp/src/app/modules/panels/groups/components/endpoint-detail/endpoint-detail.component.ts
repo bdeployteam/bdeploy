@@ -2,17 +2,20 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   BehaviorSubject,
+  Observable,
+  Subscription,
   catchError,
   combineLatest,
   first,
   map,
-  Observable,
   of,
   skipWhile,
-  Subscription,
   switchMap,
 } from 'rxjs';
-import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
+import {
+  InstanceGroupConfiguration,
+  LinkedValueConfiguration,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
@@ -33,6 +36,7 @@ export class EndpointDetailComponent implements OnDestroy {
   /* template */ header: string;
   /* template */ directUri: string;
   /* template */ rawUrl: string;
+  /* template */ enabled: boolean; // flag from config
 
   private subscription: Subscription;
 
@@ -78,6 +82,12 @@ export class EndpointDetailComponent implements OnDestroy {
         .pipe(switchMap(([app, group]) => this.getRawUrl(app, group)))
         .subscribe((url) => (this.rawUrl = url))
     );
+
+    this.subscription.add(
+      this.app$
+        .pipe(switchMap((app) => this.isEnabled$(app)))
+        .subscribe((enabled) => (this.enabled = enabled))
+    );
   }
 
   ngOnDestroy(): void {
@@ -109,10 +119,28 @@ export class EndpointDetailComponent implements OnDestroy {
     );
   }
 
+  private isEnabled$(app: ClientApp): Observable<boolean> {
+    if (!app) {
+      return of(false);
+    }
+    const expr = app.endpoint.endpoint.enabled;
+    return this.renderPreview$(expr, app).pipe(
+      map((val) => !!val && val !== 'false'),
+      catchError(() => of(false))
+    );
+  }
+
   private contextPath$(app: ClientApp): Observable<string> {
-    const cp = app.endpoint.endpoint.contextPath;
-    if (!cp.linkExpression) {
-      return of(cp.value);
+    const expr = app.endpoint.endpoint.contextPath;
+    return this.renderPreview$(expr, app);
+  }
+
+  private renderPreview$(
+    expr: LinkedValueConfiguration,
+    app: ClientApp
+  ): Observable<string> {
+    if (!expr.linkExpression) {
+      return of(expr.value);
     }
     const instance$ = this.instances.instances$.pipe(
       map((instances) =>
@@ -149,16 +177,16 @@ export class EndpointDetailComponent implements OnDestroy {
         const process = nodes?.nodeConfigDtos
           ?.map((n) =>
             n.nodeConfiguration?.applications?.find(
-              (a) => a.id === app.client?.id
+              (a) => a.id === app.endpoint?.id
             )
           )
           .find((a) => a);
         return getRenderPreview(
-          app.endpoint.endpoint.contextPath,
+          expr,
           process,
           {
             config: instance?.instanceConfiguration,
-            nodeDtos: nodes.nodeConfigDtos,
+            nodeDtos: nodes?.nodeConfigDtos,
           },
           system?.config
         );
@@ -188,6 +216,42 @@ export class EndpointDetailComponent implements OnDestroy {
         },
       },
     ];
+  }
+
+  /* template */ openInlineDisabledReason(disabled: boolean): string {
+    return disabled ? 'Endpoint "enabled" configuration flag is disabled.' : '';
+  }
+
+  /* template */ openUiEndpointDisabledReason(
+    disabled: boolean,
+    disabledProxying: boolean,
+    noRawUrl: boolean
+  ): string {
+    let reason = '';
+    if (disabled) {
+      reason += 'Endpoint "enabled" configuration flag is disabled. ';
+    }
+    if (disabledProxying) {
+      reason += 'Endpoint proxying is disabled. ';
+    }
+    if (noRawUrl) {
+      reason += 'Raw URL to application not available.';
+    }
+    return reason;
+  }
+
+  /* template */ openUiEndpointDirectDisabledReason(
+    disabled: boolean,
+    noDirectUri: boolean
+  ): string {
+    let reason = '';
+    if (disabled) {
+      reason += 'Endpoint "enabled" configuration flag is disabled. ';
+    }
+    if (noDirectUri) {
+      reason += 'Direct URI to application not available.';
+    }
+    return reason;
   }
 
   /* template */ openUiEndpoint() {

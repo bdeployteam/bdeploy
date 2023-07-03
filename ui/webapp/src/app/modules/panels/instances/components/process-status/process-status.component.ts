@@ -7,7 +7,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
 import { distinctUntilChanged, finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -139,10 +139,10 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
           a.key.tag === config?.application?.tag
       );
 
+      const system = systems?.find(
+        (s) => s.key.name === active?.instanceConfiguration?.system?.name
+      );
       if (app) {
-        const system = systems?.find(
-          (s) => s.key.name === active?.instanceConfiguration?.system?.name
-        );
         this.pinnedParameters = config.start.parameters
           .filter((p) => p.pinned)
           .map((p) => {
@@ -168,9 +168,21 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       }
 
       // figure out if we have UI endpoints configured.
-      this.uiEndpoints = config?.endpoints.http.filter(
-        (e) => e.type === HttpEndpointType.UI
-      );
+      this.uiEndpoints = config?.endpoints.http
+        .filter((e) => e.type === HttpEndpointType.UI)
+        .filter((e) => {
+          const preview = getRenderPreview(
+            e.enabled,
+            config,
+            {
+              config: active?.instanceConfiguration,
+              nodeDtos: nodes?.nodeConfigDtos,
+            },
+            system?.config
+          );
+          const enabled = !!preview && preview !== 'false';
+          return enabled;
+        });
 
       // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
       this.starting$.next(false);
