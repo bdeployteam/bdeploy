@@ -107,7 +107,7 @@ export class InstancesColumnsService {
 
   instanceServerColumn: BdDataColumn<InstanceDto> = {
     id: 'managedServer',
-    name: 'Managed Server',
+    name: 'Server',
     hint: BdDataColumnTypeHint.DETAILS,
     data: (r) =>
       r.managedServer
@@ -115,6 +115,7 @@ export class InstancesColumnsService {
         : null,
     icon: () => 'dns',
     component: InstanceManagedServerComponent,
+    width: '64px',
     showWhen: '(min-width: 2000px)',
   };
 
