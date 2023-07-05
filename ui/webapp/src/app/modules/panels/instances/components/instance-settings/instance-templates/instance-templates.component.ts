@@ -4,10 +4,10 @@ import { MatStepper } from '@angular/material/stepper';
 import { cloneDeep } from 'lodash-es';
 import {
   BehaviorSubject,
-  combineLatest,
   Observable,
-  of,
   Subscription,
+  combineLatest,
+  of,
 } from 'rxjs';
 import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
@@ -536,6 +536,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
           for (const v of this.requiredVariables) {
             this.variables[v.id] = v.defaultValue;
           }
+          this.validateHasAllVariables();
         } else {
           this.hasAllVariables = true;
         }
