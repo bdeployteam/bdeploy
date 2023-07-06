@@ -25,7 +25,7 @@ public class JerseyCspFilter extends BaseFilter {
             "font-src 'self'",
             "script-src 'self' 'unsafe-inline'",
             "connect-src 'self'",
-            "img-src 'self' data:",
+            "img-src 'self' https://* data:",
             "style-src 'self' 'unsafe-inline'",
             "base-uri 'self'",
             "form-action 'self'"
