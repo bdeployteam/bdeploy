@@ -25,6 +25,7 @@ import { EditGlobalAttributeComponent } from './components/edit-global-attribute
 import { EditLdapServerComponent } from './components/edit-ldap-server/edit-ldap-server.component';
 import { EditUserGroupComponent } from './components/edit-user-group/edit-user-group.component';
 import { EditUserComponent } from './components/edit-user/edit-user.component';
+import { ImportLdapServerComponent } from './components/import-ldap-server/import-ldap-server.component';
 import { LogConfigEditorComponent } from './components/log-config-editor/log-config-editor.component';
 import { LogFileViewerComponent } from './components/log-file-viewer/log-file-viewer.component';
 import { NodeConversionComponent } from './components/node-details/node-conversion/node-conversion.component';
@@ -56,6 +57,7 @@ import { UserGroupAdminDetailComponent } from './components/user-group-admin-det
     AddLdapServerComponent,
     EditLdapServerComponent,
     CheckLdapServerComponent,
+    ImportLdapServerComponent,
     AuthTestComponent,
     AddGlobalAttributeComponent,
     EditGlobalAttributeComponent,

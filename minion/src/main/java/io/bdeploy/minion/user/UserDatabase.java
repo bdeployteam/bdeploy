@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -41,6 +43,7 @@ import io.bdeploy.bhive.op.ObjectConsistencyCheckOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.ScopedPermission;
+import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.manifest.SettingsManifest;
@@ -49,6 +52,9 @@ import io.bdeploy.interfaces.settings.LDAPSettingsDto;
 import io.bdeploy.interfaces.settings.SpecialAuthenticators;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.user.ldap.LdapAuthenticator;
+import io.bdeploy.minion.user.ldap.LdapUserGroupInfo;
+import io.bdeploy.minion.user.ldap.LdapUserGroupInfo.MemberRefType;
+import io.bdeploy.minion.user.ldap.LdapUserInfo;
 import io.bdeploy.minion.user.oauth2.Auth0TokenAuthenticator;
 import io.bdeploy.minion.user.oauth2.OktaTokenAuthenticator;
 import io.bdeploy.minion.user.oauth2.OpenIDConnectAuthenticator;
@@ -270,6 +276,98 @@ public class UserDatabase implements AuthService {
     @Override
     public String testLdapServer(LDAPSettingsDto dto) {
         // if there's no password in the dto, check if it is an existing setting and take the password from there, if not, proceed with an empty password
+        fillPassword(dto);
+        return ldapAuthenticator.testLdapServer(dto);
+    }
+
+    @Override
+    public String importAccountsLdapServer(LDAPSettingsDto dto) {
+
+        StringJoiner feedback = new StringJoiner("\n");
+
+        try {
+            fillPassword(dto);
+
+            var groups = ldapAuthenticator.importUserGroupsLdapServer(dto, feedback);
+            for (LdapUserGroupInfo group : groups) {
+                group.info = userGroupDatabase.importLdapGroup(group, feedback);
+            }
+
+            feedback.add("");
+
+            var users = ldapAuthenticator.importUsersLdapServer(dto, feedback);
+
+            for (LdapUserInfo user : users) {
+                user.info = importLdapUser(user, feedback);
+            }
+            feedback.add("");
+
+            addUsersToGroups(users, groups, feedback);
+        } catch (Exception e) {
+            feedback.add(e.getMessage());
+        }
+
+        return feedback.toString();
+    }
+
+    private UserInfo importLdapUser(LdapUserInfo user, StringJoiner feedback) {
+        UserInfo existing = getAll().stream().filter(u -> u.name.equalsIgnoreCase(user.name)).findAny().orElse(null);
+
+        if (existing != null) {
+            feedback.add("User with name " + user.name + " already exists, updating.");
+            existing.fullName = user.fullname;
+            existing.email = user.email;
+            internalUpdate(existing.name, existing);
+            return existing;
+        }
+
+        UserInfo info = new UserInfo(user.name);
+        info.fullName = user.fullname;
+        info.email = user.email;
+        info.external = true;
+        internalUpdate(info.name, info);
+        feedback.add("Successfully imported user " + info.name);
+        return info;
+    }
+
+    private void addUsersToGroups(List<LdapUserInfo> users, List<LdapUserGroupInfo> groups, StringJoiner feedback) {
+        Map<UserInfo, Set<UserGroupInfo>> userToGroups = new HashMap<>();
+        for (LdapUserInfo user : users) {
+            Set<UserGroupInfo> groupSet = userToGroups.computeIfAbsent(user.info, i -> new HashSet<>());
+
+            for (LdapUserGroupInfo group : groups) {
+                if ((group.memberRef == MemberRefType.DN && group.members.contains(user.dn))
+                        || (group.memberRef == MemberRefType.UID && group.members.contains(user.uid))) {
+                    groupSet.add(group.info);
+                }
+            }
+        }
+
+        for (LdapUserGroupInfo group : groups) {
+            for (LdapUserInfo user : users) {
+                if (user.hasMemberOfRef && user.memberOf.contains(group.dn)) {
+                    userToGroups.get(user.info).add(group.info);
+                }
+            }
+        }
+
+        for (Map.Entry<UserInfo, Set<UserGroupInfo>> e : userToGroups.entrySet()) {
+            UserInfo user = e.getKey();
+            for (UserGroupInfo group : e.getValue()) {
+                addUserToLdapImportedGroup(user.name, group, feedback);
+            }
+        }
+    }
+
+    private void addUserToLdapImportedGroup(String username, UserGroupInfo info, StringJoiner feedback) {
+        if (info != null) {
+            addUserToGroup(info.id, username);
+            feedback.add("Added user " + username + " to group " + info.name);
+        }
+    }
+
+    // if there's no password in the dto, check if it is an existing setting and take the password from there, if not, proceed with an empty password
+    private void fillPassword(LDAPSettingsDto dto) {
         if (dto.pass == null) {
             AuthenticationSettingsDto settings = SettingsManifest.read(target, root.getEncryptionKey(), false).auth;
             Optional<LDAPSettingsDto> storedDto = settings.ldapSettings.stream().filter(l -> l.id.equals(dto.id)).findFirst();
@@ -277,7 +375,6 @@ public class UserDatabase implements AuthService {
                 dto.pass = storedDto.get().pass;
             }
         }
-        return ldapAuthenticator.testLdapServer(dto);
     }
 
     private UserInfo authenticateInternal(String user, String pw, AuthTrace trace, List<Authenticator> auths) {

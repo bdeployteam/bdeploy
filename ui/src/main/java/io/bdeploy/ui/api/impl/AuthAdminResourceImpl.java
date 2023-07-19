@@ -88,6 +88,14 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     }
 
     @Override
+    public String importAccountsLdapServer(LDAPSettingsDto dto) {
+        String feedback = auth.importAccountsLdapServer(dto);
+        cem.change(ObjectChangeType.USER, Collections.emptyMap());
+        cem.change(ObjectChangeType.USER_GROUP, Collections.emptyMap());
+        return feedback;
+    }
+
+    @Override
     public void addUserToGroup(String group, String user) {
         auth.addUserToGroup(group, user);
         cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_GROUP_ID, user));

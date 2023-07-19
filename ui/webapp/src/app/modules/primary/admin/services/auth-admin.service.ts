@@ -127,4 +127,11 @@ export class AuthAdminService {
       headers: suppressGlobalErrorHandling(new HttpHeaders()),
     });
   }
+
+  public importAccountsLdapServer(dto: LDAPSettingsDto): Observable<string> {
+    return this.http.post(`${this.apiPath()}/import-ldap-accounts`, dto, {
+      responseType: 'text',
+      headers: suppressGlobalErrorHandling(new HttpHeaders()),
+    });
+  }
 }

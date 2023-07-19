@@ -11,6 +11,7 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { LdapCheckActionComponent } from './ldap-check-action/ldap-check-action.component';
 import { LdapEditActionComponent } from './ldap-edit-action/ldap-edit-action.component';
+import { LdapImportActionComponent } from './ldap-import-action/ldap-import-action.component';
 
 @Component({
   selector: 'app-ldap-tab',
@@ -39,6 +40,15 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
+  private colImport: BdDataColumn<LDAPSettingsDto> = {
+    id: 'import',
+    name: 'Import',
+    data: (r) => `Import accounts from ${r.server}`,
+    component: LdapImportActionComponent,
+    width: '40px',
+    actionDisabled: (r) => this.isEditMode(r),
+  };
+
   private colEdit: BdDataColumn<LDAPSettingsDto> = {
     id: 'edit',
     name: 'Edit',
@@ -62,6 +72,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     this.colServer,
     this.colDescription,
     this.colCheck,
+    this.colImport,
     this.colEdit,
     this.colDelete,
   ];

@@ -33,7 +33,7 @@
           [passwordShowable]="true"
         ></app-bd-form-input>
         <app-bd-form-input
-          label="Account Base"
+          label="Account and Group Base"
           name="base"
           [(ngModel)]="tempServer.accountBase"
           required
@@ -60,6 +60,24 @@
           label="Account E-Mail Field"
           name="mailField"
           [(ngModel)]="tempServer.accountEmail"
+          required
+        ></app-bd-form-input>
+        <app-bd-form-input
+          label="Group Pattern"
+          name="groupPattern"
+          [(ngModel)]="tempServer.groupPattern"
+          required
+        ></app-bd-form-input>
+        <app-bd-form-input
+          label="Group Name Field"
+          name="groupName"
+          [(ngModel)]="tempServer.groupName"
+          required
+        ></app-bd-form-input>
+        <app-bd-form-input
+          label="Group Description Field"
+          name="groupDescription"
+          [(ngModel)]="tempServer.groupDescription"
           required
         ></app-bd-form-input>
         <app-bd-form-toggle

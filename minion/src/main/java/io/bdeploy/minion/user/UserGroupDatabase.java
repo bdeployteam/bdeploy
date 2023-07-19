@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -39,6 +40,7 @@ import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.user.ldap.LdapUserGroupInfo;
 import io.bdeploy.ui.api.AuthGroupService;
 
 public class UserGroupDatabase implements AuthGroupService {
@@ -59,17 +61,23 @@ public class UserGroupDatabase implements AuthGroupService {
 
     @Override
     public SortedSet<UserGroupInfo> getAll() {
-        return getAllIds().stream().map(this::getUserGroup).collect(Collectors.toCollection(TreeSet::new));
+        return getAllIds().stream().map(this::getUserGroup).filter(g -> g != null && g.name != null)
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override
     public SortedSet<UserGroupInfo> getUserGroups(Set<String> ids) {
-        return getAllIds().stream().filter(ids::contains).map(this::getUserGroup).collect(Collectors.toCollection(TreeSet::new));
+        return getAllIds().stream().filter(ids::contains).map(this::getUserGroup).filter(g -> g != null && g.name != null)
+                .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private SortedSet<String> getAllIds() {
         Set<Key> keys = target.execute(new ManifestListOperation().setManifestName(NAMESPACE));
         return keys.stream().map(k -> k.getName().substring(NAMESPACE.length())).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public UserGroupInfo getByName(String name) {
+        return getAll().stream().filter(g -> name.equalsIgnoreCase(g.name)).findFirst().orElse(null);
     }
 
     public UserGroupInfo getUserGroup(String id) {
@@ -191,6 +199,24 @@ public class UserGroupDatabase implements AuthGroupService {
         clone.mergedPermissions = mergedPermissions;
 
         return clone;
+    }
+
+    public UserGroupInfo importLdapGroup(LdapUserGroupInfo group, StringJoiner feedback) {
+        UserGroupInfo existing = getAll().stream().filter(g -> g.name.equalsIgnoreCase(group.name)).findAny().orElse(null);
+
+        if (existing != null) {
+            feedback.add("Group with name " + group.name + " already exists, updating.");
+            existing.description = group.description;
+            updateUserGroup(existing);
+            return existing;
+        }
+
+        UserGroupInfo info = new UserGroupInfo();
+        info.name = group.name;
+        info.description = group.description;
+        createUserGroup(info);
+        feedback.add("Successfully imported group " + info.name + ". ID: " + info.id);
+        return info;
     }
 
 }

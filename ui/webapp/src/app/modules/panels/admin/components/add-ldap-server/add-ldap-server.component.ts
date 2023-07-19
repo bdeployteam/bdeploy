@@ -6,7 +6,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -45,6 +45,9 @@ export class AddLdapServerComponent
       accountUserName: 'sAMAccountName',
       accountFullName: 'displayName',
       accountEmail: 'mail',
+      groupPattern: '(objectClass=group)',
+      groupName: 'cn',
+      groupDescription: 'description',
       id: randomString(10),
     };
   }

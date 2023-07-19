@@ -55,6 +55,21 @@ public class LDAPSettingsDto {
     public String accountEmail;
 
     /**
+     * The query which yields all groups on the server.
+     */
+    public String groupPattern;
+
+    /**
+     * The name of the field in the response which contains the group's name
+     */
+    public String groupName;
+
+    /**
+     * The name of the field in the response which contains the group's description
+     */
+    public String groupDescription;
+
+    /**
      * Whether to follow referrals in LDAP query results.
      */
     public boolean followReferrals;

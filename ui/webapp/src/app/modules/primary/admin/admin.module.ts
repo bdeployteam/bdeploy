@@ -25,6 +25,7 @@ import { Auth0TabComponent } from './components/settings-general/auth0-tab/auth0
 import { GeneralTabComponent } from './components/settings-general/general-tab/general-tab.component';
 import { LdapCheckActionComponent } from './components/settings-general/ldap-tab/ldap-check-action/ldap-check-action.component';
 import { LdapEditActionComponent } from './components/settings-general/ldap-tab/ldap-edit-action/ldap-edit-action.component';
+import { LdapImportActionComponent } from './components/settings-general/ldap-tab/ldap-import-action/ldap-import-action.component';
 import { LdapTabComponent } from './components/settings-general/ldap-tab/ldap-tab.component';
 import { OidcTabComponent } from './components/settings-general/oidc-tab/oidc-tab.component';
 import { OktaTabComponent } from './components/settings-general/okta-tab/okta-tab.component';
@@ -56,6 +57,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     AttributeEditActionComponent,
     LdapEditActionComponent,
     LdapCheckActionComponent,
+    LdapImportActionComponent,
     NodesComponent,
     OidcTabComponent,
     Auth0TabComponent,

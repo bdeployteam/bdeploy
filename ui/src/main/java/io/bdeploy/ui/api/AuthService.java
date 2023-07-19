@@ -34,6 +34,12 @@ public interface AuthService {
     public String testLdapServer(LDAPSettingsDto dto);
 
     /**
+     * @param dto the LDAP settings
+     * @return import result or error output
+     */
+    public String importAccountsLdapServer(LDAPSettingsDto dto);
+
+    /**
      * @param info the updated user information.
      */
     public void updateUserInfo(UserInfo info);

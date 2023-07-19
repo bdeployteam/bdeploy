@@ -9,12 +9,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.StringJoiner;
 
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -236,6 +238,82 @@ public class LdapAuthenticator implements Authenticator {
             result = exception2String(dto.server + ": connection failed: ", e);
         }
         return result;
+    }
+
+    public List<LdapUserGroupInfo> importUserGroupsLdapServer(LDAPSettingsDto dto, StringJoiner feedback) {
+        LdapContext ctx = null;
+        feedback.add("Fetching User Groups...");
+        List<LdapUserGroupInfo> groups = new ArrayList<>();
+
+        try {
+            ctx = createServerContext(dto);
+
+            try {
+                SearchControls sc = new SearchControls();
+                sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                // Fetch all groups
+                NamingEnumeration<SearchResult> groupResults = ctx.search(dto.accountBase, dto.groupPattern, sc);
+                while (groupResults.hasMore()) {
+                    SearchResult searchResult = groupResults.next();
+                    Attributes attributes = searchResult.getAttributes();
+                    LdapUserGroupInfo groupInfo = new LdapUserGroupInfo(attributes, dto);
+                    groups.add(new LdapUserGroupInfo(attributes, dto));
+                    feedback.add("Fetched Group: " + groupInfo.name);
+                }
+                feedback.add("Fetched " + groups.size() + " groups");
+            } catch (NameNotFoundException e) {
+                feedback.add(exception2String(dto.server + ": base context not found: ", e));
+            } catch (NamingException e) {
+                feedback.add(exception2String(dto.server + ": query failed: ", e));
+            } finally {
+                try {
+                    closeServerContext(ctx);
+                } catch (Exception e) {
+                    feedback.add(exception2String(dto.server + ": close failed: ", e));
+                }
+            }
+        } catch (Exception e) {
+            feedback.add(exception2String(dto.server + ": connection failed: ", e));
+        }
+        return groups;
+    }
+
+    public List<LdapUserInfo> importUsersLdapServer(LDAPSettingsDto dto, StringJoiner feedback) {
+        LdapContext ctx = null;
+        feedback.add("Fetching Users...");
+        List<LdapUserInfo> users = new ArrayList<>();
+
+        try {
+            ctx = createServerContext(dto);
+
+            try {
+                SearchControls sc = new SearchControls();
+                sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                // fetch all users
+                NamingEnumeration<SearchResult> userResults = ctx.search(dto.accountBase, dto.accountPattern, sc);
+                while (userResults.hasMore()) {
+                    SearchResult searchResult = userResults.next();
+                    Attributes attributes = searchResult.getAttributes();
+                    LdapUserInfo userInfo = new LdapUserInfo(attributes, dto);
+                    users.add(userInfo);
+                    feedback.add("Fetched User: " + userInfo.name);
+                }
+                feedback.add("Fetched " + users.size() + " users");
+            } catch (NameNotFoundException e) {
+                feedback.add(exception2String(dto.server + ": base context not found: ", e));
+            } catch (NamingException e) {
+                feedback.add(exception2String(dto.server + ": query failed: ", e));
+            } finally {
+                try {
+                    closeServerContext(ctx);
+                } catch (Exception e) {
+                    feedback.add(exception2String(dto.server + ": close failed: ", e));
+                }
+            }
+        } catch (Exception e) {
+            feedback.add(exception2String(dto.server + ": connection failed: ", e));
+        }
+        return users;
     }
 
     private String exception2String(String message, Exception exception) {

@@ -11,12 +11,11 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'check-ldap-server',
-  templateUrl: './check-ldap-server.component.html',
+  selector: 'app-import-ldap-server',
+  templateUrl: './import-ldap-server.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CheckLdapServerComponent implements OnInit, OnDestroy {
+export class ImportLdapServerComponent implements OnInit, OnDestroy {
   /* template */ tempServer: Partial<LDAPSettingsDto>;
 
   private subscription: Subscription;
@@ -41,7 +40,7 @@ export class CheckLdapServerComponent implements OnInit, OnDestroy {
         (a) => a.id === route.params['id']
       );
       this.checkResult$.next(`Checking ...`);
-      this.auth.testLdapServer(server).subscribe((r) => {
+      this.auth.importAccountsLdapServer(server).subscribe((r) => {
         this.checkResult$.next(r);
       });
     });

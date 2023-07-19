@@ -133,4 +133,8 @@ public interface AuthAdminResource {
     @Path("/testLdapServer")
     public String testLdapServer(LDAPSettingsDto dto);
 
+    @POST
+    @Path("/import-ldap-accounts")
+    public String importAccountsLdapServer(LDAPSettingsDto dto);
+
 }
