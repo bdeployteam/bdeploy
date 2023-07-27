@@ -10,6 +10,9 @@ import {
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
 import { IDisposable } from 'xterm';
+import { SearchAddon } from 'xterm-addon-search';
+import { WebglAddon } from 'xterm-addon-webgl';
+import { SearchService } from '../../services/search.service';
 
 // TODO: Move to 'FunctionsUsingCSI' where possible.
 // Sequences documentation: https://xtermjs.org/docs/api/vtfeatures/
@@ -40,6 +43,14 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
   private stdinBufferCursorPos = 0;
   private stdinStartX: number;
 
+  private searchAddon = new SearchAddon();
+  private webglAddon = new WebglAddon();
+  private searchSubscription: Subscription;
+
+  constructor(searchService: SearchService) {
+    this.searchSubscription = searchService.register(this);
+  }
+
   ngAfterViewInit() {
     this.term.underlying.attachCustomKeyEventHandler((event) => {
       // prevent default handling of Ctrl-C/Ctrl-X (otherwise it resets the selections
@@ -61,6 +72,17 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
     });
 
     this.setupStdin();
+
+    this.term.underlying.loadAddon(this.searchAddon);
+    this.term.underlying.loadAddon(this.webglAddon);
+    this.webglAddon.onContextLoss(() => this.reloadWebgl());
+  }
+
+  private reloadWebgl() {
+    this.webglAddon.dispose();
+    this.webglAddon = new WebglAddon();
+    this.term.underlying.loadAddon(this.webglAddon);
+    this.webglAddon.onContextLoss(() => this.reloadWebgl());
   }
 
   ngOnDestroy(): void {
@@ -70,6 +92,18 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
       this.stdinResize.dispose();
       this.stdinResize = null;
     }
+    this.searchSubscription.unsubscribe();
+  }
+
+  bdOnSearch(search: string): void {
+    this.searchAddon.findNext(search, {
+      decorations: {
+        matchBackground: '#ebe41c', // yellow
+        matchOverviewRuler: '#ebe41c',
+        activeMatchColorOverviewRuler: '#ebe41c',
+        activeMatchBackground: '#ebe41c',
+      },
+    });
   }
 
   /** Make sure that *all* linebreaks are \r\n */
