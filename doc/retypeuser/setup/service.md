@@ -29,8 +29,8 @@ The script must be called with administrative privileges and it expects the foll
 --master | --node      Start a master or node (only controls the name of the service.)
 <Path-to-minion-bat>   Absolute path to the bdeploy batch file. 
                        Sample: C:\BDeploy\server\bin\bdeploy.bat
-<Path-to-store-files>  Absolute path to the data directory.  
-                       Sample: C:\BDeploy\data\
+<Path-to-store-files>  Absolute path to the data directory. Make sure to not include a trailing backslash.
+                       Sample: C:\BDeploy\data
 ```
 
 !!!warning Warning
