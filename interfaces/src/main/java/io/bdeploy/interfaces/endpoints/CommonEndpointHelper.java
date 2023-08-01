@@ -135,10 +135,6 @@ public class CommonEndpointHelper {
         // check if the endpoint is enabled, otherwise return null.
         try {
             LinkedValueConfiguration enabled = process(rawEndpoint.enabled, p);
-            if (enabled == null) {
-                return null;
-            }
-
             String pr = enabled.getPreRenderable();
             if (pr == null || pr.isBlank() || pr.equals("false")) {
                 return null;
