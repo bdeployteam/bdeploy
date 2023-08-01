@@ -39,7 +39,11 @@ The Client ID and Client Secret are used to authenticate with the OpenID Connect
 
 ### Auth0
 
-[Auth0](https://auth0.com/) is an OpenID Connect complient authentication provider. **BDeploy** can be configured to use it through the Authorization Code Flow. Configure an application as "Single Page Application" in the auth0 tenant, and provide the required information in the configuration page.
+[Auth0](https://auth0.com/) is an OpenID Connect compliant authentication provider. **BDeploy** can be configured to use it through the Authorization Code Flow. Configure an application as "Single Page Application" in the auth0 tenant, and provide the required information in the configuration page.
+
+### Okta
+
+[Okta](https://www.okta.com/) is an OpenID Connect compliant authentication provider. **BDeploy** can be configured to authenticate users agains `Okta` using its own proprietary authentication flow in a popup. Same as `auth0`, `Okta` requires a configured tenant which has application type "Single Page Application" set.
 
 ### LDAP Auth.
 
