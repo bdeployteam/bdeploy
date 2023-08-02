@@ -75,7 +75,7 @@ public class ApplicationParameterProvider {
                     "Cannot find unique parameter " + paramId + " for application " + app.name + ", found " + params.size());
         }
 
-        if (params.get(0).value == null) {
+        if (params.get(0).value == null || params.get(0).value.getPreRenderable() == null) {
             return null; // no actual value (yet).
         }
 

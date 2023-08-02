@@ -77,12 +77,12 @@ public class CommonEndpointHelper {
             sslcontext.init(null, new TrustManager[] { new TrustAllServersTrustManager() }, new java.security.SecureRandom());
 
             client.sslContext(sslcontext).hostnameVerifier((s1, s2) -> true);
-        } else if (Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE && endpoint.trustStore != null
-                && !endpoint.trustStore.getPreRenderable().isEmpty()) {
+        } else if (Boolean.valueOf(endpoint.secure.getPreRenderable()) == Boolean.TRUE
+                && endpoint.trustStore.getPreRenderable() != null && !endpoint.trustStore.getPreRenderable().isEmpty()) {
             Path ksPath = Paths.get(endpoint.trustStore.getPreRenderable());
 
             char[] pp = null;
-            if (endpoint.trustStorePass != null && !endpoint.trustStorePass.getPreRenderable().isEmpty()) {
+            if (endpoint.trustStorePass.getPreRenderable() != null && !endpoint.trustStorePass.getPreRenderable().isEmpty()) {
                 pp = endpoint.trustStorePass.getPreRenderable().toCharArray();
             }
 
