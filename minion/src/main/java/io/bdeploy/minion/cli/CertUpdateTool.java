@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 
+import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
-import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.MinionRootValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
@@ -20,6 +21,7 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
@@ -37,6 +39,9 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         @Help("Path to the new certificate in PEM format. This will render all existing tokens INVALID!")
         @Validator(ExistingPathValidator.class)
         String update();
+
+        @Help("When given reverts a previous update operation and restores the previous certificate and configuration.")
+        boolean revert() default false;
 
         @Help("Root directory to update.")
         @EnvironmentFallback("BDEPLOY_ROOT")
@@ -86,6 +91,8 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                 Path pem = Paths.get(config.export());
                 BCX509Helper.exportPrivateCertificateAsPem(ks, ksp, pem);
                 return createSuccess();
+            } else if (config.revert()) {
+                return doRestoreCertificate(mr, ks, ksp);
             } else {
                 return createNoOp();
             }
@@ -105,6 +112,12 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         }
 
         // now update the own access token.
+        updateSelf(mr, ks, ksp);
+
+        return createSuccess();
+    }
+
+    private void updateSelf(MinionRoot mr, Path ks, char[] ksp) throws GeneralSecurityException, IOException {
         SecurityHelper helper = SecurityHelper.getInstance();
         ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION).build();
 
@@ -116,6 +129,24 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         RemoteService newRemote = new RemoteService(minion.remote.getUri(), pack);
         minion.remote = newRemote;
         mf.update(cfg);
+    }
+
+    private RenderableResult doRestoreCertificate(MinionRoot mr, Path ks, char[] ksp)
+            throws IOException, GeneralSecurityException {
+        Path bak = ks.getParent().resolve(ks.getFileName().toString() + ".bak");
+
+        if (!PathHelper.exists(bak)) {
+            return createResultWithErrorMessage("No backup to restore from exists");
+        }
+
+        // need to swap keystores - orig -> tmp, bak -> orig, tmp -> bak
+        Path tmp = ks.getParent().resolve(ks.getFileName().toString() + ".tmp");
+
+        Files.move(ks, tmp, StandardCopyOption.REPLACE_EXISTING);
+        Files.move(bak, ks, StandardCopyOption.REPLACE_EXISTING);
+        Files.move(tmp, bak, StandardCopyOption.REPLACE_EXISTING);
+
+        updateSelf(mr, ks, ksp);
 
         return createSuccess();
     }
