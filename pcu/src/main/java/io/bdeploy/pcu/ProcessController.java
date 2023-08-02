@@ -826,7 +826,7 @@ public class ProcessController {
 
         try {
             HttpEndpoint processed = CommonEndpointHelper.processEndpoint(variableResolver, ep);
-            if (process == null) {
+            if (processed == null) {
                 logger.log(l -> l.warn("Endpoint not enabled {}, forcing probe success: {}", ep.id, type));
                 return true; // regard not-enabled probe as success, otherwise probing will always fail.
             }
