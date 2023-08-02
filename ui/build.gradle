@@ -285,13 +285,17 @@ task cleanAngular(type:Delete) {
     delete "$webappDir/dist"
 }
 
-task buildAngular(type:Exec) { t ->
+task buildAngularInternal(type:Exec) { t ->
     inputs.dir "$webappDir/src"
     outputs.dir "$webappDir/dist"
     sharedNpmLogic(t, ["run", "--", "ng", "build", "-c", "production"])
 	dependsOn 'installAngular'
-    dependsOn 'copyUserDoc'
     dependsOn 'genDtos'
+}
+
+task buildAngular() {
+    dependsOn 'buildAngularInternal'
+    dependsOn 'copyUserDoc'
 }
 
 task installAngular(type:Exec) { t ->
@@ -304,6 +308,8 @@ evaluationDependsOn(':doc')
 task copyUserDoc(type:Copy, dependsOn:':doc:retypeUserDoc') {
     from tasks.getByPath(':doc:retypeUserDoc').outputs
     into "$webappDir/dist/webapp/assets/doc"
+
+    mustRunAfter 'buildAngularInternal'
 }
 
 task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsOn: compileJava) {
