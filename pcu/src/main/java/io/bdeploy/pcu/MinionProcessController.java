@@ -1,15 +1,22 @@
 package io.bdeploy.pcu;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.common.util.FutureHelper;
 import io.bdeploy.common.util.MdcLogger;
+import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 
@@ -54,10 +61,7 @@ public class MinionProcessController {
     public void recover() {
         try {
             readLock.lock();
-            for (Map.Entry<String, InstanceProcessController> entry : instance2Controller.entrySet()) {
-                InstanceProcessController controller = entry.getValue();
-                controller.recover();
-            }
+            doParallelAndWait("Recover", instance2Controller.values().stream().map(c -> (Runnable) (() -> c.recover())).toList());
         } finally {
             readLock.unlock();
         }
@@ -69,13 +73,20 @@ public class MinionProcessController {
     public void autoStart() {
         try {
             readLock.lock();
-            for (Map.Entry<String, InstanceProcessController> entry : instance2Controller.entrySet()) {
-                InstanceProcessController controller = entry.getValue();
-                controller.autoStart();
-            }
+            doParallelAndWait("AutoStart",
+                    instance2Controller.values().stream().map(c -> (Runnable) (() -> c.autoStart())).toList());
         } finally {
             readLock.unlock();
         }
+    }
+
+    private void doParallelAndWait(String name, List<Runnable> logic) {
+        ExecutorService es = Executors.newCachedThreadPool(new NamedDaemonThreadFactory(name));
+
+        // need to use collection to satisfy the java compiler...
+        FutureHelper.awaitAll(logic.stream().map(es::submit).collect(Collectors.toCollection(() -> new ArrayList<>())));
+
+        es.shutdownNow();
     }
 
     /**
