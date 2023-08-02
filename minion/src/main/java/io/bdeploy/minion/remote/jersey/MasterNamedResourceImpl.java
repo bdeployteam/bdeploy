@@ -375,6 +375,18 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         imf.getHistory(hive).recordAction(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
     }
 
+    private void assureTagMatch(String targetTag, String actualTag) {
+        if (targetTag == null || actualTag == null) {
+            throw new WebApplicationException("Cannot determine target or actual tag of instance object",
+                    Status.INTERNAL_SERVER_ERROR);
+        }
+
+        if (!actualTag.equals(targetTag)) {
+            throw new WebApplicationException("Tag mismatch in instance configuation, " + targetTag + " != " + actualTag,
+                    Status.EXPECTATION_FAILED);
+        }
+    }
+
     private Manifest.Key createInstanceVersion(Manifest.Key target, InstanceConfiguration config,
             SortedMap<String, InstanceNodeConfiguration> nodes) {
 
@@ -387,6 +399,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         if (config.system != null) {
             system = SystemManifest.of(hive, config.system).getConfiguration();
         }
+
+        var targetTag = config.product.getTag();
 
         for (Entry<String, InstanceNodeConfiguration> entry : nodes.entrySet()) {
             InstanceNodeConfiguration inc = entry.getValue();
@@ -413,6 +427,13 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 // also make sure that every parameter is present in the command line only once.
                 cleanCommandDuplicates(cfg.start);
                 cleanCommandDuplicates(cfg.stop);
+            }
+
+            // make sure that all copies of the tags throughout the configuration
+            // are consistent (product, applications, ...)
+            assureTagMatch(targetTag, inc.product.getTag());
+            for (var a : inc.applications) {
+                assureTagMatch(targetTag, a.application.getTag());
             }
 
             RuntimeAssert.assertEquals(inc.id, config.id, "Instance ID not set on nodes");
