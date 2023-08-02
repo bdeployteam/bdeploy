@@ -17,10 +17,12 @@ import org.apache.logging.log4j.message.SimpleMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.NoThrowAutoCloseable;
+
 /**
  * Processes output of a process and handles logging it to a rolling output file.
  */
-public class RollingStreamGobbler extends Thread {
+public class RollingStreamGobbler extends Thread implements NoThrowAutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(RollingStreamGobbler.class);
 
@@ -66,6 +68,7 @@ public class RollingStreamGobbler extends Thread {
         }
     }
 
+    @Override
     public synchronized void close() {
         if (isAlive()) {
             interrupt();
@@ -89,6 +92,25 @@ public class RollingStreamGobbler extends Thread {
                 " --- Cannot resume output capture after recovery for {}/{}, PID: {} - Output will be lost until application restart.",
                 instance, app, handle.pid()), Level.ERROR);
         gobbler.stopAppender();
+    }
+
+    public NoThrowAutoCloseable attachStopProcess(Process process) {
+        Thread stopGobbler = new Thread(() -> {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                br.lines().forEach(l -> log(new SimpleMessage("[STOP] " + l), Level.INFO));
+            } catch (Exception e) {
+                log.debug("While redirecting process output:", e);
+            }
+        }, "StopGobbler [" + instance + "/" + app + "]");
+        stopGobbler.start();
+
+        return () -> {
+            if (stopGobbler.isAlive()) {
+                stopGobbler.interrupt();
+            }
+
+            // cannot do more...
+        };
     }
 
     private synchronized void log(Message msg, Level lvl) {

@@ -28,6 +28,7 @@ import org.glassfish.jersey.client.ClientProperties;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.util.MdcLogger;
 import io.bdeploy.common.util.OsHelper;
@@ -1019,27 +1020,43 @@ public class ProcessController {
             logger.log(l -> l.debug("Stop command: {}.", processConfig.stop));
 
             Process stopProcess = launch(stopCommand);
+            NoThrowAutoCloseable stopLogger = null;
 
-            // Evaluate exit code of stop command
-            boolean exited = stopProcess.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
-            if (exited) {
-                int exitValue = stopProcess.exitValue();
-                if (exitValue != 0) {
-                    logger.log(l -> l.warn("Stop command exited with non-zero code: {}.", exitValue));
-                    return;
-                }
-                waitForMainProcessAfterStopCommand();
-                return;
+            // either we can (and must) attach to an existing one, or we need a new one in case the process was recovered.
+            // the output looks slightly different, but this is way better than getting stuck due to unconsumed output.
+            if (processLogger != null) {
+                stopLogger = processLogger.attachStopProcess(stopProcess);
+            } else {
+                // java compiler misses that we're auto-closing the resource in any case through stopLogger
+                @SuppressWarnings("resource")
+                var gobbler = new RollingStreamGobbler(processDir, stopProcess, instanceId, "STOP-" + processConfig.id);
+                gobbler.start();
+
+                stopLogger = gobbler;
             }
 
-            // Stop command did not complete within allowed time
-            // Kill stop command
-            logger.log(l -> l.warn("Stop command did not finish within configured grace period."));
-            stopProcess.destroy();
-            boolean stopExited = stopProcess.waitFor(200, TimeUnit.MILLISECONDS);
-            if (!stopExited) {
-                logger.log(l -> l.warn("Stop command refuses to exit, killing."));
-                stopProcess.destroyForcibly();
+            try (var close = stopLogger) {
+                // Evaluate exit code of stop command
+                boolean exited = stopProcess.waitFor(processConfig.processControl.gracePeriod, TimeUnit.MILLISECONDS);
+                if (exited) {
+                    int exitValue = stopProcess.exitValue();
+                    if (exitValue != 0) {
+                        logger.log(l -> l.warn("Stop command exited with non-zero code: {}.", exitValue));
+                        return;
+                    }
+                    waitForMainProcessAfterStopCommand();
+                    return;
+                }
+
+                // Stop command did not complete within allowed time
+                // Kill stop command
+                logger.log(l -> l.warn("Stop command did not finish within configured grace period."));
+                stopProcess.destroy();
+                boolean stopExited = stopProcess.waitFor(200, TimeUnit.MILLISECONDS);
+                if (!stopExited) {
+                    logger.log(l -> l.warn("Stop command refuses to exit, killing."));
+                    stopProcess.destroyForcibly();
+                }
             }
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
