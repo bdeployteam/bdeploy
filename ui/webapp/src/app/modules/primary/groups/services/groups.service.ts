@@ -24,6 +24,7 @@ import {
   ObjectEvent,
   ObjectId,
 } from 'src/app/models/gen.dtos';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
@@ -68,7 +69,8 @@ export class GroupsService {
     private areas: NavAreasService,
     private settings: SettingsService,
     private snackbar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private auth: AuthenticationService
   ) {
     this.areas.groupContext$.subscribe((r) => this.setCurrent(r));
     this.update$
@@ -114,6 +116,15 @@ export class GroupsService {
   }
 
   private onGroupUpdated(groupName: string) {
+    // need to check permissions first...
+    this.auth.isScopedRead$(groupName).subscribe((authorized) => {
+      if (authorized || this.auth.isScopedExclusiveReadClient(groupName)) {
+        this.onGroupUpdatedInternal(groupName);
+      }
+    });
+  }
+
+  private onGroupUpdatedInternal(groupName: string) {
     this.loading$.next(true);
     forkJoin({
       group: this.http.get<InstanceGroupConfigurationDto>(
