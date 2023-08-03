@@ -144,7 +144,7 @@ public class ProcessResourceImpl implements ProcessResource {
     @Override
     public void restartAll() {
         InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        try (Activity activity = reporter.start("Restaring All");
+        try (Activity activity = reporter.start("Restarting All");
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
             stopAll();
             startAll();
