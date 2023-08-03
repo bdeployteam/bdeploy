@@ -61,7 +61,7 @@ public class MinionProcessController {
     public void recover() {
         try {
             readLock.lock();
-            doParallelAndWait("Recover", instance2Controller.values().stream().map(c -> (Runnable) (() -> c.recover())).toList());
+            doParallelAndWait("Recover", instance2Controller.values().stream().map(c -> (Runnable) (c::recover)).toList());
         } finally {
             readLock.unlock();
         }
@@ -73,8 +73,7 @@ public class MinionProcessController {
     public void autoStart() {
         try {
             readLock.lock();
-            doParallelAndWait("AutoStart",
-                    instance2Controller.values().stream().map(c -> (Runnable) (() -> c.autoStart())).toList());
+            doParallelAndWait("AutoStart", instance2Controller.values().stream().map(c -> (Runnable) (c::autoStart)).toList());
         } finally {
             readLock.unlock();
         }
