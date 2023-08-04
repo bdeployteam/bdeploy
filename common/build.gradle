@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api (
         'commons-codec:commons-codec:1.16.0',
-        'com.google.guava:guava:32.0.1-jre',
+        'com.google.guava:guava:32.1.2-jre',
         'io.dropwizard.metrics:metrics-core:4.2.19',
         'org.slf4j:slf4j-api:2.0.7',
         'com.j256.simplemagic:simplemagic:1.17',
