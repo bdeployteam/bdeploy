@@ -56,7 +56,16 @@ export class BdValueEditorComponent
   @Input() disabled: boolean;
   @Input() editorDisabled: boolean;
   @Input() defaultValue: LinkedValueConfiguration;
-  @Input() type: ParameterType;
+  private _type: ParameterType;
+  @Input() set type(v: ParameterType) {
+    this._type = v;
+    if (this.isBoolean() && !this.isLink() && !this.internalValue.value) {
+      this.internalValue.value = 'false';
+    }
+  }
+  get type(): ParameterType {
+    return this._type;
+  }
   @Input() customEditor: string;
   @Input() product: ManifestKey;
   @Input() group: string;
