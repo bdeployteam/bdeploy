@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.SortedSet;
 
 import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.RequiredPermissionScope;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
@@ -51,7 +52,7 @@ public interface SoftwareRepositoryResource {
     public SoftwareResource getSoftwareResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);
 
     @Path("/{softwareRepository}/product")
-    @RequiredPermission(permission = Permission.CLIENT, scope = "softwareRepository")
+    @RequiredPermissionScope(scope = "softwareRepository")
     public ProductResource getProductResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);
 
     @GET

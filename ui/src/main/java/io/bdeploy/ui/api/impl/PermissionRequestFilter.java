@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.security.NoScopeInheritance;
 import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.RequiredPermissionScope;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.jersey.JerseySecurityContext;
@@ -98,6 +99,12 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
                 activeScope = null; // reset.
             }
 
+            String requiredPermissionScopeValue = getRequiredPermissionScope(uriInfo, resourceMethod);
+            if (requiredPermissionScopeValue != null) {
+                activeScope = requiredPermissionScopeValue;
+                scopes.add(requiredPermissionScopeValue);
+            }
+
             RequiredPermission requiredPermission = getRequiredPermission(uriInfo, resourceMethod);
             if (requiredPermission == null) {
                 // even if there is not usable permission found, check if we can still find a scope on the method. no dynamics here.
@@ -138,6 +145,15 @@ public class PermissionRequestFilter implements ContainerRequestFilter {
 
         ObjectScope authScope = new ObjectScope(scopes);
         requestContext.setProperty(PERM_SCOPE, authScope);
+    }
+
+    private String getRequiredPermissionScope(ExtendedUriInfo uriInfo, ResourceMethod resourceMethod) {
+        Method method = resourceMethod.getInvocable().getDefinitionMethod();
+        RequiredPermissionScope requiredPermissionScope = method.getAnnotation(RequiredPermissionScope.class);
+        if (requiredPermissionScope == null) {
+            requiredPermissionScope = method.getDeclaringClass().getAnnotation(RequiredPermissionScope.class);
+        }
+        return requiredPermissionScope == null ? null : getScopedValue(uriInfo, requiredPermissionScope.scope(), false);
     }
 
     /**
