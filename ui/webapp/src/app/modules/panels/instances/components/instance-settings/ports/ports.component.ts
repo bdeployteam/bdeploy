@@ -9,6 +9,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import {
   PortParam,
@@ -59,7 +60,8 @@ export class PortsComponent implements OnInit {
     public edit: InstanceEditService,
     public portEdit: PortsEditService,
     private dl: DownloadService,
-    private systems: SystemsService
+    private systems: SystemsService,
+    private instances: InstancesService
   ) {}
 
   ngOnInit(): void {
@@ -72,16 +74,24 @@ export class PortsComponent implements OnInit {
   }
 
   /* template */ exportCsv() {
-    let csv = 'Application,Name,Description,Port';
+    let csv = 'Application,Name,Description,Port,Node';
     // only interested in server ports on applications.
     const system = this.edit.state$?.value?.config?.config?.system
       ? this.systems.systems$.value?.find(
           (s) => s.key.name === this.edit.state$.value.config.config.system.name
         )
       : null;
+    const nodeConfigDtos = this.instances.activeNodeCfgs$.value?.nodeConfigDtos;
     for (const port of this.portEdit.ports$.value.filter(
       (p) => p.type === ParameterType.SERVER_PORT && p.app
     )) {
+      const node = nodeConfigDtos?.find((nodeCfg) =>
+        nodeCfg.nodeConfiguration.applications.some(
+          (a) =>
+            a.application.name === port.app.application.name &&
+            a.application.tag === port.app.application.tag
+        )
+      );
       csv +=
         '\n' +
         [
@@ -94,6 +104,7 @@ export class PortsComponent implements OnInit {
             this.edit.state$.value?.config,
             system?.config
           ),
+          node?.nodeName,
         ]
           .map((e) => `"${e}"`)
           .join(',');
