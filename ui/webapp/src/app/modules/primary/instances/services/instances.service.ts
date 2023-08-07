@@ -169,6 +169,12 @@ export class InstancesService {
           if (!!s && !isEqual(cur.managedServer, s)) {
             cur.managedServer = s;
             this.current$.next(cur);
+
+            // if current == active, we need to trigger active update as well!
+            // if it is equal the below if will not detect a change for active.
+            if (cur === act) {
+              this.active$.next(act);
+            }
           }
         }
 
