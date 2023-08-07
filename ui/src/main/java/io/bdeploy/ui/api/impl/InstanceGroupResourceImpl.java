@@ -161,7 +161,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         Path hive = storage.resolve(config.name);
 
         if (Files.isDirectory(hive)) {
-            throw new WebApplicationException("Hive path already exists: ", Status.NOT_ACCEPTABLE);
+            throw new WebApplicationException(
+                    "Instance Group or Software Repository with the name " + config.name + " already exists.",
+                    Status.NOT_ACCEPTABLE);
         }
 
         // update the managed flag - indicator required when switching modes

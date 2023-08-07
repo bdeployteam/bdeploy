@@ -27,6 +27,7 @@ export class EditUniqueValueValidatorDirective
   public readonly id = 'edit-unique-value';
 
   @Input() disallowedValues: string[];
+  @Input() disallowedMessage = 'ID is not unique';
 
   constructor(private edit: InstanceEditService) {
     bdValidationRegisterMessageExtractor(this);
@@ -44,7 +45,7 @@ export class EditUniqueValueValidatorDirective
     const ok = !this.disallowedValues.includes(value);
 
     if (!ok) {
-      errors[this.id] = 'ID is not unique';
+      errors[this.id] = this.disallowedMessage;
     }
 
     return errors;
