@@ -18,6 +18,8 @@
           [(ngModel)]="group.name"
           required
           appIdentifier
+          appEditUniqueValueValidator
+          [disallowedValues]="usedNames"
         ></app-bd-form-input>
         <app-bd-form-input
           label="Title"
