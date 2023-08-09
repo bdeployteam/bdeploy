@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
@@ -83,8 +84,12 @@ public class ObjectReadOperation extends BHive.TransactedOperation<TransferStati
             // Check manifests for consistency and remove invalid ones
             Set<ElementView> damaged = execute(checkOp.setDryRun(false));
             if (!damaged.isEmpty()) {
-                throw new IllegalStateException(
-                        "Failed to stream all required objects. Removed " + damaged.size() + " missing/damaged elements.");
+                // in case the damaged manifests where removed, we also want to remove
+                // all the associated objects.
+                SortedMap<ObjectId, Long> pruned = execute(new PruneOperation());
+
+                throw new IllegalStateException("Failed to stream all required objects. Removed " + damaged.size()
+                        + " missing/damaged elements, pruned " + pruned.size() + " objects.");
             }
             result.transferSize = countingIn.getCount();
         } finally {
