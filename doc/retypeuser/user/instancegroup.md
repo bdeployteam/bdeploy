@@ -102,6 +102,10 @@ Once a **Product** is available, you can click it to open the **Product** detail
 ![Product Details Panel](/images/Doc_ProductDetailsPanel.png){width=480}
 :::
 
+!!!info Note
+There are two distinct **Download** actions available on the details panel; **Download BHive** will download a re-importable ZIP file which contains all required data in a **BDeploy** internal data format. This file can be transferred to another **BDeploy** server and imported. **Download Content** on the other hand will give you a ZIP file which contains the plain, exported files as they would ultimately end up on the target. This is primarliy useful for inspection of the content, access to individual files and such. However this is *not* meant for transfer and import on another server.
+!!!
+
 ## Create New Instances
 
 To create a new **Instance**, click the [ **+** ] button at the bottom of the page. After giving the new **Instance** a name, purpose and description, the most important thing is to select the **Product** you want to deploy. Additionally, the initial **product version** has to be chosen. It can be changed later at any time (_up-_ and _downgrade_). 
