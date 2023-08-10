@@ -70,12 +70,22 @@ describe('Admin UI Tests (User Groups)', () => {
     cy.inMainNavFlyin('add-user-group', () => {
       cy.fillFormInput('name', userGroupName);
       cy.fillFormInput('description', 'Test User Group');
+    });
+
+    cy.screenshot('Doc_Admin_User_Groups_Add');
+
+    cy.inMainNavFlyin('add-user-group', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
     cy.inMainNavContent(() => {
       cy.wait('@createUserGroup');
       cy.waitUntilContentLoaded();
+    });
+
+    cy.screenshot('Doc_Admin_User_Groups');
+
+    cy.inMainNavContent(() => {
       cy.contains('tr', userGroupName)
         .should('exist')
         .within(() => {
@@ -91,6 +101,11 @@ describe('Admin UI Tests (User Groups)', () => {
 
     cy.inMainNavFlyin('assign-user-group-permission', () => {
       cy.fillFormSelect('permission', 'ADMIN');
+    });
+
+    cy.screenshot('Doc_Admin_User_Groups_Permissions_Add');
+
+    cy.inMainNavFlyin('assign-user-group-permission', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
@@ -104,7 +119,6 @@ describe('Admin UI Tests (User Groups)', () => {
         })
         .click();
     });
-    cy.screenshot('Doc_Admin_User_Groups_Admin_Permission_Added');
 
     logout(cy);
   });
@@ -115,7 +129,6 @@ describe('Admin UI Tests (User Groups)', () => {
     cy.visit('/');
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').should('be.disabled');
-    cy.screenshot('Doc_Admin_User_Groups_Test_User_Cannot_Visit_Admin_UI');
 
     logout(cy);
   });
@@ -137,9 +150,15 @@ describe('Admin UI Tests (User Groups)', () => {
     });
     cy.inMainNavFlyin('app-user-group-admin-detail', () => {
       cy.fillFormInput('addUserInput', userName);
+    });
+
+    cy.screenshot('Doc_Admin_User_Groups_Add_Test_User');
+
+    cy.inMainNavFlyin('app-user-group-admin-detail', () => {
       cy.get('mat-icon[name="addUserButton"]').click();
       cy.waitUntilContentLoaded();
     });
+
     cy.screenshot('Doc_Admin_User_Groups_Test_User_Added_To_Group');
 
     logout(cy);
@@ -151,7 +170,6 @@ describe('Admin UI Tests (User Groups)', () => {
     cy.visit('/');
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').should('be.enabled').click();
-    cy.screenshot('Doc_Admin_User_Groups_Test_User_Can_Visit_Admin_UI');
 
     // Delete test user from user group
     cy.contains('a', 'User Groups').click();
@@ -174,7 +192,6 @@ describe('Admin UI Tests (User Groups)', () => {
         });
     });
     cy.waitUntilContentLoaded();
-    cy.screenshot('Doc_Admin_User_Groups_Test_User_Removed_From_User_Group');
 
     logout(cy);
   });
@@ -185,9 +202,6 @@ describe('Admin UI Tests (User Groups)', () => {
     cy.visit('/');
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').should('be.disabled');
-    cy.screenshot(
-      'Doc_Admin_User_Groups_Test_User_Cannot_Visit_Admin_UI_Again'
-    );
 
     logout(cy);
   });

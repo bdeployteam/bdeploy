@@ -73,12 +73,27 @@ Server URL | The URL of the LDAP server. Both `ldaps://` (with a proper certific
 Description | Free text to describe the entry
 User | The user which is used to query other users on the LDAP server (aka _bind user_)
 Password | The password for the _User_ which is used to query other users on the LDAP server.
-Account Base | Root of the LDAP tree containing all user accounts to query. Typically in the form of `dc=domain,dc=com`.
+Account and Group Base | Root of the LDAP tree containing all user accounts (with group refs) to query. Typically in the form of `dc=domain,dc=com`.
 Account Pattern | A partial LDAP query expression. Multiple filters can be written one after another. The final LDAP query is built by prepending `(&`, and appending a filter which queries the configures _Account User Field_ for the given user. This means that a pattern `(field1=value1)(field2=value2)` will result in a query like `(&(field1=value1)(field2=value2)(sAMAccountName=<GIVEN USER>))`.
 Account User Field | Specifies the field which must match the login name when querying for the user.
 Account Name Field | The field which should be used as source for the _Full Name_ of the user, which is used as a display name in [User Accounts](/experts/system/#user-accounts) management.
 Account E-Mail Field | The field which should be used as source for the users _E-Mail Address_. This is used for instance to query _Gravatar_ if _Gravatar_ support has been enabled in the [General Settings](/experts/system/#general).
+Group Pattern | A partial LDAP query expression used to fetch groups from LDAP e.g. (objectClass=posixGroup)
+Group Name Field | The field which should be used as source for the _name_ of the group, which is used as a display name in [User Groups](/experts/system/#user-groups) management.
+Group Description Field | The field which should be used as source for the _description_ of the group.
 Follow Referrals | Specifies whether the authentication process should follow referrals or not.
+
+#### LDAP Import Users and Groups
+
+To ensure a successful operation of the _Import_ feature, it is essential to accurately configure the following fields: _Account and Group Base_, _Account Pattern_, _Account User Field_, _Account Name Field_, _Account E-Mail Field_, _Group Pattern_, _Group Name Field_, and _Group Description_.
+
+Once these configurations are correctly set up, the import process becomes a straightforward task. Simply click on the _Import_ action button, and **BDeploy** will seamlessly handle the rest. Should any errors occur during the import attempt, the system will promptly notify you of the encountered issues.
+
+For added confidence, consider utilizing the _Check_ action before initiating the _Import_ process. This will help ensure a smooth connection to the LDAP Server and preemptively address any potential issues.
+
+!!!info Tip
+Using the _Check_ action prior to _Import_ can help verify the connectivity to the LDAP Server and preemptively identify any issues that might affect the import process.
+!!!
 
 #### LDAP Certificate Trust
 
@@ -138,7 +153,7 @@ The [ **Deactivate Account** ] resp. [ **Activate Account** ] allows to deactiva
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts_Inactive.png){width=480}
 :::
 
-The [ **Assign Permission** ] opens a popup for adding a permission entry. Global permissions as well as scoped permissions on **Instance Groups** can be maintained here.
+The [ **Assign Permission** ] opens a popup for adding a permission entry. Global permissions as well as scoped permissions on **Instance Groups** and **Software Repositories** can be maintained here.
 
 :::{align=center}
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts_Permissions_Add.png){width=480}
@@ -155,6 +170,40 @@ The [ **Edit User** ] opens a popup for editing the main user properties and als
 
 :::{align=center}
 ![BDeploy User Accounts](/images/Doc_Admin_User_Accounts_Edit.png){width=480}
+:::
+
+## User Groups
+
+**BDeploy** supports user groups. Their purpose is to simplify security management. By adding users to groups, administrators can efficiantly manage access levels for multiple users in one place. All the permissions of an active user group will propagate to its users.
+
+**User Groups** are managed the same way as **User Accounts**
+
+The **User Groups** dialog lists all groups known in the system, regardless of whether they are local or LDAP groups.
+
+:::{align=center}
+![BDeploy User Groups](/images/Doc_Admin_User_Groups.png){width=480}
+:::
+
+Use the [ **Create User Group** ] button to create a local user group.
+
+:::{align=center}
+![BDeploy User Groups](/images/Doc_Admin_User_Groups_Add.png){width=480}
+:::
+
+Once a **User Group** is available, you can click it to open **User Group Details** panel where detail information is shown on top along with users that belong to the group as well as the list of permissions. 
+
+The [ **Deactivate Group** ] resp. [ **Activate Group** ] allows to deactivate/activate the selected user.
+
+Use [ **Add user to the group** ] input to add user to the group. Enter user's login name and press [ **+** ] icon. 
+
+:::{align=center}
+![BDeploy User Groups](/images/Doc_Admin_User_Groups_Add_Test_User.png){width=480}
+:::
+
+The [ **Assign Permission** ] opens a popup for adding a permission entry. Global permissions as well as scoped permissions on **Instance Groups** and **Software Repositories** can be maintained here.
+
+:::{align=center}
+![BDeploy User Groups](/images/Doc_Admin_User_Groups_Permissions_Add.png){width=480}
 :::
 
 ## Manual Cleanup
