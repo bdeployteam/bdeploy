@@ -96,6 +96,11 @@ describe('Admin UI Tests (Settings)', () => {
       cy.fillFormInput('user', 'user');
       cy.fillFormInput('pass', 'pass');
       cy.fillFormInput('base', 'dc=test,dc=server');
+    });
+
+    cy.screenshot('Doc_Admin_Ldap_Server_Config');
+
+    cy.inMainNavFlyin('add-ldap-server', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
 
@@ -104,7 +109,11 @@ describe('Admin UI Tests (Settings)', () => {
         method: 'POST',
         url: '/api/auth/admin/testLdapServer',
       }).as('ldapCheck');
+    });
 
+    cy.screenshot('Doc_Admin_Ldap_Servers');
+
+    cy.inMainNavContent(() => {
       cy.contains('tr', 'Test Server')
         .should('exist')
         .within(() => {
