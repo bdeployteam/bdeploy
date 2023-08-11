@@ -134,11 +134,7 @@ Click the [ **Add** ] button in the **Custom Parameters** group to add a new **c
 
 #### Global Parameters
 
-**Global Parameters** are valid for all **Processes** of an **Instance**. They are also configured in the **Process**, but changes are copied to all other processes that also use this parameter. **Global parameters** are matched by their parameter ID, and marked with a globe icon in the **parameter configuration** panel.
-
-!!!warning Warning
-**Global Parameters** have been deprecated in favor of [System Variables](/user/instancegroup/#system-variables) and [Instance Variables](/user/instance/#instance-variables).
-!!!
+**Global Parameters** are valid for all **Processes** of an **Instance** that have a global parameter with the same **id**. They are also configured in the **Process**, but changes are copied to all other processes that also use this parameter. **Global parameters** are matched by their parameter ID, and marked with a globe icon in the **parameter configuration** panel.
 
 #### Conditional Parameters
 
@@ -182,7 +178,9 @@ Select one or more directories to have those installed to the PC running the `CL
 
 ### Instance Variables
 
-**Instance Variables** have been introduced along with their even more global counterpart [System Variables](/user/instancegroup/#system-variables). **Instance Variables** replace the concept of [Global Parameters](/user/instance/#global-parameters). They offer a more flexible - and along with [System Variables](/user/instancegroup/#system-variables) also a more powerful - way of achieving the same result.
+**Instance Variables** have been introduced along with their even more global counterpart [System Variables](/user/instancegroup/#system-variables). **Instance Variables** complement the concept of [Global Parameters](/user/instance/#global-parameters). They offer a more flexible - and along with [System Variables](/user/instancegroup/#system-variables) also a more powerful - way of achieving the same result in many cases, and allow for even more use cases.
+
+**Instance Variables** come in especially handy when used outside of process parameters, e.g. in configuration files, or process endpoints. They are inherently shared between all elements of an instance.
 
 To add **Instance Variables**, use the [ **Instance Variables...** ] option in the **Instance Settings** panel. Add a new **Instance Variable** using the [ **+** ] button in the panels toolbar.
 
@@ -197,27 +195,6 @@ The value of an **Instance Variable** can not only be a plain value of the selec
 :::
 
 Once created **Instance Variables** can be referenced from all other [Link Expressions](/user/instance/#link-expressions), e.g. on process parameters, configuration files, etc.
-
-#### Migration from Global Parameters to Instance Variables
-
-Since **Instance Variables** are the successor concept for **Global Parameters** (those have been deprecated), there is a migration path.
-
-Products need to be updated at some point to no longer have the `global` flag on parameters, and use **Instance Variables** in their [Instance Templates](/user/instance/#instance-templates) instead. There is no automated migration for this, this has to be done manually by the respective maintainers.
-
-However, updating products will not "fix" existing instances, as templates are only used when creating instances, and also parameter values for existing processes will not be updated when changing the product.
-
-Thus, there is a [ **Migrate Globals** ] button on the **Instance Variables** panel. Also, updating the product version will now (as long as migration has not been performed yet) prompt to perform the migration to **Instance Variables**. This migration will pick each `global` parameter in the **Instance** and:
-
-1. Create an **Instance Variable** using the parameters ID as variable name.
-2. Set the current `global` value to the new **Instance Variable**.
-3. Replace the current value for all instances of the `global` parameter in the **Instance** with a link expression referencing the new **Instance Variable**
-4. Disable the use of `global` for **this Instance** only. All parameters will be treated as though the `global` flag was not set.
-
-This brings the instance into a state where it is safe to either update **BDeploy** to a version which no longer supports `global` (which does not exist yet), or update the product to a version where the `global` flag is no longer used on parameters.
-
-!!!warning Warning
-This migration must be done regardless of the product being updated. Without the migration, global parameters will turn into "normal" parameters at some point. If they still contain a plain value at that point in time (and not a [Link Expression](/user/instance/#link-expressions)) it will stay this way, and **each** of the formerly "connected" parameters (through the global mechanism) will have its own value and needs to be configured separately.
-!!!
 
 ### Configuration Files
 
