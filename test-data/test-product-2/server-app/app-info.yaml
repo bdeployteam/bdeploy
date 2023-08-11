@@ -39,6 +39,7 @@ startCommand:
       groupName: "Test Parameters"
       parameter: "--text"
       mandatory: false
+      global: true
     - uid: "param.pass"
       name: "Password"
       longDescription: "A password parameter"
@@ -194,6 +195,16 @@ startCommand:
       condition:
         expression: "{{X:Test}}"
         must: BE_NON_EMPTY
+    - uid: "param.global.cond"
+      name: "Condition Depending on Global"
+      groupName: "Test Parameters"
+      parameter: "--text"
+      defaultValue: "{{V:param.global}}"
+      mandatory: true
+      condition:
+        expression: "{{V:param.global}}"
+        must: CONTAIN
+        value: "test"
 
 
 endpoints:
