@@ -1,5 +1,6 @@
 import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import {
   BehaviorSubject,
@@ -7,7 +8,9 @@ import {
   Subscription,
   combineLatest,
   finalize,
+  interval,
   of,
+  startWith,
   switchMap,
 } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
@@ -102,6 +105,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     this.colEdit,
     this.colDelete,
   ];
+  /* template */ checked: ConfigVariable[];
 
   /* template */ newValue: VariableConfiguration;
   /* template */ newUsedIds: string[] = [];
@@ -110,6 +114,8 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
 
   /* template */ completionPrefixes = buildCompletionPrefixes();
   /* template */ completions: ContentCompletion[];
+
+  /* template */ clipboardVars: ConfigVariable[];
 
   private subscription: Subscription;
   private instancesUsing: InstanceDto[];
@@ -126,7 +132,8 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     private edit: SystemsEditService,
     instances: InstancesService,
     areas: NavAreasService,
-    protected auth: AuthenticationService
+    protected auth: AuthenticationService,
+    private snackbar: MatSnackBar
   ) {
     this.subscription = this.edit.current$.subscribe((c) => {
       if (!c) {
@@ -163,6 +170,12 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     );
 
     this.subscription.add(areas.registerDirtyable(this, 'panel'));
+
+    this.subscription.add(
+      interval(1000)
+        .pipe(startWith(null))
+        .subscribe(() => this.readFromClipboard())
+    );
   }
 
   ngOnDestroy(): void {
@@ -222,6 +235,91 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
         this.tb.closePanel();
       }
     });
+  }
+
+  /* template */ doCopy() {
+    const json = JSON.stringify(this.checked, null, '\t');
+
+    navigator.clipboard.writeText(json).then(
+      () =>
+        this.snackbar.open('Copied to clipboard successfully', null, {
+          duration: 1000,
+        }),
+      () =>
+        this.snackbar.open('Unable to write to clipboard.', null, {
+          duration: 1000,
+        })
+    );
+  }
+
+  /* template */ doPaste() {
+    if (!this.clipboardVars?.length) {
+      this.snackbar.open('Unable to read from clipboard.', null, {
+        duration: 1000,
+      });
+      return;
+    }
+    const newVars: VariableConfiguration[] = [];
+    const existingVars: VariableConfiguration[] = [];
+    this.clipboardVars.forEach((systemVar) => {
+      const found = this.system.config.systemVariables.some(
+        (sv) => sv.id === systemVar.value.id
+      );
+      if (found) {
+        existingVars.push(systemVar.value);
+      } else {
+        newVars.push(systemVar.value);
+      }
+    });
+    let message = `${this.clipboardVars.length} system variables copied from clipboard. `;
+    if (newVars.length) {
+      this.system.config.systemVariables.push(...newVars);
+      message += `Added ${newVars.length} system variables. `;
+    } else {
+      message += 'No new system variables to add. ';
+    }
+
+    if (existingVars.length) {
+      message += `Skipped ${existingVars.length} system variables for conflicting with existing ones.`;
+    }
+
+    this.system.config.systemVariables.sort((a, b) => a.id.localeCompare(b.id));
+    this.buildVariables();
+    this.snackbar.open(message, 'DISMISS');
+  }
+
+  private readFromClipboard() {
+    if (!navigator.clipboard.readText) {
+      // must be firefox. firefox allows reading the clipboard *only* from browser
+      // extensions but never from web pages itself. it is rumored that there is a config
+      // which can be enabled ("Dom.Events.Testing.AsynClipBoard"), however that did not
+      // change browser behaviour in tests.
+      this.clipboardVars = null;
+      console.error(
+        'Clipboard access is not supported in this browser. Pasting applications is not possible.'
+      );
+      return;
+    }
+    navigator.clipboard.readText().then(
+      (data) => {
+        this.clipboardVars = null;
+        try {
+          const systemVariables: ConfigVariable[] = JSON.parse(data);
+          const validNames = systemVariables.every((sv) => !!sv.name);
+          const validVariables = systemVariables.every(
+            (sv) => !!sv.value && !!sv.value.id
+          );
+          if (!validNames || !validVariables) {
+            console.error(`Invalid system variables format.`);
+          }
+          this.clipboardVars = systemVariables;
+        } catch {}
+      },
+      (e) => {
+        console.error('Unable to read from clipboard', e);
+        this.clipboardVars = null;
+      }
+    );
   }
 
   /* template */ onAdd(templ: TemplateRef<any>) {

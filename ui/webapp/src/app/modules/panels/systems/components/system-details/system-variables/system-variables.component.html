@@ -84,6 +84,20 @@
       (click)="onAdd(addTemplate)"
     ></app-bd-button>
     <app-bd-button
+      text="Copy Selected"
+      icon="content_copy"
+      [collapsed]="false"
+      (click)="doCopy()"
+      [disabled]="!checked?.length"
+    ></app-bd-button>
+    <app-bd-button
+      text="Paste"
+      icon="content_paste_go"
+      [collapsed]="false"
+      [disabled]="!clipboardVars?.length"
+      (click)="doPaste()"
+    ></app-bd-button>
+    <app-bd-button
       text="Save"
       icon="save"
       color="primary"
@@ -100,6 +114,8 @@
         <app-bd-data-table
           [records]="records"
           [columns]="columns"
+          [checkMode]="true"
+          [(checked)]="checked"
         ></app-bd-data-table>
       </div>
     </div>
