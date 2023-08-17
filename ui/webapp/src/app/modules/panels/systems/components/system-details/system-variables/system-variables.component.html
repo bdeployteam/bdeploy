@@ -80,7 +80,7 @@
     <app-bd-button
       text="Add"
       icon="add"
-      [disabled]="(saving$ | async)"
+      [disabled]="(saving$ | async) || !(auth.isCurrentScopeWrite$ | async)"
       (click)="onAdd(addTemplate)"
     ></app-bd-button>
     <app-bd-button
@@ -89,7 +89,7 @@
       color="primary"
       [collapsed]="false"
       [loadingWhen$]="saving$"
-      [disabled]="!isDirty() || (saving$ | async)"
+      [disabled]="!isDirty() || (saving$ | async) || !(auth.isCurrentScopeWrite$ | async)"
       (click)="onSave()"
     ></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>

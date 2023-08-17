@@ -16,6 +16,7 @@
       icon="add"
       [route]="['panels', 'systems', 'add']"
       tooltip="below"
+      [disabled]="!(authService.isCurrentScopeWrite$ | async)"
     ></app-bd-panel-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>

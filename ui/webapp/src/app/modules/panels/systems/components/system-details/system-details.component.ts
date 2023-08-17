@@ -1,7 +1,8 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesColumnsService } from 'src/app/modules/primary/instances/services/instances-columns.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -39,7 +40,8 @@ export class SystemDetailsComponent implements OnDestroy {
     private areas: NavAreasService,
     instances: InstancesService,
     private servers: ServersService,
-    private instanceColumns: InstancesColumnsService
+    private instanceColumns: InstancesColumnsService,
+    protected auth: AuthenticationService
   ) {
     this.subscription = combineLatest([
       edit.current$,
