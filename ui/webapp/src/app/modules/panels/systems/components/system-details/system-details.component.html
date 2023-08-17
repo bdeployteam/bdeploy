@@ -29,6 +29,7 @@
         [route]="['edit']"
         [relative]="true"
         [collapsed]="false"
+        [disabled]="!(auth.isCurrentScopeWrite$ | async)"
         text="Configure..."
         icon="settings"
       ></app-bd-panel-button>
@@ -44,7 +45,7 @@
         [collapsed]="false"
         icon="delete"
         (click)="onDelete()"
-        [disabled]="!isSynchronized() || !!(instancesUsing$ | async)?.length"
+        [disabled]="!isSynchronized() || !!(instancesUsing$ | async)?.length || !(auth.isCurrentScopeWrite$ | async)"
         [matTooltip]="!!(instancesUsing$ | async)?.length ? 'Cannot delete system while it is in use' : null"
         matTooltipPosition="below"
         matTooltipShowDelay="500"

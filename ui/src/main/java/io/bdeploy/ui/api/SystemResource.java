@@ -7,6 +7,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jvnet.hk2.annotations.Optional;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.common.security.RequiredPermission;
+import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
 import io.bdeploy.ui.dto.SystemTemplateDto;
 import io.bdeploy.ui.dto.SystemTemplateRequestDto;
@@ -29,10 +31,12 @@ public interface SystemResource {
     public List<SystemConfigurationDto> list();
 
     @POST
+    @RequiredPermission(permission = Permission.WRITE)
     public Manifest.Key update(SystemConfigurationDto dto);
 
     @DELETE
     @Path("{system}")
+    @RequiredPermission(permission = Permission.WRITE)
     public void delete(@PathParam("system") String system);
 
     @POST
@@ -42,6 +46,7 @@ public interface SystemResource {
 
     @POST
     @Path("apply")
+    @RequiredPermission(permission = Permission.WRITE)
     public SystemTemplateResultDto applyTemplate(SystemTemplateRequestDto request);
 
 }

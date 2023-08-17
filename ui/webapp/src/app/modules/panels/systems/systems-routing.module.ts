@@ -30,7 +30,7 @@ const SYSTEMS_ROUTES: Route[] = [
   {
     path: 'details/:skey/variables',
     component: SystemVariablesComponent,
-    canActivate: [ScopedWriteGuard],
+    canActivate: [ScopedReadGuard],
     canDeactivate: [DirtyDialogGuard],
     data: { max: true },
   },

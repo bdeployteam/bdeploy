@@ -3,11 +3,11 @@ import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import {
   BehaviorSubject,
+  Observable,
+  Subscription,
   combineLatest,
   finalize,
-  Observable,
   of,
-  Subscription,
   switchMap,
 } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
@@ -24,6 +24,7 @@ import {
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import {
   buildCompletionPrefixes,
@@ -72,6 +73,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     data: () => 'Edit',
     width: '40px',
     icon: () => 'edit',
+    actionDisabled: () => !this.auth.isCurrentScopeWrite(),
     action: (r) => {
       this.onEdit(r);
     },
@@ -83,6 +85,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     data: () => 'Delete',
     width: '40px',
     icon: () => 'delete',
+    actionDisabled: () => !this.auth.isCurrentScopeWrite(),
     action: (r) => {
       this.onDelete(r);
     },
@@ -122,7 +125,8 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   constructor(
     private edit: SystemsEditService,
     instances: InstancesService,
-    areas: NavAreasService
+    areas: NavAreasService,
+    protected auth: AuthenticationService
   ) {
     this.subscription = this.edit.current$.subscribe((c) => {
       if (!c) {
