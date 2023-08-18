@@ -26,21 +26,21 @@ import {
 import { DomSanitizer } from '@angular/platform-browser';
 import {
   BehaviorSubject,
-  debounceTime,
   Observable,
-  of,
   Subject,
   Subscription,
+  debounceTime,
+  of,
 } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
   BdDataColumnTypeHint,
+  BdDataGrouping,
+  UNMATCHED_GROUP,
   bdDataDefaultSearch,
   bdDataDefaultSort,
-  BdDataGrouping,
   bdSortGroups,
-  UNMATCHED_GROUP,
 } from 'src/app/models/data';
 import { BdSearchable, SearchService } from '../../services/search.service';
 

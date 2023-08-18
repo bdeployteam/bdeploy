@@ -11,10 +11,13 @@
         You can choose which of the nodes available on the server will be
         available for configuration in this instance.
       </div>
+      <!-- TODO: searching requires a complete revamp of the table wrt filtering. Filtered
+           rows are not even created, thus they cannot be checked. This is bad in this case. -->
       <app-bd-data-table
         [records]="records"
         [columns]="columns"
         [checkMode]="true"
+        [searchable]="false"
         [(checked)]="checked"
         (checkedChange)="onCheckedChange($event)"
         [checkChangeAllowed]="checkChangeAllowed"
