@@ -132,8 +132,27 @@
           ></app-history-diff-field>
         </ng-container>
       </div>
+      <ng-container *ngIf="diff.start.environment?.length">
+        <div class="bd-description-text mt-2.5">Start Environment:</div>
+        <div class="flex flex-wrap gap-1 justify-start items-center">
+          <ng-container *ngFor="let param of diff.start.environment">
+            <ng-template #paramPopup>
+              <app-param-desc-card
+                [descriptor]="param.descriptor"
+              ></app-param-desc-card>
+            </ng-template>
+            <!-- Don't set masking by the field, as parameters are partially pre-masked in case of passwords. -->
+            <app-history-diff-field
+              [diffSide]="diffSide"
+              *ngFor="let val of param.values"
+              [diff]="val"
+              [popup]="paramPopup"
+            ></app-history-diff-field>
+          </ng-container>
+        </div>
+      </ng-container>
       <ng-container *ngIf="diff.endpoints?.http?.length && !onlyCommand">
-        <div class="bd-description-text" class="mt-2.5">Endpoints:</div>
+        <div class="bd-description-text mt-2.5">Endpoints:</div>
         <div
           *ngFor="let epdiff of diff.endpoints.http"
           class="flex flex-col gap-1"

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
+import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration.ParameterConfigurationTarget;
 import io.bdeploy.interfaces.configuration.pcu.ProcessConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessControlConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor;
@@ -109,14 +110,26 @@ public class ApplicationConfiguration {
 
         String startCmd = TemplateHelper.process(start.executable, valueResolver, skipDelayCallback);
         processConfig.start.add(manifestInstallPath.resolve(startCmd).toString());
-        start.parameters.stream().map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
+        start.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.COMMAND)
+                .map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
                 .forEach(processConfig.start::addAll);
+
+        start.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.ENVIRONMENT).forEach(e -> {
+            processConfig.startEnv.put(e.preRendered.get(0),
+                    TemplateHelper.process(e.preRendered.get(1), valueResolver, skipDelayCallback));
+        });
 
         if (hasStopCommand()) {
             String stopCmd = TemplateHelper.process(stop.executable, valueResolver, skipDelayCallback);
             processConfig.stop.add(manifestInstallPath.resolve(stopCmd).toString());
-            stop.parameters.stream().map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
+            stop.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.COMMAND)
+                    .map(pc -> TemplateHelper.process(pc.preRendered, valueResolver, skipDelayCallback))
                     .forEach(processConfig.stop::addAll);
+
+            stop.parameters.stream().filter(p -> p.target == ParameterConfigurationTarget.ENVIRONMENT).forEach(e -> {
+                processConfig.stopEnv.put(e.preRendered.get(0),
+                        TemplateHelper.process(e.preRendered.get(1), valueResolver, skipDelayCallback));
+            });
         }
 
         return processConfig;

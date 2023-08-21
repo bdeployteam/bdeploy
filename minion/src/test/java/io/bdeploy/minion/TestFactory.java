@@ -25,7 +25,9 @@ import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration.ParameterConfigurationTarget;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
@@ -149,6 +151,14 @@ public class TestFactory {
         sleepParam.id = "sleepParam";
         sleepParam.preRendered.add("10");
         cfg.start.parameters.add(sleepParam);
+
+        ParameterConfiguration envParam = new ParameterConfiguration();
+        envParam.target = ParameterConfigurationTarget.ENVIRONMENT;
+        envParam.id = "XENV";
+        envParam.value = new LinkedValueConfiguration("Value");
+        envParam.preRendered.add("XENV");
+        envParam.preRendered.add("Value");
+        cfg.start.parameters.add(envParam);
 
         /* STEP 1e: setup the node configuration, which basically only references all application configs */
         InstanceNodeConfiguration inc = new InstanceNodeConfiguration();

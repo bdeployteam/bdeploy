@@ -26,7 +26,8 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
         PASSWORD,
         SERVER_PORT,
         CLIENT_PORT,
-        URL
+        URL,
+        ENVIRONMENT
     }
 
     /**

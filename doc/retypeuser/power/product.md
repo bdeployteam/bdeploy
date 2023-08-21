@@ -339,9 +339,11 @@ _Default:_ `STRING`
 
 _Mandatory:_ no
 
-_Description:_ Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`.
+_Description:_ Type of parameter. This defines the type of input field used to edit the parameter. Available are `STRING`, `NUMERIC`, `BOOLEAN`, `PASSWORD`, `CLIENT_PORT`, `SERVER_PORT`. Since *5.6.0*, `ENVIRONMENT` is available as an additional type.
 
 The `CLIENT_PORT` and `SERVER_PORT` types are treated like `NUMERIC` parameters throughout the whole application, with the exception of the dialogs that deal with ports specifically.
+
+The `ENVIRONMENT` type will cause a parameter to be put in the process' environment instead of its command line. The name of the environment variable is specified using the `parameter` field. The fields `hasValue`, `valueAsSeparateArg` and `valueSeparator` must not be set on `ENVIRONMENT` parameters, and are ignored. Instead the Operating System specific Environment Variable handling is applied.
 
 === **Attribute**: `customEditor`
 _Default:_ `STRING`

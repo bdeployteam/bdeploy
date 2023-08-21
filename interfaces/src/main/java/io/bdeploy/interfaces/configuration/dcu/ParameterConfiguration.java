@@ -8,11 +8,17 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 
 /**
  * Describes a single parameter as configured in a configuration UI.
  */
 public class ParameterConfiguration {
+
+    public enum ParameterConfigurationTarget {
+        COMMAND,
+        ENVIRONMENT,
+    }
 
     /**
      * The ID of the parameter, which can be used to reference it from other
@@ -51,6 +57,11 @@ public class ParameterConfiguration {
     public List<String> preRendered = new ArrayList<>();
 
     /**
+     * Whether the parameter is an environment variable.
+     */
+    public ParameterConfigurationTarget target = ParameterConfigurationTarget.COMMAND;
+
+    /**
      * Updates the {@link #preRendered} representation of the parameter using the given descriptor (can be <code>null</code> for
      * custom parameters).
      */
@@ -60,6 +71,13 @@ public class ParameterConfiguration {
         if (desc == null) {
             // custom parameter
             preRendered = Collections.singletonList(strValue);
+            return;
+        }
+
+        if (desc.type == ParameterType.ENVIRONMENT) {
+            // not on CLI.
+            target = ParameterConfigurationTarget.ENVIRONMENT;
+            preRendered = List.of(desc.parameter, strValue);
             return;
         }
 

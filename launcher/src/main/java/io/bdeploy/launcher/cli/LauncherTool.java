@@ -920,6 +920,11 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         try {
             ProcessBuilder b = new ProcessBuilder(command).redirectError(Redirect.INHERIT).redirectInput(Redirect.INHERIT)
                     .redirectOutput(Redirect.INHERIT).directory(appDir.toFile());
+
+            if (pc.startEnv != null) {
+                b.environment().putAll(pc.startEnv);
+            }
+
             return b.start();
         } catch (IOException e) {
             throw new IllegalStateException("Cannot start " + appCfg.id, e);

@@ -205,7 +205,13 @@ startCommand:
         expression: "{{V:param.global}}"
         must: CONTAIN
         value: "test"
-
+    - uid: "param.env.test"
+      name: "Test Environment"
+      description: "Sets the TEST_VAR environment variable"
+      groupName: "Test Parameters"
+      parameter: "TEST_VAR"
+      defaultValue: "X"
+      type: ENVIRONMENT
 
 endpoints:
     http:
