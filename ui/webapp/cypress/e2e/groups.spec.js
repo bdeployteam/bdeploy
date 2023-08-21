@@ -263,20 +263,14 @@ describe('Groups Tests', () => {
     });
 
     cy.inMainNavFlyin('app-settings', () => {
-      cy.get(`app-bd-button[text="Repair BHive Problems"]`).click();
-      cy.contains('app-bd-notification-card', 'Repair').within(() => {
+      cy.get(`app-bd-button[text="Repair BHive Problems and Prune"]`).click();
+      cy.contains('app-bd-notification-card', 'Repair and Prune').within(() => {
         cy.get('button[data-cy^="Yes"]').click();
       });
 
       cy.get('app-bd-dialog-message').within(() => {
         cy.contains('No damaged objects were found.').should('exist');
-        cy.contains('button', 'OK').should('exist').and('be.enabled').click();
-      });
-
-      cy.get(`app-bd-button[text="Prune unused data in BHive"]`).click();
-
-      cy.get('app-bd-dialog-message').within(() => {
-        cy.contains('Prune').should('exist');
+        cy.contains('Prune freed').should('exist');
         cy.contains('button', 'OK').should('exist').and('be.enabled').click();
       });
 

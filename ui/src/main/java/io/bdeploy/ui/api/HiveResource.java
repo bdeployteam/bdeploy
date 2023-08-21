@@ -1,10 +1,10 @@
 package io.bdeploy.ui.api;
 
 import java.util.List;
-import java.util.Map;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.ui.dto.HiveEntryDto;
 import jakarta.ws.rs.DELETE;
@@ -40,13 +40,9 @@ public interface HiveResource {
     public Response download(@ActivityScope @QueryParam("hive") String hiveParam, @QueryParam("id") String id);
 
     @GET
-    @Path("/prune")
-    public String prune(@ActivityScope @QueryParam("hive") String hive);
-
-    @GET
-    @Path("/fsck")
+    @Path("/repair-and-prune")
     @RequiredPermission(permission = Permission.ADMIN, scope = "hive")
-    public Map<String, String> fsck(@ActivityScope @QueryParam("hive") String hive, @QueryParam("fix") boolean fix);
+    public RepairAndPruneResultDto repairAndPrune(@ActivityScope @QueryParam("hive") String hive, @QueryParam("fix") boolean fix);
 
     @DELETE
     @Path("/delete")

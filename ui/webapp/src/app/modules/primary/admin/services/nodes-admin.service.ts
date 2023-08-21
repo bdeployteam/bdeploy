@@ -7,6 +7,7 @@ import {
   NodeAttachDto,
   ObjectChangeType,
   RemoteService,
+  RepairAndPruneResultDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import {
@@ -85,18 +86,14 @@ export class NodesAdminService {
       .pipe(measure(`Remove node ${nodeName}`));
   }
 
-  public fsckNode(nodeName: string): Observable<{ [key: string]: string }> {
+  public repairAndPruneNode(
+    nodeName: string
+  ): Observable<RepairAndPruneResultDto> {
     return this.http
-      .post<{ [key: string]: string }>(
-        `${this.apiPath()}/nodes/${nodeName}/fsck`,
+      .post<RepairAndPruneResultDto>(
+        `${this.apiPath()}/nodes/${nodeName}/repair-and-prune`,
         null
       )
-      .pipe(measure(`Fsck node ${nodeName}`));
-  }
-
-  public pruneNode(nodeName: string): Observable<number> {
-    return this.http
-      .post<number>(`${this.apiPath()}/nodes/${nodeName}/prune`, null)
-      .pipe(measure(`Prune node ${nodeName}`));
+      .pipe(measure(`Repair and Prune node ${nodeName}`));
   }
 }

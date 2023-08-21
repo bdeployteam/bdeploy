@@ -17,7 +17,6 @@ export class SettingsComponent {
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ pruning$ = new BehaviorSubject<boolean>(false);
   /* template */ repairing$ = new BehaviorSubject<boolean>(false);
 
   constructor(
@@ -28,49 +27,40 @@ export class SettingsComponent {
     private router: Router
   ) {}
 
-  /* template */ onRepair(group: InstanceGroupConfiguration): void {
+  /* template */ onRepairAndPrune(group: InstanceGroupConfiguration): void {
     this.dialog
       .confirm(
-        'Repair',
+        'Repair and Prune',
         'Repairing will remove any (anyhow) damaged and unusable elements from the BHive'
       )
       .subscribe((confirmed) => {
         if (confirmed) {
           this.repairing$.next(true);
           this.details
-            .repair(group.name)
+            .repairAndPrune(group.name)
             .pipe(finalize(() => this.repairing$.next(false)))
-            .subscribe((r) => {
+            .subscribe(({ repaired, pruned }) => {
               console.groupCollapsed('Damaged Objects');
-              const keys = Object.keys(r);
+              const keys = Object.keys(repaired);
               for (const key of keys) {
-                console.log(key, ':', r[key]);
+                console.log(key, ':', repaired[key]);
               }
               console.groupEnd();
 
+              const repairMessage = keys?.length
+                ? `Repair removed ${keys.length} damaged objects`
+                : `No damaged objects were found.`;
+
+              const pruneMessage = `Prune freed <strong>${pruned}</strong> in ${group.name}.`;
               this.dialog
                 .info(
-                  `Repair`,
-                  keys?.length
-                    ? `Repair removed ${keys.length} damaged objects`
-                    : `No damaged objects were found.`,
+                  `Repair and Prune`,
+                  `${repairMessage}<br/>${pruneMessage}`,
                   'build'
                 )
                 .subscribe();
             });
         }
-      });
-  }
-
-  /* template */ onPrune(group: InstanceGroupConfiguration): void {
-    this.pruning$.next(true);
-    this.details
-      .prune(group.name)
-      .pipe(finalize(() => this.pruning$.next(false)))
-      .subscribe((r) => {
-        this.dialog
-          .info('Prune', `Prune freed <strong>${r}</strong> in ${group.name}.`)
-          .subscribe();
       });
   }
 
