@@ -3,7 +3,7 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
 import { GroupUsersService } from '../../../services/group-users.service';
 
 @Component({
-  selector: 'app-permissions',
+  selector: 'app-instance-group-permissions',
   templateUrl: './permissions.component.html',
 })
 export class PermissionsComponent {

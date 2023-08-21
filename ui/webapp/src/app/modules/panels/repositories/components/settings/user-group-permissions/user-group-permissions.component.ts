@@ -13,7 +13,7 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
 import { RepositoryUsersService } from '../../../services/repository-users.service';
 
 @Component({
-  selector: 'app-user-group-permissions',
+  selector: 'app-software-repository-user-group-permissions',
   templateUrl: './user-group-permissions.component.html',
 })
 export class UserGroupPermissionsComponent {
