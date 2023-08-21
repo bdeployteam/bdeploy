@@ -19,6 +19,7 @@
   >
     <mat-icon
       *ngIf="icon && !svgIcon && !(loadingWhen$ | async)"
+      aria-hidden="false"
       class="local-icon-position"
       [matBadge]="badge"
       [matBadgeHidden]="!badge"
@@ -28,6 +29,7 @@
     >
     <mat-icon
       *ngIf="svgIcon && !(loadingWhen$ | async)"
+      aria-hidden="false"
       class="local-icon-position"
       [svgIcon]="svgIcon"
       [matBadge]="badge"
