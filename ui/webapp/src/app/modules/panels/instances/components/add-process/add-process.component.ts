@@ -8,10 +8,11 @@ import {
 } from '@angular/core';
 import {
   BehaviorSubject,
-  combineLatest,
   Observable,
-  of,
   Subscription,
+  combineLatest,
+  interval,
+  of,
 } from 'rxjs';
 import { distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -31,7 +32,6 @@ import {
   getAppOs,
   updateAppOs,
 } from 'src/app/modules/core/utils/manifest.utils';
-import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessEditService } from '../../services/process-edit.service';
@@ -96,7 +96,6 @@ export class AddProcessComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
 
   constructor(
-    private groups: GroupsService,
     private edit: ProcessEditService,
     public instanceEdit: InstanceEditService,
     public servers: ServersService
@@ -167,11 +166,19 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.readFromClipboard(node, nodeConfigs[node.nodeName]);
-
       this.records$.next(recs);
       this.loading$.next(false);
     });
+
+    this.subscription.add(
+      combineLatest([
+        this.edit.node$.pipe(distinctUntilChanged()),
+        this.instanceEdit.nodes$,
+        interval(1000),
+      ]).subscribe(([node, nodeConfigs]) =>
+        this.readFromClipboard(node, nodeConfigs[node.nodeName])
+      )
+    );
   }
 
   ngOnDestroy(): void {
