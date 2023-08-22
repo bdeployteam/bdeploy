@@ -29,6 +29,7 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
@@ -120,6 +121,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("start").build());
 
             out().println("Starting " + r.getMode() + "...");
+            log.info("Starting {} / {} ...", VersionHelper.getVersionAsString(), r.getMode());
 
             if (!config.skipConnectionCheck()) {
                 conCheck(r);
