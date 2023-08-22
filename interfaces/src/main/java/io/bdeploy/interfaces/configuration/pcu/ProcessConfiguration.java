@@ -2,6 +2,8 @@ package io.bdeploy.interfaces.configuration.pcu;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.annotation.processing.Generated;
 
@@ -69,6 +71,16 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
      * List of configured endpoints which are relevant for process control.
      */
     public EndpointsConfiguration endpoints = new EndpointsConfiguration();
+
+    /**
+     * A map of environment variables to set when launching a process.
+     */
+    public Map<String, String> startEnv = new TreeMap<>();
+
+    /**
+     * A map of environment variables to set when launching the stop command.
+     */
+    public Map<String, String> stopEnv = new TreeMap<>();
 
     @Override
     public int compareTo(ProcessConfiguration o) {

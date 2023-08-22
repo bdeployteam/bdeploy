@@ -14,10 +14,10 @@ import {
 import { NgControl, NgForm } from '@angular/forms';
 import {
   BehaviorSubject,
-  combineLatest,
   Observable,
-  of,
   Subscription,
+  combineLatest,
+  of,
 } from 'rxjs';
 import { debounceTime, map, skipWhile } from 'rxjs/operators';
 import {
@@ -27,7 +27,9 @@ import {
   InstanceConfigurationDto,
   LinkedValueConfiguration,
   ParameterConfiguration,
+  ParameterConfigurationTarget,
   ParameterDescriptor,
+  ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
@@ -315,6 +317,10 @@ export class ConfigProcessParamGroupComponent
         value: initialValue,
         pinned: false,
         preRendered: [],
+        target:
+          p.descriptor.type === ParameterType.ENVIRONMENT
+            ? ParameterConfigurationTarget.ENVIRONMENT
+            : ParameterConfigurationTarget.COMMAND,
       };
       this.doPreRender(p);
 
@@ -469,6 +475,7 @@ export class ConfigProcessParamGroupComponent
         value: createLinkedValue(this.customTemp.value),
         pinned: false,
         preRendered: [],
+        target: ParameterConfigurationTarget.COMMAND, // TODO: support custom environment?
       },
       editorEnabled: true,
     };
@@ -550,6 +557,10 @@ export class ConfigProcessParamGroupComponent
       p.descriptor,
       p.value.value
     );
+    p.value.target =
+      p.descriptor.type === ParameterType.ENVIRONMENT
+        ? ParameterConfigurationTarget.ENVIRONMENT
+        : ParameterConfigurationTarget.COMMAND;
     this.updatePreview$.next(true);
   }
 

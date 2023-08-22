@@ -15,6 +15,7 @@ import {
   LinkedValueConfiguration,
   ParameterConditionType,
   ParameterConfiguration,
+  ParameterConfigurationTarget,
   ParameterDescriptor,
   ParameterType,
   ProcessControlConfiguration,
@@ -200,6 +201,10 @@ export class ProcessEditService {
         if (own) {
           own.preRendered = this.preRenderParameter(param, own.value);
         }
+        own.target =
+          param.type === ParameterType.ENVIRONMENT
+            ? ParameterConfigurationTarget.ENVIRONMENT
+            : ParameterConfigurationTarget.COMMAND;
       }
 
       // always fully re-calculate stop command.
@@ -324,6 +329,10 @@ export class ProcessEditService {
       return [strValue];
     }
 
+    if (desc.type === ParameterType.ENVIRONMENT) {
+      return [desc.parameter, strValue];
+    }
+
     if (desc.hasValue) {
       if (!desc.parameter) {
         return [strValue];
@@ -370,11 +379,13 @@ export class ProcessEditService {
         for (const id of Object.keys(values)) {
           const p = app.start?.parameters?.find((x) => x.id === id);
           if (p) {
+            const desc = globals.find((x) => x.id === id);
             p.value = values[id];
-            p.preRendered = this.preRenderParameter(
-              globals.find((x) => x.id === id),
-              p.value
-            );
+            p.preRendered = this.preRenderParameter(desc, p.value);
+            p.target =
+              desc.type === ParameterType.ENVIRONMENT
+                ? ParameterConfigurationTarget.ENVIRONMENT
+                : ParameterConfigurationTarget.COMMAND;
           }
         }
       }
@@ -432,6 +443,10 @@ export class ProcessEditService {
           value: val,
           pinned: false,
           preRendered: this.preRenderParameter(p, val),
+          target:
+            p.type === ParameterType.ENVIRONMENT
+              ? ParameterConfigurationTarget.ENVIRONMENT
+              : ParameterConfigurationTarget.COMMAND,
         };
       })
       .filter((p) => !!p);

@@ -21,6 +21,7 @@ import io.bdeploy.interfaces.descriptor.application.ApplicationDescriptor.Applic
 import io.bdeploy.interfaces.descriptor.application.ExecutableDescriptor;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
+import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
 
 public class TestAppFactory {
 
@@ -118,6 +119,7 @@ public class TestAppFactory {
         cfg.startCommand.parameters.add(getParam("--param1", "Parameter 1", "test"));
         cfg.startCommand.parameters.add(getParam("--param2", "Parameter 2", "more"));
         cfg.startCommand.parameters.add(getParam("--jdk", "Parameter 2", "{{M:jdk}}"));
+        cfg.startCommand.parameters.add(getEnv("XENV", "Env Desc", "X"));
 
         if (port != 0) {
             HttpEndpoint fakeEndpoint = new HttpEndpoint();
@@ -162,4 +164,11 @@ public class TestAppFactory {
         return c;
     }
 
+    private static ParameterDescriptor getEnv(String param, String desc, String def) {
+        ParameterDescriptor e = getParam(param, desc, def);
+
+        e.type = ParameterType.ENVIRONMENT;
+
+        return e;
+    }
 }

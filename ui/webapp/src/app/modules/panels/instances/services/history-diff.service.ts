@@ -11,6 +11,7 @@ import {
   InstanceConfiguration,
   OperatingSystem,
   ParameterConfiguration,
+  ParameterConfigurationTarget,
   ParameterDescriptor,
   ParameterType,
   ProcessControlConfiguration,
@@ -122,6 +123,7 @@ export class CommandDiff {
   public type: DiffType;
   public executable: Difference;
   public parameters: ParameterDiff[] = [];
+  public environment: ParameterDiff[] = [];
 
   constructor(
     base: CommandConfiguration,
@@ -135,7 +137,10 @@ export class CommandDiff {
         const compareParam = compare?.parameters?.find(
           (p) => p.id === param.id
         );
-        this.parameters.push(
+        (param.target === ParameterConfigurationTarget.ENVIRONMENT
+          ? this.environment
+          : this.parameters
+        ).push(
           new ParameterDiff(
             param,
             compareParam,
@@ -159,7 +164,8 @@ export class CommandDiff {
       compare,
       this.executable.type,
       newParamChange,
-      ...this.parameters.map((p) => p.type)
+      ...this.parameters.map((p) => p.type),
+      ...this.environment.map((p) => p.type)
     );
   }
 }
@@ -174,6 +180,22 @@ export class ParameterDiff {
     compare: ParameterConfiguration,
     public descriptor: ParameterDescriptor
   ) {
+    // in case this is an environment variable, we can shorten things.
+    if (descriptor?.type === ParameterType.ENVIRONMENT) {
+      this.values.push(
+        new Difference(
+          `${descriptor.parameter}=${getPreRenderable(base?.value)}`,
+          `${descriptor.parameter}=${getPreRenderable(compare?.value)}`
+        )
+      );
+      this.type = getParentChangeType(
+        base,
+        compare,
+        ...this.values.map((d) => d.type)
+      );
+      return;
+    }
+
     // in case we KNOW this is a PASSWORD parameter, we want to pre-mask the value in each actual value.
     const maskingLV =
       descriptor?.type === ParameterType.PASSWORD

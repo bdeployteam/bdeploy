@@ -453,7 +453,7 @@ public class ProcessController {
         doCancelProbeTasks();
 
         try {
-            process = launch(processConfig.start);
+            process = launch(processConfig.start, processConfig.startEnv);
             processHandle = process.toHandle();
             processStdin = process.getOutputStream();
             processLogger = new RollingStreamGobbler(processDir, process, instanceId, processConfig.id);
@@ -964,11 +964,14 @@ public class ProcessController {
      * @return the process handle
      * @throws IOException in case of an error starting the {@link Process}.
      */
-    private Process launch(List<String> cmd) throws IOException {
+    private Process launch(List<String> cmd, Map<String, String> env) throws IOException {
         List<String> command = replaceVariables(cmd);
         logger.log(l -> l.debug("Launching new process {}", command));
 
         ProcessBuilder b = new ProcessBuilder(command).directory(processDir.toFile());
+        if (env != null) {
+            b.environment().putAll(env);
+        }
         b.redirectErrorStream(true);
 
         return b.start();
@@ -1019,7 +1022,7 @@ public class ProcessController {
             logger.log(l -> l.info("Invoking configured stop command."));
             logger.log(l -> l.debug("Stop command: {}.", processConfig.stop));
 
-            Process stopProcess = launch(stopCommand);
+            Process stopProcess = launch(stopCommand, processConfig.stopEnv);
             NoThrowAutoCloseable stopLogger = null;
 
             // either we can (and must) attach to an existing one, or we need a new one in case the process was recovered.

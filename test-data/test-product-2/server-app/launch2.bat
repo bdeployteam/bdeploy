@@ -4,6 +4,7 @@
 @rem # TEST APPLICATION                              #
 @rem #################################################
 echo "Command line arguments %*"
+echo "Environment var TEST_VAR=%TEST_VAR%"
 
 goto loop
 

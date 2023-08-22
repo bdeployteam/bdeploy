@@ -52,9 +52,11 @@ class RemoteProcessConfigCliTest {
         var result = tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                 "--instanceGroup=demo", "--uuid=" + id, "--process=app", "--showParameters");
 
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
         assertEquals("sleepParam", result.get(0).get("Id"));
         assertEquals("", result.get(0).get("Value"));
+        assertEquals("XENV", result.get(1).get("Id"));
+        assertEquals("Value", result.get(1).get("Value"));
 
         tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--process=app", "--set=--param1", "--value=TestValue");
@@ -62,11 +64,13 @@ class RemoteProcessConfigCliTest {
         result = tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                 "--instanceGroup=demo", "--uuid=" + id, "--process=app", "--showParameters");
 
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
         assertEquals("sleepParam", result.get(0).get("Id"));
         assertEquals("", result.get(0).get("Value"));
         assertEquals("--param1", result.get(1).get("Id"));
         assertEquals("TestValue", result.get(1).get("Value"));
+        assertEquals("XENV", result.get(2).get("Id"));
+        assertEquals("Value", result.get(2).get("Value"));
 
         tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--process=app", "--set=--param1", "--value=Other Test Value");
@@ -74,7 +78,7 @@ class RemoteProcessConfigCliTest {
         result = tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                 "--instanceGroup=demo", "--uuid=" + id, "--process=app", "--showParameters");
 
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
         assertEquals("--param1", result.get(1).get("Id"));
         assertEquals("Other Test Value", result.get(1).get("Value"));
 
@@ -84,8 +88,9 @@ class RemoteProcessConfigCliTest {
         result = tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                 "--instanceGroup=demo", "--uuid=" + id, "--process=app", "--showParameters");
 
-        assertEquals(1, result.size());
+        assertEquals(2, result.size());
         assertEquals("sleepParam", result.get(0).get("Id"));
+        assertEquals("XENV", result.get(1).get("Id"));
 
         tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth, "--instanceGroup=demo",
                 "--uuid=" + id, "--process=app", "--set=my.custom.1", "--value=Custom One");
@@ -96,7 +101,7 @@ class RemoteProcessConfigCliTest {
         result = tools.execute(RemoteProcessConfigTool.class, "--remote=" + remote.getUri(), "--token=" + auth,
                 "--instanceGroup=demo", "--uuid=" + id, "--process=app", "--showParameters");
 
-        assertEquals(3, result.size());
+        assertEquals(4, result.size());
         assertEquals("my.custom.1", result.get(0).get("Id"));
         assertEquals("Custom One", result.get(0).get("Value"));
         assertEquals("*", result.get(0).get("Custom"));

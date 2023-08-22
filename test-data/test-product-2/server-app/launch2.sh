@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 echo "Command line arguments" $@
+echo "Environment var TEST_VAR=${TEST_VAR}"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
