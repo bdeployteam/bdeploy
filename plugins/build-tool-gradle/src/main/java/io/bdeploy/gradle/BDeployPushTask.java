@@ -1,7 +1,10 @@
 package io.bdeploy.gradle;
 
+import javax.inject.Inject;
+
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
@@ -14,7 +17,6 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.gradle.extensions.BDeployServerExtension;
 import io.bdeploy.gradle.extensions.ServerExtension;
-import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Pushes a previously built product to a specified server.
@@ -25,10 +27,14 @@ public class BDeployPushTask extends DefaultTask {
 	private DirectoryProperty localBHive;
 	private Property<Key> key;
 
-	public BDeployPushTask() {
-		localBHive = getProject().getObjects().directoryProperty();
-		key = getProject().getObjects().property(Key.class);
-		getExtensions().create("target", BDeployServerExtension.class, getProject().getObjects());
+	/**
+	 * @param factory the factory to create properties
+	 */
+	@Inject
+	public BDeployPushTask(ObjectFactory factory) {
+		localBHive = factory.directoryProperty();
+		key = factory.property(Key.class);
+		getExtensions().create("target", BDeployServerExtension.class, factory);
 
 		getProject().afterEvaluate(prj -> {
 			if (productTask != null) {
@@ -42,6 +48,9 @@ public class BDeployPushTask extends DefaultTask {
 		});
 	}
 
+	/**
+	 * Executes the task
+	 */
 	@TaskAction
 	public void perform() {
 		BDeployServerExtension ext = getExtensions().getByType(BDeployServerExtension.class);
@@ -52,13 +61,7 @@ public class BDeployPushTask extends DefaultTask {
 		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
 				: new ActivityReporter.Null();
 		for (ServerExtension target : ext.getServers().getAsMap().values()) {
-			if (!target.getUri().isPresent() || !target.getToken().isPresent()
-					|| !target.getInstanceGroup().isPresent()) {
-				throw new IllegalStateException("Set '.uri', '.token' and '.instanceGroup' on " + target.getName());
-			}
-
-			RemoteService svc = new RemoteService(UriBuilder.fromUri(target.getUri().get()).build(),
-					target.getToken().get());
+			RemoteService svc = target.getRemote();
 
 			System.out.println(" >> Pushing " + key.get() + " to " + target.getName());
 

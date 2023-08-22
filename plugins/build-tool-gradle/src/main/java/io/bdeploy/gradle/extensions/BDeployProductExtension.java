@@ -17,6 +17,9 @@ public class BDeployProductExtension {
 	private final NamedDomainObjectContainer<ApplicationExtension> applications;
 	private final MapProperty<String, String> labels;
 
+	/**
+	 * @param factory the factory to create properties with.
+	 */
 	public BDeployProductExtension(ObjectFactory factory) {
 		this.version = factory.property(String.class);
 		this.productInfo = factory.fileProperty();
