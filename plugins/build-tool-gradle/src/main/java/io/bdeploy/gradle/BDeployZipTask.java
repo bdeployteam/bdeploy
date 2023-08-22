@@ -2,9 +2,12 @@ package io.bdeploy.gradle;
 
 import java.net.URI;
 
+import javax.inject.Inject;
+
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
@@ -28,10 +31,14 @@ public class BDeployZipTask extends DefaultTask {
 	private Property<Key> key;
 	private RegularFileProperty output;
 
-	public BDeployZipTask() {
-		localBHive = getProject().getObjects().directoryProperty();
-		key = getProject().getObjects().property(Key.class);
-		output = getProject().getObjects().fileProperty();
+	/**
+	 * @param factory the factory to create properties.
+	 */
+	@Inject
+	public BDeployZipTask(ObjectFactory factory) {
+		localBHive = factory.directoryProperty();
+		key = factory.property(Key.class);
+		output = factory.fileProperty();
 
 		getProject().afterEvaluate(prj -> {
 			if (productTask != null) {
@@ -45,6 +52,9 @@ public class BDeployZipTask extends DefaultTask {
 		});
 	}
 
+	/**
+	 * Executes the task
+	 */
 	@TaskAction
 	public void perform() {
 		System.out.println(" >> Zip'ing " + key.get());

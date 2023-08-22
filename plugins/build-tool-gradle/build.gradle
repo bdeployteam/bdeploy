@@ -8,7 +8,7 @@
 
 plugins {
     // Apply the Java Gradle plugin development plugin to add support for developing Gradle plugins
-    id "com.gradle.plugin-publish" version "1.0.0"
+    id "com.gradle.plugin-publish" version "1.2.1"
     id 'java-gradle-plugin'
     id 'eclipse'
     id "com.github.ben-manes.versions" version "0.47.0"
@@ -21,7 +21,7 @@ repositories {
     }
 }
 
-version = "5.1.0"
+version = "5.5.0"
 group = "io.bdeploy"
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -33,26 +33,23 @@ dependencies {
     testImplementation gradleTestKit()
 
     implementation (
-        'io.bdeploy:api:5.1.0'
+        'io.bdeploy:api:5.5.0'
     )
 }
 
 gradlePlugin {
     // Define the plugin
+    website = 'https://bdeploy.io/'
+    vcsUrl = 'https://github.com/bdeployteam/bdeploy'
     plugins {
-        bdeploy {
+        create("bdeploy") {
             id = 'io.bdeploy.gradle.plugin'
             implementationClass = 'io.bdeploy.gradle.BDeployGradlePlugin'
             displayName = "BDeploy Gradle plugin"
             description = 'Plugin which builds BDeploy products from your applications'
+            tags.set(['BDeploy', 'deployment', 'application', 'product'])
         }
     }
-}
-
-pluginBundle {
-    website = 'https://bdeploy.io/'
-    vcsUrl = 'https://github.com/bdeployteam/bdeploy'
-    tags = ['BDeploy', 'deployment', 'application', 'product']
 }
 
 // Add a source set for the functional test suite

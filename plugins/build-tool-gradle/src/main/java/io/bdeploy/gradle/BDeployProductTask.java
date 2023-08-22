@@ -10,9 +10,12 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.inject.Inject;
+
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
@@ -32,12 +35,10 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.gradle.config.BDeployRepositoryServerConfig;
 import io.bdeploy.gradle.extensions.ApplicationExtension;
 import io.bdeploy.gradle.extensions.BDeployProductExtension;
-import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Builds a product into a local BHive. Requires the applications with an
@@ -53,9 +54,13 @@ public class BDeployProductTask extends DefaultTask {
 	private boolean dryRun = false;
 	private Key key;
 
-	public BDeployProductTask() {
-		this.localBHive = getProject().getObjects().directoryProperty();
-		this.getExtensions().create("product", BDeployProductExtension.class, getProject().getObjects());
+	/**
+	 * @param factory the factory to create properties
+	 */
+	@Inject
+	public BDeployProductTask(ObjectFactory factory) {
+		this.localBHive = factory.directoryProperty();
+		this.getExtensions().create("product", BDeployProductExtension.class, factory);
 
 		getProject().afterEvaluate(prj -> {
 			if (!localBHive.isPresent()) {
@@ -67,6 +72,11 @@ public class BDeployProductTask extends DefaultTask {
 		getOutputs().upToDateWhen(e -> false);
 	}
 
+	/**
+	 * Executes the task
+	 * 
+	 * @throws IOException in case of problems
+	 */
 	@TaskAction
 	public void perform() throws IOException {
 		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
@@ -79,10 +89,8 @@ public class BDeployProductTask extends DefaultTask {
 		String version = ext.getVersion().getOrElse(getProject().getVersion().toString());
 		File hive = localBHive.getAsFile().get();
 
-		if (repositoryServer.getUri() != null && repositoryServer.getToken() != null) {
-			RemoteService sourceServer = new RemoteService(UriBuilder.fromUri(repositoryServer.getUri()).build(),
-					repositoryServer.getToken());
-			fetcher = new RemoteDependencyFetcher(sourceServer, null, reporter);
+		if (repositoryServer.isConfigured()) {
+			fetcher = new RemoteDependencyFetcher(repositoryServer.getRemote(), null, reporter);
 		}
 
 		if (prodInfoYaml == null || !prodInfoYaml.exists()) {
@@ -133,7 +141,7 @@ public class BDeployProductTask extends DefaultTask {
 
 		File pvdFile = new File(prodInfoYaml.getParentFile(), pd.versionFile);
 
-		log.info(" :: Repository Server: {}", repositoryServer.getUri());
+		log.info(" :: Repository Server: {}", repositoryServer.getRemote().getUri());
 		log.info(" :: Product: {}", pd.product);
 		log.info(" :: Product Version: {}", version);
 		log.info(" :: Local BHive: {}", hive);
@@ -184,6 +192,9 @@ public class BDeployProductTask extends DefaultTask {
 		return repositoryServer;
 	}
 
+	/**
+	 * @param action configuration for a repository server.
+	 */
 	public void repositoryServer(Action<? super BDeployRepositoryServerConfig> action) {
 		action.execute(repositoryServer);
 	}
@@ -204,6 +215,9 @@ public class BDeployProductTask extends DefaultTask {
 		return dryRun;
 	}
 
+	/**
+	 * @param dryRun whether to dryRun only.
+	 */
 	public void setDryRun(boolean dryRun) {
 		this.dryRun = dryRun;
 	}

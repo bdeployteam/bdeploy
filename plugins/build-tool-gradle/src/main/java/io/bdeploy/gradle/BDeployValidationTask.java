@@ -20,7 +20,6 @@ import io.bdeploy.api.validation.v1.dto.ProductValidationIssueApi.ProductValidat
 import io.bdeploy.api.validation.v1.dto.ProductValidationResponseApi;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.gradle.config.BDeployRepositoryServerConfig;
-import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Validates a BDeploy product from a given product-validation.yaml
@@ -32,6 +31,9 @@ public class BDeployValidationTask extends DefaultTask {
 	private BDeployRepositoryServerConfig validationServer = new BDeployRepositoryServerConfig();
 	private RegularFileProperty validationYaml;
 
+	/**
+	 * @param factory creates the task
+	 */
 	@Inject
 	public BDeployValidationTask(ObjectFactory factory) {
 		validationYaml = factory.fileProperty();
@@ -40,23 +42,23 @@ public class BDeployValidationTask extends DefaultTask {
 		getOutputs().upToDateWhen(e -> false);
 	}
 
+	/**
+	 * Executes the task
+	 * 
+	 * @throws IOException in case of issues.
+	 */
 	@TaskAction
 	public void perform() throws IOException {
 		// apply from extension if set, but prefer local configuration.
 		File descriptorYaml = validationYaml.getAsFile().getOrNull();
 
-		if (validationServer.getUri() == null || validationServer.getToken() == null) {
-			throw new IllegalArgumentException("Need a configured validationServer");
-		}
-		
-		RemoteService sourceServer = new RemoteService(UriBuilder.fromUri(validationServer.getUri()).build(),
-				validationServer.getToken());
+		RemoteService sourceServer = validationServer.getRemote();
 
 		if (descriptorYaml == null || !descriptorYaml.exists()) {
 			throw new IllegalArgumentException("product-validation.yaml is not set or does not exist: " + descriptorYaml);
 		}
 
-		log.info(" :: Repository Server: {}", validationServer.getUri());
+		log.info(" :: Repository Server: {}", sourceServer.getUri());
 		log.info(" :: Product Validation: {}", descriptorYaml);
 
 		ProductValidationResponseApi validate = ProductValidationHelper.validate(descriptorYaml.toPath(), sourceServer);
@@ -78,6 +80,9 @@ public class BDeployValidationTask extends DefaultTask {
 		return validationServer;
 	}
 
+	/**
+	 * @param action configuration action for validation server.
+	 */
 	public void validationServer(Action<? super BDeployRepositoryServerConfig> action) {
 		action.execute(validationServer);
 	}

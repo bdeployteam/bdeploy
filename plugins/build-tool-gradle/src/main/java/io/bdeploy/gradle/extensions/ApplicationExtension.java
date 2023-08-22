@@ -15,6 +15,10 @@ public class ApplicationExtension {
 	private final RegularFileProperty yaml;
 	private final ListProperty<String> os;
 
+	/**
+	 * @param name the name of the instance
+	 * @param factory the factory to create properties.
+	 */
 	public ApplicationExtension(String name, ObjectFactory factory) {
 		this.name = name;
 		this.yaml = factory.fileProperty();
@@ -37,6 +41,9 @@ public class ApplicationExtension {
 		return yaml;
 	}
 
+	/**
+	 * @param file the path to the 'app-info.yaml'.
+	 */
 	public void setYaml(File file) {
 		yaml.set(file);
 	}
