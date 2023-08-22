@@ -14,20 +14,12 @@
         storage.</span
       >
       <app-bd-button
-        text="Repair Default BHive"
+        text="Repair Default BHive and Prune"
         icon="build"
         [collapsed]="false"
         [disabled]="state.offline || (repairing$ | async)"
-        (click)="doFsck()"
+        (click)="doRepairAndPrune()"
         [loadingWhen$]="repairing$"
-      ></app-bd-button>
-      <app-bd-button
-        text="Prune Default BHive"
-        icon="delete_sweep"
-        [collapsed]="false"
-        [disabled]="state.offline || (pruning$ | async)"
-        (click)="doPrune()"
-        [loadingWhen$]="pruning$"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

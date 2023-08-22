@@ -21,19 +21,11 @@
       ></app-bd-panel-button>
       <app-bd-button
         icon="construction"
-        text="Repair"
+        text="Repair and Prune Unused Objects"
         [collapsed]="false"
-        (click)="doRepair()"
+        (click)="doRepairAndPrune()"
         [loadingWhen$]="repairing$"
         [disabled]="repairing$ | async"
-      ></app-bd-button>
-      <app-bd-button
-        icon="cleaning_services"
-        text="Prune Unused Objects"
-        [collapsed]="false"
-        (click)="doPrune()"
-        [loadingWhen$]="pruning$"
-        [disabled]="pruning$ | async"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

@@ -1,9 +1,8 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, finalize, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
 import { MinionStatusDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { formatSize } from 'src/app/modules/core/utils/object.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
 
 @Component({
@@ -14,7 +13,6 @@ export class NodeMaintenanceComponent implements OnDestroy {
   /* template */ nodeName: string;
   /* template */ state: MinionStatusDto;
   /* template */ repairing$ = new BehaviorSubject<boolean>(false);
-  /* template */ pruning$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -34,52 +32,39 @@ export class NodeMaintenanceComponent implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  /* template */ doFsck() {
+  /* template */ doRepairAndPrune() {
     this.dialog
       .confirm(
-        'Repair',
+        'Repair and Prune',
         'Repairing will remove any (anyhow) damaged and unusable elements from the BHive'
       )
       .subscribe((confirmed) => {
         if (confirmed) {
           this.repairing$.next(true);
           this.nodesAdmin
-            .fsckNode(this.nodeName)
+            .repairAndPruneNode(this.nodeName)
             .pipe(finalize(() => this.repairing$.next(false)))
-            .subscribe((r) => {
+            .subscribe(({ repaired, pruned }) => {
               console.groupCollapsed('Damaged Objects');
-              const keys = Object.keys(r);
+              const keys = Object.keys(repaired);
               for (const key of keys) {
-                console.log(key, ':', r[key]);
+                console.log(key, ':', repaired[key]);
               }
               console.groupEnd();
 
+              const repairMessage = keys?.length
+                ? `Repair removed ${keys.length} damaged objects`
+                : `No damaged objects were found.`;
+              const pruneMessage = `Prune freed <strong>${pruned}</strong> on ${this.nodeName}.`;
               this.dialog
                 .info(
-                  `Repair`,
-                  keys?.length
-                    ? `Repair removed ${keys.length} damaged objects`
-                    : `No damaged objects were found.`,
+                  `Repair and Prune`,
+                  `${repairMessage}<br/>${pruneMessage}`,
                   'build'
                 )
                 .subscribe();
             });
         }
-      });
-  }
-
-  /* template */ doPrune() {
-    this.pruning$.next(true);
-    this.nodesAdmin
-      .pruneNode(this.nodeName)
-      .pipe(finalize(() => this.pruning$.next(false)))
-      .subscribe((r) => {
-        this.dialog
-          .info(
-            'Prune',
-            `Prune freed <strong>${formatSize(r)}</strong> on ${this.nodeName}.`
-          )
-          .subscribe();
       });
   }
 }

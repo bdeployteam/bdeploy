@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   CustomAttributesRecord,
   InstanceGroupConfiguration,
+  RepairAndPruneResultDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 
@@ -28,16 +29,12 @@ export class GroupDetailsService {
     return this.http.post(`${this.apiPath(group)}/attributes`, attributes);
   }
 
-  public prune(hive: string) {
-    return this.http.get(`${this.hiveApiPath}/prune`, {
-      params: { hive },
-      responseType: 'text',
-    });
-  }
-
-  public repair(hive: string) {
-    return this.http.get<Map<string, string>>(`${this.hiveApiPath}/fsck`, {
-      params: { hive, fix: 'true' },
-    });
+  public repairAndPrune(hive: string): Observable<RepairAndPruneResultDto> {
+    return this.http.get<RepairAndPruneResultDto>(
+      `${this.hiveApiPath}/repair-and-prune`,
+      {
+        params: { hive, fix: 'true' },
+      }
+    );
   }
 }

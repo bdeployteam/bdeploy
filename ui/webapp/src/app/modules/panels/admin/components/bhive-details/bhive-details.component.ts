@@ -13,7 +13,6 @@ import { HiveService } from 'src/app/modules/primary/admin/services/hive.service
 export class BhiveDetailsComponent implements OnDestroy {
   /* template */ bhive$ = new BehaviorSubject<string>(null);
   /* template */ repairing$ = new BehaviorSubject<boolean>(false);
-  /* template */ pruning$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -33,55 +32,42 @@ export class BhiveDetailsComponent implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  /* template */ doRepair(): void {
+  /* template */ doRepairAndPrune(): void {
     this.dialog
       .confirm(
-        'Repair',
+        'Repair and Prune',
         'Repairing will remove any (anyhow) damaged and unusable elements from the BHive'
       )
       .subscribe((confirmed) => {
         if (confirmed) {
           this.repairing$.next(true);
           this.hives
-            .fsck(this.bhive$.value, true)
+            .repairAndPrune(this.bhive$.value, true)
             .pipe(
               finalize(() => this.repairing$.next(false)),
-              measure('Repairing ' + this.bhive$.value)
+              measure('Repairing and Pruning ' + this.bhive$.value)
             )
-            .subscribe((r) => {
+            .subscribe(({ repaired, pruned }) => {
               console.groupCollapsed('Damaged Objects');
-              const keys = Object.keys(r);
+              const keys = Object.keys(repaired);
               for (const key of keys) {
-                console.log(key, ':', r[key]);
+                console.log(key, ':', repaired[key]);
               }
               console.groupEnd();
 
+              const repairMessage = keys?.length
+                ? `Repair removed ${keys.length} damaged objects.`
+                : `No damaged objects were found.`;
+              const pruneMessage = `Prune freed <strong>${pruned}</strong> in ${this.bhive$.value}.`;
               this.dialog
                 .info(
-                  `Repair`,
-                  keys?.length
-                    ? `Repair removed ${keys.length} damaged objects`
-                    : `No damaged objects were found.`,
+                  `Repair and Prune`,
+                  `${repairMessage}<br/>${pruneMessage}`,
                   'build'
                 )
                 .subscribe();
             });
         }
-      });
-  }
-
-  /* template */ doPrune(): void {
-    this.pruning$.next(true);
-    this.hives
-      .prune(this.bhive$.value)
-      .pipe(finalize(() => this.pruning$.next(false)))
-      .subscribe((r) => {
-        this.dialog
-          .info(
-            'Prune',
-            `Prune freed <strong>${r}</strong> in ${this.bhive$.value}.`
-          )
-          .subscribe();
       });
   }
 }

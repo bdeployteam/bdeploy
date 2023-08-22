@@ -9,7 +9,9 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper;
+import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
@@ -113,19 +115,11 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
     }
 
     @Override
-    public Map<String, String> fsckNode(String name) {
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            throw new WebApplicationException("Operation not available in mode CENTRAL");
-        }
-        return ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).fsckNode(name);
+    public RepairAndPruneResultDto repairAndPruneNode(String name) {
+        RepairAndPruneResultDto result = new RepairAndPruneResultDto();
+        result.repaired = ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).fsckNode(name);
+        result.pruned = FormatHelper.formatFileSize(
+                ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).pruneNode(name));
+        return result;
     }
-
-    @Override
-    public long pruneNode(String name) {
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            throw new WebApplicationException("Operation not available in mode CENTRAL");
-        }
-        return ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).pruneNode(name);
-    }
-
 }

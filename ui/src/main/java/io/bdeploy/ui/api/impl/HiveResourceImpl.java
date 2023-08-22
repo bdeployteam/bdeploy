@@ -35,6 +35,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.FormatHelper;
+import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.ui.api.HiveLoggingResource;
 import io.bdeploy.ui.api.HiveResource;
@@ -148,7 +149,14 @@ public class HiveResourceImpl implements HiveResource {
     }
 
     @Override
-    public String prune(String hiveParam) {
+    public RepairAndPruneResultDto repairAndPrune(String hiveParam, boolean fix) {
+        RepairAndPruneResultDto result = new RepairAndPruneResultDto();
+        result.repaired = fsck(hiveParam, fix);
+        result.pruned = prune(hiveParam);
+        return result;
+    }
+
+    private String prune(String hiveParam) {
         log.debug("prune(\"{}\")", hiveParam);
         BHive hive = registry.get(hiveParam);
 
@@ -158,8 +166,7 @@ public class HiveResourceImpl implements HiveResource {
         return FormatHelper.formatFileSize(sumFreedBytes);
     }
 
-    @Override
-    public Map<String, String> fsck(String hiveParam, boolean fix) {
+    private Map<String, String> fsck(String hiveParam, boolean fix) {
         log.debug("fsck(\"{}\")", hiveParam);
         BHive hive = registry.get(hiveParam);
 

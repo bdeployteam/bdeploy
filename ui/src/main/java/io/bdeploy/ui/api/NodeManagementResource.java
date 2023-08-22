@@ -7,6 +7,7 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
 import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.ws.rs.Consumes;
@@ -83,16 +84,7 @@ public interface NodeManagementResource {
      * @param name the name of the node to check.
      */
     @POST
-    @Path("/nodes/{name}/fsck")
+    @Path("/nodes/{name}/repair-and-prune")
     @RequiredPermission(permission = Permission.ADMIN)
-    public Map<String, String> fsckNode(@PathParam("name") String name);
-
-    /**
-     * @param name the name of the node to prune.
-     */
-    @POST
-    @Path("/nodes/{name}/prune")
-    @RequiredPermission(permission = Permission.ADMIN)
-    public long pruneNode(@PathParam("name") String name);
-
+    public RepairAndPruneResultDto repairAndPruneNode(@PathParam("name") String name);
 }

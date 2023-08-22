@@ -49,20 +49,12 @@
         <mat-divider></mat-divider>
 
         <app-bd-button
-          text="Repair BHive Problems"
+          text="Repair BHive Problems and Prune"
           icon="build"
           [collapsed]="false"
-          (click)="onRepair(group)"
+          (click)="onRepairAndPrune(group)"
           [loadingWhen$]="repairing$"
           [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (repairing$ | async)"
-        ></app-bd-button>
-        <app-bd-button
-          text="Prune unused data in BHive"
-          icon="delete_sweep"
-          [collapsed]="false"
-          (click)="onPrune(group)"
-          [loadingWhen$]="pruning$"
-          [disabled]="!(auth.isCurrentScopeWrite$ | async) || (pruning$ | async)"
         ></app-bd-button>
         <app-bd-button
           text="Delete Instance Group"

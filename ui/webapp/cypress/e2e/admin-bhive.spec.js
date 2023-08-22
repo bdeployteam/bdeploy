@@ -38,7 +38,9 @@ describe('Admin UI Tests (BHive)', () => {
 
       cy.waitUntilContentLoaded();
       cy.get('app-bd-dialog-toolbar').within(() => {
-        cy.get('button[data-cy^="Back to Parent"]').should('exist').and('be.enabled');
+        cy.get('button[data-cy^="Back to Parent"]')
+          .should('exist')
+          .and('be.enabled');
       });
 
       cy.contains('tr', 'minion.json').click();
@@ -50,25 +52,19 @@ describe('Admin UI Tests (BHive)', () => {
     });
 
     cy.inMainNavFlyin('app-bhive-details', () => {
-      cy.intercept({ method: 'GET', url: '/api/hive/fsck?hive=default&fix=true' }).as('fsck');
-      cy.get('button[data-cy^="Repair"]').click();
-      cy.contains('app-bd-notification-card', 'Repair').within(() => {
+      cy.intercept({
+        method: 'GET',
+        url: '/api/hive/repair-and-prune?hive=default&fix=true',
+      }).as('repairAndPrune');
+      cy.get('button[data-cy^="Repair and Prune Unused Objects"]').click();
+      cy.contains('app-bd-notification-card', 'Repair and Prune').within(() => {
         cy.get('button[data-cy^="Yes"]').click();
       });
-      cy.wait('@fsck');
+      cy.wait('@repairAndPrune');
 
-      cy.contains('app-bd-notification-card', 'Repair').within(() => {
+      cy.contains('app-bd-notification-card', 'Repair and Prune').within(() => {
         cy.contains('No damaged objects').should('exist');
-        cy.get('button[data-cy^="OK"]').click();
-      });
-    });
-
-    cy.inMainNavFlyin('app-bhive-details', () => {
-      cy.intercept({ method: 'GET', url: '/api/hive/prune?hive=default' }).as('prune');
-      cy.get('button[data-cy^="Prune"]').click();
-      cy.wait('@prune');
-
-      cy.contains('app-bd-notification-card', 'Prune').within(() => {
+        cy.contains('Prune freed').should('exist');
         cy.get('button[data-cy^="OK"]').click();
       });
     });

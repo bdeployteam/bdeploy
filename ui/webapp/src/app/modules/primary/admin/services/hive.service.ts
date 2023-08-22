@@ -3,7 +3,10 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
-import { HiveEntryDto } from '../../../../models/gen.dtos';
+import {
+  HiveEntryDto,
+  RepairAndPruneResultDto,
+} from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 
 @Injectable({
@@ -79,14 +82,6 @@ export class HiveService {
       .pipe(finalize(() => this.loading$.next(false)));
   }
 
-  public prune(hive: string): Observable<string> {
-    const params: HttpParams = new HttpParams().set('hive', hive);
-    return this.http.get(`${this.apiPath()}/prune`, {
-      params: params,
-      responseType: 'text',
-    });
-  }
-
   public delete(hive: string, name: string, tag: string) {
     const params: HttpParams = new HttpParams()
       .set('hive', hive)
@@ -95,12 +90,18 @@ export class HiveService {
     return this.http.delete(`${this.apiPath()}/delete`, { params: params });
   }
 
-  public fsck(hive: string, fix: boolean): Observable<Map<string, string>> {
+  public repairAndPrune(
+    hive: string,
+    fix: boolean
+  ): Observable<RepairAndPruneResultDto> {
     const params: HttpParams = new HttpParams()
       .set('hive', hive)
       .set('fix', fix.toString());
-    return this.http.get<Map<string, string>>(`${this.apiPath()}/fsck`, {
-      params: params,
-    });
+    return this.http.get<RepairAndPruneResultDto>(
+      `${this.apiPath()}/repair-and-prune`,
+      {
+        params: params,
+      }
+    );
   }
 }
