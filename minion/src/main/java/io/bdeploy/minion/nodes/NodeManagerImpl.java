@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jvnet.hk2.annotations.Service;
@@ -234,6 +235,9 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                     Thread.currentThread().interrupt();
                     log.warn("Waiting for node {} failed: {}", name, ie.toString());
                     return null;
+                } catch (TimeoutException te) {
+                    // just continue with what we have...
+                    log.debug("Waiting for node {} timed out.", name);
                 } catch (Exception e) {
                     log.warn("Waiting for node {} failed: {}", name, e.toString());
                     return null;

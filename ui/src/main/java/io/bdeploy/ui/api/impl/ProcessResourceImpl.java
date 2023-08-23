@@ -1,7 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
 import java.util.List;
-import java.util.Map;
+import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.common.ActivityReporter;
@@ -9,14 +9,15 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter;
 import io.bdeploy.ui.api.ProcessResource;
+import io.bdeploy.ui.dto.InstanceProcessStatusDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
@@ -44,16 +45,38 @@ public class ProcessResourceImpl implements ProcessResource {
     }
 
     @Override
-    public Map<String, ProcessStatusDto> getStatus() {
+    public InstanceProcessStatusDto getStatus() {
         MasterNamedResource master = getMasterResource();
         InstanceStatusDto instanceStatus = master.getStatus(instanceId);
-        return instanceStatus.getAppStatus();
+
+        InstanceProcessStatusDto result = new InstanceProcessStatusDto();
+        result.processStates = instanceStatus.getAppStatus();
+        result.processToNode = new TreeMap<>();
+
+        for (var app : result.processStates.keySet()) {
+            result.processToNode.put(app, instanceStatus.getNodeWhereAppIsDeployed(app));
+
+            var running = instanceStatus.getNodeWhereAppIsRunningOrScheduled(app);
+            if (running != null) {
+                // takes precedence;
+                result.processToNode.put(app, running);
+            }
+        }
+
+        return result;
     }
 
     @Override
-    public ProcessDetailDto getDetails(String appId) {
+    public ProcessDetailDto getDetails(String nodeName, String appId) {
         MasterNamedResource master = getMasterResource();
-        return master.getProcessDetails(instanceId, appId);
+        try {
+            return master.getProcessDetailsFromNode(instanceId, appId, nodeName);
+        } catch (WebApplicationException wea) {
+            if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
+                return master.getProcessDetails(instanceId, appId);
+            }
+            throw wea;
+        }
     }
 
     @Override
@@ -66,7 +89,7 @@ public class ProcessResourceImpl implements ProcessResource {
                 master.start(instanceId, processIds);
             } catch (WebApplicationException wea) {
                 // Compatibility with pre-4.2.0
-                if (wea.getResponse().getStatus() == 499) {
+                if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
                     for (var p : processIds) {
                         master.start(instanceId, p);
                     }
@@ -87,7 +110,7 @@ public class ProcessResourceImpl implements ProcessResource {
                 master.stop(instanceId, processIds);
             } catch (WebApplicationException wea) {
                 // Compatibility with pre-4.2.0
-                if (wea.getResponse().getStatus() == 499) {
+                if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
                     for (var p : processIds) {
                         master.stop(instanceId, p);
                     }
@@ -109,7 +132,7 @@ public class ProcessResourceImpl implements ProcessResource {
                 master.start(instanceId, processIds);
             } catch (WebApplicationException wea) {
                 // Compatibility with pre-4.2.0
-                if (wea.getResponse().getStatus() == 499) {
+                if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
                     for (var p : processIds) {
                         master.stop(instanceId, p);
                         master.start(instanceId, p);

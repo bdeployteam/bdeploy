@@ -271,10 +271,25 @@ public interface MasterNamedResource {
      * @param instanceId the unique id of the instance.
      * @param appId the application UID to query
      * @return the full detailed status of the process.
+     * @deprecated this method is inherently slow as it needs to determine the node the process is running on.
      */
+    @Deprecated(since = "5.6.0", forRemoval = true)
     @GET
     @Path("/process-details")
     public ProcessDetailDto getProcessDetails(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
+
+    /**
+     * Returns the full status of a single application.
+     *
+     * @param instanceId the unique ID of the instance
+     * @param appId the application ID to query
+     * @param node the name of the node the application is expected to run on.
+     * @return the full detailed status of the process.
+     */
+    @GET
+    @Path("/process-details-fast")
+    public ProcessDetailDto getProcessDetailsFromNode(@QueryParam("u") String instanceId, @QueryParam("a") String appId,
+            @QueryParam("n") String node);
 
     /**
      * @param principal the principal name to issue the token to.

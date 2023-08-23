@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
   InstanceDto,
+  InstanceProcessStatusDto,
   ProcessState,
   ProcessStatusDto,
 } from 'src/app/models/gen.dtos';
@@ -22,6 +23,7 @@ export class ProcessesService {
   processStates$ = new BehaviorSubject<{ [key: string]: ProcessStatusDto }>(
     null
   );
+  processToNode$ = new BehaviorSubject<{ [key: string]: string }>({});
   processStatesLoadTime$ = new BehaviorSubject<number>(null);
 
   private instance: InstanceDto;
@@ -69,7 +71,7 @@ export class ProcessesService {
     private groups: GroupsService,
     private servers: ServersService,
     private instances: InstancesService,
-    private ngZone: NgZone
+    ngZone: NgZone
   ) {
     this.cfg.isCentral$.subscribe((value) => {
       this.isCentral = value;
@@ -118,7 +120,7 @@ export class ProcessesService {
 
     const group = this.groups.current$.value;
     this.http
-      .get<{ [key: string]: ProcessStatusDto }>(
+      .get<InstanceProcessStatusDto>(
         `${this.apiPath(group.name, this.instance.instanceConfiguration.id)}`,
         NO_LOADING_BAR
       )
@@ -127,7 +129,8 @@ export class ProcessesService {
         measure('Load Process States')
       )
       .subscribe((p) => {
-        this.processStates$.next(p);
+        this.processStates$.next(p.processStates);
+        this.processToNode$.next(p.processToNode);
         this.processStatesLoadTime$.next(Date.now()); // local time wanted.
       });
   }

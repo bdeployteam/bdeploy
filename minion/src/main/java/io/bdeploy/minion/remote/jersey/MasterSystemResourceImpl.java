@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
@@ -36,9 +35,6 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
     @Inject
     private MinionRoot root;
 
-    @Inject
-    private ActivityReporter reporter;
-
     public MasterSystemResourceImpl(BHive hive) {
         this.hive = hive;
     }
@@ -55,7 +51,7 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
     @Override
     public Manifest.Key update(SystemConfiguration system) {
         var newKey = new SystemManifest.Builder().setSystemId(system.id).setConfiguration(system).insert(hive);
-        var ir = rc.initResource(new MasterNamedResourceImpl(root, hive, reporter));
+        var ir = rc.initResource(new MasterNamedResourceImpl(root, hive));
 
         for (var key : InstanceManifest.scan(hive, true)) {
             var im = InstanceManifest.of(hive, key);

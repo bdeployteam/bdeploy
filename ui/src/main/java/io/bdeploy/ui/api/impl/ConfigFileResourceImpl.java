@@ -23,11 +23,8 @@ import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
-import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.ui.api.ConfigFileResource;
-import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.ConfigFileDto;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -44,15 +41,6 @@ public class ConfigFileResourceImpl implements ConfigFileResource {
 
     @Context
     private ResourceContext rc;
-
-    @Inject
-    private MasterProvider mp;
-
-    @Inject
-    private ChangeEventManager changes;
-
-    @Inject
-    private Minion minion;
 
     public ConfigFileResourceImpl(BHive hive, String instanceId) {
         this.hive = hive;

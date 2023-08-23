@@ -643,7 +643,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             throw new WebApplicationException("Hive not found: " + name, Status.NOT_FOUND);
         }
 
-        return rc.initResource(new MasterNamedResourceImpl(root, h, reporter));
+        return rc.initResource(new MasterNamedResourceImpl(root, h));
     }
 
     private static final class NodeGroupState {

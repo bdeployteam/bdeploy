@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import {
   ApplicationConfiguration,
@@ -40,12 +40,13 @@ export class ProcessDetailsService implements OnDestroy {
     this.subscription = combineLatest([
       this.areas.panelRoute$,
       this.processes.processStates$,
+      this.processes.processToNode$,
       this.instances.active$,
       this.instances.activeNodeCfgs$,
-    ]).subscribe(([route, states, instance, nodes]) => {
+    ]).subscribe(([route, states, app2node, instance, nodes]) => {
       // check preconditions to do anything at all :) a lot of data needs to be available.
       const process = route?.params['process'];
-      if (!process || !instance || !nodes) {
+      if (!process || !app2node || !app2node[process] || !instance || !nodes) {
         this.processConfig$.next(null);
         this.processDetail$.next(null);
         this.loading$.next(false);
@@ -74,7 +75,7 @@ export class ProcessDetailsService implements OnDestroy {
           `${this.apiPath(
             this.groups.current$.value.name,
             instance.instanceConfiguration.id
-          )}/processes/${process}`,
+          )}/processes/${app2node[process]}/${process}`,
           NO_LOADING_BAR
         )
         .pipe(

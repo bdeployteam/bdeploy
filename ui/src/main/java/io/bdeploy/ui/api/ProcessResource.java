@@ -1,14 +1,13 @@
 package io.bdeploy.ui.api;
 
 import java.util.List;
-import java.util.Map;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
-import io.bdeploy.interfaces.configuration.pcu.ProcessStatusDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.ui.dto.InstanceProcessStatusDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -24,11 +23,11 @@ public interface ProcessResource {
 
     @GET
     @Path("/")
-    public Map<String, ProcessStatusDto> getStatus();
+    public InstanceProcessStatusDto getStatus();
 
     @GET
-    @Path("/{appId}")
-    public ProcessDetailDto getDetails(@ActivityScope @PathParam("appId") String appId);
+    @Path("/{nodeId}/{appId}")
+    public ProcessDetailDto getDetails(@PathParam("nodeId") String nodeId, @ActivityScope @PathParam("appId") String appId);
 
     @POST
     @Path("/start")
