@@ -902,12 +902,9 @@ ext { <3>
 }
 
 task validateProduct(type: io.bdeploy.gradle.BDeployValidationTask, dependsOn: installDist) { <4>
-  if(project.hasProperty('vtoken')) {
-    validationServer {
-      uri = 'https://localhost:7701/api'
-      token = project.getProperty('vtoken')
-    }
-  }   
+  validationServer {
+    useLogin = true
+  }
 
   validationYaml = file('bdeploy/product-validation.yaml')
 }
@@ -938,13 +935,10 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
   of buildProduct
 
   target.servers {
-    if(project.hasProperty('server')) {
       myServer { <7>
-        uri = project.getProperty('server')
-        token = project.getProperty('token')
+        useLogin = true
         instanceGroup = project.getProperty('instanceGroup')
       }
-    }
   }
 }
 
@@ -954,10 +948,10 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 1. Applies the plugin **BDeploy** gradle plugin.
 2. Sets the project version. **Gradle** does not strictly require a version, and uses 'unspecified' as default. **BDeploy** requires _some_ sort of version, and setting it for the whole project is good practice.
 3. Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plain use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
-4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files.
+4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files. The `validationServer` can set `useLogin = true` to use logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` manually to have full control.
 5. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.
 6. If `buildProduct` built a product, this task will package it as a ZIP file. Note that a ZIP will always contain _all of_ the product, whereas `pushProduct` can push only required deltas which are not present on the target server.
-7. The `pushProduct` task can push required deltas to one or more configured target servers. When calling this task, you need to set according project properties, e.g. using `-Pserver=https://server:7701/api` or in `~/.gradle/gradle.properties`.
+7. The `pushProduct` task can push required deltas to one or more configured target servers. Each server can set `useLogin = true` to use logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` manually to have full control. In addition the target `instanceGroup` must be specified for pushing.
 8. Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
 
 Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](#app-infoyaml) and [`product-info.yaml`](#product-infoyaml) for all supported content.
