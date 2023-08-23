@@ -1,5 +1,5 @@
 import { defer, Observable, throwError } from 'rxjs';
-import { catchError, finalize, tap } from 'rxjs/operators';
+import { catchError, finalize } from 'rxjs/operators';
 
 /**
  * Creates an Observable that mirrors the source Observable and adds performance marks for:
@@ -28,31 +28,25 @@ export const measure = function <T>(name: string) {
       return defer(() => {
         nativeWindow.performance.mark(`${fullName}:subscribe`);
         return source.pipe(
-          tap(() => nativeWindow.performance.mark(`${fullName}:next`)),
           catchError((error) => {
             nativeWindow.performance.mark(`${fullName}:error`);
             return throwError(() => error);
           }),
           finalize(() => {
             nativeWindow.performance.mark(`${fullName}:complete`);
-            nativeWindow.performance.measure(
-              `${fullName}`,
-              `${fullName}:subscribe`,
-              `${fullName}:complete`
-            );
-            nativeWindow.performance.measure(
-              `${fullName}-JSP`,
-              `${fullName}:next`,
-              `${fullName}:complete`
-            );
-            logMeasurements(
-              name,
-              nativeWindow.performance.getEntriesByName(fullName, 'measure'),
-              nativeWindow.performance.getEntriesByName(
-                fullName + '-JSP',
-                'measure'
-              )
-            );
+            try {
+              nativeWindow.performance.measure(
+                `${fullName}`,
+                `${fullName}:subscribe`,
+                `${fullName}:complete`
+              );
+              logMeasurements(
+                name,
+                nativeWindow.performance.getEntriesByName(fullName, 'measure')
+              );
+            } catch (err) {
+              console.warn(`Error while measuring ${fullName}.`, err);
+            }
           })
         );
       });
@@ -61,20 +55,17 @@ export const measure = function <T>(name: string) {
   };
 };
 
-function logMeasurements(
-  name: string,
-  entries: PerformanceEntryList,
-  jspEntries: PerformanceEntryList
-) {
+function logMeasurements(name: string, entries: PerformanceEntryList) {
   const last = entries[entries.length - 1];
   const avg =
     entries.map((p) => p.duration).reduce((p, c) => p + c) / entries.length;
-  const lastJsp = jspEntries[entries.length - 1];
   console.group(name);
-  logTiming('Total Duration [ms]', last.duration);
-  logTiming('JS Processing [ms]', lastJsp.duration);
-  logTiming('Average Total [ms]', avg);
-  console.groupEnd();
+  try {
+    logTiming('Total Duration [ms]', last.duration);
+    logTiming('Average Total [ms]', avg);
+  } finally {
+    console.groupEnd();
+  }
 }
 
 function logTiming(label: string, duration: number) {

@@ -25,6 +25,7 @@ export class ProcessDetailsService implements OnDestroy {
   public processConfig$ = new BehaviorSubject<ApplicationConfiguration>(null);
 
   private subscription: Subscription;
+  private detailsCall: Subscription;
 
   private apiPath = (group, instance) =>
     `${this.cfg.config.api}/group/${group}/instance/${instance}`;
@@ -40,11 +41,11 @@ export class ProcessDetailsService implements OnDestroy {
     this.subscription = combineLatest([
       this.areas.panelRoute$,
       this.processes.processStates$,
-      this.processes.processToNode$,
       this.instances.active$,
       this.instances.activeNodeCfgs$,
-    ]).subscribe(([route, states, app2node, instance, nodes]) => {
-      // check preconditions to do anything at all :) a lot of data needs to be available.
+    ]).subscribe(([route, states, instance, nodes]) => {
+      // don't subscribe to processToNode$ separately, as it will always trigger twice together with process states.
+      const app2node = this.processes.processToNode$.value;
       const process = route?.params['process'];
       if (!process || !app2node || !app2node[process] || !instance || !nodes) {
         this.processConfig$.next(null);
@@ -52,6 +53,8 @@ export class ProcessDetailsService implements OnDestroy {
         this.loading$.next(false);
         return;
       }
+
+      this.loading$.next(true);
 
       // find the configuration for the application we're showing details for
       const appsPerNode = nodes.nodeConfigDtos.map((x) =>
@@ -69,8 +72,11 @@ export class ProcessDetailsService implements OnDestroy {
         return;
       }
 
+      // if we're already performing a call, cancel it - only one detail at a time.
+      this.detailsCall?.unsubscribe();
+
       // now load the status details and popuplate the service data.
-      this.http
+      this.detailsCall = this.http
         .get<ProcessDetailDto>(
           `${this.apiPath(
             this.groups.current$.value.name,
@@ -79,7 +85,10 @@ export class ProcessDetailsService implements OnDestroy {
           NO_LOADING_BAR
         )
         .pipe(
-          finalize(() => this.loading$.next(false)),
+          finalize(() => {
+            this.detailsCall = null;
+            this.loading$.next(false);
+          }),
           measure(`Process Details`)
         )
         .subscribe((d) => {

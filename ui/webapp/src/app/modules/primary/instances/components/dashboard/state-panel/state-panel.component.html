@@ -32,8 +32,13 @@
     <div>
       Last state refresh: {{ lastRefreshAt$ | async | date: 'HH:mm:ss' }}
     </div>
-    <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)"
-      >refresh</app-bd-micro-icon-button
-    >
+    <ng-template #refreshButton>
+      <app-bd-micro-icon-button [size]="16" (click)="manualRefresh.emit(null)"
+        >refresh</app-bd-micro-icon-button
+      >
+    </ng-template>
+    <ng-container *ngIf="refreshingWhen$ | async; else refreshButton">
+      <mat-spinner [diameter]="16"></mat-spinner>
+    </ng-container>
   </div>
 </div>

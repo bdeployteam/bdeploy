@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
   InstanceDto,
@@ -29,6 +30,10 @@ export class ProcessesService {
   private instance: InstanceDto;
   private loadInterval;
   private checkInterval;
+
+  private loadCall: Subscription;
+  private loadCancelCount = 0;
+  private loadWarnIssued = false;
 
   public static get(
     states: { [key: string]: ProcessStatusDto },
@@ -71,6 +76,7 @@ export class ProcessesService {
     private groups: GroupsService,
     private servers: ServersService,
     private instances: InstancesService,
+    private snackbar: MatSnackBar,
     ngZone: NgZone
   ) {
     this.cfg.isCentral$.subscribe((value) => {
@@ -89,7 +95,7 @@ export class ProcessesService {
           // we'll refresh every 30 seconds in case of central & synced, and every 5 seconds in case we're local.
           this.loadInterval = setInterval(
             () => this.reload(),
-            this.isCentral ? 30000 : 5000
+            this.isCentral ? 15000 : 5000
           );
           this.checkInterval = setInterval(() => this.checkState(), 1000);
         });
@@ -118,19 +124,49 @@ export class ProcessesService {
       return;
     }
 
+    if (this.loadCall) {
+      // central interval = 15 seconds, so warning every 45 seconds.
+      // local interval = 5 seconds, so warning every 20 seconds.
+      // (warning after N calls have already been cancelled, so interval * count + 1)
+      if (
+        this.loadCancelCount > 0 &&
+        this.loadCancelCount % (this.isCentral ? 2 : 3) == 0
+      ) {
+        if (!this.loadWarnIssued) {
+          this.loadWarnIssued = true;
+          this.snackbar.open(
+            'Process status response seems to be very slow, please be patient.',
+            'ACKNOWLEDGE'
+          );
+        }
+        return; // not cancelling, not re-calling. lets just wait for at least one to succeed at some point.
+      } else {
+        this.loadCancelCount++;
+        this.loadCall.unsubscribe();
+      }
+    } else {
+      this.loadCancelCount = 0;
+    }
+
+    this.loadWarnIssued = false;
+    this.loading$.next(true);
+
     const group = this.groups.current$.value;
-    this.http
+    this.loadCall = this.http
       .get<InstanceProcessStatusDto>(
         `${this.apiPath(group.name, this.instance.instanceConfiguration.id)}`,
         NO_LOADING_BAR
       )
       .pipe(
-        finalize(() => this.loading$.next(false)),
+        finalize(() => {
+          this.loadCall = null;
+          this.loading$.next(false);
+        }),
         measure('Load Process States')
       )
       .subscribe((p) => {
-        this.processStates$.next(p.processStates);
         this.processToNode$.next(p.processToNode);
+        this.processStates$.next(p.processStates);
         this.processStatesLoadTime$.next(Date.now()); // local time wanted.
       });
   }

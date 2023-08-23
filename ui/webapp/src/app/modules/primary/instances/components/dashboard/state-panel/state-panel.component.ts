@@ -6,7 +6,7 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { BehaviorSubject, isObservable, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, isObservable, of } from 'rxjs';
 
 export type StateType =
   | 'ok'
@@ -38,10 +38,11 @@ export class NodeStatePanelComponent implements OnChanges {
   @Input() items: StateItem[];
   @Input() narrowWhen$: BehaviorSubject<boolean>;
   @Input() lastRefreshAt$: BehaviorSubject<number>;
+  @Input() refreshingWhen$: BehaviorSubject<boolean>;
 
   @Output() manualRefresh = new EventEmitter<any>();
 
-  /* template */ itemsToDisplay: StateItemToDisplay[];
+  protected itemsToDisplay: StateItemToDisplay[];
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.items) {
