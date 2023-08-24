@@ -2,7 +2,7 @@
   <app-bd-dialog-toolbar header="User Accounts">
     <div class="flex-auto"></div>
     <app-bd-data-grouping
-      (groupingChange)="dataDisplay.grouping = $event; dataDisplay.update()"
+      (groupingChange)="dataDisplay.grouping = $event"
       [definitions]="grouping"
       [records]="authAdmin.users$ | async"
       presetKey="userAdmin"
@@ -20,14 +20,14 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="bd-default-padding">
-      <app-bd-data-table
+      <app-bd-data-display
         #dataDisplay
         [records]="authAdmin.users$ | async"
         [columns]="columns"
         [recordRoute]="getRecordRoute"
         [sort]="sort"
       >
-      </app-bd-data-table>
+      </app-bd-data-display>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>
