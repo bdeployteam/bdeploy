@@ -20,10 +20,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
@@ -56,7 +52,6 @@ import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
-import io.bdeploy.common.util.FutureHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.StreamHelper;
@@ -117,7 +112,7 @@ import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
-import io.bdeploy.ui.RequestScopedNamedDaemonThreadFactory;
+import io.bdeploy.ui.RequestScopedParallelOperations;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
@@ -297,12 +292,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
             ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
             try (Activity sync = reporter.start("Synchronize Servers", toSync.size())) {
-                AtomicLong syncNo = new AtomicLong(0);
-                ExecutorService es = Executors.newFixedThreadPool(4, new RequestScopedNamedDaemonThreadFactory(reqScope,
-                        reg.get(group).getTransactions(), reporter, () -> "Mass-Synchronizer " + syncNo.incrementAndGet()));
-                List<Future<?>> syncTasks = new ArrayList<>();
+                List<Runnable> syncTasks = new ArrayList<>();
                 for (ManagedMasterDto host : toSync) {
-                    syncTasks.add(es.submit(() -> {
+                    syncTasks.add(() -> {
                         try (Activity singleSync = reporter.start("Synchronize " + host.hostName)) {
                             if (log.isDebugEnabled()) {
                                 log.debug("Synchronize {}", host.hostName);
@@ -316,11 +308,11 @@ public class InstanceResourceImpl implements InstanceResource {
                             }
                         }
                         sync.workAndCancelIfRequested(1);
-                    }));
+                    });
                 }
 
-                FutureHelper.awaitAll(syncTasks);
-                es.shutdown(); // make all threads exit :)
+                RequestScopedParallelOperations.runAndAwaitAll("Mass-Synchronizer", syncTasks, reqScope,
+                        reg.get(group).getTransactions(), reporter);
             }
         } else {
             // update the local stored state.
@@ -688,15 +680,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public void installLatestVersions(List<String> instanceIds) {
-        AtomicLong threadNum = new AtomicLong(0);
-        ExecutorService pool = Executors.newFixedThreadPool(4, new RequestScopedNamedDaemonThreadFactory(reqScope,
-                reg.get(group).getTransactions(), reporter, () -> "Instance-Bulk-Install-" + threadNum.incrementAndGet()));
-        List<Future<?>> tasks = new ArrayList<>();
-        for (String instanceId : instanceIds) {
-            tasks.add(pool.submit(() -> install(instanceId, null))); // passing null tag will load the latest version
-        }
-        FutureHelper.awaitAll(tasks);
-        pool.shutdown(); // make all threads exit :)
+        RequestScopedParallelOperations.runAndAwaitAll("Instance-Bulk-Install",
+                instanceIds.stream().map(i -> (Runnable) () -> install(i, null)).toList(), reqScope,
+                reg.get(group).getTransactions(), reporter);
     }
 
     @Override

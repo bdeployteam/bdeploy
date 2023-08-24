@@ -15,6 +15,7 @@ import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.remote.versioning.VersionMismatchFilter;
 import io.bdeploy.jersey.TestServer;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -129,7 +130,7 @@ class VersioningTest {
         UnversionedV2 unversioned2 = ResourceProvider.getResource(svc, UnversionedV2.class, null);
 
         var wea = assertThrows(WebApplicationException.class, versioned2::textV2);
-        assertEquals(499, wea.getResponse().getStatus());
+        assertEquals(VersionMismatchFilter.CODE_VERSION_MISMATCH, wea.getResponse().getStatus());
 
         var wea2 = assertThrows(WebApplicationException.class, unversioned2::textV2);
         assertEquals(404, wea2.getResponse().getStatus());

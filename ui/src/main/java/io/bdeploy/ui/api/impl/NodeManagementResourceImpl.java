@@ -6,8 +6,6 @@ import java.util.Map;
 
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper;
@@ -18,7 +16,6 @@ import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManagementResource;
-import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.dto.NodeAttachDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -35,15 +32,6 @@ public class NodeManagementResourceImpl implements NodeManagementResource {
 
     @Inject
     private Minion minion;
-
-    @Inject
-    private ActivityReporter reporter;
-
-    @Inject
-    private BHiveRegistry registry;
-
-    @Inject
-    private NodeManager nodes;
 
     @Context
     private SecurityContext context;

@@ -26,7 +26,6 @@ import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -69,9 +68,6 @@ public class SystemResourceImpl implements SystemResource {
 
     @Inject
     private ActivityReporter reporter;
-
-    @Inject
-    private ProductUpdateService pus;
 
     public SystemResourceImpl(String group, BHive hive) {
         this.group = group;

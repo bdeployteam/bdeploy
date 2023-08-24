@@ -87,6 +87,9 @@ public class RollingStreamGobbler extends Thread implements NoThrowAutoCloseable
     }
 
     public static void logProcessRecovery(Path targetDir, ProcessHandle handle, String instance, String app) {
+        // we intentionally only perform "half" the close, by freeing up resources an *don't* care about threads
+        // since we never started one.
+        @SuppressWarnings("resource")
         RollingStreamGobbler gobbler = new RollingStreamGobbler(targetDir, null, instance, app);
         gobbler.log(new FormattedMessage(
                 " --- Cannot resume output capture after recovery for {}/{}, PID: {} - Output will be lost until application restart.",

@@ -150,7 +150,7 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
 
                 for (var port : matchedPorts) {
                     port.state = portAndState.getValue();
-                    ProcessStatusDto processStatus = status.get(port.appId);
+                    ProcessStatusDto processStatus = status.processStates.get(port.appId);
                     if (processStatus != null) {
                         port.processState = processStatus.processState;
                         port.runningTag = processStatus.instanceTag;

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,7 +21,7 @@ public class InstanceStatusDto {
     private final String instanceId;
 
     /** Node status informations. Key = NAME of the node */
-    public final Map<String, InstanceNodeStatusDto> node2Applications = new HashMap<>();
+    public final Map<String, InstanceNodeStatusDto> node2Applications = new ConcurrentHashMap<>();
 
     /**
      * Creates a new status DTO for the given instance.

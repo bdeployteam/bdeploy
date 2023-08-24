@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
+import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,6 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -108,9 +108,12 @@ import io.bdeploy.interfaces.remote.NodeProcessResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.RequestScopedParallelOperations;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -125,7 +128,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     private static final Logger log = LoggerFactory.getLogger(MasterNamedResourceImpl.class);
 
     private final BHive hive;
-    private final ActivityReporter reporter;
     private final MinionRoot root;
 
     @Context
@@ -137,10 +139,15 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Inject
     private NodeManager nodes;
 
-    public MasterNamedResourceImpl(MinionRoot root, BHive hive, ActivityReporter reporter) {
+    @Inject
+    private Provider<RequestScope> reqScope;
+
+    @Inject
+    private JerseyBroadcastingActivityReporter reporter;
+
+    public MasterNamedResourceImpl(MinionRoot root, BHive hive) {
         this.root = root;
         this.hive = hive;
-        this.reporter = reporter;
     }
 
     private InstanceState getState(InstanceManifest im, BHive hive) {
@@ -1010,33 +1017,46 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public InstanceStatusDto getStatus(String instanceId) {
-        // we don't use the instance manifest to figure out nodes, since node assignment can change over versions. we simply query all nodes for now.
-        // TODO: this might be quite inefficient if we have many nodes, and always only deploy to a small subset.
+        // we don't use the instance manifest to figure out nodes, since node assignment can change over versions.
+        // we simply query all nodes, as the alternative would be more expensive, even though local: read all versions
+        // of the instance and figure out which nodes could *potentially* have running processes.
         InstanceStatusDto instanceStatus = new InstanceStatusDto(instanceId);
 
         // all node names regardless of their status.
         Collection<String> nodeNames = nodes.getAllNodeNames();
 
         try (Activity activity = reporter.start("Read Node Processes", nodeNames.size())) {
-            for (String nodeName : nodeNames) {
-                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+            List<Runnable> actions = new ArrayList<>();
 
+            for (String nodeName : nodeNames) {
+                // avoid blocking. getNodeConfigIfOnline tries to await status calls. we just skip that
+                var currentState = nodes.getNodeStatus(nodeName);
+                if (currentState == null || currentState.offline) {
+                    continue; // don't bother waiting for it to react *sometimes*.
+                }
+
+                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
                 if (node == null) {
                     continue; // don't log to avoid flooding - node manager will log once.
                 }
 
-                NodeProcessResource spc = ResourceProvider.getVersionedResource(node.remote, NodeProcessResource.class, context);
-                try {
-                    InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
-                    instanceStatus.add(nodeName, nodeStatus);
-                } catch (Exception e) {
-                    log.error("Cannot fetch process status of {}", nodeName);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Exception:", e);
+                actions.add(() -> {
+                    NodeProcessResource spc = ResourceProvider.getVersionedResource(node.remote, NodeProcessResource.class,
+                            context);
+                    try {
+                        InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
+                        instanceStatus.add(nodeName, nodeStatus);
+                    } catch (Exception e) {
+                        log.error("Cannot fetch process status of {}", nodeName);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Exception:", e);
+                        }
                     }
-                }
-                activity.worked(1);
+                    activity.worked(1);
+                });
             }
+            RequestScopedParallelOperations.runAndAwaitAll("Node-Process-Status", actions, reqScope, hive.getTransactions(),
+                    reporter);
         }
         return instanceStatus;
     }
@@ -1044,7 +1064,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public ProcessDetailDto getProcessDetails(String instanceId, String appId) {
         // Check if the application is running on a node
-        InstanceStatusDto status = getStatus(instanceId);
+        InstanceStatusDto status = getStatus(instanceId); // this is super-slow (potentially), thus this method is deprecated.
         String nodeName = status.getNodeWhereAppIsRunning(appId);
 
         // Check if the application is deployed on a node
@@ -1058,12 +1078,17 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         }
 
         // Query process details
+        return getProcessDetailsFromNode(instanceId, appId, nodeName);
+    }
+
+    @Override
+    public ProcessDetailDto getProcessDetailsFromNode(String instanceId, String appId, String node) {
         try {
-            return nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
-                    .getProcessDetails(instanceId, appId);
+            return nodes.getNodeResourceIfOnlineOrThrow(node, NodeProcessResource.class, context).getProcessDetails(instanceId,
+                    appId);
         } catch (Exception e) {
-            throw new WebApplicationException(
-                    "Cannot fetch process status from " + nodeName + " for " + instanceId + ", " + appId, e);
+            throw new WebApplicationException("Cannot fetch process status from " + node + " for " + instanceId + ", " + appId,
+                    e);
         }
     }
 

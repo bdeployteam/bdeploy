@@ -37,6 +37,7 @@ import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ProcessResource;
 import io.bdeploy.ui.cli.RemoteProcessTool.RemoteProcessConfig;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
+import io.bdeploy.ui.dto.InstanceProcessStatusDto;
 import jakarta.ws.rs.NotFoundException;
 
 @Help("Deploy to a remote master minion")
@@ -128,7 +129,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         if (appId == null) {
             return createAllProcessesTable(config, svc, ir);
         } else {
-            ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(appId);
+            InstanceProcessStatusDto allStatus = ir.getProcessResource(instanceId).getStatus();
+            ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(allStatus.processToNode.get(appId), appId);
             InstanceNodeConfigurationListDto cfg = ir.getNodeConfigurations(appStatus.status.instanceId,
                     appStatus.status.instanceTag);
             Optional<ApplicationConfiguration> app = findAppConfig(appStatus.status, Optional.ofNullable(cfg));
@@ -161,7 +163,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
             } else {
                 ir.getProcessResource(instanceId).startProcesses(getAppIds(config, ir));
                 if (config.join()) {
-                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().get(config.application()).processState);
+                    doJoin(2000, () -> ir.getProcessResource(instanceId).getStatus().processStates
+                            .get(config.application()).processState);
                 }
             }
         } else if (config.stop()) {
@@ -237,6 +240,10 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         Map<String, Optional<InstanceNodeConfigurationListDto>> nodeDtos = new TreeMap<>();
         InstanceStateRecord deploymentStates = ir.getDeploymentStates(instanceId);
         List<ProcessStatusDto> processEntries = getOrderedProcessEntries(config, ir, deploymentStates.activeTag);
+
+        ProcessResource pr = ir.getProcessResource(config.uuid());
+        InstanceProcessStatusDto overall = pr.getStatus();
+
         for (ProcessStatusDto processEntry : processEntries) {
             String tag = processEntry.instanceTag;
             Optional<InstanceConfiguration> instance = instanceInfos.computeIfAbsent(tag, k -> {
@@ -260,7 +267,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 }
             });
             Optional<ApplicationConfiguration> cfg = findAppConfig(processEntry, nodes);
-            addProcessRows(table, ir.getProcessResource(config.uuid()), processEntry, instance, deploymentStates, cfg);
+            addProcessRows(table, pr, processEntry, instance, deploymentStates, cfg, overall);
         }
 
         table.addFooter(" * Versions marked with '*' are out-of-sync (not running from the active version)");
@@ -288,7 +295,7 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
                 .filter(controlGroup -> isNullOrEmpty(controlGroupName) || controlGroupName.equals(controlGroup.name))
                 .map(controlGroup -> controlGroup.processOrder).flatMap(Collection::stream).toList();
 
-        Map<String, ProcessStatusDto> status = ir.getProcessResource(instanceId).getStatus();
+        Map<String, ProcessStatusDto> status = ir.getProcessResource(instanceId).getStatus().processStates;
 
         Comparator<ProcessStatusDto> comparator = (a, b) -> Integer.compare(processOrderList.indexOf(a.appId),
                 processOrderList.indexOf(b.appId));
@@ -305,8 +312,9 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
 
     private void addProcessRows(DataTable table, ProcessResource pr, ProcessStatusDto process,
             Optional<InstanceConfiguration> instance, InstanceStateRecord deploymentStates,
-            Optional<ApplicationConfiguration> cfg) {
-        ProcessDetailDto detail = pr.getDetails(process.appId);
+            Optional<ApplicationConfiguration> cfg, InstanceProcessStatusDto overall) {
+
+        ProcessDetailDto detail = pr.getDetails(overall.processToNode.get(process.appId), process.appId);
         ProcessHandleDto handle = detail.handle;
 
         table.row().cell(process.appName) //
