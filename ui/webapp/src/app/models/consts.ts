@@ -1,5 +1,6 @@
 /** HTTP header constant used to suppress global error handling */
 export const NO_ERROR_HANDLING_HDR = 'X-No-Global-Error-Handling';
+export const NO_UNAUTH_DELAY_HDR = 'X-No-Unauth-Delay';
 
 /** "Special" name of node containing client applications. */
 export const CLIENT_NODE_NAME = '__ClientApplications';

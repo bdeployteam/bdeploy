@@ -1,51 +1,66 @@
 //@ts-check
 
 Cypress.Commands.add('login', function () {
-  cy.fixture('login.json').then((user) => {
-    cy.request({
-      method: 'POST',
-      url: Cypress.env('backendBaseUrl') + '/auth/session',
-      body: { user: user.user, password: user.pass },
-    });
-    cy.getCookie('st').should('exist');
+  return cy.fixture('login.json').then((user) => {
+    return cy
+      .request({
+        method: 'POST',
+        url: Cypress.config('baseUrl') + '/api/auth/session',
+        body: { user: user.user, password: user.pass },
+      })
+      .then((resp) => {
+        expect(resp.status).to.eq(200);
+        cy.getCookie('st').should('exist');
+      });
   });
 });
 
 Cypress.Commands.add('loginCentral', function () {
-  cy.fixture('login.json').then((user) => {
-    cy.request({
-      method: 'POST',
-      url: Cypress.env('backendBaseUrlCentral') + '/auth/session',
-      body: { user: user.user, password: user.pass },
-    });
-    cy.getCookie('st').should('exist');
+  return cy.fixture('login.json').then((user) => {
+    return cy
+      .request({
+        method: 'POST',
+        url: Cypress.env('baseUrlCentral') + '/api/auth/session',
+        body: { user: user.user, password: user.pass },
+      })
+      .then((resp) => {
+        expect(resp.status).to.eq(200);
+        cy.getCookie('st').should('exist');
+      });
   });
 });
 
 Cypress.Commands.add('loginManaged', function () {
-  cy.fixture('login.json').then((user) => {
-    cy.request({
-      method: 'POST',
-      url: Cypress.env('backendBaseUrlManaged') + '/auth/session',
-      body: { user: user.user, password: user.pass },
-    });
-    cy.getCookie('st').should('exist');
+  return cy.fixture('login.json').then((user) => {
+    return cy
+      .request({
+        method: 'POST',
+        url: Cypress.env('baseUrlManaged') + '/api/auth/session',
+        body: { user: user.user, password: user.pass },
+      })
+      .then((resp) => {
+        expect(resp.status).to.eq(200);
+        cy.getCookie('st').should('exist');
+      });
   });
 });
 
 Cypress.Commands.add('visitCentral', function (url) {
-  cy.loginCentral();
-  return cy.forceVisit(Cypress.env('baseUrlCentral') + url);
+  return cy.loginCentral().then(() => {
+    return cy.forceVisit(Cypress.env('baseUrlCentral') + url);
+  });
 });
 
 Cypress.Commands.add('visitManaged', function (url) {
-  cy.loginManaged();
-  return cy.forceVisit(Cypress.env('baseUrlManaged') + url);
+  return cy.loginManaged().then(() => {
+    return cy.forceVisit(Cypress.env('baseUrlManaged') + url);
+  });
 });
 
 // this allows, together with disabled chrome web security to cross-origin visit our different servers
 // without reloading all of cypress.
 Cypress.Commands.add('forceVisit', (url) => {
+  console.log(`forceVisit ${url}`);
   cy.get('body').then((body$) => {
     const appWindow = body$[0].ownerDocument.defaultView;
     const appIframe = appWindow.parent.document.querySelector('iframe');
@@ -79,14 +94,16 @@ Cypress.Commands.add('visitBDeploy', function (url, mode) {
 Cypress.Commands.add(
   'authenticatedRequest',
   function (opts, mode = 'STANDALONE') {
+    let lg;
     if (mode === 'STANDALONE') {
-      cy.login();
+      lg = cy.login();
     } else if (mode === 'MANAGED') {
-      cy.loginManaged();
+      lg = cy.loginManaged();
     } else {
-      cy.loginCentral();
+      lg = cy.loginCentral();
     }
-
-    return cy.request(opts);
+    return lg.then(() => {
+      return cy.request(opts);
+    });
   }
 );

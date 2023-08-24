@@ -8,7 +8,7 @@ describe('Groups Tests (Clients)', () => {
     cy.cleanAllGroups();
     cy.authenticatedRequest({
       method: 'DELETE',
-      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client`,
+      url: `${Cypress.config('baseUrl')}/auth/admin?name=client`,
       failOnStatusCode: false,
     });
   });
@@ -130,7 +130,7 @@ describe('Groups Tests (Clients)', () => {
   it('Creates a local user', () => {
     cy.authenticatedRequest({
       method: 'PUT',
-      url: `${Cypress.env('backendBaseUrl')}/auth/admin/local`,
+      url: `${Cypress.config('baseUrl')}/api/auth/admin/local`,
       body: { name: 'client', password: 'clientclient' },
     });
   });
@@ -220,7 +220,7 @@ describe('Groups Tests (Clients)', () => {
     cy.deleteGroup(groupName);
     cy.authenticatedRequest({
       method: 'DELETE',
-      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=client`,
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=client`,
     });
   });
 });

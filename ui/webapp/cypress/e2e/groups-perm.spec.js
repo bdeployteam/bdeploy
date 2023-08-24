@@ -9,12 +9,12 @@ describe('Groups Tests (Permissions)', () => {
 
     cy.authenticatedRequest({
       method: 'DELETE',
-      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=read`,
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=read`,
       failOnStatusCode: false,
     });
     cy.authenticatedRequest({
       method: 'DELETE',
-      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=write`,
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=write`,
       failOnStatusCode: false,
     });
   });
@@ -193,12 +193,12 @@ describe('Groups Tests (Permissions)', () => {
     cy.deleteGroup(groupName);
     cy.authenticatedRequest({
       method: 'DELETE',
-      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=read`,
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=read`,
       failOnStatusCode: false,
     });
     cy.authenticatedRequest({
       method: 'DELETE',
-      url: `${Cypress.env('backendBaseUrl')}/auth/admin?name=write`,
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=write`,
       failOnStatusCode: false,
     });
   });

@@ -22,7 +22,7 @@ module.exports = (on, config) => {
       return new Promise((resolve, reject) => {
         import('got').then((got) =>
           got
-            .got(args.url, { https: { rejectUnauthorized: false } })
+            .got(args.url, { dnsLookupIpVersion: 4 })
             .then((res) => {
               if (!res || res?.statusCode !== 200) {
                 return reject(

@@ -19,7 +19,6 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
       catchError((err) => {
         if (err.status === 401 && !req.headers.has(NO_ERROR_HANDLING_HDR)) {
           // API request unauthorized, log out the application
-          console.debug('unauthorized request: ' + err.url);
           this.logout();
           return of(null);
         }

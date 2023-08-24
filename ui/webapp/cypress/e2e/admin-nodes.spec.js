@@ -46,6 +46,13 @@ describe('Admin Nodes Test', () => {
   });
 
   it('Tests Add/Remove', () => {
+    cy.visit('/');
+    cy.get('.local-hamburger-button').click();
+    cy.get('button[data-cy=Administration]').click();
+
+    cy.contains('a', 'Nodes').click();
+    cy.waitUntilContentLoaded();
+
     cy.pressToolbarButton('Add Node');
 
     cy.intercept({ method: 'GET', url: '**/api/node-admin/nodes' }).as('list');

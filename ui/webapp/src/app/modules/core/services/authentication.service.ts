@@ -25,7 +25,10 @@ import {
   UserChangePasswordDto,
   UserInfo,
 } from '../../../models/gen.dtos';
-import { suppressGlobalErrorHandling } from '../utils/server.utils';
+import {
+  suppressGlobalErrorHandling,
+  suppressUnauthenticatedDelay,
+} from '../utils/server.utils';
 import { ConfigService } from './config.service';
 import { NavAreasService } from './nav-areas.service';
 
@@ -109,7 +112,9 @@ export class AuthenticationService {
         { user: username, password: password } as CredentialsApi,
         {
           responseType: 'text',
-          headers: suppressGlobalErrorHandling(new HttpHeaders()),
+          headers: suppressGlobalErrorHandling(
+            suppressUnauthenticatedDelay(new HttpHeaders())
+          ),
           params: auth ? new HttpParams().set('auth', auth) : undefined,
         }
       )
@@ -121,7 +126,9 @@ export class AuthenticationService {
         switchMap((t) => {
           return this.http
             .get<UserInfo>(this.cfg.config.api + '/auth/user', {
-              headers: suppressGlobalErrorHandling(new HttpHeaders()),
+              headers: suppressGlobalErrorHandling(
+                suppressUnauthenticatedDelay(new HttpHeaders())
+              ),
             })
             .pipe(
               catchError((err) => {
@@ -215,7 +222,9 @@ export class AuthenticationService {
 
     return combineLatest([
       this.http.post(`${this.cfg.config.api}/auth/session/logout`, null, {
-        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+        headers: suppressGlobalErrorHandling(
+          suppressUnauthenticatedDelay(new HttpHeaders())
+        ),
       }),
       this.auth0Logout(),
     ]).pipe(

@@ -1,10 +1,17 @@
 import { HttpHeaders } from '@angular/common/http';
 import { OperatorFunction } from 'rxjs';
 import { delay, retryWhen, scan } from 'rxjs/operators';
-import { NO_ERROR_HANDLING_HDR } from 'src/app/models/consts';
+import {
+  NO_ERROR_HANDLING_HDR,
+  NO_UNAUTH_DELAY_HDR,
+} from 'src/app/models/consts';
 
 export function suppressGlobalErrorHandling(p: HttpHeaders): HttpHeaders {
   return p.append(NO_ERROR_HANDLING_HDR, 'true');
+}
+
+export function suppressUnauthenticatedDelay(p: HttpHeaders): HttpHeaders {
+  return p.append(NO_UNAUTH_DELAY_HDR, 'true');
 }
 
 /**

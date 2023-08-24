@@ -22,7 +22,10 @@ import {
   VERSION_DATA,
 } from '../components/connection-version/connection-version.component';
 import { NO_LOADING_BAR_CONTEXT } from '../utils/loading-bar.util';
-import { suppressGlobalErrorHandling } from '../utils/server.utils';
+import {
+  suppressGlobalErrorHandling,
+  suppressUnauthenticatedDelay,
+} from '../utils/server.utils';
 import { ThemeService } from './theme.service';
 
 export interface AppConfig {
@@ -117,7 +120,10 @@ export class ConfigService {
           // trigger load of an existing session in case there is one on the server.
           // finally load authentication setting.
           const loadAuthSettings = this.http.get<WebAuthSettingsDto>(
-            this.config.api + '/master/settings/web-auth'
+            this.config.api + '/master/settings/web-auth',
+            {
+              headers: suppressUnauthenticatedDelay(new HttpHeaders()),
+            }
           );
 
           combineLatest([loadAuthSettings, this.loadSession()]).subscribe(
@@ -154,7 +160,9 @@ export class ConfigService {
     return this.http
       .get(`${this.config.api}/auth/session`, {
         responseType: 'text',
-        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+        headers: suppressGlobalErrorHandling(
+          suppressUnauthenticatedDelay(new HttpHeaders())
+        ),
       })
       .pipe(
         catchError((err) => {
@@ -275,9 +283,11 @@ export class ConfigService {
   public getBackendInfo(errorHandling = false): Observable<BackendInfoDto> {
     return this.http
       .get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
-        headers: errorHandling
-          ? {}
-          : suppressGlobalErrorHandling(new HttpHeaders()),
+        headers: suppressUnauthenticatedDelay(
+          errorHandling
+            ? new HttpHeaders()
+            : suppressGlobalErrorHandling(new HttpHeaders())
+        ),
         context: NO_LOADING_BAR_CONTEXT,
       })
       .pipe(

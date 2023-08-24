@@ -142,8 +142,6 @@ String quoteJson(String s) {
 }
 
 List<String> getCypressConfig() {
-    def standalonePort = project(":test-data").testServerPort
-    def centralPort = project(":test-data").testServerPortCentral
     def managedPort = project(":test-data").testServerPortManaged
     def timeout = '60000'
     if(project.hasProperty('cypressTimeout')) {
@@ -161,9 +159,7 @@ List<String> getCypressConfig() {
                         ? ",\"e2e\":{\"excludeSpecPattern\":\"**/central-managed.spec.js\"}" 
                         : "") +
                     "}"),
-        "--env", "backendBaseUrl=https://localhost:${standalonePort}/api"
-        + ",baseUrlCentral=http://localhost:4211"
-        + ",backendBaseUrlCentral=https://localhost:${centralPort}/api"
+        "--env", "baseUrlCentral=http://localhost:4211"
         + ",baseUrlManaged=http://localhost:4212"
         + ",backendBaseUrlManaged=https://localhost:${managedPort}/api"
         + (project.hasProperty('cypressNoCoverage') ? ",DISABLE_COVERAGE=yes" : "")
@@ -243,11 +239,8 @@ task runDevCypress(type: Exec) {
     workingDir "$webappDir"
     commandLine (["${webappDir}/node_modules/.bin/" + cypressCmd(), "open", 
         "--config", "baseUrl=http://localhost:4200", 
-        "--env", "backendBaseUrl=https://localhost:7701/api"
-        + ",baseUrlCentral=http://localhost:4201"
-        + ",backendBaseUrlCentral=https://localhost:7705/api"
+        "--env", "baseUrlCentral=http://localhost:4201"
         + ",baseUrlManaged=http://localhost:4202"
-        + ",backendBaseUrlManaged=https://localhost:7706/api"
     ])
 }
 

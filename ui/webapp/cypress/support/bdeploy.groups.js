@@ -194,7 +194,7 @@ Cypress.Commands.add('attachManaged', function (groupName, screenshot = false) {
     cy.contains('div', 'Details for server to link').should('exist');
     cy.contains('button', 'Save').should('exist').and('be.disabled');
     cy.fillFormInput('description', 'Description of managed server');
-    cy.fillFormInput('uri', Cypress.env('backendBaseUrlManaged'));
+    cy.fillFormInput('uri', Cypress.env('backendBaseUrlManaged')); // DON'T use baseUrlManaged, due to direct backend/backend connection!
   });
   cy.screenshot('Doc_CentralLinkServerFilled');
   cy.inMainNavFlyin('app-link-managed', () => {
@@ -211,13 +211,13 @@ Cypress.Commands.add('attachManaged', function (groupName, screenshot = false) {
 Cypress.Commands.add('cleanAllGroups', function (mode = 'STANDALONE') {
   const backend =
     mode === 'STANDALONE'
-      ? 'backendBaseUrl'
+      ? Cypress.config('baseUrl')
       : mode === 'MANAGED'
-      ? 'backendBaseUrlManaged'
-      : 'backendBaseUrlCentral';
+      ? Cypress.env('baseUrlManaged')
+      : Cypress.env('baseUrlCentral');
 
   cy.authenticatedRequest(
-    { method: 'GET', url: `${Cypress.env(backend)}/group` },
+    { method: 'GET', url: `${backend}/api/group` },
     mode
   ).then((resp) => {
     if (!Array.isArray(resp.body)) {
@@ -227,7 +227,7 @@ Cypress.Commands.add('cleanAllGroups', function (mode = 'STANDALONE') {
       const group = x.instanceGroupConfiguration.name;
 
       cy.authenticatedRequest(
-        { method: 'DELETE', url: `${Cypress.env(backend)}/group/${group}` },
+        { method: 'DELETE', url: `${backend}/api/group/${group}` },
         mode
       );
     }
@@ -237,13 +237,13 @@ Cypress.Commands.add('cleanAllGroups', function (mode = 'STANDALONE') {
 Cypress.Commands.add('cleanAllSoftwareRepos', function (mode = 'STANDALONE') {
   const backend =
     mode === 'STANDALONE'
-      ? 'backendBaseUrl'
+      ? Cypress.config('baseUrl')
       : mode === 'MANAGED'
-      ? 'backendBaseUrlManaged'
-      : 'backendBaseUrlCentral';
+      ? Cypress.env('baseUrlManaged')
+      : Cypress.env('baseUrlCentral');
 
   cy.authenticatedRequest(
-    { method: 'GET', url: `${Cypress.env(backend)}/softwarerepository` },
+    { method: 'GET', url: `${backend}/api/softwarerepository` },
     mode
   ).then((resp) => {
     if (!Array.isArray(resp.body)) {
@@ -255,9 +255,7 @@ Cypress.Commands.add('cleanAllSoftwareRepos', function (mode = 'STANDALONE') {
       cy.authenticatedRequest(
         {
           method: 'DELETE',
-          url: `${Cypress.env(
-            backend
-          )}/softwarerepository/${softwareRepository}`,
+          url: `${backend}/api/softwarerepository/${softwareRepository}`,
         },
         mode
       );

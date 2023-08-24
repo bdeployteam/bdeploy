@@ -219,12 +219,9 @@ Cypress.Commands.add(
         .then(() => {
           stubbed.restore();
 
-          if (url.startsWith('/api')) {
-            url = url.substring(4);
-          }
           if (url.startsWith('/')) {
             // URL argument is relative in production, see application config.json
-            url = Cypress.env('backendBaseUrl') + url;
+            url = Cypress.config('baseUrl') + url;
           }
 
           cy.task('downloadFileFromUrl', {
