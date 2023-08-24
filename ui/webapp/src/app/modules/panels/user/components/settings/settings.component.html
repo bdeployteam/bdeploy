@@ -38,6 +38,11 @@
         </div>
       </div>
 
+      <app-bd-data-table
+        [records]="user.permissions"
+        [columns]="permColumns"
+      ></app-bd-data-table>
+
       <app-bd-panel-button
         [collapsed]="false"
         [disabled]="user.external"
