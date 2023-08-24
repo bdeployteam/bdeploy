@@ -13,7 +13,7 @@ import { BdDataPermissionLevelCellComponent } from '../../../../../core/componen
 import { UsersColumnsService } from '../../../../../core/services/users-columns.service';
 
 @Component({
-  selector: 'app-user-permissions',
+  selector: 'app-instance-group-user-permissions',
   templateUrl: './user-permissions.component.html',
 })
 export class UserPermissionsComponent {

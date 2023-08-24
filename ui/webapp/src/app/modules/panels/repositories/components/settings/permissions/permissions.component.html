@@ -7,10 +7,14 @@
   <app-bd-dialog-content>
     <mat-tab-group animationDuration="0ms">
       <mat-tab label="Users">
-        <app-user-permissions [dialog]="dlg"></app-user-permissions>
+        <app-software-repository-user-permissions
+          [dialog]="dlg"
+        ></app-software-repository-user-permissions>
       </mat-tab>
       <mat-tab label="User Groups">
-        <app-user-group-permissions [dialog]="dlg"></app-user-group-permissions>
+        <app-software-repository-user-group-permissions
+          [dialog]="dlg"
+        ></app-software-repository-user-group-permissions>
       </mat-tab>
     </mat-tab-group>
   </app-bd-dialog-content>

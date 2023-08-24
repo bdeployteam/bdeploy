@@ -145,7 +145,7 @@ describe('Groups Tests (Permissions)', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_GroupPermGlobalOnly');
 
-    cy.inMainNavFlyin('app-permissions', () => {
+    cy.inMainNavFlyin('app-instance-group-permissions', () => {
       cy.contains('tr', 'read')
         .should('exist')
         .within(() => {
@@ -161,7 +161,7 @@ describe('Groups Tests (Permissions)', () => {
 
     cy.screenshot('Doc_GroupPermSetWrite');
 
-    cy.inMainNavFlyin('app-permissions', () => {
+    cy.inMainNavFlyin('app-instance-group-permissions', () => {
       cy.contains('app-bd-notification-card', 'Modify')
         .should('exist')
         .within(() => {

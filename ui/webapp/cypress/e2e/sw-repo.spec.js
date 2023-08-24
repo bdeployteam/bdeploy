@@ -210,7 +210,7 @@ describe('Software Repository Tests', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_SoftwareRepoPermissions');
 
-    cy.inMainNavFlyin('app-permissions', () => {
+    cy.inMainNavFlyin('app-software-repository-permissions', () => {
       cy.pressToolbarButton('Back');
     });
 
