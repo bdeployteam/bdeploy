@@ -20,14 +20,14 @@
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="bd-default-padding">
-      <app-bd-data-table
+      <app-bd-data-display
         #dataDisplay
         [records]="authAdmin.userGroups$ | async"
         [columns]="columns"
         [recordRoute]="getRecordRoute"
         [sort]="sort"
       >
-      </app-bd-data-table>
+      </app-bd-data-display>
     </div>
   </app-bd-dialog-content>
 </app-bd-dialog>
