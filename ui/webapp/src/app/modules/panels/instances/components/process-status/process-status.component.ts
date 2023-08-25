@@ -1,6 +1,6 @@
 import {
-  ChangeDetectorRef,
   Component,
+  NgZone,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -108,8 +108,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     private cfg: ConfigService,
     private route: ActivatedRoute,
     private systems: SystemsService,
-    private cd: ChangeDetectorRef,
-    public areas: NavAreasService
+    public areas: NavAreasService,
+    private zone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -213,18 +213,21 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       );
 
       if (this.isCrashedWaiting) {
-        this.restartProgressHandle = setInterval(
-          () => this.doUpdateRestartProgress(detail),
-          1000
-        );
-        this.doUpdateRestartProgress(detail);
+        this.zone.runOutsideAngular(() => {
+          this.restartProgressHandle = setInterval(
+            () => this.doUpdateRestartProgress(detail),
+            1000
+          );
+        });
       }
 
       if (this.isRunning) {
-        this.uptimeCalculateHandle = setTimeout(
-          () => this.doCalculateUptimeString(detail),
-          1
-        );
+        this.zone.runOutsideAngular(() => {
+          this.uptimeCalculateHandle = setTimeout(
+            () => this.doCalculateUptimeString(detail),
+            1
+          );
+        });
       }
     });
 
@@ -381,28 +384,41 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
         // calculate reschedule for next minute
         delay = 60000 - (ms - Math.floor(ms / 60000) * 60000);
       }
-      this.uptime$.next(s);
-      this.uptimeCalculateHandle = setTimeout(
-        () => this.doCalculateUptimeString(detail),
-        delay
-      );
 
-      this.cd.detectChanges();
+      this.zone.run(() => {
+        this.uptime$.next(s);
+        this.uptimeCalculateHandle = setTimeout(
+          () => this.doCalculateUptimeString(detail),
+          delay
+        );
+      });
     } else {
-      this.uptime$.next(null);
+      this.zone.run(() => {
+        this.uptime$.next(null);
+      });
     }
   }
 
   private doUpdateRestartProgress(detail: ProcessDetailDto) {
     const diff = detail.recoverAt - this.cfg.getCorrectedNow();
-    if (diff < 100) {
+    if (diff < 50) {
+      // trigger immediate reload as we know that something is about to happen.
       this.processes.reload();
     } else {
       const totalSeconds = detail.recoverDelay + 2;
       const remainingSeconds = Math.round(diff / 1000);
-      this.restartProgress$.next(100 - 100 * (remainingSeconds / totalSeconds));
-      this.restartProgressText$.next(remainingSeconds + ' seconds');
-      this.cd.detectChanges();
+      const restartProgress = 100 - 100 * (remainingSeconds / totalSeconds);
+      const remainingHint = remainingSeconds + ' seconds';
+
+      if (
+        restartProgress != this.restartProgress$.value ||
+        remainingHint != this.restartProgressText$.value
+      ) {
+        this.zone.run(() => {
+          this.restartProgress$.next(restartProgress);
+          this.restartProgressText$.next(remainingHint);
+        });
+      }
     }
   }
 }

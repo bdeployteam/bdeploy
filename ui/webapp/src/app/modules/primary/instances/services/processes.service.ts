@@ -77,7 +77,7 @@ export class ProcessesService {
     private servers: ServersService,
     private instances: InstancesService,
     private snackbar: MatSnackBar,
-    ngZone: NgZone
+    private zone: NgZone
   ) {
     this.cfg.isCentral$.subscribe((value) => {
       this.isCentral = value;
@@ -91,16 +91,16 @@ export class ProcessesService {
 
         this.instance = instance;
 
-        ngZone.runOutsideAngular(() => {
+        zone.runOutsideAngular(() => {
           // we'll refresh every 30 seconds in case of central & synced, and every 5 seconds in case we're local.
           this.loadInterval = setInterval(
-            () => this.reload(),
+            () => this.reload(true),
             this.isCentral ? 15000 : 5000
           );
           this.checkInterval = setInterval(() => this.checkState(), 1000);
         });
 
-        this.reload();
+        this.reload(true);
       }
     );
   }
@@ -119,56 +119,75 @@ export class ProcessesService {
     return true;
   }
 
-  public reload() {
+  /**
+   * load the current process state.
+   *
+   * @param trackCalls whether to keep track of repeated calls and issue warnings if previous calls took too long. this is primarily meant for use when reloading on an interval.
+   */
+  public reload(trackCalls = false) {
     if (!this.checkState()) {
       return;
     }
 
-    if (this.loadCall) {
-      // central interval = 15 seconds, so warning every 45 seconds.
-      // local interval = 5 seconds, so warning every 20 seconds.
-      // (warning after N calls have already been cancelled, so interval * count + 1)
-      if (
-        this.loadCancelCount > 0 &&
-        this.loadCancelCount % (this.isCentral ? 2 : 3) == 0
-      ) {
-        if (!this.loadWarnIssued) {
-          this.loadWarnIssued = true;
-          this.snackbar.open(
-            'Process status response seems to be very slow, please be patient.',
-            'ACKNOWLEDGE'
-          );
+    if (trackCalls) {
+      if (this.loadCall) {
+        // central interval = 15 seconds, so warning every 45 seconds.
+        // local interval = 5 seconds, so warning every 20 seconds.
+        // (warning after N calls have already been cancelled, so interval * count + 1)
+        if (
+          this.loadCancelCount > 0 &&
+          this.loadCancelCount % (this.isCentral ? 2 : 3) == 0
+        ) {
+          if (!this.loadWarnIssued) {
+            this.loadWarnIssued = true;
+            this.snackbar.open(
+              'Process status response seems to be very slow, please be patient.',
+              'ACKNOWLEDGE'
+            );
+          }
+          return; // not cancelling, not re-calling. lets just wait for at least one to succeed at some point.
+        } else {
+          this.loadCancelCount++;
+          this.loadCall.unsubscribe();
         }
-        return; // not cancelling, not re-calling. lets just wait for at least one to succeed at some point.
       } else {
-        this.loadCancelCount++;
-        this.loadCall.unsubscribe();
+        this.loadCancelCount = 0;
       }
-    } else {
-      this.loadCancelCount = 0;
+      this.loadWarnIssued = false;
     }
 
-    this.loadWarnIssued = false;
-    this.loading$.next(true);
+    this.zone.run(() => {
+      this.loading$.next(true);
+    });
 
     const group = this.groups.current$.value;
-    this.loadCall = this.http
+    const call = this.http
       .get<InstanceProcessStatusDto>(
         `${this.apiPath(group.name, this.instance.instanceConfiguration.id)}`,
         NO_LOADING_BAR
       )
       .pipe(
         finalize(() => {
-          this.loadCall = null;
-          this.loading$.next(false);
+          this.zone.run(() => {
+            if (trackCalls) {
+              this.loadCall = null;
+            }
+            this.loading$.next(false);
+          });
         }),
         measure('Load Process States')
       )
       .subscribe((p) => {
-        this.processToNode$.next(p.processToNode);
-        this.processStates$.next(p.processStates);
-        this.processStatesLoadTime$.next(Date.now()); // local time wanted.
+        this.zone.run(() => {
+          this.processToNode$.next(p.processToNode);
+          this.processStates$.next(p.processStates);
+          this.processStatesLoadTime$.next(Date.now()); // local time wanted.
+        });
       });
+
+    if (trackCalls) {
+      this.loadCall = call;
+    }
   }
 
   public start(pids: string[]): Observable<any> {
