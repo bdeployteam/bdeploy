@@ -22,6 +22,7 @@ import { StateItem, StateType } from '../state-panel/state-panel.component';
 @Component({
   selector: 'app-instance-server-node',
   templateUrl: './server-node.component.html',
+  styleUrls: ['./server-node.component.css'],
 })
 export class ServerNodeComponent implements OnInit, OnDestroy {
   @Input() node: InstanceNodeConfigurationDto;

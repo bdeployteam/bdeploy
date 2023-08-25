@@ -1,12 +1,14 @@
-<div class="bd-rect-card flex flex-col">
-  <div class="bd-default-padding local-header flex flex-col">
-    <div class="bd-type-text">Virtual Node</div>
-    <div class="bd-title-text">Client Applications</div>
+<div class="bd-rect-card flex flex-col sticky-container">
+  <div class="sticky">
+    <div class="bd-default-padding local-header flex flex-col">
+      <div class="bd-type-text">Virtual Node</div>
+      <div class="bd-title-text">Client Applications</div>
+    </div>
+    <app-node-state-panel
+      [items]="nodeStateItems$ | async"
+      [narrowWhen$]="narrowWhen$"
+    ></app-node-state-panel>
   </div>
-  <app-node-state-panel
-    [items]="nodeStateItems$ | async"
-    [narrowWhen$]="narrowWhen$"
-  ></app-node-state-panel>
   <ng-container *ngIf="!(collapsedWhen$ | async)">
     <mat-divider></mat-divider>
     <div class="bd-default-padding">

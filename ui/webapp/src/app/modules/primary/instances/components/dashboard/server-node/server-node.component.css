@@ -1,9 +1,3 @@
-.local-header {
-  margin-top: 0px;
-  padding-top: 10px;
-  background-color: var(--bd-bg-toolbar);
-}
-
 .sticky-container {
   position: relative;
 }
