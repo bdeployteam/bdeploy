@@ -350,6 +350,14 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
       });
     }
 
+    // sort the timers...
+    x.sort((a, b) => {
+      const ta = this.getTimer(this.selectedGroup, a.name);
+      const tb = this.getTimer(this.selectedGroup, b.name);
+
+      return tb.histogram.median - ta.histogram.median;
+    });
+
     this.countGraphHeight = x.length * 25 + 100;
     this.groupCounts = x;
   }
@@ -382,6 +390,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
     this.selectedTimer = timer;
     this.selectedTimerName = t.name;
     this.histogramDetails = {
+      median: this.toMillis(this.selectedTimer.histogram.median),
       p75th: this.toMillis(this.selectedTimer.histogram.p75th),
       p99th: this.toMillis(this.selectedTimer.histogram.p99th),
       min: this.toMillis(this.selectedTimer.histogram.min),

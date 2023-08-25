@@ -156,7 +156,8 @@
 
       <!-- Metrics of selected group -->
       <h3 *ngIf="selectedGroup" class="flex justify-start items-center gap-1">
-        <mat-icon>lightbulb</mat-icon>Click a metric to view details
+        <mat-icon>lightbulb</mat-icon>Click a metric to view details. Sorted by
+        mean duration of calls, slowest first.
       </h3>
       <div *ngIf="selectedGroup" class="charts-area flex-auto">
         <div class="count-chart" [style.height.px]="countGraphHeight">
@@ -189,6 +190,10 @@
                 <strong>{{ selectedTimer.meter.oneMinRate }}</strong></span
               >
               <mat-divider></mat-divider>
+              <span
+                >Time [Median]:
+                <strong>{{ histogramDetails.median }} ms</strong></span
+              >
               <span
                 >Time [75th]:
                 <strong>{{ histogramDetails.p75th }} ms</strong></span
