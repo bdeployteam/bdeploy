@@ -6,25 +6,11 @@ import {
   UserGroupInfo,
   UserInfo,
 } from 'src/app/models/gen.dtos';
-import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { PermissionColumnsService } from 'src/app/modules/core/services/permission-columns.service';
 import { UsersColumnsService } from 'src/app/modules/core/services/users-columns.service';
 import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-admin.service';
-
-const COL_SCOPE: BdDataColumn<ScopedPermission> = {
-  id: 'scope',
-  name: 'Scope',
-  data: (r) => (r.scope ? r.scope : 'Global'),
-  classes: (r) => (r.scope ? [] : ['bd-text-secondary']),
-};
-
-const COL_PERMISSION: BdDataColumn<ScopedPermission> = {
-  id: 'permission',
-  name: 'Permission',
-  data: (r) => r.permission,
-  component: BdDataPermissionLevelCellComponent,
-};
 
 @Component({
   selector: 'app-user-group-admin-detail',
@@ -53,8 +39,7 @@ export class UserGroupAdminDetailComponent implements OnDestroy {
   /* template */ loading$ = new BehaviorSubject<boolean>(false);
   /* template */ group$ = new BehaviorSubject<UserGroupInfo>(null);
   /* template */ permColumns: BdDataColumn<ScopedPermission>[] = [
-    COL_SCOPE,
-    COL_PERMISSION,
+    ...this.permissionColumnsService.defaultPermissionColumns,
     this.colDeletePerm,
   ];
   /* template */ userColumns: BdDataColumn<UserInfo>[] = [
@@ -71,7 +56,8 @@ export class UserGroupAdminDetailComponent implements OnDestroy {
   constructor(
     private areas: NavAreasService,
     private authAdmin: AuthAdminService,
-    private usersColumnsService: UsersColumnsService
+    private usersColumnsService: UsersColumnsService,
+    private permissionColumnsService: PermissionColumnsService
   ) {
     this.subscription = combineLatest([
       areas.panelRoute$,
