@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import {
@@ -36,7 +36,8 @@ export class ProcessDetailsService implements OnDestroy {
     private groups: GroupsService,
     private instances: InstancesService,
     private processes: ProcessesService,
-    private areas: NavAreasService
+    private areas: NavAreasService,
+    private zone: NgZone
   ) {
     this.subscription = combineLatest([
       this.areas.panelRoute$,
@@ -48,13 +49,13 @@ export class ProcessDetailsService implements OnDestroy {
       const app2node = this.processes.processToNode$.value;
       const process = route?.params['process'];
       if (!process || !app2node || !app2node[process] || !instance || !nodes) {
-        this.processConfig$.next(null);
-        this.processDetail$.next(null);
-        this.loading$.next(false);
+        this.zone.run(() => {
+          this.processConfig$.next(null);
+          this.processDetail$.next(null);
+          this.loading$.next(false);
+        });
         return;
       }
-
-      this.loading$.next(true);
 
       // find the configuration for the application we're showing details for
       const appsPerNode = nodes.nodeConfigDtos.map((x) =>
@@ -65,12 +66,16 @@ export class ProcessDetailsService implements OnDestroy {
       const allApps: ApplicationConfiguration[] = [].concat(...appsPerNode);
       const app = allApps.find((a) => a?.id === process);
 
-      this.processConfig$.next(app);
+      this.zone.run(() => {
+        this.processConfig$.next(app);
 
-      if (!states || !states[process]) {
-        this.processDetail$.next(null);
-        return;
-      }
+        if (!states || !states[process]) {
+          this.processDetail$.next(null);
+          return;
+        }
+
+        this.loading$.next(true);
+      });
 
       // if we're already performing a call, cancel it - only one detail at a time.
       this.detailsCall?.unsubscribe();
@@ -86,8 +91,10 @@ export class ProcessDetailsService implements OnDestroy {
         )
         .pipe(
           finalize(() => {
-            this.detailsCall = null;
-            this.loading$.next(false);
+            this.zone.run(() => {
+              this.detailsCall = null;
+              this.loading$.next(false);
+            });
           }),
           measure(`Process Details`)
         )
