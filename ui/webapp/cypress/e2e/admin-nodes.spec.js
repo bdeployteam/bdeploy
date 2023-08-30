@@ -11,8 +11,6 @@ describe('Admin Nodes Test', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.contains('a', 'Nodes').click();
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavContent(() => {
       cy.contains('tr', 'master').should('exist').click();
     });
@@ -51,14 +49,12 @@ describe('Admin Nodes Test', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.contains('a', 'Nodes').click();
-    cy.waitUntilContentLoaded();
-
     cy.pressToolbarButton('Add Node');
-
-    cy.intercept({ method: 'GET', url: '**/api/node-admin/nodes' }).as('list');
 
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_Nodes_Add');
+
+    cy.intercept({ method: 'GET', url: '**/api/node-admin/nodes' }).as('list');
 
     cy.inMainNavFlyin('app-add-node', () => {
       cy.fillFormInput('name', 'TestNode');
@@ -69,7 +65,6 @@ describe('Admin Nodes Test', () => {
 
     cy.checkMainNavFlyinClosed();
     cy.wait('@list');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'TestNode').should('exist').click();
@@ -86,7 +81,6 @@ describe('Admin Nodes Test', () => {
     });
 
     cy.wait('@list');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'TestNode').should('not.exist');

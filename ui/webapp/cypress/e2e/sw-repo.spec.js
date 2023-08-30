@@ -81,7 +81,6 @@ describe('Software Repository Tests', () => {
       ).should('exist');
     });
 
-    cy.waitUntilContentLoaded();
     cy.contains('tr', 'io.bdeploy/demo/product').should('exist');
 
     // check presence of software and product
@@ -167,7 +166,6 @@ describe('Software Repository Tests', () => {
       });
     });
 
-    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Demo Product').should('not.exist');
     });

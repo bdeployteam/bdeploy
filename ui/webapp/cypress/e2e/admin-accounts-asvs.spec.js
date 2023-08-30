@@ -11,7 +11,6 @@ describe('Admin UI Tests (Accounts ASVS)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.contains('a', 'User Accounts').click();
-    cy.waitUntilContentLoaded();
 
     // test password rules
     cy.inMainNavContent(() => {

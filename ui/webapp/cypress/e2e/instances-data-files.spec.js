@@ -4,10 +4,6 @@ describe('Instance Data Files Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
   });
@@ -15,15 +11,18 @@ describe('Instance Data Files Tests', () => {
   it('Prepares the test (group, products, instance)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
   it('Configures Processes', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     // Add Server Process
     cy.inMainNavContent(() => {
@@ -86,7 +85,6 @@ describe('Instance Data Files Tests', () => {
 
     // save navigates to dashboard, navigate back
     cy.pressMainNavButton('Instance Configuration');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       // "added" border should be gone, we're in sync now.
@@ -99,10 +97,9 @@ describe('Instance Data Files Tests', () => {
   });
 
   it('Produces data file', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Dashboard');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('.bd-rect-card', 'has no active version')
@@ -131,11 +128,11 @@ describe('Instance Data Files Tests', () => {
   });
 
   it('Checks data file from process', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Data Files');
 
     cy.waitUntilContentLoaded();
-
     cy.screenshot('Doc_DataFiles');
 
     // additionally open preview once.
@@ -144,14 +141,11 @@ describe('Instance Data Files Tests', () => {
     });
 
     cy.waitUntilContentLoaded();
-
     cy.screenshot('Doc_DataFilesView');
 
     cy.inMainNavFlyin('app-data-file-viewer', () => {
       cy.pressToolbarButton('Edit');
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.monacoEditor().should('contain.value', 'TEST');
@@ -169,10 +163,9 @@ describe('Instance Data Files Tests', () => {
   });
 
   it('Checks adding and modifying data files', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Data Files');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Add File');
@@ -190,13 +183,9 @@ describe('Instance Data Files Tests', () => {
       cy.contains('tr', 'test.txt').should('exist').click();
     });
 
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavFlyin('app-data-file-viewer', () => {
       cy.pressToolbarButton('Edit');
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.typeInMonacoEditor('This is a test');
@@ -204,12 +193,9 @@ describe('Instance Data Files Tests', () => {
     });
 
     cy.waitUntilContentLoaded();
-
     cy.inMainNavFlyin('app-data-file-viewer', () => {
       cy.pressToolbarButton('Edit');
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-data-file-editor', () => {
       cy.monacoEditor().should('have.value', 'This is a test');
@@ -218,10 +204,9 @@ describe('Instance Data Files Tests', () => {
   });
 
   it('Tests replacing a file', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Data Files');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'test.txt').should('exist').and('not.contain', '0 B');
@@ -246,10 +231,9 @@ describe('Instance Data Files Tests', () => {
   });
 
   it('Checks bulk manipulation', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Data Files');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Bulk Manipulation');
@@ -271,9 +255,5 @@ describe('Instance Data Files Tests', () => {
         cy.contains('tr', 'test.txt').should('not.exist');
       }
     );
-  });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
   });
 });

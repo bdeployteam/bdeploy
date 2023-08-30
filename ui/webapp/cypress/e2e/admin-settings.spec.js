@@ -115,10 +115,8 @@ describe('Admin UI Tests (Settings)', () => {
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Test Server')
-        .should('exist')
-        .within(() => {
-          cy.get('button[data-cy^="Check connection"]').click();
-        });
+        .find('button[data-cy^="Check connection"]')
+        .click();
     });
     cy.inMainNavFlyin('check-ldap-server', () => {
       cy.wait('@ldapCheck').then((intercept) => {
@@ -129,12 +127,7 @@ describe('Admin UI Tests (Settings)', () => {
       cy.get('button[data-cy="Close"]').click();
     });
 
-    cy.contains('tr', 'Test Server')
-      .should('exist')
-      .within(() => {
-        cy.get('button[data-cy^="Remove"]').click();
-      });
-
+    cy.contains('tr', 'Test Server').find('button[data-cy^="Remove"]').click();
     cy.contains('tr', 'Test Server').should('not.exist');
   });
 
@@ -159,9 +152,13 @@ describe('Admin UI Tests (Settings)', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_Global_Attributes');
 
+    cy.visit('/');
     cy.createGroup('Attr-Test-1');
+
+    cy.visit('/');
     cy.createGroup('Attr-Test-2');
 
+    cy.visit('/');
     cy.enterGroup('Attr-Test-1');
 
     cy.inMainNavContent(() => {
@@ -233,14 +230,16 @@ describe('Admin UI Tests (Settings)', () => {
 
     cy.inMainNavContent(() => {
       cy.contains('.mat-mdc-tab', 'Global Attributes').click();
-      cy.contains('tr', 'Attr1').within(() => {
-        cy.get('button[data-cy^="Remove"]').click();
-      });
+      cy.contains('tr', 'Attr1').as('attr');
+      cy.get('@attr').find('button[data-cy^="Remove"]').click();
       cy.contains('tr', 'Attr1').should('not.exist');
       cy.pressToolbarButton('Save');
     });
 
+    cy.visit('/');
     cy.deleteGroup('Attr-Test-1');
+
+    cy.visit('/');
     cy.deleteGroup('Attr-Test-2');
   });
 
@@ -265,41 +264,42 @@ describe('Admin UI Tests (Settings)', () => {
         'pluginList'
       );
       cy.contains('tr', 'pause').should('exist');
-      cy.contains('tr', 'bdeploy-demo-plugin')
-        .should('exist')
-        .within(() => {
-          cy.contains('mat-icon', 'check_box').should('exist'); // loaded
-          cy.contains('mat-icon', 'public').should('exist'); // global
 
-          cy.get('button[data-cy^="Unload"]').click();
-        });
+      cy.contains('tr', 'bdeploy-demo-plugin')
+        .contains('mat-icon', 'check_box')
+        .should('exist'); // loaded
+      cy.contains('tr', 'bdeploy-demo-plugin')
+        .contains('mat-icon', 'public')
+        .should('exist'); // global
+      cy.contains('tr', 'bdeploy-demo-plugin')
+        .find('button[data-cy^="Unload"]')
+        .click();
 
       cy.wait('@pluginList'); // should be called after unload, required to query the *correct* tr now.
-      cy.waitUntilContentLoaded();
     });
 
+    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_Plugins');
 
     cy.inMainNavContent(() => {
       // re-fetch the row as it is re-created.
       cy.contains('tr', 'bdeploy-demo-plugin')
-        .should('exist')
-        .within(() => {
-          cy.contains('mat-icon', 'check_box_outline_blank').should('exist'); // not loaded
-
-          cy.get('button[data-cy^="Load"]').click();
-        });
+        .contains('mat-icon', 'check_box_outline_blank')
+        .should('exist'); // not loaded
+      cy.contains('tr', 'bdeploy-demo-plugin')
+        .find('button[data-cy^="Load"]')
+        .click();
 
       cy.wait('@pluginList'); // should be called after load, required to query the *correct* tr now.
-      cy.waitUntilContentLoaded();
 
       // and re-fetch again.
+      cy.contains('tr', 'bdeploy-demo-plugin').should('exist').as('row');
       cy.contains('tr', 'bdeploy-demo-plugin')
-        .should('exist')
-        .within(() => {
-          cy.contains('mat-icon', 'check_box').should('exist'); // loaded again
-          cy.get('button[data-cy^="Delete"]').click();
-        });
+        .contains('mat-icon', 'check_box')
+        .should('exist'); // loaded again
+      cy.contains('tr', 'bdeploy-demo-plugin')
+        .find('button[data-cy^="Delete"]')
+        .click();
 
       cy.contains('app-bd-notification-card', 'Delete').within(() => {
         cy.get('button[data-cy=Yes]').click();

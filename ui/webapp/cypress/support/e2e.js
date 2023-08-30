@@ -21,6 +21,11 @@ if (Cypress.env('DISABLE_COVERAGE') !== 'yes') {
   require('@cypress/code-coverage/support');
 }
 
+before(() => {
+  cy.cleanAllGroups();
+  cy.cleanAllSoftwareRepos();
+});
+
 Cypress.Screenshot.defaults({ overwrite: true });
 
 Cypress.on('uncaught:exception', (err, runnable) => {

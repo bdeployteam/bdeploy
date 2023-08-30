@@ -6,10 +6,6 @@ describe('Instance Settings Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
   });
@@ -17,15 +13,18 @@ describe('Instance Settings Tests', () => {
   it('Prepares the test (group, products, instance)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip');
+
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
   });
 
   it('Tests Base Configuration', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
@@ -76,10 +75,9 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Instance Variables', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
@@ -216,10 +214,9 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Configuration Files', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
@@ -235,8 +232,6 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-config-files', () => {
-      cy.waitUntilContentLoaded();
-
       cy.contains('tr', 'Current instance configuration files').should('exist');
       cy.contains('tr', 'current product version').should('not.exist');
 
@@ -249,8 +244,6 @@ describe('Instance Settings Tests', () => {
           cy.get('button[data-cy="Yes"]').click();
         }
       );
-
-      cy.waitUntilContentLoaded();
 
       cy.contains('tr', 'dummy2.cfg').should('not.exist');
 
@@ -267,8 +260,6 @@ describe('Instance Settings Tests', () => {
       );
     });
 
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavFlyin('app-config-files', () => {
       cy.pressToolbarButton('Back to Overview');
     });
@@ -283,8 +274,6 @@ describe('Instance Settings Tests', () => {
 
     // save navigates to dashboard, navigate back
     cy.pressMainNavButton('Instance Configuration');
-    cy.waitUntilContentLoaded();
-
     cy.pressToolbarButton('Instance Settings');
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -292,8 +281,6 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-config-files', () => {
-      cy.waitUntilContentLoaded();
-
       cy.contains('tr', 'current product version').should('exist');
 
       cy.contains('tr', 'binary2.cfg')
@@ -322,8 +309,6 @@ describe('Instance Settings Tests', () => {
       });
     });
 
-    cy.waitUntilContentLoaded();
-
     cy.monacoEditor().should('contain.value', 'dummy configuration');
     cy.typeInMonacoEditor('Configuration File Content', true);
 
@@ -342,8 +327,6 @@ describe('Instance Settings Tests', () => {
         }
       );
 
-      cy.waitUntilContentLoaded();
-
       cy.contains('tr', 'test.json')
         .should('exist')
         .within(() => {
@@ -359,13 +342,9 @@ describe('Instance Settings Tests', () => {
       cy.pressToolbarButton('Apply');
     });
 
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavFlyin('app-config-files', () => {
       cy.pressToolbarButton('Back to Overview');
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('button[data-cy^="Save"]').should('be.enabled').click();
@@ -374,10 +353,9 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Banner', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
@@ -464,10 +442,9 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Ports', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
@@ -493,10 +470,9 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Nodes', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
@@ -555,8 +531,6 @@ describe('Instance Settings Tests', () => {
         .within(() => {
           cy.contains('No data').should('exist');
         });
-
-      cy.waitUntilContentLoaded();
     });
   });
 
@@ -584,10 +558,10 @@ describe('Instance Settings Tests', () => {
     });
 
     // now use definition in instance
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
-    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
@@ -602,7 +576,6 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-attributes', () => {
-      cy.waitUntilContentLoaded();
       cy.get('button[data-cy^="Add/Edit"]').click();
       cy.contains('app-bd-notification-card', 'Add/Edit').within(() => {
         cy.fillFormSelect('id', 'Demo Attribute');
@@ -637,10 +610,9 @@ describe('Instance Settings Tests', () => {
       cy.contains('tr', instanceName).should('exist');
     });
 
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
@@ -663,9 +635,5 @@ describe('Instance Settings Tests', () => {
         });
       cy.contains('tr', 'Instance Value').should('not.exist');
     });
-  });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
   });
 });

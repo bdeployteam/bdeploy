@@ -13,7 +13,6 @@ declare namespace Cypress {
      */
     visitCentral(url: string);
     visitManaged(url: string);
-    visitBDeploy(url: string, mode: 'STANDALONE' | 'CENTRAL' | 'MANAGED');
 
     /**
      * Forces (re-)visit of the given URL by adding a random timestamp query parameter to the URL
@@ -24,6 +23,9 @@ declare namespace Cypress {
     forceVisit(url: string);
 
     /** performs an authenticated request */
-    authenticatedRequest(req: Partial<RequestOptions>, mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL'): Chainable<Cypress.Response<any>>;
+    authenticatedRequest(
+      req: Partial<RequestOptions>,
+      mode?: 'STANDALONE' | 'MANAGED' | 'CENTRAL'
+    ): Chainable<Cypress.Response<any>>;
   }
 }

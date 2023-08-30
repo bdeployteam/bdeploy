@@ -4,10 +4,6 @@ describe('Instance Dashboard Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
   });
@@ -15,17 +11,20 @@ describe('Instance Dashboard Tests', () => {
   it('Prepares the test (group, products, instance)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
   it('Prepares Instance Version', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.screenshot('Doc_InstanceEmpty');
 
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     // create some from a template
     cy.inMainNavContent(() => {
@@ -35,8 +34,6 @@ describe('Instance Dashboard Tests', () => {
         }
       );
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.fillFormSelect('Template', 'Default Configuration');
@@ -49,8 +46,6 @@ describe('Instance Dashboard Tests', () => {
       cy.fillFormInput('Sleep Timeout', '10');
       cy.get('button[data-cy="Confirm"]').click();
     });
-
-    cy.waitUntilContentLoaded();
 
     // change the name from Another Server With Sleep to Another Process for later tests.
     cy.inMainNavContent(() => {
@@ -83,8 +78,8 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Test Dashboard', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('.bd-rect-card', 'has no active version')
@@ -132,6 +127,8 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Test Manual Confirm', () => {
+    cy.visit('/');
+    cy.enterInstance(groupName, instanceName);
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Server No Sleep').click();
     });
@@ -150,16 +147,14 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Test Process Control', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
-    cy.waitUntilContentLoaded();
 
     cy.checkMainNavFlyinClosed();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Another Process').click();
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-process-status', () => {
       cy.contains('Another Process').should('exist');
@@ -224,16 +219,14 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Test Selected Bulk Process Control', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
-    cy.waitUntilContentLoaded();
 
     cy.checkMainNavFlyinClosed();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Bulk Control');
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-bulk-control', () => {
       cy.contains('div', 'selected processes.')
@@ -277,9 +270,7 @@ describe('Instance Dashboard Tests', () => {
       });
     });
 
-    cy.waitUntilContentLoaded();
     cy.wait('@list');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('tr:contains("OK")').should('have.length', 2);
@@ -299,9 +290,7 @@ describe('Instance Dashboard Tests', () => {
       });
     });
 
-    cy.waitUntilContentLoaded();
     cy.wait('@list');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('tr:contains("stop")').should('have.length', 3);
@@ -309,8 +298,8 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Tests card mode', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Toggle Card Mode');
@@ -322,8 +311,8 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Tests collapsed mode', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Collapsed Mode');
@@ -336,8 +325,8 @@ describe('Instance Dashboard Tests', () => {
   });
 
   it('Tests node details', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('app-instance-server-node', 'master').within(() => {
@@ -350,9 +339,5 @@ describe('Instance Dashboard Tests', () => {
       cy.get('app-node-header[show="load"]').should('exist');
       cy.get('app-node-header[show="cpu"]').should('exist');
     });
-  });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
   });
 });

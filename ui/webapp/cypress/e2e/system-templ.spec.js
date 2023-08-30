@@ -1,10 +1,6 @@
 describe('System Template Tests', () => {
   var groupName = 'Demo';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
   });
@@ -12,18 +8,21 @@ describe('System Template Tests', () => {
   it('Prepares the test (group, products)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'chat-product-1-direct.zip');
   });
 
   it('Creates Instances From System Template', () => {
     cy.visit('/');
     cy.enterGroup(groupName);
-    cy.waitUntilContentLoaded();
 
     cy.pressToolbarButton('Apply System Template');
-    cy.waitUntilContentLoaded();
 
+    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_SystemTemplate_Wizard');
 
     cy.inMainNavContent(() => {
@@ -84,7 +83,6 @@ describe('System Template Tests', () => {
   it('Check Instances', () => {
     cy.visit('/');
     cy.enterGroup(groupName);
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.get('tr:contains("Demo Chat App")').should('have.length', 3);

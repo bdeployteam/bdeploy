@@ -1,7 +1,6 @@
 //@ts-check
 
 describe('Admin UI Tests (Cleanup)', () => {
-
   var groupName = 'Demo';
 
   beforeEach(() => {
@@ -11,7 +10,11 @@ describe('Admin UI Tests (Cleanup)', () => {
   it('Prepares the test (group, products, instance)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip');
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
   });
 
@@ -49,11 +52,5 @@ describe('Admin UI Tests (Cleanup)', () => {
       cy.wait('@cleanup');
       cy.contains('tr', 'DELETE_MANIFEST').should('not.exist');
     });
-
   });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
-  });
-
 });

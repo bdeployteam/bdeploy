@@ -3,7 +3,6 @@ function logout(cy) {
   cy.inMainNavFlyin('app-settings', () => {
     cy.get('button[data-cy="Logout"]').click();
   });
-  cy.waitUntilContentLoaded();
 }
 
 function login(cy, user, pass) {
@@ -11,8 +10,6 @@ function login(cy, user, pass) {
   cy.fillFormInput('pass', pass);
 
   cy.get('button[type="submit"]').click();
-
-  cy.waitUntilContentLoaded();
 
   cy.inMainNavContent(() => {
     cy.contains('Welcome to BDeploy').should('exist');
@@ -26,14 +23,13 @@ describe('Admin UI Tests (User Groups)', () => {
 
   it('Creates test user and test user group', () => {
     cy.login();
-
     cy.visit('/');
+
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').click();
 
     // Create user
     cy.contains('a', 'User Accounts').click();
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Create User');
@@ -58,7 +54,6 @@ describe('Admin UI Tests (User Groups)', () => {
 
     // Create user group
     cy.contains('a', 'User Groups').click();
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Create User Group');
@@ -107,10 +102,10 @@ describe('Admin UI Tests (User Groups)', () => {
 
     cy.inMainNavFlyin('assign-user-group-permission', () => {
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
+      cy.waitUntilContentLoaded();
     });
 
     // check ADMIN perm.
-    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', userGroupName)
         .should('exist')
@@ -124,9 +119,9 @@ describe('Admin UI Tests (User Groups)', () => {
   });
 
   it('Validates test user cannot access admin UI', () => {
+    cy.visit('/');
     login(cy, userName, password);
 
-    cy.visit('/');
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').should('be.disabled');
 
@@ -136,11 +131,11 @@ describe('Admin UI Tests (User Groups)', () => {
   it('Adds test user to user group with global ADMIN right', () => {
     cy.login();
     cy.visit('/');
+
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').click();
     cy.contains('a', 'User Groups').click();
     cy.inMainNavContent(() => {
-      cy.waitUntilContentLoaded();
       cy.contains('tr', userGroupName)
         .should('exist')
         .within(() => {
@@ -165,16 +160,14 @@ describe('Admin UI Tests (User Groups)', () => {
   });
 
   it('Validates test user can access Admin UI and removes itself from user group', () => {
+    cy.visit('/');
     login(cy, userName, password);
 
-    cy.visit('/');
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').should('be.enabled').click();
 
     // Delete test user from user group
     cy.contains('a', 'User Groups').click();
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavContent(() => {
       cy.contains('tr', userGroupName)
         .should('exist')
@@ -191,15 +184,14 @@ describe('Admin UI Tests (User Groups)', () => {
           cy.contains('mat-icon', 'delete').click();
         });
     });
-    cy.waitUntilContentLoaded();
 
     logout(cy);
   });
 
   it('Validates test user cannot access admin UI again', () => {
+    cy.visit('/');
     login(cy, userName, password);
 
-    cy.visit('/');
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').should('be.disabled');
 
@@ -208,15 +200,13 @@ describe('Admin UI Tests (User Groups)', () => {
 
   it('Clean up', () => {
     cy.login();
-
     cy.visit('/');
+
     cy.get('.local-hamburger-button').click();
     cy.get('button[data-cy=Administration]').click();
 
     // Delete user
     cy.contains('a', 'User Accounts').click();
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavContent(() => {
       cy.contains('tr', userName)
         .should('exist')
@@ -235,8 +225,6 @@ describe('Admin UI Tests (User Groups)', () => {
 
     // Delete user group
     cy.contains('a', 'User Groups').click();
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavContent(() => {
       cy.contains('tr', userGroupName)
         .should('exist')

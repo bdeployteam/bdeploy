@@ -6,10 +6,6 @@ describe('Instance Settings Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
   });
@@ -17,15 +13,18 @@ describe('Instance Settings Tests', () => {
   it('Prepares the test (group, products, instance)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
   it('Tests Instance Templates', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     // shortcut to get to the templates
     cy.inMainNavContent(() => {
@@ -46,8 +45,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavFlyin('app-instance-settings', () => {
       cy.get('button[data-cy^="Instance Templates"]').click();
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.fillFormSelect('Template', 'Default Configuration');
@@ -180,10 +177,9 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Process Templates', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('app-config-node', 'master').within(() => {
@@ -229,7 +225,6 @@ describe('Instance Settings Tests', () => {
       });
     });
 
-    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_InstanceNewProcess');
 
     cy.inMainNavFlyin('app-edit-process-overview', () => {
@@ -259,10 +254,9 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Instance Export', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance History');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Current').click();
@@ -278,12 +272,13 @@ describe('Instance Settings Tests', () => {
   });
 
   it('Tests Instance Import', () => {
+    cy.visit('/');
     cy.createInstance(groupName, instanceName + '2', 'Demo Product', '2.0.0');
+
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName + '2');
 
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('Current Version: 1').should('exist');
@@ -301,8 +296,6 @@ describe('Instance Settings Tests', () => {
       cy.fillFileDrop('instance-export.zip');
       cy.contains('app-bd-notification-card', 'Success').should('exist');
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('Current Version: 2').should('exist');
@@ -336,15 +329,9 @@ describe('Instance Settings Tests', () => {
       cy.contains('app-bd-notification-card', 'Success').should('exist');
     });
 
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavContent(() => {
       cy.contains('Current Version: 3').should('exist');
       cy.contains('SAVING NOT POSSIBLE').should('exist');
     });
-  });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
   });
 });

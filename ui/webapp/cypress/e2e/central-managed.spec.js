@@ -12,16 +12,25 @@ describe('Central/Managed Basic Test', function () {
 
   it('Creates a group on the central server', () => {
     cy.visitCentral('/');
-    cy.createGroup(groupName, 'CENTRAL');
+    cy.createGroup(groupName);
   });
 
-  it('Attaches a managed server to the central server', () => {
-    cy.attachManaged(groupName, true);
+  it('Attaches a managed server to the central server (managed part)', () => {
+    cy.visitManaged('/');
+    cy.attachManagedSide(groupName);
   });
 
-  it('Deletes and re-attaches the managed server to the central server', () => {
-    cy.deleteGroup(groupName, 'MANAGED');
+  it('Attaches a managed server to the central server (central part)', () => {
+    cy.visitCentral('/');
+    cy.attachCentralSide(groupName);
+  });
 
+  it('Deletes group on managed server', () => {
+    cy.visitManaged('/');
+    cy.deleteGroup(groupName);
+  });
+
+  it('Re-attaches the managed server to the central server (prep)', () => {
     cy.visitCentral('/');
     // go to managed servers and sync -> fails
     cy.enterGroup(groupName);
@@ -48,28 +57,28 @@ describe('Central/Managed Basic Test', function () {
         cy.contains('button', 'Yes').should('exist').and('be.enabled').click();
       });
     });
+  });
 
-    cy.attachManaged(groupName);
+  it('Re-attaches the managed server to the central server (managed part)', () => {
+    cy.visitManaged('/');
+    cy.attachManagedSide(groupName);
+  });
+
+  it('Re-attaches the managed server to the central server (central part)', () => {
+    cy.visitCentral('/');
+    cy.attachCentralSide(groupName);
   });
 
   it('Creates an instance on managed server', () => {
-    cy.uploadProductIntoGroup(
-      groupName,
-      'test-product-1-direct.zip',
-      false,
-      'MANAGED'
-    );
+    cy.visitManaged('/');
+    cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip', false);
 
-    cy.createInstance(
-      groupName,
-      instanceName,
-      'Demo Product',
-      '1.0.0',
-      'MANAGED'
-    );
+    cy.visitManaged('/');
+    cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
+  });
 
+  it('Check instance on central', () => {
     cy.visitCentral('/');
-    cy.waitUntilContentLoaded();
     cy.enterGroup(groupName);
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName).should('not.exist');
@@ -140,22 +149,15 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Creates an instance on central server', () => {
-    cy.uploadProductIntoGroup(
-      groupName,
-      'test-product-2-direct.zip',
-      false,
-      'CENTRAL'
-    );
-    cy.createInstance(
-      groupName,
-      instanceName2,
-      'Demo Product',
-      '2.0.0',
-      'CENTRAL'
-    );
+    cy.visitCentral('/');
+    cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', false);
 
+    cy.visitCentral('/');
+    cy.createInstance(groupName, instanceName2, 'Demo Product', '2.0.0');
+  });
+
+  it('Checks instance on managed', () => {
     cy.visitManaged('/');
-    cy.waitUntilContentLoaded();
     cy.enterGroup(groupName);
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName2).should('exist');
@@ -165,7 +167,8 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Configures instance on central server', () => {
-    cy.enterInstance(groupName, instanceName2, 'CENTRAL');
+    cy.visitCentral('/');
+    cy.enterInstance(groupName, instanceName2);
 
     cy.screenshot('Doc_CentralInstanceDashboard');
 
@@ -184,8 +187,6 @@ describe('Central/Managed Basic Test', function () {
         }
       );
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.fillFormSelect('Template', 'Default Configuration');
@@ -210,7 +211,6 @@ describe('Central/Managed Basic Test', function () {
   it('Checks product not available on managed', () => {
     cy.visitManaged('/');
     cy.enterGroup(groupName);
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName2)
@@ -222,7 +222,8 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Synchronizes, installs, activates on central', () => {
-    cy.enterInstance(groupName, instanceName2, 'CENTRAL');
+    cy.visitCentral('/');
+    cy.enterInstance(groupName, instanceName2);
     cy.pressToolbarButton('Synchronize');
 
     cy.contains('.bd-rect-card', 'no active version')
@@ -237,7 +238,6 @@ describe('Central/Managed Basic Test', function () {
         });
       });
 
-    cy.waitUntilContentLoaded();
     cy.contains('app-instance-server-node', 'master').within(() => {
       cy.contains('tr', 'Server No Sleep').should('exist');
       cy.contains('tr', 'Server With Sleep').should('exist');
@@ -247,7 +247,6 @@ describe('Central/Managed Basic Test', function () {
   it('Checks product implicitly available on managed', () => {
     cy.visitManaged('/');
     cy.enterGroup(groupName);
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName2)
@@ -259,7 +258,8 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Starts process on central', () => {
-    cy.enterInstance(groupName, instanceName2, 'CENTRAL');
+    cy.visitCentral('/');
+    cy.enterInstance(groupName, instanceName2);
     cy.pressToolbarButton('Synchronize');
     cy.waitUntilContentLoaded();
 
@@ -272,7 +272,6 @@ describe('Central/Managed Basic Test', function () {
       cy.contains('button', 'stop').should('be.enabled');
     });
 
-    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('app-instance-server-node', 'master').within(() => {
         cy.contains('app-bd-micro-icon-button', 'refresh').click();
@@ -287,8 +286,8 @@ describe('Central/Managed Basic Test', function () {
   });
 
   it('Stops process on managed', () => {
-    cy.enterInstance(groupName, instanceName2, 'MANAGED');
-    cy.waitUntilContentLoaded();
+    cy.visitManaged('/');
+    cy.enterInstance(groupName, instanceName2);
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Another Server With Sleep')
@@ -303,16 +302,18 @@ describe('Central/Managed Basic Test', function () {
     });
   });
 
-  it('Deletes the group on central and managed server', () => {
-    cy.deleteGroup(groupName, 'CENTRAL');
+  it('Deletes the group on central', () => {
+    cy.visitCentral('/');
+    cy.deleteGroup(groupName);
+  });
 
+  it('Deletes the group on managed', () => {
     cy.visitManaged('/');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', groupName).should('exist');
     });
 
-    cy.deleteGroup(groupName, 'MANAGED');
+    cy.deleteGroup(groupName);
   });
 });

@@ -79,18 +79,6 @@ Cypress.Commands.add('forceVisit', (url) => {
   });
 });
 
-Cypress.Commands.add('visitBDeploy', function (url, mode) {
-  if (mode === 'STANDALONE') {
-    return cy.forceVisit(Cypress.config('baseUrl') + url);
-  } else if (mode === 'CENTRAL') {
-    return cy.visitCentral(url);
-  } else if (mode === 'MANAGED') {
-    return cy.visitManaged(url);
-  } else {
-    throw new Error('Unsupported mode: ' + mode);
-  }
-});
-
 Cypress.Commands.add(
   'authenticatedRequest',
   function (opts, mode = 'STANDALONE') {

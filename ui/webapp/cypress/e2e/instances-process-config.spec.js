@@ -4,10 +4,6 @@ describe('Instance Process Config Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
   });
@@ -15,16 +11,21 @@ describe('Instance Process Config Tests', () => {
   it('Prepares the test (group, products, instance)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip');
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
   });
 
   it('Configures Processes', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     // Add Server Process
     cy.inMainNavContent(() => {
@@ -69,8 +70,6 @@ describe('Instance Process Config Tests', () => {
         }
       );
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-add-process', () => {
       cy.contains('tr', 'Client Application')
@@ -383,8 +382,6 @@ describe('Instance Process Config Tests', () => {
 
     // navigate back to configuration to continue tests
     cy.pressMainNavButton('Instance Configuration');
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavContent(() => {
       // "added" border should be gone, we're in sync now.
       cy.get('app-config-node[data-cy="master"]').within((node) => {
@@ -440,6 +437,7 @@ describe('Instance Process Config Tests', () => {
 
   // this test is in here since we have some processes configured already.
   it('Tests product update', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
@@ -466,8 +464,6 @@ describe('Instance Process Config Tests', () => {
     });
 
     cy.checkMainNavFlyinClosed();
-
-    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_InstanceProductUpdateHints');
 
     cy.contains('app-bd-notification-card', 'Product Update')
@@ -511,7 +507,6 @@ describe('Instance Process Config Tests', () => {
 
     // save navigates to dashboard, navigate back
     cy.pressMainNavButton('Instance Configuration');
-    cy.waitUntilContentLoaded();
 
     // "changed" border should be gone, we're in sync now.
     cy.get('app-config-node[data-cy="master"]').within((node) => {
@@ -522,6 +517,7 @@ describe('Instance Process Config Tests', () => {
   });
 
   it('Tests endpoints', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
@@ -543,6 +539,7 @@ describe('Instance Process Config Tests', () => {
   });
 
   it('Tests Client Config Whitelist', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
@@ -591,9 +588,5 @@ describe('Instance Process Config Tests', () => {
 
       cy.pressToolbarButton('Apply');
     });
-  });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
   });
 });
