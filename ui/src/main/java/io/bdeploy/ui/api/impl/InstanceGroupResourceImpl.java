@@ -53,6 +53,7 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
+import io.bdeploy.jersey.JerseySecurityContext;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
@@ -73,6 +74,7 @@ import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.UiEndpointDto;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -105,6 +107,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     @Context
     private SecurityContext context;
 
+    @Context
+    private ContainerRequestContext crq;
+
     @Inject
     private Minion minion;
 
@@ -131,9 +136,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             return null;
         }
 
-        // The current user must have at least scoped client download permissions
-        ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.CLIENT);
-        if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
+        if (!isAuthorized(new ScopedPermission(cfg.name, Permission.CLIENT))) {
             return null;
         }
 
@@ -147,6 +150,20 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         }
 
         return new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceIds));
+    }
+
+    private boolean isAuthorized(ScopedPermission requiredPermission) {
+        // need to obtain from request to avoid SecurityContextInjectee wrapper.
+        SecurityContext ctx = crq.getSecurityContext();
+        if (!(ctx instanceof JerseySecurityContext)) {
+            return false;
+        }
+        JerseySecurityContext securityContext = (JerseySecurityContext) ctx;
+        if (!securityContext.isAuthorized(requiredPermission)
+                && !auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -466,9 +483,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
             if (cfg == null) {
                 continue;
             }
-            // The current user must have at least scoped read permissions
-            ScopedPermission requiredPermission = new ScopedPermission(cfg.name, Permission.READ);
-            if (!auth.isAuthorized(context.getUserPrincipal().getName(), requiredPermission)) {
+            if (!isAuthorized(new ScopedPermission(cfg.name, Permission.READ))) {
                 continue;
             }
             result.put(cfg.name, manifest.getAttributes(groupHive).read());
