@@ -11,8 +11,6 @@ describe('Admin UI Tests (Accounts)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.contains('a', 'User Accounts').click();
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavContent(() => {
       cy.fixture('login.json').then((user) => {
         cy.contains('tr', user.user)
@@ -170,7 +168,6 @@ describe('Admin UI Tests (Accounts)', () => {
     });
 
     // check edit
-    cy.waitUntilContentLoaded();
     cy.inMainNavFlyin('app-user-admin-detail', () => {
       cy.get('button[data-cy^="Edit"]').click();
     });
@@ -184,7 +181,6 @@ describe('Admin UI Tests (Accounts)', () => {
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_Admin_User_Accounts_Edit');
 
-    cy.waitUntilContentLoaded();
     cy.inMainNavContent(() => {
       cy.contains('tr', 'test')
         .should('exist')

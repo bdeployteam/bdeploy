@@ -5,18 +5,8 @@ describe('Instance Group Product Import Test', () => {
   var productName = 'Demo Product';
   var productVersion = '1.0.0';
 
-  before(() => {
-    cy.cleanAllGroups();
-    cy.cleanAllSoftwareRepos();
-  });
-
   beforeEach(() => {
     cy.login();
-  });
-
-  after(() => {
-    cy.cleanAllGroups();
-    cy.cleanAllSoftwareRepos();
   });
 
   it('Prepares repository', () => {
@@ -38,8 +28,6 @@ describe('Instance Group Product Import Test', () => {
     });
 
     cy.checkMainNavFlyinClosed();
-
-    cy.waitUntilContentLoaded();
   });
 
   it('Uploads product', () => {
@@ -54,8 +42,6 @@ describe('Instance Group Product Import Test', () => {
     });
 
     // upload product.
-    cy.waitUntilContentLoaded();
-
     cy.inMainNavFlyin('app-software-upload', () => {
       cy.fillFileDrop('test-product-1-direct.zip');
       cy.contains(
@@ -64,7 +50,6 @@ describe('Instance Group Product Import Test', () => {
       ).should('exist');
     });
 
-    cy.waitUntilContentLoaded();
     cy.contains('tr', 'io.bdeploy/demo/product').should('exist');
 
     // verify upload
@@ -89,19 +74,18 @@ describe('Instance Group Product Import Test', () => {
   });
 
   it('Imports product', () => {
-    cy.waitUntilContentLoaded();
+    cy.visit('/');
     cy.inMainNavContent(() => {
       cy.contains('tr', groupName).should('exist').click();
-      cy.waitUntilContentLoaded();
     });
     cy.pressMainNavButton('Products');
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Import Product...');
     });
-    cy.inMainNavFlyin('app-product-transfer-repo', () => {
-      cy.waitUntilContentLoaded();
-    });
+
+    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_ImportProduct_SelectRepo');
+
     cy.inMainNavFlyin('app-product-transfer-repo', () => {
       cy.fillFormSelect('repository', softwareRepoName);
     });
@@ -116,11 +100,14 @@ describe('Instance Group Product Import Test', () => {
     cy.inMainNavFlyin('app-product-transfer-repo', () => {
       cy.contains('button', 'Import').should('exist').and('be.enabled').click();
     });
+
+    cy.visit('/');
     cy.verifyProductVersion(groupName, productName, productVersion);
     cy.screenshot('Doc_ImportProduct_Success');
   });
 
   it('Create instance with imported product', () => {
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, productName, productVersion);
   });
 });

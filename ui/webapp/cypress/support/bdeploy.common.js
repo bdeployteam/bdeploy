@@ -1,13 +1,21 @@
 //@ts-check
 
 Cypress.Commands.add('waitUntilContentLoaded', function () {
-  cy.document()
+  cy.log('Waiting for content load.');
+  cy.document({ log: false })
     .its('body')
-    .within(() => {
-      cy.get('ngx-loading-bar').children().should('not.exist');
-      cy.get('span:contains("Loading Module...")').should('not.exist');
-      cy.get('app-bd-loading-overlay[data-cy="loading"]').should('not.exist');
-      cy.document().its('body').find('button mat-spinner').should('not.exist'); // no work-in-progress buttons
+    .within({ log: false }, () => {
+      cy.get('ngx-loading-bar', { log: false }).children().should('not.exist');
+      cy.get('span:contains("Loading Module...")', { log: false }).should(
+        'not.exist'
+      );
+      cy.get('app-bd-loading-overlay[data-cy="loading"]', {
+        log: false,
+      }).should('not.exist');
+      cy.document()
+        .its('body')
+        .find('button mat-spinner', { log: false })
+        .should('not.exist'); // no work-in-progress buttons
     });
 });
 

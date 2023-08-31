@@ -5,11 +5,10 @@ export default defineConfig({
   defaultCommandTimeout: 60000,
   requestTimeout: 30000,
   responseTimeout: 60000,
-  // required for central/managed test to forceVisit.
+  // required for central/managed test to visit.
   chromeWebSecurity: false,
   viewportWidth: 1280,
   viewportHeight: 720,
-  videoCompression: 0,
   numTestsKeptInMemory: 5,
   e2e: {
     // We've imported your old cypress plugins here.
@@ -21,6 +20,6 @@ export default defineConfig({
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
 
     // required for origin switching in cypress 12
-    // experimentalOriginDependencies: true,
+    experimentalOriginDependencies: true,
   },
 });

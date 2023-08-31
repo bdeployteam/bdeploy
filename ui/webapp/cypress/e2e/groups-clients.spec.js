@@ -5,11 +5,17 @@ describe('Groups Tests (Clients)', () => {
   var instanceName = 'TestInstance';
 
   before(() => {
-    cy.cleanAllGroups();
     cy.authenticatedRequest({
       method: 'DELETE',
-      url: `${Cypress.config('baseUrl')}/auth/admin?name=client`,
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=client`,
       failOnStatusCode: false,
+    });
+  });
+
+  after(() => {
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=client`,
     });
   });
 
@@ -20,15 +26,18 @@ describe('Groups Tests (Clients)', () => {
   it('Creates a group', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
   it('Prepares the instance', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('.bd-rect-card', 'The instance is currently empty').within(
@@ -37,8 +46,6 @@ describe('Groups Tests (Clients)', () => {
         }
       );
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.fillFormSelect('Template', 'Default Configuration');
@@ -78,17 +85,15 @@ describe('Groups Tests (Clients)', () => {
   });
 
   it('Tests client applications page', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Client Applications');
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName).should('exist');
       cy.get('tr:contains("Client Test")').should('have.length', 1).click(); // only one shown due to OS!
     });
 
-    cy.waitUntilContentLoaded();
     cy.screenshot('Doc_ClientApps');
 
     // current OS
@@ -136,6 +141,7 @@ describe('Groups Tests (Clients)', () => {
   });
 
   it('Tests no group visible', () => {
+    cy.visit('/');
     cy.pressMainNavTopButton('User Settings');
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy="Logout"]').click();
@@ -179,7 +185,6 @@ describe('Groups Tests (Clients)', () => {
       });
 
       cy.wait('@getUsers');
-      cy.waitUntilContentLoaded();
 
       cy.contains('tr', 'client').within(() => {
         cy.contains('.local-CLIENT-chip', 'CLIENT').should('exist');
@@ -188,6 +193,7 @@ describe('Groups Tests (Clients)', () => {
   });
 
   it('Tests clients visible', () => {
+    cy.visit('/');
     cy.pressMainNavTopButton('User Settings');
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy="Logout"]').click();
@@ -197,8 +203,6 @@ describe('Groups Tests (Clients)', () => {
     cy.fillFormInput('pass', 'clientclient');
 
     cy.get('button[type="submit"]').click();
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('Welcome to BDeploy').should('not.exist');
@@ -213,14 +217,6 @@ describe('Groups Tests (Clients)', () => {
     cy.inMainNavContent(() => {
       cy.contains('tr', instanceName).should('exist');
       cy.get('tr:contains("Client Test")').should('have.length', 1); // only one shown due to OS!
-    });
-  });
-
-  it('Deletes the group', () => {
-    cy.deleteGroup(groupName);
-    cy.authenticatedRequest({
-      method: 'DELETE',
-      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=client`,
     });
   });
 });

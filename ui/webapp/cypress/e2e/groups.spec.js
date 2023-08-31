@@ -6,10 +6,6 @@ describe('Groups Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
     deleteDownloadsFolder();
@@ -24,6 +20,7 @@ describe('Groups Tests', () => {
     });
     cy.screenshot('Doc_DemoGroup');
 
+    cy.visit('/');
     cy.enterGroup(groupName);
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_DemoInstancesEmpty');
@@ -31,7 +28,6 @@ describe('Groups Tests', () => {
 
   it('Switches to card mode', () => {
     cy.visit('/');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.contains('tr', groupName).should('exist');
@@ -57,7 +53,6 @@ describe('Groups Tests', () => {
 
   it('Edits the group', () => {
     cy.visit('/');
-
     cy.enterGroup(groupName);
 
     cy.inMainNavContent(() => {
@@ -108,16 +103,21 @@ describe('Groups Tests', () => {
   });
 
   it('Upload products to the instance group', function () {
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip', true); // this first for accurate screenshots :)
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-1-direct.zip');
+
+    cy.visit('/');
     cy.verifyProductVersion(groupName, 'Demo Product', '1.0.0');
+
+    cy.visit('/');
     cy.verifyProductVersion(groupName, 'Demo Product', '2.0.0');
   });
 
   it("Checks the product's details panel", function () {
     cy.visit('/');
-    cy.waitUntilContentLoaded();
-
     cy.enterGroup(groupName);
 
     cy.pressMainNavButton('Products');
@@ -215,7 +215,6 @@ describe('Groups Tests', () => {
     });
 
     cy.wait('@getUsage');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-product-details', () => {
       // "Delete" button
@@ -234,28 +233,33 @@ describe('Groups Tests', () => {
       cy.contains('tr', /Demo Product.*2.0.0/).should('not.exist');
     });
 
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.verifyProductVersion(groupName, 'Demo Product', '2.0.0');
   });
 
   it('Creates an instance', () => {
     cy.visit('/');
     cy.enterGroup(groupName);
+
     cy.waitUntilContentLoaded();
     cy.screenshot('Doc_DemoInstancesNoInstance');
 
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '1.0.0');
 
     cy.screenshot('Doc_DemoInstance');
   });
 
   it('Deletes the instance', () => {
+    cy.visit('/');
     cy.deleteInstance(groupName, instanceName);
   });
 
   it('Tests the maintenance functions', () => {
     cy.visit('/');
-
     cy.enterGroup(groupName);
 
     cy.inMainNavContent(() => {
@@ -279,6 +283,7 @@ describe('Groups Tests', () => {
   });
 
   it('Deletes the group', () => {
+    cy.visit('/');
     cy.deleteGroup(groupName);
   });
 });

@@ -2,6 +2,10 @@
 
 describe('Login Tests', function () {
   it('Visits start page and logs in', function () {
+    // need explicit logout, as test fraework logs us in
+    cy.clearAllCookies();
+    cy.clearAllLocalStorage();
+
     cy.visit('/');
     cy.waitUntilContentLoaded();
 

@@ -5,8 +5,19 @@ describe('Groups Tests (Permissions)', () => {
   var instanceName = 'TestInstance';
 
   before(() => {
-    cy.cleanAllGroups();
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=read`,
+      failOnStatusCode: false,
+    });
+    cy.authenticatedRequest({
+      method: 'DELETE',
+      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=write`,
+      failOnStatusCode: false,
+    });
+  });
 
+  after(() => {
     cy.authenticatedRequest({
       method: 'DELETE',
       url: `${Cypress.config('baseUrl')}/api/auth/admin?name=read`,
@@ -35,7 +46,6 @@ describe('Groups Tests (Permissions)', () => {
     cy.get('button[data-cy=Administration]').click();
 
     cy.contains('a', 'User Accounts').click();
-    cy.waitUntilContentLoaded();
 
     // create test users - CLIENT permission has its separate test.
     ['read', 'write'].forEach((perm) => {
@@ -53,7 +63,6 @@ describe('Groups Tests (Permissions)', () => {
       });
 
       cy.wait('@createUser');
-      cy.waitUntilContentLoaded();
 
       cy.inMainNavContent(() => {
         cy.contains('tr', perm).should('exist').click();
@@ -84,6 +93,7 @@ describe('Groups Tests (Permissions)', () => {
   });
 
   it('Tests write user can create instance', () => {
+    cy.visit('/');
     cy.pressMainNavTopButton('User Settings');
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy="Logout"]').click();
@@ -93,8 +103,6 @@ describe('Groups Tests (Permissions)', () => {
     cy.fillFormInput('pass', 'write'.repeat(3));
 
     cy.get('button[type="submit"]').click();
-
-    cy.waitUntilContentLoaded();
     cy.contains('tr', groupName).should('exist');
 
     cy.inMainNavContent(() => {
@@ -102,10 +110,12 @@ describe('Groups Tests (Permissions)', () => {
       cy.get('button[data-cy^="Add Instance Group"]').should('be.disabled');
     });
 
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
   it('Tests read user can not create instance', () => {
+    cy.visit('/');
     cy.pressMainNavTopButton('User Settings');
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy="Logout"]').click();
@@ -115,8 +125,6 @@ describe('Groups Tests (Permissions)', () => {
     cy.fillFormInput('pass', 'read'.repeat(3));
 
     cy.get('button[type="submit"]').click();
-
-    cy.waitUntilContentLoaded();
     cy.contains('tr', groupName).should('exist');
 
     cy.inMainNavContent(() => {
@@ -124,6 +132,7 @@ describe('Groups Tests (Permissions)', () => {
       cy.get('button[data-cy^="Add Instance Group"]').should('be.disabled');
     });
 
+    cy.visit('/');
     cy.enterGroup(groupName);
 
     cy.inMainNavContent(() => {
@@ -173,6 +182,7 @@ describe('Groups Tests (Permissions)', () => {
   });
 
   it('Tests read user with local permission can create instance', () => {
+    cy.visit('/');
     cy.pressMainNavTopButton('User Settings');
     cy.inMainNavFlyin('app-settings', () => {
       cy.get('button[data-cy="Logout"]').click();
@@ -182,24 +192,9 @@ describe('Groups Tests (Permissions)', () => {
     cy.fillFormInput('pass', 'read'.repeat(3));
 
     cy.get('button[type="submit"]').click();
-
-    cy.waitUntilContentLoaded();
     cy.contains('tr', groupName).should('exist');
 
+    cy.visit('/');
     cy.createInstance(groupName, instanceName + '2', 'Demo Product', '2.0.0');
-  });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
-    cy.authenticatedRequest({
-      method: 'DELETE',
-      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=read`,
-      failOnStatusCode: false,
-    });
-    cy.authenticatedRequest({
-      method: 'DELETE',
-      url: `${Cypress.config('baseUrl')}/api/auth/admin?name=write`,
-      failOnStatusCode: false,
-    });
   });
 });

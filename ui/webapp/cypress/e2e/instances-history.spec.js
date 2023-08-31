@@ -4,10 +4,6 @@ describe('Instance History Tests', () => {
   var groupName = 'Demo';
   var instanceName = 'TestInstance';
 
-  before(() => {
-    cy.cleanAllGroups();
-  });
-
   beforeEach(() => {
     cy.login();
   });
@@ -15,24 +11,27 @@ describe('Instance History Tests', () => {
   it('Prepares the test (group, products, instance)', () => {
     cy.visit('/');
     cy.createGroup(groupName);
+
+    cy.visit('/');
     cy.uploadProductIntoGroup(groupName, 'test-product-2-direct.zip');
+
+    cy.visit('/');
     cy.createInstance(groupName, instanceName, 'Demo Product', '2.0.0');
   });
 
   it('Prepares Instance Version', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
-    cy.waitUntilContentLoaded();
-
     // create some from a template
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
-        cy.get('button[data-cy^="Apply Instance Template"]').click();
-      });
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
+        () => {
+          cy.get('button[data-cy^="Apply Instance Template"]').click();
+        }
+      );
     });
-
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavFlyin('app-instance-templates', () => {
       cy.fillFormSelect('Template', 'Default Configuration');
@@ -56,10 +55,9 @@ describe('Instance History Tests', () => {
   });
 
   it('Test Creation History', () => {
+    cy.visit('/');
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance History');
-
-    cy.waitUntilContentLoaded();
 
     cy.screenshot('Doc_History');
 
@@ -84,9 +82,14 @@ describe('Instance History Tests', () => {
     });
 
     cy.inMainNavFlyin('app-history-compare', () => {
-      cy.get('app-history-header-config:contains("TestInstance")').should('have.length', 2);
+      cy.get('app-history-header-config:contains("TestInstance")').should(
+        'have.length',
+        2
+      );
       cy.contains('app-history-diff-field', 'Server No Sleep').should('exist');
-      cy.contains('app-history-diff-field', 'Server With Sleep').should('exist');
+      cy.contains('app-history-diff-field', 'Server With Sleep').should(
+        'exist'
+      );
       cy.contains('app-history-diff-field', 'Client Test Text').should('exist');
     });
     cy.screenshot('Doc_HistoryCompare');
@@ -100,6 +103,10 @@ describe('Instance History Tests', () => {
   });
 
   it('Tests install and activate', () => {
+    cy.visit('/');
+    cy.enterInstance(groupName, instanceName);
+    cy.pressMainNavButton('Instance History');
+
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Version 2: Created').click();
     });
@@ -108,10 +115,7 @@ describe('Instance History Tests', () => {
       cy.get('button[data-cy="Activate"]').should('be.disabled');
 
       cy.get('button[data-cy="Install"]').click();
-      cy.waitUntilContentLoaded();
-
       cy.get('button[data-cy="Activate"]').should('be.enabled').click();
-      cy.waitUntilContentLoaded();
     });
 
     cy.inMainNavContent(() => {
@@ -129,7 +133,8 @@ describe('Instance History Tests', () => {
   });
 
   it('Starts and stops a process', () => {
-    cy.pressMainNavButton('Instance Dashboard');
+    cy.visit('/');
+    cy.enterInstance(groupName, instanceName);
 
     cy.inMainNavContent(() => {
       cy.contains('tr', 'Another Server With Sleep').click();
@@ -146,8 +151,9 @@ describe('Instance History Tests', () => {
   });
 
   it('Tests runtime history', () => {
+    cy.visit('/');
+    cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance History');
-    cy.waitUntilContentLoaded();
 
     cy.inMainNavContent(() => {
       cy.pressToolbarButton('Show Runtime Events');
@@ -168,9 +174,5 @@ describe('Instance History Tests', () => {
     });
 
     cy.screenshot('Doc_HistoryRuntime');
-  });
-
-  it('Cleans up', () => {
-    cy.deleteGroup(groupName);
   });
 });
