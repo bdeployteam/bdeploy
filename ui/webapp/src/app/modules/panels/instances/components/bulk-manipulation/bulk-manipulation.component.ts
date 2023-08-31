@@ -1,30 +1,70 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { InstanceDto } from 'src/app/models/gen.dtos';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  inject,
+} from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { finalize, switchMap } from 'rxjs/operators';
+import {
+  BulkOperationResultDto,
+  InstanceDto,
+  ProductDto,
+} from 'src/app/models/gen.dtos';
+import {
+  ACTION_CANCEL,
+  ACTION_OK,
+  BdDialogMessage,
+} from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
+import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { InstanceBulkService } from '../../services/instance-bulk.service';
+import { ACTION_APPLY } from './../../../../core/components/bd-dialog-message/bd-dialog-message.component';
 
 @Component({
   selector: 'app-bulk-manipulation',
   templateUrl: './bulk-manipulation.component.html',
 })
 export class BulkManipulationComponent implements OnInit, OnDestroy {
-  /* template */ starting$ = new BehaviorSubject<boolean>(false);
-  /* template */ stopping$ = new BehaviorSubject<boolean>(false);
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ installing$ = new BehaviorSubject<boolean>(false);
-  /* template */ activating$ = new BehaviorSubject<boolean>(false);
-  /* template */ isAllSameProduct: boolean;
-  /* template */ selections: InstanceDto[];
+  protected starting$ = new BehaviorSubject<boolean>(false);
+  protected stopping$ = new BehaviorSubject<boolean>(false);
+  protected deleting$ = new BehaviorSubject<boolean>(false);
+  protected installing$ = new BehaviorSubject<boolean>(false);
+  protected activating$ = new BehaviorSubject<boolean>(false);
+  protected updating$ = new BehaviorSubject<boolean>(false);
+
+  private lock$ = combineLatest([
+    this.starting$,
+    this.stopping$,
+    this.deleting$,
+    this.installing$,
+    this.activating$,
+    this.updating$,
+  ]).subscribe((a) => {
+    const running = !a.every((e) => !e);
+    this.bulk?.frozen$.next(running);
+  });
+
+  protected isAllSameProduct: boolean;
+  protected selections: InstanceDto[];
+
+  protected selectableProducts: ProductDto[];
+  protected selectableProductLabels: string[];
+  protected selectedTarget: ProductDto;
+
+  protected bulkOpResult: BulkOperationResultDto;
+
+  protected bulk = inject(InstanceBulkService);
+  protected instance = inject(InstancesService);
+  protected products = inject(ProductsService);
+
   private subscription: Subscription;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-
-  constructor(
-    public bulk: InstanceBulkService,
-    public instance: InstancesService
-  ) {}
+  @ViewChild('productChooser') private prodChooser: TemplateRef<any>;
+  @ViewChild('opResult') private opResult: TemplateRef<any>;
 
   ngOnInit(): void {
     this.subscription = this.bulk.selection$.subscribe((selections) => {
@@ -38,7 +78,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* template */ onStart() {
+  protected onStart() {
     this.starting$.next(true);
     this.bulk
       .start()
@@ -46,7 +86,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  /* template */ onStop() {
+  protected onStop() {
     this.stopping$.next(true);
     this.bulk
       .stop()
@@ -54,7 +94,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  /* template */ onDelete() {
+  protected onDelete() {
     this.dialog
       .confirm(
         `Delete ${this.bulk.selection$.value.length} instances?`,
@@ -71,20 +111,40 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
         this.deleting$.next(true);
         this.bulk
           .delete()
-          .pipe(finalize(() => this.deleting$.next(false)))
+          .pipe(
+            switchMap((r) => {
+              this.bulkOpResult = r;
+              return this.dialog.message({
+                header: 'Result',
+                template: this.opResult,
+                actions: [ACTION_OK],
+              });
+            }),
+            finalize(() => this.deleting$.next(false))
+          )
           .subscribe();
       });
   }
 
-  /* template */ onInstall() {
+  protected onInstall() {
     this.installing$.next(true);
     this.bulk
       .install()
-      .pipe(finalize(() => this.installing$.next(false)))
+      .pipe(
+        switchMap((r) => {
+          this.bulkOpResult = r;
+          return this.dialog.message({
+            header: 'Result',
+            template: this.opResult,
+            actions: [ACTION_OK],
+          });
+        }),
+        finalize(() => this.installing$.next(false))
+      )
       .subscribe();
   }
 
-  /* template */ onActivate() {
+  protected onActivate() {
     this.dialog
       .confirm(
         'Activate',
@@ -99,13 +159,79 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
         this.activating$.next(true);
         this.bulk
           .activate()
-          .pipe(finalize(() => this.activating$.next(false)))
+          .pipe(
+            switchMap((r) => {
+              this.bulkOpResult = r;
+              return this.dialog.message({
+                header: 'Result',
+                template: this.opResult,
+                actions: [ACTION_OK],
+              });
+            }),
+            finalize(() => this.activating$.next(false))
+          )
           .subscribe();
       });
   }
 
-  /* template */ onFetchStates() {
+  protected onFetchStates() {
     this.bulk.fetchStates();
+  }
+
+  protected onUpdate() {
+    this.updating$.next(true);
+
+    // 1) figure out selectable products.
+    const prod = this.selections[0].instanceConfiguration.product.name;
+    this.selectableProducts = this.products.products$.value.filter(
+      (v) => v.key.name === prod
+    );
+    this.selectableProductLabels = this.selectableProducts.map(
+      (p) => p.key.tag
+    );
+
+    if (!this.selectableProducts?.length) {
+      this.dialog
+        .info(
+          'No Target available',
+          'There are no suitable target product versions available.',
+          'warning'
+        )
+        .subscribe();
+      return;
+    }
+
+    this.selectedTarget = this.selectableProducts[0];
+
+    // 2) open dialog to select product.
+    const msg: BdDialogMessage<boolean> = {
+      header: 'Choose Target Product Version',
+      template: this.prodChooser,
+      validation: () => !!this.selectedTarget,
+      actions: [ACTION_CANCEL, ACTION_APPLY],
+    };
+    this.dialog.message(msg).subscribe((r) => {
+      if (!r) {
+        this.updating$.next(false);
+        return;
+      }
+
+      // 3) perform
+      this.bulk
+        .update(this.selectedTarget.key.tag)
+        .pipe(
+          switchMap((r) => {
+            this.bulkOpResult = r;
+            return this.dialog.message({
+              header: 'Result',
+              template: this.opResult,
+              actions: [ACTION_OK],
+            });
+          }),
+          finalize(() => this.updating$.next(false))
+        )
+        .subscribe();
+    });
   }
 
   ngOnDestroy(): void {

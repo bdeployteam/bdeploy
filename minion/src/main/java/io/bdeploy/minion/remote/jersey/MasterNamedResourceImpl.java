@@ -731,9 +731,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         for (Map.Entry<String, Manifest.Key> entry : oldConfig.getInstanceNodeManifests().entrySet()) {
             InstanceNodeManifest oldInmf = InstanceNodeManifest.of(hive, entry.getValue());
             InstanceNodeConfiguration nodeConfig = oldInmf.getConfiguration();
-
-            InstanceNodeConfigurationDto dto = new InstanceNodeConfigurationDto(entry.getKey());
-            dto.nodeConfiguration = nodeConfig;
+            InstanceNodeConfigurationDto dto = new InstanceNodeConfigurationDto(entry.getKey(), nodeConfig);
 
             result.add(dto);
         }
@@ -744,6 +742,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void delete(String instanceId) {
         Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceId));
+
+        // make sure all is uninstalled.
+        allInstanceObjects.stream().filter(i -> i.getName().equals(InstanceManifest.getRootName(instanceId)))
+                .forEach(this::uninstall);
+
         allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
     }
 
@@ -1029,12 +1032,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             List<Runnable> actions = new ArrayList<>();
 
             for (String nodeName : nodeNames) {
-                // avoid blocking. getNodeConfigIfOnline tries to await status calls. we just skip that
-                var currentState = nodes.getNodeStatus(nodeName);
-                if (currentState == null || currentState.offline) {
-                    continue; // don't bother waiting for it to react *sometimes*.
-                }
-
                 MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
                 if (node == null) {
                     continue; // don't log to avoid flooding - node manager will log once.

@@ -11,7 +11,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.jvnet.hk2.annotations.Service;
@@ -223,36 +222,11 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     public MinionDto getNodeConfigIfOnline(String name) {
         var state = status.get(name);
         if (state == null || state.offline) {
-            if (requests.containsKey(name)) {
-                // a background connection request is running.
-                // we do not want to block for an extended time here, however this might come
-                // with extremely unpleasant timing, so we wait a small amount of time in case
-                // the minion is responsive.
-                var rq = requests.get(name);
-                try {
-                    rq.get(100, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    log.warn("Waiting for node {} failed: {}", name, ie.toString());
-                    return null;
-                } catch (TimeoutException te) {
-                    // just continue with what we have...
-                    log.debug("Waiting for node {} timed out.", name);
-                } catch (Exception e) {
-                    log.warn("Waiting for node {} failed: {}", name, e.toString());
-                    return null;
-                }
-
-                // refresh state if we successfully awaited the request.
-                state = status.get(name);
-                if (state == null || state.offline) {
-                    // still offline after we tried to contact it.
-                    return null;
-                }
-            } else {
-                // no request running, this is simply offline for *some* reason.
-                return null;
-            }
+            // there might be a connection request running which *may* return,
+            // however we cannot do anything about unlucky timing and even a
+            // small wait here might slow down things *significantly* in case
+            // of many nodes.
+            return null;
         }
         return state.config;
     }

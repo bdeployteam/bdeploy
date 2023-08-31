@@ -15,8 +15,10 @@ public class InstanceNodeConfigurationDto {
     public InstanceNodeConfiguration nodeConfiguration;
 
     @JsonCreator
-    public InstanceNodeConfigurationDto(@JsonProperty("nodeName") String nodeName) {
+    public InstanceNodeConfigurationDto(@JsonProperty("nodeName") String nodeName,
+            @JsonProperty("nodeConfiguration") InstanceNodeConfiguration config) {
         this.nodeName = nodeName;
+        this.nodeConfiguration = config;
     }
 
 }

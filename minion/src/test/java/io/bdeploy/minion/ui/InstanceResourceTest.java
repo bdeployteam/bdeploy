@@ -145,7 +145,7 @@ class InstanceResourceTest {
         instanceResource.create(instanceConfig, null);
 
         // Create node configuration
-        InstanceNodeConfigurationDto nodeDto = new InstanceNodeConfigurationDto("Node1");
+        InstanceNodeConfigurationDto nodeDto = new InstanceNodeConfigurationDto("Node1", null);
         {
             InstanceNodeConfiguration nodeConfig = new InstanceNodeConfiguration();
             nodeConfig.applications.add(TestFactory.createAppConfig(product));

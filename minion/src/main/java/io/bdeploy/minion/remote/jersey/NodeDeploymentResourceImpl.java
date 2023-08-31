@@ -176,7 +176,7 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         MinionProcessController processController = root.getProcessController();
         InstanceProcessController controller = processController.getOrCreate(hive, inm);
         InstanceNodeStatusDto status = controller.getStatus();
-        if (status.areAppsRunningOrScheduledInVersion(key.getName())) {
+        if (status.areAppsRunningOrScheduledInVersion(key.getTag())) {
             throw new WebApplicationException("Key " + key + " has one or more applications running.", Status.BAD_REQUEST);
         }
 

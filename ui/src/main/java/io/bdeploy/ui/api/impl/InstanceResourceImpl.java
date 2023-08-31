@@ -19,13 +19,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
-import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +85,6 @@ import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
-import io.bdeploy.interfaces.manifest.state.InstanceOverallState;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
@@ -112,9 +109,9 @@ import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
-import io.bdeploy.ui.RequestScopedParallelOperations;
 import io.bdeploy.ui.api.AuthService;
 import io.bdeploy.ui.api.ConfigFileResource;
+import io.bdeploy.ui.api.InstanceBulkResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.InstanceTemplateResource;
@@ -131,7 +128,6 @@ import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
-import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
@@ -140,7 +136,6 @@ import io.bdeploy.ui.dto.StringEntryChunkDto;
 import io.bdeploy.ui.utils.WindowsInstaller;
 import io.bdeploy.ui.utils.WindowsInstallerConfig;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
@@ -196,9 +191,6 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private ProductUpdateService pus;
-
-    @Inject
-    private Provider<RequestScope> reqScope;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -274,64 +266,6 @@ public class InstanceResourceImpl implements InstanceResource {
                 parent.children.add(child);
             }
         }
-    }
-
-    @Override
-    public List<InstanceOverallStatusDto> syncInstances(List<Manifest.Key> given) {
-        // in case no instance IDs are given, sync and get all.
-        List<InstanceDto> list = list();
-        List<Manifest.Key> instances = (given == null || given.isEmpty()) ? list.stream().map(d -> d.instance).toList() : given;
-        Set<String> errors = new TreeSet<>();
-
-        // on CENTRAL only, synchronize managed servers. only after that we know all instances.
-        if (minion.getMode() == MinionMode.CENTRAL) {
-            List<ManagedMasterDto> toSync = list.stream().filter(i -> instances.contains(i.instance)).map(i -> i.managedServer)
-                    .toList();
-
-            log.info("Mass-synchronize {} server(s).", toSync.size());
-
-            ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
-            try (Activity sync = reporter.start("Synchronize Servers", toSync.size())) {
-                List<Runnable> syncTasks = new ArrayList<>();
-                for (ManagedMasterDto host : toSync) {
-                    syncTasks.add(() -> {
-                        try (Activity singleSync = reporter.start("Synchronize " + host.hostName)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Synchronize {}", host.hostName);
-                            }
-                            rs.synchronize(group, host.hostName);
-                        } catch (Exception e) {
-                            errors.add(host.hostName);
-                            log.warn("Could not synchronize managed server: {}: {}", host.hostName, e.toString());
-                            if (log.isDebugEnabled()) {
-                                log.debug("Exception:", e);
-                            }
-                        }
-                        sync.workAndCancelIfRequested(1);
-                    });
-                }
-
-                RequestScopedParallelOperations.runAndAwaitAll("Mass-Synchronizer", syncTasks, reqScope,
-                        reg.get(group).getTransactions(), reporter);
-            }
-        } else {
-            // update the local stored state.
-            ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).getNamedMaster(group)
-                    .updateOverallStatus();
-        }
-
-        // for each instance, read the meta-manifest, and provide the recorded data.
-        var result = new ArrayList<InstanceOverallStatusDto>();
-        for (var inst : list.stream().filter(i -> instances.contains(i.instance)).toList()) {
-            if (inst.managedServer != null && inst.managedServer.hostName != null
-                    && errors.contains(inst.managedServer.hostName)) {
-                continue; // no state as we could not sync.
-            }
-            result.add(new InstanceOverallStatusDto(inst.instanceConfiguration.id,
-                    new InstanceOverallState(inst.instance, hive).read()));
-        }
-
-        return result;
     }
 
     @Override
@@ -536,20 +470,6 @@ public class InstanceResourceImpl implements InstanceResource {
         try (Activity deploy = reporter.start("Deleting " + im.getConfiguration().name);
                 NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
             MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
-            InstanceStatusDto status = root.getNamedMaster(group).getStatus(instance);
-            for (String app : status.getAppStatus().keySet()) {
-                if (status.isAppRunningOrScheduled(app)) {
-                    throw new WebApplicationException("Application still running, cannot delete: " + app,
-                            Status.EXPECTATION_FAILED);
-                }
-            }
-
-            // cleanup is done periodically in background, still uninstall installed
-            // versions to prevent re-start of processes later
-            for (InstanceVersionDto dto : versions) {
-                root.getNamedMaster(group).uninstall(dto.key);
-            }
-
             root.getNamedMaster(group).delete(instance);
         }
 
@@ -669,20 +589,13 @@ public class InstanceResourceImpl implements InstanceResource {
             InstanceNodeConfiguration configuration = manifest.getConfiguration();
             InstanceNodeConfigurationDto nodeConfig = node2Config.computeIfAbsent(nodeName, k -> {
                 // Node is not known any more but has configured applications
-                InstanceNodeConfigurationDto inc = new InstanceNodeConfigurationDto(k);
+                InstanceNodeConfigurationDto inc = new InstanceNodeConfigurationDto(k, null);
                 result.nodeConfigDtos.add(inc);
                 return inc;
             });
 
             nodeConfig.nodeConfiguration = configuration;
         }
-    }
-
-    @Override
-    public void installLatestVersions(List<String> instanceIds) {
-        RequestScopedParallelOperations.runAndAwaitAll("Instance-Bulk-Install",
-                instanceIds.stream().map(i -> (Runnable) () -> install(i, null)).toList(), reqScope,
-                reg.get(group).getTransactions(), reporter);
     }
 
     @Override
@@ -1302,6 +1215,11 @@ public class InstanceResourceImpl implements InstanceResource {
         }
 
         return CommonEndpointHelper.initUri(processed, node.remote.getUri().getHost(), processed.contextPath.getPreRenderable());
+    }
+
+    @Override
+    public InstanceBulkResource getBulkResource() {
+        return rc.initResource(new InstanceBulkResourceImpl(hive, group));
     }
 
 }

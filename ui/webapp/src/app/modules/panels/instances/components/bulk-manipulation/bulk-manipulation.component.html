@@ -1,3 +1,36 @@
+<ng-template #productChooser>
+  <div class="flex flex-col gap-2.5">
+    <span
+      >Choose the target product version to set on
+      <strong>{{ selections.length }}</strong> instances</span
+    >
+    <app-bd-form-select
+      name="prodVersion"
+      [(ngModel)]="selectedTarget"
+      [values]="selectableProducts"
+      [labels]="selectableProductLabels"
+    ></app-bd-form-select>
+  </div>
+</ng-template>
+
+<ng-template #opResult>
+  <div
+    class="grid grid-cols-[16px_85px_auto] gap-x-1 gap-y-2 items-center max-h-60 overflow-auto pr-1 pl-0.5"
+  >
+    <ng-container *ngFor="let res of bulkOpResult.results">
+      <mat-icon
+        [style.width.px]="16"
+        [style.height.px]="16"
+        [style.font-size.px]="16"
+        >{{ res.type === 'INFO' ? 'info' : (res.type === 'ERROR' ? 'error' :
+        'warning') }}</mat-icon
+      >
+      <span class="text-xs font-mono tracking-tighter">{{res.target}}</span>
+      <span class="text-xs">{{res.message}}</span>
+    </ng-container>
+  </div>
+</ng-template>
+
 <app-bd-dialog>
   <app-bd-dialog-toolbar
     header="Bulk Instance Manipulation"
@@ -33,15 +66,15 @@
         (click)="onFetchStates()"
       ></app-bd-button>
       <mat-divider></mat-divider>
-      <app-bd-panel-button
+      <app-bd-button
         [collapsed]="false"
-        [disabled]="!selections.length || !isAllSameProduct"
+        [disabled]="!selections.length || !isAllSameProduct || (updating$ | async)"
+        [loadingWhen$]="updating$"
         text="Set Product Version"
         icon="security_update_good"
         [toggle]="false"
-        [relative]="true"
-        [route]="['update']"
-      ></app-bd-panel-button>
+        (click)="onUpdate()"
+      ></app-bd-button>
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"

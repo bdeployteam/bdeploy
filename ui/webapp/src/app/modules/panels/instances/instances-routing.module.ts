@@ -10,7 +10,6 @@ import { AddInstanceComponent } from './components/add-instance/add-instance.com
 import { AddProcessComponent } from './components/add-process/add-process.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
 import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
-import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
 import { DataFileViewerComponent } from './components/data-file-viewer/data-file-viewer.component';
 import { DataFilesBulkManipulationComponent } from './components/data-files-buld-maipulation/data-files-bulk-manipulation.component';
@@ -59,11 +58,6 @@ const INSTANCES_ROUTES: Route[] = [
   {
     path: 'bulk-manip',
     component: BulkManipulationComponent,
-    canActivate: [ScopedWriteGuard],
-  },
-  {
-    path: 'bulk-manip/update',
-    component: UpdateProductComponent,
     canActivate: [ScopedWriteGuard],
   },
   {

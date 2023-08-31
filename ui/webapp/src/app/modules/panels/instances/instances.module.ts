@@ -21,7 +21,6 @@ import { AddProcessComponent } from './components/add-process/add-process.compon
 import { AppTemplateNameComponent } from './components/add-process/app-template-name/app-template-name.component';
 import { BulkControlComponent } from './components/bulk-control/bulk-control.component';
 import { BulkManipulationComponent } from './components/bulk-manipulation/bulk-manipulation.component';
-import { UpdateProductComponent } from './components/bulk-manipulation/update-product/update-product.component';
 import { ConfigDescCardsComponent } from './components/config-desc-cards/config-desc-cards.component';
 import { ConfigDescElementComponent } from './components/config-desc-element/config-desc-element.component';
 import { DataFileEditorComponent } from './components/data-file-editor/data-file-editor.component';
@@ -134,7 +133,6 @@ import { SystemOnServerValidatorDirective } from './validators/system-on-server-
     ConfigureEndpointsComponent,
     PortShiftComponent,
     BulkManipulationComponent,
-    UpdateProductComponent,
     DataFileEditorComponent,
     ColorSelectComponent,
     ColorSelectGroupComponent,

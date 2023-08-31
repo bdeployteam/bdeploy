@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
@@ -29,7 +28,6 @@ import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceNodeConfigurationListDto;
-import io.bdeploy.ui.dto.InstanceOverallStatusDto;
 import io.bdeploy.ui.dto.InstanceVersionDto;
 import io.bdeploy.ui.dto.StringEntryChunkDto;
 import jakarta.ws.rs.Consumes;
@@ -54,13 +52,6 @@ public interface InstanceResource {
 
     @GET
     public List<InstanceDto> list();
-
-    /**
-     * Synchronizes all instances and receives their overall status, including potential hints on to what is "wrong".
-     */
-    @POST
-    @Path("/syncAll")
-    public List<InstanceOverallStatusDto> syncInstances(List<Manifest.Key> instances);
 
     @GET
     @Path("/{instance}/versions")
@@ -117,11 +108,6 @@ public interface InstanceResource {
     @RequiredPermission(permission = Permission.WRITE)
     public void install(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
 
-    @POST
-    @Path("/install-latest")
-    @RequiredPermission(permission = Permission.WRITE)
-    public void installLatestVersions(List<String> instanceids);
-
     @GET
     @Path("/{instance}/{tag}/uninstall")
     @RequiredPermission(permission = Permission.WRITE)
@@ -152,6 +138,10 @@ public interface InstanceResource {
     @Path("/{instance}/processes")
     @RequiredPermission(permission = Permission.READ)
     public ProcessResource getProcessResource(@ActivityScope @PathParam("instance") String instanceId);
+
+    @Path("/bulk")
+    @RequiredPermission(permission = Permission.WRITE)
+    public InstanceBulkResource getBulkResource();
 
     @Path("/templates")
     @RequiredPermission(permission = Permission.WRITE)

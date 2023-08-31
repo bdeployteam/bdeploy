@@ -314,9 +314,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
 
             InstanceNodeConfigurationDto node = result.stream().filter(n -> n.nodeName.equals(mappedToNode)).findFirst()
                     .orElseGet(() -> {
-                        var r = new InstanceNodeConfigurationDto(mappedToNode);
-
-                        r.nodeConfiguration = new InstanceNodeConfiguration();
+                        var r = new InstanceNodeConfigurationDto(mappedToNode, new InstanceNodeConfiguration());
                         r.nodeConfiguration.copyRedundantFields(config);
 
                         // NO need to care about (redundant!) instance variables, etc. This is done when saving the instance.

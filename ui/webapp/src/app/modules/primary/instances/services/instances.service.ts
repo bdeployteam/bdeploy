@@ -456,7 +456,7 @@ export class InstancesService {
     this.overallStatesLoading$.next(true);
     this.http
       .post<InstanceOverallStatusDto[]>(
-        `${this.apiPath(this.group)}/syncAll`,
+        `${this.apiPath(this.group)}/bulk/bulkSync`,
         instances
       )
       .pipe(

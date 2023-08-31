@@ -58,9 +58,9 @@ public class TaskExecutor {
                     }
                 } catch (Exception ex) {
                     if (failure == null) {
-                        failure = new RuntimeException("Failed to execute task");
-                        failure.addSuppressed(ex);
+                        failure = new RuntimeException("Failed to execute task", ex);
                     }
+                    failure.addSuppressed(ex);
                 }
             }
 
