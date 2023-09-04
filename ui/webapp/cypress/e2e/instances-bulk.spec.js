@@ -43,6 +43,8 @@ describe('Instance Bulk Tests', () => {
         .check({ force: true });
     });
 
+    cy.screenshot('Doc_InstancesBulkPanel');
+
     cy.inMainNavFlyin('app-bulk-manipulation', () => {
       cy.contains('div', 'instances selected')
         .find('strong:contains("3")')
@@ -156,6 +158,13 @@ describe('Instance Bulk Tests', () => {
           'have.length',
           3
         );
+      });
+    });
+
+    cy.screenshot('Doc_InstancesBulkResult');
+
+    cy.inMainNavFlyin('app-bulk-manipulation', () => {
+      cy.contains('app-bd-notification-card', 'Result').within(() => {
         cy.get('button[data-cy=OK]').click();
       });
     });

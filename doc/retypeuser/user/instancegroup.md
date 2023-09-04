@@ -60,7 +60,7 @@ The user table is grouped by permission assignment, either global, local or unas
 
 ## Initial Steps
 
-Click on an **Instance Group** to open the **instance browser** of this group. Here you can see all **Instances** grouped by their _purpose_ (can be `Development`, `Test` or `Productive`).
+Click on an **Instance Group** to open the **Instance Browser** of this group. Here you can see all **Instances** grouped by their _purpose_ (can be `Development`, `Test` or `Productive`).
 
 :::{align=center}
 ![Empty Instance Browser](/images/Doc_DemoInstancesEmpty.png){width=480}
@@ -143,6 +143,20 @@ The value can then be used for grouping instance groups through the grouping pan
 Very similar to the global attributes, each **Instance Group** may have its own **attributes**. These attributes are not global, but are only visible within the **Instance Group**. Each **Instance** can assign a value to each of these attributes. Again, similar to the **Instance Group** browser, the **Instance** browser can use the assigned values to group **Instances** by those values.
 
 The **attributes** are defined in the **Instance Group** settings. The **values** are assigned in the **Instance** settings.
+
+## Bulk Manipulation and Control
+
+Instances can be manipulated and controlled in batches from the **Instance Browser**. Click the [**Bulk Manipulation**] button in the toolbar. This will open the **Bulk Manipulation** panel to the right. Instances can be selected in the main content area now by selecting the checkboxes in front of them.
+
+:::{align=center}
+![Bulk Manipulation Panel and Selection](/images/Doc_InstancesBulkPanel.png){width=480}
+:::
+
+Once a set of instances is selected, the available actions can be performed on all of them. All actions (except for start/stop) will show a result once performed. Start/stop will not show a result, as it will just _trigger_ start/stop on instances. Depending on their configuration it is not possible to show a result.
+
+:::{align=center}
+![Bulk Manipulation Panel and Selection](/images/Doc_InstancesBulkResult.png){width=480}
+:::
 
 ## Systems
 
