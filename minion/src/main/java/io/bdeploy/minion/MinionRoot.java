@@ -74,6 +74,7 @@ import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
+import io.bdeploy.minion.job.SyncLdapUserGroupsJob;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
 import io.bdeploy.minion.nodes.NodeManagerImpl;
@@ -478,6 +479,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         if (minionMode == MinionMode.STANDALONE) {
             CheckLatestGitHubReleaseJob.create(this);
         }
+
+        SyncLdapUserGroupsJob.create(this, getState().syncLdapUserGroupsSchedule);
     }
 
     private void createJobScheduler() {

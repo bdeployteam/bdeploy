@@ -74,4 +74,9 @@ public class LDAPSettingsDto {
      */
     public boolean followReferrals;
 
+    /**
+     * Whether to import users and groups periodically in SyncLdapUserGroupsJob.
+     */
+    public boolean syncEnabled;
+
 }

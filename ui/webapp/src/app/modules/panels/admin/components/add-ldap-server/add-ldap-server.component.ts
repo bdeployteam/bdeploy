@@ -48,6 +48,7 @@ export class AddLdapServerComponent
       groupPattern: '(objectClass=group)',
       groupName: 'cn',
       groupDescription: 'description',
+      syncEnabled: true,
       id: randomString(10),
     };
   }

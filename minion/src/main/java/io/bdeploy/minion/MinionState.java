@@ -72,6 +72,16 @@ public class MinionState {
     public long cleanupLastRun;
 
     /**
+     * 'Cron' format schedule for SyncLdapUserGroupsJob.
+     */
+    public String syncLdapUserGroupsSchedule;
+
+    /**
+     * Timestamp of last successful execution of SyncLdapUserGroupsJob on this minion.
+     */
+    public long syncLdapUserGroupsLastRun;
+
+    /**
      * The last minion version which was successfully migrated to.
      */
     public String fullyMigratedVersion;
