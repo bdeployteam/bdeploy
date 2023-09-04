@@ -200,11 +200,11 @@ export class ProcessEditService {
         const own = appConfig.start.parameters.find((p) => p.id === param.id);
         if (own) {
           own.preRendered = this.preRenderParameter(param, own.value);
+          own.target =
+            param.type === ParameterType.ENVIRONMENT
+              ? ParameterConfigurationTarget.ENVIRONMENT
+              : ParameterConfigurationTarget.COMMAND;
         }
-        own.target =
-          param.type === ParameterType.ENVIRONMENT
-            ? ParameterConfigurationTarget.ENVIRONMENT
-            : ParameterConfigurationTarget.COMMAND;
       }
 
       // always fully re-calculate stop command.

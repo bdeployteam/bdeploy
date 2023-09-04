@@ -113,6 +113,8 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         return;
       }
 
+      this.clipBoardCfg$.next(null);
+
       const groups: AppGroup[] = [];
       const nodeConfig = nodeConfigs[node.nodeName];
       const sortedApps = [...apps].sort((a, b) => {
@@ -193,7 +195,6 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     node: InstanceNodeConfigurationDto,
     minion: MinionDto
   ) {
-    this.clipBoardCfg$.next(null);
     this.clipBoardError$.next(null);
 
     if (!navigator.clipboard.readText) {
@@ -201,6 +202,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       // extensions but never from web pages itself. it is rumored that there is a config
       // which can be enabled ("Dom.Events.Testing.AsynClipBoard"), however that did not
       // change browser behaviour in tests.
+      this.clipBoardCfg$.next(null);
       this.clipBoardError$.next(
         'Clipboard access is not supported in this browser. Pasting applications is not possible.'
       );
@@ -214,6 +216,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         if (value.state !== 'granted') {
           // otherwise 'prompt' is open - not an error
           if (value.state === 'denied') {
+            this.clipBoardCfg$.next(null);
             this.clipBoardError$.next(
               'No permission to read from the clipboard, pasting not possible.'
             );
@@ -221,6 +224,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
         }
       },
       (reason) => {
+        this.clipBoardCfg$.next(null);
         this.clipBoardError$.next(
           `Cannot check clipboard permission (${reason}).`
         );
@@ -233,6 +237,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       try {
         appConfig = JSON.parse(data) as ApplicationConfiguration;
       } catch (e) {
+        this.clipBoardCfg$.next(null);
         return; // this is not an error, its just not an application configuration :)
       }
 
@@ -258,7 +263,10 @@ export class AddProcessComponent implements OnInit, OnDestroy {
           // raw, unprocessed.
           this.clipBoardCfg$.next(appConfig);
         },
-        error: (err) => console.log(`Error when reading clipboard: ${err}`),
+        error: (err) => {
+          console.log(`Error when reading clipboard: ${err}`);
+          this.clipBoardCfg$.next(null);
+        },
       });
     });
   }
