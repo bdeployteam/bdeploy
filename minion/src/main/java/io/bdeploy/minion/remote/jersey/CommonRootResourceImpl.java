@@ -232,7 +232,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
                     dir.entries.addAll(nodes.getNodeResourceIfOnlineOrThrow(nodeName, MinionStatusResource.class, security)
                             .getLogEntries(hive));
                 } catch (Exception e) {
-                    log.warn("Problem fetching log directory of {}", nodeName, e);
+                    log.warn("Problem fetching log directory of {}: {}", nodeName, e.toString());
                     dir.problem = e.toString();
                 }
 

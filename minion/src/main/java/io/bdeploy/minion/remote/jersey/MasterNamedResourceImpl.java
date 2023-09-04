@@ -1126,7 +1126,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 history.add(nodeName, nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
                         .getRuntimeHistory(instanceId));
             } catch (Exception e) {
-                history.addError(nodeName, "Cannot load runtime history (" + e.getMessage() + ")");
+                history.addError(nodeName, "Cannot load runtime history (" + e.toString() + ")");
             }
         }
         return history;

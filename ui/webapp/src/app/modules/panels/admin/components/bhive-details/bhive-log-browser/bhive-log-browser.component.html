@@ -18,17 +18,21 @@
       [(selectedIndex)]="selectedIndex"
       animationDuration="0ms"
     >
-      <mat-tab
+      <ng-container
         *ngFor="let logDirectory of hiveLogging.directories$ | async"
-        label="{{ logDirectory.minion }}"
       >
-        <app-bd-data-table
-          [records]="logDirectory.entries"
-          [columns]="columns"
-          [sort]="sort"
-          [recordRoute]="getRecordRoute"
-        ></app-bd-data-table>
-      </mat-tab>
+        <mat-tab
+          *ngIf="logDirectory.entries?.length"
+          label="{{ logDirectory.minion }}"
+        >
+          <app-bd-data-table
+            [records]="logDirectory.entries"
+            [columns]="columns"
+            [sort]="sort"
+            [recordRoute]="getRecordRoute"
+          ></app-bd-data-table>
+        </mat-tab>
+      </ng-container>
     </mat-tab-group>
   </app-bd-dialog-content>
 </app-bd-dialog>
