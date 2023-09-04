@@ -35,6 +35,9 @@ class HiveAuditTest {
         Path src = ContentHelper.genSimpleTestTree(tmp, "src");
         Manifest.Key key = new Manifest.Key("test", "v1");
 
+        // get rid of unpredictable audits for this test.
+        hive.setDisableSlowAudit(true);
+
         try (Transaction t = hive.getTransactions().begin()) {
             assertThat(hive.execute(new ImportOperation().setManifest(key).setSourcePath(src)), is(key));
         }

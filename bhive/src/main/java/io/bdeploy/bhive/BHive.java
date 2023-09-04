@@ -63,6 +63,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
     private final ActivityReporter reporter;
     private final Auditor auditor;
     private int parallelism = 4;
+    private boolean auditSlowOps = true;
 
     private Predicate<String> lockContentValidator = null;
     private Supplier<String> lockContentSupplier = null;
@@ -114,6 +115,13 @@ public class BHive implements AutoCloseable, BHiveExecution {
 
     public URI getUri() {
         return uri;
+    }
+
+    /**
+     * TESTING only, disable unpredictable logs for slow operations depending on machine.
+     */
+    public void setDisableSlowAudit(boolean disable) {
+        this.auditSlowOps = !disable;
     }
 
     /**
@@ -184,7 +192,18 @@ public class BHive implements AutoCloseable, BHiveExecution {
                 auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName())
                         .addParameters(new AuditParameterExtractor().extract(op)).build());
             }
-            return op.call();
+
+            long start = System.currentTimeMillis();
+            try {
+                return op.call();
+            } finally {
+                long timing = System.currentTimeMillis() - start;
+                if (timing > 250 && auditSlowOps) {
+                    auditor.audit(AuditRecord.Builder.fromSystem().setWhat(op.getClass().getSimpleName())
+                            .addParameters(new AuditParameterExtractor().extract(op)).setMessage("Long running: " + timing + "ms")
+                            .build());
+                }
+            }
         } catch (Exception ex) {
             onOperationFailed(op, ex);
             if (attempt >= op.retryCount) {
