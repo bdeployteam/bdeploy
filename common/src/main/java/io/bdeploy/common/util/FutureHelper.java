@@ -28,8 +28,8 @@ public class FutureHelper {
         });
 
         if (!exceptions.isEmpty()) {
-            IllegalStateException ise = new IllegalStateException("Asynchronous operation(s) failed");
-            exceptions.forEach(ise::addSuppressed);
+            IllegalStateException ise = new IllegalStateException("Asynchronous operation(s) failed", exceptions.get(0));
+            exceptions.subList(1, exceptions.size()).forEach(ise::addSuppressed);
             throw ise;
         }
     }
