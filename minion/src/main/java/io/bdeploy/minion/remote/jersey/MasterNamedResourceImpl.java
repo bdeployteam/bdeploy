@@ -53,7 +53,6 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.StringHelper;
-import io.bdeploy.common.util.TaskExecutor;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VariableResolver;
@@ -172,7 +171,8 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product, Status.NOT_FOUND);
         }
 
-        TaskExecutor executor = new TaskExecutor(reporter);
+        List<Runnable> runnables = new ArrayList<>();
+
         for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
             String nodeName = entry.getKey();
             Manifest.Key toDeploy = entry.getValue();
@@ -181,41 +181,41 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
             assertNotNull(node, "Node not available: " + nodeName);
             assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
 
-            // grab all required manifests from the applications
-            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
-            LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
-            PushOperation pushOp = new PushOperation().setRemote(node.remote);
-            for (ApplicationConfiguration app : inm.getConfiguration().applications) {
-                pushOp.addManifest(app.application);
-                ApplicationManifest amf = ApplicationManifest.of(hive, app.application, null);
+            Runnable r = () -> {
+                try (Activity act = reporter.start("Installing to " + nodeName)) {
+                    // grab all required manifests from the applications
+                    InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
+                    LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
+                    PushOperation pushOp = new PushOperation().setRemote(node.remote);
+                    for (ApplicationConfiguration app : inm.getConfiguration().applications) {
+                        pushOp.addManifest(app.application);
+                        ApplicationManifest amf = ApplicationManifest.of(hive, app.application, null);
 
-                // applications /must/ follow the ScopedManifestKey rules.
-                ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
+                        // applications /must/ follow the ScopedManifestKey rules.
+                        ScopedManifestKey smk = ScopedManifestKey.parse(app.application);
 
-                // the dependency must be here. it has been pushed here with the product,
-                // since the product /must/ reference all direct dependencies.
-                localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem())
-                        .forEach(pushOp::addManifest);
-            }
+                        // the dependency must be here. it has been pushed here with the product,
+                        // since the product /must/ reference all direct dependencies.
+                        localDeps.fetch(hive, amf.getDescriptor().runtimeDependencies, smk.getOperatingSystem())
+                                .forEach(pushOp::addManifest);
+                    }
 
-            // Make sure the node has the manifest
-            pushOp.addManifest(toDeploy);
+                    // Make sure the node has the manifest
+                    pushOp.addManifest(toDeploy);
 
-            // Create the task that pushes all manifests and then installs them on the remote
-            NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class,
-                    context);
-            executor.add(() -> {
-                hive.execute(pushOp);
-                deployment.install(toDeploy);
-            });
+                    // Create the task that pushes all manifests and then installs them on the remote
+                    NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote,
+                            NodeDeploymentResource.class, context);
+                    hive.execute(pushOp);
+                    deployment.install(toDeploy);
+                }
+            };
+
+            runnables.add(r);
         }
 
         // Execute all tasks
-        try {
-            executor.run("Installing");
-        } catch (Exception ex) {
-            throw new WebApplicationException("Installation failed", ex, Status.INTERNAL_SERVER_ERROR);
-        }
+        RequestScopedParallelOperations.runAndAwaitAll("Install", runnables, reqScope, hive.getTransactions(), reporter);
 
         getState(imf, hive).install(key.getTag());
         imf.getHistory(hive).recordAction(Action.INSTALL, context.getUserPrincipal().getName(), null);
@@ -351,32 +351,34 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
         fragments.remove(InstanceManifest.CLIENT_NODE_NAME);
 
-        TaskExecutor executor = new TaskExecutor(reporter);
+        List<Runnable> runnables = new ArrayList<>();
+
         for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
             String nodeName = entry.getKey();
             Manifest.Key toRemove = entry.getValue();
-            MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
-            assertNotNull(toRemove, "Cannot lookup node manifest on master: " + toRemove);
+            runnables.add(() -> {
+                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
-            if (node == null) {
-                // minion no longer exists or node is offline. this is recoverable as when the node is online
-                // during the next cleanup cycle, it will clean itself.
-                log.warn("Node not available: {}. Ignoring.", nodeName);
-                continue;
-            }
+                assertNotNull(toRemove, "Cannot lookup node manifest on master: " + toRemove);
 
-            NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class,
-                    context);
-            executor.add(() -> deployment.remove(toRemove));
+                if (node == null) {
+                    // minion no longer exists or node is offline. this is recoverable as when the node is online
+                    // during the next cleanup cycle, it will clean itself.
+                    log.warn("Node not available: {}. Ignoring.", nodeName);
+                    return;
+                }
+
+                try (Activity act = reporter.start("Uninstalling from " + nodeName)) {
+                    NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote,
+                            NodeDeploymentResource.class, context);
+                    deployment.remove(toRemove);
+                }
+            });
         }
 
         // Execute all tasks
-        try {
-            executor.run("Uninstalling");
-        } catch (Exception ex) {
-            throw new WebApplicationException("Failed to uninstall.", ex, Status.INTERNAL_SERVER_ERROR);
-        }
+        RequestScopedParallelOperations.runAndAwaitAll("Uninstall", runnables, reqScope, hive.getTransactions(), reporter);
 
         getState(imf, hive).uninstall(key.getTag());
         imf.getHistory(hive).recordAction(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
