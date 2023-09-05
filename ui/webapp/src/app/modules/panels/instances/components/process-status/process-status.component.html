@@ -1,7 +1,4 @@
-<app-bd-dialog
-  [loadingWhen$]="details.loading$"
-  [hideContentWhenLoading]="false"
->
+<app-bd-dialog [loadingWhen$]="loading$" [hideContentWhenLoading]="false">
   <app-bd-dialog-toolbar
     [panel]="true"
     header="Process {{ processConfig?.name }}"

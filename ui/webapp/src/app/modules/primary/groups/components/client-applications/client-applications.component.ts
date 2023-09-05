@@ -35,7 +35,7 @@ const clientIdColumn: BdDataColumn<ClientApp> = {
 const clientInstanceColumn: BdDataColumn<ClientApp> = {
   id: 'instance',
   name: 'Instance Name',
-  data: (r) => r.instance.name,
+  data: (r) => r.instanceName,
   hint: BdDataColumnTypeHint.DESCRIPTION,
 };
 
@@ -72,7 +72,7 @@ export class ClientApplicationsComponent implements OnInit {
   /* template */ grouping: BdDataGroupingDefinition<ClientApp>[] = [
     {
       name: 'Instance Name',
-      group: (r) => r.instance.name,
+      group: (r) => r.instanceName,
       associatedColumn: clientInstanceColumn.id,
     },
     {

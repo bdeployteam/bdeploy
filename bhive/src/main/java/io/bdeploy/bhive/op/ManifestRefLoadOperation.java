@@ -17,7 +17,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.ActivityReporter.Activity;
 
 /**
  * Resolve {@link Manifest}s referenced in a {@link Tree} by the given
@@ -33,16 +32,14 @@ public class ManifestRefLoadOperation extends BHive.Operation<SortedMap<ObjectId
     public SortedMap<ObjectId, Manifest.Key> call() throws Exception {
         assertFalse(ids.isEmpty(), "Nothing to load");
 
-        try (Activity activity = getActivityReporter().start("Loading Relations", -1)) {
-            SortedMap<ObjectId, Key> refs = new TreeMap<>();
-            for (ObjectId id : ids) {
-                try (InputStream is = getObjectManager().db(x -> x.getStream(id))) {
-                    refs.put(id, StorageHelper.fromStream(is, Manifest.Key.class));
-                }
-
+        SortedMap<ObjectId, Key> refs = new TreeMap<>();
+        for (ObjectId id : ids) {
+            try (InputStream is = getObjectManager().db(x -> x.getStream(id))) {
+                refs.put(id, StorageHelper.fromStream(is, Manifest.Key.class));
             }
-            return refs;
+
         }
+        return refs;
     }
 
     public ManifestRefLoadOperation addManifestRef(ObjectId manifest) {

@@ -73,6 +73,10 @@ export class InstancesService {
   );
   /** the history for the *active* instance. this may not be fully complete history, it is meant for a brief overview of events on the instance. */
   activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
+
+  private activeStateCall: Subscription;
+  private activeHistoryCall: Subscription;
+
   private activeLoadInterval;
   private activeCheckInterval;
 
@@ -620,16 +624,21 @@ export class InstancesService {
       return;
     }
 
-    this.http
-      .get<{ [minionName: string]: MinionStatusDto }>(
-        `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${
-          act.activeVersion.tag
-        }/minionState`
-      )
-      .pipe(measure('Node States'))
-      .subscribe((states) => {
-        this.activeNodeStates$.next(states);
-      });
+    this.activeStateCall =
+      this.activeStateCall ||
+      this.http
+        .get<{ [minionName: string]: MinionStatusDto }>(
+          `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/${
+            act.activeVersion.tag
+          }/minionState`
+        )
+        .pipe(
+          measure('Node States'),
+          finalize(() => (this.activeStateCall = null))
+        )
+        .subscribe((states) => {
+          this.activeNodeStates$.next(states);
+        });
 
     const historyFilter: Partial<HistoryFilterDto> = {
       showCreateEvents: true,
@@ -637,14 +646,19 @@ export class InstancesService {
       showRuntimeEvents: true,
       maxResults: 150,
     };
-    this.http
-      .post<HistoryResultDto>(
-        `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/history`,
-        historyFilter
-      )
-      .pipe(measure('Active Instance History'))
-      .subscribe((history) => {
-        this.activeHistory$.next(history);
-      });
+    this.activeHistoryCall =
+      this.activeHistoryCall ||
+      this.http
+        .post<HistoryResultDto>(
+          `${this.apiPath(this.group)}/${act.instanceConfiguration.id}/history`,
+          historyFilter
+        )
+        .pipe(
+          measure('Active Instance History'),
+          finalize(() => (this.activeHistoryCall = null))
+        )
+        .subscribe((history) => {
+          this.activeHistory$.next(history);
+        });
   }
 }

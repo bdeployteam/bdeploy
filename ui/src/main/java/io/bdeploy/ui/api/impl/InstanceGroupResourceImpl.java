@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,6 @@ import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
-import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.interfaces.descriptor.application.HttpEndpoint;
@@ -65,6 +63,7 @@ import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
+import io.bdeploy.ui.dto.InstanceAllClientsDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import io.bdeploy.ui.dto.InstanceUiEndpointsDto;
@@ -144,9 +143,9 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         List<String> instanceIds = new ArrayList<>();
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
         for (Key imKey : imKeys) {
-            InstanceManifest im = InstanceManifest.of(hive, imKey);
-            InstanceConfiguration config = im.getConfiguration();
-            instanceIds.add(config.id);
+            // shortcut for performance reasons: calculate the instance ID from its key instead of loading the instance.
+            // this information is only used for searching, so it is not *that* important.
+            instanceIds.add(imKey.getName().substring(0, imKey.getName().indexOf('/')));
         }
 
         return new InstanceGroupConfigurationDto(cfg, String.join(" ", instanceIds));
@@ -336,8 +335,11 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
     }
 
     @Override
-    public Collection<InstanceClientAppsDto> listClientApps(String group, OperatingSystem os) {
-        Collection<InstanceClientAppsDto> result = new ArrayList<>();
+    public InstanceAllClientsDto listAllClients(String group, OperatingSystem os) {
+        InstanceAllClientsDto result = new InstanceAllClientsDto();
+
+        // this should be little to now overhead.
+        result.launchers = rc.initResource(new SoftwareUpdateResourceImpl()).getLatestLaunchers();
 
         BHive hive = getGroupHive(group);
         InstanceResource resource = getInstanceResource(group);
@@ -358,92 +360,82 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 // make sure we do have the active version.
                 im = InstanceManifest.load(hive, instanceId, active);
             }
-            SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
-            Key clientKey = manifests.get(InstanceManifest.CLIENT_NODE_NAME);
-            if (clientKey == null) {
-                continue;
-            }
-            InstanceClientAppsDto clientApps = new InstanceClientAppsDto();
-            clientApps.instance = idto.instanceConfiguration;
-            clientApps.applications = new ArrayList<>();
 
-            // Add all configured client applications
-            InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, clientKey);
-            for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
-                ClientApplicationDto clientApp = new ClientApplicationDto();
-                clientApp.id = appConfig.id;
-                clientApp.description = appConfig.name;
-                ScopedManifestKey scopedKey = ScopedManifestKey.parse(appConfig.application);
-                clientApp.os = scopedKey.getOperatingSystem();
-                if (os != null && clientApp.os != os) {
-                    continue;
-                }
-                clientApps.applications.add(clientApp);
+            InstanceClientAppsDto clients = listClientApps(im, hive, os);
+            InstanceUiEndpointsDto eps = listUiEndpoints(im, hive);
+
+            if (clients != null) {
+                result.clients.add(clients);
             }
 
-            // Only add if we have at least one application
-            if (clientApps.applications.isEmpty()) {
-                continue;
+            if (eps != null) {
+                result.endpoints.add(eps);
             }
-            result.add(clientApps);
         }
         return result;
     }
 
-    @Override
-    public Collection<InstanceUiEndpointsDto> listUiEndpoints(String group) {
-        Collection<InstanceUiEndpointsDto> result = new ArrayList<>();
+    private InstanceClientAppsDto listClientApps(InstanceManifest im, BHive hive, OperatingSystem os) {
+        SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
+        Key clientKey = manifests.get(InstanceManifest.CLIENT_NODE_NAME);
+        if (clientKey == null) {
+            return null;
+        }
+        InstanceClientAppsDto clientApps = new InstanceClientAppsDto();
+        clientApps.instanceId = im.getConfiguration().id;
+        clientApps.applications = new ArrayList<>();
 
-        BHive hive = getGroupHive(group);
-        InstanceResource resource = getInstanceResource(group);
-        for (InstanceDto idto : resource.list()) {
-            String instanceId = idto.instanceConfiguration.id;
-
-            // Always use latest version to lookup remote service
-            InstanceManifest im = InstanceManifest.load(hive, instanceId, null);
-
-            // Contact master to find out the active version. Skip if no version is active
-            String active = getInstanceResource(group).getDeploymentStates(instanceId).activeTag;
-            if (active == null) {
+        // Add all configured client applications
+        InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, clientKey);
+        for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
+            ClientApplicationDto clientApp = new ClientApplicationDto();
+            clientApp.id = appConfig.id;
+            clientApp.description = appConfig.name;
+            ScopedManifestKey scopedKey = ScopedManifestKey.parse(appConfig.application);
+            clientApp.os = scopedKey.getOperatingSystem();
+            if (os != null && clientApp.os != os) {
                 continue;
             }
+            clientApps.applications.add(clientApp);
+        }
 
-            // Get a list of all node manifests - clients are stored in a special node
-            if (!active.equals(im.getManifest().getTag())) {
-                // make sure we do have the active version.
-                im = InstanceManifest.load(hive, instanceId, active);
-            }
-            SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
+        // Only add if we have at least one application
+        if (clientApps.applications.isEmpty()) {
+            return null;
+        }
+        return clientApps;
+    }
 
-            InstanceUiEndpointsDto allInstEps = new InstanceUiEndpointsDto();
-            allInstEps.instance = idto.instanceConfiguration;
-            allInstEps.endpoints = new ArrayList<>();
+    private InstanceUiEndpointsDto listUiEndpoints(InstanceManifest im, BHive hive) {
+        SortedMap<String, Key> manifests = im.getInstanceNodeManifests();
 
-            for (Map.Entry<String, Key> nodeEntry : manifests.entrySet()) {
-                // Add all configured client applications
-                InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, nodeEntry.getValue());
-                for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
-                    for (HttpEndpoint configuredEp : appConfig.endpoints.http) {
-                        if (configuredEp.type != HttpEndpointType.UI) {
-                            continue;
-                        }
+        InstanceUiEndpointsDto allInstEps = new InstanceUiEndpointsDto();
+        allInstEps.instanceId = im.getConfiguration().id;
+        allInstEps.endpoints = new ArrayList<>();
 
-                        UiEndpointDto uiEp = new UiEndpointDto();
-                        uiEp.id = appConfig.id;
-                        uiEp.appName = appConfig.name;
-                        uiEp.endpoint = configuredEp;
-                        allInstEps.endpoints.add(uiEp);
+        for (Map.Entry<String, Key> nodeEntry : manifests.entrySet()) {
+            // Add all configured client applications
+            InstanceNodeManifest instanceNode = InstanceNodeManifest.of(hive, nodeEntry.getValue());
+            for (ApplicationConfiguration appConfig : instanceNode.getConfiguration().applications) {
+                for (HttpEndpoint configuredEp : appConfig.endpoints.http) {
+                    if (configuredEp.type != HttpEndpointType.UI) {
+                        continue;
                     }
-                }
 
-                // Only add if we have at least one application
-                if (allInstEps.endpoints.isEmpty()) {
-                    continue;
+                    UiEndpointDto uiEp = new UiEndpointDto();
+                    uiEp.id = appConfig.id;
+                    uiEp.appName = appConfig.name;
+                    uiEp.endpoint = configuredEp;
+                    allInstEps.endpoints.add(uiEp);
                 }
-                result.add(allInstEps);
             }
         }
-        return result;
+
+        if (allInstEps.endpoints.isEmpty()) {
+            return null;
+        }
+
+        return allInstEps;
     }
 
     @Override

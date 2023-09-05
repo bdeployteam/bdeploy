@@ -1,7 +1,6 @@
 package io.bdeploy.ui.api;
 
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -21,8 +20,7 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
 import io.bdeploy.jersey.ActivityScope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
-import io.bdeploy.ui.dto.InstanceClientAppsDto;
-import io.bdeploy.ui.dto.InstanceUiEndpointsDto;
+import io.bdeploy.ui.dto.InstanceAllClientsDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -121,15 +119,10 @@ public interface InstanceGroupResource {
     public ProductResource getProductResource(@ActivityScope @PathParam("group") String group);
 
     @GET
-    @Path("/{group}/client-apps")
+    @Path("/{group}/all-clients")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public Collection<InstanceClientAppsDto> listClientApps(@ActivityScope @PathParam("group") String group,
+    public InstanceAllClientsDto listAllClients(@ActivityScope @PathParam("group") String group,
             @QueryParam("os") OperatingSystem os);
-
-    @GET
-    @Path("/{group}/ui-endpoints")
-    @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public Collection<InstanceUiEndpointsDto> listUiEndpoints(@ActivityScope @PathParam("group") String group);
 
     @GET
     @Path("/list-attributes")

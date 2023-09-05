@@ -73,7 +73,6 @@ export class ProcessNativesComponent implements OnDestroy {
 
   constructor(public details: ProcessDetailsService) {
     this.subscription = this.details.processDetail$.subscribe((detail) => {
-      // FIXME: don't always reset records, this re-creates the table all the time, leading to popups closing.
       this.processes = [];
       if (detail) {
         this.flattenProcesses(this.processes, detail.handle);

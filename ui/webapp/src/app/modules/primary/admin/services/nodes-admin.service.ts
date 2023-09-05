@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, finalize, Observable } from 'rxjs';
+import { BehaviorSubject, debounceTime, finalize, Observable } from 'rxjs';
 import {
   ManifestKey,
   MinionStatusDto,
@@ -28,6 +28,7 @@ export class NodesAdminService {
   public loading$ = new BehaviorSubject<boolean>(true);
   public nodes$ = new BehaviorSubject<MinionRecord[]>(null);
 
+  private update$ = new BehaviorSubject<void>(null);
   private apiPath = () => `${this.cfg.config.api}/node-admin`;
 
   constructor(
@@ -36,10 +37,10 @@ export class NodesAdminService {
     private http: HttpClient
   ) {
     this.changes.subscribe(ObjectChangeType.NODES, EMPTY_SCOPE, () => {
-      this.reload();
+      this.update$.next(null);
     });
 
-    this.reload();
+    this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
   }
 
   public reload() {

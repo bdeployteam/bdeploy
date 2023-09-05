@@ -88,7 +88,7 @@ export class ProcessUiInlineComponent implements OnDestroy {
 
         this.contextPath$(this.app).subscribe((cp) => {
           this.rawUrl = `${cfg.config.api}/master/upx/${group.name}/${
-            this.app.instance.id
+            this.app.instanceId
           }/${this.app.endpoint.id}/${
             this.app.endpoint.endpoint.id
           }${this.cpWithSlash(cp)}`;
@@ -109,7 +109,7 @@ export class ProcessUiInlineComponent implements OnDestroy {
     }
     const instance$ = this.instances.instances$.pipe(
       map((instances) =>
-        instances?.find((i) => i.instanceConfiguration.id === app.instance.id)
+        instances?.find((i) => i.instanceConfiguration.id === app.instanceId)
       ),
       skipWhile((instance) => !instance || !instance.activeVersion)
     );

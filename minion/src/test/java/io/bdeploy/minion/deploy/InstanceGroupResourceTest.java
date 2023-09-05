@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +24,7 @@ import io.bdeploy.minion.TestFactory;
 import io.bdeploy.minion.TestMinion;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.dto.ClientApplicationDto;
+import io.bdeploy.ui.dto.InstanceAllClientsDto;
 import io.bdeploy.ui.dto.InstanceClientAppsDto;
 
 @ExtendWith(TestMinion.class)
@@ -35,8 +35,8 @@ class InstanceGroupResourceTest {
     private static final String GROUP_NAME = "demo";
 
     @Test
-    void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root,
-            CommonRootResource common, RemoteService remote, @TempDir Path tmp) throws IOException, InterruptedException {
+    void testListClientApps(InstanceGroupResource resource, BHive local, MasterRootResource root, CommonRootResource common,
+            RemoteService remote, @TempDir Path tmp) throws IOException, InterruptedException {
         OperatingSystem runningOs = OsHelper.getRunningOs();
 
         // Create install a small demo instance
@@ -45,17 +45,17 @@ class InstanceGroupResourceTest {
         master.install(instance);
 
         // Non-activated versions should not be contained in the result
-        Collection<InstanceClientAppsDto> clientApps = resource.listClientApps(GROUP_NAME, runningOs);
-        assertEquals(0, clientApps.size());
+        InstanceAllClientsDto clientApps = resource.listAllClients(GROUP_NAME, runningOs);
+        assertEquals(0, clientApps.clients.size());
 
         // Activate and check if we now get the desired result
         master.activate(instance);
-        clientApps = resource.listClientApps(GROUP_NAME, runningOs);
-        assertEquals(1, clientApps.size());
+        clientApps = resource.listAllClients(GROUP_NAME, runningOs);
+        assertEquals(1, clientApps.clients.size());
 
         // A single application for the current OS must be contained
-        InstanceClientAppsDto instanceApps = clientApps.iterator().next();
-        assertNotNull(instanceApps.instance);
+        InstanceClientAppsDto instanceApps = clientApps.clients.iterator().next();
+        assertNotNull(instanceApps.instanceId);
         assertEquals(1, instanceApps.applications.size());
 
         ClientApplicationDto app = instanceApps.applications.iterator().next();

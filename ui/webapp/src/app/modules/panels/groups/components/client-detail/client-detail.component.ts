@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -60,7 +60,7 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
   /* template */ downloadInstaller(app: ClientApp) {
     this.downloadingInstaller$.next(true);
     this.clients
-      .downloadInstaller(app.client.id, app.instance.id)
+      .downloadInstaller(app.client.id, app.instanceId)
       .pipe(finalize(() => this.downloadingInstaller$.next(false)))
       .subscribe();
   }
@@ -71,7 +71,7 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
       .downloadClickAndStart(
         app.client.id,
         app.client.description,
-        app.instance.id
+        app.instanceId
       )
       .pipe(finalize(() => this.downloadingClickAndStart$.next(false)))
       .subscribe();

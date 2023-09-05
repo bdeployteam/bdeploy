@@ -142,14 +142,24 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
     private void fetchNodeState(String node) {
         MinionDto mdto = config.getMinion(node);
         try {
-
             if (log.isDebugEnabled()) {
                 log.debug("Contacting node {}", node);
             }
 
             // in case the configuration was removed while we were scheduled.
             if (mdto != null) {
-                MinionStatusDto msd = ResourceProvider.getResource(mdto.remote, MinionStatusResource.class, null).getStatus();
+                MinionStatusResource msr = ResourceProvider.getResource(mdto.remote, MinionStatusResource.class, null);
+
+                long start = System.currentTimeMillis();
+                // this call only grabs in-memory information. even though there is *some* amount, its not much, and should be rather fast.
+                // a typical *local* duration for this call is between 100 and 150ms in case there are many things going on in parallel.
+                MinionStatusDto msd = msr.getStatus();
+                long duration = System.currentTimeMillis() - start;
+                if (duration > 250) {
+                    log.warn("Slow response from {}: {}ms", node, duration);
+                }
+
+                msd.lastRoundtrip = duration;
                 status.put(node, msd);
 
                 // previously inhibited contact warning means node was not reachable. log recovery

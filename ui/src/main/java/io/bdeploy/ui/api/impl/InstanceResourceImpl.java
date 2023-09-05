@@ -76,6 +76,7 @@ import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.endpoints.CommonEndpointHelper;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
+import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
@@ -84,6 +85,8 @@ import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.manifest.banner.InstanceBannerRecord;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
+import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -215,8 +218,7 @@ public class InstanceResourceImpl implements InstanceResource {
     private String getNewerVersionAvailableInRepository(InstanceConfiguration config, Set<Key> instanceGroupProductKeys,
             Comparator<String> productVersionComparator) {
         Key productKey = config.product;
-        InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
-        InstanceGroupConfiguration igc = igr.getInstanceGroupConfigurationDto(group).instanceGroupConfiguration;
+        InstanceGroupConfiguration igc = new InstanceGroupManifest(hive).read();
         if (igc.productToRepo == null || !igc.productToRepo.containsKey(productKey.getName())) {
             return null;
         }
@@ -399,9 +401,16 @@ public class InstanceResourceImpl implements InstanceResource {
 
         ManagedMasterDto managedMaster = null;
         if (minion.getMode() == MinionMode.CENTRAL) {
-            ManagedServersResource ms = rc.initResource(new ManagedServersResourceImpl());
             try {
-                managedMaster = ms.getServerForInstance(group, config.id, imKey.getTag());
+                // nearly the same as ManagedServersResource, but we can speed up a few things as we read a lot already.
+                ManagedMastersConfiguration masters = new ManagedMasters(hive).read();
+                String selected = new ControllingMaster(hive, im.getManifest()).read().getName();
+                if (selected == null) {
+                    return null;
+                }
+
+                managedMaster = masters.getManagedMaster(selected);
+                managedMaster.auth = null; // make sure to clear auth.
             } catch (WebApplicationException e) {
                 log.warn("Cannot load managed server for group {}, instance {}", group, config.id);
             }

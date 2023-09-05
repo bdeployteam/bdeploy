@@ -33,6 +33,11 @@ public class MinionStatusDto {
     public MinionMonitoringDto monitoring;
 
     /**
+     * Rolling average duration of the node manager contact call in milliseconds.
+     */
+    public long lastRoundtrip;
+
+    /**
      * Creates a new node status indicating that this node is offline.
      *
      * @param config

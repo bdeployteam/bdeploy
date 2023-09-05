@@ -14,6 +14,7 @@ import org.glassfish.jersey.server.model.ResourceMethod;
 import com.google.common.base.Splitter;
 
 import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.JerseyRequestContext;
 import io.bdeploy.jersey.JerseyScopeService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -35,12 +36,16 @@ public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFi
     private JerseyScopeService scopeService;
 
     @Inject
+    private JerseyRequestContext reqCtxService;
+
+    @Inject
     private JerseyBroadcastingActivityReporter reporter;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         // thread may have been pooled. if a task crashed quite hard, current activity could still be set.
         reporter.resetCurrentActivity();
+        reqCtxService.setRequest(requestContext);
 
         UriInfo plainInfo = requestContext.getUriInfo();
         if (plainInfo instanceof ExtendedUriInfo) {
@@ -79,6 +84,7 @@ public class JerseyRemoteActivityScopeServerFilter implements ContainerRequestFi
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
         // no matter the response, we want to clear out the current scope information.
         scopeService.clear();
+        reqCtxService.setRequest(null);
     }
 
     private List<String> getMethodScope(ExtendedUriInfo info, ResourceMethod m) {

@@ -45,7 +45,9 @@ public class RequestScopedNamedDaemonThreadFactory extends NamedDaemonThreadFact
     public Thread newThread(Runnable r) {
         RequestContext scope = reqScope.get().referenceCurrent();
         return super.newThread(() -> {
-            tx.detachThread();
+            if (tx != null) {
+                tx.detachThread();
+            }
 
             reqScope.get().runInScope(scope, () -> {
                 // must branch *inside* the request scope to be able to copy data over.

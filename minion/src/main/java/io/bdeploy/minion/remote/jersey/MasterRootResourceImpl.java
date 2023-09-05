@@ -13,6 +13,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,6 @@ import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.RetryableScope;
 import io.bdeploy.common.Version;
@@ -54,7 +54,9 @@ import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
+import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.ui.RequestScopedParallelOperations;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -64,6 +66,7 @@ import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.BackendInfoDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -81,7 +84,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
     private BHiveRegistry registry;
 
     @Inject
-    private ActivityReporter reporter;
+    private JerseyBroadcastingActivityReporter reporter;
 
     @Inject
     private NodeManager nodes;
@@ -91,6 +94,9 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Context
     private SecurityContext context;
+
+    @Inject
+    private Provider<RequestScope> reqScope;
 
     @Override
     public Map<String, MinionStatusDto> getNodes() {
@@ -568,58 +574,73 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     private void prepareUpdate(Manifest.Key version, boolean clean, SortedMap<String, MinionUpdateResource> toUpdate) {
-        Activity preparing = reporter.start("Preparing update on Minions...", toUpdate.size());
-        // prepare the update on all minions
-        for (Map.Entry<String, MinionUpdateResource> ur : toUpdate.entrySet()) {
-            try {
-                ur.getValue().prepare(version, clean);
-            } catch (Exception e) {
-                // don't immediately throw to update as many minions as possible.
-                // this Exception should actually never happen according to the contract.
-                throw new WebApplicationException("Cannot preapre update on " + ur.getKey(), e);
+        try (Activity preparing = reporter.start("Preparing update on Minions...", toUpdate.size())) {
+            List<Runnable> runnables = new ArrayList<>();
+
+            // prepare the update on all minions
+            for (Map.Entry<String, MinionUpdateResource> ur : toUpdate.entrySet()) {
+                runnables.add(() -> {
+                    try {
+                        ur.getValue().prepare(version, clean);
+                    } catch (Exception e) {
+                        // don't immediately throw to update as many minions as possible.
+                        // this Exception should actually never happen according to the contract.
+                        throw new WebApplicationException("Cannot preapre update on " + ur.getKey(), e);
+                    }
+                    preparing.worked(1);
+                });
             }
-            preparing.worked(1);
+
+            RequestScopedParallelOperations.runAndAwaitAll("Prepare-Update", runnables, reqScope, null, reporter);
         }
-        preparing.done();
     }
 
     private void pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, Collection<String> nodeNames,
             SortedMap<String, MinionUpdateResource> toUpdate) {
-        Activity pushing = reporter.start("Pushing Update to Nodes", nodeNames.size());
-        for (String nodeName : nodeNames) {
-            MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);
+        try (Activity pushing = reporter.start("Pushing Update to Nodes", nodeNames.size())) {
+            List<Runnable> runnables = new ArrayList<>();
 
-            if (minionDto == null) {
-                // this means the node needs to be updated separately later on.
-                log.warn("Cannot push update to offline node {}", nodeName);
-                continue;
-            }
+            for (String nodeName : nodeNames) {
+                MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);
 
-            RemoteService service = minionDto.remote;
-            try {
-                if (minionDto.os == updateOs) {
-                    MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class, context);
-                    toUpdate.put(nodeName, resource);
-                } else {
-                    log.warn("Not updating {}, wrong os ({} != {})", nodeName, minionDto.os, updateOs);
-                    pushing.workAndCancelIfRequested(1);
+                if (minionDto == null) {
+                    // this means the node needs to be updated separately later on.
+                    log.warn("Cannot push update to offline node {}", nodeName);
                     continue;
                 }
-            } catch (Exception e) {
-                log.warn("Cannot contact minion: {} - not updating.", nodeName);
-                pushing.workAndCancelIfRequested(1);
-                continue;
+
+                runnables.add(() -> {
+                    RemoteService service = minionDto.remote;
+                    try {
+                        if (minionDto.os == updateOs) {
+                            MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class,
+                                    context);
+                            synchronized (toUpdate) {
+                                toUpdate.put(nodeName, resource);
+                            }
+                        } else {
+                            log.warn("Not updating {}, wrong os ({} != {})", nodeName, minionDto.os, updateOs);
+                            pushing.workAndCancelIfRequested(1);
+                            return;
+                        }
+                    } catch (Exception e) {
+                        log.warn("Cannot contact minion: {} - not updating.", nodeName);
+                        pushing.workAndCancelIfRequested(1);
+                        return;
+                    }
+
+                    try {
+                        h.execute(new PushOperation().addManifest(version).setRemote(service));
+                    } catch (Exception e) {
+                        log.error("Cannot push update to minion: {}", nodeName, e);
+                        throw new WebApplicationException("Cannot push update to minions", e, Status.BAD_GATEWAY);
+                    }
+                    pushing.workAndCancelIfRequested(1);
+                });
             }
 
-            try {
-                h.execute(new PushOperation().addManifest(version).setRemote(service));
-            } catch (Exception e) {
-                log.error("Cannot push update to minion: {}", nodeName, e);
-                throw new WebApplicationException("Cannot push update to minions", e, Status.BAD_GATEWAY);
-            }
-            pushing.workAndCancelIfRequested(1);
+            RequestScopedParallelOperations.runAndAwaitAll("Push-Update", runnables, reqScope, h.getTransactions(), reporter);
         }
-        pushing.done();
     }
 
     private OperatingSystem getTargetOsFromUpdate(Key version) {

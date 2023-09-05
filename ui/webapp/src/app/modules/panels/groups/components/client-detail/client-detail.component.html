@@ -17,7 +17,7 @@
         <strong>Name:</strong>
         <div>{{ app.client.description }}</div>
         <strong>Instance:</strong>
-        <div>{{ app.instance.name }}</div>
+        <div>{{ app.instanceName }}</div>
       </div>
       <app-bd-expand-button
         text="Usage Statistics"
@@ -28,7 +28,7 @@
           <app-client-usage-graph
             class="flex-auto"
             [appId]="app.client.id"
-            [instanceId]="app.instance.id"
+            [instanceId]="app.instanceId"
           ></app-client-usage-graph>
         </div>
       </app-bd-expand-button>

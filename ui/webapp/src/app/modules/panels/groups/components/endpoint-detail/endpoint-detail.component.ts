@@ -119,7 +119,7 @@ export class EndpointDetailComponent implements OnDestroy {
     return this.contextPath$(app).pipe(
       map(
         (cp) =>
-          `${this.cfg.config.api}/master/upx/${group.name}/${app.instance.id}/${
+          `${this.cfg.config.api}/master/upx/${group.name}/${app.instanceId}/${
             app.endpoint.id
           }/${app.endpoint.endpoint.id}${this.cpWithSlash(cp)}`
       ),
@@ -152,7 +152,7 @@ export class EndpointDetailComponent implements OnDestroy {
     }
     const instance$ = this.instances.instances$.pipe(
       map((instances) =>
-        instances?.find((i) => i.instanceConfiguration.id === app.instance.id)
+        instances?.find((i) => i.instanceConfiguration.id === app.instanceId)
       ),
       skipWhile((instance) => !instance || !instance.activeVersion)
     );

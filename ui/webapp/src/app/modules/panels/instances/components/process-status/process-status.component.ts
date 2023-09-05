@@ -7,8 +7,14 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
-import { distinctUntilChanged, finalize, map } from 'rxjs/operators';
+import { BehaviorSubject, Subscription, combineLatest, iif, of } from 'rxjs';
+import {
+  delay,
+  distinctUntilChanged,
+  finalize,
+  map,
+  switchMap,
+} from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
@@ -89,7 +95,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   ];
   /* template */ uiEndpoints: HttpEndpoint[] = [];
 
-  public performing$ = new BehaviorSubject<boolean>(false);
+  // we only show a loading spinner if loading takes longer than 200ms.
+  protected loading$ = this.details.loading$.pipe(
+    switchMap((l) => iif(() => l, of(l).pipe(delay(200)), of(l)))
+  );
+  protected performing$ = new BehaviorSubject<boolean>(false);
 
   private restartProgressHandle: any;
   private uptimeCalculateHandle: any;

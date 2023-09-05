@@ -8,7 +8,6 @@ import {
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
 import { InstancesService } from '../../../services/instances.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
 import { StateItem } from '../state-panel/state-panel.component';
@@ -42,7 +41,6 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
 
   constructor(
     public instances: InstancesService,
-    public clients: ClientsService,
     private appCols: ProcessesColumnsService,
     private areas: NavAreasService,
     private auth: AuthenticationService,

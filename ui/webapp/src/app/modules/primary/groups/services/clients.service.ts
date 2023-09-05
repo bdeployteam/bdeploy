@@ -1,12 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, forkJoin, of } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
+import { debounceTime, finalize, skipWhile, take } from 'rxjs/operators';
 import {
   ClientApplicationDto,
-  InstanceClientAppsDto,
-  InstanceConfiguration,
-  InstanceUiEndpointsDto,
+  InstanceAllClientsDto,
   LauncherDto,
   ObjectChangeType,
   OperatingSystem,
@@ -17,10 +15,12 @@ import { DownloadService } from 'src/app/modules/core/services/download.service'
 import { ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
+import { InstancesService } from '../../instances/services/instances.service';
 import { GroupsService } from './groups.service';
 
 export interface ClientApp {
-  instance: InstanceConfiguration;
+  instanceId: string;
+  instanceName: string;
   client: ClientApplicationDto;
   endpoint: UiEndpointDto;
 }
@@ -33,6 +33,9 @@ export class ClientsService {
   public launcher$ = new BehaviorSubject<LauncherDto>(null);
   public apps$ = new BehaviorSubject<ClientApp[]>(null);
 
+  private update$ = new BehaviorSubject<string>(null);
+  private loadCall: Subscription;
+
   private subscription: Subscription;
   private apiSwupPath = `${this.cfg.config.api}/swup`;
   private apiGroupPath = (g) => `${this.cfg.config.api}/group/${g}`;
@@ -43,11 +46,15 @@ export class ClientsService {
     private cfg: ConfigService,
     private groups: GroupsService,
     private downloads: DownloadService,
-    private changes: ObjectChangesService
+    private changes: ObjectChangesService,
+    private instances: InstancesService
   ) {
     this.groups.current$.subscribe((g) =>
       this.updateChangeSubscription(g?.name)
     );
+
+    // debounce updates in case multiple instances updated in a single go.
+    this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
   }
 
   private reload(group: string) {
@@ -56,45 +63,57 @@ export class ClientsService {
       return;
     }
 
+    if (this.loadCall) {
+      // cancel previous calls.
+      this.loadCall.unsubscribe();
+    }
+
     this.loading$.next(true);
-    forkJoin({
-      launchers: this.http.get<LauncherDto>(
-        `${this.apiSwupPath}/launcherLatest`
-      ),
-      apps: this.http.get<InstanceClientAppsDto[]>(
-        `${this.apiGroupPath(group)}/client-apps`
-      ),
-      uiEps: this.http.get<InstanceUiEndpointsDto[]>(
-        `${this.apiGroupPath(group)}/ui-endpoints`
-      ),
-    })
+    this.loadCall = this.http
+      .get<InstanceAllClientsDto>(`${this.apiGroupPath(group)}/all-clients`)
       .pipe(
         finalize(() => this.loading$.next(false)),
-        measure('Load Client Launchers and Applications')
+        measure('Load all Clients')
       )
       .subscribe((result) => {
         this.launcher$.next(result.launchers);
 
-        const r: ClientApp[] = [];
-        for (const inst of result.apps) {
-          r.push(
-            ...inst.applications.map((a) => ({
-              instance: inst.instance,
-              client: a,
-              endpoint: null,
-            }))
-          );
-        }
-        for (const eps of result.uiEps) {
-          r.push(
-            ...eps.endpoints.map((e) => ({
-              instance: eps.instance,
-              client: null,
-              endpoint: e,
-            }))
-          );
-        }
-        this.apps$.next(r);
+        // immediate in most cases, but waits for initial load.
+        this.instances.instances$
+          .pipe(
+            skipWhile((i) => !i?.length),
+            take(1)
+          )
+          .subscribe((insts) => {
+            const r: ClientApp[] = [];
+            for (const inst of result.clients) {
+              const iname = insts.find(
+                (i) => i.instanceConfiguration?.id === inst.instanceId
+              )?.instanceConfiguration?.name;
+              r.push(
+                ...inst.applications.map((a) => ({
+                  instanceId: inst.instanceId,
+                  instanceName: iname,
+                  client: a,
+                  endpoint: null,
+                }))
+              );
+            }
+            for (const eps of result.endpoints) {
+              const iname = insts.find(
+                (i) => i.instanceConfiguration?.id === eps.instanceId
+              )?.instanceConfiguration?.name;
+              r.push(
+                ...eps.endpoints.map((e) => ({
+                  instanceId: eps.instanceId,
+                  instanceName: iname,
+                  client: null,
+                  endpoint: e,
+                }))
+              );
+            }
+            this.apps$.next(r);
+          });
       });
   }
 
@@ -108,12 +127,12 @@ export class ClientsService {
         ObjectChangeType.INSTANCE,
         { scope: [group] },
         () => {
-          this.reload(group);
+          this.update$.next(group);
         }
       );
     }
 
-    this.reload(group);
+    this.update$.next(group);
   }
 
   public hasLauncher(os: OperatingSystem): boolean {
@@ -216,7 +235,7 @@ export class ClientsService {
   public getDirectUiURI(app: ClientApp): Observable<string> {
     return this.http.get(
       `${this.apiInstancePath(this.groups.current$.value.name)}/${
-        app.instance.id
+        app.instanceId
       }/uiDirect/${app.endpoint.id}/${app.endpoint.endpoint.id}`,
       {
         responseType: 'text',
