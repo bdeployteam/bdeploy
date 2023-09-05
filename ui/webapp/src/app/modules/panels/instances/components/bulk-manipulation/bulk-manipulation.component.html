@@ -59,7 +59,7 @@
       <mat-divider></mat-divider>
       <app-bd-button
         [collapsed]="false"
-        [disabled]="!selections.length || (stopping$ | async)"
+        [disabled]="!selections.length || (instance.overallStatesLoading$ | async)"
         [loadingWhen$]="instance.overallStatesLoading$"
         text="Fetch Instance States"
         svgIcon="sync-all"
