@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Instance Settings"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Instance Settings" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
@@ -100,8 +97,8 @@
         [color]="(edit.current$ | async)?.newerVersionAvailable || !(edit.hasCurrentProduct$ | async) ? 'accent' : null"
       ></app-bd-panel-button>
       <app-bd-button
-        [loadingWhen$]="deleting$"
-        [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (deleting$ | async)"
+        [loadingWhen$]="mappedDelete$"
+        [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (mappedDelete$ | async)"
         text="Delete Instance"
         icon="delete"
         [collapsed]="false"

@@ -30,10 +30,8 @@ import com.ning.http.client.ListenableFuture;
 import com.ning.http.client.ws.WebSocket;
 import com.ning.http.client.ws.WebSocketUpgradeHandler;
 
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
-import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeClientFilter;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.jersey.ws.change.client.ObjectChangeClientListener;
 import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
@@ -43,7 +41,6 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
 
 /**
@@ -57,18 +54,15 @@ public class JerseyClientFactory {
     }
 
     private static final Logger log = LoggerFactory.getLogger(JerseyClientFactory.class);
-    private static ActivityReporter defaultReporter = new ActivityReporter.Null();
 
     private SSLContext sslContext;
     private String bearer;
     private final RemoteService svc;
-    private ActivityReporter reporter = defaultReporter;
 
     private final Set<com.fasterxml.jackson.databind.Module> additionalModules = new HashSet<>();
     private JerseyObjectMapper mapperFeature;
     private WebTarget cachedTarget;
 
-    private static final ThreadLocal<String> proxyUuid = new ThreadLocal<>();
     private static final Cache<RemoteService, JerseyClientFactory> factoryCache = CacheBuilder.newBuilder().maximumSize(100)
             .expireAfterAccess(5, TimeUnit.MINUTES).build();
 
@@ -135,21 +129,6 @@ public class JerseyClientFactory {
     }
 
     /**
-     * @param reporter the {@link ActivityReporter} to report lengthy operations to
-     *            (e.g. up/download).
-     */
-    public void setReporter(ActivityReporter reporter) {
-        this.reporter = reporter;
-    }
-
-    /**
-     * @param activityReporter the default {@link ActivityReporter} used for all new {@link JerseyClientFactory}s.
-     */
-    public static void setDefaultReporter(ActivityReporter activityReporter) {
-        defaultReporter = activityReporter;
-    }
-
-    /**
      * @return the configured {@link SSLContext} used by this factory. This is only
      *         for testing.
      */
@@ -209,8 +188,6 @@ public class JerseyClientFactory {
         builder.register(new ClientBearerFilter(bearer));
         builder.register(JerseyPathReader.class);
         builder.register(JerseyPathWriter.class);
-        builder.register(new JerseyClientReporterResolver());
-        builder.register(new JerseyRemoteActivityScopeClientFilter(proxyUuid::get));
 
         for (Object reg : additionalRegistrations) {
             if (reg instanceof Class<?>) {
@@ -228,14 +205,6 @@ public class JerseyClientFactory {
         }
 
         return target;
-    }
-
-    public static void setProxyUuid(String uuid) {
-        if (uuid == null) {
-            proxyUuid.remove();
-        } else {
-            proxyUuid.set(uuid);
-        }
     }
 
     /**
@@ -281,16 +250,6 @@ public class JerseyClientFactory {
         public void filter(ClientRequestContext requestContext) throws IOException {
             requestContext.getHeaders().add("Authorization", "Bearer " + bearerToken);
         }
-    }
-
-    @Provider
-    private final class JerseyClientReporterResolver implements ContextResolver<ActivityReporter> {
-
-        @Override
-        public ActivityReporter getContext(Class<?> type) {
-            return reporter;
-        }
-
     }
 
 }

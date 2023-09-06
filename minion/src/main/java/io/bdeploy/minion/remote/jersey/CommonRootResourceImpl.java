@@ -15,9 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.PathHelper;
@@ -35,6 +34,8 @@ import io.bdeploy.interfaces.remote.CommonProxyResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.jersey.JerseySecurityContext;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.jersey.errorpages.JerseyCustomErrorPages;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
@@ -58,9 +59,6 @@ public class CommonRootResourceImpl implements CommonRootResource {
     @Inject
     private BHiveRegistry registry;
 
-    @Inject
-    private ActivityReporter reporter;
-
     @Context
     private ResourceContext rc;
 
@@ -78,6 +76,9 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
     @Context
     private SecurityContext security;
+
+    @Inject
+    private ActionFactory af;
 
     @Override
     public Version getVersion() {
@@ -112,7 +113,7 @@ public class CommonRootResourceImpl implements CommonRootResource {
             throw new WebApplicationException("Hive path already exists", Status.NOT_ACCEPTABLE);
         }
 
-        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
+        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
         registry.register(config.name, h);
         new SoftwareRepositoryManifest(h).update(config);
     }
@@ -168,19 +169,21 @@ public class CommonRootResourceImpl implements CommonRootResource {
 
         meta.managed = (minion.getMode() != MinionMode.STANDALONE);
 
-        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
+        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
         registry.register(meta.name, h);
         new InstanceGroupManifest(h).update(meta);
     }
 
     @Override
     public void deleteInstanceGroup(String name) {
-        BHive bHive = registry.get(name);
-        if (bHive == null) {
-            throw new WebApplicationException("Instance Group '" + name + "' does not exist", Status.NOT_FOUND);
+        try (ActionHandle h = af.run(Actions.DELETE_GROUP, name)) {
+            BHive bHive = registry.get(name);
+            if (bHive == null) {
+                throw new WebApplicationException("Instance Group '" + name + "' does not exist", Status.NOT_FOUND);
+            }
+            registry.unregister(name);
+            PathHelper.deleteRecursiveRetry(Paths.get(bHive.getUri()));
         }
-        registry.unregister(name);
-        PathHelper.deleteRecursiveRetry(Paths.get(bHive.getUri()));
     }
 
     @Override
@@ -203,15 +206,13 @@ public class CommonRootResourceImpl implements CommonRootResource {
     @Override
     public void setLoggerConfig(Path config) {
         Collection<String> nodeNames = nodes.getAllNodeNames();
-        try (Activity updating = reporter.start("Update Node Logging", nodeNames.size())) {
+        try {
             for (String nodeName : nodeNames) {
                 try {
                     nodes.getNodeResourceIfOnlineOrThrow(nodeName, MinionStatusResource.class, security).setLoggerConfig(config);
                 } catch (Exception e) {
                     log.error("Cannot udpate logging configuration on {}", nodeName, e);
                 }
-
-                updating.workAndCancelIfRequested(1);
             }
         } finally {
             PathHelper.deleteRecursiveRetry(config);
@@ -223,22 +224,19 @@ public class CommonRootResourceImpl implements CommonRootResource {
         List<RemoteDirectory> result = new ArrayList<>();
 
         Collection<String> nodeNames = nodes.getAllNodeNames();
-        try (Activity reading = reporter.start("Reading Node Logs", nodeNames.size())) {
-            for (String nodeName : nodeNames) {
-                RemoteDirectory dir = new RemoteDirectory();
-                dir.minion = nodeName;
+        for (String nodeName : nodeNames) {
+            RemoteDirectory dir = new RemoteDirectory();
+            dir.minion = nodeName;
 
-                try {
-                    dir.entries.addAll(nodes.getNodeResourceIfOnlineOrThrow(nodeName, MinionStatusResource.class, security)
-                            .getLogEntries(hive));
-                } catch (Exception e) {
-                    log.warn("Problem fetching log directory of {}: {}", nodeName, e.toString());
-                    dir.problem = e.toString();
-                }
-
-                result.add(dir);
-                reading.workAndCancelIfRequested(1);
+            try {
+                dir.entries.addAll(
+                        nodes.getNodeResourceIfOnlineOrThrow(nodeName, MinionStatusResource.class, security).getLogEntries(hive));
+            } catch (Exception e) {
+                log.warn("Problem fetching log directory of {}: {}", nodeName, e.toString());
+                dir.problem = e.toString();
             }
+
+            result.add(dir);
         }
 
         return result;

@@ -1,44 +1,47 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { OperatingSystem } from 'src/app/models/gen.dtos';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
+import { Actions, OperatingSystem } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
-import {
-  SoftwareUpdateService,
-  SoftwareVersion,
-} from 'src/app/modules/primary/admin/services/software-update.service';
+import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/admin/services/software-update.service';
 
 @Component({
   selector: 'app-software-details',
   templateUrl: './software-details.component.html',
 })
 export class SoftwareDetailsComponent implements OnDestroy {
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ installing$ = new BehaviorSubject<boolean>(false);
+  private software = inject(SoftwareUpdateService);
+  private actions = inject(ActionsService);
+  protected cfg = inject(ConfigService);
 
-  /* template */ software$ = new BehaviorSubject<SoftwareVersion>(null);
+  private deleting$ = new BehaviorSubject<boolean>(false);
+  private installing$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ systemOs$ = new BehaviorSubject<OperatingSystem[]>(null);
-  /* template */ launcherOs$ = new BehaviorSubject<OperatingSystem[]>(null);
+  protected software$ = new BehaviorSubject<SoftwareVersion>(null);
+  protected mappedDelete$ = this.actions.action(
+    [Actions.DELETE_UPDATES],
+    this.deleting$,
+    null,
+    null,
+    this.software$.pipe(map((s) => s?.version))
+  );
+  protected mappedInstall$ = this.actions.action([Actions.UPDATE, Actions.RESTART_SERVER], this.installing$); // global!
+
+  protected systemOs$ = new BehaviorSubject<OperatingSystem[]>(null);
+  protected launcherOs$ = new BehaviorSubject<OperatingSystem[]>(null);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
-  constructor(
-    areas: NavAreasService,
-    private software: SoftwareUpdateService,
-    public cfg: ConfigService
-  ) {
-    this.subscription = combineLatest([
-      areas.panelRoute$,
-      software.software$,
-    ]).subscribe(([r, s]) => {
+  constructor(areas: NavAreasService) {
+    this.subscription = combineLatest([areas.panelRoute$, this.software.software$]).subscribe(([r, s]) => {
       if (!r?.params || !r.params['version'] || !s) return;
 
       const version = r.params['version'];
@@ -66,10 +69,7 @@ export class SoftwareDetailsComponent implements OnDestroy {
 
         this.deleting$.next(true);
         this.software
-          .deleteVersion([
-            ...this.software$.value.system,
-            ...this.software$.value.launcher,
-          ])
+          .deleteVersion([...this.software$.value.system, ...this.software$.value.launcher])
           .pipe(finalize(() => this.deleting$.next(false)))
           .subscribe(() => {
             this.tb.closePanel();

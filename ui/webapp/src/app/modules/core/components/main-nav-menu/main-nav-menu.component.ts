@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
-import { ActivitiesService } from '../../services/activities.service';
+import { ActionsService } from '../../services/actions.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { NavAreasService } from '../../services/nav-areas.service';
@@ -71,7 +71,7 @@ export class MainNavMenuComponent {
     public cfgService: ConfigService,
     public authService: AuthenticationService,
     public areas: NavAreasService,
-    public activities: ActivitiesService
+    public actions: ActionsService
   ) {}
 
   @HostBinding('@menuOpenClose') get animationState() {

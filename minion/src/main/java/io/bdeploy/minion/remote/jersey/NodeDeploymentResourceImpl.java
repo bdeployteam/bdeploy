@@ -28,11 +28,9 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.dcu.TaskSynchronizer;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
@@ -61,9 +59,6 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
     private MinionRoot root;
 
     @Inject
-    private ActivityReporter reporter;
-
-    @Inject
     private FileSystemSpaceService fsss;
 
     @Inject
@@ -84,18 +79,16 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
             throw new WebApplicationException("Not enough free space in " + root.getDeploymentDir(), Status.SERVICE_UNAVAILABLE);
         }
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
-        try (Activity deploying = reporter.start("Deploying Ver. " + key.getTag() + " of " + inm.getConfiguration().name)) {
-            InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
-            inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
-            inc.install();
-            getState(inm, hive).install(key.getTag());
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
+        inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
+        inc.install();
+        getState(inm, hive).install(key.getTag());
 
-            // Notify that there is a new deployment
-            MinionProcessController processController = root.getProcessController();
-            InstanceProcessController controller = processController.getOrCreate(hive, inm);
-            controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, inm.getKey().getTag(),
-                    inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
-        }
+        // Notify that there is a new deployment
+        MinionProcessController processController = root.getProcessController();
+        InstanceProcessController controller = processController.getOrCreate(hive, inm);
+        controller.createProcessControllers(inc.getDeploymentPathProvider(), inc.getResolver(), inm, inm.getKey().getTag(),
+                inc.getProcessGroupConfiguration(), inm.getRuntimeHistory(hive));
     }
 
     @Override

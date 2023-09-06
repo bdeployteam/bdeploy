@@ -1,8 +1,9 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, finalize, Subscription } from 'rxjs';
-import { MinionStatusDto } from 'src/app/models/gen.dtos';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
+import { Actions, MinionStatusDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
@@ -13,25 +14,22 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
   templateUrl: './node-details.component.html',
 })
 export class NodeDetailsComponent implements OnDestroy {
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
   /* template */ nodeName$ = new BehaviorSubject<string>(null);
   /* template */ nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
   /* template */ nodeVersion: string;
   /* template */ isCurrent: boolean;
+
+  private deleting$ = new BehaviorSubject<boolean>(false);
+  private actions = inject(ActionsService);
   private subscription: Subscription;
+
+  protected mappedDelete$ = this.actions.action([Actions.REMOVE_NODE], this.deleting$, null, null, this.nodeName$);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
-  constructor(
-    private nodeAdmin: NodesAdminService,
-    private cfg: ConfigService,
-    areas: NavAreasService
-  ) {
-    this.subscription = combineLatest([
-      this.nodeAdmin.nodes$,
-      areas.panelRoute$,
-    ]).subscribe(([nodes, route]) => {
+  constructor(private nodeAdmin: NodesAdminService, private cfg: ConfigService, areas: NavAreasService) {
+    this.subscription = combineLatest([this.nodeAdmin.nodes$, areas.panelRoute$]).subscribe(([nodes, route]) => {
       if (!nodes || !route || !route.params.node) {
         this.nodeName$.next(null);
         this.nodeState$.next(null);
@@ -48,8 +46,7 @@ export class NodeDetailsComponent implements OnDestroy {
         ? convert2String(nodeStatus.status?.config?.version)
         : 'Unknown';
 
-      this.isCurrent =
-        this.nodeVersion === convert2String(this.cfg.config.version);
+      this.isCurrent = this.nodeVersion === convert2String(this.cfg.config.version);
     });
   }
 

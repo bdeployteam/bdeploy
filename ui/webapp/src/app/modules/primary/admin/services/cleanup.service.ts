@@ -1,28 +1,30 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
-import { CleanupGroup } from '../../../../models/gen.dtos';
+import { Actions, CleanupGroup } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CleanupService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private ngZone = inject(NgZone);
+  private actions = inject(ActionsService);
+
+  private internalPerforming$ = new BehaviorSubject<boolean>(false);
+
   public loading$ = new BehaviorSubject<boolean>(false);
-  public performing$ = new BehaviorSubject<boolean>(false);
   public countdown$ = new BehaviorSubject<number>(-1);
   public cleanup$ = new BehaviorSubject<CleanupGroup[]>(null);
+  public performing$ = this.actions.action([Actions.CLEANUP_PERFORM], this.internalPerforming$);
 
   private apiPath = () => `${this.cfg.config.api}/cleanUi`;
   private cdHandle;
-
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private ngZone: NgZone
-  ) {}
 
   public calculateCleanup() {
     clearInterval(this.cdHandle);
@@ -58,12 +60,12 @@ export class CleanupService {
     clearInterval(this.cdHandle);
     this.countdown$.next(-1);
 
-    this.performing$.next(true);
+    this.internalPerforming$.next(true);
     return this.http
       .post(`${this.apiPath()}`, groups)
       .pipe(
         finalize(() => {
-          this.performing$.next(false);
+          this.internalPerforming$.next(false);
           this.cleanup$.next(null);
         }),
         measure('Perform Cleanup')

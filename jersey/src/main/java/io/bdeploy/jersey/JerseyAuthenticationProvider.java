@@ -13,9 +13,12 @@ import javax.annotation.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.audit.AuditRecord;
+import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.jersey.errorpages.JerseyCustomErrorPages;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.NameBinding;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -40,6 +43,9 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
     private static final String BDEPLOY_ALT_AUTH_HEADER = "X-BDeploy-Authorization";
     private static final String THREAD_ORIG_NAME = "THREAD_ORIG_NAME";
     private static final Logger log = LoggerFactory.getLogger(JerseyAuthenticationProvider.class);
+
+    @Inject
+    private Auditor auditor;
 
     /**
      * Mark a single endpoint as "unsecure", allowing a call without valid token.
@@ -127,6 +133,10 @@ public class JerseyAuthenticationProvider implements ContainerRequestFilter, Con
             String sessionId = requestContext.getCookies().get(SessionManager.SESSION_COOKIE).getValue();
             String token = sessionManager.getSessionToken(sessionId);
             if (token == null) {
+                if (sessionId != null) {
+                    auditor.audit(AuditRecord.Builder.fromRequest(requestContext).setMessage("Invalid Session")
+                            .addParameter("id", sessionId).build());
+                }
                 abortWithUnauthorized(requestContext);
                 return;
             }

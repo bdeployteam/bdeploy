@@ -18,7 +18,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfigurationDto;
 import io.bdeploy.interfaces.manifest.attributes.CustomAttributesRecord;
 import io.bdeploy.interfaces.settings.CustomDataGrouping;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.InstanceAllClientsDto;
 import jakarta.ws.rs.Consumes;
@@ -48,55 +48,55 @@ public interface InstanceGroupResource {
     @GET
     @Path("/{group}")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public InstanceGroupConfigurationDto getInstanceGroupConfigurationDto(@ActivityScope @PathParam("group") String group);
+    public InstanceGroupConfigurationDto getInstanceGroupConfigurationDto(@Scope @PathParam("group") String group);
 
     @POST
     @Path("/{group}")
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
-    public void update(@ActivityScope @PathParam("group") String group, InstanceGroupConfiguration config);
+    public void update(@Scope @PathParam("group") String group, InstanceGroupConfiguration config);
 
     @POST
     @Path("/{group}/user-permissions")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public void updateUserPermissions(@ActivityScope @PathParam("group") String group, UserPermissionUpdateDto[] permissions);
+    public void updateUserPermissions(@Scope @PathParam("group") String group, UserPermissionUpdateDto[] permissions);
 
     @POST
     @Path("/{group}/user-group-permissions")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public void updateUserGroupPermissions(@ActivityScope @PathParam("group") String group,
+    public void updateUserGroupPermissions(@Scope @PathParam("group") String group,
             UserGroupPermissionUpdateDto[] permissions);
 
     @DELETE
     @Path("/{group}")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void delete(@ActivityScope @PathParam("group") String group);
+    public void delete(@Scope @PathParam("group") String group);
 
     @GET
     @Path("/{group}/users")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public SortedSet<UserInfo> getAllUser(@ActivityScope @PathParam("group") String group);
+    public SortedSet<UserInfo> getAllUser(@Scope @PathParam("group") String group);
 
     @GET
     @Path("/{group}/user-groups")
     @RequiredPermission(permission = Permission.ADMIN, scope = "group")
-    public SortedSet<UserGroupInfo> getAllUserGroup(@ActivityScope @PathParam("group") String group);
+    public SortedSet<UserGroupInfo> getAllUserGroup(@Scope @PathParam("group") String group);
 
     @POST
     @Path("/{group}/image")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
-    public void updateImage(@ActivityScope @PathParam("group") String group, @FormDataParam("image") InputStream imageData);
+    public void updateImage(@Scope @PathParam("group") String group, @FormDataParam("image") InputStream imageData);
 
     @DELETE
     @Path("/{group}/image")
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
-    public void deleteImage(@ActivityScope @PathParam("group") String group);
+    public void deleteImage(@Scope @PathParam("group") String group);
 
     @GET
     @Path("/{group}/image")
     @Produces("image/png")
     @Unsecured // required to allow requests from browser directly (e.g. CSS).
-    public Response readImage(@ActivityScope @PathParam("group") String group);
+    public Response readImage(@Scope @PathParam("group") String group);
 
     /**
      * Create a new unique (in the given group) UUID for an instance.
@@ -104,24 +104,24 @@ public interface InstanceGroupResource {
     @GET
     @Path("/{group}/new-uuid")
     @RequiredPermission(permission = Permission.READ, scope = "group")
-    public String createId(@ActivityScope @PathParam("group") String group);
+    public String createId(@Scope @PathParam("group") String group);
 
     @Path("/{group}/instance")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public InstanceResource getInstanceResource(@ActivityScope @PathParam("group") String group);
+    public InstanceResource getInstanceResource(@Scope @PathParam("group") String group);
 
     @Path("/{group}/system")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public SystemResource getSystemResource(@ActivityScope @PathParam("group") String group);
+    public SystemResource getSystemResource(@Scope @PathParam("group") String group);
 
     @Path("/{group}/product")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public ProductResource getProductResource(@ActivityScope @PathParam("group") String group);
+    public ProductResource getProductResource(@Scope @PathParam("group") String group);
 
     @GET
     @Path("/{group}/all-clients")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public InstanceAllClientsDto listAllClients(@ActivityScope @PathParam("group") String group,
+    public InstanceAllClientsDto listAllClients(@Scope @PathParam("group") String group,
             @QueryParam("os") OperatingSystem os);
 
     @GET
@@ -131,17 +131,17 @@ public interface InstanceGroupResource {
     @GET
     @Path("/{group}/attributes")
     @RequiredPermission(permission = Permission.CLIENT, scope = "group")
-    public CustomAttributesRecord getAttributes(@ActivityScope @PathParam("group") String group);
+    public CustomAttributesRecord getAttributes(@Scope @PathParam("group") String group);
 
     @POST
     @Path("/{group}/attributes")
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
-    public void updateAttributes(@ActivityScope @PathParam("group") String group, CustomAttributesRecord attributes);
+    public void updateAttributes(@Scope @PathParam("group") String group, CustomAttributesRecord attributes);
 
     @PUT
     @Path("/{group}/presets")
     @RequiredPermission(permission = Permission.WRITE, scope = "group")
-    public void updatePreset(@ActivityScope @PathParam("group") String group, @QueryParam("multiple") boolean multiple,
+    public void updatePreset(@Scope @PathParam("group") String group, @QueryParam("multiple") boolean multiple,
             List<CustomDataGrouping> preset);
 
 }

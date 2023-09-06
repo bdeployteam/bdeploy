@@ -42,13 +42,10 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
-import org.glassfish.jersey.server.spi.Container;
-import org.glassfish.jersey.server.spi.ContainerLifecycleListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.audit.Slf4jAuditor;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
@@ -57,22 +54,18 @@ import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationUnprovider;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.JerseyAuthenticationWeakenerProvider;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.UserValidator;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
-import io.bdeploy.jersey.activity.JerseyRemoteActivityResourceImpl;
-import io.bdeploy.jersey.activity.JerseyRemoteActivityScopeServerFilter;
+import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.jersey.errorpages.JerseyGrizzlyErrorPageGenerator;
 import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitor;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringResourceImpl;
 import io.bdeploy.jersey.monitoring.JerseyServerMonitoringSamplerService;
+import io.bdeploy.jersey.resources.ActionResourceImpl;
 import io.bdeploy.jersey.resources.JerseyMetricsResourceImpl;
 import jakarta.annotation.Priority;
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.ext.ContextResolver;
-import jakarta.ws.rs.ext.Provider;
 
 /**
  * Encapsulates required functionality from the Grizzly HttpServer with the
@@ -135,7 +128,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final char[] passphrase;
     private final Instant startTime = Instant.now();
     private final Collection<AutoCloseable> closeableResources = new ArrayList<>();
-    private final ActivityReporter.Delegating reporterDelegate = new ActivityReporter.Delegating();
     private final CompletableFuture<RegistrationTarget> startup = new CompletableFuture<>();
 
     private final AtomicLong broadcasterId = new AtomicLong(0);
@@ -177,22 +169,13 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     }
 
     /**
-     * @return an {@link ActivityReporter} which can broadcast to remote.
-     */
-    public ActivityReporter getRemoteActivityReporter() {
-        return reporterDelegate;
-    }
-
-    /**
-     * Sets the auditor that will be used by the server to log requests. The auditor will be closed
-     * when the server is terminated.
+     * Sets the auditor that will be used by the server to log requests.
      *
      * @param auditor
      *            auditor to log requests
      */
     public void setAuditor(Auditor auditor) {
         this.auditor = auditor;
-        registerResource(auditor);
     }
 
     /**
@@ -307,7 +290,9 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             for (Map.Entry<HttpHandlerRegistration, HttpHandler> regs : preRegistrations.entrySet()) {
                 server.getServerConfiguration().addHttpHandler(regs.getValue(), regs.getKey());
             }
+
             monitor.setServer(server);
+            monitor.setSessionManager(sessionManager);
 
             // register custom error page generator.
             server.getServerConfiguration().setDefaultErrorPageGenerator(new JerseyGrizzlyErrorPageGenerator());
@@ -375,12 +360,10 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         config.register(JerseyMetricsResourceImpl.class);
         config.register(JerseyAuditingFilter.class);
         config.register(JerseyExceptionMapper.class);
-        config.register(JerseyRemoteActivityResourceImpl.class);
-        config.register(JerseyRemoteActivityScopeServerFilter.class);
+        config.register(ActionResourceImpl.class);
         config.register(JerseyServerMonitoringResourceImpl.class);
-        config.register(new JerseyLazyReporterInitializer());
-        config.register(new JerseyServerReporterContextResolver());
         config.register(new JerseyWriteLockFilter());
+        config.register(JerseyScopeFilter.class);
 
         config.property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, CL_BUFFER_SIZE);
     }
@@ -434,11 +417,11 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
             // NOTE: *DO NOT* create singleton resources here on the fly, since this binder is used
             // when initializing plugins as well. For every plugin loaded this might cause resource leaks.
 
-            bind(JerseyBroadcastingActivityReporter.class).in(Singleton.class).to(JerseyBroadcastingActivityReporter.class);
             bind(JerseyWriteLockService.class).in(Singleton.class).to(JerseyWriteLockService.class);
             bind(JerseyScopeService.class).in(Singleton.class).to(JerseyScopeService.class);
-            bind(JerseyRequestContext.class).in(Singleton.class).to(JerseyRequestContext.class);
             bind(FileSystemSpaceService.class).in(Singleton.class).to(FileSystemSpaceService.class);
+
+            bind(ActionFactory.class).to(ActionFactory.class);
 
             bind(startTime).named(START_TIME).to(Instant.class);
             bind(broadcastScheduler).named(BROADCAST_EXECUTOR).to(ScheduledExecutorService.class);
@@ -447,9 +430,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             // need to lazily access the auditor in case it is changed later.
             bindFactory(new JerseyAuditorBridgeFactory()).to(Auditor.class);
-
-            // need to bridge over to the same instance as used for the singleton sse activity reporter.
-            bindFactory(JerseyRemoteActivityReporterBridgeFactory.class).to(ActivityReporter.class);
         }
 
     }
@@ -467,66 +447,6 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         @Override
         public void dispose(Auditor instance) {
             // nothing to do
-        }
-
-    }
-
-    /**
-     * Provides the instance of {@link JerseyBroadcastingActivityReporter} when an {@link ActivityReporter} is requested for
-     * injection.
-     */
-    private static class JerseyRemoteActivityReporterBridgeFactory implements Factory<ActivityReporter> {
-
-        @Inject
-        private JerseyBroadcastingActivityReporter reporter;
-
-        @Override
-        public ActivityReporter provide() {
-            return reporter;
-        }
-
-        @Override
-        public void dispose(ActivityReporter instance) {
-            // nothing to do
-        }
-
-    }
-
-    /**
-     * Updates the delegate {@link ActivityReporter} of the {@link JerseyServer} to the resolved
-     * {@link JerseyBroadcastingActivityReporter}
-     * once it is available for injection.
-     */
-    private class JerseyLazyReporterInitializer implements ContainerLifecycleListener {
-
-        @Override
-        public void onStartup(Container container) {
-            reporterDelegate.setDelegate(container.getApplicationHandler().getInjectionManager()
-                    .getInstance(JerseyBroadcastingActivityReporter.class));
-        }
-
-        @Override
-        public void onReload(Container container) {
-            // delegate stays the same
-        }
-
-        @Override
-        public void onShutdown(Container container) {
-            // nothing to do
-        }
-
-    }
-
-    /**
-     * Provides the {@link ActivityReporter} delegate as JAX-RS context object, which is required by {@link Provider}s that want
-     * to resolve the {@link ActivityReporter} from the JAX-RS context.
-     */
-    @Provider
-    private class JerseyServerReporterContextResolver implements ContextResolver<ActivityReporter> {
-
-        @Override
-        public ActivityReporter getContext(Class<?> type) {
-            return reporterDelegate;
         }
 
     }

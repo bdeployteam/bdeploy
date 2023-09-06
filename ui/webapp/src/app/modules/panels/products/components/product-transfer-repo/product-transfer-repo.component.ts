@@ -1,13 +1,11 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { groupBy } from 'lodash-es';
 import { BehaviorSubject, combineLatest, finalize, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  ProductDto,
-  SoftwareRepositoryConfiguration,
-} from 'src/app/models/gen.dtos';
+import { Actions, ProductDto, SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsColumnsService } from 'src/app/modules/primary/products/services/products-columns.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
@@ -19,9 +17,14 @@ import { RepositoryService } from 'src/app/modules/primary/repositories/services
   templateUrl: './product-transfer-repo.component.html',
 })
 export class ProductTransferRepoComponent implements OnInit {
-  /* template */ prodVersionColumns: BdDataColumn<ProductDto>[] = [
-    this.prodCols.productVersionColumn,
-  ];
+  private repositories = inject(RepositoriesService);
+  private repository = inject(RepositoryService);
+  private products = inject(ProductsService);
+  private prodCols = inject(ProductsColumnsService);
+  private areas = inject(NavAreasService);
+  private actions = inject(ActionsService);
+
+  protected prodVersionColumns: BdDataColumn<ProductDto>[] = [this.prodCols.productVersionColumn];
 
   /* template */ repos: SoftwareRepositoryConfiguration[];
   /* template */ repoLabels: string[];
@@ -32,26 +35,25 @@ export class ProductTransferRepoComponent implements OnInit {
   /* template */ prodsById: { [key: string]: ProductDto[] } = {};
   /* template */ prodIds: string[];
   /* template */ prodLabels: string[];
-  /* template */ selectedVersions: ProductDto[];
+  /* template */ selectedVersions$ = new BehaviorSubject<ProductDto[]>([]);
 
-  /* template */ loading$ = combineLatest([
-    this.products.loading$,
-    this.repositories.loading$,
-  ]).pipe(map(([a, b]) => a || b));
-  /* template */ importing$ = new BehaviorSubject<boolean>(false);
+  protected loading$ = combineLatest([this.products.loading$, this.repositories.loading$]).pipe(
+    map(([a, b]) => a || b)
+  );
+
+  protected importing$ = new BehaviorSubject<boolean>(false);
+  protected mappedImporting$ = this.actions.action(
+    [Actions.IMPORT_PROD_REPO],
+    this.importing$,
+    null,
+    null,
+    this.selectedVersions$.pipe(map((x) => x.map((y) => `${y.key.name}:${y.key.tag}`)))
+  );
 
   private queryRepo: string = null;
   private queryProduct: string = null;
 
   @ViewChild(MatStepper) stepper: MatStepper;
-
-  constructor(
-    private repositories: RepositoriesService,
-    private repository: RepositoryService,
-    private products: ProductsService,
-    private prodCols: ProductsColumnsService,
-    private areas: NavAreasService
-  ) {}
 
   ngOnInit(): void {
     const snap = this.areas.panelRoute$.value;
@@ -78,9 +80,7 @@ export class ProductTransferRepoComponent implements OnInit {
 
   private preselectProduct(products: ProductDto[]): void {
     if (!this.queryProduct) return;
-    this.selectedProductId = products.find(
-      (p) => !!this.queryProduct && p.key.name === this.queryProduct
-    )?.product;
+    this.selectedProductId = products.find((p) => !!this.queryProduct && p.key.name === this.queryProduct)?.product;
     this.queryProduct = null;
     if (!this.selectedProductId) return;
     this.stepper.selected.completed = true;
@@ -102,16 +102,11 @@ export class ProductTransferRepoComponent implements OnInit {
           .subscribe((prods) => {
             const products = this.products.products$.value || [];
             const filtered = prods.filter(
-              (p) =>
-                !products.find(
-                  (p2) => p2.key.name === p.key.name && p2.key.tag === p.key.tag
-                )
+              (p) => !products.find((p2) => p2.key.name === p.key.name && p2.key.tag === p.key.tag)
             );
             this.prodsById = groupBy(filtered, (p) => p.product);
             this.prodIds = Object.keys(this.prodsById);
-            this.prodLabels = this.prodIds.map(
-              (k) => this.prodsById[k][0].name
-            ); // first is the one with the highest version as well
+            this.prodLabels = this.prodIds.map((k) => this.prodsById[k][0].name); // first is the one with the highest version as well
             this.preselectProduct(filtered);
           });
         break;
@@ -119,14 +114,14 @@ export class ProductTransferRepoComponent implements OnInit {
   }
 
   /* template */ importVersions() {
-    if (!this.selectedVersions?.length) {
+    if (!this.selectedVersions$.value?.length) {
       this.areas.closePanel();
       return;
     }
 
     this.importing$.next(true);
     this.products
-      .importProduct(this.selectedVersions, this.selectedRepo.name)
+      .importProduct(this.selectedVersions$.value, this.selectedRepo.name)
       .pipe(finalize(() => this.importing$.next(false)))
       .subscribe(() => this.areas.closePanel());
   }

@@ -356,7 +356,6 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.BulkOperationResultDto',
         // Other, generic
         'io.bdeploy.common.Version',
-        'io.bdeploy.common.ActivitySnapshot',
         'io.bdeploy.common.security.ApiAccessToken',
         'io.bdeploy.interfaces.cleanup.CleanupGroup',
         'io.bdeploy.interfaces.directory.RemoteDirectory',
@@ -378,6 +377,7 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.jersey.ws.change.msg.ObjectChangeDto',
         'io.bdeploy.jersey.ws.change.msg.ObjectChangeInitDto',
         'io.bdeploy.jersey.ws.change.msg.ObjectChangeRegistrationDto',
+        'io.bdeploy.jersey.actions.ActionBroadcastDto',
         // Metrics
         'io.bdeploy.jersey.resources.JerseyMetricsResource$MetricBundle',
         'io.bdeploy.common.metrics.Metrics$MetricGroup',

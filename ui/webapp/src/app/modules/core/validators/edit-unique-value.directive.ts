@@ -1,10 +1,5 @@
 import { Directive, Input } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
   BdValidationMessageExtractor,
   bdValidationRegisterMessageExtractor,
@@ -21,9 +16,7 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
     },
   ],
 })
-export class EditUniqueValueValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class EditUniqueValueValidatorDirective implements Validator, BdValidationMessageExtractor {
   public readonly id = 'edit-unique-value';
 
   @Input() disallowedValues: string[];

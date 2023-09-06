@@ -11,7 +11,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.plugin.PluginInfoDto;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -52,7 +52,7 @@ public interface PluginResource {
      */
     @POST
     @Path("/list-product-plugins/{group}")
-    public List<PluginInfoDto> getProductPlugins(@ActivityScope @PathParam("group") String group, Manifest.Key product);
+    public List<PluginInfoDto> getProductPlugins(@Scope @PathParam("group") String group, Manifest.Key product);
 
     /**
      * @param product a product from which to lookup and load local plugins.
@@ -61,13 +61,13 @@ public interface PluginResource {
     @POST
     @Path("/get-editor/{group}/{type}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public PluginInfoDto getPluginForEditor(@ActivityScope @PathParam("group") String group, @PathParam("type") String type,
+    public PluginInfoDto getPluginForEditor(@Scope @PathParam("group") String group, @PathParam("type") String type,
             Manifest.Key product);
 
     @POST
     @Path("/list-editor-types/{group}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public Set<String> getEditorTypes(@ActivityScope @PathParam("group") String group, Manifest.Key product);
+    public Set<String> getEditorTypes(@Scope @PathParam("group") String group, Manifest.Key product);
 
     /**
      * @param id unload a certain plugin.

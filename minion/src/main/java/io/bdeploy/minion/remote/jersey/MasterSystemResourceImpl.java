@@ -35,8 +35,11 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
     @Inject
     private MinionRoot root;
 
-    public MasterSystemResourceImpl(BHive hive) {
+    private final String name;
+
+    public MasterSystemResourceImpl(BHive hive, String name) {
         this.hive = hive;
+        this.name = name;
     }
 
     @Override
@@ -51,7 +54,7 @@ public class MasterSystemResourceImpl implements MasterSystemResource {
     @Override
     public Manifest.Key update(SystemConfiguration system) {
         var newKey = new SystemManifest.Builder().setSystemId(system.id).setConfiguration(system).insert(hive);
-        var ir = rc.initResource(new MasterNamedResourceImpl(root, hive));
+        var ir = rc.initResource(new MasterNamedResourceImpl(root, hive, name));
 
         for (var key : InstanceManifest.scan(hive, true)) {
             var im = InstanceManifest.of(hive, key);

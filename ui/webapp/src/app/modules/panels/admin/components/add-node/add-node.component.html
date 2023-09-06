@@ -1,21 +1,16 @@
 <app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
-  <app-bd-dialog-toolbar
-    header="Add Node"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Node" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm">
       <div class="flex flex-col gap-2.5">
         <span
-          >You can either manually enter node information below, or drop a
-          <code>node-ident</code> file which is created during the
-          initialization process on the physical node.</span
+          >You can either manually enter node information below, or drop a <code>node-ident</code> file which is created
+          during the initialization process on the physical node.</span
         >
         <span
-          >Alternatively you can also drop the
-          <strong>identification card</strong> of an existing
-          <strong>master</strong> node. This can be found on the servers node
-          management when converting the <strong>master node</strong>.</span
+          >Alternatively you can also drop the <strong>identification card</strong> of an existing
+          <strong>master</strong> node. This can be found on the servers node management when converting the
+          <strong>master node</strong>.</span
         >
         <mat-card
           appearance="outlined"
@@ -28,16 +23,16 @@
         <app-bd-form-input
           name="name"
           label="Name"
-          [(ngModel)]="data.name"
+          [ngModel]="data.name"
+          (ngModelChange)="updateName($event)"
           required
           appIdentifier
+          appEditUniqueValueValidator
+          errorDisplay="immediate"
+          [disallowedValues]="nodeNames$ | async"
+          [appRevalidateOn]="nodeNames$"
         ></app-bd-form-input>
-        <app-bd-form-input
-          name="uri"
-          label="Node URI"
-          [(ngModel)]="data.remote.uri"
-          required
-        ></app-bd-form-input>
+        <app-bd-form-input name="uri" label="Node URI" [(ngModel)]="data.remote.uri" required></app-bd-form-input>
         <app-bd-form-input
           name="auth"
           label="Full Auth. Token"
@@ -46,8 +41,8 @@
         ></app-bd-form-input>
         <app-bd-button
           color="primary"
-          [disabled]="!canSave() || (adding$ | async)"
-          [loadingWhen$]="adding$"
+          [disabled]="!canSave() || (mappedAdd$ | async)"
+          [loadingWhen$]="mappedAdd$"
           [collapsed]="false"
           text="Save"
           icon="save"

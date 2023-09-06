@@ -5,7 +5,7 @@ import java.util.List;
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.ui.dto.HiveEntryDto;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -24,32 +24,32 @@ public interface HiveResource {
 
     @GET
     @Path("/listManifests")
-    public List<HiveEntryDto> listManifests(@ActivityScope @QueryParam("hive") String hiveParam);
+    public List<HiveEntryDto> listManifests(@Scope @QueryParam("hive") String hiveParam);
 
     @GET
     @Path("/listManifest")
-    public List<HiveEntryDto> listManifest(@ActivityScope @QueryParam("hive") String hiveParam, @QueryParam("name") String name,
+    public List<HiveEntryDto> listManifest(@Scope @QueryParam("hive") String hiveParam, @QueryParam("name") String name,
             @QueryParam("tag") String tag);
 
     @GET
     @Path("/list")
-    public List<HiveEntryDto> list(@ActivityScope @QueryParam("hive") String hiveParam, @QueryParam("id") String id);
+    public List<HiveEntryDto> list(@Scope @QueryParam("hive") String hiveParam, @QueryParam("id") String id);
 
     @GET
     @Path("/download")
-    public Response download(@ActivityScope @QueryParam("hive") String hiveParam, @QueryParam("id") String id);
+    public Response download(@Scope @QueryParam("hive") String hiveParam, @QueryParam("id") String id);
 
     @GET
     @Path("/repair-and-prune")
     @RequiredPermission(permission = Permission.ADMIN, scope = "hive")
-    public RepairAndPruneResultDto repairAndPrune(@ActivityScope @QueryParam("hive") String hive, @QueryParam("fix") boolean fix);
+    public RepairAndPruneResultDto repairAndPrune(@Scope @QueryParam("hive") String hive, @QueryParam("fix") boolean fix);
 
     @DELETE
     @Path("/delete")
     @RequiredPermission(permission = Permission.ADMIN, scope = "hive")
-    public void delete(@ActivityScope @QueryParam("hive") String hive, @QueryParam("name") String manifestName,
+    public void delete(@Scope @QueryParam("hive") String hive, @QueryParam("name") String manifestName,
             @QueryParam("tag") String manifestTag);
 
     @Path("/{hive}/logging")
-    public HiveLoggingResource getLoggingResource(@ActivityScope @PathParam("hive") String hive);
+    public HiveLoggingResource getLoggingResource(@Scope @PathParam("hive") String hive);
 }

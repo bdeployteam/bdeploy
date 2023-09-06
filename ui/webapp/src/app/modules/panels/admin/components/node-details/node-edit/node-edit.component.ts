@@ -1,18 +1,12 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import {
-  BehaviorSubject,
-  combineLatest,
-  finalize,
-  map,
-  Observable,
-  Subscription,
-} from 'rxjs';
-import { RemoteService } from 'src/app/models/gen.dtos';
+import { BehaviorSubject, Observable, Subscription, combineLatest, finalize } from 'rxjs';
+import { Actions, RemoteService } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
@@ -24,17 +18,21 @@ import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
   styleUrls: ['./node-edit.component.css'],
 })
 export class NodeEditComponent implements OnDestroy, DirtyableDialog {
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ replacing$ = new BehaviorSubject<boolean>(false);
+  private saving$ = new BehaviorSubject<boolean>(false);
+  private actions = inject(ActionsService);
+
+  protected nodeName$ = new BehaviorSubject<string>(null);
+  protected mappedSave$ = this.actions.action(
+    [Actions.EDIT_NODE, Actions.REPLACE_NODE],
+    this.saving$,
+    null,
+    null,
+    this.nodeName$
+  );
+
   /* template */ data: RemoteService;
   /* template */ orig: RemoteService;
-  /* template */ nodeName: string;
   /* template */ replace = false;
-
-  /* template */ loading$ = combineLatest([
-    this.nodesAdmin.loading$,
-    this.replacing$,
-  ]).pipe(map(([l, r]) => l || r));
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -45,23 +43,19 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
   constructor(public nodesAdmin: NodesAdminService, areas: NavAreasService) {
     this.subscription = areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([areas.panelRoute$, nodesAdmin.nodes$]).subscribe(
-        ([r, n]) => {
-          if (!r?.params?.node || !n?.length) {
-            this.nodeName = null;
-            this.data = null;
-            return;
-          }
-
-          this.replace = !!r.data.replace;
-          this.nodeName = r.params.node;
-          this.orig = cloneDeep(
-            n.find((x) => x.name === this.nodeName).status?.config?.remote
-          );
-          this.orig.authPack = ''; // clear existing pack, not relevant AT ALL.
-          this.data = cloneDeep(this.orig);
+      combineLatest([areas.panelRoute$, nodesAdmin.nodes$]).subscribe(([r, n]) => {
+        if (!r?.params?.node || !n?.length) {
+          this.nodeName$.next(null);
+          this.data = null;
+          return;
         }
-      )
+
+        this.replace = !!r.data.replace;
+        this.nodeName$.next(r.params.node);
+        this.orig = cloneDeep(n.find((x) => x.name === r.params.node).status?.config?.remote);
+        this.orig.authPack = ''; // clear existing pack, not relevant AT ALL.
+        this.data = cloneDeep(this.orig);
+      })
     );
   }
 
@@ -78,16 +72,13 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
   }
 
   doSave(): Observable<any> {
+    this.saving$.next(true);
     if (this.replace) {
-      this.replacing$.next(true);
       return this.nodesAdmin
-        .replaceNode(this.nodeName, this.data)
-        .pipe(finalize(() => this.replacing$.next(false)));
-    } else {
-      this.saving$.next(true);
-      return this.nodesAdmin
-        .editNode(this.nodeName, this.data)
+        .replaceNode(this.nodeName$.value, this.data)
         .pipe(finalize(() => this.saving$.next(false)));
+    } else {
+      return this.nodesAdmin.editNode(this.nodeName$.value, this.data).pipe(finalize(() => this.saving$.next(false)));
     }
   }
 

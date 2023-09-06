@@ -1,77 +1,51 @@
-<app-bd-dialog
-  [loadingWhen$]="loading$"
-  [resetWhen$]="detailsService.softwarePackage$"
->
-  <app-bd-dialog-toolbar
-    header="Details"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+<app-bd-dialog [loadingWhen$]="loading$" [resetWhen$]="detailsService.softwarePackage$">
+  <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
-    <div
-      class="flex flex-col gap-2.5"
-      *ngIf="detailsService.softwarePackage$ | async as software"
-    >
+    <div class="flex flex-col gap-2.5" *ngIf="detailsService.softwarePackage$ | async as software">
       <ng-container *ngIf="software?.type === 'Product'">
         <div class="grid grid-cols-[70px_auto] gap-1">
           <strong>ID:</strong>
-          <div>{{ software.product }}</div>
+          <div>{{ asProduct(software).product }}</div>
           <strong>Name:</strong>
-          <div>{{ software.name }}</div>
+          <div>{{ asProduct(software).name }}</div>
           <strong>Version:</strong>
-          <div>{{ software.key.tag }}</div>
+          <div>{{ asProduct(software).key.tag }}</div>
           <strong>Vendor:</strong>
-          <div>{{ software.vendor }}</div>
+          <div>{{ asProduct(software).vendor }}</div>
         </div>
 
-        <ng-container *ngIf="detailsService.softwarePackage$ | async as prod">
-          <app-bd-expand-button [text]="'Labels'" icon="label">
-            <app-bd-data-display
-              [records]="detailsService.labels$ | async"
-              [columns]="labelColumns"
-            >
-              <app-bd-no-data>
-                <div>This product has no labels.</div>
-              </app-bd-no-data>
-            </app-bd-data-display>
-          </app-bd-expand-button>
+        <app-bd-expand-button [text]="'Labels'" icon="label">
+          <app-bd-data-display [records]="detailsService.labels$ | async" [columns]="labelColumns">
+            <app-bd-no-data>
+              <div>This product has no labels.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
 
-          <app-bd-expand-button
-            text="Application Templates"
-            icon="bookmark_border"
-          >
-            <app-bd-data-display
-              [records]="prod.applicationTemplates"
-              [columns]="appTemplColumns"
-            >
-              <app-bd-no-data>
-                <div>This product has no application templates.</div>
-              </app-bd-no-data>
-            </app-bd-data-display>
-          </app-bd-expand-button>
+        <app-bd-expand-button text="Application Templates" icon="bookmark_border">
+          <app-bd-data-display [records]="asProduct(software).applicationTemplates" [columns]="appTemplColumns">
+            <app-bd-no-data>
+              <div>This product has no application templates.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
 
-          <app-bd-expand-button text="Instance Templates" icon="bookmarks">
-            <app-bd-data-display
-              [records]="prod.instanceTemplates"
-              [columns]="instTemplColumns"
-            >
-              <app-bd-no-data>
-                <div>This product has no instance templates.</div>
-              </app-bd-no-data>
-            </app-bd-data-display>
-          </app-bd-expand-button>
+        <app-bd-expand-button text="Instance Templates" icon="bookmarks">
+          <app-bd-data-display [records]="asProduct(software).instanceTemplates" [columns]="instTemplColumns">
+            <app-bd-no-data>
+              <div>This product has no instance templates.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
 
-          <app-bd-expand-button text="Plugins" icon="extension">
-            <app-bd-data-display
-              [records]="softwareDetailsPlugins$ | async"
-              [columns]="pluginColumns"
-            >
-              <app-bd-no-data>
-                <div>This product has no plugins.</div>
-              </app-bd-no-data>
-            </app-bd-data-display>
-          </app-bd-expand-button>
-        </ng-container>
+        <app-bd-expand-button text="Plugins" icon="extension">
+          <app-bd-data-display [records]="softwareDetailsPlugins$ | async" [columns]="pluginColumns">
+            <app-bd-no-data>
+              <div>This product has no plugins.</div>
+            </app-bd-no-data>
+          </app-bd-data-display>
+        </app-bd-expand-button>
       </ng-container>
 
       <ng-container *ngIf="software?.type === 'External Software'">
@@ -92,8 +66,8 @@
         text="Download Content"
         icon="cloud_download"
         (click)="doDownload(true)"
-        [loadingWhen$]="preparingContent$"
-        [disabled]="preparingContent$ | async"
+        [loadingWhen$]="mappedPrepC$"
+        [disabled]="mappedPrepC$ | async"
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"

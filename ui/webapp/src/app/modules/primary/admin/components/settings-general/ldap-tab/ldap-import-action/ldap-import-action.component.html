@@ -3,5 +3,7 @@
     icon="history"
     text="Import Accounts"
     [route]="['panels', 'admin', 'ldap', record.id, 'import']"
+    [disabled]="mappedImport$ | async"
+    [loadingWhen$]="mappedImport$"
   ></app-bd-panel-button>
 </div>

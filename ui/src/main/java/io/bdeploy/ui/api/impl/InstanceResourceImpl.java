@@ -46,8 +46,7 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.NoThrowAutoCloseable;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -108,7 +107,8 @@ import io.bdeploy.interfaces.variables.ParameterValueResolver;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService.EntryRequest;
@@ -166,9 +166,6 @@ public class InstanceResourceImpl implements InstanceResource {
     private AuthService auth;
 
     @Inject
-    private JerseyBroadcastingActivityReporter reporter;
-
-    @Inject
     private Minion minion;
 
     @Inject
@@ -194,6 +191,9 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Inject
     private ProductUpdateService pus;
+
+    @Inject
+    private ActionFactory af;
 
     public InstanceResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -460,7 +460,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
             throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag + ", current="
-                    + oldConfig.getManifest().getTag(), Status.CONFLICT);
+                    + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
         }
 
         MasterRootResource root = getManagingRootResource(managedServer);
@@ -476,11 +476,9 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = readInstance(instance);
         List<InstanceVersionDto> versions = listVersions(instance);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
-        try (Activity deploy = reporter.start("Deleting " + im.getConfiguration().name);
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
-            MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
-            root.getNamedMaster(group).delete(instance);
-        }
+
+        MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
+        root.getNamedMaster(group).delete(instance);
 
         syncInstance(minion, rc, group, instance);
 
@@ -493,20 +491,17 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest im = readInstance(instanceId);
         Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
         RemoteService master = mp.getControllingMaster(hive, im.getManifest());
-        try (Activity deploy = reporter.start("Deleting Ver. " + tag + " of " + im.getConfiguration().name);
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
-            MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
-            if (getDeploymentStates(instanceId).installedTags.contains(tag)) {
-                throw new WebApplicationException("Version " + tag + " is still installed, cannot delete",
-                        Status.EXPECTATION_FAILED);
-            }
 
-            root.getNamedMaster(group).deleteVersion(instanceId, tag);
+        MasterRootResource root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
+        if (getDeploymentStates(instanceId).installedTags.contains(tag)) {
+            throw new WebApplicationException("Version " + tag + " is still installed, cannot delete", Status.EXPECTATION_FAILED);
+        }
 
-            // now delete also on the central...
-            if (minion.getMode() == MinionMode.CENTRAL) {
-                InstanceManifest.delete(hive, key);
-            }
+        root.getNamedMaster(group).deleteVersion(instanceId, tag);
+
+        // now delete also on the central...
+        if (minion.getMode() == MinionMode.CENTRAL) {
+            InstanceManifest.delete(hive, key);
         }
 
         syncInstance(minion, rc, group, instanceId);
@@ -611,28 +606,24 @@ public class InstanceResourceImpl implements InstanceResource {
     public void install(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter
-                .start("Installing Ver. " + instance.getManifest().getTag() + " of " + instance.getConfiguration().name);
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            // 1. push config to remote (small'ish).
-            hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
 
-            // 2. push product to remote in case it is not yet there, and we have it.
-            if (Boolean.TRUE
-                    .equals(hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product)))) {
-                TransferStatistics stats = hive.execute(
-                        new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
+        // 1. push config to remote (small'ish).
+        hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
 
-                log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
-                        svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects,
-                        FormatHelper.formatFileSize(stats.transferSize), FormatHelper.formatDuration(stats.duration),
-                        FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
-            }
+        // 2. push product to remote in case it is not yet there, and we have it.
+        if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product)))) {
+            TransferStatistics stats = hive.execute(
+                    new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
-            // 3: tell master to deploy
-            MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-            master.getNamedMaster(group).install(instance.getManifest());
+            log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
+                    svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects, FormatHelper.formatFileSize(stats.transferSize),
+                    FormatHelper.formatDuration(stats.duration),
+                    FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
         }
+
+        // 3: tell master to deploy
+        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        master.getNamedMaster(group).install(instance.getManifest());
 
         syncInstance(minion, rc, group, instanceId);
         changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
@@ -643,29 +634,27 @@ public class InstanceResourceImpl implements InstanceResource {
     public void uninstall(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Uninstalling Ver. " + tag + " of " + instance.getConfiguration().name);
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            // 1: check that version is not active
-            String activeTag = getDeploymentStates(instanceId).activeTag;
-            if (tag.equals(activeTag)) {
-                throw new WebApplicationException("Cannot uninstall active version", Status.EXPECTATION_FAILED);
-            }
 
-            // 2: check for running or scheduled applications
-            MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-            MasterNamedResource namedMaster = master.getNamedMaster(group);
-            InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
-            Map<String, ProcessStatusDto> appStatus = instanceStatus.getAppStatus();
-            Optional<ProcessStatusDto> runningOrScheduledInVersion = appStatus.values().stream()
-                    .filter(p -> tag.equals(p.instanceTag) && p.processState.isRunningOrScheduled()).findFirst();
-            if (runningOrScheduledInVersion.isPresent()) {
-                throw new WebApplicationException("Cannot uninstall instance version " + instance.getConfiguration().name + ":"
-                        + tag + " because it has running or scheduled applications", Status.EXPECTATION_FAILED);
-            }
-
-            // 3: tell master to undeploy
-            master.getNamedMaster(group).uninstall(instance.getManifest());
+        // 1: check that version is not active
+        String activeTag = getDeploymentStates(instanceId).activeTag;
+        if (tag.equals(activeTag)) {
+            throw new WebApplicationException("Cannot uninstall active version", Status.EXPECTATION_FAILED);
         }
+
+        // 2: check for running or scheduled applications
+        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        MasterNamedResource namedMaster = master.getNamedMaster(group);
+        InstanceStatusDto instanceStatus = namedMaster.getStatus(instanceId);
+        Map<String, ProcessStatusDto> appStatus = instanceStatus.getAppStatus();
+        Optional<ProcessStatusDto> runningOrScheduledInVersion = appStatus.values().stream()
+                .filter(p -> tag.equals(p.instanceTag) && p.processState.isRunningOrScheduled()).findFirst();
+        if (runningOrScheduledInVersion.isPresent()) {
+            throw new WebApplicationException("Cannot uninstall instance version " + instance.getConfiguration().name + ":" + tag
+                    + " because it has running or scheduled applications", Status.EXPECTATION_FAILED);
+        }
+
+        // 3: tell master to undeploy
+        master.getNamedMaster(group).uninstall(instance.getManifest());
 
         syncInstance(minion, rc, group, instanceId);
         changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
@@ -676,11 +665,9 @@ public class InstanceResourceImpl implements InstanceResource {
     public void activate(String instanceId, String tag) {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
-        try (Activity deploy = reporter.start("Activating Ver. " + tag + " of " + instance.getConfiguration().name);
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-            MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-            master.getNamedMaster(group).activate(instance.getManifest());
-        }
+
+        MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+        master.getNamedMaster(group).activate(instance.getManifest());
 
         syncInstance(minion, rc, group, instanceId);
         changes.change(ObjectChangeType.INSTANCE, instance.getManifest(),
@@ -689,22 +676,25 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public InstanceUpdateDto updateProductVersion(String instanceId, String productTag, InstanceUpdateDto state) {
-        ProductManifest current = null;
-        try {
-            current = ProductManifest.of(hive, state.config.config.product);
-        } catch (Exception e) {
-            log.info("Missing source product on product update: {}", state.config.config.product);
+        try (ActionHandle h = af.run(Actions.UPDATE_PRODUCT_VERSION, group, instanceId)) {
+            ProductManifest current = null;
+            try {
+                current = ProductManifest.of(hive, state.config.config.product);
+            } catch (Exception e) {
+                log.info("Missing source product on product update: {}", state.config.config.product);
+            }
+
+            ProductManifest pm = current;
+            List<ApplicationManifest> currentApps = current == null ? null
+                    : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm)).toList();
+
+            ProductManifest target = ProductManifest.of(hive,
+                    new Manifest.Key(state.config.config.product.getName(), productTag));
+            List<ApplicationManifest> targetApps = target.getApplications().stream()
+                    .map(k -> ApplicationManifest.of(hive, k, target)).toList();
+
+            return pus.update(state, target, current, targetApps, currentApps);
         }
-
-        ProductManifest pm = current;
-        List<ApplicationManifest> currentApps = current == null ? null
-                : current.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, pm)).toList();
-
-        ProductManifest target = ProductManifest.of(hive, new Manifest.Key(state.config.config.product.getName(), productTag));
-        List<ApplicationManifest> targetApps = target.getApplications().stream().map(k -> ApplicationManifest.of(hive, k, target))
-                .toList();
-
-        return pus.update(state, target, current, targetApps, currentApps);
     }
 
     @Override
@@ -767,68 +757,70 @@ public class InstanceResourceImpl implements InstanceResource {
 
     @Override
     public String createClientInstaller(String instanceId, String applicationId) {
-        InstanceStateRecord state = getDeploymentStates(instanceId);
-        InstanceManifest im = InstanceManifest.load(hive, instanceId, state.activeTag);
-        ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
+        try (ActionHandle h = af.run(Actions.DOWNLOAD_CLIENT_INSTALLER, group, instanceId, applicationId)) {
+            InstanceStateRecord state = getDeploymentStates(instanceId);
+            InstanceManifest im = InstanceManifest.load(hive, instanceId, state.activeTag);
+            ApplicationConfiguration appConfig = im.getApplicationConfiguration(hive, applicationId);
 
-        // Request a new file where we can store the installer
-        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        String token = ds.createNewToken();
-        Path installerPath = ds.getStoragePath(token);
+            // Request a new file where we can store the installer
+            DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+            String token = ds.createNewToken();
+            Path installerPath = ds.getStoragePath(token);
 
-        // Determine the target OS, and build the according installer.
-        ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
-        OperatingSystem applicationOs = applicationKey.getOperatingSystem();
+            // Determine the target OS, and build the according installer.
+            ScopedManifestKey applicationKey = ScopedManifestKey.parse(appConfig.application);
+            OperatingSystem applicationOs = applicationKey.getOperatingSystem();
 
-        // Determine latest version of launcher
-        SoftwareUpdateResourceImpl swr = rc.initResource(new SoftwareUpdateResourceImpl());
-        ScopedManifestKey launcherKey = swr.getNewestLauncher(applicationOs);
-        if (launcherKey == null) {
-            throw new WebApplicationException(
-                    "Cannot find launcher for target OS. Ensure there is one available in the System Software.",
-                    Status.NOT_FOUND);
+            // Determine latest version of launcher
+            SoftwareUpdateResourceImpl swr = rc.initResource(new SoftwareUpdateResourceImpl());
+            ScopedManifestKey launcherKey = swr.getNewestLauncher(applicationOs);
+            if (launcherKey == null) {
+                throw new WebApplicationException(
+                        "Cannot find launcher for target OS. Ensure there is one available in the System Software.",
+                        Status.NOT_FOUND);
+            }
+
+            // The URI for the installer will use the URI from the target server
+            // We intentionally do not optimize the installer to use the URI from the
+            // central server
+            // so that installers can be shared and used regardless from where they have
+            // been downloaded from
+            ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().id, appConfig.id);
+            URI baseUri = clickAndStart.host.getUri();
+
+            UriBuilder launcherUri = UriBuilder.fromUri(baseUri);
+            launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
+            launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
+
+            UriBuilder iconUri = UriBuilder.fromUri(baseUri);
+            iconUri.path("/group/{group}/instance/");
+            iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
+
+            UriBuilder splashUrl = UriBuilder.fromUri(baseUri);
+            splashUrl.path("/group/{group}/instance/");
+            splashUrl.path(InstanceResource.PATH_DOWNLOAD_APP_SPLASH);
+
+            URI launcherLocation = launcherUri.build(new Object[] { applicationOs.name().toLowerCase() }, false);
+            URI iconLocation = iconUri.build(group, im.getConfiguration().id, appConfig.id);
+            URI splashLocation = splashUrl.build(group, im.getConfiguration().id, appConfig.id);
+
+            String fileName = "%1$s (%2$s - %3$s) - Installer";
+            if (applicationOs == OperatingSystem.WINDOWS) {
+                fileName = fileName + ".exe";
+                createWindowsInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation,
+                        splashLocation);
+            } else if (applicationOs == OperatingSystem.LINUX || applicationOs == OperatingSystem.MACOS) {
+                fileName = fileName + ".run";
+                createLinuxInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation);
+            } else {
+                throw new WebApplicationException("Unsupported OS for installer: " + applicationOs);
+            }
+            fileName = String.format(fileName, appConfig.name, group, im.getConfiguration().name);
+
+            // Return the name of the token for downloading
+            ds.registerForDownload(token, fileName);
+            return token;
         }
-
-        // The URI for the installer will use the URI from the target server
-        // We intentionally do not optimize the installer to use the URI from the
-        // central server
-        // so that installers can be shared and used regardless from where they have
-        // been downloaded from
-        ClickAndStartDescriptor clickAndStart = getClickAndStartDescriptor(im.getConfiguration().id, appConfig.id);
-        URI baseUri = clickAndStart.host.getUri();
-
-        UriBuilder launcherUri = UriBuilder.fromUri(baseUri);
-        launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
-        launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
-
-        UriBuilder iconUri = UriBuilder.fromUri(baseUri);
-        iconUri.path("/group/{group}/instance/");
-        iconUri.path(InstanceResource.PATH_DOWNLOAD_APP_ICON);
-
-        UriBuilder splashUrl = UriBuilder.fromUri(baseUri);
-        splashUrl.path("/group/{group}/instance/");
-        splashUrl.path(InstanceResource.PATH_DOWNLOAD_APP_SPLASH);
-
-        URI launcherLocation = launcherUri.build(new Object[] { applicationOs.name().toLowerCase() }, false);
-        URI iconLocation = iconUri.build(group, im.getConfiguration().id, appConfig.id);
-        URI splashLocation = splashUrl.build(group, im.getConfiguration().id, appConfig.id);
-
-        String fileName = "%1$s (%2$s - %3$s) - Installer";
-        if (applicationOs == OperatingSystem.WINDOWS) {
-            fileName = fileName + ".exe";
-            createWindowsInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation,
-                    splashLocation);
-        } else if (applicationOs == OperatingSystem.LINUX || applicationOs == OperatingSystem.MACOS) {
-            fileName = fileName + ".run";
-            createLinuxInstaller(im, appConfig, clickAndStart, installerPath, launcherKey, launcherLocation, iconLocation);
-        } else {
-            throw new WebApplicationException("Unsupported OS for installer: " + applicationOs);
-        }
-        fileName = String.format(fileName, appConfig.name, group, im.getConfiguration().name);
-
-        // Return the name of the token for downloading
-        ds.registerForDownload(token, fileName);
-        return token;
     }
 
     private void createLinuxInstaller(InstanceManifest im, ApplicationConfiguration appConfig,

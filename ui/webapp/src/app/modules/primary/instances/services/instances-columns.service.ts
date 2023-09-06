@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
-import {
-  BdDataColumn,
-  BdDataColumnDisplay,
-  BdDataColumnTypeHint,
-} from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceDto, ManifestKey, MinionMode } from 'src/app/models/gen.dtos';
+import { BdIdentifierCellComponent } from 'src/app/modules/core/components/bd-identifier-cell/bd-identifier-cell.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { ProductsService } from '../../products/services/products.service';
@@ -22,7 +19,8 @@ import { InstancesService } from './instances.service';
 export class InstancesColumnsService {
   instanceTypeColumn: BdDataColumn<InstanceDto> = {
     id: 'type',
-    name: 'Purpose',
+    name: 'Purp.',
+    description: 'Purpose',
     hint: BdDataColumnTypeHint.TYPE,
     data: (r) => r.instanceConfiguration.purpose,
     width: '20px',
@@ -43,8 +41,9 @@ export class InstancesColumnsService {
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.instanceConfiguration.id,
-    width: '110px',
-    showWhen: '(min-width: 2100px)',
+    width: '70px',
+    showWhen: '(min-width: 1900px)',
+    component: BdIdentifierCellComponent,
   };
 
   instanceDescriptionColumn: BdDataColumn<InstanceDto> = {
@@ -70,9 +69,7 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
     data: (r) =>
       this.products.products$.value.find(
-        (p) =>
-          p.key.name === r.instanceConfiguration.product.name &&
-          p.key.tag === r.instanceConfiguration.product.tag
+        (p) => p.key.name === r.instanceConfiguration.product.name && p.key.tag === r.instanceConfiguration.product.tag
       )?.name || r.instanceConfiguration.product.name,
     icon: () => 'apps',
     showWhen: '(min-width: 600px)',
@@ -93,13 +90,14 @@ export class InstancesColumnsService {
     hint: BdDataColumnTypeHint.DETAILS,
     data: (r) => (r.activeProduct ? r.activeProduct.tag : null),
     icon: () => 'security_update_good',
-    showWhen: '(min-width: 750px)',
+    showWhen: '(min-width: 1000px)',
     sortCard: true,
   };
 
   instanceBannerColumn: BdDataColumn<InstanceDto> = {
     id: 'bannerHint',
-    name: 'Banner',
+    name: 'Ban.',
+    description: 'Banner',
     data: (r) => r.banner?.text,
     component: InstanceBannerHintComponent,
     width: '24px',
@@ -107,16 +105,13 @@ export class InstancesColumnsService {
 
   instanceServerColumn: BdDataColumn<InstanceDto> = {
     id: 'managedServer',
-    name: 'Server',
+    name: 'Serv.',
+    description: 'Managed Server',
     hint: BdDataColumnTypeHint.DETAILS,
-    data: (r) =>
-      r.managedServer
-        ? `${r.managedServer.hostName} - ${r.managedServer.description}`
-        : null,
+    data: (r) => (r.managedServer ? `${r.managedServer.hostName} - ${r.managedServer.description}` : null),
     icon: () => 'dns',
     component: InstanceManagedServerComponent,
-    width: '64px',
-    showWhen: '(min-width: 2000px)',
+    width: '24px',
   };
 
   instanceSyncColumn: BdDataColumn<InstanceDto> = {
@@ -146,9 +141,8 @@ export class InstancesColumnsService {
       return 'None';
     }
     return (
-      this.systems.systems$.value?.find(
-        (s) => s.key?.name === system?.name && s.key?.tag === system?.tag
-      )?.config?.name || system?.name?.substring('meta/system/'.length)
+      this.systems.systems$.value?.find((s) => s.key?.name === system?.name && s.key?.tag === system?.tag)?.config
+        ?.name || system?.name?.substring('meta/system/'.length)
     );
   }
 }

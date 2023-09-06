@@ -1,12 +1,8 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import {
-  MinionMode,
-  ProductDto,
-  ProductTransferDto,
-} from 'src/app/models/gen.dtos';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest, finalize, map, of } from 'rxjs';
+import { Actions, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProductsColumnsService } from 'src/app/modules/primary/products/services/products-columns.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
@@ -21,7 +17,10 @@ export class ManagedTransferComponent implements OnDestroy {
   /* template */ records$ = new BehaviorSubject<ProductDto[]>(null);
   /* template */ server$ = new BehaviorSubject<string>(null);
   /* template */ typeText$ = new BehaviorSubject<string>(null);
-  /* template */ selected: ProductDto[] = [];
+  /* template */ selected$ = new BehaviorSubject<ProductDto[]>([]);
+
+  private actions = inject(ActionsService);
+  protected mappedTransfer$;
 
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
@@ -39,23 +38,23 @@ export class ManagedTransferComponent implements OnDestroy {
       this.products.products$,
       this.servers.servers$,
     ]).subscribe(([r, p, s]) => {
-      if (
-        !r?.params ||
-        !r.params['server'] ||
-        !r.params['target'] ||
-        !p ||
-        !s?.length
-      ) {
+      if (!r?.params || !r.params['server'] || !r.params['target'] || !p || !s?.length) {
         return;
       }
 
       const server = r.params['server'];
       const target = r.params['target'];
 
-      this.server$.next(server);
-      this.typeText$.next(
-        target === MinionMode.CENTRAL ? 'Download from' : 'Upload to'
+      this.mappedTransfer$ = this.actions.action(
+        target === MinionMode.CENTRAL ? [Actions.TRANSFER_PRODUCT_CENTRAL] : [Actions.TRANSFER_PRODUCT_MANAGED],
+        of(false),
+        null,
+        null,
+        this.selected$.pipe(map((p) => p.map((x) => `${x.key.name}:${x.key.tag}`)))
       );
+
+      this.server$.next(server);
+      this.typeText$.next(target === MinionMode.CENTRAL ? 'Download from' : 'Upload to');
 
       if (target === MinionMode.CENTRAL) {
         this.transfer = {
@@ -81,23 +80,11 @@ export class ManagedTransferComponent implements OnDestroy {
         .subscribe((x) => {
           if (target === MinionMode.CENTRAL) {
             this.records$.next(
-              x.filter(
-                (rp) =>
-                  !p.find(
-                    (lp) =>
-                      lp.key.name === rp.key.name && lp.key.tag === rp.key.tag
-                  )
-              )
+              x.filter((rp) => !p.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag))
             );
           } else {
             this.records$.next(
-              p.filter(
-                (rp) =>
-                  !x.find(
-                    (lp) =>
-                      lp.key.name === rp.key.name && lp.key.tag === rp.key.tag
-                  )
-              )
+              p.filter((rp) => !x.find((lp) => lp.key.name === rp.key.name && lp.key.tag === rp.key.tag))
             );
           }
         });
@@ -109,7 +96,7 @@ export class ManagedTransferComponent implements OnDestroy {
   }
 
   /* template */ doTransfer(): void {
-    this.transfer.versionsToTransfer = this.selected;
+    this.transfer.versionsToTransfer = this.selected$.value;
     this.servers.transferProducts(this.transfer).subscribe(() => {
       this.tb.closePanel();
     });

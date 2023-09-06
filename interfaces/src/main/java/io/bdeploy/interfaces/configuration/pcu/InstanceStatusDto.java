@@ -66,7 +66,7 @@ public class InstanceStatusDto {
      * @param nodeStatus
      *            all running applications
      */
-    public void add(String minion, InstanceNodeStatusDto nodeStatus) {
+    public synchronized void add(String minion, InstanceNodeStatusDto nodeStatus) {
         node2Applications.put(minion, nodeStatus);
     }
 

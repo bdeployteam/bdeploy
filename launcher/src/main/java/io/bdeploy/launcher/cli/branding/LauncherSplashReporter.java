@@ -9,8 +9,6 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongSupplier;
 
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.NoThrowAutoCloseable;
-import io.bdeploy.common.security.RemoteService;
 
 public class LauncherSplashReporter implements ActivityReporter {
 
@@ -56,11 +54,6 @@ public class LauncherSplashReporter implements ActivityReporter {
     @Override
     public Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
         return new SplashActivity(activity, maxValue, currentValue);
-    }
-
-    @Override
-    public NoThrowAutoCloseable proxyActivities(RemoteService service) {
-        throw new UnsupportedOperationException();
     }
 
     private final class SplashActivity implements Activity {

@@ -85,6 +85,13 @@ public class BHiveRegistry implements AutoCloseable {
     }
 
     /**
+     * @return the {@link ActivityReporter} to be used for {@link BHive}s.
+     */
+    public ActivityReporter getActivityReporter() {
+        return reporter;
+    }
+
+    /**
      * Manually register an additional (non-discovered) {@link BHive} to be available in the registry.
      * <p>
      * Note that this {@link BHive} will be {@link BHive#close() closed} along with all other {@link BHive} when the registry is

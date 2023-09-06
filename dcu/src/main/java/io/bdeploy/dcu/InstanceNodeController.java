@@ -27,7 +27,6 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;

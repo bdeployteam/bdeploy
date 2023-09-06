@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$" [hideContentWhenLoading]="false">
-  <app-bd-dialog-toolbar
-    [panel]="true"
-    header="Process {{ processConfig?.name }}"
-  >
+  <app-bd-dialog-toolbar [panel]="true" header="Process {{ processConfig?.name }}">
     <div class="flex-auto"></div>
     <app-process-status-icon
       [record]="processConfig"
@@ -30,10 +27,8 @@
       <div class="text-justify">
         The process is currently running from an instance version (<strong
           >{{ processDetail?.status.instanceTag }}</strong
-        >) which is not the active version (<strong
-          >{{ (instances.active$ | async)?.instance?.tag }}</strong
-        >). Stop the process and start it again to launch it from the active
-        version instead.
+        >) which is not the active version (<strong>{{ (instances.active$ | async)?.instance?.tag }}</strong>). Stop the
+        process and start it again to launch it from the active version instead.
       </div>
     </app-bd-notification-card>
     <app-bd-notification-card
@@ -44,18 +39,14 @@
       header="Server Not Synchronized"
     >
       <div class="text-justify">
-        The managed server hosting this instance is not synchronized, runtime
-        details are unavailable. Please synchronize the server to see additional
-        details.
+        The managed server hosting this instance is not synchronized, runtime details are unavailable. Please
+        synchronize the server to see additional details.
       </div>
     </app-bd-notification-card>
-    <div
-      *ngIf="processConfig"
-      class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center"
-    >
+    <div *ngIf="processConfig" class="p-5 grid grid-cols-[24px_90px_auto] gap-2.5 items-center">
       <mat-icon class="local-id-labels">fingerprint</mat-icon>
       <div class="local-id-labels">Process ID:</div>
-      <div class="local-id-labels">{{ processConfig?.id }}</div>
+      <div class="local-id-labels"><app-bd-identifier [id]="processConfig?.id"></app-bd-identifier></div>
 
       <mat-icon>flight_takeoff</mat-icon>
       <div>Start Type:</div>
@@ -63,15 +54,11 @@
 
       <mat-icon>favorite_outline</mat-icon>
       <div>Keep Alive:</div>
-      <div>
-        {{ processConfig?.processControl.keepAlive ? 'Enabled' : 'Disabled' }}
-      </div>
+      <div>{{ processConfig?.processControl.keepAlive ? 'Enabled' : 'Disabled' }}</div>
 
       <ng-container *ngIf="processDetail">
         <ng-container *ngIf="!isRunning && !isCrashedWaiting">
-          <ng-container
-            *ngIf="processDetail?.status.exitCode || processDetail?.stopTime > 0"
-          >
+          <ng-container *ngIf="processDetail?.status.exitCode || processDetail?.stopTime > 0">
             <mat-icon>exit_to_app</mat-icon>
             <div>Exit Code:</div>
             <div>{{ processDetail?.status.exitCode }}</div>
@@ -80,9 +67,7 @@
           <ng-container *ngIf="processDetail?.stopTime > 0">
             <mat-icon>timer</mat-icon>
             <div>Stopped At:</div>
-            <div *ngIf="!!processDetail?.stopTime">
-              {{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}
-            </div>
+            <div *ngIf="!!processDetail?.stopTime">{{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
             <div *ngIf="!processDetail?.stopTime">-</div>
           </ng-container>
         </ng-container>
@@ -93,16 +78,12 @@
 
           <mat-icon>timer</mat-icon>
           <div>Started At:</div>
-          <div>
-            {{ processDetail?.handle.startTime | date: 'dd.MM.yyyy HH:mm' }}
-          </div>
+          <div>{{ processDetail?.handle.startTime | date: 'dd.MM.yyyy HH:mm' }}</div>
         </ng-container>
         <ng-container *ngIf="isCrashedWaiting">
           <mat-icon>report</mat-icon>
           <div>Stopped At:</div>
-          <div *ngIf="!!processDetail?.stopTime">
-            {{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}
-          </div>
+          <div *ngIf="!!processDetail?.stopTime">{{ processDetail?.stopTime | date: 'dd.MM.yyyy HH:mm' }}</div>
           <div *ngIf="!processDetail?.stopTime">-</div>
 
           <mat-progress-spinner
@@ -116,10 +97,7 @@
       </ng-container>
     </div>
     <mat-divider></mat-divider>
-    <div
-      *ngIf="!processDetail && !(details.loading$ | async)"
-      class="bd-hint-text mt-2.5"
-    >
+    <div *ngIf="!processDetail && !(details.loading$ | async)" class="bd-hint-text mt-2.5">
       No process details available.
     </div>
     <ng-container *ngIf="processDetail">
@@ -128,57 +106,36 @@
           class="local-control-button"
           [collapsed]="false"
           color="primary"
-          [disabled]="!(!(auth.isCurrentScopeWrite$ | async) || (outdated$ | async) || (performing$ | async) ? false : !isRunning)"
+          [disabled]="startDisabled$ | async"
           (click)="start()"
           matTooltip="Start Application"
         >
-          <mat-icon
-            class="material-symbols-filled flex-auto"
-            *ngIf="!(starting$ | async)"
-            >play_arrow</mat-icon
-          >
-          <div
-            class="flex-auto flex justify-center items-center"
-            *ngIf="starting$ | async"
-          >
+          <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedStart$ | async)">play_arrow</mat-icon>
+          <div class="flex-auto flex justify-center items-center" *ngIf="mappedStart$ | async">
             <mat-spinner [diameter]="24"></mat-spinner>
           </div>
         </app-bd-button>
         <app-bd-button
           class="local-control-button"
           [collapsed]="false"
-          [disabled]="!(!(auth.isCurrentScopeWrite$ | async) || (performing$ | async) ? false : (isRunning || isCrashedWaiting || isStartPlanned) && !isStopping)"
+          [disabled]="stopDisabled$ | async"
           (click)="stop()"
           matTooltip="Stop Application"
         >
-          <mat-icon
-            class="material-symbols-filled flex-auto"
-            *ngIf="!(stopping$ | async)"
-            >stop</mat-icon
-          >
-          <div
-            class="flex-auto flex justify-center items-center"
-            *ngIf="stopping$ | async"
-          >
+          <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedStop$ | async)">stop</mat-icon>
+          <div class="flex-auto flex justify-center items-center" *ngIf="mappedStop$ | async">
             <mat-spinner [diameter]="24"></mat-spinner>
           </div>
         </app-bd-button>
         <app-bd-button
           class="local-control-button"
           [collapsed]="false"
-          [disabled]="!(!(auth.isCurrentScopeWrite$ | async) || (outdated$ | async) || (performing$ | async) ? false : isRunning || isCrashedWaiting)"
+          [disabled]="restartDisabled$ | async"
           (click)="restart()"
           matTooltip="Restart Application"
         >
-          <mat-icon
-            class="material-symbols-filled flex-auto"
-            *ngIf="!(restarting$ | async)"
-            >replay</mat-icon
-          >
-          <div
-            class="flex-auto flex justify-center items-center"
-            *ngIf="restarting$ | async"
-          >
+          <mat-icon class="material-symbols-filled flex-auto" *ngIf="!(mappedRestart$ | async)">replay</mat-icon>
+          <div class="flex-auto flex justify-center items-center" *ngIf="mappedRestart$ | async">
             <mat-spinner [diameter]="24"></mat-spinner>
           </div>
         </app-bd-button>
@@ -190,15 +147,11 @@
           text="Process Probes"
           icon="network_check"
         >
-          <ng-container
-            *ngFor="let probe of processDetail?.lastProbes; let isLast = last; trackBy: trackProbe"
-          >
+          <ng-container *ngFor="let probe of processDetail?.lastProbes; let isLast = last; trackBy: trackProbe">
             <app-probe-status [probe]="probe"></app-probe-status>
             <mat-divider *ngIf="!isLast"></mat-divider>
           </ng-container>
-          <app-bd-no-data *ngIf="!processDetail?.lastProbes?.length">
-            No Probe Information.
-          </app-bd-no-data>
+          <app-bd-no-data *ngIf="!processDetail?.lastProbes?.length"> No Probe Information. </app-bd-no-data>
         </app-bd-expand-button>
         <app-bd-panel-button
           [collapsed]="false"
@@ -237,15 +190,8 @@
         </ng-container>
         <ng-container *ngIf="pinnedParameters?.length">
           <mat-divider></mat-divider>
-          <app-bd-expand-button
-            text="Pinned Parameters"
-            icon="push_pin"
-            [expanded]="true"
-          >
-            <app-bd-data-table
-              [records]="pinnedParameters"
-              [columns]="pinnedColumns"
-            ></app-bd-data-table>
+          <app-bd-expand-button text="Pinned Parameters" icon="push_pin" [expanded]="true">
+            <app-bd-data-table [records]="pinnedParameters" [columns]="pinnedColumns"></app-bd-data-table>
           </app-bd-expand-button>
         </ng-container>
       </div>

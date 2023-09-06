@@ -15,7 +15,6 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 import jakarta.ws.rs.Produces;
@@ -25,7 +24,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
-import jakarta.ws.rs.ext.Providers;
 
 /**
  * Allows serializing existing files by returning/accepting {@link Path}
@@ -46,9 +44,6 @@ public class JerseyPathWriter implements MessageBodyWriter<Path> {
 
     @Context
     private ResourceInfo info;
-
-    @Context
-    private Providers providers;
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -73,8 +68,7 @@ public class JerseyPathWriter implements MessageBodyWriter<Path> {
         OpenOption[] delOpt = delete ? new OpenOption[] { StandardOpenOption.DELETE_ON_CLOSE } : new OpenOption[0];
 
         try (InputStream in = Files.newInputStream(t, delOpt)) {
-            JerseyStreamingHelper.streamWithProgress(providers.getContextResolver(ActivityReporter.class, MediaType.WILDCARD_TYPE)
-                    .getContext(ActivityReporter.class), StreamDirection.WRITE, in, entityStream, size);
+            JerseyStreamingHelper.streamWithProgress(StreamDirection.WRITE, in, entityStream, size);
         }
 
         if (delete) {

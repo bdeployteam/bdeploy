@@ -13,8 +13,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -23,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.cli.data.DataFormat;
 import io.bdeploy.common.cli.data.DataTable;
-import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
 
 /**
@@ -54,11 +51,6 @@ public interface ActivityReporter {
      * updates on the values.
      */
     public Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue);
-
-    /**
-     * Proxy remote activities to this {@link ActivityReporter} implementation if possible.
-     */
-    public NoThrowAutoCloseable proxyActivities(RemoteService service);
 
     /**
      * An Activity allows updating progress and signaling when the {@link Activity}
@@ -129,7 +121,6 @@ public interface ActivityReporter {
         private ScheduledExecutorService updater;
         private ScheduledFuture<?> scheduled;
         private boolean verbose;
-        private BiFunction<RemoteService, Consumer<List<ActivitySnapshot>>, NoThrowAutoCloseable> proxyConnector;
 
         private final Deque<AsyncActivity> activities = new ArrayDeque<>();
         private final List<AsyncActivity> allActivities = new ArrayList<>();
@@ -335,46 +326,6 @@ public interface ActivityReporter {
 
         }
 
-        public void setProxyConnector(
-                BiFunction<RemoteService, Consumer<List<ActivitySnapshot>>, NoThrowAutoCloseable> proxyConnector) {
-            this.proxyConnector = proxyConnector;
-        }
-
-        @Override
-        public NoThrowAutoCloseable proxyActivities(RemoteService service) {
-            return new StreamRemoteActivityProxy(service);
-        }
-
-        private class StreamRemoteActivityProxy implements NoThrowAutoCloseable {
-
-            private NoThrowAutoCloseable source;
-
-            public StreamRemoteActivityProxy(RemoteService svc) {
-                // getKeyStore is only set for real remotes. local hives will have no key store.
-                if (svc != null && svc.getKeyStore() != null && proxyConnector != null) {
-                    source = proxyConnector.apply(svc, this::onMessage);
-                }
-            }
-
-            private void onMessage(List<ActivitySnapshot> message) {
-                try {
-                    for (ActivitySnapshot act : message) {
-                        output.println("SRV: " + act);
-                    }
-                } catch (Exception e) {
-                    output.println("Cannot read server activities:");
-                    e.printStackTrace(output);
-                }
-            }
-
-            @Override
-            public void close() {
-                if (source != null) {
-                    source.close();
-                }
-            }
-
-        }
     }
 
     /**
@@ -427,46 +378,6 @@ public interface ActivityReporter {
                 return false;
             }
 
-        }
-
-        @Override
-        public NoThrowAutoCloseable proxyActivities(RemoteService service) {
-            return () -> {
-            };
-        }
-
-    }
-
-    /**
-     * Delegator {@link ActivityReporter} which can change destination lazily once a proper instance
-     * is available (after server startup, ...).
-     */
-    public class Delegating implements ActivityReporter {
-
-        private ActivityReporter delegate = new ActivityReporter.Null();
-
-        public void setDelegate(ActivityReporter delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public Activity start(String activity) {
-            return delegate.start(activity);
-        }
-
-        @Override
-        public Activity start(String activity, long maxWork) {
-            return delegate.start(activity, maxWork);
-        }
-
-        @Override
-        public Activity start(String activity, LongSupplier maxValue, LongSupplier currentValue) {
-            return delegate.start(activity, maxValue, currentValue);
-        }
-
-        @Override
-        public NoThrowAutoCloseable proxyActivities(RemoteService service) {
-            return delegate.proxyActivities(service);
         }
 
     }

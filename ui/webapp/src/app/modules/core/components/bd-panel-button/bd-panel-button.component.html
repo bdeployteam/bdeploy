@@ -14,6 +14,7 @@
   [routerLink]="['', { outlets: { panel: generatedRoute$ | async } }]"
   routerLinkActive
   queryParamsHandling="preserve"
+  [loadingWhen$]="loadingWhen$"
 >
   <ng-content></ng-content>
 </app-bd-button>

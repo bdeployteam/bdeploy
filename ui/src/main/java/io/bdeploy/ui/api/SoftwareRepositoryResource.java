@@ -11,7 +11,7 @@ import io.bdeploy.interfaces.UserGroupPermissionUpdateDto;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.UserPermissionUpdateDto;
 import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfiguration;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -36,44 +36,44 @@ public interface SoftwareRepositoryResource {
 
     @GET
     @Path("/{repo}")
-    public SoftwareRepositoryConfiguration read(@ActivityScope @PathParam("repo") String repo);
+    public SoftwareRepositoryConfiguration read(@Scope @PathParam("repo") String repo);
 
     @POST
     @Path("/{repo}")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void update(@ActivityScope @PathParam("repo") String repo, SoftwareRepositoryConfiguration config);
+    public void update(@Scope @PathParam("repo") String repo, SoftwareRepositoryConfiguration config);
 
     @DELETE
     @Path("/{repo}")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void delete(@ActivityScope @PathParam("repo") String repo);
+    public void delete(@Scope @PathParam("repo") String repo);
 
     @Path("/{softwareRepository}/content")
-    public SoftwareResource getSoftwareResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);
+    public SoftwareResource getSoftwareResource(@Scope @PathParam("softwareRepository") String softwareRepository);
 
     @Path("/{softwareRepository}/product")
     @RequiredPermissionScope(scope = "softwareRepository")
-    public ProductResource getProductResource(@ActivityScope @PathParam("softwareRepository") String softwareRepository);
+    public ProductResource getProductResource(@Scope @PathParam("softwareRepository") String softwareRepository);
 
     @GET
     @Path("/{repo}/users")
     @RequiredPermission(permission = Permission.ADMIN)
-    public SortedSet<UserInfo> getAllUser(@ActivityScope @PathParam("repo") String repo);
+    public SortedSet<UserInfo> getAllUser(@Scope @PathParam("repo") String repo);
 
     @GET
     @Path("/{repo}/user-groups")
     @RequiredPermission(permission = Permission.ADMIN)
-    public SortedSet<UserGroupInfo> getUserGroups(@ActivityScope @PathParam("repo") String repo);
+    public SortedSet<UserGroupInfo> getUserGroups(@Scope @PathParam("repo") String repo);
 
     @POST
     @Path("/{repo}/user-permissions")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void updateUserPermissions(@ActivityScope @PathParam("repo") String repo, UserPermissionUpdateDto[] permissions);
+    public void updateUserPermissions(@Scope @PathParam("repo") String repo, UserPermissionUpdateDto[] permissions);
 
     @POST
     @Path("/{repo}/user-group-permissions")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void updateUserGroupPermissions(@ActivityScope @PathParam("repo") String repo,
+    public void updateUserGroupPermissions(@Scope @PathParam("repo") String repo,
             UserGroupPermissionUpdateDto[] permissions);
 
 }

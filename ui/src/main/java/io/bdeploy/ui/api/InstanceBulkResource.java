@@ -1,6 +1,7 @@
 package io.bdeploy.ui.api;
 
 import java.util.List;
+import java.util.Set;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RequiredPermission;
@@ -86,6 +87,6 @@ public interface InstanceBulkResource {
      */
     @POST
     @Path("/bulkSync")
-    public List<InstanceOverallStatusDto> syncBulk(List<Manifest.Key> instances);
+    public List<InstanceOverallStatusDto> syncBulk(Set<Manifest.Key> instances);
 
 }

@@ -1,9 +1,6 @@
 <ng-template #detailsPopup>
   <div class="flex">
-    <mat-card
-      appearance="outlined"
-      class="local-details-popup-sizing flex flex-col gap-1 p-2.5"
-    >
+    <mat-card appearance="outlined" class="local-details-popup-sizing flex flex-col gap-1 p-2.5">
       <div class="m-2">
         <div class="grid grid-cols-[110px_auto] gap-1">
           <strong>Name:</strong>
@@ -13,9 +10,7 @@
           <strong>URI:</strong>
           <div class="truncate">{{ record.managedServer.uri }}</div>
           <strong>Last Sync.:</strong>
-          <div>
-            {{ record.managedServer.lastSync | date: 'dd.MM.yyyy HH:mm' }}
-          </div>
+          <div>{{ record.managedServer.lastSync | date: 'dd.MM.yyyy HH:mm' }}</div>
           <div class="mt-2" *ngIf="(auth.isCurrentScopeAdmin$ | async)">
             <a class="local-link" (click)="goToServerPage()">Configure</a>
           </div>
@@ -27,7 +22,7 @@
 
 <mat-icon
   *ngIf="record.managedServer"
-  class="local-icon bd-accent-text"
+  class="local-icon bd-accent-text ml-1"
   [appBdPopup]="detailsPopup"
   [appBdPopupDelay]="300"
   appBdPopupTrigger="hover"

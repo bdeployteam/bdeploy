@@ -7,7 +7,7 @@ import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import { RepositoryService } from 'src/app/modules/primary/repositories/services/repository.service';
+import { RepositoryService, SwPkgCompound } from 'src/app/modules/primary/repositories/services/repository.service';
 import { LabelRecord } from '../../products/services/product-details.service';
 
 /**
@@ -21,7 +21,7 @@ import { LabelRecord } from '../../products/services/product-details.service';
 export class SoftwareDetailsService implements OnDestroy {
   public manifestKey$ = new BehaviorSubject<string>(null);
   public manifestTag$ = new BehaviorSubject<string>(null);
-  public softwarePackage$ = new BehaviorSubject<any>(null);
+  public softwarePackage$ = new BehaviorSubject<SwPkgCompound>(null);
   public labels$ = new BehaviorSubject<LabelRecord[]>(null);
 
   private plugins$ = new BehaviorSubject<PluginInfoDto[]>(null);
@@ -55,11 +55,7 @@ export class SoftwareDetailsService implements OnDestroy {
       this.softwareSubscription = this.repository.data$
         .pipe(
           map((data) =>
-            data.find(
-              (e) =>
-                e.key.name === this.manifestKey$.value &&
-                e.key.tag === this.manifestTag$.value
-            )
+            data.find((e) => e.key.name === this.manifestKey$.value && e.key.tag === this.manifestTag$.value)
           )
         )
         .subscribe((data) => {

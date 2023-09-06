@@ -29,4 +29,6 @@ public final class JerseyServerMonitoringSnapshot {
     public long vmMaxMem;
     public long vmTotalMem;
     public long vmFreeMem;
+
+    public long activeSessions;
 }

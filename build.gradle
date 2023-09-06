@@ -45,7 +45,7 @@ if (hasProperty('buildScan')) {
 
 ext {
     // Defines the minimum BDeploy version when upgrading to "this" version. This is checked on servers which support this property prior to performing the update.
-    minSourceServerVersion = "2.0.0"
+    minSourceServerVersion = "4.2.0"
 
     // Defines the path to a WINDOWS JDK, to be able to build windows dist packages on linux
     win64jdk = readJdk("win64jdk")

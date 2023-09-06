@@ -1,11 +1,8 @@
 import { Injectable } from '@angular/core';
-import {
-  BdDataColumn,
-  BdDataColumnDisplay,
-  BdDataColumnTypeHint,
-} from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
+import { BdIdentifierCellComponent } from 'src/app/modules/core/components/bd-identifier-cell/bd-identifier-cell.component';
 import { getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { ProcessOutdatedComponent } from '../components/dashboard/process-outdated/process-outdated.component';
 import { ProcessStatusIconComponent } from '../components/dashboard/process-status-icon/process-status-icon.component';
@@ -38,11 +35,11 @@ export class ProcessesColumnsService {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
-    data: (r) => (r.id ? r.id : 'New Process'),
+    data: (r) => (r.id ? r.id : 'new'),
     isId: true,
-    width: '135px',
+    width: '120px',
     showWhen: '(min-width:1000px)',
-    classes: (r) => (r.id ? [] : ['bd-description-text']),
+    component: BdIdentifierCellComponent,
   };
 
   processAvatarColumn: BdDataColumn<ApplicationConfiguration> = {
@@ -65,9 +62,7 @@ export class ProcessesColumnsService {
     id: 'appName',
     name: 'Application Type',
     data: (r) =>
-      this.instances.activeNodeCfgs$.value?.applications?.find(
-        (app) => app.name === r.name
-      )?.descriptor?.name, // this.edit.getApplicationDescriptor(r.application.name)?.name,
+      this.instances.activeNodeCfgs$.value?.applications?.find((app) => app.name === r.name)?.descriptor?.name, // this.edit.getApplicationDescriptor(r.application.name)?.name,
     width: '200px',
     showWhen: '(min-width: 1180px)',
   };
@@ -75,15 +70,11 @@ export class ProcessesColumnsService {
   processActualityColumn: BdDataColumn<ApplicationConfiguration> = {
     id: 'actuality',
     name: 'Actuality',
-    description:
-      'Whether the process is running from the currently active instance version',
+    description: 'Whether the process is running from the currently active instance version',
     hint: BdDataColumnTypeHint.DETAILS,
     component: ProcessOutdatedComponent,
     data: (r) => {
-      const procTag = ProcessesService.get(
-        this.processes.processStates$.value,
-        r.id
-      )?.instanceTag;
+      const procTag = ProcessesService.get(this.processes.processStates$.value, r.id)?.instanceTag;
       const instTag = this.instances.active$.value?.instance?.tag;
       return procTag === instTag ? null : procTag;
     }, // for sorting and display on the card.
@@ -96,9 +87,7 @@ export class ProcessesColumnsService {
     name: 'Status',
     hint: BdDataColumnTypeHint.STATUS,
     component: ProcessStatusIconComponent,
-    data: (r) =>
-      ProcessesService.get(this.processes.processStates$.value, r.id)
-        ?.processState,
+    data: (r) => ProcessesService.get(this.processes.processStates$.value, r.id)?.processState,
     width: '40px',
   };
 
@@ -134,18 +123,11 @@ export class ProcessesColumnsService {
     this.applicationNameColumn,
   ];
 
-  constructor(
-    private processes: ProcessesService,
-    private instances: InstancesService,
-    private ports: PortsService
-  ) {}
+  constructor(private processes: ProcessesService, private instances: InstancesService, private ports: PortsService) {}
 
   private getAllPortsRating(r: ApplicationConfiguration) {
     const currentStates = this.ports.activePortStates$.value;
-    const processState = ProcessesService.get(
-      this.processes.processStates$.value,
-      r.id
-    );
+    const processState = ProcessesService.get(this.processes.processStates$.value, r.id);
     if (!currentStates || !processState) {
       return undefined;
     }

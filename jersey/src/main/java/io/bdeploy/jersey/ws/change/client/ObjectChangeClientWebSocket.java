@@ -29,6 +29,10 @@ public class ObjectChangeClientWebSocket implements NoThrowAutoCloseable {
         this.connection = webSocket;
     }
 
+    public boolean isOpen() {
+        return connection.isOpen();
+    }
+
     /**
      * Subscribe to subsequent changes of the given type and scope.
      */

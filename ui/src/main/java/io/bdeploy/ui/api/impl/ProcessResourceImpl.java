@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
@@ -26,8 +23,8 @@ import jakarta.ws.rs.core.SecurityContext;
 public class ProcessResourceImpl implements ProcessResource {
 
     private final BHive hive;
-    private final String instanceGroup;
-    private final String instanceId;
+    private final String group;
+    private final String instance;
 
     @Inject
     private MasterProvider mp;
@@ -35,19 +32,16 @@ public class ProcessResourceImpl implements ProcessResource {
     @Context
     private SecurityContext context;
 
-    @Inject
-    private ActivityReporter reporter;
-
-    public ProcessResourceImpl(BHive hive, String instanceGroup, String instanceId) {
+    public ProcessResourceImpl(BHive hive, String group, String instance) {
         this.hive = hive;
-        this.instanceGroup = instanceGroup;
-        this.instanceId = instanceId;
+        this.group = group;
+        this.instance = instance;
     }
 
     @Override
     public InstanceProcessStatusDto getStatus() {
         MasterNamedResource master = getMasterResource();
-        InstanceStatusDto instanceStatus = master.getStatus(instanceId);
+        InstanceStatusDto instanceStatus = master.getStatus(instance);
 
         InstanceProcessStatusDto result = new InstanceProcessStatusDto();
         result.processStates = instanceStatus.getAppStatus();
@@ -70,10 +64,10 @@ public class ProcessResourceImpl implements ProcessResource {
     public ProcessDetailDto getDetails(String nodeName, String appId) {
         MasterNamedResource master = getMasterResource();
         try {
-            return master.getProcessDetailsFromNode(instanceId, appId, nodeName);
+            return master.getProcessDetailsFromNode(instance, appId, nodeName);
         } catch (WebApplicationException wea) {
             if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
-                return master.getProcessDetails(instanceId, appId);
+                return master.getProcessDetails(instance, appId);
             }
             throw wea;
         }
@@ -82,115 +76,57 @@ public class ProcessResourceImpl implements ProcessResource {
     @Override
     public void startProcesses(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
-        InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        try (Activity activity = reporter.start("Launching");
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            try {
-                master.start(instanceId, processIds);
-            } catch (WebApplicationException wea) {
-                // Compatibility with pre-4.2.0
-                if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
-                    for (var p : processIds) {
-                        master.start(instanceId, p);
-                    }
-                } else {
-                    throw wea;
-                }
-            }
-        }
+        master.start(instance, processIds);
     }
 
     @Override
     public void stopProcesses(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
-        InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        try (Activity activity = reporter.start("Stopping");
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            try {
-                master.stop(instanceId, processIds);
-            } catch (WebApplicationException wea) {
-                // Compatibility with pre-4.2.0
-                if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
-                    for (var p : processIds) {
-                        master.stop(instanceId, p);
-                    }
-                } else {
-                    throw wea;
-                }
-            }
-        }
+        master.stop(instance, processIds);
     }
 
     @Override
     public void restartProcesses(List<String> processIds) {
         MasterNamedResource master = getMasterResource();
-        InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        try (Activity activity = reporter.start("Restarting");
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            try {
-                master.stop(instanceId, processIds);
-                master.start(instanceId, processIds);
-            } catch (WebApplicationException wea) {
-                // Compatibility with pre-4.2.0
-                if (wea.getResponse().getStatus() == VersionMismatchFilter.CODE_VERSION_MISMATCH) {
-                    for (var p : processIds) {
-                        master.stop(instanceId, p);
-                        master.start(instanceId, p);
-                    }
-                } else {
-                    throw wea;
-                }
-            }
-        }
+        master.stop(instance, processIds);
+        master.start(instance, processIds);
     }
 
     @Override
     public void startAll() {
         MasterNamedResource master = getMasterResource();
-        InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        try (Activity activity = reporter.start("Starting All");
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.start(instanceId);
-        }
+        master.start(instance);
     }
 
     @Override
     public void stopAll() {
         MasterNamedResource master = getMasterResource();
-        InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        try (Activity activity = reporter.start("Stopping All");
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            master.stop(instanceId);
-        }
+        master.stop(instance);
     }
 
     @Override
     public void restartAll() {
-        InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
-        try (Activity activity = reporter.start("Restarting All");
-                NoThrowAutoCloseable proxy = reporter.proxyActivities(mp.getControllingMaster(hive, manifest.getManifest()))) {
-            stopAll();
-            startAll();
-        }
+        stopAll();
+        startAll();
     }
 
     @Override
     public List<RemoteDirectory> getDataDirSnapshot() {
         MasterNamedResource master = getMasterResource();
-        return master.getDataDirectorySnapshots(instanceId);
+        return master.getDataDirectorySnapshots(instance);
     }
 
     @Override
     public void writeToStdin(String processId, String data) {
         MasterNamedResource master = getMasterResource();
-        master.writeToStdin(instanceId, processId, data);
+        master.writeToStdin(instance, processId, data);
     }
 
     private MasterNamedResource getMasterResource() {
-        InstanceManifest manifest = InstanceManifest.load(hive, instanceId, null);
+        InstanceManifest manifest = InstanceManifest.load(hive, instance, null);
         MasterRootResource root = ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, manifest.getManifest()),
                 MasterRootResource.class, context);
-        return root.getNamedMaster(instanceGroup);
+        return root.getNamedMaster(group);
     }
 
 }

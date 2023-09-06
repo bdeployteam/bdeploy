@@ -1,33 +1,14 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [panel]="true"
-    header="History Details"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [panel]="true" header="History Details"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="entry$ | async as entry" class="flex flex-col gap-2.5">
       <div class="flex gap-2.5">
-        <app-user-avatar
-          [mail]="entry?.email"
-          [hostSize]="64"
-          [avatarSize]="64"
-        ></app-user-avatar>
+        <app-user-avatar [mail]="entry?.email" [hostSize]="64" [avatarSize]="64"></app-user-avatar>
         <div class="flex-auto grid grid-cols-[70px_auto] gap-1 items-center">
           <div><strong>Username:</strong></div>
-          <div
-            class="truncate"
-            [matTooltip]="entry.user"
-            [matTooltipShowDelay]="1000"
-          >
-            {{ entry.user }}
-          </div>
+          <div class="truncate" [matTooltip]="entry.user" [matTooltipShowDelay]="1000">{{ entry.user }}</div>
           <div><strong>E-Mail:</strong></div>
-          <div
-            class="truncate"
-            [matTooltip]="entry.email"
-            [matTooltipShowDelay]="1000"
-          >
-            {{ entry.email }}
-          </div>
+          <div class="truncate" [matTooltip]="entry.email" [matTooltipShowDelay]="1000">{{ entry.email }}</div>
         </div>
       </div>
       <div class="grid gap-1 items-center grid-cols-[100px_auto]">
@@ -99,8 +80,8 @@
           icon="delete"
           text="Delete"
           (click)="doDelete()"
-          [disabled]="(deleting$ | async) || isInstalled"
-          [loadingWhen$]="deleting$"
+          [disabled]="(mappedDelete$ | async) || isInstalled"
+          [loadingWhen$]="mappedDelete$"
         ></app-bd-button>
         <ng-container *ngIf="state$ | async as state">
           <mat-divider></mat-divider>
@@ -112,9 +93,8 @@
             *ngIf="!(servers.isCurrentInstanceSynchronized$ | async)"
           >
             <div class="text-justify">
-              The managed server responsible for this instance is not
-              synchronized, version controls are unavailable. Please synchronize
-              the server to use these controls.
+              The managed server responsible for this instance is not synchronized, version controls are unavailable.
+              Please synchronize the server to use these controls.
             </div>
           </app-bd-notification-card>
           <app-bd-button
@@ -122,9 +102,9 @@
             text="Install"
             icon="layers"
             color="primary"
-            [disabled]="(installing$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)"
+            [disabled]="(mappedInstall$ | async) || isInstalled || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)"
             (click)="doInstall()"
-            [loadingWhen$]="installing$"
+            [loadingWhen$]="mappedInstall$"
           ></app-bd-button>
           <app-bd-button
             [collapsed]="false"
@@ -132,35 +112,29 @@
             icon="star"
             color="primary"
             [disabled]="
-              (activating$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
+              (mappedActivate$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
             (click)="doActivate()"
-            [loadingWhen$]="activating$"
+            [loadingWhen$]="mappedActivate$"
           ></app-bd-button>
           <app-bd-button
             [collapsed]="false"
             text="Uninstall"
             icon="layers_clear"
             [disabled]="
-              (uninstalling$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
+              (mappedUninstall$ | async) || !isInstalled || isActive || !(servers.isCurrentInstanceSynchronized$ | async) || !(auth.isCurrentScopeWrite$ | async)
             "
             (click)="doUninstall()"
-            [loadingWhen$]="uninstalling$"
+            [loadingWhen$]="mappedUninstall$"
           ></app-bd-button>
         </ng-container>
       </ng-container>
     </div>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(entry$ | async)">
-    <app-bd-notification-card
-      icon="history"
-      [type]="'warning'"
-      [dismissable]="false"
-      header="No Information"
-    >
+    <app-bd-notification-card icon="history" [type]="'warning'" [dismissable]="false" header="No Information">
       <div class="text-justify">
-        The selected history entry cannot be retrieved. Please select another
-        one from the list.
+        The selected history entry cannot be retrieved. Please select another one from the list.
       </div>
     </app-bd-notification-card>
   </app-bd-dialog-content>

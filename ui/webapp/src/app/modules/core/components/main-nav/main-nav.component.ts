@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ActivitiesService } from '../../services/activities.service';
+import { ActionsService } from '../../services/actions.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
 import { ObjectChangesService } from '../../services/object-changes.service';
@@ -21,30 +21,32 @@ export class MainNavComponent {
   constructor(
     private authService: AuthenticationService,
     public themeService: ThemeService,
-    public activities: ActivitiesService,
+    public actions: ActionsService,
     private changes: ObjectChangesService,
     private config: ConfigService,
     private snackbar: MatSnackBar
   ) {
-    this.changes.errorCount$.subscribe((count) => {
-      // in case we exceed a certain threshold, we will show a warning to the user. the error count is reset, and we start over again in case the user dismisses this message.
-      if (count === 3 && !this.config.isCurrentlyUnreachable()) {
-        // we check for the exact number to avout repeated messages.
-        // this is a number that should not happen in a typical session, *except* when there is a systemic problem with websockets. also
-        // this number of errors should occur "rather" quickly in case there is a websocket issue.
+    combineLatest([this.changes.errorCount$, this.config.offline$]).subscribe(
+      ([count, offline]) => {
+        // in case we exceed a certain threshold, we will show a warning to the user. the error count is reset, and we start over again in case the user dismisses this message.
+        if (count === 3 && !offline) {
+          // we check for the exact number to avout repeated messages.
+          // this is a number that should not happen in a typical session, *except* when there is a systemic problem with websockets. also
+          // this number of errors should occur "rather" quickly in case there is a websocket issue.
 
-        this.snackbar
-          .open(
-            'There seems to be an issue with WebSockets on your System. Communication with the server is restricted. New data will not be received without refresh.',
-            'ACKNOWLEDGE',
-            { panelClass: 'error-snackbar' }
-          )
-          .afterDismissed()
-          .subscribe(() => {
-            // reset so we start counting and waiting for errors over again.
-            this.changes.errorCount$.next(0);
-          });
+          this.snackbar
+            .open(
+              'There seems to be an issue with WebSockets on your System. Communication with the server is restricted. New data will not be received without refresh.',
+              'ACKNOWLEDGE',
+              { panelClass: 'error-snackbar' }
+            )
+            .afterDismissed()
+            .subscribe(() => {
+              // reset so we start counting and waiting for errors over again.
+              this.changes.errorCount$.next(0);
+            });
+        }
       }
-    });
+    );
   }
 }

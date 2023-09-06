@@ -33,9 +33,7 @@ export class HistoryService {
       this.update(filter);
     });
 
-    this.subscription.add(
-      this.instances.current$.subscribe(() => this.reset())
-    );
+    this.subscription.add(this.instances.current$.subscribe(() => this.reset()));
   }
 
   /** Stops reading and publishing history and resets all internal state */

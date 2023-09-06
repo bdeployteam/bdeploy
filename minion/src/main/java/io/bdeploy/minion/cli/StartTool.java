@@ -15,7 +15,6 @@ import io.bdeploy.bhive.remote.jersey.BHiveLocatorImpl;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
@@ -30,6 +29,7 @@ import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.VersionHelper;
+import io.bdeploy.dcu.TaskSynchronizer;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
@@ -41,9 +41,10 @@ import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.RegistrationTarget;
+import io.bdeploy.jersey.actions.ActionBridge;
+import io.bdeploy.jersey.actions.ActionService;
 import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
-import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.ConnectivityChecker;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
@@ -116,8 +117,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
     protected RenderableResult run(MasterConfig config) {
         helpAndFailIfMissing(config.root(), "Missing --root");
 
-        ActivityReporter.Delegating delegate = new ActivityReporter.Delegating();
-        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), delegate)) {
+        try (MinionRoot r = new MinionRoot(Paths.get(config.root()), new ActivityReporter.Null())) {
             r.getAuditor().audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("start").build());
 
             out().println("Starting " + r.getMode() + "...");
@@ -137,7 +137,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
 
             try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass, r.getSessionConfiguration())) {
-                BHiveRegistry reg = setupServerCommon(delegate, r, srv, config);
+                BHiveRegistry reg = setupServerCommon(new ActivityReporter.Null(), r, srv, config);
 
                 if (r.getMode() != MinionMode.NODE) {
                     // MASTER (standalone, managed, central)
@@ -203,17 +203,15 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
                 r.isInitialConnectionCheckFailed());
     }
 
-    private BHiveRegistry setupServerCommon(ActivityReporter.Delegating delegate, MinionRoot r, JerseyServer srv,
-            MasterConfig config) {
+    private BHiveRegistry setupServerCommon(ActivityReporter repo, MinionRoot r, JerseyServer srv, MasterConfig config) {
         r.onStartup(config.consoleLog());
         srv.afterStartup().thenRun(() -> r.afterStartup(false));
 
-        srv.setAuditor(RollingFileAuditor.getInstance(r.getLogDir()));
+        srv.setAuditor(r.getAuditor());
         r.setRestartManager(new JerseyAwareMinionRestartManager(srv));
         r.setupServerTasks(r.getMode());
-        delegate.setDelegate(srv.getRemoteActivityReporter());
 
-        return registerCommonResources(srv, r, srv.getRemoteActivityReporter());
+        return registerCommonResources(srv, r, repo);
     }
 
     public static void registerMasterResources(RegistrationTarget srv, BHiveRegistry reg, boolean webapp, MinionRoot minionRoot,
@@ -243,6 +241,10 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
                     bind(pluginManager).to(PluginManager.class);
                 }
                 bind(new VersionSorterServiceImpl(pluginManager, reg)).to(VersionSorterService.class);
+
+                if (minionRoot.getMode() == MinionMode.CENTRAL) {
+                    bind(new ActionBridge(minionRoot.getActions())).to(ActionBridge.class);
+                }
             }
         });
 
@@ -307,6 +309,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         protected void configure() {
             bind(root).to(MinionRoot.class);
             bind(root).to(Minion.class);
+            bind(root.createActionService(ocws)).to(ActionService.class);
             bind(root.getUsers()).to(AuthService.class);
             bind(root.getUserGroups()).to(AuthGroupService.class);
             bind(root.getState().storageMinFree).named(JerseyServer.FILE_SYSTEM_MIN_SPACE).to(Long.class);

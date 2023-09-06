@@ -1,6 +1,6 @@
-<app-bd-dialog [loadingWhen$]="loading$">
+<app-bd-dialog [loadingWhen$]="nodesAdmin.loading$">
   <app-bd-dialog-toolbar
-    [header]="(replace ? 'Replace ' : 'Edit ') + nodeName"
+    [header]="(replace ? 'Replace ' : 'Edit ') + (nodeName$ | async)"
     [panel]="true"
     [route]="['..']"
   ></app-bd-dialog-toolbar>
@@ -8,13 +8,12 @@
     <form #form="ngForm">
       <div class="flex flex-col gap-2.5" *ngIf="data && orig">
         <span
-          >You can either manually enter node information below, or drop a
-          <code>node-ident</code> file which is created during the
-          initialization process on the physical node.</span
+          >You can either manually enter node information below, or drop a <code>node-ident</code> file which is created
+          during the initialization process on the physical node.</span
         >
         <span *ngIf="replace">
-          Note that <strong>replacing</strong> a node may take a while, since
-          all software and configuration on the new node will be restored.
+          Note that <strong>replacing</strong> a node may take a while, since all software and configuration on the new
+          node will be restored.
         </span>
         <mat-card
           appearance="outlined"
@@ -24,12 +23,7 @@
         >
           Drop node information here!
         </mat-card>
-        <app-bd-form-input
-          name="uri"
-          label="Node URI"
-          [(ngModel)]="data.uri"
-          required
-        ></app-bd-form-input>
+        <app-bd-form-input name="uri" label="Node URI" [(ngModel)]="data.uri" required></app-bd-form-input>
         <app-bd-form-input
           name="auth"
           label="Full Auth. Token"
@@ -38,8 +32,8 @@
         ></app-bd-form-input>
         <app-bd-button
           color="primary"
-          [disabled]="!canSave() || (saving$ | async)"
-          [loadingWhen$]="saving$"
+          [disabled]="!canSave() || (mappedSave$ | async)"
+          [loadingWhen$]="mappedSave$"
           [collapsed]="false"
           text="Save"
           icon="save"

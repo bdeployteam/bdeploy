@@ -1,24 +1,14 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  TemplateRef,
-  ViewChild,
-  inject,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { finalize, switchMap } from 'rxjs/operators';
-import {
-  BulkOperationResultDto,
-  InstanceDto,
-  ProductDto,
-} from 'src/app/models/gen.dtos';
+import { finalize, map, switchMap } from 'rxjs/operators';
+import { Actions, BulkOperationResultDto, ProductDto } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
   ACTION_OK,
   BdDialogMessage,
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { InstanceBulkService } from '../../services/instance-bulk.service';
@@ -29,27 +19,14 @@ import { ACTION_APPLY } from './../../../../core/components/bd-dialog-message/bd
   templateUrl: './bulk-manipulation.component.html',
 })
 export class BulkManipulationComponent implements OnInit, OnDestroy {
-  protected starting$ = new BehaviorSubject<boolean>(false);
-  protected stopping$ = new BehaviorSubject<boolean>(false);
-  protected deleting$ = new BehaviorSubject<boolean>(false);
-  protected installing$ = new BehaviorSubject<boolean>(false);
-  protected activating$ = new BehaviorSubject<boolean>(false);
-  protected updating$ = new BehaviorSubject<boolean>(false);
-
-  private lock$ = combineLatest([
-    this.starting$,
-    this.stopping$,
-    this.deleting$,
-    this.installing$,
-    this.activating$,
-    this.updating$,
-  ]).subscribe((a) => {
-    const running = !a.every((e) => !e);
-    this.bulk?.frozen$.next(running);
-  });
+  private starting$ = new BehaviorSubject<boolean>(false);
+  private stopping$ = new BehaviorSubject<boolean>(false);
+  private deleting$ = new BehaviorSubject<boolean>(false);
+  private installing$ = new BehaviorSubject<boolean>(false);
+  private activating$ = new BehaviorSubject<boolean>(false);
+  private updating$ = new BehaviorSubject<boolean>(false);
 
   protected isAllSameProduct: boolean;
-  protected selections: InstanceDto[];
 
   protected selectableProducts: ProductDto[];
   protected selectableProductLabels: string[];
@@ -60,6 +37,16 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   protected bulk = inject(InstanceBulkService);
   protected instance = inject(InstancesService);
   protected products = inject(ProductsService);
+  protected actions = inject(ActionsService);
+
+  private ids$ = this.bulk.selection$.pipe(map((i) => i.map((x) => x.instanceConfiguration.id)));
+
+  protected mappedStart$ = this.actions.action([Actions.START_INSTANCE], this.starting$, null, this.ids$);
+  protected mappedStop$ = this.actions.action([Actions.STOP_INSTANCE], this.stopping$, null, this.ids$);
+  protected mappedDelete$ = this.actions.action([Actions.DELETE_INSTANCE], this.deleting$, null, this.ids$);
+  protected mappedInstall$ = this.actions.action([Actions.INSTALL], this.installing$, null, this.ids$);
+  protected mappedActivate$ = this.actions.action([Actions.ACTIVATE], this.activating$, null, this.ids$);
+  protected mappedUpdate$ = this.actions.action([Actions.UPDATE_PRODUCT_VERSION], this.updating$, null, this.ids$);
 
   private subscription: Subscription;
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -68,21 +55,43 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.bulk.selection$.subscribe((selections) => {
-      this.selections = selections;
       this.isAllSameProduct = selections.every(
         (i) =>
           !!i?.instanceConfiguration?.product?.name &&
-          i.instanceConfiguration.product.name ===
-            selections[0].instanceConfiguration.product.name
+          i.instanceConfiguration.product.name === selections[0].instanceConfiguration.product.name
       );
     });
+
+    this.subscription.add(
+      combineLatest([
+        this.starting$,
+        this.stopping$,
+        this.deleting$,
+        this.installing$,
+        this.activating$,
+        this.updating$,
+      ]).subscribe((a) => {
+        const running = !a.every((e) => !e);
+        this.bulk?.frozen$.next(running);
+      })
+    );
   }
 
   protected onStart() {
     this.starting$.next(true);
     this.bulk
       .start()
-      .pipe(finalize(() => this.starting$.next(false)))
+      .pipe(
+        switchMap((r) => {
+          this.bulkOpResult = r;
+          return this.dialog.message({
+            header: 'Result',
+            template: this.opResult,
+            actions: [ACTION_OK],
+          });
+        }),
+        finalize(() => this.starting$.next(false))
+      )
       .subscribe();
   }
 
@@ -90,7 +99,17 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
     this.stopping$.next(true);
     this.bulk
       .stop()
-      .pipe(finalize(() => this.stopping$.next(false)))
+      .pipe(
+        switchMap((r) => {
+          this.bulkOpResult = r;
+          return this.dialog.message({
+            header: 'Result',
+            template: this.opResult,
+            actions: [ACTION_OK],
+          });
+        }),
+        finalize(() => this.stopping$.next(false))
+      )
       .subscribe();
   }
 
@@ -182,21 +201,13 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
     this.updating$.next(true);
 
     // 1) figure out selectable products.
-    const prod = this.selections[0].instanceConfiguration.product.name;
-    this.selectableProducts = this.products.products$.value.filter(
-      (v) => v.key.name === prod
-    );
-    this.selectableProductLabels = this.selectableProducts.map(
-      (p) => p.key.tag
-    );
+    const prod = this.bulk.selection$.value[0].instanceConfiguration.product.name;
+    this.selectableProducts = this.products.products$.value.filter((v) => v.key.name === prod);
+    this.selectableProductLabels = this.selectableProducts.map((p) => p.key.tag);
 
     if (!this.selectableProducts?.length) {
       this.dialog
-        .info(
-          'No Target available',
-          'There are no suitable target product versions available.',
-          'warning'
-        )
+        .info('No Target available', 'There are no suitable target product versions available.', 'warning')
         .subscribe();
       return;
     }

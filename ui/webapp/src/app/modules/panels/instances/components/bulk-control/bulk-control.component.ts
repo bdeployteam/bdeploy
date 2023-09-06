@@ -1,8 +1,9 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { ApplicationStartType, InstanceDto } from 'src/app/models/gen.dtos';
+import { Actions, ApplicationStartType, InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesBulkService } from 'src/app/modules/primary/instances/services/processes-bulk.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
@@ -13,16 +14,44 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './bulk-control.component.html',
 })
 export class BulkControlComponent {
-  /* template */ starting$ = new BehaviorSubject<boolean>(false);
-  /* template */ stopping$ = new BehaviorSubject<boolean>(false);
-  /* template */ restarting$ = new BehaviorSubject<boolean>(false);
+  private starting$ = new BehaviorSubject<boolean>(false);
+  private stopping$ = new BehaviorSubject<boolean>(false);
+  private restarting$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ startingMulti$ = new BehaviorSubject<boolean>(false);
-  /* template */ stoppingMulti$ = new BehaviorSubject<boolean>(false);
-  /* template */ restartingMulti$ = new BehaviorSubject<boolean>(false);
+  private startingMulti$ = new BehaviorSubject<boolean>(false);
+  private stoppingMulti$ = new BehaviorSubject<boolean>(false);
+  private restartingMulti$ = new BehaviorSubject<boolean>(false);
 
   /* template */ bulkContainsConfirmed = false;
-  /* template */ bulkSelection: string[] = [];
+  /* template */ bulkSelection$ = new BehaviorSubject<string[]>(null);
+
+  private sas = inject(ActionsService);
+
+  protected mappedStart$ = this.sas.action([Actions.START_INSTANCE], this.starting$);
+  protected mappedStop$ = this.sas.action([Actions.STOP_INSTANCE], this.starting$);
+  protected mappedRestart$ = this.sas.action([Actions.START_INSTANCE, Actions.STOP_INSTANCE], this.restarting$);
+
+  protected mappedStartMulti$ = this.sas.action(
+    [Actions.START_PROCESS],
+    this.startingMulti$,
+    null,
+    null,
+    this.bulkSelection$
+  );
+  protected mappedStopMulti$ = this.sas.action(
+    [Actions.STOP_PROCESS],
+    this.stoppingMulti$,
+    null,
+    null,
+    this.bulkSelection$
+  );
+  protected mappedRestartMulti$ = this.sas.action(
+    [Actions.START_PROCESS, Actions.STOP_PROCESS],
+    this.restartingMulti$,
+    null,
+    null,
+    this.bulkSelection$
+  );
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -35,24 +64,19 @@ export class BulkControlComponent {
     this.bulk.selection$.subscribe((s) => {
       if (!s) {
         this.bulkContainsConfirmed = false;
-        this.bulkSelection = [];
+        this.bulkSelection$.next([]);
         return;
       }
 
       this.bulkContainsConfirmed = Object.keys(s).some(
-        (k) =>
-          s[k].filter(
-            (c) =>
-              c?.processControl?.startType ===
-              ApplicationStartType.MANUAL_CONFIRM
-          ).length > 0
+        (k) => s[k].filter((c) => c?.processControl?.startType === ApplicationStartType.MANUAL_CONFIRM).length > 0
       );
 
       const result: string[] = [];
       Object.keys(s).forEach((k) => {
         result.push(...s[k].map((c) => c.id));
       });
-      this.bulkSelection = result;
+      this.bulkSelection$.next(result);
     });
   }
 
@@ -117,7 +141,7 @@ export class BulkControlComponent {
         if (b) {
           this.startingMulti$.next(true);
           this.processes
-            .start(this.bulkSelection)
+            .start(this.bulkSelection$.value)
             .pipe(finalize(() => this.startingMulti$.next(false)))
             .subscribe();
         }
@@ -134,7 +158,7 @@ export class BulkControlComponent {
         if (b) {
           this.stoppingMulti$.next(true);
           this.processes
-            .stop(this.bulkSelection)
+            .stop(this.bulkSelection$.value)
             .pipe(finalize(() => this.stoppingMulti$.next(false)))
             .subscribe();
         }
@@ -151,7 +175,7 @@ export class BulkControlComponent {
         if (b) {
           this.restartingMulti$.next(true);
           this.processes
-            .restart(this.bulkSelection)
+            .restart(this.bulkSelection$.value)
             .pipe(finalize(() => this.restartingMulti$.next(false)))
             .subscribe();
         }

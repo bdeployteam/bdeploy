@@ -16,26 +16,14 @@
       *ngIf="(isUploading$ | async) || (isUploadProcessing$ | async) || (isImporting$ | async)"
       class="break-all bd-description-text"
     >
-      {{ processingHint$ | async }}
+      Working on it...
     </div>
-    <div *ngIf="isUploadFailed$ | async" class="break-all bd-description-text">
-      {{ uploadStatus.detail }}
-    </div>
-    <div
-      *ngIf="isUploadFinished$ | async"
-      class="break-all bd-description-text"
-    >
+    <div *ngIf="isUploadFailed$ | async" class="break-all bd-description-text">{{ uploadStatus.detail }}</div>
+    <div *ngIf="isUploadFinished$ | async" class="break-all bd-description-text">
       {{ this.uploadStatus?.detail?.details }}
     </div>
-    <div *ngIf="isImportFailed$ | async" class="break-all bd-description-text">
-      {{ importStatus?.detail }}
-    </div>
-    <div
-      *ngIf="isImportFinished$ | async"
-      class="break-all bd-description-text"
-    >
-      {{ importStatus?.detail }}
-    </div>
+    <div *ngIf="isImportFailed$ | async" class="break-all bd-description-text">{{ importStatus?.detail }}</div>
+    <div *ngIf="isImportFinished$ | async" class="break-all bd-description-text">{{ importStatus?.detail }}</div>
     <ng-container
       *ngIf="!!uploadStatus.detail && !(!!uploadStatus?.detail?.isHive || !!uploadStatus?.detail?.isProduct) && !!!importStatus"
     >
@@ -59,16 +47,8 @@
           name="allOs"
           [(ngModel)]="supportAllOs"
         ></app-bd-form-toggle>
-        <app-bd-form-toggle
-          label="Windows"
-          name="windows"
-          [(ngModel)]="supportWindows"
-        ></app-bd-form-toggle>
-        <app-bd-form-toggle
-          label="Linux"
-          name="linux"
-          [(ngModel)]="supportLinux"
-        ></app-bd-form-toggle>
+        <app-bd-form-toggle label="Windows" name="windows" [(ngModel)]="supportWindows"></app-bd-form-toggle>
+        <app-bd-form-toggle label="Linux" name="linux" [(ngModel)]="supportLinux"></app-bd-form-toggle>
       </div>
 
       <app-bd-button
@@ -85,11 +65,7 @@
       "
         (click)="import()"
       ></app-bd-button>
-      <app-bd-button
-        text="Cancel"
-        (click)="onDismiss()"
-        [collapsed]="false"
-      ></app-bd-button>
+      <app-bd-button text="Cancel" (click)="onDismiss()" [collapsed]="false"></app-bd-button>
     </ng-container>
   </div>
 </app-bd-notification-card>

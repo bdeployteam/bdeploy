@@ -1,7 +1,9 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { Actions } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { HiveService } from 'src/app/modules/primary/admin/services/hive.service';
@@ -12,7 +14,15 @@ import { HiveService } from 'src/app/modules/primary/admin/services/hive.service
 })
 export class BhiveDetailsComponent implements OnDestroy {
   /* template */ bhive$ = new BehaviorSubject<string>(null);
-  /* template */ repairing$ = new BehaviorSubject<boolean>(false);
+
+  private repairing$ = new BehaviorSubject<boolean>(false);
+
+  private actions = inject(ActionsService);
+  protected mappedRepair$ = this.actions.action(
+    [Actions.FSCK_BHIVE, Actions.PRUNE_BHIVE],
+    this.repairing$,
+    this.bhive$
+  );
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -34,10 +44,7 @@ export class BhiveDetailsComponent implements OnDestroy {
 
   /* template */ doRepairAndPrune(): void {
     this.dialog
-      .confirm(
-        'Repair and Prune',
-        'Repairing will remove any (anyhow) damaged and unusable elements from the BHive'
-      )
+      .confirm('Repair and Prune', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive')
       .subscribe((confirmed) => {
         if (confirmed) {
           this.repairing$.next(true);
@@ -59,13 +66,7 @@ export class BhiveDetailsComponent implements OnDestroy {
                 ? `Repair removed ${keys.length} damaged objects.`
                 : `No damaged objects were found.`;
               const pruneMessage = `Prune freed <strong>${pruned}</strong> in ${this.bhive$.value}.`;
-              this.dialog
-                .info(
-                  `Repair and Prune`,
-                  `${repairMessage}<br/>${pruneMessage}`,
-                  'build'
-                )
-                .subscribe();
+              this.dialog.info(`Repair and Prune`, `${repairMessage}<br/>${pruneMessage}`, 'build').subscribe();
             });
         }
       });

@@ -22,9 +22,9 @@ public class DbTestBase {
     private ObjectDatabase db;
 
     @BeforeEach
-    void initDb(@TempDir Path tmp, ActivityReporter reporter) throws IOException {
+    void initDb(@TempDir Path tmp, ActivityReporter r) throws IOException {
         dbPath = tmp.resolve("objdb");
-        db = new ObjectDatabase(dbPath, tmp.resolve("objtmp"), reporter, null);
+        db = new ObjectDatabase(dbPath, tmp.resolve("objtmp"), r, null);
     }
 
     protected ObjectDatabase getObjectDatabase() {

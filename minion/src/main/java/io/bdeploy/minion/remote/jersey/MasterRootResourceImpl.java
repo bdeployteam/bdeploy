@@ -13,7 +13,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +29,9 @@ import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.RetryableScope;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.SortOneAsLastComparator;
@@ -54,9 +53,9 @@ import io.bdeploy.interfaces.remote.MinionStatusResource;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.minion.MinionRoot;
-import io.bdeploy.ui.RequestScopedParallelOperations;
+import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.InstanceResource;
@@ -66,7 +65,6 @@ import io.bdeploy.ui.api.SoftwareUpdateResource;
 import io.bdeploy.ui.dto.BackendInfoDto;
 import io.bdeploy.ui.dto.InstanceDto;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -84,9 +82,6 @@ public class MasterRootResourceImpl implements MasterRootResource {
     private BHiveRegistry registry;
 
     @Inject
-    private JerseyBroadcastingActivityReporter reporter;
-
-    @Inject
     private NodeManager nodes;
 
     @Context
@@ -96,7 +91,10 @@ public class MasterRootResourceImpl implements MasterRootResource {
     private SecurityContext context;
 
     @Inject
-    private Provider<RequestScope> reqScope;
+    private RequestScopedParallelOperationsService rspos;
+
+    @Inject
+    private ActionFactory af;
 
     @Override
     public Map<String, MinionStatusDto> getNodes() {
@@ -105,12 +103,14 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void addNode(String name, RemoteService minion) {
-        nodes.addNode(name, MinionDto.create(false, minion));
+        try (var handle = af.run(Actions.ADD_NODE, null, null, name)) {
+            nodes.addNode(name, MinionDto.create(false, minion));
+        }
     }
 
     @Override
     public void convertNode(String name, RemoteService minion) {
-        try (Activity finding = reporter.start("Migrating " + name)) {
+        try (var handle = af.run(Actions.CONVERT_TO_NODE, null, null, name)) {
             // first, contact and verify information.
             MinionMigrationState state = checkAndPrepareNodesForMigration(name, minion);
 
@@ -134,60 +134,54 @@ public class MasterRootResourceImpl implements MasterRootResource {
     private void checkAndCollectInstancesForMigration(RemoteService minion, MinionMigrationState state) {
         InstanceGroupResource remoteIgr = ResourceProvider.getResource(minion, InstanceGroupResource.class, context);
 
-        try (Activity finding = reporter.start("Finding Instances for Migration", state.allGroups.size())) {
-            for (InstanceGroupConfiguration igc : state.allGroups) {
-                InstanceResource remoteIr = remoteIgr.getInstanceResource(igc.name);
+        for (InstanceGroupConfiguration igc : state.allGroups) {
+            InstanceResource remoteIr = remoteIgr.getInstanceResource(igc.name);
 
-                List<InstanceDto> instances = remoteIr.list();
-                state.allInstances.put(igc.name, instances);
-                Map<String, List<Manifest.Key>> toFetch = state.toFetch.computeIfAbsent(igc.name, k -> new TreeMap<>());
+            List<InstanceDto> instances = remoteIr.list();
+            state.allInstances.put(igc.name, instances);
+            Map<String, List<Manifest.Key>> toFetch = state.toFetch.computeIfAbsent(igc.name, k -> new TreeMap<>());
 
-                for (InstanceDto instance : instances) {
-                    List<Manifest.Key> toFetchForInstance = new ArrayList<>();
-                    toFetchForInstance.add(instance.activeVersion != null ? instance.activeVersion : instance.latestVersion);
-                    toFetchForInstance.add(
-                            instance.activeProduct != null ? instance.activeProduct : instance.instanceConfiguration.product);
-                    toFetch.put(instance.instanceConfiguration.id, toFetchForInstance);
-                }
+            for (InstanceDto instance : instances) {
+                List<Manifest.Key> toFetchForInstance = new ArrayList<>();
+                toFetchForInstance.add(instance.activeVersion != null ? instance.activeVersion : instance.latestVersion);
+                toFetchForInstance
+                        .add(instance.activeProduct != null ? instance.activeProduct : instance.instanceConfiguration.product);
+                toFetch.put(instance.instanceConfiguration.id, toFetchForInstance);
             }
-            finding.workAndCancelIfRequested(1);
         }
     }
 
     private void transferAndProcessInstances(RemoteService minion, MinionMigrationState state) {
-        try (Activity fetching = reporter.start("Transferring Data for Migration")) {
-            for (Map.Entry<String, Map<String, List<Manifest.Key>>> grpEntry : state.toFetch.entrySet()) {
-                BHive grpHive = registry.get(grpEntry.getKey()); // must exist, see previous steps.
+        for (Map.Entry<String, Map<String, List<Manifest.Key>>> grpEntry : state.toFetch.entrySet()) {
+            BHive grpHive = registry.get(grpEntry.getKey()); // must exist, see previous steps.
 
-                for (Map.Entry<String, List<Manifest.Key>> entry : grpEntry.getValue().entrySet()) {
-                    // only fetch things which are not there yet. FetchOperation would do this automatically,
-                    // but we want to know what to delete in case post-processing goes wrong.
-                    List<Key> toFetch = entry.getValue().stream()
-                            .filter(k -> Boolean.FALSE.equals(grpHive.execute(new ManifestExistsOperation().setManifest(k))))
-                            .toList();
+            for (Map.Entry<String, List<Manifest.Key>> entry : grpEntry.getValue().entrySet()) {
+                // only fetch things which are not there yet. FetchOperation would do this automatically,
+                // but we want to know what to delete in case post-processing goes wrong.
+                List<Key> toFetch = entry.getValue().stream()
+                        .filter(k -> Boolean.FALSE.equals(grpHive.execute(new ManifestExistsOperation().setManifest(k))))
+                        .toList();
 
-                    try (Transaction tx = grpHive.getTransactions().begin()) {
-                        // actually fetch.
-                        grpHive.execute(
-                                new FetchOperation().setRemote(minion).setHiveName(grpEntry.getKey()).addManifest(toFetch));
+                try (Transaction tx = grpHive.getTransactions().begin()) {
+                    // actually fetch.
+                    grpHive.execute(new FetchOperation().setRemote(minion).setHiveName(grpEntry.getKey()).addManifest(toFetch));
 
-                        // TODO: fetch instance runtimeDependencies overrides here once implemented.
+                    // TODO: fetch instance runtimeDependencies overrides here once implemented.
+                }
+
+                try {
+                    // replace oldMasterName in node configs with the new name. we do this immediately
+                    // so that we have a chance to remove things we fetched in case we encounter an error.
+                    postProcessInstance(grpEntry.getKey(), entry.getKey(), state.originalName, state.newName);
+                } catch (Exception e) {
+                    // in case of *any* exception while post-processing the instance, we want to get rid of things we fetched.
+                    log.error("Cannot perform migration on instance {}: {}", entry.getKey(), e.toString());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error Details:", e);
                     }
 
-                    try {
-                        // replace oldMasterName in node configs with the new name. we do this immediately
-                        // so that we have a chance to remove things we fetched in case we encounter an error.
-                        postProcessInstance(grpEntry.getKey(), entry.getKey(), state.originalName, state.newName);
-                    } catch (Exception e) {
-                        // in case of *any* exception while post-processing the instance, we want to get rid of things we fetched.
-                        log.error("Cannot perform migration on instance {}: {}", entry.getKey(), e.toString());
-                        if (log.isDebugEnabled()) {
-                            log.debug("Error Details:", e);
-                        }
-
-                        // remove all the manifests for this instance again.
-                        toFetch.forEach(m -> grpHive.execute(new ManifestDeleteOperation().setToDelete(m)));
-                    }
+                    // remove all the manifests for this instance again.
+                    toFetch.forEach(m -> grpHive.execute(new ManifestDeleteOperation().setToDelete(m)));
                 }
             }
         }
@@ -386,63 +380,62 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void editNode(String name, RemoteService minion) {
-        nodes.editNode(name, minion);
+        try (var handle = af.run(Actions.EDIT_NODE, null, null, name)) {
+            nodes.editNode(name, minion);
+        }
     }
 
     private Map<String, NodeGroupState> getInstancesToReinstall(String node) {
         Map<String, NodeGroupState> result = new TreeMap<>();
 
-        try (Activity finding = reporter.start("Finding Instances to repair on Node " + node)) {
-            CommonRootResource groups = rc.initResource(new CommonRootResourceImpl());
+        CommonRootResource groups = rc.initResource(new CommonRootResourceImpl());
 
-            groups.getInstanceGroups().forEach(g -> {
-                NodeGroupState ngs = new NodeGroupState();
+        groups.getInstanceGroups().forEach(g -> {
+            NodeGroupState ngs = new NodeGroupState();
 
-                // find all instances in the group
-                BHive hive = registry.get(g.name);
-                SortedSet<Key> ims = InstanceManifest.scan(hive, true);
+            // find all instances in the group
+            BHive hive = registry.get(g.name);
+            SortedSet<Key> ims = InstanceManifest.scan(hive, true);
 
-                ims.forEach(e -> {
-                    InstanceManifest im = InstanceManifest.of(hive, e);
-                    InstanceConfiguration i = im.getConfiguration();
+            ims.forEach(e -> {
+                InstanceManifest im = InstanceManifest.of(hive, e);
+                InstanceConfiguration i = im.getConfiguration();
 
-                    // find all installed/active versions
-                    InstanceStateRecord states = im.getState(hive).read();
-                    NodeInstanceState ns = new NodeInstanceState();
-                    ns.active = states.activeTag;
-                    ns.name = i.name;
+                // find all installed/active versions
+                InstanceStateRecord states = im.getState(hive).read();
+                NodeInstanceState ns = new NodeInstanceState();
+                ns.active = states.activeTag;
 
-                    for (String installed : states.installedTags) {
-                        // if it does, we add it to the list we want to re-install.
-                        if (im.getInstanceNodeManifests().containsKey(node)) {
-                            ns.installed.add(installed);
-                        }
+                for (String installed : states.installedTags) {
+                    // if it does, we add it to the list we want to re-install.
+                    if (im.getInstanceNodeManifests().containsKey(node)) {
+                        ns.installed.add(installed);
                     }
+                }
 
-                    if (!ns.installed.isEmpty()) {
-                        ngs.instances.put(i.id, ns);
-                    }
-                });
-
-                if (!ngs.instances.isEmpty()) {
-                    result.put(g.name, ngs);
+                if (!ns.installed.isEmpty()) {
+                    ngs.instances.put(i.id, ns);
                 }
             });
-        }
+
+            if (!ngs.instances.isEmpty()) {
+                result.put(g.name, ngs);
+            }
+        });
 
         return result;
     }
 
     @Override
     public void replaceNode(String name, RemoteService minion) {
-        // 1. update the node configuration. this also forces contact with the node to be established.
-        editNode(name, minion);
+        try (var handle = af.run(Actions.REPLACE_NODE, null, null, name)) {
+            // 1. update the node configuration. this also forces contact with the node to be established.
+            editNode(name, minion);
 
-        // 3. find all instances in which the node participates.
-        Map<String, NodeGroupState> toReinstall = getInstancesToReinstall(name);
+            // 3. find all instances in which the node participates.
+            Map<String, NodeGroupState> toReinstall = getInstancesToReinstall(name);
 
-        // 4. trigger re-install of all software.
-        try (Activity grpReinstall = reporter.start("Replacing Node " + name, toReinstall.size())) {
+            // 4. trigger re-install of all software.
             for (var entry : toReinstall.entrySet()) {
                 String group = entry.getKey();
                 NodeGroupState ngs = entry.getValue();
@@ -455,39 +448,38 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
                     MasterNamedResource mnr = getNamedMaster(group);
 
-                    try (Activity instReinstall = reporter.start("Restoring " + nis.name, nis.installed.size())) {
-                        for (var instanceTag : nis.installed) {
-                            InstanceManifest iim = InstanceManifest.load(hive, instanceId, instanceTag);
+                    for (var instanceTag : nis.installed) {
+                        InstanceManifest iim = InstanceManifest.load(hive, instanceId, instanceTag);
 
-                            mnr.install(iim.getManifest());
-                            if (instanceTag.equals(nis.active)) {
-                                mnr.activate(iim.getManifest());
-                            }
-
-                            instReinstall.workAndCancelIfRequested(1);
+                        mnr.install(iim.getManifest());
+                        if (instanceTag.equals(nis.active)) {
+                            mnr.activate(iim.getManifest());
                         }
                     }
                 }
-
-                grpReinstall.workAndCancelIfRequested(1);
             }
         }
-
     }
 
     @Override
     public void removeNode(String name) {
-        nodes.removeNode(name);
+        try (var handle = af.run(Actions.REMOVE_NODE, null, null, name)) {
+            nodes.removeNode(name);
+        }
     }
 
     @Override
     public Map<String, String> fsckNode(String name) {
-        return nodes.getNodeResourceIfOnlineOrThrow(name, MinionStatusResource.class, context).repairDefaultBHive();
+        try (var handle = af.run(Actions.FSCK_NODE, null, null, name)) {
+            return nodes.getNodeResourceIfOnlineOrThrow(name, MinionStatusResource.class, context).repairDefaultBHive();
+        }
     }
 
     @Override
     public long pruneNode(String name) {
-        return nodes.getNodeResourceIfOnlineOrThrow(name, MinionStatusResource.class, context).pruneDefaultBHive();
+        try (var handle = af.run(Actions.PRUNE_NODE, null, null, name)) {
+            return nodes.getNodeResourceIfOnlineOrThrow(name, MinionStatusResource.class, context).pruneDefaultBHive();
+        }
     }
 
     @Override
@@ -497,63 +489,67 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void updateV1(Manifest.Key version, boolean clean) {
-        BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+        try (var handle = af.run(Actions.UPDATE, null, null, version.getTag())) {
+            BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
 
-        Set<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
-        if (!keys.contains(version)) {
-            throw new WebApplicationException("Key not found: + " + version, Status.NOT_FOUND);
-        }
+            Set<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
+            if (!keys.contains(version)) {
+                throw new WebApplicationException("Key not found: + " + version, Status.NOT_FOUND);
+            }
 
-        // find target OS for update package
-        OperatingSystem updateOs = getTargetOsFromUpdate(version);
+            // find target OS for update package
+            OperatingSystem updateOs = getTargetOsFromUpdate(version);
 
-        // Push the update to the nodes. Ensure that master is the last one
-        String masterName = root.getState().self;
-        Collection<String> nodeNames = nodes.getAllNodeNames();
-        SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>(new SortOneAsLastComparator(masterName));
-        pushUpdate(version, bhive, updateOs, nodeNames, toUpdate);
+            // Push the update to the nodes. Ensure that master is the last one
+            String masterName = root.getState().self;
+            Collection<String> nodeNames = nodes.getAllNodeNames();
+            SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>(new SortOneAsLastComparator(masterName));
+            pushUpdate(version, bhive, updateOs, nodeNames, toUpdate);
 
-        // DON'T check for cancel from here on anymore to avoid inconsistent setups
-        // (inconsistent setups can STILL occur in mixed-OS setups)
-        prepareUpdate(version, clean, toUpdate);
+            // DON'T check for cancel from here on anymore to avoid inconsistent setups
+            // (inconsistent setups can STILL occur in mixed-OS setups)
+            prepareUpdate(version, clean, toUpdate);
 
-        // now perform the update on all
-        List<Throwable> problems = performUpdate(version, toUpdate);
-        if (!problems.isEmpty()) {
-            WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
-                    Status.INTERNAL_SERVER_ERROR);
-            problems.forEach(ex::addSuppressed);
-            throw ex;
+            // now perform the update on all
+            List<Throwable> problems = performUpdate(version, toUpdate);
+            if (!problems.isEmpty()) {
+                WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
+                        Status.INTERNAL_SERVER_ERROR);
+                problems.forEach(ex::addSuppressed);
+                throw ex;
+            }
         }
     }
 
     @Override
     public void updateNode(String name, Manifest.Key version, boolean clean) {
-        BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+        try (var handle = af.run(Actions.UPDATE_NODE, null, null, name)) {
+            BHive bhive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
 
-        Set<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
-        if (!keys.contains(version)) {
-            throw new WebApplicationException("Key not found: + " + version, Status.NOT_FOUND);
-        }
+            Set<Key> keys = bhive.execute(new ManifestListOperation().setManifestName(version.toString()));
+            if (!keys.contains(version)) {
+                throw new WebApplicationException("Key not found: + " + version, Status.NOT_FOUND);
+            }
 
-        // find target OS for update package
-        OperatingSystem updateOs = getTargetOsFromUpdate(version);
+            // find target OS for update package
+            OperatingSystem updateOs = getTargetOsFromUpdate(version);
 
-        // Push the update to the nodes. Ensure that master is the last one
-        SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>();
-        pushUpdate(version, bhive, updateOs, Collections.singletonList(name), toUpdate);
+            // Push the update to the nodes. Ensure that master is the last one
+            SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>();
+            pushUpdate(version, bhive, updateOs, Collections.singletonList(name), toUpdate);
 
-        // DON'T check for cancel from here on anymore to avoid inconsistent setups
-        // (inconsistent setups can STILL occur in mixed-OS setups)
-        prepareUpdate(version, clean, toUpdate);
+            // DON'T check for cancel from here on anymore to avoid inconsistent setups
+            // (inconsistent setups can STILL occur in mixed-OS setups)
+            prepareUpdate(version, clean, toUpdate);
 
-        // now perform the update on all
-        List<Throwable> problems = performUpdate(version, toUpdate);
-        if (!problems.isEmpty()) {
-            WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
-                    Status.INTERNAL_SERVER_ERROR);
-            problems.forEach(ex::addSuppressed);
-            throw ex;
+            // now perform the update on all
+            List<Throwable> problems = performUpdate(version, toUpdate);
+            if (!problems.isEmpty()) {
+                WebApplicationException ex = new WebApplicationException("Problem(s) updating minion(s)",
+                        Status.INTERNAL_SERVER_ERROR);
+                problems.forEach(ex::addSuppressed);
+                throw ex;
+            }
         }
     }
 
@@ -574,73 +570,65 @@ public class MasterRootResourceImpl implements MasterRootResource {
     }
 
     private void prepareUpdate(Manifest.Key version, boolean clean, SortedMap<String, MinionUpdateResource> toUpdate) {
-        try (Activity preparing = reporter.start("Preparing update on Minions...", toUpdate.size())) {
-            List<Runnable> runnables = new ArrayList<>();
+        List<Runnable> runnables = new ArrayList<>();
 
-            // prepare the update on all minions
-            for (Map.Entry<String, MinionUpdateResource> ur : toUpdate.entrySet()) {
-                runnables.add(() -> {
-                    try {
-                        ur.getValue().prepare(version, clean);
-                    } catch (Exception e) {
-                        // don't immediately throw to update as many minions as possible.
-                        // this Exception should actually never happen according to the contract.
-                        throw new WebApplicationException("Cannot preapre update on " + ur.getKey(), e);
-                    }
-                    preparing.worked(1);
-                });
-            }
-
-            RequestScopedParallelOperations.runAndAwaitAll("Prepare-Update", runnables, reqScope, null, reporter);
+        // prepare the update on all minions
+        for (Map.Entry<String, MinionUpdateResource> ur : toUpdate.entrySet()) {
+            runnables.add(() -> {
+                try {
+                    ur.getValue().prepare(version, clean);
+                } catch (Exception e) {
+                    // don't immediately throw to update as many minions as possible.
+                    // this Exception should actually never happen according to the contract.
+                    throw new WebApplicationException("Cannot preapre update on " + ur.getKey(), e);
+                }
+            });
         }
+
+        rspos.runAndAwaitAll("Prepare-Update", runnables, null);
     }
 
     private void pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, Collection<String> nodeNames,
             SortedMap<String, MinionUpdateResource> toUpdate) {
-        try (Activity pushing = reporter.start("Pushing Update to Nodes", nodeNames.size())) {
-            List<Runnable> runnables = new ArrayList<>();
+        List<Runnable> runnables = new ArrayList<>();
 
-            for (String nodeName : nodeNames) {
-                MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);
+        for (String nodeName : nodeNames) {
+            MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);
 
-                if (minionDto == null) {
-                    // this means the node needs to be updated separately later on.
-                    log.warn("Cannot push update to offline node {}", nodeName);
-                    continue;
-                }
-
-                runnables.add(() -> {
-                    RemoteService service = minionDto.remote;
-                    try {
-                        if (minionDto.os == updateOs) {
-                            MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class,
-                                    context);
-                            synchronized (toUpdate) {
-                                toUpdate.put(nodeName, resource);
-                            }
-                        } else {
-                            log.warn("Not updating {}, wrong os ({} != {})", nodeName, minionDto.os, updateOs);
-                            pushing.workAndCancelIfRequested(1);
-                            return;
-                        }
-                    } catch (Exception e) {
-                        log.warn("Cannot contact minion: {} - not updating.", nodeName);
-                        pushing.workAndCancelIfRequested(1);
-                        return;
-                    }
-
-                    try {
-                        h.execute(new PushOperation().addManifest(version).setRemote(service));
-                    } catch (Exception e) {
-                        log.error("Cannot push update to minion: {}", nodeName, e);
-                        throw new WebApplicationException("Cannot push update to minions", e, Status.BAD_GATEWAY);
-                    }
-                    pushing.workAndCancelIfRequested(1);
-                });
+            if (minionDto == null) {
+                // this means the node needs to be updated separately later on.
+                log.warn("Cannot push update to offline node {}", nodeName);
+                continue;
             }
 
-            RequestScopedParallelOperations.runAndAwaitAll("Push-Update", runnables, reqScope, h.getTransactions(), reporter);
+            runnables.add(() -> {
+                RemoteService service = minionDto.remote;
+                try {
+                    if (minionDto.os == updateOs) {
+                        MinionUpdateResource resource = ResourceProvider.getResource(service, MinionUpdateResource.class,
+                                context);
+                        synchronized (toUpdate) {
+                            toUpdate.put(nodeName, resource);
+                        }
+                    } else {
+                        log.warn("Not updating {}, wrong os ({} != {})", nodeName, minionDto.os, updateOs);
+                        return;
+                    }
+                } catch (Exception e) {
+                    log.warn("Cannot contact minion: {} - not updating.", nodeName);
+                    return;
+                }
+
+                try {
+                    h.execute(new PushOperation().addManifest(version).setRemote(service));
+                } catch (Exception e) {
+                    log.error("Cannot push update to minion: {}", nodeName, e);
+                    throw new WebApplicationException("Cannot push update to minions", e, Status.BAD_GATEWAY);
+                }
+            });
         }
+
+        rspos.runAndAwaitAll("Push-Update", runnables, h.getTransactions());
     }
 
     private OperatingSystem getTargetOsFromUpdate(Key version) {
@@ -654,6 +642,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     @Override
     public void restartServer() {
+        // never-ending restart-server action which will notify the web-ui of pending restart.
+        af.run(Actions.RESTART_SERVER);
         root.getRestartManager().performRestart(1_000);
     }
 
@@ -664,7 +654,7 @@ public class MasterRootResourceImpl implements MasterRootResource {
             throw new WebApplicationException("Hive not found: " + name, Status.NOT_FOUND);
         }
 
-        return rc.initResource(new MasterNamedResourceImpl(root, h));
+        return rc.initResource(new MasterNamedResourceImpl(root, h, name));
     }
 
     private static final class NodeGroupState {
@@ -674,7 +664,6 @@ public class MasterRootResourceImpl implements MasterRootResource {
 
     private static final class NodeInstanceState {
 
-        public String name;
         public List<String> installed = new ArrayList<>();
         public String active;
     }

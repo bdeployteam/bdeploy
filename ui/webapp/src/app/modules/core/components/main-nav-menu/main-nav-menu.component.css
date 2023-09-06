@@ -49,7 +49,7 @@
   display: none;
 }
 
-.local-activity-popup-sizing {
+.local-action-popup-sizing {
   max-width: calc(100% - 10px);
   width: 700px;
   position: relative;

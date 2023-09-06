@@ -1,6 +1,7 @@
 {
   "singleQuote": true,
   "endOfLine": "auto",
+  "printWidth": 120,
   "overrides": [
     {
       "files": "*.scss",

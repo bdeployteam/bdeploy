@@ -26,16 +26,16 @@
         text="Install Update"
         [collapsed]="false"
         (click)="doInstall()"
-        [loadingWhen$]="installing$"
-        [disabled]="!(software$ | async)?.system?.length || (software$ | async)?.current || (installing$ | async) || (cfg.isUpdateInstallSucceeded$ | async)"
+        [loadingWhen$]="mappedInstall$"
+        [disabled]="!(software$ | async)?.system?.length || (software$ | async)?.current || (mappedInstall$ | async) || (cfg.isUpdateInstallSucceeded$ | async)"
       ></app-bd-button>
       <app-bd-button
         icon="delete"
         text="Delete"
         [collapsed]="false"
         (click)="doDelete()"
-        [loadingWhen$]="deleting$"
-        [disabled]="(deleting$ | async) || (software$ | async)?.current"
+        [loadingWhen$]="mappedDelete$"
+        [disabled]="(mappedDelete$ | async) || (software$ | async)?.current"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

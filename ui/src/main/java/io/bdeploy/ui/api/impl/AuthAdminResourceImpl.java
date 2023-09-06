@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.SortedSet;
 
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.UserGroupInfo;
 import io.bdeploy.interfaces.UserInfo;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
@@ -26,6 +29,9 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
 
     @Inject
     private ChangeEventManager cem;
+
+    @Inject
+    private ActionFactory af;
 
     @Override
     public void createLocalUser(UserInfo info) {
@@ -89,10 +95,12 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
 
     @Override
     public String importAccountsLdapServer(LDAPSettingsDto dto) {
-        String feedback = auth.importAccountsLdapServer(dto);
-        cem.change(ObjectChangeType.USER, Collections.emptyMap());
-        cem.change(ObjectChangeType.USER_GROUP, Collections.emptyMap());
-        return feedback;
+        try (ActionHandle h = af.run(Actions.LDAP_SYNC, null, null, dto.id)) {
+            String feedback = auth.importAccountsLdapServer(dto);
+            cem.change(ObjectChangeType.USER, Collections.emptyMap());
+            cem.change(ObjectChangeType.USER_GROUP, Collections.emptyMap());
+            return feedback;
+        }
     }
 
     @Override

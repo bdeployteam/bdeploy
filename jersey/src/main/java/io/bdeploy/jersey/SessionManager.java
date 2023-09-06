@@ -1,5 +1,7 @@
 package io.bdeploy.jersey;
 
+import java.util.Set;
+
 import io.bdeploy.common.security.ApiAccessToken;
 
 /**
@@ -28,6 +30,11 @@ public interface SessionManager extends AutoCloseable {
      * @param session the session ID to invalidate.
      */
     public void removeSession(String session);
+
+    /**
+     * @return a set of active sessions in the past period (currently 5 minutes).
+     */
+    public Set<String> getActiveSessions();
 
     /**
      * Closes and cleans up the session manager.

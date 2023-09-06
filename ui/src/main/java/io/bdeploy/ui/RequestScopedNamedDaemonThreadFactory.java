@@ -7,9 +7,9 @@ import org.glassfish.jersey.process.internal.RequestContext;
 import org.glassfish.jersey.process.internal.RequestScope;
 
 import io.bdeploy.bhive.BHiveTransactions;
-import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.util.NamedDaemonThreadFactory;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.JerseyScopeService;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import jakarta.inject.Provider;
 
 /**
@@ -25,35 +25,35 @@ public class RequestScopedNamedDaemonThreadFactory extends NamedDaemonThreadFact
 
     private final Provider<RequestScope> reqScope;
     private final BHiveTransactions tx;
-    private final JerseyBroadcastingActivityReporter reporter;
+    private final JerseyScopeService scopeService;
 
     public RequestScopedNamedDaemonThreadFactory(Provider<RequestScope> req, BHiveTransactions tx,
-            JerseyBroadcastingActivityReporter reporter, String name) {
-        this(req, tx, reporter, () -> name);
+            JerseyScopeService scopeService, String name) {
+        this(req, tx, scopeService, () -> name);
     }
 
     public RequestScopedNamedDaemonThreadFactory(Provider<RequestScope> req, BHiveTransactions tx,
-            JerseyBroadcastingActivityReporter reporter, Supplier<String> name) {
+            JerseyScopeService scopeService, Supplier<String> name) {
         super(name);
 
         this.reqScope = req;
+        this.scopeService = scopeService;
         this.tx = tx;
-        this.reporter = reporter;
     }
 
     @Override
     public Thread newThread(Runnable r) {
         RequestContext scope = reqScope.get().referenceCurrent();
+        ObjectScope objscope = scopeService.getObjectScope();
         return super.newThread(() -> {
             if (tx != null) {
                 tx.detachThread();
             }
 
+            scopeService.setScope(objscope);
             reqScope.get().runInScope(scope, () -> {
                 // must branch *inside* the request scope to be able to copy data over.
-                try (NoThrowAutoCloseable c = reporter.branchThread()) {
-                    r.run();
-                }
+                r.run();
             });
         });
     }

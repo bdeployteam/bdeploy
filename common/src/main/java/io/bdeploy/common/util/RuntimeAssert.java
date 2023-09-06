@@ -20,8 +20,18 @@ public class RuntimeAssert {
         assertTrue(o != null, msg);
     }
 
+    public static void assertNull(Object o, String msg) {
+        assertTrue(o == null, msg);
+    }
+
     public static void assertNotNull(Object o) {
         if (o == null) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public static void assertNull(Object o) {
+        if (o != null) {
             throw new IllegalStateException();
         }
     }

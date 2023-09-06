@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Instance Group Settings"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Instance Group Settings" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
@@ -53,16 +50,16 @@
           icon="build"
           [collapsed]="false"
           (click)="onRepairAndPrune(group)"
-          [loadingWhen$]="repairing$"
-          [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (repairing$ | async)"
+          [loadingWhen$]="mappedRepair$"
+          [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (mappedRepair$ | async)"
         ></app-bd-button>
         <app-bd-button
           text="Delete Instance Group"
           icon="delete"
           [collapsed]="false"
           (click)="onDelete(group)"
-          [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (deleting$ | async)"
-          [loadingWhen$]="deleting$"
+          [disabled]="!(auth.isCurrentScopeAdmin$ | async) || (mappedDelete$ | async)"
+          [loadingWhen$]="mappedDelete$"
         ></app-bd-button>
       </ng-container>
     </div>

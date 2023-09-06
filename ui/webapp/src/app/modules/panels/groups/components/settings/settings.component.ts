@@ -1,9 +1,10 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
+import { Actions, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -14,10 +15,15 @@ import { GroupDetailsService } from '../../services/group-details.service';
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
+  private actions = inject(ActionsService);
+
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ repairing$ = new BehaviorSubject<boolean>(false);
+  private deleting$ = new BehaviorSubject<boolean>(false);
+  private repairing$ = new BehaviorSubject<boolean>(false);
+
+  protected mappedDelete$ = this.actions.action([Actions.DELETE_GROUP], this.deleting$);
+  protected mappedRepair$ = this.actions.action([Actions.FSCK_BHIVE, Actions.PRUNE_BHIVE], this.repairing$);
 
   constructor(
     public auth: AuthenticationService,
@@ -29,10 +35,7 @@ export class SettingsComponent {
 
   /* template */ onRepairAndPrune(group: InstanceGroupConfiguration): void {
     this.dialog
-      .confirm(
-        'Repair and Prune',
-        'Repairing will remove any (anyhow) damaged and unusable elements from the BHive'
-      )
+      .confirm('Repair and Prune', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive')
       .subscribe((confirmed) => {
         if (confirmed) {
           this.repairing$.next(true);
@@ -52,13 +55,7 @@ export class SettingsComponent {
                 : `No damaged objects were found.`;
 
               const pruneMessage = `Prune freed <strong>${pruned}</strong> in ${group.name}.`;
-              this.dialog
-                .info(
-                  `Repair and Prune`,
-                  `${repairMessage}<br/>${pruneMessage}`,
-                  'build'
-                )
-                .subscribe();
+              this.dialog.info(`Repair and Prune`, `${repairMessage}<br/>${pruneMessage}`, 'build').subscribe();
             });
         }
       });

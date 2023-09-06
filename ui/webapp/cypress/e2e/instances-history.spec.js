@@ -26,11 +26,9 @@ describe('Instance History Tests', () => {
 
     // create some from a template
     cy.inMainNavContent(() => {
-      cy.contains('.bd-rect-card', 'The instance is currently empty').within(
-        () => {
-          cy.get('button[data-cy^="Apply Instance Template"]').click();
-        }
-      );
+      cy.contains('.bd-rect-card', 'The instance is currently empty').within(() => {
+        cy.get('button[data-cy^="Apply Instance Template"]').click();
+      });
     });
 
     cy.inMainNavFlyin('app-instance-templates', () => {
@@ -40,7 +38,7 @@ describe('Instance History Tests', () => {
       cy.fillFormSelect('Client Apps', 'Apply to Client Applications');
       cy.get('button[data-cy="Next"]').click();
 
-      cy.fillFormInput('Text Value', 'Test Text');
+      cy.fillFormInput('Text Value', 'TestText');
       cy.fillFormInput('Sleep Timeout', '5');
       cy.get('button[data-cy="Confirm"]').click();
     });
@@ -82,15 +80,10 @@ describe('Instance History Tests', () => {
     });
 
     cy.inMainNavFlyin('app-history-compare', () => {
-      cy.get('app-history-header-config:contains("TestInstance")').should(
-        'have.length',
-        2
-      );
+      cy.get('app-history-header-config:contains("TestInstance")').should('have.length', 2);
       cy.contains('app-history-diff-field', 'Server No Sleep').should('exist');
-      cy.contains('app-history-diff-field', 'Server With Sleep').should(
-        'exist'
-      );
-      cy.contains('app-history-diff-field', 'Client Test Text').should('exist');
+      cy.contains('app-history-diff-field', 'Server With Sleep').should('exist');
+      cy.contains('app-history-diff-field', 'Client TestText').should('exist');
     });
     cy.screenshot('Doc_HistoryCompare');
     cy.inMainNavFlyin('app-history-compare', () => {

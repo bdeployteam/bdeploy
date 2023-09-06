@@ -61,7 +61,7 @@ describe('Instance Settings Tests', () => {
     cy.screenshot('Doc_InstanceTemplatesVars');
 
     cy.inMainNavFlyin('app-instance-templates', () => {
-      cy.fillFormInput('Text Value', 'Test Text');
+      cy.fillFormInput('Text Value', 'TestText');
       cy.fillFormInput('Sleep Timeout', '5');
       cy.get('button[data-cy="Confirm"]').click();
     });
@@ -111,19 +111,12 @@ describe('Instance Settings Tests', () => {
       });
       cy.contains('mat-expansion-panel', 'Sleep Configuration').within(() => {
         cy.get('mat-panel-title').click();
-        cy.get('mat-expansion-panel-header').should(
-          'have.attr',
-          'aria-expanded',
-          'true'
-        );
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
 
         cy.get('app-bd-form-input[name="param.sleep_link"]')
           .should('exist')
           .within(() => {
-            cy.get('input[name="param.sleep_link"]').should(
-              'have.value',
-              '{{X:param.shared.exp}}'
-            );
+            cy.get('input[name="param.sleep_link"]').should('have.value', '{{X:param.shared.exp}}');
           });
       });
 
@@ -211,12 +204,10 @@ describe('Instance Settings Tests', () => {
     cy.screenshot('Doc_InstanceAddProcessTemplVars');
 
     cy.inMainNavFlyin('app-add-process', () => {
-      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(
-        () => {
-          cy.fillFormInput('Sleep Timeout', '7');
-          cy.get('button[data-cy="Confirm"]').click();
-        }
-      );
+      cy.contains('app-bd-notification-card', 'Assign Variable Values').within(() => {
+        cy.fillFormInput('Sleep Timeout', '7');
+        cy.get('button[data-cy="Confirm"]').click();
+      });
     });
 
     cy.inMainNavContent(() => {
@@ -237,11 +228,7 @@ describe('Instance Settings Tests', () => {
       });
       cy.contains('mat-expansion-panel', 'Sleep Configuration').within(() => {
         cy.get('mat-panel-title').click();
-        cy.get('mat-expansion-panel-header').should(
-          'have.attr',
-          'aria-expanded',
-          'true'
-        );
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
 
         cy.get('app-bd-form-input[name="param.sleep_val"]')
           .should('exist')
@@ -263,10 +250,7 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavFlyin('app-history-entry', () => {
-      cy.get('button[data-cy^="Export"]').downloadByLocationAssign(
-        'instance-export.zip',
-        true
-      );
+      cy.get('button[data-cy^="Export"]').downloadByLocationAssign('instance-export.zip', true);
       validateZip('instance-export.zip', 'instance.json', true);
     });
   });
@@ -282,9 +266,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.contains('Current Version: 1').should('exist');
-      cy.contains('.bd-rect-card', 'The instance is currently empty').should(
-        'exist'
-      );
+      cy.contains('.bd-rect-card', 'The instance is currently empty').should('exist');
       cy.pressToolbarButton('Instance Settings');
     });
 

@@ -6,7 +6,6 @@ import io.bdeploy.common.audit.AuditRecord;
 import io.bdeploy.common.audit.AuditRecord.Severity;
 import io.bdeploy.common.audit.Auditor;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -28,14 +27,13 @@ public class JerseyAuditingFilter implements ContainerResponseFilter {
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
         StatusType status = responseContext.getStatusInfo();
 
-        // skip GET reqeusts which are successful
-        if (status.getFamily() == Family.SUCCESSFUL && requestContext.getMethod().equals(HttpMethod.GET)) {
+        // only audit *failed* requests.
+        if (status.getFamily() == Family.SUCCESSFUL) {
             return;
         }
 
-        auditor.audit(AuditRecord.Builder.fromRequest(requestContext)
-                .setSeverity(responseContext.getStatus() > 400 ? Severity.WARNING : Severity.NORMAL)
-                .setMessage(status.getStatusCode() + ": " + status.getReasonPhrase()).build());
+        auditor.audit(AuditRecord.Builder.fromRequest(requestContext).setSeverity(Severity.WARNING)
+                .setMessage("HTTP: " + status.getStatusCode() + ": " + status.getReasonPhrase()).build());
     }
 
 }

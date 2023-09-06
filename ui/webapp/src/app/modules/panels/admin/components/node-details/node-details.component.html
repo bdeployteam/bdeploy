@@ -1,28 +1,17 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [panel]="true"
-    header="Node {{ nodeName$ | async }}"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [panel]="true" header="Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <div
-      *ngIf="nodeState$ | async as state; else noState"
-      class="flex flex-col gap-2.5"
-    >
+    <div *ngIf="nodeState$ | async as state; else noState" class="flex flex-col gap-2.5">
       <app-bd-notification-card
         [svgIcon]="state.config.os"
         [dismissable]="false"
         header="{{ nodeName$ | async }} - {{ state.config.os }}"
       >
-        <div
-          class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1"
-        >
+        <div class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
           <div>BDeploy Version:</div>
           <div class="truncate">{{ nodeVersion }}</div>
           <div>Number of CPUs:</div>
-          <div>
-            {{ !!state.monitoring?.availableProcessors ?
-            state.monitoring.availableProcessors : 'Unknown' }}
-          </div>
+          <div>{{ !!state.monitoring?.availableProcessors ? state.monitoring.availableProcessors : 'Unknown' }}</div>
           <div>Master:</div>
           <div>{{ state.config.master ? 'yes' : 'no' }}</div>
           <ng-container *ngIf="!state.offline">
@@ -31,13 +20,7 @@
           </ng-container>
           <ng-container *ngIf="state.offline">
             <div>Status:</div>
-            <div
-              class="truncate"
-              [matTooltip]="state.infoText"
-              [matTooltipShowDelay]="500"
-            >
-              {{ state.infoText }}
-            </div>
+            <div class="truncate" [matTooltip]="state.infoText" [matTooltipShowDelay]="500">{{ state.infoText }}</div>
           </ng-container>
           <div>Response Time:</div>
           <div>{{ state.lastRoundtrip }}ms</div>
@@ -90,8 +73,8 @@
         icon="delete"
         [collapsed]="false"
         (click)="onDelete()"
-        [disabled]="state.config?.master || (deleting$ | async)"
-        [loadingWhen$]="deleting$"
+        [disabled]="state.config?.master || (mappedDelete$ | async)"
+        [loadingWhen$]="mappedDelete$"
       ></app-bd-button>
     </div>
     <ng-template #noState>

@@ -11,7 +11,6 @@ import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.bhive.remote.jersey.BHiveResource.FetchSpec;
 import io.bdeploy.bhive.remote.jersey.BHiveResource.ObjectListSpec;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.jersey.JerseyClientFactory;
 import jakarta.ws.rs.NotFoundException;
@@ -27,11 +26,10 @@ public class JerseyRemoteBHive implements RemoteBHive {
 
     private final BHiveResource client;
 
-    public JerseyRemoteBHive(RemoteService service, String name, ActivityReporter reporter) {
+    public JerseyRemoteBHive(RemoteService service, String name) {
         JerseyClientFactory jcf = JerseyClientFactory.get(service);
 
         jcf.register(HIVE_JACKSON_MODULE);
-        jcf.setReporter(reporter);
 
         this.client = jcf.getProxyClient(BHiveLocator.class).getNamedHive(name == null ? DEFAULT_NAME : name);
     }

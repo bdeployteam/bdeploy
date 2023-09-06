@@ -13,11 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivitySnapshot;
-import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -28,11 +24,6 @@ import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.OnDiscKeyStore;
 import io.bdeploy.common.security.RemoteService;
-import io.bdeploy.common.util.JacksonHelper;
-import io.bdeploy.jersey.JerseyClientFactory;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
-import io.bdeploy.jersey.ws.change.client.ObjectChangeClientWebSocket;
-import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriBuilder;
 
@@ -118,19 +109,14 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
             svc = createServiceFromLLM(rc, optional, llm);
         }
 
-        if (getActivityReporter() instanceof ActivityReporter.Stream) {
-            ((ActivityReporter.Stream) getActivityReporter()).setProxyConnector(this::connectProxy);
-        }
-
-        JerseyClientFactory.setDefaultReporter(getActivityReporter());
-
-        try (NoThrowAutoCloseable proxy = getActivityReporter().proxyActivities(svc)) {
-            return run(config, svc);
-        }
+        // TODO: subscribe to actions *triggered by us*. This requires sending a client ID and
+        // filtering actions on the server when broadcasting. This in turn has the same challenges
+        // as scope service and activities had (?).
+        return run(config, svc);
     }
 
     protected SecurityContext getLocalContext() {
-        return null; // always null for the CLI. Ther server will infer the context from the token;
+        return null; // always null for the CLI. The server will infer the context from the token;
     }
 
     private RemoteService createServiceFromLLM(RemoteConfig rc, boolean optional, LocalLoginManager llm) {
@@ -161,38 +147,6 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
 
         svc = createRemoteService(rc, optional, r);
         return svc;
-    }
-
-    private NoThrowAutoCloseable connectProxy(RemoteService remote, Consumer<List<ActivitySnapshot>> onMessage) {
-        return new NoThrowAutoCloseable() {
-
-            private ObjectChangeClientWebSocket ws;
-
-            {
-                try {
-                    this.ws = JerseyClientFactory.get(remote).getObjectChangeWebSocket(c -> {
-                        String serialized = c.details.get(JerseyBroadcastingActivityReporter.OCT_ACTIVIES);
-                        try {
-                            onMessage.accept(
-                                    JacksonHelper.getDefaultJsonObjectMapper().readValue(serialized, ActivitySnapshot.LIST_TYPE));
-                        } catch (Exception e) {
-                            out().println("Cannot read remote activities");
-                            e.printStackTrace(out());
-                        }
-                    });
-                    this.ws.subscribe(JerseyBroadcastingActivityReporter.OCT_ACTIVIES, ObjectScope.EMPTY);
-                } catch (Exception e) {
-                    out().println("Cannot initialize Acitivities WebSocket");
-                }
-            }
-
-            @Override
-            public void close() {
-                if (ws != null) {
-                    ws.close();
-                }
-            }
-        };
     }
 
     private RemoteService createRemoteService(RemoteConfig rc, boolean optional, URI r) {

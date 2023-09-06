@@ -11,7 +11,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.ui.dto.MinionSyncResultDto;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
@@ -37,7 +37,7 @@ public interface ManagedServersResource {
     @PUT
     @Path("/auto-attach/{group}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public void tryAutoAttach(@ActivityScope @PathParam("group") String groupName, ManagedMasterDto target);
+    public void tryAutoAttach(@Scope @PathParam("group") String groupName, ManagedMasterDto target);
 
     /**
      * Used on a central server to manually (force) attach the given server without verification
@@ -45,7 +45,7 @@ public interface ManagedServersResource {
     @PUT
     @Path("/manual-attach/{group}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public void manualAttach(@ActivityScope @PathParam("group") String groupName, ManagedMasterDto target);
+    public void manualAttach(@Scope @PathParam("group") String groupName, ManagedMasterDto target);
 
     /**
      * Used on a managed server to manually (force) attach an instance group from a central server using it's encrypted
@@ -69,7 +69,7 @@ public interface ManagedServersResource {
     @POST
     @Path("/central-ident/{group}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public String getCentralIdent(@ActivityScope @PathParam("group") String group, ManagedMasterDto target);
+    public String getCentralIdent(@Scope @PathParam("group") String group, ManagedMasterDto target);
 
     /**
      * Retrieve all available managed servers for an instance group on the central server
@@ -77,7 +77,7 @@ public interface ManagedServersResource {
     @GET
     @Path("/list/{group}")
     @RequiredPermission(scope = "group", permission = Permission.CLIENT)
-    public List<ManagedMasterDto> getManagedServers(@ActivityScope @PathParam("group") String instanceGroup);
+    public List<ManagedMasterDto> getManagedServers(@Scope @PathParam("group") String instanceGroup);
 
     /**
      * Retrieve the controlling managed server on the central server.
@@ -85,7 +85,7 @@ public interface ManagedServersResource {
     @GET
     @Path("/controlling-server/{group}/{instanceId}")
     @RequiredPermission(scope = "group", permission = Permission.READ)
-    public ManagedMasterDto getServerForInstance(@ActivityScope @PathParam("group") String instanceGroup,
+    public ManagedMasterDto getServerForInstance(@Scope @PathParam("group") String instanceGroup,
             @PathParam("instanceId") String instanceId, @QueryParam("instanceTag") String instanceTag);
 
     /**
@@ -94,67 +94,67 @@ public interface ManagedServersResource {
     @GET
     @Path("/controlled-instances/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.READ)
-    public List<InstanceConfiguration> getInstancesControlledBy(@ActivityScope @PathParam("group") String groupName,
+    public List<InstanceConfiguration> getInstancesControlledBy(@Scope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @DELETE
     @Path("/delete-server/{group}/{server:.+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public void deleteManagedServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName);
+    public void deleteManagedServer(@Scope @PathParam("group") String groupName, @PathParam("server") String serverName);
 
     @POST
     @Path("/update-server/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public void updateManagedServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
+    public void updateManagedServer(@Scope @PathParam("group") String groupName, @PathParam("server") String serverName,
             ManagedMasterDto update);
 
     @GET
     @Path("/minion-state/{group}/{server:.+}")
     @Consumes(MediaType.TEXT_PLAIN)
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public Map<String, MinionStatusDto> getMinionStateOfManagedServer(@ActivityScope @PathParam("group") String groupName,
+    public Map<String, MinionStatusDto> getMinionStateOfManagedServer(@Scope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/synchronize/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.READ)
-    public MinionSyncResultDto synchronize(@ActivityScope @PathParam("group") String groupName,
+    public MinionSyncResultDto synchronize(@Scope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @GET
     @Path("/list-products/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public List<ProductDto> listProducts(@ActivityScope @PathParam("group") String groupName,
+    public List<ProductDto> listProducts(@Scope @PathParam("group") String groupName,
             @PathParam("server") String serverName);
 
     @POST
     @Path("/transfer-products/{group}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public void transferProducts(@ActivityScope @PathParam("group") String groupName, ProductTransferDto transfer);
+    public void transferProducts(@Scope @PathParam("group") String groupName, ProductTransferDto transfer);
 
     @GET
     @Path("/active-transfers/{group}")
     @RequiredPermission(scope = "group", permission = Permission.WRITE)
-    public SortedSet<ProductDto> getActiveTransfers(@ActivityScope @PathParam("group") String groupName);
+    public SortedSet<ProductDto> getActiveTransfers(@Scope @PathParam("group") String groupName);
 
     @POST
     @Path("/minion-transfer-updates/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public void transferUpdate(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
+    public void transferUpdate(@Scope @PathParam("group") String groupName, @PathParam("server") String serverName,
             MinionUpdateDto dto);
 
     @POST
     @Path("/minion-install-updates/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public void installUpdate(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName,
+    public void installUpdate(@Scope @PathParam("group") String groupName, @PathParam("server") String serverName,
             MinionUpdateDto dto);
 
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/minion-ping/{group}/{server:.+}")
     @RequiredPermission(scope = "group", permission = Permission.ADMIN)
-    public Version pingServer(@ActivityScope @PathParam("group") String groupName, @PathParam("server") String serverName);
+    public Version pingServer(@Scope @PathParam("group") String groupName, @PathParam("server") String serverName);
 
 }

@@ -38,7 +38,7 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
         ) {
           switch (e.status) {
             case 0:
-              this.config.checkServerReachable();
+              this.config.markServerOffline();
               return throwError(() => e);
             case 401:
               // let 401 pass through for logout redirection in the other interceptor :)

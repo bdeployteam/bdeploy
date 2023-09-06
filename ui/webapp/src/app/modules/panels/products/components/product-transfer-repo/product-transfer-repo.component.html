@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Import Product"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Import Product" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5 h-full">
       <mat-stepper
@@ -29,15 +26,10 @@
         </mat-step>
         <mat-step label="Choose Product" [completed]="!!selectedProductId">
           <div class="min-h-[63px]">
-            <app-bd-loading-overlay
-              [show]="productsLoading$ | async"
-              mode="hide"
-            >
+            <app-bd-loading-overlay [show]="productsLoading$ | async" mode="hide">
               <div class="flex flex-col gap-1">
                 <span>Choose the product to import.</span>
-                <span class="bd-description-text"
-                  >Only products with importable versions are shown.</span
-                >
+                <span class="bd-description-text">Only products with importable versions are shown.</span>
                 <app-bd-form-select
                   name="product"
                   errorDisplay="immediate"
@@ -59,7 +51,8 @@
               [records]="prodsById[selectedProductId]"
               [columns]="prodVersionColumns"
               [checkMode]="true"
-              [(checked)]="selectedVersions"
+              [checked]="selectedVersions$.value"
+              (checkedChange)="selectedVersions$.next($event)"
               [checkedFrozenWhen$]="importing$"
               [headerHidden]="true"
             ></app-bd-data-table>
@@ -72,8 +65,8 @@
         color="primary"
         [collapsed]="false"
         (click)="importVersions()"
-        [disabled]="!selectedVersions?.length || (importing$ | async)"
-        [loadingWhen$]="importing$"
+        [disabled]="!selectedVersions$.value?.length || (mappedImporting$ | async)"
+        [loadingWhen$]="mappedImporting$"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

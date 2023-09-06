@@ -8,16 +8,12 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-import jakarta.ws.rs.ext.Providers;
-
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 
 /**
  * Allows deserializing {@link Path} objects (parameter or return value). The
@@ -32,9 +28,6 @@ import io.bdeploy.jersey.JerseyStreamingHelper.StreamDirection;
 public class JerseyPathReader implements MessageBodyReader<Path> {
 
     static final String PATH_SIZE_HDR = "X-File-Size"; // don't use Content-Length = restricted.
-
-    @Context
-    private Providers providers;
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
@@ -54,8 +47,7 @@ public class JerseyPathReader implements MessageBodyReader<Path> {
 
         Path tmpFile = Files.createTempFile("dl-", ".bin");
         try (OutputStream out = Files.newOutputStream(tmpFile)) {
-            JerseyStreamingHelper.streamWithProgress(providers.getContextResolver(ActivityReporter.class, MediaType.WILDCARD_TYPE)
-                    .getContext(ActivityReporter.class), StreamDirection.READ, entityStream, out, length);
+            JerseyStreamingHelper.streamWithProgress(StreamDirection.READ, entityStream, out, length);
         }
         return tmpFile;
     }

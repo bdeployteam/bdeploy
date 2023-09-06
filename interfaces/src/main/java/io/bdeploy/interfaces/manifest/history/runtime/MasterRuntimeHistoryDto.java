@@ -14,14 +14,14 @@ public class MasterRuntimeHistoryDto {
     /**
      * Adds the given runtime history for the given minion
      */
-    public void add(String minionName, MinionRuntimeHistoryDto history) {
+    public synchronized void add(String minionName, MinionRuntimeHistoryDto history) {
         minion2History.put(minionName, history);
     }
 
     /**
      * Adds the given error message for the given minion
      */
-    public void addError(String minionName, String error) {
+    public synchronized void addError(String minionName, String error) {
         minion2Error.put(minionName, error);
     }
 

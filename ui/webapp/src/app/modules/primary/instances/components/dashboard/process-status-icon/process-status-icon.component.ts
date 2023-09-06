@@ -1,18 +1,8 @@
-import {
-  Component,
-  HostBinding,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import {
-  ApplicationConfiguration,
-  ProcessState,
-  ProcessStatusDto,
-} from 'src/app/models/gen.dtos';
+import { Component, HostBinding, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
+import { Actions, ApplicationConfiguration, ProcessState, ProcessStatusDto } from 'src/app/models/gen.dtos';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
+import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProcessesService } from '../../../services/processes.service';
 
 @Component({
@@ -20,22 +10,30 @@ import { ProcessesService } from '../../../services/processes.service';
   templateUrl: './process-status-icon.component.html',
   styleUrls: ['./process-status-icon.component.css'],
 })
-export class ProcessStatusIconComponent
-  implements OnInit, OnChanges, OnDestroy
-{
-  @Input() record: ApplicationConfiguration;
+export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
+  private processes = inject(ProcessesService);
+  private actions = inject(ActionsService);
+  private areas = inject(NavAreasService);
 
+  @Input() record: ApplicationConfiguration;
   @HostBinding('attr.data-cy') dataCy: string;
 
-  /* template */ icon$ = new BehaviorSubject<string>('help');
-  /* template */ svgIcon$ = new BehaviorSubject<string>(null);
-  /* template */ hint$ = new BehaviorSubject<string>('Unknown');
-  /* template */ class$ = new BehaviorSubject<string>('local-unknown');
+  protected icon$ = new BehaviorSubject<string>('help');
+  protected svgIcon$ = new BehaviorSubject<string>(null);
+  protected hint$ = new BehaviorSubject<string>('Unknown');
+  protected class$ = new BehaviorSubject<string>('local-unknown');
 
+  private id$ = new BehaviorSubject<string>(null);
   private change$ = new BehaviorSubject<any>(null);
   private subscription: Subscription;
 
-  constructor(private processes: ProcessesService) {}
+  protected mappedAction$ = this.actions.action(
+    [Actions.START_PROCESS, Actions.STOP_PROCESS],
+    of(false),
+    null,
+    null,
+    this.id$
+  );
 
   ngOnInit(): void {
     this.subscription = combineLatest([
@@ -44,6 +42,7 @@ export class ProcessStatusIconComponent
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ]).subscribe(([ps, _]) => {
       if (this.record) {
+        this.id$.next(this.record.id);
         this.update(ps);
       }
     });
@@ -70,28 +69,13 @@ export class ProcessStatusIconComponent
       case ProcessState.STOPPED:
         return this.next('stop', null, 'Stopped', 'local-stopped');
       case ProcessState.STOPPED_START_PLANNED:
-        return this.next(
-          null,
-          'start-scheduled',
-          'Process scheduled to start',
-          'local-stopped'
-        );
+        return this.next(null, 'start-scheduled', 'Process scheduled to start', 'local-stopped');
       case ProcessState.RUNNING_NOT_STARTED:
-        return this.next(
-          null,
-          'start-scheduled',
-          'Process starting',
-          'local-running'
-        );
+        return this.next(null, 'start-scheduled', 'Process starting', 'local-running');
       case ProcessState.RUNNING:
         return this.next('favorite', null, 'Running', 'local-running');
       case ProcessState.RUNNING_UNSTABLE:
-        return this.next(
-          'favorite',
-          null,
-          'Running (Recently Crashed)',
-          'local-crashed'
-        );
+        return this.next('favorite', null, 'Running (Recently Crashed)', 'local-crashed');
       case ProcessState.RUNNING_NOT_ALIVE:
         return this.next(
           'heart_broken',
@@ -100,26 +84,11 @@ export class ProcessStatusIconComponent
           'local-crashed'
         );
       case ProcessState.RUNNING_STOP_PLANNED:
-        return this.next(
-          null,
-          'stop-scheduled',
-          'Running (Stop Planned)',
-          'local-running'
-        );
+        return this.next(null, 'stop-scheduled', 'Running (Stop Planned)', 'local-running');
       case ProcessState.CRASHED_WAITING:
-        return this.next(
-          'report_problem',
-          null,
-          'Crashed (Restart pending)',
-          'local-crashed'
-        );
+        return this.next('report_problem', null, 'Crashed (Restart pending)', 'local-crashed');
       case ProcessState.CRASHED_PERMANENTLY:
-        return this.next(
-          'error',
-          null,
-          'Crashed (Too many retries, stopped)',
-          'local-crashed'
-        );
+        return this.next('error', null, 'Crashed (Too many retries, stopped)', 'local-crashed');
     }
   }
 

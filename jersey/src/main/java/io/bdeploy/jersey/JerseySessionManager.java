@@ -1,5 +1,7 @@
 package io.bdeploy.jersey;
 
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,6 +26,8 @@ public class JerseySessionManager implements SessionManager {
     private Future<?> storeJob;
     private final ScheduledExecutorService saveSched = Executors.newScheduledThreadPool(1,
             new NamedDaemonThreadFactory("Session Storage Persistence"));
+
+    private final Cache<String, String> activeInPeriod = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
 
     public JerseySessionManager(JerseySessionConfiguration config) {
         this.storage = config.storage;
@@ -76,7 +80,21 @@ public class JerseySessionManager implements SessionManager {
 
     @Override
     public String getSessionToken(String session) {
-        return sessions.getIfPresent(session);
+        String sess = sessions.getIfPresent(session);
+        if (sess != null) {
+            try {
+                activeInPeriod.get(session, () -> session);
+            } catch (Exception x) {
+                // cannot happen.
+                log.error("Huh?", x);
+            }
+        }
+        return sess;
+    }
+
+    @Override
+    public Set<String> getActiveSessions() {
+        return new TreeSet<>(activeInPeriod.asMap().keySet());
     }
 
     @Override

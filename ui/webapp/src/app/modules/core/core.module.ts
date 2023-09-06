@@ -38,8 +38,7 @@ import { GravatarModule } from 'ngx-gravatar';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.component';
-import { BdActivitiesComponent } from './components/bd-activities/bd-activities.component';
-import { BdActivityInstanceFooterComponent } from './components/bd-activity-instance-footer/bd-activity-instance-footer.component';
+import { BdActionsComponent } from './components/bd-actions/bd-actions.component';
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
@@ -79,6 +78,8 @@ import { BdFormInputComponent } from './components/bd-form-input/bd-form-input.c
 import { BdFormSelectComponentOptionComponent } from './components/bd-form-select-component-option/bd-form-select-component-option.component';
 import { BdFormSelectComponent } from './components/bd-form-select/bd-form-select.component';
 import { BdFormToggleComponent } from './components/bd-form-toggle/bd-form-toggle.component';
+import { BdIdentifierCellComponent } from './components/bd-identifier-cell/bd-identifier-cell.component';
+import { BdIdentifierComponent } from './components/bd-identifier/bd-identifier.component';
 import { BdImageUploadComponent } from './components/bd-image-upload/bd-image-upload.component';
 import { BdLoadingOverlayComponent } from './components/bd-loading-overlay/bd-loading-overlay.component';
 import { BdLogoComponent } from './components/bd-logo/bd-logo.component';
@@ -103,6 +104,7 @@ import { MainNavComponent } from './components/main-nav/main-nav.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { ClickStopPropagationDirective } from './directives/click-stop-propagation.directive';
 import { FileDropDirective } from './directives/file-drop.directive';
+import { RevalidateOnDirective } from './directives/revalidate-on.directive';
 import { httpInterceptorProviders } from './interceptors';
 import { VersionShortPipe } from './pipes/version-short.pipe';
 import { VersionPipe } from './pipes/version.pipe';
@@ -177,8 +179,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdDataSyncCellComponent,
     BdEditorComponent,
     BdEditorDiffComponent,
-    BdActivitiesComponent,
-    BdActivityInstanceFooterComponent,
+    BdActionsComponent,
     BdDataUserAvatarCellComponent,
     BdFormSelectComponentOptionComponent,
     BdDataPermissionLevelCellComponent,
@@ -198,6 +199,9 @@ function loadAppConfig(cfgService: ConfigService) {
     PropagateErrorValidatorDirective,
     BdCustomEditorComponent,
     BdConfirmationComponent,
+    RevalidateOnDirective,
+    BdIdentifierComponent,
+    BdIdentifierCellComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -316,6 +320,8 @@ function loadAppConfig(cfgService: ConfigService) {
     BdExpressionPickerComponent,
     BdCustomEditorComponent,
     BdConfirmationComponent,
+    BdIdentifierCellComponent,
+    BdIdentifierComponent,
 
     // validators
     IdentifierValidator,
@@ -326,6 +332,7 @@ function loadAppConfig(cfgService: ConfigService) {
     PortValueValidatorDirective,
     EditItemInListValidatorDirective,
     LinkExpressionInputValidatorDirective,
+    RevalidateOnDirective,
   ],
 })
 export class CoreModule {}

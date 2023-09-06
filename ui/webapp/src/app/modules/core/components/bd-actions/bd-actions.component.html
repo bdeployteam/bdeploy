@@ -1,0 +1,29 @@
+<div class="flex flex-col gap-1">
+  <div *ngFor="let act of content$ | async; trackBy: doTrack">
+    <app-bd-notification-card
+      [collapsed]="true"
+      icon="hourglass_bottom"
+      [dismissable]="false"
+      [header]="formatTitle(act) | async"
+    >
+      <div class="flex flex-col gap-1">
+        <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+        <div class="flex">
+          <div class="flex-auto"></div>
+          <span><em>{{ formatDuration(act.execution) }}</em></span>
+        </div>
+
+        <div class="flex -mt-2">
+          <div class="flex-auto"></div>
+          <div class="bd-hint-text">
+            ~{{ act.execution.name + (act.execution.source ? (' on ' + act.execution.source) : '') }}.
+          </div>
+        </div>
+      </div>
+    </app-bd-notification-card>
+  </div>
+</div>
+
+<app-bd-no-data *ngIf="!(actions.actions$ | async)?.length">
+  <p>There are currently no actions running in the current scope.</p>
+</app-bd-no-data>

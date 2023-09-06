@@ -6,13 +6,15 @@ import {
   NgZone,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { ManagedMasterDto } from 'src/app/models/gen.dtos';
+import { BehaviorSubject, Subscription, of } from 'rxjs';
+import { distinctUntilChanged, finalize } from 'rxjs/operators';
+import { Actions, ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { ServerDetailsService } from 'src/app/modules/panels/servers/services/server-details.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { ActionsService } from '../../services/actions.service';
 import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
@@ -25,7 +27,24 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
   @Input() server: ManagedMasterDto;
   @Input() collapsed = true;
 
-  /* template */ synchronizing$ = new BehaviorSubject<boolean>(false);
+  private serverDetailsService = inject(ServerDetailsService);
+  private servers = inject(ServersService);
+  private auth = inject(AuthenticationService);
+  private instancesService = inject(InstancesService);
+  private ngZone = inject(NgZone);
+  private cd = inject(ChangeDetectorRef);
+  private actions = inject(ActionsService);
+
+  private synchronizing$ = new BehaviorSubject<boolean>(false);
+  private hostName$ = new BehaviorSubject<string>(null);
+  protected mappedSync$ = this.actions.action(
+    [Actions.SYNCHRONIZING],
+    this.synchronizing$,
+    null, // default: use current
+    of(null), // we *dont* want to fire on current instance change.
+    this.hostName$.pipe(distinctUntilChanged())
+  );
+
   /* template */ sync$ = new BehaviorSubject<boolean>(false);
   /* template */ tooltip$ = new BehaviorSubject<string>(null);
   /* template */ badge$ = new BehaviorSubject<number>(null);
@@ -33,15 +52,6 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
 
   private interval;
   private sub: Subscription;
-
-  constructor(
-    private serverDetailsService: ServerDetailsService,
-    private servers: ServersService,
-    private auth: AuthenticationService,
-    private instancesService: InstancesService,
-    private ngZone: NgZone,
-    private cd: ChangeDetectorRef
-  ) {}
 
   ngOnInit(): void {
     this.sub = this.servers.servers$.subscribe(() => {
@@ -63,15 +73,12 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
 
   updateSyncState() {
     const instance =
-      this.instancesService.current$?.value?.managedServer ||
-      this.instancesService.active$?.value?.managedServer;
+      this.instancesService.current$?.value?.managedServer || this.instancesService.active$?.value?.managedServer;
     if (instance) {
       this.servers.updateInstanceSyncState(instance);
     }
     if (this.serverDetailsService.server$?.value) {
-      this.servers.updateServerSyncState(
-        this.serverDetailsService.server$?.value
-      );
+      this.servers.updateServerSyncState(this.serverDetailsService.server$?.value);
     }
   }
 
@@ -93,39 +100,30 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     if (!this.server) {
       return;
     }
+    this.hostName$.next(this.server.hostName);
     const oldBadge = this.badge$.value;
 
     const isSynchronized = this.servers.isSynchronized(this.server);
     this.noPerm$.next(false);
     if (!isSynchronized && this.server?.update?.forceUpdate) {
       this.sync$.next(false);
-      this.tooltip$.next(
-        'The server requires a mandatory update before synchronization is possible.'
-      );
+      this.tooltip$.next('The server requires a mandatory update before synchronization is possible.');
       this.badge$.next(null);
     } else if (!isSynchronized) {
       this.sync$.next(false);
-      this.tooltip$.next(
-        'The server is not synchronized. Click to synchronize now'
-      );
+      this.tooltip$.next('The server is not synchronized. Click to synchronize now');
       this.badge$.next(null);
     } else {
       this.sync$.next(true);
 
-      const remainingSeconds = Math.round(
-        this.servers.getRemainingSynchronizedTime(this.server) / 1000
-      );
+      const remainingSeconds = Math.round(this.servers.getRemainingSynchronizedTime(this.server) / 1000);
 
       if (remainingSeconds > 60) {
         const remainingMinutes = Math.round(remainingSeconds / 60);
-        this.tooltip$.next(
-          `The server is in synchronized state for ${remainingMinutes} minutes`
-        );
+        this.tooltip$.next(`The server is in synchronized state for ${remainingMinutes} minutes`);
         this.badge$.next(remainingMinutes);
       } else {
-        this.tooltip$.next(
-          `The server is in synchronized state for ${remainingSeconds} seconds`
-        );
+        this.tooltip$.next(`The server is in synchronized state for ${remainingSeconds} seconds`);
         this.badge$.next(remainingSeconds);
       }
     }

@@ -22,7 +22,7 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
@@ -55,7 +55,7 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}/versions")
-    public List<InstanceVersionDto> listVersions(@ActivityScope @PathParam("instance") String instanceId);
+    public List<InstanceVersionDto> listVersions(@Scope @PathParam("instance") String instanceId);
 
     @PUT
     @RequiredPermission(permission = Permission.WRITE)
@@ -63,81 +63,81 @@ public interface InstanceResource {
 
     @GET
     @Path("/{instance}")
-    public InstanceDto read(@ActivityScope @PathParam("instance") String instanceId);
+    public InstanceDto read(@Scope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/{instance}/{versionTag}")
-    public InstanceConfiguration readVersion(@ActivityScope @PathParam("instance") String instanceId,
+    public InstanceConfiguration readVersion(@Scope @PathParam("instance") String instanceId,
             @PathParam("versionTag") String versionTag);
 
     @POST
     @Path("/{instance}/update")
     @RequiredPermission(permission = Permission.WRITE)
-    public void update(@ActivityScope @PathParam("instance") String instanceId, InstanceUpdateDto config,
+    public void update(@Scope @PathParam("instance") String instanceId, InstanceUpdateDto config,
             @QueryParam("managedServer") String managedServer, @QueryParam("expect") String expectedTag);
 
     @DELETE
     @Path("/{instance}/delete")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void delete(@ActivityScope @PathParam("instance") String instanceId);
+    public void delete(@Scope @PathParam("instance") String instanceId);
 
     @DELETE
     @Path("/{instance}/deleteVersion/{tag}")
     @RequiredPermission(permission = Permission.ADMIN)
-    public void deleteVersion(@ActivityScope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
+    public void deleteVersion(@Scope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/{tag}/nodeConfiguration")
-    public InstanceNodeConfigurationListDto getNodeConfigurations(@ActivityScope @PathParam("instance") String instanceId,
+    public InstanceNodeConfigurationListDto getNodeConfigurations(@Scope @PathParam("instance") String instanceId,
             @PathParam("tag") String versionTag);
 
     @GET
     @Path("/{instance}/{tag}/minionConfiguration")
     @RequiredPermission(permission = Permission.READ)
-    public Map<String, MinionDto> getMinionConfiguration(@ActivityScope @PathParam("instance") String instanceId,
+    public Map<String, MinionDto> getMinionConfiguration(@Scope @PathParam("instance") String instanceId,
             @PathParam("tag") String versionTag);
 
     @GET
     @Path("/{instance}/{tag}/minionState")
     @RequiredPermission(permission = Permission.READ)
-    public Map<String, MinionStatusDto> getMinionState(@ActivityScope @PathParam("instance") String instanceId,
+    public Map<String, MinionStatusDto> getMinionState(@Scope @PathParam("instance") String instanceId,
             @PathParam("tag") String versionTag);
 
     @GET
     @Path("/{instance}/{tag}/install")
     @RequiredPermission(permission = Permission.WRITE)
-    public void install(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
+    public void install(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/{tag}/uninstall")
     @RequiredPermission(permission = Permission.WRITE)
-    public void uninstall(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
+    public void uninstall(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
 
     @GET
     @Path("/{instance}/{tag}/activate")
     @RequiredPermission(permission = Permission.WRITE)
-    public void activate(@ActivityScope @PathParam("instance") String instanceId, @ActivityScope @PathParam("tag") String tag);
+    public void activate(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag);
 
     @POST
     @Path("/{instance}/updateProductVersion/{target}")
     @RequiredPermission(permission = Permission.WRITE)
-    public InstanceUpdateDto updateProductVersion(@ActivityScope @PathParam("instance") String instanceId,
+    public InstanceUpdateDto updateProductVersion(@Scope @PathParam("instance") String instanceId,
             @PathParam("target") String productTag, InstanceUpdateDto state);
 
     @POST
     @Path("/{instance}/validate")
     @RequiredPermission(permission = Permission.WRITE)
-    public List<ApplicationValidationDto> validate(@ActivityScope @PathParam("instance") String instanceId,
+    public List<ApplicationValidationDto> validate(@Scope @PathParam("instance") String instanceId,
             InstanceUpdateDto state);
 
     @GET
     @Path("/{instance}/state")
     @RequiredPermission(permission = Permission.READ)
-    public InstanceStateRecord getDeploymentStates(@ActivityScope @PathParam("instance") String instanceId);
+    public InstanceStateRecord getDeploymentStates(@Scope @PathParam("instance") String instanceId);
 
     @Path("/{instance}/processes")
     @RequiredPermission(permission = Permission.READ)
-    public ProcessResource getProcessResource(@ActivityScope @PathParam("instance") String instanceId);
+    public ProcessResource getProcessResource(@Scope @PathParam("instance") String instanceId);
 
     @Path("/bulk")
     @RequiredPermission(permission = Permission.WRITE)
@@ -149,7 +149,7 @@ public interface InstanceResource {
 
     @Path("/{instance}/cfgFiles")
     @RequiredPermission(permission = Permission.READ)
-    public ConfigFileResource getConfigResource(@ActivityScope @PathParam("instance") String instanceId);
+    public ConfigFileResource getConfigResource(@Scope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/{instance}/{applicationId}/clickAndStart")
@@ -179,104 +179,104 @@ public interface InstanceResource {
     @Path("/{instance}/export/{tag}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @RequiredPermission(permission = Permission.WRITE)
-    public Response exportInstance(@ActivityScope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
+    public Response exportInstance(@Scope @PathParam("instance") String instanceId, @PathParam("tag") String tag);
 
     @POST
     @Path("/{instance}/import")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RequiredPermission(permission = Permission.WRITE)
     public List<Key> importInstance(@FormDataParam("file") InputStream inputStream,
-            @ActivityScope @PathParam("instance") String instanceId);
+            @Scope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/{instance}/output/{tag}/{app}")
     @RequiredPermission(permission = Permission.READ)
-    public RemoteDirectory getOutputEntry(@ActivityScope @PathParam("instance") String instanceId,
-            @ActivityScope @PathParam("tag") String tag, @PathParam("app") String app);
+    public RemoteDirectory getOutputEntry(@Scope @PathParam("instance") String instanceId,
+            @Scope @PathParam("tag") String tag, @PathParam("app") String app);
 
     @POST
     @Path("/{instance}/content/{minion}")
     @RequiredPermission(permission = Permission.READ)
-    public StringEntryChunkDto getContentChunk(@ActivityScope @PathParam("instance") String instanceId,
+    public StringEntryChunkDto getContentChunk(@Scope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, RemoteDirectoryEntry entry, @QueryParam("offset") long offset,
             @QueryParam("limit") long limit);
 
     @POST
     @Path("/{instance}/request/{minion}")
     @RequiredPermission(permission = Permission.READ)
-    public String getContentStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
+    public String getContentStreamRequest(@Scope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, RemoteDirectoryEntry entry);
 
     @POST
     @Path("/{instance}/requestMultiZip/{minion}")
     @RequiredPermission(permission = Permission.READ)
-    public String getContentMultiZipStreamRequest(@ActivityScope @PathParam("instance") String instanceId,
+    public String getContentMultiZipStreamRequest(@Scope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, List<RemoteDirectoryEntry> entry);
 
     @POST
     @Path("/{instance}/data/update/{minion}")
     @RequiredPermission(permission = Permission.WRITE)
-    public void updateDataFiles(@ActivityScope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
+    public void updateDataFiles(@Scope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
             List<FileStatusDto> updates);
 
     @POST
     @Path("/{instance}/delete/{minion}")
     @RequiredPermission(permission = Permission.WRITE)
-    public void deleteDataFile(@ActivityScope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
+    public void deleteDataFile(@Scope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
             RemoteDirectoryEntry entry);
 
     @GET
     @Unsecured
     @Path("/{instance}/stream/{token}")
     @RequiredPermission(permission = Permission.READ)
-    public Response getContentStream(@ActivityScope @PathParam("instance") String instanceId, @PathParam("token") String token);
+    public Response getContentStream(@Scope @PathParam("instance") String instanceId, @PathParam("token") String token);
 
     @GET
     @Unsecured
     @Path("/{instance}/streamMultiZip/{token}")
     @RequiredPermission(permission = Permission.READ)
-    public Response getContentMultiZipStream(@ActivityScope @PathParam("instance") String instanceId,
+    public Response getContentMultiZipStream(@Scope @PathParam("instance") String instanceId,
             @PathParam("token") String token);
 
     @POST
     @Path("/{instance}/check-ports/{minion}")
     @RequiredPermission(permission = Permission.READ)
-    public Map<Integer, Boolean> getPortStates(@ActivityScope @PathParam("instance") String instanceId,
+    public Map<Integer, Boolean> getPortStates(@Scope @PathParam("instance") String instanceId,
             @PathParam("minion") String minion, List<Integer> ports);
 
     @GET
     @Path("/{instance}/banner")
-    public InstanceBannerRecord getBanner(@ActivityScope @PathParam("instance") String instanceId);
+    public InstanceBannerRecord getBanner(@Scope @PathParam("instance") String instanceId);
 
     @POST
     @Path("/{instance}/banner")
     @RequiredPermission(permission = Permission.WRITE)
-    public void updateBanner(@ActivityScope @PathParam("instance") String instanceId, InstanceBannerRecord instanceBannerRecord);
+    public void updateBanner(@Scope @PathParam("instance") String instanceId, InstanceBannerRecord instanceBannerRecord);
 
     @POST
     @Path("/{instance}/history")
     @RequiredPermission(permission = Permission.READ)
-    public HistoryResultDto getInstanceHistory(@ActivityScope @PathParam("instance") String instanceId, HistoryFilterDto filter);
+    public HistoryResultDto getInstanceHistory(@Scope @PathParam("instance") String instanceId, HistoryFilterDto filter);
 
     @GET
     @Path("/{instance}/attributes")
     @RequiredPermission(permission = Permission.READ)
-    public CustomAttributesRecord getAttributes(@ActivityScope @PathParam("instance") String instanceId);
+    public CustomAttributesRecord getAttributes(@Scope @PathParam("instance") String instanceId);
 
     @POST
     @Path("/{instance}/attributes")
     @RequiredPermission(permission = Permission.WRITE)
-    public void updateAttributes(@ActivityScope @PathParam("instance") String instanceId, CustomAttributesRecord attributes);
+    public void updateAttributes(@Scope @PathParam("instance") String instanceId, CustomAttributesRecord attributes);
 
     @GET
     @Path("/{instance}/clientUsage")
     @RequiredPermission(permission = Permission.CLIENT)
-    public ClientUsageData getClientUsageData(@ActivityScope @PathParam("instance") String instanceId);
+    public ClientUsageData getClientUsageData(@Scope @PathParam("instance") String instanceId);
 
     @GET
     @Path("/{instance}/uiDirect/{app}/{ep : [^/]+}")
     @RequiredPermission(permission = Permission.CLIENT)
-    public String getUiDirectUrl(@ActivityScope @PathParam("instance") String instance, @PathParam("app") String application,
+    public String getUiDirectUrl(@Scope @PathParam("instance") String instance, @PathParam("app") String application,
             @PathParam("ep") String endpoint);
 
 }

@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [panel]="true"
-    header="Node {{ nodeName$ | async }}"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [panel]="true" header="Node {{ nodeName$ | async }}"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div *ngIf="nodeState$ | async as state" class="flex flex-col gap-2.5">
       <app-bd-notification-card
@@ -10,21 +7,18 @@
         [dismissable]="false"
         header="{{ nodeName$ | async }} - {{ state.config.os }}"
       >
-        <div
-          class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1"
-        >
+        <div class="grid grid-cols-[120px_auto] auto-rows-[24px] items-center gap-1">
           <div>BDeploy Version:</div>
           <div class="truncate">{{ nodeVersion }}</div>
           <div>Number of CPUs:</div>
-          <div>
-            {{ !!state.monitoring?.availableProcessors ?
-            state.monitoring.availableProcessors : 'Unknown' }}
-          </div>
+          <div>{{ !!state.monitoring?.availableProcessors ? state.monitoring.availableProcessors : 'Unknown' }}</div>
           <div>Master:</div>
           <div>{{ state.config.master ? 'yes' : 'no' }}</div>
           <ng-container *ngIf="!state.offline">
             <div>Up Since:</div>
             <div>{{ state.startup | date: 'dd.MM.yyyy HH:mm' }}</div>
+            <div>Response Time:</div>
+            <div>{{ state.lastRoundtrip }}ms</div>
           </ng-container>
           <ng-container *ngIf="state.offline">
             <div>Status:</div>
@@ -44,16 +38,10 @@
     </div>
   </app-bd-dialog-content>
   <app-bd-dialog-content *ngIf="!(nodeState$ | async)">
-    <app-bd-notification-card
-      icon="history"
-      [type]="'warning'"
-      [dismissable]="false"
-      header="Server Not Synchronized"
-    >
+    <app-bd-notification-card icon="history" [type]="'warning'" [dismissable]="false" header="Server Not Synchronized">
       <div class="text-justify">
-        The managed server responsible for this node is not synchronized,
-        details are unavailable. Please synchronize the server to see additional
-        details.
+        The managed server responsible for this node is not synchronized, details are unavailable. Please synchronize
+        the server to see additional details.
       </div>
     </app-bd-notification-card>
   </app-bd-dialog-content>

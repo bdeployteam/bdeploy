@@ -32,11 +32,11 @@ import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.TreeLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.ui.api.HiveLoggingResource;
 import io.bdeploy.ui.api.HiveResource;
 import io.bdeploy.ui.dto.HiveEntryDto;
@@ -55,13 +55,13 @@ public class HiveResourceImpl implements HiveResource {
     private BHiveRegistry registry;
 
     @Inject
-    private ActivityReporter reporter;
-
-    @Inject
     private VersionSorterService vss;
 
     @Inject
     private ResourceContext rc;
+
+    @Inject
+    private ActionFactory af;
 
     @Override
     public List<String> listHives() {
@@ -157,20 +157,22 @@ public class HiveResourceImpl implements HiveResource {
     }
 
     private String prune(String hiveParam) {
-        log.debug("prune(\"{}\")", hiveParam);
-        BHive hive = registry.get(hiveParam);
+        try (var handle = af.run(Actions.PRUNE_BHIVE, hiveParam)) {
+            log.debug("prune(\"{}\")", hiveParam);
+            BHive hive = registry.get(hiveParam);
 
-        SortedMap<ObjectId, Long> pruned = hive.execute(new PruneOperation());
-        Long sumFreedBytes = pruned.entrySet().stream().collect(Collectors.summingLong(Map.Entry::getValue));
+            SortedMap<ObjectId, Long> pruned = hive.execute(new PruneOperation());
+            Long sumFreedBytes = pruned.entrySet().stream().collect(Collectors.summingLong(Map.Entry::getValue));
 
-        return FormatHelper.formatFileSize(sumFreedBytes);
+            return FormatHelper.formatFileSize(sumFreedBytes);
+        }
     }
 
     private Map<String, String> fsck(String hiveParam, boolean fix) {
-        log.debug("fsck(\"{}\")", hiveParam);
-        BHive hive = registry.get(hiveParam);
+        try (var handle = af.run(Actions.FSCK_BHIVE, hiveParam)) {
+            log.debug("fsck(\"{}\")", hiveParam);
+            BHive hive = registry.get(hiveParam);
 
-        try (Activity fsck = reporter.start("Checking " + hiveParam)) {
             Set<ElementView> problematic = hive.execute(new FsckOperation().setRepair(fix));
             Map<String, String> result = new TreeMap<>();
             problematic.forEach(e -> result.put(e.getElementId().getId(), e.getPathString()));

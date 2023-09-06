@@ -17,9 +17,12 @@ import org.glassfish.grizzly.threadpool.AbstractThreadPool;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.threadpool.ThreadPoolProbe;
 
+import io.bdeploy.jersey.JerseySessionManager;
+
 public class JerseyServerMonitor {
 
     private HttpServer server;
+    private JerseySessionManager sessionManager;
 
     private final LongAdder conAccepted = new LongAdder();
     private final LongAdder conClosed = new LongAdder();
@@ -45,6 +48,10 @@ public class JerseyServerMonitor {
     public void setServer(HttpServer server) {
         this.server = server;
         registerProbes();
+    }
+
+    public void setSessionManager(JerseySessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     public JerseyServerMonitoringSnapshot getSnapshot() {
@@ -77,6 +84,8 @@ public class JerseyServerMonitor {
         snapshot.vmMaxMem = Runtime.getRuntime().maxMemory();
         snapshot.vmFreeMem = Runtime.getRuntime().freeMemory();
         snapshot.vmTotalMem = Runtime.getRuntime().totalMemory();
+
+        snapshot.activeSessions = sessionManager.getActiveSessions().size();
 
         return snapshot;
     }

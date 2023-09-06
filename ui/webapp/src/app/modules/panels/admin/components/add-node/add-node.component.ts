@@ -1,8 +1,8 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, finalize, Observable, of, Subscription } from 'rxjs';
-import { MinionMode, NodeAttachDto } from 'src/app/models/gen.dtos';
+import { BehaviorSubject, Observable, Subscription, finalize, map, of, skipWhile, startWith, tap } from 'rxjs';
+import { Actions, MinionMode, NodeAttachDto } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
   BdDialogMessageAction,
@@ -10,6 +10,7 @@ import {
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
@@ -37,8 +38,27 @@ const ACTION_MIGRATE: BdDialogMessageAction<boolean> = {
   styleUrls: ['./add-node.component.css'],
 })
 export class AddNodeComponent implements DirtyableDialog, OnDestroy {
-  /* template */ adding$ = new BehaviorSubject<boolean>(false);
-  /* template */ data = cloneDeep(DEF_NODE);
+  private actions = inject(ActionsService);
+  protected nodesAdmin = inject(NodesAdminService);
+
+  private adding$ = new BehaviorSubject<boolean>(false);
+
+  protected nodeName$ = new BehaviorSubject<string>(null);
+  protected nodeNames$ = this.nodesAdmin.nodes$.pipe(
+    skipWhile((n) => !n?.length),
+    map((n) => n.map((x) => x.name)),
+    tap(() => setTimeout(() => this.form?.controls['name'].updateValueAndValidity())),
+    startWith([])
+  );
+  protected mappedAdd$ = this.actions.action(
+    [Actions.ADD_NODE, Actions.CONVERT_TO_NODE],
+    this.adding$,
+    null,
+    null,
+    // the dummy string is to not react on *any* node beind manipulated from remote events until the user starts typing.
+    this.nodeName$.pipe(map((n) => (!n?.length ? '__DUMMY__' : n)))
+  );
+  protected data = cloneDeep(DEF_NODE);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -46,12 +66,17 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(public nodesAdmin: NodesAdminService, areas: NavAreasService) {
+  constructor(areas: NavAreasService) {
     this.subscription = areas.registerDirtyable(this, 'panel');
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  updateName(event: any) {
+    this.data.name = event;
+    this.nodeName$.next(event);
   }
 
   isDirty(): boolean {
@@ -64,9 +89,12 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
 
   doSave(): Observable<any> {
     this.adding$.next(true);
-    return this.nodesAdmin
-      .addNode(this.data)
-      .pipe(finalize(() => this.adding$.next(false)));
+    return this.nodesAdmin.addNode(this.data).pipe(
+      finalize(() => {
+        this.adding$.next(false);
+        this.nodeName$.next(null);
+      })
+    );
   }
 
   onSave() {

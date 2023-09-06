@@ -3,12 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BarHorizontalComponent } from '@swimlane/ngx-charts';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import {
-  JerseyServerMonitoringDto,
-  MetricBundle,
-  MetricGroup,
-  TimerMetric,
-} from '../../../../../models/gen.dtos';
+import { JerseyServerMonitoringDto, MetricBundle, MetricGroup, TimerMetric } from '../../../../../models/gen.dtos';
 import { MetricsService } from '../../services/metrics.service';
 
 export interface SeriesElement {
@@ -46,6 +41,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
   poolTasks = [];
   conBytes = [];
   conBytesAbs = [];
+  activeSess = [];
 
   colorScheme = {
     domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'],
@@ -58,11 +54,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
 
   countGraphHeight = 100;
 
-  constructor(
-    private metrics: MetricsService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private metrics: MetricsService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.metrics
@@ -77,12 +69,8 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
 
           this.allMetrics.set(group, item);
         }
-        this.keys$.next(
-          this.keys$.value.concat(Array.from(this.allMetrics.keys()))
-        );
-        this.tabIndex = parseInt(
-          this.route.snapshot.queryParamMap.get('tabIndex')
-        );
+        this.keys$.next(this.keys$.value.concat(Array.from(this.allMetrics.keys())));
+        this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'));
         this.doSelect(this.tabIndex);
       });
   }
@@ -102,9 +90,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
   doSelect(tabIndex: number) {
     this.router.navigate([], { queryParams: { tabIndex: tabIndex } });
     this.tabIndex = tabIndex;
-    this.tabIndex
-      ? this.select(this.keys$.value[this.tabIndex])
-      : this.selectServer();
+    this.tabIndex ? this.select(this.keys$.value[this.tabIndex]) : this.selectServer();
   }
 
   private selectServer() {
@@ -126,6 +112,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
     this.poolTasks = [];
     this.conBytes = [];
     this.conBytesAbs = [];
+    this.activeSess = [];
 
     this.metrics.getServerMetrics().subscribe((r) => {
       this.serverStats = r;
@@ -166,8 +153,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
 
       let lastTasksQueued = this.serverStats?.snapshots[0]?.poolTasksQueued;
       let lastTasksFinished = this.serverStats?.snapshots[0]?.poolTasksFinished;
-      let lastTasksCancelled =
-        this.serverStats?.snapshots[0]?.poolTasksCancelled;
+      let lastTasksCancelled = this.serverStats?.snapshots[0]?.poolTasksCancelled;
 
       const conBytesRead: SeriesElement[] = [];
       const conBytesWritten: SeriesElement[] = [];
@@ -177,6 +163,8 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
 
       let lastBytesRead = this.serverStats?.snapshots[0]?.conBytesRead;
       let lastBytesWritten = this.serverStats?.snapshots[0]?.conBytesWritten;
+
+      const activeSessions: SeriesElement[] = [];
 
       for (const snap of this.serverStats.snapshots) {
         if (vmCpuCount === 0) {
@@ -282,6 +270,11 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
           name: label,
           value: snap.conBytesWritten / (1024 * 1024),
         });
+
+        activeSessions.push({
+          name: label,
+          value: snap.activeSessions,
+        });
       }
 
       this.vmCpu.push({ name: 'Threads', series: vmCpuThreadCount });
@@ -326,6 +319,8 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
 
       this.conBytesAbs.push({ name: 'Read', series: conBytesReadAbs });
       this.conBytesAbs.push({ name: 'Written', series: conBytesWrittenAbs });
+
+      this.activeSess.push({ name: 'Active Sessions [5m]', series: activeSessions });
     });
   }
 

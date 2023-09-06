@@ -6,7 +6,7 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.ui.dto.InstanceProcessStatusDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -27,7 +27,7 @@ public interface ProcessResource {
 
     @GET
     @Path("/{nodeId}/{appId}")
-    public ProcessDetailDto getDetails(@PathParam("nodeId") String nodeId, @ActivityScope @PathParam("appId") String appId);
+    public ProcessDetailDto getDetails(@PathParam("nodeId") String nodeId, @Scope @PathParam("appId") String appId);
 
     @POST
     @Path("/start")

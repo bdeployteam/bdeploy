@@ -3,6 +3,7 @@ package io.bdeploy.minion.job;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import org.quartz.CronScheduleBuilder;
@@ -24,11 +25,16 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
+import io.bdeploy.interfaces.cleanup.CleanupGroup;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
+import io.bdeploy.jersey.actions.Action;
+import io.bdeploy.jersey.actions.ActionExecution;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
@@ -126,7 +132,17 @@ public class MasterCleanupJob implements Job {
 
             CleanupHelper ch = new CleanupHelper(null, mr, registry, new SelfMasterProvider(mr.getSelf()),
                     new VersionSorterServiceImpl(mr.getPluginManager(), registry));
-            ch.execute(ch.calculate());
+
+            List<CleanupGroup> actions;
+            try (ActionHandle h = mr.getActions().start(new Action(Actions.CLEANUP_CALCULATE, null, null, null),
+                    ActionExecution.fromSystem())) {
+                actions = ch.calculate();
+            }
+
+            try (ActionHandle h = mr.getActions().start(new Action(Actions.CLEANUP_PERFORM, null, null, null),
+                    ActionExecution.fromSystem())) {
+                ch.execute(actions);
+            }
 
             mr.modifyState(s -> s.cleanupLastRun = System.currentTimeMillis());
             log.info("Cleanup finished");

@@ -1,9 +1,5 @@
-<div class="flex ml-4">
-  <div
-    class="local-chip"
-    [ngClass]="[getPurposeClass()]"
-    [matTooltip]="record.instanceConfiguration.purpose"
-  >
+<div class="flex ml-1.5">
+  <div class="local-chip" [ngClass]="[getPurposeClass()]" [matTooltip]="record.instanceConfiguration.purpose">
     {{ getPurposeAbbrev() }}
   </div>
 </div>

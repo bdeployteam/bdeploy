@@ -1,16 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import {
-  BdDataColumn,
-  BdDataGrouping,
-  BdDataGroupingDefinition,
-} from 'src/app/models/data';
-import {
-  CustomDataGrouping,
-  InstanceDto,
-  InstanceGroupConfiguration,
-} from 'src/app/models/gen.dtos';
+import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
+import { CustomDataGrouping, InstanceDto, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -46,32 +38,25 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
       group: (r) =>
         this.products.products$.value.find(
           (p) =>
-            p.key.name === r.instanceConfiguration.product.name &&
-            p.key.tag === r.instanceConfiguration.product.tag
+            p.key.name === r.instanceConfiguration.product.name && p.key.tag === r.instanceConfiguration.product.tag
         )?.name || r.instanceConfiguration.product.name,
       associatedColumn: this.instanceColumns.instanceProductColumn.id,
     },
   ];
   grouping: BdDataGroupingDefinition<InstanceDto>[];
-  defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [
-    { definition: this.initGrouping[0], selected: [] },
-  ];
-  defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [
-    { definition: this.initGrouping[0], selected: [] },
-  ];
+  defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
+  defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
   hasProducts$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
 
   private colOverallStatus: BdDataColumn<InstanceDto> = {
     id: 'status',
-    name: 'Status',
-    data: (r) =>
-      this.instances.overallStates$.value?.find(
-        (x) => x.id === r.instanceConfiguration?.id
-      ),
+    name: 'St.',
+    description: 'Status',
+    data: (r) => this.instances.overallStates$.value?.find((x) => x.id === r.instanceConfiguration?.id),
     component: OverallStatusColumnComponent,
-    width: '110px',
+    width: '24px',
   };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
@@ -79,12 +64,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   private data: BdDataDisplayComponent<InstanceDto>;
 
   /* template */ getRecordRoute = (row: InstanceDto) => {
-    return [
-      '/instances',
-      'dashboard',
-      this.areas.groupContext$.value,
-      row.instanceConfiguration.id,
-    ];
+    return ['/instances', 'dashboard', this.areas.groupContext$.value, row.instanceConfiguration.id];
   };
 
   /* template */ isCardView: boolean;
@@ -129,11 +109,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
-    this.subscription.add(
-      this.products.products$.subscribe((p) =>
-        this.hasProducts$.next(!!p && !!p.length)
-      )
-    );
+    this.subscription.add(this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length)));
     this.subscription.add(
       this.groups.current$.subscribe((g) => {
         if (!g) {
@@ -152,9 +128,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subscription.add(
-      this.instances.overallStates$.subscribe(() => this.data?.redraw())
-    );
+    this.subscription.add(this.instances.overallStates$.subscribe(() => this.data?.redraw()));
   }
 
   private calculateDefaultGrouping(g: InstanceGroupConfiguration): void {
@@ -182,9 +156,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   }
 
   get defaultGrouping(): BdDataGrouping<InstanceDto>[] {
-    return this.isCardView
-      ? this.defaultSingleGrouping
-      : this.defaultMultipleGrouping;
+    return this.isCardView ? this.defaultSingleGrouping : this.defaultMultipleGrouping;
   }
 
   saveGlobalPreset(preset: CustomDataGrouping[]) {

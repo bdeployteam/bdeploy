@@ -13,6 +13,7 @@ import io.bdeploy.jersey.errorpages.JerseyCustomErrorPages;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.ProductUpdateService;
 import io.bdeploy.ui.RemoteEntryStreamRequestService;
+import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.MediaType;
 
@@ -78,6 +79,7 @@ public class UiResources {
                 bind(ChangeEventManager.class).in(Singleton.class).to(ChangeEventManager.class);
                 bind(ProductUpdateService.class).in(Singleton.class).to(ProductUpdateService.class);
                 bind(ManifestSpawnToChangeEventBridge.class).in(Singleton.class).to(ManifestSpawnToChangeEventBridge.class);
+                bind(RequestScopedParallelOperationsService.class).to(RequestScopedParallelOperationsService.class);
             }
         });
     }

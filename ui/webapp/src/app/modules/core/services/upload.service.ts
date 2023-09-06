@@ -1,13 +1,6 @@
-import {
-  HttpClient,
-  HttpEventType,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-  HttpResponse,
-} from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { UploadInfoDto } from 'src/app/models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
 
@@ -128,16 +121,11 @@ export class UploadService {
    *  @param formDataParam the FormData's property name that holds the file
    *  @returns a map containing the upload status for each file
    */
-  public uploadFile(
-    url: string,
-    file: File,
-    urlParameter: UrlParameter[],
-    formDataParam: string
-  ): UploadStatus {
+  public uploadFile(url: string, file: File, urlParameter: UrlParameter[], formDataParam: string): UploadStatus {
     // create a new progress-subject for every file
     const uploadStatus = new UploadStatus();
     const progressSubject = new Subject<number>();
-    const stateSubject = new Subject<UploadState>();
+    const stateSubject = new BehaviorSubject<UploadState>(UploadState.UPLOADING);
     uploadStatus.file = file;
     uploadStatus.progressObservable = progressSubject.asObservable();
     uploadStatus.stateObservable = stateSubject.asObservable();
@@ -145,7 +133,6 @@ export class UploadService {
       uploadStatus.state = state;
     });
     uploadStatus.scope = this.uuidv4();
-    stateSubject.next(UploadState.UPLOADING);
 
     // create a new multipart-form for every file
     const formData: FormData = new FormData();
@@ -155,6 +142,7 @@ export class UploadService {
     const options = {
       reportProgress: true,
       headers: suppressGlobalErrorHandling(
+        // TODO: this is no longer supported.
         new HttpHeaders({ 'X-Proxy-Activity-Scope': uploadStatus.scope })
       ),
     };
@@ -164,10 +152,7 @@ export class UploadService {
       let httpParams = new HttpParams();
       urlParameter.forEach((p) => {
         if (p.type === 'boolean') {
-          httpParams = httpParams.set(
-            p.id,
-            p.value === true ? 'true' : 'false'
-          );
+          httpParams = httpParams.set(p.id, p.value === true ? 'true' : 'false');
         } else {
           httpParams = httpParams.set(p.id, p.value);
         }
@@ -195,8 +180,7 @@ export class UploadService {
         }
       },
       error: (error) => {
-        uploadStatus.detail =
-          error.statusText + ' (Status ' + error.status + ')';
+        uploadStatus.detail = error.statusText + ' (Status ' + error.status + ')';
         stateSubject.next(UploadState.FAILED);
         progressSubject.complete();
         stateSubject.complete();
@@ -208,13 +192,12 @@ export class UploadService {
 
   public importFile(url: string, dto: UploadInfoDto): ImportStatus {
     const importStatus = new ImportStatus();
-    const stateSubject = new Subject<ImportState>();
+    const stateSubject = new BehaviorSubject<ImportState>(ImportState.IMPORTING);
     importStatus.filename = dto.filename;
     importStatus.stateObservable = stateSubject.asObservable();
     importStatus.stateObservable.subscribe((state) => {
       importStatus.state = state;
     });
-    stateSubject.next(ImportState.IMPORTING);
 
     this.http
       .post<UploadInfoDto>(url, dto, {
@@ -227,8 +210,7 @@ export class UploadService {
           stateSubject.complete();
         },
         error: (error) => {
-          importStatus.detail =
-            error.statusText + ' (Status ' + error.status + ')';
+          importStatus.detail = error.statusText + ' (Status ' + error.status + ')';
           stateSubject.next(ImportState.FAILED);
           stateSubject.complete();
         },
@@ -237,15 +219,12 @@ export class UploadService {
   }
 
   uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
-      /[xy]/g,
-      function (c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      // tslint:disable-next-line:no-bitwise
+      const r = (Math.random() * 16) | 0,
         // tslint:disable-next-line:no-bitwise
-        const r = (Math.random() * 16) | 0,
-          // tslint:disable-next-line:no-bitwise
-          v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      }
-    );
+        v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 }

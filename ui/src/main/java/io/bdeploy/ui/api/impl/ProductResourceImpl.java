@@ -41,6 +41,7 @@ import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -52,6 +53,8 @@ import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.api.ApplicationResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.Minion;
@@ -90,6 +93,9 @@ public class ProductResourceImpl implements ProductResource {
     @Inject
     private ChangeEventManager changes;
 
+    @Inject
+    private ActionFactory af;
+
     private final BHive hive;
 
     private final String group;
@@ -125,28 +131,30 @@ public class ProductResourceImpl implements ProductResource {
 
     @Override
     public void delete(String name, String tag) {
-        Manifest.Key key = new Manifest.Key(name, tag);
-        Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
-        if (existing.size() != 1) {
-            log.warn("Cannot uniquely identify {} to delete", key);
-            return;
+        try (ActionHandle h = af.run(Actions.DELETE_PRODUCT, group, null, name + ":" + tag)) {
+            Manifest.Key key = new Manifest.Key(name, tag);
+            Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
+            if (existing.size() != 1) {
+                log.warn("Cannot uniquely identify {} to delete", key);
+                return;
+            }
+
+            if (!getProductUsedIn(name, tag).isEmpty()) {
+                throw new WebApplicationException("Product version is still in use", Status.BAD_REQUEST);
+            }
+
+            // unload any plugins loaded from this version
+            pm.unloadProduct(key);
+
+            // This assumes that no single application version is used in multiple products.
+            ProductManifest pmf = ProductManifest.of(hive, key);
+            SortedSet<Key> apps = pmf.getApplications();
+
+            hive.execute(new ManifestDeleteOperation().setToDelete(key));
+            apps.forEach(a -> hive.execute(new ManifestDeleteOperation().setToDelete(a)));
+
+            changes.remove(ObjectChangeType.PRODUCT, key);
         }
-
-        if (!getProductUsedIn(name, tag).isEmpty()) {
-            throw new WebApplicationException("Product version is still in use", Status.BAD_REQUEST);
-        }
-
-        // unload any plugins loaded from this version
-        pm.unloadProduct(key);
-
-        // This assumes that no single application version is used in multiple products.
-        ProductManifest pmf = ProductManifest.of(hive, key);
-        SortedSet<Key> apps = pmf.getApplications();
-
-        hive.execute(new ManifestDeleteOperation().setToDelete(key));
-        apps.forEach(a -> hive.execute(new ManifestDeleteOperation().setToDelete(a)));
-
-        changes.remove(ObjectChangeType.PRODUCT, key);
     }
 
     @Override
@@ -189,9 +197,13 @@ public class ProductResourceImpl implements ProductResource {
     public String createProductZipFile(String name, String tag, boolean original) {
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
         if (original) {
-            return ds.createOriginalZipAndRegister(hive, name, tag);
+            try (ActionHandle h = af.run(Actions.DOWNLOAD_PRODUCT_C, group, null, name + ":" + tag)) {
+                return ds.createOriginalZipAndRegister(hive, name, tag);
+            }
         } else {
-            return ds.createManifestZipAndRegister(hive, name, tag);
+            try (ActionHandle h = af.run(Actions.DOWNLOAD_PRODUCT_H, group, null, name + ":" + tag)) {
+                return ds.createManifestZipAndRegister(hive, name, tag);
+            }
         }
     }
 
@@ -336,26 +348,29 @@ public class ProductResourceImpl implements ProductResource {
 
     @Override
     public void copyProduct(String softwareRepository, String productName, List<String> productTags) {
-        BHive repoHive = registry.get(softwareRepository);
-        if (repoHive == null) {
-            throw new WebApplicationException(Status.NOT_FOUND);
-        }
-        for (String productTag : productTags) {
-            Manifest.Key key = new Manifest.Key(productName, productTag);
+        try (ActionHandle h = af.runMulti(Actions.IMPORT_PROD_REPO, group, null,
+                productTags.stream().map(t -> productName + ":" + t).toList())) {
+            BHive repoHive = registry.get(softwareRepository);
+            if (repoHive == null) {
+                throw new WebApplicationException(Status.NOT_FOUND);
+            }
+            for (String productTag : productTags) {
+                Manifest.Key key = new Manifest.Key(productName, productTag);
 
-            Set<ObjectId> objectIds = repoHive.execute(new ObjectListOperation().addManifest(key));
-            CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
-            objectIds.forEach(copy::addObject);
-            repoHive.execute(copy);
-        }
+                Set<ObjectId> objectIds = repoHive.execute(new ObjectListOperation().addManifest(key));
+                CopyOperation copy = new CopyOperation().setDestinationHive(hive).addManifest(key);
+                objectIds.forEach(copy::addObject);
+                repoHive.execute(copy);
+            }
 
-        InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
-        InstanceGroupConfiguration igc = igr.getInstanceGroupConfigurationDto(this.group).instanceGroupConfiguration;
-        if (igc.productToRepo == null) {
-            igc.productToRepo = new HashMap<>();
+            InstanceGroupResource igr = rc.getResource(InstanceGroupResourceImpl.class);
+            InstanceGroupConfiguration igc = igr.getInstanceGroupConfigurationDto(this.group).instanceGroupConfiguration;
+            if (igc.productToRepo == null) {
+                igc.productToRepo = new HashMap<>();
+            }
+            igc.productToRepo.put(productName, softwareRepository);
+            igr.update(this.group, igc);
         }
-        igc.productToRepo.put(productName, softwareRepository);
-        igr.update(this.group, igc);
     }
 
     @Override

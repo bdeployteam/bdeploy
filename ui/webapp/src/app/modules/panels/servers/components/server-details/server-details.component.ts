@@ -1,11 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import { ManagedMasterDto, OperatingSystem } from 'src/app/models/gen.dtos';
+import { Actions, ManagedMasterDto, OperatingSystem } from 'src/app/models/gen.dtos';
 import { BdDataSvgIconCellComponent } from 'src/app/modules/core/components/bd-data-svg-icon-cell/bd-data-svg-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
@@ -53,33 +54,45 @@ const detailOsCol: BdDataColumn<MinionRow> = {
   providers: [ServerDetailsService],
 })
 export class ServerDetailsComponent implements OnInit {
+  protected servers = inject(ServersService);
+  protected serverDetails = inject(ServerDetailsService);
+  protected auth = inject(AuthenticationService);
+  protected areas = inject(NavAreasService);
+  private actions = inject(ActionsService);
+
   private deleting$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ loading$ = combineLatest([
-    this.deleting$,
-    this.servers.loading$,
-    this.serverDetails.loading$,
-  ]).pipe(map(([a, b, c]) => a || b || c));
-  /* template */ transfering$ = new BehaviorSubject<boolean>(false);
-  /* template */ installing$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns = [
-    detailNameCol,
-    detailVersionCol,
-    detailMasterCol,
-    detailOsCol,
-  ];
+  private transfering$ = new BehaviorSubject<boolean>(false);
+  private installing$ = new BehaviorSubject<boolean>(false);
+
+  private s$ = this.serverDetails.server$.pipe(map((s) => (!s ? '__DUMMY__' : s.hostName)));
+
+  protected mappedTransfer$ = this.actions.action(
+    [Actions.MANAGED_UPDATE_TRANSFER],
+    this.transfering$,
+    null,
+    null,
+    this.s$
+  );
+  protected mappedInstall$ = this.actions.action(
+    [Actions.MANAGED_UPDATE_INSTALL],
+    this.installing$,
+    null,
+    null,
+    this.s$
+  );
+  private mappedDelete$ = this.actions.action([Actions.REMOVE_MANAGED], this.deleting$, null, null, this.s$);
+
+  protected loading$ = combineLatest([this.mappedDelete$, this.servers.loading$, this.serverDetails.loading$]).pipe(
+    map(([a, b, c]) => a || b || c)
+  );
+
+  /* template */ columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
   /* template */ version: string;
   /* template */ minions: MinionRow[];
   /* template */ server: ManagedMasterDto;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-
-  constructor(
-    public servers: ServersService,
-    public serverDetails: ServerDetailsService,
-    public auth: AuthenticationService,
-    public areas: NavAreasService
-  ) {}
 
   ngOnInit(): void {
     this.serverDetails.server$.subscribe((server) => {
@@ -154,12 +167,7 @@ export class ServerDetailsComponent implements OnInit {
           } else if (err instanceof HttpErrorResponse) {
             msg = err.statusText;
           }
-          this.dialog
-            .info(
-              'Eror Updating',
-              `There was an error applying the update to the server: ${msg}`
-            )
-            .subscribe();
+          this.dialog.info('Eror Updating', `There was an error applying the update to the server: ${msg}`).subscribe();
         },
       });
   }

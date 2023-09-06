@@ -12,7 +12,7 @@ import io.bdeploy.interfaces.configuration.instance.SoftwareRepositoryConfigurat
 import io.bdeploy.interfaces.directory.EntryChunk;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -102,7 +102,7 @@ public interface CommonRootResource {
      * @return the {@link CommonInstanceResource} to query information from.
      */
     @Path("/common")
-    public CommonInstanceResource getInstanceResource(@ActivityScope @QueryParam("BDeploy_group") String group);
+    public CommonInstanceResource getInstanceResource(@Scope @QueryParam("BDeploy_group") String group);
 
     /**
      * Retrieves the current logger configuration.

@@ -9,16 +9,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.Threads;
-import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.TestServer;
 
 class StreamTest {
@@ -33,11 +30,6 @@ class StreamTest {
     @BeforeAll
     static void prepare(@TempDir Path tmp) throws Exception {
         src = ContentHelper.genTestFile(tmp, 1024 * 1024);
-    }
-
-    @BeforeEach
-    void setClientOutput(JerseyClientFactory factory) {
-        factory.setReporter(new ActivityReporter.Stream(System.err));
     }
 
     @Test

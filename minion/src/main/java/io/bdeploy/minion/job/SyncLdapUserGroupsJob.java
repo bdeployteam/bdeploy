@@ -21,7 +21,11 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.FormatHelper;
+import io.bdeploy.jersey.actions.Action;
+import io.bdeploy.jersey.actions.ActionExecution;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.minion.MinionRoot;
 
 /**
@@ -94,8 +98,11 @@ public class SyncLdapUserGroupsJob implements Job {
         }
 
         mr.getSettings().auth.ldapSettings.stream().filter(ldap -> ldap.syncEnabled).forEach(ldap -> {
-            String feedback = mr.getUsers().importAccountsLdapServer(ldap);
-            log.info(feedback);
+            try (ActionHandle h = mr.getActions().start(new Action(Actions.LDAP_SYNC, null, null, ldap.id),
+                    ActionExecution.fromSystem())) {
+                String feedback = mr.getUsers().importAccountsLdapServer(ldap);
+                log.info(feedback);
+            }
         });
         mr.modifyState(s -> s.ldapSyncLastRun = System.currentTimeMillis());
     }

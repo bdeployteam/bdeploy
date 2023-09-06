@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [header]="'BHive ' + (bhive$ | async)"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar [header]="'BHive ' + (bhive$ | async)" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-1">
       <app-bd-panel-button
@@ -24,8 +21,8 @@
         text="Repair and Prune Unused Objects"
         [collapsed]="false"
         (click)="doRepairAndPrune()"
-        [loadingWhen$]="repairing$"
-        [disabled]="repairing$ | async"
+        [loadingWhen$]="mappedRepair$"
+        [disabled]="mappedRepair$ | async"
       ></app-bd-button>
     </div>
   </app-bd-dialog-content>

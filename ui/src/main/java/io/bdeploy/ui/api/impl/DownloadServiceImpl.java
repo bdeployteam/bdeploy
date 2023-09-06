@@ -212,7 +212,7 @@ public class DownloadServiceImpl implements DownloadService {
         try {
             // build ZIP from key.
             Path tmpFile = Files.createTempFile(minion.getTempDir(), "sw-", ".zip");
-            Path tmpFolder = minion.getTempDir().resolve(key.directoryFriendlyName());
+            Path tmpFolder = minion.getTempDir().resolve(token);
             try {
                 // add once more the directoryFriendlyName, as it should be included in the ZIP!
                 hive.execute(new ExportOperation().setManifest(key).setTarget(tmpFolder.resolve(key.directoryFriendlyName())));

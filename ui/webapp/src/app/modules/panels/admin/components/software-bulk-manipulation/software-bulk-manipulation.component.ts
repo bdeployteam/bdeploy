@@ -1,12 +1,11 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, map } from 'rxjs/operators';
+import { Actions } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import {
-  SoftwareUpdateService,
-  SoftwareVersion,
-} from 'src/app/modules/primary/admin/services/software-update.service';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
+import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/admin/services/software-update.service';
 import { SoftwareVersionBulkService } from '../../services/software-version-bulk.service';
 
 @Component({
@@ -14,22 +13,26 @@ import { SoftwareVersionBulkService } from '../../services/software-version-bulk
   templateUrl: './software-bulk-manipulation.component.html',
 })
 export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ selections: SoftwareVersion[];
+  private actions = inject(ActionsService);
+  private bulk = inject(SoftwareVersionBulkService);
+  private software = inject(SoftwareUpdateService);
+  private deleting$ = new BehaviorSubject<boolean>(false);
+
+  protected mappedDelete$ = this.actions.action(
+    [Actions.DELETE_UPDATES],
+    this.deleting$,
+    null,
+    null,
+    this.bulk.selection$.pipe(map((b) => b.map((x) => x.version)))
+  );
+  protected selections: SoftwareVersion[];
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
-  constructor(
-    private bulk: SoftwareVersionBulkService,
-    private software: SoftwareUpdateService
-  ) {}
-
   ngOnInit(): void {
-    this.subscription = this.bulk.selection$.subscribe(
-      (selections) => (this.selections = selections)
-    );
+    this.subscription = this.bulk.selection$.subscribe((selections) => (this.selections = selections));
   }
 
   /* template */ onDelete() {

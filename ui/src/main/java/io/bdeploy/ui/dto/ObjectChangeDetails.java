@@ -9,7 +9,7 @@ public enum ObjectChangeDetails {
     KEY_NAME,
     KEY_TAG,
     CHANGE_HINT,
-    ACTIVITIES,
+    SERVER_ACTION,
     USER_NAME,
     USER_GROUP_ID,
     ID,

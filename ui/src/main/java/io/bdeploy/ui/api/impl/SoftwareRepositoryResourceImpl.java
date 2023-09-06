@@ -11,7 +11,6 @@ import java.util.SortedSet;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.interfaces.UserGroupInfo;
@@ -38,9 +37,6 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Context
     private ResourceContext rc;
-
-    @Inject
-    private ActivityReporter reporter;
 
     @Inject
     private BHiveRegistry registry;
@@ -101,7 +97,7 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
                     Status.NOT_ACCEPTABLE);
         }
 
-        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
+        BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
         registry.register(config.name, h);
         SoftwareRepositoryManifest srm = new SoftwareRepositoryManifest(h);
         srm.update(config);

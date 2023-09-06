@@ -36,7 +36,6 @@ import io.bdeploy.bhive.op.PruneOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.util.PathHelper;
 import jakarta.ws.rs.core.UriBuilder;
 
@@ -49,21 +48,17 @@ public class LocalBHiveAdapter implements RemoteBHive {
     private static final Logger log = LoggerFactory.getLogger(LocalBHiveAdapter.class);
 
     private final BHive hive;
-    private final ActivityReporter reporter;
 
     /**
      * Creates the adapter for the given {@link BHive}.
      */
-    public LocalBHiveAdapter(BHive hive, ActivityReporter reporter) {
+    public LocalBHiveAdapter(BHive hive) {
         this.hive = hive;
-        this.reporter = reporter;
     }
 
     @Override
     public Set<ObjectId> getMissingObjects(Set<ObjectId> all) {
-        try (Activity activity = reporter.start("Determining Objects")) {
-            return hive.execute(new ObjectExistsOperation().addAll(all)).missing;
-        }
+        return hive.execute(new ObjectExistsOperation().addAll(all)).missing;
     }
 
     @Override
@@ -120,7 +115,8 @@ public class LocalBHiveAdapter implements RemoteBHive {
             throw new IllegalArgumentException("File does not exist: " + zipedHive);
         }
 
-        try (BHive packed = new BHive(UriBuilder.fromUri("jar:" + zipedHive.toUri()).build(), null, reporter)) {
+        try (BHive packed = new BHive(UriBuilder.fromUri("jar:" + zipedHive.toUri()).build(), null,
+                new ActivityReporter.Null())) {
             packed.execute(new CopyOperation().setDestinationHive(hive).setPartialAllowed(false));
         } catch (Exception e) {
             throw new IllegalStateException("Cannot push to local repository", e);
@@ -142,7 +138,8 @@ public class LocalBHiveAdapter implements RemoteBHive {
             Path tmpHive = Files.createTempFile("fetch-", ".zip");
             PathHelper.deleteIfExistsRetry(tmpHive); // need to delete to re-create with ZipFileSystem
 
-            try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), null, reporter)) {
+            try (BHive emptyHive = new BHive(UriBuilder.fromUri("jar:" + tmpHive.toUri()).build(), null,
+                    new ActivityReporter.Null())) {
                 CopyOperation op = new CopyOperation().setDestinationHive(emptyHive).setPartialAllowed(true);
                 requiredObjects.forEach(op::addObject);
                 manifestsToFetch.forEach(op::addManifest);

@@ -6,26 +6,17 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthClientConfig } from '@auth0/auth0-angular';
 import { isEqual } from 'lodash-es';
-import { BehaviorSubject, Observable, Subject, combineLatest, of } from 'rxjs';
-import { catchError, delay, retryWhen, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, combineLatest, firstValueFrom, of } from 'rxjs';
+import { catchError, distinctUntilChanged, map, retry, switchMap, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import {
-  BackendInfoDto,
-  MinionMode,
-  PluginInfoDto,
-  Version,
-  WebAuthSettingsDto,
-} from '../../../models/gen.dtos';
+import { BackendInfoDto, MinionMode, PluginInfoDto, Version, WebAuthSettingsDto } from '../../../models/gen.dtos';
 import { ConnectionLostComponent } from '../components/connection-lost/connection-lost.component';
 import {
   ConnectionVersionComponent,
   VERSION_DATA,
 } from '../components/connection-version/connection-version.component';
 import { NO_LOADING_BAR_CONTEXT } from '../utils/loading-bar.util';
-import {
-  suppressGlobalErrorHandling,
-  suppressUnauthenticatedDelay,
-} from '../utils/server.utils';
+import { suppressGlobalErrorHandling, suppressUnauthenticatedDelay } from '../utils/server.utils';
 import { ThemeService } from './theme.service';
 
 export interface AppConfig {
@@ -45,12 +36,13 @@ export class ConfigService {
   public initialSession = new Subject<string>();
 
   private checkInterval;
-  private isUnreachable = false;
   private overlayRef: OverlayRef;
   private versionLock = false;
 
   private backendTimeOffset = 0;
   private backendOffsetWarning = false;
+
+  offline$ = new BehaviorSubject<boolean>(false);
 
   isCentral$ = new BehaviorSubject<boolean>(false);
   isManaged$ = new BehaviorSubject<boolean>(false);
@@ -64,10 +56,9 @@ export class ConfigService {
     private http: HttpClient,
     private overlay: Overlay,
     private auth0: AuthClientConfig,
-    private injector: Injector,
+    private ngZone: NgZone,
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer,
-    ngZone: NgZone,
   ) {
     iconRegistry.setDefaultFontSetClass('material-symbols-outlined')
 
@@ -93,13 +84,23 @@ export class ConfigService {
       // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.
       this.checkInterval = setInterval(() => this.checkServerVersion(), 60000);
     });
+
+    this.offline$.pipe(distinctUntilChanged()).subscribe(o => {
+      ngZone.run(() => {
+        if(!o) {
+          this.closeOverlay();
+        } else {
+          this.showOfflineOverlayAndPoll();
+        }
+      });
+    });
   }
 
   /** Used during application init to load the configuration. */
   public load(): Promise<AppConfig> {
-    return new Promise((resolve) => {
-      this.getBackendInfo(true).subscribe({
-        next: (bv) => {
+    return firstValueFrom(
+      this.getBackendInfo(true).pipe(
+        map((bv) => {
           this.config = {
             version: bv.version,
             hostname: bv.name,
@@ -110,59 +111,50 @@ export class ConfigService {
           console.log('API URL set to ' + this.config.api);
           console.log('WS URL set to ' + this.config.ws);
           console.log('Remote reports mode ' + this.config.mode);
-          this.isNewGitHubReleaseAvailable$.next(
-            bv.isNewGitHubReleaseAvailable
-          );
+          this.isNewGitHubReleaseAvailable$.next(bv.isNewGitHubReleaseAvailable);
           this.isCentral$.next(this.config.mode === MinionMode.CENTRAL);
           this.isManaged$.next(this.config.mode === MinionMode.MANAGED);
           this.isStandalone$.next(this.config.mode === MinionMode.STANDALONE);
 
+          return this.config;
+        }),
+        switchMap((c) => {
           // trigger load of an existing session in case there is one on the server.
           // finally load authentication setting.
-          const loadAuthSettings = this.http.get<WebAuthSettingsDto>(
-            this.config.api + '/master/settings/web-auth',
-            {
-              headers: suppressUnauthenticatedDelay(new HttpHeaders()),
-            }
-          );
+          const loadAuthSettings = this.http.get<WebAuthSettingsDto>(this.config.api + '/master/settings/web-auth', {
+            headers: suppressUnauthenticatedDelay(new HttpHeaders()),
+          });
+          return combineLatest([of(c), loadAuthSettings, this.loadSession()]);
+        }),
+        map(([config, authSettings, session]) => {
+          this.webAuthCfg = authSettings;
+          this.initialSession.next(session);
 
-          combineLatest([loadAuthSettings, this.loadSession()]).subscribe(
-            ([cfg, session]) => {
-              this.webAuthCfg = cfg;
-              this.initialSession.next(session);
+          // auth0 config.
+          if (authSettings?.auth0?.enabled) {
+            this.auth0.set({
+              clientId: authSettings.auth0.clientId,
+              domain: authSettings.auth0.domain,
+            });
+          } else {
+            // avoid problems (crash) in auth0 servive.
+            this.auth0.set({
+              clientId: '',
+              domain: '',
+            });
+          }
 
-              // auth0 config.
-              if (cfg?.auth0?.enabled) {
-                this.auth0.set({
-                  clientId: cfg.auth0.clientId,
-                  domain: cfg.auth0.domain,
-                });
-              } else {
-                // avoid problems (crash) in auth0 servive.
-                this.auth0.set({
-                  clientId: '',
-                  domain: '',
-                });
-              }
-
-              resolve(this.config);
-            }
-          );
-        },
-        error: (err) => {
-          console.error('Cannot load configuration', err);
-        },
-      });
-    });
+          return config;
+        })
+      )
+    );
   }
 
   loadSession(): Observable<any> {
     return this.http
       .get(`${this.config.api}/auth/session`, {
         responseType: 'text',
-        headers: suppressGlobalErrorHandling(
-          suppressUnauthenticatedDelay(new HttpHeaders())
-        ),
+        headers: suppressGlobalErrorHandling(suppressUnauthenticatedDelay(new HttpHeaders())),
       })
       .pipe(
         catchError((err) => {
@@ -182,44 +174,38 @@ export class ConfigService {
 
   private doCheckVersion(bv: BackendInfoDto) {
     if (!isEqual(this.config.version, bv.version)) {
+      // offline$ should have already been set to false, thus offline overlay is closed.
       if (this.overlayRef) {
-        if (this.isUnreachable) {
-          // we were recovering and now the backend reports another version.
-          this.closeOverlay();
-        } else {
-          return; // we're already showing the new version overlay.
-        }
+        return; // we're already showing the new version overlay.
       }
 
-      // there is no return from here anyway. The user must reload the application.
-      this.stopCheckAndLockVersion();
+      this.ngZone.run(() => {
+        // there is no return from here anyway. The user must reload the application.
+        this.stopCheckAndLockVersion();
 
-      this.overlayRef = this.overlay.create({
-        positionStrategy: this.overlay
-          .position()
-          .global()
-          .centerHorizontally()
-          .centerVertically(),
-        hasBackdrop: true,
-      });
+        this.overlayRef = this.overlay.create({
+          positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+          hasBackdrop: true,
+        });
 
-      // create a portal with a custom injector which passes the received version data to show it.
-      const portal = new ComponentPortal(
-        ConnectionVersionComponent,
-        null,
-        Injector.create({
-          providers: [
-            {
-              provide: VERSION_DATA,
-              useValue: {
-                oldVersion: this.config.version,
-                newVersion: bv.version,
+        // create a portal with a custom injector which passes the received version data to show it.
+        const portal = new ComponentPortal(
+          ConnectionVersionComponent,
+          null,
+          Injector.create({
+            providers: [
+              {
+                provide: VERSION_DATA,
+                useValue: {
+                  oldVersion: this.config.version,
+                  newVersion: bv.version,
+                },
               },
-            },
-          ],
-        })
-      );
-      this.overlayRef.attach(portal);
+            ],
+          })
+        );
+        this.overlayRef.attach(portal);
+      });
     }
   }
 
@@ -230,39 +216,32 @@ export class ConfigService {
   }
 
   /** Call in case of suspected problems with the backend connection, will show a dialog until server connection is restored. */
-  public checkServerReachable(): void {
-    if (!this.isUnreachable) {
-      this.isUnreachable = true;
+  public markServerOffline(): void {
+    this.offline$.next(true);
+  }
 
-      this.overlayRef = this.overlay.create({
-        positionStrategy: this.overlay
-          .position()
-          .global()
-          .centerHorizontally()
-          .centerVertically(),
-        hasBackdrop: true,
+  private showOfflineOverlayAndPoll(): void {
+    this.overlayRef = this.overlay.create({
+      positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
+      hasBackdrop: true,
+    });
+
+    const portal = new ComponentPortal(ConnectionLostComponent);
+    this.overlayRef.attach(portal);
+
+    this.getBackendInfo()
+      .pipe(retry({ delay: 2000 }))
+      .subscribe((r) => {
+        if (this.versionLock) {
+          return;
+        }
+
+        if (!this.config) {
+          window.location.reload();
+        } else {
+          this.doCheckVersion(r);
+        }
       });
-
-      const portal = new ComponentPortal(ConnectionLostComponent);
-      this.overlayRef.attach(portal);
-
-      this.getBackendInfo()
-        .pipe(retryWhen((errors) => errors.pipe(delay(2000))))
-        .subscribe((r) => {
-          if (this.versionLock) {
-            return;
-          }
-
-          if (!this.config) {
-            window.location.reload();
-          } else {
-            this.doCheckVersion(r);
-          }
-
-          this.closeOverlay();
-          this.isUnreachable = false;
-        });
-    }
   }
 
   /** Closes the overlay (connection lost, server version) if present */
@@ -284,9 +263,7 @@ export class ConfigService {
     return this.http
       .get<BackendInfoDto>(environment.apiUrl + '/backend-info/version', {
         headers: suppressUnauthenticatedDelay(
-          errorHandling
-            ? new HttpHeaders()
-            : suppressGlobalErrorHandling(new HttpHeaders())
+          errorHandling ? new HttpHeaders() : suppressGlobalErrorHandling(new HttpHeaders())
         ),
         context: NO_LOADING_BAR_CONTEXT,
       })
@@ -300,6 +277,9 @@ export class ConfigService {
           throw e;
         }),
         tap((v) => {
+          // wherever this call came from, we're not offline anymore in case we were!
+          this.offline$.next(false);
+
           const serverTime = v.time;
           const clientTime = Date.now();
 
@@ -317,9 +297,5 @@ export class ConfigService {
 
   public getCorrectedNow(): number {
     return Date.now() + this.backendTimeOffset;
-  }
-
-  public isCurrentlyUnreachable(): boolean {
-    return this.isUnreachable;
   }
 }

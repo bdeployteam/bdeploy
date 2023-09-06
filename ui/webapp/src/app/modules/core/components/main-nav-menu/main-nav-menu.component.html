@@ -1,11 +1,9 @@
-<ng-template #activitiesPopup>
+<ng-template #actionsPopup>
   <mat-card
     appearance="outlined"
-    [class.local-activity-collapsed]="!expanded"
-    [class.local-activity-expanded]="expanded"
-    class="local-activity-popup-sizing flex flex-col gap-1 p-2.5"
+    class="local-action-popup-sizing flex flex-col gap-1 p-2.5"
   >
-    <app-bd-activities></app-bd-activities>
+    <app-bd-actions></app-bd-actions>
   </mat-card>
 </ng-template>
 
@@ -153,36 +151,33 @@
   <div
     *ngIf="expanded"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-    [appBdPopup]="activitiesPopup"
+    [appBdPopup]="actionsPopup"
     appBdPopupPosition="right-above"
-    [class.bd-disabled-text]="!(activities.activities$ | async)?.length"
-    [class.bd-accent-text]="!!(activities.activities$ | async)?.length"
+    [class.bd-disabled-text]="!(actions.actions$ | async)?.length"
+    [class.bd-accent-text]="!!(actions.actions$ | async)?.length"
     class="cursor-pointer flex justify-start items-center pb-2.5"
   >
     <mat-spinner
       class="bd-inherited-spinner"
-      [mode]="!!(activities.activities$ | async)?.length ? 'indeterminate' : 'determinate'"
-      [value]="!(activities.activities$ | async)?.length ? 100 : 0"
+      [mode]="!!(actions.actions$ | async)?.length ? 'indeterminate' : 'determinate'"
+      [value]="!(actions.actions$ | async)?.length ? 100 : 0"
       [diameter]="24"
     ></mat-spinner>
-    <div
-      *ngIf="!!(activities.activities$ | async)?.length"
-      class="bd-text pl-2.5"
-    >
-      {{ (activities.activities$ | async)?.length }} Activities.
+    <div *ngIf="!!(actions.actions$ | async)?.length" class="bd-text pl-2.5">
+      {{ (actions.actions$ | async)?.length }} Actions.
     </div>
     <div
-      *ngIf="!(activities.activities$ | async)?.length"
+      *ngIf="!(actions.actions$ | async)?.length"
       class="bd-disabled-text pl-2.5"
     >
-      No Activities.
+      No Actions.
     </div>
   </div>
 
   <div
-    *ngIf="!expanded && !!(activities.activities$ | async)?.length"
+    *ngIf="!expanded && !!(actions.actions$ | async)?.length"
     [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-    [appBdPopup]="activitiesPopup"
+    [appBdPopup]="actionsPopup"
     appBdPopupPosition="right-above"
     class="bd-accent-text cursor-pointer flex pl-1.5"
   >

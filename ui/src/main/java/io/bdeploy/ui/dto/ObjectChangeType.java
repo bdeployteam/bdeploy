@@ -9,7 +9,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
  * of hand-crafted code.
  */
 public enum ObjectChangeType {
-    ACTIVITIES,
+    SERVER_ACTIONS,
     INSTANCE_GROUP,         // Bridged
     PRODUCT,                // Bridged
     SOFTWARE_REPO,          // Bridged

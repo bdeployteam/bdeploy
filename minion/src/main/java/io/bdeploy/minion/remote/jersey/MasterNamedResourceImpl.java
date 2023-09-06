@@ -22,11 +22,11 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
-import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ import io.bdeploy.bhive.op.ManifestNextIdOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
-import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
 import io.bdeploy.common.util.StreamHelper;
@@ -107,12 +107,11 @@ import io.bdeploy.interfaces.remote.NodeProcessResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.minion.MinionRoot;
-import io.bdeploy.ui.RequestScopedParallelOperations;
+import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
@@ -139,14 +138,17 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     private NodeManager nodes;
 
     @Inject
-    private Provider<RequestScope> reqScope;
+    private ActionFactory af;
 
     @Inject
-    private JerseyBroadcastingActivityReporter reporter;
+    private RequestScopedParallelOperationsService rspos;
 
-    public MasterNamedResourceImpl(MinionRoot root, BHive hive) {
+    private final String name;
+
+    public MasterNamedResourceImpl(MinionRoot root, BHive hive, String name) {
         this.root = root;
         this.hive = hive;
+        this.name = name;
     }
 
     private InstanceState getState(InstanceManifest im, BHive hive) {
@@ -162,27 +164,28 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public void install(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
-        SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
-        fragmentReferences.remove(InstanceManifest.CLIENT_NODE_NAME);
+        try (var handle = af.run(Actions.INSTALL, name, imf.getConfiguration().id, key.getTag())) {
+            SortedMap<String, Key> fragmentReferences = imf.getInstanceNodeManifests();
+            fragmentReferences.remove(InstanceManifest.CLIENT_NODE_NAME);
 
-        // assure that the product has been pushed to the master (e.g. by central).
-        Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(imf.getConfiguration().product));
-        if (!Boolean.TRUE.equals(productExists)) {
-            throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product, Status.NOT_FOUND);
-        }
+            // assure that the product has been pushed to the master (e.g. by central).
+            Boolean productExists = hive.execute(new ManifestExistsOperation().setManifest(imf.getConfiguration().product));
+            if (!Boolean.TRUE.equals(productExists)) {
+                throw new WebApplicationException("Cannot find required product " + imf.getConfiguration().product,
+                        Status.NOT_FOUND);
+            }
 
-        List<Runnable> runnables = new ArrayList<>();
+            List<Runnable> runnables = new ArrayList<>();
 
-        for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
-            String nodeName = entry.getKey();
-            Manifest.Key toDeploy = entry.getValue();
-            MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+            for (Map.Entry<String, Manifest.Key> entry : fragmentReferences.entrySet()) {
+                String nodeName = entry.getKey();
+                Manifest.Key toDeploy = entry.getValue();
+                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
-            assertNotNull(node, "Node not available: " + nodeName);
-            assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
+                assertNotNull(node, "Node not available: " + nodeName);
+                assertNotNull(toDeploy, "Cannot lookup node manifest on master: " + toDeploy);
 
-            Runnable r = () -> {
-                try (Activity act = reporter.start("Installing to " + nodeName)) {
+                Runnable r = () -> {
                     // grab all required manifests from the applications
                     InstanceNodeManifest inm = InstanceNodeManifest.of(hive, toDeploy);
                     LocalDependencyFetcher localDeps = new LocalDependencyFetcher();
@@ -208,17 +211,17 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                             NodeDeploymentResource.class, context);
                     hive.execute(pushOp);
                     deployment.install(toDeploy);
-                }
-            };
+                };
 
-            runnables.add(r);
+                runnables.add(r);
+            }
+
+            // Execute all tasks
+            rspos.runAndAwaitAll("Install", runnables, hive.getTransactions());
+
+            getState(imf, hive).install(key.getTag());
+            imf.getHistory(hive).recordAction(Action.INSTALL, context.getUserPrincipal().getName(), null);
         }
-
-        // Execute all tasks
-        RequestScopedParallelOperations.runAndAwaitAll("Install", runnables, reqScope, hive.getTransactions(), reporter);
-
-        getState(imf, hive).install(key.getTag());
-        imf.getHistory(hive).recordAction(Action.INSTALL, context.getUserPrincipal().getName(), null);
     }
 
     @Override
@@ -231,39 +234,39 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     "Given manifest for ID " + imf.getConfiguration().id + " is not fully deployed: " + key, Status.NOT_FOUND);
         }
 
-        // record de-activation
-        String activeTag = imf.getState(hive).read().activeTag;
-        if (activeTag != null) {
-            try {
-                InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().id, activeTag);
-                oldIm.getHistory(hive).recordAction(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
+        try (var handle = af.run(Actions.ACTIVATE, name, imf.getConfiguration().id, key.getTag())) {
+            // record de-activation
+            String activeTag = imf.getState(hive).read().activeTag;
+            if (activeTag != null) {
+                try {
+                    InstanceManifest oldIm = InstanceManifest.load(hive, imf.getConfiguration().id, activeTag);
+                    oldIm.getHistory(hive).recordAction(Action.DEACTIVATE, context.getUserPrincipal().getName(), null);
 
-                // make sure all nodes which no longer participate are deactivated.
-                for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifests().entrySet()) {
-                    // deactivation by activation later on.
-                    if (imf.getInstanceNodeManifests().containsKey(oldNode.getKey())) {
-                        continue;
+                    // make sure all nodes which no longer participate are deactivated.
+                    for (Map.Entry<String, Manifest.Key> oldNode : oldIm.getInstanceNodeManifests().entrySet()) {
+                        // deactivation by activation later on.
+                        if (imf.getInstanceNodeManifests().containsKey(oldNode.getKey())) {
+                            continue;
+                        }
+
+                        MinionDto node = nodes.getNodeConfigIfOnline(oldNode.getKey());
+                        if (node == null) {
+                            log.info("Minion {} not available for de-activation", oldNode.getKey());
+                            continue;
+                        }
+
+                        ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class, context)
+                                .deactivate(oldNode.getValue());
                     }
-
-                    MinionDto node = nodes.getNodeConfigIfOnline(oldNode.getKey());
-                    if (node == null) {
-                        log.info("Minion {} not available for de-activation", oldNode.getKey());
-                        continue;
-                    }
-
-                    ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class, context)
-                            .deactivate(oldNode.getValue());
+                } catch (Exception e) {
+                    // in case the old version disappeared (manual deletion, automatic migration,
+                    // ...) we do not
+                    // want to fail to activate the new version...
+                    log.debug("Cannot set old version to de-activated", e);
                 }
-            } catch (Exception e) {
-                // in case the old version disappeared (manual deletion, automatic migration,
-                // ...) we do not
-                // want to fail to activate the new version...
-                log.debug("Cannot set old version to de-activated", e);
             }
-        }
 
-        SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
-        try (Activity activating = reporter.start("Activating on minions...", fragments.size())) {
+            SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
             for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
                 String nodeName = entry.getKey();
                 if (InstanceManifest.CLIENT_NODE_NAME.equals(nodeName)) {
@@ -284,13 +287,11 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     // log but don't forward exception to the client
                     throw new WebApplicationException("Cannot activate on " + nodeName, e, Status.BAD_GATEWAY);
                 }
-
-                activating.worked(1);
             }
-        }
 
-        getState(imf, hive).activate(key.getTag());
-        imf.getHistory(hive).recordAction(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
+            getState(imf, hive).activate(key.getTag());
+            imf.getHistory(hive).recordAction(Action.ACTIVATE, context.getUserPrincipal().getName(), null);
+        }
     }
 
     /**
@@ -348,40 +349,41 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public void uninstall(Key key) {
         InstanceManifest imf = InstanceManifest.of(hive, key);
 
-        SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
-        fragments.remove(InstanceManifest.CLIENT_NODE_NAME);
+        try (var handle = af.run(Actions.UNINSTALL, name, imf.getConfiguration().id, key.getTag())) {
 
-        List<Runnable> runnables = new ArrayList<>();
+            SortedMap<String, Key> fragments = imf.getInstanceNodeManifests();
+            fragments.remove(InstanceManifest.CLIENT_NODE_NAME);
 
-        for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
-            String nodeName = entry.getKey();
-            Manifest.Key toRemove = entry.getValue();
+            List<Runnable> runnables = new ArrayList<>();
 
-            runnables.add(() -> {
-                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+            for (Map.Entry<String, Manifest.Key> entry : fragments.entrySet()) {
+                String nodeName = entry.getKey();
+                Manifest.Key toRemove = entry.getValue();
 
-                assertNotNull(toRemove, "Cannot lookup node manifest on master: " + toRemove);
+                runnables.add(() -> {
+                    MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
 
-                if (node == null) {
-                    // minion no longer exists or node is offline. this is recoverable as when the node is online
-                    // during the next cleanup cycle, it will clean itself.
-                    log.warn("Node not available: {}. Ignoring.", nodeName);
-                    return;
-                }
+                    assertNotNull(toRemove, "Cannot lookup node manifest on master: " + toRemove);
 
-                try (Activity act = reporter.start("Uninstalling from " + nodeName)) {
+                    if (node == null) {
+                        // minion no longer exists or node is offline. this is recoverable as when the node is online
+                        // during the next cleanup cycle, it will clean itself.
+                        log.warn("Node not available: {}. Ignoring.", nodeName);
+                        return;
+                    }
+
                     NodeDeploymentResource deployment = ResourceProvider.getVersionedResource(node.remote,
                             NodeDeploymentResource.class, context);
                     deployment.remove(toRemove);
-                }
-            });
+                });
+            }
+
+            // Execute all tasks
+            rspos.runAndAwaitAll("Uninstall", runnables, hive.getTransactions());
+
+            getState(imf, hive).uninstall(key.getTag());
+            imf.getHistory(hive).recordAction(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
         }
-
-        // Execute all tasks
-        RequestScopedParallelOperations.runAndAwaitAll("Uninstall", runnables, reqScope, hive.getTransactions(), reporter);
-
-        getState(imf, hive).uninstall(key.getTag());
-        imf.getHistory(hive).recordAction(Action.UNINSTALL, context.getUserPrincipal().getName(), null);
     }
 
     private void assureTagMatch(String targetTag, String actualTag) {
@@ -566,47 +568,51 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     public Manifest.Key update(InstanceUpdateDto update, String expectedTag) {
         InstanceConfigurationDto state = update.config;
         List<FileStatusDto> configUpdates = update.files;
-
         InstanceConfiguration instanceConfig = state.config;
-        String rootName = InstanceManifest.getRootName(instanceConfig.id);
-        Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(rootName));
-        InstanceManifest oldConfig = null;
-        if (expectedTag == null && !existing.isEmpty()) {
-            throw new WebApplicationException("Instance already exists: " + instanceConfig.id, Status.CONFLICT);
-        } else if (expectedTag != null) {
-            oldConfig = InstanceManifest.load(hive, instanceConfig.id, null);
-            if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
-                throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag
-                        + ", current=" + oldConfig.getManifest().getTag(), Status.CONFLICT);
-            }
-        }
 
-        try (Transaction t = hive.getTransactions().begin()) {
-            if (configUpdates != null && !configUpdates.isEmpty()) {
-                // export existing tree and apply updates.
-                // set/reset config tree ID on instanceConfig.
-                instanceConfig.configTree = applyConfigUpdates(instanceConfig.configTree, p -> applyUpdates(configUpdates, p));
+        try (var handle = af.run(Actions.CREATE_INSTANCE_VERSION, name, instanceConfig.id)) {
+
+            String rootName = InstanceManifest.getRootName(instanceConfig.id);
+            Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(rootName));
+            InstanceManifest oldConfig = null;
+            if (expectedTag == null && !existing.isEmpty()) {
+                throw new WebApplicationException("Instance already exists: " + instanceConfig.id, Status.BAD_REQUEST);
+            } else if (expectedTag != null) {
+                oldConfig = InstanceManifest.load(hive, instanceConfig.id, null);
+                if (!oldConfig.getManifest().getTag().equals(expectedTag)) {
+                    throw new WebApplicationException("Expected version is not the current one: expected=" + expectedTag
+                            + ", current=" + oldConfig.getManifest().getTag(), Status.BAD_REQUEST);
+                }
             }
 
-            // calculate target key.
-            String rootTag = this.getNextRootTag(rootName);
-            Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
+            try (Transaction t = hive.getTransactions().begin()) {
+                if (configUpdates != null && !configUpdates.isEmpty()) {
+                    // export existing tree and apply updates.
+                    // set/reset config tree ID on instanceConfig.
+                    instanceConfig.configTree = applyConfigUpdates(instanceConfig.configTree,
+                            p -> applyUpdates(configUpdates, p));
+                }
 
-            if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
-                // no new node config - re-apply existing one with new tag, align redundant
-                // fields.
-                state.nodeDtos = readExistingNodeConfigs(oldConfig);
+                // calculate target key.
+                String rootTag = this.getNextRootTag(rootName);
+                Manifest.Key rootKey = new Manifest.Key(rootName, rootTag);
+
+                if ((state.nodeDtos == null || state.nodeDtos.isEmpty()) && oldConfig != null) {
+                    // no new node config - re-apply existing one with new tag, align redundant
+                    // fields.
+                    state.nodeDtos = readExistingNodeConfigs(oldConfig);
+                }
+
+                // does NOT validate that the product exists, as it might still reside on the
+                // central server, not this one.
+
+                SortedMap<String, InstanceNodeConfiguration> nodeMap = new TreeMap<>();
+                if (state.nodeDtos != null) {
+                    state.nodeDtos.forEach(n -> nodeMap.put(n.nodeName, updateControlGroups(n.nodeConfiguration)));
+                }
+
+                return createInstanceVersion(rootKey, state.config, nodeMap);
             }
-
-            // does NOT validate that the product exists, as it might still reside on the
-            // central server, not this one.
-
-            SortedMap<String, InstanceNodeConfiguration> nodeMap = new TreeMap<>();
-            if (state.nodeDtos != null) {
-                state.nodeDtos.forEach(n -> nodeMap.put(n.nodeName, updateControlGroups(n.nodeConfiguration)));
-            }
-
-            return createInstanceVersion(rootKey, state.config, nodeMap);
         }
     }
 
@@ -743,54 +749,66 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @WriteLock
     @Override
     public void delete(String instanceId) {
-        Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceId));
+        try (var handle = af.run(Actions.DELETE_INSTANCE, name, instanceId)) {
+            Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(instanceId));
 
-        // make sure all is uninstalled.
-        allInstanceObjects.stream().filter(i -> i.getName().equals(InstanceManifest.getRootName(instanceId)))
-                .forEach(this::uninstall);
+            // make sure all is uninstalled.
+            allInstanceObjects.stream().filter(i -> i.getName().equals(InstanceManifest.getRootName(instanceId)))
+                    .forEach(this::uninstall);
 
-        allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+            allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+        }
     }
 
     @Override
     public void deleteVersion(String instanceId, String tag) {
-        Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
-        InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.DELETE, context.getUserPrincipal().getName(), null);
-        InstanceManifest.delete(hive, key);
+        try (var handle = af.run(Actions.DELETE_INSTANCE_VERSION, name, instanceId, tag)) {
+            Manifest.Key key = new Manifest.Key(InstanceManifest.getRootName(instanceId), tag);
+            InstanceManifest.of(hive, key).getHistory(hive).recordAction(Action.DELETE, context.getUserPrincipal().getName(),
+                    null);
+            InstanceManifest.delete(hive, key);
+        }
     }
 
     @Override
     public List<RemoteDirectory> getDataDirectorySnapshots(String instanceId) {
-        List<RemoteDirectory> result = new ArrayList<>();
+        List<RemoteDirectory> result = new CopyOnWriteArrayList<>();
 
-        String activeTag = getInstanceState(instanceId).activeTag;
-        if (activeTag == null) {
-            throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
-        }
-
-        InstanceStatusDto status = getStatus(instanceId);
-        for (String nodeName : status.getNodesWithApps()) {
-            RemoteDirectory idd = new RemoteDirectory();
-            idd.minion = nodeName;
-            idd.id = instanceId;
-
-            try {
-                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
-
-                if (node == null) {
-                    idd.problem = "Node is offline";
-                } else {
-                    NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(node.remote, NodeDeploymentResource.class,
-                            context);
-                    List<RemoteDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
-                    idd.entries.addAll(iddes);
-                }
-            } catch (Exception e) {
-                log.warn("Problem fetching data directory of {}", nodeName, e);
-                idd.problem = e.toString();
+        try (var handle = af.run(Actions.READ_DATA_DIRS, name, instanceId)) {
+            String activeTag = getInstanceState(instanceId).activeTag;
+            if (activeTag == null) {
+                throw new WebApplicationException("Cannot find active version for instance " + instanceId, Status.NOT_FOUND);
             }
 
-            result.add(idd);
+            List<Runnable> runnables = new ArrayList<>();
+            InstanceStatusDto status = getStatus(instanceId);
+            for (String nodeName : status.getNodesWithApps()) {
+
+                runnables.add(() -> {
+                    RemoteDirectory idd = new RemoteDirectory();
+                    idd.minion = nodeName;
+                    idd.id = instanceId;
+                    try {
+                        MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+
+                        if (node == null) {
+                            idd.problem = "Node is offline";
+                        } else {
+                            NodeDeploymentResource sdr = ResourceProvider.getVersionedResource(node.remote,
+                                    NodeDeploymentResource.class, context);
+                            List<RemoteDirectoryEntry> iddes = sdr.getDataDirectoryEntries(instanceId);
+                            idd.entries.addAll(iddes);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Problem fetching data directory of {}", nodeName, e);
+                        idd.problem = e.toString();
+                    }
+
+                    result.add(idd);
+                });
+            }
+
+            rspos.runAndAwaitAll("Read-Data-Dirs", runnables, hive.getTransactions());
         }
 
         return result;
@@ -880,103 +898,105 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public void start(String instanceId) {
-        InstanceStatusDto status = getStatus(instanceId);
+        try (var handle = af.run(Actions.START_INSTANCE, name, instanceId)) {
+            InstanceStatusDto status = getStatus(instanceId);
 
-        // find all nodes where applications are deployed.
-        Collection<String> nodesWithApps = status.getNodesWithApps();
+            // find all nodes where applications are deployed.
+            Collection<String> nodesWithApps = status.getNodesWithApps();
 
-        try (Activity activity = reporter.start("Starting Instance", nodesWithApps.size())) {
+            List<Runnable> runnables = new ArrayList<>();
             for (String nodeName : nodesWithApps) {
-                try {
-                    nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).start(instanceId);
-                } catch (Exception e) {
-                    log.error("Cannot start {} on node {}", instanceId, nodeName, e);
-                }
-                activity.workAndCancelIfRequested(1);
+                runnables.add(() -> {
+                    try {
+                        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).start(instanceId);
+                    } catch (Exception e) {
+                        log.error("Cannot start {} on node {}", instanceId, nodeName, e);
+                    }
+                });
             }
+            rspos.runAndAwaitAll("Start-Instance", runnables, hive.getTransactions());
         }
-    }
-
-    @Override
-    public void start(String instanceId, String applicationId) {
-        start(instanceId, List.of(applicationId));
     }
 
     @Override
     public void start(String instanceId, List<String> applicationIds) {
-        InstanceStatusDto status = getStatus(instanceId);
-        Map<String, List<String>> groupedByNode = new TreeMap<>();
+        try (var handle = af.runMulti(Actions.START_PROCESS, name, instanceId, applicationIds)) {
+            InstanceStatusDto status = getStatus(instanceId);
+            Map<String, List<String>> groupedByNode = new TreeMap<>();
 
-        for (String applicationId : applicationIds) {
-            // Find minion where the application is deployed
-            String nodeName = status.getNodeWhereAppIsDeployed(applicationId);
-            if (nodeName == null) {
-                throw new WebApplicationException("Application is not deployed on any node: " + applicationId,
-                        Status.INTERNAL_SERVER_ERROR);
+            for (String applicationId : applicationIds) {
+                // Find minion where the application is deployed
+                String nodeName = status.getNodeWhereAppIsDeployed(applicationId);
+                if (nodeName == null) {
+                    throw new WebApplicationException("Application is not deployed on any node: " + applicationId,
+                            Status.INTERNAL_SERVER_ERROR);
+                }
+                groupedByNode.computeIfAbsent(nodeName, n -> new ArrayList<>()).add(applicationId);
             }
-            groupedByNode.computeIfAbsent(nodeName, n -> new ArrayList<>()).add(applicationId);
-        }
 
-        for (var entry : groupedByNode.entrySet()) {
-            try (Activity activity = reporter.start("Launching " + entry.getValue().size() + " applications on " + entry.getKey(),
-                    -1)) {
-                // Now launch this application on the node
-                nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).start(instanceId,
-                        entry.getValue());
+            List<Runnable> runnables = new ArrayList<>();
+            for (var entry : groupedByNode.entrySet()) {
+                runnables.add(() -> {
+                    // Now launch this application on the node
+                    nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).start(instanceId,
+                            entry.getValue());
+                });
             }
+            rspos.runAndAwaitAll("Start-Processes", runnables, hive.getTransactions());
         }
     }
 
     @Override
     public void stop(String instanceId) {
-        InstanceStatusDto status = getStatus(instanceId);
+        try (var handle = af.run(Actions.STOP_INSTANCE, name, instanceId)) {
+            InstanceStatusDto status = getStatus(instanceId);
 
-        // Find out all nodes where at least one application is running
-        Collection<String> runningNodes = status.getNodesWhereAppsAreRunningOrScheduled();
+            // Find out all nodes where at least one application is running
+            Collection<String> runningNodes = status.getNodesWhereAppsAreRunningOrScheduled();
 
-        try (Activity activity = reporter.start("Stopping Instance", runningNodes.size())) {
+            List<Runnable> runnables = new ArrayList<>();
             for (String nodeName : runningNodes) {
-                try {
-                    nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).stop(instanceId);
-                } catch (Exception e) {
-                    log.error("Cannot stop {} on node {}", instanceId, nodeName, e);
-                }
-                activity.workAndCancelIfRequested(1);
+                runnables.add(() -> {
+                    try {
+                        nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context).stop(instanceId);
+                    } catch (Exception e) {
+                        log.error("Cannot stop {} on node {}", instanceId, nodeName, e);
+                    }
+                });
             }
+            rspos.runAndAwaitAll("Stop-Instance", runnables, hive.getTransactions());
         }
-    }
-
-    @Override
-    public void stop(String instanceId, String applicationId) {
-        stop(instanceId, List.of(applicationId));
     }
 
     @Override
     public void stop(String instanceId, List<String> applicationIds) {
-        InstanceStatusDto status = getStatus(instanceId);
-        Map<String, List<String>> groupedByNode = new TreeMap<>();
+        try (var handle = af.runMulti(Actions.STOP_PROCESS, name, instanceId, applicationIds)) {
+            InstanceStatusDto status = getStatus(instanceId);
+            Map<String, List<String>> groupedByNode = new TreeMap<>();
 
-        for (var applicationId : applicationIds) {
-            // Find node where the application is running
-            Optional<String> node = status.node2Applications.entrySet().stream()
-                    .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
-                            && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
-                    .map(Entry::getKey).findFirst();
+            for (var applicationId : applicationIds) {
+                // Find node where the application is running
+                Optional<String> node = status.node2Applications.entrySet().stream()
+                        .filter(e -> e.getValue().hasApps() && e.getValue().getStatus(applicationId) != null
+                                && e.getValue().getStatus(applicationId).processState != ProcessState.STOPPED)
+                        .map(Entry::getKey).findFirst();
 
-            if (node.isEmpty()) {
-                continue; // ignore - not deployed.
+                if (node.isEmpty()) {
+                    continue; // ignore - not deployed.
+                }
+
+                groupedByNode.computeIfAbsent(node.get(), n -> new ArrayList<>()).add(applicationId);
             }
 
-            groupedByNode.computeIfAbsent(node.get(), n -> new ArrayList<>()).add(applicationId);
-        }
-
-        for (var entry : groupedByNode.entrySet()) {
-            // Now stop the applications on the node
-            try (Activity activity = reporter.start("Stopping " + entry.getValue().size() + " applications on " + entry.getKey(),
-                    -1)) {
-                nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).stop(instanceId,
-                        entry.getValue());
+            List<Runnable> runnables = new ArrayList<>();
+            for (var entry : groupedByNode.entrySet()) {
+                runnables.add(() -> {
+                    // Now stop the applications on the node
+                    nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).stop(instanceId,
+                            entry.getValue());
+                });
             }
+            rspos.runAndAwaitAll("Stop-Processes", runnables, hive.getTransactions());
         }
     }
 
@@ -1030,54 +1050,50 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         // all node names regardless of their status.
         Collection<String> nodeNames = nodes.getAllNodeNames();
 
-        try (Activity activity = reporter.start("Read Node Processes", nodeNames.size())) {
-            List<Runnable> actions = new ArrayList<>();
-
-            for (String nodeName : nodeNames) {
-                MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
-                if (node == null) {
-                    continue; // don't log to avoid flooding - node manager will log once.
-                }
-
-                actions.add(() -> {
-                    NodeProcessResource spc = ResourceProvider.getVersionedResource(node.remote, NodeProcessResource.class,
-                            context);
-                    try {
-                        InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
-                        instanceStatus.add(nodeName, nodeStatus);
-                    } catch (Exception e) {
-                        log.error("Cannot fetch process status of {}", nodeName);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Exception:", e);
-                        }
-                    }
-                    activity.worked(1);
-                });
+        List<Runnable> actions = new ArrayList<>();
+        for (String nodeName : nodeNames) {
+            MinionDto node = nodes.getNodeConfigIfOnline(nodeName);
+            if (node == null) {
+                continue; // don't log to avoid flooding - node manager will log once.
             }
-            RequestScopedParallelOperations.runAndAwaitAll("Node-Process-Status", actions, reqScope, hive.getTransactions(),
-                    reporter);
+
+            actions.add(() -> {
+                NodeProcessResource spc = ResourceProvider.getVersionedResource(node.remote, NodeProcessResource.class, context);
+                try {
+                    InstanceNodeStatusDto nodeStatus = spc.getStatus(instanceId);
+                    instanceStatus.add(nodeName, nodeStatus);
+                } catch (Exception e) {
+                    log.error("Cannot fetch process status of {}", nodeName);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Exception:", e);
+                    }
+                }
+            });
         }
+        rspos.runAndAwaitAll("Node-Process-Status", actions, hive.getTransactions());
         return instanceStatus;
     }
 
     @Override
     public ProcessDetailDto getProcessDetails(String instanceId, String appId) {
-        // Check if the application is running on a node
-        InstanceStatusDto status = getStatus(instanceId); // this is super-slow (potentially), thus this method is deprecated.
-        String nodeName = status.getNodeWhereAppIsRunning(appId);
+        try (var handle = af.run(Actions.READ_PROCESS_STATUS, name, instanceId, appId)) {
+            // Check if the application is running on a node
+            InstanceStatusDto status = getStatus(instanceId); // this is super-slow (potentially), thus this method is deprecated.
+            String nodeName = status.getNodeWhereAppIsRunning(appId);
 
-        // Check if the application is deployed on a node
-        if (nodeName == null) {
-            nodeName = status.getNodeWhereAppIsDeployed(appId);
+            // Check if the application is deployed on a node
+            if (nodeName == null) {
+                nodeName = status.getNodeWhereAppIsDeployed(appId);
+            }
+
+            // Application is nowhere deployed and nowhere running
+            if (nodeName == null) {
+                return null;
+            }
+
+            // Query process details
+            return getProcessDetailsFromNode(instanceId, appId, nodeName);
         }
-
-        // Application is nowhere deployed and nowhere running
-        if (nodeName == null) {
-            return null;
-        }
-
-        // Query process details
-        return getProcessDetailsFromNode(instanceId, appId, nodeName);
     }
 
     @Override
@@ -1116,21 +1132,25 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public MasterRuntimeHistoryDto getRuntimeHistory(String instanceId) {
         // we don't use the instance manifest to figure out nodes, since node assignment can change over versions. we simply query all nodes for now.
-        // TODO: this might be quite inefficient if we have many nodes, and always only deploy to a small subset.
-
         MasterRuntimeHistoryDto history = new MasterRuntimeHistoryDto();
 
         // all node names regardless of their status.
         Collection<String> nodeNames = nodes.getAllNodeNames();
 
+        List<Runnable> runnables = new ArrayList<>();
         for (String nodeName : nodeNames) {
-            try {
-                history.add(nodeName, nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
-                        .getRuntimeHistory(instanceId));
-            } catch (Exception e) {
-                history.addError(nodeName, "Cannot load runtime history (" + e.toString() + ")");
-            }
+            runnables.add(() -> {
+                try {
+                    history.add(nodeName, nodes.getNodeResourceIfOnlineOrThrow(nodeName, NodeProcessResource.class, context)
+                            .getRuntimeHistory(instanceId));
+                } catch (Exception e) {
+                    history.addError(nodeName, "Cannot load runtime history (" + e.toString() + ")");
+                }
+            });
         }
+
+        rspos.runAndAwaitAll("Runtime-History", runnables, hive.getTransactions());
+
         return history;
     }
 
@@ -1166,7 +1186,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
         SortedSet<Key> imKeys = InstanceManifest.scan(hive, true);
         Map<String, MinionStatusDto> nodeStatus = nodes.getAllNodeStatus();
 
-        try (Activity all = reporter.start("Fetch Instance Status", imKeys.size())) {
+        try (var handle = af.run(Actions.UPDATE_OVERALL_STATUS, name)) {
             for (Key imKey : imKeys) {
                 InstanceManifest im = InstanceManifest.of(hive, imKey);
 
@@ -1238,7 +1258,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 }
 
                 im.getOverallState(hive).update(overallStatus, overallStatusMessages);
-                all.workAndCancelIfRequested(1);
             }
         }
     }
@@ -1303,6 +1322,6 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Override
     public MasterSystemResource getSystemResource() {
-        return rc.initResource(new MasterSystemResourceImpl(hive));
+        return rc.initResource(new MasterSystemResourceImpl(hive, name));
     }
 }

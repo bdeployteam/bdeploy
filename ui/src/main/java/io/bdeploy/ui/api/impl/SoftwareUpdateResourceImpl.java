@@ -34,6 +34,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.bhive.util.VersionComparator;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
@@ -44,6 +45,8 @@ import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.CommonUpdateResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareUpdateResource;
@@ -75,6 +78,9 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Inject
     private Minion minion;
+
+    @Inject
+    private ActionFactory af;
 
     @Context
     private UriInfo info;
@@ -140,9 +146,12 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Override
     public void deleteVersions(List<Manifest.Key> keys) {
-        BHive hive = getHive();
-        keys.forEach(k -> hive.execute(new ManifestDeleteOperation().setToDelete(k)));
-        hive.execute(new PruneOperation());
+        try (ActionHandle h = af.runMulti(Actions.DELETE_UPDATES, null, null,
+                keys.stream().map(k -> k.getTag()).distinct().toList())) {
+            BHive hive = getHive();
+            keys.forEach(k -> hive.execute(new ManifestDeleteOperation().setToDelete(k)));
+            hive.execute(new PruneOperation());
+        }
     }
 
     @Override
@@ -233,33 +242,35 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
 
     @Override
     public String createLauncherInstallerFor(String osName) {
-        OperatingSystem os = OperatingSystem.valueOf(osName.toUpperCase());
-        ScopedManifestKey launcherKey = getNewestLauncher(os);
+        try (ActionHandle h = af.run(Actions.DOWNLOAD_LAUNCHER)) {
+            OperatingSystem os = OperatingSystem.valueOf(osName.toUpperCase());
+            ScopedManifestKey launcherKey = getNewestLauncher(os);
 
-        // Request a new file where we can store the launcher
-        DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        String token = ds.createNewToken();
-        Path installerPath = ds.getStoragePath(token);
+            // Request a new file where we can store the launcher
+            DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
+            String token = ds.createNewToken();
+            Path installerPath = ds.getStoragePath(token);
 
-        UriBuilder launcherUri = UriBuilder.fromUri(info.getBaseUri());
-        launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
-        launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
-        URI launcherLocation = launcherUri.build(new Object[] { os.name().toLowerCase() }, false);
+            UriBuilder launcherUri = UriBuilder.fromUri(info.getBaseUri());
+            launcherUri.path(SoftwareUpdateResource.ROOT_PATH);
+            launcherUri.path(SoftwareUpdateResource.DOWNLOAD_LATEST_PATH);
+            URI launcherLocation = launcherUri.build(new Object[] { os.name().toLowerCase() }, false);
 
-        String fileName = null;
-        if (os == OperatingSystem.WINDOWS) {
-            fileName = "BDeploy Click & Start - Installer.exe";
-            createWindowsInstaller(installerPath, launcherKey, launcherLocation);
-        } else if (os == OperatingSystem.LINUX || os == OperatingSystem.MACOS) {
-            fileName = "BDeploy-Click-and-Start-Installer.run";
-            createLinuxInstaller(installerPath, launcherKey, launcherLocation);
-        } else {
-            throw new WebApplicationException("MAC OS Installer not yet supported");
+            String fileName = null;
+            if (os == OperatingSystem.WINDOWS) {
+                fileName = "BDeploy Click & Start - Installer.exe";
+                createWindowsInstaller(installerPath, launcherKey, launcherLocation);
+            } else if (os == OperatingSystem.LINUX || os == OperatingSystem.MACOS) {
+                fileName = "BDeploy-Click-and-Start-Installer.run";
+                createLinuxInstaller(installerPath, launcherKey, launcherLocation);
+            } else {
+                throw new WebApplicationException("MAC OS Installer not yet supported");
+            }
+
+            // Register the file for downloading
+            ds.registerForDownload(token, fileName);
+            return token;
         }
-
-        // Register the file for downloading
-        ds.registerForDownload(token, fileName);
-        return token;
     }
 
     private void createLinuxInstaller(Path installerPath, ScopedManifestKey launcherKey, URI launcherLocation) {

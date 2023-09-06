@@ -187,18 +187,6 @@ public interface MasterNamedResource {
     public void start(@QueryParam("u") String instanceId);
 
     /**
-     * Starts a single application of an instance.
-     *
-     * @param instanceId the unique id of the instance.
-     * @param applicationId the unique ID of the application.
-     * @deprecated use {@link #start(String, List)} instead.
-     */
-    @Deprecated(since = "4.2.0", forRemoval = true)
-    @POST
-    @Path("/startApp")
-    public void start(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
-
-    /**
      * Starts one or more applications, respecting potential process control groups.
      *
      * @param instanceId the instance ID
@@ -208,18 +196,6 @@ public interface MasterNamedResource {
     @POST
     @Path("/startApps")
     public void start(@QueryParam("u") String instanceId, List<String> applicationIds);
-
-    /**
-     * Stops a single application of an instance.
-     *
-     * @param instanceId the unique id of the instance.
-     * @param applicationId the unique ID of the application.
-     * @deprecated use {@link #stop(String, List)} instead.
-     */
-    @Deprecated(since = "4.2.0", forRemoval = true)
-    @POST
-    @Path("/stopApp")
-    public void stop(@QueryParam("u") String instanceId, @QueryParam("a") String applicationId);
 
     /**
      * Stops one or more applications of an instance, respecting potential process control groups.

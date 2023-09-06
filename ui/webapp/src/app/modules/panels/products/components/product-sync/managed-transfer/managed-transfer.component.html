@@ -7,22 +7,21 @@
   ></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
-      <div>
-        The following product versions are currently not available on the target
-        system.
-      </div>
+      <div>The following product versions are currently not available on the target system.</div>
       <app-bd-data-table
         [records]="records$ | async"
         [columns]="productColumns.defaultReducedProductsColumns"
         [checkMode]="true"
-        [(checked)]="selected"
+        [checked]="selected$.value"
+        (checkedChange)="selected$.next($event)"
       ></app-bd-data-table>
       <app-bd-button
         text="Transfer"
-        [disabled]="!selected?.length"
+        [disabled]="!(selected$ | async)?.length || (mappedTransfer$ && (mappedTransfer$ | async))"
         [collapsed]="false"
         icon="local_shipping"
         color="primary"
+        [loadingWhen$]="mappedTransfer$"
         (click)="doTransfer()"
       ></app-bd-button>
     </div>

@@ -12,7 +12,6 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.bhive.remote.LocalBHiveAdapter;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.jersey.JerseyPathWriter.DeleteAfterWrite;
 
@@ -22,8 +21,8 @@ public class BHiveResourceImpl implements BHiveResource {
 
     private final LocalBHiveAdapter wrapper;
 
-    public BHiveResourceImpl(BHive hive, ActivityReporter reporter) {
-        this.wrapper = new LocalBHiveAdapter(hive, reporter);
+    public BHiveResourceImpl(BHive hive) {
+        this.wrapper = new LocalBHiveAdapter(hive);
     }
 
     @Override

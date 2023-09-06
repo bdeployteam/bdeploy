@@ -8,11 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a parameter which contributes to the scope of activities started within the current request.
+ * Annotates a parameter which contributes to the scope of actions and operations started within the current request.
  */
 @Documented
 @Retention(RUNTIME)
 @Target(ElementType.PARAMETER)
-public @interface ActivityScope {
+public @interface Scope {
 
 }

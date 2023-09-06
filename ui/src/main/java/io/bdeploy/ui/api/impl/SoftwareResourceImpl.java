@@ -38,6 +38,7 @@ import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestLoadOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -45,6 +46,8 @@ import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.SoftwareResource;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
@@ -73,6 +76,9 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
     @Inject
     private ChangeEventManager changes;
+
+    @Inject
+    private ActionFactory af;
 
     private final BHive hive;
 
@@ -111,25 +117,31 @@ public class SoftwareResourceImpl implements SoftwareResource {
 
     @Override
     public void delete(String name, String tag) {
-        Manifest.Key key = new Manifest.Key(name, tag);
-        Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
-        if (existing.size() != 1) {
-            log.warn("Cannot uniquely identify {} to delete", key);
-            return;
+        try (ActionHandle h = af.run(Actions.DELETE_SOFTWARE, repository, null, name + ":" + tag)) {
+            Manifest.Key key = new Manifest.Key(name, tag);
+            Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
+            if (existing.size() != 1) {
+                log.warn("Cannot uniquely identify {} to delete", key);
+                return;
+            }
+
+            hive.execute(new ManifestDeleteOperation().setToDelete(key));
+
+            changes.change(ObjectChangeType.SOFTWARE_PACKAGE, key);
         }
-
-        hive.execute(new ManifestDeleteOperation().setToDelete(key));
-
-        changes.change(ObjectChangeType.SOFTWARE_PACKAGE, key);
     }
 
     @Override
     public String createSoftwareZipFile(String name, String tag, boolean original) {
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
         if (original) {
-            return ds.createOriginalZipAndRegister(hive, name, tag);
+            try (ActionHandle h = af.run(Actions.DOWNLOAD_SOFTWARE_C, repository, null, name + ":" + tag)) {
+                return ds.createOriginalZipAndRegister(hive, name, tag);
+            }
         } else {
-            return ds.createManifestZipAndRegister(hive, name, tag);
+            try (ActionHandle h = af.run(Actions.DOWNLOAD_SOFTWARE_H, repository, null, name + ":" + tag)) {
+                return ds.createManifestZipAndRegister(hive, name, tag);
+            }
         }
     }
 

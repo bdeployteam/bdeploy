@@ -1,19 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
-import {
-  ActivatedRouteSnapshot,
-  RouterLink,
-  RouterLinkActive,
-} from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdButtonColorMode } from '../bd-button/bd-button.component';
 
@@ -33,6 +21,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() color: BdButtonColorMode;
   @Input() disabled = false;
   @Input() tooltip: TooltipPosition;
+  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
 
   @ViewChild(RouterLink) private rl: RouterLink;
   @ViewChild(RouterLinkActive) /* template */ rla: RouterLinkActive;

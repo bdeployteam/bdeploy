@@ -10,16 +10,10 @@
     [mode]="(uploading$ | async) ? 'determinate' : 'indeterminate'"
     [value]="status.progressObservable | async"
   ></mat-progress-bar>
-  <div
-    *ngIf="(uploading$ | async) || (processing$ | async)"
-    class="break-all bd-description-text"
-  >
-    {{ processingHint$ | async }}
+  <div *ngIf="(uploading$ | async) || (processing$ | async)" class="break-all bd-description-text">
+    Working on it...
   </div>
-  <div
-    *ngIf="(failed$ | async) || (finished$ | async)"
-    class="break-all bd-description-text"
-  >
+  <div *ngIf="(failed$ | async) || (finished$ | async)" class="break-all bd-description-text">
     {{ (failed$ | async) ? status.detail : this.resultEvaluator(status) }}
   </div>
 </app-bd-notification-card>

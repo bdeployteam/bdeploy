@@ -1,8 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Bulk Control"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Bulk Control" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content *ngIf="instances.active$ | async as instance">
     <app-bd-notification-card
@@ -13,9 +10,8 @@
       *ngIf="!(servers.isCurrentInstanceSynchronized$ | async); else currentInstanceSynchronized"
     >
       <div class="text-justify">
-        The managed server responsible for this instance is not synchronized,
-        bulk controls are unavailable. Please synchronize the server to use
-        these controls.
+        The managed server responsible for this instance is not synchronized, bulk controls are unavailable. Please
+        synchronize the server to use these controls.
       </div>
     </app-bd-notification-card>
     <ng-template #currentInstanceSynchronized>
@@ -25,30 +21,30 @@
           icon="play_arrow"
           text="Start Instance"
           (click)="doStart(instance)"
-          [loadingWhen$]="starting$"
-          [disabled]="starting$ | async"
+          [loadingWhen$]="mappedStart$"
+          [disabled]="mappedStart$ | async"
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
           icon="stop"
           text="Stop Instance"
           (click)="doStop(instance)"
-          [loadingWhen$]="stopping$"
-          [disabled]="stopping$ | async"
+          [loadingWhen$]="mappedStop$"
+          [disabled]="mappedStop$ | async"
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
           icon="replay"
           text="Restart Instance"
           (click)="doRestart(instance)"
-          [loadingWhen$]="restarting$"
-          [disabled]="restarting$ | async"
+          [loadingWhen$]="mappedRestart$"
+          [disabled]="mappedRestart$ | async"
         ></app-bd-button>
         <mat-divider></mat-divider>
         <div class="flex flex-col gap-2.5">
           <div>
             Control
-            <strong>{{ bulkSelection.length || 0 }}</strong>
+            <strong>{{ bulkSelection$.value.length || 0 }}</strong>
             selected processes.
           </div>
           <app-bd-notification-card
@@ -57,8 +53,8 @@
             header="Confirmation Required"
             [dismissable]="false"
           >
-            The selection contains one or more processes which require
-            confirmation. Those processes can not be controlled in a bulk.
+            The selection contains one or more processes which require confirmation. Those processes can not be
+            controlled in a bulk.
           </app-bd-notification-card>
         </div>
         <app-bd-button
@@ -66,24 +62,24 @@
           icon="play_arrow"
           text="Start Selected Processes"
           (click)="doStartMulti(instance)"
-          [loadingWhen$]="startingMulti$"
-          [disabled]="(startingMulti$ | async) || !bulkSelection.length || bulkContainsConfirmed"
+          [loadingWhen$]="mappedStartMulti$"
+          [disabled]="(mappedStartMulti$ | async) || !bulkSelection$.value.length || bulkContainsConfirmed"
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
           icon="stop"
           text="Stop Selected Processes"
           (click)="doStopMulti(instance)"
-          [loadingWhen$]="stoppingMulti$"
-          [disabled]="(stoppingMulti$ | async) || !bulkSelection.length || bulkContainsConfirmed"
+          [loadingWhen$]="mappedStopMulti$"
+          [disabled]="(mappedStopMulti$ | async) || !bulkSelection$.value.length || bulkContainsConfirmed"
         ></app-bd-button>
         <app-bd-button
           [collapsed]="false"
           icon="replay"
           text="Restart Selected Processes"
           (click)="doRestartMulti(instance)"
-          [loadingWhen$]="restartingMulti$"
-          [disabled]="(restartingMulti$ | async) || !bulkSelection.length || bulkContainsConfirmed"
+          [loadingWhen$]="mappedRestartMulti$"
+          [disabled]="(mappedRestartMulti$ | async) || !bulkSelection$.value.length || bulkContainsConfirmed"
         ></app-bd-button>
       </div>
     </ng-template>

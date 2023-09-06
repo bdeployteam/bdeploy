@@ -157,6 +157,9 @@ public class ProcessController {
     /** The results of the last probe calls */
     private final Map<ProcessProbeType, ProcessProbeResultDto> lastProbeResults = new EnumMap<>(ProcessProbeType.class);
 
+    /** In production, by default, don't wait for out.txt file lock */
+    private static boolean lockWait = false;
+
     /**
      * Creates a new process controller for the given configuration.
      *
@@ -679,12 +682,16 @@ public class ProcessController {
         }
     }
 
+    public static void enableWaitForLockRelease(boolean enable) {
+        lockWait = enable;
+    }
+
     /**
      * Waits until the process releases the lock that is hold on the out.txt file.
      */
     private void waitForLockRelease() {
         // Only Windows is holding file-locks
-        if (OsHelper.getRunningOs() != OperatingSystem.WINDOWS) {
+        if (OsHelper.getRunningOs() != OperatingSystem.WINDOWS || !lockWait) {
             return;
         }
 

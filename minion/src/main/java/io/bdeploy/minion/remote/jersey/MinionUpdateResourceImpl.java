@@ -26,9 +26,11 @@ import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectSizeOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.UpdateHelper;
 import io.bdeploy.interfaces.remote.MinionUpdateResource;
+import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.api.MinionMode;
 import jakarta.inject.Inject;
@@ -42,6 +44,9 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
     @Inject
     private MinionRoot root;
 
+    @Inject
+    private ActionFactory actions;
+
     @Override
     public void convertToNode() {
         // convert to type node.
@@ -54,6 +59,8 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
             log.warn(" * {}", p);
         }
 
+        // never-ending restart-server action which will notify the web-ui of pending restart.
+        actions.run(Actions.RESTART_SERVER);
         root.getRestartManager().performRestart(1_000);
     }
 
@@ -66,6 +73,8 @@ public class MinionUpdateResourceImpl implements MinionUpdateResource {
                     Status.PRECONDITION_FAILED);
         }
 
+        // never-ending restart-server action which will notify the web-ui of pending restart.
+        actions.run(Actions.RESTART_SERVER);
         root.getRestartManager().performRestart(1_000);
     }
 

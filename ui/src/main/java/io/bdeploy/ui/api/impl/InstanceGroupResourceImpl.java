@@ -27,7 +27,6 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ImportObjectOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
-import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
@@ -87,9 +86,6 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
     @Inject
     private BHiveRegistry registry;
-
-    @Inject
-    private ActivityReporter reporter;
 
     @Context
     private ResourceContext rc;
@@ -190,7 +186,7 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
         }
 
         try {
-            BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), reporter);
+            BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
             registry.register(config.name, h);
             InstanceGroupManifest igm = new InstanceGroupManifest(h);
             igm.update(config);

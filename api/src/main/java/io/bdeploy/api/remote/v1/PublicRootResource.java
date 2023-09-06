@@ -5,7 +5,7 @@ import java.util.List;
 import io.bdeploy.api.remote.v1.dto.CredentialsApi;
 import io.bdeploy.api.remote.v1.dto.InstanceGroupConfigurationApi;
 import io.bdeploy.api.remote.v1.dto.SoftwareRepositoryConfigurationApi;
-import io.bdeploy.jersey.ActivityScope;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.WeakTokenAllowed;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -113,6 +113,6 @@ public interface PublicRootResource {
     @Operation
     @Path("/common")
     public PublicInstanceResource getInstanceResource(
-            @Parameter(description = "The name of the instance group to access") @ActivityScope @QueryParam("BDeploy_group") String group);
+            @Parameter(description = "The name of the instance group to access") @Scope @QueryParam("BDeploy_group") String group);
 
 }

@@ -13,7 +13,7 @@ import org.glassfish.jersey.process.internal.RequestScope;
 
 import io.bdeploy.bhive.BHiveTransactions;
 import io.bdeploy.common.util.FutureHelper;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.JerseyScopeService;
 import jakarta.inject.Provider;
 
 public class RequestScopedParallelOperations {
@@ -21,14 +21,14 @@ public class RequestScopedParallelOperations {
     private static final int MAX_OPS = 4;
 
     public static void runAndAwaitAll(String id, Collection<Runnable> actions, Provider<RequestScope> scope, BHiveTransactions tx,
-            JerseyBroadcastingActivityReporter reporter) {
+            JerseyScopeService scopeService) {
         // use the id plus a number for each new thread.
         AtomicLong threadNum = new AtomicLong(0);
         Supplier<String> threadId = () -> id + "-" + threadNum.incrementAndGet();
 
         // create a pool with a fixed size, which is capable of inheriting the current request scope.
         ExecutorService pool = Executors.newFixedThreadPool(MAX_OPS,
-                new RequestScopedNamedDaemonThreadFactory(scope, tx, reporter, threadId));
+                new RequestScopedNamedDaemonThreadFactory(scope, tx, scopeService, threadId));
 
         // submit all tasks and map to their result.
         List<Future<?>> tasks = new ArrayList<>();

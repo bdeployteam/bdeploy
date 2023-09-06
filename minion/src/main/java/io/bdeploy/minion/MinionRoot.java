@@ -46,8 +46,8 @@ import io.bdeploy.bhive.op.FsckOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
@@ -56,6 +56,7 @@ import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.InstanceNodeController;
+import io.bdeploy.dcu.TaskSynchronizer;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.ProcessGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
@@ -70,6 +71,11 @@ import io.bdeploy.interfaces.settings.OktaSettingsDto;
 import io.bdeploy.jersey.JerseyServer;
 import io.bdeploy.jersey.JerseySessionConfiguration;
 import io.bdeploy.jersey.SessionStorage;
+import io.bdeploy.jersey.actions.Action;
+import io.bdeploy.jersey.actions.ActionExecution;
+import io.bdeploy.jersey.actions.ActionService;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
+import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
@@ -83,6 +89,7 @@ import io.bdeploy.minion.user.UserDatabase;
 import io.bdeploy.minion.user.UserGroupDatabase;
 import io.bdeploy.pcu.InstanceProcessController;
 import io.bdeploy.pcu.MinionProcessController;
+import io.bdeploy.pcu.ProcessController;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
@@ -122,6 +129,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private boolean consoleLog;
     private Version latestGitHubReleaseVersion;
     private boolean conCheckFailed = false;
+
+    private ActionService actions;
+    private ActionHandle startupAction;
 
     public MinionRoot(Path root, ActivityReporter reporter) {
         super(root.resolve("etc"));
@@ -244,6 +254,15 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         // we *must* do it after startup of server to already have a UI where startup
         // could be aborted/monitored/etc.
         processController.autoStart();
+
+        // in case we're in a test, we want to aggressively wait for certain conditions
+        // when stopping processes. This is mostly irrelevant in the real world, so save the wait.
+        ProcessController.enableWaitForLockRelease(isTest);
+
+        log.info("After startup flow finished.");
+
+        // after all autoStart has completed, the server is finally fully up.
+        startupAction.close();
     }
 
     /** Updates the logging config file if required, and switches to using it */
@@ -888,5 +907,15 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         Version currentVersion = VersionHelper.getVersion();
         return currentVersion != null && this.latestGitHubReleaseVersion != null
                 && this.latestGitHubReleaseVersion.compareTo(currentVersion) > 0;
+    }
+
+    public ActionService createActionService(ObjectChangeWebSocket ocws) {
+        actions = new ActionService(ocws, auditor);
+        startupAction = actions.start(new Action(Actions.STARTING_SERVER, null, null, null), ActionExecution.fromSystem());
+        return actions;
+    }
+
+    public ActionService getActions() {
+        return actions;
     }
 }

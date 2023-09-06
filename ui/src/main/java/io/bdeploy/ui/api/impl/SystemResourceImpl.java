@@ -9,8 +9,6 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.util.StorageHelper;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -65,9 +63,6 @@ public class SystemResourceImpl implements SystemResource {
 
     @Inject
     private ChangeEventManager changes;
-
-    @Inject
-    private ActivityReporter reporter;
 
     public SystemResourceImpl(String group, BHive hive) {
         this.group = group;
@@ -154,41 +149,32 @@ public class SystemResourceImpl implements SystemResource {
         RemoteService remote = mp.getNamedMasterOrSelf(hive, target);
         SystemTemplateDto result = new SystemTemplateDto();
 
-        try (Activity loading = reporter.start("Fetching Nodes...", 4)) {
-            // fetch all the node states from the actual remote server which has been seleted.
-            result.nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes();
-            loading.worked(1);
-            loading.activity("Loading System Template...");
+        // fetch all the node states from the actual remote server which has been seleted.
+        result.nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes();
 
-            // load the actual template from the file
-            SystemTemplateDescriptor template = StorageHelper.fromYamlStream(inputStream, SystemTemplateDescriptor.class);
+        // load the actual template from the file
+        SystemTemplateDescriptor template = StorageHelper.fromYamlStream(inputStream, SystemTemplateDescriptor.class);
 
-            // verify that instances have been defined in the template.
-            if (template.instances == null || template.instances.isEmpty()) {
-                throw new WebApplicationException("No instances defined in system template.", Status.NOT_ACCEPTABLE);
-            }
-
-            // load all products that are available. this will also give us all templates, so we can assure they are all there.
-            loading.worked(1);
-            loading.activity("Loading required Products...");
-            ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
-            List<ProductDto> products = pr.list(null);
-
-            // check whether all requested products and the requested template IN the product(s) are present.
-            loading.worked(1);
-            loading.activity("Validating System Template " + template.name);
-
-            InstanceTemplateResourceImpl itr = rc.initResource(new InstanceTemplateResourceImpl(group, hive));
-
-            for (InstanceTemplateReferenceDescriptor instance : template.instances) {
-                ProductDto product = itr.findMatchingProductOrFail(instance, products);
-                result.products.add(product);
-            }
-
-            result.template = template;
-
-            return result;
+        // verify that instances have been defined in the template.
+        if (template.instances == null || template.instances.isEmpty()) {
+            throw new WebApplicationException("No instances defined in system template.", Status.NOT_ACCEPTABLE);
         }
+
+        // load all products that are available. this will also give us all templates, so we can assure they are all there.
+        ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
+        List<ProductDto> products = pr.list(null);
+
+        // check whether all requested products and the requested template IN the product(s) are present.
+        InstanceTemplateResourceImpl itr = rc.initResource(new InstanceTemplateResourceImpl(group, hive));
+
+        for (InstanceTemplateReferenceDescriptor instance : template.instances) {
+            ProductDto product = itr.findMatchingProductOrFail(instance, products);
+            result.products.add(product);
+        }
+
+        result.template = template;
+
+        return result;
     }
 
     @Override

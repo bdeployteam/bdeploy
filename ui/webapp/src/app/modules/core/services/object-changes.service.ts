@@ -68,7 +68,7 @@ export class ObjectChangesService {
     });
     _socket.addEventListener('error', (err) => {
       console.error('Error on WebSocket', err);
-      this.cfg.checkServerReachable();
+      this.cfg.markServerOffline();
       this._error$.next(err);
       this.onErrorIncrease();
     });

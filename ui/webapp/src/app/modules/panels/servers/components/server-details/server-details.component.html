@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar
-    header="Details"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Details" [panel]="true"></app-bd-dialog-toolbar>
 
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="server">
@@ -19,9 +16,7 @@
           <strong>Update available:</strong>
           <div class="flex justify-start items-center">
             {{ version }}
-            <mat-icon class="bd-warning-text bd-small-icon"
-              >system_update</mat-icon
-            >
+            <mat-icon class="bd-warning-text bd-small-icon">system_update</mat-icon>
           </div>
         </ng-container>
       </div>
@@ -30,31 +25,29 @@
           class="grid grid-cols-[24px_auto] gap-2.5 items-center"
           *ngIf="!(servers.isServerDetailsSynchronized$ | async) && !server.update.forceUpdate"
         >
-          <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize
-          to enable update related actions.
+          <mat-icon class="bd-warning-text">warning</mat-icon>Please synchronize to enable update related actions.
         </div>
         <div
           class="grid grid-cols-[24px_auto] gap-2.5 items-center"
           *ngIf="!(servers.isServerDetailsSynchronized$ | async) && server.update.forceUpdate"
         >
-          <mat-icon class="bd-warning-text">warning</mat-icon>A major version
-          update must be installed to re-enable synchronizing.
+          <mat-icon class="bd-warning-text">warning</mat-icon>A major version update must be installed to re-enable
+          synchronizing.
         </div>
         <div class="bd-description-text text-justify">
-          An update can be transfered without installing to prepare a future
-          update up front. This option is only available if the update package
-          is not yet present on the managed server.
+          An update can be transfered without installing to prepare a future update up front. This option is only
+          available if the update package is not yet present on the managed server.
         </div>
         <app-bd-button
           text="Transfer Update Package"
           icon="cloud_upload"
           [collapsed]="false"
           [disabled]="
-            (transfering$ | async) ||
+            (mappedTransfer$ | async) ||
             !server.update.packagesToTransfer?.length ||
             !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)
           "
-          [loadingWhen$]="transfering$"
+          [loadingWhen$]="mappedTransfer$"
           (click)="doUpdateTransfer(server)"
           [matTooltip]="!server.update.packagesToTransfer?.length ? 'All packages have already been transfered' : null"
           matTooltipPosition="above"
@@ -64,8 +57,8 @@
           icon="system_update"
           [collapsed]="false"
           color="primary"
-          [disabled]="(installing$ | async) || !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)"
-          [loadingWhen$]="installing$"
+          [disabled]="(mappedInstall$ | async) || !((servers.isServerDetailsSynchronized$ | async) || server.update.forceUpdate)"
+          [loadingWhen$]="mappedInstall$"
           (click)="doUpdateInstall(server)"
         ></app-bd-button>
       </ng-container>
@@ -76,10 +69,7 @@
           </app-bd-no-data>
         </app-bd-data-display>
       </app-bd-expand-button>
-      <app-bd-server-sync-button
-        [collapsed]="false"
-        [server]="server"
-      ></app-bd-server-sync-button>
+      <app-bd-server-sync-button [collapsed]="false" [server]="server"></app-bd-server-sync-button>
       <app-bd-panel-button
         text="Edit Server Details..."
         icon="edit"

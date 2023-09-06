@@ -1,6 +1,5 @@
 package io.bdeploy.ui;
 
-import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -17,12 +16,13 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.ActivityReporter.Activity;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
-import io.bdeploy.jersey.JerseyScopeService;
+import io.bdeploy.jersey.actions.ActionExecution;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
@@ -32,32 +32,21 @@ import jakarta.ws.rs.core.UriBuilder;
 @Service
 public class ProductTransferService {
 
+    @Inject
+    private ActionFactory af;
+
     private static final Logger log = LoggerFactory.getLogger(ProductTransferService.class);
     private final SortedMap<String, SortedSet<ProductDto>> inTransfer = new TreeMap<>();
     private final ExecutorService transferExec = Executors.newFixedThreadPool(2);
-
-    @Inject
-    private JerseyScopeService jss;
-
-    @Inject
-    private ActivityReporter reporter;
 
     public void initTransfer(BHive instanceGroupHive, String groupName, ProductTransferDto data) {
         synchronized (inTransfer) {
             getInTransferFor(groupName).addAll(data.versionsToTransfer);
         }
 
-        // for progress tracking.
-        List<String> parentScope = jss.getScope();
-        String parentUser = jss.getUser();
-
         CompletableFuture.runAsync(() -> {
             // on another thread, need to re-init activity reporting.
-            jss.setScope(parentScope, parentUser);
-
-            try (Activity act = reporter.start("Transferring " + data.versionsToTransfer.size() + " products...")) {
-                doTransfer(instanceGroupHive, groupName, data);
-            }
+            doTransfer(instanceGroupHive, groupName, data);
         }, transferExec).whenComplete((r, e) -> {
             synchronized (inTransfer) {
                 getInTransferFor(groupName).removeAll(data.versionsToTransfer);
@@ -73,16 +62,19 @@ public class ProductTransferService {
         ManagedMasters masters = new ManagedMasters(instanceGroupHive);
         FetchOperation fetch = null;
         PushOperation push = null;
+        Actions action = null;
 
         if (data.sourceMode == MinionMode.CENTRAL) {
             // need push to managed server only
             ManagedMasterDto attached = masters.read().getManagedMaster(data.targetServer);
             RemoteService svc = new RemoteService(UriBuilder.fromUri(attached.uri).build(), attached.auth);
             push = new PushOperation().setRemote(svc).setHiveName(groupName);
+            action = Actions.TRANSFER_PRODUCT_MANAGED;
         } else {
             ManagedMasterDto srcAttached = masters.read().getManagedMaster(data.sourceServer);
             RemoteService srcSvc = new RemoteService(UriBuilder.fromUri(srcAttached.uri).build(), srcAttached.auth);
             fetch = new FetchOperation().setRemote(srcSvc).setHiveName(groupName);
+            action = Actions.TRANSFER_PRODUCT_CENTRAL;
 
             if (data.targetMode == MinionMode.MANAGED) {
                 // need a push after the fetch.
@@ -101,14 +93,18 @@ public class ProductTransferService {
             }
         }
 
-        // always first fetch, then push
-        if (fetch != null) {
-            try (Transaction t = instanceGroupHive.getTransactions().begin()) {
-                instanceGroupHive.execute(fetch);
+        try (ActionHandle h = af.runMultiAs(action, groupName, null,
+                data.versionsToTransfer.stream().map(v -> v.key.getName() + ":" + v.key.getTag()).toList(),
+                () -> ActionExecution.fromSystem())) {
+            // always first fetch, then push
+            if (fetch != null) {
+                try (Transaction t = instanceGroupHive.getTransactions().begin()) {
+                    instanceGroupHive.execute(fetch);
+                }
             }
-        }
-        if (push != null) {
-            instanceGroupHive.execute(push);
+            if (push != null) {
+                instanceGroupHive.execute(push);
+            }
         }
     }
 

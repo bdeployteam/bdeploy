@@ -1,13 +1,10 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
 import { isEqual } from 'lodash-es';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import {
-  HistoryEntryDto,
-  HistoryEntryType,
-  InstanceStateRecord,
-} from 'src/app/models/gen.dtos';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
+import { Actions, HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
+import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { HistoryService } from 'src/app/modules/primary/instances/services/history.service';
@@ -21,13 +18,35 @@ import { histKey, histKeyDecode } from '../../utils/history-key.utils';
   templateUrl: './history-entry.component.html',
 })
 export class HistoryEntryComponent implements OnDestroy {
+  private areas = inject(NavAreasService);
+  private history = inject(HistoryService);
+  private actions = inject(ActionsService);
+  protected instances = inject(InstancesService);
+  protected states = inject(InstanceStateService);
+  protected servers = inject(ServersService);
+  protected auth = inject(AuthenticationService);
+
   /* template */ entry$ = new BehaviorSubject<HistoryEntryDto>(null);
   /* template */ state$ = new BehaviorSubject<InstanceStateRecord>(null);
 
-  /* template */ installing$ = new BehaviorSubject<boolean>(false);
-  /* template */ uninstalling$ = new BehaviorSubject<boolean>(false);
-  /* template */ activating$ = new BehaviorSubject<boolean>(false);
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
+  private installing$ = new BehaviorSubject<boolean>(false);
+  private uninstalling$ = new BehaviorSubject<boolean>(false);
+  private activating$ = new BehaviorSubject<boolean>(false);
+  private deleting$ = new BehaviorSubject<boolean>(false);
+
+  private tag$ = this.entry$.pipe(map((e) => e.instanceTag));
+
+  protected mappedInstall$ = this.actions.action([Actions.INSTALL], this.installing$, null, null, this.tag$);
+  protected mappedUninstall$ = this.actions.action([Actions.UNINSTALL], this.uninstalling$, null, null, this.tag$);
+  protected mappedActivate$ = this.actions.action([Actions.ACTIVATE], this.activating$, null, null, this.tag$);
+  protected mappedDelete$ = this.actions.action(
+    [Actions.DELETE_INSTANCE_VERSION],
+    this.deleting$,
+    null,
+    null,
+    this.tag$
+  );
+
   /* template */ isCreate: boolean;
   /* template */ isInstalled: boolean;
   /* template */ isActive: boolean;
@@ -36,36 +55,23 @@ export class HistoryEntryComponent implements OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(
-    private areas: NavAreasService,
-    private history: HistoryService,
-    public instances: InstancesService,
-    public states: InstanceStateService,
-    public servers: ServersService,
-    public auth: AuthenticationService
-  ) {
-    this.subscription = combineLatest([
-      this.areas.panelRoute$,
-      this.history.history$,
-      this.states.state$,
-    ]).subscribe(([route, entries, state]) => {
-      // Note: basing the selection on an index in the service has some drawbacks, but we can do that now without needing to change a lot in the backend.
-      const key = route?.paramMap?.get('key');
-      this.state$.next(state);
-      if (!key || !entries) {
-        this.entry$.next(null);
-      } else {
-        const entry = entries.find((e) =>
-          isEqual(histKey(e), histKeyDecode(key))
-        );
-        this.entry$.next(entry);
-        this.isCreate = entry.type === HistoryEntryType.CREATE;
-        this.isInstalled = !!state?.installedTags?.find(
-          (s) => s === entry?.instanceTag
-        );
-        this.isActive = state?.activeTag === entry?.instanceTag;
+  constructor() {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.history.history$, this.states.state$]).subscribe(
+      ([route, entries, state]) => {
+        // Note: basing the selection on an index in the service has some drawbacks, but we can do that now without needing to change a lot in the backend.
+        const key = route?.paramMap?.get('key');
+        this.state$.next(state);
+        if (!key || !entries) {
+          this.entry$.next(null);
+        } else {
+          const entry = entries.find((e) => isEqual(histKey(e), histKeyDecode(key)));
+          this.entry$.next(entry);
+          this.isCreate = entry.type === HistoryEntryType.CREATE;
+          this.isInstalled = !!state?.installedTags?.find((s) => s === entry?.instanceTag);
+          this.isActive = state?.activeTag === entry?.instanceTag;
+        }
       }
-    });
+    );
   }
 
   ngOnDestroy(): void {

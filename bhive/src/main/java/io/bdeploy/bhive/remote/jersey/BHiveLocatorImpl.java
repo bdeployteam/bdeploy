@@ -4,20 +4,18 @@ import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.bdeploy.bhive.BHive;
+import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.jersey.fs.FileSystemSpaceService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response.Status;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.bdeploy.bhive.BHive;
-import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.security.ScopedPermission.Permission;
-import io.bdeploy.jersey.fs.FileSystemSpaceService;
 
 /**
  * Uses the server's {@link BHiveRegistry} to find a named {@link BHive} and return it's {@link BHiveRegistry}.
@@ -28,9 +26,6 @@ public class BHiveLocatorImpl implements BHiveLocator {
 
     @Inject
     private BHiveRegistry registry;
-
-    @Inject
-    private ActivityReporter reporter;
 
     @Inject
     private FileSystemSpaceService fsss;
@@ -60,7 +55,7 @@ public class BHiveLocatorImpl implements BHiveLocator {
                 log.debug("Error:", e);
             }
         }
-        return rc.initResource(new BHiveResourceImpl(hive, reporter));
+        return rc.initResource(new BHiveResourceImpl(hive));
     }
 
     @Override

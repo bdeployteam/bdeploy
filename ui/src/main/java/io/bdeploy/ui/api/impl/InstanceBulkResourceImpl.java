@@ -1,22 +1,22 @@
 package io.bdeploy.ui.api.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
-import org.glassfish.jersey.process.internal.RequestScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.common.ActivityReporter.Activity;
-import io.bdeploy.common.NoThrowAutoCloseable;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
@@ -33,9 +33,11 @@ import io.bdeploy.interfaces.manifest.state.InstanceOverallState;
 import io.bdeploy.interfaces.remote.MasterNamedResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.activity.JerseyBroadcastingActivityReporter;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
+import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.ProductUpdateService;
-import io.bdeploy.ui.RequestScopedParallelOperations;
+import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import io.bdeploy.ui.api.InstanceBulkResource;
 import io.bdeploy.ui.api.InstanceResource;
 import io.bdeploy.ui.api.ManagedServersResource;
@@ -50,7 +52,6 @@ import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
@@ -65,9 +66,6 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     @Inject
     private Minion minion;
 
-    @Inject
-    private JerseyBroadcastingActivityReporter reporter;
-
     @Context
     private ResourceContext rc;
 
@@ -78,13 +76,16 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     private ProductUpdateService pus;
 
     @Inject
-    private Provider<RequestScope> reqScope;
+    private RequestScopedParallelOperationsService rspos;
 
     @Inject
     private MasterProvider mp;
 
     @Inject
     private ChangeEventManager changes;
+
+    @Inject
+    private ActionFactory af;
 
     private final BHive hive;
     private final String group;
@@ -120,105 +121,107 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             return new InstanceUpdateDto(icd, null);
         }).forEach(dto -> updates.add(dto));
 
-        // 2) validate all are using the same product (name, not version).
-        var refProd = updates.get(0).config.config.product.getName();
+        try (ActionHandle h = af.runMulti(Actions.UPDATE_PRODUCT_VERSION, group, instanceKeys.keySet())) {
+            // 2) validate all are using the same product (name, not version).
+            var refProd = updates.get(0).config.config.product.getName();
 
-        new ArrayList<>(updates).stream().forEach(i -> {
-            if (!refProd.equals(i.config.config.product.getName())) {
-                updates.remove(i);
-                result.add(new OperationResult(i.config.config.id, OperationResultType.ERROR,
-                        "All instances must be based on the same product."));
-            }
-        });
-
-        // 3) read source product versions (may differ!) and all associated applications.
-        Map<String, ProductManifest> currentProds = new TreeMap<>();
-        Map<String, List<ApplicationManifest>> currentApps = new TreeMap<>();
-
-        for (var e : updates) {
-            Key productKey = e.config.config.product;
-
-            var pm = currentProds.computeIfAbsent(productKey.getTag(), v -> {
-                try {
-                    return ProductManifest.of(hive, productKey);
-                } catch (Exception ex) {
-                    // this *might* be ok :)
-                    log.info("Missing product {} while updating {}", productKey, e.config.config.id);
-                    return null;
+            new ArrayList<>(updates).stream().forEach(i -> {
+                if (!refProd.equals(i.config.config.product.getName())) {
+                    updates.remove(i);
+                    result.add(new OperationResult(i.config.config.id, OperationResultType.ERROR,
+                            "All instances must be based on the same product."));
                 }
             });
 
-            if (pm != null) {
-                currentApps.computeIfAbsent(productKey.getTag(), v -> {
-                    return pm.getApplications().stream().map(a -> ApplicationManifest.of(hive, a, pm)).toList();
+            // 3) read source product versions (may differ!) and all associated applications.
+            Map<String, ProductManifest> currentProds = new TreeMap<>();
+            Map<String, List<ApplicationManifest>> currentApps = new TreeMap<>();
+
+            for (var e : updates) {
+                Key productKey = e.config.config.product;
+
+                var pm = currentProds.computeIfAbsent(productKey.getTag(), v -> {
+                    try {
+                        return ProductManifest.of(hive, productKey);
+                    } catch (Exception ex) {
+                        // this *might* be ok :)
+                        log.info("Missing product {} while updating {}", productKey, e.config.config.id);
+                        return null;
+                    }
+                });
+
+                if (pm != null) {
+                    currentApps.computeIfAbsent(productKey.getTag(), v -> {
+                        return pm.getApplications().stream().map(a -> ApplicationManifest.of(hive, a, pm)).toList();
+                    });
+                }
+            }
+
+            // 4) read target product version (same for all).
+            ProductManifest targetProd = ProductManifest.of(hive, new Manifest.Key(refProd, productTag));
+            List<ApplicationManifest> targetApps = targetProd.getApplications().stream()
+                    .map(a -> ApplicationManifest.of(hive, a, targetProd)).toList();
+
+            // 5) read all systems we need for validation.
+            Map<Manifest.Key, SystemConfiguration> systems = new TreeMap<>();
+            for (var update : updates) {
+                var sysKey = update.config.config.system;
+                if (sysKey != null) {
+                    systems.computeIfAbsent(sysKey, k -> SystemManifest.of(hive, sysKey).getConfiguration());
+                }
+            }
+
+            // 5) prepare call to pus.update() and pus.validate() for each instance. then save the result if possible.
+            Set<Manifest.Key> toSync = new ConcurrentSkipListSet<>();
+            List<Runnable> updateRuns = new ArrayList<>();
+            List<InstanceUpdateDto> updated = new ArrayList<>();
+            for (var update : updates) {
+                String sourceTag = update.config.config.product.getTag();
+
+                if (sourceTag.equals(productTag)) {
+                    // we can skip this, it's already there!
+                    result.add(new OperationResult(update.config.config.id, OperationResultType.INFO,
+                            "Skipped, already on " + productTag));
+                    continue;
+                }
+
+                updateRuns.add(() -> {
+                    try {
+                        var system = update.config.config.system != null ? systems.get(update.config.config.system) : null;
+                        var upd = pus.update(update, targetProd, currentProds.get(sourceTag), targetApps,
+                                currentApps.get(sourceTag));
+                        var issues = pus.validate(upd, targetApps, system);
+
+                        if (issues.isEmpty()) {
+                            updated.add(upd);
+                        } else {
+                            result.add(new OperationResult(upd.config.config.id, OperationResultType.WARNING,
+                                    issues.size() + " Validation issues after update, skipping."));
+                            return;
+                        }
+
+                        var key = instanceKeys.get(update.config.config.id);
+                        RemoteService svc = mp.getControllingMaster(hive, key);
+                        MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
+                        MasterNamedResource mnr = root.getNamedMaster(group);
+
+                        var resultKey = mnr.update(update, key.getTag());
+                        result.add(new OperationResult(update.config.config.id, OperationResultType.INFO,
+                                "Created instance version " + resultKey.getTag()));
+                        toSync.add(key); // sync the *old* key, as the new one does not exist for us on central.
+                    } catch (Exception e) {
+                        log.warn("Error while updating {}", update.config.config.id, e);
+                        result.add(new OperationResult(update.config.config.id, OperationResultType.ERROR, e.getMessage()));
+                    }
                 });
             }
+
+            // 6) run all prepared tasks.
+            rspos.runAndAwaitAll("Bulk-Update", updateRuns, hive.getTransactions());
+
+            // 7) sync!
+            syncBulk(toSync);
         }
-
-        // 4) read target product version (same for all).
-        ProductManifest targetProd = ProductManifest.of(hive, new Manifest.Key(refProd, productTag));
-        List<ApplicationManifest> targetApps = targetProd.getApplications().stream()
-                .map(a -> ApplicationManifest.of(hive, a, targetProd)).toList();
-
-        // 5) read all systems we need for validation.
-        Map<Manifest.Key, SystemConfiguration> systems = new TreeMap<>();
-        for (var update : updates) {
-            var sysKey = update.config.config.system;
-            if (sysKey != null) {
-                systems.computeIfAbsent(sysKey, k -> SystemManifest.of(hive, sysKey).getConfiguration());
-            }
-        }
-
-        // 5) prepare call to pus.update() and pus.validate() for each instance. then save the result if possible.
-        List<Manifest.Key> toSync = new CopyOnWriteArrayList<>();
-        List<Runnable> updateRuns = new ArrayList<>();
-        List<InstanceUpdateDto> updated = new ArrayList<>();
-        for (var update : updates) {
-            String sourceTag = update.config.config.product.getTag();
-
-            if (sourceTag.equals(productTag)) {
-                // we can skip this, it's already there!
-                result.add(new OperationResult(update.config.config.id, OperationResultType.INFO,
-                        "Skipped, already on " + productTag));
-                continue;
-            }
-
-            updateRuns.add(() -> {
-                try (Activity act = reporter.start("Updating " + update.config.config.id)) {
-                    var system = update.config.config.system != null ? systems.get(update.config.config.system) : null;
-                    var upd = pus.update(update, targetProd, currentProds.get(sourceTag), targetApps, currentApps.get(sourceTag));
-                    var issues = pus.validate(upd, targetApps, system);
-
-                    if (issues.isEmpty()) {
-                        updated.add(upd);
-                    } else {
-                        result.add(new OperationResult(upd.config.config.id, OperationResultType.WARNING,
-                                issues.size() + " Validation issues after update, skipping."));
-                        return;
-                    }
-
-                    var key = instanceKeys.get(update.config.config.id);
-                    RemoteService svc = mp.getControllingMaster(hive, key);
-                    MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-                    MasterNamedResource mnr = root.getNamedMaster(group);
-
-                    var resultKey = mnr.update(update, key.getTag());
-                    result.add(new OperationResult(update.config.config.id, OperationResultType.INFO,
-                            "Created instance version " + resultKey.getTag()));
-                    toSync.add(key); // sync the *old* key, as the new one does not exist for us on central.
-                } catch (Exception e) {
-                    log.warn("Error while updating {}", update.config.config.id, e);
-                    result.add(new OperationResult(update.config.config.id, OperationResultType.ERROR,
-                            "Error while updating: " + e.toString()));
-                }
-            });
-        }
-
-        // 6) run all prepared tasks.
-        RequestScopedParallelOperations.runAndAwaitAll("Bulk-Update", updateRuns, reqScope, hive.getTransactions(), reporter);
-
-        // 7) sync!
-        syncBulk(toSync);
 
         return result;
     }
@@ -227,29 +230,29 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     public BulkOperationResultDto startBulk(List<String> instances) {
         var result = new BulkOperationResultDto();
         var ir = getInstanceResource();
-        var sync = new CopyOnWriteArrayList<Manifest.Key>();
+        var sync = new ConcurrentHashMap<Manifest.Key, String>();
         var actions = instances.stream().map(i -> (Runnable) () -> {
             var im = InstanceManifest.load(hive, i, null);
-            var master = mp.getControllingMaster(hive, im.getManifest());
-            try (Activity act = reporter.start("Starting " + im.getConfiguration().name);
-                    NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
+            try {
                 var pr = ir.getProcessResource(i);
                 pr.startAll();
 
-                sync.add(im.getManifest());
+                sync.put(im.getManifest(), im.getConfiguration().id);
                 result.add(new OperationResult(i, OperationResultType.INFO, "Started"));
             } catch (Exception e) {
                 log.warn("Error while starting {}", i, e);
-                result.add(new OperationResult(i, OperationResultType.ERROR, "Error starting: " + e.toString()));
+                result.add(new OperationResult(i, OperationResultType.ERROR, e.getMessage()));
             }
         }).toList();
 
-        RequestScopedParallelOperations.runAndAwaitAll("Bulk-Start", actions, reqScope, hive.getTransactions(), reporter);
+        rspos.runAndAwaitAll("Bulk-Start", actions, hive.getTransactions());
 
-        syncBulk(sync);
+        syncBulk(sync.keySet());
 
-        sync.forEach(i -> changes.change(ObjectChangeType.INSTANCE, i,
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        sync.entrySet()
+                .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
+                        new ObjectScope(group, e.getValue(), e.getKey().getTag()),
+                        Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
 
         return result;
     }
@@ -258,29 +261,29 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     public BulkOperationResultDto stopBulk(List<String> instances) {
         var result = new BulkOperationResultDto();
         var ir = getInstanceResource();
-        var sync = new CopyOnWriteArrayList<Manifest.Key>();
+        var sync = new ConcurrentHashMap<Manifest.Key, String>();
         var actions = instances.stream().map(i -> (Runnable) () -> {
             var im = InstanceManifest.load(hive, i, null);
-            var master = mp.getControllingMaster(hive, im.getManifest());
-            try (Activity act = reporter.start("Stopping " + im.getConfiguration().name);
-                    NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
+            try {
                 var pr = ir.getProcessResource(i);
                 pr.stopAll();
 
-                sync.add(im.getManifest());
+                sync.put(im.getManifest(), im.getConfiguration().id);
                 result.add(new OperationResult(i, OperationResultType.INFO, "Stopped"));
             } catch (Exception e) {
                 log.warn("Error while starting {}", i, e);
-                result.add(new OperationResult(i, OperationResultType.ERROR, "Error stopping: " + e.toString()));
+                result.add(new OperationResult(i, OperationResultType.ERROR, e.getMessage()));
             }
         }).toList();
 
-        RequestScopedParallelOperations.runAndAwaitAll("Bulk-Stop", actions, reqScope, hive.getTransactions(), reporter);
+        rspos.runAndAwaitAll("Bulk-Stop", actions, hive.getTransactions());
 
-        syncBulk(sync);
+        syncBulk(sync.keySet());
 
-        sync.forEach(i -> changes.change(ObjectChangeType.INSTANCE, i,
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        sync.entrySet()
+                .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
+                        new ObjectScope(group, e.getValue(), e.getKey().getTag()),
+                        Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
 
         return result;
     }
@@ -288,32 +291,32 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     @Override
     public BulkOperationResultDto deleteBulk(List<String> instances) {
         var result = new BulkOperationResultDto();
-        var sync = new CopyOnWriteArrayList<Manifest.Key>();
+        var sync = new ConcurrentHashMap<Manifest.Key, String>();
 
         var actions = instances.stream().map(i -> (Runnable) () -> {
             var im = InstanceManifest.load(hive, i, null);
             var master = mp.getControllingMaster(hive, im.getManifest());
-            try (Activity act = reporter.start("Deleting " + im.getConfiguration().name);
-                    NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
+            try {
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
                 root.getNamedMaster(group).delete(i);
 
-                sync.add(im.getManifest());
+                sync.put(im.getManifest(), im.getConfiguration().id);
                 result.add(new OperationResult(i, OperationResultType.INFO, "Deleted"));
             } catch (Exception e) {
                 log.warn("Error while deleting {}", i, e);
-                result.add(new OperationResult(i, OperationResultType.ERROR, "Error deleting: " + e.toString()));
+                result.add(new OperationResult(i, OperationResultType.ERROR, e.getMessage()));
             }
         }).toList();
 
-        RequestScopedParallelOperations.runAndAwaitAll("Bulk-Delete", actions, reqScope, hive.getTransactions(), reporter);
+        rspos.runAndAwaitAll("Bulk-Delete", actions, hive.getTransactions());
 
         // now sync and fire update for all manipulated instances.
-        syncBulk(sync);
+        syncBulk(sync.keySet());
 
         // TODO: check who actually fires change events. should be the master directly (?) and the sync in
         // case of central (only!). no resources in the UI should ever fire?
-        sync.forEach(i -> changes.remove(ObjectChangeType.INSTANCE, i));
+        sync.entrySet().forEach(e -> changes.remove(ObjectChangeType.INSTANCE, e.getKey(),
+                new ObjectScope(group, e.getValue(), e.getKey().getTag())));
 
         return result;
     }
@@ -321,7 +324,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     @Override
     public BulkOperationResultDto installLatestBulk(List<String> instances) {
         var result = new BulkOperationResultDto();
-        var sync = new CopyOnWriteArrayList<Manifest.Key>();
+        var sync = new ConcurrentHashMap<Manifest.Key, String>();
 
         var actions = instances.stream().map(i -> (Runnable) () -> {
             var im = InstanceManifest.load(hive, i, null);
@@ -333,28 +336,28 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             }
 
             var master = mp.getControllingMaster(hive, im.getManifest());
-            try (Activity act = reporter.start("Installing " + im.getConfiguration().name);
-                    NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
+            try {
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
                 root.getNamedMaster(group).install(im.getManifest());
 
-                sync.add(im.getManifest()); // only on success.
+                sync.put(im.getManifest(), im.getConfiguration().id); // only on success.
                 result.add(new OperationResult(i, OperationResultType.INFO, "Installed"));
             } catch (Exception e) {
                 log.warn("Error while deleting {}", i, e);
-                result.add(new OperationResult(i, OperationResultType.ERROR, "Error installing: " + e.toString()));
+                result.add(new OperationResult(i, OperationResultType.ERROR, e.getMessage()));
             }
         }).toList();
 
-        RequestScopedParallelOperations.runAndAwaitAll("Bulk-Install-Latest", actions, reqScope, hive.getTransactions(),
-                reporter);
+        rspos.runAndAwaitAll("Bulk-Install-Latest", actions, hive.getTransactions());
 
         // now sync and fire update for all manipulated instances.
-        syncBulk(sync);
+        syncBulk(sync.keySet());
 
         // TODO: same check as above regarding events.
-        sync.forEach(i -> changes.change(ObjectChangeType.INSTANCE, i,
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        sync.entrySet()
+                .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
+                        new ObjectScope(group, e.getValue(), e.getKey().getTag()),
+                        Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
 
         return result;
     }
@@ -362,7 +365,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     @Override
     public BulkOperationResultDto activateLatestBulk(List<String> instances) {
         var result = new BulkOperationResultDto();
-        var sync = new CopyOnWriteArrayList<Manifest.Key>();
+        var sync = new ConcurrentHashMap<Manifest.Key, String>();
 
         var actions = instances.stream().map(i -> (Runnable) () -> {
             var im = InstanceManifest.load(hive, i, null);
@@ -374,37 +377,38 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             }
 
             var master = mp.getControllingMaster(hive, im.getManifest());
-            try (Activity act = reporter.start("Activating " + im.getConfiguration().name);
-                    NoThrowAutoCloseable proxy = reporter.proxyActivities(master)) {
+            try {
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
                 root.getNamedMaster(group).activate(im.getManifest());
 
-                sync.add(im.getManifest()); // only on success.
+                sync.put(im.getManifest(), im.getConfiguration().id); // only on success.
                 result.add(new OperationResult(i, OperationResultType.INFO, "Activated"));
             } catch (Exception e) {
                 log.warn("Error while deleting {}", i, e);
-                result.add(new OperationResult(i, OperationResultType.ERROR, "Error activating: " + e.toString()));
+                result.add(new OperationResult(i, OperationResultType.ERROR, e.getMessage()));
             }
         }).toList();
 
-        RequestScopedParallelOperations.runAndAwaitAll("Bulk-Activate-Latest", actions, reqScope, hive.getTransactions(),
-                reporter);
+        rspos.runAndAwaitAll("Bulk-Activate-Latest", actions, hive.getTransactions());
 
         // now sync and fire update for all manipulated instances.
-        syncBulk(sync);
+        syncBulk(sync.keySet());
 
         // TODO: same check as above regarding events.
-        sync.forEach(i -> changes.change(ObjectChangeType.INSTANCE, i,
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+        sync.entrySet()
+                .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
+                        new ObjectScope(group, e.getValue(), e.getKey().getTag()),
+                        Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
 
         return result;
     }
 
     @Override
-    public List<InstanceOverallStatusDto> syncBulk(List<Key> given) {
+    public List<InstanceOverallStatusDto> syncBulk(Set<Key> given) {
         // in case no instance IDs are given, sync and get all.
         List<InstanceDto> list = rc.initResource(new InstanceResourceImpl(group, hive)).list();
-        List<Manifest.Key> instances = (given == null || given.isEmpty()) ? list.stream().map(d -> d.instance).toList() : given;
+        Collection<Manifest.Key> instances = (given == null || given.isEmpty()) ? list.stream().map(d -> d.instance).toList()
+                : given;
         Set<String> errors = new TreeSet<>();
 
         // on CENTRAL only, synchronize managed servers. only after that we know all instances.
@@ -415,29 +419,25 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
             log.info("Mass-synchronize {} server(s).", toSync.size());
 
             ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
-            try (Activity sync = reporter.start("Synchronize Servers", toSync.size())) {
-                List<Runnable> syncTasks = new ArrayList<>();
-                for (ManagedMasterDto host : toSync) {
-                    syncTasks.add(() -> {
-                        try (Activity singleSync = reporter.start("Synchronize " + host.hostName)) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Synchronize {}", host.hostName);
-                            }
-                            rs.synchronize(group, host.hostName);
-                        } catch (Exception e) {
-                            errors.add(host.hostName);
-                            log.warn("Could not synchronize managed server: {}: {}", host.hostName, e.toString());
-                            if (log.isDebugEnabled()) {
-                                log.debug("Exception:", e);
-                            }
+            List<Runnable> syncTasks = new ArrayList<>();
+            for (ManagedMasterDto host : toSync) {
+                syncTasks.add(() -> {
+                    try {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Synchronize {}", host.hostName);
                         }
-                        sync.workAndCancelIfRequested(1);
-                    });
-                }
-
-                RequestScopedParallelOperations.runAndAwaitAll("Mass-Synchronizer", syncTasks, reqScope, hive.getTransactions(),
-                        reporter);
+                        rs.synchronize(group, host.hostName);
+                    } catch (Exception e) {
+                        errors.add(host.hostName);
+                        log.warn("Could not synchronize managed server: {}: {}", host.hostName, e.toString());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Exception:", e);
+                        }
+                    }
+                });
             }
+
+            rspos.runAndAwaitAll("Mass-Synchronizer", syncTasks, hive.getTransactions());
         } else {
             // update the local stored state.
             ResourceProvider.getResource(minion.getSelf(), MasterRootResource.class, context).getNamedMaster(group)

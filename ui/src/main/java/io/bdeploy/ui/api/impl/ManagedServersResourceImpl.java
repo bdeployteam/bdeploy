@@ -40,6 +40,7 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.Version;
+import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.StreamHelper;
 import io.bdeploy.common.util.VersionHelper;
@@ -65,6 +66,9 @@ import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.JerseyClientFactory;
 import io.bdeploy.jersey.JerseyOnBehalfOfFilter;
+import io.bdeploy.jersey.actions.ActionBridge;
+import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import io.bdeploy.ui.ProductTransferService;
 import io.bdeploy.ui.api.BackendInfoResource;
@@ -109,13 +113,16 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     private Minion minion;
 
     @Inject
-    private ActivityReporter reporter;
-
-    @Inject
     private ProductTransferService transfers;
 
     @Inject
     private ChangeEventManager changes;
+
+    @Inject
+    private Optional<ActionBridge> bridge;
+
+    @Inject
+    private ActionFactory af;
 
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
@@ -133,7 +140,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMasters mm = new ManagedMasters(hive);
 
         if (mm.read().getManagedMasters().containsKey(target.hostName)) {
-            throw new WebApplicationException("Server with name " + target.hostName + " already exists!", Status.CONFLICT);
+            throw new WebApplicationException("Server with name " + target.hostName + " already exists!", Status.BAD_REQUEST);
         }
 
         InstanceGroupManifest igm = new InstanceGroupManifest(hive);
@@ -170,7 +177,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         ManagedMasters mm = new ManagedMasters(hive);
 
         if (mm.read().getManagedMasters().containsKey(target.hostName)) {
-            throw new WebApplicationException("Server with name " + target.hostName + " already exists!", Status.CONFLICT);
+            throw new WebApplicationException("Server with name " + target.hostName + " already exists!", Status.BAD_REQUEST);
         }
 
         // store the attachment locally
@@ -297,20 +304,22 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
     @Override
     public void deleteManagedServer(String groupName, String serverName) {
-        BHive hive = getInstanceGroupHive(groupName);
-        List<InstanceConfiguration> controlled = getInstancesControlledBy(groupName, serverName);
+        try (ActionHandle h = af.run(Actions.REMOVE_MANAGED, groupName, null, serverName)) {
+            BHive hive = getInstanceGroupHive(groupName);
+            List<InstanceConfiguration> controlled = getInstancesControlledBy(groupName, serverName);
 
-        // delete all of the instances /LOCALLY/ on the central, but NOT using the remote master (we "just" detach).
-        for (InstanceConfiguration cfg : controlled) {
-            Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.id));
-            allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+            // delete all of the instances /LOCALLY/ on the central, but NOT using the remote master (we "just" detach).
+            for (InstanceConfiguration cfg : controlled) {
+                Set<Key> allInstanceObjects = hive.execute(new ManifestListOperation().setManifestName(cfg.id));
+                allInstanceObjects.forEach(x -> hive.execute(new ManifestDeleteOperation().setToDelete(x)));
+            }
+
+            new ManagedMasters(hive).detach(serverName);
+
+            InstanceGroupManifest igm = new InstanceGroupManifest(hive);
+            changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
+                    Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
         }
-
-        new ManagedMasters(hive).detach(serverName);
-
-        InstanceGroupManifest igm = new InstanceGroupManifest(hive);
-        changes.change(ObjectChangeType.INSTANCE_GROUP, igm.getKey(),
-                Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.SERVERS));
     }
 
     @Override
@@ -363,21 +372,23 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         if (minion.getMode() != MinionMode.CENTRAL) {
             return null;
         }
-        BHive hive = getInstanceGroupHive(groupName);
-        try (Transaction t = hive.getTransactions().begin()) {
-            return synchronizeTransacted(hive, groupName, serverName);
-        } catch (Exception e) {
-            log.warn("Cannot synchronize {}: {}", serverName, e.toString());
-            if (log.isDebugEnabled()) {
-                log.debug("Error:", e);
-            }
+        try (ActionHandle h = af.run(Actions.SYNCHRONIZING, groupName, null, serverName)) {
+            BHive hive = getInstanceGroupHive(groupName);
+            try (Transaction t = hive.getTransactions().begin()) {
+                return synchronizeTransacted(hive, groupName, serverName);
+            } catch (Exception e) {
+                log.warn("Cannot synchronize {}: {}", serverName, e.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("Error:", e);
+                }
 
-            // in case we have a dedicated status associated.
-            if (e instanceof WebApplicationException) {
-                throw e;
-            }
+                // in case we have a dedicated status associated.
+                if (e instanceof WebApplicationException) {
+                    throw e;
+                }
 
-            throw new WebApplicationException("Cannot synchronize " + serverName, e);
+                throw new WebApplicationException("Cannot synchronize " + serverName, e);
+            }
         }
     }
 
@@ -409,6 +420,14 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // don't continue actual data sync if update MUST be installed.
         if (!attached.update.forceUpdate) {
+            // notify the action bridge service. it must exist since we're on central.
+            if (bridge.isPresent()) {
+                bridge.get().onSync(serverName, svc);
+            } else {
+                // this should never happen. central (and only central) must have it registered!
+                log.error("Action Bridge not available!");
+            }
+
             // 2. Sync instance group data with managed server.
             CommonRootResource root = ResourceProvider.getVersionedResource(svc, CommonRootResource.class, context);
             if (root.getInstanceGroups().stream().map(g -> g.name).noneMatch(n -> n.equals(groupName))) {
@@ -441,7 +460,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             List<String> instanceIds = instances.values().stream().map(ic -> ic.id).toList();
 
             FetchOperation fetchOp = new FetchOperation().setRemote(svc).setHiveName(groupName);
-            try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, reporter)) {
+            try (RemoteBHive rbh = RemoteBHive.forService(svc, groupName, new ActivityReporter.Null())) {
                 Set<Manifest.Key> keysToFetch = new LinkedHashSet<>();
 
                 // maybe we can scope this down a little in the future.
@@ -601,7 +620,7 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
         // Contact the remote service to find out all installed versions
         Set<ScopedManifestKey> remoteVersions = new HashSet<>();
-        try (RemoteBHive rbh = RemoteBHive.forService(svc, null, reporter)) {
+        try (RemoteBHive rbh = RemoteBHive.forService(svc, null, new ActivityReporter.Null())) {
             SortedMap<Key, ObjectId> inventory = rbh.getManifestInventory(SoftwareUpdateResource.BDEPLOY_MF_NAME,
                     SoftwareUpdateResource.LAUNCHER_MF_NAME);
             inventory.keySet().stream().forEach(key -> remoteVersions.add(ScopedManifestKey.parse(key)));
@@ -622,57 +641,61 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
     @Override
     public void transferUpdate(String groupName, String serverName, MinionUpdateDto updates) {
-        // Avoid pushing all manifest if we do not specify what to transfer
-        if (updates.packagesToTransfer.isEmpty()) {
-            return;
+        try (ActionHandle h = af.run(Actions.MANAGED_UPDATE_TRANSFER, groupName, null, serverName)) {
+            // Avoid pushing all manifest if we do not specify what to transfer
+            if (updates.packagesToTransfer.isEmpty()) {
+                return;
+            }
+
+            RemoteService svc = getConfiguredRemote(groupName, serverName);
+
+            // Push them to the default hive of the target server
+            PushOperation push = new PushOperation();
+            updates.packagesToTransfer.forEach(push::addManifest);
+
+            // Updates are stored in the local default hive
+            BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
+            defaultHive.execute(push.setRemote(svc));
+
+            // update the information in the hive.
+            BHive hive = getInstanceGroupHive(groupName);
+            ManagedMasters mm = new ManagedMasters(hive);
+            ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+            attached.update = getUpdates(svc);
+            mm.attach(attached, true);
         }
-
-        RemoteService svc = getConfiguredRemote(groupName, serverName);
-
-        // Push them to the default hive of the target server
-        PushOperation push = new PushOperation();
-        updates.packagesToTransfer.forEach(push::addManifest);
-
-        // Updates are stored in the local default hive
-        BHive defaultHive = registry.get(JerseyRemoteBHive.DEFAULT_NAME);
-        defaultHive.execute(push.setRemote(svc));
-
-        // update the information in the hive.
-        BHive hive = getInstanceGroupHive(groupName);
-        ManagedMasters mm = new ManagedMasters(hive);
-        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        attached.update = getUpdates(svc);
-        mm.attach(attached, true);
     }
 
     @Override
     public void installUpdate(String groupName, String serverName, MinionUpdateDto updates) {
-        // Only retain server packages in the list of packages to install
-        Collection<Key> keys = updates.packagesToInstall;
-        Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
+        try (ActionHandle h = af.run(Actions.MANAGED_UPDATE_INSTALL, groupName, null, serverName)) {
+            // Only retain server packages in the list of packages to install
+            Collection<Key> keys = updates.packagesToInstall;
+            Collection<Key> server = keys.stream().filter(UpdateHelper::isBDeployServerKey).toList();
 
-        BHive hive = getInstanceGroupHive(groupName);
+            BHive hive = getInstanceGroupHive(groupName);
 
-        ManagedMasters mm = new ManagedMasters(hive);
-        ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
-        Map<String, MinionDto> allMinions = attached.minions.values();
+            ManagedMasters mm = new ManagedMasters(hive);
+            ManagedMasterDto attached = mm.read().getManagedMaster(serverName);
+            Map<String, MinionDto> allMinions = attached.minions.values();
 
-        // Determine OS of the master
-        Optional<MinionDto> masterDto = allMinions.values().stream().filter(dto -> dto.master).findFirst();
-        if (!masterDto.isPresent()) {
-            throw new WebApplicationException("Cannot determine master node");
+            // Determine OS of the master
+            Optional<MinionDto> masterDto = allMinions.values().stream().filter(dto -> dto.master).findFirst();
+            if (!masterDto.isPresent()) {
+                throw new WebApplicationException("Cannot determine master node");
+            }
+
+            // Trigger the update on the master node
+            RemoteService svc = getConfiguredRemote(groupName, serverName);
+            UpdateHelper.update(svc, server, true, context);
+
+            // update the information in the hive.
+            attached.update = getUpdates(svc);
+            mm.attach(attached, true);
+
+            // force a new RemoteService instance on next call
+            JerseyClientFactory.invalidateCached(svc);
         }
-
-        // Trigger the update on the master node
-        RemoteService svc = getConfiguredRemote(groupName, serverName);
-        UpdateHelper.update(svc, server, true, context);
-
-        // update the information in the hive.
-        attached.update = getUpdates(svc);
-        mm.attach(attached, true);
-
-        // force a new RemoteService instance on next call
-        JerseyClientFactory.invalidateCached(svc);
     }
 
     @Override
