@@ -298,7 +298,7 @@ public class UserDatabase implements AuthService {
             var users = ldapAuthenticator.importUsersLdapServer(dto, feedback);
 
             for (LdapUserInfo user : users) {
-                user.info = importLdapUser(user, feedback);
+                user.info = importLdapUser(dto, user, feedback);
             }
             feedback.add("");
 
@@ -310,13 +310,21 @@ public class UserDatabase implements AuthService {
         return feedback.toString();
     }
 
-    private UserInfo importLdapUser(LdapUserInfo user, StringJoiner feedback) {
+    private UserInfo importLdapUser(LDAPSettingsDto dto, LdapUserInfo user, StringJoiner feedback) {
         UserInfo existing = getAll().stream().filter(u -> u.name.equalsIgnoreCase(user.name)).findAny().orElse(null);
+
+        if (existing != null && !existing.external) {
+            feedback.add("Locally managed user " + user.name + " already exists, skipping info update for " + user.name);
+            return existing;
+        }
 
         if (existing != null) {
             feedback.add("User with name " + user.name + " already exists, updating.");
             existing.fullName = user.fullname;
             existing.email = user.email;
+            existing.external = true;
+            existing.externalSystem = LdapAuthenticator.LDAP_SYSTEM;
+            existing.externalTag = dto.id;
             internalUpdate(existing.name, existing);
             return existing;
         }
@@ -325,6 +333,8 @@ public class UserDatabase implements AuthService {
         info.fullName = user.fullname;
         info.email = user.email;
         info.external = true;
+        info.externalSystem = LdapAuthenticator.LDAP_SYSTEM;
+        info.externalTag = dto.id;
         internalUpdate(info.name, info);
         feedback.add("Successfully imported user " + info.name);
         return info;
@@ -433,6 +443,7 @@ public class UserDatabase implements AuthService {
                 // apply permissions from existing user to keep them intact.
                 newU.permissions = existing.permissions;
                 newU.inactive = existing.inactive;
+                newU.groups = existing.groups;
             }
 
             newU.lastActiveLogin = System.currentTimeMillis();
