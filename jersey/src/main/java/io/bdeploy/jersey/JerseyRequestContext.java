@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.NoThrowAutoCloseable;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import jakarta.ws.rs.container.ContainerRequestContext;
 
 /**
@@ -21,32 +23,25 @@ public class JerseyRequestContext {
 
     private static final Logger log = LoggerFactory.getLogger(JerseyRequestContext.class);
 
-    private final ThreadLocal<ContainerRequestContext> reqCtx = new ThreadLocal<>();
+    @Inject
+    private Provider<ContainerRequestContext> reqCtx;
 
     private final ThreadLocal<Map<String, Object>> override = new ThreadLocal<>();
     private final ThreadLocal<Map<String, Object>> fallback = ThreadLocal.withInitial(() -> new TreeMap<>());
-
-    public void setRequest(ContainerRequestContext requestContext) {
-        reqCtx.set(requestContext);
-    }
 
     public Object getProperty(String name) {
         if (override.get() != null) {
             return override.get().get(name);
         }
 
-        var ctx = reqCtx.get();
-        if (ctx != null) {
-            try {
-                return ctx.getProperty(name);
-            } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Failed to get property {}", name, e);
-                }
+        try {
+            return this.reqCtx.get().getProperty(name);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to get property {}", name, e);
             }
+            return fallback.get().get(name);
         }
-
-        return fallback.get().get(name);
     }
 
     public void setProperty(String name, Object object) {
@@ -54,17 +49,14 @@ public class JerseyRequestContext {
             override.get().put(name, object);
         }
 
-        var ctx = reqCtx.get();
-        if (ctx != null) {
-            try {
-                ctx.setProperty(name, object);
-            } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Failed to set property {}", name, e);
-                }
+        try {
+            this.reqCtx.get().setProperty(name, object);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to set property {}", name, e);
             }
+            fallback.get().put(name, object);
         }
-        fallback.get().put(name, object);
     }
 
     public void removeProperty(String name) {
@@ -72,17 +64,14 @@ public class JerseyRequestContext {
             override.get().remove(name);
         }
 
-        var ctx = reqCtx.get();
-        if (ctx != null) {
-            try {
-                ctx.removeProperty(name);
-            } catch (Exception e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Failed to remove property {}", name, e);
-                }
+        try {
+            reqCtx.get().removeProperty(name);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to remove property {}", name, e);
             }
+            fallback.get().remove(name);
         }
-        fallback.get().remove(name);
     }
 
     public void clear() {
@@ -99,5 +88,4 @@ public class JerseyRequestContext {
         override.set(new TreeMap<>());
         return override::remove;
     }
-
 }
