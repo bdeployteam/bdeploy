@@ -47,6 +47,12 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         @Help("Scopes a specific permission specified with --permission to a certain instance group")
         String scope();
 
+        @Help(value = "Mark user as active during add/update", arg = false)
+        boolean active() default false;
+
+        @Help(value = "Mark user as inactive during add/update", arg = false)
+        boolean inactive() default false;
+
         @Help("The name of the user to remove.")
         String remove();
 
@@ -115,18 +121,28 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         if (config.password() != null) {
             admin.updateLocalUserPassword(config.update(), config.password());
         }
+        boolean updated = false;
+        if (config.active() || config.inactive()) {
+            setInactive(user, config);
+            updated = true;
+        }
         if (config.admin()) {
             user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
-            admin.updateUser(user);
+            updated = true;
         }
         if (config.permission() != null) {
             user.permissions.add(new ScopedPermission(config.scope(), Permission.valueOf(config.permission().toUpperCase())));
+            updated = true;
+        }
+        if (updated) {
             admin.updateUser(user);
         }
     }
 
     private void addUser(UserConfig config, AuthAdminResource admin) {
         UserInfo user = new UserInfo(config.add());
+
+        setInactive(user, config);
         if (config.admin()) {
             user.permissions.add(ApiAccessToken.ADMIN_PERMISSION);
         }
@@ -135,6 +151,18 @@ public class RemoteUserTool extends RemoteServiceTool<UserConfig> {
         }
         user.password = config.password();
         admin.createLocalUser(user);
+    }
+
+    private void setInactive(UserInfo user, UserConfig config) {
+        if (config.active() && config.inactive()) {
+            helpAndFail("Cannot mark user as both active and inactive");
+        }
+        if (config.active()) {
+            user.inactive = false;
+        }
+        if (config.inactive()) {
+            user.inactive = true;
+        }
     }
 
 }
