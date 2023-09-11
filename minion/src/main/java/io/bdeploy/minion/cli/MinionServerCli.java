@@ -25,6 +25,7 @@ public class MinionServerCli extends ToolBase {
         register(CertUpdateTool.class);
         register(ConfigTool.class);
         register(StorageTool.class);
+        register(LdapTool.class);
 
         // local session and scripting
         register(InteractiveShell.class);

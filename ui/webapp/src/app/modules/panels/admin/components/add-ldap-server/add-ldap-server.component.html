@@ -85,6 +85,11 @@
         name="referrals"
         [(ngModel)]="tempServer.followReferrals"
       ></app-bd-form-toggle>
+      <app-bd-form-toggle
+        label="Periodically sync users and groups"
+        name="syncEnabled"
+        [(ngModel)]="tempServer.syncEnabled"
+      ></app-bd-form-toggle>
       <app-bd-button
         color="primary"
         [collapsed]="false"
