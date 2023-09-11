@@ -38,7 +38,7 @@ public class LdapAuthenticator implements Authenticator {
 
     private static final Logger log = LoggerFactory.getLogger(LdapAuthenticator.class);
 
-    private static final String LDAP_SYSTEM = "LDAP";
+    public static final String LDAP_SYSTEM = "LDAP";
 
     @Override
     public boolean isResponsible(UserInfo user, AuthenticationSettingsDto settings) {
