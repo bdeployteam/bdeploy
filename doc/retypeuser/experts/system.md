@@ -82,6 +82,7 @@ Group Pattern | A partial LDAP query expression used to fetch groups from LDAP e
 Group Name Field | The field which should be used as source for the _name_ of the group, which is used as a display name in [User Groups](/experts/system/#user-groups) management.
 Group Description Field | The field which should be used as source for the _description_ of the group.
 Follow Referrals | Specifies whether the authentication process should follow referrals or not.
+Periodically sync users and groups | A flag that marks the connection to be selected for [LDAP Synchronization Job](/experts/system/#ldap-synchronization-job). If not selected, users and groups can be imported only manually via _Import_ action in Admin UI.
 
 #### LDAP Import Users and Groups
 
@@ -94,6 +95,13 @@ For added confidence, consider utilizing the _Check_ action before initiating th
 !!!info Tip
 Using the _Check_ action prior to _Import_ can help verify the connectivity to the LDAP Server and preemptively identify any issues that might affect the import process.
 !!!
+
+##### LDAP Synchronization Job
+_LDAP Synchronization Job_ periodically imports users and groups for LDAP connections with selected **Periodically sync users and groups** flag.  
+The job is identical to _Import_ action.  
+By default job starts every midnight, but its schedule can be reconfigured via CLI.  
+To reschedule a job use `ldap --root=... "--setSyncSchedule=..."` where _setSyncSchedule_ is in cron format (e.g. 0 0 0 * * ? for midnight)  
+To check current schedule and last run timestamp use `ldap --root=... --showSyncInfo`
 
 #### LDAP Certificate Trust
 

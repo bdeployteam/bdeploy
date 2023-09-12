@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.Optional;
 
 import org.quartz.CronScheduleBuilder;
 
@@ -35,11 +36,11 @@ public class LdapTool extends ConfiguredCliTool<LdapConfig> {
         @Validator({ MinionRootValidator.class, PathOwnershipValidator.class })
         String root();
 
-        @Help("Updates cron schedule for SyncLdapUserGroupsJob")
-        String setLdapSyncSchedule();
+        @Help("Updates cron schedule for LDAP Synchronization Job")
+        String setSyncSchedule();
 
-        @Help(value = "Show schedule and last time SyncLdapUserGroupsJob was successfully executed", arg = false)
-        boolean showLdapSyncInfo();
+        @Help(value = "Show schedule and last time LDAP Synchronization Job was successfully executed", arg = false)
+        boolean showSyncInfo();
 
     }
 
@@ -57,9 +58,9 @@ public class LdapTool extends ConfiguredCliTool<LdapConfig> {
         }
 
         try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
-            if (config.setLdapSyncSchedule() != null) {
+            if (config.setSyncSchedule() != null) {
                 return setLdapSyncSchedule(mr, config);
-            } else if (config.showLdapSyncInfo()) {
+            } else if (config.showSyncInfo()) {
                 return showLdapSyncInfo(mr);
             } else {
                 return createNoOp();
@@ -69,21 +70,22 @@ public class LdapTool extends ConfiguredCliTool<LdapConfig> {
 
     private DataResult setLdapSyncSchedule(MinionRoot mr, LdapConfig config) {
         try {
-            CronScheduleBuilder.cronScheduleNonvalidatedExpression(config.setLdapSyncSchedule());
+            CronScheduleBuilder.cronScheduleNonvalidatedExpression(config.setSyncSchedule());
         } catch (ParseException e) {
             throw new IllegalStateException("Invalid schedule", e);
         }
 
-        mr.modifyState(s -> s.syncLdapUserGroupsSchedule = config.setLdapSyncSchedule());
-        SyncLdapUserGroupsJob.create(mr, mr.getState().syncLdapUserGroupsSchedule); // reschedule job
+        mr.modifyState(s -> s.ldapSyncSchedule = config.setSyncSchedule());
         return createSuccess();
-
     }
 
     private DataResult showLdapSyncInfo(MinionRoot mr) {
         DataResult result = createEmptyResult();
-        result.addField("Schedule", mr.getState().syncLdapUserGroupsSchedule);
-        result.addField("Last Run", FormatHelper.format(Instant.ofEpochMilli(mr.getState().syncLdapUserGroupsLastRun)));
+        String schedule = Optional.ofNullable(mr.getState().ldapSyncSchedule).orElse(SyncLdapUserGroupsJob.DEFAULT_SYNC_SCHEDULE);
+        String lastRun = mr.getState().ldapSyncLastRun == 0 ? "N/A"
+                : FormatHelper.format(Instant.ofEpochMilli(mr.getState().ldapSyncLastRun));
+        result.addField("Cron Schedule", schedule);
+        result.addField("Last Run", lastRun);
         return result;
     }
 

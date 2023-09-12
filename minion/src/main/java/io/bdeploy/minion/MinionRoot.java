@@ -480,7 +480,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             CheckLatestGitHubReleaseJob.create(this);
         }
 
-        SyncLdapUserGroupsJob.create(this, getState().syncLdapUserGroupsSchedule);
+        SyncLdapUserGroupsJob.create(this, getState().ldapSyncSchedule);
     }
 
     private void createJobScheduler() {
