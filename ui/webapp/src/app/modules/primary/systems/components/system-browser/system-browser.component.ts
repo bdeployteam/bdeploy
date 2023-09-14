@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MinionMode, SystemConfigurationDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -10,15 +10,21 @@ import { SystemsService } from '../../services/systems.service';
   selector: 'app-system-browser',
   templateUrl: './system-browser.component.html',
 })
-export class SystemBrowserComponent {
-  /* template */ sysCols = [
+export class SystemBrowserComponent implements OnInit {
+  private columns = inject(SystemsColumnsService);
+  private config = inject(ConfigService);
+  protected systems = inject(SystemsService);
+  protected groups = inject(GroupsService);
+  protected authService = inject(AuthenticationService);
+
+  protected sysCols = [
     this.columns.systemNameColumn,
     this.columns.systemDescriptionColumn,
     this.columns.systemVarsColumn,
     this.columns.systemIdColumn,
   ];
 
-  /* template */ getRecordRoute = (row: SystemConfigurationDto) => {
+  protected getRecordRoute = (row: SystemConfigurationDto) => {
     return [
       '',
       {
@@ -29,16 +35,10 @@ export class SystemBrowserComponent {
     ];
   };
 
-  /* template */ gridMode: boolean;
+  protected gridMode: boolean;
 
-  constructor(
-    public systems: SystemsService,
-    public groups: GroupsService,
-    public authService: AuthenticationService,
-    private columns: SystemsColumnsService,
-    config: ConfigService
-  ) {
-    if (config.config.mode === MinionMode.CENTRAL) {
+  ngOnInit() {
+    if (this.config.config.mode === MinionMode.CENTRAL) {
       this.sysCols.push(this.columns.systemMinionColumn);
       this.sysCols.push(this.columns.systemSyncColumn);
     }

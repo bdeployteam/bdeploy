@@ -26,13 +26,13 @@ export class EditUniqueValueValidatorDirective implements Validator, BdValidatio
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     const errors = {};
     const ok = !this.disallowedValues.includes(value);

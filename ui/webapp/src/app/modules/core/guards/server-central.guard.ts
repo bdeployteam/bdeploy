@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { MinionMode } from 'src/app/models/gen.dtos';
@@ -7,12 +7,10 @@ import { ConfigService } from '../services/config.service';
 @Injectable({
   providedIn: 'root',
 })
-export class ServerCentralGuard  {
-  constructor(
-    private config: ConfigService,
-    private snackbar: MatSnackBar,
-    private router: Router
-  ) {}
+export class ServerCentralGuard {
+  private config = inject(ConfigService);
+  private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     if (this.config.config.mode !== MinionMode.CENTRAL) {

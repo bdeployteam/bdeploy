@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -11,24 +11,22 @@ import { ProcessEditService } from '../../services/process-edit.service';
   templateUrl: './edit-process-overview.component.html',
 })
 export class EditProcessOverviewComponent {
-  /* template */ clientNodeName = CLIENT_NODE_NAME;
+  private areas = inject(NavAreasService);
+  private snackbar = inject(MatSnackBar);
+  protected edit = inject(ProcessEditService);
+  protected instanceEdit = inject(InstanceEditService);
+  protected servers = inject(ServersService);
 
-  constructor(
-    public edit: ProcessEditService,
-    public instanceEdit: InstanceEditService,
-    public servers: ServersService,
-    private areas: NavAreasService,
-    private snackbar: MatSnackBar
-  ) {}
+  protected clientNodeName = CLIENT_NODE_NAME;
 
-  /* template */ doDelete() {
+  protected doDelete() {
     const process = this.edit.process$.value;
     this.edit.removeProcess();
     this.instanceEdit.conceal(`Remove ${process.name}`);
     this.areas.closePanel();
   }
 
-  /* template */ doCopy() {
+  protected doCopy() {
     const process = this.edit.process$.value;
 
     navigator.clipboard.writeText(JSON.stringify(process, null, '\t')).then(

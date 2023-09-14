@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
@@ -15,14 +15,18 @@ import { ProductsService } from '../../services/products.service';
   templateUrl: './products-browser.component.html',
 })
 export class ProductsBrowserComponent implements OnInit {
-  grouping: BdDataGroupingDefinition<ProductDto>[] = [
-    { name: 'Product ID', group: (r) => r.product },
-  ];
-  defaultGrouping: BdDataGrouping<ProductDto>[] = [
-    { definition: this.grouping[0], selected: [] },
-  ];
+  private cardViewService = inject(CardViewService);
+  protected cfg = inject(ConfigService);
+  protected products = inject(ProductsService);
+  protected productColumns = inject(ProductsColumnsService);
+  protected groups = inject(GroupsService);
+  protected auth = inject(AuthenticationService);
+  protected bulk = inject(ProductBulkService);
 
-  /* template */ getRecordRoute = (row: ProductDto) => {
+  protected grouping: BdDataGroupingDefinition<ProductDto>[] = [{ name: 'Product ID', group: (r) => r.product }];
+  protected defaultGrouping: BdDataGrouping<ProductDto>[] = [{ definition: this.grouping[0], selected: [] }];
+
+  protected getRecordRoute = (row: ProductDto) => {
     return [
       '',
       {
@@ -33,19 +37,9 @@ export class ProductsBrowserComponent implements OnInit {
     ];
   };
 
-  /* template */ isCardView: boolean;
-  /* template */ presetKeyValue = 'products';
-  /* template */ sort: Sort = { active: 'version', direction: 'desc' };
-
-  constructor(
-    public cfg: ConfigService,
-    public products: ProductsService,
-    public productColumns: ProductsColumnsService,
-    public groups: GroupsService,
-    public auth: AuthenticationService,
-    public bulk: ProductBulkService,
-    private cardViewService: CardViewService
-  ) {}
+  protected isCardView: boolean;
+  protected presetKeyValue = 'products';
+  protected sort: Sort = { active: 'version', direction: 'desc' };
 
   ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);

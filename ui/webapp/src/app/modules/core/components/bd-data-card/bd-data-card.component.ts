@@ -8,6 +8,7 @@ import {
   Output,
   SimpleChanges,
   TemplateRef,
+  inject,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
@@ -18,6 +19,8 @@ import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
   styleUrls: ['./bd-data-card.component.css'],
 })
 export class BdDataCardComponent<T> implements OnInit, OnChanges {
+  private sanitizer = inject(DomSanitizer);
+
   /**
    * The columns to display
    */
@@ -56,8 +59,6 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
 
   @ContentChild('extraCardDetails') extraCardDetails: TemplateRef<any>;
 
-  constructor(private sanitizer: DomSanitizer) {}
-
   ngOnInit(): void {
     this.calculateColumnPlacing();
   }
@@ -70,33 +71,17 @@ export class BdDataCardComponent<T> implements OnInit, OnChanges {
 
   private calculateColumnPlacing() {
     // from the column definitions, find the columns we want to render...
-    this.colType = this.columns.find(
-      (c) => c.hint === BdDataColumnTypeHint.TYPE
-    );
-    this.colTitle = this.columns.find(
-      (c) => c.hint === BdDataColumnTypeHint.TITLE
-    );
-    this.colDescription = this.columns.find(
-      (c) => c.hint === BdDataColumnTypeHint.DESCRIPTION
-    );
-    this.colStatus = this.columns.find(
-      (c) => c.hint === BdDataColumnTypeHint.STATUS
-    );
-    this.colFooter = this.columns.find(
-      (c) => c.hint === BdDataColumnTypeHint.FOOTER
-    );
-    this.colAvatar = this.columns.find(
-      (c) => c.hint === BdDataColumnTypeHint.AVATAR
-    );
-    this.colActions = this.columns.filter(
-      (c) => c.hint === BdDataColumnTypeHint.ACTIONS
-    );
-    this.colDetails = this.columns.filter(
-      (c) => c.hint === BdDataColumnTypeHint.DETAILS
-    );
+    this.colType = this.columns.find((c) => c.hint === BdDataColumnTypeHint.TYPE);
+    this.colTitle = this.columns.find((c) => c.hint === BdDataColumnTypeHint.TITLE);
+    this.colDescription = this.columns.find((c) => c.hint === BdDataColumnTypeHint.DESCRIPTION);
+    this.colStatus = this.columns.find((c) => c.hint === BdDataColumnTypeHint.STATUS);
+    this.colFooter = this.columns.find((c) => c.hint === BdDataColumnTypeHint.FOOTER);
+    this.colAvatar = this.columns.find((c) => c.hint === BdDataColumnTypeHint.AVATAR);
+    this.colActions = this.columns.filter((c) => c.hint === BdDataColumnTypeHint.ACTIONS);
+    this.colDetails = this.columns.filter((c) => c.hint === BdDataColumnTypeHint.DETAILS);
   }
 
-  /* template */ getImageUrl() {
+  protected getImageUrl() {
     if (this.colAvatar) {
       const url = this.colAvatar.data(this.record);
       if (url) {

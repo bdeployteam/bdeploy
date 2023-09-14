@@ -7,9 +7,9 @@ import { BdConfirmationComponent } from '../components/bd-confirmation/bd-confir
   providedIn: 'root',
 })
 export class ConfirmationService {
-  constructor(public dialog: MatDialog) {}
+  constructor(private dialog: MatDialog) {}
 
-  confirm(header: string, message: string): Observable<boolean> {
+  public confirm(header: string, message: string): Observable<boolean> {
     const dialogRef = this.dialog.open(BdConfirmationComponent, {
       disableClose: true,
       panelClass: 'bd-dialog-container',

@@ -1,6 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { ProductDto } from 'src/app/models/gen.dtos';
-import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 
@@ -9,18 +8,15 @@ import { ProductsService } from 'src/app/modules/primary/products/services/produ
   templateUrl: './update-action.component.html',
 })
 export class UpdateActionComponent implements OnInit {
+  private products = inject(ProductsService);
+  private edit = inject(InstanceEditService);
+
   @Input() record: ProductDto;
 
   private index: number;
   private curIndex: number;
-  /* template */ isUpgrade: boolean;
-  /* template */ isCurrent: boolean;
-
-  constructor(
-    private products: ProductsService,
-    private edit: InstanceEditService,
-    private areas: NavAreasService
-  ) {}
+  protected isUpgrade: boolean;
+  protected isCurrent: boolean;
 
   ngOnInit(): void {
     const products = this.products.products$.value || [];
@@ -34,7 +30,7 @@ export class UpdateActionComponent implements OnInit {
     this.isCurrent = this.index === this.curIndex;
   }
 
-  /* template */ doUpdate() {
+  protected doUpdate() {
     this.edit.updateProduct(this.record);
   }
 }

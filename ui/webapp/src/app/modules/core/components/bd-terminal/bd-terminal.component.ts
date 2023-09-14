@@ -4,8 +4,10 @@ import {
   EventEmitter,
   Input,
   OnDestroy,
+  OnInit,
   Output,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { NgTerminal } from 'ng-terminal';
 import { Observable, Subscription } from 'rxjs';
@@ -29,7 +31,9 @@ const EL_TO_EOL: string = CSI + '0K'; // clear from cursor to EOL
   templateUrl: './bd-terminal.component.html',
   styleUrls: ['./bd-terminal.component.css'],
 })
-export class BdTerminalComponent implements AfterViewInit, OnDestroy {
+export class BdTerminalComponent implements AfterViewInit, OnInit, OnDestroy {
+  private searchService = inject(SearchService);
+
   @Input() content$: Observable<string>;
   @Input() allowInput = false;
   @Output() userInput = new EventEmitter<string>();
@@ -47,8 +51,8 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
   private webglAddon = new WebglAddon();
   private searchSubscription: Subscription;
 
-  constructor(searchService: SearchService) {
-    this.searchSubscription = searchService.register(this);
+  ngOnInit() {
+    this.searchSubscription = this.searchService.register(this);
   }
 
   ngAfterViewInit() {
@@ -121,9 +125,7 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
 
   /** Retrieve the current X position of the cursor */
   private getCursorX(): number {
-    return this.term.underlying
-      ? this.term.underlying.buffer.active.cursorX
-      : undefined;
+    return this.term.underlying ? this.term.underlying.buffer.active.cursorX : undefined;
   }
 
   /** Wires up user input possibilities if they are enabled. */
@@ -175,15 +177,10 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
                 switch (input[idx]) {
                   case 'C': // cursor right
                     this.stdinBufferCursorPos =
-                      this.stdinBufferCursorPos +
-                      (this.stdinBuffer.length > this.stdinBufferCursorPos
-                        ? 1
-                        : 0);
+                      this.stdinBufferCursorPos + (this.stdinBuffer.length > this.stdinBufferCursorPos ? 1 : 0);
                     break;
                   case 'D': // cursor left
-                    this.stdinBufferCursorPos =
-                      this.stdinBufferCursorPos -
-                      (this.stdinBufferCursorPos > 0 ? 1 : 0);
+                    this.stdinBufferCursorPos = this.stdinBufferCursorPos - (this.stdinBufferCursorPos > 0 ? 1 : 0);
                     break;
                   case 'H': // pos 1
                     this.stdinBufferCursorPos = 0;
@@ -239,11 +236,7 @@ export class BdTerminalComponent implements AfterViewInit, OnDestroy {
 
   /** Retrieves the current amoun of lines taken up by user input */
   private getInputLineCount() {
-    return this.stdinBuffer
-      ? Math.ceil(
-          (this.stdinStartX + this.stdinBuffer.length) / this.getTermCols()
-        )
-      : 1;
+    return this.stdinBuffer ? Math.ceil((this.stdinStartX + this.stdinBuffer.length) / this.getTermCols()) : 1;
   }
 
   /** Clears all existing content in the terminal */

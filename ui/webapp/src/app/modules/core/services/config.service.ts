@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, Injector, NgZone } from '@angular/core';
+import { Injectable, Injector, NgZone, inject } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AuthClientConfig } from '@auth0/auth0-angular';
@@ -31,9 +31,24 @@ export interface AppConfig {
   providedIn: 'root',
 })
 export class ConfigService {
+  private themes = inject(ThemeService); /* dummy: required to bootstrap theming early! */
+  private http = inject(HttpClient);
+  private overlay = inject(Overlay);
+  private auth0 = inject(AuthClientConfig);
+  private ngZone = inject(NgZone);
+  private icons = inject(MatIconRegistry);
+  private sanitizer = inject(DomSanitizer);
+
   public config: AppConfig;
   public webAuthCfg: WebAuthSettingsDto;
   public initialSession = new Subject<string>();
+
+  public offline$ = new BehaviorSubject<boolean>(false);
+  public isCentral$ = new BehaviorSubject<boolean>(false);
+  public isManaged$ = new BehaviorSubject<boolean>(false);
+  public isStandalone$ = new BehaviorSubject<boolean>(false);
+  public isNewGitHubReleaseAvailable$ = new BehaviorSubject<boolean>(false);
+  public isUpdateInstallSucceeded$ = new BehaviorSubject<boolean>(false);
 
   private checkInterval;
   private overlayRef: OverlayRef;
@@ -42,51 +57,35 @@ export class ConfigService {
   private backendTimeOffset = 0;
   private backendOffsetWarning = false;
 
-  offline$ = new BehaviorSubject<boolean>(false);
-
-  isCentral$ = new BehaviorSubject<boolean>(false);
-  isManaged$ = new BehaviorSubject<boolean>(false);
-  isStandalone$ = new BehaviorSubject<boolean>(false);
-  isNewGitHubReleaseAvailable$ = new BehaviorSubject<boolean>(false);
-  isUpdateInstallSucceeded$ = new BehaviorSubject<boolean>(false);
-
   // prettier-ignore
-  constructor(
-    private themes: ThemeService /* dummy: required to bootstrap theming early! */,
-    private http: HttpClient,
-    private overlay: Overlay,
-    private auth0: AuthClientConfig,
-    private ngZone: NgZone,
-    iconRegistry: MatIconRegistry,
-    sanitizer: DomSanitizer,
-  ) {
-    iconRegistry.setDefaultFontSetClass('material-symbols-outlined')
+  constructor() {
+    this.icons.setDefaultFontSetClass('material-symbols-outlined')
 
     // register all custom icons we want to use with <mat-icon>
-    iconRegistry.addSvgIcon('bdeploy', sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
-    iconRegistry.addSvgIcon('instance-settings', sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg'));
-    iconRegistry.addSvgIcon('start-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg'));
-    iconRegistry.addSvgIcon('stop-scheduled', sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
-    iconRegistry.addSvgIcon('sync-all', sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg'));
-    iconRegistry.addSvgIcon('auth0', sanitizer.bypassSecurityTrustResourceUrl('assets/auth0.svg'));
-    iconRegistry.addSvgIcon('okta', sanitizer.bypassSecurityTrustResourceUrl('assets/okta.svg'));
+    this.icons.addSvgIcon('bdeploy', this.sanitizer.bypassSecurityTrustResourceUrl('assets/logo-single-path-square.svg'));
+    this.icons.addSvgIcon('instance-settings', this.sanitizer.bypassSecurityTrustResourceUrl('assets/instance-settings.svg'));
+    this.icons.addSvgIcon('start-scheduled', this.sanitizer.bypassSecurityTrustResourceUrl('assets/start_schedule.svg'));
+    this.icons.addSvgIcon('stop-scheduled', this.sanitizer.bypassSecurityTrustResourceUrl('assets/stop_schedule.svg'));
+    this.icons.addSvgIcon('sync-all', this.sanitizer.bypassSecurityTrustResourceUrl('assets/syncall.svg'));
+    this.icons.addSvgIcon('auth0', this.sanitizer.bypassSecurityTrustResourceUrl('assets/auth0.svg'));
+    this.icons.addSvgIcon('okta', this.sanitizer.bypassSecurityTrustResourceUrl('assets/okta.svg'));
 
-    iconRegistry.addSvgIcon('LINUX', sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
-    iconRegistry.addSvgIcon('WINDOWS', sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
-    iconRegistry.addSvgIcon('AIX', sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
-    iconRegistry.addSvgIcon('MACOS', sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
-    iconRegistry.addSvgIcon('WEB', sanitizer.bypassSecurityTrustResourceUrl('assets/web.svg'));
-    iconRegistry.addSvgIcon('sort_asc', sanitizer.bypassSecurityTrustResourceUrl('assets/sort-asc.svg'));
-    iconRegistry.addSvgIcon('sort_desc', sanitizer.bypassSecurityTrustResourceUrl('assets/sort-desc.svg'));
+    this.icons.addSvgIcon('LINUX', this.sanitizer.bypassSecurityTrustResourceUrl('assets/linux.svg'));
+    this.icons.addSvgIcon('WINDOWS', this.sanitizer.bypassSecurityTrustResourceUrl('assets/windows.svg'));
+    this.icons.addSvgIcon('AIX', this.sanitizer.bypassSecurityTrustResourceUrl('assets/aix.svg'));
+    this.icons.addSvgIcon('MACOS', this.sanitizer.bypassSecurityTrustResourceUrl('assets/mac.svg'));
+    this.icons.addSvgIcon('WEB', this.sanitizer.bypassSecurityTrustResourceUrl('assets/web.svg'));
+    this.icons.addSvgIcon('sort_asc', this.sanitizer.bypassSecurityTrustResourceUrl('assets/sort-asc.svg'));
+    this.icons.addSvgIcon('sort_desc', this.sanitizer.bypassSecurityTrustResourceUrl('assets/sort-desc.svg'));
 
     // check whether the server version changed every minute.
-    ngZone.runOutsideAngular(() => {
+    this.ngZone.runOutsideAngular(() => {
       // *usually* we loose the server connection for a short period when this happens, so the interval is just a fallback.
       this.checkInterval = setInterval(() => this.checkServerVersion(), 60000);
     });
 
     this.offline$.pipe(distinctUntilChanged()).subscribe(o => {
-      ngZone.run(() => {
+      this.ngZone.run(() => {
         if(!o) {
           this.closeOverlay();
         } else {
@@ -150,7 +149,7 @@ export class ConfigService {
     );
   }
 
-  loadSession(): Observable<any> {
+  public loadSession(): Observable<any> {
     return this.http
       .get(`${this.config.api}/auth/session`, {
         responseType: 'text',

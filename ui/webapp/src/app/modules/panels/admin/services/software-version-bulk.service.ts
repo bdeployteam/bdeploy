@@ -1,22 +1,22 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  SoftwareUpdateService,
-  SoftwareVersion,
-} from 'src/app/modules/primary/admin/services/software-update.service';
+import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/admin/services/software-update.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SoftwareVersionBulkService {
+  private areas = inject(NavAreasService);
+  private software = inject(SoftwareUpdateService);
+
   public selection$ = new BehaviorSubject<SoftwareVersion[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);
 
-  constructor(areas: NavAreasService, private software: SoftwareUpdateService) {
+  constructor() {
     // clear selection when the primary route changes
-    areas.primaryRoute$.subscribe(() => this.selection$.next([]));
+    this.areas.primaryRoute$.subscribe(() => this.selection$.next([]));
   }
 
   public delete() {

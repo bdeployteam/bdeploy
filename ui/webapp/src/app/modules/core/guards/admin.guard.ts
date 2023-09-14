@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { AuthenticationService } from '../services/authentication.service';
@@ -6,12 +6,10 @@ import { AuthenticationService } from '../services/authentication.service';
 @Injectable({
   providedIn: 'root',
 })
-export class AdminGuard  {
-  constructor(
-    private authService: AuthenticationService,
-    private snackbar: MatSnackBar,
-    private router: Router
-  ) {}
+export class AdminGuard {
+  private authService = inject(AuthenticationService);
+  private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     if (this.authService.isGlobalAdmin()) {

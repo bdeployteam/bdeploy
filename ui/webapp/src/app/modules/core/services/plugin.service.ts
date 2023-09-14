@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ManifestKey, PluginInfoDto } from 'src/app/models/gen.dtos';
 import { Api } from '../plugins/plugin.api';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
@@ -10,13 +10,10 @@ import { ConfigService } from './config.service';
   providedIn: 'root',
 })
 export class PluginService {
-  constructor(private http: HttpClient, private config: ConfigService) {}
+  private http = inject(HttpClient);
+  private config = inject(ConfigService);
 
-  public getEditorPlugin(
-    group: string,
-    product: ManifestKey,
-    editorType: string
-  ): Observable<PluginInfoDto> {
+  public getEditorPlugin(group: string, product: ManifestKey, editorType: string): Observable<PluginInfoDto> {
     return this.http.post<PluginInfoDto>(
       `${this.config.config.api}/plugin-admin/get-editor/${group}/${editorType}`,
       product,
@@ -26,28 +23,17 @@ export class PluginService {
     );
   }
 
-  public getAvailableEditorTypes(
-    group: string,
-    product: ManifestKey
-  ): Observable<string[]> {
-    return this.http.post<string[]>(
-      `${this.config.config.api}/plugin-admin/list-editor-types/${group}`,
-      product
-    );
+  public getAvailableEditorTypes(group: string, product: ManifestKey): Observable<string[]> {
+    return this.http.post<string[]>(`${this.config.config.api}/plugin-admin/list-editor-types/${group}`, product);
   }
 
   public load(plugin: PluginInfoDto, modulePath: string): Promise<any> {
     // Note: webpackIgnore is extremely important, otherwise webpack tries to resolve the import locally at build time.
-    return import(
-      /* webpackIgnore: true */ this.config.getPluginUrl(plugin) + modulePath
-    );
+    return import(/* webpackIgnore: true */ this.config.getPluginUrl(plugin) + modulePath);
   }
 
   private buildPluginUrl(plugin: PluginInfoDto, path: string): string {
-    return (
-      this.config.getPluginUrl(plugin) +
-      (path.startsWith('/') ? path : '/' + path)
-    );
+    return this.config.getPluginUrl(plugin) + (path.startsWith('/') ? path : '/' + path);
   }
 
   public getApi(plugin: PluginInfoDto): Api {

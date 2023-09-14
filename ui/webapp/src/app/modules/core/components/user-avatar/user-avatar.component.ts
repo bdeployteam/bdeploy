@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, OnInit, inject } from '@angular/core';
 import { SettingsService } from '../../services/settings.service';
 
 export interface StyleDef {
@@ -12,6 +12,8 @@ export interface StyleDef {
   templateUrl: './user-avatar.component.html',
 })
 export class UserAvatarComponent implements OnInit {
+  protected settings = inject(SettingsService);
+
   @Input()
   @HostBinding('style.width.px')
   @HostBinding('style.height.px')
@@ -23,10 +25,8 @@ export class UserAvatarComponent implements OnInit {
   @Input()
   public mail;
 
-  /* template */ hostStyle: StyleDef;
-  /* template */ avatarStyle: StyleDef;
-
-  constructor(public settings: SettingsService) {}
+  protected hostStyle: StyleDef;
+  protected avatarStyle: StyleDef;
 
   ngOnInit() {
     this.hostStyle = this.getStyle(this.hostSize);

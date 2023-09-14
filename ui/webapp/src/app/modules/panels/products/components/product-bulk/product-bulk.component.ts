@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -9,13 +9,12 @@ import { ProductBulkService } from '../../services/product-bulk.service';
   templateUrl: './product-bulk.component.html',
 })
 export class ProductBulkComponent {
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
+  protected bulk = inject(ProductBulkService);
+  protected deleting$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(public bulk: ProductBulkService) {}
-
-  /* template */ onDelete() {
+  protected onDelete() {
     this.dialog
       .confirm(
         `Delete ${this.bulk.selection$.value.length} products?`,

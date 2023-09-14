@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
 import {
@@ -12,10 +12,7 @@ import {
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { InstancesService } from '../../../services/instances.service';
-import {
-  NodeApplicationPort,
-  PortsService,
-} from '../../../services/ports.service';
+import { NodeApplicationPort, PortsService } from '../../../services/ports.service';
 import { ProcessesService } from '../../../services/processes.service';
 import { StateItem, StateType } from '../state-panel/state-panel.component';
 
@@ -25,24 +22,26 @@ import { StateItem, StateType } from '../state-panel/state-panel.component';
   styleUrls: ['./server-node.component.css'],
 })
 export class ServerNodeComponent implements OnInit, OnDestroy {
+  private instances = inject(InstancesService);
+  private ports = inject(PortsService);
+  private auth = inject(AuthenticationService);
+  private areas = inject(NavAreasService);
+  protected processes = inject(ProcessesService);
+
   @Input() node: InstanceNodeConfigurationDto;
 
   @Input() bulkMode: boolean;
   @Input() gridWhen$: BehaviorSubject<boolean>;
-  @Input() groupingWhen$: BehaviorSubject<
-    BdDataGrouping<ApplicationConfiguration>[]
-  >;
+  @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>;
   @Input() collapsedWhen$: BehaviorSubject<boolean>;
   @Input() narrowWhen$: BehaviorSubject<boolean>;
 
-  /* template */ nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
-  /* template */ nodeStateItems$ = new BehaviorSubject<StateItem[]>([]);
+  protected nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
+  protected nodeStateItems$ = new BehaviorSubject<StateItem[]>([]);
 
   private subscription: Subscription;
   private portsState = new BehaviorSubject<StateType>('unknown');
-  private portsTooltip = new BehaviorSubject<string>(
-    'State of all server ports'
-  );
+  private portsTooltip = new BehaviorSubject<string>('State of all server ports');
   private portsItem: StateItem = {
     name: 'Server Ports',
     type: this.portsState,
@@ -50,22 +49,12 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   };
 
   private processesState = new BehaviorSubject<StateType>('unknown');
-  private processesTooltip = new BehaviorSubject<string>(
-    'State of all server processes'
-  );
+  private processesTooltip = new BehaviorSubject<string>('State of all server processes');
   private processesItem: StateItem = {
     name: 'Instance Processes',
     type: this.processesState,
     tooltip: this.processesTooltip,
   };
-
-  constructor(
-    private instances: InstancesService,
-    private ports: PortsService,
-    public processes: ProcessesService,
-    private auth: AuthenticationService,
-    private areas: NavAreasService
-  ) {}
 
   ngOnInit(): void {
     this.subscription = this.instances.activeNodeStates$.subscribe((states) => {
@@ -89,12 +78,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         click: this.auth.isCurrentScopeWrite()
           ? () => {
               this.areas.navigateBoth(
-                [
-                  'instances',
-                  'configuration',
-                  this.areas.groupContext$.value,
-                  this.node.nodeConfiguration.id,
-                ],
+                ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
                 ['panels', 'instances', 'settings', 'product']
               );
             }
@@ -111,10 +95,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     });
 
     this.subscription.add(
-      combineLatest([
-        this.ports.activePortStates$,
-        this.processes.processStates$,
-      ]).subscribe(([ports, states]) => {
+      combineLatest([this.ports.activePortStates$, this.processes.processStates$]).subscribe(([ports, states]) => {
         this.updateAllProcesses(states);
         this.updateAllPortsRating(ports, states);
       })
@@ -122,7 +103,7 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private updateAllProcesses(states: { [key: string]: ProcessStatusDto }) {
@@ -153,14 +134,8 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
     this.updateProcessStateItem(stoppedApps, deadApps, runningApps);
   }
 
-  private updateProcessStateItem(
-    stoppedApps: number,
-    deadApps: number,
-    runningApps: number
-  ) {
-    this.processesState.next(
-      !stoppedApps && !deadApps ? 'ok' : !runningApps ? 'info' : 'warning'
-    );
+  private updateProcessStateItem(stoppedApps: number, deadApps: number, runningApps: number) {
+    this.processesState.next(!stoppedApps && !deadApps ? 'ok' : !runningApps ? 'info' : 'warning');
     this.processesTooltip.next(
       !runningApps
         ? 'The instance is stopped'
@@ -169,27 +144,19 @@ export class ServerNodeComponent implements OnInit, OnDestroy {
         : `${stoppedApps} 'Instance' type ${
             stoppedApps === 1 ? 'application is' : 'applications are'
           } not running.\n${deadApps} 'Instance' type ${
-            deadApps === 1
-              ? 'application reports'
-              : 'applications are reporting'
+            deadApps === 1 ? 'application reports' : 'applications are reporting'
           } problems.`
     );
   }
 
-  private updateAllPortsRating(
-    ports: NodeApplicationPort[],
-    states: { [key: string]: ProcessStatusDto }
-  ) {
+  private updateAllPortsRating(ports: NodeApplicationPort[], states: { [key: string]: ProcessStatusDto }) {
     if (!ports || !states) {
       this.portsState.next('unknown');
       this.portsTooltip.next('No information available');
       return;
     }
 
-    const appPorts = ports.filter(
-      (p) =>
-        !!this.node.nodeConfiguration.applications.find((a) => a.id === p.appId)
-    );
+    const appPorts = ports.filter((p) => !!this.node.nodeConfiguration.applications.find((a) => a.id === p.appId));
 
     let badPorts = 0;
     appPorts.forEach((p) => {

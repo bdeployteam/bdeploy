@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest, finalize, map, of } from 'rxjs';
 import { Actions, MinionMode, ProductDto, ProductTransferDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -12,12 +12,17 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   selector: 'app-managed-transfer',
   templateUrl: './managed-transfer.component.html',
 })
-export class ManagedTransferComponent implements OnDestroy {
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ records$ = new BehaviorSubject<ProductDto[]>(null);
-  /* template */ server$ = new BehaviorSubject<string>(null);
-  /* template */ typeText$ = new BehaviorSubject<string>(null);
-  /* template */ selected$ = new BehaviorSubject<ProductDto[]>([]);
+export class ManagedTransferComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  private servers = inject(ServersService);
+  private products = inject(ProductsService);
+  protected productColumns = inject(ProductsColumnsService);
+
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected records$ = new BehaviorSubject<ProductDto[]>(null);
+  protected server$ = new BehaviorSubject<string>(null);
+  protected typeText$ = new BehaviorSubject<string>(null);
+  protected selected$ = new BehaviorSubject<ProductDto[]>([]);
 
   private actions = inject(ActionsService);
   protected mappedTransfer$;
@@ -27,12 +32,7 @@ export class ManagedTransferComponent implements OnDestroy {
   private transfer: ProductTransferDto;
   private subscription: Subscription;
 
-  constructor(
-    private areas: NavAreasService,
-    private servers: ServersService,
-    private products: ProductsService,
-    public productColumns: ProductsColumnsService
-  ) {
+  ngOnInit() {
     this.subscription = combineLatest([
       this.areas.panelRoute$,
       this.products.products$,
@@ -92,10 +92,10 @@ export class ManagedTransferComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ doTransfer(): void {
+  protected doTransfer(): void {
     this.transfer.versionsToTransfer = this.selected$.value;
     this.servers.transferProducts(this.transfer).subscribe(() => {
       this.tb.closePanel();

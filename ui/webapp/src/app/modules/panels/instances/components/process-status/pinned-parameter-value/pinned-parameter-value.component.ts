@@ -1,10 +1,7 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ParameterType } from 'src/app/models/gen.dtos';
-import {
-  NodeApplicationPort,
-  PortsService,
-} from 'src/app/modules/primary/instances/services/ports.service';
+import { NodeApplicationPort, PortsService } from 'src/app/modules/primary/instances/services/ports.service';
 import { PinnedParameter } from '../process-status.component';
 
 @Component({
@@ -13,19 +10,16 @@ import { PinnedParameter } from '../process-status.component';
   styleUrls: ['./pinned-parameter-value.component.css'],
 })
 export class PinnedParameterValueComponent implements OnInit, OnChanges {
+  private ports = inject(PortsService);
+
   @Input() record: PinnedParameter;
 
-  /* template */ portState$ = new BehaviorSubject<NodeApplicationPort>(null);
-  /* template */ booleanValue: boolean;
-
-  constructor(private ports: PortsService) {}
+  protected portState$ = new BehaviorSubject<NodeApplicationPort>(null);
+  protected booleanValue: boolean;
 
   ngOnInit(): void {
     this.ports.activePortStates$.subscribe((a) => {
-      const port = a?.find(
-        (p) =>
-          p.appId === this.record.appId && p.paramId === this.record.paramId
-      );
+      const port = a?.find((p) => p.appId === this.record.appId && p.paramId === this.record.paramId);
       this.portState$.next(port);
     });
 

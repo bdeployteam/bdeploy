@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { TooltipPosition } from '@angular/material/tooltip';
 import { ActivatedRouteSnapshot, RouterLink, RouterLinkActive } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -11,6 +20,8 @@ import { BdButtonColorMode } from '../bd-button/bd-button.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
+  private areas = inject(NavAreasService);
+
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() text: string;
@@ -24,13 +35,11 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
 
   @ViewChild(RouterLink) private rl: RouterLink;
-  @ViewChild(RouterLinkActive) /* template */ rla: RouterLinkActive;
+  @ViewChild(RouterLinkActive) public rla: RouterLinkActive;
 
   private subscription: Subscription;
 
-  /* template */ generatedRoute$ = new BehaviorSubject<any[]>([]);
-
-  constructor(private areas: NavAreasService) {}
+  protected generatedRoute$ = new BehaviorSubject<any[]>([]);
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((snap) => {
@@ -43,9 +52,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
   }
 
   private getRoute(snap: ActivatedRouteSnapshot) {
@@ -69,7 +76,7 @@ export class BdPanelButtonComponent implements OnInit, OnDestroy, OnChanges {
     return [...result, ...snap.url.map((u) => u.path)];
   }
 
-  /* template */ toggleRoute() {
+  protected toggleRoute() {
     if (this.toggle && this.rla.isActive) {
       this.areas.closePanel();
     }

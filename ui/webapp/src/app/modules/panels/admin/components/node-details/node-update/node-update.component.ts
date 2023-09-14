@@ -69,10 +69,10 @@ export class NodeUpdateComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ performUpdate() {
+  protected performUpdate() {
     this.updating$.next(true);
     this.nodesAdmin
       .updateNode(this.nodeName$.value, this.version.system)

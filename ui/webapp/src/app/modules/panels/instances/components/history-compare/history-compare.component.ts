@@ -1,12 +1,9 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  BdSearchable,
-  SearchService,
-} from 'src/app/modules/core/services/search.service';
+import { BdSearchable, SearchService } from 'src/app/modules/core/services/search.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { HistoryDetailsService } from '../../services/history-details.service';
 import { ApplicationPair, ConfigPair, NodePair } from '../../utils/diff-utils';
@@ -17,30 +14,30 @@ import { InstanceConfigCache } from '../../utils/instance-utils';
   templateUrl: './history-compare.component.html',
   styleUrls: ['./history-compare.component.css'],
 })
-export class HistoryCompareComponent implements OnDestroy, BdSearchable {
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
+export class HistoryCompareComponent implements OnInit, OnDestroy, BdSearchable {
+  private areas = inject(NavAreasService);
+  private bop = inject(BreakpointObserver);
+  private details = inject(HistoryDetailsService);
+  private searchService = inject(SearchService);
+  protected instances = inject(InstancesService);
 
-  /* template */ base$ = new BehaviorSubject<string>(null);
-  /* template */ compare$ = new BehaviorSubject<string>(null);
+  protected narrow$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
-  /* template */ clientNodeName = CLIENT_NODE_NAME;
+  protected base$ = new BehaviorSubject<string>(null);
+  protected compare$ = new BehaviorSubject<string>(null);
 
-  /* template */ searchTerm = '';
-  /* template */ showOnlyDifferences = true;
+  protected configPair$ = new BehaviorSubject<ConfigPair>(null);
+  protected clientNodeName = CLIENT_NODE_NAME;
+
+  protected searchTerm = '';
+  protected showOnlyDifferences = true;
 
   private baseConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private compareConfig$ = new BehaviorSubject<InstanceConfigCache>(null);
   private subscription: Subscription;
 
-  constructor(
-    private areas: NavAreasService,
-    bop: BreakpointObserver,
-    private details: HistoryDetailsService,
-    public instances: InstancesService,
-    private searchService: SearchService
-  ) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
+  ngOnInit() {
+    this.subscription = this.bop.observe('(max-width: 800px)').subscribe((bs) => {
       this.narrow$.next(bs.matches);
     });
 
@@ -71,37 +68,35 @@ export class HistoryCompareComponent implements OnDestroy, BdSearchable {
     );
 
     this.subscription.add(
-      combineLatest([this.baseConfig$, this.compareConfig$]).subscribe(
-        ([base, compare]) => {
-          if (!!base && !!compare) {
-            const pair = new ConfigPair(base, compare);
-            this.configPair$.next(pair);
-          } else {
-            this.configPair$.next(null);
-          }
+      combineLatest([this.baseConfig$, this.compareConfig$]).subscribe(([base, compare]) => {
+        if (!!base && !!compare) {
+          const pair = new ConfigPair(base, compare);
+          this.configPair$.next(pair);
+        } else {
+          this.configPair$.next(null);
         }
-      )
+      })
     );
 
     this.subscription.add(this.searchService.register(this));
   }
 
-  /* template */ showAppPair(appPair: ApplicationPair): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  protected showAppPair(appPair: ApplicationPair): boolean {
     const showAll = !this.showOnlyDifferences;
     return showAll || appPair.hasDifferences;
   }
 
-  /* template */ showNodePair(nodePair: NodePair): boolean {
+  protected showNodePair(nodePair: NodePair): boolean {
     const hasApplications = !!nodePair?.applications?.length;
     const showAll = !this.showOnlyDifferences;
     return hasApplications && (showAll || nodePair.hasDifferences);
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  bdOnSearch(value: string) {
+  public bdOnSearch(value: string) {
     this.searchTerm = value;
   }
 }

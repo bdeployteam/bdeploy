@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 
 @Component({
@@ -7,5 +7,5 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
   styleUrls: ['./admin-shell.component.css'],
 })
 export class AdminShellComponent {
-  constructor(public cfg: ConfigService) {}
+  public cfg = inject(ConfigService);
 }

@@ -1,12 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
-import {
-  ApplicationDto,
-  ObjectChangeType,
-  ProductDto,
-} from 'src/app/models/gen.dtos';
+import { ApplicationDto, ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { ObjectChangesService } from '../../../core/services/object-changes.service';
@@ -16,8 +12,13 @@ import { GroupsService } from '../../groups/services/groups.service';
   providedIn: 'root',
 })
 export class ProductsService {
-  loading$ = new BehaviorSubject<boolean>(true);
-  products$ = new BehaviorSubject<ProductDto[]>(null);
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private groups = inject(GroupsService);
+
+  public loading$ = new BehaviorSubject<boolean>(true);
+  public products$ = new BehaviorSubject<ProductDto[]>(null);
 
   private group: string;
   private subscription: Subscription;
@@ -26,25 +27,14 @@ export class ProductsService {
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/product`;
   public uploadUrl$ = new BehaviorSubject<string>(null);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    groups: GroupsService
-  ) {
-    groups.current$.subscribe((group) => this.load(group?.name));
-    this.delayLoad$
-      .pipe(debounceTime(100))
-      .subscribe((group) => this.load(group));
+  constructor() {
+    this.groups.current$.subscribe((group) => this.load(group?.name));
+    this.delayLoad$.pipe(debounceTime(100)).subscribe((group) => this.load(group));
   }
 
   public loadApplications(prod: ProductDto): Observable<ApplicationDto[]> {
     return this.http
-      .get<ApplicationDto[]>(
-        `${this.apiPath(this.group)}/${prod.key.name}/${
-          prod.key.tag
-        }/application`
-      )
+      .get<ApplicationDto[]>(`${this.apiPath(this.group)}/${prod.key.name}/${prod.key.tag}/application`)
       .pipe(measure('Load Applications of Product'));
   }
 
@@ -58,9 +48,7 @@ export class ProductsService {
       name: products[0].key.name, // products array contains different versions of the same product, so its fine
       tags: products.map((prod) => prod.key.tag),
     };
-    return this.http
-      .post(`${this.apiPath(this.group)}/copy`, null, { params })
-      .pipe(measure('Import Product'));
+    return this.http.post(`${this.apiPath(this.group)}/copy`, null, { params }).pipe(measure('Import Product'));
   }
 
   private load(group: string) {
@@ -89,18 +77,13 @@ export class ProductsService {
   }
 
   private updateChangeSubscription(group: string) {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
+    this.subscription = null;
 
     if (group) {
-      this.subscription = this.changes.subscribe(
-        ObjectChangeType.PRODUCT,
-        { scope: [group] },
-        () => {
-          this.delayLoad$.next(group);
-        }
-      );
+      this.subscription = this.changes.subscribe(ObjectChangeType.PRODUCT, { scope: [group] }, () => {
+        this.delayLoad$.next(group);
+      });
     }
   }
 }

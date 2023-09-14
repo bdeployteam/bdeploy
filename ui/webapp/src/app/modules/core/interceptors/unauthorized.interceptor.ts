@@ -1,9 +1,5 @@
-import {
-  HttpHandler,
-  HttpInterceptor,
-  HttpRequest,
-} from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -12,7 +8,8 @@ import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable()
 export class UnauthorizedInterceptor implements HttpInterceptor {
-  constructor(private auth: AuthenticationService, private router: Router) {}
+  private auth = inject(AuthenticationService);
+  private router = inject(Router);
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     return next.handle(req).pipe(
@@ -29,9 +26,7 @@ export class UnauthorizedInterceptor implements HttpInterceptor {
 
   logout(): void {
     this.auth.logout().subscribe(() => {
-      this.router
-        .navigate(['/login'])
-        .then(() => console.log('user logged out'));
+      this.router.navigate(['/login']).then(() => console.log('user logged out'));
     });
   }
 }

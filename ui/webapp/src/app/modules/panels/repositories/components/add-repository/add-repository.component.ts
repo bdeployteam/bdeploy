@@ -1,13 +1,6 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import {
-  BehaviorSubject,
-  Observable,
-  Subscription,
-  combineLatest,
-  finalize,
-  map,
-} from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -19,27 +12,25 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   selector: 'app-add-repository',
   templateUrl: './add-repository.component.html',
 })
-export class AddRepositoryComponent implements OnDestroy, DirtyableDialog {
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ repository: Partial<SoftwareRepositoryConfiguration> = {};
-  /* template */ usedNames: string[] = [];
+export class AddRepositoryComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private repositories = inject(RepositoriesService);
+  private groups = inject(GroupsService);
+  private areas = inject(NavAreasService);
+
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected repository: Partial<SoftwareRepositoryConfiguration> = {};
+  protected usedNames: string[] = [];
 
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    private repositories: RepositoriesService,
-    private groups: GroupsService,
-    private areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
+  ngOnInit() {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
 
     combineLatest([
-      this.groups.groups$.pipe(
-        map((g) => g?.map((x) => x.instanceGroupConfiguration.name))
-      ),
+      this.groups.groups$.pipe(map((g) => g?.map((x) => x.instanceGroupConfiguration.name))),
       this.repositories.repositories$.pipe(map((r) => r?.map((y) => y.name))),
     ])
       .pipe(map(([g, r]) => [...(g && g), ...(r && r)]))
@@ -48,19 +39,23 @@ export class AddRepositoryComponent implements OnDestroy, DirtyableDialog {
       });
   }
 
-  isDirty(): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.saving$.next(true);
     this.doSave().subscribe(() => {
       this.areas.closePanel();
-      this.subscription.unsubscribe();
+      this.subscription?.unsubscribe();
     });
   }
 
@@ -71,9 +66,5 @@ export class AddRepositoryComponent implements OnDestroy, DirtyableDialog {
         this.saving$.next(false);
       })
     );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

@@ -1,21 +1,17 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RepositoryDetailsService {
-  private apiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}`;
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private repositories: RepositoriesService
-  ) {}
+  private apiPath = (r) => `${this.cfg.config.api}/softwarerepository/${r}`;
 
   public delete(repository: SoftwareRepositoryConfiguration): Observable<any> {
     return this.http.delete(`${this.apiPath(repository.name)}`);

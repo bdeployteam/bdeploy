@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, NgZone, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import {
@@ -20,6 +20,14 @@ import { ProcessesService } from 'src/app/modules/primary/instances/services/pro
   providedIn: 'root',
 })
 export class ProcessDetailsService implements OnDestroy {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private groups = inject(GroupsService);
+  private instances = inject(InstancesService);
+  private processes = inject(ProcessesService);
+  private areas = inject(NavAreasService);
+  private zone = inject(NgZone);
+
   public loading$ = new BehaviorSubject<boolean>(true);
   public processDetail$ = new BehaviorSubject<ProcessDetailDto>(null);
   public processConfig$ = new BehaviorSubject<ApplicationConfiguration>(null);
@@ -27,18 +35,9 @@ export class ProcessDetailsService implements OnDestroy {
   private subscription: Subscription;
   private detailsCall: Subscription;
 
-  private apiPath = (group, instance) =>
-    `${this.cfg.config.api}/group/${group}/instance/${instance}`;
+  private apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private groups: GroupsService,
-    private instances: InstancesService,
-    private processes: ProcessesService,
-    private areas: NavAreasService,
-    private zone: NgZone
-  ) {
+  constructor() {
     this.subscription = combineLatest([
       this.areas.panelRoute$,
       this.processes.processStates$,
@@ -59,9 +58,7 @@ export class ProcessDetailsService implements OnDestroy {
 
       // find the configuration for the application we're showing details for
       const appsPerNode = nodes.nodeConfigDtos.map((x) =>
-        x?.nodeConfiguration?.applications
-          ? x.nodeConfiguration.applications
-          : []
+        x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : []
       );
       const allApps: ApplicationConfiguration[] = [].concat(...appsPerNode);
       const app = allApps.find((a) => a?.id === process);
@@ -83,10 +80,9 @@ export class ProcessDetailsService implements OnDestroy {
       // now load the status details and popuplate the service data.
       this.detailsCall = this.http
         .get<ProcessDetailDto>(
-          `${this.apiPath(
-            this.groups.current$.value.name,
-            instance.instanceConfiguration.id
-          )}/processes/${app2node[process]}/${process}`,
+          `${this.apiPath(this.groups.current$.value.name, instance.instanceConfiguration.id)}/processes/${
+            app2node[process]
+          }/${process}`,
           NO_LOADING_BAR
         )
         .pipe(
@@ -105,7 +101,7 @@ export class ProcessDetailsService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public writeStdin(value: string) {
@@ -131,10 +127,9 @@ export class ProcessDetailsService implements OnDestroy {
 
     return this.http
       .get<RemoteDirectory>(
-        `${this.apiPath(
-          this.groups.current$.value.name,
-          detail.status.instanceId
-        )}/output/${detail.status.instanceTag}/${detail.status.appId}`,
+        `${this.apiPath(this.groups.current$.value.name, detail.status.instanceId)}/output/${
+          detail.status.instanceTag
+        }/${detail.status.appId}`,
         NO_LOADING_BAR
       )
       .pipe(

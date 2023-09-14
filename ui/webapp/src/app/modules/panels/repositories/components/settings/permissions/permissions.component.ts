@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 import { RepositoryUsersService } from '../../../services/repository-users.service';
 
@@ -7,8 +7,6 @@ import { RepositoryUsersService } from '../../../services/repository-users.servi
   templateUrl: './permissions.component.html',
 })
 export class PermissionsComponent {
-  constructor(
-    public repos: RepositoriesService,
-    public users: RepositoryUsersService
-  ) {}
+  protected repos = inject(RepositoriesService);
+  protected users = inject(RepositoryUsersService);
 }

@@ -61,6 +61,12 @@ const colPinnedValue: BdDataColumn<PinnedParameter> = {
   encapsulation: ViewEncapsulation.None,
 })
 export class ProcessStatusComponent implements OnInit, OnDestroy {
+  private cfg = inject(ConfigService);
+  private route = inject(ActivatedRoute);
+  private systems = inject(SystemsService);
+  private zone = inject(NgZone);
+  private actions = inject(ActionsService);
+
   protected auth = inject(AuthenticationService);
   protected groups = inject(GroupsService);
   protected details = inject(ProcessDetailsService);
@@ -69,33 +75,27 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected servers = inject(ServersService);
   protected areas = inject(NavAreasService);
 
-  private cfg = inject(ConfigService);
-  private route = inject(ActivatedRoute);
-  private systems = inject(SystemsService);
-  private zone = inject(NgZone);
-  private actions = inject(ActionsService);
-
-  /* template */ uptime$ = new BehaviorSubject<string>(null);
-  /* template */ restartProgress$ = new BehaviorSubject<number>(0);
-  /* template */ restartProgressText$ = new BehaviorSubject<string>(null);
-  /* template */ outdated$ = new BehaviorSubject<boolean>(false);
+  protected uptime$ = new BehaviorSubject<string>(null);
+  protected restartProgress$ = new BehaviorSubject<number>(0);
+  protected restartProgressText$ = new BehaviorSubject<string>(null);
+  protected outdated$ = new BehaviorSubject<boolean>(false);
 
   private starting$ = new BehaviorSubject<boolean>(false);
   private stopping$ = new BehaviorSubject<boolean>(false);
   private restarting$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ isCrashedWaiting: boolean;
-  /* template */ isStopping: boolean;
-  /* template */ isRunning: boolean;
-  /* template */ isStartPlanned: boolean;
+  protected isCrashedWaiting: boolean;
+  protected isStopping: boolean;
+  protected isRunning: boolean;
+  protected isStartPlanned: boolean;
 
-  /* template */ processDetail: ProcessDetailDto;
-  /* template */ processConfig: ApplicationConfiguration;
-  /* template */ nodeCfg: InstanceNodeConfigurationDto;
-  /* template */ startType: 'Instance' | 'Manual' | 'Confirmed Manual';
-  /* template */ pinnedParameters: PinnedParameter[] = [];
-  /* template */ pinnedColumns: BdDataColumn<PinnedParameter>[] = [colPinnedName, colPinnedValue];
-  /* template */ uiEndpoints: HttpEndpoint[] = [];
+  protected processDetail: ProcessDetailDto;
+  protected processConfig: ApplicationConfiguration;
+  protected nodeCfg: InstanceNodeConfigurationDto;
+  protected startType: 'Instance' | 'Manual' | 'Confirmed Manual';
+  protected pinnedParameters: PinnedParameter[] = [];
+  protected pinnedColumns: BdDataColumn<PinnedParameter>[] = [colPinnedName, colPinnedValue];
+  protected uiEndpoints: HttpEndpoint[] = [];
 
   // we only show a loading spinner if loading takes longer than 200ms.
   protected loading$ = this.details.loading$.pipe(switchMap((l) => iif(() => l, of(l).pipe(delay(200)), of(l))));
@@ -247,7 +247,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
     this.clearIntervals();
   }
 
@@ -271,11 +271,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ trackProbe(index: number, probe: ProcessProbeResultDto) {
+  protected trackProbe(index: number, probe: ProcessProbeResultDto) {
     return probe.type;
   }
 
-  /* template */ start() {
+  protected start() {
     this.starting$.next(true);
     let confirmation = of(true);
 
@@ -307,7 +307,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* template */ stop() {
+  protected stop() {
     this.stopping$.next(true);
     this.processes
       .stop([this.processDetail.status.appId])
@@ -315,7 +315,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  /* template */ restart() {
+  protected restart() {
     this.restarting$.next(true);
     this.processes
       .restart([this.processDetail.status.appId])
@@ -323,7 +323,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  /* template */ getRouterLink(r: HttpEndpoint) {
+  protected getRouterLink(r: HttpEndpoint) {
     const returnUrl = this.route.snapshot.pathFromRoot.map((s) => s.url.map((u) => u.toString()).join('/')).join('/');
     return [
       '',

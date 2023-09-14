@@ -1,11 +1,7 @@
-import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import {
-  BdDataColumn,
-  BdDataGrouping,
-  BdDataGroupingDefinition,
-} from 'src/app/models/data';
+import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
 import { FileStatusType } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
@@ -14,49 +10,40 @@ import {
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
 import { ConfigFilesColumnsService } from '../../../services/config-files-columns.service';
-import {
-  ConfigFile,
-  ConfigFilesService,
-} from '../../../services/config-files.service';
+import { ConfigFile, ConfigFilesService } from '../../../services/config-files.service';
 
 @Component({
   selector: 'app-config-files',
   templateUrl: './config-files.component.html',
 })
-export class ConfigFilesComponent implements OnDestroy {
-  /* template */ records$ = new BehaviorSubject<ConfigFile[]>(null);
-  /* template */ columns: BdDataColumn<ConfigFile>[] =
-    this.cfgFileColumns.defaultColumns;
+export class ConfigFilesComponent implements OnInit, OnDestroy {
+  protected cfgFiles = inject(ConfigFilesService);
+  protected cfgFileColumns = inject(ConfigFilesColumnsService);
 
-  /* template */ groupingDefinition: BdDataGroupingDefinition<ConfigFile> = {
+  protected records$ = new BehaviorSubject<ConfigFile[]>(null);
+  protected columns: BdDataColumn<ConfigFile>[] = this.cfgFileColumns.defaultColumns;
+
+  protected groupingDefinition: BdDataGroupingDefinition<ConfigFile> = {
     name: 'Configuration File Availability',
     group: (r) => this.getGroup(r),
   };
 
-  /* template */ grouping: BdDataGrouping<ConfigFile>[] = [
-    { definition: this.groupingDefinition, selected: [] },
-  ];
+  protected grouping: BdDataGrouping<ConfigFile>[] = [{ definition: this.groupingDefinition, selected: [] }];
 
-  /* template */ tempFilePath: string;
-  /* template */ tempFileError: string;
-  /* template */ tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
-  /* template */ tempFileContent = '';
+  protected tempFilePath: string;
+  protected tempFileError: string;
+  protected tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
+  protected tempFileContent = '';
   private tempFileIsBin = false;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
-  @ViewChild('tempFileInput', { static: false })
-  private tempFileInput: BdFormInputComponent;
+  @ViewChild('tempFileInput', { static: false }) private tempFileInput: BdFormInputComponent;
 
   private subscription: Subscription;
 
-  constructor(
-    public cfgFiles: ConfigFilesService,
-    public cfgFileColumns: ConfigFilesColumnsService
-  ) {
+  ngOnInit() {
     this.subscription = this.cfgFiles.files$.subscribe((f) => {
-      this.records$.next(
-        f?.filter((x) => x.modification?.type !== FileStatusType.DELETE)
-      );
+      this.records$.next(f?.filter((x) => x.modification?.type !== FileStatusType.DELETE));
     });
   }
 
@@ -74,7 +61,7 @@ export class ConfigFilesComponent implements OnDestroy {
     }
   }
 
-  /* template */ doAddFile(tpl: TemplateRef<any>): void {
+  protected doAddFile(tpl: TemplateRef<any>): void {
     this.tempFilePath = '';
     this.tempFileContent = '';
 
@@ -84,25 +71,18 @@ export class ConfigFilesComponent implements OnDestroy {
         icon: 'add',
         template: tpl,
         validation: () =>
-          !this.tempFileInput
-            ? false
-            : !this.tempFileInput.isInvalid() &&
-              !this.tempFileContentLoading$.value,
+          !this.tempFileInput ? false : !this.tempFileInput.isInvalid() && !this.tempFileContentLoading$.value,
         actions: [ACTION_CANCEL, ACTION_OK],
       })
       .subscribe((r) => {
         if (!r) {
           return;
         }
-        this.cfgFiles.add(
-          this.tempFilePath,
-          this.tempFileContent,
-          this.tempFileIsBin
-        );
+        this.cfgFiles.add(this.tempFilePath, this.tempFileContent, this.tempFileIsBin);
       });
   }
 
-  /* template */ doAddFileContent(file: File) {
+  protected doAddFileContent(file: File) {
     this.tempFileError = null;
     this.tempFileContentLoading$.next(true);
 

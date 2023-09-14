@@ -1,11 +1,7 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  ScopedPermission,
-  UserGroupInfo,
-  UserInfo,
-} from 'src/app/models/gen.dtos';
+import { ScopedPermission, UserGroupInfo, UserInfo } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { PermissionColumnsService } from 'src/app/modules/core/services/permission-columns.service';
@@ -17,7 +13,12 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   templateUrl: './user-group-admin-detail.component.html',
   styleUrls: ['./user-group-admin-detail.component.css'],
 })
-export class UserGroupAdminDetailComponent implements OnDestroy {
+export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  private authAdmin = inject(AuthAdminService);
+  private usersColumnsService = inject(UsersColumnsService);
+  private permissionColumnsService = inject(PermissionColumnsService);
+
   private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
     id: 'deletePermission',
     name: 'Delete',
@@ -36,54 +37,44 @@ export class UserGroupAdminDetailComponent implements OnDestroy {
     width: '40px',
   };
 
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ group$ = new BehaviorSubject<UserGroupInfo>(null);
-  /* template */ permColumns: BdDataColumn<ScopedPermission>[] = [
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected group$ = new BehaviorSubject<UserGroupInfo>(null);
+  protected permColumns: BdDataColumn<ScopedPermission>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
     this.colDeletePerm,
   ];
-  /* template */ userColumns: BdDataColumn<UserInfo>[] = [
+  protected userColumns: BdDataColumn<UserInfo>[] = [
     ...this.usersColumnsService.userGroupAdminDetailsColumns,
     this.colDeleteUser,
   ];
-  /* template */ users: UserInfo[] = [];
-  /* template */ suggestedUsers: UserInfo[] = [];
+  protected users: UserInfo[] = [];
+  protected suggestedUsers: UserInfo[] = [];
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   private subscription: Subscription;
 
-  constructor(
-    private areas: NavAreasService,
-    private authAdmin: AuthAdminService,
-    private usersColumnsService: UsersColumnsService,
-    private permissionColumnsService: PermissionColumnsService
-  ) {
-    this.subscription = combineLatest([
-      areas.panelRoute$,
-      authAdmin.userGroups$,
-    ]).subscribe(([route, groups]) => {
-      if (!groups || !route?.params || !route.params['group']) {
-        this.group$.next(null);
-        return;
-      }
-      const group = groups.find((g) => g.id === route.params['group']);
-      this.group$.next(group);
-    });
-    this.subscription.add(
-      combineLatest([authAdmin.users$, this.group$]).subscribe(
-        ([users, group]) => {
-          if (!users || !group) {
-            this.users = [];
-            this.suggestedUsers = [];
-          } else {
-            this.users = users.filter((u) => u.groups.indexOf(group.id) >= 0);
-            this.suggestedUsers = users.filter(
-              (u) => u.groups.indexOf(group.id) == -1
-            );
-          }
+  ngOnInit() {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.authAdmin.userGroups$]).subscribe(
+      ([route, groups]) => {
+        if (!groups || !route?.params || !route.params['group']) {
+          this.group$.next(null);
+          return;
         }
-      )
+        const group = groups.find((g) => g.id === route.params['group']);
+        this.group$.next(group);
+      }
+    );
+    this.subscription.add(
+      combineLatest([this.authAdmin.users$, this.group$]).subscribe(([users, group]) => {
+        if (!users || !group) {
+          this.users = [];
+          this.suggestedUsers = [];
+        } else {
+          this.users = users.filter((u) => u.groups.indexOf(group.id) >= 0);
+          this.suggestedUsers = users.filter((u) => u.groups.indexOf(group.id) == -1);
+        }
+      })
     );
   }
 
@@ -111,7 +102,7 @@ export class UserGroupAdminDetailComponent implements OnDestroy {
       .subscribe();
   }
 
-  /* template */ addUser(info: UserInfo): void {
+  protected addUser(info: UserInfo): void {
     const group = this.group$.value.id;
     const user = info.name;
     this.loading$.next(true);
@@ -121,10 +112,7 @@ export class UserGroupAdminDetailComponent implements OnDestroy {
       .subscribe();
   }
 
-  /* tepmlate */ onSetInactive(
-    userGroupInfo: UserGroupInfo,
-    newValue: boolean
-  ): void {
+  protected onSetInactive(userGroupInfo: UserGroupInfo, newValue: boolean): void {
     this.loading$.next(true);
     userGroupInfo.inactive = newValue;
     this.authAdmin
@@ -133,12 +121,9 @@ export class UserGroupAdminDetailComponent implements OnDestroy {
       .subscribe();
   }
 
-  /* template */ onDelete(group: UserGroupInfo): void {
+  protected onDelete(group: UserGroupInfo): void {
     this.dialog
-      .confirm(
-        'Delete User Group',
-        `Are you sure you want to delete user group ${group.name}?`
-      )
+      .confirm('Delete User Group', `Are you sure you want to delete user group ${group.name}?`)
       .subscribe((r) => {
         if (!r) {
           return;

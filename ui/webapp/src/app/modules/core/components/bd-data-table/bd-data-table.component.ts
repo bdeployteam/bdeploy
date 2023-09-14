@@ -16,22 +16,13 @@ import {
   SimpleChanges,
   ViewChild,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
 import { MatLegacyCheckbox } from '@angular/material/legacy-checkbox';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
-import {
-  MatTreeFlatDataSource,
-  MatTreeFlattener,
-} from '@angular/material/tree';
+import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
-import {
-  BehaviorSubject,
-  Observable,
-  Subject,
-  Subscription,
-  debounceTime,
-  of,
-} from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, debounceTime, of } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
@@ -91,9 +82,12 @@ const MAX_ROWS_PER_GROUP = 500;
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BdDataTableComponent<T>
-  implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable
-{
+export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit, OnChanges, BdSearchable {
+  private searchService = inject(SearchService);
+  private media = inject(BreakpointObserver);
+  private sanitizer = inject(DomSanitizer);
+  private cd = inject(ChangeDetectorRef);
+
   /**
    * Aria caption for the table, mainly for screen readers.
    */
@@ -105,15 +99,12 @@ export class BdDataTableComponent<T>
   /**
    * The columns to display
    */
-  /* template */ _columns: BdDataColumn<T>[];
-  /* template */ _visibleColumns: string[];
+  protected _columns: BdDataColumn<T>[];
+  protected _visibleColumns: string[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
-      (c) =>
-        !c.display ||
-        c.display === BdDataColumnDisplay.TABLE ||
-        c.display === BdDataColumnDisplay.BOTH
+      (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH
     );
     this.updateColumnsToDisplay();
     this.updateMediaSubscriptions();
@@ -126,22 +117,14 @@ export class BdDataTableComponent<T>
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (
-    data: T[],
-    column: BdDataColumn<T>,
-    direction: SortDirection
-  ) => T[] = bdDataDefaultSort;
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /**
    * A callback which provides enhanced searching in the table. The default search will
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (
-    search: string,
-    data: T[],
-    columns: BdDataColumn<T>[]
-  ) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -237,8 +220,7 @@ export class BdDataTableComponent<T>
   );
 
   /** The transformer bound to 'this', so we can use this in the transformer function */
-  private boundTransformer: (node: Node<T>, level: number) => FlatNode<T> =
-    this.transformer.bind(this);
+  private boundTransformer: (node: Node<T>, level: number) => FlatNode<T> = this.transformer.bind(this);
   private treeFlattener = new MatTreeFlattener(
     this.boundTransformer,
     (n) => n.level,
@@ -251,25 +233,14 @@ export class BdDataTableComponent<T>
   /** endless pseudo-id counter for created nodes to be used with trackBy in case no ID solumn is set. */
   private nodeCnt = 0;
 
-  /* template */ hasMoreData = false;
-  /* template */ hasMoreDataText = '...';
+  protected hasMoreData = false;
+  protected hasMoreDataText = '...';
 
   /** The model holding the current checkbox selection state */
-  /* template */ checkSelection = new SelectionModel<FlatNode<T>>(true);
+  protected checkSelection = new SelectionModel<FlatNode<T>>(true);
 
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
-  /* tempalte */ dataSource = new MatTreeFlatDataSource(
-    this.treeControl,
-    this.treeFlattener
-  );
-
-  constructor(
-    private searchService: SearchService,
-    private media: BreakpointObserver,
-    private sanitizer: DomSanitizer,
-    private cd: ChangeDetectorRef,
-    private bp: BreakpointObserver
-  ) {}
+  /* tempalte */ dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
   ngOnInit(): void {
     if (this.searchable) {
@@ -283,9 +254,7 @@ export class BdDataTableComponent<T>
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
     this.closeMediaSubscriptions();
   }
 
@@ -328,18 +297,12 @@ export class BdDataTableComponent<T>
     this._columns
       .filter((c) => !!c.showWhen)
       .forEach((c) =>
-        this.mediaSubscription.add(
-          this.media
-            .observe(c.showWhen)
-            .subscribe(() => this.updateColumnsToDisplay())
-        )
+        this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe(() => this.updateColumnsToDisplay()))
       );
   }
 
   private closeMediaSubscriptions() {
-    if (this.mediaSubscription) {
-      this.mediaSubscription.unsubscribe();
-    }
+    this.mediaSubscription?.unsubscribe();
   }
 
   private updateColumnsToDisplay() {
@@ -350,12 +313,7 @@ export class BdDataTableComponent<T>
             return false;
           }
         }
-        if (
-          this.grouping &&
-          this.grouping.findIndex(
-            (g) => g.definition?.associatedColumn === c.id
-          ) !== -1
-        ) {
+        if (this.grouping && this.grouping.findIndex((g) => g.definition?.associatedColumn === c.id) !== -1) {
           return false;
         }
         return true;
@@ -387,12 +345,7 @@ export class BdDataTableComponent<T>
     // benchmarks show that this method is quite fast, event with a lot of data.
     // it takes roughly 100 (76 - 110) ms to generate a model for ~1000 records.
     this.hasMoreData = false;
-    this.dataSource.data = this.generateModel(
-      this.records ? [...this.records] : [],
-      this.grouping,
-      this.sort,
-      false
-    );
+    this.dataSource.data = this.generateModel(this.records ? [...this.records] : [], this.grouping, this.sort, false);
 
     if (this.expandGroups) {
       // TODO: Saving of expansion state on update. To achieve this, every BdDataGrouping must
@@ -428,11 +381,7 @@ export class BdDataTableComponent<T>
       level: level,
     };
 
-    if (
-      !!node.item &&
-      !!this.checked &&
-      !!this.checked.find((c) => c === node.item)
-    ) {
+    if (!!node.item && !!this.checked && !!this.checked.find((c) => c === node.item)) {
       this.checkSelection.select(flatNode);
     }
 
@@ -443,12 +392,7 @@ export class BdDataTableComponent<T>
    * Generates the actual model displayed by the widget from the raw data given.
    * This method is called recursively to apply groupings at various levels.
    */
-  private generateModel(
-    data: T[],
-    grouping: BdDataGrouping<T>[],
-    sort: Sort,
-    skipSearch: boolean
-  ): Node<T>[] {
+  private generateModel(data: T[], grouping: BdDataGrouping<T>[], sort: Sort, skipSearch: boolean): Node<T>[] {
     // if there is grouping to be applied, apply the top-most level now, and recurse.
     if (!!grouping && grouping.length > 0) {
       // do grouping by identifying the "group" of each record through the BdDataGrouping.
@@ -460,12 +404,9 @@ export class BdDataTableComponent<T>
           group = UNMATCHED_GROUP;
         }
 
-        const show =
-          !grouping[0].selected?.length || grouping[0].selected.includes(group);
+        const show = !grouping[0].selected?.length || grouping[0].selected.includes(group);
         if (show && group) {
-          const list = byGroup.has(group)
-            ? byGroup.get(group)
-            : byGroup.set(group, []).get(group);
+          const list = byGroup.has(group) ? byGroup.get(group) : byGroup.set(group, []).get(group);
           list.push(row);
         }
       }
@@ -484,14 +425,8 @@ export class BdDataTableComponent<T>
       const result: Node<T>[] = [];
       for (const [key, value] of byGroupSorted) {
         const searchMatchesGroup =
-          this.search?.length > 0 &&
-          key.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
-        const children = this.generateModel(
-          value,
-          grouping.slice(1),
-          sort,
-          skipSearch || searchMatchesGroup
-        );
+          this.search?.length > 0 && key.toLowerCase().indexOf(this.search.toLowerCase()) !== -1;
+        const children = this.generateModel(value, grouping.slice(1), sort, skipSearch || searchMatchesGroup);
         if (children?.length) {
           result.push({
             nodeId: key,
@@ -507,9 +442,7 @@ export class BdDataTableComponent<T>
     // There is no grouping left, so we can now create the nodes for the actual data records.
     // The only thing left to do here is to apply the current searching/sorting if given. Otherwise
     // data is presented in the given order.
-    let sortedData = skipSearch
-      ? data
-      : this.searchData(this.search, data, this._columns);
+    let sortedData = skipSearch ? data : this.searchData(this.search, data, this._columns);
     if (!!this.sortData && !!sort && !!sort.active && !!sort.direction) {
       const col = this._columns.find((c) => c.id === sort.active);
       if (!col) {
@@ -525,35 +458,30 @@ export class BdDataTableComponent<T>
     // by the transformer callback of treeControl.
     this.hasMoreData = sortedData.length > MAX_ROWS_PER_GROUP;
     return sortedData.slice(0, MAX_ROWS_PER_GROUP).map((i) => ({
-      nodeId: idCols?.length
-        ? idCols.map((c) => c.data(i)).join('_')
-        : this.nodeCnt++,
+      nodeId: idCols?.length ? idCols.map((c) => c.data(i)).join('_') : this.nodeCnt++,
       item: i,
       groupOrFirstColumn: this._columns[0].data(i),
       children: [],
     }));
   }
 
-  /* template */ trackNode(index: number, node: FlatNode<T>) {
+  protected trackNode(index: number, node: FlatNode<T>) {
     return node.node.nodeId;
   }
 
-  /* template */ getNoExpandIndent(level: number) {
+  protected getNoExpandIndent(level: number) {
     if (level === 0) {
       return 0;
     }
     return (level - 1) * 24 + 40;
   }
 
-  /* template */ getUnknownIcon(col: BdDataColumn<T>) {
-    console.warn(
-      'No icon callback registered for column definition with action',
-      col
-    );
+  protected getUnknownIcon(col: BdDataColumn<T>) {
+    console.warn('No icon callback registered for column definition with action', col);
     return 'help'; // default fallback.
   }
 
-  /* template */ toggleCheck(node: FlatNode<T>, cb: MatLegacyCheckbox) {
+  protected toggleCheck(node: FlatNode<T>, cb: MatLegacyCheckbox) {
     if (!node.expandable) {
       const target = !this.checkSelection.isSelected(node);
       let confirm = of(true);
@@ -567,11 +495,7 @@ export class BdDataTableComponent<T>
           } else {
             this.checkSelection.deselect(node);
           }
-          this.checkedChange.emit(
-            this.checkSelection.selected
-              .filter((s) => !!s.node.item)
-              .map((s) => s.node.item)
-          );
+          this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
         } else {
           cb.checked = !target;
         }
@@ -580,35 +504,25 @@ export class BdDataTableComponent<T>
       const isChecked = this.isChecked(node);
 
       // if ALL are checked, we deselect all, otherwise we "upgrade" to all selected
-      isChecked
-        ? this.checkSelection.deselect(node)
-        : this.checkSelection.select(node);
+      isChecked ? this.checkSelection.deselect(node) : this.checkSelection.select(node);
 
       const children = this.treeControl.getDescendants(node);
       this.checkSelection.isSelected(node)
         ? this.checkSelection.select(...children)
         : this.checkSelection.deselect(...children);
-      this.checkedChange.emit(
-        this.checkSelection.selected
-          .filter((s) => !!s.node.item)
-          .map((s) => s.node.item)
-      );
+      this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
     }
   }
 
-  /* template */ toggleCheckAll() {
+  protected toggleCheckAll() {
     const isChecked = this.isAnyChecked();
     isChecked
       ? this.checkSelection.deselect(...this.treeControl.dataNodes)
       : this.checkSelection.select(...this.treeControl.dataNodes);
-    this.checkedChange.emit(
-      this.checkSelection.selected
-        .filter((s) => !!s.node.item)
-        .map((s) => s.node.item)
-    );
+    this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
   }
 
-  /* template */ isChecked(node: FlatNode<T>) {
+  protected isChecked(node: FlatNode<T>) {
     if (!node.expandable) {
       return this.checkSelection.isSelected(node);
     }
@@ -617,39 +531,32 @@ export class BdDataTableComponent<T>
     return children.every((child) => this.checkSelection.isSelected(child));
   }
 
-  /* template */ isAllChecked() {
-    return (
-      this.checkSelection.selected.filter((n) => !!n?.node?.item).length ===
-      this.records?.length
-    );
+  protected isAllChecked() {
+    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length === this.records?.length;
   }
 
-  /* template */ isAnyChecked() {
-    return (
-      this.checkSelection.selected.filter((n) => !!n?.node?.item).length > 0
-    );
+  protected isAnyChecked() {
+    return this.checkSelection.selected.filter((n) => !!n?.node?.item).length > 0;
   }
 
-  /* template */ isPartiallyChecked(node: FlatNode<T>) {
+  protected isPartiallyChecked(node: FlatNode<T>) {
     const children = this.treeControl.getDescendants(node);
-    const selected = children.filter((child) =>
-      this.checkSelection.isSelected(child)
-    );
+    const selected = children.filter((child) => this.checkSelection.isSelected(child));
     return selected.length > 0 && selected.length < children.length; // at least one but not all.
   }
 
-  /* template */ isImageColumn(col: BdDataColumn<T>) {
+  protected isImageColumn(col: BdDataColumn<T>) {
     return col.hint === BdDataColumnTypeHint.AVATAR;
   }
 
-  /* template */ getImageUrl(col: BdDataColumn<T>, record: T) {
+  protected getImageUrl(col: BdDataColumn<T>, record: T) {
     const url = col.data(record);
     if (url) {
       return this.sanitizer.bypassSecurityTrustUrl(url);
     }
   }
 
-  /* template */ onDrop(event: CdkDragDrop<T[]>) {
+  protected onDrop(event: CdkDragDrop<T[]>) {
     // we made sure during init that indices match (no sorting, no grouping, no checking), so we can be "pretty" sure that just passing indices is a good idea.
     this.dragReorder.emit({
       previousIndex: event.previousIndex,

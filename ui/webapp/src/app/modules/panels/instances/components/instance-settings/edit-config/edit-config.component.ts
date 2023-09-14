@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 import { InstancePurpose, ManifestKey } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -8,10 +8,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  GlobalEditState,
-  InstanceEditService,
-} from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { GlobalEditState, InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 
@@ -19,58 +16,44 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   selector: 'app-edit-config',
   templateUrl: './edit-config.component.html',
 })
-export class EditConfigComponent
-  implements OnDestroy, DirtyableDialog, AfterViewInit
-{
+export class EditConfigComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
+  private areas = inject(NavAreasService);
+  protected cfg = inject(ConfigService);
+  protected edit = inject(InstanceEditService);
+  protected servers = inject(ServersService);
+  protected systems = inject(SystemsService);
+
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
   private subscription: Subscription;
 
-  /* template */ purposes = [
-    InstancePurpose.PRODUCTIVE,
-    InstancePurpose.DEVELOPMENT,
-    InstancePurpose.TEST,
-  ];
-  /* template */ hasPendingChanges: boolean;
+  protected purposes = [InstancePurpose.PRODUCTIVE, InstancePurpose.DEVELOPMENT, InstancePurpose.TEST];
+  protected hasPendingChanges: boolean;
 
-  /* template */ systemKeys: ManifestKey[];
-  /* template */ systemLabels: string[];
-  /* template */ systemSel: ManifestKey;
+  protected systemKeys: ManifestKey[];
+  protected systemLabels: string[];
+  protected systemSel: ManifestKey;
 
-  constructor(
-    public cfg: ConfigService,
-    public edit: InstanceEditService,
-    public servers: ServersService,
-    public systems: SystemsService,
-    areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
+  ngOnInit() {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([systems.systems$, edit.state$, edit.current$]).subscribe(
-        ([s, i, dto]) => {
-          if (!s?.length || !i) {
-            return;
-          }
-
-          const serverName = dto?.managedServer?.hostName;
-          const filtered = s.filter(
-            (x) => !x.minion || x.minion === serverName
-          );
-
-          this.systemKeys = filtered.map((s) => s.key);
-          this.systemLabels = filtered.map(
-            (s) => `${s.config.name} (${s.config.description})`
-          );
-
-          if (i.config.config.system) {
-            this.systemSel = this.systemKeys.find(
-              (k) => k.name === i.config.config.system.name
-            );
-          }
+      combineLatest([this.systems.systems$, this.edit.state$, this.edit.current$]).subscribe(([s, i, dto]) => {
+        if (!s?.length || !i) {
+          return;
         }
-      )
+
+        const serverName = dto?.managedServer?.hostName;
+        const filtered = s.filter((x) => !x.minion || x.minion === serverName);
+
+        this.systemKeys = filtered.map((s) => s.key);
+        this.systemLabels = filtered.map((s) => `${s.config.name} (${s.config.description})`);
+
+        if (i.config.config.system) {
+          this.systemSel = this.systemKeys.find((k) => k.name === i.config.config.system.name);
+        }
+      })
     );
   }
 
@@ -86,22 +69,22 @@ export class EditConfigComponent
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
     return this.edit.hasPendingChanges();
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
-  /* template */ onSystemChange(state: GlobalEditState, value: ManifestKey) {
+  protected onSystemChange(state: GlobalEditState, value: ManifestKey) {
     state.config.config.system = value;
   }
 

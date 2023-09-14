@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 
 @Component({
@@ -6,5 +6,5 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './oidc-tab.component.html',
 })
 export class OidcTabComponent {
-  constructor(public settings: SettingsService) {}
+  public settings = inject(SettingsService);
 }

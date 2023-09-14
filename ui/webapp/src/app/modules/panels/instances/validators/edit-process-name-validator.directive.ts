@@ -1,10 +1,5 @@
-import { Directive, Input } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { Directive, Input, inject } from '@angular/core';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   BdValidationMessageExtractor,
@@ -22,24 +17,23 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
     },
   ],
 })
-export class EditProcessNameValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class EditProcessNameValidatorDirective implements Validator, BdValidationMessageExtractor {
+  private edit = inject(InstanceEditService);
   public readonly id = 'edit-process-name';
 
   @Input() appEditProcessNameValidator: string;
 
-  constructor(private edit: InstanceEditService) {
+  constructor() {
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const name = control.value as string;
     if (!name?.length) {
       return null; // "required" must be validated elsewhere.

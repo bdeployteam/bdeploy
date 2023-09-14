@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { Permission, UserInfo } from 'src/app/models/gen.dtos';
 import {
@@ -17,6 +17,10 @@ import { UsersColumnsService } from '../../../../../core/services/users-columns.
   templateUrl: './user-permissions.component.html',
 })
 export class UserPermissionsComponent {
+  protected groups = inject(GroupsService);
+  protected users = inject(GroupUsersService);
+  protected userCols = inject(UsersColumnsService);
+
   private readonly colGlobalPerm: BdDataColumn<UserInfo> = {
     id: 'global',
     name: 'Global Perm.',
@@ -39,10 +43,7 @@ export class UserPermissionsComponent {
     data: (r) => `Modify permissions for ${r.name}`,
     action: (r) => this.doModify(this.modDialog, r),
     actionDisabled: (r) => this.getAvailablePermissionsForUser(r).length === 0,
-    icon: (r) =>
-      !this.getLocalPermissionLevel(r) && !this.getGlobalPermissionLevel(r)
-        ? 'add'
-        : 'edit',
+    icon: (r) => (!this.getLocalPermissionLevel(r) && !this.getGlobalPermissionLevel(r) ? 'add' : 'edit'),
     width: '40px',
   };
 
@@ -53,19 +54,15 @@ export class UserPermissionsComponent {
     disabled: () => !this.getLocalPermissionLevel(this.modUser),
   };
 
-  private groupNames = [
-    'Local Permission',
-    'Global Permission',
-    'No Permission',
-  ];
+  private groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
 
-  /* template */ columns: BdDataColumn<UserInfo>[] = [
+  protected columns: BdDataColumn<UserInfo>[] = [
     ...this.userCols.defaultUsersColumns,
     this.colGlobalPerm,
     this.colLocalPerm,
     this.colModPerm,
   ];
-  /* template */ grouping: BdDataGrouping<UserInfo>[] = [
+  protected grouping: BdDataGrouping<UserInfo>[] = [
     {
       definition: {
         group: (r) =>
@@ -81,23 +78,15 @@ export class UserPermissionsComponent {
     },
   ];
 
-  /* template */ modPerm: Permission;
-  /* template */ modUser: UserInfo;
-  /* template */ availablePermissionsForUser: Permission[];
+  protected modPerm: Permission;
+  protected modUser: UserInfo;
+  protected availablePermissionsForUser: Permission[];
 
   @Input() dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
 
-  constructor(
-    public groups: GroupsService,
-    public users: GroupUsersService,
-    public userCols: UsersColumnsService
-  ) {}
-
   private getLocalPermissionLevel(user: UserInfo): Permission {
-    return user.permissions.find(
-      (p) => p.scope === this.groups.current$.value.name
-    )?.permission;
+    return user.permissions.find((p) => p.scope === this.groups.current$.value.name)?.permission;
   }
 
   private getGlobalPermissionLevel(user: UserInfo): Permission {
@@ -106,9 +95,7 @@ export class UserPermissionsComponent {
 
   private doModify(tpl: TemplateRef<any>, user: UserInfo) {
     this.modUser = user;
-    this.availablePermissionsForUser = this.getAvailablePermissionsForUser(
-      this.modUser
-    );
+    this.availablePermissionsForUser = this.getAvailablePermissionsForUser(this.modUser);
     this.modPerm = this.getLocalPermissionLevel(user);
     this.dialog
       .message({
@@ -132,12 +119,7 @@ export class UserPermissionsComponent {
 
     // only permissions HIGHER than the current global permission are avilable.
     const glob = this.getGlobalPermissionLevel(user);
-    const allPerms = [
-      Permission.CLIENT,
-      Permission.READ,
-      Permission.WRITE,
-      Permission.ADMIN,
-    ];
+    const allPerms = [Permission.CLIENT, Permission.READ, Permission.WRITE, Permission.ADMIN];
 
     if (!glob) return allPerms;
     if (glob === Permission.CLIENT) return allPerms.slice(1);

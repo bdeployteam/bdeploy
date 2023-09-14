@@ -10,8 +10,8 @@ import { PortParam } from '../../../../services/ports-edit.service';
 export class PortTypeCellComponent implements OnInit {
   @Input() record: PortParam;
 
-  /* template */ shortType;
-  /* template */ shortDesc;
+  protected shortType;
+  protected shortDesc;
 
   ngOnInit() {
     if (this.record) {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { NodeAttachDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-admin.service';
@@ -9,13 +9,13 @@ import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
   templateUrl: './node-conversion.component.html',
   styleUrls: ['./node-conversion.component.css'],
 })
-export class NodeConversionComponent {
-  /* template */ data: NodeAttachDto;
+export class NodeConversionComponent implements OnInit {
+  private cfg = inject(ConfigService);
+  protected nodesAdmin = inject(NodesAdminService);
 
-  constructor(
-    private cfg: ConfigService,
-    public nodesAdmin: NodesAdminService
-  ) {
+  protected data: NodeAttachDto;
+
+  ngOnInit() {
     this.nodesAdmin.nodes$.subscribe((n) => {
       if (!n) {
         return;
@@ -33,7 +33,7 @@ export class NodeConversionComponent {
     });
   }
 
-  /* template */ onDragStart($event) {
+  protected onDragStart($event) {
     $event.dataTransfer.effectAllowed = 'link';
     $event.dataTransfer.setData(NODE_MIME_TYPE, JSON.stringify(this.data));
   }

@@ -1,12 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BehaviorSubject } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
-import {
-  RemoteDirectory,
-  RemoteDirectoryEntry,
-} from '../../../../../models/gen.dtos';
+import { RemoteDirectory, RemoteDirectoryEntry } from '../../../../../models/gen.dtos';
 import { LogColumnsService } from '../../services/log-columns.service';
 import { LoggingAdminService } from '../../services/logging-admin.service';
 
@@ -15,6 +12,10 @@ import { LoggingAdminService } from '../../services/logging-admin.service';
   templateUrl: './log-files-browser.component.html',
 })
 export class LogFilesBrowserComponent implements OnInit {
+  private cols = inject(LogColumnsService);
+  protected authService = inject(AuthenticationService);
+  protected loggingAdmin = inject(LoggingAdminService);
+
   private readonly colDownload: BdDataColumn<RemoteDirectoryEntry> = {
     id: 'download',
     name: 'D/L',
@@ -24,16 +25,13 @@ export class LogFilesBrowserComponent implements OnInit {
     icon: () => 'cloud_download',
   };
 
-  /* template */ columns: BdDataColumn<RemoteDirectoryEntry>[] = [
-    ...this.cols.defaultColumns,
-    this.colDownload,
-  ];
-  /* template */ records$ = new BehaviorSubject<RemoteDirectoryEntry[]>([]);
-  /* template */ sort: Sort = { active: 'modified', direction: 'desc' };
-  /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
+  protected columns: BdDataColumn<RemoteDirectoryEntry>[] = [...this.cols.defaultColumns, this.colDownload];
+  protected records$ = new BehaviorSubject<RemoteDirectoryEntry[]>([]);
+  protected sort: Sort = { active: 'modified', direction: 'desc' };
+  protected directory$ = new BehaviorSubject<RemoteDirectory>(null);
 
   private _index = 0;
-  /* template */ set selectedIndex(index: number) {
+  protected set selectedIndex(index: number) {
     this._index = index;
     if (this.loggingAdmin.directories$.value?.length) {
       this.directory$.next(this.loggingAdmin.directories$.value[index]);
@@ -42,23 +40,16 @@ export class LogFilesBrowserComponent implements OnInit {
     }
   }
 
-  /* template */ get selectedIndex(): number {
+  protected get selectedIndex(): number {
     return this._index;
   }
 
-  /* template */ getRecordRoute = (row: RemoteDirectoryEntry) => {
+  protected getRecordRoute = (row: RemoteDirectoryEntry) => {
     return [
       '',
       {
         outlets: {
-          panel: [
-            'panels',
-            'admin',
-            'logging',
-            'view',
-            this.directory$.value.minion,
-            row.path,
-          ],
+          panel: ['panels', 'admin', 'logging', 'view', this.directory$.value.minion, row.path],
         },
       },
     ];
@@ -67,12 +58,6 @@ export class LogFilesBrowserComponent implements OnInit {
   public activeRemoteDirectory: RemoteDirectory = null;
   public activeRemoteDirectoryEntry: RemoteDirectoryEntry = null;
 
-  constructor(
-    public authService: AuthenticationService,
-    public loggingAdmin: LoggingAdminService,
-    private cols: LogColumnsService
-  ) {}
-
   public ngOnInit(): void {
     this.loggingAdmin.directories$.subscribe((dirs) => {
       this.directory$.next(dirs[0]);
@@ -80,13 +65,7 @@ export class LogFilesBrowserComponent implements OnInit {
     this.loggingAdmin.reload();
   }
 
-  private download(
-    remoteDirectory: RemoteDirectory,
-    remoteDirectoryEntry: RemoteDirectoryEntry
-  ) {
-    this.loggingAdmin.downloadLogFileContent(
-      remoteDirectory,
-      remoteDirectoryEntry
-    );
+  private download(remoteDirectory: RemoteDirectory, remoteDirectoryEntry: RemoteDirectoryEntry) {
+    this.loggingAdmin.downloadLogFileContent(remoteDirectory, remoteDirectoryEntry);
   }
 }

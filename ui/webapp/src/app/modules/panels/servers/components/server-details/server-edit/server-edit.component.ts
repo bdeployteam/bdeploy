@@ -1,13 +1,7 @@
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { debounceTime, finalize, map } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -23,34 +17,27 @@ import { ServerDetailsService } from '../../../services/server-details.service';
   templateUrl: './server-edit.component.html',
   providers: [ServerDetailsService],
 })
-export class ServerEditComponent
-  implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit
-{
-  /* tepmlate */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ loading$ = combineLatest([
-    this.saving$,
-    this.servers.loading$,
-    this.details.loading$,
-  ]).pipe(map(([a, b, c]) => a || b || c));
+export class ServerEditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
+  private servers = inject(ServersService);
+  private areas = inject(NavAreasService);
+  protected details = inject(ServerDetailsService);
 
-  /* template */ server: ManagedMasterDto;
-  /* template */ orig: ManagedMasterDto;
-  /* template */ disableSave: boolean;
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected loading$ = combineLatest([this.saving$, this.servers.loading$, this.details.loading$]).pipe(
+    map(([a, b, c]) => a || b || c)
+  );
+
+  protected server: ManagedMasterDto;
+  protected orig: ManagedMasterDto;
+  protected disableSave: boolean;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
   private subscription: Subscription;
 
-  constructor(
-    private servers: ServersService,
-    public details: ServerDetailsService,
-    areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       this.details.server$.subscribe((s) => {
         this.server = cloneDeep(s);
@@ -71,14 +58,14 @@ export class ServerEditComponent
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty() {
     return isDirty(this.server, this.orig);
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => {
       this.orig = cloneDeep(this.server);
       this.tb.closePanel();
@@ -87,8 +74,6 @@ export class ServerEditComponent
 
   public doSave() {
     this.saving$.next(true);
-    return this.details
-      .update(this.server)
-      .pipe(finalize(() => this.saving$.next(false)));
+    return this.details.update(this.server).pipe(finalize(() => this.saving$.next(false)));
   }
 }

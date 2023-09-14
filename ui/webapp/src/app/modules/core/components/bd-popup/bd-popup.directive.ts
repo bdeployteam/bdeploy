@@ -11,6 +11,7 @@ import {
   Renderer2,
   TemplateRef,
   ViewContainerRef,
+  inject,
 } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { cloneDeep } from 'lodash-es';
@@ -114,6 +115,12 @@ const RIGHT_BELOW: ConnectedPosition = {
   exportAs: 'appBdPopup',
 })
 export class BdPopupDirective implements OnDestroy {
+  private host = inject(ElementRef);
+  private overlay = inject(Overlay);
+  private viewContainerRef = inject(ViewContainerRef);
+  private popupService = inject(PopupService);
+  private _render = inject(Renderer2);
+
   @Input() appBdPopup: TemplateRef<any>;
   @Input() appBdPopupTrigger: 'click' | 'hover' = 'click';
   @Input() appBdPopupDelay = 0;
@@ -132,14 +139,6 @@ export class BdPopupDirective implements OnDestroy {
 
   private clearEnterListener: () => void;
   private clearLeaveListener: () => void;
-
-  constructor(
-    private host: ElementRef,
-    private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef,
-    private popupService: PopupService,
-    private _render: Renderer2
-  ) {}
 
   ngOnDestroy(): void {
     this.closeOverlay();
@@ -209,21 +208,13 @@ export class BdPopupDirective implements OnDestroy {
   }
 
   private hookOverlay() {
-    this.clearEnterListener = this._render.listen(
-      this.overlayRef.hostElement,
-      'mouseenter',
-      () => {
-        this.mouseOverPopup = true;
-      }
-    );
-    this.clearLeaveListener = this._render.listen(
-      this.overlayRef.hostElement,
-      'mouseleave',
-      () => {
-        this.mouseOverPopup = false;
-        this.checkCloseOnLeave();
-      }
-    );
+    this.clearEnterListener = this._render.listen(this.overlayRef.hostElement, 'mouseenter', () => {
+      this.mouseOverPopup = true;
+    });
+    this.clearLeaveListener = this._render.listen(this.overlayRef.hostElement, 'mouseleave', () => {
+      this.mouseOverPopup = false;
+      this.checkCloseOnLeave();
+    });
   }
 
   private unhookOverlay() {
@@ -263,9 +254,7 @@ export class BdPopupDirective implements OnDestroy {
   }
 
   private fixupPanelClasses(pos: ConnectedPosition[]) {
-    const name = this.appBdPopupChevronColor
-      ? this.appBdPopupChevronColor
-      : 'default';
+    const name = this.appBdPopupChevronColor ? this.appBdPopupChevronColor : 'default';
     const result = [];
     pos.forEach((p) => {
       const x = cloneDeep(p);

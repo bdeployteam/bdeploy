@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { RatingStatusColumnComponent } from '../components/rating-status-column/rating-status-column.component';
 import { StateStatusColumnComponent } from '../components/state-status-column/state-status-column.component';
@@ -35,6 +35,8 @@ const portStateCol: BdDataColumn<NodeApplicationPort> = {
   providedIn: 'root',
 })
 export class PortsColumnsService {
+  private processes = inject(ProcessesService);
+
   private portRatingCol: BdDataColumn<NodeApplicationPort> = {
     id: 'rating',
     name: 'Rating',
@@ -49,12 +51,7 @@ export class PortsColumnsService {
     portStateCol,
     this.portRatingCol,
   ];
-  public defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort>[] = [
-    portAppCol,
-    ...this.defaultPortsColumns,
-  ];
-
-  constructor(private processes: ProcessesService) {}
+  public defaultPortsColumnsWithApp: BdDataColumn<NodeApplicationPort>[] = [portAppCol, ...this.defaultPortsColumns];
 
   private getRating(r: NodeApplicationPort) {
     const currentStates = this.processes.processStates$.value;

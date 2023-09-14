@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { UserInfo } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ConfigService } from '../../services/config.service';
@@ -11,17 +11,17 @@ import { SettingsService } from '../../services/settings.service';
   templateUrl: './main-nav-top.component.html',
   styleUrls: ['./main-nav-top.component.css'],
 })
-export class MainNavTopComponent {
-  /* template */ logoSize = 64;
-  /* template */ user: UserInfo;
+export class MainNavTopComponent implements OnInit {
+  private media = inject(BreakpointObserver);
+  private authService = inject(AuthenticationService);
+  protected cfgService = inject(ConfigService);
+  protected search = inject(SearchService);
+  protected settings = inject(SettingsService);
 
-  constructor(
-    public cfgService: ConfigService,
-    public search: SearchService,
-    private media: BreakpointObserver,
-    private authService: AuthenticationService,
-    public settings: SettingsService
-  ) {
+  protected logoSize = 64;
+  protected user: UserInfo;
+
+  ngOnInit() {
     this.media.observe('(max-width:1280px)').subscribe((bs) => {
       this.logoSize = bs.matches ? 48 : 64;
     });

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { combineLatest, map } from 'rxjs';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
@@ -16,14 +16,18 @@ import { AuthAdminService } from '../../services/auth-admin.service';
   styleUrls: ['./user-groups-browser.component.css'],
 })
 export class UserGroupsBrowserComponent {
-  colPermLevel: BdDataColumn<UserGroupInfo> = {
+  private groupCols = inject(UserGroupsColumnsService);
+  protected authAdmin = inject(AuthAdminService);
+  protected settings = inject(SettingsService);
+
+  private colPermLevel: BdDataColumn<UserGroupInfo> = {
     id: 'permLevel',
     name: 'Global Permission',
     data: (r) => getGlobalPermission(r.permissions),
     component: BdDataPermissionLevelCellComponent,
   };
 
-  colInact: BdDataColumn<UserGroupInfo> = {
+  private colInact: BdDataColumn<UserGroupInfo> = {
     id: 'inactive',
     name: 'Inact.',
     data: (r) => (r.inactive ? 'check_box' : 'check_box_outline_blank'),
@@ -31,18 +35,17 @@ export class UserGroupsBrowserComponent {
     width: '40px',
   };
 
-  /* template */ columns: BdDataColumn<UserGroupInfo>[] = [
+  protected columns: BdDataColumn<UserGroupInfo>[] = [
     this.colInact,
     ...this.groupCols.defaultColumns,
     this.colPermLevel,
   ];
 
-  /* template */ loading$ = combineLatest([
-    this.settings.loading$,
-    this.authAdmin.loadingUsers$,
-  ]).pipe(map(([s, a]) => s || a));
+  protected loading$ = combineLatest([this.settings.loading$, this.authAdmin.loadingUsers$]).pipe(
+    map(([s, a]) => s || a)
+  );
 
-  /* template */ getRecordRoute = (row: UserGroupInfo) => {
+  protected getRecordRoute = (row: UserGroupInfo) => {
     return [
       '',
       {
@@ -51,13 +54,6 @@ export class UserGroupsBrowserComponent {
     ];
   };
 
-  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
-
-  /* template */ grouping: BdDataGroupingDefinition<UserGroupInfo>[] = [];
-
-  constructor(
-    public authAdmin: AuthAdminService,
-    public settings: SettingsService,
-    private groupCols: UserGroupsColumnsService
-  ) {}
+  protected sort: Sort = { active: 'name', direction: 'asc' };
+  protected grouping: BdDataGroupingDefinition<UserGroupInfo>[] = [];
 }

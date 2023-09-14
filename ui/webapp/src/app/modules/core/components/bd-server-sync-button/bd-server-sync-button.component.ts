@@ -45,10 +45,10 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     this.hostName$.pipe(distinctUntilChanged())
   );
 
-  /* template */ sync$ = new BehaviorSubject<boolean>(false);
-  /* template */ tooltip$ = new BehaviorSubject<string>(null);
-  /* template */ badge$ = new BehaviorSubject<number>(null);
-  /* template */ noPerm$ = new BehaviorSubject<boolean>(false);
+  protected sync$ = new BehaviorSubject<boolean>(false);
+  protected tooltip$ = new BehaviorSubject<string>(null);
+  protected badge$ = new BehaviorSubject<number>(null);
+  protected noPerm$ = new BehaviorSubject<boolean>(false);
 
   private interval;
   private sub: Subscription;
@@ -68,7 +68,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.interval);
-    this.sub.unsubscribe();
+    this.sub?.unsubscribe();
   }
 
   updateSyncState() {
@@ -82,7 +82,7 @@ export class BdServerSyncButtonComponent implements OnInit, OnDestroy {
     }
   }
 
-  /* template */ doSynchronize(server: ManagedMasterDto) {
+  protected doSynchronize(server: ManagedMasterDto) {
     this.synchronizing$.next(true);
     this.servers
       .synchronize(server)

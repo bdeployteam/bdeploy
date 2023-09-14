@@ -1,12 +1,9 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { combineLatest, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Subscription, combineLatest } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import {
-  Edit,
-  InstanceEditService,
-} from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { Edit, InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 interface InstanceEditRow {
   edit: Edit;
@@ -43,24 +40,17 @@ const redoColumn: BdDataColumn<InstanceEditRow> = {
   templateUrl: './local-changes.component.html',
 })
 export class LocalChangesComponent implements OnInit, OnDestroy {
-  /* template */ records: InstanceEditRow[] = [];
-  /* template */ columns: BdDataColumn<InstanceEditRow>[] = [
-    descColumn,
-    currentColumn,
-    redoColumn,
-  ];
+  protected edit = inject(InstanceEditService);
+
+  protected records: InstanceEditRow[] = [];
+  protected columns: BdDataColumn<InstanceEditRow>[] = [descColumn, currentColumn, redoColumn];
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   private subscription: Subscription;
 
-  constructor(public edit: InstanceEditService) {}
-
   ngOnInit(): void {
-    this.subscription = combineLatest([
-      this.edit.undo$,
-      this.edit.redo$,
-    ]).subscribe(() => {
+    this.subscription = combineLatest([this.edit.undo$, this.edit.redo$]).subscribe(() => {
       const recs: InstanceEditRow[] = [];
       // fetch the whole list and build data for the table.
       for (const undo of this.edit.undos) {
@@ -80,10 +70,10 @@ export class LocalChangesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ doDiscard() {
+  protected doDiscard() {
     this.dialog
       .confirm(
         `Discard unsaved changes?`,

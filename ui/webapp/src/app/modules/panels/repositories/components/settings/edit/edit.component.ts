@@ -1,5 +1,4 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
@@ -16,25 +15,21 @@ import { RepositoryDetailsService } from '../../../services/repository-details.s
   templateUrl: './edit.component.html',
 })
 export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ repository: SoftwareRepositoryConfiguration;
-  /* template */ origRepository: SoftwareRepositoryConfiguration;
-  /* template */ disableSave: boolean;
+  private areas = inject(NavAreasService);
+  protected repositories = inject(RepositoriesService);
+  protected details = inject(RepositoryDetailsService);
+
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected repository: SoftwareRepositoryConfiguration;
+  protected origRepository: SoftwareRepositoryConfiguration;
+  protected disableSave: boolean;
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
-  constructor(
-    public repositories: RepositoriesService,
-    public details: RepositoryDetailsService,
-    private http: HttpClient,
-    areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.repositories.current$.subscribe((r) => {
       if (!r) {
         this.repository = null;
@@ -46,14 +41,14 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     return isDirty(this.repository, this.origRepository);
   }
 
-  /* template */ onSave(): void {
+  protected onSave(): void {
     this.saving$.next(true);
     this.doSave().subscribe({
       next: () => {
@@ -63,7 +58,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     });
   }
 
-  /* template */ public doSave(): Observable<any> {
+  public doSave(): Observable<any> {
     return this.details.update(this.repository);
   }
 
@@ -73,7 +68,7 @@ export class EditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.tb.closePanel();
   }
 
-  /* template */ onChange() {
+  protected onChange() {
     this.disableSave = this.isDirty();
   }
 }

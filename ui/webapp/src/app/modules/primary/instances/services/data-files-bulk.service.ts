@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
@@ -13,6 +14,14 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class DataFilesBulkService {
+  private areas = inject(NavAreasService);
+  private cfg = inject(ConfigService);
+  private groups = inject(GroupsService);
+  private instances = inject(InstancesService);
+  private downloads = inject(DownloadService);
+  private http = inject(HttpClient);
+  private dataFilesService = inject(DataFilesService);
+
   public selection: {
     directory: RemoteDirectory;
     entry: RemoteDirectoryEntry;
@@ -21,37 +30,18 @@ export class DataFilesBulkService {
 
   private apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
 
-  constructor(
-    areas: NavAreasService,
-    private cfg: ConfigService,
-    private groups: GroupsService,
-    private instances: InstancesService,
-    private downloads: DownloadService,
-    private http: HttpClient,
-    private dataFilesService: DataFilesService
-  ) {
+  constructor() {
     // clear selection when the primary route changes
-    areas.primaryRoute$.subscribe(() => (this.selection = []));
+    this.areas.primaryRoute$.subscribe(() => (this.selection = []));
   }
 
-  async deleteFiles(): Promise<any> {
-    return Promise.all(
-      this.selection.map(
-        (file) =>
-          new Promise((resolve) =>
-            this.dataFilesService
-              .deleteFile(file.directory, file.entry)
-              .subscribe((data) => resolve(data))
-          )
-      )
-    ).then((data: any) => data);
+  public deleteFiles(): Observable<any> {
+    // FIXME: issue only a single call, not multiple!
+    return of(...this.selection).pipe(mergeMap((file) => this.dataFilesService.deleteFile(file.directory, file.entry)));
   }
 
   public downloadDataFile() {
-    const path = this.apiPath(
-      this.groups.current$.value.name,
-      this.instances.current$.value.instanceConfiguration.id
-    );
+    const path = this.apiPath(this.groups.current$.value.name, this.instances.current$.value.instanceConfiguration.id);
 
     const minion = this.selection[0]?.directory?.minion;
     const entries: RemoteDirectoryEntry[] = [];

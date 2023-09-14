@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
@@ -13,6 +12,9 @@ import { AttributeEditActionComponent } from './attribute-edit-action/attribute-
   templateUrl: './attributes-tab.component.html',
 })
 export class AttributesTabComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  protected settings = inject(SettingsService);
+
   private defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'id',
     name: 'ID',
@@ -42,29 +44,22 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
     action: (r) => this.settings.removeAttribute(r),
     icon: () => 'delete',
     width: '40px',
-    actionDisabled: (r) => this.disableDelete(r),
+    actionDisabled: (r) => this.selectedAttributeName === r.name,
   };
 
-  /* template */ attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [
+  protected attributeColumns: BdDataColumn<CustomAttributeDescriptor>[] = [
     this.defIdCol,
     this.defDescCol,
     this.defEditCol,
     this.defDelCol,
   ];
-  /* template */ tempAttribute: CustomAttributeDescriptor;
-  /* template */ tempUsedIds: string[];
+  protected tempAttribute: CustomAttributeDescriptor;
+  protected tempUsedIds: string[];
   private selectedAttributeName: string;
 
   private subscription: Subscription;
 
-  @ViewChild(BdDataTableComponent)
-  private table: BdDataTableComponent<CustomAttributeDescriptor>;
-
-  constructor(
-    private router: Router,
-    public settings: SettingsService,
-    private areas: NavAreasService
-  ) {}
+  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<CustomAttributeDescriptor>;
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
@@ -74,16 +69,10 @@ export class AttributesTabComponent implements OnInit, OnDestroy {
       }
       this.selectedAttributeName = route.params['attribute'];
     });
-    this.subscription.add(
-      this.settings.settingsUpdated$.subscribe(() => this.table?.update())
-    );
-  }
-
-  disableDelete(r) {
-    return this.selectedAttributeName === r.name;
+    this.subscription.add(this.settings.settingsUpdated$.subscribe(() => this.table?.update()));
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 }

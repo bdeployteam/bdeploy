@@ -21,13 +21,13 @@ export class BdFileUploadComponent implements OnInit {
 
   private uploads = inject(UploadService);
 
-  /* template */ status: UploadStatus;
-  /* template */ finished$ = new BehaviorSubject<boolean>(false);
-  /* template */ failed$ = new BehaviorSubject<boolean>(false);
-  /* template */ uploading$ = new BehaviorSubject<boolean>(false);
-  /* template */ processing$ = new BehaviorSubject<boolean>(false);
-  /* template */ icon$ = new BehaviorSubject<string>(this.getIcon());
-  /* template */ header$ = new BehaviorSubject<string>(this.getHeader());
+  protected status: UploadStatus;
+  protected finished$ = new BehaviorSubject<boolean>(false);
+  protected failed$ = new BehaviorSubject<boolean>(false);
+  protected uploading$ = new BehaviorSubject<boolean>(false);
+  protected processing$ = new BehaviorSubject<boolean>(false);
+  protected icon$ = new BehaviorSubject<string>(this.getIcon());
+  protected header$ = new BehaviorSubject<string>(this.getHeader());
 
   ngOnInit(): void {
     this.status = this.uploads.uploadFile(this.url, this.file, this.parameters, this.formDataParam);
@@ -85,7 +85,7 @@ export class BdFileUploadComponent implements OnInit {
     }
   }
 
-  /* template */ onDismiss() {
+  protected onDismiss() {
     if (this.uploading$.value) {
       this.status.cancel();
     }

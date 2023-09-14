@@ -1,44 +1,36 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import { BdDataTableComponent } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { PortsColumnsService } from 'src/app/modules/primary/instances/services/ports-columns.service';
-import {
-  NodeApplicationPort,
-  PortsService,
-} from 'src/app/modules/primary/instances/services/ports.service';
+import { NodeApplicationPort, PortsService } from 'src/app/modules/primary/instances/services/ports.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
 
 @Component({
   selector: 'app-process-ports',
   templateUrl: './process-ports.component.html',
 })
-export class ProcessPortsComponent implements OnDestroy {
-  /* template */ ports$ = new BehaviorSubject<NodeApplicationPort[]>(null);
+export class ProcessPortsComponent implements OnInit, OnDestroy {
+  private ports = inject(PortsService);
+  protected details = inject(ProcessDetailsService);
+  protected columns = inject(PortsColumnsService);
 
-  @ViewChild(BdDataTableComponent)
-  table: BdDataTableComponent<NodeApplicationPort>;
+  protected ports$ = new BehaviorSubject<NodeApplicationPort[]>(null);
 
   private subscription: Subscription;
 
-  constructor(
-    ports: PortsService,
-    public details: ProcessDetailsService,
-    public columns: PortsColumnsService
-  ) {
-    this.subscription = combineLatest([
-      ports.activePortStates$,
-      details.processConfig$,
-    ]).subscribe(([states, config]) => {
-      if (!states || !config) {
-        this.ports$.next(null);
-        return;
-      }
+  ngOnInit() {
+    this.subscription = combineLatest([this.ports.activePortStates$, this.details.processConfig$]).subscribe(
+      ([states, config]) => {
+        if (!states || !config) {
+          this.ports$.next(null);
+          return;
+        }
 
-      this.ports$.next(states.filter((s) => s.appId === config.id));
-    });
+        this.ports$.next(states.filter((s) => s.appId === config.id));
+      }
+    );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 }

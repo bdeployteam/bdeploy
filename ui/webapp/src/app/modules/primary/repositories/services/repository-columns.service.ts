@@ -1,42 +1,38 @@
 import { Injectable } from '@angular/core';
-import {
-  BdDataColumn,
-  BdDataColumnDisplay,
-  BdDataColumnTypeHint,
-} from 'src/app/models/data';
-import { RepositoryService } from './repository.service';
+import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
+import { ProdDtoWithType, SwPkgCompound } from './repository.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RepositoryColumnsService {
-  nameColumn: BdDataColumn<any> = {
+  private nameColumn: BdDataColumn<SwPkgCompound> = {
     id: 'name',
     name: 'Name',
     data: (r) => r.key.name,
     isId: true,
   };
 
-  productNameColumn: BdDataColumn<any> = {
+  private productNameColumn: BdDataColumn<ProdDtoWithType> = {
     id: 'productName',
     name: 'Product Name',
     data: (r) => r.name,
   };
 
-  versionColumn: BdDataColumn<any> = {
+  private versionColumn: BdDataColumn<SwPkgCompound> = {
     id: 'version',
     name: 'Version',
     data: (r) => r.key.tag,
     isId: true,
   };
 
-  productVendorColumn: BdDataColumn<any> = {
+  private productVendorColumn: BdDataColumn<ProdDtoWithType> = {
     id: 'vendor',
     name: 'Vendor',
     data: (r) => r.vendor,
   };
 
-  cardTitle: BdDataColumn<any> = {
+  private cardTitle: BdDataColumn<ProdDtoWithType> = {
     id: 'cardTitle',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -44,7 +40,7 @@ export class RepositoryColumnsService {
     data: (r) => (r.type === 'Product' ? r.name : r.key.name),
   };
 
-  cardDescription: BdDataColumn<any> = {
+  private cardDescription: BdDataColumn<ProdDtoWithType> = {
     id: 'cardDescription',
     name: 'Description',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -52,7 +48,7 @@ export class RepositoryColumnsService {
     data: (r) => (r.type === 'Product' ? r.key.name + ' ' : '') + r.key.tag,
   };
 
-  cardLogo: BdDataColumn<any> = {
+  private cardLogo: BdDataColumn<ProdDtoWithType> = {
     id: 'cardLogo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -60,7 +56,7 @@ export class RepositoryColumnsService {
     data: () => '/assets/no-image.svg',
   };
 
-  cardVendor: BdDataColumn<any> = {
+  private cardVendor: BdDataColumn<ProdDtoWithType> = {
     id: 'cardvendor',
     name: 'Vendor',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -68,7 +64,7 @@ export class RepositoryColumnsService {
     data: () => '-',
   };
 
-  defaultRepositoryColumns: BdDataColumn<any>[] = [
+  public defaultRepositoryColumns: BdDataColumn<SwPkgCompound>[] = [
     this.nameColumn,
     this.productNameColumn,
     this.versionColumn,
@@ -78,6 +74,4 @@ export class RepositoryColumnsService {
     this.cardLogo,
     this.cardVendor,
   ];
-
-  constructor(private repository: RepositoryService) {}
 }

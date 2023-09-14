@@ -1,13 +1,6 @@
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, HostBinding, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, HostBinding, OnInit, inject } from '@angular/core';
 import { routerAnimation } from '../../animations/special';
 import { NavAreasService } from '../../services/nav-areas.service';
 
@@ -33,10 +26,10 @@ import { NavAreasService } from '../../services/nav-areas.service';
   ],
 })
 export class MainNavFlyinComponent implements OnInit {
-  constructor(
-    private areas: NavAreasService,
-    private media: BreakpointObserver
-  ) {}
+  private areas = inject(NavAreasService);
+  private media = inject(BreakpointObserver);
+
+  protected panelContent = '';
 
   @HostBinding('attr.data-cy')
   @HostBinding('@openClose')
@@ -58,11 +51,8 @@ export class MainNavFlyinComponent implements OnInit {
     return large ? 'max-lg' : 'max-sm';
   }
 
-  panelContent = '';
-  subscription: Subscription;
-
   ngOnInit(): void {
-    this.subscription = this.areas.panelRoute$.subscribe((route) => {
+    this.areas.panelRoute$.subscribe((route) => {
       if (!route) {
         this.panelContent = '';
       } else {

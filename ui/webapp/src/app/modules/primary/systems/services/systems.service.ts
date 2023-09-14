@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import {
   ObjectChangeType,
   SystemConfigurationDto,
@@ -16,18 +16,18 @@ import { GroupsService } from '../../groups/services/groups.service';
   providedIn: 'root',
 })
 export class SystemsService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private groups = inject(GroupsService);
+
   public systems$ = new BehaviorSubject<SystemConfigurationDto[]>([]);
   public loading$ = new BehaviorSubject<boolean>(true);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/system`;
   private subscription: Subscription;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private groups: GroupsService
-  ) {
+  constructor() {
     this.groups.current$.subscribe((g) => {
       this.updateChangeSubscription(g?.name);
 
@@ -57,41 +57,28 @@ export class SystemsService {
     return this.apiPath(this.groups.current$.value?.name);
   }
 
-  public apply(
-    request: SystemTemplateRequestDto
-  ): Observable<SystemTemplateResultDto> {
-    return this.http.post<SystemTemplateResultDto>(
-      `${this.apiPath(this.groups.current$.value?.name)}/apply`,
-      request
-    );
+  public apply(request: SystemTemplateRequestDto): Observable<SystemTemplateResultDto> {
+    return this.http.post<SystemTemplateResultDto>(`${this.apiPath(this.groups.current$.value?.name)}/apply`, request);
   }
 
   private load(group: string): Observable<SystemConfigurationDto[]> {
     this.loading$.next(true);
-    return this.http
-      .get<SystemConfigurationDto[]>(`${this.apiPath(group)}`)
-      .pipe(
-        finalize(() => this.loading$.next(false)),
-        measure(`Systems of ${group}`)
-      );
+    return this.http.get<SystemConfigurationDto[]>(`${this.apiPath(group)}`).pipe(
+      finalize(() => this.loading$.next(false)),
+      measure(`Systems of ${group}`)
+    );
   }
 
   private updateChangeSubscription(group: string) {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = null;
-    }
+    this.subscription?.unsubscribe();
+    this.subscription = null;
 
     if (group) {
-      this.subscription = this.changes.subscribe(
-        ObjectChangeType.SYSTEM,
-        { scope: [group] },
-        () => {
-          this.load(group).subscribe((systems) => {
-            this.systems$.next(systems);
-          });
-        }
-      );
+      this.subscription = this.changes.subscribe(ObjectChangeType.SYSTEM, { scope: [group] }, () => {
+        this.load(group).subscribe((systems) => {
+          this.systems$.next(systems);
+        });
+      });
     }
   }
 }

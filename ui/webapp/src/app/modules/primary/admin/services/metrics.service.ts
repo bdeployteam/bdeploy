@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { JerseyServerMonitoringDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
@@ -8,7 +8,8 @@ import { ConfigService } from '../../../core/services/config.service';
   providedIn: 'root',
 })
 export class MetricsService {
-  constructor(private http: HttpClient, private config: ConfigService) {}
+  private http = inject(HttpClient);
+  private config = inject(ConfigService);
 
   public getAllMetrics(): Observable<any> {
     return this.http.get<any>(this.config.config.api + '/metrics');

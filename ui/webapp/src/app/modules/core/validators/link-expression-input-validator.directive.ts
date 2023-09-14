@@ -1,20 +1,12 @@
 import { Directive, Input } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
   ApplicationConfiguration,
   InstanceConfigurationDto,
   ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
-import {
-  createLinkedValue,
-  getRenderPreview,
-} from 'src/app/modules/core/utils/linked-values.utils';
+import { createLinkedValue, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import {
   BdValidationMessageExtractor,
   bdValidationRegisterMessageExtractor,
@@ -30,17 +22,12 @@ import {
     },
   ],
 })
-export class LinkExpressionInputValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class LinkExpressionInputValidatorDirective implements Validator, BdValidationMessageExtractor {
   public readonly id = 'link-expression-input';
 
   @Input('appLinkExpressionInputValidator') isLink: boolean;
-
-  @Input('appLinkExpressionInputValidatorProcess')
-  process: ApplicationConfiguration;
-  @Input('appLinkExpressionInputValidatorInstance')
-  instance: InstanceConfigurationDto;
+  @Input('appLinkExpressionInputValidatorProcess') process: ApplicationConfiguration;
+  @Input('appLinkExpressionInputValidatorInstance') instance: InstanceConfigurationDto;
   @Input('appLinkExpressionInputValidatorSystem') system: SystemConfiguration;
   @Input('appLinkExpressionInputValidatorType') type: ParameterType;
 
@@ -48,13 +35,13 @@ export class LinkExpressionInputValidatorDirective
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value as string;
     if (!value?.length) {
       return null; // "required" must be validated elsewhere.
@@ -67,7 +54,7 @@ export class LinkExpressionInputValidatorDirective
     }
   }
 
-  validateLink(value: string): ValidationErrors | null {
+  private validateLink(value: string): ValidationErrors | null {
     const errors = {};
 
     if (value?.indexOf('{{') < 0) {
@@ -75,40 +62,24 @@ export class LinkExpressionInputValidatorDirective
       return errors;
     }
 
-    if (
-      (value?.match(/{{/g) || []).length !== (value?.match(/}}/g) || []).length
-    ) {
-      errors[this.id] =
-        "Link expression should contain equal number of '{{' and '}}'.";
+    if ((value?.match(/{{/g) || []).length !== (value?.match(/}}/g) || []).length) {
+      errors[this.id] = "Link expression should contain equal number of '{{' and '}}'.";
       return errors;
     }
 
-    const expanded = getRenderPreview(
-      createLinkedValue(value),
-      this.process,
-      this.instance,
-      this.system
-    );
+    const expanded = getRenderPreview(createLinkedValue(value), this.process, this.instance, this.system);
 
     const unresolved = expanded.match(/{{([^}]+)}}/g);
     if (unresolved) {
-      errors[
-        this.id
-      ] = `Link expression contains unresolvable expressions: ${unresolved.join(
-        ', '
-      )}`;
+      errors[this.id] = `Link expression contains unresolvable expressions: ${unresolved.join(', ')}`;
       return errors;
     }
 
     const type = this.type || ParameterType.STRING;
     switch (type) {
       case ParameterType.BOOLEAN:
-        if (
-          expanded?.toLowerCase() !== 'true' &&
-          expanded?.toLowerCase() !== 'false'
-        ) {
-          errors[this.id] =
-            'Link expression does not expand to a boolean value.';
+        if (expanded?.toLowerCase() !== 'true' && expanded?.toLowerCase() !== 'false') {
+          errors[this.id] = 'Link expression does not expand to a boolean value.';
           return errors;
         }
         break;
@@ -116,8 +87,7 @@ export class LinkExpressionInputValidatorDirective
       case ParameterType.CLIENT_PORT:
       case ParameterType.SERVER_PORT:
         if (isNaN(Number(expanded))) {
-          errors[this.id] =
-            'Link expression does not expand to a numeric value.';
+          errors[this.id] = 'Link expression does not expand to a numeric value.';
           return errors;
         }
         break;
@@ -126,7 +96,7 @@ export class LinkExpressionInputValidatorDirective
     return errors;
   }
 
-  validatePlain(value: string): ValidationErrors | null {
+  private validatePlain(value: string): ValidationErrors | null {
     const errors = {};
 
     if (value?.indexOf('{{') > 0) {

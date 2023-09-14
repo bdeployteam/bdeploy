@@ -89,15 +89,11 @@ export class SoftwareDetailsComponent implements OnInit {
   protected auth = inject(AuthenticationService);
   protected actions = inject(ActionsService);
 
-  /* template */ labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
-  /* template */ appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = [appTemplateNameColumn];
-  /* template */ instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = [instTemplateNameColumn];
-  /* template */ pluginColumns: BdDataColumn<PluginInfoDto>[] = [
-    pluginNameColumn,
-    pluginVersionColumn,
-    pluginOIDColumn,
-  ];
-  /* template */ softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
+  protected labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
+  protected appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = [appTemplateNameColumn];
+  protected instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = [instTemplateNameColumn];
+  protected pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
+  protected softwareDetailsPlugins$: Observable<PluginInfoDto[]>;
 
   private p$ = this.detailsService.softwarePackage$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
 
@@ -133,7 +129,7 @@ export class SoftwareDetailsComponent implements OnInit {
     throw new Error('Ooops');
   }
 
-  /* template */ doDelete(software: any) {
+  protected doDelete(software: any) {
     this.dialog
       .confirm(`Delete ${software.key.tag}`, `Are you sure you want to delete version ${software.key.tag}?`, 'delete')
       .subscribe((r) => {
@@ -149,7 +145,7 @@ export class SoftwareDetailsComponent implements OnInit {
       });
   }
 
-  /* template */ doDownload(original: boolean) {
+  protected doDownload(original: boolean) {
     const preparing$ = original ? this.preparingC$ : this.preparingBHive$;
     preparing$.next(true);
     this.detailsService

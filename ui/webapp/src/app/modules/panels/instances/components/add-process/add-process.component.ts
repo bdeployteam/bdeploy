@@ -1,19 +1,5 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  TemplateRef,
-  ViewChild,
-  ViewEncapsulation,
-} from '@angular/core';
-import {
-  BehaviorSubject,
-  Observable,
-  Subscription,
-  combineLatest,
-  interval,
-  of,
-} from 'rxjs';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import { BehaviorSubject, Observable, Subscription, combineLatest, interval, of } from 'rxjs';
 import { distinctUntilChanged, finalize } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
@@ -27,11 +13,7 @@ import {
   OperatingSystem,
 } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import {
-  getAppKeyName,
-  getAppOs,
-  updateAppOs,
-} from 'src/app/modules/core/utils/manifest.utils';
+import { getAppKeyName, getAppOs, updateAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ProcessEditService } from '../../services/process-edit.service';
@@ -66,40 +48,33 @@ const colAppName: BdDataColumn<AppRow> = {
   encapsulation: ViewEncapsulation.None,
 })
 export class AddProcessComponent implements OnInit, OnDestroy {
+  private edit = inject(ProcessEditService);
+  protected instanceEdit = inject(InstanceEditService);
+  protected servers = inject(ServersService);
+
   private colAdd: BdDataColumn<AppRow> = {
     id: 'add',
     name: 'Add',
-    data: (r) =>
-      `Add ${
-        r.template ? 'template ' + r.template.name : r.app.appDisplayName
-      } to selected node.`,
+    data: (r) => `Add ${r.template ? 'template ' + r.template.name : r.app.appDisplayName} to selected node.`,
     icon: (r) => (r.template ? 'auto_fix_normal' : 'add'),
     action: (r) => this.addProcess(r),
     width: '42px',
   };
 
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ records$ = new BehaviorSubject<AppRow[]>([]);
-  /* template */ columns: BdDataColumn<AppRow>[] = [colAppName, this.colAdd];
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected records$ = new BehaviorSubject<AppRow[]>([]);
+  protected columns: BdDataColumn<AppRow>[] = [colAppName, this.colAdd];
 
-  /* template */ selectedTemplate: FlattenedApplicationTemplateConfiguration;
-  /* template */ response: { [key: string]: string };
+  protected selectedTemplate: FlattenedApplicationTemplateConfiguration;
+  protected response: { [key: string]: string };
 
-  /* template */ clipBoardCfg$ = new BehaviorSubject<ApplicationConfiguration>(
-    null
-  );
-  /* template */ clipBoardError$ = new BehaviorSubject<string>(null);
+  protected clipBoardCfg$ = new BehaviorSubject<ApplicationConfiguration>(null);
+  protected clipBoardError$ = new BehaviorSubject<string>(null);
 
   @ViewChild('varTemplate') template: TemplateRef<any>;
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
   private subscription: Subscription;
-
-  constructor(
-    private edit: ProcessEditService,
-    public instanceEdit: InstanceEditService,
-    public servers: ServersService
-  ) {}
 
   ngOnInit(): void {
     this.subscription = combineLatest([
@@ -173,28 +148,21 @@ export class AddProcessComponent implements OnInit, OnDestroy {
     });
 
     this.subscription.add(
-      combineLatest([
-        this.edit.node$.pipe(distinctUntilChanged()),
-        this.instanceEdit.nodes$,
-        interval(1000),
-      ]).subscribe(([node, nodeConfigs]) =>
-        this.readFromClipboard(node, nodeConfigs[node.nodeName])
+      combineLatest([this.edit.node$.pipe(distinctUntilChanged()), this.instanceEdit.nodes$, interval(1000)]).subscribe(
+        ([node, nodeConfigs]) => this.readFromClipboard(node, nodeConfigs[node.nodeName])
       )
     );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ doPaste(cfg: ApplicationConfiguration) {
+  protected doPaste(cfg: ApplicationConfiguration) {
     this.edit.addProcessPaste(cfg);
   }
 
-  private readFromClipboard(
-    node: InstanceNodeConfigurationDto,
-    minion: MinionDto
-  ) {
+  private readFromClipboard(node: InstanceNodeConfigurationDto, minion: MinionDto) {
     this.clipBoardError$.next(null);
 
     if (!navigator.clipboard.readText) {
@@ -217,17 +185,13 @@ export class AddProcessComponent implements OnInit, OnDestroy {
           // otherwise 'prompt' is open - not an error
           if (value.state === 'denied') {
             this.clipBoardCfg$.next(null);
-            this.clipBoardError$.next(
-              'No permission to read from the clipboard, pasting not possible.'
-            );
+            this.clipBoardError$.next('No permission to read from the clipboard, pasting not possible.');
           }
         }
       },
       (reason) => {
         this.clipBoardCfg$.next(null);
-        this.clipBoardError$.next(
-          `Cannot check clipboard permission (${reason}).`
-        );
+        this.clipBoardError$.next(`Cannot check clipboard permission (${reason}).`);
       }
     );
 
@@ -252,10 +216,8 @@ export class AddProcessComponent implements OnInit, OnDestroy {
             return; // app not found, product mismatch?
           }
           if (
-            (app.descriptor.type === ApplicationType.SERVER &&
-              this.isClientNode(node)) ||
-            (app.descriptor.type === ApplicationType.CLIENT &&
-              !this.isClientNode(node))
+            (app.descriptor.type === ApplicationType.SERVER && this.isClientNode(node)) ||
+            (app.descriptor.type === ApplicationType.CLIENT && !this.isClientNode(node))
           ) {
             return; // not an error, just not suitable to paste
           }
@@ -287,8 +249,7 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       vars = this.dialog.message({
         header: 'Assign Variable Values',
         template: this.template,
-        validation: () =>
-          this.validateHasAllVariables(row.template, this.response),
+        validation: () => this.validateHasAllVariables(row.template, this.response),
         actions: [
           { name: 'Cancel', confirm: false, result: null },
           { name: 'Confirm', confirm: true, result: this.response },
@@ -305,30 +266,18 @@ export class AddProcessComponent implements OnInit, OnDestroy {
       if (this.isClientNode(row.node)) {
         // multiple applications for the same ID for multiple OS'.
         for (const app of row.app.applications) {
-          allCreations.push(
-            this.edit.addProcess(row.node, app, row.template, v, [])
-          );
+          allCreations.push(this.edit.addProcess(row.node, app, row.template, v, []));
         }
       } else {
         // only one application may exist with the same ID.
-        allCreations.push(
-          this.edit.addProcess(
-            row.node,
-            row.app.applications[0],
-            row.template,
-            v,
-            []
-          )
-        );
+        allCreations.push(this.edit.addProcess(row.node, row.app.applications[0], row.template, v, []));
       }
 
       this.loading$.next(true);
       combineLatest(allCreations)
         .pipe(finalize(() => this.loading$.next(false)))
         .subscribe(() => {
-          this.instanceEdit.conceal(
-            'Add ' + (row.template ? row.template.name : row.app.appDisplayName)
-          );
+          this.instanceEdit.conceal('Add ' + (row.template ? row.template.name : row.app.appDisplayName));
         });
     });
   }

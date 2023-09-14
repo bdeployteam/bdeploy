@@ -9,17 +9,18 @@ import {
   Output,
   SimpleChanges,
   TemplateRef,
+  inject,
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   BdDataColumn,
   BdDataColumnDisplay,
+  BdDataGrouping,
+  UNMATCHED_GROUP,
   bdDataDefaultSearch,
   bdDataDefaultSort,
-  BdDataGrouping,
   bdExtractGroups,
-  UNMATCHED_GROUP,
 } from 'src/app/models/data';
 import { NavAreasService } from '../../services/nav-areas.service';
 import { BdSearchable, SearchService } from '../../services/search.service';
@@ -28,20 +29,18 @@ import { BdSearchable, SearchService } from '../../services/search.service';
   selector: 'app-bd-data-grid',
   templateUrl: './bd-data-grid.component.html',
 })
-export class BdDataGridComponent<T>
-  implements OnInit, OnDestroy, BdSearchable, OnChanges
-{
+export class BdDataGridComponent<T> implements OnInit, OnDestroy, BdSearchable, OnChanges {
+  private searchService = inject(SearchService);
+  protected areas = inject(NavAreasService);
+
   /**
    * The columns to display
    */
-  /* template */ _columns: BdDataColumn<T>[];
+  protected _columns: BdDataColumn<T>[];
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
-      (c) =>
-        !c.display ||
-        c.display === BdDataColumnDisplay.CARD ||
-        c.display === BdDataColumnDisplay.BOTH
+      (c) => !c.display || c.display === BdDataColumnDisplay.CARD || c.display === BdDataColumnDisplay.BOTH
     );
   }
 
@@ -50,11 +49,7 @@ export class BdDataGridComponent<T>
    * concatenate each value in each record object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (
-    search: string,
-    data: T[],
-    columns: BdDataColumn<T>[]
-  ) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-grid should register itself as a BdSearchable with the global SearchService.
@@ -73,11 +68,7 @@ export class BdDataGridComponent<T>
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (
-    data: T[],
-    column: BdDataColumn<T>,
-    direction: SortDirection
-  ) => T[] = bdDataDefaultSort;
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /**
    * Which column to sort cards by
@@ -129,11 +120,6 @@ export class BdDataGridComponent<T>
   @ContentChild('dataGridExtraCardDetails')
   dataGridExtraCardDetails: TemplateRef<any>;
 
-  constructor(
-    private searchService: SearchService,
-    public areas: NavAreasService
-  ) {}
-
   ngOnInit(): void {
     if (this.searchable) {
       // register this table as "searchable" in the global search service if requested.
@@ -150,36 +136,31 @@ export class BdDataGridComponent<T>
     }
   }
 
-  /* template */ onTabChange(event) {
+  protected onTabChange(event) {
     this.activeGroup = event.tab?.textLabel;
     this.calculateRecordsToDisplay();
   }
 
-  /* template */ onRecordClick(event: T) {
+  protected onRecordClick(event: T) {
     this.recordClick.emit(event);
 
     if (!this.checkMode) return;
 
     const isChecked = this.checked.some((record) => record === event);
 
-    const next = isChecked
-      ? this.checked.filter((record) => record !== event)
-      : [...this.checked, event];
+    const next = isChecked ? this.checked.filter((record) => record !== event) : [...this.checked, event];
 
     this.checkedChange.emit(next);
   }
 
-  /* template */ isSelected(record: T): boolean {
+  protected isSelected(record: T): boolean {
     return this.checkMode && this.checked.some((r) => r === record);
   }
 
   private populateRecords(): void {
     // populate records to display with empty search by default.
     if (this.grouping) {
-      this.groupValues = bdExtractGroups(
-        this.grouping.definition,
-        this.records
-      );
+      this.groupValues = bdExtractGroups(this.grouping.definition, this.records);
       this.activeGroup = this.groupValues[0];
     } else {
       this.activeGroup = null;
@@ -204,12 +185,7 @@ export class BdDataGridComponent<T>
   }
 
   private sortRecords(records: T[]): T[] {
-    if (
-      !this.sortData ||
-      !this.sort ||
-      !this.sort.active ||
-      !this.sort.direction
-    ) {
+    if (!this.sortData || !this.sort || !this.sort.active || !this.sort.direction) {
       return records;
     }
     const col = this._columns.find((c) => c.id === this.sort.active);
@@ -234,8 +210,6 @@ export class BdDataGridComponent<T>
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
   }
 }

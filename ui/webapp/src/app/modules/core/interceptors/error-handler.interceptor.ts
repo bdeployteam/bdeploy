@@ -1,11 +1,5 @@
-import {
-  HttpErrorResponse,
-  HttpEvent,
-  HttpHandler,
-  HttpInterceptor,
-  HttpRequest,
-} from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import * as he from 'he';
@@ -17,25 +11,17 @@ import { NavAreasService } from '../services/nav-areas.service';
 
 @Injectable()
 export class HttpErrorHandlerInterceptor implements HttpInterceptor {
-  constructor(
-    private config: ConfigService,
-    private snackbar: MatSnackBar,
-    private router: Router,
-    private areas: NavAreasService
-  ) {}
+  private config = inject(ConfigService);
+  private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
+  private areas = inject(NavAreasService);
 
-  intercept(
-    request: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let displayPath = '';
     let msg = '';
     return next.handle(request).pipe(
       catchError((e) => {
-        if (
-          e instanceof HttpErrorResponse &&
-          !request.headers.has(NO_ERROR_HANDLING_HDR)
-        ) {
+        if (e instanceof HttpErrorResponse && !request.headers.has(NO_ERROR_HANDLING_HDR)) {
           switch (e.status) {
             case 0:
               this.config.markServerOffline();
@@ -71,11 +57,9 @@ export class HttpErrorHandlerInterceptor implements HttpInterceptor {
                 // silent.
               }
               // response status texts are HTML encoded, so we need to decode that here manually.
-              this.snackbar.open(
-                e.status + ': ' + he.decode(e.statusText) + ': ' + displayPath,
-                'DISMISS',
-                { panelClass: 'error-snackbar' }
-              );
+              this.snackbar.open(e.status + ': ' + he.decode(e.statusText) + ': ' + displayPath, 'DISMISS', {
+                panelClass: 'error-snackbar',
+              });
               return throwError(() => e);
           }
         }

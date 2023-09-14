@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
 import { Actions, MinionStatusDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -10,7 +10,10 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
   selector: 'app-node-maintenance',
   templateUrl: './node-maintenance.component.html',
 })
-export class NodeMaintenanceComponent implements OnDestroy {
+export class NodeMaintenanceComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  protected nodesAdmin = inject(NodesAdminService);
+
   private repairing$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
   private actions = inject(ActionsService);
@@ -27,18 +30,18 @@ export class NodeMaintenanceComponent implements OnDestroy {
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(areas: NavAreasService, public nodesAdmin: NodesAdminService) {
-    this.subscription = combineLatest([areas.panelRoute$, nodesAdmin.nodes$]).subscribe(([route, nodes]) => {
+  ngOnInit() {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.nodesAdmin.nodes$]).subscribe(([route, nodes]) => {
       this.nodeName$.next(route?.params?.node);
       this.state = nodes?.find((n) => n.name === this.nodeName$.value)?.status;
     });
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ doRepairAndPrune() {
+  protected doRepairAndPrune() {
     this.dialog
       .confirm('Repair and Prune', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive')
       .subscribe((confirmed) => {

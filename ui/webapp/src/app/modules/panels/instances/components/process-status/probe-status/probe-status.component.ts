@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ProcessProbeResultDto } from 'src/app/models/gen.dtos';
 
@@ -8,24 +8,26 @@ import { ProcessProbeResultDto } from 'src/app/models/gen.dtos';
   templateUrl: './probe-status.component.html',
   styleUrls: ['./probe-status.component.css'],
 })
-export class ProbeStatusComponent implements OnChanges, OnDestroy {
+export class ProbeStatusComponent implements OnInit, OnChanges, OnDestroy {
+  private bop = inject(BreakpointObserver);
+
   @Input() probe: ProcessProbeResultDto;
 
-  /* template */ class: string;
-  /* template */ icon = 'help';
-  /* template */ content$ = new BehaviorSubject<string>(null);
-  /* template */ narrow$ = new BehaviorSubject<boolean>(false);
+  protected class: string;
+  protected icon = 'help';
+  protected content$ = new BehaviorSubject<string>(null);
+  protected narrow$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
 
-  constructor(bop: BreakpointObserver) {
-    this.subscription = bop.observe('(max-width: 800px)').subscribe((bs) => {
+  ngOnInit() {
+    this.subscription = this.bop.observe('(max-width: 800px)').subscribe((bs) => {
       this.narrow$.next(bs.matches);
     });
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   ngOnChanges(): void {

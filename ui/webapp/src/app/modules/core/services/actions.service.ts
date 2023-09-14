@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription, combineLatest, of, startWith } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skipWhile, take } from 'rxjs/operators';
@@ -22,23 +22,23 @@ import { EMPTY_SCOPE, ObjectChangesService } from './object-changes.service';
   providedIn: 'root',
 })
 export class ActionsService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private areas = inject(NavAreasService);
+  private changes = inject(ObjectChangesService);
+  private auth = inject(AuthenticationService);
+
   public actions$ = new BehaviorSubject<ActionBroadcastDto[]>(null);
 
   private apiPath = `${this.cfg.config.api}/actions`;
   private changesSubscription: Subscription;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private areas: NavAreasService,
-    changes: ObjectChangesService,
-    auth: AuthenticationService
-  ) {
+  constructor() {
     combineLatest([
-      areas.groupContext$,
-      areas.instanceContext$,
-      cfg.offline$.pipe(distinctUntilChanged()),
-      auth.getTokenSubject().pipe(distinctUntilChanged()),
+      this.areas.groupContext$,
+      this.areas.instanceContext$,
+      this.cfg.offline$.pipe(distinctUntilChanged()),
+      this.auth.getTokenSubject().pipe(distinctUntilChanged()),
     ])
       .pipe(debounceTime(500))
       .subscribe(([group, instance, offline]) => {
@@ -51,9 +51,7 @@ export class ActionsService {
           }
         }
 
-        if (this.changesSubscription) {
-          this.changesSubscription.unsubscribe();
-        }
+        this.changesSubscription?.unsubscribe();
 
         // when updating, we need to re-fetch the current state of actions.
         this.actions$.next(null);
@@ -73,14 +71,14 @@ export class ActionsService {
           this.actions$.next(r);
         });
 
-        if (!auth.isGlobalAdmin() && (scope.scope.length === 0 || auth.isCurrentScopeExclusiveReadClient())) {
+        if (!this.auth.isGlobalAdmin() && (scope.scope.length === 0 || this.auth.isCurrentScopeExclusiveReadClient())) {
           // in this case we would see *all* actions from *all* scopes. this is not only a performance
           // but also a permission-wise problem, as permissions are granted on group level (first level of scope).
           // global admins STILL want to see all actions, e.g. when performing maintenance on global scope.
           return;
         }
 
-        this.changesSubscription = changes.subscribe(ObjectChangeType.SERVER_ACTIONS, scope, (c) => {
+        this.changesSubscription = this.changes.subscribe(ObjectChangeType.SERVER_ACTIONS, scope, (c) => {
           this.actions$
             .pipe(
               skipWhile((a) => !a),

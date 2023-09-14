@@ -1,16 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { isEqual } from 'lodash-es';
-import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
-import {
-  debounceTime,
-  finalize,
-  first,
-  skipWhile,
-  switchMap,
-} from 'rxjs/operators';
+import { BehaviorSubject, Observable, forkJoin } from 'rxjs';
+import { debounceTime, finalize, first, skipWhile, switchMap } from 'rxjs/operators';
 import {
   CustomAttributeDescriptor,
   CustomAttributesRecord,
@@ -28,10 +22,7 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
-import {
-  EMPTY_SCOPE,
-  ObjectChangesService,
-} from '../../../core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from '../../../core/services/object-changes.service';
 import { SettingsService } from '../../../core/services/settings.service';
 
 const INIT_GROUPS = [];
@@ -40,64 +31,53 @@ const INIT_GROUPS = [];
   providedIn: 'root',
 })
 export class GroupsService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private areas = inject(NavAreasService);
+  private settings = inject(SettingsService);
+  private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
+  private auth = inject(AuthenticationService);
+
   private apiPath = `${this.cfg.config.api}/group`;
   private update$ = new BehaviorSubject<ObjectChangeDto>(null);
 
-  loading$ = new BehaviorSubject<boolean>(true);
+  public loading$ = new BehaviorSubject<boolean>(true);
 
   /** All instance groups */
-  groups$ = new BehaviorSubject<InstanceGroupConfigurationDto[]>(INIT_GROUPS);
+  public groups$ = new BehaviorSubject<InstanceGroupConfigurationDto[]>(INIT_GROUPS);
 
   /** The "current" group based on the current route context */
-  current$ = new BehaviorSubject<InstanceGroupConfiguration>(null);
+  public current$ = new BehaviorSubject<InstanceGroupConfiguration>(null);
 
   /** The "current" group's attribute values */
-  currentAttributeValues$ = new BehaviorSubject<CustomAttributesRecord>(null);
+  public currentAttributeValues$ = new BehaviorSubject<CustomAttributesRecord>(null);
 
   /** All *global* attribute definitions */
-  attributeDefinitions$ = new BehaviorSubject<CustomAttributeDescriptor[]>([]);
+  public attributeDefinitions$ = new BehaviorSubject<CustomAttributeDescriptor[]>([]);
 
   /** All attribute values for all groups */
-  attributeValues$ = new BehaviorSubject<{
+  public attributeValues$ = new BehaviorSubject<{
     [index: string]: CustomAttributesRecord;
   }>({});
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private areas: NavAreasService,
-    private settings: SettingsService,
-    private snackbar: MatSnackBar,
-    private router: Router,
-    private auth: AuthenticationService
-  ) {
+  constructor() {
     this.areas.groupContext$.subscribe((r) => this.setCurrent(r));
-    this.update$
-      .pipe(debounceTime(100))
-      .subscribe((change) => this.onGroupsChanged(change));
-    this.changes.subscribe(
-      ObjectChangeType.INSTANCE_GROUP,
-      EMPTY_SCOPE,
-      (change) => {
-        if (
-          change.details[ObjectChangeDetails.CHANGE_HINT] ===
-          ObjectChangeHint.SERVERS
-        ) {
-          // ignore changes in managed servers, those as handled in ServersService.
-          return;
-        }
-        this.update$.next(change);
+    this.update$.pipe(debounceTime(100)).subscribe((change) => this.onGroupsChanged(change));
+    this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, EMPTY_SCOPE, (change) => {
+      if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.SERVERS) {
+        // ignore changes in managed servers, those as handled in ServersService.
+        return;
       }
-    );
+      this.update$.next(change);
+    });
   }
 
   private onGroupsChanged(change: ObjectChangeDto) {
     const scopeLength = change?.scope?.scope.length;
     if (!!change && scopeLength !== 1) {
-      console.warn(
-        `Unexpected instance group change scope length: ${scopeLength}. Reloading.`
-      );
+      console.warn(`Unexpected instance group change scope length: ${scopeLength}. Reloading.`);
       this.reload();
       return;
     }
@@ -127,25 +107,15 @@ export class GroupsService {
   private onGroupUpdatedInternal(groupName: string) {
     this.loading$.next(true);
     forkJoin({
-      group: this.http.get<InstanceGroupConfigurationDto>(
-        `${this.apiPath}/${groupName}`
-      ),
-      attribute: this.http.get<CustomAttributesRecord>(
-        `${this.apiPath}/${groupName}/attributes`
-      ),
+      group: this.http.get<InstanceGroupConfigurationDto>(`${this.apiPath}/${groupName}`),
+      attribute: this.http.get<CustomAttributesRecord>(`${this.apiPath}/${groupName}/attributes`),
     })
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe(({ group, attribute }) => {
-        const oldGroup = this.groups$.value.find(
-          (g) => g.instanceGroupConfiguration.name === groupName
-        );
+        const oldGroup = this.groups$.value.find((g) => g.instanceGroupConfiguration.name === groupName);
         const groups = this.groups$.value.filter((g) => g !== oldGroup);
         groups.push(group);
-        groups.sort((a, b) =>
-          a.instanceGroupConfiguration.name.localeCompare(
-            b.instanceGroupConfiguration.name
-          )
-        );
+        groups.sort((a, b) => a.instanceGroupConfiguration.name.localeCompare(b.instanceGroupConfiguration.name));
         this.groups$.next(groups);
 
         const attr = this.attributeValues$.value;
@@ -160,9 +130,7 @@ export class GroupsService {
   }
 
   private onGroupDeleted(groupName: string) {
-    const groups = this.groups$.value.filter(
-      (g) => g.instanceGroupConfiguration.name !== groupName
-    );
+    const groups = this.groups$.value.filter((g) => g.instanceGroupConfiguration.name !== groupName);
     this.groups$.next(groups);
 
     const attr = this.attributeValues$.value;
@@ -208,24 +176,15 @@ export class GroupsService {
     return this.http.delete<Response>(`${this.apiPath}/${group}/image`);
   }
 
-  public updatePreset(
-    group: string,
-    preset: CustomDataGrouping[],
-    multiple: boolean
-  ): Observable<any> {
-    return this.http.put<any>(
-      `${this.apiPath}/${group}/presets?multiple=${multiple}`,
-      preset
-    );
+  public updatePreset(group: string, preset: CustomDataGrouping[], multiple: boolean): Observable<any> {
+    return this.http.put<any>(`${this.apiPath}/${group}/presets?multiple=${multiple}`, preset);
   }
 
   private reload() {
     this.loading$.next(true);
     forkJoin({
       groups: this.http.get<InstanceGroupConfigurationDto[]>(this.apiPath),
-      attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(
-        `${this.apiPath}/list-attributes`
-      ),
+      attributes: this.http.get<{ [index: string]: CustomAttributesRecord }>(`${this.apiPath}/list-attributes`),
     })
       .pipe(
         finalize(() => this.loading$.next(false)),
@@ -255,9 +214,7 @@ export class GroupsService {
 
     const groups = this.groups$.value;
     const current = this.current$.value;
-    const updated = groups
-      .map((dto) => dto.instanceGroupConfiguration)
-      .find((g) => g.name === group);
+    const updated = groups.map((dto) => dto.instanceGroupConfiguration).find((g) => g.name === group);
 
     const notFound = !!group && !updated && groups !== INIT_GROUPS;
     if (notFound) {

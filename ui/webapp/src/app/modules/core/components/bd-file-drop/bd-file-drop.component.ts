@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -30,8 +22,8 @@ export class BdFileDropComponent {
 
   @ViewChild('file', { static: true }) private fileRef: ElementRef;
 
-  /* template */ active = false;
-  /* template */ validationError$ = new BehaviorSubject<boolean>(false);
+  protected active = false;
+  protected validationError$ = new BehaviorSubject<boolean>(false);
 
   doSelectFiles() {
     this.fileRef.nativeElement.click();

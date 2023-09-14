@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, TemplateRef } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, TemplateRef, inject } from '@angular/core';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { delayedFadeIn } from '../../animations/fades';
@@ -99,7 +99,9 @@ export const ACTION_NO: BdDialogMessageAction<boolean> = {
   templateUrl: './bd-dialog-message.component.html',
   animations: [delayedFadeIn],
 })
-export class BdDialogMessageComponent implements OnDestroy {
+export class BdDialogMessageComponent implements OnInit, OnDestroy {
+  private popupService = inject(PopupService);
+
   public message$ = new BehaviorSubject<BdDialogMessage<any>>(null);
   public result$ = new Subject<any>();
   public confirmed$ = new BehaviorSubject<boolean>(true);
@@ -120,15 +122,13 @@ export class BdDialogMessageComponent implements OnDestroy {
     return this._userConfirmation;
   }
 
-  constructor(private popupService: PopupService) {
+  ngOnInit(): void {
     // reset confirmation state whenever a new message arrives which requires confirmation.
-    this.subscription = this.message$
-      .pipe(filter((v) => !!v))
-      .subscribe((r) => this.confirmed$.next(!r.confirmation));
+    this.subscription = this.message$.pipe(filter((v) => !!v)).subscribe((r) => this.confirmed$.next(!r.confirmation));
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public reset(): void {
@@ -169,7 +169,7 @@ export class BdDialogMessageComponent implements OnDestroy {
     this._userConfirmation = '';
   }
 
-  /* template */ onConfirmationUpdate(value) {
+  protected onConfirmationUpdate(value) {
     if (this.message$.value.confirmation === value) {
       this.confirmed$.next(true);
     }

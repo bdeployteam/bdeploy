@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 import { InstancesService } from '../../../services/instances.service';
@@ -10,15 +10,13 @@ import { ProcessesService } from '../../../services/processes.service';
   styleUrls: ['./process-outdated.component.css'],
 })
 export class ProcessOutdatedComponent implements OnInit {
+  private processes = inject(ProcessesService);
+  private instances = inject(InstancesService);
+
   @Input() record: ApplicationConfiguration;
 
-  /* template */ running$ = new BehaviorSubject<boolean>(false);
-  /* template */ outdated$ = new BehaviorSubject<boolean>(false);
-
-  constructor(
-    private processes: ProcessesService,
-    private instances: InstancesService
-  ) {}
+  protected running$ = new BehaviorSubject<boolean>(false);
+  protected outdated$ = new BehaviorSubject<boolean>(false);
 
   ngOnInit(): void {
     this.processes.processStates$.subscribe((s) => {
@@ -30,10 +28,7 @@ export class ProcessOutdatedComponent implements OnInit {
       } else {
         const isRunning = ProcessesService.isRunning(status.processState);
         this.running$.next(isRunning);
-        this.outdated$.next(
-          isRunning &&
-            status.instanceTag !== this.instances.active$.value?.instance?.tag
-        );
+        this.outdated$.next(isRunning && status.instanceTag !== this.instances.active$.value?.instance?.tag);
       }
     });
   }

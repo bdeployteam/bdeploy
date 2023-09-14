@@ -1,21 +1,8 @@
-import { Component, NgZone, OnDestroy } from '@angular/core';
-import {
-  BehaviorSubject,
-  Subject,
-  Subscription,
-  combineLatest,
-  delay,
-  of,
-  skipWhile,
-  switchMap,
-} from 'rxjs';
+import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Subject, Subscription, combineLatest, delay, of, skipWhile, switchMap } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  isArchived,
-  isOversized,
-  unwrap,
-} from 'src/app/modules/core/utils/file-viewer.utils';
+import { isArchived, isOversized, unwrap } from 'src/app/modules/core/utils/file-viewer.utils';
 import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logging-admin.service';
 
 const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
@@ -24,25 +11,22 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
   selector: 'app-log-file-viewer',
   templateUrl: './log-file-viewer.component.html',
 })
-export class LogFileViewerComponent implements OnDestroy {
-  /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
-  /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
-  /* template */ content$ = new Subject<string>();
-  /* template */ follow$ = new BehaviorSubject<boolean>(false);
+export class LogFileViewerComponent implements OnInit, OnDestroy {
+  private loggingAdmin = inject(LoggingAdminService);
+  private areas = inject(NavAreasService);
+  private ngZone = inject(NgZone);
+
+  protected directory$ = new BehaviorSubject<RemoteDirectory>(null);
+  protected file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
+  protected content$ = new Subject<string>();
+  protected follow$ = new BehaviorSubject<boolean>(false);
 
   private followInterval;
   private offset = 0;
   private subscription: Subscription;
 
-  constructor(
-    private loggingAdmin: LoggingAdminService,
-    areas: NavAreasService,
-    ngZone: NgZone
-  ) {
-    this.subscription = combineLatest([
-      areas.panelRoute$,
-      loggingAdmin.directories$,
-    ]).subscribe(([r, d]) => {
+  ngOnInit() {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.loggingAdmin.directories$]).subscribe(([r, d]) => {
       if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
         return;
       }
@@ -51,10 +35,7 @@ export class LogFileViewerComponent implements OnDestroy {
       const fileName = r.params['file'];
 
       // check if we need to reset, otherwise e.g. the file size was updated, which is fine to follow along.
-      if (
-        nodeName !== this.directory$.value?.minion ||
-        fileName !== this.file$.value?.path
-      ) {
+      if (nodeName !== this.directory$.value?.minion || fileName !== this.file$.value?.path) {
         // reset!
         this.offset = 0;
       }
@@ -79,11 +60,8 @@ export class LogFileViewerComponent implements OnDestroy {
       this.follow$.subscribe((b) => {
         clearInterval(this.followInterval);
         if (b) {
-          ngZone.runOutsideAngular(() => {
-            this.followInterval = setInterval(
-              () => loggingAdmin.reload(),
-              2000
-            );
+          this.ngZone.runOutsideAngular(() => {
+            this.followInterval = setInterval(() => this.loggingAdmin.reload(), 2000);
           });
         }
       })
@@ -91,7 +69,7 @@ export class LogFileViewerComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
     clearInterval(this.followInterval);
   }
 

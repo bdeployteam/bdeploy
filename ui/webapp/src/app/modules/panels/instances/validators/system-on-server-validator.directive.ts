@@ -1,10 +1,5 @@
-import { Directive, Input } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { Directive, Input, inject } from '@angular/core';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import { ManifestKey } from 'src/app/models/gen.dtos';
 import {
   BdValidationMessageExtractor,
@@ -22,33 +17,31 @@ import { SystemsService } from '../../../primary/systems/services/systems.servic
     },
   ],
 })
-export class SystemOnServerValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class SystemOnServerValidatorDirective implements Validator, BdValidationMessageExtractor {
+  private systems = inject(SystemsService);
+
   public readonly id = 'system-on-server';
 
   @Input('appSystemOnServerValidator') serverName: string;
 
-  constructor(private systems: SystemsService) {
+  constructor() {
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value as ManifestKey;
 
     if (!this.serverName || !value) {
       return {}; // no server selected (YET), or no system selected
     }
 
-    const system = this.systems.systems$.value?.find(
-      (s) => s.key.name === value?.name && s.key.tag === value?.tag
-    );
+    const system = this.systems.systems$.value?.find((s) => s.key.name === value?.name && s.key.tag === value?.tag);
 
     if (!system) {
       return {
@@ -58,8 +51,7 @@ export class SystemOnServerValidatorDirective
 
     if (system.minion !== this.serverName) {
       return {
-        [this
-          .id]: `The selected system is on a different server than the selected target server.`,
+        [this.id]: `The selected system is on a different server than the selected target server.`,
       };
     }
 

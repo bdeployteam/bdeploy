@@ -1,5 +1,5 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { Observable, of, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Observable, Subscription, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -12,27 +12,27 @@ import { ProcessEditService } from '../../../services/process-edit.service';
   selector: 'app-configure-process',
   templateUrl: './configure-process.component.html',
 })
-export class ConfigureProcessComponent implements OnDestroy, DirtyableDialog {
+export class ConfigureProcessComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private instanceEdit = inject(InstanceEditService);
+  private areas = inject(NavAreasService);
+  protected edit = inject(ProcessEditService);
+
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
-  /* template */ hasPendingChanges: boolean;
-  /* template */ isInvalid: boolean;
+  protected hasPendingChanges: boolean;
+  protected isInvalid: boolean;
   private isHeaderInvalid: boolean;
   private isParamGroupInvalid: boolean;
 
   private subscription: Subscription;
 
-  constructor(
-    public edit: ProcessEditService,
-    private instanceEdit: InstanceEditService,
-    areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
+  ngOnInit() {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
@@ -43,23 +43,20 @@ export class ConfigureProcessComponent implements OnDestroy, DirtyableDialog {
     return !this.isInvalid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
     return of(true).pipe(
       tap(() => {
-        this.edit.alignGlobalParameters(
-          this.edit.application$.value,
-          this.edit.process$.value
-        );
+        this.edit.alignGlobalParameters(this.edit.application$.value, this.edit.process$.value);
         this.instanceEdit.conceal(`Edit ${this.edit.process$.value.name}`);
       })
     );
   }
 
-  /* template */ checkIsInvalid(event: boolean, isHeader: boolean) {
+  protected checkIsInvalid(event: boolean, isHeader: boolean) {
     if (isHeader) {
       this.isHeaderInvalid = event;
     } else {

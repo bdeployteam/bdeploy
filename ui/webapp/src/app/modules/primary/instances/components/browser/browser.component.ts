@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn, BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
@@ -22,7 +22,17 @@ import { OverallStatusColumnComponent } from './overall-status-column/overall-st
   templateUrl: './browser.component.html',
 })
 export class InstancesBrowserComponent implements OnInit, OnDestroy {
-  initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
+  private config = inject(ConfigService);
+  private cardViewService = inject(CardViewService);
+  protected instances = inject(InstancesService);
+  protected instanceColumns = inject(InstancesColumnsService);
+  protected products = inject(ProductsService);
+  protected groups = inject(GroupsService);
+  protected areas = inject(NavAreasService);
+  protected authService = inject(AuthenticationService);
+  protected bulk = inject(InstanceBulkService);
+
+  protected initGrouping: BdDataGroupingDefinition<InstanceDto>[] = [
     {
       name: 'System',
       group: (r) => this.instanceColumns.instanceSystemColumn.data(r),
@@ -43,10 +53,11 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
       associatedColumn: this.instanceColumns.instanceProductColumn.id,
     },
   ];
-  grouping: BdDataGroupingDefinition<InstanceDto>[];
-  defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
-  defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
-  hasProducts$ = new BehaviorSubject<boolean>(false);
+  protected grouping: BdDataGroupingDefinition<InstanceDto>[];
+  protected hasProducts$ = new BehaviorSubject<boolean>(false);
+
+  private defaultSingleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
+  private defaultMultipleGrouping: BdDataGrouping<InstanceDto>[] = [{ definition: this.initGrouping[0], selected: [] }];
 
   private subscription: Subscription;
 
@@ -60,16 +71,15 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
   };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-  @ViewChild(BdDataDisplayComponent)
-  private data: BdDataDisplayComponent<InstanceDto>;
+  @ViewChild(BdDataDisplayComponent) private data: BdDataDisplayComponent<InstanceDto>;
 
-  /* template */ getRecordRoute = (row: InstanceDto) => {
+  protected getRecordRoute = (row: InstanceDto) => {
     return ['/instances', 'dashboard', this.areas.groupContext$.value, row.instanceConfiguration.id];
   };
 
-  /* template */ isCardView: boolean;
-  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
-  /* template */ columns: BdDataColumn<InstanceDto>[] = [
+  protected isCardView: boolean;
+  protected sort: Sort = { active: 'name', direction: 'asc' };
+  protected columns: BdDataColumn<InstanceDto>[] = [
     this.instanceColumns.instanceNameColumn,
     this.instanceColumns.instanceIdColumn,
     this.instanceColumns.instanceDescriptionColumn,
@@ -84,18 +94,8 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     this.instanceColumns.instanceSyncColumn,
   ];
 
-  constructor(
-    public instances: InstancesService,
-    public instanceColumns: InstancesColumnsService,
-    public products: ProductsService,
-    public groups: GroupsService,
-    public areas: NavAreasService,
-    public authService: AuthenticationService,
-    public bulk: InstanceBulkService,
-    config: ConfigService,
-    private cardViewService: CardViewService
-  ) {
-    this.subscription = config.isCentral$.subscribe((value) => {
+  ngOnInit(): void {
+    this.subscription = this.config.isCentral$.subscribe((value) => {
       if (value) {
         this.initGrouping.push({
           name: 'Managed Server',
@@ -105,9 +105,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
       }
       this.grouping = [...this.initGrouping];
     });
-  }
 
-  ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
     this.subscription.add(this.products.products$.subscribe((p) => this.hasProducts$.next(!!p && !!p.length)));
     this.subscription.add(
@@ -131,6 +129,10 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     this.subscription.add(this.instances.overallStates$.subscribe(() => this.data?.redraw()));
   }
 
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
   private calculateDefaultGrouping(g: InstanceGroupConfiguration): void {
     this.defaultSingleGrouping =
       g.groupingSinglePreset === null
@@ -151,15 +153,15 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     ];
   }
 
-  get presetKeyValue(): string {
+  protected get presetKeyValue(): string {
     return `instance-${this.groups.current$.value?.name}`;
   }
 
-  get defaultGrouping(): BdDataGrouping<InstanceDto>[] {
+  protected get defaultGrouping(): BdDataGrouping<InstanceDto>[] {
     return this.isCardView ? this.defaultSingleGrouping : this.defaultMultipleGrouping;
   }
 
-  saveGlobalPreset(preset: CustomDataGrouping[]) {
+  protected saveGlobalPreset(preset: CustomDataGrouping[]) {
     const group = this.groups.current$.value;
     const multiple = !this.isCardView;
     this.groups.updatePreset(group.name, preset, multiple).subscribe();
@@ -172,11 +174,7 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
     this.calculateDefaultGrouping(group);
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  doSyncAll() {
+  protected doSyncAll() {
     this.dialog
       .confirm(
         'Query all Instances',

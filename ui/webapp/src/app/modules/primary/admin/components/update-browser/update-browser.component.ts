@@ -1,12 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { SoftwareVersionBulkService } from 'src/app/modules/panels/admin/services/software-version-bulk.service';
-import {
-  SoftwareUpdateService,
-  SoftwareVersion,
-} from '../../services/software-update.service';
+import { SoftwareUpdateService, SoftwareVersion } from '../../services/software-update.service';
 
 const COL_TAG: BdDataColumn<SoftwareVersion> = {
   id: 'tag',
@@ -36,12 +33,11 @@ const COL_LAUNCHER: BdDataColumn<SoftwareVersion> = {
   templateUrl: './update-browser.component.html',
 })
 export class UpdateBrowserComponent implements OnInit {
-  /* template */ columns: BdDataColumn<SoftwareVersion>[] = [
-    COL_TAG,
-    COL_SYSTEM,
-    COL_LAUNCHER,
-  ];
-  /* template */ getRecordRoute = (r: SoftwareVersion) => {
+  protected software = inject(SoftwareUpdateService);
+  protected bulk = inject(SoftwareVersionBulkService);
+
+  protected columns: BdDataColumn<SoftwareVersion>[] = [COL_TAG, COL_SYSTEM, COL_LAUNCHER];
+  protected getRecordRoute = (r: SoftwareVersion) => {
     return [
       '',
       {
@@ -54,16 +50,11 @@ export class UpdateBrowserComponent implements OnInit {
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(
-    public software: SoftwareUpdateService,
-    public bulk: SoftwareVersionBulkService
-  ) {}
-
   ngOnInit() {
     this.software.load();
   }
 
-  /* template */ restartServer() {
+  protected restartServer() {
     this.dialog
       .confirm(
         'Restart Server',

@@ -54,11 +54,11 @@ const detailOsCol: BdDataColumn<MinionRow> = {
   providers: [ServerDetailsService],
 })
 export class ServerDetailsComponent implements OnInit {
+  private actions = inject(ActionsService);
   protected servers = inject(ServersService);
   protected serverDetails = inject(ServerDetailsService);
   protected auth = inject(AuthenticationService);
   protected areas = inject(NavAreasService);
-  private actions = inject(ActionsService);
 
   private deleting$ = new BehaviorSubject<boolean>(false);
 
@@ -87,10 +87,10 @@ export class ServerDetailsComponent implements OnInit {
     map(([a, b, c]) => a || b || c)
   );
 
-  /* template */ columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
-  /* template */ version: string;
-  /* template */ minions: MinionRow[];
-  /* template */ server: ManagedMasterDto;
+  protected columns = [detailNameCol, detailVersionCol, detailMasterCol, detailOsCol];
+  protected version: string;
+  protected minions: MinionRow[];
+  protected server: ManagedMasterDto;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -117,7 +117,7 @@ export class ServerDetailsComponent implements OnInit {
     });
   }
 
-  /* template */ doDelete(server: ManagedMasterDto) {
+  protected doDelete(server: ManagedMasterDto) {
     this.dialog
       .confirm(
         `Delete ${server.hostName}`,
@@ -138,7 +138,7 @@ export class ServerDetailsComponent implements OnInit {
       });
   }
 
-  /* template */ doUpdateTransfer(server: ManagedMasterDto) {
+  protected doUpdateTransfer(server: ManagedMasterDto) {
     this.transfering$.next(true);
     this.serverDetails
       .remoteUpdateTransfer(server)
@@ -146,7 +146,7 @@ export class ServerDetailsComponent implements OnInit {
       .subscribe();
   }
 
-  /* template */ doUpdateInstall(server: ManagedMasterDto) {
+  protected doUpdateInstall(server: ManagedMasterDto) {
     this.installing$.next(true);
     this.serverDetails
       .remoteUpdateInstall(server)

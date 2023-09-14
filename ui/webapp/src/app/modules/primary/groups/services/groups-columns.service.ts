@@ -1,9 +1,5 @@
-import { Injectable } from '@angular/core';
-import {
-  BdDataColumn,
-  BdDataColumnDisplay,
-  BdDataColumnTypeHint,
-} from 'src/app/models/data';
+import { Injectable, inject } from '@angular/core';
+import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceGroupConfigurationDto } from 'src/app/models/gen.dtos';
 import { GroupsService } from './groups.service';
 
@@ -11,7 +7,9 @@ import { GroupsService } from './groups.service';
   providedIn: 'root',
 })
 export class GroupsColumnsService {
-  groupTypeColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private groups = inject(GroupsService);
+
+  private groupTypeColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
@@ -19,7 +17,7 @@ export class GroupsColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  groupNameColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private groupNameColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'name',
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -30,7 +28,7 @@ export class GroupsColumnsService {
     sortCard: true,
   };
 
-  groupTitleColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private groupTitleColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'title',
     name: 'Title',
     hint: BdDataColumnTypeHint.TITLE,
@@ -38,7 +36,7 @@ export class GroupsColumnsService {
     sortCard: true,
   };
 
-  groupDescriptionColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private groupDescriptionColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -46,21 +44,17 @@ export class GroupsColumnsService {
     showWhen: '(min-width: 1000px)',
   };
 
-  groupLogoTableColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private groupLogoTableColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
     display: BdDataColumnDisplay.TABLE,
     data: (r) =>
-      this.groups.getLogoUrlOrDefault(
-        r.instanceGroupConfiguration.name,
-        r.instanceGroupConfiguration.logo,
-        null
-      ),
+      this.groups.getLogoUrlOrDefault(r.instanceGroupConfiguration.name, r.instanceGroupConfiguration.logo, null),
     width: '150px',
   };
 
-  groupLogoCardColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
+  private groupLogoCardColumn: BdDataColumn<InstanceGroupConfigurationDto> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -73,7 +67,7 @@ export class GroupsColumnsService {
       ),
   };
 
-  defaultGroupColumns: BdDataColumn<InstanceGroupConfigurationDto>[] = [
+  public defaultGroupColumns: BdDataColumn<InstanceGroupConfigurationDto>[] = [
     this.groupTypeColumn,
     this.groupNameColumn,
     this.groupTitleColumn,
@@ -81,6 +75,4 @@ export class GroupsColumnsService {
     this.groupLogoTableColumn,
     this.groupLogoCardColumn,
   ];
-
-  constructor(private groups: GroupsService) {}
 }

@@ -10,7 +10,7 @@ export class BdDataSizeCellComponent<T> implements OnInit {
   @Input() record: T;
   @Input() column: BdDataColumn<T>;
 
-  /* template */ formatted: string;
+  protected formatted: string;
 
   ngOnInit(): void {
     const v = this.column.data(this.record);

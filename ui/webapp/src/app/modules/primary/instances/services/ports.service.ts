@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, Observable, combineLatest, forkJoin } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
   InstanceDto,
@@ -33,18 +33,18 @@ export interface NodeApplicationPort {
   providedIn: 'root',
 })
 export class PortsService {
-  activePortStates$ = new BehaviorSubject<NodeApplicationPort[]>(null);
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private groups = inject(GroupsService);
+  private instances = inject(InstancesService);
+  private processes = inject(ProcessesService);
+  private systems = inject(SystemsService);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private groups: GroupsService,
-    private instances: InstancesService,
-    private processes: ProcessesService,
-    private systems: SystemsService
-  ) {
+  public activePortStates$ = new BehaviorSubject<NodeApplicationPort[]>(null);
+
+  constructor() {
     combineLatest([
       this.instances.active$,
       this.instances.activeNodeCfgs$,
@@ -67,9 +67,7 @@ export class PortsService {
         instance,
         nodes,
         nodeStates,
-        systems?.find(
-          (s) => s.key.name === instance?.instanceConfiguration?.system?.name
-        )
+        systems?.find((s) => s.key.name === instance?.instanceConfiguration?.system?.name)
       );
     });
   }
@@ -95,10 +93,7 @@ export class PortsService {
       }
 
       // if nof in the list, the node may be no longer configured on the server
-      if (
-        !Object.keys(nodeStates).includes(node.nodeName) ||
-        nodeStates[node.nodeName]?.offline
-      ) {
+      if (!Object.keys(nodeStates).includes(node.nodeName) || nodeStates[node.nodeName]?.offline) {
         continue; // offline, don't bother.
       }
 
@@ -106,12 +101,8 @@ export class PortsService {
 
       for (const app of node.nodeConfiguration.applications) {
         for (const param of app.start.parameters) {
-          const appDesc = cfgs.applications.find(
-            (a) => a.key.name === app.application.name
-          )?.descriptor;
-          const paramDesc = appDesc?.startCommand.parameters.find(
-            (p) => p.id === param.id
-          );
+          const appDesc = cfgs.applications.find((a) => a.key.name === app.application.name)?.descriptor;
+          const paramDesc = appDesc?.startCommand.parameters.find((p) => p.id === param.id);
 
           if (!paramDesc || paramDesc.type !== ParameterType.SERVER_PORT) {
             continue;
@@ -145,20 +136,16 @@ export class PortsService {
           new Observable((s) => {
             this.http
               .post<{ [key: number]: boolean }>(
-                `${this.apiPath(this.groups.current$.value.name)}/${
-                  instance.instanceConfiguration.id
-                }/check-ports/${node.nodeName}`,
+                `${this.apiPath(this.groups.current$.value.name)}/${instance.instanceConfiguration.id}/check-ports/${
+                  node.nodeName
+                }`,
                 portsOfNode.map((na) => na.port),
                 {
                   headers: suppressGlobalErrorHandling(new HttpHeaders()),
                   context: NO_LOADING_BAR_CONTEXT,
                 }
               )
-              .pipe(
-                measure(
-                  `Ports of ${instance.instanceConfiguration.id}/${node.nodeName}`
-                )
-              )
+              .pipe(measure(`Ports of ${instance.instanceConfiguration.id}/${node.nodeName}`))
               .subscribe({
                 next: (result) => {
                   for (const desc of portsOfNode) {
@@ -168,9 +155,7 @@ export class PortsService {
                   s.complete();
                 },
                 error: (err) => {
-                  this.instances.reloadActiveStates(
-                    this.instances.active$.value
-                  );
+                  this.instances.reloadActiveStates(this.instances.active$.value);
                   s.error(err);
                   s.complete();
                 },

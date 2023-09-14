@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-bd-confirmation',
@@ -7,10 +7,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdConfirmationComponent {
-  constructor(
-    private dialogRef: MatDialogRef<BdConfirmationComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { header: string; message: string }
-  ) {}
+  private dialogRef = inject(MatDialogRef<BdConfirmationComponent>);
+  protected data: { header: string; message: string } = inject(MAT_DIALOG_DATA);
 
   confirm(answer: boolean) {
     this.dialogRef.close(answer);

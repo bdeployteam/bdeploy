@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
@@ -20,25 +14,20 @@ import { randomString } from 'src/app/modules/core/utils/object.utils';
   templateUrl: './add-ldap-server.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddLdapServerComponent
-  implements OnInit, OnDestroy, DirtyableDialog
-{
-  /* template */ tempServer: Partial<LDAPSettingsDto>;
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
+export class AddLdapServerComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private settings = inject(SettingsService);
+  private areas = inject(NavAreasService);
+
+  protected tempServer: Partial<LDAPSettingsDto>;
+  protected saving$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    private settings: SettingsService,
-    private areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.tempServer = {
       server: 'ldaps://',
       accountPattern: '(objectCategory=person)',
@@ -53,15 +42,19 @@ export class AddLdapServerComponent
     };
   }
 
-  isDirty(): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.saving$.next(true);
     this.doSave()
       .pipe(
@@ -71,16 +64,12 @@ export class AddLdapServerComponent
       )
       .subscribe(() => {
         this.areas.closePanel();
-        this.subscription.unsubscribe();
+        this.subscription?.unsubscribe();
       });
   }
 
   public doSave(): Observable<boolean> {
     this.saving$.next(true);
     return this.settings.addLdapServer(this.tempServer);
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

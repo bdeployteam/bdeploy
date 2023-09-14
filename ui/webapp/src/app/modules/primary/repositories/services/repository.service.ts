@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { debounceTime, finalize, map } from 'rxjs/operators';
 import { ManifestKey, ObjectChangeType, ProductDto } from 'src/app/models/gen.dtos';
@@ -23,6 +23,11 @@ export type SwPkgCompound = ProdDtoWithType | SwDtoWithType;
   providedIn: 'root',
 })
 export class RepositoryService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private repositories = inject(RepositoriesService);
+
   private repository: string;
   private subscription: Subscription;
 
@@ -33,17 +38,13 @@ export class RepositoryService {
 
   private update$ = new BehaviorSubject<string>(null);
 
-  products$ = new BehaviorSubject<ProductDto[]>([]);
-  productsLoading$ = new BehaviorSubject<boolean>(true);
+  public products$ = new BehaviorSubject<ProductDto[]>([]);
+  public productsLoading$ = new BehaviorSubject<boolean>(true);
 
-  softwarePackages$ = new BehaviorSubject<ManifestKey[]>([]);
-  softwarePackagesLoading$ = new BehaviorSubject<boolean>(true);
+  public softwarePackages$ = new BehaviorSubject<ManifestKey[]>([]);
+  public softwarePackagesLoading$ = new BehaviorSubject<boolean>(true);
 
-  // <any> is a ProductDto with:
-  //  type: 'Product' / 'External Software'
-  //  key:  key of product / manifest key of external package
-  //  ...ProductDto properties / undefined
-  data$: Observable<SwPkgCompound[]> = combineLatest([
+  public data$: Observable<SwPkgCompound[]> = combineLatest([
     this.products$.pipe(map((products) => products.map((product) => ({ type: 'Product', ...product })))),
     this.softwarePackages$.pipe(
       map((softwarePackages) =>
@@ -55,17 +56,12 @@ export class RepositoryService {
     ),
   ]).pipe(map(([products, softwarePackages]) => [...products, ...softwarePackages]));
 
-  loading$: Observable<boolean> = combineLatest([this.productsLoading$, this.softwarePackagesLoading$]).pipe(
+  public loading$: Observable<boolean> = combineLatest([this.productsLoading$, this.softwarePackagesLoading$]).pipe(
     map(([pl, el]) => pl || el)
   );
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    repositories: RepositoriesService
-  ) {
-    repositories.current$.subscribe((repository) => {
+  constructor() {
+    this.repositories.current$.subscribe((repository) => {
       // whenever the current repo changes, we trigger a delayed reload.
       // we *anyhow* want to remove the outdated data before doing this.
       // otherwise the user would briefly see the old data before loading begins.
@@ -129,9 +125,8 @@ export class RepositoryService {
   }
 
   private updateChangeSubscription(repository: string) {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
+    this.subscription = null;
 
     if (repository) {
       this.subscription = this.changes.subscribe(ObjectChangeType.SOFTWARE_PACKAGE, { scope: [repository] }, () => {

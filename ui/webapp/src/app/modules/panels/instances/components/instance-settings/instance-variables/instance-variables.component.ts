@@ -1,7 +1,7 @@
-import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import { combineLatest, Observable, of, Subscription, tap } from 'rxjs';
+import { Observable, Subscription, combineLatest, of, tap } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import {
   ApplicationDto,
@@ -20,10 +20,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { PluginService } from 'src/app/modules/core/services/plugin.service';
-import {
-  buildCompletionPrefixes,
-  buildCompletions,
-} from 'src/app/modules/core/utils/completion.utils';
+import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
 import { getMaskedPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -57,7 +54,13 @@ const colDesc: BdDataColumn<ConfigVariable> = {
   selector: 'app-instance-variables',
   templateUrl: './instance-variables.component.html',
 })
-export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
+export class InstanceVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
+  private systems = inject(SystemsService);
+  private areas = inject(NavAreasService);
+  private plugins = inject(PluginService);
+  protected edit = inject(InstanceEditService);
+  protected groups = inject(GroupsService);
+
   private readonly colEdit: BdDataColumn<ConfigVariable> = {
     id: 'edit',
     name: 'Edit',
@@ -80,26 +83,20 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
     },
   };
 
-  /* template */ records: ConfigVariable[] = [];
-  /* template */ columns: BdDataColumn<ConfigVariable>[] = [
-    colName,
-    colValue,
-    colDesc,
-    this.colEdit,
-    this.colDelete,
-  ];
+  protected records: ConfigVariable[] = [];
+  protected columns: BdDataColumn<ConfigVariable>[] = [colName, colValue, colDesc, this.colEdit, this.colDelete];
 
-  /* template */ newValue: VariableConfiguration;
-  /* template */ newUsedIds: string[] = [];
+  protected newValue: VariableConfiguration;
+  protected newUsedIds: string[] = [];
 
-  /* template */ instance: InstanceConfigurationDto;
-  /* template */ system: SystemConfiguration;
-  /* template */ apps: ApplicationDto[];
-  /* template */ typeValues: ParameterType[] = Object.values(ParameterType);
-  /* template */ editorValues: string[];
+  protected instance: InstanceConfigurationDto;
+  protected system: SystemConfiguration;
+  protected apps: ApplicationDto[];
+  protected typeValues: ParameterType[] = Object.values(ParameterType);
+  protected editorValues: string[];
 
-  /* template */ completionPrefixes = buildCompletionPrefixes();
-  /* template */ completions: ContentCompletion[];
+  protected completionPrefixes = buildCompletionPrefixes();
+  protected completions: ContentCompletion[];
 
   private subscription: Subscription;
 
@@ -111,17 +108,11 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
   @ViewChild('addForm', { static: false }) addForm: NgForm;
   @ViewChild('editForm', { static: false }) editForm: NgForm;
 
-  constructor(
-    public edit: InstanceEditService,
-    public groups: GroupsService,
-    systems: SystemsService,
-    areas: NavAreasService,
-    plugins: PluginService
-  ) {
+  ngOnInit() {
     this.subscription = combineLatest([
       this.edit.state$,
       this.edit.stateApplications$,
-      systems.systems$,
+      this.systems.systems$,
     ]).subscribe(([instance, apps, systems]) => {
       if (instance?.config) {
         this.buildVariables(instance.config);
@@ -130,35 +121,24 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
         this.apps = apps;
 
         if (instance?.config?.config?.system && systems?.length) {
-          this.system = systems.find(
-            (s) => s.key.name === instance.config.config.system.name
-          )?.config;
+          this.system = systems.find((s) => s.key.name === instance.config.config.system.name)?.config;
         }
 
-        this.completions = buildCompletions(
-          this.completionPrefixes,
-          this.instance,
-          this.system,
-          null,
-          this.apps
-        );
+        this.completions = buildCompletions(this.completionPrefixes, this.instance, this.system, null, this.apps);
 
-        plugins
-          .getAvailableEditorTypes(
-            groups.current$?.value?.name,
-            instance.config.config.product
-          )
+        this.plugins
+          .getAvailableEditorTypes(this.groups.current$?.value?.name, instance.config.config.product)
           .subscribe((editors) => {
             this.editorValues = editors;
           });
       }
     });
 
-    this.subscription.add(areas.registerDirtyable(this, 'panel'));
+    this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private buildVariables(config: InstanceConfigurationDto) {
@@ -177,7 +157,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
     return this.edit.hasPendingChanges();
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
@@ -189,7 +169,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
     );
   }
 
-  /* template */ onAdd(templ: TemplateRef<any>) {
+  protected onAdd(templ: TemplateRef<any>) {
     this.newUsedIds = this.records.map((r) => r.name);
     this.newValue = {
       id: '',
@@ -225,7 +205,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
       });
   }
 
-  /* template */ onEdit(variable: ConfigVariable) {
+  protected onEdit(variable: ConfigVariable) {
     this.newValue = cloneDeep(variable.value);
     this.dialog
       .message({
@@ -252,7 +232,7 @@ export class InstanceVariablesComponent implements DirtyableDialog, OnDestroy {
       });
   }
 
-  /* template */ onTypeChange(value: ParameterType) {
+  protected onTypeChange(value: ParameterType) {
     // check if we need to clear the value in case we switch from password to *something*.
     if (
       this.newValue.type !== value &&

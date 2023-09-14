@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  InjectionToken,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, InjectionToken } from '@angular/core';
 import { MinionMode, Version } from 'src/app/models/gen.dtos';
 import { convert2String } from '../../utils/version.utils';
 
@@ -22,9 +17,9 @@ export const VERSION_DATA = new InjectionToken<VersionMismatch>('VERSION_DATA');
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectionVersionComponent {
-  /* template */ newVersion: string;
-  /* template */ oldVersion: string;
-  /* template */ mode: MinionMode;
+  protected newVersion: string;
+  protected oldVersion: string;
+  protected mode: MinionMode;
 
   constructor(@Inject(VERSION_DATA) private data: VersionMismatch) {
     this.newVersion = convert2String(data.newVersion);

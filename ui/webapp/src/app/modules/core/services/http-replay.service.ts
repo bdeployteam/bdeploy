@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, ReplaySubject, share } from 'rxjs';
 
 interface ReplayCache {
@@ -10,9 +10,9 @@ interface ReplayCache {
   providedIn: 'root',
 })
 export class HttpReplayService {
-  private cache: ReplayCache = {};
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private cache: ReplayCache = {};
 
   public get<T>(url: string, resetTimeMs = 1000): Observable<T> {
     if (!this.cache[url]) {

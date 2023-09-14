@@ -1,14 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import {
-  InstanceUsageDto,
-  ManifestKey,
-  PluginInfoDto,
-  ProductDto,
-} from 'src/app/models/gen.dtos';
+import { InstanceUsageDto, ManifestKey, PluginInfoDto, ProductDto } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -28,6 +23,13 @@ export interface LabelRecord {
  */
 @Injectable()
 export class ProductDetailsService implements OnDestroy {
+  private products = inject(ProductsService);
+  private route = inject(ActivatedRoute);
+  private areas = inject(NavAreasService);
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private downloads = inject(DownloadService);
+
   public productKey$ = new BehaviorSubject<string>(null);
   public productTag$ = new BehaviorSubject<string>(null);
   public product$ = new BehaviorSubject<ProductDto>(null);
@@ -47,29 +49,16 @@ export class ProductDetailsService implements OnDestroy {
   private pluginApiPath = () =>
     `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.groupContext$.value}`;
 
-  constructor(
-    private products: ProductsService,
-    private route: ActivatedRoute,
-    private areas: NavAreasService,
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private downloads: DownloadService
-  ) {
+  constructor() {
     this.subscription = this.route.paramMap.subscribe((p) => {
       this.productKey$.next(p.get('key'));
       this.productTag$.next(p.get('tag'));
 
-      if (this.prodSubscription) {
-        this.prodSubscription.unsubscribe();
-      }
+      this.prodSubscription?.unsubscribe();
       this.prodSubscription = this.products.products$
         .pipe(
           map((prods) =>
-            prods?.find(
-              (e) =>
-                e.key.name === this.productKey$.value &&
-                e.key.tag === this.productTag$.value
-            )
+            prods?.find((e) => e.key.name === this.productKey$.value && e.key.tag === this.productTag$.value)
           )
         )
         .subscribe((prod) => {
@@ -81,8 +70,8 @@ export class ProductDetailsService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
-    this.prodSubscription.unsubscribe();
+    this.subscription?.unsubscribe();
+    this.prodSubscription?.unsubscribe();
   }
 
   public getUsedIn(): Observable<InstanceUsageDto[]> {
@@ -118,13 +107,11 @@ export class ProductDetailsService implements OnDestroy {
   public download(original: boolean): Observable<any> {
     const params = new HttpParams().set('original', original);
     return new Observable<any>((s) => {
-      this.http
-        .get(`${this.apiPath()}/zip`, { params, responseType: 'text' })
-        .subscribe((token) => {
-          this.downloads.download(this.downloads.createDownloadUrl(token));
-          s.next(token);
-          s.complete();
-        });
+      this.http.get(`${this.apiPath()}/zip`, { params, responseType: 'text' }).subscribe((token) => {
+        this.downloads.download(this.downloads.createDownloadUrl(token));
+        s.next(token);
+        s.complete();
+      });
     });
   }
 

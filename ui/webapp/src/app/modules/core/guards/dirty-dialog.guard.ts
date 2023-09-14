@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
@@ -66,22 +66,19 @@ export interface DirtyableDialog {
 @Injectable({
   providedIn: 'root',
 })
-export class DirtyDialogGuard  {
-  constructor(private areas: NavAreasService, private router: Router) {}
+export class DirtyDialogGuard {
+  private areas = inject(NavAreasService);
+  private router = inject(Router);
 
   canDeactivate(component: DirtyableDialog): Observable<boolean> {
-    const ignore =
-      this.router.getCurrentNavigation()?.extras?.state?.ignoreDirtyGuard;
+    const ignore = this.router.getCurrentNavigation()?.extras?.state?.ignoreDirtyGuard;
     if (ignore) {
       return of(true); // forced navigation.
     }
 
     // If there is an open *and* dirty panel, special handling is required to keep popups
     // in visible areas (maximized panel).
-    if (
-      this.areas.hasDirtyPanel() &&
-      this.areas.getDirtyableType(component) !== 'panel'
-    ) {
+    if (this.areas.hasDirtyPanel() && this.areas.getDirtyableType(component) !== 'panel') {
       // 1. confirm on panel - otherwise reject
       // 2. hide panel
       // 3. confirm on primary - otherwise reject
@@ -116,10 +113,7 @@ export class DirtyDialogGuard  {
     }
 
     // panel exists, is dirtyable, is NOT dirty, and main component is not the panel - we want to force the panel to close.
-    if (
-      !!this.areas.getDirtyable('panel') &&
-      this.areas.getDirtyableType(component) !== 'panel'
-    ) {
+    if (!!this.areas.getDirtyable('panel') && this.areas.getDirtyableType(component) !== 'panel') {
       // hide the panel right away to be out of the way for a potential dirty check on the main component.
       this.areas.panelVisible$.next(false);
       this.areas.forcePanelClose$.next(true);
@@ -136,9 +130,7 @@ export class DirtyDialogGuard  {
     }
   }
 
-  private confirmAndSaveComponent(
-    component: DirtyableDialog
-  ): Observable<boolean> {
+  private confirmAndSaveComponent(component: DirtyableDialog): Observable<boolean> {
     return this.confirm(component).pipe(
       switchMap((x) => {
         if (x === DirtyActionType.CANCEL) {
@@ -199,9 +191,7 @@ export class DirtyDialogGuard  {
         message:
           'The dialog contains unsaved changes. Save the changes before leaving? You may also stay and continue editing.',
         icon: 'save',
-        actions: canSave
-          ? [actCancel, actDiscard, actSave]
-          : [actCancel, actDiscard],
+        actions: canSave ? [actCancel, actDiscard, actSave] : [actCancel, actDiscard],
       })
       .pipe(
         tap((result) => {

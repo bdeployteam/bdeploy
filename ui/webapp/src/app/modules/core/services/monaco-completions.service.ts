@@ -7,11 +7,11 @@ import { ContentCompletion } from '../components/bd-content-assist-menu/bd-conte
 export class MonacoCompletionsService {
   private completions: ContentCompletion[];
 
-  getCompletions(): ContentCompletion[] {
+  public getCompletions(): ContentCompletion[] {
     return this.completions;
   }
 
-  setCompletions(completions: ContentCompletion[]): void {
+  public setCompletions(completions: ContentCompletion[]): void {
     this.completions = completions;
   }
 }

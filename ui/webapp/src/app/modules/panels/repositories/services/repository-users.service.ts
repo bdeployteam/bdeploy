@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import {
@@ -12,10 +12,7 @@ import {
   UserPermissionUpdateDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import {
-  EMPTY_SCOPE,
-  ObjectChangesService,
-} from 'src/app/modules/core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
 
@@ -23,6 +20,11 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   providedIn: 'root',
 })
 export class RepositoryUsersService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private repos = inject(RepositoriesService);
+
   public loadingUsers$ = new BehaviorSubject<boolean>(false);
   public loadingUserGroups$ = new BehaviorSubject<boolean>(false);
   public loading$ = combineLatest({
@@ -35,12 +37,7 @@ export class RepositoryUsersService {
   private repo: SoftwareRepositoryConfiguration;
   private apiPath = (g) => `${this.cfg.config.api}/softwarerepository/${g}`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private repos: RepositoriesService
-  ) {
+  constructor() {
     this.repos.current$.subscribe((r) => {
       this.repo = r;
       this.loadUsers();

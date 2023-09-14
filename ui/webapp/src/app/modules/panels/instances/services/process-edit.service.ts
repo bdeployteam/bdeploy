@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
@@ -24,15 +24,8 @@ import {
   TemplateParameter,
 } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  createLinkedValue,
-  getPreRenderable,
-  getRenderPreview,
-} from 'src/app/modules/core/utils/linked-values.utils';
-import {
-  getAppKeyName,
-  getAppOs,
-} from 'src/app/modules/core/utils/manifest.utils';
+import { createLinkedValue, getPreRenderable, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
+import { getAppKeyName, getAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { performTemplateVariableSubst } from 'src/app/modules/core/utils/object.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -43,6 +36,13 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   providedIn: 'root',
 })
 export class ProcessEditService {
+  private edit = inject(InstanceEditService);
+  private products = inject(ProductsService);
+  private areas = inject(NavAreasService);
+  private groups = inject(GroupsService);
+  private systems = inject(SystemsService);
+  private snackbar = inject(MatSnackBar);
+
   public node$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
   public product$ = new BehaviorSubject<ProductDto>(null);
   public applications$ = new BehaviorSubject<ApplicationDto[]>(null);
@@ -51,14 +51,7 @@ export class ProcessEditService {
 
   private preliminary: ApplicationConfiguration[] = [];
 
-  constructor(
-    private edit: InstanceEditService,
-    private products: ProductsService,
-    private areas: NavAreasService,
-    private groups: GroupsService,
-    private systems: SystemsService,
-    private snackbar: MatSnackBar
-  ) {
+  constructor() {
     combineLatest([
       this.areas.panelRoute$,
       this.products.products$,
@@ -76,29 +69,17 @@ export class ProcessEditService {
         return;
       }
 
-      this.node$.next(
-        state.config.nodeDtos.find((n) => n.nodeName === nodeName)
-      );
+      this.node$.next(state.config.nodeDtos.find((n) => n.nodeName === nodeName));
       this.product$.next(
         prods.find(
-          (p) =>
-            p.key.name === state.config.config.product.name &&
-            p.key.tag === state.config.config.product.tag
+          (p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag
         )
       );
       this.applications$.next(apps);
 
       if (!!process && !!this.node$.value?.nodeConfiguration?.applications) {
-        this.process$.next(
-          this.node$.value.nodeConfiguration.applications.find(
-            (a) => a.id === process
-          )
-        );
-        this.application$.next(
-          apps.find(
-            (x) => x.key.name === this.process$.value?.application?.name
-          )
-        );
+        this.process$.next(this.node$.value.nodeConfiguration.applications.find((a) => a.id === process));
+        this.application$.next(apps.find((x) => x.key.name === this.process$.value?.application?.name));
       }
     });
   }
@@ -124,9 +105,7 @@ export class ProcessEditService {
 
     // remove from control group(s)
     for (const grp of this.node$.value.nodeConfiguration.controlGroups) {
-      const idx = grp.processOrder.findIndex(
-        (id) => id === this.process$.value.id
-      );
+      const idx = grp.processOrder.findIndex((id) => id === this.process$.value.id);
       if (idx !== -1) {
         grp.processOrder.splice(idx, 1);
       }
@@ -147,19 +126,14 @@ export class ProcessEditService {
 
       if (!replacement) {
         // cannot find suitable application, cannot continue;
-        this.snackbar.open(
-          'Cannot find suitable application while pasting.',
-          'DISMISS'
-        );
+        this.snackbar.open('Cannot find suitable application while pasting.', 'DISMISS');
         return;
       }
 
       appConfig.application = replacement.key;
     }
 
-    const app = this.applications$.value.find(
-      (a) => appConfig.application.name === a.key.name
-    );
+    const app = this.applications$.value.find((a) => appConfig.application.name === a.key.name);
 
     // Generate unique identifier
     this.groups.newId().subscribe((id) => {
@@ -174,9 +148,7 @@ export class ProcessEditService {
       // there is no need to align global parameters in other apps, since no global
       // should have a value different from the ones in the instances already after
       // this alignment code.
-      const globals = app.descriptor.startCommand.parameters.filter(
-        (p) => p.global
-      );
+      const globals = app.descriptor.startCommand.parameters.filter((p) => p.global);
       for (const global of globals) {
         const existing = this.getGlobalParameter(global.id);
         const own = appConfig.start.parameters.find((p) => p.id === global.id);
@@ -185,9 +157,7 @@ export class ProcessEditService {
         }
       }
 
-      const fixed = app.descriptor.startCommand.parameters.filter(
-        (p) => p.fixed
-      );
+      const fixed = app.descriptor.startCommand.parameters.filter((p) => p.fixed);
       for (const f of fixed) {
         const own = appConfig.start.parameters.find((p) => p.id === f.id);
         if (own) {
@@ -208,17 +178,10 @@ export class ProcessEditService {
       }
 
       // always fully re-calculate stop command.
-      appConfig.stop = this.calculateInitialCommand(
-        app.descriptor.stopCommand,
-        [],
-        {},
-        []
-      );
+      appConfig.stop = this.calculateInitialCommand(app.descriptor.stopCommand, [], {}, []);
 
       this.node$.value.nodeConfiguration.applications.push(appConfig);
-      this.edit
-        .getLastControlGroup(this.node$.value.nodeConfiguration)
-        .processOrder.push(appConfig.id);
+      this.edit.getLastControlGroup(this.node$.value.nodeConfiguration).processOrder.push(appConfig.id);
       this.edit.conceal(`Paste ${appConfig.name}`);
     });
   }
@@ -236,20 +199,13 @@ export class ProcessEditService {
       variableValues,
       status
     );
-    const stop: CommandConfiguration = this.calculateInitialCommand(
-      application.descriptor.stopCommand,
-      [],
-      {},
-      status
-    );
+    const stop: CommandConfiguration = this.calculateInitialCommand(application.descriptor.stopCommand, [], {}, status);
 
     const process: ApplicationConfiguration = {
       id: null, // calculated later
       uid: null, // compat
       application: application.key,
-      name: template?.name
-        ? performTemplateVariableSubst(template.name, variableValues, status)
-        : application.name,
+      name: template?.name ? performTemplateVariableSubst(template.name, variableValues, status) : application.name,
       pooling: application.descriptor.pooling,
       endpoints: cloneDeep(application.descriptor.endpoints),
       processControl: {
@@ -300,9 +256,7 @@ export class ProcessEditService {
         const reqGrp = template?.preferredProcessControlGroup;
         let targetGroup: ProcessControlGroupConfiguration;
         if (reqGrp) {
-          targetGroup = node.nodeConfiguration.controlGroups.find(
-            (g) => g.name === reqGrp
-          );
+          targetGroup = node.nodeConfiguration.controlGroups.find((g) => g.name === reqGrp);
         }
         if (!targetGroup) {
           targetGroup = this.edit.getLastControlGroup(node.nodeConfiguration);
@@ -314,10 +268,7 @@ export class ProcessEditService {
     );
   }
 
-  public preRenderParameter(
-    desc: ParameterDescriptor,
-    value: LinkedValueConfiguration
-  ): string[] {
+  public preRenderParameter(desc: ParameterDescriptor, value: LinkedValueConfiguration): string[] {
     const lvv = getPreRenderable(value);
     const strValue = lvv === null || lvv === undefined ? '' : lvv;
 
@@ -351,13 +302,8 @@ export class ProcessEditService {
    * Applies each global parameter *from* the given application to all other applications which
    * refer to the same global parameter.
    */
-  public alignGlobalParameters(
-    appDto: ApplicationDto,
-    process: ApplicationConfiguration
-  ) {
-    const globals = appDto.descriptor?.startCommand?.parameters?.filter(
-      (p) => p.global
-    );
+  public alignGlobalParameters(appDto: ApplicationDto, process: ApplicationConfiguration) {
+    const globals = appDto.descriptor?.startCommand?.parameters?.filter((p) => p.global);
     if (!globals?.length) {
       return;
     }
@@ -372,10 +318,7 @@ export class ProcessEditService {
 
     // eslint-disable-next-line no-unsafe-optional-chaining
     for (const node of this.edit.state$.value?.config.nodeDtos) {
-      for (const app of [
-        ...node.nodeConfiguration.applications,
-        ...this.preliminary,
-      ]) {
+      for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
         for (const id of Object.keys(values)) {
           const p = app.start?.parameters?.find((x) => x.id === id);
           if (p) {
@@ -395,10 +338,7 @@ export class ProcessEditService {
   public getGlobalParameter(id: string): ParameterConfiguration {
     // eslint-disable-next-line no-unsafe-optional-chaining
     for (const node of this.edit.state$.value?.config.nodeDtos) {
-      for (const app of [
-        ...node.nodeConfiguration.applications,
-        ...this.preliminary,
-      ]) {
+      for (const app of [...node.nodeConfiguration.applications, ...this.preliminary]) {
         const p = app.start?.parameters?.find((x) => x.id === id);
         if (p) {
           return p;
@@ -427,9 +367,7 @@ export class ProcessEditService {
 
         let val = p.defaultValue;
         if (!!tpl && tpl.value !== undefined && tpl.value !== null) {
-          val = createLinkedValue(
-            performTemplateVariableSubst(tpl.value, values, status)
-          );
+          val = createLinkedValue(performTemplateVariableSubst(tpl.value, values, status));
         } else if (p.global) {
           const gp = this.getGlobalParameter(p.id);
           if (gp) {
@@ -470,17 +408,11 @@ export class ProcessEditService {
     };
   }
 
-  public meetsConditionOnCurrent(
-    param: ParameterDescriptor
-  ): Observable<boolean> {
+  public meetsConditionOnCurrent(param: ParameterDescriptor): Observable<boolean> {
     return combineLatest([this.application$, this.process$]).pipe(
       skipWhile(([a, c]) => !a || !c),
       map(([app, cfg]) => {
-        return this.meetsConditionOnGiven(
-          param,
-          app.descriptor.startCommand,
-          cfg
-        );
+        return this.meetsConditionOnGiven(param, app.descriptor.startCommand, cfg);
       }),
       first()
     );
@@ -491,10 +423,7 @@ export class ProcessEditService {
     descriptor: ExecutableDescriptor,
     process: ApplicationConfiguration
   ): boolean {
-    if (
-      !param.condition ||
-      (!param.condition.parameter && !param.condition.expression)
-    ) {
+    if (!param.condition || (!param.condition.parameter && !param.condition.expression)) {
       return true; // no condition, all OK :)
     }
 
@@ -502,18 +431,12 @@ export class ProcessEditService {
     let expression = param.condition.expression;
     if (param.condition.parameter) {
       expression = `{{V:${param.condition.parameter}}}`;
-      targetType =
-        descriptor.parameters.find((p) => p.id === param.condition.parameter)
-          ?.type || param.type;
+      targetType = descriptor.parameters.find((p) => p.id === param.condition.parameter)?.type || param.type;
     }
 
     const system =
-      this.edit.state$.value?.config?.config?.system &&
-      this.systems.systems$.value?.length
-        ? this.systems.systems$.value.find(
-            (s) =>
-              s.key.name === this.edit.state$.value.config.config.system.name
-          )
+      this.edit.state$.value?.config?.config?.system && this.systems.systems$.value?.length
+        ? this.systems.systems$.value.find((s) => s.key.name === this.edit.state$.value.config.config.system.name)
         : null;
 
     const value = getRenderPreview(
@@ -538,15 +461,9 @@ export class ProcessEditService {
       case ParameterConditionType.END_WITH:
         return value.endsWith(param.condition.value);
       case ParameterConditionType.BE_EMPTY:
-        return (
-          value.trim().length <= 0 ||
-          (targetType === ParameterType.BOOLEAN && value.trim() === 'false')
-        );
+        return value.trim().length <= 0 || (targetType === ParameterType.BOOLEAN && value.trim() === 'false');
       case ParameterConditionType.BE_NON_EMPTY:
-        return (
-          value.trim().length > 0 &&
-          !(targetType === ParameterType.BOOLEAN && value.trim() === 'false')
-        );
+        return value.trim().length > 0 && !(targetType === ParameterType.BOOLEAN && value.trim() === 'false');
     }
   }
 }

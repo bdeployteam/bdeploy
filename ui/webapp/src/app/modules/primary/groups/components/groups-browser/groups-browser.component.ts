@@ -1,15 +1,8 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { combineLatest, Subscription } from 'rxjs';
-import {
-  BdDataColumn,
-  bdDataDefaultSearch,
-  BdDataGroupingDefinition,
-} from 'src/app/models/data';
-import {
-  InstanceGroupConfigurationDto,
-  MinionMode,
-} from 'src/app/models/gen.dtos';
+import { Subscription, combineLatest } from 'rxjs';
+import { BdDataColumn, BdDataGroupingDefinition, bdDataDefaultSearch } from 'src/app/models/data';
+import { InstanceGroupConfigurationDto, MinionMode } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -22,21 +15,27 @@ import { GroupsService } from '../../services/groups.service';
   templateUrl: './groups-browser.component.html',
 })
 export class GroupsBrowserComponent implements OnInit, OnDestroy {
-  grouping: BdDataGroupingDefinition<InstanceGroupConfigurationDto>[] = [];
+  private cardViewService = inject(CardViewService);
+  protected groups = inject(GroupsService);
+  protected groupColumns = inject(GroupsColumnsService);
+  protected config = inject(ConfigService);
+  protected authService = inject(AuthenticationService);
+
+  protected grouping: BdDataGroupingDefinition<InstanceGroupConfigurationDto>[] = [];
 
   private subscription: Subscription;
   private isCentral = false;
-  /* template */ isManaged = false;
   private isStandalone = false;
-  /* template */ isAddAllowed = false;
-  /* template */ isAttachAllowed = false;
-  /* template */ isCardView: boolean;
-  /* template */ presetKeyValue = 'instanceGroups';
-  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
+  protected isManaged = false;
+  protected isAddAllowed = false;
+  protected isAttachAllowed = false;
+  protected isCardView: boolean;
+  protected presetKeyValue = 'instanceGroups';
+  protected sort: Sort = { active: 'name', direction: 'asc' };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  /* template */ getRecordRoute = (r: InstanceGroupConfigurationDto) => {
+  protected getRecordRoute = (r: InstanceGroupConfigurationDto) => {
     const row = r.instanceGroupConfiguration;
     if (this.authService.isScopedExclusiveReadClient(row.name)) {
       return ['/groups', 'clients', row.name];
@@ -44,57 +43,40 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
 
     // in case we're managed but the group is not (yet), we're not allowed to enter the group.
     if (!row.managed && this.config.config.mode === MinionMode.MANAGED) {
-      return [
-        '',
-        { outlets: { panel: ['panels', 'servers', 'link', 'central'] } },
-      ];
+      return ['', { outlets: { panel: ['panels', 'servers', 'link', 'central'] } }];
     }
 
     return ['/instances', 'browser', row.name];
   };
-
-  constructor(
-    public groups: GroupsService,
-    public groupColumns: GroupsColumnsService,
-    public config: ConfigService,
-    public authService: AuthenticationService,
-    private cardViewService: CardViewService
-  ) {}
 
   ngOnInit(): void {
     this.subscription = this.groups.attributeDefinitions$.subscribe((attrs) => {
       this.grouping = attrs.map((attr) => {
         return {
           name: attr.description,
-          group: (r) =>
-            this.groups.attributeValues$.value[
-              r.instanceGroupConfiguration.name
-            ]?.attributes[attr.name],
+          group: (r) => this.groups.attributeValues$.value[r.instanceGroupConfiguration.name]?.attributes[attr.name],
         };
       });
     });
     this.subscription.add(
-      combineLatest([
-        this.config.isCentral$,
-        this.config.isManaged$,
-        this.config.isStandalone$,
-      ]).subscribe(([isCentral, isManaged, isStandalone]) => {
-        this.isCentral = isCentral;
-        this.isManaged = isManaged;
-        this.isStandalone = isStandalone;
-      })
+      combineLatest([this.config.isCentral$, this.config.isManaged$, this.config.isStandalone$]).subscribe(
+        ([isCentral, isManaged, isStandalone]) => {
+          this.isCentral = isCentral;
+          this.isManaged = isManaged;
+          this.isStandalone = isStandalone;
+        }
+      )
     );
-    this.isAddAllowed =
-      this.authService.isGlobalAdmin() && (this.isCentral || this.isStandalone);
+    this.isAddAllowed = this.authService.isGlobalAdmin() && (this.isCentral || this.isStandalone);
     this.isAttachAllowed = this.authService.isGlobalAdmin() && this.isManaged;
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  onRecordClick(r: InstanceGroupConfigurationDto) {
+  protected onRecordClick(r: InstanceGroupConfigurationDto) {
     // in case we're managed but the group is not (yet), we're not allowed to enter the group - show a message instead
     const row = r.instanceGroupConfiguration;
     if (!row.managed && this.config.config.mode === MinionMode.MANAGED) {
@@ -108,7 +90,7 @@ export class GroupsBrowserComponent implements OnInit, OnDestroy {
     }
   }
 
-  searchInstanceGroupData(
+  protected searchInstanceGroupData(
     search: string,
     data: InstanceGroupConfigurationDto[],
     columns: BdDataColumn<InstanceGroupConfigurationDto>[]

@@ -19,6 +19,11 @@ import { ACTION_APPLY } from './../../../../core/components/bd-dialog-message/bd
   templateUrl: './bulk-manipulation.component.html',
 })
 export class BulkManipulationComponent implements OnInit, OnDestroy {
+  protected bulk = inject(InstanceBulkService);
+  protected instance = inject(InstancesService);
+  protected products = inject(ProductsService);
+  protected actions = inject(ActionsService);
+
   private starting$ = new BehaviorSubject<boolean>(false);
   private stopping$ = new BehaviorSubject<boolean>(false);
   private deleting$ = new BehaviorSubject<boolean>(false);
@@ -27,17 +32,10 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   private updating$ = new BehaviorSubject<boolean>(false);
 
   protected isAllSameProduct: boolean;
-
   protected selectableProducts: ProductDto[];
   protected selectableProductLabels: string[];
   protected selectedTarget: ProductDto;
-
   protected bulkOpResult: BulkOperationResultDto;
-
-  protected bulk = inject(InstanceBulkService);
-  protected instance = inject(InstancesService);
-  protected products = inject(ProductsService);
-  protected actions = inject(ActionsService);
 
   private ids$ = this.bulk.selection$.pipe(map((i) => i.map((x) => x.instanceConfiguration.id)));
 
@@ -246,6 +244,6 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 }

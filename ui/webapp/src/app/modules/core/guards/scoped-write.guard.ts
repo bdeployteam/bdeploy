@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -10,31 +10,20 @@ import { findParam } from './scoped-read.guard';
 @Injectable({
   providedIn: 'root',
 })
-export class ScopedWriteGuard  {
-  constructor(
-    private authService: AuthenticationService,
-    private snackbar: MatSnackBar,
-    private router: Router,
-    private areas: NavAreasService
-  ) {}
+export class ScopedWriteGuard {
+  private authService = inject(AuthenticationService);
+  private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
+  private areas = inject(NavAreasService);
 
   canActivate(route: ActivatedRouteSnapshot): boolean | Observable<boolean> {
-    const group =
-      findParam('group', route) ||
-      this.areas._tempNavGroupContext$.value ||
-      this.areas.groupContext$.value;
+    const group = findParam('group', route) || this.areas._tempNavGroupContext$.value || this.areas.groupContext$.value;
     const repo =
-      findParam('repo', route) ||
-      this.areas._tempNavGroupContext$.value ||
-      this.areas.repositoryContext$.value;
+      findParam('repo', route) || this.areas._tempNavGroupContext$.value || this.areas.repositoryContext$.value;
     const ctx = group ? group : repo;
 
     this.areas._tempNavGroupContext$.next(group);
     this.areas._tempNavRepoContext$.next(group);
-
-    if (!this.authService.isAuthenticated()) {
-      return true;
-    }
 
     return this.authService.isScopedWrite$(ctx).pipe(
       map((isScopedWrite) => {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { InstanceDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -14,67 +14,51 @@ import { SystemsEditService } from '../../services/systems-edit.service';
   selector: 'app-system-details',
   templateUrl: './system-details.component.html',
 })
-export class SystemDetailsComponent implements OnDestroy {
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ instancesUsing$ = new BehaviorSubject<InstanceDto[]>(null);
-  /* template */ instancesUsingColumns = [
-    this.instanceColumns.instanceNameColumn,
-    this.instanceColumns.instanceIdColumn,
-  ];
+export class SystemDetailsComponent implements OnInit, OnDestroy {
+  private systems = inject(SystemsService);
+  private areas = inject(NavAreasService);
+  private instances = inject(InstancesService);
+  private servers = inject(ServersService);
+  private instanceColumns = inject(InstancesColumnsService);
+  protected edit = inject(SystemsEditService);
+  protected auth = inject(AuthenticationService);
 
-  /* template */ getRecordRoute = (row: InstanceDto) => {
-    return [
-      '/instances',
-      'dashboard',
-      this.areas.groupContext$.value,
-      row.instanceConfiguration.id,
-    ];
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected instancesUsing$ = new BehaviorSubject<InstanceDto[]>(null);
+  protected instancesUsingColumns = [this.instanceColumns.instanceNameColumn, this.instanceColumns.instanceIdColumn];
+
+  protected getRecordRoute = (row: InstanceDto) => {
+    return ['/instances', 'dashboard', this.areas.groupContext$.value, row.instanceConfiguration.id];
   };
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(
-    private systems: SystemsService,
-    public edit: SystemsEditService,
-    private areas: NavAreasService,
-    instances: InstancesService,
-    private servers: ServersService,
-    private instanceColumns: InstancesColumnsService,
-    protected auth: AuthenticationService
-  ) {
-    this.subscription = combineLatest([
-      edit.current$,
-      instances.instances$,
-    ]).subscribe(([c, i]) => {
+  ngOnInit() {
+    this.subscription = combineLatest([this.edit.current$, this.instances.instances$]).subscribe(([c, i]) => {
       if (!c || !i) {
         this.instancesUsing$.next(null);
         return;
       }
 
-      this.instancesUsing$.next(
-        i.filter((i) => i.instanceConfiguration?.system?.name === c.key?.name)
-      );
-
+      this.instancesUsing$.next(i.filter((i) => i.instanceConfiguration?.system?.name === c.key?.name));
       this.loading$.next(false);
     });
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ isSynchronized(): boolean {
+  protected isSynchronized(): boolean {
     return this.servers.isSynchronized(
       this.edit.current$.value?.minion
-        ? this.servers.servers$.value?.find(
-            (s) => s.hostName === this.edit.current$.value?.minion
-          )
+        ? this.servers.servers$.value?.find((s) => s.hostName === this.edit.current$.value?.minion)
         : null
     );
   }
 
-  /* template */ onDelete() {
+  protected onDelete() {
     this.dialog
       .confirm(
         `Delete ${this.edit.current$.value?.config?.name}`,
@@ -82,11 +66,9 @@ export class SystemDetailsComponent implements OnDestroy {
       )
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.systems
-            .delete(this.edit.current$.value?.config.id)
-            .subscribe(() => {
-              this.areas.closePanel();
-            });
+          this.systems.delete(this.edit.current$.value?.config.id).subscribe(() => {
+            this.areas.closePanel();
+          });
         }
       });
   }

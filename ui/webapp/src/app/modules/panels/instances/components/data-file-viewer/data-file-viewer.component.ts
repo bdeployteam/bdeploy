@@ -1,22 +1,9 @@
-import { Component, NgZone, OnDestroy } from '@angular/core';
-import {
-  BehaviorSubject,
-  Subject,
-  Subscription,
-  combineLatest,
-  delay,
-  of,
-  skipWhile,
-  switchMap,
-} from 'rxjs';
+import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Subject, Subscription, combineLatest, delay, of, skipWhile, switchMap } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  isArchived,
-  isOversized,
-  unwrap,
-} from 'src/app/modules/core/utils/file-viewer.utils';
+import { isArchived, isOversized, unwrap } from 'src/app/modules/core/utils/file-viewer.utils';
 import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
@@ -26,44 +13,38 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
   selector: 'app-data-file-viewer',
   templateUrl: './data-file-viewer.component.html',
 })
-export class DataFileViewerComponent implements OnDestroy {
-  /* template */ directory$ = new BehaviorSubject<RemoteDirectory>(null);
-  /* template */ file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
-  /* template */ content$ = new Subject<string>();
-  /* template */ follow$ = new BehaviorSubject<boolean>(false);
+export class DataFileViewerComponent implements OnInit, OnDestroy {
+  private instances = inject(InstancesService);
+  private areas = inject(NavAreasService);
+  private df = inject(DataFilesService);
+  private auth = inject(AuthenticationService);
+  private ngZone = inject(NgZone);
 
-  /* template */ oversized = false;
-  /* template */ canEdit = false;
+  protected directory$ = new BehaviorSubject<RemoteDirectory>(null);
+  protected file$ = new BehaviorSubject<RemoteDirectoryEntry>(null);
+  protected content$ = new Subject<string>();
+  protected follow$ = new BehaviorSubject<boolean>(false);
+
+  protected oversized = false;
+  protected canEdit = false;
 
   private followInterval;
   private offset = 0;
   private subscription: Subscription;
 
-  constructor(
-    private instances: InstancesService,
-    areas: NavAreasService,
-    df: DataFilesService,
-    auth: AuthenticationService,
-    ngZone: NgZone
-  ) {
-    this.subscription = combineLatest([
-      areas.panelRoute$,
-      df.directories$,
-    ]).subscribe(([r, d]) => {
+  ngOnInit(): void {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.df.directories$]).subscribe(([r, d]) => {
       if (!r?.params || !r.params['node'] || !r.params['file'] || !d) {
         return;
       }
 
-      this.canEdit = auth.isCurrentScopeWrite();
+      this.canEdit = this.auth.isCurrentScopeWrite();
 
       const nodeName = r.params['node'];
       const fileName = r.params['file'];
 
       // check if we need to reset, otherwise e.g. the file size was updated, which is fine to follow along.
-      if (
-        nodeName !== this.directory$.value?.minion ||
-        fileName !== this.file$.value?.path
-      ) {
+      if (nodeName !== this.directory$.value?.minion || fileName !== this.file$.value?.path) {
         // reset!
         this.offset = 0;
       }
@@ -89,8 +70,8 @@ export class DataFileViewerComponent implements OnDestroy {
       this.follow$.subscribe((b) => {
         clearInterval(this.followInterval);
         if (b) {
-          ngZone.runOutsideAngular(() => {
-            this.followInterval = setInterval(() => df.load(), 2000);
+          this.ngZone.runOutsideAngular(() => {
+            this.followInterval = setInterval(() => this.df.load(), 2000);
           });
         }
       })
@@ -98,11 +79,11 @@ export class DataFileViewerComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
     clearInterval(this.followInterval);
   }
 
-  /* template */ doDownload() {
+  protected doDownload() {
     this.instances.download(this.directory$.value, this.file$.value);
   }
 

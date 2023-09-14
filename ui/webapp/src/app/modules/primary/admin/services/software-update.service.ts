@@ -1,14 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, Observable, forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
-import {
-  LauncherDto,
-  ManifestKey,
-  OperatingSystem,
-} from '../../../../models/gen.dtos';
+import { LauncherDto, ManifestKey, OperatingSystem } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 
 export interface SoftwareVersion {
@@ -24,13 +20,14 @@ export interface SoftwareVersion {
   providedIn: 'root',
 })
 export class SoftwareUpdateService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+
   public loading$ = new BehaviorSubject<boolean>(false);
   public software$ = new BehaviorSubject<SoftwareVersion[]>(null);
 
   private apiPath = () => `${this.cfg.config.api}/swup`;
   public uploadUrl$ = new BehaviorSubject<string>(this.apiPath());
-
-  constructor(private cfg: ConfigService, private http: HttpClient) {}
 
   public load() {
     this.loading$.next(true);

@@ -8,6 +8,7 @@ import {
   Output,
   SimpleChanges,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BdDataGrouping, BdDataGroupingDefinition } from 'src/app/models/data';
@@ -28,6 +29,10 @@ enum PresetType {
   encapsulation: ViewEncapsulation.None,
 })
 export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
+  private snackBar = inject(MatSnackBar);
+  private confirmationService = inject(ConfirmationService);
+  protected auth = inject(AuthenticationService);
+
   /** whether mutiple groupings are supported */
   @Input() multiple = true;
 
@@ -50,14 +55,14 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   @Output() globalPresetSaved = new EventEmitter<CustomDataGrouping[]>();
 
-  /* template */ groupings: BdDataGrouping<T>[] = [];
-  /* template */ presetType: PresetType;
-  /* template */ presetTypes = [PresetType.GLOBAL, PresetType.PERSONAL];
-  /* template */ get availableDefinitions(): BdDataGroupingDefinition<T>[] {
+  protected groupings: BdDataGrouping<T>[] = [];
+  protected presetType: PresetType;
+  protected presetTypes = [PresetType.GLOBAL, PresetType.PERSONAL];
+  protected get availableDefinitions(): BdDataGroupingDefinition<T>[] {
     const selectedDefinitions = this.groupings.map((g) => g.definition);
     return this.definitions.filter((def) => !selectedDefinitions.includes(def));
   }
-  /* template */ get groupBy(): string {
+  protected get groupBy(): string {
     const groupings =
       this.groupings
         .map((g) => g.definition?.name)
@@ -67,17 +72,11 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     return groupBy.length > 30 ? `${groupBy.substring(0, 30)}...` : groupBy;
   }
 
-  /* template */ get disabled(): boolean {
+  protected get disabled(): boolean {
     const isGlobalPreset = this.presetType === PresetType.GLOBAL;
     const isAdmin = this.auth.isCurrentScopeAdmin$.value;
     return isGlobalPreset && (!isAdmin || !this.hasGlobalPreset);
   }
-
-  constructor(
-    private snackBar: MatSnackBar,
-    public auth: AuthenticationService,
-    private confirmationService: ConfirmationService
-  ) {}
 
   ngOnInit(): void {
     this.loadPreset();
@@ -102,10 +101,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     }
     if (changes['defaultGrouping']) {
       // if global preset was updated, default grouping would change
-      if (
-        changes['defaultGrouping'].currentValue !==
-        changes['defaultGrouping'].previousValue
-      ) {
+      if (changes['defaultGrouping'].currentValue !== changes['defaultGrouping'].previousValue) {
         this.loadPreset();
         this.fireUpdate();
       }
@@ -138,10 +134,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     // deserialize the stored preset.
     try {
       const parsed = JSON.parse(stored) as CustomDataGrouping[];
-      const restored: BdDataGrouping<T>[] = calculateGrouping(
-        this.definitions,
-        parsed
-      );
+      const restored: BdDataGrouping<T>[] = calculateGrouping(this.definitions, parsed);
       if (restored?.length) {
         this.groupings = restored;
       } else {
@@ -164,11 +157,11 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
       );
   }
 
-  /* template */ capitalize(val: string): string {
+  protected capitalize(val: string): string {
     return val[0].toUpperCase() + val.substring(1).toLowerCase();
   }
 
-  /* template */ setPresetType(presetType: PresetType): void {
+  protected setPresetType(presetType: PresetType): void {
     this.presetType = presetType;
     localStorage.setItem(this.presetTypeKey(), this.presetType);
     this.loadPreset();
@@ -191,7 +184,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     }
   }
 
-  /* template */ savePreset(): void {
+  protected savePreset(): void {
     switch (this.presetType) {
       case PresetType.GLOBAL:
         this.saveGlobalPreset();
@@ -208,10 +201,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     const preset = this.groupingToPreset();
 
     this.confirmationService
-      .confirm(
-        'Save global preset?',
-        'This grouping will be set as the global default preset for all users.'
-      )
+      .confirm('Save global preset?', 'This grouping will be set as the global default preset for all users.')
       .subscribe((confirmed) => {
         if (confirmed) {
           this.globalPresetSaved.emit(preset);
@@ -220,17 +210,14 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
   }
 
   private saveLocalPreset() {
-    localStorage.setItem(
-      this.getStorageKey(),
-      JSON.stringify(this.groupingToPreset())
-    );
+    localStorage.setItem(this.getStorageKey(), JSON.stringify(this.groupingToPreset()));
 
     this.snackBar.open('Preset saved in local browser.', null, {
       duration: 1500,
     });
   }
 
-  /* template */ deletePreset(): void {
+  protected deletePreset(): void {
     switch (this.presetType) {
       case PresetType.GLOBAL:
         this.deleteGlobalPreset();
@@ -244,10 +231,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
 
   private deleteGlobalPreset() {
     this.confirmationService
-      .confirm(
-        'Delete global preset?',
-        'Default grouping will be set as the global default preset for all users.'
-      )
+      .confirm('Delete global preset?', 'Default grouping will be set as the global default preset for all users.')
       .subscribe((confirmed) => {
         if (confirmed) {
           this.globalPresetSaved.emit(null);
@@ -264,11 +248,11 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     });
   }
 
-  /* template */ addGrouping() {
+  protected addGrouping() {
     this.groupings.push({ definition: null, selected: [] });
   }
 
-  /* template */ removeGrouping(grouping: BdDataGrouping<T>) {
+  protected removeGrouping(grouping: BdDataGrouping<T>) {
     this.groupings.splice(this.groupings.indexOf(grouping), 1);
 
     // add an empty one, so there is always a panel visible.
@@ -279,12 +263,12 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     this.fireUpdate();
   }
 
-  /* template */ onDrop(event: CdkDragDrop<BdDataGrouping<T>[]>) {
+  protected onDrop(event: CdkDragDrop<BdDataGrouping<T>[]>) {
     moveItemInArray(this.groupings, event.previousIndex, event.currentIndex);
     this.fireUpdate();
   }
 
-  /* template */ fireUpdate() {
+  protected fireUpdate() {
     const filteredGroups = this.groupings.filter((g) => !!g.definition);
     this.groupingChange.emit(filteredGroups);
   }

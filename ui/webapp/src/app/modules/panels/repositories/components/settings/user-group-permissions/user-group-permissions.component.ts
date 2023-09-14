@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import { Permission, UserGroupInfo } from 'src/app/models/gen.dtos';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
@@ -17,6 +17,10 @@ import { RepositoryUsersService } from '../../../services/repository-users.servi
   templateUrl: './user-group-permissions.component.html',
 })
 export class UserGroupPermissionsComponent {
+  private groupCols = inject(UserGroupsColumnsService);
+  protected repos = inject(RepositoriesService);
+  protected users = inject(RepositoryUsersService);
+
   private readonly colGlobalPerm: BdDataColumn<UserGroupInfo> = {
     id: 'global',
     name: 'Global Perm.',
@@ -39,10 +43,7 @@ export class UserGroupPermissionsComponent {
     data: (r) => `Modify permissions for ${r.name}`,
     action: (r) => this.doModify(this.modDialog, r),
     actionDisabled: (r) => this.getAvailablePermissionsForGroup(r).length === 0,
-    icon: (r) =>
-      !this.getLocalPermissionLevel(r) && !this.getGlobalPermissionLevel(r)
-        ? 'add'
-        : 'edit',
+    icon: (r) => (!this.getLocalPermissionLevel(r) && !this.getGlobalPermissionLevel(r) ? 'add' : 'edit'),
     width: '40px',
   };
 
@@ -53,19 +54,15 @@ export class UserGroupPermissionsComponent {
     disabled: () => !this.getLocalPermissionLevel(this.modGroup),
   };
 
-  private groupNames = [
-    'Local Permission',
-    'Global Permission',
-    'No Permission',
-  ];
+  private groupNames = ['Local Permission', 'Global Permission', 'No Permission'];
 
-  /* template */ columns: BdDataColumn<UserGroupInfo>[] = [
+  protected columns: BdDataColumn<UserGroupInfo>[] = [
     ...this.groupCols.defaultColumns,
     this.colGlobalPerm,
     this.colLocalPerm,
     this.colModPerm,
   ];
-  /* template */ grouping: BdDataGrouping<UserGroupInfo>[] = [
+  protected grouping: BdDataGrouping<UserGroupInfo>[] = [
     {
       definition: {
         group: (r) =>
@@ -81,23 +78,15 @@ export class UserGroupPermissionsComponent {
     },
   ];
 
-  /* template */ modPerm: Permission;
-  /* template */ modGroup: UserGroupInfo;
-  /* template */ availablePermissionsForGroup: Permission[];
+  protected modPerm: Permission;
+  protected modGroup: UserGroupInfo;
+  protected availablePermissionsForGroup: Permission[];
 
   @Input() dialog: BdDialogComponent;
   @ViewChild('modDialog') private modDialog: TemplateRef<any>;
 
-  constructor(
-    public repos: RepositoriesService,
-    public users: RepositoryUsersService,
-    private groupCols: UserGroupsColumnsService
-  ) {}
-
   private getLocalPermissionLevel(group: UserGroupInfo): Permission {
-    return group.permissions.find(
-      (p) => p.scope === this.repos.current$.value.name
-    )?.permission;
+    return group.permissions.find((p) => p.scope === this.repos.current$.value.name)?.permission;
   }
 
   private getGlobalPermissionLevel(group: UserGroupInfo): Permission {
@@ -106,9 +95,7 @@ export class UserGroupPermissionsComponent {
 
   private doModify(tpl: TemplateRef<any>, group: UserGroupInfo) {
     this.modGroup = group;
-    this.availablePermissionsForGroup = this.getAvailablePermissionsForGroup(
-      this.modGroup
-    );
+    this.availablePermissionsForGroup = this.getAvailablePermissionsForGroup(this.modGroup);
     this.modPerm = this.getLocalPermissionLevel(group);
     this.dialog
       .message({
@@ -132,12 +119,7 @@ export class UserGroupPermissionsComponent {
 
     // only permissions HIGHER than the current global permission are avilable.
     const glob = this.getGlobalPermissionLevel(group);
-    const allPerms = [
-      Permission.CLIENT,
-      Permission.READ,
-      Permission.WRITE,
-      Permission.ADMIN,
-    ];
+    const allPerms = [Permission.CLIENT, Permission.READ, Permission.WRITE, Permission.ADMIN];
 
     if (!glob) return allPerms;
     if (glob === Permission.CLIENT) return allPerms.slice(1);

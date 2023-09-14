@@ -1,11 +1,8 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  CustomAttributeDescriptor,
-  InstanceGroupConfiguration,
-} from 'src/app/models/gen.dtos';
+import { CustomAttributeDescriptor, InstanceGroupConfiguration } from 'src/app/models/gen.dtos';
 import {
   ACTION_APPLY,
   ACTION_CANCEL,
@@ -19,6 +16,9 @@ import { GroupDetailsService } from '../../../services/group-details.service';
   templateUrl: './attribute-definitions.component.html',
 })
 export class AttributeDefinitionsComponent {
+  protected groups = inject(GroupsService);
+  protected details = inject(GroupDetailsService);
+
   private defIdCol: BdDataColumn<CustomAttributeDescriptor> = {
     id: 'id',
     name: 'ID',
@@ -43,26 +43,14 @@ export class AttributeDefinitionsComponent {
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns: BdDataColumn<CustomAttributeDescriptor>[] = [
-    this.defIdCol,
-    this.defDescCol,
-    this.defDelCol,
-  ];
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected columns: BdDataColumn<CustomAttributeDescriptor>[] = [this.defIdCol, this.defDescCol, this.defDelCol];
 
-  /* template */ newId: string;
-  /* template */ newDesc: string;
-  /* template */ newUsedIds: string[];
+  protected newId: string;
+  protected newDesc: string;
+  protected newUsedIds: string[];
 
-  constructor(
-    public groups: GroupsService,
-    public details: GroupDetailsService
-  ) {}
-
-  /* template */ showAddDialog(
-    group: InstanceGroupConfiguration,
-    templ: TemplateRef<any>
-  ) {
+  protected showAddDialog(group: InstanceGroupConfiguration, templ: TemplateRef<any>) {
     this.newUsedIds = group.instanceAttributes.map((r) => r.name);
     this.dialog
       .message({

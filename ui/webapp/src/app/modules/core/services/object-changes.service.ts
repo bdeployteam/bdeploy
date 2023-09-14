@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import ReconnectingWebSocket, { ErrorEvent } from 'reconnecting-websocket';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, combineLatest } from 'rxjs';
+import { distinctUntilChanged, skipWhile } from 'rxjs/operators';
 import {
   ObjectChangeDto,
   ObjectChangeInitDto,
@@ -24,24 +25,30 @@ interface RemoteRegistration {
   providedIn: 'root',
 })
 export class ObjectChangesService {
-  private ws: ReconnectingWebSocket;
+  private cfg = inject(ConfigService);
+  private auth = inject(AuthenticationService);
+
+  public errorCount$ = new BehaviorSubject<number>(0);
+
   private _change$ = new Subject<ObjectChangeDto>();
   private _error$ = new Subject<ErrorEvent>();
   private _open$ = new BehaviorSubject<boolean>(false);
   private _refs: { [index: string]: RemoteRegistration } = {};
   private _lastError = 0;
-  public errorCount$ = new BehaviorSubject<number>(0);
+  private ws = this.createWebSocket();
 
-  constructor(private cfg: ConfigService, private auth: AuthenticationService) {
-    this.ws = this.createWebSocket();
-    this.auth.getTokenSubject().subscribe(() => this.ws.reconnect());
+  constructor() {
+    combineLatest([
+      this.auth.getTokenSubject().pipe(distinctUntilChanged()),
+      this.cfg.offline$.pipe(distinctUntilChanged()),
+    ])
+      .pipe(skipWhile(([t, o]) => !t || o))
+      .subscribe(() => this.ws.reconnect());
   }
 
   private createWebSocket() {
     // See io.bdeploy.jersey.ws.change.ObjectChangeWebSocket
-    const _socket = new ReconnectingWebSocket(
-      this.getWebsocketUrl() + '/object-changes'
-    );
+    const _socket = new ReconnectingWebSocket(this.getWebsocketUrl() + '/object-changes');
     _socket.addEventListener('open', () => {
       if (!this.auth.getToken()) {
         return;
@@ -114,7 +121,7 @@ export class ObjectChangesService {
     return `${type}|${scope.scope?.length ? scope.scope.join(';') : '[]'}`;
   }
 
-  subscribe(
+  public subscribe(
     type: ObjectChangeType,
     scope: ObjectScope,
     next: (next: ObjectChangeDto) => void,

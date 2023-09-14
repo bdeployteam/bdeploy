@@ -1,22 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { InstanceDto, ManifestKey, MinionMode } from 'src/app/models/gen.dtos';
 import { BdIdentifierCellComponent } from 'src/app/modules/core/components/bd-identifier-cell/bd-identifier-cell.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { BdDataSyncCellComponent } from '../../../core/components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { ProductsService } from '../../products/services/products.service';
-import { ServersService } from '../../servers/services/servers.service';
 import { SystemsService } from '../../systems/services/systems.service';
 import { InstanceBannerHintComponent } from '../components/browser/instance-banner-hint/instance-banner-hint.component';
 import { InstanceManagedServerComponent } from '../components/browser/instance-managed-server/instance-managed-server.component';
 import { InstanceProductVersionComponent } from '../components/browser/instance-product-version/instance-product-version.component';
 import { InstancePurposeShortComponent } from '../components/browser/instance-purpose-short/instance-purpose-short.component';
-import { InstancesService } from './instances.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class InstancesColumnsService {
+  private cfg = inject(ConfigService);
+  private products = inject(ProductsService);
+  private systems = inject(SystemsService);
+
   instanceTypeColumn: BdDataColumn<InstanceDto> = {
     id: 'type',
     name: 'Purp.',
@@ -123,14 +125,8 @@ export class InstancesColumnsService {
     width: '50px',
   };
 
-  constructor(
-    private cfg: ConfigService,
-    private instances: InstancesService,
-    private servers: ServersService,
-    private products: ProductsService,
-    private systems: SystemsService
-  ) {
-    if (cfg.config.mode !== MinionMode.CENTRAL) {
+  constructor() {
+    if (this.cfg.config.mode !== MinionMode.CENTRAL) {
       this.instanceSyncColumn.display = BdDataColumnDisplay.NONE;
       this.instanceServerColumn.display = BdDataColumnDisplay.NONE;
     }

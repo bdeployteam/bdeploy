@@ -1,19 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  of,
-  Subscription,
-} from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -27,40 +15,30 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
   templateUrl: './edit-global-attribute.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditGlobalAttributeComponent
-  implements OnInit, OnDestroy, DirtyableDialog
-{
-  /* template */ tempAttribute: CustomAttributeDescriptor;
-  /* template */ origAttribute: CustomAttributeDescriptor;
-  /* template */ initialAttribute: CustomAttributeDescriptor;
-  /* template */ tempUsedIds: string[];
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
+export class EditGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private settings = inject(SettingsService);
+  private areas = inject(NavAreasService);
+
+  protected tempAttribute: CustomAttributeDescriptor;
+  protected origAttribute: CustomAttributeDescriptor;
+  protected initialAttribute: CustomAttributeDescriptor;
+  protected tempUsedIds: string[];
+  protected loading$ = new BehaviorSubject<boolean>(true);
 
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    private settings: SettingsService,
-    private areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([
-        this.areas.panelRoute$,
-        this.settings.settings$,
-      ]).subscribe(([route, settings]) => {
+      combineLatest([this.areas.panelRoute$, this.settings.settings$]).subscribe(([route, settings]) => {
         if (!settings || !route?.params || !route.params['attribute']) {
           return;
         }
 
-        this.initialAttribute = settings.instanceGroup.attributes.find(
-          (a) => a.name === route.params['attribute']
-        );
+        this.initialAttribute = settings.instanceGroup.attributes.find((a) => a.name === route.params['attribute']);
         this.tempAttribute = cloneDeep(this.initialAttribute);
         this.origAttribute = cloneDeep(this.initialAttribute);
         this.tempUsedIds = settings.instanceGroup.attributes
@@ -72,33 +50,28 @@ export class EditGlobalAttributeComponent
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => {
       this.reset();
     });
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     if (!this.tempAttribute) {
       return false;
     }
     return isDirty(this.tempAttribute, this.initialAttribute);
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
   public doSave(): Observable<void> {
-    return of(
-      this.settings.editGlobalAttribute(
-        this.tempAttribute,
-        this.initialAttribute
-      )
-    );
+    return of(this.settings.editGlobalAttribute(this.tempAttribute, this.initialAttribute));
   }
 
   private reset() {

@@ -1,19 +1,5 @@
-import {
-  animate,
-  animateChild,
-  group,
-  query,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostBinding,
-  Input,
-} from '@angular/core';
+import { animate, animateChild, group, query, state, style, transition, trigger } from '@angular/animations';
+import { ChangeDetectionStrategy, Component, HostBinding, Input, inject } from '@angular/core';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 import { ActionsService } from '../../services/actions.service';
@@ -24,10 +10,7 @@ import { NavAreasService } from '../../services/nav-areas.service';
 @Component({
   selector: 'app-main-nav-menu',
   templateUrl: './main-nav-menu.component.html',
-  styleUrls: [
-    './main-nav-menu.component.css',
-    './main-nav-menu-hamburger.scss',
-  ],
+  styleUrls: ['./main-nav-menu.component.css', './main-nav-menu-hamburger.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     delayedFadeIn,
@@ -38,16 +21,10 @@ import { NavAreasService } from '../../services/nav-areas.service';
       state('closed', style({ width: '64px' })),
       state('open', style({ width: '220px' })),
       transition('open => closed', [
-        group([
-          animate('0.2s ease', style({ width: '64px' })),
-          query('@*', [animateChild()]),
-        ]),
+        group([animate('0.2s ease', style({ width: '64px' })), query('@*', [animateChild()])]),
       ]),
       transition('closed => open', [
-        group([
-          animate('0.2s ease', style({ width: '220px' })),
-          query('@*', [animateChild()]),
-        ]),
+        group([animate('0.2s ease', style({ width: '220px' })), query('@*', [animateChild()])]),
       ]),
     ]),
     trigger('headerOpenClose', [
@@ -59,6 +36,11 @@ import { NavAreasService } from '../../services/nav-areas.service';
   ],
 })
 export class MainNavMenuComponent {
+  protected cfgService = inject(ConfigService);
+  protected authService = inject(AuthenticationService);
+  protected areas = inject(NavAreasService);
+  protected actions = inject(ActionsService);
+
   @Input() set expanded(val: boolean) {
     this.areas.menuMaximized$.next(!this.areas.menuMaximized$.value);
   }
@@ -67,20 +49,11 @@ export class MainNavMenuComponent {
     return this.areas.menuMaximized$.value;
   }
 
-  constructor(
-    public cfgService: ConfigService,
-    public authService: AuthenticationService,
-    public areas: NavAreasService,
-    public actions: ActionsService
-  ) {}
-
   @HostBinding('@menuOpenClose') get animationState() {
     return this.expanded ? 'open' : 'closed';
   }
 
   goToGitHub(): void {
-    window
-      .open('https://github.com/bdeployteam/bdeploy/releases/latest', '_blank')
-      .focus();
+    window.open('https://github.com/bdeployteam/bdeploy/releases/latest', '_blank').focus();
   }
 }

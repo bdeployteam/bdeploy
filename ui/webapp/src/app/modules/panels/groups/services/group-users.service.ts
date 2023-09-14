@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import {
@@ -12,10 +12,7 @@ import {
   UserPermissionUpdateDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import {
-  EMPTY_SCOPE,
-  ObjectChangesService,
-} from 'src/app/modules/core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 
@@ -23,6 +20,11 @@ import { GroupsService } from 'src/app/modules/primary/groups/services/groups.se
   providedIn: 'root',
 })
 export class GroupUsersService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private groups = inject(GroupsService);
+
   public loadingUsers$ = new BehaviorSubject<boolean>(false);
   public loadingUserGroups$ = new BehaviorSubject<boolean>(false);
   public loading$ = combineLatest({
@@ -35,12 +37,7 @@ export class GroupUsersService {
   private group: InstanceGroupConfiguration;
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private groups: GroupsService
-  ) {
+  constructor() {
     this.groups.current$.subscribe((g) => {
       this.group = g;
       this.loadUsers();

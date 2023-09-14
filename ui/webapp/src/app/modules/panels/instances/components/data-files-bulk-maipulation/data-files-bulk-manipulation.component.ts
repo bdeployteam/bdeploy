@@ -1,5 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Component, ViewChild, inject } from '@angular/core';
+import { BehaviorSubject, finalize } from 'rxjs';
 import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -11,25 +11,23 @@ import { DataFilesService } from 'src/app/modules/primary/instances/services/dat
   templateUrl: './data-files-bulk-manipulation.component.html',
 })
 export class DataFilesBulkManipulationComponent {
-  /* template */ starting$ = new BehaviorSubject<boolean>(false);
-  /* template */ stopping$ = new BehaviorSubject<boolean>(false);
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
-  /* template */ installing$ = new BehaviorSubject<boolean>(false);
-  /* template */ activating$ = new BehaviorSubject<boolean>(false);
-  /* template */ isAllSameProduct: boolean;
-  /* template */ selections: {
+  private areas = inject(NavAreasService);
+  private dataFilesService = inject(DataFilesService);
+  protected dataFilesBulkService = inject(DataFilesBulkService);
+
+  protected starting$ = new BehaviorSubject<boolean>(false);
+  protected stopping$ = new BehaviorSubject<boolean>(false);
+  protected deleting$ = new BehaviorSubject<boolean>(false);
+  protected installing$ = new BehaviorSubject<boolean>(false);
+  protected activating$ = new BehaviorSubject<boolean>(false);
+  protected isAllSameProduct: boolean;
+  protected selections: {
     directory: RemoteDirectory;
     entry: RemoteDirectoryEntry;
   }[];
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(
-    public dataFilesBulkService: DataFilesBulkService,
-    private areas: NavAreasService,
-    private dataFilesService: DataFilesService
-  ) {}
-
-  /* template */ onDelete() {
+  protected onDelete() {
     const count = this.dataFilesBulkService.selection.length;
     this.dialog
       .confirm(
@@ -45,15 +43,17 @@ export class DataFilesBulkManipulationComponent {
         }
 
         this.deleting$.next(true);
-        this.dataFilesBulkService.deleteFiles().then(() => {
-          this.deleting$.next(false);
-          this.dataFilesService.load();
-          this.areas.closePanel();
-        });
+        this.dataFilesBulkService
+          .deleteFiles()
+          .pipe(finalize(() => this.deleting$.next(false)))
+          .subscribe(() => {
+            this.dataFilesService.load();
+            this.areas.closePanel();
+          });
       });
   }
 
-  /* template */ onDownload() {
+  protected onDownload() {
     this.dataFilesBulkService.downloadDataFile();
   }
 }

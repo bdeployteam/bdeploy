@@ -1,11 +1,7 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
-import {
-  InstanceDto,
-  RemoteDirectory,
-  RemoteDirectoryEntry,
-} from 'src/app/models/gen.dtos';
+import { InstanceDto, RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -51,6 +47,13 @@ const colModTime: BdDataColumn<FileListEntry> = {
   templateUrl: './data-files.component.html',
 })
 export class DataFilesComponent implements OnInit, OnDestroy {
+  private instances = inject(InstancesService);
+  private df = inject(DataFilesService);
+  protected cfg = inject(ConfigService);
+  protected servers = inject(ServersService);
+  protected authService = inject(AuthenticationService);
+  protected dataFilesBulkService = inject(DataFilesBulkService);
+
   private readonly colDownload: BdDataColumn<FileListEntry> = {
     id: 'download',
     name: 'Downl.',
@@ -69,65 +72,41 @@ export class DataFilesComponent implements OnInit, OnDestroy {
     width: '50px',
     actionDisabled: () => !this.authService.isCurrentScopeWrite(),
   };
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ records$ = new BehaviorSubject<FileListEntry[]>(null);
-  /* template */ noactive$ = new BehaviorSubject<boolean>(true);
-  /* template */ columns: BdDataColumn<FileListEntry>[] = [
-    colPath,
-    colModTime,
-    colSize,
-    this.colDownload,
-    this.colDelete,
-  ];
-  /* template */ grouping: BdDataGrouping<FileListEntry>[] = [
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected records$ = new BehaviorSubject<FileListEntry[]>(null);
+  protected noactive$ = new BehaviorSubject<boolean>(true);
+  protected columns: BdDataColumn<FileListEntry>[] = [colPath, colModTime, colSize, this.colDownload, this.colDelete];
+  protected grouping: BdDataGrouping<FileListEntry>[] = [
     {
       definition: { group: (r) => r.directory.minion, name: 'Node Name' },
       selected: [],
     },
   ];
-  /* template */ getRecordRoute = (row: FileListEntry) => {
+  protected getRecordRoute = (row: FileListEntry) => {
     return [
       '',
       {
         outlets: {
-          panel: [
-            'panels',
-            'instances',
-            'data-files',
-            row.directory.minion,
-            row.entry.path,
-            'view',
-          ],
+          panel: ['panels', 'instances', 'data-files', row.directory.minion, row.entry.path, 'view'],
         },
       },
     ];
   };
 
-  /* template */ instance: InstanceDto;
+  protected instance: InstanceDto;
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(
-    public cfg: ConfigService,
-    public instances: InstancesService,
-    public servers: ServersService,
-    public df: DataFilesService,
-    public authService: AuthenticationService,
-    public dataFilesBulkService: DataFilesBulkService
-  ) {}
-
   ngOnInit(): void {
-    this.subscription = combineLatest([
-      this.instances.current$,
-      this.servers.servers$,
-      this.cfg.isCentral$,
-    ]).subscribe(([inst, srvs, isCentral]) => {
-      if (isCentral && !srvs?.length) {
-        return;
+    this.subscription = combineLatest([this.instances.current$, this.servers.servers$, this.cfg.isCentral$]).subscribe(
+      ([inst, srvs, isCentral]) => {
+        if (isCentral && !srvs?.length) {
+          return;
+        }
+        this.load(inst);
       }
-      this.load(inst);
-    });
+    );
 
     this.subscription.add(
       this.df.directories$.subscribe((dd) => {
@@ -139,9 +118,7 @@ export class DataFilesComponent implements OnInit, OnDestroy {
         const entries: FileListEntry[] = [];
         for (const dir of dd) {
           if (dir.problem) {
-            console.warn(
-              `Problem reading files from ${dir.minion}: ${dir.problem}`
-            );
+            console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
             continue;
           }
           for (const entry of dir.entries) {
@@ -155,17 +132,14 @@ export class DataFilesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ load(inst: InstanceDto) {
+  protected load(inst: InstanceDto) {
     this.instance = inst;
     this.noactive$.next(!inst?.activeVersion?.tag);
 
-    if (
-      this.noactive$.value ||
-      !this.servers.isSynchronized(inst?.managedServer)
-    ) {
+    if (this.noactive$.value || !this.servers.isSynchronized(inst?.managedServer)) {
       this.loading$.next(false);
       return;
     }

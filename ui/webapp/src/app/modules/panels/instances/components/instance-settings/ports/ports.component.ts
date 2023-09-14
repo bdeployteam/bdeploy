@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { ParameterType } from 'src/app/models/gen.dtos';
 import {
@@ -11,10 +11,7 @@ import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
-import {
-  PortParam,
-  PortsEditService,
-} from '../../../services/ports-edit.service';
+import { PortParam, PortsEditService } from '../../../services/ports-edit.service';
 import { PortTypeCellComponent } from './port-type-cell/port-type-cell.component';
 
 const colName: BdDataColumn<PortParam> = {
@@ -45,24 +42,18 @@ const colPort: BdDataColumn<PortParam> = {
   templateUrl: './ports.component.html',
 })
 export class PortsComponent implements OnInit {
-  /* template */ columns: BdDataColumn<PortParam>[] = [
-    colName,
-    colType,
-    colPort,
-  ];
-  /* template */ checked: PortParam[];
-  /* template */ ports: PortParam[] = [];
-  /* template */ amount: number;
+  private dl = inject(DownloadService);
+  private systems = inject(SystemsService);
+  private instances = inject(InstancesService);
+  protected edit = inject(InstanceEditService);
+  protected portEdit = inject(PortsEditService);
+
+  protected columns: BdDataColumn<PortParam>[] = [colName, colType, colPort];
+  protected checked: PortParam[];
+  protected ports: PortParam[] = [];
+  protected amount: number;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
-
-  constructor(
-    public edit: InstanceEditService,
-    public portEdit: PortsEditService,
-    private dl: DownloadService,
-    private systems: SystemsService,
-    private instances: InstancesService
-  ) {}
 
   ngOnInit(): void {
     this.portEdit.ports$.subscribe((ports) => {
@@ -73,23 +64,17 @@ export class PortsComponent implements OnInit {
     });
   }
 
-  /* template */ exportCsv() {
+  protected exportCsv() {
     let csv = 'Application,Name,Description,Port,Node';
     // only interested in server ports on applications.
     const system = this.edit.state$?.value?.config?.config?.system
-      ? this.systems.systems$.value?.find(
-          (s) => s.key.name === this.edit.state$.value.config.config.system.name
-        )
+      ? this.systems.systems$.value?.find((s) => s.key.name === this.edit.state$.value.config.config.system.name)
       : null;
     const nodeConfigDtos = this.instances.activeNodeCfgs$.value?.nodeConfigDtos;
-    for (const port of this.portEdit.ports$.value.filter(
-      (p) => p.type === ParameterType.SERVER_PORT && p.app
-    )) {
+    for (const port of this.portEdit.ports$.value.filter((p) => p.type === ParameterType.SERVER_PORT && p.app)) {
       const node = nodeConfigDtos?.find((nodeCfg) =>
         nodeCfg.nodeConfiguration.applications.some(
-          (a) =>
-            a.application.name === port.app.application.name &&
-            a.application.tag === port.app.application.tag
+          (a) => a.application.name === port.app.application.name && a.application.tag === port.app.application.tag
         )
       );
       csv +=
@@ -98,12 +83,7 @@ export class PortsComponent implements OnInit {
           port.source,
           port.name,
           port.description,
-          getRenderPreview(
-            port.value,
-            port.app,
-            this.edit.state$.value?.config,
-            system?.config
-          ),
+          getRenderPreview(port.value, port.app, this.edit.state$.value?.config, system?.config),
           node?.nodeName,
         ]
           .map((e) => `"${e}"`)
@@ -111,13 +91,10 @@ export class PortsComponent implements OnInit {
     }
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    this.dl.downloadBlob(
-      'ports-' + this.edit.current$.value.instanceConfiguration.id + '.csv',
-      blob
-    );
+    this.dl.downloadBlob('ports-' + this.edit.current$.value.instanceConfiguration.id + '.csv', blob);
   }
 
-  /* template */ shiftSelectedPorts(tpl: TemplateRef<any>) {
+  protected shiftSelectedPorts(tpl: TemplateRef<any>) {
     this.amount = null;
     this.dialog
       .message({
@@ -134,9 +111,7 @@ export class PortsComponent implements OnInit {
             this.dialog
               .message({
                 header: 'Failed to shift ports.',
-                message: `<ul class="list-disc list-inside">${errors
-                  .map((e) => `<li>${e}</li>`)
-                  .join('')}</ul>`,
+                message: `<ul class="list-disc list-inside">${errors.map((e) => `<li>${e}</li>`).join('')}</ul>`,
                 actions: [ACTION_CANCEL],
               })
               .subscribe();

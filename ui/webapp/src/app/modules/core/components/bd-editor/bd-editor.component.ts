@@ -8,6 +8,7 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  inject,
 } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { MonacoCompletionsService } from '../../services/monaco-completions.service';
@@ -19,6 +20,10 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
   templateUrl: './bd-editor.component.html',
 })
 export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
+  private themeService = inject(ThemeService);
+  private editorCompletions = inject(MonacoCompletionsService);
+  private cd = inject(ChangeDetectorRef);
+
   private globalMonaco;
   private monaco;
   private subscription: Subscription;
@@ -38,22 +43,14 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
 
   @Output() contentChange = new EventEmitter<string>();
 
-  /* template */ editorContent = '';
-  /* template */ editorOptions;
-  /* template */ inited$ = new BehaviorSubject<boolean>(false);
-
-  constructor(
-    private themeService: ThemeService,
-    private editorCompletions: MonacoCompletionsService,
-    private cd: ChangeDetectorRef
-  ) {}
+  protected editorContent = '';
+  protected editorOptions;
+  protected inited$ = new BehaviorSubject<boolean>(false);
 
   ngOnInit(): void {
     this.subscription = this.themeService.getThemeSubject().subscribe(() => {
       if (this.globalMonaco) {
-        this.globalMonaco.editor.setTheme(
-          this.themeService.isDarkTheme() ? 'vs-dark' : 'vs'
-        );
+        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
       }
     });
 
@@ -74,10 +71,10 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ onMonacoInit(monaco) {
+  protected onMonacoInit(monaco) {
     this.monaco = monaco;
     this.globalMonaco = window['monaco'];
 
@@ -86,10 +83,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
       // register completion provider.
       const provider = this.createCompletionProvider(this.editorCompletions);
       this.globalMonaco.languages.getLanguages().forEach((l) => {
-        this.globalMonaco.languages.registerCompletionItemProvider(
-          l.id,
-          provider
-        );
+        this.globalMonaco.languages.registerCompletionItemProvider(l.id, provider);
         this.globalMonaco['__providerRegistered'] = true;
       });
     }
@@ -104,7 +98,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     }, 1000);
   }
 
-  /* template */ onModelChange(event: string) {
+  protected onModelChange(event: string) {
     this.contentChange.emit(event);
   }
 
@@ -123,9 +117,7 @@ export class BdEditorComponent implements OnInit, OnDestroy, OnChanges {
     this.monaco.setModel(model);
   }
 
-  private createCompletionProvider(
-    editorCompletions: MonacoCompletionsService
-  ): any {
+  private createCompletionProvider(editorCompletions: MonacoCompletionsService): any {
     // ATTENTION: the provider may NOT use ANYTHING from this component, as it will live globally, longer than this component.
     // Thus we're using a global service which will hold the currently valid completions. This also implies that ther cannot be
     // more than one set of completions at a time - thus IF there would be more than one editor, they'd share those.

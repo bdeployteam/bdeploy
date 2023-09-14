@@ -1,14 +1,8 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { cloneDeep } from 'lodash-es';
-import {
-  BehaviorSubject,
-  Observable,
-  Subscription,
-  combineLatest,
-  of,
-} from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, of } from 'rxjs';
 import { concatAll, finalize, first, map, skipWhile } from 'rxjs/operators';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -29,14 +23,8 @@ import {
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
-import {
-  createLinkedValue,
-  getPreRenderable,
-} from 'src/app/modules/core/utils/linked-values.utils';
-import {
-  getAppKeyName,
-  getTemplateAppKey,
-} from 'src/app/modules/core/utils/manifest.utils';
+import { createLinkedValue, getPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
+import { getAppKeyName, getTemplateAppKey } from 'src/app/modules/core/utils/manifest.utils';
 import { performTemplateVariableSubst } from 'src/app/modules/core/utils/object.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
@@ -71,28 +59,30 @@ const tplColDetails: BdDataColumn<TemplateMessage> = {
   templateUrl: './instance-templates.component.html',
   styleUrls: ['./instance-templates.component.css'],
 })
-export class InstanceTemplatesComponent implements OnDestroy {
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
+export class InstanceTemplatesComponent implements OnInit, OnDestroy {
+  private products = inject(ProductsService);
+  private edit = inject(ProcessEditService);
+  protected servers = inject(ServersService);
+  protected instanceEdit = inject(InstanceEditService);
 
-  /* template */ records: FlattenedInstanceTemplateConfiguration[];
-  /* template */ recordsLabel: string[];
+  protected loading$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ template: FlattenedInstanceTemplateConfiguration;
-  /* template */ variables: { [key: string]: string }; // key is var name, value is value.
-  /* template */ groups: { [key: string]: string }; // key is group name, value is target node name.
-  /* template */ messages: TemplateMessage[];
-  /* template */ msgColumns: BdDataColumn<TemplateMessage>[] = [
-    tplColName,
-    tplColDetails,
-  ];
-  /* template */ isAnyGroupSelected = false;
-  /* template */ hasAllVariables = false;
-  /* template */ firstStepCompleted = false;
-  /* template */ secondStepCompleted = false;
-  /* template */ requiredVariables: TemplateVariable[] = [];
+  protected records: FlattenedInstanceTemplateConfiguration[];
+  protected recordsLabel: string[];
 
-  /* template */ groupNodes: { [key: string]: string[] };
-  /* template */ groupLabels: { [key: string]: string[] };
+  protected template: FlattenedInstanceTemplateConfiguration;
+  protected variables: { [key: string]: string }; // key is var name, value is value.
+  protected groups: { [key: string]: string }; // key is group name, value is target node name.
+  protected messages: TemplateMessage[];
+  protected msgColumns: BdDataColumn<TemplateMessage>[] = [tplColName, tplColDetails];
+  protected isAnyGroupSelected = false;
+  protected hasAllVariables = false;
+  protected firstStepCompleted = false;
+  protected secondStepCompleted = false;
+  protected requiredVariables: TemplateVariable[] = [];
+
+  protected groupNodes: { [key: string]: string[] };
+  protected groupLabels: { [key: string]: string[] };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -102,40 +92,30 @@ export class InstanceTemplatesComponent implements OnDestroy {
   private product: ProductDto;
   private subscription: Subscription;
 
-  constructor(
-    public servers: ServersService,
-    public instanceEdit: InstanceEditService,
-    private products: ProductsService,
-    private edit: ProcessEditService
-  ) {
-    this.subscription = combineLatest([
-      this.instanceEdit.state$,
-      this.products.products$,
-    ]).subscribe(([state, prods]) => {
-      const prod = prods?.find(
-        (p) =>
-          p.key.name === state?.config?.config?.product.name &&
-          p.key.tag === state?.config?.config?.product.tag
-      );
+  ngOnInit() {
+    this.subscription = combineLatest([this.instanceEdit.state$, this.products.products$]).subscribe(
+      ([state, prods]) => {
+        const prod = prods?.find(
+          (p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag
+        );
 
-      if (!prod) {
-        this.records = [];
-        return;
+        if (!prod) {
+          this.records = [];
+          return;
+        }
+
+        this.product = prod;
+        this.records = prod.instanceTemplates ? prod.instanceTemplates : [];
+        this.recordsLabel = this.records.map((record) => record.name);
       }
-
-      this.product = prod;
-      this.records = prod.instanceTemplates ? prod.instanceTemplates : [];
-      this.recordsLabel = this.records.map((record) => record.name);
-    });
+    );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  private getNodesFor(
-    group: FlattenedInstanceTemplateGroupConfiguration
-  ): string[] {
+  private getNodesFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     if (group.type === ApplicationType.CLIENT) {
       return [null, CLIENT_NODE_NAME];
     } else {
@@ -149,9 +129,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     }
   }
 
-  private getLabelsFor(
-    group: FlattenedInstanceTemplateGroupConfiguration
-  ): string[] {
+  private getLabelsFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     const nodeValues = this.getNodesFor(group);
 
     return nodeValues.map((n) => {
@@ -165,7 +143,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     });
   }
 
-  public validateAnyGroupSelected() {
+  protected validateAnyGroupSelected() {
     for (const k of Object.keys(this.groups)) {
       const v = this.groups[k];
       if (v !== null && v !== undefined) {
@@ -176,7 +154,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     this.isAnyGroupSelected = false;
   }
 
-  public validateHasAllVariables() {
+  protected validateHasAllVariables() {
     if (!this.template) {
       return;
     }
@@ -190,7 +168,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     this.hasAllVariables = true;
   }
 
-  /* template */ selectTemplate() {
+  protected selectTemplate() {
     // setup things required by the templates.
     this.groupNodes = {};
     this.groupLabels = {};
@@ -205,7 +183,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     this.goNext();
   }
 
-  /* template */ goToAssignVariableStep() {
+  protected goToAssignVariableStep() {
     this.secondStepCompleted = true;
     this.goNext();
   }
@@ -215,7 +193,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     this.myStepper.next();
   }
 
-  public applyStageFinal() {
+  protected applyStageFinal() {
     this.loading$.next(true);
     this.messages = [];
     const observables: Observable<any>[] = [];
@@ -236,11 +214,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
         const processed = cloneDeep(v);
         const status: StatusMessage[] = [];
         processed.value = createLinkedValue(
-          performTemplateVariableSubst(
-            getPreRenderable(processed.value),
-            this.variables,
-            status
-          )
+          performTemplateVariableSubst(getPreRenderable(processed.value), this.variables, status)
         );
         status.forEach((e) =>
           this.messages.push({
@@ -252,9 +226,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
           })
         );
 
-        const index = instance.instanceVariables.findIndex(
-          (x) => x.id === v.id
-        );
+        const index = instance.instanceVariables.findIndex((x) => x.id === v.id);
         if (index !== -1) {
           // replace.
           instance.instanceVariables.splice(index, 1, processed);
@@ -272,9 +244,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
         continue; // skipped.
       }
 
-      const node = this.instanceEdit.state$.value?.config?.nodeDtos?.find(
-        (n) => n.nodeName === nodeName
-      );
+      const node = this.instanceEdit.state$.value?.config?.nodeDtos?.find((n) => n.nodeName === nodeName);
       const group = this.template.groups.find((g) => g.name === groupName);
 
       if (!node || !group) {
@@ -291,14 +261,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
       // not set or SERVER
       if (group.type !== ApplicationType.CLIENT) {
         // for servers, we need to find the appropriate application with the correct OS.
-        this.applyServerGroup(
-          group,
-          node,
-          pcgs,
-          groupName,
-          nodeName,
-          observables
-        );
+        this.applyServerGroup(group, node, pcgs, groupName, nodeName, observables);
       } else {
         // for clients we add all matches, regardless of the OS.
         this.applyClientGroup(group, observables, node, groupName, nodeName);
@@ -315,9 +278,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
     combineLatest(observables)
       .pipe(finalize(() => this.loading$.next(false)))
       .subscribe(() => {
-        this.instanceEdit.state$.value?.config?.nodeDtos.forEach((n) =>
-          this.cleanProcessControlGroup(n)
-        );
+        this.instanceEdit.state$.value?.config?.nodeDtos.forEach((n) => this.cleanProcessControlGroup(n));
 
         let applyResult = of(true);
         // now if we DO have messages, we want to show them to the user.
@@ -334,9 +295,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
 
         applyResult.subscribe((r) => {
           if (r) {
-            this.instanceEdit.conceal(
-              `Apply instance template ${templateName}`
-            );
+            this.instanceEdit.conceal(`Apply instance template ${templateName}`);
           } else {
             this.instanceEdit.discard();
           }
@@ -359,21 +318,19 @@ export class InstanceTemplatesComponent implements OnDestroy {
         const appKey = getAppKeyName(app.key);
         if (searchKey === appKey) {
           observables.push(
-            this.edit
-              .addProcess(node, app, template, this.variables, status)
-              .pipe(
-                finalize(() => {
-                  status.forEach((e) =>
-                    this.messages.push({
-                      group: groupName,
-                      node: nodeName,
-                      appname: template?.name ? template.name : app.name,
-                      template: template,
-                      message: e,
-                    })
-                  );
-                })
-              )
+            this.edit.addProcess(node, app, template, this.variables, status).pipe(
+              finalize(() => {
+                status.forEach((e) =>
+                  this.messages.push({
+                    group: groupName,
+                    node: nodeName,
+                    appname: template?.name ? template.name : app.name,
+                    template: template,
+                    message: e,
+                  })
+                );
+              })
+            )
           );
         }
       }
@@ -401,8 +358,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
           // map the node info to the application key we need for our node.
           map((n) =>
             this.instanceEdit.stateApplications$.value?.find(
-              (a) =>
-                a.key.name === getTemplateAppKey(this.product, app, n[nodeName])
+              (a) => a.key.name === getTemplateAppKey(this.product, app, n[nodeName])
             )
           ),
           // map the key of the app to an observable to actually add the application if possible.
@@ -421,21 +377,19 @@ export class InstanceTemplatesComponent implements OnDestroy {
               return of<string>(null);
             } else {
               const status = [];
-              return this.edit
-                .addProcess(node, a, app, this.variables, status)
-                .pipe(
-                  finalize(() => {
-                    status.forEach((e) =>
-                      this.messages.push({
-                        group: groupName,
-                        node: nodeName,
-                        appname: app?.name ? app.name : a.name,
-                        template: app,
-                        message: e,
-                      })
-                    );
-                  })
-                );
+              return this.edit.addProcess(node, a, app, this.variables, status).pipe(
+                finalize(() => {
+                  status.forEach((e) =>
+                    this.messages.push({
+                      group: groupName,
+                      node: nodeName,
+                      appname: app?.name ? app.name : a.name,
+                      template: app,
+                      message: e,
+                    })
+                  );
+                })
+              );
             }
           }),
           // since adding returns an observable we concat them, so a subscription to the observable will yield the addProcess response.
@@ -457,9 +411,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
   ) {
     const cg = app.preferredProcessControlGroup;
     if (cg) {
-      const existingCg = node.nodeConfiguration.controlGroups.find(
-        (n) => n.name === cg
-      );
+      const existingCg = node.nodeConfiguration.controlGroups.find((n) => n.name === cg);
       if (!existingCg) {
         // need to prepare the group.
         const pcgTempl = pcgs.find((p) => p.name === cg);
@@ -486,13 +438,10 @@ export class InstanceTemplatesComponent implements OnDestroy {
    * Removes empty process control groups from the configuration.
    */
   private cleanProcessControlGroup(node: InstanceNodeConfigurationDto) {
-    node.nodeConfiguration.controlGroups =
-      node.nodeConfiguration.controlGroups.filter(
-        (n) => !!n.processOrder?.length
-      );
+    node.nodeConfiguration.controlGroups = node.nodeConfiguration.controlGroups.filter((n) => !!n.processOrder?.length);
   }
 
-  /* template */ onStepSelectionChange(event: StepperSelectionEvent) {
+  protected onStepSelectionChange(event: StepperSelectionEvent) {
     switch (event.selectedIndex) {
       case 0:
         this.groups = {};
@@ -513,9 +462,7 @@ export class InstanceTemplatesComponent implements OnDestroy {
         this.requiredVariables = [];
 
         if (this.template.directlyUsedTemplateVars?.length) {
-          this.requiredVariables.push(
-            ...this.template.directlyUsedTemplateVars
-          );
+          this.requiredVariables.push(...this.template.directlyUsedTemplateVars);
         }
 
         for (const grp of Object.keys(this.groups)) {

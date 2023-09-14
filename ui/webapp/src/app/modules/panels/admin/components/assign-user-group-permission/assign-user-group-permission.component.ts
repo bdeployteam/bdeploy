@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest, skipWhile } from 'rxjs';
 import { Permission } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -18,29 +13,22 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssignUserGroupPermissionComponent implements OnInit, OnDestroy {
-  /* template */ scopes$ = new BehaviorSubject<string[]>([null]);
-  /* template */ labels$ = new BehaviorSubject<string[]>(['Global']);
-  /* template */ assignScope: string = null;
-  /* template */ assignPerm: Permission;
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ allPerms: Permission[] = Object.keys(Permission).map(
-    (k) => Permission[k]
-  );
+  private authAdmin = inject(AuthAdminService);
+  private areas = inject(NavAreasService);
+  private groups = inject(GroupsService);
+  private repositories = inject(RepositoriesService);
+
+  protected scopes$ = new BehaviorSubject<string[]>([null]);
+  protected labels$ = new BehaviorSubject<string[]>(['Global']);
+  protected assignScope: string = null;
+  protected assignPerm: Permission;
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected allPerms: Permission[] = Object.keys(Permission).map((k) => Permission[k]);
 
   private subscription: Subscription;
 
-  constructor(
-    private authAdmin: AuthAdminService,
-    private areas: NavAreasService,
-    private groups: GroupsService,
-    private repositories: RepositoriesService
-  ) {}
-
   ngOnInit(): void {
-    this.subscription = combineLatest([
-      this.groups.groups$,
-      this.repositories.repositories$,
-    ])
+    this.subscription = combineLatest([this.groups.groups$, this.repositories.repositories$])
       .pipe(skipWhile(([g]) => !g))
       .subscribe(([groups, repositories]) => {
         const groupNames = groups.map((g) => g.instanceGroupConfiguration.name);
@@ -53,13 +41,13 @@ export class AssignUserGroupPermissionComponent implements OnInit, OnDestroy {
       });
   }
 
-  /* template */ onSave() {
-    const group = this.authAdmin.userGroups$.value.find(
-      (g) => g.id === this.areas.panelRoute$.value.params['group']
-    );
-    const existing = group.permissions.find(
-      (p) => p.scope === this.assignScope
-    );
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  protected onSave() {
+    const group = this.authAdmin.userGroups$.value.find((g) => g.id === this.areas.panelRoute$.value.params['group']);
+    const existing = group.permissions.find((p) => p.scope === this.assignScope);
     if (existing) {
       existing.permission = this.assignPerm;
     } else {
@@ -74,9 +62,5 @@ export class AssignUserGroupPermissionComponent implements OnInit, OnDestroy {
         this.areas.closePanel();
       })
     );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

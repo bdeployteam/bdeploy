@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import {
   BdDataColumn,
@@ -16,10 +16,7 @@ import { GroupsService } from '../../services/groups.service';
 const clientNameColumn: BdDataColumn<ClientApp> = {
   id: 'name',
   name: 'Client Name',
-  data: (r) =>
-    r.client
-      ? r.client.description
-      : `${r.endpoint.appName} - ${r.endpoint.endpoint.id}`,
+  data: (r) => (r.client ? r.client.description : `${r.endpoint.appName} - ${r.endpoint.endpoint.id}`),
   hint: BdDataColumnTypeHint.TITLE,
 };
 
@@ -60,8 +57,13 @@ const clientAvatarColumn: BdDataColumn<ClientApp> = {
   templateUrl: './client-applications.component.html',
 })
 export class ClientApplicationsComponent implements OnInit {
-  /* template */ currentOs: OperatingSystem;
-  /* template */ columns: BdDataColumn<ClientApp>[] = [
+  protected groups = inject(GroupsService);
+  protected clients = inject(ClientsService);
+  private dd = inject(DeviceDetectorService);
+  private cardViewService = inject(CardViewService);
+
+  protected currentOs: OperatingSystem;
+  protected columns: BdDataColumn<ClientApp>[] = [
     clientNameColumn,
     clientIdColumn,
     clientInstanceColumn,
@@ -69,7 +71,7 @@ export class ClientApplicationsComponent implements OnInit {
     clientAvatarColumn,
   ];
 
-  /* template */ grouping: BdDataGroupingDefinition<ClientApp>[] = [
+  protected grouping: BdDataGroupingDefinition<ClientApp>[] = [
     {
       name: 'Instance Name',
       group: (r) => r.instanceName,
@@ -80,43 +82,29 @@ export class ClientApplicationsComponent implements OnInit {
       group: (r) => (r.client ? r.client.os : 'WEB'),
     },
   ];
-  /* template */ defaultGrouping: BdDataGrouping<ClientApp>[];
+  protected defaultGrouping: BdDataGrouping<ClientApp>[];
 
-  /* template */ getRecordRoute = (row: ClientApp) => {
+  protected getRecordRoute = (row: ClientApp) => {
     if (row.client) {
-      return [
-        '',
-        { outlets: { panel: ['panels', 'groups', 'client', row.client.id] } },
-      ];
+      return ['', { outlets: { panel: ['panels', 'groups', 'client', row.client.id] } }];
     } else {
       return [
         '',
         {
           outlets: {
-            panel: [
-              'panels',
-              'groups',
-              'endpoint-detail',
-              row.endpoint.id,
-              row.endpoint.endpoint.id,
-            ],
+            panel: ['panels', 'groups', 'endpoint-detail', row.endpoint.id, row.endpoint.endpoint.id],
           },
         },
       ];
     }
   };
 
-  /* template */ isCardView: boolean;
-  /* template */ presetKeyValue = 'clientApplications';
+  protected isCardView: boolean;
+  protected presetKeyValue = 'clientApplications';
 
-  constructor(
-    public groups: GroupsService,
-    public clients: ClientsService,
-    dd: DeviceDetectorService,
-    private cardViewService: CardViewService
-  ) {
+  ngOnInit(): void {
     this.currentOs = (() => {
-      switch (dd.os) {
+      switch (this.dd.os) {
         case 'Windows':
           return OperatingSystem.WINDOWS;
         case 'Linux':
@@ -130,9 +118,7 @@ export class ClientApplicationsComponent implements OnInit {
       { definition: this.grouping[0], selected: [] },
       { definition: this.grouping[1], selected: [this.currentOs, 'WEB'] },
     ];
-  }
 
-  ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
   }
 }

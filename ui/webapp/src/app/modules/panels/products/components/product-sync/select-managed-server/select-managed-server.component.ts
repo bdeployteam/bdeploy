@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ServersColumnsService } from 'src/app/modules/primary/servers/services/servers-columns.service';
@@ -9,7 +9,11 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   templateUrl: './select-managed-server.component.html',
 })
 export class SelectManagedServerComponent {
-  /* template */ getRecordRoute = (row: ManagedMasterDto) => {
+  private areas = inject(NavAreasService);
+  protected servers = inject(ServersService);
+  protected columns = inject(ServersColumnsService);
+
+  protected getRecordRoute = (row: ManagedMasterDto) => {
     // calculate relative route, as this component is used from two different routes.
     const allRoutes = this.areas.panelRoute$.value.pathFromRoot;
     const oldRoute = allRoutes
@@ -25,10 +29,4 @@ export class SelectManagedServerComponent {
       },
     ];
   };
-
-  constructor(
-    public servers: ServersService,
-    public columns: ServersColumnsService,
-    private areas: NavAreasService
-  ) {}
 }

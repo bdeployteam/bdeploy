@@ -1,11 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { cloneDeep } from 'lodash-es';
@@ -24,14 +18,18 @@ import { GroupDetailsService } from '../../../services/group-details.service';
   selector: 'app-edit',
   templateUrl: './edit.component.html',
 })
-export class EditComponent
-  implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit
-{
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ group: InstanceGroupConfiguration;
-  /* template */ origGroup: InstanceGroupConfiguration;
-  /* template */ origImage$ = new Subject<SafeUrl>();
-  /* template */ disableSave: boolean;
+export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
+  private http = inject(HttpClient);
+  private sanitizer = inject(DomSanitizer);
+  private areas = inject(NavAreasService);
+  protected groups = inject(GroupsService);
+  protected details = inject(GroupDetailsService);
+
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected group: InstanceGroupConfiguration;
+  protected origGroup: InstanceGroupConfiguration;
+  protected origImage$ = new Subject<SafeUrl>();
+  protected disableSave: boolean;
   private image: File;
   private imageChanged = false;
   private subscription: Subscription;
@@ -40,17 +38,8 @@ export class EditComponent
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    public groups: GroupsService,
-    public details: GroupDetailsService,
-    private http: HttpClient,
-    private sanitizer: DomSanitizer,
-    areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       this.groups.current$.subscribe((g) => {
         if (!g) {
@@ -66,9 +55,7 @@ export class EditComponent
           this.http.get(url, { responseType: 'blob' }).subscribe((data) => {
             const reader = new FileReader();
             reader.onload = () => {
-              this.origImage$.next(
-                this.sanitizer.bypassSecurityTrustUrl(reader.result.toString())
-              );
+              this.origImage$.next(this.sanitizer.bypassSecurityTrustUrl(reader.result.toString()));
             };
             reader.readAsDataURL(data);
           });
@@ -89,34 +76,28 @@ export class EditComponent
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
     return isDirty(this.group, this.origGroup) || this.imageChanged;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSelectImage(image: File) {
+  protected onSelectImage(image: File) {
     this.imageChanged = true;
     this.image = image;
     this.disableSave = this.isDirty();
   }
 
-  /* template */ onUnsupportedFile(file: File) {
-    this.dialog
-      .info(
-        'Unsupported File Type',
-        `${file.name} has an unsupported file type.`,
-        'warning'
-      )
-      .subscribe();
+  protected onUnsupportedFile(file: File) {
+    this.dialog.info('Unsupported File Type', `${file.name} has an unsupported file type.`, 'warning').subscribe();
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.saving$.next(true);
     this.doSave()
       .pipe(finalize(() => this.saving$.next(false)))
@@ -130,9 +111,7 @@ export class EditComponent
         .update(this.group)
         .pipe(
           concatMap(() =>
-            this.image
-              ? this.groups.updateImage(this.group.name, this.image)
-              : this.groups.removeImage(this.group.name)
+            this.image ? this.groups.updateImage(this.group.name, this.image) : this.groups.removeImage(this.group.name)
           )
         );
     }

@@ -1,13 +1,6 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
-import {
-  Component,
-  ElementRef,
-  Input,
-  TemplateRef,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, ElementRef, Input, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
 
 export class ContentCompletion {
   value: string;
@@ -21,26 +14,24 @@ export class ContentCompletion {
   styleUrls: ['./bd-content-assist-menu.component.css'],
 })
 export class BdContentAssistMenuComponent {
+  private overlay = inject(Overlay);
+  private viewContainerRef = inject(ViewContainerRef);
+
   @Input() attachTo: HTMLElement;
   @Input() values: ContentCompletion[];
   @Input() prefixes: ContentCompletion[];
 
   public onClickSelect: (s) => void;
 
-  /* template */ matches: ContentCompletion[];
-  /* template */ selected: number;
-  /* template */ isPrefix = true;
-  /* template */ tooManyMatches = false;
+  protected matches: ContentCompletion[];
+  protected selected: number;
+  protected isPrefix = true;
+  protected tooManyMatches = false;
 
   @ViewChild('menu') private menu: TemplateRef<any>;
   @ViewChild('itemContainer', { static: false, read: ElementRef })
   private containerElement: ElementRef;
   private overlayRef: OverlayRef;
-
-  constructor(
-    private overlay: Overlay,
-    private viewContainerRef: ViewContainerRef
-  ) {}
 
   public show(word: string) {
     if (!this.values?.length) {
@@ -48,9 +39,7 @@ export class BdContentAssistMenuComponent {
     }
 
     // if the word contains the same amount of {{ and }}, we are not needed.
-    if (
-      (word?.match(/{{/g) || []).length === (word?.match(/}}/g) || []).length
-    ) {
+    if ((word?.match(/{{/g) || []).length === (word?.match(/}}/g) || []).length) {
       // same amount.
       this.hide();
       return;
@@ -140,9 +129,7 @@ export class BdContentAssistMenuComponent {
   }
 
   public previous() {
-    this.setSelected(
-      (this.selected - 1 + this.matches.length) % this.matches.length
-    );
+    this.setSelected((this.selected - 1 + this.matches.length) % this.matches.length);
   }
 
   public select(): string {
@@ -157,7 +144,7 @@ export class BdContentAssistMenuComponent {
     return result.value;
   }
 
-  /* template */ setSelected(i: number) {
+  protected setSelected(i: number) {
     this.selected = i;
 
     // container may only contain options, so index access works.

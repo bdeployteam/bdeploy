@@ -1,11 +1,5 @@
-import { Injectable } from '@angular/core';
-import {
-  ActivatedRoute,
-  ActivatedRouteSnapshot,
-  NavigationEnd,
-  NavigationExtras,
-  Router,
-} from '@angular/router';
+import { Injectable, inject } from '@angular/core';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, NavigationExtras, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { DirtyableDialog } from '../guards/dirty-dialog.guard';
@@ -15,27 +9,27 @@ export type DirtyableKey = 'primary' | 'panel' | 'admin';
   providedIn: 'root',
 })
 export class NavAreasService {
-  panelVisible$ = new BehaviorSubject<boolean>(false);
-  panelMaximized$ = new BehaviorSubject<boolean>(false);
-  menuMaximized$ = new BehaviorSubject<boolean>(false);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
 
-  primaryRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
-  panelRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
-  adminRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+  public panelVisible$ = new BehaviorSubject<boolean>(false);
+  public panelMaximized$ = new BehaviorSubject<boolean>(false);
+  public menuMaximized$ = new BehaviorSubject<boolean>(false);
 
-  /** should ONLY be used by GroupsService. Subscribe to GroupsService.current$ instead */
-  groupContext$ = new BehaviorSubject<string>(null);
+  public primaryRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+  public panelRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
+  public adminRoute$ = new BehaviorSubject<ActivatedRouteSnapshot>(null);
 
-  /** should ONLY be used by InstancesService. Subscribe to InstancesService.current$ instead */
-  instanceContext$ = new BehaviorSubject<string>(null);
-
-  repositoryContext$ = new BehaviorSubject<string>(null);
+  public groupContext$ = new BehaviorSubject<string>(null);
+  public instanceContext$ = new BehaviorSubject<string>(null);
+  public repositoryContext$ = new BehaviorSubject<string>(null);
 
   /** should ONLY be used by DirtyDialogGuard. */
-  forcePanelClose$ = new BehaviorSubject<boolean>(false);
+  public forcePanelClose$ = new BehaviorSubject<boolean>(false);
 
-  _tempNavGroupContext$ = new BehaviorSubject<string>(null);
-  _tempNavRepoContext$ = new BehaviorSubject<string>(null);
+  /** relevat for guards ONLY */
+  public _tempNavGroupContext$ = new BehaviorSubject<string>(null);
+  public _tempNavRepoContext$ = new BehaviorSubject<string>(null);
 
   private dirtyables: { [P in DirtyableKey]: DirtyableDialog } = {
     panel: null,
@@ -45,7 +39,7 @@ export class NavAreasService {
 
   private primaryState: string;
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute) {
+  constructor() {
     this.router.events
       .pipe(
         filter((e) => e instanceof NavigationEnd),
@@ -76,9 +70,7 @@ export class NavAreasService {
 
         // update the states visible to the flyin part of the main nav.
         this.panelVisible$.next(panelSnapshot ? true : false);
-        this.panelMaximized$.next(
-          !!panelSnapshot && !!panelSnapshot.data && !!panelSnapshot.data['max']
-        );
+        this.panelMaximized$.next(!!panelSnapshot && !!panelSnapshot.data && !!panelSnapshot.data['max']);
 
         // we compare the full route from the root of the primary snapshot to determine whether
         // or not we need to close an open panel. if it changes, we close the panel.
@@ -93,10 +85,7 @@ export class NavAreasService {
 
         // primaryState may not be set in case we are just navigating from the void, i.e. somebody opened a link
         // which includes a panel navigation.
-        if (
-          !!this.forcePanelClose$.value ||
-          (this.primaryState && newPrimaryState !== this.primaryState)
-        ) {
+        if (!!this.forcePanelClose$.value || (this.primaryState && newPrimaryState !== this.primaryState)) {
           this.closePanel(this.forcePanelClose$.value);
           this.forcePanelClose$.next(false);
         }
@@ -157,12 +146,7 @@ export class NavAreasService {
     }
   }
 
-  public navigateBoth(
-    primary: any[],
-    panel: any[],
-    primaryExtra?: NavigationExtras,
-    panelExtra?: NavigationExtras
-  ) {
+  public navigateBoth(primary: any[], panel: any[], primaryExtra?: NavigationExtras, panelExtra?: NavigationExtras) {
     this.router.navigate(primary, primaryExtra).then((nav) => {
       if (nav) {
         // need to perform a panel navigation separately to avoid closing the panel and to separate query params.
@@ -171,10 +155,7 @@ export class NavAreasService {
     });
   }
 
-  public registerDirtyable(
-    dirtyable: DirtyableDialog,
-    type: DirtyableKey
-  ): Subscription {
+  public registerDirtyable(dirtyable: DirtyableDialog, type: DirtyableKey): Subscription {
     this.dirtyables[type] = dirtyable;
 
     return new Subscription(() => {
@@ -206,11 +187,7 @@ export class NavAreasService {
 
   private deregisterDirtyable(dirtyable: DirtyableDialog, type: DirtyableKey) {
     if (this.dirtyables[type] !== dirtyable) {
-      console.error(
-        'Unexpected dirtyable while deregistering.',
-        dirtyable,
-        this.dirtyables[type]
-      );
+      console.error('Unexpected dirtyable while deregistering.', dirtyable, this.dirtyables[type]);
     }
 
     this.dirtyables[type] = null;
@@ -227,10 +204,7 @@ export class NavAreasService {
     return result;
   }
 
-  private findChildRouteForOutlet(
-    route: ActivatedRoute,
-    outlet: string
-  ): ActivatedRoute {
+  private findChildRouteForOutlet(route: ActivatedRoute, outlet: string): ActivatedRoute {
     if (!route.children) {
       return null;
     }

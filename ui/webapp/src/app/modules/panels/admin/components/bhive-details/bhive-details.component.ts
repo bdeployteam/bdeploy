@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Actions } from 'src/app/models/gen.dtos';
@@ -12,8 +12,11 @@ import { HiveService } from 'src/app/modules/primary/admin/services/hive.service
   selector: 'app-bhive-details',
   templateUrl: './bhive-details.component.html',
 })
-export class BhiveDetailsComponent implements OnDestroy {
-  /* template */ bhive$ = new BehaviorSubject<string>(null);
+export class BhiveDetailsComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  private hives = inject(HiveService);
+
+  protected bhive$ = new BehaviorSubject<string>(null);
 
   private repairing$ = new BehaviorSubject<boolean>(false);
 
@@ -28,8 +31,8 @@ export class BhiveDetailsComponent implements OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(areas: NavAreasService, private hives: HiveService) {
-    this.subscription = areas.panelRoute$.subscribe((route) => {
+  ngOnInit() {
+    this.subscription = this.areas.panelRoute$.subscribe((route) => {
       if (!route?.params || !route?.params['bhive']) {
         return;
       }
@@ -39,10 +42,10 @@ export class BhiveDetailsComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ doRepairAndPrune(): void {
+  protected doRepairAndPrune(): void {
     this.dialog
       .confirm('Repair and Prune', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive')
       .subscribe((confirmed) => {

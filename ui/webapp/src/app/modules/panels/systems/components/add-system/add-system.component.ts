@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import { ManagedMasterDto, SystemConfiguration } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -15,30 +15,27 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   templateUrl: './add-system.component.html',
 })
 export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ system: Partial<SystemConfiguration> = {};
-  /* template */ isCentral = false;
-  /* template */ server: ManagedMasterDto;
-  /* template */ serverList: ManagedMasterDto[] = [];
-  /* template */ serverNames: string[] = [];
+  private areas = inject(NavAreasService);
+  private systems = inject(SystemsService);
+  private cfg = inject(ConfigService);
+  private groups = inject(GroupsService);
+  protected servers = inject(ServersService);
+
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected system: Partial<SystemConfiguration> = {};
+  protected isCentral = false;
+  protected server: ManagedMasterDto;
+  protected serverList: ManagedMasterDto[] = [];
+  protected serverNames: string[] = [];
 
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    private areas: NavAreasService,
-    private systems: SystemsService,
-    public servers: ServersService,
-    private cfg: ConfigService,
-    private groups: GroupsService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
@@ -53,22 +50,24 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.subscription.add(
       this.servers.servers$.subscribe((s) => {
         this.serverList = s;
-        this.serverNames = this.serverList.map(
-          (c) => `${c.hostName} - ${c.description}`
-        );
+        this.serverNames = this.serverList.map((c) => `${c.hostName} - ${c.description}`);
       })
     );
   }
 
-  isDirty(): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.saving$.next(true);
     this.doSave().subscribe(() => {
       this.reset();
@@ -77,7 +76,7 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
 
   private reset() {
     this.areas.closePanel();
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public doSave(): Observable<void> {
@@ -93,9 +92,5 @@ export class AddSystemComponent implements OnInit, OnDestroy, DirtyableDialog {
           this.saving$.next(false);
         })
       );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

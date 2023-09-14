@@ -13,7 +13,7 @@ export class ColorSelectComponent {
   @Input() selected: boolean;
   @Output() selectedChanged = new EventEmitter<ColorSelectComponent>();
 
-  /* template */ onClick() {
+  protected onClick() {
     this.selectedChanged.emit(this);
   }
 }

@@ -1,10 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
@@ -22,14 +16,16 @@ import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
   selector: 'app-edit',
   templateUrl: './edit.component.html',
 })
-export class EditComponent
-  implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit
-{
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ mail$ = new BehaviorSubject<string>(null);
-  /* template */ user: UserInfo;
-  /* template */ orig: UserInfo;
-  /* template */ disableSave: boolean;
+export class EditComponent implements OnInit, OnDestroy, DirtyableDialog, AfterViewInit {
+  private auth = inject(AuthenticationService);
+  private areas = inject(NavAreasService);
+  protected settings = inject(SettingsService);
+
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected mail$ = new BehaviorSubject<string>(null);
+  protected user: UserInfo;
+  protected orig: UserInfo;
+  protected disableSave: boolean;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -37,18 +33,9 @@ export class EditComponent
   private subscription: Subscription;
   private mailChanged = new Subject<string>();
 
-  constructor(
-    private auth: AuthenticationService,
-    public settings: SettingsService,
-    areas: NavAreasService
-  ) {
-    this.subscription = this.mailChanged
-      .pipe(debounceTime(500))
-      .subscribe((v) => this.mail$.next(v));
-    this.subscription.add(areas.registerDirtyable(this, 'panel'));
-  }
-
   ngOnInit(): void {
+    this.subscription = this.mailChanged.pipe(debounceTime(500)).subscribe((v) => this.mail$.next(v));
+    this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
     this.auth
       .getUserInfo()
       .pipe(
@@ -77,26 +64,24 @@ export class EditComponent
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
     return isDirty(this.user, this.orig);
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
   public doSave(): Observable<any> {
     this.loading$.next(true);
     this.orig = cloneDeep(this.user);
-    return this.auth
-      .updateUserInfo(this.user)
-      .pipe(finalize(() => this.loading$.next(false)));
+    return this.auth.updateUserInfo(this.user).pipe(finalize(() => this.loading$.next(false)));
   }
 
-  /* template */ updateMail(): void {
+  protected updateMail(): void {
     this.mailChanged.next(this.user.email);
   }
 }

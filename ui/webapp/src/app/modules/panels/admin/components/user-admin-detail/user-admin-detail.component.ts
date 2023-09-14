@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
@@ -14,7 +14,12 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   templateUrl: './user-admin-detail.component.html',
   styleUrls: ['./user-admin-detail.component.css'],
 })
-export class UserAdminDetailComponent implements OnDestroy {
+export class UserAdminDetailComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  private authAdmin = inject(AuthAdminService);
+  private auth = inject(AuthenticationService);
+  private permissionColumnsService = inject(PermissionColumnsService);
+
   private readonly colDeletePerm: BdDataColumn<ScopedPermission> = {
     id: 'delete',
     name: 'Delete',
@@ -24,28 +29,20 @@ export class UserAdminDetailComponent implements OnDestroy {
     width: '40px',
   };
 
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ user$ = new BehaviorSubject<UserInfo>(null);
-  /* template */ permColumns: BdDataColumn<ScopedPermission>[] = [
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected user$ = new BehaviorSubject<UserInfo>(null);
+  protected permColumns: BdDataColumn<ScopedPermission>[] = [
     ...this.permissionColumnsService.defaultPermissionColumns,
     this.colDeletePerm,
   ];
-  /* template */ isCurrentUser: boolean;
+  protected isCurrentUser: boolean;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   private subscription: Subscription;
 
-  constructor(
-    private areas: NavAreasService,
-    private authAdmin: AuthAdminService,
-    private auth: AuthenticationService,
-    private permissionColumnsService: PermissionColumnsService
-  ) {
-    this.subscription = combineLatest([
-      areas.panelRoute$,
-      authAdmin.users$,
-    ]).subscribe(([route, users]) => {
+  ngOnInit() {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.authAdmin.users$]).subscribe(([route, users]) => {
       if (!users || !route?.params || !route.params['user']) {
         this.user$.next(null);
         return;
@@ -57,7 +54,7 @@ export class UserAdminDetailComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private onRemovePermission(perm: ScopedPermission): void {
@@ -66,11 +63,7 @@ export class UserAdminDetailComponent implements OnDestroy {
     if (this.isCurrentUser && perm.scope === null) {
       // refuse to remove global permissions from current user
       this.dialog
-        .info(
-          'Cannot remove global permission',
-          'You cannot remove global permissions from yourself.',
-          'warning'
-        )
+        .info('Cannot remove global permission', 'You cannot remove global permissions from yourself.', 'warning')
         .subscribe();
       return;
     }
@@ -92,24 +85,19 @@ export class UserAdminDetailComponent implements OnDestroy {
       .subscribe();
   }
 
-  /* template */ onDelete(userInfo: UserInfo): void {
-    this.dialog
-      .confirm(
-        'Delete User',
-        `Are you sure you want to delete user ${userInfo.name}?`
-      )
-      .subscribe((r) => {
-        if (!r) {
-          return;
-        }
+  protected onDelete(userInfo: UserInfo): void {
+    this.dialog.confirm('Delete User', `Are you sure you want to delete user ${userInfo.name}?`).subscribe((r) => {
+      if (!r) {
+        return;
+      }
 
-        this.loading$.next(true);
-        this.authAdmin
-          .deleteUser(userInfo.name)
-          .pipe(finalize(() => this.loading$.next(false)))
-          .subscribe(() => {
-            this.areas.closePanel();
-          });
-      });
+      this.loading$.next(true);
+      this.authAdmin
+        .deleteUser(userInfo.name)
+        .pipe(finalize(() => this.loading$.next(false)))
+        .subscribe(() => {
+          this.areas.closePanel();
+        });
+    });
   }
 }

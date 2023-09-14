@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { SoftwareUpdateService } from 'src/app/modules/primary/admin/services/software-update.service';
 
 @Component({
@@ -6,15 +6,15 @@ import { SoftwareUpdateService } from 'src/app/modules/primary/admin/services/so
   templateUrl: './software-upload.component.html',
 })
 export class SoftwareUploadComponent {
-  /* template */ files: File[] = [];
+  protected software = inject(SoftwareUpdateService);
 
-  constructor(public software: SoftwareUpdateService) {}
+  protected files: File[] = [];
 
-  /* template */ fileAdded(file: File) {
+  protected fileAdded(file: File) {
     this.files.push(file);
   }
 
-  /* template */ onDismiss(index: number) {
+  protected onDismiss(index: number) {
     this.files.splice(index, 1);
   }
 }

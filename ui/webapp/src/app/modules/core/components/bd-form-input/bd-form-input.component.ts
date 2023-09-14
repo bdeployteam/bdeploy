@@ -4,19 +4,13 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  OnInit,
-  Optional,
   Output,
-  Self,
   TemplateRef,
   ViewChild,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
-import {
-  ControlValueAccessor,
-  NgControl,
-  UntypedFormControl,
-} from '@angular/forms';
+import { ControlValueAccessor, NgControl, UntypedFormControl } from '@angular/forms';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { BehaviorSubject } from 'rxjs';
@@ -30,9 +24,10 @@ import { ContentCompletion } from '../bd-content-assist-menu/bd-content-assist-m
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BdFormInputComponent
-  implements OnInit, ControlValueAccessor, ErrorStateMatcher
-{
+export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMatcher {
+  protected ngControl = inject(NgControl, { self: true, optional: true });
+  protected elementRef = inject(ElementRef);
+
   @Input() label: string;
   @Input() name: string;
   @Input() required: any;
@@ -53,13 +48,13 @@ export class BdFormInputComponent
 
   @ViewChild(MatAutocompleteTrigger) private trigger: MatAutocompleteTrigger;
 
-  /* template */ showPassword = false;
-  /* template */ filteredSuggested$ = new BehaviorSubject<string[]>([]);
+  protected showPassword = false;
+  protected filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
-  /* template */ get value() {
+  public get value() {
     return this.internalValue;
   }
-  /* template */ set value(v) {
+  public set value(v) {
     if (v !== this.internalValue) {
       this.writeValue(v);
       this.onChangedCb(v);
@@ -74,16 +69,10 @@ export class BdFormInputComponent
     /* intentionally empty */
   };
 
-  constructor(
-    @Optional() @Self() public ngControl: NgControl,
-    public elementRef: ElementRef
-  ) {
-    if (ngControl) {
-      ngControl.valueAccessor = this;
+  constructor() {
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
     }
-  }
-
-  ngOnInit(): void {
     this.updateFilter();
   }
 
@@ -125,17 +114,14 @@ export class BdFormInputComponent
       return false;
     }
 
-    return (
-      this.errorDisplay === 'immediate' ||
-      !!(control && (control.dirty || control.touched))
-    );
+    return this.errorDisplay === 'immediate' || !!(control && (control.dirty || control.touched));
   }
 
   public isInvalid() {
     return this.ngControl && this.ngControl.invalid;
   }
 
-  /* template */ getErrorMessage() {
+  public getErrorMessage() {
     if (!this.ngControl) {
       return null;
     }
@@ -172,10 +158,6 @@ export class BdFormInputComponent
       return;
     }
 
-    this.filteredSuggested$.next(
-      this.suggested.filter((e) =>
-        e.toLowerCase().includes(inputAsString.toLowerCase())
-      )
-    );
+    this.filteredSuggested$.next(this.suggested.filter((e) => e.toLowerCase().includes(inputAsString.toLowerCase())));
   }
 }

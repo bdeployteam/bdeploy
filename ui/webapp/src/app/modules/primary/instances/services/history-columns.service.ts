@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { HistoryEntryDto, HistoryEntryType } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
@@ -58,8 +58,7 @@ const historyTitleColumn: BdDataColumn<HistoryEntryDto> = {
 const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
   id: 'pid',
   name: 'PID',
-  data: (r) =>
-    !!r.runtimeEvent && !!r.runtimeEvent.pid ? r.runtimeEvent.pid : null,
+  data: (r) => (!!r.runtimeEvent && !!r.runtimeEvent.pid ? r.runtimeEvent.pid : null),
   width: '80px',
   showWhen: '(min-width: 1200px)',
 };
@@ -68,6 +67,8 @@ const historyPidColumn: BdDataColumn<HistoryEntryDto> = {
   providedIn: 'root',
 })
 export class HistoryColumnsService {
+  private instances = inject(InstancesService);
+
   public historyStateColumn: BdDataColumn<HistoryEntryDto> = {
     id: 'state',
     name: 'State',
@@ -92,8 +93,6 @@ export class HistoryColumnsService {
     this.historyStateColumn,
     this.historyVersionColumn,
   ];
-
-  constructor(private instances: InstancesService) {}
 
   private getVersionText(row: HistoryEntryDto) {
     if (row.instanceTag === this.instances.current$.value?.activeVersion?.tag) {

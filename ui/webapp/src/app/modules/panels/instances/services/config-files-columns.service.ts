@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { FileStatusType } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
@@ -9,6 +9,8 @@ import { ConfigFile, ConfigFilesService } from './config-files.service';
   providedIn: 'root',
 })
 export class ConfigFilesColumnsService {
+  private cfgFiles = inject(ConfigFilesService);
+
   private readonly colStatus: BdDataColumn<ConfigFile> = {
     id: 'status',
     name: 'Status',
@@ -28,8 +30,7 @@ export class ConfigFilesColumnsService {
     id: 'prodState',
     name: 'Sync. State',
     data: (r) => this.getSyncStateText(r),
-    classes: (r) =>
-      this.cfgFiles.getStatus(r) === 'local' ? ['bd-secondary-text'] : [],
+    classes: (r) => (this.cfgFiles.getStatus(r) === 'local' ? ['bd-secondary-text'] : []),
     showWhen: '(min-width: 800px)',
   };
 
@@ -47,8 +48,6 @@ export class ConfigFilesColumnsService {
     this.colProductState,
     this.colActions,
   ];
-
-  constructor(private cfgFiles: ConfigFilesService) {}
 
   private getStatusIcon(r: ConfigFile) {
     if (!r.modification) {

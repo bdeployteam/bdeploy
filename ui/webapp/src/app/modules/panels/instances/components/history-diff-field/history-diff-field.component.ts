@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, TemplateRef } from '@angular/core';
-import { Difference, DiffType } from '../../services/history-diff.service';
+import { DiffType, Difference } from '../../services/history-diff.service';
 
 @Component({
   selector: 'app-history-diff-field',
@@ -16,9 +16,9 @@ export class HistoryDiffFieldComponent implements OnInit {
   /** Which side of the diff is this field on. */
   @Input() diffSide: 'left' | 'right' | 'none' = 'none';
 
-  /* template */ borderClass: string;
-  /* template */ bgClass: string;
-  /* template */ value: string;
+  protected borderClass: string;
+  protected bgClass: string;
+  protected value: string;
 
   ngOnInit(): void {
     this.borderClass = this.getBorderClass();
@@ -50,8 +50,6 @@ export class HistoryDiffFieldComponent implements OnInit {
       return '-';
     }
 
-    return this.maskValue
-      ? '*'.repeat(this.diff.value.length)
-      : this.diff.value;
+    return this.maskValue ? '*'.repeat(this.diff.value.length) : this.diff.value;
   }
 }

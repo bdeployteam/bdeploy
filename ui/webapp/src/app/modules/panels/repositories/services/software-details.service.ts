@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -19,6 +19,13 @@ import { LabelRecord } from '../../products/services/product-details.service';
  */
 @Injectable()
 export class SoftwareDetailsService implements OnDestroy {
+  private route = inject(ActivatedRoute);
+  private repository = inject(RepositoryService);
+  private areas = inject(NavAreasService);
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private downloads = inject(DownloadService);
+
   public manifestKey$ = new BehaviorSubject<string>(null);
   public manifestTag$ = new BehaviorSubject<string>(null);
   public softwarePackage$ = new BehaviorSubject<SwPkgCompound>(null);
@@ -37,21 +44,12 @@ export class SoftwareDetailsService implements OnDestroy {
   private pluginApiPath = () =>
     `${this.cfg.config.api}/plugin-admin/list-product-plugins/${this.areas.repositoryContext$.value}`;
 
-  constructor(
-    private route: ActivatedRoute,
-    private repository: RepositoryService,
-    private areas: NavAreasService,
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private downloads: DownloadService
-  ) {
+  constructor() {
     this.subscription = this.route.paramMap.subscribe((p) => {
       this.manifestKey$.next(p.get('key'));
       this.manifestTag$.next(p.get('tag'));
 
-      if (this.softwareSubscription) {
-        this.softwareSubscription.unsubscribe();
-      }
+      this.softwareSubscription?.unsubscribe();
       this.softwareSubscription = this.repository.data$
         .pipe(
           map((data) =>
@@ -66,7 +64,7 @@ export class SoftwareDetailsService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public getPlugins(): Observable<PluginInfoDto[]> {
@@ -112,7 +110,7 @@ export class SoftwareDetailsService implements OnDestroy {
     }
   }
 
-  mapLabels(software: any) {
+  private mapLabels(software: any) {
     const labels: LabelRecord[] = [];
     if (software?.labels) {
       for (const k of Object.keys(software.labels)) {

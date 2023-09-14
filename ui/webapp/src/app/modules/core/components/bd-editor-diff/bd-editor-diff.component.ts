@@ -1,12 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-} from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 
@@ -15,6 +7,9 @@ import { ThemeService } from '../../services/theme.service';
   templateUrl: './bd-editor-diff.component.html',
 })
 export class BdEditorDiffComponent implements OnInit, OnDestroy {
+  private themeService = inject(ThemeService);
+  private cd = inject(ChangeDetectorRef);
+
   private globalMonaco;
   private monaco;
   private subscription: Subscription;
@@ -24,25 +19,18 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   @Input() path = '';
   @Output() modifiedContentChange = new EventEmitter<string>();
 
-  /* template */ editorOptions = {
+  protected editorOptions = {
     theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
     language: 'plaintext',
     automaticLayout: true,
   };
 
-  /* template */ inited$ = new BehaviorSubject<boolean>(false);
-
-  constructor(
-    private themeService: ThemeService,
-    private cd: ChangeDetectorRef
-  ) {}
+  protected inited$ = new BehaviorSubject<boolean>(false);
 
   ngOnInit(): void {
     this.subscription = this.themeService.getThemeSubject().subscribe(() => {
       if (this.globalMonaco) {
-        this.globalMonaco.editor.setTheme(
-          this.themeService.isDarkTheme() ? 'vs-dark' : 'vs'
-        );
+        this.globalMonaco.editor.setTheme(this.themeService.isDarkTheme() ? 'vs-dark' : 'vs');
       }
     });
   }
@@ -81,13 +69,11 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     };
     this.monaco.setModel(model);
     this.monaco.getModifiedEditor().onDidChangeModelContent(() => {
-      this.modifiedContentChange.emit(
-        this.monaco.getModifiedEditor().getValue()
-      );
+      this.modifiedContentChange.emit(this.monaco.getModifiedEditor().getValue());
     });
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 }

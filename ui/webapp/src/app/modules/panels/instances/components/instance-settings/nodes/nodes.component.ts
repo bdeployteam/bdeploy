@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
@@ -28,69 +28,62 @@ const colNodeName: BdDataColumn<NodeRow> = {
   templateUrl: './nodes.component.html',
 })
 export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
-  /* template */ records: NodeRow[] = [];
-  /* template */ columns: BdDataColumn<NodeRow>[] = [colNodeName];
-  /* template */ checked: NodeRow[] = [];
-  /* template */ hasPendingChanges: boolean;
+  private areas = inject(NavAreasService);
+  protected edit = inject(InstanceEditService);
+  protected servers = inject(ServersService);
+
+  protected records: NodeRow[] = [];
+  protected columns: BdDataColumn<NodeRow>[] = [colNodeName];
+  protected checked: NodeRow[] = [];
+  protected hasPendingChanges: boolean;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
-  constructor(
-    public edit: InstanceEditService,
-    public servers: ServersService,
-    areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([this.edit.nodes$, this.edit.state$]).subscribe(
-        ([nodes, state]) => {
-          this.records = [];
+      combineLatest([this.edit.nodes$, this.edit.state$]).subscribe(([nodes, state]) => {
+        this.records = [];
 
-          if (!nodes || !state) {
-            return;
-          }
+        if (!nodes || !state) {
+          return;
+        }
 
-          // nodes which are configured on the server.
-          for (const key of Object.keys(nodes)) {
-            const config = state.config.nodeDtos.find(
-              (n) => n.nodeName === key
-            );
-            const row = { name: key, config: config };
-            this.records.push(row);
-            if (config) {
-              this.checked.push(row);
-            }
-          }
-
-          // nodes which are not (no longer) present.
-          for (const node of state.config.nodeDtos) {
-            const hasNode = !!nodes[node.nodeName];
-            if (!hasNode && node.nodeName !== CLIENT_NODE_NAME) {
-              const row = { name: node.nodeName, config: node };
-              this.records.push(row);
-              this.checked.push(row);
-            }
+        // nodes which are configured on the server.
+        for (const key of Object.keys(nodes)) {
+          const config = state.config.nodeDtos.find((n) => n.nodeName === key);
+          const row = { name: key, config: config };
+          this.records.push(row);
+          if (config) {
+            this.checked.push(row);
           }
         }
-      )
+
+        // nodes which are not (no longer) present.
+        for (const node of state.config.nodeDtos) {
+          const hasNode = !!nodes[node.nodeName];
+          if (!hasNode && node.nodeName !== CLIENT_NODE_NAME) {
+            const row = { name: node.nodeName, config: node };
+            this.records.push(row);
+            this.checked.push(row);
+          }
+        }
+      })
     );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   isDirty(): boolean {
     return this.edit.hasPendingChanges();
   }
 
-  /* template */ onCheckedChange(rows: NodeRow[]) {
+  protected onCheckedChange(rows: NodeRow[]) {
     // need to propagate changes to the state object.
     // eslint-disable-next-line no-unsafe-optional-chaining
     for (const node of [...this.edit.state$.value?.config.nodeDtos]) {
@@ -100,33 +93,21 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
 
       if (!rows.find((r) => r.name === node.nodeName)) {
         // no longer in the list, remove.
-        this.edit.state$.value?.config.nodeDtos.splice(
-          this.edit.state$.value?.config.nodeDtos.indexOf(node),
-          1
-        );
+        this.edit.state$.value?.config.nodeDtos.splice(this.edit.state$.value?.config.nodeDtos.indexOf(node), 1);
         this.records.find((r) => r.name === node.nodeName).config = null;
       }
     }
 
     for (const row of rows) {
-      if (
-        !this.edit.state$.value?.config.nodeDtos.find(
-          (n) => n.nodeName === row.name
-        )
-      ) {
+      if (!this.edit.state$.value?.config.nodeDtos.find((n) => n.nodeName === row.name)) {
         const inst = this.edit.current$.value;
-        this.edit.state$.value?.config.nodeDtos.push(
-          this.edit.createEmptyNode(row.name, inst.instanceConfiguration)
-        );
+        this.edit.state$.value?.config.nodeDtos.push(this.edit.createEmptyNode(row.name, inst.instanceConfiguration));
       }
     }
     this.hasPendingChanges = this.edit.hasPendingChanges();
   }
 
-  /* template */ checkChangeAllowed: (
-    row: NodeRow,
-    target: boolean
-  ) => Observable<boolean> = (row, target) => {
+  protected checkChangeAllowed: (row: NodeRow, target: boolean) => Observable<boolean> = (row, target) => {
     // checking is always allowed
     if (target) {
       return of(true);
@@ -143,7 +124,7 @@ export class NodesComponent implements OnInit, OnDestroy, DirtyableDialog {
     return of(true);
   };
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 

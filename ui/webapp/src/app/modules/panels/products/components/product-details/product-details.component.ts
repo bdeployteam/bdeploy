@@ -107,24 +107,20 @@ const refTagColumn: BdDataColumn<ManifestKey> = {
   providers: [ProductDetailsService],
 })
 export class ProductDetailsComponent implements OnInit {
+  private actions = inject(ActionsService);
   protected products = inject(ProductsService);
   protected singleProduct = inject(ProductDetailsService);
   protected areas = inject(NavAreasService);
   protected auth = inject(AuthenticationService);
-  private actions = inject(ActionsService);
 
-  /* template */ instanceColumns: BdDataColumn<InstanceUsageDto>[] = [instanceNameColumn, instanceTagColumn];
-  /* template */ labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
-  /* template */ appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = [appTemplateNameColumn];
-  /* template */ instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = [instTemplateNameColumn];
-  /* template */ pluginColumns: BdDataColumn<PluginInfoDto>[] = [
-    pluginNameColumn,
-    pluginVersionColumn,
-    pluginOIDColumn,
-  ];
+  protected instanceColumns: BdDataColumn<InstanceUsageDto>[] = [instanceNameColumn, instanceTagColumn];
+  protected labelColumns: BdDataColumn<LabelRecord>[] = [labelKeyColumn, labelValueColumn];
+  protected appTemplColumns: BdDataColumn<FlattenedApplicationTemplateConfiguration>[] = [appTemplateNameColumn];
+  protected instTemplColumns: BdDataColumn<FlattenedInstanceTemplateConfiguration>[] = [instTemplateNameColumn];
+  protected pluginColumns: BdDataColumn<PluginInfoDto>[] = [pluginNameColumn, pluginVersionColumn, pluginOIDColumn];
 
-  /* template */ refColumns: BdDataColumn<ManifestKey>[] = [refNameColumn, refTagColumn];
-  /* template */ singleProductPlugins$: Observable<PluginInfoDto[]>;
+  protected refColumns: BdDataColumn<ManifestKey>[] = [refNameColumn, refTagColumn];
+  protected singleProductPlugins$: Observable<PluginInfoDto[]>;
 
   private deleting$ = new BehaviorSubject<boolean>(false);
   private preparingCont$ = new BehaviorSubject<boolean>(false);
@@ -143,7 +139,7 @@ export class ProductDetailsComponent implements OnInit {
     this.singleProductPlugins$ = this.singleProduct.getPlugins();
   }
 
-  /* template */ doDelete(prod: ProductDto) {
+  protected doDelete(prod: ProductDto) {
     this.dialog
       .confirm(`Delete ${prod.key.tag}`, `Are you sure you want to delete version ${prod.key.tag}?`, 'delete')
       .subscribe((r) => {
@@ -159,7 +155,7 @@ export class ProductDetailsComponent implements OnInit {
       });
   }
 
-  /* template */ doDownload(original: boolean) {
+  protected doDownload(original: boolean) {
     const preparing$ = original ? this.preparingCont$ : this.preparingBHive$;
     preparing$.next(true);
     this.singleProduct

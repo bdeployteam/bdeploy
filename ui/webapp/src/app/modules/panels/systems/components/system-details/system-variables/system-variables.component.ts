@@ -1,4 +1,4 @@
-import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
@@ -14,11 +14,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  InstanceDto,
-  ParameterType,
-  SystemConfigurationDto,
-} from 'src/app/models/gen.dtos';
+import { InstanceDto, ParameterType, SystemConfigurationDto } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
   ACTION_CANCEL,
@@ -29,10 +25,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  buildCompletionPrefixes,
-  buildCompletions,
-} from 'src/app/modules/core/utils/completion.utils';
+import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
 import { isDirty } from 'src/app/modules/core/utils/dirty.utils';
 import { getMaskedPreRenderable } from 'src/app/modules/core/utils/linked-values.utils';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -69,7 +62,13 @@ const colDesc: BdDataColumn<ConfigVariable> = {
   selector: 'app-system-variables',
   templateUrl: './system-variables.component.html',
 })
-export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
+export class SystemVariablesComponent implements DirtyableDialog, OnInit, OnDestroy {
+  private edit = inject(SystemsEditService);
+  private instances = inject(InstancesService);
+  private areas = inject(NavAreasService);
+  private snackbar = inject(MatSnackBar);
+  protected auth = inject(AuthenticationService);
+
   private readonly colEdit: BdDataColumn<ConfigVariable> = {
     id: 'edit',
     name: 'Edit',
@@ -95,27 +94,21 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   };
 
   private orig: SystemConfigurationDto;
-  /* template */ system: SystemConfigurationDto;
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ records: ConfigVariable[] = [];
-  /* template */ columns: BdDataColumn<ConfigVariable>[] = [
-    colName,
-    colValue,
-    colDesc,
-    this.colEdit,
-    this.colDelete,
-  ];
-  /* template */ checked: ConfigVariable[];
+  protected system: SystemConfigurationDto;
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected records: ConfigVariable[] = [];
+  protected columns: BdDataColumn<ConfigVariable>[] = [colName, colValue, colDesc, this.colEdit, this.colDelete];
+  protected checked: ConfigVariable[];
 
-  /* template */ newValue: VariableConfiguration;
-  /* template */ newUsedIds: string[] = [];
+  protected newValue: VariableConfiguration;
+  protected newUsedIds: string[] = [];
 
-  /* template */ typeValues: ParameterType[] = Object.values(ParameterType);
+  protected typeValues: ParameterType[] = Object.values(ParameterType);
 
-  /* template */ completionPrefixes = buildCompletionPrefixes();
-  /* template */ completions: ContentCompletion[];
+  protected completionPrefixes = buildCompletionPrefixes();
+  protected completions: ContentCompletion[];
 
-  /* template */ clipboardVars: ConfigVariable[];
+  protected clipboardVars: ConfigVariable[];
 
   private subscription: Subscription;
   private instancesUsing: InstanceDto[];
@@ -128,13 +121,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
 
   @ViewChild('editTemplate') editTemplate: TemplateRef<any>;
 
-  constructor(
-    private edit: SystemsEditService,
-    instances: InstancesService,
-    areas: NavAreasService,
-    protected auth: AuthenticationService,
-    private snackbar: MatSnackBar
-  ) {
+  ngOnInit() {
     this.subscription = this.edit.current$.subscribe((c) => {
       if (!c) {
         return;
@@ -143,33 +130,23 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
       this.system = cloneDeep(c);
       this.orig = cloneDeep(c);
 
-      this.completions = buildCompletions(
-        this.completionPrefixes,
-        null,
-        this.system.config,
-        null,
-        null
-      );
+      this.completions = buildCompletions(this.completionPrefixes, null, this.system.config, null, null);
 
       this.buildVariables();
     });
 
     this.subscription.add(
-      combineLatest([edit.current$, instances.instances$]).subscribe(
-        ([c, i]) => {
-          if (!c || !i) {
-            this.instancesUsing = [];
-            return;
-          }
-
-          this.instancesUsing = i.filter(
-            (i) => i.instanceConfiguration?.system?.name === c.key?.name
-          );
+      combineLatest([this.edit.current$, this.instances.instances$]).subscribe(([c, i]) => {
+        if (!c || !i) {
+          this.instancesUsing = [];
+          return;
         }
-      )
+
+        this.instancesUsing = i.filter((i) => i.instanceConfiguration?.system?.name === c.key?.name);
+      })
     );
 
-    this.subscription.add(areas.registerDirtyable(this, 'panel'));
+    this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
 
     this.subscription.add(
       interval(1000)
@@ -179,7 +156,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private buildVariables() {
@@ -200,9 +177,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
   public doSave(): Observable<any> {
     this.saving$.next(true);
 
-    const save = this.edit
-      .update(this.system)
-      .pipe(finalize(() => this.saving$.next(false)));
+    const save = this.edit.update(this.system).pipe(finalize(() => this.saving$.next(false)));
 
     if (this.instancesUsing?.length) {
       return this.dialog
@@ -216,9 +191,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
             if (b) {
               return save;
             } else {
-              return of(MAGIC_ABORT).pipe(
-                finalize(() => this.saving$.next(false))
-              );
+              return of(MAGIC_ABORT).pipe(finalize(() => this.saving$.next(false)));
             }
           })
         );
@@ -228,7 +201,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     }
   }
 
-  /* template */ onSave(): void {
+  protected onSave(): void {
     this.doSave().subscribe((x) => {
       if (x != MAGIC_ABORT) {
         this.system = this.orig = null;
@@ -237,7 +210,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     });
   }
 
-  /* template */ doCopy() {
+  protected doCopy() {
     const json = JSON.stringify(this.checked, null, '\t');
 
     navigator.clipboard.writeText(json).then(
@@ -252,7 +225,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     );
   }
 
-  /* template */ doPaste() {
+  protected doPaste() {
     if (!this.clipboardVars?.length) {
       this.snackbar.open('Unable to read from clipboard.', null, {
         duration: 1000,
@@ -262,9 +235,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     const newVars: VariableConfiguration[] = [];
     const existingVars: VariableConfiguration[] = [];
     this.clipboardVars.forEach((systemVar) => {
-      const found = this.system.config.systemVariables.some(
-        (sv) => sv.id === systemVar.value.id
-      );
+      const found = this.system.config.systemVariables.some((sv) => sv.id === systemVar.value.id);
       if (found) {
         existingVars.push(systemVar.value);
       } else {
@@ -295,9 +266,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
       // which can be enabled ("Dom.Events.Testing.AsynClipBoard"), however that did not
       // change browser behaviour in tests.
       this.clipboardVars = null;
-      console.error(
-        'Clipboard access is not supported in this browser. Pasting applications is not possible.'
-      );
+      console.error('Clipboard access is not supported in this browser. Pasting applications is not possible.');
       return;
     }
     navigator.clipboard.readText().then(
@@ -306,9 +275,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
         try {
           const systemVariables: ConfigVariable[] = JSON.parse(data);
           const validNames = systemVariables.every((sv) => !!sv.name);
-          const validVariables = systemVariables.every(
-            (sv) => !!sv.value && !!sv.value.id
-          );
+          const validVariables = systemVariables.every((sv) => !!sv.value && !!sv.value.id);
           if (!validNames || !validVariables) {
             console.error(`Invalid system variables format.`);
           }
@@ -322,7 +289,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
     );
   }
 
-  /* template */ onAdd(templ: TemplateRef<any>) {
+  protected onAdd(templ: TemplateRef<any>) {
     this.newUsedIds = this.records.map((r) => r.name);
     this.newValue = {
       id: '',
@@ -348,14 +315,12 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
         }
 
         this.system.config.systemVariables.push(value);
-        this.system.config.systemVariables.sort((a, b) =>
-          a.id.localeCompare(b.id)
-        );
+        this.system.config.systemVariables.sort((a, b) => a.id.localeCompare(b.id));
         this.buildVariables();
       });
   }
 
-  /* template */ onEdit(variable: ConfigVariable) {
+  protected onEdit(variable: ConfigVariable) {
     this.newValue = cloneDeep(variable.value);
     this.dialog
       .message({
@@ -374,9 +339,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
         }
 
         this.system.config.systemVariables.splice(
-          this.system.config.systemVariables.findIndex(
-            (x) => x.id === value.id
-          ),
+          this.system.config.systemVariables.findIndex((x) => x.id === value.id),
           1,
           value
         );
@@ -384,7 +347,7 @@ export class SystemVariablesComponent implements DirtyableDialog, OnDestroy {
       });
   }
 
-  /* template */ onTypeChange(value: ParameterType) {
+  protected onTypeChange(value: ParameterType) {
     // check if we need to clear the value in case we switch from password to *something*.
     if (
       this.newValue.type !== value &&

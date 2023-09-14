@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
@@ -15,11 +8,11 @@ import {
 } from 'src/app/models/gen.dtos';
 import { BdPopupDirective } from 'src/app/modules/core/components/bd-popup/bd-popup.directive';
 import {
+  LinkVariable,
   gatherPathExpansions,
   gatherProcessExpansions,
   gatherSpecialExpansions,
   gatherVariableExpansions,
-  LinkVariable,
 } from 'src/app/modules/core/utils/linked-values.utils';
 
 const colVarName: BdDataColumn<LinkVariable> = {
@@ -60,16 +53,12 @@ export class BdExpressionPickerComponent implements OnChanges {
 
   @Output() linkSelected = new EventEmitter<string>();
 
-  /* template */ varRecords: LinkVariable[];
+  protected varRecords: LinkVariable[];
   /* temlpate */ paramRecords: LinkVariable[];
-  /* template */ pathRecords: LinkVariable[];
-  /* template */ specialRecords: LinkVariable[];
+  protected pathRecords: LinkVariable[];
+  protected specialRecords: LinkVariable[];
 
-  /* template */ varColumns: BdDataColumn<LinkVariable>[] = [
-    colVarName,
-    colVarValue,
-    colVarDesc,
-  ];
+  protected varColumns: BdDataColumn<LinkVariable>[] = [colVarName, colVarValue, colVarDesc];
   /* temlpate */ paramGrouping: BdDataGrouping<LinkVariable>[] = [
     {
       definition: { group: (r) => r.group, name: 'Application' },
@@ -80,20 +69,12 @@ export class BdExpressionPickerComponent implements OnChanges {
   ngOnChanges(): void {
     // instance variables take precedence over system variables
     this.varRecords = gatherVariableExpansions(this.instance, this.system);
-    this.paramRecords = gatherProcessExpansions(
-      this.instance,
-      this.process,
-      this.applications
-    );
+    this.paramRecords = gatherProcessExpansions(this.instance, this.process, this.applications);
     this.pathRecords = gatherPathExpansions();
-    this.specialRecords = gatherSpecialExpansions(
-      this.instance,
-      this.process,
-      this.system
-    );
+    this.specialRecords = gatherSpecialExpansions(this.instance, this.process, this.system);
   }
 
-  /* template */ onSelect(v: LinkVariable) {
+  protected onSelect(v: LinkVariable) {
     this.linkSelected.emit(v.link);
     this.popup?.closeOverlay();
   }

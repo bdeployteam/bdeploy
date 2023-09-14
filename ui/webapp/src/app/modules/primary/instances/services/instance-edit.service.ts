@@ -1,15 +1,8 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
-import {
-  BehaviorSubject,
-  combineLatest,
-  forkJoin,
-  Observable,
-  of,
-  Subject,
-} from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest, forkJoin, of } from 'rxjs';
 import { debounceTime, finalize, first, tap } from 'rxjs/operators';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
@@ -30,15 +23,9 @@ import {
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  mapObjToArray,
-  removeNullValues,
-} from 'src/app/modules/core/utils/object.utils';
+import { mapObjToArray, removeNullValues } from 'src/app/modules/core/utils/object.utils';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
-import {
-  DEF_CONTROL_GROUP,
-  getNodeOfApplication,
-} from 'src/app/modules/panels/instances/utils/instance-utils';
+import { DEF_CONTROL_GROUP, getNodeOfApplication } from 'src/app/modules/panels/instances/utils/instance-utils';
 import { GroupsService } from '../../groups/services/groups.service';
 import { ProductsService } from '../../products/services/products.service';
 import { InstancesService } from './instances.service';
@@ -70,11 +57,7 @@ export interface Edit {
  * Note that a 'virtual' edit may be created without looking at base/state. Any edit will be
  * applied after it has been created.
  */
-export type EditFactory = (
-  description: string,
-  base: GlobalEditState,
-  state: GlobalEditState
-) => Edit;
+export type EditFactory = (description: string, base: GlobalEditState, state: GlobalEditState) => Edit;
 
 /**
  * A generic edit, which may represent virtually any change.
@@ -86,11 +69,7 @@ export type EditFactory = (
 export class InstanceEdit implements Edit {
   private state: GlobalEditState;
 
-  constructor(
-    public description: string,
-    base: GlobalEditState,
-    current: GlobalEditState
-  ) {
+  constructor(public description: string, base: GlobalEditState, current: GlobalEditState) {
     // clone current state so nobody outside can modify what we stored.
     this.state = cloneDeep(current);
   }
@@ -118,37 +97,25 @@ export class InstanceApplicationMoveEdit implements Edit {
   ) {}
 
   public apply(current: GlobalEditState): GlobalEditState {
-    const nodeConfig = current.config.nodeDtos.find(
-      (n) => n.nodeName === this.nodeName
-    ).nodeConfiguration;
+    const nodeConfig = current.config.nodeDtos.find((n) => n.nodeName === this.nodeName).nodeConfiguration;
 
     // Step 1 - reorder in process control groups.
     if (this.source === this.target) {
       // can use a simple move in array.
-      const orderList = nodeConfig.controlGroups.find(
-        (cg) => cg.name === this.source
-      ).processOrder;
+      const orderList = nodeConfig.controlGroups.find((cg) => cg.name === this.source).processOrder;
       moveItemInArray(orderList, this.previousIndex, this.currentIndex);
     } else {
       // need to move from one array to another.
-      const sourceList = nodeConfig.controlGroups.find(
-        (cg) => cg.name === this.source
-      ).processOrder;
-      const targetList = nodeConfig.controlGroups.find(
-        (cg) => cg.name === this.target
-      ).processOrder;
+      const sourceList = nodeConfig.controlGroups.find((cg) => cg.name === this.source).processOrder;
+      const targetList = nodeConfig.controlGroups.find((cg) => cg.name === this.target).processOrder;
       const item = sourceList[this.previousIndex];
       sourceList.splice(this.previousIndex, 1);
       targetList.splice(this.currentIndex, 0, item);
     }
 
     // Step 2 - reorder in applications.
-    const allApps = ([] as string[]).concat(
-      ...nodeConfig.controlGroups.map((cg) => cg.processOrder)
-    );
-    nodeConfig.applications.sort(
-      (a, b) => allApps.indexOf(a.id) - allApps.indexOf(b.id)
-    );
+    const allApps = ([] as string[]).concat(...nodeConfig.controlGroups.map((cg) => cg.processOrder));
+    nodeConfig.applications.sort((a, b) => allApps.indexOf(a.id) - allApps.indexOf(b.id));
 
     return current;
   }
@@ -158,6 +125,14 @@ export class InstanceApplicationMoveEdit implements Edit {
   providedIn: 'root',
 })
 export class InstanceEditService {
+  private http = inject(HttpClient);
+  private cfg = inject(ConfigService);
+  private groups = inject(GroupsService);
+  private instances = inject(InstancesService);
+  private products = inject(ProductsService);
+  private areas = inject(NavAreasService);
+  private ngZone = inject(NgZone);
+
   public loading$ = new BehaviorSubject<boolean>(true);
   public saving$ = new BehaviorSubject<boolean>(false);
 
@@ -188,24 +163,13 @@ export class InstanceEditService {
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
   private updateSaveableChangesHandle;
 
-  constructor(
-    private http: HttpClient,
-    private cfg: ConfigService,
-    private groups: GroupsService,
-    private instances: InstancesService,
-    private products: ProductsService,
-    private areas: NavAreasService,
-    private ngZone: NgZone
-  ) {
+  constructor() {
     this.instances.current$.subscribe((instance) => {
       // ALWAYS update current$ to pick up updated global data (banner, etc.).
       const cur = this.current$.value;
       this.current$.next(instance);
 
-      if (
-        instance?.instance?.name !== cur?.instance?.name ||
-        instance?.instance?.tag !== cur?.instance?.tag
-      ) {
+      if (instance?.instance?.name !== cur?.instance?.name || instance?.instance?.tag !== cur?.instance?.tag) {
         if (!!this.undos?.length || !!this.redos?.length) {
           // instance (version?) changes, but we have edits... this means we're basically doomed.
           console.warn('Instance update with pending changes.');
@@ -242,9 +206,7 @@ export class InstanceEditService {
       }
     });
 
-    this.validationDebounce$
-      .pipe(debounceTime(500))
-      .subscribe(() => this.validate());
+    this.validationDebounce$.pipe(debounceTime(500)).subscribe(() => this.validate());
     this.issues$.subscribe((i) => this.issuesSubject$.next(i));
   }
 
@@ -264,14 +226,7 @@ export class InstanceEditService {
     target: string
   ): EditFactory {
     return (desc: string) => {
-      return new InstanceApplicationMoveEdit(
-        desc,
-        node,
-        previous,
-        current,
-        source,
-        target
-      );
+      return new InstanceApplicationMoveEdit(desc, node, previous, current, source, target);
     };
   }
 
@@ -311,10 +266,7 @@ export class InstanceEditService {
   }
 
   public dismissUpdateIssue(issue: ApplicationValidationDto) {
-    this.state$.value.warnings?.splice(
-      this.state$.value.warnings?.indexOf(issue),
-      1
-    );
+    this.state$.value.warnings?.splice(this.state$.value.warnings?.indexOf(issue), 1);
     this.conceal('Dismiss update message: ' + issue.message);
   }
 
@@ -340,14 +292,11 @@ export class InstanceEditService {
     if (inst) {
       this.loading$.next(true);
       forkJoin({
-        nodes: this.instances.loadNodes(
-          inst.instanceConfiguration.id,
-          inst.instance.tag
-        ),
+        nodes: this.instances.loadNodes(inst.instanceConfiguration.id, inst.instance.tag),
         minions: this.http.get<{ [key: string]: MinionDto }>(
-          `${this.apiPath(this.groups.current$.value.name)}/${
-            inst.instanceConfiguration.id
-          }/${inst.instance.tag}/minionConfiguration`
+          `${this.apiPath(this.groups.current$.value.name)}/${inst.instanceConfiguration.id}/${
+            inst.instance.tag
+          }/minionConfiguration`
         ),
       })
         .pipe(
@@ -373,25 +322,14 @@ export class InstanceEditService {
           if (!base.nodeDtos.length) {
             const masterNode = nodesArray.find((n) => n.value.master);
             if (masterNode) {
-              base.nodeDtos.push(
-                this.createEmptyNode(masterNode.key, base.config)
-              );
+              base.nodeDtos.push(this.createEmptyNode(masterNode.key, base.config));
             }
           }
 
           // make sure we have the client application virtual node if there are client applications.
-          const clientNode = base.nodeDtos.find(
-            (n) => n.nodeName === CLIENT_NODE_NAME
-          );
-          if (
-            !clientNode &&
-            !!nodes.applications.find(
-              (a) => a.descriptor.type === ApplicationType.CLIENT
-            )
-          ) {
-            base.nodeDtos.push(
-              this.createEmptyNode(CLIENT_NODE_NAME, base.config)
-            );
+          const clientNode = base.nodeDtos.find((n) => n.nodeName === CLIENT_NODE_NAME);
+          if (!clientNode && !!nodes.applications.find((a) => a.descriptor.type === ApplicationType.CLIENT)) {
+            base.nodeDtos.push(this.createEmptyNode(CLIENT_NODE_NAME, base.config));
           }
 
           this.base$.next({ config: base, files: [], warnings: [] });
@@ -444,10 +382,7 @@ export class InstanceEditService {
    * @returns  whether there is one or more concealed changes.
    */
   private hasSaveableChanges(): boolean {
-    return (
-      this.undos.length > 0 &&
-      this.hasChanges(this.state$.value, this.base$.value)
-    );
+    return this.undos.length > 0 && this.hasChanges(this.state$.value, this.base$.value);
   }
 
   /** Applies all current InstanceEdits and saves the result to the server. */
@@ -470,13 +405,9 @@ export class InstanceEditService {
     };
 
     return this.http
-      .post(
-        `${this.apiPath(this.groups.current$.value.name)}/${
-          state.config.config.id
-        }/update`,
-        update,
-        { params: { managedServer, expect } }
-      )
+      .post(`${this.apiPath(this.groups.current$.value.name)}/${state.config.config.id}/update`, update, {
+        params: { managedServer, expect },
+      })
       .pipe(
         finalize(() => this.saving$.next(false)),
         measure('Save Instance'),
@@ -525,15 +456,11 @@ export class InstanceEditService {
       return null;
     }
 
-    return this.stateApplications$.value.find((a) => a.key.name === name)
-      ?.descriptor;
+    return this.stateApplications$.value.find((a) => a.key.name === name)?.descriptor;
   }
 
   /** Creates an empty node, which can be added to an instance configuration */
-  public createEmptyNode(
-    name: string,
-    instance: InstanceConfiguration
-  ): InstanceNodeConfigurationDto {
+  public createEmptyNode(name: string, instance: InstanceConfiguration): InstanceNodeConfigurationDto {
     return {
       nodeName: name,
       nodeConfiguration: {
@@ -568,25 +495,15 @@ export class InstanceEditService {
     const baseAppIndex = baseNodeApps?.findIndex((a) => a.id === id);
     const stateAppIndex = stateNodeApps?.findIndex((a) => a.id === id);
 
-    const baseAppCg = baseNode?.nodeConfiguration?.controlGroups?.find((cg) =>
-      cg.processOrder.includes(id)
-    );
-    const stateAppCg = stateNode?.nodeConfiguration?.controlGroups?.find((cg) =>
-      cg.processOrder.includes(id)
-    );
+    const baseAppCg = baseNode?.nodeConfiguration?.controlGroups?.find((cg) => cg.processOrder.includes(id));
+    const stateAppCg = stateNode?.nodeConfiguration?.controlGroups?.find((cg) => cg.processOrder.includes(id));
 
     const baseAppCgIndex = baseAppCg?.processOrder?.findIndex((a) => a === id);
-    const stateAppCgIndex = stateAppCg?.processOrder?.findIndex(
-      (a) => a === id
-    );
+    const stateAppCgIndex = stateAppCg?.processOrder?.findIndex((a) => a === id);
 
     // if undefined, we just switch to "not found" - the node might not even exist.
-    const baseComp =
-      baseAppIndex === undefined || baseAppIndex === null ? -1 : baseAppIndex;
-    const stateComp =
-      stateAppIndex === undefined || stateAppIndex === null
-        ? -1
-        : stateAppIndex;
+    const baseComp = baseAppIndex === undefined || baseAppIndex === null ? -1 : baseAppIndex;
+    const stateComp = stateAppIndex === undefined || stateAppIndex === null ? -1 : stateAppIndex;
 
     if (this.issues$.value?.length) {
       const issues = this.issues$.value.filter((i) => i.appId === id);
@@ -607,10 +524,7 @@ export class InstanceEditService {
         baseAppCg?.name === stateAppCg?.name &&
         baseAppCgIndex === stateAppCgIndex &&
         baseNode.nodeName === stateNode.nodeName &&
-        !this.hasChanges(
-          baseNodeApps[baseAppIndex],
-          stateNodeApps[stateAppIndex]
-        )
+        !this.hasChanges(baseNodeApps[baseAppIndex], stateNodeApps[stateAppIndex])
       ) {
         return ProcessEditState.NONE;
       } else {
@@ -626,11 +540,7 @@ export class InstanceEditService {
   }
 
   private validate() {
-    if (
-      !this.state$.value?.config ||
-      !this.groups.current$.value?.name ||
-      !this.current$.value
-    ) {
+    if (!this.state$.value?.config || !this.groups.current$.value?.name || !this.current$.value) {
       // re-request validation once loading is done...
       this.requestValidation();
       return;
@@ -651,9 +561,7 @@ export class InstanceEditService {
     };
     this.http
       .post<ApplicationValidationDto[]>(
-        `${this.apiPath(this.groups.current$.value.name)}/${
-          this.state$.value?.config.config.id
-        }/validate`,
+        `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.id}/validate`,
         upd
       )
       .pipe(
@@ -672,9 +580,9 @@ export class InstanceEditService {
     };
     forkJoin({
       update: this.http.post<InstanceUpdateDto>(
-        `${this.apiPath(this.groups.current$.value.name)}/${
-          this.state$.value?.config.config.id
-        }/updateProductVersion/${target.key.tag}`,
+        `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.id}/updateProductVersion/${
+          target.key.tag
+        }`,
         upd
       ),
       apps: this.products.loadApplications(target),
@@ -695,9 +603,7 @@ export class InstanceEditService {
       });
   }
 
-  public getLastControlGroup(
-    node: InstanceNodeConfiguration
-  ): ProcessControlGroupConfiguration {
+  public getLastControlGroup(node: InstanceNodeConfiguration): ProcessControlGroupConfiguration {
     if (!node.controlGroups?.length) {
       node.controlGroups = [cloneDeep(DEF_CONTROL_GROUP)];
       node.controlGroups[0].processOrder = node.applications.map((a) => a.id);
@@ -720,10 +626,9 @@ export class InstanceEditService {
     if (!this.state$.value?.config?.nodeDtos?.length) {
       return null;
     }
-    return getNodeOfApplication(
-      this.state$.value?.config?.nodeDtos,
-      id
-    )?.nodeConfiguration.applications.find((a) => a.id === id);
+    return getNodeOfApplication(this.state$.value?.config?.nodeDtos, id)?.nodeConfiguration.applications.find(
+      (a) => a.id === id
+    );
   }
 
   /** Creates the current state from the base and all recorded edits. */

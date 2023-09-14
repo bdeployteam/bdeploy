@@ -1,26 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import {
-  BehaviorSubject,
-  finalize,
-  map,
-  Observable,
-  of,
-  Subscription,
-  switchMap,
-  tap,
-} from 'rxjs';
-import {
-  FileStatusDto,
-  FileStatusType,
-  RemoteDirectory,
-} from 'src/app/models/gen.dtos';
+import { BehaviorSubject, Observable, Subscription, finalize, map, of, switchMap, tap } from 'rxjs';
+import { FileStatusDto, FileStatusType, RemoteDirectory } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -32,17 +13,18 @@ import { DataFilesService } from 'src/app/modules/primary/instances/services/dat
   templateUrl: './add-data-file.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddDataFileComponent
-  implements OnInit, OnDestroy, DirtyableDialog
-{
-  /* template */ minions$ = new BehaviorSubject<string[]>([]);
+export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog {
+  public df = inject(DataFilesService);
+  private areas = inject(NavAreasService);
 
-  /* template */ tempFilePath: string;
-  /* template */ tempFileMinion: string;
-  /* template */ tempFileError: string;
-  /* template */ tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
+  protected minions$ = new BehaviorSubject<string[]>([]);
+
+  protected tempFilePath: string;
+  protected tempFileMinion: string;
+  protected tempFileError: string;
+  protected tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
   private tempFileContent = '';
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
+  protected saving$ = new BehaviorSubject<boolean>(false);
   private fileToSave: FileStatusDto;
   private directory: RemoteDirectory;
 
@@ -51,11 +33,8 @@ export class AddDataFileComponent
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(public df: DataFilesService, private areas: NavAreasService) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       this.df.directories$.subscribe((dd) => {
         if (!dd) {
@@ -63,9 +42,7 @@ export class AddDataFileComponent
         }
         for (const dir of dd) {
           if (dir.problem) {
-            console.warn(
-              `Problem reading files from ${dir.minion}: ${dir.problem}`
-            );
+            console.warn(`Problem reading files from ${dir.minion}: ${dir.problem}`);
             continue;
           }
         }
@@ -74,15 +51,19 @@ export class AddDataFileComponent
     );
   }
 
-  isDirty(): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe();
   }
 
@@ -93,40 +74,28 @@ export class AddDataFileComponent
       type: FileStatusType.ADD,
       content: this.tempFileContent,
     };
-    this.directory = this.df.directories$.value.find(
-      (d) => d.minion === this.tempFileMinion
-    );
+    this.directory = this.df.directories$.value.find((d) => d.minion === this.tempFileMinion);
 
     // standard update
-    let update: Observable<any> = this.df
-      .updateFile(this.directory, this.fileToSave)
-      .pipe(
-        switchMap(() => {
-          return of(true);
-        })
-      );
+    let update: Observable<any> = this.df.updateFile(this.directory, this.fileToSave).pipe(
+      switchMap(() => {
+        return of(true);
+      })
+    );
 
     // replace update
     if (this.shouldReplace()) {
-      update = this.dialog
-        .confirm(
-          'File Exists',
-          'A file with the given name exists - replace?',
-          'warning'
-        )
-        .pipe(
-          tap((r) => {
-            if (r) this.fileToSave.type = FileStatusType.EDIT;
-          }),
-          switchMap((confirm) => {
-            if (this.shouldReplace() && confirm) {
-              return this.df
-                .updateFile(this.directory, this.fileToSave)
-                .pipe(map(() => true));
-            }
-            return of(false);
-          })
-        );
+      update = this.dialog.confirm('File Exists', 'A file with the given name exists - replace?', 'warning').pipe(
+        tap((r) => {
+          if (r) this.fileToSave.type = FileStatusType.EDIT;
+        }),
+        switchMap((confirm) => {
+          if (this.shouldReplace() && confirm) {
+            return this.df.updateFile(this.directory, this.fileToSave).pipe(map(() => true));
+          }
+          return of(false);
+        })
+      );
     }
 
     return update.pipe(
@@ -145,7 +114,7 @@ export class AddDataFileComponent
     return !!this.directory.entries.find((e) => e.path === this.tempFilePath);
   }
 
-  /* template */ doAddFileContent(file: File) {
+  protected doAddFileContent(file: File) {
     this.tempFileError = null;
     this.tempFileContentLoading$.next(true);
 
@@ -169,13 +138,9 @@ export class AddDataFileComponent
     reader.readAsDataURL(file);
   }
 
-  reset() {
+  private reset() {
     this.df.load();
     this.areas.closePanel();
-    this.subscription.unsubscribe();
-  }
-
-  ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 }

@@ -6,17 +6,13 @@ import {
   EventEmitter,
   Input,
   Output,
+  inject,
 } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { TooltipPosition } from '@angular/material/tooltip';
-import { BehaviorSubject, fromEvent, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, fromEvent } from 'rxjs';
 
-export type BdButtonColorMode =
-  | 'primary'
-  | 'accent'
-  | 'toolbar'
-  | 'warn'
-  | 'inherit';
+export type BdButtonColorMode = 'primary' | 'accent' | 'toolbar' | 'warn' | 'inherit';
 
 @Component({
   selector: 'app-bd-button',
@@ -25,6 +21,8 @@ export type BdButtonColorMode =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdButtonComponent implements AfterViewInit {
+  private _elementRef = inject(ElementRef);
+
   @Input() icon: string;
   @Input() svgIcon: string;
   @Input() text: string;
@@ -35,16 +33,12 @@ export class BdButtonComponent implements AfterViewInit {
   @Input() color: BdButtonColorMode;
   @Input() disabled = false;
   @Input() isSubmit = true; // default in HTML *is* submit.
-  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(
-    false
-  );
+  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
 
   @Input() isToggle = false;
   @Input() toggleOnClick = true;
   @Input() toggle = false;
   @Output() toggleChange = new EventEmitter<boolean>();
-
-  constructor(public _elementRef: ElementRef) {}
 
   ngAfterViewInit() {
     /*

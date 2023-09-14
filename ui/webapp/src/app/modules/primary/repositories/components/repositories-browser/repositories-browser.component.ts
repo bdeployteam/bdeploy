@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
@@ -10,19 +10,17 @@ import { RepositoriesService } from '../../services/repositories.service';
   templateUrl: './repositories-browser.component.html',
 })
 export class RepositoriesBrowserComponent implements OnInit {
-  /* template */ getRecordRoute = (row: SoftwareRepositoryConfiguration) => {
+  private cardViewService = inject(CardViewService);
+  protected repositories = inject(RepositoriesService);
+  protected repositoriesColumns = inject(RepositoriesColumnsService);
+  protected authenticationService = inject(AuthenticationService);
+
+  protected getRecordRoute = (row: SoftwareRepositoryConfiguration) => {
     return ['/repositories', 'repository', row.name];
   };
 
-  /* template */ isCardView: boolean;
-  /* template */ presetKeyValue = 'softwareRepositories';
-
-  constructor(
-    public repositories: RepositoriesService,
-    public repositoriesColumns: RepositoriesColumnsService,
-    public authenticationService: AuthenticationService,
-    private cardViewService: CardViewService
-  ) {}
+  protected isCardView: boolean;
+  protected presetKeyValue = 'softwareRepositories';
 
   ngOnInit() {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);

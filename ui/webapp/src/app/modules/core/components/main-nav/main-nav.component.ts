@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable, combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActionsService } from '../../services/actions.service';
 import { AuthenticationService } from '../../services/authentication.service';
@@ -13,40 +13,37 @@ import { ThemeService } from '../../services/theme.service';
   templateUrl: './main-nav.component.html',
   styleUrls: ['./main-nav.component.css'],
 })
-export class MainNavComponent {
-  isAuth$: Observable<boolean> = this.authService
-    .getTokenSubject()
-    .pipe(map((s) => s !== null));
+export class MainNavComponent implements OnInit {
+  private authService = inject(AuthenticationService);
+  private changes = inject(ObjectChangesService);
+  private config = inject(ConfigService);
+  private snackbar = inject(MatSnackBar);
+  protected themeService = inject(ThemeService);
+  protected actions = inject(ActionsService);
 
-  constructor(
-    private authService: AuthenticationService,
-    public themeService: ThemeService,
-    public actions: ActionsService,
-    private changes: ObjectChangesService,
-    private config: ConfigService,
-    private snackbar: MatSnackBar
-  ) {
-    combineLatest([this.changes.errorCount$, this.config.offline$]).subscribe(
-      ([count, offline]) => {
-        // in case we exceed a certain threshold, we will show a warning to the user. the error count is reset, and we start over again in case the user dismisses this message.
-        if (count === 3 && !offline) {
-          // we check for the exact number to avout repeated messages.
-          // this is a number that should not happen in a typical session, *except* when there is a systemic problem with websockets. also
-          // this number of errors should occur "rather" quickly in case there is a websocket issue.
+  isAuth$: Observable<boolean> = this.authService.getTokenSubject().pipe(map((s) => s !== null));
 
-          this.snackbar
-            .open(
-              'There seems to be an issue with WebSockets on your System. Communication with the server is restricted. New data will not be received without refresh.',
-              'ACKNOWLEDGE',
-              { panelClass: 'error-snackbar' }
-            )
-            .afterDismissed()
-            .subscribe(() => {
-              // reset so we start counting and waiting for errors over again.
-              this.changes.errorCount$.next(0);
-            });
-        }
+  ngOnInit() {
+    // TODO: move this code to objectchangesservice?
+    combineLatest([this.changes.errorCount$, this.config.offline$]).subscribe(([count, offline]) => {
+      // in case we exceed a certain threshold, we will show a warning to the user. the error count is reset, and we start over again in case the user dismisses this message.
+      if (count === 3 && !offline) {
+        // we check for the exact number to avout repeated messages.
+        // this is a number that should not happen in a typical session, *except* when there is a systemic problem with websockets. also
+        // this number of errors should occur "rather" quickly in case there is a websocket issue.
+
+        this.snackbar
+          .open(
+            'There seems to be an issue with WebSockets on your System. Communication with the server is restricted. New data will not be received without refresh.',
+            'ACKNOWLEDGE',
+            { panelClass: 'error-snackbar' }
+          )
+          .afterDismissed()
+          .subscribe(() => {
+            // reset so we start counting and waiting for errors over again.
+            this.changes.errorCount$.next(0);
+          });
       }
-    );
+    });
   }
 }

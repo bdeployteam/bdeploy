@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize, first, skipWhile } from 'rxjs/operators';
@@ -13,18 +13,14 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent implements OnInit {
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ user: UserInfo;
-  /* template */ permColumns: BdDataColumn<ScopedPermission>[] = [
-    ...this.permissionColumnsService.defaultPermissionColumns,
-  ];
+  private router = inject(Router);
+  private permissionColumnsService = inject(PermissionColumnsService);
+  protected authService = inject(AuthenticationService);
+  protected settings = inject(SettingsService);
 
-  constructor(
-    private router: Router,
-    public authService: AuthenticationService,
-    public settings: SettingsService,
-    private permissionColumnsService: PermissionColumnsService
-  ) {}
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected user: UserInfo;
+  protected permColumns: BdDataColumn<ScopedPermission>[] = [...this.permissionColumnsService.defaultPermissionColumns];
 
   ngOnInit(): void {
     this.authService
@@ -39,7 +35,7 @@ export class SettingsComponent implements OnInit {
       });
   }
 
-  /* template */ logout(): void {
+  protected logout(): void {
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/login']).then(() => {
         console.log('user logged out');

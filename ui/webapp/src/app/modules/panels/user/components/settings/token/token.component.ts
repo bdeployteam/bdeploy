@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -11,15 +11,13 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
   styleUrls: ['./token.component.css'],
 })
 export class TokenComponent implements OnInit {
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ user$ = new BehaviorSubject<UserInfo>(null);
-  /* template */ pack$ = new BehaviorSubject<string>('');
-  /* template */ genFull = false;
+  private authService = inject(AuthenticationService);
+  private snackbarService = inject(MatSnackBar);
 
-  constructor(
-    private authService: AuthenticationService,
-    private snackbarService: MatSnackBar
-  ) {}
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected user$ = new BehaviorSubject<UserInfo>(null);
+  protected pack$ = new BehaviorSubject<string>('');
+  protected genFull = false;
 
   ngOnInit(): void {
     this.authService.getUserInfo().subscribe((r) => {
@@ -28,7 +26,7 @@ export class TokenComponent implements OnInit {
     });
   }
 
-  regenPack() {
+  protected regenPack() {
     this.loading$.next(true);
     this.authService
       .getAuthPackForUser(this.genFull)
@@ -36,7 +34,7 @@ export class TokenComponent implements OnInit {
       .subscribe((r) => this.pack$.next(r));
   }
 
-  /* template */ doCopy(value: string) {
+  protected doCopy(value: string) {
     navigator.clipboard.writeText(value).then(
       () =>
         this.snackbarService.open('Copied to clipboard successfully', null, {

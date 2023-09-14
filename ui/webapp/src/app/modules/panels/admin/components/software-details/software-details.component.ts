@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
 import { Actions, OperatingSystem } from 'src/app/models/gen.dtos';
@@ -14,9 +14,10 @@ import { SoftwareUpdateService, SoftwareVersion } from 'src/app/modules/primary/
   selector: 'app-software-details',
   templateUrl: './software-details.component.html',
 })
-export class SoftwareDetailsComponent implements OnDestroy {
+export class SoftwareDetailsComponent implements OnInit, OnDestroy {
   private software = inject(SoftwareUpdateService);
   private actions = inject(ActionsService);
+  private areas = inject(NavAreasService);
   protected cfg = inject(ConfigService);
 
   private deleting$ = new BehaviorSubject<boolean>(false);
@@ -40,8 +41,8 @@ export class SoftwareDetailsComponent implements OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(areas: NavAreasService) {
-    this.subscription = combineLatest([areas.panelRoute$, this.software.software$]).subscribe(([r, s]) => {
+  ngOnInit() {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.software.software$]).subscribe(([r, s]) => {
       if (!r?.params || !r.params['version'] || !s) return;
 
       const version = r.params['version'];
@@ -54,10 +55,10 @@ export class SoftwareDetailsComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ doDelete() {
+  protected doDelete() {
     this.dialog
       .confirm(
         'Delete Version',
@@ -78,7 +79,7 @@ export class SoftwareDetailsComponent implements OnDestroy {
       });
   }
 
-  /* template */ doInstall() {
+  protected doInstall() {
     this.dialog
       .confirm(
         'Install Version',

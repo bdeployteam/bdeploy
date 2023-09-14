@@ -29,16 +29,14 @@ export class BdSearchFieldComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
 
   ngOnInit(): void {
-    this.subscription = this.searchChanged
-      .pipe(debounceTime(200))
-      .subscribe((v) => this.valueChange.emit(v));
+    this.subscription = this.searchChanged.pipe(debounceTime(200)).subscribe((v) => this.valueChange.emit(v));
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ queueChange() {
+  protected queueChange() {
     this.searchChanged.next(this.value);
   }
 

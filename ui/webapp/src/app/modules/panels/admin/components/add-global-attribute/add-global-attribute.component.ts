@@ -1,12 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import { CustomAttributeDescriptor } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -19,40 +13,38 @@ import { SettingsService } from 'src/app/modules/core/services/settings.service'
   templateUrl: './add-global-attribute.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddGlobalAttributeComponent
-  implements OnInit, OnDestroy, DirtyableDialog
-{
-  /* template */ tempAttribute: CustomAttributeDescriptor;
-  /* template */ tempUsedIds: string[];
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
+export class AddGlobalAttributeComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private settings = inject(SettingsService);
+  private areas = inject(NavAreasService);
+
+  protected tempAttribute: CustomAttributeDescriptor;
+  protected tempUsedIds: string[];
+  protected saving$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    private settings: SettingsService,
-    private areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.tempAttribute = { name: '', description: '' };
-    this.tempUsedIds =
-      this.settings.settings$.value.instanceGroup.attributes.map((a) => a.name);
+    this.tempUsedIds = this.settings.settings$.value.instanceGroup.attributes.map((a) => a.name);
   }
 
-  isDirty(): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.saving$.next(true);
     this.doSave()
       .pipe(
@@ -62,16 +54,12 @@ export class AddGlobalAttributeComponent
       )
       .subscribe(() => {
         this.areas.closePanel();
-        this.subscription.unsubscribe();
+        this.subscription?.unsubscribe();
       });
   }
 
   public doSave(): Observable<boolean> {
     this.saving$.next(true);
     return this.settings.addGlobalAttribute(this.tempAttribute);
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

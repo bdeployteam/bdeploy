@@ -1,5 +1,5 @@
-import { Component, OnDestroy } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -12,7 +12,11 @@ import { UpdateActionComponent } from './update-action/update-action.component';
   selector: 'app-product-update',
   templateUrl: './product-update.component.html',
 })
-export class ProductUpdateComponent implements OnDestroy {
+export class ProductUpdateComponent implements OnInit, OnDestroy {
+  public products = inject(ProductsService);
+  public edit = inject(InstanceEditService);
+  public areas = inject(NavAreasService);
+
   private readonly productVersionColumn: BdDataColumn<ProductDto> = {
     id: 'version',
     name: 'Version',
@@ -31,23 +35,13 @@ export class ProductUpdateComponent implements OnDestroy {
     width: '40px',
   };
 
-  /* template */ records$ = new BehaviorSubject<ProductDto[]>(null);
-  /* template */ columns: BdDataColumn<ProductDto>[] = [
-    this.productVersionColumn,
-    this.productUpdateAction,
-  ];
+  protected records$ = new BehaviorSubject<ProductDto[]>(null);
+  protected columns: BdDataColumn<ProductDto>[] = [this.productVersionColumn, this.productUpdateAction];
 
   private subscription: Subscription;
 
-  constructor(
-    public products: ProductsService,
-    public edit: InstanceEditService,
-    public areas: NavAreasService
-  ) {
-    this.subscription = combineLatest([
-      this.edit.state$,
-      this.products.products$,
-    ]).subscribe(([state, prods]) => {
+  ngOnInit() {
+    this.subscription = combineLatest([this.edit.state$, this.products.products$]).subscribe(([state, prods]) => {
       if (!state || !prods?.length) {
         this.records$.next(null);
         return;
@@ -58,28 +52,21 @@ export class ProductUpdateComponent implements OnDestroy {
           .filter((p) => p.key.name === state.config.config.product.name)
           .filter(
             (p) =>
-              this.isCurrent(p) ||
-              this.matchesProductFilterRegex(
-                p.key.tag,
-                state.config.config.productFilterRegex
-              )
+              this.isCurrent(p) || this.matchesProductFilterRegex(p.key.tag, state.config.config.productFilterRegex)
           )
       );
     });
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private isCurrent(product: ProductDto): boolean {
     return this.edit.state$.value.config.config.product.tag === product.key.tag;
   }
 
-  private matchesProductFilterRegex(
-    productTag: string,
-    productFilterRegex: string
-  ): boolean {
+  private matchesProductFilterRegex(productTag: string, productFilterRegex: string): boolean {
     // if there is no filter, all products are eligible
     if (!productFilterRegex) return true;
     return new RegExp(productFilterRegex).test(productTag);

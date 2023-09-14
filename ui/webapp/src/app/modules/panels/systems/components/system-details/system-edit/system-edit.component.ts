@@ -1,6 +1,6 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
-import { BehaviorSubject, finalize, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import { SystemConfigurationDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -13,26 +13,29 @@ import { SystemsEditService } from '../../../services/systems-edit.service';
   selector: 'app-system-edit',
   templateUrl: './system-edit.component.html',
 })
-export class SystemEditComponent implements OnDestroy, DirtyableDialog {
-  /* template */ system: SystemConfigurationDto;
-  /* template */ orig: SystemConfigurationDto;
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
+export class SystemEditComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private edit = inject(SystemsEditService);
+  private areas = inject(NavAreasService);
+
+  protected system: SystemConfigurationDto;
+  protected orig: SystemConfigurationDto;
+  protected saving$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
-  constructor(private edit: SystemsEditService, areas: NavAreasService) {
-    this.subscription = edit.current$.subscribe((c) => {
+  ngOnInit() {
+    this.subscription = this.edit.current$.subscribe((c) => {
       this.system = cloneDeep(c);
       this.orig = cloneDeep(c);
     });
-    this.subscription.add(areas.registerDirtyable(this, 'panel'));
+    this.subscription.add(this.areas.registerDirtyable(this, 'panel'));
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
@@ -41,12 +44,10 @@ export class SystemEditComponent implements OnDestroy, DirtyableDialog {
 
   public doSave(): Observable<any> {
     this.saving$.next(true);
-    return this.edit
-      .update(this.system)
-      .pipe(finalize(() => this.saving$.next(false)));
+    return this.edit.update(this.system).pipe(finalize(() => this.saving$.next(false)));
   }
 
-  /* template */ onSave(): void {
+  protected onSave(): void {
     this.doSave().subscribe(() => {
       this.orig = this.system;
       this.tb.closePanel();

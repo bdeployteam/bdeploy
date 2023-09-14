@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, debounceTime, finalize, Observable } from 'rxjs';
 import {
   ManifestKey,
@@ -10,10 +10,7 @@ import {
   RepairAndPruneResultDto,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import {
-  EMPTY_SCOPE,
-  ObjectChangesService,
-} from 'src/app/modules/core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 
 export interface MinionRecord {
@@ -25,17 +22,17 @@ export interface MinionRecord {
   providedIn: 'root',
 })
 export class NodesAdminService {
+  private changes = inject(ObjectChangesService);
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+
   public loading$ = new BehaviorSubject<boolean>(true);
   public nodes$ = new BehaviorSubject<MinionRecord[]>(null);
 
   private update$ = new BehaviorSubject<void>(null);
   private apiPath = () => `${this.cfg.config.api}/node-admin`;
 
-  constructor(
-    private changes: ObjectChangesService,
-    private cfg: ConfigService,
-    private http: HttpClient
-  ) {
+  constructor() {
     this.changes.subscribe(ObjectChangeType.NODES, EMPTY_SCOPE, () => {
       this.update$.next(null);
     });
@@ -64,15 +61,11 @@ export class NodesAdminService {
   }
 
   public addNode(dto: NodeAttachDto): Observable<any> {
-    return this.http
-      .put(`${this.apiPath()}/nodes`, dto)
-      .pipe(measure(`Add node ${dto.name}`));
+    return this.http.put(`${this.apiPath()}/nodes`, dto).pipe(measure(`Add node ${dto.name}`));
   }
 
   public editNode(nodeName: string, remote: RemoteService): Observable<any> {
-    return this.http
-      .post(`${this.apiPath()}/nodes/${nodeName}`, remote)
-      .pipe(measure(`Edit node ${nodeName}`));
+    return this.http.post(`${this.apiPath()}/nodes/${nodeName}`, remote).pipe(measure(`Edit node ${nodeName}`));
   }
 
   public replaceNode(nodeName: string, remote: RemoteService): Observable<any> {
@@ -82,19 +75,12 @@ export class NodesAdminService {
   }
 
   public removeNode(nodeName: string): Observable<any> {
-    return this.http
-      .delete(`${this.apiPath()}/nodes/${nodeName}`)
-      .pipe(measure(`Remove node ${nodeName}`));
+    return this.http.delete(`${this.apiPath()}/nodes/${nodeName}`).pipe(measure(`Remove node ${nodeName}`));
   }
 
-  public repairAndPruneNode(
-    nodeName: string
-  ): Observable<RepairAndPruneResultDto> {
+  public repairAndPruneNode(nodeName: string): Observable<RepairAndPruneResultDto> {
     return this.http
-      .post<RepairAndPruneResultDto>(
-        `${this.apiPath()}/nodes/${nodeName}/repair-and-prune`,
-        null
-      )
+      .post<RepairAndPruneResultDto>(`${this.apiPath()}/nodes/${nodeName}/repair-and-prune`, null)
       .pipe(measure(`Repair and Prune node ${nodeName}`));
   }
 }

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, switchMap, take, tap } from 'rxjs/operators';
 import { InstanceDto } from 'src/app/models/gen.dtos';
@@ -13,29 +13,26 @@ import { BulkOperationResultDto } from './../../../../models/gen.dtos';
   providedIn: 'root',
 })
 export class InstanceBulkService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private groups = inject(GroupsService);
+  private instance = inject(InstancesService);
+  private areas = inject(NavAreasService);
+
   public selection$ = new BehaviorSubject<InstanceDto[]>([]);
   public frozen$ = new BehaviorSubject<boolean>(false);
 
-  private bulkApiPath = (group) =>
-    `${this.cfg.config.api}/group/${group}/instance/bulk`;
+  private bulkApiPath = (group) => `${this.cfg.config.api}/group/${group}/instance/bulk`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private groups: GroupsService,
-    private instance: InstancesService,
-    areas: NavAreasService
-  ) {
+  constructor() {
     // clear selection when the primary route changes
-    areas.primaryRoute$.subscribe(() => this.selection$.next([]));
+    this.areas.primaryRoute$.subscribe(() => this.selection$.next([]));
 
     // find matching selected instances if possible once instances change.
-    instance.instances$.subscribe((i) => {
+    this.instance.instances$.subscribe((i) => {
       const newSelection: InstanceDto[] = [];
       this.selection$.value.forEach((inst) => {
-        const found = i.find(
-          (c) => c.instanceConfiguration.id === inst.instanceConfiguration.id
-        );
+        const found = i.find((c) => c.instanceConfiguration.id === inst.instanceConfiguration.id);
         if (found) {
           newSelection.push(found);
         }
@@ -86,9 +83,7 @@ export class InstanceBulkService {
       map((i) => i.map((dto) => dto.instance)),
       switchMap((i) => {
         return this.http.post<BulkOperationResultDto>(
-          `${this.bulkApiPath(
-            this.groups.current$.value.name
-          )}/bulkUpdate/${targetVersion}`,
+          `${this.bulkApiPath(this.groups.current$.value.name)}/bulkUpdate/${targetVersion}`,
           i
         );
       }),
@@ -139,8 +134,6 @@ export class InstanceBulkService {
   }
 
   public fetchStates(): void {
-    this.instance.syncAndFetchState(
-      this.selection$.value?.map((i) => i.instance)
-    );
+    this.instance.syncAndFetchState(this.selection$.value?.map((i) => i.instance));
   }
 }

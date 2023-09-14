@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
@@ -12,10 +12,7 @@ import {
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  EMPTY_SCOPE,
-  ObjectChangesService,
-} from 'src/app/modules/core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from 'src/app/modules/core/services/object-changes.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 
 const INIT_REPOSITORIES = [];
@@ -24,48 +21,39 @@ const INIT_REPOSITORIES = [];
   providedIn: 'root',
 })
 export class RepositoriesService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private areas = inject(NavAreasService);
+  private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
+
   private apiPath = `${this.cfg.config.api}/softwarerepository`;
   private update$ = new BehaviorSubject<any>(null);
 
-  loading$ = new BehaviorSubject<boolean>(true);
+  public loading$ = new BehaviorSubject<boolean>(true);
 
   /** All software repositories */
-  repositories$ = new ReplaySubject<SoftwareRepositoryConfiguration[]>(1);
-  currentRepositores: SoftwareRepositoryConfiguration[] = INIT_REPOSITORIES;
+  public repositories$ = new ReplaySubject<SoftwareRepositoryConfiguration[]>(1);
+  public currentRepositores: SoftwareRepositoryConfiguration[] = INIT_REPOSITORIES;
 
   /** The *current* repository based on the current route context */
-  current$ = new BehaviorSubject<SoftwareRepositoryConfiguration>(null);
+  public current$ = new BehaviorSubject<SoftwareRepositoryConfiguration>(null);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private areas: NavAreasService,
-    private snackbar: MatSnackBar,
-    private router: Router
-  ) {
+  constructor() {
     this.repositories$.subscribe((repos) => (this.currentRepositores = repos));
     this.areas.repositoryContext$.subscribe((r) => this.setCurrent(r));
     this.update$.pipe(debounceTime(100)).subscribe(() => this.reload());
-    this.changes.subscribe(
-      ObjectChangeType.SOFTWARE_REPO,
-      EMPTY_SCOPE,
-      (change) => {
-        if (
-          change.details[ObjectChangeDetails.CHANGE_HINT] ===
-          ObjectChangeHint.SERVERS
-        ) {
-          // ignore changes in managed servers, those as handled in ServersService.
-          return;
-        }
-        this.update$.next(change);
+    this.changes.subscribe(ObjectChangeType.SOFTWARE_REPO, EMPTY_SCOPE, (change) => {
+      if (change.details[ObjectChangeDetails.CHANGE_HINT] === ObjectChangeHint.SERVERS) {
+        // ignore changes in managed servers, those as handled in ServersService.
+        return;
       }
-    );
+      this.update$.next(change);
+    });
   }
 
-  public create(
-    repository: Partial<SoftwareRepositoryConfiguration>
-  ): Observable<any> {
+  public create(repository: Partial<SoftwareRepositoryConfiguration>): Observable<any> {
     return this.http.put(this.apiPath, repository);
   }
 
@@ -91,8 +79,7 @@ export class RepositoriesService {
 
     const currentRepository = repositories.find((r) => r.name === repository);
 
-    const notFound =
-      !!repository && !currentRepository && repositories !== INIT_REPOSITORIES;
+    const notFound = !!repository && !currentRepository && repositories !== INIT_REPOSITORIES;
     if (notFound) {
       this.onNotFound();
       return;

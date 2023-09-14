@@ -1,10 +1,5 @@
-import { Directive } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { Directive, inject } from '@angular/core';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
   BdValidationMessageExtractor,
   bdValidationRegisterMessageExtractor,
@@ -21,22 +16,21 @@ import { ConfigFilesService } from '../services/config-files.service';
     },
   ],
 })
-export class CfgFileNameValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class CfgFileNameValidatorDirective implements Validator, BdValidationMessageExtractor {
+  private cfgFiles = inject(ConfigFilesService);
   public readonly id = 'cfg-file-name';
 
-  constructor(private cfgFiles: ConfigFilesService) {
+  constructor() {
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const name = control.value as string;
     if (!name?.length) {
       return null; // "required" must be validated elsewhere.

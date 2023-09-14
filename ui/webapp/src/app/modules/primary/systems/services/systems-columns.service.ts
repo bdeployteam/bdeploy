@@ -1,10 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
-import {
-  ManagedMasterDto,
-  MinionMode,
-  SystemConfigurationDto,
-} from 'src/app/models/gen.dtos';
+import { ManagedMasterDto, MinionMode, SystemConfigurationDto } from 'src/app/models/gen.dtos';
 import { BdDataSyncCellComponent } from 'src/app/modules/core/components/bd-data-sync-cell/bd-data-sync-cell.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ServersService } from '../../servers/services/servers.service';
@@ -13,6 +9,9 @@ import { ServersService } from '../../servers/services/servers.service';
   providedIn: 'root',
 })
 export class SystemsColumnsService {
+  private cfg = inject(ConfigService);
+  private serversSvc = inject(ServersService);
+
   public systemIdColumn: BdDataColumn<SystemConfigurationDto> = {
     id: 'system',
     name: 'ID',
@@ -65,11 +64,11 @@ export class SystemsColumnsService {
 
   private servers: ManagedMasterDto[] = [];
 
-  constructor(cfg: ConfigService, servers: ServersService) {
-    if (cfg.config.mode !== MinionMode.CENTRAL) {
+  constructor() {
+    if (this.cfg.config.mode !== MinionMode.CENTRAL) {
       return;
     }
-    servers.servers$.subscribe((s) => (this.servers = s));
+    this.serversSvc.servers$.subscribe((s) => (this.servers = s));
   }
 
   private getServer(name: string): ManagedMasterDto {

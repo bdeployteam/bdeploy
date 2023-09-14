@@ -1,12 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import {
-  RemoteDirectory,
-  RemoteDirectoryEntry,
-  StringEntryChunkDto,
-} from 'src/app/models/gen.dtos';
+import { RemoteDirectory, RemoteDirectoryEntry, StringEntryChunkDto } from 'src/app/models/gen.dtos';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { ConfigService } from '../../../core/services/config.service';
 import { DownloadService } from '../../../core/services/download.service';
@@ -15,16 +11,14 @@ import { DownloadService } from '../../../core/services/download.service';
   providedIn: 'root',
 })
 export class LoggingAdminService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private downloadService = inject(DownloadService);
+
   public loading$ = new BehaviorSubject<boolean>(false);
   public directories$ = new BehaviorSubject<RemoteDirectory[]>([]);
 
   private apiPath = () => `${this.cfg.config.api}/logging-admin`;
-
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private downloadService: DownloadService
-  ) {}
 
   public reload() {
     this.loading$.next(true);
@@ -42,9 +36,7 @@ export class LoggingAdminService {
             } else if (b.minion === 'master') {
               return 1;
             } else {
-              return a.minion
-                .toLocaleLowerCase()
-                .localeCompare(b.minion.toLocaleLowerCase());
+              return a.minion.toLocaleLowerCase().localeCompare(b.minion.toLocaleLowerCase());
             }
           })
         )
@@ -70,18 +62,12 @@ export class LoggingAdminService {
   ): Observable<StringEntryChunkDto> {
     const options = {
       headers: null,
-      params: new HttpParams()
-        .set('offset', offset.toString())
-        .set('limit', limit.toString()),
+      params: new HttpParams().set('offset', offset.toString()).set('limit', limit.toString()),
     };
     if (silent) {
       options.headers = { ignoreLoadingBar: '' };
     }
-    return this.http.post<StringEntryChunkDto>(
-      `${this.apiPath()}/content/${rd.minion}`,
-      rde,
-      options
-    );
+    return this.http.post<StringEntryChunkDto>(`${this.apiPath()}/content/${rd.minion}`, rde, options);
   }
 
   public getLogConfig(): Observable<string> {

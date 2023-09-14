@@ -2,7 +2,6 @@ import { Component, HostBinding, Input, OnChanges, OnDestroy, OnInit, SimpleChan
 import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
 import { Actions, ApplicationConfiguration, ProcessState, ProcessStatusDto } from 'src/app/models/gen.dtos';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
-import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ProcessesService } from '../../../services/processes.service';
 
 @Component({
@@ -13,7 +12,6 @@ import { ProcessesService } from '../../../services/processes.service';
 export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy {
   private processes = inject(ProcessesService);
   private actions = inject(ActionsService);
-  private areas = inject(NavAreasService);
 
   @Input() record: ApplicationConfiguration;
   @HostBinding('attr.data-cy') dataCy: string;
@@ -53,7 +51,7 @@ export class ProcessStatusIconComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private update(ps: { [key: string]: ProcessStatusDto }) {

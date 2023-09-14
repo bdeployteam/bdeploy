@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   Input,
-  Optional,
-  Self,
   TemplateRef,
   ViewChild,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { MatLegacyCheckbox } from '@angular/material/legacy-checkbox';
@@ -20,6 +19,8 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdFormToggleComponent implements ControlValueAccessor {
+  protected ngControl = inject(NgControl, { self: true, optional: true });
+
   @Input() label: string;
   @Input() name: string;
   @Input() disabled: boolean;
@@ -30,10 +31,10 @@ export class BdFormToggleComponent implements ControlValueAccessor {
   private checkbox: MatLegacyCheckbox;
   @ViewChild(MatSlideToggle, { static: false }) private slide: MatSlideToggle;
 
-  /* template */ get value() {
+  protected get value() {
     return this.internalValue;
   }
-  /* template */ set value(v) {
+  protected set value(v) {
     if (v !== this.internalValue) {
       this.internalValue = v;
       this.onTouchedCb();
@@ -50,9 +51,9 @@ export class BdFormToggleComponent implements ControlValueAccessor {
     /* intentionally empty */
   };
 
-  constructor(@Optional() @Self() private ngControl: NgControl) {
-    if (ngControl) {
-      ngControl.valueAccessor = this;
+  constructor() {
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
     }
   }
 
@@ -70,8 +71,7 @@ export class BdFormToggleComponent implements ControlValueAccessor {
     this.onTouchedCb = fn;
   }
 
-  /* template */
-  onClick() {
+  protected onClick() {
     if (this.disabled) {
       return;
     }

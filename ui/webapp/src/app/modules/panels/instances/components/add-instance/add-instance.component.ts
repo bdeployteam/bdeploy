@@ -1,14 +1,9 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { AbstractControl, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import {
-  InstanceConfiguration,
-  InstancePurpose,
-  ManagedMasterDto,
-  ManifestKey,
-} from 'src/app/models/gen.dtos';
+import { InstanceConfiguration, InstancePurpose, ManagedMasterDto, ManifestKey } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -29,51 +24,46 @@ interface ProductRow {
   selector: 'app-add-instance',
   templateUrl: './add-instance.component.html',
 })
-export class AddInstanceComponent
-  implements OnInit, OnDestroy, DirtyableDialog
-{
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ config: Partial<InstanceConfiguration> = {
+export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private groups = inject(GroupsService);
+  private instances = inject(InstancesService);
+  private areas = inject(NavAreasService);
+  private router = inject(Router);
+  protected products = inject(ProductsService);
+  protected servers = inject(ServersService);
+  protected cfg = inject(ConfigService);
+  protected systems = inject(SystemsService);
+
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected config: Partial<InstanceConfiguration> = {
     autoUninstall: true,
     product: { name: null, tag: null },
   };
-  /* template */ server: ManagedMasterDto;
-  /* template */ selectedProduct: ProductRow;
+  protected server: ManagedMasterDto;
+  protected selectedProduct: ProductRow;
 
-  /* template */ prodList: ProductRow[] = [];
-  /* template */ serverList: ManagedMasterDto[] = [];
+  protected prodList: ProductRow[] = [];
+  protected serverList: ManagedMasterDto[] = [];
 
   private subscription: Subscription;
-  /* template */ public isCentral = false;
-  /* template */ purposes: InstancePurpose[] = [
+  protected isCentral = false;
+  protected purposes: InstancePurpose[] = [
     InstancePurpose.PRODUCTIVE,
     InstancePurpose.DEVELOPMENT,
     InstancePurpose.TEST,
   ];
-  /* template */ productNames: string[] = [];
-  /* template */ serverNames: string[] = [];
+  protected productNames: string[] = [];
+  protected serverNames: string[] = [];
 
-  /* template */ systemKeys: ManifestKey[];
-  /* template */ systemLabels: string[];
-  /* template */ systemSel: ManifestKey;
+  protected systemKeys: ManifestKey[];
+  protected systemLabels: string[];
+  protected systemSel: ManifestKey;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    private groups: GroupsService,
-    private instances: InstancesService,
-    public products: ProductsService,
-    private areas: NavAreasService,
-    public servers: ServersService,
-    public cfg: ConfigService,
-    public systems: SystemsService,
-    private router: Router
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
@@ -118,9 +108,7 @@ export class AddInstanceComponent
     this.subscription.add(
       this.servers.servers$.subscribe((s) => {
         this.serverList = s;
-        this.serverNames = this.serverList.map(
-          (c) => `${c.hostName} - ${c.description}`
-        );
+        this.serverNames = this.serverList.map((c) => `${c.hostName} - ${c.description}`);
       })
     );
 
@@ -130,54 +118,45 @@ export class AddInstanceComponent
           return;
         }
         this.systemKeys = s.map((s) => s.key);
-        this.systemLabels = s.map(
-          (s) => `${s.config.name} (${s.config.description})`
-        );
+        this.systemLabels = s.map((s) => `${s.config.name} (${s.config.description})`);
       })
     );
   }
 
-  isDirty(): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  /* template */ onSave(): void {
+  protected onSave(): void {
     this.doSave().subscribe(() => {
-      this.router.navigate([
-        'instances',
-        'configuration',
-        this.areas.groupContext$.value,
-        this.config.id,
-      ]);
-      this.subscription.unsubscribe();
+      this.router.navigate(['instances', 'configuration', this.areas.groupContext$.value, this.config.id]);
+      this.subscription?.unsubscribe();
     });
   }
 
   public doSave(): Observable<void> {
     this.loading$.next(true);
-    return this.instances
-      .create(this.config, this.server?.hostName)
-      .pipe(finalize(() => this.loading$.next(false)));
+    return this.instances.create(this.config, this.server?.hostName).pipe(finalize(() => this.loading$.next(false)));
   }
 
-  /* template */ updateProduct() {
+  protected updateProduct() {
     this.config.product.name = this.selectedProduct.id;
     this.config.product.tag = null;
   }
 
-  /* template */ onSystemChange(value: ManifestKey) {
+  protected onSystemChange(value: ManifestKey) {
     this.config.system = value;
   }
 
-  /* template */ delayRevalidateSystem(control: AbstractControl) {
+  protected delayRevalidateSystem(control: AbstractControl) {
     setTimeout(() => control.updateValueAndValidity());
   }
 }

@@ -1,10 +1,5 @@
 import { Directive, Input } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
   BdValidationMessageExtractor,
   bdValidationRegisterMessageExtractor,
@@ -20,9 +15,7 @@ import {
     },
   ],
 })
-export class EditItemInListValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class EditItemInListValidatorDirective implements Validator, BdValidationMessageExtractor {
   public readonly id = 'edit-item-in-list';
 
   @Input() allowedValues: string[];
@@ -31,13 +24,13 @@ export class EditItemInListValidatorDirective
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value?.length) {
       return {};
     }

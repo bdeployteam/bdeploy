@@ -5,6 +5,7 @@ import {
   ElementRef,
   HostBinding,
   Input,
+  inject,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
 
@@ -14,14 +15,14 @@ import { fromEvent } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdMicroIconButtonComponent implements AfterViewInit {
+  private _elementRef = inject(ElementRef);
+
   @Input() disabled = false;
 
   @HostBinding('style.max-width.px')
   @HostBinding('style.max-height.px')
   @Input()
   size = 24;
-
-  constructor(public _elementRef: ElementRef) {}
 
   ngAfterViewInit(): void {
     fromEvent<MouseEvent>(this._elementRef.nativeElement, 'click', {

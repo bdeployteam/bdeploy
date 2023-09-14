@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription, combineLatest, finalize } from 'rxjs';
@@ -17,9 +17,12 @@ import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
   templateUrl: './node-edit.component.html',
   styleUrls: ['./node-edit.component.css'],
 })
-export class NodeEditComponent implements OnDestroy, DirtyableDialog {
-  private saving$ = new BehaviorSubject<boolean>(false);
+export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private areas = inject(NavAreasService);
   private actions = inject(ActionsService);
+  protected nodesAdmin = inject(NodesAdminService);
+
+  private saving$ = new BehaviorSubject<boolean>(false);
 
   protected nodeName$ = new BehaviorSubject<string>(null);
   protected mappedSave$ = this.actions.action(
@@ -30,9 +33,9 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
     this.nodeName$
   );
 
-  /* template */ data: RemoteService;
-  /* template */ orig: RemoteService;
-  /* template */ replace = false;
+  protected data: RemoteService;
+  protected orig: RemoteService;
+  protected replace = false;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
@@ -40,10 +43,10 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
 
   private subscription: Subscription;
 
-  constructor(public nodesAdmin: NodesAdminService, areas: NavAreasService) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
+  ngOnInit() {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([areas.panelRoute$, nodesAdmin.nodes$]).subscribe(([r, n]) => {
+      combineLatest([this.areas.panelRoute$, this.nodesAdmin.nodes$]).subscribe(([r, n]) => {
         if (!r?.params?.node || !n?.length) {
           this.nodeName$.next(null);
           this.data = null;
@@ -60,18 +63,18 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     return isDirty(this.data, this.orig);
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return !this.form?.invalid;
   }
 
-  doSave(): Observable<any> {
+  public doSave(): Observable<any> {
     this.saving$.next(true);
     if (this.replace) {
       return this.nodesAdmin
@@ -82,7 +85,7 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
     }
   }
 
-  onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => {
       this.data = this.orig; // avoid "unsaved" warning.
       this.tb.closePanel();
@@ -99,7 +102,7 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
     reader.readAsText(file);
   }
 
-  /* template */ onDrop(event: DragEvent) {
+  protected onDrop(event: DragEvent) {
     event.preventDefault();
 
     if (event.dataTransfer.files.length > 0) {
@@ -111,7 +114,7 @@ export class NodeEditComponent implements OnDestroy, DirtyableDialog {
     }
   }
 
-  /* template */ onOver(event: DragEvent) {
+  protected onOver(event: DragEvent) {
     // need to cancel the event and return false to ALLOW drop.
     if (event.preventDefault) {
       event.preventDefault();

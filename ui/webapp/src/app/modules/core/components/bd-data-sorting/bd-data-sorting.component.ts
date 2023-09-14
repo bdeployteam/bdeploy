@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { BdDataColumn } from 'src/app/models/data';
 
@@ -18,7 +12,7 @@ export class BdDataSortingComponent<T> {
   /**
    * The columns to select for sorting
    */
-  /* template */ _columns: BdDataColumn<T>[];
+  protected _columns: BdDataColumn<T>[];
 
   @Input() set columns(cols: BdDataColumn<T>[]) {
     this._columns = cols.filter((col) => col.sortCard);
@@ -29,8 +23,8 @@ export class BdDataSortingComponent<T> {
 
   @Input() disabled = false;
 
-  /* template */ direction: SortDirection;
-  /* template */ get selectedColumn(): BdDataColumn<T> {
+  protected direction: SortDirection;
+  protected get selectedColumn(): BdDataColumn<T> {
     return this._columns?.find((col) => col.id === this.sort?.active);
   }
 

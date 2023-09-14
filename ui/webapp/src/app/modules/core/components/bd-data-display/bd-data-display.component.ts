@@ -1,20 +1,7 @@
-import {
-  Component,
-  ContentChild,
-  EventEmitter,
-  Input,
-  Output,
-  TemplateRef,
-  ViewChild,
-} from '@angular/core';
+import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef, ViewChild, inject } from '@angular/core';
 import { Sort, SortDirection } from '@angular/material/sort';
 import { BehaviorSubject } from 'rxjs';
-import {
-  BdDataColumn,
-  bdDataDefaultSearch,
-  bdDataDefaultSort,
-  BdDataGrouping,
-} from 'src/app/models/data';
+import { BdDataColumn, BdDataGrouping, bdDataDefaultSearch, bdDataDefaultSort } from 'src/app/models/data';
 import { CardViewService } from '../../services/card-view.service';
 import { BdDataGridComponent } from '../bd-data-grid/bd-data-grid.component';
 import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
@@ -24,10 +11,12 @@ import { BdDataTableComponent } from '../bd-data-table/bd-data-table.component';
   templateUrl: './bd-data-display.component.html',
 })
 export class BdDataDisplayComponent<T> {
+  private cardViewService = inject(CardViewService);
+
   /**
    * The current display mode, which will either use bd-data-table (false) or bd-data-grid (true) to visualize data.
    */
-  /* template */ _grid: boolean;
+  protected _grid: boolean;
   @Input() set grid(val: boolean) {
     this._grid = val;
 
@@ -65,11 +54,7 @@ export class BdDataDisplayComponent<T> {
    *
    * Sorting through header click is disabled all together if this callback is not given.
    */
-  @Input() sortData: (
-    data: T[],
-    column: BdDataColumn<T>,
-    direction: SortDirection
-  ) => T[] = bdDataDefaultSort;
+  @Input() sortData: (data: T[], column: BdDataColumn<T>, direction: SortDirection) => T[] = bdDataDefaultSort;
 
   /** The current sort dicdated by the sortHeader if available (table only) */
   @Input() sort: Sort;
@@ -79,11 +64,7 @@ export class BdDataDisplayComponent<T> {
    * concatenate each value in each row object, regardless of whether it is displayed or not.
    * Then the search string is applied to this single string in a case insensitive manner.
    */
-  @Input() searchData: (
-    search: string,
-    data: T[],
-    columns: BdDataColumn<T>[]
-  ) => T[] = bdDataDefaultSearch;
+  @Input() searchData: (search: string, data: T[], columns: BdDataColumn<T>[]) => T[] = bdDataDefaultSearch;
 
   /**
    * Whether the data-table should register itself as a BdSearchable with the global SearchService.
@@ -140,8 +121,6 @@ export class BdDataDisplayComponent<T> {
   @ViewChild('grid', { static: false }) gridComp: BdDataGridComponent<T>;
   @ContentChild('dataDisplayExtraCardDetails')
   dataDisplayExtraCardDetails: TemplateRef<any>;
-
-  constructor(private cardViewService: CardViewService) {}
 
   public update(): void {
     this.tableComp?.update();

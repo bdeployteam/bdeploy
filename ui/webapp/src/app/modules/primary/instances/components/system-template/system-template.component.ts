@@ -1,16 +1,13 @@
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
-import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
-import { map, Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { StatusMessage } from 'src/app/models/config.model';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
-import {
-  UploadState,
-  UploadStatus,
-} from 'src/app/modules/core/services/upload.service';
+import { UploadState, UploadStatus } from 'src/app/modules/core/services/upload.service';
 import { performTemplateVariableSubst } from 'src/app/modules/core/utils/object.utils';
 import { ServersService } from '../../../servers/services/servers.service';
 import { SystemsService } from '../../../systems/services/systems.service';
@@ -83,39 +80,47 @@ const colInstanceMsg: BdDataColumn<InstanceTemplateReferenceResultDto> = {
   styleUrls: ['./system-template.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class SystemTemplateComponent {
-  /* template */ file: File;
-  /* template */ template: SystemTemplateDto;
-  /* template */ name: string;
-  /* template */ purpose: InstancePurpose;
-  /* template */ serverSelectionCompleted: boolean;
-  /* template */ isCentral: boolean;
-  /* template */ serverDtos: ManagedMasterDto[];
-  /* template */ serverLabels: string[];
-  /* template */ selectedServer: ManagedMasterDto;
-  /* template */ templates: TemplateSelection[];
+export class SystemTemplateComponent implements OnInit {
+  protected cfg = inject(ConfigService);
+  protected groups = inject(GroupsService);
+  protected systems = inject(SystemsService);
+  protected servers = inject(ServersService);
 
-  /* template */ systemVariables: { [key: string]: string };
-  /* template */ requiredSystemVariables: TemplateVariable[] = [];
-  /* template */ isAllSystemVariablesSet = false;
+  protected file: File;
+  protected template: SystemTemplateDto;
+  protected name: string;
+  protected purpose: InstancePurpose;
+  protected serverSelectionCompleted: boolean;
+  protected isCentral: boolean;
+  protected serverDtos: ManagedMasterDto[];
+  protected serverLabels: string[];
+  protected selectedServer: ManagedMasterDto;
+  protected templates: TemplateSelection[];
 
-  /* template */ nodeNames: string[];
-  /* template */ isAllTemplateGroupsSelected = false;
-  /* template */ isAllVariablesSet = false;
-  /* template */ result: SystemTemplateResultDto;
-  /* template */ resultCols: BdDataColumn<InstanceTemplateReferenceResultDto>[] =
-    [colInstResIcon, colInstanceName, colInstanceMsg];
-  /* template */ resultIsSuccess: boolean;
-  /* template */ resultHasWarnings: boolean;
-  /* template */ purposes: InstancePurpose[] = [
+  protected systemVariables: { [key: string]: string };
+  protected requiredSystemVariables: TemplateVariable[] = [];
+  protected isAllSystemVariablesSet = false;
+
+  protected nodeNames: string[];
+  protected isAllTemplateGroupsSelected = false;
+  protected isAllVariablesSet = false;
+  protected result: SystemTemplateResultDto;
+  protected resultCols: BdDataColumn<InstanceTemplateReferenceResultDto>[] = [
+    colInstResIcon,
+    colInstanceName,
+    colInstanceMsg,
+  ];
+  protected resultIsSuccess: boolean;
+  protected resultHasWarnings: boolean;
+  protected purposes: InstancePurpose[] = [
     InstancePurpose.PRODUCTIVE,
     InstancePurpose.DEVELOPMENT,
     InstancePurpose.TEST,
   ];
 
-  /* template */ systemNames$: Observable<string[]>;
+  protected systemNames$: Observable<string[]>;
 
-  /* template */ onUploadResult: (status: UploadStatus) => string = (s) => {
+  protected onUploadResult: (status: UploadStatus) => string = (s) => {
     if (s.state === UploadState.FAILED) {
       return s.detail as string;
     }
@@ -127,22 +132,15 @@ export class SystemTemplateComponent {
 
   @ViewChild(MatStepper) private stepper: MatStepper;
 
-  constructor(
-    public cfg: ConfigService,
-    public groups: GroupsService,
-    public systems: SystemsService,
-    public servers: ServersService
-  ) {
-    this.systemNames$ = this.systems.systems$.pipe(
-      map((s) => s.map((x) => x.config.name))
-    );
+  ngOnInit() {
+    this.systemNames$ = this.systems.systems$.pipe(map((s) => s.map((x) => x.config.name)));
 
-    cfg.isCentral$.subscribe((b) => {
+    this.cfg.isCentral$.subscribe((b) => {
       this.isCentral = b;
       this.serverSelectionCompleted = !this.isCentral;
     });
 
-    servers.servers$.subscribe((s) => {
+    this.servers.servers$.subscribe((s) => {
       if (!s?.length) {
         this.serverDtos = null;
         this.serverLabels = null;
@@ -154,16 +152,16 @@ export class SystemTemplateComponent {
     });
   }
 
-  /* template */ readSystemTemplate(file: File) {
+  protected readSystemTemplate(file: File) {
     this.file = file;
   }
 
-  /* template */ onDismiss() {
+  protected onDismiss() {
     this.template = null;
     this.file = null;
   }
 
-  /* template */ onStepSelectionChange(event: StepperSelectionEvent) {
+  protected onStepSelectionChange(event: StepperSelectionEvent) {
     switch (event.selectedIndex) {
       case 0:
         this.onChooseTargetStep();
@@ -211,15 +209,9 @@ export class SystemTemplateComponent {
       this.systems.apply(data).subscribe((r) => {
         this.result = r;
         this.resultIsSuccess =
-          r.results
-            .map((r) => r.status)
-            .findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) ===
-          -1;
+          r.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.ERROR) === -1;
         this.resultHasWarnings =
-          r.results
-            .map((r) => r.status)
-            .findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !==
-          -1;
+          r.results.map((r) => r.status).findIndex((s) => s === InstanceTemplateReferenceStatus.WARNING) !== -1;
         this.stepper.next();
       });
     }
@@ -232,9 +224,7 @@ export class SystemTemplateComponent {
 
     if (this.template.template.templateVariables?.length) {
       // template variables applicable for system variables.
-      this.requiredSystemVariables.push(
-        ...this.template.template.templateVariables
-      );
+      this.requiredSystemVariables.push(...this.template.template.templateVariables);
     }
 
     if (this.requiredSystemVariables.length) {
@@ -254,22 +244,12 @@ export class SystemTemplateComponent {
       // cannot be null, as the backend would otherwise reject.
       const prod = this.template.products.find(
         (p) =>
-          p.product === i.productId &&
-          (!i.productVersionRegex ||
-            new RegExp(i.productVersionRegex).test(p.key.tag))
+          p.product === i.productId && (!i.productVersionRegex || new RegExp(i.productVersionRegex).test(p.key.tag))
       );
 
       const expStatus: StatusMessage[] = [];
-      const expName = performTemplateVariableSubst(
-        i.name,
-        this.systemVariables,
-        expStatus
-      );
-      const expDesc = performTemplateVariableSubst(
-        i.description,
-        this.systemVariables,
-        expStatus
-      );
+      const expName = performTemplateVariableSubst(i.name, this.systemVariables, expStatus);
+      const expDesc = performTemplateVariableSubst(i.description, this.systemVariables, expStatus);
 
       const tpl = prod.instanceTemplates.find((t) => t.name === i.templateName);
       const groups = {};
@@ -283,17 +263,11 @@ export class SystemTemplateComponent {
         const mapping = i.defaultMappings?.find((d) => d.group === grp.name);
         if (mapping) {
           // the mapping can use system template variables!
-          const expNode = performTemplateVariableSubst(
-            mapping.node,
-            this.systemVariables,
-            expStatus
-          );
+          const expNode = performTemplateVariableSubst(mapping.node, this.systemVariables, expStatus);
 
           const presetNode = nodes[grp.name].find((n) => n === expNode);
           if (!presetNode) {
-            console.log(
-              `Cannot find node to preset for ${grp.name}: ${expNode}`
-            );
+            console.log(`Cannot find node to preset for ${grp.name}: ${expNode}`);
           } else {
             groups[grp.name] = presetNode;
           }
@@ -301,9 +275,7 @@ export class SystemTemplateComponent {
       }
 
       if (expStatus.length > 0) {
-        console.log(
-          `There have been ${expStatus.length} issues when expanding template variables for ${i.name}`
-        );
+        console.log(`There have been ${expStatus.length} issues when expanding template variables for ${i.name}`);
         expStatus.forEach((s) => console.log(` -> ${s.message}`));
       }
 
@@ -363,9 +335,7 @@ export class SystemTemplateComponent {
     if (tpl.ref.fixedVariables?.length) {
       // handle fixed variables passed on from system template.
       for (const fixed of tpl.ref.fixedVariables) {
-        const reqIndex = tpl.requiredVariables.findIndex(
-          (x) => x.id === fixed.id
-        );
+        const reqIndex = tpl.requiredVariables.findIndex((x) => x.id === fixed.id);
         if (reqIndex === -1) {
           continue; // not required in this instance template
         }
@@ -401,9 +371,7 @@ export class SystemTemplateComponent {
     this.selectedServer = null;
   }
 
-  private getNodesFor(
-    group: FlattenedInstanceTemplateGroupConfiguration
-  ): string[] {
+  private getNodesFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     if (group.type === ApplicationType.CLIENT) {
       return [null, CLIENT_NODE_NAME];
     } else {
@@ -415,9 +383,7 @@ export class SystemTemplateComponent {
     }
   }
 
-  private getLabelsFor(
-    group: FlattenedInstanceTemplateGroupConfiguration
-  ): string[] {
+  private getLabelsFor(group: FlattenedInstanceTemplateGroupConfiguration): string[] {
     const nodeValues = this.getNodesFor(group);
 
     return nodeValues.map((n) => {
@@ -446,7 +412,7 @@ export class SystemTemplateComponent {
     this.isAllTemplateGroupsSelected = true;
   }
 
-  /* template */ validateAnyGroupSelected(tpl: TemplateSelection) {
+  protected validateAnyGroupSelected(tpl: TemplateSelection) {
     // we may need more or less variables :) do this early for the early return below.
     this.updateInstanteTemplateVariables(tpl);
 
@@ -462,7 +428,7 @@ export class SystemTemplateComponent {
     this.validateAllTemplateGroupsSelected();
   }
 
-  /* template */ validateHasAllSystemVariables() {
+  protected validateHasAllSystemVariables() {
     if (!this.template) {
       return;
     }
@@ -477,7 +443,7 @@ export class SystemTemplateComponent {
     this.isAllSystemVariablesSet = true;
   }
 
-  /* template */ validateHasAllVariables(tpl: TemplateSelection) {
+  protected validateHasAllVariables(tpl: TemplateSelection) {
     if (!this.template) {
       return;
     }
@@ -498,7 +464,7 @@ export class SystemTemplateComponent {
     }
   }
 
-  /* template */ toggleSkipInstance(val: boolean, tpl: TemplateSelection) {
+  protected toggleSkipInstance(val: boolean, tpl: TemplateSelection) {
     if (!val) {
       tpl.groups = {};
     }

@@ -34,16 +34,14 @@ export enum BdDialogScrollEvent {
   templateUrl: './bd-dialog.component.html',
 })
 export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(
-    false
-  );
+  @Input() loadingWhen$: Observable<boolean> = new BehaviorSubject<boolean>(false);
   @Input() resetWhen$ = new BehaviorSubject<any>(false);
   @Input() hideContentWhenLoading = true;
   @Input() restoreScrollAfterLoad = false;
   @Input() padding = true;
   @Output() scrollTo = new EventEmitter<BdDialogScrollEvent>();
 
-  /* template */ showContent$: Observable<boolean>;
+  protected showContent$: Observable<boolean>;
 
   @ViewChild(BdDialogMessageComponent) messageComp: BdDialogMessageComponent;
   @ViewChild('scrollContainer') scrollContainer: ElementRef;
@@ -52,9 +50,7 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   private storedPosition: number;
 
   ngOnInit(): void {
-    this.showContent$ = this.loadingWhen$.pipe(
-      map((v) => !(v && this.hideContentWhenLoading))
-    );
+    this.showContent$ = this.loadingWhen$.pipe(map((v) => !(v && this.hideContentWhenLoading)));
   }
 
   ngAfterViewInit(): void {
@@ -86,16 +82,10 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
   }
 
-  public info(
-    header: string,
-    message: string,
-    icon?: string
-  ): Observable<boolean> {
+  public info(header: string, message: string, icon?: string): Observable<boolean> {
     return this.message({ header, message, icon, actions: [ACTION_OK] });
   }
 
@@ -130,7 +120,7 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.messageComp;
   }
 
-  /* template */ onScrollContent(event: any) {
+  protected onScrollContent(event: any) {
     const ele = event.target; // the scroll container;
     const scrollTop = ele.scrollTop; // the offset within the scrollHeight of the currently top-most pixel.
     const contentHeight = ele.scrollHeight; // the height of all the content which can scroll.

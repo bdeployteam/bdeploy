@@ -1,5 +1,5 @@
 import { moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { LDAPSettingsDto } from 'src/app/models/gen.dtos';
@@ -18,6 +18,9 @@ import { LdapImportActionComponent } from './ldap-import-action/ldap-import-acti
   templateUrl: './ldap-tab.component.html',
 })
 export class LdapTabComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  protected settings = inject(SettingsService);
+
   private colServer: BdDataColumn<LDAPSettingsDto> = {
     id: 'server',
     name: 'Server',
@@ -68,7 +71,7 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     actionDisabled: (r) => this.isEditMode(r),
   };
 
-  /* template */ columns: BdDataColumn<LDAPSettingsDto>[] = [
+  protected columns: BdDataColumn<LDAPSettingsDto>[] = [
     this.colServer,
     this.colDescription,
     this.colCheck,
@@ -76,19 +79,13 @@ export class LdapTabComponent implements OnInit, OnDestroy {
     this.colEdit,
     this.colDelete,
   ];
-  /* template */ tempServer: Partial<LDAPSettingsDto>;
-  /* template */ checkResult$ = new Subject<string>();
+  protected tempServer: Partial<LDAPSettingsDto>;
+  protected checkResult$ = new Subject<string>();
   private selectedServerId: string;
 
   private subscription: Subscription;
 
-  @ViewChild(BdDataTableComponent)
-  private table: BdDataTableComponent<LDAPSettingsDto>;
-
-  constructor(
-    public settings: SettingsService,
-    private areas: NavAreasService
-  ) {}
+  @ViewChild(BdDataTableComponent) private table: BdDataTableComponent<LDAPSettingsDto>;
 
   ngOnInit(): void {
     this.subscription = this.areas.panelRoute$.subscribe((route) => {
@@ -98,29 +95,23 @@ export class LdapTabComponent implements OnInit, OnDestroy {
       }
       this.selectedServerId = route.params['id'];
     });
-    this.subscription.add(
-      this.settings.settingsUpdated$.subscribe(() => this.table?.update())
-    );
+    this.subscription.add(this.settings.settingsUpdated$.subscribe(() => this.table?.update()));
   }
 
-  /* template */ onReorder(order: DragReorderEvent<LDAPSettingsDto>) {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  protected onReorder(order: DragReorderEvent<LDAPSettingsDto>) {
     if (order.previousIndex === order.currentIndex) {
       return;
     }
 
-    moveItemInArray(
-      this.settings.settings$.value.auth.ldapSettings,
-      order.previousIndex,
-      order.currentIndex
-    );
+    moveItemInArray(this.settings.settings$.value.auth.ldapSettings, order.previousIndex, order.currentIndex);
     this.settings.serversReordered();
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  isEditMode(r) {
+  private isEditMode(r) {
     return this.selectedServerId === r.id;
   }
 }

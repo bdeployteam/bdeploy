@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
 import { debounceTime, finalize, skipWhile, take } from 'rxjs/operators';
 import {
@@ -29,6 +29,13 @@ export interface ClientApp {
   providedIn: 'root',
 })
 export class ClientsService {
+  private http = inject(HttpClient);
+  private cfg = inject(ConfigService);
+  private groups = inject(GroupsService);
+  private downloads = inject(DownloadService);
+  private changes = inject(ObjectChangesService);
+  private instances = inject(InstancesService);
+
   public loading$ = new BehaviorSubject<boolean>(true);
   public launcher$ = new BehaviorSubject<LauncherDto>(null);
   public apps$ = new BehaviorSubject<ClientApp[]>(null);
@@ -41,17 +48,8 @@ export class ClientsService {
   private apiGroupPath = (g) => `${this.cfg.config.api}/group/${g}`;
   private apiInstancePath = (g) => `${this.apiGroupPath(g)}/instance`;
 
-  constructor(
-    private http: HttpClient,
-    private cfg: ConfigService,
-    private groups: GroupsService,
-    private downloads: DownloadService,
-    private changes: ObjectChangesService,
-    private instances: InstancesService
-  ) {
-    this.groups.current$.subscribe((g) =>
-      this.updateChangeSubscription(g?.name)
-    );
+  constructor() {
+    this.groups.current$.subscribe((g) => this.updateChangeSubscription(g?.name));
 
     // debounce updates in case multiple instances updated in a single go.
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
@@ -63,10 +61,8 @@ export class ClientsService {
       return;
     }
 
-    if (this.loadCall) {
-      // cancel previous calls.
-      this.loadCall.unsubscribe();
-    }
+    // cancel previous calls.
+    this.loadCall?.unsubscribe();
 
     this.loading$.next(true);
     this.loadCall = this.http
@@ -87,9 +83,8 @@ export class ClientsService {
           .subscribe((insts) => {
             const r: ClientApp[] = [];
             for (const inst of result.clients) {
-              const iname = insts.find(
-                (i) => i.instanceConfiguration?.id === inst.instanceId
-              )?.instanceConfiguration?.name;
+              const iname = insts.find((i) => i.instanceConfiguration?.id === inst.instanceId)?.instanceConfiguration
+                ?.name;
               r.push(
                 ...inst.applications.map((a) => ({
                   instanceId: inst.instanceId,
@@ -100,9 +95,8 @@ export class ClientsService {
               );
             }
             for (const eps of result.endpoints) {
-              const iname = insts.find(
-                (i) => i.instanceConfiguration?.id === eps.instanceId
-              )?.instanceConfiguration?.name;
+              const iname = insts.find((i) => i.instanceConfiguration?.id === eps.instanceId)?.instanceConfiguration
+                ?.name;
               r.push(
                 ...eps.endpoints.map((e) => ({
                   instanceId: eps.instanceId,
@@ -118,44 +112,26 @@ export class ClientsService {
   }
 
   private updateChangeSubscription(group: string) {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
 
     if (group) {
-      this.subscription = this.changes.subscribe(
-        ObjectChangeType.INSTANCE,
-        { scope: [group] },
-        () => {
-          this.update$.next(group);
-        }
-      );
+      this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE, { scope: [group] }, () => {
+        this.update$.next(group);
+      });
     }
 
     this.update$.next(group);
   }
 
   public hasLauncher(os: OperatingSystem): boolean {
-    return (
-      !!this.launcher$.value &&
-      !!this.launcher$.value.launchers &&
-      !!this.launcher$.value.launchers[os]
-    );
+    return !!this.launcher$.value && !!this.launcher$.value.launchers && !!this.launcher$.value.launchers[os];
   }
 
   /** Downloads the Click & Start file for the given client application */
-  public downloadClickAndStart(
-    app: string,
-    name: string,
-    instance: string
-  ): Observable<any> {
+  public downloadClickAndStart(app: string, name: string, instance: string): Observable<any> {
     return new Observable((s) => {
       this.http
-        .get(
-          `${this.apiInstancePath(
-            this.groups.current$.value.name
-          )}/${instance}/${app}/clickAndStart`
-        )
+        .get(`${this.apiInstancePath(this.groups.current$.value.name)}/${instance}/${app}/clickAndStart`)
         .subscribe({
           next: (data) => {
             this.downloads.downloadJson(name + '.bdeploy', data);
@@ -174,14 +150,9 @@ export class ClientsService {
   public downloadInstaller(app: string, instance: string): Observable<any> {
     return new Observable((s) => {
       this.http
-        .get(
-          `${this.apiInstancePath(
-            this.groups.current$.value.name
-          )}/${instance}/${app}/installer/zip`,
-          {
-            responseType: 'text',
-          }
-        )
+        .get(`${this.apiInstancePath(this.groups.current$.value.name)}/${instance}/${app}/installer/zip`, {
+          responseType: 'text',
+        })
         .subscribe({
           next: (token) => {
             this.downloads.download(this.downloads.createDownloadUrl(token));
@@ -226,17 +197,15 @@ export class ClientsService {
     }
 
     // TODO: To allow better progress reporting, we should use our prepare/token/download mechanism instead.
-    this.downloads.download(
-      `${this.apiSwupPath}/download/${launchers[os].name}/${launchers[os].tag}`
-    );
+    this.downloads.download(`${this.apiSwupPath}/download/${launchers[os].name}/${launchers[os].tag}`);
     return of(null);
   }
 
   public getDirectUiURI(app: ClientApp): Observable<string> {
     return this.http.get(
-      `${this.apiInstancePath(this.groups.current$.value.name)}/${
-        app.instanceId
-      }/uiDirect/${app.endpoint.id}/${app.endpoint.endpoint.id}`,
+      `${this.apiInstancePath(this.groups.current$.value.name)}/${app.instanceId}/uiDirect/${app.endpoint.id}/${
+        app.endpoint.endpoint.id
+      }`,
       {
         responseType: 'text',
         headers: suppressGlobalErrorHandling(new HttpHeaders()),

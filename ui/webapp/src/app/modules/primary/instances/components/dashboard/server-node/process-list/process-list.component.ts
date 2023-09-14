@@ -1,12 +1,5 @@
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
-import { BehaviorSubject, filter, Subscription } from 'rxjs';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, filter } from 'rxjs';
 import { BdDataColumn, BdDataGrouping } from 'src/app/models/data';
 import {
   ApplicationConfiguration,
@@ -33,9 +26,14 @@ export const CONTROL_GROUP_COL_ID = 'ctrlGroup';
   selector: 'app-node-process-list',
   templateUrl: './process-list.component.html',
 })
-export class NodeProcessListComponent
-  implements OnInit, AfterViewInit, OnDestroy
-{
+export class NodeProcessListComponent implements OnInit, AfterViewInit, OnDestroy {
+  private appCols = inject(ProcessesColumnsService);
+  private cardViewService = inject(CardViewService);
+  private ports = inject(PortsService);
+  private instances = inject(InstancesService);
+  private systems = inject(SystemsService);
+  protected bulk = inject(ProcessesBulkService);
+
   private processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration> = {
     id: CONTROL_GROUP_COL_ID,
     name: 'Control Group',
@@ -45,53 +43,33 @@ export class NodeProcessListComponent
   };
 
   @Input() node: InstanceNodeConfigurationDto;
-
   @Input() bulkMode: boolean;
   @Input() gridWhen$: BehaviorSubject<boolean>;
-  @Input() groupingWhen$: BehaviorSubject<
-    BdDataGrouping<ApplicationConfiguration>[]
-  >;
+  @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>;
 
-  /* template */ columns = [...this.appCols.defaultProcessesColumns];
+  @ViewChild(BdDataDisplayComponent) private data: BdDataDisplayComponent<ApplicationConfiguration>;
 
-  /* template */ getRecordRoute = (row: ApplicationConfiguration) => {
-    return [
-      '',
-      { outlets: { panel: ['panels', 'instances', 'process', row.id] } },
-    ];
+  protected columns = [...this.appCols.defaultProcessesColumns];
+
+  protected getRecordRoute = (row: ApplicationConfiguration) => {
+    return ['', { outlets: { panel: ['panels', 'instances', 'process', row.id] } }];
   };
 
-  /* template */ isCardView: boolean;
-  /* template */ presetKeyValue = 'processList';
+  protected isCardView: boolean;
+  protected presetKeyValue = 'processList';
 
-  @ViewChild(BdDataDisplayComponent)
-  private data: BdDataDisplayComponent<ApplicationConfiguration>;
   private subscription: Subscription;
   private nodes: InstanceNodeConfigurationListDto;
 
-  constructor(
-    private appCols: ProcessesColumnsService,
-    private cardViewService: CardViewService,
-    public bulk: ProcessesBulkService,
-    private ports: PortsService,
-    private instances: InstancesService,
-    private systems: SystemsService
-  ) {
-    this.columns.splice(2, 0, this.processCtrlGroupColumn);
-  }
-
   ngOnInit(): void {
+    this.columns.splice(2, 0, this.processCtrlGroupColumn);
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
-    this.instances.activeNodeCfgs$
-      .pipe(filter((i) => !!i))
-      .subscribe((nodes) => (this.nodes = nodes));
+    this.instances.activeNodeCfgs$.pipe(filter((i) => !!i)).subscribe((nodes) => (this.nodes = nodes));
   }
 
   ngAfterViewInit(): void {
     // active ports states reacts to *all* other state changes, so we use this as update trigger.
-    this.subscription = this.ports.activePortStates$.subscribe(() =>
-      this.data.redraw()
-    );
+    this.subscription = this.ports.activePortStates$.subscribe(() => this.data.redraw());
   }
 
   ngOnDestroy(): void {
@@ -99,18 +77,12 @@ export class NodeProcessListComponent
   }
 
   getControlGroup(row: ApplicationConfiguration): string {
-    return this.node.nodeConfiguration.controlGroups.find((cg) =>
-      cg.processOrder.includes(row.id)
-    )?.name;
+    return this.node.nodeConfiguration.controlGroups.find((cg) => cg.processOrder.includes(row.id))?.name;
   }
 
-  /* template */ getPinnedParameters(
-    record: ApplicationConfiguration
-  ): PinnedParameter[] {
+  protected getPinnedParameters(record: ApplicationConfiguration): PinnedParameter[] {
     const app = this.nodes?.applications?.find(
-      (a) =>
-        a.key.name === record.application?.name &&
-        a.key.tag === record.application?.tag
+      (a) => a.key.name === record.application?.name && a.key.tag === record.application?.tag
     );
     const params = app?.descriptor?.startCommand?.parameters;
     return record.start.parameters
@@ -121,17 +93,11 @@ export class NodeProcessListComponent
       }));
   }
 
-  getPinnedParameterValue(
-    record: ApplicationConfiguration,
-    p: ParameterConfiguration
-  ): string {
-    const instanceConfiguration =
-      this.instances.active$.value?.instanceConfiguration;
+  private getPinnedParameterValue(record: ApplicationConfiguration, p: ParameterConfiguration): string {
+    const instanceConfiguration = this.instances.active$.value?.instanceConfiguration;
 
     const system = instanceConfiguration?.system
-      ? this.systems.systems$.value?.find(
-          (s) => s.key.name === instanceConfiguration.system.name
-        )
+      ? this.systems.systems$.value?.find((s) => s.key.name === instanceConfiguration.system.name)
       : null;
 
     const nodeDtos = this.instances.activeNodeCfgs$.value?.nodeConfigDtos;
@@ -147,7 +113,7 @@ export class NodeProcessListComponent
     );
   }
 
-  /* template */ doTrack(index: number, param: PinnedParameter) {
+  protected doTrack(index: number, param: PinnedParameter) {
     return param.name;
   }
 }

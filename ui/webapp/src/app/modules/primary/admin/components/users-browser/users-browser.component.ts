@@ -1,13 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
-import {
-  LDAPSettingsDto,
-  SpecialAuthenticators,
-  UserInfo,
-} from 'src/app/models/gen.dtos';
+import { LDAPSettingsDto, SpecialAuthenticators, UserInfo } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
@@ -22,6 +18,10 @@ import { AuthAdminService } from '../../services/auth-admin.service';
   styleUrls: ['./users-browser.component.css'],
 })
 export class UsersBrowserComponent {
+  private userColumns = inject(UsersColumnsService);
+  protected authAdmin = inject(AuthAdminService);
+  protected settings = inject(SettingsService);
+
   private colPermLevel: BdDataColumn<UserInfo> = {
     id: 'permLevel',
     name: 'Global Permission',
@@ -54,18 +54,17 @@ export class UsersBrowserComponent {
     component: BdDataDateCellComponent,
   };
 
-  /* template */ loading$ = combineLatest([
-    this.settings.loading$,
-    this.authAdmin.loadingUsers$,
-  ]).pipe(map(([s, a]) => s || a));
-  /* template */ columns: BdDataColumn<UserInfo>[] = [
+  protected loading$ = combineLatest([this.settings.loading$, this.authAdmin.loadingUsers$]).pipe(
+    map(([s, a]) => s || a)
+  );
+  protected columns: BdDataColumn<UserInfo>[] = [
     ...this.userColumns.defaultUsersColumns,
     this.colPermLevel,
     this.colInact,
     this.colAuthBy,
     this.colLastLogin,
   ];
-  /* template */ grouping: BdDataGroupingDefinition<UserInfo>[] = [
+  protected grouping: BdDataGroupingDefinition<UserInfo>[] = [
     {
       name: 'Authenticated By',
       group: (r) => this.getAuthenticatedBy(r),
@@ -77,31 +76,21 @@ export class UsersBrowserComponent {
       associatedColumn: this.colPermLevel.id,
     },
   ];
-  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
+  protected sort: Sort = { active: 'name', direction: 'asc' };
 
-  /* template */ getRecordRoute = (row: UserInfo) => {
-    return [
-      '',
-      { outlets: { panel: ['panels', 'admin', 'user-detail', row.name] } },
-    ];
+  protected getRecordRoute = (row: UserInfo) => {
+    return ['', { outlets: { panel: ['panels', 'admin', 'user-detail', row.name] } }];
   };
 
-  /* template */ addUser: Partial<UserInfo>;
-  /* template */ addConfirm: string;
+  protected addUser: Partial<UserInfo>;
+  protected addConfirm: string;
 
-  constructor(
-    public authAdmin: AuthAdminService,
-    private userColumns: UsersColumnsService,
-    public settings: SettingsService
-  ) {}
-
-  public getAuthenticatedBy(userInfo: UserInfo): string {
+  private getAuthenticatedBy(userInfo: UserInfo): string {
     if (userInfo.externalSystem) {
       if (userInfo.externalSystem === 'LDAP') {
-        const dto: LDAPSettingsDto =
-          this.settings.settings$.value.auth.ldapSettings.find(
-            (s) => s.id === userInfo.externalTag
-          );
+        const dto: LDAPSettingsDto = this.settings.settings$.value.auth.ldapSettings.find(
+          (s) => s.id === userInfo.externalTag
+        );
         return dto ? dto.description : 'All configured Servers';
       } else if (userInfo.externalSystem === 'OIDC') {
         return 'OpenID Connect';

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable, Subscription, combineLatest, debounceTime } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -15,10 +15,18 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class ProcessesService {
-  loading$ = new BehaviorSubject<boolean>(true);
-  processStates$ = new BehaviorSubject<{ [key: string]: ProcessStatusDto }>(null);
-  processToNode$ = new BehaviorSubject<{ [key: string]: string }>({});
-  processStatesLoadTime$ = new BehaviorSubject<number>(null);
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private groups = inject(GroupsService);
+  private servers = inject(ServersService);
+  private instances = inject(InstancesService);
+  private snackbar = inject(MatSnackBar);
+  private zone = inject(NgZone);
+
+  public loading$ = new BehaviorSubject<boolean>(true);
+  public processStates$ = new BehaviorSubject<{ [key: string]: ProcessStatusDto }>(null);
+  public processToNode$ = new BehaviorSubject<{ [key: string]: string }>({});
+  public processStatesLoadTime$ = new BehaviorSubject<number>(null);
 
   private instance: InstanceDto;
   private loadInterval;
@@ -56,15 +64,7 @@ export class ProcessesService {
   private apiPath = (group, instance) => `${this.cfg.config.api}/group/${group}/instance/${instance}/processes`;
   private isCentral = false;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private groups: GroupsService,
-    private servers: ServersService,
-    private instances: InstancesService,
-    private snackbar: MatSnackBar,
-    private zone: NgZone
-  ) {
+  constructor() {
     this.cfg.isCentral$.subscribe((value) => {
       this.isCentral = value;
     });
@@ -79,7 +79,7 @@ export class ProcessesService {
 
           this.instance = instance;
 
-          zone.runOutsideAngular(() => {
+          this.zone.runOutsideAngular(() => {
             // we'll refresh every 30 seconds in case of central & synced, and every 5 seconds in case we're local.
             this.loadInterval = setInterval(() => this.reload(true), this.isCentral ? 15000 : 5000);
             this.checkInterval = setInterval(() => this.checkState(), 1000);

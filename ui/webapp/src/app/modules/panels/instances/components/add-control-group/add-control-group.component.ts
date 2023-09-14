@@ -1,20 +1,7 @@
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import {
-  combineLatest,
-  debounceTime,
-  Observable,
-  of,
-  Subscription,
-  tap,
-} from 'rxjs';
+import { Observable, Subscription, combineLatest, debounceTime, of, tap } from 'rxjs';
 import {
   InstanceNodeConfiguration,
   ProcessControlGroupConfiguration,
@@ -41,50 +28,34 @@ const GROUP_TEMPLATE = {
   selector: 'app-add-control-group',
   templateUrl: './add-control-group.component.html',
 })
-export class AddControlGroupComponent
-  implements OnInit, OnDestroy, AfterViewInit
-{
+export class AddControlGroupComponent implements OnInit, OnDestroy, AfterViewInit {
+  private areas = inject(NavAreasService);
+  protected cfg = inject(ConfigService);
+  protected edit = inject(InstanceEditService);
+  protected servers = inject(ServersService);
+
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
   private subscription: Subscription;
 
-  /* template */ handlingTypeValues = [
-    ProcessControlGroupHandlingType.SEQUENTIAL,
-    ProcessControlGroupHandlingType.PARALLEL,
-  ];
-  /* template */ waitTypeValues = [
-    ProcessControlGroupWaitType.CONTINUE,
-    ProcessControlGroupWaitType.WAIT,
-  ];
+  protected handlingTypeValues = [ProcessControlGroupHandlingType.SEQUENTIAL, ProcessControlGroupHandlingType.PARALLEL];
+  protected waitTypeValues = [ProcessControlGroupWaitType.CONTINUE, ProcessControlGroupWaitType.WAIT];
 
-  /* template */ newGroup: ProcessControlGroupConfiguration =
-    cloneDeep(GROUP_TEMPLATE);
-  /* template */ node: InstanceNodeConfiguration;
-  /* template */ nodeName: string;
-  /* template */ hasPendingChanges: boolean;
-
-  constructor(
-    public cfg: ConfigService,
-    public edit: InstanceEditService,
-    public servers: ServersService,
-    private areas: NavAreasService
-  ) {}
+  protected newGroup: ProcessControlGroupConfiguration = cloneDeep(GROUP_TEMPLATE);
+  protected node: InstanceNodeConfiguration;
+  protected nodeName: string;
+  protected hasPendingChanges: boolean;
 
   ngOnInit(): void {
-    this.subscription = combineLatest([
-      this.edit.state$,
-      this.areas.panelRoute$,
-    ]).subscribe(([state, route]) => {
+    this.subscription = combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
       if (!state || !route || !route.params?.node) {
         this.node = null;
         return;
       }
       this.nodeName = route.params.node;
-      this.node = state.config.nodeDtos.find(
-        (n) => n.nodeName === route.params.node
-      )?.nodeConfiguration;
+      this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
     });
   }
 
@@ -92,22 +63,20 @@ export class AddControlGroupComponent
     if (!this.form) {
       return;
     }
-    this.subscription = this.form.valueChanges
-      .pipe(debounceTime(100))
-      .subscribe(() => {
-        this.hasPendingChanges = this.isDirty();
-      });
+    this.subscription = this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
+      this.hasPendingChanges = this.isDirty();
+    });
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
     return isDirty(this.newGroup, GROUP_TEMPLATE);
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 

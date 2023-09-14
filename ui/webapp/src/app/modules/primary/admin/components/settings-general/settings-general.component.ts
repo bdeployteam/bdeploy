@@ -1,10 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
@@ -17,25 +11,24 @@ import { SettingsService } from '../../../../core/services/settings.service';
   templateUrl: './settings-general.component.html',
   encapsulation: ViewEncapsulation.None,
 })
-export class SettingsGeneralComponent
-  implements OnInit, OnDestroy, DirtyableDialog
-{
-  /* template */ addPlugin$ = new Subject<any>();
-  /* template */ tabIndex: number;
+export class SettingsGeneralComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private areas = inject(NavAreasService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  protected settings = inject(SettingsService);
+
+  protected addPlugin$ = new Subject<any>();
+  protected tabIndex: number;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
-  constructor(
-    public settings: SettingsService,
-    private areas: NavAreasService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
-    areas.registerDirtyable(this, 'admin');
+  ngOnInit() {
+    this.areas.registerDirtyable(this, 'admin');
+    this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'));
   }
 
-  ngOnInit() {
-    this.tabIndex = parseInt(this.route.snapshot.queryParamMap.get('tabIndex'));
+  ngOnDestroy(): void {
+    this.router.navigate([], { queryParams: {} });
   }
 
   public isDirty(): boolean {
@@ -46,15 +39,11 @@ export class SettingsGeneralComponent
     return this.settings.save();
   }
 
-  /* template */ tabChanged(tab) {
+  protected tabChanged(tab) {
     this.router.navigate([], { queryParams: { tabIndex: tab.index } });
     this.tabIndex = parseInt(tab.index);
     if (this.areas.panelVisible$.value) {
       setTimeout(() => this.areas.closePanel());
     }
-  }
-
-  ngOnDestroy(): void {
-    this.router.navigate([], { queryParams: {} });
   }
 }

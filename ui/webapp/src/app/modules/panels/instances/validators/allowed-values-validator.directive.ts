@@ -1,10 +1,5 @@
 import { Directive, Input } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
   BdValidationMessageExtractor,
   bdValidationRegisterMessageExtractor,
@@ -20,9 +15,7 @@ import {
     },
   ],
 })
-export class AllowedValuesValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class AllowedValuesValidatorDirective implements Validator, BdValidationMessageExtractor {
   public readonly id = 'edit-allowed-values';
 
   @Input() appAllowedValuesValidator: string[];
@@ -31,13 +24,13 @@ export class AllowedValuesValidatorDirective
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value?.value; // LinkedValue
     const errors = {};
 
@@ -47,9 +40,7 @@ export class AllowedValuesValidatorDirective
     }
 
     if (this.appAllowedValuesValidator.findIndex((v) => v === value) === -1) {
-      errors[
-        this.id
-      ] = `Value must be one of: ${this.appAllowedValuesValidator.join(', ')}`;
+      errors[this.id] = `Value must be one of: ${this.appAllowedValuesValidator.join(', ')}`;
     }
 
     return errors;

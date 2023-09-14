@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { InstanceVersionDto } from 'src/app/models/gen.dtos';
@@ -10,7 +10,11 @@ import { HistoryDetailsService } from '../../services/history-details.service';
   selector: 'app-history-compare-select',
   templateUrl: './history-compare-select.component.html',
 })
-export class HistoryCompareSelectComponent implements OnDestroy {
+export class HistoryCompareSelectComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  private instances = inject(InstancesService);
+  protected details = inject(HistoryDetailsService);
+
   private versionColumn: BdDataColumn<InstanceVersionDto> = {
     id: 'version',
     name: 'Instance Version',
@@ -28,13 +32,10 @@ export class HistoryCompareSelectComponent implements OnDestroy {
   private subscription: Subscription;
   private key: string;
 
-  /* template */ records$ = new BehaviorSubject<InstanceVersionDto[]>(null);
-  /* template */ base: string;
-  /* template */ columns: BdDataColumn<InstanceVersionDto>[] = [
-    this.versionColumn,
-    this.productVersionColumn,
-  ];
-  /* template */ getRecordRoute = (row: InstanceVersionDto) => {
+  protected records$ = new BehaviorSubject<InstanceVersionDto[]>(null);
+  protected base: string;
+  protected columns: BdDataColumn<InstanceVersionDto>[] = [this.versionColumn, this.productVersionColumn];
+  protected getRecordRoute = (row: InstanceVersionDto) => {
     if (row.key.tag === this.base) {
       return [];
     }
@@ -42,25 +43,13 @@ export class HistoryCompareSelectComponent implements OnDestroy {
       '',
       {
         outlets: {
-          panel: [
-            'panels',
-            'instances',
-            'history',
-            this.key,
-            'compare',
-            this.base,
-            row.key.tag,
-          ],
+          panel: ['panels', 'instances', 'history', this.key, 'compare', this.base, row.key.tag],
         },
       },
     ];
   };
 
-  constructor(
-    private areas: NavAreasService,
-    public details: HistoryDetailsService,
-    private instances: InstancesService
-  ) {
+  ngOnInit() {
     this.subscription = this.areas.panelRoute$.subscribe((r) => {
       if (!r) {
         return;
@@ -81,7 +70,7 @@ export class HistoryCompareSelectComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private getVersionText(row: InstanceVersionDto) {
@@ -116,11 +105,11 @@ export class HistoryCompareSelectComponent implements OnDestroy {
     return [];
   }
 
-  /* template */ onBack() {
+  protected onBack() {
     window.history.back();
   }
 
-  /* template */ doSort(records: InstanceVersionDto[]) {
+  protected doSort(records: InstanceVersionDto[]) {
     return [...records].sort((a, b) => Number(b.key.tag) - Number(a.key.tag));
   }
 }

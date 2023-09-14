@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Observable, forkJoin, map, of, skipWhile, switchMap, take, timer } from 'rxjs';
 import { ActionBroadcastDto, ActionExecution, ActionScope } from 'src/app/models/gen.dtos';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ActionsService } from '../../services/actions.service';
-import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   selector: 'app-bd-actions',
@@ -11,16 +10,17 @@ import { AuthenticationService } from '../../services/authentication.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdActionsComponent {
+  private instances = inject(InstancesService);
+  protected actions = inject(ActionsService);
+
   // to update duration values every second.
   content$ = timer(0, 1000).pipe(switchMap(() => this.actions.actions$.pipe(take(1))));
 
-  constructor(public actions: ActionsService, public auth: AuthenticationService, public instances: InstancesService) {}
-
-  /* template */ doTrack(index: number, item: ActionBroadcastDto) {
+  protected doTrack(index: number, item: ActionBroadcastDto) {
     return `${item.action.type}.${item.action.bhive}.${item.action.instance}.${item.action.item}.${item.execution.name}.${item.execution.start}`;
   }
 
-  /* template */ formatTitle(dto: ActionBroadcastDto): Observable<string> {
+  protected formatTitle(dto: ActionBroadcastDto): Observable<string> {
     const filteredJoiner = (components: string[]) => components.filter((c) => !!c).join(' - ');
 
     if (dto.scope === ActionScope.GLOBAL) {
@@ -58,7 +58,7 @@ export class BdActionsComponent {
     }
   }
 
-  /* template */ formatDuration(exec: ActionExecution) {
+  protected formatDuration(exec: ActionExecution) {
     const ms = new Date().getTime() - exec.start;
     const sec = Math.floor(ms / 1000) % 60;
     const min = Math.floor(ms / 60000) % 60;

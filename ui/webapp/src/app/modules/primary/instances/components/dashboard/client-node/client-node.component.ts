@@ -1,10 +1,7 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataGrouping } from 'src/app/models/data';
-import {
-  ApplicationConfiguration,
-  InstanceNodeConfigurationDto,
-} from 'src/app/models/gen.dtos';
+import { ApplicationConfiguration, InstanceNodeConfigurationDto } from 'src/app/models/gen.dtos';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { CardViewService } from 'src/app/modules/core/services/card-view.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -18,34 +15,30 @@ import { StateItem } from '../state-panel/state-panel.component';
   styleUrls: ['./client-node.component.css'],
 })
 export class ClientNodeComponent implements OnInit, OnDestroy {
+  private appCols = inject(ProcessesColumnsService);
+  private areas = inject(NavAreasService);
+  private auth = inject(AuthenticationService);
+  private cardViewService = inject(CardViewService);
+  protected instances = inject(InstancesService);
+
   @Input() node: InstanceNodeConfigurationDto;
 
   @Input() gridWhen$: BehaviorSubject<boolean>;
-  @Input() groupingWhen$: BehaviorSubject<
-    BdDataGrouping<ApplicationConfiguration>[]
-  >;
+  @Input() groupingWhen$: BehaviorSubject<BdDataGrouping<ApplicationConfiguration>[]>;
   @Input() collapsedWhen$: BehaviorSubject<boolean>;
   @Input() narrowWhen$: BehaviorSubject<boolean>;
 
-  /* template */ nodeStateItems$ = new BehaviorSubject<StateItem[]>([]);
-  /* template */ columns = this.appCols.defaultProcessClientColumns;
+  protected nodeStateItems$ = new BehaviorSubject<StateItem[]>([]);
+  protected columns = this.appCols.defaultProcessClientColumns;
 
-  /* template */ getRecordRoute = (row: ApplicationConfiguration) => {
+  protected getRecordRoute = (row: ApplicationConfiguration) => {
     return ['', { outlets: { panel: ['panels', 'groups', 'client', row.id] } }];
   };
 
-  /* template */ isCardView: boolean;
-  /* template */ presetKeyValue = 'processList';
+  protected isCardView: boolean;
+  protected presetKeyValue = 'processList';
 
   private subscription: Subscription;
-
-  constructor(
-    public instances: InstancesService,
-    private appCols: ProcessesColumnsService,
-    private areas: NavAreasService,
-    private auth: AuthenticationService,
-    private cardViewService: CardViewService
-  ) {}
 
   ngOnInit(): void {
     this.isCardView = this.cardViewService.checkCardView(this.presetKeyValue);
@@ -67,12 +60,7 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
           updAvail && this.auth.isCurrentScopeWrite()
             ? () => {
                 this.areas.navigateBoth(
-                  [
-                    'instances',
-                    'configuration',
-                    this.areas.groupContext$.value,
-                    this.node.nodeConfiguration.id,
-                  ],
+                  ['instances', 'configuration', this.areas.groupContext$.value, this.node.nodeConfiguration.id],
                   ['panels', 'instances', 'settings', 'product']
                 );
               }
@@ -84,6 +72,6 @@ export class ClientNodeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 }

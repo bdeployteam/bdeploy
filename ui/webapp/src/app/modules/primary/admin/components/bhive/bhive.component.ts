@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { BehaviorSubject } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
@@ -24,20 +24,22 @@ const COL_ID: BdDataColumn<string> = {
   selector: 'app-bhive',
   templateUrl: './bhive.component.html',
 })
-export class BHiveComponent {
-  /* template */ records$ = new BehaviorSubject<string[]>(null);
-  /* template */ columns: BdDataColumn<string>[] = [COL_AVATAR, COL_ID];
-  /* template */ sort: Sort = { active: 'id', direction: 'asc' };
+export class BHiveComponent implements OnInit {
+  protected hives = inject(HiveService);
 
-  /* template */ getRecordRoute = (row: string) => {
+  protected records$ = new BehaviorSubject<string[]>(null);
+  protected columns: BdDataColumn<string>[] = [COL_AVATAR, COL_ID];
+  protected sort: Sort = { active: 'id', direction: 'asc' };
+
+  protected getRecordRoute = (row: string) => {
     return ['', { outlets: { panel: ['panels', 'admin', 'bhive', row] } }];
   };
 
-  constructor(public hives: HiveService) {
+  ngOnInit() {
     this.load();
   }
 
-  /* template */ load() {
+  protected load() {
     this.hives.listHives().subscribe((hives) => this.records$.next(hives));
   }
 }

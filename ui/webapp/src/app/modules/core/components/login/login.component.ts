@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
@@ -15,25 +15,23 @@ import { ConfigService } from '../../services/config.service';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private auth0 = inject(AuthService);
+  private snackbar = inject(MatSnackBar);
+  protected auth = inject(AuthenticationService);
+  protected cfg = inject(ConfigService);
+
   private tokenSubscription: Subscription;
 
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ user: string;
-  /* template */ pass: string;
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected user: string;
+  protected pass: string;
 
-  /* template */ logoClass: string;
+  protected logoClass: string;
 
   public loginFailed = false;
   public loginFailedMessage;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    public auth: AuthenticationService,
-    public cfg: ConfigService,
-    private auth0: AuthService,
-    private snackbar: MatSnackBar
-  ) {}
 
   ngOnInit(): void {
     this.tokenSubscription = this.auth.getTokenSubject().subscribe((token) => {
@@ -53,10 +51,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.tokenSubscription.unsubscribe();
+    this.tokenSubscription?.unsubscribe();
   }
 
-  /* template */ onSubmit(): void {
+  protected onSubmit(): void {
     this.loading$.next(true);
     this.auth.authenticate(this.user, this.pass).subscribe({
       next: () => {
@@ -77,7 +75,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* template */ loginAuth0() {
+  protected loginAuth0() {
     this.loading$.next(true);
     this.auth0
       .loginWithPopup()
@@ -88,57 +86,9 @@ export class LoginComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe(() => {
-        forkJoin([
-          firstValueFrom(this.auth0.user$),
-          this.auth0.getAccessTokenSilently(),
-        ]).subscribe(([u, t]) => {
+        forkJoin([firstValueFrom(this.auth0.user$), this.auth0.getAccessTokenSilently()]).subscribe(([u, t]) => {
           this.user = u.email;
-          this.auth
-            .authenticate(u.email, t, SpecialAuthenticators.AUTH0)
-            .subscribe({
-              next: () => {
-                console.log(`User "${u.email}" successfully logged in`);
-              },
-              error: (error) => {
-                this.loading$.next(false);
-                if (error.status === 401) {
-                  this.loginFailedMessage = `User "${u.email}" failed to authenticate`;
-                } else {
-                  this.loginFailedMessage = `Error authenticating "${u.email}"`;
-                }
-
-                console.error(this.loginFailedMessage, error);
-                this.loginFailed = true;
-              },
-            });
-        });
-      });
-  }
-
-  /* template */ loginOkta() {
-    const config: OktaAuthOptions = {
-      issuer: `https://${this.cfg.webAuthCfg.okta.domain}/`,
-      clientId: this.cfg.webAuthCfg.okta.clientId,
-    };
-
-    const client = new OktaAuth(config);
-    this.loading$.next(true);
-    client.token
-      .getWithPopup({ popupTitle: 'Login using Okta' })
-      .then(async (t) => {
-        const u = await client.token.getUserInfo(
-          t.tokens.accessToken,
-          t.tokens.idToken
-        );
-
-        this.user = u.email;
-        this.auth
-          .authenticate(
-            u.email,
-            JSON.stringify(t.tokens.accessToken),
-            SpecialAuthenticators.OKTA
-          )
-          .subscribe({
+          this.auth.authenticate(u.email, t, SpecialAuthenticators.AUTH0).subscribe({
             next: () => {
               console.log(`User "${u.email}" successfully logged in`);
             },
@@ -154,6 +104,40 @@ export class LoginComponent implements OnInit, OnDestroy {
               this.loginFailed = true;
             },
           });
+        });
+      });
+  }
+
+  protected loginOkta() {
+    const config: OktaAuthOptions = {
+      issuer: `https://${this.cfg.webAuthCfg.okta.domain}/`,
+      clientId: this.cfg.webAuthCfg.okta.clientId,
+    };
+
+    const client = new OktaAuth(config);
+    this.loading$.next(true);
+    client.token
+      .getWithPopup({ popupTitle: 'Login using Okta' })
+      .then(async (t) => {
+        const u = await client.token.getUserInfo(t.tokens.accessToken, t.tokens.idToken);
+
+        this.user = u.email;
+        this.auth.authenticate(u.email, JSON.stringify(t.tokens.accessToken), SpecialAuthenticators.OKTA).subscribe({
+          next: () => {
+            console.log(`User "${u.email}" successfully logged in`);
+          },
+          error: (error) => {
+            this.loading$.next(false);
+            if (error.status === 401) {
+              this.loginFailedMessage = `User "${u.email}" failed to authenticate`;
+            } else {
+              this.loginFailedMessage = `Error authenticating "${u.email}"`;
+            }
+
+            console.error(this.loginFailedMessage, error);
+            this.loginFailed = true;
+          },
+        });
       })
       .catch((err) => {
         this.loading$.next(false);
@@ -163,7 +147,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
   }
 
-  /* template */ onLogoClick() {
+  protected onLogoClick() {
     this.logoClass = 'local-hinge';
     setTimeout(() => (this.logoClass = null), 2000);
   }

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { differenceInDays, parse } from 'date-fns';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -30,28 +30,22 @@ const DATE_FORMAT = 'yyyy-MM-dd';
   providedIn: 'root',
 })
 export class ClientsUsageService {
+  private http = inject(HttpClient);
+  private cfg = inject(ConfigService);
+  private groups = inject(GroupsService);
+
   public loading$ = new BehaviorSubject<boolean>(true);
   public clientUsage$ = new BehaviorSubject<ClientUsagePerApp[]>(null);
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
-  constructor(
-    private http: HttpClient,
-    private cfg: ConfigService,
-    private groups: GroupsService
-  ) {}
-
   public load(id: string): Observable<ClientUsagePerApp[]> {
     this.loading$.next(true);
-    return this.http
-      .get<ClientUsageData>(
-        `${this.apiPath(this.groups.current$.value.name)}/${id}/clientUsage`
-      )
-      .pipe(
-        finalize(() => this.loading$.next(false)),
-        measure('Load Client Usage'),
-        map((usage) => this.transform(usage))
-      );
+    return this.http.get<ClientUsageData>(`${this.apiPath(this.groups.current$.value.name)}/${id}/clientUsage`).pipe(
+      finalize(() => this.loading$.next(false)),
+      measure('Load Client Usage'),
+      map((usage) => this.transform(usage))
+    );
   }
 
   /**

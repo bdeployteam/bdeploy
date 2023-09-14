@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
@@ -14,26 +14,23 @@ const MAX_TAIL = 512 * 1024; // 512KB max initial fetch.
   styleUrls: ['./process-console.component.css'],
 })
 export class ProcessConsoleComponent implements OnInit, OnDestroy {
-  /* template */ content$ = new BehaviorSubject<string>('');
-  /* template */ available$ = new BehaviorSubject<boolean>(false);
-  /* template */ hasStdin$ = new BehaviorSubject<boolean>(false);
-  /* template */ stdin$ = new BehaviorSubject<boolean>(false);
-  /* template */ follow$ = new BehaviorSubject<boolean>(false);
+  private auth = inject(AuthenticationService);
+  private ngZone = inject(NgZone);
+  protected instances = inject(InstancesService);
+  protected details = inject(ProcessDetailsService);
+  protected servers = inject(ServersService);
+
+  protected content$ = new BehaviorSubject<string>('');
+  protected available$ = new BehaviorSubject<boolean>(false);
+  protected hasStdin$ = new BehaviorSubject<boolean>(false);
+  protected stdin$ = new BehaviorSubject<boolean>(false);
+  protected follow$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
   private followInterval;
 
   private loadingChunk = false;
-
   private offset = 0;
-
-  constructor(
-    private auth: AuthenticationService,
-    public instances: InstancesService,
-    public details: ProcessDetailsService,
-    public servers: ServersService,
-    private ngZone: NgZone
-  ) {}
 
   ngOnInit(): void {
     this.subscription = this.follow$.subscribe((b) => {
@@ -46,10 +43,7 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
     });
 
     this.subscription.add(
-      combineLatest([
-        this.details.processConfig$,
-        this.details.processDetail$,
-      ]).subscribe(([cfg, detail]) => {
+      combineLatest([this.details.processConfig$, this.details.processDetail$]).subscribe(([cfg, detail]) => {
         if (!detail) {
           this.available$.next(false);
           this.follow$.next(false);
@@ -67,9 +61,7 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
             ProcessesService.isRunning(detail.status.processState) &&
             this.auth.isCurrentScopeWrite()
         );
-        this.follow$.next(
-          ProcessesService.isRunning(detail.status.processState)
-        );
+        this.follow$.next(ProcessesService.isRunning(detail.status.processState));
         this.available$.next(true);
 
         this.nextChunk(); // initial
@@ -78,7 +70,7 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
     clearInterval(this.followInterval);
   }
 
@@ -111,11 +103,11 @@ export class ProcessConsoleComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* template */ onUserInput(input: string) {
+  protected onUserInput(input: string) {
     this.details.writeStdin(input);
   }
 
-  /* template */ doDownload() {
+  protected doDownload() {
     this.details.getOutputEntry().subscribe(([dir, entry]) => {
       this.instances.download(dir, entry);
     });

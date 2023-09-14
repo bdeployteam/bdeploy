@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
 import { debounceTime, finalize, tap } from 'rxjs/operators';
 import {
@@ -26,24 +26,25 @@ export enum AttachType {
   providedIn: 'root',
 })
 export class ServersService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private groups = inject(GroupsService);
+
   public loading$ = new BehaviorSubject<boolean>(true);
   public servers$ = new BehaviorSubject<ManagedMasterDto[]>([]);
+
+  public isCurrentInstanceSynchronized$ = new BehaviorSubject<boolean>(true);
+  public isServerDetailsSynchronized$ = new BehaviorSubject<boolean>(true);
 
   private apiPath = `${this.cfg.config.api}/managed-servers`;
   private group: string;
   private subscription: Subscription;
   private isCentral = false;
-  public isCurrentInstanceSynchronized$ = new BehaviorSubject<boolean>(true);
-  public isServerDetailsSynchronized$ = new BehaviorSubject<boolean>(true);
 
   private update$ = new BehaviorSubject<string>(null);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private groups: GroupsService
-  ) {
+  constructor() {
     this.groups.current$.subscribe((g) => this.update$.next(g?.name));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
     this.cfg.isCentral$.subscribe((value) => {
@@ -52,18 +53,13 @@ export class ServersService {
   }
 
   private updateChangeSubscription(group: string) {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
+    this.subscription = null;
 
     if (group) {
-      this.subscription = this.changes.subscribe(
-        ObjectChangeType.INSTANCE_GROUP,
-        { scope: [group] },
-        () => {
-          this.update$.next(group);
-        }
-      );
+      this.subscription = this.changes.subscribe(ObjectChangeType.INSTANCE_GROUP, { scope: [group] }, () => {
+        this.update$.next(group);
+      });
     }
   }
 
@@ -91,29 +87,21 @@ export class ServersService {
       });
   }
 
-  public synchronize(
-    server: ManagedMasterDto
-  ): Observable<MinionSyncResultDto> {
+  public synchronize(server: ManagedMasterDto): Observable<MinionSyncResultDto> {
     if (this.isCentral) {
-      return this.http
-        .get<MinionSyncResultDto>(
-          `${this.apiPath}/synchronize/${this.group}/${server.hostName}`
-        )
-        .pipe(
-          tap((s) => {
-            if (this.servers$.value?.length) {
-              this.servers$.value.splice(
-                this.servers$.value.findIndex(
-                  (o) => o.hostName === s.server.hostName
-                ),
-                1,
-                s.server
-              );
+      return this.http.get<MinionSyncResultDto>(`${this.apiPath}/synchronize/${this.group}/${server.hostName}`).pipe(
+        tap((s) => {
+          if (this.servers$.value?.length) {
+            this.servers$.value.splice(
+              this.servers$.value.findIndex((o) => o.hostName === s.server.hostName),
+              1,
+              s.server
+            );
 
-              this.servers$.next(this.servers$.value);
-            }
-          })
-        );
+            this.servers$.next(this.servers$.value);
+          }
+        })
+      );
     }
     return of(null);
   }
@@ -140,9 +128,7 @@ export class ServersService {
   private getSynchronizedOffset(server: ManagedMasterDto): number {
     if (this.isCentral) {
       // prefer current information if loaded.
-      const currentS = this.servers$.value?.find(
-        (s) => s.hostName === server.hostName
-      );
+      const currentS = this.servers$.value?.find((s) => s.hostName === server.hostName);
       const currentTime = this.cfg.getCorrectedNow(); // use server time to compare.
       return currentTime - (currentS ? currentS : server).lastSync;
     }
@@ -161,18 +147,16 @@ export class ServersService {
             s.complete();
           },
           error: () => {
-            this.http
-              .put(`${this.apiPath}/manual-attach/${this.group}`, server)
-              .subscribe({
-                next: () => {
-                  s.next(AttachType.MANUAL);
-                  s.complete();
-                },
-                error: (manualErr) => {
-                  s.error(manualErr);
-                  s.complete();
-                },
-              });
+            this.http.put(`${this.apiPath}/manual-attach/${this.group}`, server).subscribe({
+              next: () => {
+                s.next(AttachType.MANUAL);
+                s.complete();
+              },
+              error: (manualErr) => {
+                s.error(manualErr);
+                s.complete();
+              },
+            });
           },
         });
     });
@@ -185,25 +169,17 @@ export class ServersService {
   }
 
   public getCentralIdent(server: ManagedMasterDto): Observable<string> {
-    return this.http.post(
-      `${this.apiPath}/central-ident/${this.group}`,
-      server,
-      { responseType: 'text' }
-    );
+    return this.http.post(`${this.apiPath}/central-ident/${this.group}`, server, { responseType: 'text' });
   }
 
   public getManagedIdent(): Observable<ManagedMasterDto> {
     // TODO: why is this method in the wrong service on the server?
-    return this.http.get<ManagedMasterDto>(
-      `${this.cfg.config.api}/backend-info/managed-master`
-    );
+    return this.http.get<ManagedMasterDto>(`${this.cfg.config.api}/backend-info/managed-master`);
   }
 
   public getRemoteProducts(server: string): Observable<ProductDto[]> {
     return this.http
-      .get<ProductDto[]>(
-        `${this.apiPath}/list-products/${this.group}/${server}`
-      )
+      .get<ProductDto[]>(`${this.apiPath}/list-products/${this.group}/${server}`)
       .pipe(measure('Load remote products'));
   }
 

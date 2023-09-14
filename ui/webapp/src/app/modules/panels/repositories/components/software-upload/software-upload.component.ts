@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RepositoryService } from 'src/app/modules/primary/repositories/services/repository.service';
 
 @Component({
@@ -6,15 +6,15 @@ import { RepositoryService } from 'src/app/modules/primary/repositories/services
   templateUrl: './software-upload.component.html',
 })
 export class SoftwareUploadComponent {
-  /* template */ files: File[] = [];
+  protected repositoryService = inject(RepositoryService);
 
-  constructor(public repositoryService: RepositoryService) {}
+  protected files: File[] = [];
 
-  /* template */ fileAdded(file: File) {
+  protected fileAdded(file: File) {
     this.files.push(file);
   }
 
-  /* template */ onDismiss(index: number) {
+  protected onDismiss(index: number) {
     this.files.splice(index, 1);
   }
 }

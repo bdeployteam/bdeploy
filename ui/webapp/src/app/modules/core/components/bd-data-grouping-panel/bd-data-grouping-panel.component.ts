@@ -1,21 +1,12 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { MatLegacyCheckboxChange } from '@angular/material/legacy-checkbox';
 import { Subscription } from 'rxjs';
 import {
   BdDataGrouping,
   BdDataGroupingDefinition,
+  UNMATCHED_GROUP,
   bdExtractGroups,
   bdSortGroups,
-  UNMATCHED_GROUP,
 } from 'src/app/models/data';
 
 /**
@@ -28,9 +19,7 @@ import {
   styleUrls: ['./bd-data-grouping-panel.component.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BdDataGroupingPanelComponent<T>
-  implements OnInit, OnChanges, OnDestroy
-{
+export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDestroy {
   /** The available grouping definitions */
   @Input() definitions: BdDataGroupingDefinition<T>[];
   /** The records currently available for grouping */
@@ -48,21 +37,19 @@ export class BdDataGroupingPanelComponent<T>
   /** Emitted whenever remove button is clicked by the user */
   @Output() removeClicked = new EventEmitter<BdDataGrouping<T>>();
 
-  /* template */ noGroup = UNMATCHED_GROUP;
-  /* template */ groupingValues: string[];
-  /* template */ filter: string;
-  /* template */ get filteredGroupingValues(): string[] {
+  protected noGroup = UNMATCHED_GROUP;
+  protected groupingValues: string[];
+  protected filter: string;
+  protected get filteredGroupingValues(): string[] {
     if (!this.filter) {
       return this.groupingValues;
     }
-    return this.groupingValues.filter(
-      (gv) => gv && gv.toLowerCase().includes(this.filter.toLowerCase())
-    );
+    return this.groupingValues.filter((gv) => gv && gv.toLowerCase().includes(this.filter.toLowerCase()));
   }
-  /* template */ get selectGroupingLabel(): string {
+  protected get selectGroupingLabel(): string {
     return this.grouping?.definition?.name ? 'Grouping' : 'Select Grouping';
   }
-  /* template */ get filterPlaceholder(): string {
+  protected get filterPlaceholder(): string {
     return this.grouping?.definition?.name || 'Filter Options Below';
   }
 
@@ -76,7 +63,7 @@ export class BdDataGroupingPanelComponent<T>
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   ngOnChanges(): void {
@@ -86,20 +73,13 @@ export class BdDataGroupingPanelComponent<T>
   updateGroupingValues() {
     // calculate possible values for the grouping.
     if (!!this.grouping?.definition && this.records?.length) {
-      this.groupingValues = bdExtractGroups(
-        this.grouping.definition,
-        this.records
-      ).sort(
-        this.grouping.definition.sort
-          ? this.grouping.definition.sort
-          : bdSortGroups
+      this.groupingValues = bdExtractGroups(this.grouping.definition, this.records).sort(
+        this.grouping.definition.sort ? this.grouping.definition.sort : bdSortGroups
       );
 
       // remove any "stale" grouping from the current setting (i.e. row value no longer present)
       if (this.grouping.selected?.length) {
-        this.grouping.selected = this.grouping.selected.filter((val) =>
-          this.groupingValues.includes(val)
-        );
+        this.grouping.selected = this.grouping.selected.filter((val) => this.groupingValues.includes(val));
 
         if (this.grouping.selected.length === this.groupingValues.length) {
           this.grouping.selected = [];
@@ -108,16 +88,12 @@ export class BdDataGroupingPanelComponent<T>
 
       // selected values should show up first
       this.groupingValues.sort((a, b) =>
-        this.grouping.selected.includes(a)
-          ? -1
-          : this.grouping.selected.includes(b)
-          ? 1
-          : 0
+        this.grouping.selected.includes(a) ? -1 : this.grouping.selected.includes(b) ? 1 : 0
       );
     }
   }
 
-  /* template */ setGrouping(def: BdDataGroupingDefinition<T>) {
+  protected setGrouping(def: BdDataGroupingDefinition<T>) {
     if (def === this.grouping.definition) {
       // the same thing, don't re-load and trigger.
     }
@@ -128,10 +104,7 @@ export class BdDataGroupingPanelComponent<T>
     this.groupingChange.emit(this.grouping);
   }
 
-  /* template */ groupCheckChanged(
-    group: string,
-    change: MatLegacyCheckboxChange
-  ) {
+  protected groupCheckChanged(group: string, change: MatLegacyCheckboxChange) {
     if (!this.grouping || !this.grouping.definition) {
       return;
     }
@@ -143,9 +116,7 @@ export class BdDataGroupingPanelComponent<T>
         this.grouping.selected = this.groupingValues;
       }
 
-      this.grouping.selected = this.grouping.selected.filter(
-        (g) => g !== group
-      );
+      this.grouping.selected = this.grouping.selected.filter((g) => g !== group);
 
       if (!this.grouping.selected.length) {
         // after de-selection, grouping is empty -> all checkboxes will be selected, need to re-select
@@ -163,13 +134,13 @@ export class BdDataGroupingPanelComponent<T>
     this.groupingChange.emit(this.grouping);
   }
 
-  /* template */ removeGrouping(): void {
+  protected removeGrouping(): void {
     if (!this.removeDisabled) {
       this.removeClicked.emit(this.grouping);
     }
   }
 
-  /* template */ groupingLevelNumber(level: number): string {
+  protected groupingLevelNumber(level: number): string {
     // level will never reach 21. So this should be ok
     switch (level) {
       case 1:

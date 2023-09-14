@@ -35,7 +35,11 @@ export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
     this.subscription = this.bulk.selection$.subscribe((selections) => (this.selections = selections));
   }
 
-  /* template */ onDelete() {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  protected onDelete() {
     this.dialog
       .confirm(
         `Delete ${this.selections.length} system versions?`,
@@ -58,9 +62,5 @@ export class SoftwareBulkManipulationComponent implements OnInit, OnDestroy {
             this.software.load();
           });
       });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

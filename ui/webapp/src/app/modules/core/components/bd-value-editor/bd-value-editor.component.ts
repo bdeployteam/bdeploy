@@ -4,18 +4,12 @@ import {
   EventEmitter,
   Input,
   OnInit,
-  Optional,
   Output,
-  Self,
   TemplateRef,
   ViewChild,
+  inject,
 } from '@angular/core';
-import {
-  ControlContainer,
-  ControlValueAccessor,
-  NgControl,
-  NgForm,
-} from '@angular/forms';
+import { ControlContainer, ControlValueAccessor, NgControl, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Subject, debounceTime } from 'rxjs';
@@ -42,9 +36,9 @@ import { BdPopupDirective } from '../bd-popup/bd-popup.directive';
   viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BdValueEditorComponent
-  implements OnInit, ControlValueAccessor, ErrorStateMatcher
-{
+export class BdValueEditorComponent implements OnInit, ControlValueAccessor, ErrorStateMatcher {
+  protected ngControl = inject(NgControl, { self: true, optional: true });
+
   @Input() label: string;
   @Input() name: string;
   @Input() required: boolean;
@@ -83,22 +77,22 @@ export class BdValueEditorComponent
 
   private modelChanged = new Subject<LinkedValueConfiguration>();
 
-  /* template */ passwordLock = true;
-  /* template */ linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
-  /* template */ booleanValue;
-  /* template */ preview;
+  protected passwordLock = true;
+  protected linkEditorPopup$ = new BehaviorSubject<BdPopupDirective>(null);
+  protected booleanValue;
+  protected preview;
 
-  /* template */ get value(): LinkedValueConfiguration {
+  protected get value(): LinkedValueConfiguration {
     return this.internalValue;
   }
-  /* template */ set value(v: LinkedValueConfiguration) {
+  protected set value(v: LinkedValueConfiguration) {
     if (v !== this.internalValue) {
       this.writeValue(v);
       this.fireChange(v);
     }
   }
 
-  /* template */ internalValue: LinkedValueConfiguration = {
+  protected internalValue: LinkedValueConfiguration = {
     value: null,
     linkExpression: null,
   };
@@ -109,9 +103,9 @@ export class BdValueEditorComponent
     /* intentionally empty */
   };
 
-  constructor(@Optional() @Self() public ngControl: NgControl) {
-    if (ngControl) {
-      ngControl.valueAccessor = this;
+  constructor() {
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
     }
   }
 
@@ -156,12 +150,7 @@ export class BdValueEditorComponent
 
   private updatePreview(value: LinkedValueConfiguration) {
     if (value?.linkExpression?.length) {
-      this.preview = getRenderPreview(
-        this.internalValue,
-        this.process,
-        this.instance,
-        this.system
-      );
+      this.preview = getRenderPreview(this.internalValue, this.process, this.instance, this.system);
     } else {
       this.preview = null;
     }
@@ -191,7 +180,7 @@ export class BdValueEditorComponent
     return this.ngControl && this.ngControl.invalid;
   }
 
-  /* template */ getErrorMessage() {
+  protected getErrorMessage() {
     if (!this.ngControl) {
       return null;
     }
@@ -199,28 +188,22 @@ export class BdValueEditorComponent
     return bdValidationMessage(this.label, this.ngControl.errors);
   }
 
-  /* template */ isBoolean() {
+  protected isBoolean() {
     return this.type === ParameterType.BOOLEAN;
   }
 
-  /* template */ isLink() {
+  protected isLink() {
     if (!this.internalValue) {
       return false;
     }
-    return (
-      this.internalValue.linkExpression !== null &&
-      this.internalValue.linkExpression !== undefined
-    );
+    return this.internalValue.linkExpression !== null && this.internalValue.linkExpression !== undefined;
   }
 
-  /* template */ isPort() {
-    return (
-      this.type === ParameterType.CLIENT_PORT ||
-      this.type === ParameterType.SERVER_PORT
-    );
+  protected isPort() {
+    return this.type === ParameterType.CLIENT_PORT || this.type === ParameterType.SERVER_PORT;
   }
 
-  /* template */ getInputType() {
+  protected getInputType() {
     if (!this.type) {
       return undefined;
     }
@@ -234,7 +217,7 @@ export class BdValueEditorComponent
     }
   }
 
-  /* template */ doRevert() {
+  protected doRevert() {
     if (!this.defaultValue) {
       this.writeValue({
         value: this.isBoolean() ? 'false' : '',
@@ -247,7 +230,7 @@ export class BdValueEditorComponent
     this.fireChange(this.internalValue);
   }
 
-  /* template */ doChangeValue(event: any) {
+  protected doChangeValue(event: any) {
     let reset = false;
     const val = `${event}`; // convert to string in case of number, etc.
 
@@ -255,9 +238,7 @@ export class BdValueEditorComponent
     switch (this.type) {
       case ParameterType.BOOLEAN:
         if (val !== 'true' && val !== 'false') {
-          console.log(
-            `Value is a boolean, but the value is not true or false, resetting to default.`
-          );
+          console.log(`Value is a boolean, but the value is not true or false, resetting to default.`);
           reset = true;
         }
         break;
@@ -288,7 +269,7 @@ export class BdValueEditorComponent
     }
   }
 
-  /* template */ doChangeLink(val: string) {
+  protected doChangeLink(val: string) {
     this.writeValue({ value: null, linkExpression: val ? val : '' });
     this.fireChange(this.internalValue);
   }
@@ -297,32 +278,25 @@ export class BdValueEditorComponent
     this.doChangeValue(this.booleanValue ? 'true' : 'false');
   }
 
-  /* template */ appendLink(v: string) {
+  protected appendLink(v: string) {
     this.doChangeLink(this.internalValue?.linkExpression + v);
   }
 
-  /* template */ makeValueLink() {
+  protected makeValueLink() {
     if (this.type === ParameterType.PASSWORD) {
       this.doChangeLink(''); // DON'T ever apply a password to the plain text editor, rather clear it.
     }
     this.doChangeLink(this.internalValue?.value);
   }
 
-  /* template */ makeValuePlain() {
+  protected makeValuePlain() {
     if (this.type === ParameterType.PASSWORD) {
       this.doChangeValue('');
       return;
     }
 
     if (this.value?.linkExpression?.indexOf('{{') >= 0) {
-      this.doChangeValue(
-        getRenderPreview(
-          this.internalValue,
-          this.process,
-          this.instance,
-          this.system
-        )
-      );
+      this.doChangeValue(getRenderPreview(this.internalValue, this.process, this.instance, this.system));
     } else {
       this.doChangeValue(this.internalValue?.linkExpression);
     }

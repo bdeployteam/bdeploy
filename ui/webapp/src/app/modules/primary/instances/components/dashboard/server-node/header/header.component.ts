@@ -1,11 +1,6 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
-import {
-  HistoryEntryType,
-  InstanceNodeConfigurationDto,
-  OperatingSystem,
-  ProcessState,
-} from 'src/app/models/gen.dtos';
+import { Component, Input, OnChanges, OnDestroy, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { HistoryEntryType, InstanceNodeConfigurationDto, OperatingSystem, ProcessState } from 'src/app/models/gen.dtos';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { InstancesService } from '../../../../services/instances.service';
 
@@ -32,37 +27,32 @@ interface MarkedEvent {
   styleUrls: ['./header.component.css'],
 })
 export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
+  private instances = inject(InstancesService);
+  protected servers = inject(ServersService);
+
   @Input() node: InstanceNodeConfigurationDto;
   @Input() show: 'load' | 'cpu';
   @Input() hasAction = true;
 
-  /* template */ events: MarkedEvent[];
-  /* template */ curve: number[] = [];
-  /* template */ curveLabel: string;
-  /* template */ maxValue: number;
-  /* template */ maxLabel: string;
-  /* template */ renderTime: number = Date.now(); // local time.
+  protected events: MarkedEvent[];
+  protected curve: number[] = [];
+  protected curveLabel: string;
+  protected maxValue: number;
+  protected maxLabel: string;
+  protected renderTime: number = Date.now(); // local time.
 
-  /* template */ pathInfo;
-  /* template */ pathPoints;
-  /* template */ endMarker = false;
-  /* template */ hasVisiblePoint = false;
-  /* template */ formatter: (number) => string;
+  protected pathInfo;
+  protected pathPoints;
+  protected endMarker = false;
+  protected hasVisiblePoint = false;
+  protected formatter: (number) => string;
 
   private changes$ = new BehaviorSubject<boolean>(false);
 
   private subscription: Subscription;
 
-  constructor(
-    private instances: InstancesService,
-    public servers: ServersService
-  ) {}
-
   ngOnInit(): void {
-    this.subscription = combineLatest([
-      this.instances.activeNodeStates$,
-      this.changes$,
-    ]).subscribe(([states]) => {
+    this.subscription = combineLatest([this.instances.activeNodeStates$, this.changes$]).subscribe(([states]) => {
       if (!states || !states[this.node.nodeName]?.config) {
         this.curve = [];
         this.maxValue = 0;
@@ -77,21 +67,16 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
       }
 
       // first we want to find the curve to plot, either cpu usage (windows), or load average (all others)
-      if (
-        (!!this.show && this.show === 'cpu') ||
-        (!this.show && state.config.os === OperatingSystem.WINDOWS)
-      ) {
+      if ((!!this.show && this.show === 'cpu') || (!this.show && state.config.os === OperatingSystem.WINDOWS)) {
         this.curve = state.monitoring.cpuUsage;
         this.curveLabel = 'System CPU Usage';
         this.maxValue = 1.0; // system cpu load: 0.0 to 1.0
-        this.formatter = (n) =>
-          Math.round((n * 100 + Number.EPSILON) * 100) / 100 + '%';
+        this.formatter = (n) => Math.round((n * 100 + Number.EPSILON) * 100) / 100 + '%';
       } else {
         this.curve = state.monitoring.loadAvg;
         this.curveLabel = 'Load Average';
         this.maxValue = state.monitoring.availableProcessors;
-        this.formatter = (n) =>
-          Math.round(((n + Number.EPSILON) * 100) / 100).toString();
+        this.formatter = (n) => Math.round(((n + Number.EPSILON) * 100) / 100).toString();
       }
 
       this.maxLabel = 'Available CPUs: ' + state.monitoring.availableProcessors;
@@ -108,9 +93,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
         }
 
         const limit = this.renderTime - TOTAL_MS; // skip events older than this.
-        const eventsInTimeframe = history.events.filter(
-          (e) => e.timestamp >= limit
-        );
+        const eventsInTimeframe = history.events.filter((e) => e.timestamp >= limit);
         const eventsToRender: MarkedEvent[] = [];
         let userInfo = '';
         let eventType: MarkedEventType = 'info';
@@ -162,7 +145,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   ngOnChanges(): void {
@@ -199,9 +182,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
         path += `M ${pointX},${pointY}`;
       } else {
         // cubic bezier, with the handles shifted 3% off the start/end points - this will give a nice and smooth curve.
-        path += `C ${prevX - 3},${prevY} ${
-          pointX + 3
-        },${pointY} ${pointX},${pointY}`;
+        path += `C ${prevX - 3},${prevY} ${pointX + 3},${pointY} ${pointX},${pointY}`;
       }
 
       prevX = pointX;
@@ -220,11 +201,7 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
     const data = this.getRelevantDataPoints();
 
     let curX = 100;
-    for (
-      let index = 0;
-      index < data.length;
-      ++index, curX = curX - PERC_PER_MIN
-    ) {
+    for (let index = 0; index < data.length; ++index, curX = curX - PERC_PER_MIN) {
       const pointX = curX;
       const pointY = 100 - (data[index] / highestVal) * 100;
 
@@ -251,11 +228,11 @@ export class NodeHeaderComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  /* template */ getMaxLineY() {
+  protected getMaxLineY() {
     return 100 - (this.maxValue / this.getMaxY()) * 100;
   }
 
-  /* template */ getEventX(event: MarkedEvent) {
+  protected getEventX(event: MarkedEvent) {
     const ms = this.renderTime - event.time;
     const perc = ms * PERC_PER_MS;
 

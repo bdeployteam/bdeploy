@@ -1,10 +1,5 @@
-import { Directive } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { Directive, inject } from '@angular/core';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
   BdValidationMessageExtractor,
   bdValidationRegisterMessageExtractor,
@@ -21,23 +16,23 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
     },
   ],
 })
-export class EditCustomIdValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class EditCustomIdValidatorDirective implements Validator, BdValidationMessageExtractor {
+  private edit = inject(InstanceEditService);
+
   public readonly id = 'edit-custom-id';
   private readonly idRegExp = new RegExp(/^[A-Za-z][A-Za-z0-9_\\-\\.]*$/);
 
-  constructor(private edit: InstanceEditService) {
+  constructor() {
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     const errors = {};
     const ok = this.idRegExp.test(value);

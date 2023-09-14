@@ -1,25 +1,21 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
-import {
-  ApplicationPair,
-  ConfigPair,
-  NodePair,
-} from '../../../utils/diff-utils';
+import { ApplicationPair, ConfigPair, NodePair } from '../../../utils/diff-utils';
 
 @Component({
   selector: 'app-local-diff',
   templateUrl: './local-diff.component.html',
 })
 export class LocalDiffComponent implements OnInit, OnDestroy {
-  /* template */ configPair$ = new BehaviorSubject<ConfigPair>(null);
-  /* template */ clientNodeName = CLIENT_NODE_NAME;
-  /* template */ showOnlyDifferences = true;
+  protected edit = inject(InstanceEditService);
+
+  protected configPair$ = new BehaviorSubject<ConfigPair>(null);
+  protected clientNodeName = CLIENT_NODE_NAME;
+  protected showOnlyDifferences = true;
 
   private subscription: Subscription;
-
-  constructor(public edit: InstanceEditService) {}
 
   ngOnInit(): void {
     this.subscription = combineLatest([
@@ -55,18 +51,18 @@ export class LocalDiffComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* template */ showAppPair(appPair: ApplicationPair): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  protected showAppPair(appPair: ApplicationPair): boolean {
     const showAll = !this.showOnlyDifferences;
     return showAll || appPair.hasDifferences;
   }
 
-  /* template */ showNodePair(nodePair: NodePair): boolean {
+  protected showNodePair(nodePair: NodePair): boolean {
     const hasApplications = !!nodePair?.applications?.length;
     const showAll = !this.showOnlyDifferences;
     return hasApplications && (showAll || nodePair.hasDifferences);
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

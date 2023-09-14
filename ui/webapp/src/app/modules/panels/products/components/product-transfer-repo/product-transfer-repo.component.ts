@@ -26,16 +26,16 @@ export class ProductTransferRepoComponent implements OnInit {
 
   protected prodVersionColumns: BdDataColumn<ProductDto>[] = [this.prodCols.productVersionColumn];
 
-  /* template */ repos: SoftwareRepositoryConfiguration[];
-  /* template */ repoLabels: string[];
-  /* template */ selectedRepo: SoftwareRepositoryConfiguration;
-  /* template */ selectedProductId: string;
-  /* template */ productsLoading$ = new BehaviorSubject<boolean>(false);
-  /* template */ allProducts = [];
-  /* template */ prodsById: { [key: string]: ProductDto[] } = {};
-  /* template */ prodIds: string[];
-  /* template */ prodLabels: string[];
-  /* template */ selectedVersions$ = new BehaviorSubject<ProductDto[]>([]);
+  protected repos: SoftwareRepositoryConfiguration[];
+  protected repoLabels: string[];
+  protected selectedRepo: SoftwareRepositoryConfiguration;
+  protected selectedProductId: string;
+  protected productsLoading$ = new BehaviorSubject<boolean>(false);
+  protected allProducts = [];
+  protected prodsById: { [key: string]: ProductDto[] } = {};
+  protected prodIds: string[];
+  protected prodLabels: string[];
+  protected selectedVersions$ = new BehaviorSubject<ProductDto[]>([]);
 
   protected loading$ = combineLatest([this.products.loading$, this.repositories.loading$]).pipe(
     map(([a, b]) => a || b)
@@ -87,7 +87,7 @@ export class ProductTransferRepoComponent implements OnInit {
     this.stepper.next();
   }
 
-  /* template */ onStepSelectionChange(event: StepperSelectionEvent) {
+  protected onStepSelectionChange(event: StepperSelectionEvent) {
     switch (event.selectedIndex) {
       case 0:
         this.selectedRepo = null;
@@ -113,7 +113,7 @@ export class ProductTransferRepoComponent implements OnInit {
     }
   }
 
-  /* template */ importVersions() {
+  protected importVersions() {
     if (!this.selectedVersions$.value?.length) {
       this.areas.closePanel();
       return;

@@ -11,9 +11,7 @@ export interface BdValidationMessageExtractor {
 }
 
 const msgExtractors: BdValidationMessageExtractor[] = [];
-export function bdValidationRegisterMessageExtractor(
-  extractor: BdValidationMessageExtractor
-) {
+export function bdValidationRegisterMessageExtractor(extractor: BdValidationMessageExtractor) {
   if (msgExtractors.find((e) => e.id === extractor.id)) {
     return;
   }
@@ -24,10 +22,7 @@ export function bdValidationRegisterMessageExtractor(
 /**
  * Returns proper error messages for all common validators which can be registered on a bd-form-*
  */
-export function bdValidationMessage(
-  label: string,
-  errors: ValidationErrors
-): string {
+export function bdValidationMessage(label: string, errors: ValidationErrors): string {
   if (!errors) {
     return null;
   }

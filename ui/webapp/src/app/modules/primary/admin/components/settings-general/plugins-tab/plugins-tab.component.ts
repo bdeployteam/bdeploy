@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
@@ -12,6 +12,8 @@ import { PluginLoadActionComponent } from './plugin-load-action/plugin-load-acti
   templateUrl: './plugins-tab.component.html',
 })
 export class PluginsTabComponent {
+  protected plugins = inject(PluginAdminService);
+
   private colId: BdDataColumn<PluginInfoDto> = {
     id: 'id',
     name: 'ID',
@@ -65,7 +67,7 @@ export class PluginsTabComponent {
     width: '40px',
   };
 
-  /* template */ columns: BdDataColumn<PluginInfoDto>[] = [
+  protected columns: BdDataColumn<PluginInfoDto>[] = [
     this.colId,
     this.colName,
     this.colVersion,
@@ -75,11 +77,7 @@ export class PluginsTabComponent {
     this.colDelete,
   ];
 
-  /* template */ plugins$ = this.plugins.plugins$.pipe(
-    map((data) => this.sortPlugins(data))
-  );
-
-  constructor(public plugins: PluginAdminService) {}
+  protected plugins$ = this.plugins.plugins$.pipe(map((data) => this.sortPlugins(data)));
 
   private sortPlugins(data: PluginInfoDto[]): PluginInfoDto[] {
     return [...data].sort((a, b) => {

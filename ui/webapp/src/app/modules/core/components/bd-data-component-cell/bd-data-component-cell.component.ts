@@ -1,12 +1,4 @@
-import {
-  Component,
-  ComponentRef,
-  Input,
-  OnDestroy,
-  OnInit,
-  Type,
-  ViewContainerRef,
-} from '@angular/core';
+import { Component, ComponentRef, Input, OnDestroy, OnInit, Type, ViewContainerRef, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 
 @Component({
@@ -14,12 +6,12 @@ import { BdDataColumn } from 'src/app/models/data';
   templateUrl: './bd-data-component-cell.component.html',
 })
 export class BdDataComponentCellComponent<T, X> implements OnInit, OnDestroy {
+  private vc = inject(ViewContainerRef);
+
   @Input() record: T;
   @Input() column: BdDataColumn<T>;
   @Input() componentType: Type<X>;
   private componentRef: ComponentRef<X>;
-
-  constructor(private vc: ViewContainerRef) {}
 
   ngOnInit(): void {
     this.vc.clear();

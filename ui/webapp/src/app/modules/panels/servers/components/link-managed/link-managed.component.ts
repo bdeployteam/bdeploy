@@ -1,13 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  AttachType,
-  ServersService,
-} from 'src/app/modules/primary/servers/services/servers.service';
+import { AttachType, ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
 
 @Component({
@@ -16,16 +13,14 @@ import { ATTACH_MIME_TYPE } from '../../services/server-details.service';
   styleUrls: ['./link-managed.component.css'],
 })
 export class LinkManagedComponent {
-  /* template */ payload: ManagedMasterDto;
-  /* template */ ident: string;
-  /* template */ manual = false;
-  /* template */ loadingIdent$ = new BehaviorSubject<boolean>(true);
+  private servers = inject(ServersService);
+  private areas = inject(NavAreasService);
+  private downloads = inject(DownloadService);
 
-  constructor(
-    private servers: ServersService,
-    private areas: NavAreasService,
-    private downloads: DownloadService
-  ) {}
+  protected payload: ManagedMasterDto;
+  protected ident: string;
+  protected manual = false;
+  protected loadingIdent$ = new BehaviorSubject<boolean>(true);
 
   private readFile(file: File) {
     const reader = new FileReader();
@@ -35,7 +30,7 @@ export class LinkManagedComponent {
     reader.readAsText(file);
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.servers.attachManaged(this.payload).subscribe((type) => {
       if (type === AttachType.AUTO) {
         this.areas.closePanel();
@@ -49,7 +44,7 @@ export class LinkManagedComponent {
     });
   }
 
-  /* template */ onDrop(event: DragEvent) {
+  protected onDrop(event: DragEvent) {
     event.preventDefault();
 
     if (event.dataTransfer.files.length > 0) {
@@ -59,7 +54,7 @@ export class LinkManagedComponent {
     }
   }
 
-  /* template */ onOver(event: DragEvent) {
+  protected onOver(event: DragEvent) {
     // need to cancel the event and return false to ALLOW drop.
     if (event.preventDefault) {
       event.preventDefault();
@@ -68,13 +63,13 @@ export class LinkManagedComponent {
     return false;
   }
 
-  /* template */ onUpload(event: any) {
+  protected onUpload(event: any) {
     if (event.target.files && event.target.files.length > 0) {
       this.readFile(event.target.files[0]);
     }
   }
 
-  /* template */ onDownloadCentralIdent() {
+  protected onDownloadCentralIdent() {
     this.downloads.downloadBlob(
       'central-' + this.payload.hostName + '.txt',
       new Blob([this.ident], { type: 'text/plain' })

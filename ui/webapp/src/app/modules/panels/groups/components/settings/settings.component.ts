@@ -16,6 +16,11 @@ import { GroupDetailsService } from '../../services/group-details.service';
 })
 export class SettingsComponent {
   private actions = inject(ActionsService);
+  private router = inject(Router);
+  protected auth = inject(AuthenticationService);
+  protected groups = inject(GroupsService);
+  protected details = inject(GroupDetailsService);
+  protected instances = inject(InstancesService);
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
@@ -25,15 +30,7 @@ export class SettingsComponent {
   protected mappedDelete$ = this.actions.action([Actions.DELETE_GROUP], this.deleting$);
   protected mappedRepair$ = this.actions.action([Actions.FSCK_BHIVE, Actions.PRUNE_BHIVE], this.repairing$);
 
-  constructor(
-    public auth: AuthenticationService,
-    public groups: GroupsService,
-    public details: GroupDetailsService,
-    public instances: InstancesService,
-    private router: Router
-  ) {}
-
-  /* template */ onRepairAndPrune(group: InstanceGroupConfiguration): void {
+  protected onRepairAndPrune(group: InstanceGroupConfiguration): void {
     this.dialog
       .confirm('Repair and Prune', 'Repairing will remove any (anyhow) damaged and unusable elements from the BHive')
       .subscribe((confirmed) => {
@@ -61,7 +58,7 @@ export class SettingsComponent {
       });
   }
 
-  /* template */ onDelete(group: InstanceGroupConfiguration): void {
+  protected onDelete(group: InstanceGroupConfiguration): void {
     this.dialog
       .confirm(
         `Delete ${group.name}`,

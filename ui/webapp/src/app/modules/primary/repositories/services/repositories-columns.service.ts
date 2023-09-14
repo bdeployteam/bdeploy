@@ -1,17 +1,12 @@
 import { Injectable } from '@angular/core';
-import {
-  BdDataColumn,
-  BdDataColumnDisplay,
-  BdDataColumnTypeHint,
-} from 'src/app/models/data';
+import { BdDataColumn, BdDataColumnDisplay, BdDataColumnTypeHint } from 'src/app/models/data';
 import { SoftwareRepositoryConfiguration } from 'src/app/models/gen.dtos';
-import { RepositoriesService } from './repositories.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RepositoriesColumnsService {
-  repositoryTypeColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private repositoryTypeColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'type',
     name: 'Type',
     hint: BdDataColumnTypeHint.TYPE,
@@ -19,7 +14,7 @@ export class RepositoriesColumnsService {
     display: BdDataColumnDisplay.CARD,
   };
 
-  repositoryNameColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private repositoryNameColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'name',
     name: 'Name (Key)',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -28,7 +23,7 @@ export class RepositoriesColumnsService {
     width: '200px',
   };
 
-  repositoryDescriptionColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private repositoryDescriptionColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -37,7 +32,7 @@ export class RepositoriesColumnsService {
     showWhen: '(min-width: 1000px)',
   };
 
-  repositoryLogoCardColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
+  private repositoryLogoCardColumn: BdDataColumn<SoftwareRepositoryConfiguration> = {
     id: 'logo',
     name: 'Logo',
     hint: BdDataColumnTypeHint.AVATAR,
@@ -45,12 +40,10 @@ export class RepositoriesColumnsService {
     data: () => '/assets/no-image.svg',
   };
 
-  defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration>[] = [
+  public defaultRepositoryColumns: BdDataColumn<SoftwareRepositoryConfiguration>[] = [
     this.repositoryTypeColumn,
     this.repositoryNameColumn,
     this.repositoryDescriptionColumn,
     this.repositoryLogoCardColumn,
   ];
-
-  constructor(private repositories: RepositoriesService) {}
 }

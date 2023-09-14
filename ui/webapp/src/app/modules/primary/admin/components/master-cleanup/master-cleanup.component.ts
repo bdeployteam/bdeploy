@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { BdDataColumn } from 'src/app/models/data';
 import { CleanupAction } from 'src/app/models/gen.dtos';
 import { CleanupService } from '../../services/cleanup.service';
@@ -28,11 +28,7 @@ const COL_DESC: BdDataColumn<CleanupAction> = {
   encapsulation: ViewEncapsulation.None,
 })
 export class MasterCleanupComponent {
-  /* template */ columns: BdDataColumn<CleanupAction>[] = [
-    COL_TYPE,
-    COL_WHAT,
-    COL_DESC,
-  ];
+  protected cleanup = inject(CleanupService);
 
-  constructor(public cleanup: CleanupService) {}
+  protected columns: BdDataColumn<CleanupAction>[] = [COL_TYPE, COL_WHAT, COL_DESC];
 }

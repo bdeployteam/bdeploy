@@ -8,8 +8,9 @@ import {
   OnInit,
   QueryList,
   ViewChildren,
+  inject,
 } from '@angular/core';
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import {
@@ -23,10 +24,7 @@ import {
   DragReorderEvent,
 } from 'src/app/modules/core/components/bd-data-table/bd-data-table.component';
 import { DEF_CONTROL_GROUP } from 'src/app/modules/panels/instances/utils/instance-utils';
-import {
-  InstanceEditService,
-  ProcessEditState,
-} from '../../../services/instance-edit.service';
+import { InstanceEditService, ProcessEditState } from '../../../services/instance-edit.service';
 import { ProcessesColumnsService } from '../../../services/processes-columns.service';
 import { ProcessNameAndOsComponent } from '../../process-name-and-os/process-name-and-os.component';
 
@@ -36,81 +34,57 @@ import { ProcessNameAndOsComponent } from '../../process-name-and-os/process-nam
   styleUrls: ['./config-node.component.css'],
 })
 export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
+  private edit = inject(InstanceEditService);
+  protected columns = inject(ProcessesColumnsService);
+
   @HostBinding('attr.data-cy') @Input() nodeName: string;
 
-  private processCtrlGroupColumn: BdDataColumn<ApplicationConfiguration> = {
-    id: 'ctrlGroup',
-    name: 'Control Group',
-    data: (r) => this.getControlGroup(r),
-    width: '120px',
-    showWhen: '(min-width:1000px)',
+  private processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'name',
+    name: 'Name',
+    hint: BdDataColumnTypeHint.TITLE,
+    data: (r) => r.name,
+    classes: (r) => this.getStateClass(r),
   };
 
-  private processNameAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> =
-    {
-      id: 'name',
-      name: 'Name',
-      hint: BdDataColumnTypeHint.TITLE,
-      data: (r) => r.name,
-      classes: (r) => this.getStateClass(r),
-    };
+  private processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> = {
+    id: 'name',
+    name: 'Name and OS',
+    hint: BdDataColumnTypeHint.TITLE,
+    data: (r) => r.name,
+    classes: (r) => this.getStateClass(r),
+    component: ProcessNameAndOsComponent,
+  };
 
-  private processNameAndOsAndEditStatusColumn: BdDataColumn<ApplicationConfiguration> =
-    {
-      id: 'name',
-      name: 'Name and OS',
-      hint: BdDataColumnTypeHint.TITLE,
-      data: (r) => r.name,
-      classes: (r) => this.getStateClass(r),
-      component: ProcessNameAndOsComponent,
-    };
-
-  /* template */ node$ = new BehaviorSubject<MinionDto>(null);
-  /* template */ config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(
-    null
-  );
-  /* template */ groupedProcesses$ = new BehaviorSubject<{
+  protected node$ = new BehaviorSubject<MinionDto>(null);
+  protected config$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
+  protected groupedProcesses$ = new BehaviorSubject<{
     [key: string]: ApplicationConfiguration[];
   }>(null);
-  /* template */ allowedSources$ = new BehaviorSubject<string[]>(null);
-  /* template */ isClientNode: boolean;
-  /* template */ nodeType: string;
-  /* template */ node: string;
-  /* template */ groupExpansion: { [key: string]: boolean } = {};
-  /* template */ lastId: string;
-  /* template */ clientTableId =
-    CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
+  protected allowedSources$ = new BehaviorSubject<string[]>(null);
+  protected isClientNode: boolean;
+  protected nodeType: string;
+  protected node: string;
+  protected groupExpansion: { [key: string]: boolean } = {};
+  protected lastId: string;
+  protected clientTableId = CLIENT_NODE_NAME + '||' + DEF_CONTROL_GROUP.name;
 
-  /* template */ cols: BdDataColumn<ApplicationConfiguration>[] = [];
+  protected cols: BdDataColumn<ApplicationConfiguration>[] = [];
 
-  @ViewChildren(BdDataTableComponent) data: QueryList<
-    BdDataTableComponent<ApplicationConfiguration>
-  >;
+  @ViewChildren(BdDataTableComponent) private data: QueryList<BdDataTableComponent<ApplicationConfiguration>>;
 
   private subscription: Subscription;
 
-  /* template */ getRecordRoute = (row: ApplicationConfiguration) => {
+  protected getRecordRoute = (row: ApplicationConfiguration) => {
     return [
       '',
       {
         outlets: {
-          panel: [
-            'panels',
-            'instances',
-            'config',
-            'process',
-            this.nodeName,
-            row.id,
-          ],
+          panel: ['panels', 'instances', 'config', 'process', this.nodeName, row.id],
         },
       },
     ];
   };
-
-  constructor(
-    private edit: InstanceEditService,
-    public columns: ProcessesColumnsService
-  ) {}
 
   ngOnInit(): void {
     this.subscription = this.edit.nodes$.subscribe((nodes) => {
@@ -124,25 +98,17 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.node = this.isClientNode ? 'Client Applications' : this.nodeName;
 
       if (this.isClientNode) {
-        this.cols = [
-          this.processNameAndOsAndEditStatusColumn,
-          ...this.columns.defaultProcessesConfigColumns,
-        ];
+        this.cols = [this.processNameAndOsAndEditStatusColumn, ...this.columns.defaultProcessesConfigColumns];
       } else {
-        this.cols = [
-          this.processNameAndEditStatusColumn,
-          ...this.columns.defaultProcessesConfigColumns,
-        ];
+        this.cols = [this.processNameAndEditStatusColumn, ...this.columns.defaultProcessesConfigColumns];
       }
     });
 
     this.subscription.add(
-      combineLatest([this.edit.validating$, this.edit.issues$]).subscribe(
-        () => {
-          // update in case validation is run in the background - this means something may have changed
-          this.data?.forEach((t) => t?.redraw());
-        }
-      )
+      combineLatest([this.edit.validating$, this.edit.issues$]).subscribe(() => {
+        // update in case validation is run in the background - this means something may have changed
+        this.data?.forEach((t) => t?.redraw());
+      })
     );
   }
 
@@ -150,9 +116,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription.add(
       this.edit.state$.subscribe((s) => {
         setTimeout(() => {
-          const nodeConfig = s?.config?.nodeDtos?.find(
-            (n) => n.nodeName === this.nodeName
-          );
+          const nodeConfig = s?.config?.nodeDtos?.find((n) => n.nodeName === this.nodeName);
           this.config$.next(nodeConfig);
 
           if (!nodeConfig) {
@@ -189,9 +153,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
           // don't use groupedProcesses keys, as this will not contain *empty* groups.
           this.allowedSources$.next(
-            nodeConfig.nodeConfiguration.controlGroups.map(
-              (cg) => this.nodeName + '||' + cg.name
-            )
+            nodeConfig.nodeConfiguration.controlGroups.map((cg) => this.nodeName + '||' + cg.name)
           );
           this.groupedProcesses$.next(grouped);
           this.data.forEach((t) => t.update());
@@ -201,14 +163,11 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ onReorder(order: DragReorderEvent<ApplicationConfiguration>) {
-    if (
-      order.previousIndex === order.currentIndex &&
-      order.sourceId === order.targetId
-    ) {
+  protected onReorder(order: DragReorderEvent<ApplicationConfiguration>) {
+    if (order.previousIndex === order.currentIndex && order.sourceId === order.targetId) {
       return;
     }
 
@@ -218,11 +177,7 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (order.sourceId === order.targetId) {
       // this is NOT necessary, but prevents flickering while rebuilding state.
-      moveItemInArray(
-        this.groupedProcesses$.value[sourceGroup],
-        order.previousIndex,
-        order.currentIndex
-      );
+      moveItemInArray(this.groupedProcesses$.value[sourceGroup], order.previousIndex, order.currentIndex);
     }
 
     this.edit.conceal(
@@ -239,15 +194,10 @@ export class ConfigNodeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getControlGroup(row: ApplicationConfiguration): string {
-    return this.config$.value.nodeConfiguration.controlGroups.find((cg) =>
-      cg.processOrder.includes(row.id)
-    )?.name;
+    return this.config$.value.nodeConfiguration.controlGroups.find((cg) => cg.processOrder.includes(row.id))?.name;
   }
 
-  /* template */ doTrack(
-    index: number,
-    group: ProcessControlGroupConfiguration
-  ) {
+  protected doTrack(index: number, group: ProcessControlGroupConfiguration) {
     return group.name;
   }
 

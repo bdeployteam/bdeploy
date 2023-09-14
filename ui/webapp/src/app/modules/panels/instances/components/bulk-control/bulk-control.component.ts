@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Actions, ApplicationStartType, InstanceDto } from 'src/app/models/gen.dtos';
@@ -13,7 +13,13 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   selector: 'app-bulk-control',
   templateUrl: './bulk-control.component.html',
 })
-export class BulkControlComponent {
+export class BulkControlComponent implements OnInit {
+  private processes = inject(ProcessesService);
+  private actions = inject(ActionsService);
+  protected instances = inject(InstancesService);
+  protected servers = inject(ServersService);
+  protected bulk = inject(ProcessesBulkService);
+
   private starting$ = new BehaviorSubject<boolean>(false);
   private stopping$ = new BehaviorSubject<boolean>(false);
   private restarting$ = new BehaviorSubject<boolean>(false);
@@ -22,30 +28,28 @@ export class BulkControlComponent {
   private stoppingMulti$ = new BehaviorSubject<boolean>(false);
   private restartingMulti$ = new BehaviorSubject<boolean>(false);
 
-  /* template */ bulkContainsConfirmed = false;
-  /* template */ bulkSelection$ = new BehaviorSubject<string[]>(null);
+  protected bulkContainsConfirmed = false;
+  protected bulkSelection$ = new BehaviorSubject<string[]>(null);
 
-  private sas = inject(ActionsService);
+  protected mappedStart$ = this.actions.action([Actions.START_INSTANCE], this.starting$);
+  protected mappedStop$ = this.actions.action([Actions.STOP_INSTANCE], this.starting$);
+  protected mappedRestart$ = this.actions.action([Actions.START_INSTANCE, Actions.STOP_INSTANCE], this.restarting$);
 
-  protected mappedStart$ = this.sas.action([Actions.START_INSTANCE], this.starting$);
-  protected mappedStop$ = this.sas.action([Actions.STOP_INSTANCE], this.starting$);
-  protected mappedRestart$ = this.sas.action([Actions.START_INSTANCE, Actions.STOP_INSTANCE], this.restarting$);
-
-  protected mappedStartMulti$ = this.sas.action(
+  protected mappedStartMulti$ = this.actions.action(
     [Actions.START_PROCESS],
     this.startingMulti$,
     null,
     null,
     this.bulkSelection$
   );
-  protected mappedStopMulti$ = this.sas.action(
+  protected mappedStopMulti$ = this.actions.action(
     [Actions.STOP_PROCESS],
     this.stoppingMulti$,
     null,
     null,
     this.bulkSelection$
   );
-  protected mappedRestartMulti$ = this.sas.action(
+  protected mappedRestartMulti$ = this.actions.action(
     [Actions.START_PROCESS, Actions.STOP_PROCESS],
     this.restartingMulti$,
     null,
@@ -55,12 +59,7 @@ export class BulkControlComponent {
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
-  constructor(
-    public instances: InstancesService,
-    public servers: ServersService,
-    private processes: ProcessesService,
-    public bulk: ProcessesBulkService
-  ) {
+  ngOnInit(): void {
     this.bulk.selection$.subscribe((s) => {
       if (!s) {
         this.bulkContainsConfirmed = false;
@@ -80,7 +79,7 @@ export class BulkControlComponent {
     });
   }
 
-  /* template */ doStart(instance: InstanceDto) {
+  protected doStart(instance: InstanceDto) {
     this.dialog
       .confirm(
         'Confirm Start',
@@ -97,7 +96,7 @@ export class BulkControlComponent {
       });
   }
 
-  /* template */ doStop(instance: InstanceDto) {
+  protected doStop(instance: InstanceDto) {
     this.dialog
       .confirm(
         'Confirm Stop',
@@ -114,7 +113,7 @@ export class BulkControlComponent {
       });
   }
 
-  /* template */ doRestart(instance: InstanceDto) {
+  protected doRestart(instance: InstanceDto) {
     this.dialog
       .confirm(
         'Confirm Restart',
@@ -131,7 +130,7 @@ export class BulkControlComponent {
       });
   }
 
-  /* template */ doStartMulti(instance: InstanceDto) {
+  protected doStartMulti(instance: InstanceDto) {
     this.dialog
       .confirm(
         'Confirm Start',
@@ -148,7 +147,7 @@ export class BulkControlComponent {
       });
   }
 
-  /* template */ doStopMulti(instance: InstanceDto) {
+  protected doStopMulti(instance: InstanceDto) {
     this.dialog
       .confirm(
         'Confirm Stop',
@@ -165,7 +164,7 @@ export class BulkControlComponent {
       });
   }
 
-  /* template */ doRestartMulti(instance: InstanceDto) {
+  protected doRestartMulti(instance: InstanceDto) {
     this.dialog
       .confirm(
         'Confirm Restart',

@@ -1,10 +1,4 @@
-import {
-  Directive,
-  ElementRef,
-  HostListener,
-  Input,
-  OnInit,
-} from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, OnInit, inject } from '@angular/core';
 import { BdContentAssistMenuComponent } from '../bd-content-assist-menu/bd-content-assist-menu.component';
 
 enum Keys {
@@ -27,9 +21,9 @@ class WordInfo {
   exportAs: 'appBdContentAssist',
 })
 export class BdContentAssistDirective implements OnInit {
-  @Input() appBdContentAssist: BdContentAssistMenuComponent;
+  private elementRef = inject(ElementRef);
 
-  constructor(private elementRef: ElementRef) {}
+  @Input() appBdContentAssist: BdContentAssistMenuComponent;
 
   ngOnInit(): void {
     this.appBdContentAssist.onClickSelect = (s) => {
@@ -116,9 +110,7 @@ export class BdContentAssistDirective implements OnInit {
     input.value =
       input.value.substring(0, wordInfo.begin) +
       val +
-      input.value.substring(
-        wordInfo.selection !== wordInfo.end ? wordInfo.selection : wordInfo.end
-      );
+      input.value.substring(wordInfo.selection !== wordInfo.end ? wordInfo.selection : wordInfo.end);
 
     // required to re-run validation on the input.
     input.dispatchEvent(new Event('input', { bubbles: true }));

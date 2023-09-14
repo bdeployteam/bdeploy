@@ -1,10 +1,5 @@
 import { Directive, Input } from '@angular/core';
-import {
-  AbstractControl,
-  NG_VALIDATORS,
-  ValidationErrors,
-  Validator,
-} from '@angular/forms';
+import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 
 export const PORT_VALIDATION = 'port-value';
 
@@ -21,7 +16,7 @@ export const PORT_VALIDATION = 'port-value';
 export class PortValueValidatorDirective implements Validator {
   @Input() appPortValueValidator: boolean;
 
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     if (!this.appPortValueValidator) {
       return {};
     }

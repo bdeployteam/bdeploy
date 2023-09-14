@@ -1,9 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ManifestKey } from 'src/app/models/gen.dtos';
-import {
-  UploadStatus,
-  UrlParameter,
-} from 'src/app/modules/core/services/upload.service';
+import { UploadStatus, UrlParameter } from 'src/app/modules/core/services/upload.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 
 interface ImportFile {
@@ -16,9 +13,11 @@ interface ImportFile {
   templateUrl: './import-instance.component.html',
 })
 export class ImportInstanceComponent {
-  /* template */ files: ImportFile[] = [];
+  protected instances = inject(InstancesService);
 
-  /* template */ resultEval = (s: UploadStatus) => {
+  protected files: ImportFile[] = [];
+
+  protected resultEval = (s: UploadStatus) => {
     if (s.detail.length === 0) {
       return 'Nothing to do.';
     }
@@ -26,13 +25,11 @@ export class ImportInstanceComponent {
     return 'Created Instance Version: ' + tags.map((key) => key.tag).join(',');
   };
 
-  constructor(public instances: InstancesService) {}
-
-  /* template */ fileAdded(file: File) {
+  protected fileAdded(file: File) {
     this.files.push({ file: file, parameters: [] });
   }
 
-  /* template */ onDismiss(index: number) {
+  protected onDismiss(index: number) {
     this.files.splice(index, 1);
   }
 }

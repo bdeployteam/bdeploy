@@ -1,17 +1,12 @@
-import {
-  HttpHandler,
-  HttpInterceptor,
-  HttpRequest,
-} from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { skipWhile, switchMap, take } from 'rxjs/operators';
 import { NO_UNAUTH_DELAY_HDR } from 'src/app/models/consts';
 import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable()
 export class DelayForAuthInterceptor implements HttpInterceptor {
-  constructor(private auth: AuthenticationService, private router: Router) {}
+  private auth = inject(AuthenticationService);
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     // only continue with requests if we have a user already.

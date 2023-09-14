@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription, finalize, map, of, skipWhile, startWith, tap } from 'rxjs';
@@ -37,7 +37,8 @@ const ACTION_MIGRATE: BdDialogMessageAction<boolean> = {
   templateUrl: './add-node.component.html',
   styleUrls: ['./add-node.component.css'],
 })
-export class AddNodeComponent implements DirtyableDialog, OnDestroy {
+export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
   private actions = inject(ActionsService);
   protected nodesAdmin = inject(NodesAdminService);
 
@@ -66,28 +67,28 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
 
   private subscription: Subscription;
 
-  constructor(areas: NavAreasService) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
+  ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  updateName(event: any) {
+  protected updateName(event: any) {
     this.data.name = event;
     this.nodeName$.next(event);
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     return isDirty(this.data, DEF_NODE);
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return !this.form?.invalid;
   }
 
-  doSave(): Observable<any> {
+  public doSave(): Observable<any> {
     this.adding$.next(true);
     return this.nodesAdmin.addNode(this.data).pipe(
       finalize(() => {
@@ -97,7 +98,7 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
     );
   }
 
-  onSave() {
+  protected onSave() {
     let confirmation: Observable<boolean> = of(true);
     if (this.data.sourceMode && this.data.sourceMode !== MinionMode.NODE) {
       confirmation = this.dialog.message({
@@ -126,7 +127,7 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
     reader.readAsText(file);
   }
 
-  /* template */ onDrop(event: DragEvent) {
+  protected onDrop(event: DragEvent) {
     event.preventDefault();
 
     if (event.dataTransfer.files.length > 0) {
@@ -136,7 +137,7 @@ export class AddNodeComponent implements DirtyableDialog, OnDestroy {
     }
   }
 
-  /* template */ onOver(event: DragEvent) {
+  protected onOver(event: DragEvent) {
     // need to cancel the event and return false to ALLOW drop.
     if (event.preventDefault) {
       event.preventDefault();

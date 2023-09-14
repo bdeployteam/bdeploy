@@ -1,7 +1,7 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { CLIENT_NODE_NAME, sortNodesMasterFirst } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
 import {
@@ -25,9 +25,17 @@ import { InstanceEditService } from '../../services/instance-edit.service';
   templateUrl: './configuration.component.html',
   styleUrls: ['./configuration.component.css'],
 })
-export class ConfigurationComponent
-  implements OnInit, OnDestroy, DirtyableDialog
-{
+export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private media = inject(BreakpointObserver);
+  private products = inject(ProductsService);
+  private router = inject(Router);
+  private groups = inject(GroupsService);
+  protected cfg = inject(ConfigService);
+  protected areas = inject(NavAreasService);
+  protected servers = inject(ServersService);
+  protected edit = inject(InstanceEditService);
+  protected auth = inject(AuthenticationService);
+
   private readonly issueColApp: BdDataColumn<ApplicationValidationDto> = {
     id: 'app',
     name: 'Application',
@@ -58,106 +66,79 @@ export class ConfigurationComponent
     width: '40px',
   };
 
-  /* template */ issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [
+  protected issuesColumns: BdDataColumn<ApplicationValidationDto>[] = [
     this.issueColApp,
     this.issueColParam,
     this.issueColMsg,
     this.issueColDismiss,
   ];
-  /* template */ validationColumns: BdDataColumn<ApplicationValidationDto>[] = [
+  protected validationColumns: BdDataColumn<ApplicationValidationDto>[] = [
     this.issueColApp,
     this.issueColParam,
     this.issueColMsg,
   ];
 
-  /* template */ narrow$ = new BehaviorSubject<boolean>(true);
-  /* template */ headerName$ = new BehaviorSubject<string>('Loading');
+  protected narrow$ = new BehaviorSubject<boolean>(true);
+  protected headerName$ = new BehaviorSubject<string>('Loading');
 
-  /* template */ config$ = new BehaviorSubject<InstanceConfiguration>(null);
-  /* template */ serverNodes$ = new BehaviorSubject<
-    InstanceNodeConfigurationDto[]
-  >([]);
-  /* template */ clientNode$ =
-    new BehaviorSubject<InstanceNodeConfigurationDto>(null);
+  protected config$ = new BehaviorSubject<InstanceConfiguration>(null);
+  protected serverNodes$ = new BehaviorSubject<InstanceNodeConfigurationDto[]>([]);
+  protected clientNode$ = new BehaviorSubject<InstanceNodeConfigurationDto>(null);
 
-  /* template */ templates$ = new BehaviorSubject<
-    FlattenedInstanceTemplateConfiguration[]
-  >(null);
-  /* template */ isEmptyInstance$ = new BehaviorSubject<boolean>(false);
+  protected templates$ = new BehaviorSubject<FlattenedInstanceTemplateConfiguration[]>(null);
+  protected isEmptyInstance$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   private subscription: Subscription;
-  private migrationWarningShown: boolean = null;
-  public isCentral = false;
+  protected isCentral = false;
 
-  constructor(
-    public cfg: ConfigService,
-    public areas: NavAreasService,
-    public servers: ServersService,
-    public edit: InstanceEditService,
-    private media: BreakpointObserver,
-    private products: ProductsService,
-    private router: Router,
-    public auth: AuthenticationService,
-    private groups: GroupsService
-  ) {
-    this.subscription = this.media
-      .observe('(max-width:700px)')
-      .subscribe((bs) => this.narrow$.next(bs.matches));
+  ngOnInit(): void {
+    this.subscription = this.media.observe('(max-width:700px)').subscribe((bs) => this.narrow$.next(bs.matches));
     this.subscription.add(this.areas.registerDirtyable(this, 'primary'));
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
       })
     );
-  }
 
-  ngOnInit(): void {
     this.subscription.add(
-      combineLatest([this.edit.state$, this.products.products$]).subscribe(
-        ([state, products]) => {
-          if (!state || !products) {
-            this.config$.next(null);
-            this.serverNodes$.next([]);
-            this.clientNode$.next(null);
-          } else {
-            this.config$.next(state.config.config);
-            this.headerName$.next(
-              this.edit.hasPendingChanges() ||
-                this.edit.hasSaveableChanges$.value
-                ? `${state.config.config.name}*`
-                : state.config.config.name
-            );
+      combineLatest([this.edit.state$, this.products.products$]).subscribe(([state, products]) => {
+        if (!state || !products) {
+          this.config$.next(null);
+          this.serverNodes$.next([]);
+          this.clientNode$.next(null);
+        } else {
+          this.config$.next(state.config.config);
+          this.headerName$.next(
+            this.edit.hasPendingChanges() || this.edit.hasSaveableChanges$.value
+              ? `${state.config.config.name}*`
+              : state.config.config.name
+          );
 
-            this.serverNodes$.next(
-              state.config.nodeDtos
-                .filter((p) => !this.isClientNode(p))
-                .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName))
-            );
-            this.clientNode$.next(
-              state.config.nodeDtos.find((n) => this.isClientNode(n))
-            );
+          this.serverNodes$.next(
+            state.config.nodeDtos
+              .filter((p) => !this.isClientNode(p))
+              .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName))
+          );
+          this.clientNode$.next(state.config.nodeDtos.find((n) => this.isClientNode(n)));
 
-            const prod = products.find(
-              (p) =>
-                p.key.name === state.config.config.product.name &&
-                p.key.tag === state.config.config.product.tag
-            );
-            if (prod) {
-              this.templates$.next(prod.instanceTemplates);
-            }
-
-            this.edit.requestValidation();
+          const prod = products.find(
+            (p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag
+          );
+          if (prod) {
+            this.templates$.next(prod.instanceTemplates);
           }
-          this.isEmptyInstance$.next(this.isEmptyInstance());
+
+          this.edit.requestValidation();
         }
-      )
+        this.isEmptyInstance$.next(this.isEmptyInstance());
+      })
     );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
     this.edit.reset();
   }
 
@@ -168,7 +149,7 @@ export class ConfigurationComponent
     return this.edit.hasSaveableChanges$.value;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => {
       // after save navigate back to the dashboard - this will take the user where he will likely want to continue
       // anyway (install, activate, start processes, etc.)
@@ -203,11 +184,11 @@ export class ConfigurationComponent
     return true;
   }
 
-  /* template */ doTrack(index: number, node: InstanceNodeConfigurationDto) {
+  protected doTrack(index: number, node: InstanceNodeConfigurationDto) {
     return node.nodeName;
   }
 
-  /* template */ getApplicationName(id: string) {
+  protected getApplicationName(id: string) {
     if (!id) {
       return 'Global';
     }
@@ -220,10 +201,9 @@ export class ConfigurationComponent
     return cfg.name;
   }
 
-  /* template */ goToProductImport() {
+  protected goToProductImport() {
     const repo = this.edit.current$.value?.newerVersionAvailableInRepository;
-    const product =
-      this.edit.current$.value?.instanceConfiguration.product.name;
+    const product = this.edit.current$.value?.instanceConfiguration.product.name;
     this.areas.navigateBoth(
       ['products', 'browser', this.groups.current$.value.name],
       ['panels', 'products', 'transfer'],

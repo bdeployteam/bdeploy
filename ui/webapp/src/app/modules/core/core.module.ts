@@ -109,7 +109,7 @@ import { httpInterceptorProviders } from './interceptors';
 import { VersionShortPipe } from './pipes/version-short.pipe';
 import { VersionPipe } from './pipes/version.pipe';
 import { ConfigService } from './services/config.service';
-import { EditItemInListValidatorDirective } from './validators/edit-item-in-list';
+import { EditItemInListValidatorDirective } from './validators/edit-item-in-list.directive';
 import { EditUniqueValueValidatorDirective } from './validators/edit-unique-value.directive';
 import { IdentifierValidator } from './validators/identifier.directive';
 import { LinkExpressionInputValidatorDirective } from './validators/link-expression-input-validator.directive';

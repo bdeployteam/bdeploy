@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BarHorizontalComponent } from '@swimlane/ngx-charts';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { JerseyServerMonitoringDto, MetricBundle, MetricGroup, TimerMetric } from '../../../../../models/gen.dtos';
@@ -17,44 +16,41 @@ export interface SeriesElement {
   styleUrls: ['./metrics-overview.component.css'],
 })
 export class MetricsOverviewComponent implements OnInit, OnDestroy {
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ keys$ = new BehaviorSubject<string[]>(['SERVER']);
-  /* template */ tabIndex: number;
+  private metrics = inject(MetricsService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  allMetrics: Map<MetricGroup, MetricBundle>;
-  selectedGroup: MetricGroup;
-  groupCounts: SeriesElement[];
-  selectedTimer: TimerMetric;
-  selectedTimerName: string;
-  histogramDetails;
-  serverStats: JerseyServerMonitoringDto;
+  private allMetrics: Map<MetricGroup, MetricBundle>;
+
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected keys$ = new BehaviorSubject<string[]>(['SERVER']);
+  protected tabIndex: number;
+
+  protected selectedGroup: MetricGroup;
+  protected groupCounts: SeriesElement[];
+  protected selectedTimer: TimerMetric;
+  protected selectedTimerName: string;
+  protected histogramDetails;
+  protected serverStats: JerseyServerMonitoringDto;
 
   // converted data for serverstats
-  vmCpu = [];
-  vmCpuRef = [];
-  vmMem = [];
-  vmMemRef = [];
-  req = [];
-  reqAbs = [];
-  poolSize = [];
-  poolSizeRef = [];
-  poolTasks = [];
-  conBytes = [];
-  conBytesAbs = [];
-  activeSess = [];
+  protected vmCpu = [];
+  protected vmCpuRef = [];
+  protected vmMem = [];
+  protected vmMemRef = [];
+  protected req = [];
+  protected reqAbs = [];
+  protected poolSize = [];
+  protected poolSizeRef = [];
+  protected poolTasks = [];
+  protected conBytes = [];
+  protected conBytesAbs = [];
+  protected activeSess = [];
 
-  colorScheme = {
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'],
-  };
-  timerSeries: { name: string; series: SeriesElement[] }[];
-  referenceLines: SeriesElement[];
+  protected timerSeries: { name: string; series: SeriesElement[] }[];
+  protected referenceLines: SeriesElement[];
 
-  @ViewChild('countChart')
-  countChart: BarHorizontalComponent;
-
-  countGraphHeight = 100;
-
-  constructor(private metrics: MetricsService, private router: Router, private route: ActivatedRoute) {}
+  protected countGraphHeight = 100;
 
   ngOnInit() {
     this.metrics
@@ -75,19 +71,20 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
       });
   }
 
-  getGroup(group: MetricGroup): MetricBundle {
-    return this.allMetrics.get(group);
+  ngOnDestroy(): void {
+    // this is required to clear off query parameters if we leave this primary page.
+    this.router.navigate([], { queryParams: {} });
   }
 
-  getTimers(group: MetricGroup): string[] {
+  private getTimers(group: MetricGroup): string[] {
     return Object.keys(this.allMetrics.get(group).timers);
   }
 
-  getTimer(group: MetricGroup, name: string): TimerMetric {
+  private getTimer(group: MetricGroup, name: string): TimerMetric {
     return this.allMetrics.get(group).timers[name];
   }
 
-  doSelect(tabIndex: number) {
+  protected doSelect(tabIndex: number) {
     this.router.navigate([], { queryParams: { tabIndex: tabIndex } });
     this.tabIndex = tabIndex;
     this.tabIndex ? this.select(this.keys$.value[this.tabIndex]) : this.selectServer();
@@ -357,7 +354,7 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
     this.groupCounts = x;
   }
 
-  selectTimer(t: SeriesElement) {
+  protected selectTimer(t: SeriesElement) {
     this.timerSeries = [];
     const timer = this.getTimer(this.selectedGroup, t.name);
 
@@ -396,9 +393,5 @@ export class MetricsOverviewComponent implements OnInit, OnDestroy {
   private toMillis(nanos: number): number {
     // nanos to millis and round to 2 decimal places
     return Math.round(nanos / 10000) / 100;
-  }
-
-  ngOnDestroy(): void {
-    this.router.navigate([], { queryParams: {} });
   }
 }

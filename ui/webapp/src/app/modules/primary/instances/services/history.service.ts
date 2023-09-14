@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { HistoryEntryDto, HistoryFilterDto } from 'src/app/models/gen.dtos';
@@ -8,9 +8,11 @@ import { InstancesService } from './instances.service';
   providedIn: 'root',
 })
 export class HistoryService {
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ history$ = new BehaviorSubject<HistoryEntryDto[]>(null);
-  /* template */ filter$ = new BehaviorSubject<Partial<HistoryFilterDto>>({
+  private instances = inject(InstancesService);
+
+  public history$ = new BehaviorSubject<HistoryEntryDto[]>(null);
+  public loading$ = new BehaviorSubject<boolean>(true);
+  public filter$ = new BehaviorSubject<Partial<HistoryFilterDto>>({
     maxResults: 100,
     showCreateEvents: true,
     showDeploymentEvents: true,
@@ -18,8 +20,6 @@ export class HistoryService {
   });
 
   private subscription: Subscription;
-
-  constructor(private instances: InstancesService) {}
 
   /** Begins publishing history on the history$ subject */
   public begin() {
@@ -38,7 +38,7 @@ export class HistoryService {
 
   /** Stops reading and publishing history and resets all internal state */
   public stop() {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
     this.reset();
   }
 

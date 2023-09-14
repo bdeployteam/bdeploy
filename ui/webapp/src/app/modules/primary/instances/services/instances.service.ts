@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { cloneDeep, isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription, combineLatest, forkJoin, of } from 'rxjs';
 import { debounceTime, finalize, first, map, skip, skipWhile, tap } from 'rxjs/operators';
@@ -38,22 +38,33 @@ import { ServersService } from '../../servers/services/servers.service';
   providedIn: 'root',
 })
 export class InstancesService {
-  listLoading$ = new BehaviorSubject<boolean>(true);
-  activeLoading$ = new BehaviorSubject<boolean>(false);
-  loading$ = combineLatest([this.listLoading$, this.activeLoading$]).pipe(map(([a, b]) => a || b));
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+  private areas = inject(NavAreasService);
+  private serversService = inject(ServersService);
+  private downloads = inject(DownloadService);
+  private httpReplayService = inject(HttpReplayService);
+  private products = inject(ProductsService);
+  private groups = inject(GroupsService);
+  private ngZone = inject(NgZone);
 
-  instances$ = new BehaviorSubject<InstanceDto[]>([]);
-  instancesChanges: ObjectChangeDto[] = [];
+  public listLoading$ = new BehaviorSubject<boolean>(true);
+  public activeLoading$ = new BehaviorSubject<boolean>(false);
+  public loading$ = combineLatest([this.listLoading$, this.activeLoading$]).pipe(map(([a, b]) => a || b));
+
+  public instances$ = new BehaviorSubject<InstanceDto[]>([]);
+  public instancesChanges: ObjectChangeDto[] = [];
 
   /** the current instance version */
-  current$ = new BehaviorSubject<InstanceDto>(null);
+  public current$ = new BehaviorSubject<InstanceDto>(null);
 
   /** the *active* instance version */
-  active$ = new BehaviorSubject<InstanceDto>(null);
-  activeNodeCfgs$ = new BehaviorSubject<InstanceNodeConfigurationListDto>(null);
-  activeNodeStates$ = new BehaviorSubject<{ [key: string]: MinionStatusDto }>(null);
+  public active$ = new BehaviorSubject<InstanceDto>(null);
+  public activeNodeCfgs$ = new BehaviorSubject<InstanceNodeConfigurationListDto>(null);
+  public activeNodeStates$ = new BehaviorSubject<{ [key: string]: MinionStatusDto }>(null);
   /** the history for the *active* instance. this may not be fully complete history, it is meant for a brief overview of events on the instance. */
-  activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
+  public activeHistory$ = new BehaviorSubject<HistoryResultDto>(null);
 
   private activeStateCall: Subscription;
   private activeHistoryCall: Subscription;
@@ -61,8 +72,8 @@ export class InstancesService {
   private activeLoadInterval;
   private activeCheckInterval;
 
-  overallStates$ = new BehaviorSubject<InstanceOverallStatusDto[]>([]);
-  overallStatesLoading$ = new BehaviorSubject<boolean>(false);
+  public overallStates$ = new BehaviorSubject<InstanceOverallStatusDto[]>([]);
+  public overallStatesLoading$ = new BehaviorSubject<boolean>(false);
 
   private group: string;
   private subscription: Subscription;
@@ -71,20 +82,9 @@ export class InstancesService {
 
   private apiPath = (g) => `${this.cfg.config.api}/group/${g}/instance`;
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private changes: ObjectChangesService,
-    private areas: NavAreasService,
-    private serversService: ServersService,
-    private downloads: DownloadService,
-    private httpReplayService: HttpReplayService,
-    products: ProductsService,
-    groups: GroupsService,
-    ngZone: NgZone
-  ) {
+  constructor() {
     // clear out stuff whenever the group is re-set.
-    groups.current$.subscribe(() => {
+    this.groups.current$.subscribe(() => {
       // whenever the current group changes, we trigger a delayed reload (below).
       // we *anyhow* want to remove the outdated data before doing this.
       // otherwise the user would briefly see the old data before loading begins.
@@ -94,7 +94,7 @@ export class InstancesService {
 
     // reload instances if products changed for central
     // otherwise we might see N/A chip next to product version even after product has been downloaded to central
-    combineLatest([products.products$, this.cfg.isCentral$])
+    combineLatest([this.products.products$, this.cfg.isCentral$])
       .pipe(skipWhile(([p, c]) => !p || !c))
       .subscribe(() => {
         this.listLoading$.next(true); // will be reloaded in combineLatest(groups.current$, products.products$)
@@ -102,12 +102,12 @@ export class InstancesService {
       });
 
     // only do actual loading once BOTH group and products are ready.
-    combineLatest([groups.current$, products.products$]).subscribe(([group, products]) => {
+    combineLatest([this.groups.current$, this.products.products$]).subscribe(([group, products]) => {
       if (group && products) {
         this.update$.next(group.name);
       }
     });
-    areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
+    this.areas.instanceContext$.subscribe((i) => this.loadCurrentAndActive(i));
     this.update$.pipe(debounceTime(100)).subscribe((g) => this.reload(g));
 
     this.active$.subscribe((act) => {
@@ -115,7 +115,7 @@ export class InstancesService {
       clearInterval(this.activeCheckInterval);
       // we'll refresh node states every 10 seconds as long as nothing else causes a reload. this
       // is a relatively cheap call nowadays, as this will simply fetch cached state from the node manager.
-      ngZone.runOutsideAngular(() => {
+      this.ngZone.runOutsideAngular(() => {
         this.activeLoadInterval = setInterval(() => this.reloadActiveStates(act), 10000);
         this.activeCheckInterval = setInterval(() => this.checkActiveReloadState(act), 1000);
       });
@@ -398,10 +398,8 @@ export class InstancesService {
   }
 
   private updateChangeSubscription(group: string) {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = null;
-    }
+    this.subscription?.unsubscribe();
+    this.subscription = null;
 
     this.instancesChanges = []; // if group has changed, then we don't want to track changes for prev group's instances
 

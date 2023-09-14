@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -13,12 +13,16 @@ import { RepositoriesService } from 'src/app/modules/primary/repositories/servic
   selector: 'app-add-group',
   templateUrl: './add-group.component.html',
 })
-export class AddGroupComponent implements OnDestroy, DirtyableDialog {
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ group: Partial<InstanceGroupConfiguration> = {
+export class AddGroupComponent implements OnInit, OnDestroy, DirtyableDialog {
+  private groups = inject(GroupsService);
+  private repos = inject(RepositoriesService);
+  private areas = inject(NavAreasService);
+
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected group: Partial<InstanceGroupConfiguration> = {
     autoDelete: true,
   };
-  /* template */ usedNames: string[] = [];
+  protected usedNames: string[] = [];
 
   private subscription: Subscription;
 
@@ -27,17 +31,11 @@ export class AddGroupComponent implements OnDestroy, DirtyableDialog {
 
   private image: File;
 
-  constructor(
-    private groups: GroupsService,
-    private repos: RepositoriesService,
-    private areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
+  ngOnInit() {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
 
     combineLatest([
-      this.groups.groups$.pipe(
-        map((g) => g?.map((x) => x.instanceGroupConfiguration.name))
-      ),
+      this.groups.groups$.pipe(map((g) => g?.map((x) => x.instanceGroupConfiguration.name))),
       this.repos.repositories$.pipe(map((r) => r?.map((y) => y.name))),
     ])
       .pipe(map(([g, r]) => [...(g && g), ...(r && r)]))
@@ -46,29 +44,27 @@ export class AddGroupComponent implements OnDestroy, DirtyableDialog {
       });
   }
 
-  /* template */ onSelectImage(image: File) {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  protected onSelectImage(image: File) {
     this.image = image;
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onUnsupportedFile(file: File) {
-    this.dialog
-      .info(
-        'Unsupported File Type',
-        `${file.name} has an unsupported file type.`,
-        'warning'
-      )
-      .subscribe();
+  protected onUnsupportedFile(file: File) {
+    this.dialog.info('Unsupported File Type', `${file.name} has an unsupported file type.`, 'warning').subscribe();
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.saving$.next(true);
     this.doSave().subscribe(() => {
       if (this.image) {
@@ -83,7 +79,7 @@ export class AddGroupComponent implements OnDestroy, DirtyableDialog {
 
   private reset() {
     this.areas.closePanel();
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public doSave(): Observable<void> {
@@ -93,9 +89,5 @@ export class AddGroupComponent implements OnDestroy, DirtyableDialog {
         this.saving$.next(false);
       })
     );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

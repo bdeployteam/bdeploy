@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild, inject } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -12,14 +12,14 @@ import { LoggingAdminService } from 'src/app/modules/primary/admin/services/logg
   templateUrl: './log-config-editor.component.html',
 })
 export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ config: string;
+  private loggingAdmin = inject(LoggingAdminService);
+
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected config: string;
   public origConfig: string;
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
-
-  constructor(private loggingAdmin: LoggingAdminService) {}
 
   ngOnInit(): void {
     this.loggingAdmin
@@ -31,15 +31,15 @@ export class LogConfigEditorComponent implements OnInit, DirtyableDialog {
       });
   }
 
-  isDirty(): boolean {
+  public isDirty(): boolean {
     return this.config !== this.origConfig;
   }
 
-  doSave(): Observable<any> {
+  public doSave(): Observable<any> {
     return this.loggingAdmin.setLogConfig(Base64.encode(this.config));
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 

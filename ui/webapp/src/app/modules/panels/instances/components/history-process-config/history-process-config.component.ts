@@ -1,14 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import {
-  ApplicationConfiguration,
-  ApplicationDescriptor,
-} from 'src/app/models/gen.dtos';
-import {
-  ApplicationConfigurationDiff,
-  DiffType,
-  HistoryDiffService,
-} from '../../services/history-diff.service';
+import { ApplicationConfiguration, ApplicationDescriptor } from 'src/app/models/gen.dtos';
+import { ApplicationConfigurationDiff, DiffType, HistoryDiffService } from '../../services/history-diff.service';
 
 @Component({
   selector: 'app-history-process-config',
@@ -16,6 +9,8 @@ import {
   styleUrls: ['./history-process-config.component.css'],
 })
 export class HistoryProcessConfigComponent implements OnInit {
+  private diffService = inject(HistoryDiffService);
+
   @Input() baseConfig: ApplicationConfiguration;
   @Input() compareConfig: ApplicationConfiguration;
 
@@ -26,27 +21,17 @@ export class HistoryProcessConfigComponent implements OnInit {
   /** Which side of the diff is this process on. */
   @Input() diffSide: 'left' | 'right' | 'none' = 'none';
 
-  /* template */ diff$ = new BehaviorSubject<ApplicationConfigurationDiff>(
-    null
-  );
-
-  constructor(private diffService: HistoryDiffService) {}
+  protected diff$ = new BehaviorSubject<ApplicationConfigurationDiff>(null);
 
   ngOnInit(): void {
     this.update();
   }
 
   public update(): void {
-    this.diff$.next(
-      this.diffService.diffAppConfig(
-        this.baseConfig,
-        this.compareConfig,
-        this.baseDescriptor
-      )
-    );
+    this.diff$.next(this.diffService.diffAppConfig(this.baseConfig, this.compareConfig, this.baseDescriptor));
   }
 
-  /* template */ getBorderClass(diffType: DiffType): string | string[] {
+  protected getBorderClass(diffType: DiffType): string | string[] {
     if (this.onlyCommand) {
       return [];
     }
@@ -56,13 +41,9 @@ export class HistoryProcessConfigComponent implements OnInit {
     }
 
     if (this.diff$.value?.type === DiffType.NOT_IN_COMPARE) {
-      return this.diffSide === 'right'
-        ? 'local-border-added'
-        : 'local-border-removed';
+      return this.diffSide === 'right' ? 'local-border-added' : 'local-border-removed';
     } else if (this.diff$.value?.type === DiffType.NOT_IN_BASE) {
-      return this.diffSide === 'right'
-        ? 'local-border-removed'
-        : 'local-border-added';
+      return this.diffSide === 'right' ? 'local-border-removed' : 'local-border-added';
     } else if (this.diff$.value?.type === DiffType.CHANGED) {
       return 'local-border-changed';
     }

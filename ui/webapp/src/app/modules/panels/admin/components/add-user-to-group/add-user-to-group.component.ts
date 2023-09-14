@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { UserInfo } from 'src/app/models/gen.dtos';
 
 @Component({
@@ -16,18 +10,16 @@ export class AddUserToGroupComponent {
   @Input() suggestedUsers: UserInfo[];
   @Output() userSelected = new EventEmitter<UserInfo>();
 
-  /* template */ userInput: string;
+  protected userInput: string;
 
-  /* template */ public addUserToGroup(): void {
-    const selectedUser = this.suggestedUsers.find(
-      (u) => u.name === this.userInput
-    );
+  protected addUserToGroup(): void {
+    const selectedUser = this.suggestedUsers.find((u) => u.name === this.userInput);
     if (!selectedUser) return;
     this.userSelected.emit(selectedUser);
     this.userInput = ''; // clear input
   }
 
-  /* template */ get suggestions(): string[] {
+  protected get suggestions(): string[] {
     return this.suggestedUsers.map((u) => u.name);
   }
 }

@@ -14,7 +14,7 @@ export interface ColorDef {
 export class ColorSelectGroupComponent {
   @Output() colorChanged = new EventEmitter<ColorDef>();
 
-  /* template */ colors = [
+  protected colors = [
     { name: 'Highlight 1', fg: '#FFFFFF', bg: '#C2185B' },
     { name: 'Highlight 2', fg: '#FFFFFF', bg: '#1A237E' },
     { name: 'Highlight 3', fg: '#FFFFFF', bg: '#2F729E' },
@@ -23,7 +23,7 @@ export class ColorSelectGroupComponent {
     { name: 'Warning', fg: '#000000', bg: '#FF6D00' },
     { name: 'Critical', fg: '#FFFFFF', bg: '#EA000A' },
   ];
-  /* template */ selected;
+  protected selected;
 
   public setDefault() {
     this.selected = this.colors[0].name;
@@ -46,7 +46,7 @@ export class ColorSelectGroupComponent {
     }
   }
 
-  /* template */ onChange(sel: ColorSelectComponent) {
+  protected onChange(sel: ColorSelectComponent) {
     this.selected = sel.name;
     this.colorChanged.emit({
       name: sel.name,

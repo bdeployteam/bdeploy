@@ -1,12 +1,8 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  CustomAttributeDescriptor,
-  CustomAttributesRecord,
-  InstanceDto,
-} from 'src/app/models/gen.dtos';
+import { CustomAttributeDescriptor, CustomAttributesRecord, InstanceDto } from 'src/app/models/gen.dtos';
 import {
   ACTION_APPLY,
   ACTION_CANCEL,
@@ -27,6 +23,10 @@ interface AttributeRow {
   templateUrl: './attributes.component.html',
 })
 export class AttributesComponent implements OnInit {
+  private groups = inject(GroupsService);
+  private instances = inject(InstancesService);
+  protected servers = inject(ServersService);
+
   private attrNameCol: BdDataColumn<AttributeRow> = {
     id: 'attribute',
     name: 'Attribute',
@@ -51,47 +51,35 @@ export class AttributesComponent implements OnInit {
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ columns: BdDataColumn<AttributeRow>[] = [
-    this.attrNameCol,
-    this.attrValCol,
-    this.attrRemoveCol,
-  ];
-  /* template */ records: AttributeRow[] = [];
-  /* template */ defs: CustomAttributeDescriptor[];
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected columns: BdDataColumn<AttributeRow>[] = [this.attrNameCol, this.attrValCol, this.attrRemoveCol];
+  protected records: AttributeRow[] = [];
+  protected defs: CustomAttributeDescriptor[];
 
-  /* template */ newAttr: CustomAttributeDescriptor;
-  /* template */ newValue: string;
-  /* template */ instance: InstanceDto;
-  /* template */ defLabels: string[];
+  protected newAttr: CustomAttributeDescriptor;
+  protected newValue: string;
+  protected instance: InstanceDto;
+  protected defLabels: string[];
 
   private attributes: CustomAttributesRecord;
 
-  constructor(
-    private groups: GroupsService,
-    private instances: InstancesService,
-    public servers: ServersService
-  ) {}
-
   ngOnInit(): void {
-    combineLatest([this.groups.current$, this.instances.current$]).subscribe(
-      ([group, instance]) => {
-        if (!group || !instance) {
-          return;
-        }
-
-        this.instance = instance;
-        this.defs = group.instanceAttributes;
-        this.attributes = instance.attributes;
-        this.defLabels = this.defs?.map((d) => d.description);
-
-        // if we have values for both
-        this.createRows();
+    combineLatest([this.groups.current$, this.instances.current$]).subscribe(([group, instance]) => {
+      if (!group || !instance) {
+        return;
       }
-    );
+
+      this.instance = instance;
+      this.defs = group.instanceAttributes;
+      this.attributes = instance.attributes;
+      this.defLabels = this.defs?.map((d) => d.description);
+
+      // if we have values for both
+      this.createRows();
+    });
   }
 
-  /* template */ showAddDialog(template: TemplateRef<any>) {
+  protected showAddDialog(template: TemplateRef<any>) {
     this.dialog
       .message({
         header: 'Add/Edit Attribute Value',
@@ -113,10 +101,7 @@ export class AttributesComponent implements OnInit {
 
         this.loading$.next(true);
         this.instances
-          .updateAttributes(
-            this.instance.instanceConfiguration.id,
-            this.attributes
-          )
+          .updateAttributes(this.instance.instanceConfiguration.id, this.attributes)
           .pipe(finalize(() => this.loading$.next(false)))
           .subscribe();
       });

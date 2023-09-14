@@ -13,7 +13,7 @@ export class SearchService {
   private registrations: BdSearchable[] = [];
   public enableSearch$ = new BehaviorSubject<boolean>(false);
 
-  set search(value: string) {
+  public set search(value: string) {
     if (!this.currentSearch?.length && !value?.length) {
       // updating from empty to empty. ignore.
       return;
@@ -29,11 +29,11 @@ export class SearchService {
     this.currentSearch = value;
   }
 
-  get search() {
+  public get search() {
     return this.currentSearch;
   }
 
-  register(searchable: BdSearchable): Subscription {
+  public register(searchable: BdSearchable): Subscription {
     this.registrations.push(searchable);
 
     // enable async to avoid errors while components are still being created.

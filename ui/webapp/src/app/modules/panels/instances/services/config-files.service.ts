@@ -1,94 +1,69 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import {
-  ConfigFileDto,
-  FileStatusDto,
-  FileStatusType,
-  InstanceDto,
-  ManifestKey,
-} from 'src/app/models/gen.dtos';
+import { ConfigFileDto, FileStatusDto, FileStatusType, InstanceDto, ManifestKey } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
 import { suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
-import {
-  GlobalEditState,
-  InstanceEditService,
-} from 'src/app/modules/primary/instances/services/instance-edit.service';
+import { GlobalEditState, InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 
 export interface ConfigFile {
   persistent: ConfigFileDto;
   modification: FileStatusDto;
 }
 
-export type ConfigFileStatusType =
-  | 'new'
-  | 'modified'
-  | 'local'
-  | 'sync'
-  | 'unsync'
-  | 'missing';
+export type ConfigFileStatusType = 'new' | 'modified' | 'local' | 'sync' | 'unsync' | 'missing';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConfigFilesService {
+  private http = inject(HttpClient);
+  private cfg = inject(ConfigService);
+  private groups = inject(GroupsService);
+  private editSvc = inject(InstanceEditService);
+
   private persistent$ = new BehaviorSubject<ConfigFileDto[]>(null);
   private binCache: { [key: string]: boolean } = {};
   private moveCache: { [key: string]: boolean } = {};
 
   public files$ = new BehaviorSubject<ConfigFile[]>(null);
 
-  private apiPath = (g, i) =>
-    `${this.cfg.config.api}/group/${g}/instance/${i}/cfgFiles`;
+  private apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}/cfgFiles`;
 
-  constructor(
-    private http: HttpClient,
-    private cfg: ConfigService,
-    private groups: GroupsService,
-    private editSvc: InstanceEditService
-  ) {
-    combineLatest([this.persistent$, this.editSvc.state$]).subscribe(
-      ([pers, state]) => {
-        if (!pers || !state) {
-          this.files$.next(null);
-        } else {
-          // map both to ConfigFile, potentially associating modification with an existing file.
-          const m = state.files ? state.files : [];
-          const p = pers ? pers : [];
+  constructor() {
+    combineLatest([this.persistent$, this.editSvc.state$]).subscribe(([pers, state]) => {
+      if (!pers || !state) {
+        this.files$.next(null);
+      } else {
+        // map both to ConfigFile, potentially associating modification with an existing file.
+        const m = state.files ? state.files : [];
+        const p = pers ? pers : [];
 
-          const modFiles = m.map((c) => ({
-            persistent: pers.find((x) => x.path === c.file),
-            modification: c,
-          }));
-          const persFiles = p.map((k) => ({
-            persistent: k,
-            modification: m.find((x) => x.file === k.path),
-          }));
+        const modFiles = m.map((c) => ({
+          persistent: pers.find((x) => x.path === c.file),
+          modification: c,
+        }));
+        const persFiles = p.map((k) => ({
+          persistent: k,
+          modification: m.find((x) => x.file === k.path),
+        }));
 
-          this.files$.next([
-            ...persFiles,
-            ...modFiles.filter((x) => !x.persistent),
-          ]);
-        }
+        this.files$.next([...persFiles, ...modFiles.filter((x) => !x.persistent)]);
       }
-    );
+    });
 
     // TODO: this one is triggered way too often when saving an instance (after visiting the config files page once).
-    combineLatest([
-      this.groups.current$,
-      this.editSvc.current$,
-      this.editSvc.state$,
-    ]).subscribe(([group, instance, state]) => {
-      if (!group || !instance || !state || !state.config) {
-        return;
+    combineLatest([this.groups.current$, this.editSvc.current$, this.editSvc.state$]).subscribe(
+      ([group, instance, state]) => {
+        if (!group || !instance || !state || !state.config) {
+          return;
+        }
+        this.loadFiles(group.name, instance, state).subscribe((f) => this.persistent$.next(f));
       }
-      this.loadFiles(group.name, instance, state).subscribe((f) =>
-        this.persistent$.next(f)
-      );
-    });
+    );
 
     this.editSvc.saving$.subscribe((s) => {
       if (s) {
@@ -98,18 +73,12 @@ export class ConfigFilesService {
     });
   }
 
-  private loadFiles(
-    group: string,
-    instance: InstanceDto,
-    state: GlobalEditState
-  ): Observable<ConfigFileDto[]> {
+  private loadFiles(group: string, instance: InstanceDto, state: GlobalEditState): Observable<ConfigFileDto[]> {
     return this.http
       .get<ConfigFileDto[]>(
-        `${this.apiPath(group, instance.instanceConfiguration.id)}/${
-          instance.instance.tag
-        }/${state.config.config.product.name}/${
-          state.config.config.product.tag
-        }`,
+        `${this.apiPath(group, instance.instanceConfiguration.id)}/${instance.instance.tag}/${
+          state.config.config.product.name
+        }/${state.config.config.product.tag}`,
         { headers: suppressGlobalErrorHandling(new HttpHeaders()) }
       )
       .pipe(
@@ -128,17 +97,13 @@ export class ConfigFilesService {
   }
 
   public get(path: string): ConfigFile {
-    return this.files$.value?.find(
-      (f) => f.persistent?.path === path || f.modification?.file === path
-    );
+    return this.files$.value?.find((f) => f.persistent?.path === path || f.modification?.file === path);
   }
 
   private internalAdd(path: string, content: string, binary: boolean) {
     const existing = this.get(path);
     if (!!existing?.persistent?.instanceId || !!existing?.modification?.file) {
-      throw new Error(
-        'Cannot add file: Already have a file with this name: ' + path
-      );
+      throw new Error('Cannot add file: Already have a file with this name: ' + path);
     }
 
     const file: FileStatusDto = {
@@ -155,10 +120,7 @@ export class ConfigFilesService {
     // find any existing modification and remove it.
     const mod = this.editSvc.state$.value.files?.find((m) => m.file === path);
     if (mod) {
-      this.editSvc.state$.value.files.splice(
-        this.editSvc.state$.value.files.indexOf(mod),
-        1
-      );
+      this.editSvc.state$.value.files.splice(this.editSvc.state$.value.files.indexOf(mod), 1);
     }
 
     const f = this.get(path);
@@ -200,19 +162,13 @@ export class ConfigFilesService {
     // find any existing modification and remove it.
     const mod = this.editSvc.state$.value.files?.find((m) => m.file === path);
     if (mod) {
-      this.editSvc.state$.value.files.splice(
-        this.editSvc.state$.value.files.indexOf(mod),
-        1
-      );
+      this.editSvc.state$.value.files.splice(this.editSvc.state$.value.files.indexOf(mod), 1);
     }
 
     const edit = {
       content: content,
       file: path,
-      type:
-        mod?.type === FileStatusType.ADD
-          ? FileStatusType.ADD
-          : FileStatusType.EDIT,
+      type: mod?.type === FileStatusType.ADD ? FileStatusType.ADD : FileStatusType.EDIT,
     };
 
     this.binCache[path] = binary;
@@ -229,10 +185,9 @@ export class ConfigFilesService {
 
     return this.http
       .get(
-        `${this.apiPath(
-          this.groups.current$.value.name,
-          this.editSvc.current$.value.instanceConfiguration.id
-        )}/load/${this.editSvc.current$.value.instance.tag}/${path}`,
+        `${this.apiPath(this.groups.current$.value.name, this.editSvc.current$.value.instanceConfiguration.id)}/load/${
+          this.editSvc.current$.value.instance.tag
+        }/${path}`,
         { responseType: 'text' }
       )
       .pipe(map((s) => s, measure(`Load ${path}`)));
@@ -282,11 +237,7 @@ export class ConfigFilesService {
       return 'new';
     }
 
-    if (
-      !file.persistent?.instanceId &&
-      !!file.persistent?.productId &&
-      !!file.modification?.file
-    ) {
+    if (!file.persistent?.instanceId && !!file.persistent?.productId && !!file.modification?.file) {
       return 'new';
     }
 

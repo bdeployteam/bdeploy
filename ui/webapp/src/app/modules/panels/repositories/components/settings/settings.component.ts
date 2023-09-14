@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -13,18 +13,16 @@ import { RepositoryDetailsService } from '../../services/repository-details.serv
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
+  private router = inject(Router);
+  protected auth = inject(AuthenticationService);
+  protected repositories = inject(RepositoriesService);
+  protected details = inject(RepositoryDetailsService);
+
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
 
-  /* template */ deleting$ = new BehaviorSubject<boolean>(false);
+  protected deleting$ = new BehaviorSubject<boolean>(false);
 
-  constructor(
-    public auth: AuthenticationService,
-    public repositories: RepositoriesService,
-    public details: RepositoryDetailsService,
-    private router: Router
-  ) {}
-
-  /* template */ onDelete(repository: SoftwareRepositoryConfiguration): void {
+  protected onDelete(repository: SoftwareRepositoryConfiguration): void {
     this.dialog
       .confirm(
         `Delete ${repository.name}`,

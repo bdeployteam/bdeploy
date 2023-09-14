@@ -1,23 +1,21 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
-import {
-  HiveEntryDto,
-  RepairAndPruneResultDto,
-} from '../../../../models/gen.dtos';
+import { HiveEntryDto, RepairAndPruneResultDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HiveService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+
   public loading$ = new BehaviorSubject<boolean>(false);
 
   private apiPath = () => `${this.cfg.config.api}/hive`;
-
-  constructor(private cfg: ConfigService, private http: HttpClient) {}
 
   public listHives(): Observable<string[]> {
     this.loading$.next(true);
@@ -30,32 +28,21 @@ export class HiveService {
   public listManifests(hive: string): Observable<HiveEntryDto[]> {
     this.loading$.next(true);
     const options = { params: new HttpParams().set('hive', hive) };
-    return this.http
-      .get<HiveEntryDto[]>(`${this.apiPath()}/listManifests`, options)
-      .pipe(
-        measure('List BHive Manifests'),
-        finalize(() => this.loading$.next(false))
-      );
+    return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/listManifests`, options).pipe(
+      measure('List BHive Manifests'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 
-  public listManifest(
-    hive: string,
-    name: string,
-    tag: string
-  ): Observable<HiveEntryDto[]> {
+  public listManifest(hive: string, name: string, tag: string): Observable<HiveEntryDto[]> {
     this.loading$.next(true);
     const options = {
-      params: new HttpParams()
-        .set('hive', hive)
-        .set('name', name)
-        .set('tag', tag),
+      params: new HttpParams().set('hive', hive).set('name', name).set('tag', tag),
     };
-    return this.http
-      .get<HiveEntryDto[]>(`${this.apiPath()}/listManifest`, options)
-      .pipe(
-        measure('List BHive Manifest Content'),
-        finalize(() => this.loading$.next(false))
-      );
+    return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/listManifest`, options).pipe(
+      measure('List BHive Manifest Content'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 
   public list(hive: string, id: string): Observable<HiveEntryDto[]> {
@@ -63,12 +50,10 @@ export class HiveService {
     const options = {
       params: new HttpParams().set('hive', hive).set('id', id),
     };
-    return this.http
-      .get<HiveEntryDto[]>(`${this.apiPath()}/list`, options)
-      .pipe(
-        measure('List BHive Tree'),
-        finalize(() => this.loading$.next(false))
-      );
+    return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/list`, options).pipe(
+      measure('List BHive Tree'),
+      finalize(() => this.loading$.next(false))
+    );
   }
 
   public download(hive: string, id: string) {
@@ -83,25 +68,14 @@ export class HiveService {
   }
 
   public delete(hive: string, name: string, tag: string) {
-    const params: HttpParams = new HttpParams()
-      .set('hive', hive)
-      .set('name', name)
-      .set('tag', tag);
+    const params: HttpParams = new HttpParams().set('hive', hive).set('name', name).set('tag', tag);
     return this.http.delete(`${this.apiPath()}/delete`, { params: params });
   }
 
-  public repairAndPrune(
-    hive: string,
-    fix: boolean
-  ): Observable<RepairAndPruneResultDto> {
-    const params: HttpParams = new HttpParams()
-      .set('hive', hive)
-      .set('fix', fix.toString());
-    return this.http.get<RepairAndPruneResultDto>(
-      `${this.apiPath()}/repair-and-prune`,
-      {
-        params: params,
-      }
-    );
+  public repairAndPrune(hive: string, fix: boolean): Observable<RepairAndPruneResultDto> {
+    const params: HttpParams = new HttpParams().set('hive', hive).set('fix', fix.toString());
+    return this.http.get<RepairAndPruneResultDto>(`${this.apiPath()}/repair-and-prune`, {
+      params: params,
+    });
   }
 }

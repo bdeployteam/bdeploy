@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -15,10 +15,9 @@ export interface CanComponentDeactivate {
 @Injectable({
   providedIn: 'root',
 })
-export class CanDeactivateGuard
-  
-{
-  constructor(private location: Location, private router: Router) {}
+export class CanDeactivateGuard {
+  private location = inject(Location);
+  private router = inject(Router);
 
   canDeactivate(
     component: CanComponentDeactivate,
@@ -33,18 +32,12 @@ export class CanDeactivateGuard
     return component.canDeactivate
       ? component.canDeactivate().pipe(
           tap((allowed) => {
-            if (
-              !allowed &&
-              this.router.getCurrentNavigation().trigger === 'popstate'
-            ) {
+            if (!allowed && this.router.getCurrentNavigation().trigger === 'popstate') {
               // FORWARD navigation is broken by this, but there is no simple and no plausible way to
               // distinguish back vs. forward button (grmpf). In the case where the user presses
               // forward and then cancels due to unsaved changes, we will destroy the forward history
               // by pushing state here.
-              const currentUrlTree = this.router.createUrlTree(
-                [],
-                currentRoute
-              );
+              const currentUrlTree = this.router.createUrlTree([], currentRoute);
               const currentUrl = currentUrlTree.toString();
               this.location.go(currentUrl);
             }

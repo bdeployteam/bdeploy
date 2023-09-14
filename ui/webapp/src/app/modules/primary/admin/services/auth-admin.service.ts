@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import {
@@ -10,10 +10,7 @@ import {
   UserInfo,
 } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
-import {
-  EMPTY_SCOPE,
-  ObjectChangesService,
-} from '../../../core/services/object-changes.service';
+import { EMPTY_SCOPE, ObjectChangesService } from '../../../core/services/object-changes.service';
 import { measure } from '../../../core/utils/performance.utils';
 import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
 
@@ -21,6 +18,10 @@ import { suppressGlobalErrorHandling } from '../../../core/utils/server.utils';
   providedIn: 'root',
 })
 export class AuthAdminService {
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private changes = inject(ObjectChangesService);
+
   private apiPath = () => `${this.cfg.config.api}/auth/admin`;
 
   public loadingUsers$ = new BehaviorSubject<boolean>(true);
@@ -28,17 +29,9 @@ export class AuthAdminService {
   public users$ = new BehaviorSubject<UserInfo[]>(null);
   public userGroups$ = new BehaviorSubject<UserGroupInfo[]>(null);
 
-  constructor(
-    private cfg: ConfigService,
-    private http: HttpClient,
-    changes: ObjectChangesService
-  ) {
-    changes.subscribe(ObjectChangeType.USER, EMPTY_SCOPE, () =>
-      this.loadUsers()
-    );
-    changes.subscribe(ObjectChangeType.USER_GROUP, EMPTY_SCOPE, () =>
-      this.loadUserGroups()
-    );
+  constructor() {
+    this.changes.subscribe(ObjectChangeType.USER, EMPTY_SCOPE, () => this.loadUsers());
+    this.changes.subscribe(ObjectChangeType.USER_GROUP, EMPTY_SCOPE, () => this.loadUserGroups());
     this.loadUsers();
     this.loadUserGroups();
   }
@@ -96,22 +89,14 @@ export class AuthAdminService {
   }
 
   public addUserToGroup(group: string, user: string) {
-    return this.http.post(
-      `${this.apiPath()}/user-groups/${group}/users/${user}`,
-      null
-    );
+    return this.http.post(`${this.apiPath()}/user-groups/${group}/users/${user}`, null);
   }
 
   public removeUserFromGroup(group: string, user: string) {
-    return this.http.delete(
-      `${this.apiPath()}/user-groups/${group}/users/${user}`
-    );
+    return this.http.delete(`${this.apiPath()}/user-groups/${group}/users/${user}`);
   }
 
-  public traceAuthentication(
-    username: string,
-    password: string
-  ): Observable<string[]> {
+  public traceAuthentication(username: string, password: string): Observable<string[]> {
     return this.http.post<string[]>(
       `${this.apiPath()}/traceAuthentication`,
       { user: username, password: password } as CredentialsApi,

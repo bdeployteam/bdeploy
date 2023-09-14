@@ -1,20 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscriber, Subscription } from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import {
-  InstanceConfiguration,
-  ManagedMasterDto,
-  Version,
-} from 'src/app/models/gen.dtos';
+import { InstanceConfiguration, ManagedMasterDto, Version } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  retryWithDelay,
-  suppressGlobalErrorHandling,
-} from 'src/app/modules/core/utils/server.utils';
+import { retryWithDelay, suppressGlobalErrorHandling } from 'src/app/modules/core/utils/server.utils';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 
@@ -25,6 +18,12 @@ export const ATTACH_MIME_TYPE = 'text/plain';
   providedIn: 'root',
 })
 export class ServerDetailsService implements OnDestroy {
+  private route = inject(ActivatedRoute);
+  private servers = inject(ServersService);
+  private cfg = inject(ConfigService);
+  private http = inject(HttpClient);
+  private areas = inject(NavAreasService);
+
   private apiPath = `${this.cfg.config.api}/managed-servers`;
   private serverName$ = new BehaviorSubject<string>(null);
 
@@ -35,19 +34,11 @@ export class ServerDetailsService implements OnDestroy {
   private subscription: Subscription;
   private serverSubscription: Subscription;
 
-  constructor(
-    route: ActivatedRoute,
-    private servers: ServersService,
-    private cfg: ConfigService,
-    private http: HttpClient,
-    private areas: NavAreasService
-  ) {
-    this.subscription = route.paramMap.subscribe((p) => {
+  constructor() {
+    this.subscription = this.route.paramMap.subscribe((p) => {
       this.serverName$.next(p.get('server'));
 
-      if (this.serverSubscription) {
-        this.serverSubscription.unsubscribe();
-      }
+      this.serverSubscription?.unsubscribe();
       this.serverSubscription = this.servers.servers$
         .pipe(map((s) => s.find((e) => e.hostName === this.serverName$.value)))
         .subscribe((server) => {
@@ -71,27 +62,18 @@ export class ServerDetailsService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
   }
 
   public delete(server: ManagedMasterDto) {
-    return this.http.delete(
-      `${this.apiPath}/delete-server/${this.areas.groupContext$.value}/${server.hostName}`
-    );
+    return this.http.delete(`${this.apiPath}/delete-server/${this.areas.groupContext$.value}/${server.hostName}`);
   }
 
   public update(server: ManagedMasterDto) {
-    return this.http.post(
-      `${this.apiPath}/update-server/${this.areas.groupContext$.value}/${server.hostName}`,
-      server
-    );
+    return this.http.post(`${this.apiPath}/update-server/${this.areas.groupContext$.value}/${server.hostName}`, server);
   }
 
-  public remoteUpdateTransfer(
-    server: ManagedMasterDto
-  ): Observable<ManagedMasterDto> {
+  public remoteUpdateTransfer(server: ManagedMasterDto): Observable<ManagedMasterDto> {
     return new Observable<ManagedMasterDto>((s) => {
       this.http
         .post(
@@ -148,20 +130,13 @@ export class ServerDetailsService implements OnDestroy {
 
   private waitForUpdate(server: ManagedMasterDto): Observable<any> {
     return this.http
-      .get<Version>(
-        `${this.apiPath}/minion-ping/${this.areas.groupContext$.value}/${server.hostName}`,
-        {
-          headers: suppressGlobalErrorHandling(new HttpHeaders()),
-        }
-      )
+      .get<Version>(`${this.apiPath}/minion-ping/${this.areas.groupContext$.value}/${server.hostName}`, {
+        headers: suppressGlobalErrorHandling(new HttpHeaders()),
+      })
       .pipe(
         tap((v) => {
           if (!isEqual(v, server.update?.updateVersion)) {
-            throw new Error(
-              `Server is running but reports the wrong version: ${convert2String(
-                v
-              )}`
-            );
+            throw new Error(`Server is running but reports the wrong version: ${convert2String(v)}`);
           }
         }),
         retryWithDelay()

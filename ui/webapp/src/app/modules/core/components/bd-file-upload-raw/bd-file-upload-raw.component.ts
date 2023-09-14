@@ -27,19 +27,19 @@ export class BdFileUploadRawComponent implements OnInit {
 
   private uploads = inject(UploadService);
 
-  /* template */ uploadStatus: UploadStatus;
-  /* template */ importStatus: ImportStatus;
-  /* template */ isUploadFinished$ = new BehaviorSubject<boolean>(false);
-  /* template */ isUploadFailed$ = new BehaviorSubject<boolean>(false);
-  /* template */ isUploading$ = new BehaviorSubject<boolean>(false);
-  /* template */ isUploadProcessing$ = new BehaviorSubject<boolean>(false);
-  /* template */ isImporting$ = new BehaviorSubject<boolean>(false);
-  /* template */ isImportFinished$ = new BehaviorSubject<boolean>(false);
-  /* template */ isImportFailed$ = new BehaviorSubject<boolean>(false);
-  /* template */ icon$ = new BehaviorSubject<string>(this.getIcon());
-  /* template */ header$ = new BehaviorSubject<string>(this.getHeader());
+  protected uploadStatus: UploadStatus;
+  protected importStatus: ImportStatus;
+  protected isUploadFinished$ = new BehaviorSubject<boolean>(false);
+  protected isUploadFailed$ = new BehaviorSubject<boolean>(false);
+  protected isUploading$ = new BehaviorSubject<boolean>(false);
+  protected isUploadProcessing$ = new BehaviorSubject<boolean>(false);
+  protected isImporting$ = new BehaviorSubject<boolean>(false);
+  protected isImportFinished$ = new BehaviorSubject<boolean>(false);
+  protected isImportFailed$ = new BehaviorSubject<boolean>(false);
+  protected icon$ = new BehaviorSubject<string>(this.getIcon());
+  protected header$ = new BehaviorSubject<string>(this.getHeader());
 
-  /* template */ set supportAllOs(b: boolean) {
+  protected set supportAllOs(b: boolean) {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
     if (dto) {
       if (b) {
@@ -50,12 +50,12 @@ export class BdFileUploadRawComponent implements OnInit {
     }
   }
 
-  /* template */ get supportAllOs(): boolean {
+  protected get supportAllOs(): boolean {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
     return !!dto && dto.supportedOperatingSystems === undefined;
   }
 
-  /* template */ set supportWindows(b: boolean) {
+  protected set supportWindows(b: boolean) {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
     if (dto) {
       if (b) {
@@ -72,12 +72,12 @@ export class BdFileUploadRawComponent implements OnInit {
     }
   }
 
-  /* template */ get supportWindows(): boolean {
+  protected get supportWindows(): boolean {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
     return !!dto && !!dto.supportedOperatingSystems && dto.supportedOperatingSystems.includes(OperatingSystem.WINDOWS);
   }
 
-  /* template */ set supportLinux(b: boolean) {
+  protected set supportLinux(b: boolean) {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
     if (dto) {
       if (b) {
@@ -94,7 +94,7 @@ export class BdFileUploadRawComponent implements OnInit {
     }
   }
 
-  /* template */ get supportLinux(): boolean {
+  protected get supportLinux(): boolean {
     const dto: UploadInfoDto = this.uploadStatus?.detail;
     return !!dto && !!dto.supportedOperatingSystems && dto.supportedOperatingSystems.includes(OperatingSystem.LINUX);
   }
@@ -173,7 +173,7 @@ export class BdFileUploadRawComponent implements OnInit {
     }
   }
 
-  /* template */ onDismiss() {
+  protected onDismiss() {
     if (this.isUploading$.value) {
       this.uploadStatus.cancel();
     }

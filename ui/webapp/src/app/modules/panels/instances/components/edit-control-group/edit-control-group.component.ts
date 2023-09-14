@@ -1,20 +1,7 @@
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { cloneDeep } from 'lodash-es';
-import {
-  combineLatest,
-  debounceTime,
-  Observable,
-  of,
-  Subscription,
-  tap,
-} from 'rxjs';
+import { Observable, Subscription, combineLatest, debounceTime, of, tap } from 'rxjs';
 import {
   InstanceNodeConfiguration,
   ProcessControlGroupConfiguration,
@@ -34,61 +21,44 @@ import { ServersService } from 'src/app/modules/primary/servers/services/servers
   selector: 'app-edit-control-group',
   templateUrl: './edit-control-group.component.html',
 })
-export class EditControlGroupComponent
-  implements OnInit, DirtyableDialog, OnDestroy, AfterViewInit
-{
+export class EditControlGroupComponent implements OnInit, DirtyableDialog, OnDestroy, AfterViewInit {
+  private areas = inject(NavAreasService);
+  protected cfg = inject(ConfigService);
+  protected edit = inject(InstanceEditService);
+  protected servers = inject(ServersService);
+
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
   @ViewChild('form') public form: NgForm;
 
   private subscription: Subscription;
 
-  /* template */ handlingTypeValues = [
-    ProcessControlGroupHandlingType.SEQUENTIAL,
-    ProcessControlGroupHandlingType.PARALLEL,
-  ];
-  /* template */ waitTypeValues = [
-    ProcessControlGroupWaitType.CONTINUE,
-    ProcessControlGroupWaitType.WAIT,
-  ];
+  protected handlingTypeValues = [ProcessControlGroupHandlingType.SEQUENTIAL, ProcessControlGroupHandlingType.PARALLEL];
+  protected waitTypeValues = [ProcessControlGroupWaitType.CONTINUE, ProcessControlGroupWaitType.WAIT];
 
-  /* template */ origGroup: ProcessControlGroupConfiguration;
-  /* template */ group: ProcessControlGroupConfiguration;
-  /* template */ node: InstanceNodeConfiguration;
-  /* template */ nodeName: string;
-  /* template */ hasPendingChanges: boolean;
-
-  constructor(
-    public cfg: ConfigService,
-    public edit: InstanceEditService,
-    public servers: ServersService,
-    private areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
+  protected origGroup: ProcessControlGroupConfiguration;
+  protected group: ProcessControlGroupConfiguration;
+  protected node: InstanceNodeConfiguration;
+  protected nodeName: string;
+  protected hasPendingChanges: boolean;
 
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.subscription.add(
-      combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(
-        ([state, route]) => {
-          if (!state || !route || !route.params?.node || !route.params?.cgrp) {
-            this.node = null;
-            return;
-          }
-
-          this.nodeName = route.params.node;
-          this.node = state.config.nodeDtos.find(
-            (n) => n.nodeName === route.params.node
-          )?.nodeConfiguration;
-
-          const index = this.node.controlGroups.findIndex(
-            (cg) => cg.name === route.params.cgrp
-          );
-
-          this.origGroup = this.node.controlGroups[index];
-          this.group = cloneDeep(this.origGroup);
+      combineLatest([this.edit.state$, this.areas.panelRoute$]).subscribe(([state, route]) => {
+        if (!state || !route || !route.params?.node || !route.params?.cgrp) {
+          this.node = null;
+          return;
         }
-      )
+
+        this.nodeName = route.params.node;
+        this.node = state.config.nodeDtos.find((n) => n.nodeName === route.params.node)?.nodeConfiguration;
+
+        const index = this.node.controlGroups.findIndex((cg) => cg.name === route.params.cgrp);
+
+        this.origGroup = this.node.controlGroups[index];
+        this.group = cloneDeep(this.origGroup);
+      })
     );
   }
 
@@ -104,7 +74,7 @@ export class EditControlGroupComponent
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
@@ -115,7 +85,7 @@ export class EditControlGroupComponent
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
@@ -130,7 +100,7 @@ export class EditControlGroupComponent
     );
   }
 
-  /* template */ onDelete() {
+  protected onDelete() {
     this.removeGroup();
     // if this was the last group, we trigger creation of the default group.
     this.edit.getLastControlGroup(this.node);

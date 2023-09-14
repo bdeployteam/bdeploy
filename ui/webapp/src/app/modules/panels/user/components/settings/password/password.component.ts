@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -10,17 +10,17 @@ import { AuthenticationService } from 'src/app/modules/core/services/authenticat
   templateUrl: './password.component.html',
 })
 export class PasswordComponent {
-  /* template */ loading$ = new BehaviorSubject<boolean>(false);
-  /* template */ passOrig = '';
-  /* template */ passNew = '';
-  /* template */ passVerify = '';
-  /* template */ remoteError: string = null;
+  private auth = inject(AuthenticationService);
+
+  protected loading$ = new BehaviorSubject<boolean>(false);
+  protected passOrig = '';
+  protected passNew = '';
+  protected passVerify = '';
+  protected remoteError: string = null;
 
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
-  constructor(private auth: AuthenticationService) {}
-
-  /* template */ onSave(): void {
+  protected onSave(): void {
     this.loading$.next(true);
     this.auth
       .changePassword({

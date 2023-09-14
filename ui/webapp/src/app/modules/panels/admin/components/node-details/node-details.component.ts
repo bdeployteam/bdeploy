@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest, finalize } from 'rxjs';
 import { Actions, MinionStatusDto } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
@@ -13,11 +13,15 @@ import { NodesAdminService } from 'src/app/modules/primary/admin/services/nodes-
   selector: 'app-node-details',
   templateUrl: './node-details.component.html',
 })
-export class NodeDetailsComponent implements OnDestroy {
-  /* template */ nodeName$ = new BehaviorSubject<string>(null);
-  /* template */ nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
-  /* template */ nodeVersion: string;
-  /* template */ isCurrent: boolean;
+export class NodeDetailsComponent implements OnInit, OnDestroy {
+  private nodeAdmin = inject(NodesAdminService);
+  private cfg = inject(ConfigService);
+  private areas = inject(NavAreasService);
+
+  protected nodeName$ = new BehaviorSubject<string>(null);
+  protected nodeState$ = new BehaviorSubject<MinionStatusDto>(null);
+  protected nodeVersion: string;
+  protected isCurrent: boolean;
 
   private deleting$ = new BehaviorSubject<boolean>(false);
   private actions = inject(ActionsService);
@@ -28,8 +32,8 @@ export class NodeDetailsComponent implements OnDestroy {
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
-  constructor(private nodeAdmin: NodesAdminService, private cfg: ConfigService, areas: NavAreasService) {
-    this.subscription = combineLatest([this.nodeAdmin.nodes$, areas.panelRoute$]).subscribe(([nodes, route]) => {
+  ngOnInit() {
+    this.subscription = combineLatest([this.nodeAdmin.nodes$, this.areas.panelRoute$]).subscribe(([nodes, route]) => {
       if (!nodes || !route || !route.params.node) {
         this.nodeName$.next(null);
         this.nodeState$.next(null);
@@ -51,10 +55,10 @@ export class NodeDetailsComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ onDelete() {
+  protected onDelete() {
     const nodeName = this.nodeName$.value;
     this.dialog
       .confirm(

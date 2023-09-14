@@ -1,12 +1,4 @@
-import {
-  Component,
-  forwardRef,
-  Inject,
-  Input,
-  OnInit,
-  TemplateRef,
-  ViewChild,
-} from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewChild, forwardRef, inject } from '@angular/core';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, first, skipWhile } from 'rxjs';
 import { FileStatusType } from 'src/app/models/gen.dtos';
@@ -17,11 +9,7 @@ import {
 } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
 import { BdFormInputComponent } from 'src/app/modules/core/components/bd-form-input/bd-form-input.component';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
-import {
-  ConfigFile,
-  ConfigFilesService,
-  ConfigFileStatusType,
-} from '../../../../services/config-files.service';
+import { ConfigFile, ConfigFileStatusType, ConfigFilesService } from '../../../../services/config-files.service';
 import { ConfigFilesComponent } from '../config-files.component';
 
 @Component({
@@ -29,30 +17,26 @@ import { ConfigFilesComponent } from '../config-files.component';
   templateUrl: './config-files-actions.component.html',
 })
 export class ConfigFilesActionsComponent implements OnInit {
+  private cfgFiles = inject(ConfigFilesService);
+  private edit = inject(InstanceEditService);
+  private parent = inject(forwardRef(() => ConfigFilesComponent));
+
   @Input() record: ConfigFile;
 
-  /* template */ isEditAllowed: boolean;
-  /* template */ path: string;
-  /* template */ isText: boolean;
-  /* template */ status: ConfigFileStatusType;
+  protected isEditAllowed: boolean;
+  protected path: string;
+  protected isText: boolean;
+  protected status: ConfigFileStatusType;
 
-  /* template */ newName: string;
-  /* template */ renameAllowed: boolean;
+  protected newName: string;
+  protected renameAllowed: boolean;
 
-  /* template */ tempFileError: string;
-  /* template */ tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
-  /* template */ tempFileContent = '';
+  protected tempFileError: string;
+  protected tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
+  protected tempFileContent = '';
   private tempFileIsBin = false;
 
-  @ViewChild('renameInput', { static: false })
-  private renameInput: BdFormInputComponent;
-
-  constructor(
-    private cfgFiles: ConfigFilesService,
-    private edit: InstanceEditService,
-    @Inject(forwardRef(() => ConfigFilesComponent))
-    private parent: ConfigFilesComponent
-  ) {}
+  @ViewChild('renameInput', { static: false }) private renameInput: BdFormInputComponent;
 
   ngOnInit(): void {
     this.edit.state$.subscribe(() => {
@@ -84,7 +68,7 @@ export class ConfigFilesActionsComponent implements OnInit {
     return true;
   }
 
-  /* template */ onRename(tpl: TemplateRef<any>): void {
+  protected onRename(tpl: TemplateRef<any>): void {
     const oldName = this.path;
     const isBin = !this.isText;
     this.newName = oldName;
@@ -93,8 +77,7 @@ export class ConfigFilesActionsComponent implements OnInit {
       .message({
         header: `Rename ${oldName}`,
         template: tpl,
-        validation: () =>
-          !this.renameInput ? false : !this.renameInput.isInvalid(),
+        validation: () => (!this.renameInput ? false : !this.renameInput.isInvalid()),
         actions: [ACTION_CANCEL, ACTION_CONFIRM],
       })
       .subscribe((r) => {
@@ -111,7 +94,7 @@ export class ConfigFilesActionsComponent implements OnInit {
       });
   }
 
-  /* template */ onDelete(): void {
+  protected onDelete(): void {
     this.parent.dialog
       .confirm(
         `Delete ${this.path}?`,
@@ -124,7 +107,7 @@ export class ConfigFilesActionsComponent implements OnInit {
       });
   }
 
-  /* template */ doReplaceFile(tpl: TemplateRef<any>): void {
+  protected doReplaceFile(tpl: TemplateRef<any>): void {
     this.tempFileContent = '';
 
     this.parent.dialog
@@ -139,16 +122,14 @@ export class ConfigFilesActionsComponent implements OnInit {
           return;
         }
         this.cfgFiles.edit(
-          this.record.persistent?.path
-            ? this.record.persistent.path
-            : this.record.modification.file,
+          this.record.persistent?.path ? this.record.persistent.path : this.record.modification.file,
           this.tempFileContent,
           this.tempFileIsBin
         );
       });
   }
 
-  /* template */ doAddFileContent(file: File) {
+  protected doAddFileContent(file: File) {
     this.tempFileError = null;
     this.tempFileContentLoading$.next(true);
 
@@ -179,33 +160,29 @@ export class ConfigFilesActionsComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  /* template */ doAddFromTemplate() {
+  protected doAddFromTemplate() {
     this.edit.state$
       .pipe(
         skipWhile((s) => !s?.config?.config?.product),
         first()
       )
       .subscribe((s) => {
-        this.cfgFiles
-          .loadTemplate(this.path, s.config.config.product)
-          .subscribe((t) => {
-            this.cfgFiles.add(this.path, t, !this.isText);
-          });
+        this.cfgFiles.loadTemplate(this.path, s.config.config.product).subscribe((t) => {
+          this.cfgFiles.add(this.path, t, !this.isText);
+        });
       });
   }
 
-  /* template */ doRestoreFromTemplate() {
+  protected doRestoreFromTemplate() {
     this.edit.state$
       .pipe(
         skipWhile((s) => !s?.config?.config?.product),
         first()
       )
       .subscribe((s) => {
-        this.cfgFiles
-          .loadTemplate(this.path, s.config.config.product)
-          .subscribe((t) => {
-            this.cfgFiles.edit(this.path, t, !this.isText);
-          });
+        this.cfgFiles.loadTemplate(this.path, s.config.config.product).subscribe((t) => {
+          this.cfgFiles.edit(this.path, t, !this.isText);
+        });
       });
   }
 }

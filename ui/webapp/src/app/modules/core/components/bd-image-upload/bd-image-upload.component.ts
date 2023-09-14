@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
@@ -15,6 +8,8 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BdImageUploadComponent implements OnInit {
+  private sanitizer = inject(DomSanitizer);
+
   @Input() disabled = false;
   @Input() image: SafeUrl;
   @Output() imageSelected = new EventEmitter<File>();
@@ -22,18 +17,16 @@ export class BdImageUploadComponent implements OnInit {
 
   private origImage: SafeUrl;
 
-  constructor(private sanitizer: DomSanitizer) {}
-
   ngOnInit(): void {
     this.origImage = this.image;
   }
 
-  /* template */ resetImage(): void {
+  protected resetImage(): void {
     this.image = this.origImage;
     this.imageSelected.emit(null);
   }
 
-  /* template */ onImageChange(event) {
+  protected onImageChange(event) {
     const reader = new FileReader();
     if (event.target.files && event.target.files.length > 0) {
       const selLogoFile: File = event.target.files[0];

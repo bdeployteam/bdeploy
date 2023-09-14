@@ -1,18 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  Optional,
-  Self,
-  TemplateRef,
-  Type,
-  ViewEncapsulation,
-} from '@angular/core';
-import {
-  ControlValueAccessor,
-  NgControl,
-  UntypedFormControl,
-} from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Input, TemplateRef, Type, ViewEncapsulation, inject } from '@angular/core';
+import { ControlValueAccessor, NgControl, UntypedFormControl } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { bdValidationMessage } from '../../validators/messages';
 
@@ -22,9 +9,9 @@ import { bdValidationMessage } from '../../validators/messages';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BdFormSelectComponent
-  implements ControlValueAccessor, ErrorStateMatcher
-{
+export class BdFormSelectComponent implements ControlValueAccessor, ErrorStateMatcher {
+  protected ngControl = inject(NgControl, { self: true, optional: true });
+
   @Input() label: string;
   @Input() name: string;
   @Input() values: any[] = [];
@@ -36,10 +23,10 @@ export class BdFormSelectComponent
   @Input() component: Type<any>;
   @Input() prefix: TemplateRef<any>;
 
-  /* template */ get value() {
+  public get value() {
     return this.internalValue;
   }
-  /* template */ set value(v) {
+  public set value(v) {
     if (v !== this.internalValue) {
       this.internalValue = v;
       this.onTouchedCb();
@@ -55,9 +42,9 @@ export class BdFormSelectComponent
     /* intentionally empty */
   };
 
-  constructor(@Optional() @Self() public ngControl: NgControl) {
-    if (ngControl) {
-      ngControl.valueAccessor = this;
+  constructor() {
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
     }
   }
 
@@ -80,10 +67,7 @@ export class BdFormSelectComponent
       return false;
     }
 
-    return (
-      this.errorDisplay === 'immediate' ||
-      !!(control && (control.dirty || control.touched))
-    );
+    return this.errorDisplay === 'immediate' || !!(control && (control.dirty || control.touched));
   }
 
   private isInvalid() {
@@ -94,7 +78,7 @@ export class BdFormSelectComponent
     return this.ngControl.invalid;
   }
 
-  /* template */ getErrorMessage() {
+  public getErrorMessage() {
     if (!this.ngControl) {
       return null;
     }

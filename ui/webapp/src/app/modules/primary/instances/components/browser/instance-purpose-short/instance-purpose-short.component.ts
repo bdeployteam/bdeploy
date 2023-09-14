@@ -10,11 +10,11 @@ import { InstanceDto } from 'src/app/models/gen.dtos';
 export class InstancePurposeShortComponent {
   @Input() record: InstanceDto;
 
-  /* template */ getPurposeAbbrev() {
+  protected getPurposeAbbrev() {
     return this.record.instanceConfiguration.purpose.charAt(0);
   }
 
-  /* template */ getPurposeClass(): string {
+  protected getPurposeClass(): string {
     return `local-${this.record.instanceConfiguration.purpose}`;
   }
 }

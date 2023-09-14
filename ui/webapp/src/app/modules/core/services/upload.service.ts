@@ -1,5 +1,5 @@
 import { HttpClient, HttpEventType, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { UploadInfoDto } from 'src/app/models/gen.dtos';
 import { suppressGlobalErrorHandling } from '../utils/server.utils';
@@ -83,7 +83,7 @@ export class ImportStatus {
   providedIn: 'root',
 })
 export class UploadService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   /**
    * Uploads the given files to the given URL and returns an observable result to track the upload status. For
@@ -218,7 +218,7 @@ export class UploadService {
     return importStatus;
   }
 
-  uuidv4() {
+  private uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       // tslint:disable-next-line:no-bitwise
       const r = (Math.random() * 16) | 0,

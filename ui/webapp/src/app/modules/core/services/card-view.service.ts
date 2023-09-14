@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class CardViewService {
-  checkCardView(presetKey: string): boolean {
+  public checkCardView(presetKey: string): boolean {
     const tempCardView = localStorage.getItem('card_view');
     if (tempCardView) {
       const tempParsedValue = JSON.parse(tempCardView);
@@ -18,11 +18,8 @@ export class CardViewService {
     }
   }
 
-  setCardView(presetKey: string, value: boolean): void {
+  public setCardView(presetKey: string, value: boolean): void {
     const temp = localStorage.getItem('card_view');
-    localStorage.setItem(
-      'card_view',
-      JSON.stringify({ ...JSON.parse(temp), ...{ [presetKey]: value } })
-    );
+    localStorage.setItem('card_view', JSON.stringify({ ...JSON.parse(temp), ...{ [presetKey]: value } }));
   }
 }

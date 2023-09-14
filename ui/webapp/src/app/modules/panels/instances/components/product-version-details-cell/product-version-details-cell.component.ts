@@ -10,7 +10,7 @@ export class ProductVersionDetailsCellComponent implements OnInit {
   @Input() record: ProductDto;
   @Input() column: BdDataColumn<ProductDto>;
 
-  /* template */ labels: { a: string; b: string }[] = [];
+  protected labels: { a: string; b: string }[] = [];
 
   ngOnInit(): void {
     for (const key of Object.keys(this.record.labels)) {

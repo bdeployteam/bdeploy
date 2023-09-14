@@ -1,14 +1,10 @@
-import { Component, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  HiveEntryDto,
-  ManifestKey,
-  TreeEntryType,
-} from 'src/app/models/gen.dtos';
+import { HiveEntryDto, ManifestKey, TreeEntryType } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { ACTION_CLOSE } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
@@ -24,7 +20,13 @@ type BHivePathSegment = string | ManifestKey;
   selector: 'app-bhive-browser',
   templateUrl: './bhive-browser.component.html',
 })
-export class BHiveBrowserComponent implements OnDestroy {
+export class BHiveBrowserComponent implements OnInit, OnDestroy {
+  private areas = inject(NavAreasService);
+  private search = inject(SearchService);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  protected hives = inject(HiveService);
+
   private readonly colAvatar: BdDataColumn<HiveEntryDto> = {
     id: 'avatar',
     name: '',
@@ -56,19 +58,14 @@ export class BHiveBrowserComponent implements OnDestroy {
     component: ManifestDeleteActionComponent,
   };
 
-  /* template */ bhive$ = new BehaviorSubject<string>(null);
-  /* template */ path$ = new BehaviorSubject<BHivePathSegment[]>(null);
-  /* template */ entries$ = new BehaviorSubject<HiveEntryDto[]>([]);
-  /* template */ columns = [
-    this.colAvatar,
-    this.colName,
-    this.colSize,
-    this.colDelete,
-  ];
-  /* template */ sort: Sort = { active: 'name', direction: 'asc' };
+  public bhive$ = new BehaviorSubject<string>(null);
+  protected path$ = new BehaviorSubject<BHivePathSegment[]>(null);
+  protected entries$ = new BehaviorSubject<HiveEntryDto[]>([]);
+  protected columns = [this.colAvatar, this.colName, this.colSize, this.colDelete];
+  protected sort: Sort = { active: 'name', direction: 'asc' };
 
-  /* template */ previewContent$ = new BehaviorSubject<string>(null);
-  /* template */ previewName$ = new BehaviorSubject<string>(null);
+  protected previewContent$ = new BehaviorSubject<string>(null);
+  protected previewName$ = new BehaviorSubject<string>(null);
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild('previewTemplate') private previewTemplate: TemplateRef<any>;
@@ -76,14 +73,8 @@ export class BHiveBrowserComponent implements OnDestroy {
   private subscription: Subscription;
   private lastQuery: string;
 
-  constructor(
-    areas: NavAreasService,
-    search: SearchService,
-    public hives: HiveService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute
-  ) {
-    this.subscription = areas.panelRoute$.subscribe((route) => {
+  ngOnInit() {
+    this.subscription = this.areas.panelRoute$.subscribe((route) => {
       if (!route?.params || !route?.params['bhive']) {
         return;
       }
@@ -95,7 +86,7 @@ export class BHiveBrowserComponent implements OnDestroy {
           this.path$.next(this.decodePathForUrl(route.queryParams['q']));
 
           // clear out previous search in case we changed paths.
-          search.search = '';
+          this.search.search = '';
         }
       } else {
         this.lastQuery = null;
@@ -107,7 +98,7 @@ export class BHiveBrowserComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public load() {
@@ -122,11 +113,9 @@ export class BHiveBrowserComponent implements OnDestroy {
           this.entries$.next(entries);
         });
       } else {
-        this.hives
-          .listManifest(this.bhive$.value, lastSegment.name, lastSegment.tag)
-          .subscribe((entries) => {
-            this.entries$.next(entries);
-          });
+        this.hives.listManifest(this.bhive$.value, lastSegment.name, lastSegment.tag).subscribe((entries) => {
+          this.entries$.next(entries);
+        });
       }
     }
   }
@@ -146,9 +135,7 @@ export class BHiveBrowserComponent implements OnDestroy {
     if (!path?.length) {
       return null;
     }
-    const allStrings = path.map((s) =>
-      typeof s === 'string' ? s : `|[${s.name}|${s.tag}]|`
-    );
+    const allStrings = path.map((s) => (typeof s === 'string' ? s : `|[${s.name}|${s.tag}]|`));
     return Base64.encode(JSON.stringify(allStrings), true);
   }
 
@@ -192,18 +179,13 @@ export class BHiveBrowserComponent implements OnDestroy {
           })
           .subscribe();
       } else {
-        this.dialog
-          .info(
-            `Preview ${name}`,
-            `${name} is binary data and cannot be previewed.`
-          )
-          .subscribe();
+        this.dialog.info(`Preview ${name}`, `${name} is binary data and cannot be previewed.`).subscribe();
       }
     };
     reader.readAsDataURL(data);
   }
 
-  /* template */ onClick(r: HiveEntryDto) {
+  protected onClick(r: HiveEntryDto) {
     // need to handle this manually without recordRoute for history and queryParam handling.
 
     const path = this.path$.value?.length ? [...this.path$.value] : [];
@@ -219,9 +201,7 @@ export class BHiveBrowserComponent implements OnDestroy {
           this.showPreviewIfText(data, r.name);
         });
       } else {
-        this.dialog
-          .info(`Preview ${r.name}`, `${r.name} is too large to preview.`)
-          .subscribe();
+        this.dialog.info(`Preview ${r.name}`, `${r.name} is too large to preview.`).subscribe();
       }
     }
 
@@ -231,7 +211,7 @@ export class BHiveBrowserComponent implements OnDestroy {
     });
   }
 
-  /* template */ onNavigateUp() {
+  protected onNavigateUp() {
     if (this.path$.value?.length) {
       const path = [...this.path$.value];
       path.pop();

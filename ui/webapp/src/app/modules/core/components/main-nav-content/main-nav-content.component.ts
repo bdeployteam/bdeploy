@@ -1,12 +1,6 @@
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, HostBinding, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit, inject } from '@angular/core';
 import { routerAnimation } from '../../animations/special';
 import { NavAreasService } from '../../services/nav-areas.service';
 
@@ -63,25 +57,16 @@ import { NavAreasService } from '../../services/nav-areas.service';
   ],
 })
 export class MainNavContentComponent implements OnInit {
-  constructor(
-    public areas: NavAreasService,
-    private media: BreakpointObserver
-  ) {}
+  private media = inject(BreakpointObserver);
+  protected areas = inject(NavAreasService);
 
   @HostBinding('@marginForPanel') get marginAnimation() {
-    if (
-      this.media.isMatched('(max-width: 960px)') &&
-      this.areas.panelVisible$.value
-    ) {
+    if (this.media.isMatched('(max-width: 960px)') && this.areas.panelVisible$.value) {
       return 'panelVisible-xs';
     } else if (this.media.isMatched('(max-width: 1280px)')) {
-      return this.areas.panelVisible$.value
-        ? 'panelVisible-sm'
-        : 'panelHidden-sm';
+      return this.areas.panelVisible$.value ? 'panelVisible-sm' : 'panelHidden-sm';
     } else {
-      return this.areas.panelVisible$.value
-        ? 'panelVisible-lg'
-        : 'panelHidden-lg';
+      return this.areas.panelVisible$.value ? 'panelVisible-lg' : 'panelHidden-lg';
     }
   }
 

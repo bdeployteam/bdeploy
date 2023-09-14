@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ConfigService } from './config.service';
 
 // defined in index.html directly to be as global as possible.
@@ -16,7 +16,7 @@ declare let downloadLocation: {
   providedIn: 'root',
 })
 export class DownloadService {
-  constructor(private cfg: ConfigService) {}
+  private cfg = inject(ConfigService);
 
   /**
    * Sends the given object as JSON string as download with the given file name

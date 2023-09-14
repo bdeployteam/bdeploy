@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HistoryEntryDto, InstanceStateRecord } from 'src/app/models/gen.dtos';
 import { InstanceStateService } from '../../services/instance-state.service';
@@ -8,25 +8,23 @@ import { InstanceStateService } from '../../services/instance-state.service';
   templateUrl: './history-state-column.component.html',
   styleUrls: ['./history-state-column.component.css'],
 })
-export class HistoryStateColumnComponent
-  implements OnInit, OnChanges, OnDestroy
-{
+export class HistoryStateColumnComponent implements OnInit, OnChanges, OnDestroy {
+  private state = inject(InstanceStateService);
+
   @Input() record: HistoryEntryDto;
 
   private states: InstanceStateRecord;
   private subscription: Subscription;
-  /* template */ public stateTooltipText: string;
-  /* template */ public stateClass: string[];
-  /* template */ public stateIcon: string;
+  protected stateTooltipText: string;
+  protected stateClass: string[];
+  protected stateIcon: string;
 
-  constructor(private state: InstanceStateService) {
+  ngOnInit(): void {
     this.subscription = this.state.state$.subscribe((s) => {
       this.states = s;
       this.ngOnChanges(); // re-calculate
     });
-  }
 
-  ngOnInit(): void {
     this.ngOnChanges();
   }
 
@@ -39,15 +37,13 @@ export class HistoryStateColumnComponent
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private getStateIcon() {
     if (this.states?.activeTag === this.record.instanceTag) {
       return 'check_circle'; // active
-    } else if (
-      this.states?.installedTags?.find((v) => v === this.record.instanceTag)
-    ) {
+    } else if (this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
       return 'check_circle_outline'; // installed
     }
 
@@ -57,9 +53,7 @@ export class HistoryStateColumnComponent
   private getStateTooltip(): string {
     if (this.states?.activeTag === this.record.instanceTag) {
       return 'This version is active.'; // active
-    } else if (
-      this.states?.installedTags?.find((v) => v === this.record.instanceTag)
-    ) {
+    } else if (this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
       return 'This version is installed'; // installed
     }
   }
@@ -69,14 +63,10 @@ export class HistoryStateColumnComponent
       return ['material-symbols-filled'];
     }
 
-    if (
-      this.states?.installedTags?.find((v) => v === this.record.instanceTag)
-    ) {
+    if (this.states?.installedTags?.find((v) => v === this.record.instanceTag)) {
       // if the version is older than the last-active tag, we'll uninstall it later on.
       if (this.states?.lastActiveTag) {
-        if (
-          Number(this.states.lastActiveTag) > Number(this.record.instanceTag)
-        ) {
+        if (Number(this.states.lastActiveTag) > Number(this.record.instanceTag)) {
           return ['local-greyed'];
         }
       }

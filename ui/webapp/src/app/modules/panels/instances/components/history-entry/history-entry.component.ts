@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -17,7 +17,7 @@ import { histKey, histKeyDecode } from '../../utils/history-key.utils';
   selector: 'app-history-entry',
   templateUrl: './history-entry.component.html',
 })
-export class HistoryEntryComponent implements OnDestroy {
+export class HistoryEntryComponent implements OnInit, OnDestroy {
   private areas = inject(NavAreasService);
   private history = inject(HistoryService);
   private actions = inject(ActionsService);
@@ -26,8 +26,8 @@ export class HistoryEntryComponent implements OnDestroy {
   protected servers = inject(ServersService);
   protected auth = inject(AuthenticationService);
 
-  /* template */ entry$ = new BehaviorSubject<HistoryEntryDto>(null);
-  /* template */ state$ = new BehaviorSubject<InstanceStateRecord>(null);
+  protected entry$ = new BehaviorSubject<HistoryEntryDto>(null);
+  protected state$ = new BehaviorSubject<InstanceStateRecord>(null);
 
   private installing$ = new BehaviorSubject<boolean>(false);
   private uninstalling$ = new BehaviorSubject<boolean>(false);
@@ -47,15 +47,15 @@ export class HistoryEntryComponent implements OnDestroy {
     this.tag$
   );
 
-  /* template */ isCreate: boolean;
-  /* template */ isInstalled: boolean;
-  /* template */ isActive: boolean;
+  protected isCreate: boolean;
+  protected isInstalled: boolean;
+  protected isActive: boolean;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
   private subscription: Subscription;
 
-  constructor() {
+  ngOnInit() {
     this.subscription = combineLatest([this.areas.panelRoute$, this.history.history$, this.states.state$]).subscribe(
       ([route, entries, state]) => {
         // Note: basing the selection on an index in the service has some drawbacks, but we can do that now without needing to change a lot in the backend.
@@ -75,10 +75,10 @@ export class HistoryEntryComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
-  /* template */ doInstall() {
+  protected doInstall() {
     this.installing$.next(true);
     this.states
       .install(this.entry$.value.instanceTag)
@@ -86,7 +86,7 @@ export class HistoryEntryComponent implements OnDestroy {
       .subscribe();
   }
 
-  /* template */ doUninstall() {
+  protected doUninstall() {
     this.uninstalling$.next(true);
     this.states
       .uninstall(this.entry$.value.instanceTag)
@@ -94,7 +94,7 @@ export class HistoryEntryComponent implements OnDestroy {
       .subscribe();
   }
 
-  /* template */ doActivate() {
+  protected doActivate() {
     this.activating$.next(true);
     this.states
       .activate(this.entry$.value.instanceTag)
@@ -102,11 +102,11 @@ export class HistoryEntryComponent implements OnDestroy {
       .subscribe();
   }
 
-  /* template */ doExport() {
+  protected doExport() {
     this.instances.export(this.entry$.value.instanceTag);
   }
 
-  /* template */ doDelete() {
+  protected doDelete() {
     this.dialog
       .confirm(
         `Delete Version`,

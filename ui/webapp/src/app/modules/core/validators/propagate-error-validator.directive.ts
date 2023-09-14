@@ -15,9 +15,7 @@ import {
     },
   ],
 })
-export class PropagateErrorValidatorDirective
-  implements Validator, BdValidationMessageExtractor
-{
+export class PropagateErrorValidatorDirective implements Validator, BdValidationMessageExtractor {
   public readonly id = 'propagate-error-input';
 
   @Input('appPropagateErrorValidator') error: string;
@@ -26,13 +24,13 @@ export class PropagateErrorValidatorDirective
     bdValidationRegisterMessageExtractor(this);
   }
 
-  extract(label: string, errors: ValidationErrors): string {
+  public extract(label: string, errors: ValidationErrors): string {
     if (errors[this.id]) {
       return errors[this.id];
     }
   }
 
-  validate(): ValidationErrors | null {
+  public validate(): ValidationErrors | null {
     if (this.error) {
       return { [this.id]: this.error };
     }

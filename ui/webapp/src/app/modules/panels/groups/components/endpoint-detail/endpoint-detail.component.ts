@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   BehaviorSubject,
@@ -12,17 +12,11 @@ import {
   skipWhile,
   switchMap,
 } from 'rxjs';
-import {
-  InstanceGroupConfiguration,
-  LinkedValueConfiguration,
-} from 'src/app/models/gen.dtos';
+import { InstanceGroupConfiguration, LinkedValueConfiguration } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
-import {
-  ClientApp,
-  ClientsService,
-} from 'src/app/modules/primary/groups/services/clients.service';
+import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
@@ -31,44 +25,34 @@ import { SystemsService } from 'src/app/modules/primary/systems/services/systems
   selector: 'app-endpoint-detail',
   templateUrl: './endpoint-detail.component.html',
 })
-export class EndpointDetailComponent implements OnDestroy {
-  /* template */ app$ = new BehaviorSubject<ClientApp>(null);
-  /* template */ header: string;
-  /* template */ directUri: string;
-  /* template */ rawUrl: string;
-  /* template */ enabled: boolean; // flag from config
+export class EndpointDetailComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private instances = inject(InstancesService);
+  private systems = inject(SystemsService);
+  private cfg = inject(ConfigService);
+  private areas = inject(NavAreasService);
+  private clients = inject(ClientsService);
+  private groups = inject(GroupsService);
+
+  protected app$ = new BehaviorSubject<ClientApp>(null);
+  protected header: string;
+  protected directUri: string;
+  protected rawUrl: string;
+  protected enabled: boolean; // flag from config
 
   private subscription: Subscription;
 
-  constructor(
-    private route: ActivatedRoute,
-    private instances: InstancesService,
-    private systems: SystemsService,
-    private cfg: ConfigService,
-    areas: NavAreasService,
-    private clients: ClientsService,
-    groups: GroupsService
-  ) {
-    this.subscription = combineLatest([
-      areas.panelRoute$,
-      clients.apps$,
-    ]).subscribe(([route, apps]) => {
+  ngOnInit(): void {
+    this.subscription = combineLatest([this.areas.panelRoute$, this.clients.apps$]).subscribe(([route, apps]) => {
       this.header = '';
       this.app$.next(null);
 
-      if (
-        !route ||
-        !apps ||
-        !route.paramMap.has('app') ||
-        !route.paramMap.has('endpoint')
-      ) {
+      if (!route || !apps || !route.paramMap.has('app') || !route.paramMap.has('endpoint')) {
         return;
       }
 
       const app = apps.find(
-        (a) =>
-          a.endpoint?.id === route.params.app &&
-          a.endpoint.endpoint.id === route.params.endpoint
+        (a) => a.endpoint?.id === route.params.app && a.endpoint.endpoint.id === route.params.endpoint
       );
 
       if (!app) {
@@ -80,26 +64,22 @@ export class EndpointDetailComponent implements OnDestroy {
     });
 
     this.subscription.add(
-      this.app$
-        .pipe(switchMap((app) => this.getDirectUiUri(app)))
-        .subscribe((url) => (this.directUri = url))
+      this.app$.pipe(switchMap((app) => this.getDirectUiUri(app))).subscribe((url) => (this.directUri = url))
     );
 
     this.subscription.add(
-      combineLatest([this.app$, groups.current$])
+      combineLatest([this.app$, this.groups.current$])
         .pipe(switchMap(([app, group]) => this.getRawUrl(app, group)))
         .subscribe((url) => (this.rawUrl = url))
     );
 
     this.subscription.add(
-      this.app$
-        .pipe(switchMap((app) => this.isEnabled$(app)))
-        .subscribe((enabled) => (this.enabled = enabled))
+      this.app$.pipe(switchMap((app) => this.isEnabled$(app))).subscribe((enabled) => (this.enabled = enabled))
     );
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private getDirectUiUri(app: ClientApp): Observable<string> {
@@ -109,19 +89,16 @@ export class EndpointDetailComponent implements OnDestroy {
     return this.clients.getDirectUiURI(app).pipe(catchError(() => of(null)));
   }
 
-  private getRawUrl(
-    app: ClientApp,
-    group: InstanceGroupConfiguration
-  ): Observable<string> {
+  private getRawUrl(app: ClientApp, group: InstanceGroupConfiguration): Observable<string> {
     if (!app || !group) {
       return of(null);
     }
     return this.contextPath$(app).pipe(
       map(
         (cp) =>
-          `${this.cfg.config.api}/master/upx/${group.name}/${app.instanceId}/${
-            app.endpoint.id
-          }/${app.endpoint.endpoint.id}${this.cpWithSlash(cp)}`
+          `${this.cfg.config.api}/master/upx/${group.name}/${app.instanceId}/${app.endpoint.id}/${
+            app.endpoint.endpoint.id
+          }${this.cpWithSlash(cp)}`
       ),
       catchError(() => of(null))
     );
@@ -143,51 +120,26 @@ export class EndpointDetailComponent implements OnDestroy {
     return this.renderPreview$(expr, app);
   }
 
-  private renderPreview$(
-    expr: LinkedValueConfiguration,
-    app: ClientApp
-  ): Observable<string> {
+  private renderPreview$(expr: LinkedValueConfiguration, app: ClientApp): Observable<string> {
     if (!expr.linkExpression) {
       return of(expr.value);
     }
     const instance$ = this.instances.instances$.pipe(
-      map((instances) =>
-        instances?.find((i) => i.instanceConfiguration.id === app.instanceId)
-      ),
+      map((instances) => instances?.find((i) => i.instanceConfiguration.id === app.instanceId)),
       skipWhile((instance) => !instance || !instance.activeVersion)
     );
     const activeNodeCfgs$ = instance$.pipe(
-      switchMap((instance) =>
-        this.instances.loadNodes(
-          instance.instanceConfiguration.id,
-          instance.activeVersion.tag
-        )
-      )
+      switchMap((instance) => this.instances.loadNodes(instance.instanceConfiguration.id, instance.activeVersion.tag))
     );
-    return combineLatest([
-      instance$,
-      this.systems.systems$,
-      activeNodeCfgs$,
-    ]).pipe(
-      skipWhile(
-        ([i, s, n]) =>
-          !i ||
-          (i?.instanceConfiguration?.system && !s?.length) ||
-          !n?.nodeConfigDtos?.length
-      ),
+    return combineLatest([instance$, this.systems.systems$, activeNodeCfgs$]).pipe(
+      skipWhile(([i, s, n]) => !i || (i?.instanceConfiguration?.system && !s?.length) || !n?.nodeConfigDtos?.length),
       first(), // only calculate this *ONCE* when all data is there.
       map(([instance, systems, nodes]) => {
         // system might be incorrect since instance is taken from current version instead of active one.
         // if this causes a bug, we will need a public method to fetch active version from instances.service
-        const system = systems?.find(
-          (s) => s.key.name === instance?.instanceConfiguration?.system?.name
-        );
+        const system = systems?.find((s) => s.key.name === instance?.instanceConfiguration?.system?.name);
         const process = nodes?.nodeConfigDtos
-          ?.map((n) =>
-            n.nodeConfiguration?.applications?.find(
-              (a) => a.id === app.endpoint?.id
-            )
-          )
+          ?.map((n) => n.nodeConfiguration?.applications?.find((a) => a.id === app.endpoint?.id))
           .find((a) => a);
         return getRenderPreview(
           expr,
@@ -202,11 +154,9 @@ export class EndpointDetailComponent implements OnDestroy {
     );
   }
 
-  /* template */ getRouterLink() {
+  protected getRouterLink() {
     const app = this.app$.value;
-    const returnUrl = this.route.snapshot.pathFromRoot
-      .map((s) => s.url.map((u) => u.toString()).join('/'))
-      .join('/');
+    const returnUrl = this.route.snapshot.pathFromRoot.map((s) => s.url.map((u) => u.toString()).join('/')).join('/');
     return [
       '',
       {
@@ -226,15 +176,11 @@ export class EndpointDetailComponent implements OnDestroy {
     ];
   }
 
-  /* template */ openInlineDisabledReason(disabled: boolean): string {
+  protected openInlineDisabledReason(disabled: boolean): string {
     return disabled ? 'Endpoint precondition not fulfilled.' : '';
   }
 
-  /* template */ openUiEndpointDisabledReason(
-    disabled: boolean,
-    disabledProxying: boolean,
-    noRawUrl: boolean
-  ): string {
+  protected openUiEndpointDisabledReason(disabled: boolean, disabledProxying: boolean, noRawUrl: boolean): string {
     let reason = '';
     if (disabled) {
       reason += 'Endpoint precondition not fulfilled. ';
@@ -248,10 +194,7 @@ export class EndpointDetailComponent implements OnDestroy {
     return reason;
   }
 
-  /* template */ openUiEndpointDirectDisabledReason(
-    disabled: boolean,
-    noDirectUri: boolean
-  ): string {
+  protected openUiEndpointDirectDisabledReason(disabled: boolean, noDirectUri: boolean): string {
     let reason = '';
     if (disabled) {
       reason += 'Endpoint precondition not fulfilled. ';
@@ -262,11 +205,11 @@ export class EndpointDetailComponent implements OnDestroy {
     return reason;
   }
 
-  /* template */ openUiEndpoint() {
+  protected openUiEndpoint() {
     this.openUrl(this.rawUrl);
   }
 
-  /* template */ openUiEndpointDirect() {
+  protected openUiEndpointDirect() {
     this.openUrl(this.directUri);
   }
 

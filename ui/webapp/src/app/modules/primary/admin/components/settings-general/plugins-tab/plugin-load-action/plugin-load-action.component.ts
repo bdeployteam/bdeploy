@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { PluginInfoDto } from 'src/app/models/gen.dtos';
 import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugin-admin.service';
 
@@ -7,11 +7,11 @@ import { PluginAdminService } from 'src/app/modules/primary/admin/services/plugi
   templateUrl: './plugin-load-action.component.html',
 })
 export class PluginLoadActionComponent {
+  private plugins = inject(PluginAdminService);
+
   @Input() record: PluginInfoDto;
 
-  constructor(private plugins: PluginAdminService) {}
-
-  /* template */ doLoadUnload() {
+  protected doLoadUnload() {
     if (this.record.loaded) {
       this.plugins.unloadPlugin(this.record);
     } else {

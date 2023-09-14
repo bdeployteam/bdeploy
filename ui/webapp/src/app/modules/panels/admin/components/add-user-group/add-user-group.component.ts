@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import { UserGroupInfo } from 'src/app/models/gen.dtos';
@@ -19,36 +13,37 @@ import { AuthAdminService } from 'src/app/modules/primary/admin/services/auth-ad
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddUserGroupComponent implements OnInit, OnDestroy {
-  /* template */ saving$ = new BehaviorSubject<boolean>(false);
-  /* template */ addUserGroup: Partial<UserGroupInfo>;
-  /* template */ addConfirm: string;
+  private authAdmin = inject(AuthAdminService);
+  private areas = inject(NavAreasService);
+
+  protected saving$ = new BehaviorSubject<boolean>(false);
+  protected addUserGroup: Partial<UserGroupInfo>;
+  protected addConfirm: string;
 
   private subscription: Subscription;
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
   @ViewChild('form') public form: NgForm;
 
-  constructor(
-    private authAdmin: AuthAdminService,
-    private areas: NavAreasService
-  ) {
-    this.subscription = areas.registerDirtyable(this, 'panel');
-  }
-
   ngOnInit(): void {
+    this.subscription = this.areas.registerDirtyable(this, 'panel');
     this.addUserGroup = {};
     this.addConfirm = '';
   }
 
-  isDirty(): boolean {
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  public isDirty(): boolean {
     return this.form.dirty;
   }
 
-  canSave(): boolean {
+  public canSave(): boolean {
     return this.form.valid;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.saving$.next(true);
     this.doSave()
       .pipe(
@@ -58,16 +53,12 @@ export class AddUserGroupComponent implements OnInit, OnDestroy {
       )
       .subscribe(() => {
         this.areas.closePanel();
-        this.subscription.unsubscribe();
+        this.subscription?.unsubscribe();
       });
   }
 
   public doSave(): Observable<UserGroupInfo> {
     this.saving$.next(true);
     return this.authAdmin.createUserGroup(this.addUserGroup as UserGroupInfo);
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

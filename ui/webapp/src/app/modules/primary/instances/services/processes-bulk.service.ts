@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ApplicationConfiguration } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -7,13 +7,15 @@ import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service
   providedIn: 'root',
 })
 export class ProcessesBulkService {
+  private areas = inject(NavAreasService);
+
   public selection$ = new BehaviorSubject<{
     [key: string]: ApplicationConfiguration[];
   }>({});
 
-  constructor(areas: NavAreasService) {
+  constructor() {
     // clear selection when the primary route changes
-    areas.primaryRoute$.subscribe(() => this.selection$.next({}));
+    this.areas.primaryRoute$.subscribe(() => this.selection$.next({}));
   }
 
   public update(node: string, selection: ApplicationConfiguration[]) {

@@ -1,12 +1,8 @@
-import { Component, OnDestroy } from '@angular/core';
-import { combineLatest, Subscription } from 'rxjs';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Subscription, combineLatest } from 'rxjs';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { BdDataColumn } from 'src/app/models/data';
-import {
-  ApplicationType,
-  InstanceNodeConfigurationDto,
-  OperatingSystem,
-} from 'src/app/models/gen.dtos';
+import { ApplicationType, InstanceNodeConfigurationDto, OperatingSystem } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { updateAppOs } from 'src/app/modules/core/utils/manifest.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
@@ -31,18 +27,18 @@ const colNodeName: BdDataColumn<NodeRow> = {
   selector: 'app-move-process',
   templateUrl: './move-process.component.html',
 })
-export class MoveProcessComponent implements OnDestroy {
-  /* template */ records: NodeRow[] = [];
-  /* template */ columns: BdDataColumn<NodeRow>[] = [colNodeName];
+export class MoveProcessComponent implements OnInit, OnDestroy {
+  public instanceEdit = inject(InstanceEditService);
+  public edit = inject(ProcessEditService);
+  private areas = inject(NavAreasService);
+
+  protected records: NodeRow[] = [];
+  protected columns: BdDataColumn<NodeRow>[] = [colNodeName];
 
   private currentNode: InstanceNodeConfigurationDto;
   private subscription: Subscription;
 
-  constructor(
-    public instanceEdit: InstanceEditService,
-    public edit: ProcessEditService,
-    private areas: NavAreasService
-  ) {
+  ngOnInit() {
     this.subscription = combineLatest([
       this.instanceEdit.state$,
       this.edit.application$,
@@ -56,16 +52,12 @@ export class MoveProcessComponent implements OnDestroy {
       }
 
       this.currentNode = state.config.nodeDtos.find(
-        (n) =>
-          !!n.nodeConfiguration.applications.find((a) => a.id === process.id)
+        (n) => !!n.nodeConfiguration.applications.find((a) => a.id === process.id)
       );
 
       const result: NodeRow[] = [];
       for (const node of state.config.nodeDtos) {
-        const nodeType =
-          node.nodeName === CLIENT_NODE_NAME
-            ? ApplicationType.CLIENT
-            : ApplicationType.SERVER;
+        const nodeType = node.nodeName === CLIENT_NODE_NAME ? ApplicationType.CLIENT : ApplicationType.SERVER;
         if (app.descriptor.type !== nodeType) {
           continue;
         }
@@ -98,14 +90,14 @@ export class MoveProcessComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private niceName(node: string) {
     return node === CLIENT_NODE_NAME ? 'Client Applications' : node;
   }
 
-  /* template */ onSelectNode(node: NodeRow) {
+  protected onSelectNode(node: NodeRow) {
     if (node.current) {
       // prevent move to self.
       return;
@@ -131,11 +123,7 @@ export class MoveProcessComponent implements OnDestroy {
 
     targetApps.push(cfg);
     this.instanceEdit.getLastControlGroup(targetNode).processOrder.push(cfg.id);
-    this.instanceEdit.conceal(
-      `Move ${cfg.name} from ${this.niceName(this.currentNode.nodeName)} to ${
-        node.name
-      }`
-    );
+    this.instanceEdit.conceal(`Move ${cfg.name} from ${this.niceName(this.currentNode.nodeName)} to ${node.name}`);
 
     // this edit is so severe that none of the panels (edit overview, etc.) will work as data is shifted. close panels completely.
     this.areas.closePanel();

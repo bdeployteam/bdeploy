@@ -1,16 +1,13 @@
-import { Component, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Base64 } from 'js-base64';
-import { BehaviorSubject, combineLatest, of, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, combineLatest, of } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { ContentCompletion } from 'src/app/modules/core/components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
-import {
-  buildCompletionPrefixes,
-  buildCompletions,
-} from 'src/app/modules/core/utils/completion.utils';
+import { buildCompletionPrefixes, buildCompletions } from 'src/app/modules/core/utils/completion.utils';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ConfigFilesService } from '../../../../services/config-files.service';
@@ -19,40 +16,33 @@ import { ConfigFilesService } from '../../../../services/config-files.service';
   selector: 'app-editor',
   templateUrl: './editor.component.html',
 })
-export class EditorComponent implements DirtyableDialog, OnDestroy {
-  /* template */ loading$ = new BehaviorSubject<boolean>(true);
-  /* template */ file$ = new BehaviorSubject<string>(null);
-  /* template */ content = '';
-  /* template */ originalContent = '';
+export class EditorComponent implements DirtyableDialog, OnInit, OnDestroy {
+  protected cfgFiles = inject(ConfigFilesService);
+  private areas = inject(NavAreasService);
+  private edit = inject(InstanceEditService);
+  private systems = inject(SystemsService);
 
-  /* template */ completions: ContentCompletion[];
+  protected loading$ = new BehaviorSubject<boolean>(true);
+  protected file$ = new BehaviorSubject<string>(null);
+  protected content = '';
+  protected originalContent = '';
+
+  protected completions: ContentCompletion[];
 
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild(BdDialogToolbarComponent) private tb: BdDialogToolbarComponent;
 
   private subscription: Subscription;
 
-  constructor(
-    public cfgFiles: ConfigFilesService,
-    areas: NavAreasService,
-    edit: InstanceEditService,
-    systems: SystemsService
-  ) {
+  ngOnInit() {
     this.subscription = combineLatest([
       this.cfgFiles.files$,
-      areas.panelRoute$,
-      edit.state$,
-      edit.stateApplications$,
-      systems.systems$,
+      this.areas.panelRoute$,
+      this.edit.state$,
+      this.edit.stateApplications$,
+      this.systems.systems$,
     ]).subscribe(([f, r, i, a, s]) => {
-      if (
-        !f ||
-        !r ||
-        !r.params['file'] ||
-        !i ||
-        !a ||
-        (i.config.config.system && !s?.length)
-      ) {
+      if (!f || !r || !r.params['file'] || !i || !a || (i.config.config.system && !s?.length)) {
         this.file$.next(null);
         this.content = null;
         return;
@@ -79,14 +69,14 @@ export class EditorComponent implements DirtyableDialog, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   public isDirty(): boolean {
     return this.content !== this.originalContent;
   }
 
-  /* template */ onSave() {
+  protected onSave() {
     this.doSave().subscribe(() => this.tb.closePanel());
   }
 
@@ -106,7 +96,7 @@ export class EditorComponent implements DirtyableDialog, OnDestroy {
   }
 
   @HostListener('window:keydown.control.s', ['$event'])
-  public onCtrlS(event: KeyboardEvent) {
+  private onCtrlS(event: KeyboardEvent) {
     this.onSave();
     event.preventDefault();
   }
