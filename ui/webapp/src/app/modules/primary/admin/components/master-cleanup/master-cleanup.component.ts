@@ -3,20 +3,20 @@ import { BdDataColumn } from 'src/app/models/data';
 import { CleanupAction } from 'src/app/models/gen.dtos';
 import { CleanupService } from '../../services/cleanup.service';
 
-const COL_TYPE: BdDataColumn<CleanupAction> = {
+const colType: BdDataColumn<CleanupAction> = {
   id: 'type',
   name: 'Action',
   data: (r) => r.type,
   width: '150px',
 };
 
-const COL_WHAT: BdDataColumn<CleanupAction> = {
+const colWhat: BdDataColumn<CleanupAction> = {
   id: 'what',
   name: 'Target',
   data: (r) => r.what,
 };
 
-const COL_DESC: BdDataColumn<CleanupAction> = {
+const colDesc: BdDataColumn<CleanupAction> = {
   id: 'description',
   name: 'Description',
   data: (r) => r.description,
@@ -30,5 +30,5 @@ const COL_DESC: BdDataColumn<CleanupAction> = {
 export class MasterCleanupComponent {
   protected cleanup = inject(CleanupService);
 
-  protected columns: BdDataColumn<CleanupAction>[] = [COL_TYPE, COL_WHAT, COL_DESC];
+  protected columns: BdDataColumn<CleanupAction>[] = [colType, colWhat, colDesc];
 }

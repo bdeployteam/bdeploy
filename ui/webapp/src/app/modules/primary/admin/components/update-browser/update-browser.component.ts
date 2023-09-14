@@ -5,14 +5,14 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { SoftwareVersionBulkService } from 'src/app/modules/panels/admin/services/software-version-bulk.service';
 import { SoftwareUpdateService, SoftwareVersion } from '../../services/software-update.service';
 
-const COL_TAG: BdDataColumn<SoftwareVersion> = {
+const colTag: BdDataColumn<SoftwareVersion> = {
   id: 'tag',
   name: 'Version',
   data: (r) => `${r.version}${r.current ? ' - installed' : ''}`,
   classes: (r) => (r.current ? ['bd-text-bold'] : []),
 };
 
-const COL_SYSTEM: BdDataColumn<SoftwareVersion> = {
+const colSystem: BdDataColumn<SoftwareVersion> = {
   id: 'system',
   name: 'Has System',
   data: (r) => (r.system?.length ? 'check_box' : 'check_box_outline_blank'),
@@ -20,7 +20,7 @@ const COL_SYSTEM: BdDataColumn<SoftwareVersion> = {
   component: BdDataIconCellComponent,
 };
 
-const COL_LAUNCHER: BdDataColumn<SoftwareVersion> = {
+const colLauncher: BdDataColumn<SoftwareVersion> = {
   id: 'launcher',
   name: 'Has Launcher',
   data: (r) => (r.launcher?.length ? 'check_box' : 'check_box_outline_blank'),
@@ -36,7 +36,7 @@ export class UpdateBrowserComponent implements OnInit {
   protected software = inject(SoftwareUpdateService);
   protected bulk = inject(SoftwareVersionBulkService);
 
-  protected columns: BdDataColumn<SoftwareVersion>[] = [COL_TAG, COL_SYSTEM, COL_LAUNCHER];
+  protected columns: BdDataColumn<SoftwareVersion>[] = [colTag, colSystem, colLauncher];
   protected getRecordRoute = (r: SoftwareVersion) => {
     return [
       '',

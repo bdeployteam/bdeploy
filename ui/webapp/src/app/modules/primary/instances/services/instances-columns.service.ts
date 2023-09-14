@@ -19,7 +19,7 @@ export class InstancesColumnsService {
   private products = inject(ProductsService);
   private systems = inject(SystemsService);
 
-  instanceTypeColumn: BdDataColumn<InstanceDto> = {
+  public instanceTypeColumn: BdDataColumn<InstanceDto> = {
     id: 'type',
     name: 'Purp.',
     description: 'Purpose',
@@ -30,7 +30,7 @@ export class InstancesColumnsService {
     component: InstancePurposeShortComponent,
   };
 
-  instanceNameColumn: BdDataColumn<InstanceDto> = {
+  public instanceNameColumn: BdDataColumn<InstanceDto> = {
     id: 'name',
     name: 'Name',
     hint: BdDataColumnTypeHint.TITLE,
@@ -38,7 +38,7 @@ export class InstancesColumnsService {
     sortCard: true,
   };
 
-  instanceIdColumn: BdDataColumn<InstanceDto> = {
+  public instanceIdColumn: BdDataColumn<InstanceDto> = {
     id: 'id',
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
@@ -48,7 +48,7 @@ export class InstancesColumnsService {
     component: BdIdentifierCellComponent,
   };
 
-  instanceDescriptionColumn: BdDataColumn<InstanceDto> = {
+  public instanceDescriptionColumn: BdDataColumn<InstanceDto> = {
     id: 'description',
     name: 'Description',
     hint: BdDataColumnTypeHint.FOOTER,
@@ -57,7 +57,7 @@ export class InstancesColumnsService {
     sortCard: true,
   };
 
-  instanceSystemColumn: BdDataColumn<InstanceDto> = {
+  public instanceSystemColumn: BdDataColumn<InstanceDto> = {
     id: 'system',
     name: 'System',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -65,7 +65,7 @@ export class InstancesColumnsService {
     showWhen: '(min-width: 1900px)',
   };
 
-  instanceProductColumn: BdDataColumn<InstanceDto> = {
+  public instanceProductColumn: BdDataColumn<InstanceDto> = {
     id: 'product',
     name: 'Product',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -77,7 +77,7 @@ export class InstancesColumnsService {
     showWhen: '(min-width: 600px)',
   };
 
-  instanceProductVersionColumn: BdDataColumn<InstanceDto> = {
+  public instanceProductVersionColumn: BdDataColumn<InstanceDto> = {
     id: 'productVersion',
     name: 'Product Version',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -86,7 +86,7 @@ export class InstancesColumnsService {
     icon: () => 'smartphone',
   };
 
-  instanceProductActiveColumn: BdDataColumn<InstanceDto> = {
+  public instanceProductActiveColumn: BdDataColumn<InstanceDto> = {
     id: 'activeProductVersion',
     name: 'Active Version',
     hint: BdDataColumnTypeHint.DETAILS,
@@ -96,7 +96,7 @@ export class InstancesColumnsService {
     sortCard: true,
   };
 
-  instanceBannerColumn: BdDataColumn<InstanceDto> = {
+  public instanceBannerColumn: BdDataColumn<InstanceDto> = {
     id: 'bannerHint',
     name: 'Ban.',
     description: 'Banner',
@@ -105,7 +105,7 @@ export class InstancesColumnsService {
     width: '24px',
   };
 
-  instanceServerColumn: BdDataColumn<InstanceDto> = {
+  public instanceServerColumn: BdDataColumn<InstanceDto> = {
     id: 'managedServer',
     name: 'Serv.',
     description: 'Managed Server',
@@ -116,7 +116,7 @@ export class InstancesColumnsService {
     width: '24px',
   };
 
-  instanceSyncColumn: BdDataColumn<InstanceDto> = {
+  public instanceSyncColumn: BdDataColumn<InstanceDto> = {
     id: 'sync',
     name: 'Sync.',
     hint: BdDataColumnTypeHint.ACTIONS,

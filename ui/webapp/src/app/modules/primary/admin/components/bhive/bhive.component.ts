@@ -5,7 +5,7 @@ import { BdDataColumn } from 'src/app/models/data';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { HiveService } from '../../services/hive.service';
 
-const COL_AVATAR: BdDataColumn<string> = {
+const colAvatar: BdDataColumn<string> = {
   id: 'avatar',
   name: '',
   data: () => 'sd_storage',
@@ -13,7 +13,7 @@ const COL_AVATAR: BdDataColumn<string> = {
   width: '30px',
 };
 
-const COL_ID: BdDataColumn<string> = {
+const colId: BdDataColumn<string> = {
   id: 'id',
   name: 'BHive',
   data: (r) => r,
@@ -28,7 +28,7 @@ export class BHiveComponent implements OnInit {
   protected hives = inject(HiveService);
 
   protected records$ = new BehaviorSubject<string[]>(null);
-  protected columns: BdDataColumn<string>[] = [COL_AVATAR, COL_ID];
+  protected columns: BdDataColumn<string>[] = [colAvatar, colId];
   protected sort: Sort = { active: 'id', direction: 'asc' };
 
   protected getRecordRoute = (row: string) => {
