@@ -1,10 +1,13 @@
 import { Directive, inject } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
 import { ConfigFilesService } from '../services/config-files.service';
+
+const ID = 'cfg-file-name';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appCfgFileNameValidator]',
@@ -16,19 +19,8 @@ import { ConfigFilesService } from '../services/config-files.service';
     },
   ],
 })
-export class CfgFileNameValidatorDirective implements Validator, BdValidationMessageExtractor {
+export class CfgFileNameValidatorDirective implements Validator {
   private cfgFiles = inject(ConfigFilesService);
-  public readonly id = 'cfg-file-name';
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  public extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const name = control.value as string;
@@ -43,7 +35,7 @@ export class CfgFileNameValidatorDirective implements Validator, BdValidationMes
         continue; // file only in product, we can create/rename it.
       }
       if (p?.toLowerCase() === name.toLowerCase()) {
-        errors[this.id] = `File name/path already in use`;
+        errors[ID] = `File name/path already in use`;
       }
     }
     return errors;

@@ -1,9 +1,12 @@
 import { Directive, Input } from '@angular/core';
 import { NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
+
+const ID = 'propagate-error-input';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appPropagateErrorValidator]',
@@ -15,24 +18,12 @@ import {
     },
   ],
 })
-export class PropagateErrorValidatorDirective implements Validator, BdValidationMessageExtractor {
-  public readonly id = 'propagate-error-input';
-
+export class PropagateErrorValidatorDirective implements Validator {
   @Input('appPropagateErrorValidator') error: string;
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  public extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
 
   public validate(): ValidationErrors | null {
     if (this.error) {
-      return { [this.id]: this.error };
+      return { [ID]: this.error };
     }
     return null;
   }

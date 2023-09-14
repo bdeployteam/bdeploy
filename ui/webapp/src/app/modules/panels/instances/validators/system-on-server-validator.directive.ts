@@ -2,10 +2,13 @@ import { Directive, Input, inject } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import { ManifestKey } from 'src/app/models/gen.dtos';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
 import { SystemsService } from '../../../primary/systems/services/systems.service';
+
+const ID = 'system-on-server';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appSystemOnServerValidator]',
@@ -17,22 +20,10 @@ import { SystemsService } from '../../../primary/systems/services/systems.servic
     },
   ],
 })
-export class SystemOnServerValidatorDirective implements Validator, BdValidationMessageExtractor {
+export class SystemOnServerValidatorDirective implements Validator {
   private systems = inject(SystemsService);
 
-  public readonly id = 'system-on-server';
-
   @Input('appSystemOnServerValidator') serverName: string;
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  public extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value as ManifestKey;
@@ -45,13 +36,13 @@ export class SystemOnServerValidatorDirective implements Validator, BdValidation
 
     if (!system) {
       return {
-        [this.id]: `Cannot find system with key ${value?.name}:${value?.tag}`,
+        [ID]: `Cannot find system with key ${value?.name}:${value?.tag}`,
       };
     }
 
     if (system.minion !== this.serverName) {
       return {
-        [this.id]: `The selected system is on a different server than the selected target server.`,
+        [ID]: `The selected system is on a different server than the selected target server.`,
       };
     }
 

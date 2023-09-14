@@ -1,9 +1,12 @@
 import { Directive, Input } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
+
+const ID = 'edit-item-in-list';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appEditItemInListValidator]',
@@ -15,20 +18,8 @@ import {
     },
   ],
 })
-export class EditItemInListValidatorDirective implements Validator, BdValidationMessageExtractor {
-  public readonly id = 'edit-item-in-list';
-
+export class EditItemInListValidatorDirective implements Validator {
   @Input() allowedValues: string[];
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  public extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
 
   public validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value?.length) {
@@ -41,7 +32,7 @@ export class EditItemInListValidatorDirective implements Validator, BdValidation
     for (const v of value) {
       const ok = this.allowedValues.includes(v);
       if (!ok) {
-        errors[this.id] = `${v} is not a valid entry`;
+        errors[ID] = `${v} is not a valid entry`;
       }
     }
 

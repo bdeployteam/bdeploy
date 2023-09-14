@@ -3,11 +3,14 @@ import { AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProcessEditService } from '../services/process-edit.service';
+
+const ID = 'edit-server-issue';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appServerIssuesValidator]',
@@ -19,23 +22,11 @@ import { ProcessEditService } from '../services/process-edit.service';
     },
   ],
 })
-export class EditServerIssuesValidatorDirective implements AsyncValidator, BdValidationMessageExtractor {
+export class EditServerIssuesValidatorDirective implements AsyncValidator {
   private edit = inject(ProcessEditService);
   private instanceEdit = inject(InstanceEditService);
 
-  public readonly id = 'edit-server-issue';
-
   @Input() appServerIssuesValidator: string;
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  public extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
 
   public validate(): Observable<ValidationErrors | null> {
     return this.instanceEdit.requestValidation().pipe(
@@ -48,7 +39,7 @@ export class EditServerIssuesValidatorDirective implements AsyncValidator, BdVal
         }
 
         const errors = {};
-        errors[this.id] = validation[0].message; // we can only show one message per parameter.
+        errors[ID] = validation[0].message; // we can only show one message per parameter.
         return errors;
       })
     );

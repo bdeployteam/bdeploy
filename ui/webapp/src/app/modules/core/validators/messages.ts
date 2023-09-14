@@ -4,19 +4,19 @@ import { PASSWORD_VALIDATION } from './password-verification.directive';
 import { PORT_VALIDATION } from './port-value.directive';
 import { TRIM_VALIDATION } from './trimmed.directive';
 
-export interface BdValidationMessageExtractor {
-  id: string;
-
-  extract(label: string, errors: ValidationErrors): string;
-}
+export type BdValidationMessageExtractor = (label: string, errors: ValidationErrors) => string;
 
 const msgExtractors: BdValidationMessageExtractor[] = [];
 export function bdValidationRegisterMessageExtractor(extractor: BdValidationMessageExtractor) {
-  if (msgExtractors.find((e) => e.id === extractor.id)) {
-    return;
-  }
-
   msgExtractors.push(extractor);
+}
+
+export function bdValidationIdExtractor(id: string): BdValidationMessageExtractor {
+  return (_, errors) => {
+    if (errors[id]) {
+      return errors[id];
+    }
+  };
 }
 
 /**
@@ -61,7 +61,7 @@ export function bdValidationMessage(label: string, errors: ValidationErrors): st
   }
 
   for (const x of msgExtractors) {
-    const r = x.extract(label, errors);
+    const r = x(label, errors);
     if (r !== undefined) {
       return r;
     }

@@ -1,12 +1,14 @@
-import { Directive, inject } from '@angular/core';
+import { Directive } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
 import { convert2String } from 'src/app/modules/core/utils/version.utils';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
-import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+
+const ID = 'variable-support-server';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appVariableServerValidator]',
@@ -18,21 +20,7 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
     },
   ],
 })
-export class VariableServerValidatorDirective implements Validator, BdValidationMessageExtractor {
-  private edit = inject(InstanceEditService);
-
-  public readonly id = 'variable-support-server';
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
-
+export class VariableServerValidatorDirective implements Validator {
   validate(control: AbstractControl): ValidationErrors | null {
     const server = control.value as ManagedMasterDto;
     if (!server) {
@@ -50,7 +38,7 @@ export class VariableServerValidatorDirective implements Validator, BdValidation
 
         if (!support) {
           return {
-            [this.id]: `Server version ${convert2String(n.version)} does not support systems`,
+            [ID]: `Server version ${convert2String(n.version)} does not support systems`,
           };
         }
       }

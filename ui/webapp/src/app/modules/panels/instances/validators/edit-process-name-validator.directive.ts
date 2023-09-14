@@ -2,10 +2,13 @@ import { Directive, Input, inject } from '@angular/core';
 import { AbstractControl, NG_VALIDATORS, ValidationErrors, Validator } from '@angular/forms';
 import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
+
+const ID = 'edit-process-name';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appEditProcessNameValidator]',
@@ -17,21 +20,10 @@ import { InstanceEditService } from 'src/app/modules/primary/instances/services/
     },
   ],
 })
-export class EditProcessNameValidatorDirective implements Validator, BdValidationMessageExtractor {
+export class EditProcessNameValidatorDirective implements Validator {
   private edit = inject(InstanceEditService);
-  public readonly id = 'edit-process-name';
 
   @Input() appEditProcessNameValidator: string;
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  public extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const name = control.value as string;
@@ -51,7 +43,7 @@ export class EditProcessNameValidatorDirective implements Validator, BdValidatio
           continue; // skip self.
         }
         if (a.name.toLowerCase() === name.toLowerCase()) {
-          errors[this.id] = `Process name already in use`;
+          errors[ID] = `Process name already in use`;
         }
       }
     }

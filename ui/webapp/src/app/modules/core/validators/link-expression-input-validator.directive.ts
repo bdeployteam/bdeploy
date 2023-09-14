@@ -8,9 +8,12 @@ import {
 } from 'src/app/models/gen.dtos';
 import { createLinkedValue, getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import {
-  BdValidationMessageExtractor,
+  bdValidationIdExtractor,
   bdValidationRegisterMessageExtractor,
 } from 'src/app/modules/core/validators/messages';
+
+const ID = 'link-expression-input';
+bdValidationRegisterMessageExtractor(bdValidationIdExtractor(ID));
 
 @Directive({
   selector: '[appLinkExpressionInputValidator]',
@@ -22,24 +25,12 @@ import {
     },
   ],
 })
-export class LinkExpressionInputValidatorDirective implements Validator, BdValidationMessageExtractor {
-  public readonly id = 'link-expression-input';
-
+export class LinkExpressionInputValidatorDirective implements Validator {
   @Input('appLinkExpressionInputValidator') isLink: boolean;
   @Input('appLinkExpressionInputValidatorProcess') process: ApplicationConfiguration;
   @Input('appLinkExpressionInputValidatorInstance') instance: InstanceConfigurationDto;
   @Input('appLinkExpressionInputValidatorSystem') system: SystemConfiguration;
   @Input('appLinkExpressionInputValidatorType') type: ParameterType;
-
-  constructor() {
-    bdValidationRegisterMessageExtractor(this);
-  }
-
-  public extract(label: string, errors: ValidationErrors): string {
-    if (errors[this.id]) {
-      return errors[this.id];
-    }
-  }
 
   public validate(control: AbstractControl): ValidationErrors | null {
     const value = control.value as string;
@@ -58,12 +49,12 @@ export class LinkExpressionInputValidatorDirective implements Validator, BdValid
     const errors = {};
 
     if (value?.indexOf('{{') < 0) {
-      errors[this.id] = "Link expression should contain link specifiers '{{'.";
+      errors[ID] = "Link expression should contain link specifiers '{{'.";
       return errors;
     }
 
     if ((value?.match(/{{/g) || []).length !== (value?.match(/}}/g) || []).length) {
-      errors[this.id] = "Link expression should contain equal number of '{{' and '}}'.";
+      errors[ID] = "Link expression should contain equal number of '{{' and '}}'.";
       return errors;
     }
 
@@ -71,7 +62,7 @@ export class LinkExpressionInputValidatorDirective implements Validator, BdValid
 
     const unresolved = expanded.match(/{{([^}]+)}}/g);
     if (unresolved) {
-      errors[this.id] = `Link expression contains unresolvable expressions: ${unresolved.join(', ')}`;
+      errors[ID] = `Link expression contains unresolvable expressions: ${unresolved.join(', ')}`;
       return errors;
     }
 
@@ -79,7 +70,7 @@ export class LinkExpressionInputValidatorDirective implements Validator, BdValid
     switch (type) {
       case ParameterType.BOOLEAN:
         if (expanded?.toLowerCase() !== 'true' && expanded?.toLowerCase() !== 'false') {
-          errors[this.id] = 'Link expression does not expand to a boolean value.';
+          errors[ID] = 'Link expression does not expand to a boolean value.';
           return errors;
         }
         break;
@@ -87,7 +78,7 @@ export class LinkExpressionInputValidatorDirective implements Validator, BdValid
       case ParameterType.CLIENT_PORT:
       case ParameterType.SERVER_PORT:
         if (isNaN(Number(expanded))) {
-          errors[this.id] = 'Link expression does not expand to a numeric value.';
+          errors[ID] = 'Link expression does not expand to a numeric value.';
           return errors;
         }
         break;
@@ -100,7 +91,7 @@ export class LinkExpressionInputValidatorDirective implements Validator, BdValid
     const errors = {};
 
     if (value?.indexOf('{{') > 0) {
-      errors[this.id] = "Plain value should not contain link specifiers '{{'.";
+      errors[ID] = "Plain value should not contain link specifiers '{{'.";
       return errors;
     }
 
