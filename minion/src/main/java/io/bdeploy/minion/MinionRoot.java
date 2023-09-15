@@ -129,6 +129,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private boolean consoleLog;
     private Version latestGitHubReleaseVersion;
     private boolean conCheckFailed = false;
+    private SecretKeySpec key;
 
     private ActionService actions;
     private ActionHandle startupAction;
@@ -560,7 +561,14 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return state;
     }
 
-    public SecretKeySpec getEncryptionKey() {
+    public synchronized SecretKeySpec getEncryptionKey() {
+        if (key == null) {
+            key = createEncryptionKey();
+        }
+        return key;
+    }
+
+    private SecretKeySpec createEncryptionKey() {
         try {
             return SecurityHelper.createSecretKey(getState().keystorePass);
         } catch (GeneralSecurityException e) {
