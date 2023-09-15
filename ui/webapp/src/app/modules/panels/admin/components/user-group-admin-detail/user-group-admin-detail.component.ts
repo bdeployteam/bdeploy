@@ -79,7 +79,7 @@ export class UserGroupAdminDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.subscription?.unsubscribe();
   }
 
   private onRemovePermission(perm: ScopedPermission): void {

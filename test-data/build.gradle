@@ -64,6 +64,23 @@ void setupBDeployJavaExec(JavaExec je, String root, int port) {
     }
 }
 
+void setupProfilerAgent(com.github.psxpaul.task.JavaExecFork je, String name) {
+    if(project.hasProperty("yourkitPath")) {
+        def path = new File(project.getProperty("yourkitPath"));
+        def profPath = null;
+
+        if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+            profPath = new File(path, "bin/windows-x86-64/yjpagent.dll");
+        } else if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+            profPath = new File(path, "bin/linux-x86-64/libyjpagent.so");
+        } else if (org.gradle.internal.os.OperatingSystem.current().isMacOsX()) {
+            profPath = new File(path, "bin/mac/libyjpagent.dylib");
+        }
+
+        je.jvmArgs += [ "-agentpath:" + profPath + "=tracing,sessionname=" + name ];
+    }
+}
+
 task triggerStopBDeploy() {
     doLast {
         println("Stopped BDeploy Server")
@@ -105,10 +122,11 @@ void createServerTasks(String name, String root, int port) {
     task "startTestBDeploy${name}"(type: com.github.psxpaul.task.JavaExecFork, dependsOn: "initTestBDeploy${name}") {
         doNotTrackState("No State")
         setupBDeployEnv(it, root)
+        setupProfilerAgent(it, "Test" + name)
         main = project(":minion").mainClassName
         classpath = project(":minion").sourceSets.main.runtimeClasspath
         args = [ "start", "--allowCors", "--consoleLog" ]
-        jvmArgs = [ '-Xmx128M' ] // all tests must fit :)
+        jvmArgs += [ '-Xmx128M' ] // all tests must fit :)
         waitForPort = port
         stopAfter = triggerStopBDeploy
 
@@ -238,10 +256,12 @@ githubRelease {
 jacoco {
     applyTo initTestBDeploy
     applyTo checkTestBDeploy
-    applyTo startTestBDeploy
-    if(!project.hasProperty('cypressNoCentral')) {
-        applyTo startTestBDeployCentral
-        applyTo startTestBDeployManaged
+    if(!project.hasProperty('yourkitPath')) {
+        applyTo startTestBDeploy
+        if(!project.hasProperty('cypressNoCentral')) {
+            applyTo startTestBDeployCentral
+            applyTo startTestBDeployManaged
+        }
     }
 }
 
