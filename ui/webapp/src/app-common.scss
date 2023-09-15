@@ -159,29 +159,17 @@
   }
 
   .bd-glow-bg {
-    background: radial-gradient(
-      circle,
-      var(--bd-main-bar) 0%,
-      var(--bd-main-bar-darker) 100%
-    );
+    background: radial-gradient(circle, var(--bd-main-bar) 0%, var(--bd-main-bar-darker) 100%);
     color: var(--bd-main-bar-contrast);
   }
 
   .bd-glow-bg-warn {
-    background: radial-gradient(
-      circle,
-      var(--bd-warn) 0%,
-      var(--bd-warn-darker) 100%
-    );
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
     color: var(--bd-warn-contrast);
   }
 
   .bd-glow-bg-error {
-    background: radial-gradient(
-      circle,
-      var(--bd-warn) 0%,
-      var(--bd-warn-darker) 100%
-    );
+    background: radial-gradient(circle, var(--bd-warn) 0%, var(--bd-warn-darker) 100%);
     color: var(--bd-warn-contrast);
   }
 
@@ -213,7 +201,7 @@
 
   code {
     background-color: var(--bd-bg-toolbar);
-    border-radius: 2px;
+    border-radius: 3px;
     padding: 1px 3px;
   }
 }

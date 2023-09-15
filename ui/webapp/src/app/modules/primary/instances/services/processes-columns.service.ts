@@ -40,7 +40,7 @@ export class ProcessesColumnsService {
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => (r.id ? r.id : 'new'),
     isId: true,
-    width: '120px',
+    width: '122px',
     showWhen: '(min-width:1000px)',
     component: BdIdentifierCellComponent,
   };

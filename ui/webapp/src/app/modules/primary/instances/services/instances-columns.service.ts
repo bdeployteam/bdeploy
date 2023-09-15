@@ -43,7 +43,7 @@ export class InstancesColumnsService {
     name: 'ID',
     hint: BdDataColumnTypeHint.DESCRIPTION,
     data: (r) => r.instanceConfiguration.id,
-    width: '70px',
+    width: '75px',
     showWhen: '(min-width: 1900px)',
     component: BdIdentifierCellComponent,
   };
