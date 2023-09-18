@@ -1,44 +1,18 @@
 <ng-template #directorySelector>
-  <mat-card
-    appearance="outlined"
-    class="flex flex-col gap-1 p-2.5 max-w-[300px]"
-  >
+  <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[300px]">
     <div class="flex flex-col gap-2.5">
-      <span
-        >Select the allowed configuration directories to be mirrored to the
-        client installation.</span
-      >
-      <mat-tree
-        [dataSource]="dirDataSource"
-        [treeControl]="dirTreeControl"
-        class="overflow-auto max-h-[400px]"
-      >
-        <mat-tree-node
-          *matTreeNodeDef="let node"
-          matTreeNodeToggle
-          matTreeNodePadding
-        >
+      <span>Select the allowed configuration directories to be mirrored to the client installation.</span>
+      <mat-tree [dataSource]="dirDataSource" [treeControl]="dirTreeControl" class="overflow-auto max-h-[400px]">
+        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
           <button mat-icon-button disabled></button>
-          <mat-checkbox
-            [checked]="dirSelection.isSelected(node)"
-            (change)="dirSelection.toggle(node);"
+          <mat-checkbox [checked]="dirSelection.isSelected(node)" (change)="dirSelection.toggle(node);"
             >{{node.name}}</mat-checkbox
           >
         </mat-tree-node>
 
-        <mat-tree-node
-          *matTreeNodeDef="let node; when: hasChild"
-          matTreeNodePadding
-        >
-          <button
-            mat-icon-button
-            matTreeNodeToggle
-            [attr.aria-label]="'toggle ' + node.filename"
-          >
-            <mat-icon>
-              {{dirTreeControl.isExpanded(node) ? 'expand_more' :
-              'chevron_right'}}
-            </mat-icon>
+        <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+          <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'toggle ' + node.filename">
+            <mat-icon> {{dirTreeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}} </mat-icon>
           </button>
           <mat-checkbox
             [checked]="descendantsAllSelected(node)"
@@ -49,35 +23,24 @@
         </mat-tree-node>
       </mat-tree>
       <div class="flex flex-row-reverse">
-        <app-bd-button
-          text="Apply"
-          [collapsed]="false"
-          color="primary"
-          (click)="doApplyDirectories()"
-        ></app-bd-button>
+        <app-bd-button text="Apply" [collapsed]="false" color="primary" (click)="doApplyDirectories()"></app-bd-button>
       </div>
     </div>
   </mat-card>
 </ng-template>
 
 <ng-template #directoryHelp>
-  <mat-card
-    appearance="outlined"
-    class="flex flex-col gap-1 p-2.5 max-w-[1024px]"
-  >
+  <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5 max-w-[1024px]">
     <div class="flex flex-col gap-2.5">
       <p>
-        <code>CLIENT</code> applications are not provided with potentially
-        sensitive configuration files by default.
+        <code>CLIENT</code> applications are not provided with potentially sensitive configuration files by default.
       </p>
       <p>
-        This option lets you whitelist directories within the normal
-        configuration files space, which will get provisioned to clients when
-        they install this application.
+        This option lets you whitelist directories within the normal configuration files space, which will get
+        provisioned to clients when they install this application.
       </p>
       <p>
-        Make sure to only include directories which contain files safe for
-        provisioning to potentially unsafe clients.
+        Make sure to only include directories which contain files safe for provisioning to potentially unsafe clients.
       </p>
     </div>
   </mat-card>
@@ -85,15 +48,8 @@
 
 <form #form="ngForm">
   <div class="local-header">
-    <div
-      class="flex flex-wrap gap-2.5"
-      *ngIf="app && edit.process$ | async as process"
-    >
-      <app-config-desc-element
-        card="cfg.name"
-        class="local-field"
-        position="above-right"
-      >
+    <div class="flex flex-wrap gap-2.5" *ngIf="app && edit.process$ | async as process">
+      <app-config-desc-element card="cfg.name" class="local-field" position="above-right">
         <app-bd-form-input
           label="Process Name"
           name="name"
@@ -105,11 +61,7 @@
         ></app-bd-form-input>
       </app-config-desc-element>
       <ng-container *ngIf="app.descriptor.type === 'SERVER'">
-        <app-config-desc-element
-          card="cfg.control.startType"
-          class="local-field"
-          position="above-right"
-        >
+        <app-config-desc-element card="cfg.control.startType" class="local-field" position="above-right">
           <app-bd-form-select
             label="Start Type"
             name="startType"
@@ -119,11 +71,7 @@
             errorDisplay="immediate"
           ></app-bd-form-select>
         </app-config-desc-element>
-        <app-config-desc-element
-          card="cfg.control.keepAlive"
-          class="local-field"
-          position="above-right"
-        >
+        <app-config-desc-element card="cfg.control.keepAlive" class="local-field" position="above-right">
           <app-bd-form-toggle
             label="Keep Alive"
             name="keepAlive"
@@ -131,11 +79,7 @@
             [disabled]="!app.descriptor.processControl.supportsKeepAlive"
           ></app-bd-form-toggle>
         </app-config-desc-element>
-        <app-config-desc-element
-          card="cfg.control.noRetries"
-          class="local-field"
-          position="below-right"
-        >
+        <app-config-desc-element card="cfg.control.noRetries" class="local-field" position="below-right">
           <app-bd-form-input
             label="Number of Retries"
             name="noOfRetries"
@@ -146,11 +90,7 @@
             errorDisplay="immediate"
           ></app-bd-form-input>
         </app-config-desc-element>
-        <app-config-desc-element
-          card="cfg.control.attachStdin"
-          class="local-field"
-          position="left-below"
-        >
+        <app-config-desc-element card="cfg.control.attachStdin" class="local-field" position="left-below">
           <app-bd-form-toggle
             label="Attach StdIn"
             name="attachStdIn"
@@ -158,11 +98,7 @@
             [disabled]="!app.descriptor.processControl.attachStdin"
           ></app-bd-form-toggle>
         </app-config-desc-element>
-        <app-config-desc-element
-          card="cfg.control.gracePeriod"
-          class="local-field"
-          position="below-right"
-        >
+        <app-config-desc-element card="cfg.control.gracePeriod" class="local-field" position="below-right">
           <app-bd-form-input
             class="local-field"
             label="Grace Period"
@@ -189,7 +125,7 @@
           appEditItemInListValidator
           [allowedValues]="dirFlatAllowedValues"
         >
-          <div class="flex flex-col gap-2.5">
+          <div class="flex gap-2.5">
             <mat-icon
               matTooltip="Additional Information"
               [matTooltipShowDelay]="500"
