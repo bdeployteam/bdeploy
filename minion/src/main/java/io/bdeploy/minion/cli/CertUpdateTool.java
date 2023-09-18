@@ -1,6 +1,7 @@
 package io.bdeploy.minion.cli;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +14,7 @@ import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.MinionRootValidator;
+import io.bdeploy.common.cfg.NonExistingPathValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolBase.ConfiguredCliTool;
@@ -27,6 +29,7 @@ import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.minion.BCX509Helper;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.MinionState;
 import io.bdeploy.minion.cli.CertUpdateTool.CertUpdateConfig;
 
 @Help("Manage minion certificate")
@@ -36,12 +39,28 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
 
     public @interface CertUpdateConfig {
 
-        @Help("Path to the new certificate in PEM format. This will render all existing tokens INVALID!")
+        @Help("Path to the new certificate in PEM format. The minion server will use this as HTTPS certificate instead of the internal self-signed one. "
+                + "WARNING: The certificate must be valid and trusted by browser AS WELL as the Java version in use by BDeploy.")
         @Validator(ExistingPathValidator.class)
-        String update();
+        String https();
 
-        @Help("When given reverts a previous update operation and restores the previous certificate and configuration.")
+        @Help(value = "Regenerate the internal self-signed certificate in use. WARNING: invalidates all existing tokens.",
+              arg = false)
+        boolean regenerate() default false;
+
+        @Help("Regenerate and export a master access token to the given file.")
+        @Validator(NonExistingPathValidator.class)
+        String exportToken();
+
+        @Help(value = "When given reverts a previous regenerate operation and restores the previous certificate and configuration.",
+              arg = false)
         boolean revert() default false;
+
+        @Help(value = "Reverts a previous HTTPS certificate update.", arg = false)
+        boolean revertHttps() default false;
+
+        @Help(value = "Removes the separate HTTPS certificate, and instead uses the self-signed certificate again.", arg = false)
+        boolean removeHttps() default false;
 
         @Help("Root directory to update.")
         @EnvironmentFallback("BDEPLOY_ROOT")
@@ -52,7 +71,12 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         boolean yes() default false;
 
         @Help("Target file to export the current certificate and key to")
+        @Validator(NonExistingPathValidator.class)
         String export();
+
+        @Help("Target file to export the current HTTPS certificate and key to.")
+        @Validator(NonExistingPathValidator.class)
+        String exportHttps();
     }
 
     public CertUpdateTool() {
@@ -68,16 +92,47 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
             helpAndFail("Root " + root + " does not exists!");
         }
 
-        try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
-            Path ks = mr.getState().keystorePath;
-            char[] ksp = mr.getState().keystorePass;
+        // validate commands; revert* and the others are mutually exclusive.
+        boolean hasModCommand = config.regenerate() || config.export() != null || config.exportHttps() != null
+                || config.exportToken() != null || config.https() != null;
 
-            if (config.update() != null) {
-                Path cert = Paths.get(config.update());
+        boolean hasRevertCommand = config.revert() || config.revertHttps() || config.removeHttps();
+
+        if (hasModCommand && hasRevertCommand) {
+            helpAndFail("Illegal combination of commands: modify and revert at the same time.");
+        }
+
+        if (!hasModCommand && !hasRevertCommand) {
+            return createNoOp();
+        }
+
+        try (MinionRoot mr = new MinionRoot(root, getActivityReporter())) {
+            MinionState state = mr.getState();
+
+            if (config.https() != null) {
+                Path cert = Paths.get(config.https());
                 if (!Files.isRegularFile(cert)) {
-                    helpAndFail("New certificate " + cert + " does not exist!");
+                    helpAndFail("New HTTPS certificate " + cert + " does not exist!");
                 }
 
+                boolean created = false;
+                if (state.keystoreHttpsPath == null || !PathHelper.exists(state.keystoreHttpsPath)) {
+                    mr.initHttpKeys();
+                    created = true;
+                    state = mr.getState();
+                }
+
+                try {
+                    doUpdateCertificate(mr, state.keystoreHttpsPath, state.keystorePass, cert);
+                } catch (RuntimeException e) {
+                    if (created) {
+                        Files.delete(state.keystoreHttpsPath);
+                    }
+                    throw e;
+                }
+            }
+
+            if (config.regenerate()) {
                 if (!config.yes()) {
                     out().println("ATTENTION: This operation will render all existing tokens invalid. This means");
                     out().println("           that all clients need to re-run the installer(s) to update tokens.");
@@ -86,18 +141,64 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
                     System.in.read();
                 }
 
-                return doUpdateCertificate(mr, ks, ksp, cert);
-            } else if (config.export() != null) {
-                Path pem = Paths.get(config.export());
-                BCX509Helper.exportPrivateCertificateAsPem(ks, ksp, pem);
-                return createSuccess();
-            } else if (config.revert()) {
-                return doRestoreCertificate(mr, ks, ksp);
-            } else {
-                return createNoOp();
+                doRegenerateCertificate(mr, state.keystorePath, state.keystorePass);
             }
+
+            if (config.export() != null) {
+                Path pem = Paths.get(config.export());
+                BCX509Helper.exportPrivateCertificateAsPem(state.keystorePath, state.keystorePass, pem);
+            }
+
+            if (config.exportHttps() != null) {
+                Path pem = Paths.get(config.exportHttps());
+                BCX509Helper.exportPrivateCertificateAsPem(state.keystoreHttpsPath, state.keystorePass, pem);
+            }
+
+            if (config.exportToken() != null) {
+                SecurityHelper helper = SecurityHelper.getInstance();
+                ApiAccessToken aat = new ApiAccessToken.Builder().forSystem().addPermission(ApiAccessToken.ADMIN_PERMISSION)
+                        .build();
+                String pack = helper.createSignaturePack(aat, state.keystorePath, state.keystorePass);
+
+                Files.write(Paths.get(config.exportToken()), pack.getBytes(StandardCharsets.UTF_8));
+            }
+
+            if (config.revert()) {
+                doRestoreCertificate(mr, state.keystorePath, state.keystorePass);
+                updateSelf(mr, state.keystorePath, state.keystorePass);
+            }
+
+            if (config.revertHttps()) {
+                doRestoreCertificate(mr, state.keystoreHttpsPath, state.keystorePass);
+            } else if (config.removeHttps()) {
+                Path ks = state.keystoreHttpsPath;
+                if (ks != null && PathHelper.exists(ks)) {
+                    Files.copy(ks, ks.getParent().resolve(ks.getFileName().toString() + ".bak"),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    PathHelper.deleteIfExistsRetry(ks);
+                }
+            }
+
+            return createSuccess();
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot update certificate", e);
+        }
+    }
+
+    private void doRegenerateCertificate(MinionRoot mr, Path ks, char[] ksp) {
+        mr.getAuditor()
+                .audit(AuditRecord.Builder.fromSystem().addParameters(getRawConfiguration()).setWhat("cert-update").build());
+
+        try {
+            Files.copy(ks, ks.getParent().resolve(ks.getFileName().toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+
+            // overwrites existing.
+            BCX509Helper.createKeyStore(ks, ksp);
+
+            // update our own remote
+            updateSelf(mr, ks, ksp);
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot re-generate certificate", e);
         }
     }
 
@@ -110,9 +211,6 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         } catch (Exception e) {
             throw new IllegalStateException("Cannot update certificate from " + cert, e);
         }
-
-        // now update the own access token.
-        updateSelf(mr, ks, ksp);
 
         return createSuccess();
     }
@@ -142,11 +240,16 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         // need to swap keystores - orig -> tmp, bak -> orig, tmp -> bak
         Path tmp = ks.getParent().resolve(ks.getFileName().toString() + ".tmp");
 
-        Files.move(ks, tmp, StandardCopyOption.REPLACE_EXISTING);
-        Files.move(bak, ks, StandardCopyOption.REPLACE_EXISTING);
-        Files.move(tmp, bak, StandardCopyOption.REPLACE_EXISTING);
+        // only need to create backup if ks exists -> see "config.removeHttps"
+        boolean backup = PathHelper.exists(ks);
 
-        updateSelf(mr, ks, ksp);
+        if (backup) {
+            Files.move(ks, tmp, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(bak, ks, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(tmp, bak, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            Files.move(bak, ks, StandardCopyOption.REPLACE_EXISTING);
+        }
 
         return createSuccess();
     }

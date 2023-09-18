@@ -561,6 +561,23 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return state;
     }
 
+    public void initHttpKeys() {
+        modifyState(state -> {
+            if (state.keystoreHttpsPath != null && PathHelper.exists(state.keystoreHttpsPath)) {
+                throw new IllegalStateException("HTTPS keystore already initialized");
+            }
+
+            Path ks = config.resolve("private.https");
+            state.keystoreHttpsPath = ks;
+
+            try {
+                BCX509Helper.createEmptyKeystore(ks, state.keystorePass);
+            } catch (Exception e) {
+                throw new IllegalStateException("Cannot initialize HTTPS keys for minion", e);
+            }
+        });
+    }
+
     public synchronized SecretKeySpec getEncryptionKey() {
         if (key == null) {
             key = createEncryptionKey();

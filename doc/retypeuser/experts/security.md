@@ -33,12 +33,14 @@ No.   | Fulfilled | Description
 
 **BDeploy** by default generates a self-signed certificate which is used to secure both the internal communication and the Web UI (HTTPS).
 
-It is possible to exchange this certificate with a proper one if the security warning in the Web UI is undesirable.
+It is possible to re-generate the internal certificate in case there is a suspected token leak.
 
 !!!warning Caution
 Exchanging the certificate will currently invalidate all issued _security tokens_. The ones issued to authenticated users, as well as the ones used to register **BDeploy** minions with other **BDeploy** servers.
 !!!
 
-!!!info Note
-Current swapping is possible only manually, proper CLI support pending.
+It is also possible to exchange *just* the HTTPS certificate. This will keep all issued tokens valid while allowing to secure HTTPS communication with a trusted, proper, official certificate.
+
+!!!warning Caution
+It **must** be assured that if this is done, there is *always* a valid certificate for HTTPS installed and updated before the current one looses validity, as the HTTPS certificate is not only used for browsers (frontend), but *also* for backend communication. Thus if the HTTPS certificate expires, BDeploy will essentially stop working.
 !!!

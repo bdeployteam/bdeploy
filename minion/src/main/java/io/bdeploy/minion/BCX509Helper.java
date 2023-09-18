@@ -11,10 +11,13 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,6 +96,16 @@ public class BCX509Helper {
         keyStore.load(null, null);
         keyStore.setKeyEntry(SecurityHelper.ROOT_ALIAS, kp.getPrivate(), passphrase,
                 new java.security.cert.Certificate[] { cert });
+
+        try (OutputStream os = Files.newOutputStream(target)) {
+            keyStore.store(os, passphrase);
+        }
+    }
+
+    public static void createEmptyKeystore(Path target, char[] passphrase)
+            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(null, null);
 
         try (OutputStream os = Files.newOutputStream(target)) {
             keyStore.store(os, passphrase);

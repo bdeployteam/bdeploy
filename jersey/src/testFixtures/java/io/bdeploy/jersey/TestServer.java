@@ -282,7 +282,7 @@ public class TestServer
         public CloseableServer(int port) {
             this.uri = UriBuilder.fromUri("https://localhost:" + port + "/api").build();
             service = new RemoteService(uri, authPack);
-            this.server = new JerseyServer(uri.getPort(), serverStore, storePass, JerseySessionConfiguration.noSessions());
+            this.server = new JerseyServer(uri.getPort(), serverStore, null, storePass, JerseySessionConfiguration.noSessions());
             this.factory = JerseyClientFactory.get(service);
         }
 

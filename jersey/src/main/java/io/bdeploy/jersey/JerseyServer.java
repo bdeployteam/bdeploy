@@ -125,6 +125,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
     private final int port;
     private final ResourceConfig rc = new ResourceConfig();
     private final KeyStore store;
+    private final KeyStore httpsStore;
     private final char[] passphrase;
     private final Instant startTime = Instant.now();
     private final Collection<AutoCloseable> closeableResources = new ArrayList<>();
@@ -151,9 +152,10 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
      *            for SSL.
      * @param passphrase the passphrase for the keystore.
      */
-    public JerseyServer(int port, KeyStore store, char[] passphrase, JerseySessionConfiguration sessions) {
+    public JerseyServer(int port, KeyStore store, KeyStore httpsStore, char[] passphrase, JerseySessionConfiguration sessions) {
         this.port = port;
         this.store = store;
+        this.httpsStore = httpsStore;
         this.passphrase = passphrase.clone();
         this.sessionManager = new JerseySessionManager(sessions);
     }
@@ -272,7 +274,13 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             // SSL
             KeyManagerFactory kmfactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmfactory.init(store, passphrase);
+            if (httpsStore != null) {
+                // dedicated HTTPS certificate to be used.
+                kmfactory.init(httpsStore, passphrase);
+            } else {
+                // fallback to the default certificate (self-signed).
+                kmfactory.init(store, passphrase);
+            }
 
             SSLContext ctx = SSLContext.getInstance("TLS");
             ctx.init(kmfactory.getKeyManagers(), null, null);

@@ -94,7 +94,7 @@ public class ServeTool extends ConfiguredCliTool<ServeConfig> {
     }
 
     private void runServer(short port, Map<String, BHive> hives, KeyStore ks, char[] passphrase) {
-        try (JerseyServer server = new JerseyServer(port, ks, passphrase, JerseySessionConfiguration.noSessions())) {
+        try (JerseyServer server = new JerseyServer(port, ks, null, passphrase, JerseySessionConfiguration.noSessions())) {
             BHiveRegistry reg = new BHiveRegistry(getActivityReporter(), null);
 
             for (Map.Entry<String, BHive> entry : hives.entrySet()) {

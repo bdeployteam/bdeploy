@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.RequestEntityProcessing;
@@ -30,6 +30,7 @@ import com.ning.http.client.ListenableFuture;
 import com.ning.http.client.ws.WebSocket;
 import com.ning.http.client.ws.WebSocketUpgradeHandler;
 
+import io.bdeploy.common.security.CompositeX509TrustManager;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
@@ -75,11 +76,12 @@ public class JerseyClientFactory {
             SecurityHelper sec = SecurityHelper.getInstance();
             bearer = sec.getSignedToken(svc.getKeyStore().getStore(), svc.getKeyStore().getPass());
 
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(svc.getKeyStore().getStore());
+            // composite of default trust manager (for official certificates), and the target server's
+            // self-signed internal certificate (part of the authentication token).
+            TrustManager[] tm = CompositeX509TrustManager.getTrustManagers(svc.getKeyStore().getStore());
 
             sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, tmf.getTrustManagers(), null);
+            sslContext.init(null, tm, null);
         } catch (GeneralSecurityException e) {
             throw new IllegalStateException("Cannot initialize security", e);
         }

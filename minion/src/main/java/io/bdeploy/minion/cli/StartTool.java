@@ -28,6 +28,7 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.dcu.TaskSynchronizer;
 import io.bdeploy.interfaces.UserInfo;
@@ -135,8 +136,13 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
             MinionState state = r.getState();
             SecurityHelper sh = SecurityHelper.getInstance();
             KeyStore ks = sh.loadPrivateKeyStore(state.keystorePath, state.keystorePass);
+            KeyStore https = null;
 
-            try (JerseyServer srv = new JerseyServer(state.port, ks, state.keystorePass, r.getSessionConfiguration())) {
+            if (state.keystoreHttpsPath != null && PathHelper.exists(state.keystoreHttpsPath)) {
+                https = sh.loadPrivateKeyStore(state.keystoreHttpsPath, state.keystorePass);
+            }
+
+            try (JerseyServer srv = new JerseyServer(state.port, ks, https, state.keystorePass, r.getSessionConfiguration())) {
                 BHiveRegistry reg = setupServerCommon(new ActivityReporter.Null(), r, srv, config);
 
                 if (r.getMode() != MinionMode.NODE) {

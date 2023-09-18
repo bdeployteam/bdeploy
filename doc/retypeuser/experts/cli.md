@@ -26,7 +26,7 @@ Option | Description
 
 Command | Description
 ---    | ---
-`certificate` | Manage the server certificate (export the existing, import a new). This is mainly used to import a properly signed certificate to the _master_, which serves the Web UI using this certificate over HTTPS. **BDeploy** itself does not require a properly signed certificate for internal operation to guarantee [Security](/experts/security/#security).
+`certificate` | Manage the server certificates (export the existing, import a new, set a separate HTTPS certifivate). This is mainly used to import a properly signed certificate to the _master_, which serves the Web UI using this certificate over HTTPS. **BDeploy** itself does not require a properly signed certificate for internal operation to guarantee [Security](/experts/security/#security).
 `cleanup` | Manage the schedule at which the _master_ performs background cleanup operations on all _nodes_ (including himself).
 `init` | Initializes a _root_ directory for running a server with the `start` command. The init command can be instructed to initialize the directory to run a **master** or a headless **node** when running the `start` command.
 `config` | Allows changes to the basic configuration like hostname, port or mode. The `init` command stores the given hostname, used later on for connections to self and also for variable expansion. If the hostname changed or is no longer valid, this tool can update it. Please refer to [Migrating between Modes](/user/central/#migrating-between-modes) in case you need to change the minion mode.

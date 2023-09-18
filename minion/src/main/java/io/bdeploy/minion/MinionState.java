@@ -31,6 +31,11 @@ public class MinionState {
     public Path keystorePath;
 
     /**
+     * Optional secondary keystore containing information for HTTPS *only*.
+     */
+    public Path keystoreHttpsPath;
+
+    /**
      * Passphrase for the keystore
      */
     public char[] keystorePass;
