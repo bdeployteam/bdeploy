@@ -342,7 +342,7 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             startup.complete(this);
         } catch (GeneralSecurityException | IOException e) {
-            throw new IllegalStateException("Cannot start server", e);
+            throw new IllegalStateException("Cannot start server on " + port, e);
         }
     }
 
