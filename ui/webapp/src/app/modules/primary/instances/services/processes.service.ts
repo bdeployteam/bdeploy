@@ -3,7 +3,13 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject, Observable, Subscription, combineLatest, debounceTime } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { InstanceDto, InstanceProcessStatusDto, ProcessState, ProcessStatusDto } from 'src/app/models/gen.dtos';
+import {
+  InstanceDto,
+  InstanceProcessStatusDto,
+  ProcessState,
+  ProcessStatusDto,
+  VerifyOperationResultDto,
+} from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { NO_LOADING_BAR } from 'src/app/modules/core/utils/loading-bar.util';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
@@ -182,6 +188,20 @@ export class ProcessesService {
     return this.http
       .post(`${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/restart`, pids)
       .pipe(finalize(() => this.reload()));
+  }
+
+  public verify(pid: string): Observable<VerifyOperationResultDto> {
+    return this.http.post<VerifyOperationResultDto>(
+      `${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/verify/${pid}`,
+      null
+    );
+  }
+
+  public reinstall(pid: string): Observable<any> {
+    return this.http.post<boolean>(
+      `${this.apiPath(this.groups.current$.value.name, this.instance.instanceConfiguration.id)}/reinstall/${pid}`,
+      null
+    );
   }
 
   public startInstance(): Observable<any> {

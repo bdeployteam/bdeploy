@@ -80,12 +80,16 @@ public class BrowserDialog extends BaseDialog {
     private JButton uninstallButton;
     private JButton pruneButton;
     private JButton fsckButton;
+    private JButton verifyButton;
+    private JButton reinstallButton;
 
     private JMenuItem launchItem;
     private JMenuItem updateItem;
     private JMenuItem customizeAndLaunchItem;
     private JMenuItem refreshItem;
     private JMenuItem uninstallItem;
+    private JMenuItem verifyItem;
+    private JMenuItem reinstallItem;
 
     private JProgressBar progressBar;
 
@@ -170,6 +174,20 @@ public class BrowserDialog extends BaseDialog {
         fsckButton.addActionListener(this::onFsckButtonClicked);
         fsckButton.setBackground(Color.WHITE);
 
+        verifyButton = new JButton();
+        verifyButton.setText("Verify");
+        verifyButton.setToolTipText("Check if selected application has missing or modified files.");
+        verifyButton.setIcon(WindowHelper.loadIcon("/verify.png", 20, 20));
+        verifyButton.addActionListener(this::onVerifyButtonClicked);
+        verifyButton.setBackground(Color.WHITE);
+
+        reinstallButton = new JButton();
+        reinstallButton.setText("Reinstall");
+        reinstallButton.setToolTipText("Reinstall selected application");
+        reinstallButton.setIcon(WindowHelper.loadIcon("/reinstall.png", 20, 20));
+        reinstallButton.addActionListener(this::onReinstallButtonClicked);
+        reinstallButton.setBackground(Color.WHITE);
+
         // Toolbar on the left side
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
@@ -181,6 +199,9 @@ public class BrowserDialog extends BaseDialog {
         toolbar.add(new JToolBar.Separator());
         toolbar.add(pruneButton);
         toolbar.add(fsckButton);
+        toolbar.add(new JToolBar.Separator());
+        toolbar.add(verifyButton);
+        toolbar.add(reinstallButton);
         header.add(toolbar, BorderLayout.WEST);
 
         // Search panel on the right side
@@ -275,6 +296,16 @@ public class BrowserDialog extends BaseDialog {
         refreshItem.setToolTipText(refreshButton.getToolTipText());
         refreshItem.addActionListener(this::onRefreshButtonClicked);
 
+        verifyItem = new JMenuItem(verifyButton.getText());
+        verifyItem.setIcon(WindowHelper.loadIcon("/verify.png", 16, 16));
+        verifyItem.setToolTipText(verifyButton.getToolTipText());
+        verifyItem.addActionListener(this::onVerifyButtonClicked);
+
+        reinstallItem = new JMenuItem(reinstallButton.getText());
+        reinstallItem.setIcon(WindowHelper.loadIcon("/reinstall.png", 16, 16));
+        reinstallItem.setToolTipText(reinstallButton.getToolTipText());
+        reinstallItem.addActionListener(this::onReinstallButtonClicked);
+
         JPopupMenu menu = new JPopupMenu();
         menu.add(launchItem);
         menu.add(customizeAndLaunchItem);
@@ -283,6 +314,9 @@ public class BrowserDialog extends BaseDialog {
         menu.add(updateItem);
         menu.add(new JSeparator());
         menu.add(uninstallItem);
+        menu.add(new JSeparator());
+        menu.add(verifyItem);
+        menu.add(reinstallItem);
         table.setComponentPopupMenu(menu);
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -437,6 +471,36 @@ public class BrowserDialog extends BaseDialog {
         }
     }
 
+    /** Executes the verify operation on a selected application */
+    private void onVerifyButtonClicked(ActionEvent e) {
+        try {
+            ClientSoftwareConfiguration app = getSelectedApps().get(0);
+
+            progressBar.setIndeterminate(true);
+            progressBar.setString("Verifying '" + app.clickAndStart.applicationId + "'");
+
+            List<Path> hives = ClientPathHelper.getHives(rootDir);
+            VerifyTask task = new VerifyTask(hives, auditor, app.clickAndStart, rootDir);
+            task.addPropertyChangeListener(this::doUpdateProgessBar);
+            task.execute();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Failed to run verify operation: " + ex.getMessage(), "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /** Reinstall a selected application */
+    private void onReinstallButtonClicked(ActionEvent e) {
+        ClientSoftwareConfiguration app = getSelectedApps().get(0);
+        String appName = app.metadata != null ? app.metadata.appName : app.clickAndStart.applicationId;
+
+        String message = "Are you sure you want to reinstall '" + appName + "'?";
+        int result = JOptionPane.showConfirmDialog(this, message, "Reinstall", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            doReinstall(app);
+        }
+    }
+
     /** Launches the given application */
     private void doLaunch(ClientSoftwareConfiguration app, List<String> args) {
         progressBar.setIndeterminate(true);
@@ -453,6 +517,17 @@ public class BrowserDialog extends BaseDialog {
         progressBar.setString("Uninstalling '" + app.clickAndStart.applicationId + "'");
 
         AppUninstaller task = new AppUninstaller(rootDir, app);
+        task.addPropertyChangeListener(this::doUpdateProgessBar);
+        task.addPropertyChangeListener(this::doRefreshApps);
+        task.execute();
+    }
+
+    /** Reinstalls the given application */
+    private void doReinstall(ClientSoftwareConfiguration app) {
+        progressBar.setIndeterminate(true);
+        progressBar.setString("Reinstalling '" + app.clickAndStart.applicationId + "'");
+
+        AppReinstaller task = new AppReinstaller(rootDir, app);
         task.addPropertyChangeListener(this::doUpdateProgessBar);
         task.addPropertyChangeListener(this::doRefreshApps);
         task.execute();
@@ -512,6 +587,9 @@ public class BrowserDialog extends BaseDialog {
 
             fsckButton.setEnabled(false);
             pruneButton.setEnabled(false);
+
+            verifyButton.setEnabled(false);
+            reinstallButton.setEnabled(false);
             return;
         }
 
@@ -536,6 +614,9 @@ public class BrowserDialog extends BaseDialog {
             fsckButton.setEnabled(true);
             pruneButton.setEnabled(true);
         }
+
+        verifyButton.setEnabled(!readonlyRoot && apps.size() == 1);
+        reinstallButton.setEnabled(!readonlyRoot && apps.size() == 1);
     }
 
     /** Returns if the selected applications have at least the given version */

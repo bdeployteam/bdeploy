@@ -51,6 +51,8 @@ public enum Actions {
     /// ---- low level
     FSCK_BHIVE(ActionScope.BHIVE, true, "Consistency Check"),
     PRUNE_BHIVE(ActionScope.BHIVE, true, "Prune Objects"),
+    VERIFY_APPLICATION(ActionScope.GLOBAL, true, "Application Consistency Check"),
+    REINSTALL_APPLICATION(ActionScope.GLOBAL, true, "Application Reinstall"),
 
     /// ---- central/managed
     MANAGED_UPDATE_TRANSFER(ActionScope.BHIVE, true, "Transfer Update to Server"),

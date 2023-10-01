@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
 import io.bdeploy.jersey.Scope;
@@ -43,6 +44,16 @@ public interface ProcessResource {
     @Path("/restart")
     @RequiredPermission(permission = Permission.WRITE)
     public void restartProcesses(List<String> appId);
+
+    @POST
+    @Path("/verify/{appId}")
+    @RequiredPermission(permission = Permission.WRITE)
+    public VerifyOperationResultDto verify(@PathParam("appId") String appId);
+
+    @POST
+    @Path("/reinstall/{appId}")
+    @RequiredPermission(permission = Permission.WRITE)
+    public void reinstall(@PathParam("appId") String appId);
 
     @GET
     @Path("/startAll")

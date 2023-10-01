@@ -57,6 +57,7 @@ import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.common.util.VariableResolver;
 import io.bdeploy.common.util.ZipHelper;
+import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.CommandConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.ParameterConfiguration;
@@ -1319,5 +1320,51 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
     @Override
     public MasterSystemResource getSystemResource() {
         return rc.initResource(new MasterSystemResourceImpl(hive, name));
+    }
+
+    @Override
+    public VerifyOperationResultDto verify(String instanceId, String appId) {
+        Map.Entry<String, Manifest.Key> node = getInstanceNodeManifest(instanceId, appId);
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, node.getValue());
+        String item = inm.getConfiguration().applications.stream().filter(a -> a.id.equals(appId))
+                .map(a -> a.application.toString()).findFirst().orElseThrow();
+        try (var handle = af.run(Actions.VERIFY_APPLICATION, null, null, item)) {
+            NodeDeploymentResource ndr = nodes.getNodeResourceIfOnlineOrThrow(node.getKey(), NodeDeploymentResource.class,
+                    context);
+            return ndr.verify(appId, node.getValue());
+        }
+    }
+
+    @Override
+    public void reinstall(String instanceId, String appId) {
+        Map.Entry<String, Manifest.Key> node = getInstanceNodeManifest(instanceId, appId);
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, node.getValue());
+        String item = inm.getConfiguration().applications.stream().filter(a -> a.id.equals(appId))
+                .map(a -> a.application.toString()).findFirst().orElseThrow();
+        try (var handle = af.run(Actions.REINSTALL_APPLICATION, null, null, item)) {
+            NodeDeploymentResource ndr = nodes.getNodeResourceIfOnlineOrThrow(node.getKey(), NodeDeploymentResource.class,
+                    context);
+            ndr.reinstall(appId, node.getValue());
+        }
+    }
+
+    private Map.Entry<String, Manifest.Key> getInstanceNodeManifest(String instanceId, String appId) {
+        String activeTag = getInstanceState(instanceId).activeTag;
+        InstanceManifest imf = InstanceManifest.load(hive, instanceId, activeTag);
+        Map.Entry<String, Manifest.Key> node = null;
+        for (Map.Entry<String, Manifest.Key> entry : imf.getInstanceNodeManifests().entrySet()) {
+            InstanceNodeManifest inm = InstanceNodeManifest.of(hive, entry.getValue());
+            boolean found = inm.getConfiguration().applications.stream().anyMatch(a -> a.id.equals(appId));
+            if (found) {
+                node = entry;
+                break;
+            }
+        }
+
+        // Application is nowhere deployed and nowhere running
+        if (node == null) {
+            throw new WebApplicationException("Application is not deployed on any node: " + appId, Status.INTERNAL_SERVER_ERROR);
+        }
+        return node;
     }
 }

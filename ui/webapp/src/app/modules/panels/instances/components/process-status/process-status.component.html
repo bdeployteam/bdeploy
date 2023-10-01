@@ -194,6 +194,17 @@
             <app-bd-data-table [records]="pinnedParameters" [columns]="pinnedColumns"></app-bd-data-table>
           </app-bd-expand-button>
         </ng-container>
+        <app-bd-button
+          icon="construction"
+          text="Verify Installation"
+          matTooltip="Verifies all files installed for this application, checking for modified and missing files."
+          matTooltipShowDelay="500"
+          [collapsed]="false"
+          (click)="verify()"
+          [loadingWhen$]="verifying$"
+          [disabled]="verifyDisabled$ | async"
+        >
+        </app-bd-button>
       </div>
     </ng-container>
   </app-bd-dialog-content>

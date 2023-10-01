@@ -1,5 +1,5 @@
 ---
-order: 3
+order: 4
 icon: container
 ---
 # Integration of a new product

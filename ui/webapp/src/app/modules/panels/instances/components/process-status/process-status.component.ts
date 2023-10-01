@@ -23,6 +23,7 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
+import { ConfirmationService } from 'src/app/modules/core/services/confirmation.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
@@ -31,6 +32,7 @@ import { ProcessesService } from 'src/app/modules/primary/instances/services/pro
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
 import { SystemsService } from 'src/app/modules/primary/systems/services/systems.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
+import { VerifyResultComponent } from '../verify-result/verify-result.component';
 import { PinnedParameterValueComponent } from './pinned-parameter-value/pinned-parameter-value.component';
 
 export interface PinnedParameter {
@@ -74,6 +76,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected instances = inject(InstancesService);
   protected servers = inject(ServersService);
   protected areas = inject(NavAreasService);
+  protected confirmationService = inject(ConfirmationService);
 
   protected uptime$ = new BehaviorSubject<string>(null);
   protected restartProgress$ = new BehaviorSubject<number>(0);
@@ -83,6 +86,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   private starting$ = new BehaviorSubject<boolean>(false);
   private stopping$ = new BehaviorSubject<boolean>(false);
   private restarting$ = new BehaviorSubject<boolean>(false);
+  protected verifying$ = new BehaviorSubject<boolean>(false);
 
   protected isCrashedWaiting: boolean;
   protected isStopping: boolean;
@@ -111,6 +115,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     null,
     this.pid$
   );
+
   protected performing$ = combineLatest([this.mappedStart$, this.mappedStop$, this.mappedRestart$]).pipe(
     map(([a, b, c]) => a || b || c)
   );
@@ -129,6 +134,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected restartDisabled$ = this.disabledBase.pipe(
     map(([perm, perform, outdated]) => !perm || perform || outdated || !(this.isRunning || this.isCrashedWaiting))
   );
+  protected verifyDisabled$ = combineLatest([
+    this.auth.isCurrentScopeWrite$,
+    this.verifying$,
+    this.startDisabled$,
+  ]).pipe(map(([perm, verifying, startDisabled]) => !perm || verifying || startDisabled));
 
   private restartProgressHandle: any;
   private uptimeCalculateHandle: any;
@@ -321,6 +331,27 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       .restart([this.processDetail.status.appId])
       .pipe(finalize(() => this.restarting$.next(false)))
       .subscribe();
+  }
+
+  protected verify() {
+    this.verifying$.next(true);
+    this.processes
+      .verify(this.processDetail.status.appId)
+      .pipe(switchMap((r) => this.confirmationService.prompt(VerifyResultComponent, r)))
+      .subscribe((reinstall) => {
+        this.verifying$.next(false);
+        if (reinstall) {
+          this.reinstall();
+        }
+      });
+  }
+
+  private reinstall() {
+    this.verifying$.next(true);
+    this.processes.reinstall(this.processDetail.status.appId).subscribe(() => {
+      this.verifying$.next(false);
+      this.verify();
+    });
   }
 
   protected getRouterLink(r: HttpEndpoint) {

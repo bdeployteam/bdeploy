@@ -26,12 +26,14 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.ExportOperation;
 import io.bdeploy.bhive.op.ExportTreeOperation;
+import io.bdeploy.bhive.op.VerifyOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.OsHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.VariableResolver;
+import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.cleanup.CleanupAction;
 import io.bdeploy.interfaces.cleanup.CleanupAction.CleanupType;
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -160,6 +162,16 @@ public class InstanceNodeController {
     }
 
     private boolean isApplicationInstalled(ApplicationConfiguration config) {
+        Path target = getApplicationTarget(config);
+
+        if (syncOps.isPerforming(target)) {
+            return false;
+        }
+
+        return Files.isDirectory(target);
+    }
+
+    private Path getApplicationTarget(ApplicationConfiguration config) {
         Path target;
         if (config.pooling == ApplicationPoolType.GLOBAL || config.pooling == null) {
             target = paths.get(SpecialDirectory.MANIFEST_POOL).resolve(config.application.directoryFriendlyName());
@@ -168,12 +180,7 @@ public class InstanceNodeController {
         } else {
             target = paths.get(SpecialDirectory.BIN).resolve(config.application.directoryFriendlyName());
         }
-
-        if (syncOps.isPerforming(target)) {
-            return false;
-        }
-
-        return Files.isDirectory(target);
+        return target;
     }
 
     /**
@@ -453,6 +460,24 @@ public class InstanceNodeController {
                 .filter(t -> t.equals(tagPath.getFileName().toString()))
                 // check if such an element exists (yes or no).
                 .findAny();
+    }
+
+    public VerifyOperationResultDto verify(String applicationId) {
+        ApplicationConfiguration config = getManifest().getConfiguration().applications.stream()
+                .filter(a -> a.id.equals(applicationId)).findAny().orElseThrow();
+        Path target = getApplicationTarget(config);
+
+        VerifyOperationResultDto dto = new VerifyOperationResultDto(
+                hive.execute(new VerifyOperation().setTargetPath(target).setManifest(config.application)));
+        return dto;
+    }
+
+    public void reinstall(String applicationId) {
+        ApplicationConfiguration config = getManifest().getConfiguration().applications.stream()
+                .filter(a -> a.id.equals(applicationId)).findAny().orElseThrow();
+        Path target = getApplicationTarget(config);
+        PathHelper.deleteRecursiveRetry(target);
+        installPooledApplicationsFor(manifest.getConfiguration());
     }
 
 }

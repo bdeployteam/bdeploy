@@ -31,6 +31,7 @@ import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.dcu.InstanceNodeController;
 import io.bdeploy.dcu.TaskSynchronizer;
+import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 import io.bdeploy.interfaces.configuration.pcu.InstanceNodeStatusDto;
@@ -307,6 +308,26 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         }
 
         return result;
+    }
+
+    @Override
+    public VerifyOperationResultDto verify(String applicationId, Manifest.Key nodeKey) {
+        return getInstanceNodeController(nodeKey).verify(applicationId);
+    }
+
+    @Override
+    public void reinstall(String applicationId, Key nodeKey) {
+        getInstanceNodeController(nodeKey).reinstall(applicationId);
+    }
+
+    private InstanceNodeController getInstanceNodeController(Manifest.Key nodeKey) {
+        BHive hive = root.getHive();
+        InstanceNodeManifest inm = InstanceNodeManifest.of(hive, nodeKey);
+        InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
+        if (!inc.isInstalled()) {
+            throw new WebApplicationException("Key " + nodeKey + " is not deployed", Status.NOT_FOUND);
+        }
+        return inc;
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.bdeploy.bhive.model.Manifest;
+import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.directory.RemoteDirectoryEntry;
 import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
@@ -88,5 +89,29 @@ public interface NodeDeploymentResource {
     @POST
     @Path("/check-ports")
     public Map<Integer, Boolean> getPortStates(List<Integer> ports);
+
+    /**
+     * Verifies a single application of an instance.
+     *
+     * @param nodeKey
+     *            InstanceNodeManifest key of node where application is deployed
+     * @param applicationId
+     *            the unique ID of the application.
+     */
+    @POST
+    @Path("/verify")
+    public VerifyOperationResultDto verify(@QueryParam("a") String applicationId, Manifest.Key nodeKey);
+
+    /**
+     * Verifies a single application of an instance.
+     *
+     * @param nodeKey
+     *            InstanceNodeManifest key of node where application is deployed
+     * @param applicationId
+     *            the unique ID of the application.
+     */
+    @POST
+    @Path("/reinstall")
+    public void reinstall(@QueryParam("a") String applicationId, Manifest.Key nodeKey);
 
 }

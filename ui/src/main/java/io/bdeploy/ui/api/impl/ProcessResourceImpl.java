@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import io.bdeploy.bhive.BHive;
+import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.pcu.InstanceStatusDto;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.directory.RemoteDirectory;
@@ -127,6 +128,18 @@ public class ProcessResourceImpl implements ProcessResource {
         MasterRootResource root = ResourceProvider.getVersionedResource(mp.getControllingMaster(hive, manifest.getManifest()),
                 MasterRootResource.class, context);
         return root.getNamedMaster(group);
+    }
+
+    @Override
+    public VerifyOperationResultDto verify(String appId) {
+        MasterNamedResource master = getMasterResource();
+        return master.verify(instance, appId);
+    }
+
+    @Override
+    public void reinstall(String appId) {
+        MasterNamedResource master = getMasterResource();
+        master.reinstall(instance, appId);
     }
 
 }

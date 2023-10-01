@@ -32,7 +32,6 @@ public class FsckOperation extends BHive.Operation<Set<ElementView>> {
         try (Activity activity = getActivityReporter().start("Checking", -1)) {
             if (manifests.isEmpty()) {
                 Set<Manifest.Key> localManifests = execute(new ManifestListOperation());
-
                 if (localManifests.isEmpty()) {
                     return Collections.emptySet();
                 }

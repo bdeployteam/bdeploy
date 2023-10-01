@@ -1,3 +1,4 @@
+import { ComponentType } from '@angular/cdk/portal';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
@@ -14,6 +15,15 @@ export class ConfirmationService {
       disableClose: true,
       panelClass: 'bd-dialog-container',
       data: { header, message },
+    });
+    return dialogRef.afterClosed();
+  }
+
+  public prompt<T>(component: ComponentType<T>, data: any): Observable<boolean> {
+    const dialogRef = this.dialog.open(component, {
+      disableClose: true,
+      panelClass: 'bd-dialog-container',
+      data,
     });
     return dialogRef.afterClosed();
   }

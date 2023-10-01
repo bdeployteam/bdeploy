@@ -1,0 +1,24 @@
+<app-bd-notification-card
+  header="Verify Operation Result"
+  [collapsed]="true"
+  [dismissable]="false"
+  icon="info"
+  class="mat-elevation-z3"
+>
+  <div class="flex flex-col gap-2.5">
+    <app-bd-terminal
+      class="authentication-test-terminal w-[600px] h-[300px]"
+      [content$]="verifyResult$"
+    ></app-bd-terminal>
+    <app-bd-action-row>
+      <app-bd-button
+        *ngIf="isCorrupted"
+        text="Reinstall"
+        [collapsed]="false"
+        color="primary"
+        (click)="confirm(true)"
+      ></app-bd-button>
+      <app-bd-button text="Close" [collapsed]="false" (click)="confirm(false)"></app-bd-button>
+    </app-bd-action-row>
+  </div>
+</app-bd-notification-card>

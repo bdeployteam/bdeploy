@@ -6,6 +6,7 @@ import java.util.Map;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Tree;
+import io.bdeploy.interfaces.VerifyOperationResultDto;
 import io.bdeploy.interfaces.configuration.instance.ClientApplicationConfiguration;
 import io.bdeploy.interfaces.configuration.instance.FileStatusDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
@@ -367,4 +368,24 @@ public interface MasterNamedResource {
      */
     @Path("/systems")
     public MasterSystemResource getSystemResource();
+
+    /**
+     * Verifies application of an instance.
+     *
+     * @param instanceId the unique id of the instance.
+     * @param appId the unique id of the application
+     */
+    @POST
+    @Path("/verify")
+    public VerifyOperationResultDto verify(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
+
+    /**
+     * Reinstalls application of an instance.
+     *
+     * @param instanceId the unique id of the instance.
+     * @param appId the unique id of the application
+     */
+    @POST
+    @Path("/reinstall")
+    public void reinstall(@QueryParam("u") String instanceId, @QueryParam("a") String appId);
 }
