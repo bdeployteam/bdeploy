@@ -418,6 +418,7 @@ Endpoints definitions are templates which can later on be configured by the user
 Attribute   | Description
 ---         | ---
 `id` | The unique ID of the endpoint. This ID can be used by an authorized third-pary application to instruct **BDeploy** to call this endpoint and return the result.
+`enabled` | Any [Link Expression](/user/instance/#link-expressions). If the expression evaluates to a non-empty value which does _not_ equal `false`, the endpoint is considered available/enabled and presented to the user both for configuration and usage. This can be used to tie an endpoint to the configuration of a certain parameter, e.g. the server port configuration which will host the endpoint. 
 `type` | Currently `DEFAULT`, `PROBE_STARTUP` and `PROBE_ALIVE` are supported. Endpoints referenced by _startup_ or _lifeness probes_ in the `processControl` section of a server process need to have the according type. If not specified, the `DEFAULT` type is assumed.
 `path` | The path of the endpoint on the target process. **BDeploy** uses this and other parameters (`port`) to construct an URI to the local server.
 `port` | The port this endpoint is hosted on. [Variable Expansion](/power/variables/#variable-expansions) can be used, for instance to reference a parameter of the application (using `{{V:port-param}}` where `port-param` is the ID of a parameter on the `startCommand`).
@@ -428,6 +429,10 @@ Attribute   | Description
 `authType` | The type of authentication used by **BDeploy** when calling the endpoint. Can be `NONE`, `BASIC` or `DIGEST`.
 `authUser` | The username to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.
 `authPass` | The password to use for `BASIC` or `DIGEST` `authType`. [Variable Expansion](/power/variables/#variable-expansions) can be used.
+
+!!!info Note
+Endpoints which are not considered *enabled* are not required to be configured by the user, but are still reported via public API.
+!!!
 
 ## product-info.yaml
 
