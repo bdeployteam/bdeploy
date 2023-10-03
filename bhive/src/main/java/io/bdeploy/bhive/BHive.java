@@ -10,9 +10,11 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -21,6 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Timer;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import io.bdeploy.bhive.audit.AuditParameterExtractor;
 import io.bdeploy.bhive.objects.ManifestDatabase;
@@ -67,6 +72,9 @@ public class BHive implements AutoCloseable, BHiveExecution {
 
     private Predicate<String> lockContentValidator = null;
     private Supplier<String> lockContentSupplier = null;
+
+    private static final LoadingCache<String, Object> syncCache = CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.MINUTES)
+            .build(CacheLoader.from(k -> new Object()));
 
     /**
      * Creates a new hive instance. Supports ZIP and directory hives.
@@ -168,6 +176,16 @@ public class BHive implements AutoCloseable, BHiveExecution {
     /** Get the predicate that is used to validate an existing lock file. */
     protected Predicate<String> getLockContentValidator() {
         return this.lockContentValidator;
+    }
+
+    @Override
+    public Object getSynchronizationObject(String name) {
+        try {
+            return syncCache.get(name);
+        } catch (ExecutionException e) {
+            log.warn("Cannot get synchronization object for {}: {}", name, e.toString());
+            return new Object();
+        }
     }
 
     /**
@@ -345,6 +363,11 @@ public class BHive implements AutoCloseable, BHiveExecution {
         @Override
         public BHiveTransactions getTransactions() {
             return hive.getTransactions();
+        }
+
+        @Override
+        public Object getSynchronizationObject(String name) {
+            return hive.getSynchronizationObject(name);
         }
 
         /**

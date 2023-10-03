@@ -137,55 +137,57 @@ public class MetaManifest<T> {
      * @return the {@link Key} of the current metadata manifest.
      */
     public Manifest.Key write(BHiveExecution target, T meta) {
-        String targetTag = "1";
-        Optional<Long> id = target.execute(new ManifestMaxIdOperation().setManifestName(metaName));
-        Tree oldTree = null;
+        synchronized (target.getSynchronizationObject(getMetaName())) {
+            String targetTag = "1";
+            Optional<Long> id = target.execute(new ManifestMaxIdOperation().setManifestName(metaName));
+            Tree oldTree = null;
 
-        if (id.isPresent()) {
-            targetTag = Long.toString(id.get() + 1);
+            if (id.isPresent()) {
+                targetTag = Long.toString(id.get() + 1);
 
-            // read existing version if it is present
-            Manifest mf = target
-                    .execute(new ManifestLoadOperation().setManifest(new Manifest.Key(metaName, id.get().toString())));
-            try {
-                oldTree = target.execute(new TreeLoadOperation().setTree(mf.getRoot()));
-            } catch (Exception e) {
-                log.error("Cannot load previous version of MetaManifest: {}", mf, e);
-            }
-        }
-
-        Manifest.Key targetKey = new Manifest.Key(metaName, targetTag);
-        Manifest.Builder newMf = new Manifest.Builder(targetKey);
-        Tree.Builder newTree = new Tree.Builder();
-
-        try (Transaction t = target.getTransactions().begin()) {
-            // add the new metadata object
-            String metaFileName = metaFileName();
-            if (meta != null) {
-                // if null, we don't write the entry -> delete.
-                ObjectId oid = target.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(meta)));
-                newTree.add(new Tree.Key(metaFileName, EntryType.BLOB), oid);
-            }
-
-            // now copy other entries to the new tree
-            if (oldTree != null) {
-                for (Entry<Tree.Key, ObjectId> entry : oldTree.getChildren().entrySet()) {
-                    if (entry.getKey().getName().equals(metaFileName)) {
-                        continue; // we updated this one.
-                    }
-
-                    newTree.add(entry.getKey(), entry.getValue());
+                // read existing version if it is present
+                Manifest mf = target
+                        .execute(new ManifestLoadOperation().setManifest(new Manifest.Key(metaName, id.get().toString())));
+                try {
+                    oldTree = target.execute(new TreeLoadOperation().setTree(mf.getRoot()));
+                } catch (Exception e) {
+                    log.error("Cannot load previous version of MetaManifest: {}", mf, e);
                 }
             }
 
-            // insert tree and manifest
-            ObjectId newTreeId = target.execute(new InsertArtificialTreeOperation().setTree(newTree));
-            target.execute(new InsertManifestOperation().addManifest(newMf.setRoot(newTreeId).build(target)));
+            Manifest.Key targetKey = new Manifest.Key(metaName, targetTag);
+            Manifest.Builder newMf = new Manifest.Builder(targetKey);
+            Tree.Builder newTree = new Tree.Builder();
+
+            try (Transaction t = target.getTransactions().begin()) {
+                // add the new metadata object
+                String metaFileName = metaFileName();
+                if (meta != null) {
+                    // if null, we don't write the entry -> delete.
+                    ObjectId oid = target.execute(new ImportObjectOperation().setData(StorageHelper.toRawBytes(meta)));
+                    newTree.add(new Tree.Key(metaFileName, EntryType.BLOB), oid);
+                }
+
+                // now copy other entries to the new tree
+                if (oldTree != null) {
+                    for (Entry<Tree.Key, ObjectId> entry : oldTree.getChildren().entrySet()) {
+                        if (entry.getKey().getName().equals(metaFileName)) {
+                            continue; // we updated this one.
+                        }
+
+                        newTree.add(entry.getKey(), entry.getValue());
+                    }
+                }
+
+                // insert tree and manifest
+                ObjectId newTreeId = target.execute(new InsertArtificialTreeOperation().setTree(newTree));
+                target.execute(new InsertManifestOperation().addManifest(newMf.setRoot(newTreeId).build(target)));
+            }
+
+            target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(META_HIST_SIZE).setToDelete(metaName));
+
+            return targetKey;
         }
-
-        target.execute(new ManifestDeleteOldByIdOperation().setAmountToKeep(META_HIST_SIZE).setToDelete(metaName));
-
-        return targetKey;
     }
 
     /**

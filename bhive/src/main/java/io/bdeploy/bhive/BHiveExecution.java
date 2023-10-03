@@ -20,4 +20,9 @@ public interface BHiveExecution {
      */
     public BHiveTransactions getTransactions();
 
+    /**
+     * @return an object which can be used to synchronize for a certain id/name on this BHive
+     */
+    public Object getSynchronizationObject(String name);
+
 }

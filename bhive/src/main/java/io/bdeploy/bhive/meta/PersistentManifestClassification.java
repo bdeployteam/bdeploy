@@ -46,17 +46,12 @@ public class PersistentManifestClassification<T> {
     private final Function<Manifest, T> classifier;
     private final BHive hive;
 
-    private static final Map<String, Object> loadLocks = new TreeMap<>();
-
     private SortedMap<Manifest.Key, T> classifications;
 
     public PersistentManifestClassification(BHive hive, String name, Function<Manifest, T> classifier) {
         this.classificationName = CLASSIFICATION_PREFIX + "persistent/" + name;
         this.classifier = classifier;
         this.hive = hive;
-
-        // we need a single static lock per classification name. it's ok to *never* expire this.
-        loadLocks.computeIfAbsent(classificationName, k -> new Object());
     }
 
     /**
@@ -70,7 +65,7 @@ public class PersistentManifestClassification<T> {
      */
     @SuppressWarnings("unchecked")
     public void loadAndUpdate(Set<Manifest.Key> keys) {
-        synchronized (loadLocks.get(classificationName)) {
+        synchronized (hive.getSynchronizationObject(classificationName)) {
             Optional<Long> id = hive.execute(new ManifestMaxIdOperation().setManifestName(classificationName));
             Manifest.Key key;
 
