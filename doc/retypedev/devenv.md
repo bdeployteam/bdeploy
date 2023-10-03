@@ -11,7 +11,7 @@ BDeploy uses the **Eclipse IDE** for backend- and **VSCode** for frontend-develo
     * You need to have the [Launch Configuration DSL (LcDsl)](https://marketplace.eclipse.org/content/launch-configuration-dsl) extension installed.
 * [VSCode](https://code.visualstudio.com/download)
     * You need to have the [Angular Essentials](https://marketplace.visualstudio.com/items?itemName=johnpapa.angular-essentials) extension installed.
-* [NPM](https://www.npmjs.com/get-npm)
+* [Node.js](https://nodejs.org/de) including npm, currently 18.x LTS.
     * Some people prefer to use [NVM](https://github.com/nvm-sh/nvm)
 * [GIT](https://git-scm.com/downloads)
 
@@ -32,8 +32,7 @@ This documentation will assume the path `/work/bdeploy` to be available, if not 
 * Clone the repository: `cd /work/bdeploy && git clone https://github.com/bdeployteam/bdeploy.git`
 * Change to the repository directory: `cd bdeploy`
 * Start the `gradle` build
-    * `./gradlew build` on Linux (`bash`)
-    * `.\gradlew.bat build` on Windows (`cmd.exe`)
+    * `./gradlew build`
     * The build should conclude with a `BUILD SUCCESSFUL` message
 
 The `gradle` build will build test and package BDeploy. You can find build artifacts after the build here:
@@ -48,7 +47,7 @@ Additionally, documentation deliverables can be found in the `./doc/build/docs/d
 
 To be able to build, start and debug BDeploy backend applications from the Eclipse IDE, you need to perform some extra setup steps:
 
-* On the command line (see [Repository and Gradle Build](/devenv/#repository-and-gradle-build)) generate the **Eclipse IDE** project files by running `./gradlew eclipse` (`gradlew eclipse` on windows).
+* On the command line (see [Repository and Gradle Build](/devenv/#repository-and-gradle-build)) generate the **Eclipse IDE** project files by running `./gradlew eclipse`.
 * Start the **Eclipse IDE** - choose a workspace, e.g. `/work/bdeploy/workspace`.
 * Open the **Git Repositories** view.
 * Click **Add existing local repository**, browse to the repository location (e.g. `/work/bdeploy/bdeploy`) and add it.
