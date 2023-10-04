@@ -516,7 +516,8 @@ This file defines a single **Application Template**. A [`product-info.yaml`](#pr
 ```yaml
 id: server-with-sleep <1>
 application: server-app
-name: "Server With Sleep"
+name: "Server With Sleep (Oracle)"
+processName: "Server With Sleep"
 description: "Server application which sleeps before exiting"
 preferredProcessControlGroup: "First Group" <2>
 
@@ -542,10 +543,11 @@ startParameters: <5>
 ```
 
 1. An **Application Template** must have an ID. This can be used to reference it from an **Instance Template**.
-2. The preferred process control group is used to determine which process control group to use when applying the application template. This is only used if a **Process Control Group** with this name exists in the instance configuration. **Process Control Groups** can be pre-configured in an [`instance-template.yaml`](#instance-templateyaml).
-3. A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
-4. A template can define arbitrary process control parameters to further control the default process control settings.
-5. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
+2. `name` is the value user sees when he chooses the template in UI. `processName` is the name of the resulting process configuration.
+3. The preferred process control group is used to determine which process control group to use when applying the application template. This is only used if a **Process Control Group** with this name exists in the instance configuration. **Process Control Groups** can be pre-configured in an [`instance-template.yaml`](#instance-templateyaml).
+4. A template can define (and use) template variables which are mandatory input by the user when using the template. A template variable can be referenced in parameter value definitions using the `{{T:varname}}` syntax. If the parameter value is numeric, you can also use simple arithmetic operations on the template variable like `{{T:varname:+10}}` which will add 10 to the numeric value of the template variable.
+5. A template can define arbitrary process control parameters to further control the default process control settings.
+6. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
 
 !!!info Note
 An **Application Template** can also _extend_ another previously defined template. This works the same as the `template` specifier in [`instance-template.yaml`](#instance-templateyaml) and also allows for `fixedVariables`.

@@ -25,6 +25,8 @@ public class FlattenedApplicationTemplateConfiguration {
 
     public String name;
 
+    public String processName;
+
     public String application;
 
     public String description;
@@ -52,6 +54,7 @@ public class FlattenedApplicationTemplateConfiguration {
     private FlattenedApplicationTemplateConfiguration(TemplateApplication original, List<ApplicationTemplateDescriptor> appTpl,
             List<TemplateVariable> instTplVar, List<TemplateVariableFixedValueOverride> overrides, List<String> children) {
         this.name = original.name;
+        this.processName = original.processName;
         this.application = original.application;
         this.description = original.description;
         this.preferredProcessControlGroup = original.preferredProcessControlGroup;

@@ -201,11 +201,15 @@ export class ProcessEditService {
     );
     const stop: CommandConfiguration = this.calculateInitialCommand(application.descriptor.stopCommand, [], {}, status);
 
+    const templateProcessName = !!template?.processName ? template.processName : template?.name;
+
     const process: ApplicationConfiguration = {
       id: null, // calculated later
       uid: null, // compat
       application: application.key,
-      name: template?.name ? performTemplateVariableSubst(template.name, variableValues, status) : application.name,
+      name: templateProcessName
+        ? performTemplateVariableSubst(templateProcessName, variableValues, status)
+        : application.name,
       pooling: application.descriptor.pooling,
       endpoints: cloneDeep(application.descriptor.endpoints),
       processControl: {
