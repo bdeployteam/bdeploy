@@ -10,9 +10,7 @@
         [route]="['panels', 'admin', 'add-ldap-server']"
       ></app-bd-panel-button>
     </ng-container>
-    <ng-container
-      *ngIf="generalTab.isActive || ldapTab.isActive || oidcTab.isActive"
-    >
+    <ng-container *ngIf="generalTab.isActive || ldapTab.isActive || oidcTab.isActive">
       <app-bd-panel-button
         [collapsed]="false"
         color="primary"
@@ -67,11 +65,23 @@
       >
         <mat-tab #generalTab class="flex flex-col">
           <ng-template mat-tab-label
-            ><div class="flex justify-start items-center gap-1">
-              <mat-icon>settings</mat-icon>General
-            </div></ng-template
+            ><div class="flex justify-start items-center gap-1"><mat-icon>settings</mat-icon>General</div></ng-template
           >
           <app-general-tab></app-general-tab>
+        </mat-tab>
+        <mat-tab #mailTab class="flex flex-col">
+          <ng-template mat-tab-label
+            ><div class="flex justify-start items-center gap-1"><mat-icon>mail</mat-icon>Mail Sending</div></ng-template
+          >
+          <app-mail-sending-tab></app-mail-sending-tab>
+        </mat-tab>
+        <mat-tab #mailTab class="flex flex-col">
+          <ng-template mat-tab-label
+            ><div class="flex justify-start items-center gap-1">
+              <mat-icon>mail</mat-icon>Mail Receiving
+            </div></ng-template
+          >
+          <app-mail-receiving-tab></app-mail-receiving-tab>
         </mat-tab>
         <mat-tab #oidcTab class="flex flex-col">
           <ng-template mat-tab-label
@@ -115,9 +125,7 @@
         </mat-tab>
         <mat-tab #pluginTab class="flex flex-col">
           <ng-template mat-tab-label
-            ><div class="flex justify-start items-center gap-1">
-              <mat-icon>extension</mat-icon>Plugins
-            </div></ng-template
+            ><div class="flex justify-start items-center gap-1"><mat-icon>extension</mat-icon>Plugins</div></ng-template
           >
           <ng-template matTabContent>
             <app-plugins-tab></app-plugins-tab>

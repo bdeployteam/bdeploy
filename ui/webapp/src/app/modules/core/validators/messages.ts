@@ -2,6 +2,7 @@ import { ValidationErrors } from '@angular/forms';
 import { ID_VALIDATION } from './identifier.directive';
 import { PASSWORD_VALIDATION } from './password-verification.directive';
 import { PORT_VALIDATION } from './port-value.directive';
+import { URL_VALIDATION } from './server-connection-url-syntax-validator.directive';
 import { TRIM_VALIDATION } from './trimmed.directive';
 
 export type BdValidationMessageExtractor = (label: string, errors: ValidationErrors) => string;
@@ -50,6 +51,10 @@ export function bdValidationMessage(label: string, errors: ValidationErrors): st
 
   if (errors[TRIM_VALIDATION]) {
     return `${label} contains leading or trailing spaces`;
+  }
+
+  if (errors[URL_VALIDATION]) {
+    return `${label} has an invalid syntax`;
   }
 
   if (errors[PASSWORD_VALIDATION]) {

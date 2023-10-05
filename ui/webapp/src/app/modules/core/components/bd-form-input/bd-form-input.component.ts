@@ -33,6 +33,7 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   @Input() required: any;
   @Input() disabled: any;
   @Input() type: string;
+  @Input() placeholder: string;
   @Input() suggested: string[];
   @Input() errorDisplay: 'touched' | 'immediate' = 'touched';
   @Input() passwordLock = false;

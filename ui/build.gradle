@@ -8,6 +8,7 @@ def webappDir = "$projectDir/webapp"
 dependencies {
     implementation(
         project(":common"),
+        project(":messaging"),
         project(":logging"),
         project(":jersey"),
         project(":bhive"),

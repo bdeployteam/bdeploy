@@ -1,0 +1,60 @@
+package io.bdeploy.messaging.imap;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import io.bdeploy.messaging.store.StoreConnectionHandler.FolderOpeningStyle;
+import io.bdeploy.messaging.store.imap.IMAPStoreConnectionHandler;
+import jakarta.mail.URLName;
+
+/**
+ * Contains unit tests for {@link IMAPStoreConnectionHandler}.
+ */
+public class IMAPStoreConnectionHandlerTests {
+
+    // IMAP config
+
+    private static final String HOST = "DUMMY";
+    private static final int PORT_IMAP = -1;  // commonly 143
+    private static final int PORT_IMAPS = -1; // commonly 993
+    private static final String USERNAME = "DUMMY";
+    private static final String PASSWORD = "DUMMY";
+
+    // Other constants
+
+    private static final String PROTOCOL_IMAP = "imap";
+    private static final String PROTOCOL_IMAPS = "imaps";
+    private static final String FOLDER_INBOX = "inbox";
+
+    private static final URLName URL_IMAP = new URLName(PROTOCOL_IMAP, HOST, PORT_IMAP, FOLDER_INBOX, USERNAME, PASSWORD);
+    private static final URLName URL_IMAP_NOFOLDER = new URLName(PROTOCOL_IMAP, HOST, PORT_IMAP, null, USERNAME, PASSWORD);
+    private static final URLName URL_IMAPS = new URLName(PROTOCOL_IMAPS, HOST, PORT_IMAPS, FOLDER_INBOX, USERNAME, PASSWORD);
+    private static final URLName URL_IMAPS_NOFOLDER = new URLName(PROTOCOL_IMAPS, HOST, PORT_IMAPS, null, USERNAME, PASSWORD);
+
+    @Test
+    void testWithoutConnection() throws Exception {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningStyle.ReadOnly)) {
+            // Unfortunately there is not much to test here.. I suppose we can try closing the handler multiple times in a row?
+            messageReceiver.close();
+            messageReceiver.close();
+        }
+    }
+
+    @Test
+    @Disabled("Disabled because a IMAP folder must be configured.")
+    void testImap() throws Exception {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningStyle.ReadOnly)) {
+            messageReceiver.connect(URL_IMAP);
+            messageReceiver.connect(URL_IMAP_NOFOLDER);
+        }
+    }
+
+    @Test
+    @Disabled("Disabled because a IMAP folder must be configured.")
+    void testImaps() throws Exception {
+        try (IMAPStoreConnectionHandler messageReceiver = new IMAPStoreConnectionHandler(FolderOpeningStyle.ReadOnly)) {
+            messageReceiver.connect(URL_IMAPS);
+            messageReceiver.connect(URL_IMAPS_NOFOLDER);
+        }
+    }
+}

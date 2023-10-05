@@ -1,0 +1,82 @@
+<div class="bd-default-padding">
+  <p>Configuring a mail server will allow BDeploy to send e-mails to the master BDeploy server.</p>
+  <app-bd-form-toggle
+    [(ngModel)]="settings.settings$.value.mailSenderSettings.enabled"
+    label="Enable Mail Sending"
+    (ngModelChange)="clearMessages()"
+  ></app-bd-form-toggle>
+  <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
+    Configure the SMTP/SMTPS server below if enabled.
+  </p>
+  <form #smtpConnectionData="ngForm">
+    <app-bd-form-input
+      [(ngModel)]="settings.settings$.value.mailSenderSettings.url"
+      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
+      [required]="true"
+      label="URL"
+      name="url"
+      placeholder="smtp(s)://host:port/folder"
+      appTrimmed
+      appServerConnectionUrlSyntaxValid
+    ></app-bd-form-input>
+    <app-bd-form-input
+      [(ngModel)]="settings.settings$.value.mailSenderSettings.username"
+      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
+      label="Username"
+      name="username"
+      appTrimmed
+    ></app-bd-form-input>
+    <app-bd-form-input
+      [(ngModel)]="settings.settings$.value.mailSenderSettings.password"
+      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
+      label="Password"
+      name="password"
+      type="password"
+      [passwordShowable]="true"
+    ></app-bd-form-input>
+  </form>
+  <div class="flex justify-start items-center bd-success-text">
+    <app-bd-button
+      [disabled]="!settings.settings$.value.mailSenderSettings.enabled || smtpConnectionData.invalid"
+      icon="send"
+      text="Test SMTP Server Connection"
+      [collapsed]="false"
+      (click)="testConnection()"
+    ></app-bd-button>
+    <div class="text-center pl-4">{{ (connectionTestStatusMsg$ | async) }}</div>
+  </div>
+  <br />
+  <app-bd-form-input
+    [(ngModel)]="settings.settings$.value.mailSenderSettings.senderAddress"
+    [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
+    label="Sender Address"
+    type="email"
+    email
+    appTrimmed
+  ></app-bd-form-input>
+  <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
+    Configure the receiver below if enabled.
+  </p>
+  <form #receiver="ngForm">
+    <app-bd-form-input
+      name="receiverAddress"
+      [(ngModel)]="settings.settings$.value.mailSenderSettings.receiverAddress"
+      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
+      [required]="true"
+      label="Receiver Address"
+      type="email"
+      email
+      appTrimmed
+    ></app-bd-form-input>
+  </form>
+  <div class="flex justify-start items-center bd-success-text">
+    <app-bd-button
+      [disabled]="!settings.settings$.value.mailSenderSettings.enabled || smtpConnectionData.invalid || receiver.invalid"
+      icon="send"
+      text="Send Test Mail"
+      [collapsed]="false"
+      (click)="sendTestMail()"
+    ></app-bd-button>
+    <div class="text-center pl-4 bd-success-text">{{ (mailSendingTestStatusMsg$ | async) }}</div>
+  </div>
+</div>

@@ -20,6 +20,7 @@
       [required]="required"
       [disabled]="disabled || passwordLock"
       [type]="showPassword ? 'text' : type"
+      [placeholder]="placeholder"
       [errorStateMatcher]="this"
       [appBdContentAssist]="assistContent"
       (focus)="focus.emit(true)"

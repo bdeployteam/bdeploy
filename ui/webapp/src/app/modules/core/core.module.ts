@@ -122,6 +122,7 @@ import { PasswordVerificationValidator } from './validators/password-verificatio
 import { PortValueValidatorDirective } from './validators/port-value.directive';
 import { PropagateErrorValidatorDirective } from './validators/propagate-error-validator.directive';
 import { TrimmedValidator } from './validators/trimmed.directive';
+import { ServerConnectionUrlSyntaxValidator } from './validators/server-connection-url-syntax-validator.directive';
 
 function loadAppConfig(cfgService: ConfigService) {
   return () => cfgService.load();
@@ -164,6 +165,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdFormInputComponent,
     IdentifierValidator,
     TrimmedValidator,
+    ServerConnectionUrlSyntaxValidator,
     BdFormToggleComponent,
     BdFormSelectComponent,
     BdDataComponentCellComponent,
@@ -340,6 +342,7 @@ function loadAppConfig(cfgService: ConfigService) {
     // validators
     IdentifierValidator,
     TrimmedValidator,
+    ServerConnectionUrlSyntaxValidator,
     PasswordVerificationValidator,
     EditUniqueValueValidatorDirective,
     BdExpandButtonComponent,

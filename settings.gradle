@@ -14,5 +14,6 @@ include(
     'doc',
     'launcher',
     'test-data',
-    'schema'
+    'schema',
+    'messaging'
 )

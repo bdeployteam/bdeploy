@@ -28,6 +28,8 @@ import { LdapCheckActionComponent } from './components/settings-general/ldap-tab
 import { LdapEditActionComponent } from './components/settings-general/ldap-tab/ldap-edit-action/ldap-edit-action.component';
 import { LdapImportActionComponent } from './components/settings-general/ldap-tab/ldap-import-action/ldap-import-action.component';
 import { LdapTabComponent } from './components/settings-general/ldap-tab/ldap-tab.component';
+import { MailReceivingTabComponent } from './components/settings-general/mail-receiving-tab/mail-receiving-tab.component';
+import { MailSendingTabComponent } from './components/settings-general/mail-sending-tab/mail-sending-tab.component';
 import { OidcTabComponent } from './components/settings-general/oidc-tab/oidc-tab.component';
 import { OktaTabComponent } from './components/settings-general/okta-tab/okta-tab.component';
 import { PluginDeleteActionComponent } from './components/settings-general/plugins-tab/plugin-delete-action/plugin-delete-action.component';
@@ -64,6 +66,8 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     OidcTabComponent,
     Auth0TabComponent,
     OktaTabComponent,
+    MailSendingTabComponent,
+    MailReceivingTabComponent,
   ],
   imports: [
     CommonModule,

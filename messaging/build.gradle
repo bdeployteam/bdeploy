@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    implementation(
+        project(":common"),
+
+        'org.eclipse.angus:jakarta.mail:2.0.2'
+    )
+
+    api(
+        'jakarta.mail:jakarta.mail-api:2.1.2'
+    )
+}

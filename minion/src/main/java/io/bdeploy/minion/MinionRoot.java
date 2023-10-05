@@ -72,6 +72,8 @@ import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.interfaces.settings.Auth0SettingsDto;
+import io.bdeploy.interfaces.settings.MailReceiverSettingsDto;
+import io.bdeploy.interfaces.settings.MailSenderSettingsDto;
 import io.bdeploy.interfaces.settings.OIDCSettingsDto;
 import io.bdeploy.interfaces.settings.OktaSettingsDto;
 import io.bdeploy.jersey.JerseyServer;
@@ -83,10 +85,15 @@ import io.bdeploy.jersey.actions.ActionService;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.messaging.MessageSender;
+import io.bdeploy.messaging.store.imap.custom.ExecuteUnreadMessagesReceiver;
+import io.bdeploy.messaging.transport.smtp.SMTPTransportConnectionHandler;
+import io.bdeploy.messaging.util.MessagingUtils;
 import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.minion.job.SyncLdapUserGroupsJob;
+import io.bdeploy.minion.mail.MinionRootMailHandler;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
 import io.bdeploy.minion.nodes.NodeManagerImpl;
@@ -100,6 +107,9 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.dto.JobDto;
+import jakarta.mail.MessagingException;
+import jakarta.mail.URLName;
+import jakarta.mail.search.SubjectTerm;
 import jakarta.ws.rs.WebApplicationException;
 import net.jsign.AuthenticodeSigner;
 import net.jsign.pe.PEFile;
@@ -108,6 +118,8 @@ import net.jsign.pe.PEFile;
  * Represents the root directory and configuration of a minion installation.
  */
 public class MinionRoot extends LockableDatabase implements Minion, AutoCloseable {
+
+    public static final String MAIL_SUBJECT_PATTERN_CONFIG_OF = "Configuration update of: ";
 
     private static final String STATE_FILE = "state.json";
     private static final String SESSION_FILE = "ws.json";
@@ -127,6 +139,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     private final MinionProcessController processController;
     private final NodeManagerImpl nodeManager;
+
+    private final MessageSender mailSender = new SMTPTransportConnectionHandler();
+    private final ExecuteUnreadMessagesReceiver mailReceiver = new ExecuteUnreadMessagesReceiver();
 
     private Path updates;
     private MinionRestartManager restartManager = t -> log.error("No Update Manager, cannot update Minion!");
@@ -161,6 +176,9 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         this.processController = new MinionProcessController();
         this.nodeManager = new NodeManagerImpl();
+
+        this.mailReceiver.addSearchTerm(new SubjectTerm(MAIL_SUBJECT_PATTERN_CONFIG_OF));
+        this.mailReceiver.addOnUnreadMessageFoundListener(new MinionRootMailHandler(this)::handleMail);
     }
 
     public void markConnectionCheckFailed() {
@@ -248,6 +266,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         doMigrate();
         updateMinionConfiguration();
+
+        updateMailHandling();
     }
 
     /**
@@ -271,6 +291,45 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
         // after all autoStart has completed, the server is finally fully up.
         startupAction.close();
+    }
+
+    /**
+     * Reads the current {@link SettingsConfiguration} and updates the mail handlers accordingly.
+     */
+    public void updateMailHandling() {
+        SettingsConfiguration settings = getSettings(false);
+        MailSenderSettingsDto mailSenderSettings = settings.mailSenderSettings;
+        MailReceiverSettingsDto mailReceiverSettings = settings.mailReceiverSettings;
+
+        if (mailSenderSettings.enabled) {
+            URLName parsedUrl = null;
+            try {
+                parsedUrl = MessagingUtils//
+                        .checkAndParseUrl(mailSenderSettings.url, mailSenderSettings.username, mailSenderSettings.password);
+                mailSender.connect(parsedUrl);
+            } catch (IllegalArgumentException e) {
+                log.error("Mail sender URL is incomplete.", e);
+            } catch (MessagingException e) {
+                log.error("Failed to start mail sender to " + parsedUrl, e);
+            }
+        } else {
+            mailSender.close();
+        }
+
+        if (mailReceiverSettings.enabled) {
+            URLName parsedUrl = null;
+            try {
+                parsedUrl = MessagingUtils//
+                        .checkAndParseUrl(mailReceiverSettings.url, mailReceiverSettings.username, mailReceiverSettings.password);
+                mailReceiver.connect(parsedUrl);
+            } catch (IllegalArgumentException e) {
+                log.error("Mail receiver URL is incomplete.", e);
+            } catch (MessagingException e) {
+                log.error("Failed to start mail receiver to " + parsedUrl, e);
+            }
+        } else {
+            mailReceiver.close();
+        }
     }
 
     /** Updates the logging config file if required, and switches to using it */
@@ -536,6 +595,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         return tmpDir;
     }
 
+    public MessageSender getMailSender() {
+        return mailSender;
+    }
+
     /**
      * Setup tasks which should only run when this root is used for serving a
      * minion.
@@ -588,6 +651,13 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         hive.close();
         auditor.close();
         nodeManager.close();
+
+        if (mailSender != null) {
+            mailSender.close();
+        }
+        if (mailReceiver != null) {
+            mailReceiver.close();
+        }
 
         if (scheduler != null) {
             try {
@@ -960,8 +1030,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
-    public SettingsConfiguration getSettings() {
-        SettingsConfiguration s = SettingsManifest.read(hive, getEncryptionKey(), true);
+    public SettingsConfiguration getSettings(boolean clearPasswords) {
+        SettingsConfiguration s = SettingsManifest.read(hive, getEncryptionKey(), clearPasswords);
 
         if (s.auth.oidcSettings == null) {
             s.auth.oidcSettings = new OIDCSettingsDto();
@@ -975,12 +1045,21 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             s.auth.oktaSettings = new OktaSettingsDto();
         }
 
+        if (s.mailSenderSettings == null) {
+            s.mailSenderSettings = new MailSenderSettingsDto();
+        }
+
+        if (s.mailSenderSettings == null) {
+            s.mailReceiverSettings = new MailReceiverSettingsDto();
+        }
+
         return s;
     }
 
     @Override
     public void setSettings(SettingsConfiguration settings) {
         SettingsManifest.write(hive, settings, getEncryptionKey());
+        updateMailHandling();
     }
 
     public void setLatestGitHubReleaseVersion(Version v) {

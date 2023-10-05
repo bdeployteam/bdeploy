@@ -5,11 +5,15 @@ import static io.bdeploy.common.util.RuntimeAssert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,15 +43,18 @@ import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.view.TreeView;
 import io.bdeploy.bhive.objects.view.scanner.TreeVisitor;
+import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.op.ImportTreeOperation;
 import io.bdeploy.bhive.op.ManifestDeleteOperation;
 import io.bdeploy.bhive.op.ManifestExistsOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
 import io.bdeploy.bhive.op.ManifestNextIdOperation;
+import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.bhive.op.ObjectLoadOperation;
 import io.bdeploy.bhive.op.ScanOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
+import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.RuntimeAssert;
@@ -106,16 +113,25 @@ import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.NodeDeploymentResource;
 import io.bdeploy.interfaces.remote.NodeProcessResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.interfaces.settings.MailSenderSettingsDto;
 import io.bdeploy.jersey.JerseyWriteLockService.LockingResource;
 import io.bdeploy.jersey.JerseyWriteLockService.WriteLock;
 import io.bdeploy.jersey.actions.ActionFactory;
+import io.bdeploy.messaging.MessageDataHolder;
+import io.bdeploy.messaging.MessageSender;
+import io.bdeploy.messaging.MimeFile;
+import io.bdeploy.messaging.util.MessagingUtils;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.ui.RequestScopedParallelOperationsService;
+import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import jakarta.inject.Inject;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
@@ -143,6 +159,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
     @Inject
     private RequestScopedParallelOperationsService rspos;
+
+    @Inject
+    private MessageSender mailSender;
 
     private final String name;
 
@@ -612,9 +631,64 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                     state.nodeDtos.forEach(n -> nodeMap.put(n.nodeName, updateControlGroups(n.nodeConfiguration)));
                 }
 
-                return createInstanceVersion(rootKey, state.config, nodeMap);
+                Key newInstanceVersionKey = createInstanceVersion(rootKey, state.config, nodeMap);
+
+                if (root.getMode() == MinionMode.MANAGED && root.getSettings().mailSenderSettings.enabled) {
+                    //Note that we are not allowed to use Files.createTempFile() here, because that method always immediately creates the file.
+                    //This is not okay to do here, because the constructor of BHive requires the Path-object to not yet exist in the file system.
+                    String uniqueId = name + "#" + instanceConfig.id;
+                    Path targetFile = root.getTempDir().resolve(getClass().getName() + "#TempMailBHive#" + uniqueId + ".zip");
+
+                    URI targetUri = targetFile.toUri();
+
+                    ActivityReporter.Null nullReporter = new ActivityReporter.Null();
+
+                    try {
+                        try (BHive zipHive = new BHive(targetUri, null, nullReporter)) {
+                            CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
+                            op.addManifest(newInstanceVersionKey);
+                            hive.execute(new ObjectListOperation().addManifest(newInstanceVersionKey)).forEach(op::addObject);
+                            hive.execute(op);
+                        }
+
+                        sendMail(MinionRoot.MAIL_SUBJECT_PATTERN_CONFIG_OF + uniqueId,// subject
+                                "Instance group ID: " + name + "\n"// text
+                                        + "Instance ID: " + instanceConfig.id + "\n"//
+                                        + "Datetime: "
+                                        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss +S")),//
+                                MediaType.TEXT_PLAIN,// MIME type of text
+                                uniqueId + ".zip",// name of attachment
+                                Files.readAllBytes(targetFile),// attachment as byte[]
+                                Files.probeContentType(targetFile)// MIME type of attachment
+                        );
+                    } catch (MessagingException e) {
+                        log.error("Failed to send mail.", e);
+                    } catch (IOException e) {
+                        log.error("Parsing failed.", e);
+                    } finally {
+                        if (targetFile != null) {
+                            PathHelper.deleteRecursiveRetry(targetFile);
+                        }
+                    }
+                }
+
+                return newInstanceVersionKey;
             }
         }
+    }
+
+    private void sendMail(String subject, String text, String textMimeType, String attachmentName, byte[] attachment,
+            String attachmentMimeType) throws UnsupportedEncodingException, MessagingException {
+        MailSenderSettingsDto mailSenderSettingsDto = root.getSettings().mailSenderSettings;
+
+        InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
+                : MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.senderAddress);
+        InternetAddress receiverAddress = MessagingUtils.checkAndParseAddress(mailSenderSettingsDto.receiverAddress);
+
+        MessageDataHolder dataHolder = new MessageDataHolder(senderAddress, List.of(receiverAddress), subject, text, textMimeType,
+                List.of(new MimeFile(attachmentName, attachment, attachmentMimeType)));
+
+        mailSender.send(dataHolder);
     }
 
     private String getNextRootTag(String rootName) {

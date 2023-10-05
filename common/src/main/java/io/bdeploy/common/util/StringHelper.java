@@ -16,6 +16,13 @@ public class StringHelper {
     }
 
     /**
+     * Returns whether the given string is null or blank
+     */
+    public static boolean isNullOrBlank(String s) {
+        return s == null || s.isBlank();
+    }
+
+    /**
      * Checks if the string contains only lowercase characters.
      */
     public static boolean isAllLowerCase(String s) {

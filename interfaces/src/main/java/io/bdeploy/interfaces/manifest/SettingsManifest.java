@@ -2,6 +2,7 @@ package io.bdeploy.interfaces.manifest;
 
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,9 +25,12 @@ import io.bdeploy.bhive.op.ManifestMaxIdOperation;
 import io.bdeploy.bhive.op.TreeEntryLoadOperation;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.SecurityHelper;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.settings.LDAPSettingsDto;
+import io.bdeploy.interfaces.settings.MailReceiverSettingsDto;
+import io.bdeploy.interfaces.settings.MailSenderSettingsDto;
 
 public class SettingsManifest {
 
@@ -80,50 +84,80 @@ public class SettingsManifest {
 
     private static SettingsConfiguration decryptOrClearPasswords(SettingsConfiguration config, SecretKeySpec key,
             boolean clearPasswords) {
-        for (LDAPSettingsDto lds : config.auth.ldapSettings) {
-            if (clearPasswords) {
-                lds.pass = null;
-            } else if (lds.pass != null && !lds.pass.isEmpty()) {
-                try {
-                    lds.pass = SecurityHelper.decrypt(lds.pass, key);
-                } catch (GeneralSecurityException e) {
-                    log.error("Cannot decrypt password for {}", lds.server, e);
+        List<LDAPSettingsDto> ldapSettings = config.auth.ldapSettings;
+        MailSenderSettingsDto mailSenderSettings = config.mailSenderSettings;
+        MailReceiverSettingsDto mailReceiverSettings = config.mailReceiverSettings;
+
+        if (clearPasswords) {
+            ldapSettings.stream().forEach(lds -> lds.pass = null);
+            mailSenderSettings.password = null;
+            mailReceiverSettings.password = null;
+        } else {
+            ldapSettings.stream().forEach(ldsDto -> {
+                ldsDto.pass = decryptString(key, ldsDto.pass);
+                if (StringHelper.isNullOrEmpty(ldsDto.pass)) {
+                    log.warn("No password for {}", ldsDto.server);
                 }
-            } else {
-                log.warn("No password for {}", lds.server);
+            });
+            mailSenderSettings.password = decryptString(key, mailSenderSettings.password);
+            mailReceiverSettings.password = decryptString(key, mailReceiverSettings.password);
+        }
+
+        return config;
+    }
+
+    private static String decryptString(SecretKeySpec key, String string) {
+        if (!StringHelper.isNullOrEmpty(string)) {
+            try {
+                return SecurityHelper.decrypt(string, key);
+            } catch (GeneralSecurityException e) {
+                log.error("Cannot decrypt string", e);
             }
         }
-        return config;
+        return string;
     }
 
     private static SettingsConfiguration encryptPasswords(BHive hive, SettingsConfiguration config, SecretKeySpec key) {
         SettingsConfiguration oldConfig = read(hive, key, false);
-        for (LDAPSettingsDto lds : config.auth.ldapSettings) {
-            if (lds.pass == null || lds.pass.isEmpty()) {
-                reApplyOldPassword(key, oldConfig, lds);
+
+        List<LDAPSettingsDto> oldLdapSettingsList = oldConfig.auth.ldapSettings;
+        for (LDAPSettingsDto newLdapSettings : config.auth.ldapSettings) {
+            String newPLdapPassword = newLdapSettings.pass;
+
+            if (StringHelper.isNullOrEmpty(newPLdapPassword)) {
+                LDAPSettingsDto oldLdapSettings = oldLdapSettingsList.stream()//
+                        .filter(l -> Objects.equals(l.id, newLdapSettings.id))//
+                        .findAny().orElseThrow(() -> new IllegalStateException(
+                                "No existing password found and no password supplied for LDAP server " + newLdapSettings.server));
+                newLdapSettings.pass = tryEncryptString(key, oldLdapSettings.pass);
             } else {
-                try {
-                    lds.pass = SecurityHelper.encrypt(lds.pass, key);
-                } catch (GeneralSecurityException e) {
-                    throw new IllegalStateException("Cannot encrypt password for server: " + lds.server, e);
-                }
+                newLdapSettings.pass = tryEncryptString(key, newPLdapPassword);
             }
         }
+
+        MailSenderSettingsDto mailSenderSettings = config.mailSenderSettings;
+        mailSenderSettings.password =//
+                encryptString(key, mailSenderSettings.password, oldConfig.mailReceiverSettings.password);
+
+        MailReceiverSettingsDto mailReceiverSettings = config.mailReceiverSettings;
+        mailReceiverSettings.password =//
+                encryptString(key, mailReceiverSettings.password, oldConfig.mailReceiverSettings.password);
+
         return config;
     }
 
-    private static void reApplyOldPassword(SecretKeySpec key, SettingsConfiguration oldConfig, LDAPSettingsDto lds) {
-        LDAPSettingsDto oldLds = oldConfig.auth.ldapSettings.stream().filter(l -> Objects.equals(l.id, lds.id)).findAny()
-                .orElse(null);
-        if (oldLds != null) {
-            try {
-                lds.pass = SecurityHelper.encrypt(oldLds.pass, key);
-            } catch (GeneralSecurityException e) {
-                throw new IllegalStateException("Cannot encrypt password for server: " + lds.server, e);
-            }
-        } else {
-            throw new IllegalStateException("No existing password found, and no password supplied for LDAP server " + lds.server);
+    private static String encryptString(SecretKeySpec key, String newString, String oldString) {
+        if (StringHelper.isNullOrEmpty(newString)) {
+            return oldString == null ? null : tryEncryptString(key, oldString);
         }
+        return tryEncryptString(key, newString);
     }
 
+    private static String tryEncryptString(SecretKeySpec key, String string) {
+        try {
+            return SecurityHelper.encrypt(string, key);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Failed to encrypt string", e);
+        }
+    }
 }

@@ -118,9 +118,17 @@ public interface Minion {
     public PluginManager getPluginManager();
 
     /**
+     * @return the minion settings excluding all passwords
+     */
+    public default SettingsConfiguration getSettings() {
+        return getSettings(true);
+    }
+
+    /**
+     * @param clearPasswords if <code>true</code> the {@link SettingsConfiguration} will not contain any passwords
      * @return the minion settings.
      */
-    public SettingsConfiguration getSettings();
+    public SettingsConfiguration getSettings(final boolean clearPasswords);
 
     /**
      * Updates the minion settings.

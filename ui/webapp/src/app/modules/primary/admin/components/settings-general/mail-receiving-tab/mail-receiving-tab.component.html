@@ -1,0 +1,51 @@
+<div class="bd-default-padding">
+  <p>
+    Configuring a mail receiver allows the master BDeploy server to automatically sync its settings with other BDeploy
+    clients.
+  </p>
+  <app-bd-form-toggle
+    [(ngModel)]="settings.settings$.value.mailReceiverSettings.enabled"
+    label="Enable Mail Receiving"
+    (ngModelChange)="clearMessages()"
+  ></app-bd-form-toggle>
+  <p [class.bd-disabled-text]="!settings.settings$.value.mailReceiverSettings.enabled">
+    Configure the IMAP/IMAPS server below if enabled.
+  </p>
+  <form #imapConnectionData="ngForm">
+    <app-bd-form-input
+      [(ngModel)]="settings.settings$.value.mailReceiverSettings.url"
+      [disabled]="!settings.settings$.value.mailReceiverSettings.enabled"
+      [required]="true"
+      label="URL"
+      name="url"
+      placeholder="E.g. imap(s)://host:port"
+      appTrimmed
+      appServerConnectionUrlSyntaxValid
+    ></app-bd-form-input>
+    <app-bd-form-input
+      [(ngModel)]="settings.settings$.value.mailReceiverSettings.username"
+      [disabled]="!settings.settings$.value.mailReceiverSettings.enabled"
+      label="Username"
+      name="username"
+      appTrimmed
+    ></app-bd-form-input>
+    <app-bd-form-input
+      [(ngModel)]="settings.settings$.value.mailReceiverSettings.password"
+      [disabled]="!settings.settings$.value.mailReceiverSettings.enabled"
+      label="Password"
+      name="password"
+      type="password"
+      [passwordShowable]="true"
+    ></app-bd-form-input>
+  </form>
+  <div class="flex justify-start items-center bd-success-text">
+    <app-bd-button
+      [disabled]="!settings.settings$.value.mailReceiverSettings.enabled || imapConnectionData.invalid"
+      icon="send"
+      text="Test IMAP Server Connection"
+      [collapsed]="false"
+      (click)="testConnection()"
+    ></app-bd-button>
+    <div class="text-center pl-4">{{ (connectionTestStatusMsg$ | async) }}</div>
+  </div>
+</div>

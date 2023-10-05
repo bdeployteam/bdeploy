@@ -46,6 +46,7 @@ import io.bdeploy.jersey.actions.ActionBridge;
 import io.bdeploy.jersey.actions.ActionService;
 import io.bdeploy.jersey.ws.change.ObjectChangeBroadcaster;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
+import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.minion.ConnectivityChecker;
 import io.bdeploy.minion.ControllingMasterProvider;
 import io.bdeploy.minion.MinionRoot;
@@ -242,6 +243,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
                 // required for SoftwareUpdateResourceImpl.
                 bind(MasterRootResourceImpl.class).to(MasterRootResource.class);
                 bind(minionRoot.getNodeManager()).to(NodeManager.class);
+                bind(minionRoot.getMailSender()).to(MessageSender.class);
                 bind(ControllingMasterProvider.class).in(Singleton.class).to(MasterProvider.class);
                 if (pluginManager != null) {
                     bind(pluginManager).to(PluginManager.class);

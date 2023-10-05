@@ -6,6 +6,8 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.settings.CustomAttributeDescriptor;
+import io.bdeploy.interfaces.settings.MailReceiverSettingsDto;
+import io.bdeploy.interfaces.settings.MailSenderSettingsDto;
 import io.bdeploy.interfaces.settings.WebAuthSettingsDto;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
 import jakarta.ws.rs.Consumes;
@@ -35,4 +37,19 @@ public interface MasterSettingsResource {
     @POST
     @Path("/groupAttributes")
     public void mergeInstanceGroupAttributesDescriptors(List<CustomAttributeDescriptor> attributes);
+
+    @POST
+    @Path("/mail/sending/sendTestMail")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public boolean sendTestMail(MailSenderSettingsDto mailSenderSettingsDto);
+
+    @POST
+    @Path("/mail/sending/connectionTest")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public boolean testSenderConnection(MailSenderSettingsDto mailSenderSettingsDto);
+
+    @POST
+    @Path("/mail/receiving/connectionTest")
+    @RequiredPermission(permission = Permission.ADMIN)
+    public boolean testReceiverConnection(MailReceiverSettingsDto mailSenderSettingsDto);
 }
