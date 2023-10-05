@@ -44,10 +44,8 @@ public class ProductTransferService {
             getInTransferFor(groupName).addAll(data.versionsToTransfer);
         }
 
-        CompletableFuture.runAsync(() -> {
-            // on another thread, need to re-init activity reporting.
-            doTransfer(instanceGroupHive, groupName, data);
-        }, transferExec).whenComplete((r, e) -> {
+        // on another thread, need to re-init activity reporting.
+        CompletableFuture.runAsync(() -> doTransfer(instanceGroupHive, groupName, data), transferExec).whenComplete((r, e) -> {
             synchronized (inTransfer) {
                 getInTransferFor(groupName).removeAll(data.versionsToTransfer);
             }
@@ -95,7 +93,7 @@ public class ProductTransferService {
 
         try (ActionHandle h = af.runMultiAs(action, groupName, null,
                 data.versionsToTransfer.stream().map(v -> v.key.getName() + ":" + v.key.getTag()).toList(),
-                () -> ActionExecution.fromSystem())) {
+                ActionExecution::fromSystem)) {
             // always first fetch, then push
             if (fetch != null) {
                 try (Transaction t = instanceGroupHive.getTransactions().begin()) {

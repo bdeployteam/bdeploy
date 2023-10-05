@@ -129,7 +129,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     private boolean consoleLog;
     private Version latestGitHubReleaseVersion;
     private boolean conCheckFailed = false;
-    private SecretKeySpec key;
+    private SecretKeySpec encryptionKey;
 
     private ActionService actions;
     private ActionHandle startupAction;
@@ -579,10 +579,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     public synchronized SecretKeySpec getEncryptionKey() {
-        if (key == null) {
-            key = createEncryptionKey();
+        if (encryptionKey == null) {
+            encryptionKey = createEncryptionKey();
         }
-        return key;
+        return encryptionKey;
     }
 
     private SecretKeySpec createEncryptionKey() {
@@ -753,8 +753,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             return;
         }
         SortedMap<String, Manifest.Key> activeVersions = new TreeMap<>();
-        for (Key key : keys) {
-            initProcessControllerForInstance(activeVersions, key);
+        for (Key k : keys) {
+            initProcessControllerForInstance(activeVersions, k);
         }
 
         // Check what is running and launch applications

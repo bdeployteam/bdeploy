@@ -74,6 +74,11 @@ public class CompositeX509TrustManager implements X509TrustManager {
         return Iterables.toArray(certificates.build(), X509Certificate.class);
     }
 
+    /**
+     * @param keyStore the key store with additional certificates to trust.
+     * @return a {@link TrustManager} which trusts the default (global CA) certificates as well as additional ones from the given
+     *         keystore.
+     */
     public static TrustManager[] getTrustManagers(KeyStore keyStore) {
         return new TrustManager[] { new CompositeX509TrustManager(keyStore) };
     }
@@ -92,12 +97,12 @@ public class CompositeX509TrustManager implements X509TrustManager {
         try {
             factory = TrustManagerFactory.getInstance(algorithm);
             factory.init(keystore);
-            return Iterables.getFirst(Iterables.filter(Arrays.asList(factory.getTrustManagers()), X509TrustManager.class), null);
+            return Arrays.stream(factory.getTrustManagers()).filter(X509TrustManager.class::isInstance)
+                    .map(X509TrustManager.class::cast).findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Cannot find X509 trust manager"));
         } catch (NoSuchAlgorithmException | KeyStoreException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Cannot create trust manager", e);
         }
-
-        return null;
     }
 
 }

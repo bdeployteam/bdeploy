@@ -18,7 +18,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
 import io.bdeploy.jersey.ws.change.msg.ObjectEvent;
 import jakarta.ws.rs.WebApplicationException;
 
-public class ActionsTest {
+class ActionsTest {
 
     @Test
     void actions() throws Exception {

@@ -14,7 +14,7 @@ public class JerseyScopeService {
     }
 
     public void clear() {
-        this.scope.set(ObjectScope.EMPTY);
+        this.scope.remove();
     }
 
     public ObjectScope getObjectScope() {

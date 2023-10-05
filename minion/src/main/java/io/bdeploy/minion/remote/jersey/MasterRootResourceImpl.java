@@ -501,10 +501,9 @@ public class MasterRootResourceImpl implements MasterRootResource {
             OperatingSystem updateOs = getTargetOsFromUpdate(version);
 
             // Push the update to the nodes. Ensure that master is the last one
-            String masterName = root.getState().self;
+
             Collection<String> nodeNames = nodes.getAllNodeNames();
-            SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>(new SortOneAsLastComparator(masterName));
-            pushUpdate(version, bhive, updateOs, nodeNames, toUpdate);
+            SortedMap<String, MinionUpdateResource> toUpdate = pushUpdate(version, bhive, updateOs, nodeNames);
 
             // DON'T check for cancel from here on anymore to avoid inconsistent setups
             // (inconsistent setups can STILL occur in mixed-OS setups)
@@ -535,8 +534,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
             OperatingSystem updateOs = getTargetOsFromUpdate(version);
 
             // Push the update to the nodes. Ensure that master is the last one
-            SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>();
-            pushUpdate(version, bhive, updateOs, Collections.singletonList(name), toUpdate);
+            SortedMap<String, MinionUpdateResource> toUpdate = pushUpdate(version, bhive, updateOs,
+                    Collections.singletonList(name));
 
             // DON'T check for cancel from here on anymore to avoid inconsistent setups
             // (inconsistent setups can STILL occur in mixed-OS setups)
@@ -588,9 +587,12 @@ public class MasterRootResourceImpl implements MasterRootResource {
         rspos.runAndAwaitAll("Prepare-Update", runnables, null);
     }
 
-    private void pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs, Collection<String> nodeNames,
-            SortedMap<String, MinionUpdateResource> toUpdate) {
+    private SortedMap<String, MinionUpdateResource> pushUpdate(Manifest.Key version, BHive h, OperatingSystem updateOs,
+            Collection<String> nodeNames) {
+        String masterName = root.getState().self;
+
         List<Runnable> runnables = new ArrayList<>();
+        SortedMap<String, MinionUpdateResource> toUpdate = new TreeMap<>(new SortOneAsLastComparator(masterName));
 
         for (String nodeName : nodeNames) {
             MinionDto minionDto = nodes.getNodeConfigIfOnline(nodeName);
@@ -629,6 +631,8 @@ public class MasterRootResourceImpl implements MasterRootResource {
         }
 
         rspos.runAndAwaitAll("Push-Update", runnables, h.getTransactions());
+
+        return toUpdate;
     }
 
     private OperatingSystem getTargetOsFromUpdate(Key version) {

@@ -164,12 +164,12 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
             }
 
             if (config.revert()) {
-                doRestoreCertificate(mr, state.keystorePath, state.keystorePass);
+                doRestoreCertificate(state.keystorePath);
                 updateSelf(mr, state.keystorePath, state.keystorePass);
             }
 
             if (config.revertHttps()) {
-                doRestoreCertificate(mr, state.keystoreHttpsPath, state.keystorePass);
+                doRestoreCertificate(state.keystoreHttpsPath);
             } else if (config.removeHttps()) {
                 Path ks = state.keystoreHttpsPath;
                 if (ks != null && PathHelper.exists(ks)) {
@@ -229,8 +229,7 @@ public class CertUpdateTool extends ConfiguredCliTool<CertUpdateConfig> {
         mf.update(cfg);
     }
 
-    private RenderableResult doRestoreCertificate(MinionRoot mr, Path ks, char[] ksp)
-            throws IOException, GeneralSecurityException {
+    private RenderableResult doRestoreCertificate(Path ks) throws IOException {
         Path bak = ks.getParent().resolve(ks.getFileName().toString() + ".bak");
 
         if (!PathHelper.exists(bak)) {
