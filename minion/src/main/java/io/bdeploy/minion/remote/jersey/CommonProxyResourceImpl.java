@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
@@ -37,13 +36,13 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
     private final String instanceId;
     private final String applicationId;
 
-    private final SortedMap<String, EndpointsConfiguration> endpoints;
+    private final EndpointsConfiguration endpoints;
 
     private final ProxyForwarder forwarder;
     private final ProxyUnwrapper unwrapper;
 
-    public CommonProxyResourceImpl(String group, String instanceId, String applicationId,
-            SortedMap<String, EndpointsConfiguration> endpoints, ProxyForwarder forwarder, ProxyUnwrapper unwrapper) {
+    public CommonProxyResourceImpl(String group, String instanceId, String applicationId, EndpointsConfiguration endpoints,
+            ProxyForwarder forwarder, ProxyUnwrapper unwrapper) {
         this.group = group;
         this.instanceId = instanceId;
         this.applicationId = applicationId;
@@ -53,8 +52,13 @@ public class CommonProxyResourceImpl implements CommonProxyResource {
     }
 
     private HttpEndpoint getEndpoint(String fullPath) {
-        Optional<HttpEndpoint> ep = endpoints.entrySet().stream().flatMap(e -> e.getValue().http.stream())
-                .filter(e -> e.id.equals(fullPath) || fullPath.startsWith(e.id + '/')).findFirst();
+        if (endpoints == null) {
+            throw new WebApplicationException("Endpoint " + fullPath + " not found for instance " + instanceId,
+                    Status.SERVICE_UNAVAILABLE);
+        }
+
+        Optional<HttpEndpoint> ep = endpoints.http.stream().filter(e -> e.id.equals(fullPath) || fullPath.startsWith(e.id + '/'))
+                .findFirst();
 
         if (!ep.isPresent()) {
             throw new WebApplicationException("Endpoint " + fullPath + " not found for instance " + instanceId,
