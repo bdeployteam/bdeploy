@@ -15,8 +15,11 @@ public class TemplateApplication {
     @JsonPropertyDescription("ID of another application template, which should be the basis of this template (inheritance).")
     public String template;
 
-    @JsonPropertyDescription("The name of the resulting process configuration.")
+    @JsonPropertyDescription("The name of the application template configuration.")
     public String name;
+
+    @JsonPropertyDescription("The name of the resulting process configuration.")
+    public String processName;
 
     @JsonPropertyDescription("A description of the process created by this template.")
     public String description;
