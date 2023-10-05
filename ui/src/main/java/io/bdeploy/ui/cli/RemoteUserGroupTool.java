@@ -2,7 +2,6 @@ package io.bdeploy.ui.cli;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
@@ -91,7 +90,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
         } else if (config.remove() != null) {
             remove(config, admin);
         } else if (config.list()) {
-            return list(config, admin, remote);
+            return list(admin, remote);
         } else if (config.listUsers() != null) {
             return listUsers(config, admin);
         } else if (config.addUser() != null) {
@@ -147,7 +146,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
         admin.deleteUserGroups(group.id);
     }
 
-    private DataTable list(UserGroupConfig config, AuthAdminResource admin, RemoteService remote) {
+    private DataTable list(AuthAdminResource admin, RemoteService remote) {
         DataTable table = createDataTable();
         table.setCaption("User group accounts on " + remote.getUri());
 
@@ -162,8 +161,7 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
 
     private DataTable listUsers(UserGroupConfig config, AuthAdminResource admin) {
         UserGroupInfo group = getGroup(config.listUsers(), admin);
-        List<UserInfo> users = admin.getAllUser().stream().filter(user -> user.groups.contains(group.id))
-                .collect(Collectors.toList());
+        List<UserInfo> users = admin.getAllUser().stream().filter(user -> user.groups.contains(group.id)).toList();
 
         DataTable table = createDataTable();
         table.setCaption("User accounts that belong to group " + group.name);
@@ -191,7 +189,8 @@ public class RemoteUserGroupTool extends RemoteServiceTool<UserGroupConfig> {
     }
 
     private UserGroupInfo getGroup(String name, AuthAdminResource admin) {
-        return admin.getAllUserGroups().stream().filter(g -> name.equalsIgnoreCase(g.name)).findFirst().orElse(null);
+        return admin.getAllUserGroups().stream().filter(g -> name.equalsIgnoreCase(g.name)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + name));
     }
 
 }

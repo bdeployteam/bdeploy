@@ -91,7 +91,7 @@ public class ActionService {
 
     private void cleanup() {
         synchronized (running) {
-            List<Action> notRunning = running.entrySet().stream().filter(e -> e.getValue().isEmpty()).map(e -> e.getKey())
+            List<Action> notRunning = running.entrySet().stream().filter(e -> e.getValue().isEmpty()).map(Map.Entry::getKey)
                     .collect(Collectors.toList());
             notRunning.forEach(running::remove);
         }

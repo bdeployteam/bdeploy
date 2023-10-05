@@ -147,7 +147,7 @@ public class SoftwareUpdateResourceImpl implements SoftwareUpdateResource {
     @Override
     public void deleteVersions(List<Manifest.Key> keys) {
         try (ActionHandle h = af.runMulti(Actions.DELETE_UPDATES, null, null,
-                keys.stream().map(k -> k.getTag()).distinct().toList())) {
+                keys.stream().map(Manifest.Key::getTag).distinct().toList())) {
             BHive hive = getHive();
             keys.forEach(k -> hive.execute(new ManifestDeleteOperation().setToDelete(k)));
             hive.execute(new PruneOperation());

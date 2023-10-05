@@ -2,11 +2,10 @@ package io.bdeploy.jersey.actions;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jvnet.hk2.annotations.Service;
-
-import com.google.common.base.Supplier;
 
 import io.bdeploy.common.actions.Actions;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;

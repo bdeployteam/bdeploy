@@ -51,10 +51,7 @@ public class RequestScopedNamedDaemonThreadFactory extends NamedDaemonThreadFact
             }
 
             scopeService.setScope(objscope);
-            reqScope.get().runInScope(scope, () -> {
-                // must branch *inside* the request scope to be able to copy data over.
-                r.run();
-            });
+            reqScope.get().runInScope(scope, r::run);
         });
     }
 

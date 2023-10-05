@@ -615,10 +615,12 @@ public class InstanceResourceImpl implements InstanceResource {
             TransferStatistics stats = hive.execute(
                     new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
 
-            log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
-                    svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects, FormatHelper.formatFileSize(stats.transferSize),
-                    FormatHelper.formatDuration(stats.duration),
-                    FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+            if (log.isInfoEnabled()) {
+                log.info("Pushed {} to {}; trees={}, objs={}, size={}, duration={}, rate={}", instance.getConfiguration().product,
+                        svc.getUri(), stats.sumMissingTrees, stats.sumMissingObjects,
+                        FormatHelper.formatFileSize(stats.transferSize), FormatHelper.formatDuration(stats.duration),
+                        FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+            }
         }
 
         // 3: tell master to deploy

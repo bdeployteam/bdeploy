@@ -936,11 +936,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             List<Runnable> runnables = new ArrayList<>();
             for (var entry : groupedByNode.entrySet()) {
-                runnables.add(() -> {
-                    // Now launch this application on the node
-                    nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).start(instanceId,
-                            entry.getValue());
-                });
+                // Now launch this application on the node
+                runnables.add(() -> nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context)
+                        .start(instanceId, entry.getValue()));
             }
             rspos.runAndAwaitAll("Start-Processes", runnables, hive.getTransactions());
         }
@@ -990,11 +988,9 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
             List<Runnable> runnables = new ArrayList<>();
             for (var entry : groupedByNode.entrySet()) {
-                runnables.add(() -> {
-                    // Now stop the applications on the node
-                    nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context).stop(instanceId,
-                            entry.getValue());
-                });
+                // Now stop the applications on the node
+                runnables.add(() -> nodes.getNodeResourceIfOnlineOrThrow(entry.getKey(), NodeProcessResource.class, context)
+                        .stop(instanceId, entry.getValue()));
             }
             rspos.runAndAwaitAll("Stop-Processes", runnables, hive.getTransactions());
         }
