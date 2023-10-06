@@ -15,6 +15,10 @@ For server applications [ **Reinstall** ] button will appear in verification res
 For client applications [ **Reinstall** ] is always available from the top bar and context menu.
 !!!
 
+!!!warning Warning
+Applications can be pooled, i.e. the *same* installation directory might be used for multiple **Instances** in the same **Instance Group**, depending on the applications pooling configuration. Be careful when reinstalling applications, as they might still be in use.
+!!!
+
 ## Repair and Prune
 Additionally, if certain **BHive** operations within **BDeploy** cease to work as expected, it may be due to issues with the associated **BHives**. To address this, users can utilize the [ **Repair and Prune Unused Objects** ] button, which initiates a filesystem consistency check (FSCK) and prune operations.  
 FSCK operation identifies and repairs any corrupted files within the **BHives**, potentially resolving the operational issues you have encountered.  
