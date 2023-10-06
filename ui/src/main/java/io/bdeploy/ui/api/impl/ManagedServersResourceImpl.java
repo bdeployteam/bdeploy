@@ -618,6 +618,11 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
             updateDto.forceUpdate = false;
         }
 
+        if (runningVersion.getMajor() == 6 && managedVersion.getMajor() == 5) {
+            // from 5.x -> 6.x no forced update, data format is unchanged, major version due to activities/actions ("visuals" only).
+            updateDto.forceUpdate = false;
+        }
+
         // Contact the remote service to find out all installed versions
         Set<ScopedManifestKey> remoteVersions = new HashSet<>();
         try (RemoteBHive rbh = RemoteBHive.forService(svc, null, new ActivityReporter.Null())) {
