@@ -88,6 +88,8 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   protected templates$ = new BehaviorSubject<FlattenedInstanceTemplateConfiguration[]>(null);
   protected isEmptyInstance$ = new BehaviorSubject<boolean>(false);
 
+  protected newerProductVerionsAvailable$ = new BehaviorSubject<boolean>(false);
+
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
 
   private subscription: Subscription;
@@ -133,6 +135,21 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
           this.edit.requestValidation();
         }
         this.isEmptyInstance$.next(this.isEmptyInstance());
+      })
+    );
+    this.subscription.add(
+      combineLatest([this.edit.current$, this.edit.state$]).subscribe(([current, state]) => {
+        if (!current || !state) {
+          this.newerProductVerionsAvailable$.next(false);
+          return;
+        }
+        if (current.instanceConfiguration.product.tag !== state.config.config.product.tag) {
+          this.newerProductVerionsAvailable$.next(false);
+          return;
+        }
+        const product = current.instanceConfiguration.product;
+        const newerVersionOnManaged = current?.managedServer?.productUpdates?.newerVersionAvailable[product.name];
+        this.newerProductVerionsAvailable$.next(current.newerVersionAvailable || newerVersionOnManaged);
       })
     );
   }

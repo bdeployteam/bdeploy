@@ -3,20 +3,12 @@
     <div class="flex-auto"></div>
     <div class="local-version-text" *ngIf="edit.current$ | async as inst">
       <ng-container *ngIf="!(narrow$ | async)"
-        >Current Version: {{ inst.instance.tag }}, Active: {{
-        inst.activeVersion?.tag ? inst.activeVersion.tag : 'None' }}<span
-          class="mr-0.5"
-          *ngIf="!!inst.managedServer?.hostName"
-        >
-          on {{ inst.managedServer.hostName }}</span
-        >
-        <app-instance-managed-server
-          [record]="inst"
-        ></app-instance-managed-server>
+        >Current Version: {{ inst.instance.tag }}, Active: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None'
+        }}<span class="mr-0.5" *ngIf="!!inst.managedServer?.hostName"> on {{ inst.managedServer.hostName }}</span>
+        <app-instance-managed-server [record]="inst"></app-instance-managed-server>
       </ng-container>
       <ng-container *ngIf="narrow$ | async">
-        C: {{ inst.instance.tag }}, A: {{ inst.activeVersion?.tag ?
-        inst.activeVersion.tag : 'None' }}
+        C: {{ inst.instance.tag }}, A: {{ inst.activeVersion?.tag ? inst.activeVersion.tag : 'None' }}
       </ng-container>
     </div>
     <ng-container
@@ -35,9 +27,7 @@
     </ng-container>
     <ng-container *ngIf="isCentral">
       <ng-container *ngIf="edit.current$ | async as instance">
-        <app-bd-server-sync-button
-          [server]="instance.managedServer"
-        ></app-bd-server-sync-button>
+        <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
       </ng-container>
     </ng-container>
@@ -53,10 +43,7 @@
       (click)="goToProductImport()"
     ></app-bd-button>
     <app-bd-panel-button
-      *ngIf="
-        (edit.current$ | async)?.newerVersionAvailable &&
-        (edit.current$ | async)?.instanceConfiguration.product.tag === (edit.state$ | async)?.config.config.product.tag
-      "
+      *ngIf="newerProductVerionsAvailable$ | async"
       text="Product Update Available"
       icon="system_update"
       [collapsed]="narrow$ | async"
@@ -117,14 +104,12 @@
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5 pt-0.5">
       <ng-container *ngIf="edit.current$ | async as instance">
-        <ng-container
-          *ngIf="(servers.isCurrentInstanceSynchronized$ | async) && !!(edit.hasCurrentProduct$ | async)"
-        >
+        <ng-container *ngIf="(servers.isCurrentInstanceSynchronized$ | async) && !!(edit.hasCurrentProduct$ | async)">
           <div *ngIf="edit.incompatible$ | async" class="bd-rect-card">
             <div class="flex flex-col">
               <div class="bd-default-padding bd-warning-text">
-                <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes
-                on the server. You must reload the page to resume editing.
+                <strong>SAVING NOT POSSIBLE</strong> due to conflicting changes on the server. You must reload the page
+                to resume editing.
               </div>
             </div>
           </div>
@@ -140,8 +125,8 @@
             (dismiss)="edit.dismissUpdateIssues()"
           >
             <div>
-              The following messages describe automatically performed update
-              steps which might require additional manual post-processing.
+              The following messages describe automatically performed update steps which might require additional manual
+              post-processing.
             </div>
             <app-bd-data-table
               [records]="(edit.state$ | async)?.warnings"
@@ -159,28 +144,19 @@
             class="bd-rect-card max-h-[450px]"
             background="dialog"
           >
-            <app-bd-data-table
-              [records]="issues"
-              [columns]="validationColumns"
-            ></app-bd-data-table>
+            <app-bd-data-table [records]="issues" [columns]="validationColumns"></app-bd-data-table>
           </app-bd-notification-card>
 
           <!-- banner if set. -->
-          <app-bd-banner
-            *ngIf="instance.banner && instance.banner.text"
-            [banner]="instance.banner"
-          ></app-bd-banner>
+          <app-bd-banner *ngIf="instance.banner && instance.banner.text" [banner]="instance.banner"></app-bd-banner>
 
           <!-- empty instance hint and actions. -->
-          <div
-            *ngIf="(isEmptyInstance$ | async) && !!(templates$ | async)?.length"
-            class="bd-rect-card"
-          >
+          <div *ngIf="(isEmptyInstance$ | async) && !!(templates$ | async)?.length" class="bd-rect-card">
             <div class="flex p-5">
               <div class="flex-auto flex justify-center items-center gap-1">
                 <div>
-                  The instance is currently empty. You can use templates to
-                  quickly get started. Access the templates here:
+                  The instance is currently empty. You can use templates to quickly get started. Access the templates
+                  here:
                 </div>
                 <app-bd-panel-button
                   color="primary"
@@ -194,26 +170,17 @@
           </div>
 
           <!-- all nodes -->
-          <ng-container
-            *ngFor="let node of serverNodes$ | async; trackBy: doTrack"
-          >
+          <ng-container *ngFor="let node of serverNodes$ | async; trackBy: doTrack">
             <app-config-node [nodeName]="node.nodeName"></app-config-node>
           </ng-container>
 
-          <app-config-node
-            *ngIf="clientNode$ | async as node"
-            [nodeName]="node.nodeName"
-          ></app-config-node>
+          <app-config-node *ngIf="clientNode$ | async as node" [nodeName]="node.nodeName"></app-config-node>
         </ng-container>
       </ng-container>
 
-      <app-bd-no-data
-        *ngIf="!!(edit.hasCurrentProduct$ | async) && !(servers.isCurrentInstanceSynchronized$ | async)"
-      >
+      <app-bd-no-data *ngIf="!!(edit.hasCurrentProduct$ | async) && !(servers.isCurrentInstanceSynchronized$ | async)">
         <p class="text-center">
-          <strong
-            >{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong
-          >
+          <strong>{{ (edit.current$ | async)?.instanceConfiguration.name }}</strong>
           is not synchronized with the controlling server
           <strong>{{ (edit.current$ | async).managedServer.hostName }}</strong>
         </p>
@@ -226,21 +193,12 @@
 
       <ng-container *ngIf="!(edit.hasCurrentProduct$ | async)">
         <app-bd-no-data>
-          <p>
-            The product version configured is not available on this server. The
-            configuration is not available.
-          </p>
+          <p>The product version configured is not available on this server. The configuration is not available.</p>
           <ng-container *ngIf="isCentral">
-            <p>
-              You can transfer product versions from the managed server from the
-              product overview.
-            </p>
+            <p>You can transfer product versions from the managed server from the product overview.</p>
           </ng-container>
           <ng-container *ngIf="cfg.isManaged$ | async">
-            <p>
-              You can transfer products from the central server, or upload them
-              directly.
-            </p>
+            <p>You can transfer products from the central server, or upload them directly.</p>
           </ng-container>
           <div class="flex gap-1">
             <app-bd-button
