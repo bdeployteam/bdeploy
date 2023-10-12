@@ -1,14 +1,3 @@
-ext.installRetype = { task -> 
-    configure(task) {
-        group = BasePlugin.BUILD_GROUP
-        if (!org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-            commandLine (["npm", "install", "retypeapp"])
-        } else {
-            commandLine (["npm.cmd", "install", "retypeapp"])
-        }
-    }
-}
-
 ext.buildRetype = { task ->
     configure(task) {
         group = BasePlugin.BUILD_GROUP
@@ -17,6 +6,7 @@ ext.buildRetype = { task ->
 	    } else {
 	        commandLine (["npx.cmd", "retypeapp", "build"])
 	    }
+        println "Retype done"
     }
 }
 
@@ -24,7 +14,6 @@ task retypeDevDoc(type: Exec) { t ->
     workingDir './retypedev'
     inputs.dir './retypedev'
     outputs.dir "${buildDir}/docs/dev"
-    installRetype(t)
     buildRetype(t)
 }
 
@@ -32,7 +21,6 @@ task retypeUserDoc(type: Exec) { t ->
     workingDir './retypeuser'
     inputs.dir './retypeuser'
     outputs.dir "${buildDir}/docs/user"
-    installRetype(t)
     buildRetype(t)
 }
 

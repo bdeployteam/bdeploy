@@ -1,6 +1,5 @@
 package io.bdeploy.bhive.remote;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -162,7 +161,7 @@ public class LocalBHiveAdapter implements RemoteBHive {
             try (PipedOutputStream output = new PipedOutputStream(input)) {
                 barrier.complete(null);
                 hive.execute(new ObjectWriteOperation().stream(output).manifests(manifests).objects(objects));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.warn("Cannot fully send content to fetching client via stream", e);
             }
         });
