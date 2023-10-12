@@ -63,11 +63,11 @@ export class InstancesBrowserComponent implements OnInit, OnDestroy {
 
   private colOverallStatus: BdDataColumn<InstanceDto> = {
     id: 'status',
-    name: 'St.',
+    name: 'Status',
     description: 'Status',
     data: (r) => this.instances.overallStates$.value?.find((x) => x.id === r.instanceConfiguration?.id),
     component: OverallStatusColumnComponent,
-    width: '24px',
+    width: '110px', // required width in case timestamp is shown along with the icon.
   };
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
