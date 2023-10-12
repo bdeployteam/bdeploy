@@ -57,6 +57,10 @@ groups:
   - template: server-with-sleep
     name: "Another Server With Sleep"
     preferredProcessControlGroup: "Second Group"
+    processControl:
+      startType: "INSTANCE"
+      gracePeriod: 6000
+      attachStdin: true
     startParameters:
     - uid: param.text
       value: "{{V:Server No Sleep:param.text}}"

@@ -1,5 +1,6 @@
 package io.bdeploy.ui.api.impl;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,10 +15,13 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.bdeploy.api.product.v1.impl.ScopedManifestKey;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.JacksonHelper;
 import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -388,7 +392,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.pooling = appDesc.pooling;
         cfg.processControl = new ProcessControlConfiguration();
 
-        applyProcessControl(cfg, appDesc);
+        applyProcessControl(cfg, appDesc, reqApp);
 
         // each application's endpoints start out as copy of the default. no need to copy as the template
         // was sent through REST already.
@@ -406,7 +410,10 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         return cfg;
     }
 
-    private static void applyProcessControl(ApplicationConfiguration cfg, ApplicationDescriptor appDesc) {
+    private static void applyProcessControl(ApplicationConfiguration cfg, ApplicationDescriptor appDesc,
+            FlattenedApplicationTemplateConfiguration reqApp) {
+
+        // defaults.
         cfg.processControl.attachStdin = appDesc.processControl.attachStdin;
         if (appDesc.processControl.supportedStartTypes != null && !appDesc.processControl.supportedStartTypes.isEmpty()) {
             cfg.processControl.startType = appDesc.processControl.supportedStartTypes.get(0);
@@ -420,6 +427,35 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         cfg.processControl.configDirs = appDesc.processControl.configDirs;
         cfg.processControl.startupProbe = appDesc.processControl.startupProbe;
         cfg.processControl.lifenessProbe = appDesc.processControl.lifenessProbe;
+
+        // now apply from template in case things are set.
+        applyFromPCTplMap(cfg.processControl, reqApp.processControl);
+    }
+
+    private static void applyFromPCTplMap(ProcessControlConfiguration target, Map<String, Object> tpl) {
+        ObjectMapper om = JacksonHelper.getDefaultJsonObjectMapper();
+
+        try {
+            // easiest way to convert the generic template map to something usable and typed.
+            String json = om.writeValueAsString(tpl);
+            ProcessControlConfiguration pcc = om.readValue(json, ProcessControlConfiguration.class);
+
+            for (String k : tpl.keySet()) {
+                applySingleFromPCTplMap(target, pcc, k);
+            }
+        } catch (Exception e) {
+            log.warn("Cannot process process control information", e);
+        }
+    }
+
+    private static void applySingleFromPCTplMap(ProcessControlConfiguration target, ProcessControlConfiguration source,
+            String key) {
+        try {
+            Field field = ProcessControlConfiguration.class.getField(key);
+            field.set(target, field.get(source));
+        } catch (Exception e) {
+            log.warn("Cannot apply process control field value", e);
+        }
     }
 
     private static CommandConfiguration createCommand(ExecutableDescriptor command, List<TemplateParameter> tplParameters,
