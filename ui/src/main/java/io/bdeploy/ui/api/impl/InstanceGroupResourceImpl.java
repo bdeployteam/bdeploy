@@ -230,7 +230,10 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
                 try {
                     ms.synchronize(group, dto.hostName);
                 } catch (Exception e) {
-                    log.warn("Cannot synchronize with {} on {}", dto.hostName, group, e);
+                    log.warn("Cannot synchronize with {} on {}", dto.hostName, group);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Exception", e);
+                    }
                 }
             }
         }

@@ -26,6 +26,7 @@ import io.bdeploy.jersey.ws.change.msg.ObjectChangeDto;
 import io.bdeploy.jersey.ws.change.msg.ObjectEvent;
 import io.bdeploy.jersey.ws.change.msg.ObjectScope;
 import jakarta.inject.Singleton;
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Bridges actions from managed servers to central server.
@@ -114,8 +115,12 @@ public class ActionBridge {
 
             return true;
         } catch (Exception e) {
+            var l = log.atInfo();
+            if (e instanceof NotFoundException) {
+                l = log.atDebug();
+            }
             // either not supported or another problem...?
-            log.atInfo().log("Cannot bridge actions from {}: {}", name, e);
+            l.log("Cannot bridge actions from {}: {}", name, e);
             return false;
         }
     }
