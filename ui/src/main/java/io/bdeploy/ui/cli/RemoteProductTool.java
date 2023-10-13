@@ -33,7 +33,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     public @interface ProductConfig {
 
-        @Help("Name of the instance group")
+        @Help("Name of the instance group or software repository.")
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 

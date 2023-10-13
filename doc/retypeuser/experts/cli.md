@@ -63,7 +63,9 @@ Command | Description
 `remote-process-config` | Manipulate the process configuration (parameters) of a given instance remotely.
 `remote-product` | Query and manage products available on the given **Instance Group** on a remote **BDeploy** server.
 `remote-product-validation` | Uses a [`product-validation.yaml`](/power/product/#product-validationyaml) file to perform a remote pre-validation of a product to be built in the future.
+`remote-transfer` | Transfers **External Software** and **Products** between two remote servers (by fetching and pushing locally). Optionally can re-use an existing local **BHive** to benefit from object re-use.
 `remote-repo` | Query and manage **Software Repositories** on a remote **BDeploy** server.
+`remote-repo-software` | Query **External Software** (which can be used as `runtimeDependencies`) on the given server and software repository.
 `remote-system` | Manage systems on a remote **BDeploy** server.
 `remote-user` | Manages users on a remote **BDeploy** server.
 
