@@ -225,7 +225,7 @@ public class BHive implements AutoCloseable, BHiveExecution {
         } catch (Exception ex) {
             onOperationFailed(op, ex);
             if (attempt >= op.retryCount) {
-                throw new IllegalStateException("Operation on hive " + op.hive + " failed", ex);
+                throw new IllegalStateException("Operation on hive " + op.hive.getUri() + " failed", ex);
             }
             onOperationRetry(op, attempt, ex);
             return doExecute(op, ++attempt);
