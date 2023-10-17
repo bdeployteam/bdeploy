@@ -1,9 +1,8 @@
 package io.bdeploy.ui.api;
 
-import java.io.InputStream;
 import java.util.List;
 
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.jvnet.hk2.annotations.Optional;
 
 import io.bdeploy.bhive.model.Manifest;
@@ -41,8 +40,7 @@ public interface SystemResource {
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public SystemTemplateDto loadTemplate(@FormDataParam("file") InputStream inputStream,
-            @Optional @QueryParam("server") String server);
+    public SystemTemplateDto loadTemplate(FormDataMultiPart fdmp, @Optional @QueryParam("server") String server);
 
     @POST
     @Path("apply")

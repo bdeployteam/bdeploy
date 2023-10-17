@@ -1,0 +1,43 @@
+# yaml-language-server: $schema= https://localhost:7701/api/public/v1/schema/systemTemplateYaml
+
+name: Test System
+description: 'A test system with both demo and chat product'
+
+systemVariables:
+  - id: test.system.var
+    description: 'A test system variable'
+    value: testValue
+
+templateVariables:
+  - id: node-id
+    name: "The Node Number"
+    description: "The Node ID Base"
+    defaultValue: 0
+  - id: cell-base-name
+    name: "The Node Base Name"
+    defaultValue: "Node"
+
+instances:
+  - name: 'Demo Instance'
+    description: "The Test System's Demo Instance"
+    productId: 'io.bdeploy/demo'
+    productVersionRegex: "2\\..*"
+    templateName: 'Default Configuration'
+    fixedVariables:
+      - id: 'text-param'
+        value: 'XX'
+      - id: 'sleep-timeout'
+        value: 10
+    defaultMappings:
+      - group: 'Server Apps'
+        node: 'master'
+      - group: 'Client Apps'
+        node: 'Client Applications'
+  - name: 'Chat Master'
+    description: "The Test System's third (master) Chat Instance"
+    productId: 'io.bdeploy/chat-app'
+    templateName: 'Default Configuration'
+    defaultMappings:
+      - group: 'Chat App'
+        node: 'master'
+

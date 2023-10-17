@@ -812,7 +812,11 @@ instances:
 2. Template variables in **System Templates** work similar to template variables in [`instance-template.yaml`](#instance-templateyaml). They can be used within the `system-template.yaml` in instance names, `fixedVariables` and `defaultMappings`.
 3. A simple instance reference **must** consist of a `name`, a `productId` and a `templateName`, meaning "create an instance with name `name`, from the product `productId` using the template `templateName`".
 4. `fixedVariables` allows you to specify a "fixed" value for template variables used in the referenced **Instance Template**. This will skip querying the user for a value for that variable, and instead use this fixed value.
-5. `defaultMappings` can be used to pre-assign **Instance Template** groups to available nodes. If a node with the specified name is not available during application of the **System Template**, no node will be preselected.
+5. `defaultMappings` can be used to pre-assign **Instance Template** groups to available nodes. If a node with the specified name is not available during application of the **System Template**, no node will be preselected. To specify the **Client Application** node, you can either specify 'Client Applications' or the internal name '__ClientApplications'.
+
+!!!info Note
+When applying a **System Template** from the CLI, all mappings need to be provided through `defaultMappings`, and all **Template Variables** of the **System Template** as well as  downstream **Template Variables** (required by the individual **Instance Templates**) need to either have a default value or be provided using `fixedVariables`, as the CLI is non-interactive when applying **System Templates**
+!!!
 
 ### Supported `systemVariables` Attributes
 

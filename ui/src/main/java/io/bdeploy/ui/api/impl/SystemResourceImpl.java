@@ -1,14 +1,14 @@
 package io.bdeploy.ui.api.impl;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
-import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.UuidHelper;
@@ -24,6 +24,7 @@ import io.bdeploy.interfaces.manifest.managed.MasterProvider;
 import io.bdeploy.interfaces.remote.MasterRootResource;
 import io.bdeploy.interfaces.remote.MasterSystemResource;
 import io.bdeploy.interfaces.remote.ResourceProvider;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
@@ -37,6 +38,7 @@ import io.bdeploy.ui.dto.SystemConfigurationDto;
 import io.bdeploy.ui.dto.SystemTemplateDto;
 import io.bdeploy.ui.dto.SystemTemplateRequestDto;
 import io.bdeploy.ui.dto.SystemTemplateResultDto;
+import io.bdeploy.ui.utils.InstanceTemplateHelper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -145,15 +147,14 @@ public class SystemResourceImpl implements SystemResource {
     }
 
     @Override
-    public SystemTemplateDto loadTemplate(InputStream inputStream, String target) {
+    public SystemTemplateDto loadTemplate(FormDataMultiPart fdmp, String target) {
+        SystemTemplateDescriptor template = FormDataHelper.getYamlEntityFromMultiPart(fdmp, SystemTemplateDescriptor.class);
+
         RemoteService remote = mp.getNamedMasterOrSelf(hive, target);
         SystemTemplateDto result = new SystemTemplateDto();
 
         // fetch all the node states from the actual remote server which has been seleted.
         result.nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context).getNodes();
-
-        // load the actual template from the file
-        SystemTemplateDescriptor template = StorageHelper.fromYamlStream(inputStream, SystemTemplateDescriptor.class);
 
         // verify that instances have been defined in the template.
         if (template.instances == null || template.instances.isEmpty()) {
@@ -165,10 +166,8 @@ public class SystemResourceImpl implements SystemResource {
         List<ProductDto> products = pr.list(null);
 
         // check whether all requested products and the requested template IN the product(s) are present.
-        InstanceTemplateResourceImpl itr = rc.initResource(new InstanceTemplateResourceImpl(group, hive));
-
         for (InstanceTemplateReferenceDescriptor instance : template.instances) {
-            ProductDto product = itr.findMatchingProductOrFail(instance, products);
+            ProductDto product = InstanceTemplateHelper.findMatchingProductOrFail(instance, products);
             result.products.add(product);
         }
 
@@ -228,6 +227,12 @@ public class SystemResourceImpl implements SystemResource {
 
     private Manifest.Key createSystemFromTemplateRequest(SystemTemplateRequestDto request,
             TrackingTemplateOverrideResolver ttor) {
+        for (SystemConfigurationDto existing : list()) {
+            if (existing.config.name.equals(request.name)) {
+                throw new WebApplicationException("System with name " + request.name + " already exists", Status.CONFLICT);
+            }
+        }
+
         SystemConfigurationDto scd = new SystemConfigurationDto();
         scd.config = new SystemConfiguration();
         scd.minion = request.minion;

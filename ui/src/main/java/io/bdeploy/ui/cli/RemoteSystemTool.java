@@ -1,28 +1,46 @@
 package io.bdeploy.ui.cli;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
+import io.bdeploy.common.cfg.Configuration.Validator;
+import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableRowBuilder;
+import io.bdeploy.common.cli.data.ExitCode;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.configuration.VariableConfiguration;
+import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration.InstancePurpose;
 import io.bdeploy.interfaces.configuration.system.SystemConfiguration;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
+import io.bdeploy.ui.FormDataHelper;
 import io.bdeploy.ui.api.BackendInfoResource;
 import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.SystemResource;
 import io.bdeploy.ui.cli.RemoteSystemTool.SystemConfig;
+import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.SystemConfigurationDto;
+import io.bdeploy.ui.dto.SystemTemplateDto;
+import io.bdeploy.ui.dto.SystemTemplateRequestDto;
+import io.bdeploy.ui.dto.SystemTemplateRequestDto.SystemTemplateGroupMapping;
+import io.bdeploy.ui.utils.InstanceTemplateHelper;
 
 @Help("List, create and update system configurations")
 @ToolCategory(TextUIResources.UI_CATEGORY)
@@ -70,6 +88,13 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
 
         @Help("The key of a configuration variable to remove using --update")
         String removeVariable();
+
+        @Help("Path to a system template specification. Note that not variable input is supported, the template must apply without user input.")
+        @Validator(ExistingPathValidator.class)
+        String createFrom();
+
+        @Help("Purpose for all created instances when applying a system template, defaults to 'TEST'")
+        InstancePurpose purpose() default InstancePurpose.TEST;
     }
 
     public RemoteSystemTool() {
@@ -186,19 +211,83 @@ public class RemoteSystemTool extends RemoteServiceTool<SystemConfig> {
             helpAndFailIfMissing(config.server(), "Missing --server");
         }
 
-        SystemConfiguration cfg = new SystemConfiguration();
+        if (config.createFrom() != null) {
+            try (InputStream is = Files.newInputStream(Paths.get(config.createFrom()))) {
+                SystemTemplateDto tpl = sr.loadTemplate(FormDataHelper.createMultiPartForStream(is), config.server());
 
-        cfg.id = UuidHelper.randomId();
-        cfg.name = config.name();
-        cfg.description = config.description();
+                // check whether variables are all pre-filled...
+                List<String> stvs = tpl.template.templateVariables.stream().filter(v -> v.defaultValue == null).map(x -> x.id)
+                        .toList();
+                if (!stvs.isEmpty()) {
+                    throw new IllegalArgumentException("Missing values for system template variables: " + stvs);
+                }
 
-        SystemConfigurationDto dto = new SystemConfigurationDto();
-        dto.config = cfg;
-        dto.minion = config.server();
+                Map<String, String> tplValues = new TreeMap<>();
+                for (var v : tpl.template.templateVariables) {
+                    tplValues.put(v.id, v.defaultValue);
+                }
 
-        sr.update(dto);
+                List<SystemTemplateGroupMapping> mapping = new ArrayList<>();
+                for (var it : tpl.template.instances) {
+                    var m = new SystemTemplateGroupMapping();
 
-        return createSuccess().addField("System ID", cfg.id);
+                    m.instanceName = it.name;
+                    m.productKey = InstanceTemplateHelper.findMatchingProductOrFail(it, tpl.products).key;
+                    m.groupToNode = new TreeMap<>();
+                    m.templateVariableValues = new TreeMap<>();
+
+                    // verify that each instance template has at least on template group mapping.
+                    if (it.defaultMappings == null || it.defaultMappings.isEmpty()) {
+                        throw new IllegalArgumentException("Instance " + it.name + " does not map to any nodes.");
+                    }
+
+                    it.defaultMappings.forEach(x -> m.groupToNode.put(x.group, x.node));
+
+                    // all variables need to be fixed or defaulted.
+                    if (it.fixedVariables != null && !it.fixedVariables.isEmpty()) {
+                        it.fixedVariables.forEach(v -> m.templateVariableValues.put(v.id, v.value));
+                    }
+
+                    mapping.add(m);
+                }
+
+                // if *everything* is ok, apply.
+                var rq = new SystemTemplateRequestDto();
+                rq.name = config.name();
+                rq.minion = config.server();
+                rq.purpose = config.purpose();
+                rq.groupMappings = mapping;
+                rq.templateVariableValues = tplValues;
+                rq.template = tpl.template;
+
+                var result = sr.applyTemplate(rq);
+                DataResult r = createEmptyResult();
+                for (var ir : result.results) {
+                    r.addField(ir.name, ir.status + ": " + ir.message);
+
+                    if (ir.status == InstanceTemplateReferenceStatus.ERROR) {
+                        r.setExitCode(ExitCode.ERROR);
+                    }
+                }
+
+                return r;
+            } catch (IOException e) {
+                throw new IllegalStateException("Cannot process system template", e);
+            }
+        } else {
+            SystemConfiguration cfg = new SystemConfiguration();
+
+            cfg.id = UuidHelper.randomId();
+            cfg.name = config.name();
+            cfg.description = config.description();
+
+            SystemConfigurationDto dto = new SystemConfigurationDto();
+            dto.config = cfg;
+            dto.minion = config.server();
+
+            sr.update(dto);
+            return createSuccess().addField("System ID", cfg.id);
+        }
     }
 
     private DataTable list(RemoteService remote, SystemResource sr, SystemConfig config) {

@@ -10,7 +10,6 @@ import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +54,7 @@ import io.bdeploy.interfaces.descriptor.template.SystemTemplateInstanceTemplateG
 import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
 import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 import io.bdeploy.interfaces.manifest.ApplicationManifest;
+import io.bdeploy.interfaces.manifest.InstanceManifest;
 import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.managed.MasterProvider;
@@ -70,6 +70,7 @@ import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto;
 import io.bdeploy.ui.dto.InstanceTemplateReferenceResultDto.InstanceTemplateReferenceStatus;
 import io.bdeploy.ui.dto.ProductDto;
+import io.bdeploy.ui.utils.InstanceTemplateHelper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -117,7 +118,7 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         // 1. find and verify product.
         ProductResource pr = rc.initResource(new ProductResourceImpl(hive, group));
         List<ProductDto> products = pr.list(null);
-        ProductDto product = findMatchingProductOrFail(instance, products);
+        ProductDto product = InstanceTemplateHelper.findMatchingProductOrFail(instance, products);
 
         // 2. find and verify all group mappings and whether all variables are set for each required group.
         Map<String, MinionStatusDto> nodes = ResourceProvider.getVersionedResource(remote, MasterRootResource.class, context)
@@ -175,36 +176,6 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         }
 
         return result;
-    }
-
-    ProductDto findMatchingProductOrFail(InstanceTemplateReferenceDescriptor instance, List<ProductDto> products) {
-        boolean hasRegex = !(instance.productVersionRegex == null || instance.productVersionRegex.isBlank()
-                || instance.productVersionRegex.equals(".*"));
-
-        // the list is ordered - the first matching product is also the best matching version of that product.
-        Optional<ProductDto> product = products.stream().filter(p -> {
-            if (!p.product.equals(instance.productId)) {
-                return false;
-            }
-
-            // check whether the version pattern is fulfilled
-            if (hasRegex && !Pattern.matches(instance.productVersionRegex, p.key.getTag())) {
-                return false;
-            }
-
-            // check whether requested template is in this version, otherwise reject.
-            return p.instanceTemplates.stream().anyMatch(t -> t.name.equals(instance.templateName));
-        }).findFirst();
-
-        if (product.isEmpty()) {
-            throw new WebApplicationException(
-                    "Cannot find matching product with ID '" + instance.productId
-                            + (hasRegex ? ("' (with version matching: " + instance.productVersionRegex + ")") : "'")
-                            + " or matching version does not have instance template named '" + instance.templateName + "'",
-                    Status.NOT_ACCEPTABLE);
-        }
-
-        return product.get();
     }
 
     InstanceTemplateReferenceResultDto createInstanceFromTemplateRequest(RemoteService remote, Manifest.Key systemKey,
@@ -311,10 +282,15 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         };
 
         for (var tgroup : tpl.groups) {
-            String mappedToNode = groupToNode.get(tgroup.name);
-            if (mappedToNode == null || mappedToNode.isBlank()) {
+            String targetNode = groupToNode.get(tgroup.name);
+            if (targetNode == null || targetNode.isBlank()) {
                 continue; // nope
             }
+            if (targetNode.equals("Client Applications")) {
+                targetNode = InstanceManifest.CLIENT_NODE_NAME;
+            }
+
+            String mappedToNode = targetNode;
 
             InstanceNodeConfigurationDto node = result.stream().filter(n -> n.nodeName.equals(mappedToNode)).findFirst()
                     .orElseGet(() -> {
