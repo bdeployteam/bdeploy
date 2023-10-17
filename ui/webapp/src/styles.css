@@ -38,3 +38,8 @@ body {
 .bd-dialog-container .mat-mdc-dialog-container {
   padding: 0;
 }
+
+/* fix for outlined mat-form-field bug with tailwind css https://github.com/angular/components/issues/26102 */
+.mdc-notched-outline__notch {
+  border-right: none;
+}
