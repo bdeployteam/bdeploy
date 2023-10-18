@@ -1,5 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -76,8 +78,18 @@ public class ChangeEventManager {
         remove(type, key, scope.getObjectScope());
     }
 
-    public void remove(ObjectChangeType type, Manifest.Key key, ObjectScope s) {
-        bc.send(new ObjectChangeDto(type.name(), s, ObjectEvent.REMOVED, detailsFromKey(key)));
+    public void remove(ObjectChangeType type, Manifest.Key key, Map<String, String> details) {
+        remove(type, key, scope.getObjectScope(), details);
     }
 
+    public void remove(ObjectChangeType type, Manifest.Key key, ObjectScope s) {
+        remove(type, key, scope.getObjectScope(), Collections.emptyMap());
+    }
+
+    public void remove(ObjectChangeType type, Manifest.Key key, ObjectScope s, Map<String, String> details) {
+        Map<String, String> allDetails = new HashMap<>();
+        allDetails.putAll(details);
+        allDetails.putAll(detailsFromKey(key));
+        bc.send(new ObjectChangeDto(type.name(), s, ObjectEvent.REMOVED, allDetails));
+    }
 }

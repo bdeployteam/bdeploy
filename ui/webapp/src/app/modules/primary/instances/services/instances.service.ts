@@ -353,10 +353,9 @@ export class InstancesService {
   }
 
   private getDeletedInstanceIds(): string[] {
-    // FIXME: this is bogus. If i only delete an instance *version* from instance history, the whole
-    // instance is regarded as deleted.
     return this.instancesChanges
       .filter((change) => change.event === ObjectEvent.REMOVED)
+      .filter((change) => !change.details['partial'])
       .map((change) => change.scope.scope[1]);
   }
 
@@ -364,7 +363,7 @@ export class InstancesService {
     const deletedInstanceIds = this.getDeletedInstanceIds();
 
     const updatedInstanceIds = this.instancesChanges
-      .filter((change) => change.event === ObjectEvent.CREATED || change.event === ObjectEvent.CHANGED)
+      .filter((change) => change.event !== ObjectEvent.REMOVED || !!change.details['partial']) // partial REMOVED is considered an update (only a version was removed)
       .map((change) => change.scope.scope[1])
       .filter((id) => !deletedInstanceIds.includes(id)); // in case instance was created/updated and later removed, we don't care about that
     return [...new Set(updatedInstanceIds)]; // removing duplicate ids
