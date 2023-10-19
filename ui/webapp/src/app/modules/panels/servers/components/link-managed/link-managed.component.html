@@ -1,35 +1,19 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Link Managed Server"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Link Managed Server" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
       <div>
-        Visit the managed server you want to link in a separate window now, and
-        drag the <em>link information card</em> from the
-        <strong>Link Instance Group</strong> panel to the zone below.
+        Visit the managed server you want to link in a separate window now, and drag the
+        <em>link information card</em> from the <strong>Link Instance Group</strong> panel to the zone below.
       </div>
-      <mat-card
-        appearance="outlined"
-        class="bd-drag-card bd-drop-card flex flex-col justify-center items-center"
+      <input type="file" hidden (change)="onUpload($event)" data-cy="managed-ident" />
+      <app-bd-file-drop
+        hintText="Drop managed server information here"
         (drop)="onDrop($event)"
         (dragover)="onOver($event)"
-      >
-        Drop managed server information here!
-      </mat-card>
-      <input
-        type="file"
-        hidden
-        (change)="onUpload($event)"
-        data-cy="managed-ident"
-      />
-      <form
-        class="flex flex-col gap-2.5"
-        *ngIf="!!payload"
-        #form="ngForm"
-        (ngSubmit)="onSave()"
-      >
+        (fileAdded)="fileAdded($event)"
+      ></app-bd-file-drop>
+      <form class="flex flex-col gap-2.5" *ngIf="!!payload" #form="ngForm" (ngSubmit)="onSave()">
         <div>Details for server to link:</div>
         <app-bd-form-input
           label="Server Name"
@@ -44,32 +28,25 @@
           [(ngModel)]="payload.description"
           required
         ></app-bd-form-input>
-        <app-bd-form-input
-          label="URI"
-          name="uri"
-          [(ngModel)]="payload.uri"
-          required
-          appTrimmed
-        ></app-bd-form-input>
+        <app-bd-form-input label="URI" name="uri" [(ngModel)]="payload.uri" required appTrimmed></app-bd-form-input>
         <app-bd-button
           text="Save"
           color="primary"
           icon="save"
           [collapsed]="false"
-          [disabled]="form.invalid || form.submitted"
+          [disabled]="form.invalid || (formSubmitted$ | async)"
         ></app-bd-button>
         <div class="flex flex-col gap-2.5" *ngIf="manual">
           <div>
-            The managed server has been added, but unfortunately the managed
-            server could not be informed about this fact.
+            The managed server has been added, but unfortunately the managed server could not be informed about this
+            fact.
           </div>
           <div>
-            Please download the <em>authorization file</em> below which
-            instructs the managed server on what to do.
+            Please download the <em>authorization file</em> below which instructs the managed server on what to do.
           </div>
           <div>
-            You can upload the file using the manual mode on the managed server
-            in the <strong>Link Instance Group</strong> panel.
+            You can upload the file using the manual mode on the managed server in the
+            <strong>Link Instance Group</strong> panel.
           </div>
           <app-bd-button
             text="Download Authorization File"

@@ -1,14 +1,11 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Link Instance Group"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Link Instance Group" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5">
       <div>
-        Visit the central server you want to link from in a separate window now,
-        and drag the <em>link information card</em> below to the
-        <strong>Link Managed Server</strong> panel in the other browser windows.
+        Visit the central server you want to link from in a separate window now, and drag the
+        <em>link information card</em> below to the <strong>Link Managed Server</strong> panel in the other browser
+        windows.
       </div>
       <mat-card
         appearance="outlined"
@@ -19,8 +16,7 @@
         <div>Drag me to the central server!</div>
       </mat-card>
       <div>
-        This panel will automatically close once the central server has
-        established a connection to this server.
+        This panel will automatically close once the central server has established a connection to this server.
       </div>
       <mat-expansion-panel class="flex-auto">
         <mat-expansion-panel-header>
@@ -28,9 +24,8 @@
         </mat-expansion-panel-header>
         <div class="flex flex-col gap-2.5 pt-2.5">
           <div>
-            In case you do not have the possibility to drag the card to the
-            central server now, you can download the information as a file, and
-            drop the file to the central servers
+            In case you do not have the possibility to drag the card to the central server now, you can download the
+            information as a file, and drop the file to the central servers
             <strong>Link Managed Server</strong> panel instead.
           </div>
           <app-bd-button
@@ -41,19 +36,15 @@
           ></app-bd-button>
           <div>
             Once either the card above or the
-            <strong>link information file</strong> was dropped to the central
-            server, you will receive a
-            <strong>link authorization file</strong> in return. Drop it below to
-            complete the process.
+            <strong>link information file</strong> was dropped to the central server, you will receive a
+            <strong>link authorization file</strong> in return. Drop it below to complete the process.
           </div>
-          <mat-card
-            appearance="outlined"
-            class="bd-drag-card bd-drop-card flex flex-col justify-center items-center"
+          <app-bd-file-drop
+            hintText="Drop managed server information here"
             (drop)="onDrop($event)"
             (dragover)="onOver($event)"
-          >
-            Drop managed server information here!
-          </mat-card>
+            (fileAdded)="fileAdded($event)"
+          ></app-bd-file-drop>
         </div>
       </mat-expansion-panel>
     </div>

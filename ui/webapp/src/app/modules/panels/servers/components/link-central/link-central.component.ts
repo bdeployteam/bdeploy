@@ -48,12 +48,7 @@ export class LinkCentralComponent implements OnInit, OnDestroy {
     event.preventDefault();
 
     if (event.dataTransfer.files.length > 0) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const data = reader.result.toString();
-        this.onManualAttach(data);
-      };
-      reader.readAsText(event.dataTransfer.files[0]);
+      this.readFile(event.dataTransfer.files[0]);
     } else if (event.dataTransfer.types.includes(ATTACH_MIME_TYPE)) {
       const data = event.dataTransfer.getData(ATTACH_MIME_TYPE);
       this.onManualAttach(data);
@@ -67,6 +62,19 @@ export class LinkCentralComponent implements OnInit, OnDestroy {
     }
 
     return false;
+  }
+
+  private readFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = reader.result.toString();
+      this.onManualAttach(data);
+    };
+    reader.readAsText(file);
+  }
+
+  protected fileAdded(event: any) {
+    this.readFile(event);
   }
 
   private onManualAttach(ident: string) {

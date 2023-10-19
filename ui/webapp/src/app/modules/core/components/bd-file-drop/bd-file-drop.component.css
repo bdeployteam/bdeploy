@@ -2,6 +2,7 @@
   height: 100px;
   border: 1px dashed #ccc;
   box-sizing: border-box;
+  padding: 1em;
 }
 
 .local-drop-zone-disabled {
@@ -10,11 +11,12 @@
 
 .local-drop-icon {
   margin-right: 10px;
+  min-width: 24px;
 }
 
 .local-drop-browse {
   position: relative;
-  top: -1px;
+  display: inline-block;
   cursor: pointer;
   background: transparent;
   padding: 0;

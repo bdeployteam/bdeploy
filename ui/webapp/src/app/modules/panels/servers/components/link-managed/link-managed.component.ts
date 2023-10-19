@@ -21,6 +21,7 @@ export class LinkManagedComponent {
   protected ident: string;
   protected manual = false;
   protected loadingIdent$ = new BehaviorSubject<boolean>(true);
+  protected formSubmitted$ = new BehaviorSubject<boolean>(false);
 
   private readFile(file: File) {
     const reader = new FileReader();
@@ -31,16 +32,20 @@ export class LinkManagedComponent {
   }
 
   protected onSave() {
-    this.servers.attachManaged(this.payload).subscribe((type) => {
-      if (type === AttachType.AUTO) {
-        this.areas.closePanel();
-      } else {
-        this.manual = true;
-        this.servers
-          .getCentralIdent(this.payload)
-          .pipe(finalize(() => this.loadingIdent$.next(false)))
-          .subscribe((r) => (this.ident = r));
-      }
+    this.formSubmitted$.next(true);
+    this.servers.attachManaged(this.payload).subscribe({
+      next: (type) => {
+        if (type === AttachType.AUTO) {
+          this.areas.closePanel();
+        } else {
+          this.manual = true;
+          this.servers
+            .getCentralIdent(this.payload)
+            .pipe(finalize(() => this.loadingIdent$.next(false)))
+            .subscribe((r) => (this.ident = r));
+        }
+      },
+      error: () => this.formSubmitted$.next(false),
     });
   }
 
@@ -61,6 +66,10 @@ export class LinkManagedComponent {
     }
 
     return false;
+  }
+
+  protected fileAdded(event: any) {
+    this.readFile(event);
   }
 
   protected onUpload(event: any) {

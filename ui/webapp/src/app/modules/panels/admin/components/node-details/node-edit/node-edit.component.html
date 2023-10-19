@@ -15,14 +15,12 @@
           Note that <strong>replacing</strong> a node may take a while, since all software and configuration on the new
           node will be restored.
         </span>
-        <mat-card
-          appearance="outlined"
-          class="bd-drag-card bd-drop-card flex flex-col justify-center items-center"
+        <app-bd-file-drop
+          hintText="Drop node information here"
           (drop)="onDrop($event)"
           (dragover)="onOver($event)"
-        >
-          Drop node information here!
-        </mat-card>
+          (fileAdded)="fileAdded($event)"
+        ></app-bd-file-drop>
         <app-bd-form-input name="uri" label="Node URI" [(ngModel)]="data.uri" required></app-bd-form-input>
         <app-bd-form-input
           name="auth"

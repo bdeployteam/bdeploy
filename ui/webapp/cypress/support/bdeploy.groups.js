@@ -59,59 +59,51 @@ Cypress.Commands.add('deleteGroup', function (groupName) {
 /**
  * Command: uploadProductIntoGroup
  */
-Cypress.Commands.add(
-  'uploadProductIntoGroup',
-  function (groupName, fileName, screenshots = false) {
-    cy.enterGroup(groupName);
+Cypress.Commands.add('uploadProductIntoGroup', function (groupName, fileName, screenshots = false) {
+  cy.enterGroup(groupName);
 
-    cy.pressMainNavButton('Products');
-    cy.get('app-products-browser').should('exist');
+  cy.pressMainNavButton('Products');
+  cy.get('app-products-browser').should('exist');
 
-    if (screenshots) {
-      cy.screenshot('Doc_ProductsEmpty');
-    }
-
-    cy.pressToolbarButton('Upload Product');
-
-    if (screenshots) {
-      cy.screenshot('Doc_ProductsUploadPanel');
-    }
-
-    cy.inMainNavFlyin('app-product-upload', () => {
-      cy.fillFileDrop(fileName);
-      cy.contains('app-bd-file-upload', `Uploading: ${fileName}`).should(
-        'not.exist'
-      );
-      cy.contains('app-bd-file-upload', 'Success').should('exist');
-    });
-
-    if (screenshots) {
-      cy.inMainNavContent(() => {
-        // TODO: demo product name hardcoded in case of screenshots - maybe not perfect.
-        cy.contains('tr', 'Demo Product').should('exist');
-      });
-      cy.screenshot('Doc_ProductsUploadSuccess');
-    }
+  if (screenshots) {
+    cy.screenshot('Doc_ProductsEmpty');
   }
-);
+
+  cy.pressToolbarButton('Upload Product');
+
+  if (screenshots) {
+    cy.screenshot('Doc_ProductsUploadPanel');
+  }
+
+  cy.inMainNavFlyin('app-product-upload', () => {
+    cy.fillFileDrop(fileName);
+    cy.contains('app-bd-file-upload', `Uploading: ${fileName}`).should('not.exist');
+    cy.contains('app-bd-file-upload', 'Success').should('exist');
+  });
+
+  if (screenshots) {
+    cy.inMainNavContent(() => {
+      // TODO: demo product name hardcoded in case of screenshots - maybe not perfect.
+      cy.contains('tr', 'Demo Product').should('exist');
+    });
+    cy.screenshot('Doc_ProductsUploadSuccess');
+  }
+});
 
 /**
  * Command: verifyProductVersion
  */
-Cypress.Commands.add(
-  'verifyProductVersion',
-  function (groupName, productName, productVersion) {
-    cy.enterGroup(groupName);
+Cypress.Commands.add('verifyProductVersion', function (groupName, productName, productVersion) {
+  cy.enterGroup(groupName);
 
-    cy.pressMainNavButton('Products');
-    cy.get('app-products-browser').should('exist');
+  cy.pressMainNavButton('Products');
+  cy.get('app-products-browser').should('exist');
 
-    cy.inMainNavContent(() => {
-      const content = new RegExp(`${productName}.*${productVersion}`);
-      cy.contains('tr', content).should('exist');
-    });
-  }
-);
+  cy.inMainNavContent(() => {
+    const content = new RegExp(`${productName}.*${productVersion}`);
+    cy.contains('tr', content).should('exist');
+  });
+});
 
 /**
  * Command: enterGroup
@@ -137,17 +129,12 @@ Cypress.Commands.add('attachManagedSide', function (groupName) {
   cy.waitUntilContentLoaded();
   cy.screenshot('Doc_ManagedLinkGroup');
   cy.inMainNavFlyin('app-link-central', () => {
-    cy.contains('mat-expansion-panel', 'Manual and Offline Linking').within(
-      () => {
-        cy.get('mat-panel-title').click();
-      }
-    );
+    cy.contains('mat-expansion-panel', 'Manual and Offline Linking').within(() => {
+      cy.get('mat-panel-title').click();
+    });
 
     cy.get(`app-bd-button[text="Download Link Information"]`).within(() => {
-      cy.get('button')
-        .should('exist')
-        .and('be.enabled')
-        .downloadByLinkClick('managed-ident.txt', true);
+      cy.get('button').should('exist').and('be.enabled').downloadByLinkClick('managed-ident.txt', true);
     });
   });
 });
@@ -165,7 +152,7 @@ Cypress.Commands.add('attachCentralSide', function (groupName) {
   cy.screenshot('Doc_CentralLinkServer');
   cy.inMainNavFlyin('app-link-managed', () => {
     cy.contains('div', 'Details for server to link').should('not.exist');
-    cy.contains('mat-card', 'Drop managed server information here!')
+    cy.contains('app-bd-file-drop', 'Drop managed server information here')
       .parent()
       .within(() => {
         cy.get('input[data-cy="managed-ident"]').selectFile(
@@ -198,20 +185,14 @@ Cypress.Commands.add('cleanAllGroups', function (mode = 'STANDALONE') {
       ? Cypress.env('baseUrlManaged')
       : Cypress.env('baseUrlCentral');
 
-  cy.authenticatedRequest(
-    { method: 'GET', url: `${backend}/api/group` },
-    mode
-  ).then((resp) => {
+  cy.authenticatedRequest({ method: 'GET', url: `${backend}/api/group` }, mode).then((resp) => {
     if (!Array.isArray(resp.body)) {
       return;
     }
     for (const x of resp.body) {
       const group = x.instanceGroupConfiguration.name;
 
-      cy.authenticatedRequest(
-        { method: 'DELETE', url: `${backend}/api/group/${group}` },
-        mode
-      );
+      cy.authenticatedRequest({ method: 'DELETE', url: `${backend}/api/group/${group}` }, mode);
     }
   });
 });
@@ -224,10 +205,7 @@ Cypress.Commands.add('cleanAllSoftwareRepos', function (mode = 'STANDALONE') {
       ? Cypress.env('baseUrlManaged')
       : Cypress.env('baseUrlCentral');
 
-  cy.authenticatedRequest(
-    { method: 'GET', url: `${backend}/api/softwarerepository` },
-    mode
-  ).then((resp) => {
+  cy.authenticatedRequest({ method: 'GET', url: `${backend}/api/softwarerepository` }, mode).then((resp) => {
     if (!Array.isArray(resp.body)) {
       return;
     }

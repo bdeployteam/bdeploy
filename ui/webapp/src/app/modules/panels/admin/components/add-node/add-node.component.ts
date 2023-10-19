@@ -145,4 +145,8 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
 
     return false;
   }
+
+  protected fileAdded(event: any) {
+    this.readFile(event);
+  }
 }

@@ -12,14 +12,12 @@
           <strong>master</strong> node. This can be found on the servers node management when converting the
           <strong>master node</strong>.</span
         >
-        <mat-card
-          appearance="outlined"
-          class="bd-drag-card bd-drop-card flex flex-col justify-center items-center"
+        <app-bd-file-drop
+          hintText="Drop node information here"
           (drop)="onDrop($event)"
           (dragover)="onOver($event)"
-        >
-          Drop node information here!
-        </mat-card>
+          (fileAdded)="fileAdded($event)"
+        ></app-bd-file-drop>
         <app-bd-form-input
           name="name"
           label="Name"
