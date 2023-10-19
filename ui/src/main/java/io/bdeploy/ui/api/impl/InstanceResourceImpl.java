@@ -506,7 +506,7 @@ public class InstanceResourceImpl implements InstanceResource {
 
         syncInstance(minion, rc, group, instanceId);
         if (minion.getMode() != MinionMode.CENTRAL) {
-            changes.remove(ObjectChangeType.INSTANCE, key);
+            changes.remove(ObjectChangeType.INSTANCE, key, Map.of("partial", "true"));
         }
     }
 
