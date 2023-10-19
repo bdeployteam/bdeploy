@@ -178,6 +178,19 @@ java configuration Master : minion-base {
 	memory max=256 MB;
 }
 
+java configuration Master-RelDir : minion-base {
+	argument "start";
+	argument "--root=../runtime/master";
+	argument "--allowCors";
+	argument "--consoleLog";
+	vm-argument "-XX:+HeapDumpOnOutOfMemoryError";
+//	vm-argument "-Dbdeploy.version.override=4.1.3"; // TESTING
+
+	working-dir '${workspace_loc}/runtime';
+
+	memory max=256 MB;
+}
+
 java configuration Master-MigrateMode : minion-base {
 	argument "config";
 	argument "--root=${workspace_loc}/runtime/master";
