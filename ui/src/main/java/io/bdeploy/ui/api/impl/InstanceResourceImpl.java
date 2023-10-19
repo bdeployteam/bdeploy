@@ -610,10 +610,7 @@ public class InstanceResourceImpl implements InstanceResource {
         InstanceManifest instance = InstanceManifest.load(hive, instanceId, tag);
         RemoteService svc = mp.getControllingMaster(hive, instance.getManifest());
 
-        // 1. push config to remote (small'ish).
-        hive.execute(new PushOperation().setRemote(svc).addManifest(instance.getManifest()).setHiveName(group));
-
-        // 2. push product to remote in case it is not yet there, and we have it.
+        // 1. push product to remote in case it is not yet there, and we have it.
         if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(instance.getConfiguration().product)))) {
             TransferStatistics stats = hive.execute(
                     new PushOperation().setRemote(svc).addManifest(instance.getConfiguration().product).setHiveName(group));
@@ -626,7 +623,7 @@ public class InstanceResourceImpl implements InstanceResource {
             }
         }
 
-        // 3: tell master to deploy
+        // 2: tell master to deploy
         MasterRootResource master = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
         master.getNamedMaster(group).install(instance.getManifest());
 

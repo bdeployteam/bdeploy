@@ -2,6 +2,7 @@ package io.bdeploy.ui.api.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,8 +17,12 @@ import org.slf4j.LoggerFactory;
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
+import io.bdeploy.bhive.op.ManifestExistsOperation;
+import io.bdeploy.bhive.op.remote.PushOperation;
+import io.bdeploy.bhive.op.remote.TransferStatistics;
 import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfigurationDto;
 import io.bdeploy.interfaces.configuration.instance.InstanceUpdateDto;
@@ -325,6 +330,36 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     public BulkOperationResultDto installLatestBulk(List<String> instances) {
         var result = new BulkOperationResultDto();
         var sync = new ConcurrentHashMap<Manifest.Key, String>();
+        var pushTargets = new HashMap<RemoteService, Set<Manifest.Key>>();
+
+        instances.stream().forEach(i -> {
+            var im = InstanceManifest.load(hive, i, null);
+            var master = mp.getControllingMaster(hive, im.getManifest());
+            if (Boolean.TRUE.equals(hive.execute(new ManifestExistsOperation().setManifest(im.getConfiguration().product)))) {
+                pushTargets.computeIfAbsent(master, k -> new TreeSet<>()).add(im.getConfiguration().product);
+            }
+        });
+
+        var push = pushTargets.entrySet().stream().map(e -> (Runnable) () -> {
+            try {
+                var op = new PushOperation().setRemote(e.getKey()).setHiveName(group);
+                e.getValue().forEach(op::addManifest);
+
+                // 1. push product to remote in case it is not yet there, and we have it.
+                TransferStatistics stats = hive.execute(op);
+
+                if (log.isInfoEnabled()) {
+                    log.info("Pushed {} products to {}; trees={}, objs={}, size={}, duration={}, rate={}", e.getValue().size(),
+                            e.getKey().getUri(), stats.sumMissingTrees, stats.sumMissingObjects,
+                            FormatHelper.formatFileSize(stats.transferSize), FormatHelper.formatDuration(stats.duration),
+                            FormatHelper.formatTransferRate(stats.transferSize, stats.duration));
+                }
+            } catch (Exception ex) {
+                log.warn("Error while pushing", ex);
+            }
+        }).toList();
+
+        rspos.runAndAwaitAll("Bulk-Push-Products", push, hive.getTransactions());
 
         var actions = instances.stream().map(i -> (Runnable) () -> {
             var im = InstanceManifest.load(hive, i, null);
@@ -337,13 +372,14 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
             var master = mp.getControllingMaster(hive, im.getManifest());
             try {
+                // 2. perform install.
                 var root = ResourceProvider.getVersionedResource(master, MasterRootResource.class, context);
                 root.getNamedMaster(group).install(im.getManifest());
 
                 sync.put(im.getManifest(), im.getConfiguration().id); // only on success.
                 result.add(new OperationResult(i, OperationResultType.INFO, "Installed"));
             } catch (Exception e) {
-                log.warn("Error while deleting {}", i, e);
+                log.warn("Error while installing {}", i, e);
                 result.add(new OperationResult(i, OperationResultType.ERROR, e.getMessage()));
             }
         }).toList();
@@ -413,14 +449,15 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
 
         // on CENTRAL only, synchronize managed servers. only after that we know all instances.
         if (minion.getMode() == MinionMode.CENTRAL) {
-            List<ManagedMasterDto> toSync = list.stream().filter(i -> instances.contains(i.instance)).map(i -> i.managedServer)
-                    .toList();
+            Map<String, ManagedMasterDto> toSync = new TreeMap<>();
+            list.stream().filter(i -> instances.contains(i.instance)).map(i -> i.managedServer)
+                    .forEach(m -> toSync.put(m.hostName, m));
 
             log.info("Mass-synchronize {} server(s).", toSync.size());
 
             ManagedServersResource rs = rc.initResource(new ManagedServersResourceImpl());
             List<Runnable> syncTasks = new ArrayList<>();
-            for (ManagedMasterDto host : toSync) {
+            for (ManagedMasterDto host : toSync.values()) {
                 syncTasks.add(() -> {
                     try {
                         if (log.isDebugEnabled()) {
