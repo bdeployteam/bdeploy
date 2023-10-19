@@ -75,7 +75,7 @@ Basically, `app-info.yaml` allows you to specify which executable to run, and wh
 
 The `app-info.yaml` file should be placed in the root directory of the **Application** it describes.
 
-```yaml
+```yaml app-info.yaml
 name: "My Application" <1>
 type: CLIENT <2>
 pooling: GLOBAL <3>
@@ -442,7 +442,7 @@ There is no actual requirement for the file to be named `product-info.yaml`. Thi
 
 The `product-info.yaml` file describes which **Applications** are part of the final **Product**, as well as some additional **Product** meta-data.
 
-```yaml
+```yaml product-info.yaml
 name: My Product <1>
 product: com.example/product <2>
 vendor: My Company <3>
@@ -489,7 +489,7 @@ The `product-version.yaml` file associates **Application** IDs used in the `prod
 
 The reason why this file is separate from the `product-info.yaml` is because its content (e.g. version) is specific to a single product **Build** . Therfore the `product-version.yaml` ideally is created during the build process of the product by the build system of your choice. This is different to the `app-info.yaml` files and the `product-info.yaml` file as they are written manually.
 
-```yaml
+```yaml product-version.yaml
 version: "2.1.0.201906141135" <1>
 appInfo:
   my-app1: <2>
@@ -513,7 +513,7 @@ There is no actual requirement for the file to be named `application-template.ya
 
 This file defines a single **Application Template**. A [`product-info.yaml`](#product-infoyaml) can reference multiple templates, from which the user can choose.
 
-```yaml
+```yaml application-template.yaml
 id: server-with-sleep <1>
 application: server-app
 name: "Server With Sleep (Oracle)"
@@ -553,7 +553,7 @@ startParameters: <5>
 An **Application Template** can also _extend_ another previously defined template. This works the same as the `template` specifier in [`instance-template.yaml`](#instance-templateyaml) and also allows for `fixedVariables`.
 !!!
 
-```yaml
+```yaml application-template.yaml
 id: fixed-sleep
 name: "Server With 10 Seconds Sleep"
 template: server-with-sleep <1>
@@ -607,7 +607,7 @@ There is no actual requirement for the file to be named `instance-template.yaml`
 
 This file defines a single **Instance Template**. A [`product-info.yaml`](#product-infoyaml) can reference multiple templates, from which the user can choose.
 
-```yaml
+```yaml instance-template.yaml
 name: Default Configuration <1>
 description: "Creates an instance with the default server and client configuration"
 
@@ -730,7 +730,7 @@ Attribute   | Description
 
 A `parameter-template.yaml` allows products to define re-usable blocks of parameters associated to a unique ID. These can then be applied in `app-info.yaml` files. For the user of **BDeploy**, those parameters will appear as if they were defined directly in the [`app-info.yaml`](#app-infoyaml) of the application.
 
-```yaml
+```yaml parameter-template.yaml
 id: param.template <1>
 
 parameters: <2>
@@ -755,7 +755,7 @@ To be able to use a template, the template needs to also be registered in the [`
 
 An `instance-variable-template.yaml` works the same as a `parameter-template.yaml` in that it provides common definitions for instance variables, which can be re-used in [`instance-template.yaml`](#instance-templateyaml) files. Those definitions are inlined early on, so variables from `instance-variable-template.yaml` files can do exactly the same things as `instanceVariables` in a [`instance-template.yaml`](#instance-templateyaml).
 
-```yaml
+```yaml instance-variable-template.yaml
 id: var.template <1>
 
 instanceVariables: <2>
@@ -776,7 +776,7 @@ To be able to use a template, the template needs to also be registered in the [`
 
 A (freestanding) `system-template.yaml` allows you to specify a broader scoped template than a (product-bound) `instance-template.yaml`. A `system-template.yaml` can reference multiple products, and **Instance Templates** therin to create systems containing of many instances from different products.
 
-```yaml
+```yaml system-template.yaml
 name: Test System
 description: 'A test system with both demo and chat product'
 
@@ -858,7 +858,7 @@ The `product-validation.yaml` file contains references to all files that should 
 
 The content of this files is very straight forward:
 
-```yaml
+```yaml product-validation.yaml
 product: product-info.yaml
 
 applications:
@@ -895,11 +895,10 @@ Once you have a `product-info.yaml` with it's `product-version.yaml` and all the
 Given a sample Java application which has been created from the default gradle template using `gradle init`, these are the changes you need to build a **BDeploy** product for this single application. For this demo, the application is named `test`.
 
 !!!info Note
-Add the below code to your existing `build.gradle`
+Add the below code to your *existing* `build.gradle`
 !!!
 
-`build.gradle`
-```groovy
+```groovy build.gradle
 plugins {
   ...
   id 'io.bdeploy.gradle.plugin' version '3.1.1-1' <1>
@@ -922,6 +921,10 @@ task validateProduct(type: io.bdeploy.gradle.BDeployValidationTask, dependsOn: i
 
 
 task buildProduct(type: io.bdeploy.gradle.BDeployProductTask, dependsOn: installDist) { <5>
+  repositoryServer {
+    useLogin = true
+  }
+
   product {
     version = project.ext.buildVersion
     productInfo = file('bdeploy/product-info.yaml')
@@ -959,10 +962,11 @@ task pushProduct(type: io.bdeploy.gradle.BDeployPushTask, dependsOn: buildProduc
 1. Applies the plugin **BDeploy** gradle plugin.
 2. Sets the project version. **Gradle** does not strictly require a version, and uses 'unspecified' as default. **BDeploy** requires _some_ sort of version, and setting it for the whole project is good practice.
 3. Calculate a build date, which will be substituted instead of the `SNAPSHOT` in the version. This is optional, you could just plain use the version set. The actual `buildVersion` used later when building the product is derived from the project version and the `buildDate`.
-4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files. The `validationServer` can set `useLogin = true` to use logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` manually to have full control.
-5. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.
+4. The `BDeployValidationTask` can be used to validate product information before actually building the product. The [`product-validation.yaml`](#product-validationyaml) file must contain a reference to the `product.info.yaml` used, as well as references to all `app-info.yaml` files.
+5. This task will actually build the product with the configured version. The actual data about the product is loaded from `bdeploy/product-info.yaml`, which we will create in a second. Note that this task depends on `installDist`, which will unpack the binary distribution of the application in this project into a folder, so **BDeploy** can import the individual files. Depending on the type of application and the way it is built, there might be different ways to achieve this.  
+The `repositoryServer` will be queried for additionally specified `runtimeDependencies` at build time. Those dependencies will be downloaded and embedded into the final product.
 6. If `buildProduct` built a product, this task will package it as a ZIP file. Note that a ZIP will always contain _all of_ the product, whereas `pushProduct` can push only required deltas which are not present on the target server.
-7. The `pushProduct` task can push required deltas to one or more configured target servers. Each server can set `useLogin = true` to use logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` manually to have full control. In addition the target `instanceGroup` must be specified for pushing.
+7. The `pushProduct` task can push required deltas to one or more configured target servers. The server configuration is the same as for all other `..Server` blocks (see note below). In addition the target `instanceGroup` **must** be specified for pushing.
 8. Multiple target servers can be specified in the `target.servers` section. The plugin will push to each of them.
 
 Next we need the required descriptors for the product and the application. For this sample, the information will be the bare minimum, please see [`app-info.yaml`](#app-infoyaml) and [`product-info.yaml`](#product-infoyaml) for all supported content.
@@ -973,8 +977,11 @@ Lets start off with the [`app-info.yaml`](#app-infoyaml), which describes the `t
 This file **must** be part of the binary distribution of an application and reside in its root directory. To achieve this, the most simple way (using the gradle `application` plugin) is to put the file in the subdirectory `src/main/dist` in the project folder.
 !!!
 
-`src/main/dist/app-info.yaml`
-```yaml
+!!!info Note
+All `...Server` blocks can set `useLogin = true` to use local logins created on the system using the `bdeploy login` command. You can provide a login name using `login = xx`, or specify `uri` and `token` instead of `useLogin` to have full control.
+!!!
+
+```yaml src/main/dist/app-info.yaml
 name: Test Application
 
 supportedOperatingSystems: <1>
@@ -994,8 +1001,7 @@ Finally, we need a [`product-info.yaml`](#product-infoyaml) describing the produ
 The reason why you want to put this file into a separate folder is because it allows to reference various other files by relative path. Those files (and folders) must the reside next to the [`product-info.yaml`](#product-infoyaml). Over time this can grow, and may clutter your source folders if you do not separate it.
 !!!
 
-`bdeploy/product-info.yaml`
-```yaml
+```yaml bdeploy/product-info.yaml
 name: Test Product
 product: io.bdeploy/test <1>
 vendor: BDeploy Team
@@ -1064,7 +1070,7 @@ There is no actual requirement for the file to be named `products.yaml`. This is
 
 This file is required and lists the [`product-build.yaml`](#product-buildyaml) files which are available to the integration.
 
-```yaml
+```yaml products.yaml
 products:
   "Product One": "prod-1-build.yaml"
   "Product Two": "prod-2-build.yaml"
@@ -1082,7 +1088,7 @@ The preferences also allow to configure a **BDeploy** server whos [Software Repo
 
 This file references a [`product-info.yaml`](#product-infoyaml) file and describes how to build the actual applications referenced in the `product-info.yaml`.
 
-```yaml
+```yaml product-build.yaml
 productInfoYaml: my-prod-info.yaml
 
 applications:

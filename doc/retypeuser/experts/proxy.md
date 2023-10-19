@@ -86,7 +86,7 @@ The permission to access a UI endpoint through the **BDeploy** UI is `CLIENT`.
 
 A sample UI endpoint definition may look something like this in the [app-info.yaml](/power/product/#app-infoyaml):
 
-```yaml
+```yaml app-info.yaml
 endpoints:
   http:
     - id: "appUi"
