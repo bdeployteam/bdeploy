@@ -490,7 +490,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
   protected doPreRender(p: ParameterPair) {
     p.value.preRendered = this.edit.preRenderParameter(p.descriptor, p.value.value);
     p.value.target =
-      p.descriptor.type === ParameterType.ENVIRONMENT
+      p.descriptor?.type === ParameterType.ENVIRONMENT
         ? ParameterConfigurationTarget.ENVIRONMENT
         : ParameterConfigurationTarget.COMMAND;
     this.updatePreview$.next(true);
