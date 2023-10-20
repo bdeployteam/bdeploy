@@ -100,7 +100,7 @@ public class LockDirectoryOperation extends BHive.Operation<Void> {
             return true;
         } catch (NoSuchFileException | FileNotFoundException fne) {
             return false;
-        } catch (IOException ve) {
+        } catch (Exception ve) {
             log.warn("Cannot validate lock file, assuming it is valid: {}: {}", lockFile, ve.toString());
             return true;
         }
