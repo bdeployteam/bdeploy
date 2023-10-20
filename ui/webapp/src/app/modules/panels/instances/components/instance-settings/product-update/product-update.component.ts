@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, map } from 'rxjs';
 import { BdDataColumn, BdDataColumnTypeHint } from 'src/app/models/data';
 import { ProductDto } from 'src/app/models/gen.dtos';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstanceEditService } from 'src/app/modules/primary/instances/services/instance-edit.service';
 import { ProductsService } from 'src/app/modules/primary/products/services/products.service';
 import { ProductVersionDetailsCellComponent } from '../../product-version-details-cell/product-version-details-cell.component';
@@ -16,6 +17,7 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
   public products = inject(ProductsService);
   public edit = inject(InstanceEditService);
   public areas = inject(NavAreasService);
+  private groups = inject(GroupsService);
 
   private readonly productVersionColumn: BdDataColumn<ProductDto> = {
     id: 'version',
@@ -40,6 +42,8 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
+  protected newerVersionAvailableOnManaged$: Observable<boolean>;
+
   ngOnInit() {
     this.subscription = combineLatest([this.edit.state$, this.products.products$]).subscribe(([state, prods]) => {
       if (!state || !prods?.length) {
@@ -56,6 +60,16 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
           )
       );
     });
+
+    this.newerVersionAvailableOnManaged$ = combineLatest([this.edit.current$, this.edit.state$]).pipe(
+      map(([current, state]) => {
+        if (!current || !state) {
+          return false;
+        }
+        const productName = state.config.config.product.name;
+        return current?.managedServer?.productUpdates?.newerVersionAvailable[productName];
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -70,5 +84,11 @@ export class ProductUpdateComponent implements OnInit, OnDestroy {
     // if there is no filter, all products are eligible
     if (!productFilterRegex) return true;
     return new RegExp(productFilterRegex).test(productTag);
+  }
+
+  protected goToProductSync() {
+    const group = this.groups.current$.value.name;
+    const managed = this.edit.current$.value.managedServer.hostName;
+    this.areas.navigateBoth(['products', 'browser', group], ['panels', 'products', 'sync', 'CENTRAL', managed]);
   }
 }

@@ -16,5 +16,6 @@ public class ManagedMasterDto {
     public Instant lastSync;
     public MinionConfiguration minions;
     public MinionUpdateDto update;
+    public MinionProductUpdatesDto productUpdates;
 
 }

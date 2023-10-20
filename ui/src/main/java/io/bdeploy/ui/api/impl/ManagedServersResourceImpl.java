@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -49,15 +52,18 @@ import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.configuration.instance.InstanceGroupConfiguration;
 import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
 import io.bdeploy.interfaces.manifest.InstanceManifest;
+import io.bdeploy.interfaces.manifest.ProductManifest;
 import io.bdeploy.interfaces.manifest.SystemManifest;
 import io.bdeploy.interfaces.manifest.managed.ControllingMaster;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasters;
 import io.bdeploy.interfaces.manifest.managed.ManagedMastersConfiguration;
+import io.bdeploy.interfaces.manifest.managed.MinionProductUpdatesDto;
 import io.bdeploy.interfaces.manifest.managed.MinionUpdateDto;
 import io.bdeploy.interfaces.minion.MinionConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
+import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.interfaces.remote.CommonInstanceResource;
 import io.bdeploy.interfaces.remote.CommonRootResource;
 import io.bdeploy.interfaces.remote.MasterRootResource;
@@ -123,6 +129,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
     @Inject
     private ActionFactory af;
+
+    @Inject
+    private VersionSorterService vss;
 
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
@@ -565,10 +574,36 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().config));
         attached.minions = new MinionConfiguration(config);
 
-        // 10. update current information in the hive.
+        // 10. Check if managed server has newer products that central
+        MinionProductUpdatesDto productUpdatesDto = new MinionProductUpdatesDto();
+        productUpdatesDto.newerVersionAvailable = new HashMap<>();
+        SortedSet<Key> productsOnCentral = ProductManifest.scan(hive);
+        List<ProductDto> productsOnManaged = listProducts(groupName, serverName);
+        Map<String, Comparator<String>> comparators = new TreeMap<>();
+        for (ProductDto product : productsOnManaged) {
+            String productName = product.key.getName();
+            String productTag = product.key.getTag();
+
+            if (productUpdatesDto.newerVersionAvailable.containsKey(productName)) {
+                continue;
+            }
+
+            Comparator<String> productVersionComparator = comparators.computeIfAbsent(product.key.getName(),
+                    k -> vss.getTagComparator(groupName, product.key));
+
+            boolean allCentralVersionsAreOlder = productsOnCentral.stream().filter(key -> key.getName().equals(productName))
+                    .map(Key::getTag).allMatch(tag -> productVersionComparator.compare(tag, productTag) == -1);
+            if (allCentralVersionsAreOlder) {
+                productUpdatesDto.newerVersionAvailable.put(productName, true);
+            }
+        }
+
+        attached.productUpdates = productUpdatesDto;
+
+        // 11. update current information in the hive.
         mm.attach(attached, true);
 
-        // 11. send out notifications after *all* is done.
+        // 12. send out notifications after *all* is done.
         for (var im : removedInstances) {
             changes.remove(ObjectChangeType.INSTANCE, im.getManifest(), new ObjectScope(groupName));
         }
