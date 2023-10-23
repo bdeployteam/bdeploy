@@ -36,12 +36,13 @@ export class ActionsService {
   constructor() {
     combineLatest([
       this.areas.groupContext$,
+      this.areas.repositoryContext$,
       this.areas.instanceContext$,
       this.cfg.offline$.pipe(distinctUntilChanged()),
       this.auth.getTokenSubject().pipe(distinctUntilChanged()),
     ])
       .pipe(debounceTime(500))
-      .subscribe(([group, instance, offline]) => {
+      .subscribe(([group, repo, instance, offline]) => {
         const scope: ObjectScope = cloneDeep(EMPTY_SCOPE);
         if (group) {
           scope.scope.push(group);
@@ -49,6 +50,8 @@ export class ActionsService {
           if (instance) {
             scope.scope.push(instance);
           }
+        } else if (repo) {
+          scope.scope.push(repo);
         }
 
         this.changesSubscription?.unsubscribe();
@@ -60,9 +63,18 @@ export class ActionsService {
           return; // don't bother.
         }
 
+        if (!this.auth.isGlobalAdmin() && (scope.scope.length === 0 || this.auth.isCurrentScopeExclusiveReadClient())) {
+          // in this case we would see *all* actions from *all* scopes. this is not only a performance
+          // but also a permission-wise problem, as permissions are granted on group level (first level of scope).
+          // global admins STILL want to see all actions, e.g. when performing maintenance on global scope.
+          return;
+        }
+
         let params = new HttpParams();
         if (!!group) {
           params = params.set('group', group);
+        } else if (!!repo) {
+          params = params.set('group', repo);
         }
         if (!!instance) {
           params = params.set('instance', instance);
@@ -70,13 +82,6 @@ export class ActionsService {
         this.http.get<ActionBroadcastDto[]>(`${this.apiPath}`, { params }).subscribe((r) => {
           this.actions$.next(r);
         });
-
-        if (!this.auth.isGlobalAdmin() && (scope.scope.length === 0 || this.auth.isCurrentScopeExclusiveReadClient())) {
-          // in this case we would see *all* actions from *all* scopes. this is not only a performance
-          // but also a permission-wise problem, as permissions are granted on group level (first level of scope).
-          // global admins STILL want to see all actions, e.g. when performing maintenance on global scope.
-          return;
-        }
 
         this.changesSubscription = this.changes.subscribe(ObjectChangeType.SERVER_ACTIONS, scope, (c) => {
           this.actions$
