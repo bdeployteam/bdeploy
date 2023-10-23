@@ -267,6 +267,9 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       const descriptors = this.edit.application$.value.descriptor.startCommand.parameters;
 
       let initialValue = p.descriptor?.defaultValue;
+      if (p.descriptor?.type === ParameterType.BOOLEAN && !initialValue) {
+        initialValue = createLinkedValue('false');
+      }
       if (p.descriptor.global) {
         // need to lookup a potential already existing global value.
         const global = this.edit.getGlobalParameter(p.descriptor.id);
