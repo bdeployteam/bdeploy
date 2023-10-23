@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { ProcessHandleDto } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataPopoverCellComponent } from 'src/app/modules/core/components/bd-data-popover-cell/bd-data-popover-cell.component';
+import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
 import { ProcessDetailsService } from '../../services/process-details.service';
 
 const nativePidColumn: BdDataColumn<ProcessHandleDto> = {
@@ -59,7 +60,7 @@ const nativeTimeColumn: BdDataColumn<ProcessHandleDto> = {
   templateUrl: './process-natives.component.html',
 })
 export class ProcessNativesComponent implements OnInit, OnDestroy {
-  protected details: ProcessDetailsService;
+  protected details = inject(ProcessDetailsService);
 
   protected columns: BdDataColumn<ProcessHandleDto>[] = [
     nativePidColumn,
@@ -76,7 +77,7 @@ export class ProcessNativesComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.details.processDetail$.subscribe((detail) => {
       this.processes = [];
-      if (detail) {
+      if (ProcessesService.isRunning(detail?.status?.processState)) {
         this.flattenProcesses(this.processes, detail.handle);
       }
     });
