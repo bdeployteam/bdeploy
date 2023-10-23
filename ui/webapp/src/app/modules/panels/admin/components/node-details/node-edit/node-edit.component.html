@@ -7,6 +7,7 @@
   <app-bd-dialog-content>
     <form #form="ngForm">
       <div class="flex flex-col gap-2.5" *ngIf="data && orig">
+        <strong>{{nodeName$ | async}}</strong>
         <span
           >You can either manually enter node information below, or drop a <code>node-ident</code> file which is created
           during the initialization process on the physical node.</span

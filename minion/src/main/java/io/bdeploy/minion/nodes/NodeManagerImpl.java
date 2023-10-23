@@ -33,6 +33,7 @@ import io.bdeploy.ui.api.impl.ChangeEventManager;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeHint;
 import io.bdeploy.ui.dto.ObjectChangeType;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.SecurityContext;
@@ -189,7 +190,11 @@ public class NodeManagerImpl implements NodeManager, AutoCloseable {
                 log.debug("Failed to contact {}", node, e);
             }
 
-            status.put(node, MinionStatusDto.createOffline(mdto, e.toString()));
+            if (e instanceof ProcessingException x) {
+                status.put(node, MinionStatusDto.createOffline(mdto, x.getCause().toString()));
+            } else {
+                status.put(node, MinionStatusDto.createOffline(mdto, e.toString()));
+            }
 
             // log it, we don't want to hold status in the futures.
             if (Boolean.TRUE.equals(contactWarning.get(node))) {

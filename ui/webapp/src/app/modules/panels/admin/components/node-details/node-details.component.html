@@ -18,13 +18,12 @@
             <div>Up Since:</div>
             <div>{{ state.startup | date: 'dd.MM.yyyy HH:mm' }}</div>
           </ng-container>
-          <ng-container *ngIf="state.offline">
-            <div>Status:</div>
-            <div class="truncate" [matTooltip]="state.infoText" [matTooltipShowDelay]="500">{{ state.infoText }}</div>
-          </ng-container>
           <div>Response Time:</div>
           <div>{{ state.lastRoundtrip }}ms</div>
         </div>
+        <ng-container *ngIf="state.offline">
+          <strong class="pt-2" [matTooltip]="state.infoText" [matTooltipShowDelay]="500">{{ state.infoText }}</strong>
+        </ng-container>
       </app-bd-notification-card>
 
       <mat-divider></mat-divider>

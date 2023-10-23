@@ -9,7 +9,7 @@ const nodeColName: BdDataColumn<MinionRecord> = {
   id: 'name',
   name: 'Name',
   data: (r) => r.name,
-  width: '180px',
+  width: '350px',
 };
 
 const nodeColStatus: BdDataColumn<MinionRecord> = {
