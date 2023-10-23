@@ -127,8 +127,12 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
             }
 
             if (config.mode() != MinionMode.NODE) {
-                mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
-                        Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+                try {
+                    mr.getUsers().createLocalUser(config.initUser(), config.initPassword(),
+                            Collections.singletonList(ApiAccessToken.ADMIN_PERMISSION));
+                } catch (Exception e) {
+                    return createResultWithErrorMessage(e.getMessage());
+                }
 
                 result.addField("User Created", config.initUser());
             } else {
