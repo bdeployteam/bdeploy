@@ -82,6 +82,11 @@ public class NodeDeploymentResourceImpl implements NodeDeploymentResource {
         InstanceNodeManifest inm = InstanceNodeManifest.of(hive, key);
         InstanceNodeController inc = new InstanceNodeController(hive, root.getDeploymentDir(), inm, ts);
         inc.addAdditionalVariableResolver(new MinionConfigVariableResolver(root));
+
+        if (inc.isInstalled()) {
+            return; // :)
+        }
+
         inc.install();
         getState(inm, hive).install(key.getTag());
 

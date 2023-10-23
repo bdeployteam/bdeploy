@@ -83,12 +83,9 @@ public class InstanceProcessController {
             String tag, ProcessGroupConfiguration groupConfig, MinionRuntimeHistoryManager runtimeHistory) {
         try {
             writeLock.lock();
-            // Create a new list if not yet existing for this tag
-            ProcessList processList = processMap.get(tag);
-            if (processList == null) {
-                processList = new ProcessList(tag, groupConfig);
-                processMap.put(tag, processList);
-            }
+
+            ProcessList processList = new ProcessList(tag, groupConfig);
+            processMap.put(tag, processList);
 
             // Fetch all process control groups which are available.
             processList.setControlGroupsFromConfig(inm);
