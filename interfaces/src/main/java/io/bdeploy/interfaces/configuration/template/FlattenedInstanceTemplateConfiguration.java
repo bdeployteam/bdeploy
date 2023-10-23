@@ -64,12 +64,14 @@ public class FlattenedInstanceTemplateConfiguration {
         TemplateableVariableConfiguration toReplace = null;
         List<TemplateableVariableConfiguration> vars = new ArrayList<>(original);
         do {
+            // find element which has a 'template' attribute set
             toReplace = vars.stream().filter(v -> v.template != null).findFirst().orElse(null);
             if (toReplace != null) {
-                // replace/expand it.
+                // replace/expand it. remove the placeholder element.
                 int index = vars.indexOf(toReplace);
-                vars.remove(index); // remove the original element.
+                vars.remove(index);
 
+                // find replacements by looking up the first template with matching id, and map to its elements
                 String templateId = toReplace.template;
                 List<TemplateableVariableConfiguration> replacements = templates.stream().filter(t -> t.id.equals(templateId))
                         .map(t -> t.instanceVariables).findFirst().orElse(null);
@@ -77,10 +79,10 @@ public class FlattenedInstanceTemplateConfiguration {
                 if (replacements == null) {
                     log.warn("No instance variable template found for {}", templateId);
                 } else {
-                    // only apply things which are not already there for *whatever* reason.
+                    // of the given replacements, insert those whose id is not yet present in the variable list.
                     ImmutableList.copyOf(replacements).reverse().stream()
                             .filter(p -> vars.stream().filter(x -> x.id != null && x.id.equals(p.id)).findFirst().isEmpty())
-                            .forEach(r -> vars.add(index, r));
+                            .forEach(r -> vars.add(index, new TemplateableVariableConfiguration(r)));
                 }
             }
         } while (toReplace != null);

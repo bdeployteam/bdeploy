@@ -3,6 +3,13 @@
 name: Test Overrides
 description: "Test template variable overrides"
 
+instanceVariables:
+  - id: param.global
+    value: "global-value"
+    description: "The global parameter's global value"
+    type: "STRING"
+  - template: shared.vars
+
 groups:
 - name: "No Override"
   description: "Server application should query"
