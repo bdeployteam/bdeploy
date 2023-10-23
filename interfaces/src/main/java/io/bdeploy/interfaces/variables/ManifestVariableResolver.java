@@ -18,7 +18,7 @@ public class ManifestVariableResolver extends PrefixResolver {
     protected String doResolve(String variable) {
         Path manifestPath = manifests.getManifestPath(variable);
         if (manifestPath == null) {
-            throw new IllegalStateException("Cannot resolve: " + variable);
+            return null;
         }
         return manifestPath.toString();
     }

@@ -40,6 +40,7 @@ import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathValidationDummyResolver;
+import io.bdeploy.interfaces.variables.EmptyVariableResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableDummyResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
@@ -514,7 +515,14 @@ public class ProductUpdateService {
         }
 
         try {
-            value = TemplateHelper.process(expression, resolver);
+            // we need a resolver which resolves to empty string as last resort.
+            // in case a value is requested using BE_EMPTY, non-present parameters/variables
+            // should not cause failure.
+            CompositeResolver comp = new CompositeResolver();
+            comp.add(resolver);
+            comp.add(new EmptyVariableResolver());
+
+            value = TemplateHelper.process(expression, comp);
         } catch (Exception e) {
             // that does not resolve, so it is not good :)
             return false;

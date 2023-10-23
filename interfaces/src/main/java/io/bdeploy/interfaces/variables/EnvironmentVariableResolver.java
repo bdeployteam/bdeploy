@@ -11,11 +11,7 @@ public class EnvironmentVariableResolver extends PrefixResolver {
 
     @Override
     protected String doResolve(String variable) {
-        String value = System.getenv(variable);
-        if (value == null) {
-            throw new IllegalStateException("Environment variable " + variable + " not set.");
-        }
-        return value;
+        return System.getenv(variable);
     }
 
 }

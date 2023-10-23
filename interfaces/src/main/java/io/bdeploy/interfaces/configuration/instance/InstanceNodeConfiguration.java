@@ -28,6 +28,7 @@ import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
+import io.bdeploy.interfaces.variables.EmptyVariableResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
@@ -224,18 +225,6 @@ public class InstanceNodeConfiguration {
                 used.add(variable);
             }
             return val;
-        }
-
-    }
-
-    /**
-     * used for all expansions not required to determine which system variables are required.
-     */
-    private static final class EmptyVariableResolver implements VariableResolver {
-
-        @Override
-        public String apply(String t) {
-            return ""; // always resolve to *something* (non-null);
         }
 
     }

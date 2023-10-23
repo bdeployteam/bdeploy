@@ -1,5 +1,8 @@
 package io.bdeploy.interfaces.variables;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
 
 /**
@@ -7,6 +10,7 @@ import io.bdeploy.interfaces.configuration.instance.InstanceNodeConfiguration;
  */
 public class ApplicationParameterValueResolver extends PrefixResolver {
 
+    private static final Logger log = LoggerFactory.getLogger(ApplicationParameterValueResolver.class);
     private final String appId;
     private final ApplicationParameterProvider provider;
 
@@ -22,7 +26,14 @@ public class ApplicationParameterValueResolver extends PrefixResolver {
         if (variable.contains(":")) {
             return null;
         }
-        return provider.getValueById(appId, variable);
+        try {
+            return provider.getValueById(appId, variable);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot resolve " + variable + " on " + appId, e);
+            }
+            return null;
+        }
     }
 
 }

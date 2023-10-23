@@ -213,6 +213,33 @@ startCommand:
       defaultValue: "X"
       type: ENVIRONMENT
 
+    - id: jvm-debug-port-non-suspend
+      name: "Java Port for Non-Suspend Debugging"
+      longDescription: >
+        The JVM starts immediately and is not waiting for a debugger.
+      parameter: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:"
+      valueSeparator: ""
+      type: SERVER_PORT
+      mandatory: false
+      groupName: "XOR Test"
+      condition:
+        parameter: "jvm-debug-port-suspend"
+        must: BE_EMPTY
+
+    - id: jvm-debug-port-suspend
+      name: "Java Port for Suspend Debugging"
+      longDescription: >
+        The JVM starts in suspended mode and stays suspended until a debugger attaches to it.
+        This is helpful if you want to start debugging as soon as the JVM starts
+      parameter: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:"
+      valueSeparator: ""
+      type: SERVER_PORT
+      mandatory: false
+      groupName: "XOR Test"
+      condition:
+        parameter: "jvm-debug-port-non-suspend"
+        must: BE_EMPTY
+
 endpoints:
     http:
         - id: 'myVersion'
