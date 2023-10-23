@@ -53,6 +53,7 @@ export class ProductsService {
 
   private load(group: string) {
     if (!group) {
+      this.group = null;
       this.products$.next(null);
       this.updateChangeSubscription(null);
       return;

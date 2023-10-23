@@ -82,6 +82,7 @@ export class RepositoryService {
 
   private reload(repository: string) {
     if (!repository) {
+      this.repository = null;
       this.products$.next([]);
       this.softwarePackages$.next([]);
       this.updateChangeSubscription(null);

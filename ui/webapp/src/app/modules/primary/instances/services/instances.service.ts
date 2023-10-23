@@ -251,6 +251,7 @@ export class InstancesService {
 
   private reload(group: string) {
     if (!group) {
+      this.group = null;
       this.instances$.next([]);
       this.loadCurrentAndActive(null);
       this.updateChangeSubscription(null);

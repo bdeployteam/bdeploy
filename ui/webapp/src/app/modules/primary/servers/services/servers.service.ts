@@ -65,6 +65,7 @@ export class ServersService {
 
   private reload(group: string) {
     if (!group || !this.isCentral) {
+      this.group = null;
       this.servers$.next([]);
       this.updateChangeSubscription(null);
       return;
