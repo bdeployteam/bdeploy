@@ -21,7 +21,8 @@ public class TemplateableVariableConfiguration extends VariableConfiguration {
     }
 
     public TemplateableVariableConfiguration(TemplateableVariableConfiguration r) {
-        this(r.template, r.id, new LinkedValueConfiguration(r.value.getPreRenderable()), r.description, r.type, r.customEditor);
+        this(r.template, r.id, r.value != null ? new LinkedValueConfiguration(r.value.getPreRenderable()) : null, r.description,
+                r.type, r.customEditor);
     }
 
 }
