@@ -89,7 +89,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
 
     if [[ ! -d "${r}/linux64" ]]; then
         mkdir -p "${r}/linux64"
-        curl -L "https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/adoptium?project=jdk" --output "${r}/jdk-linux64.tar.gz"
+        curl -L "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/adoptium?project=jdk" --output "${r}/jdk-linux64.tar.gz"
         (
             cd "${r}/linux64"
             tar xfz "${r}/jdk-linux64.tar.gz" > /dev/null
@@ -100,7 +100,7 @@ if [[ -n "${JDK_DL_ROOT}" ]]; then
 
     if [[ ! -d "${r}/win64" ]]; then
         mkdir -p "${r}/win64"
-        curl -L "https://api.adoptium.net/v3/binary/latest/17/ga/windows/x64/jdk/hotspot/normal/adoptium?project=jdk" --output "${r}/jdk-win64.zip"
+        curl -L "https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jdk/hotspot/normal/adoptium?project=jdk" --output "${r}/jdk-win64.zip"
         (
             cd "${r}/win64"
             unzip "${r}/jdk-win64.zip" > /dev/null

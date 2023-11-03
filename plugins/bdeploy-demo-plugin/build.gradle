@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'eclipse'
-    id "com.github.ben-manes.versions" version "0.48.0"
+    id "com.github.ben-manes.versions" version "0.49.0"
 }
 
 repositories {
@@ -13,8 +13,8 @@ repositories {
 
 version = "1.0.5"
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
 
 dependencies {
     implementation 'io.bdeploy:api:5.1.0-SNAPSHOT'
