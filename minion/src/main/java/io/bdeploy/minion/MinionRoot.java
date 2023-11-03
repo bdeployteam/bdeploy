@@ -620,7 +620,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         if (dir == null) {
             dir = root.resolve("deploy");
         }
-        return create(dir);
+        return create(dir).normalize();
     }
 
     public Path getLogDir() {
@@ -655,7 +655,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             modifyState(s -> s.storageLocations = p);
             return p;
         }
-        return paths;
+        return paths.stream().map(p -> p.normalize()).toList();
     }
 
     private <T> T readConfig(String name, Class<T> clazz) {
