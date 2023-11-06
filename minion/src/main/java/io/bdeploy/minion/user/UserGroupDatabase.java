@@ -80,6 +80,7 @@ public class UserGroupDatabase implements AuthGroupService {
         return getAll().stream().filter(g -> name.equalsIgnoreCase(g.name)).findFirst().orElse(null);
     }
 
+    @Override
     public UserGroupInfo getUserGroup(String id) {
         // Note: We are using getIfPresent and put instead of get(name, Callable) as we need to handle null values
         UserGroupInfo info = userGroupCache.getIfPresent(id);
@@ -172,11 +173,11 @@ public class UserGroupDatabase implements AuthGroupService {
     }
 
     @Override
-    public void deleteUserGroup(String group) {
-        Set<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + group));
-        log.info("Deleting {} manifests for user group {}", mfs.size(), group);
+    public void deleteUserGroup(String groupId) {
+        Set<Key> mfs = target.execute(new ManifestListOperation().setManifestName(NAMESPACE + groupId));
+        log.info("Deleting {} manifests for user group {}", mfs.size(), groupId);
         mfs.forEach(k -> target.execute(new ManifestDeleteOperation().setToDelete(k)));
-        userGroupCache.invalidate(group);
+        userGroupCache.invalidate(groupId);
     }
 
     @Override

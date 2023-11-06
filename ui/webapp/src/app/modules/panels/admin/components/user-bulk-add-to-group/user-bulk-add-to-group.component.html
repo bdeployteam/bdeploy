@@ -1,0 +1,25 @@
+<ng-template #opResult>
+  <app-bd-bulk-operation-result [bulkOpResult]="bulkOpResult"></app-bd-bulk-operation-result>
+</ng-template>
+
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Add Users To Group" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <app-bd-form-input
+      label="Add user to the group"
+      class="flex-auto"
+      [(ngModel)]="userInput"
+      [suggested]="suggestions"
+    >
+    </app-bd-form-input>
+
+    <app-bd-button
+      color="primary"
+      [collapsed]="false"
+      text="Save"
+      icon="save"
+      (click)="add()"
+      [disabled]="!group || !(bulk.selection$ | async).length"
+    ></app-bd-button>
+  </app-bd-dialog-content>
+</app-bd-dialog>

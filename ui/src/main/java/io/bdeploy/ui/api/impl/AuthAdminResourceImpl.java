@@ -15,9 +15,13 @@ import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.ui.api.AuthAdminResource;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.UserBulkResource;
+import io.bdeploy.ui.api.UserGroupBulkResource;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.container.ResourceContext;
+import jakarta.ws.rs.core.Context;
 
 public class AuthAdminResourceImpl implements AuthAdminResource {
 
@@ -32,6 +36,9 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
 
     @Inject
     private ActionFactory af;
+
+    @Context
+    private ResourceContext rc;
 
     @Override
     public void createLocalUser(UserInfo info) {
@@ -137,5 +144,15 @@ public class AuthAdminResourceImpl implements AuthAdminResource {
     public void deleteUserGroups(String group) {
         authGroup.deleteUserGroup(group);
         cem.remove(ObjectChangeType.USER_GROUP, Collections.singletonMap(ObjectChangeDetails.USER_GROUP_ID, group));
+    }
+
+    @Override
+    public UserBulkResource getUserBulkResource() {
+        return rc.initResource(new UserBulkResourceImpl());
+    }
+
+    @Override
+    public UserGroupBulkResource getUserGroupBulkResource() {
+        return rc.initResource(new UserGroupBulkResourceImpl());
     }
 }

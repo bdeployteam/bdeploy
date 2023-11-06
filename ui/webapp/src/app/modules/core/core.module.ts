@@ -40,6 +40,7 @@ import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.component';
 import { BdActionsComponent } from './components/bd-actions/bd-actions.component';
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
+import { BdBulkOperationResultComponent } from './components/bd-bulk-operation-result/bd-bulk-operation-result.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
 import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdConfirmationComponent } from './components/bd-confirmation/bd-confirmation.component';
@@ -202,6 +203,7 @@ function loadAppConfig(cfgService: ConfigService) {
     RevalidateOnDirective,
     BdIdentifierComponent,
     BdIdentifierCellComponent,
+    BdBulkOperationResultComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -322,6 +324,7 @@ function loadAppConfig(cfgService: ConfigService) {
     BdConfirmationComponent,
     BdIdentifierCellComponent,
     BdIdentifierComponent,
+    BdBulkOperationResultComponent,
 
     // validators
     IdentifierValidator,

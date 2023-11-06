@@ -1,0 +1,41 @@
+<ng-template #opResult>
+  <app-bd-bulk-operation-result [bulkOpResult]="bulkOpResult"></app-bd-bulk-operation-result>
+</ng-template>
+
+<app-bd-dialog [loadingWhen$]="loading$">
+  <app-bd-dialog-toolbar header="Bulk User Group Manipulation" [panel]="true"></app-bd-dialog-toolbar>
+  <app-bd-dialog-content>
+    <div class="flex flex-col gap-2.5" *ngIf="bulk.selection$ | async as selections">
+      <div><strong>{{ selections.length }}</strong> user groups selected.</div>
+      <mat-divider></mat-divider>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [disabled]="!selections.length"
+        text="Assign Permission..."
+        icon="security"
+        [route]="['panels', 'admin', 'user-group-bulk-manip', 'permission']"
+      ></app-bd-panel-button>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selections.length"
+        text="Activate Selected Groups"
+        icon="person"
+        (click)="onSetInactive(false)"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selections.length"
+        text="Deactivate Selected Groups"
+        icon="person_off"
+        (click)="onSetInactive(true)"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
+        [disabled]="!selections.length"
+        text="Delete Selected Groups"
+        icon="delete"
+        (click)="onDelete()"
+      ></app-bd-button>
+    </div>
+  </app-bd-dialog-content>
+</app-bd-dialog>

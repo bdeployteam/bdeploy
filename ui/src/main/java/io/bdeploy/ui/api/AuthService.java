@@ -105,10 +105,10 @@ public interface AuthService {
     public boolean isAuthorized(String user, ScopedPermission required);
 
     /**
-     * @param group group's id
-     * @param user user's name
+     * @param groupId the ID of the user group
+     * @param user the name of the user
      */
-    public void addUserToGroup(String group, String user);
+    public void addUserToGroup(String groupId, String user);
 
     /**
      * @param group group's id

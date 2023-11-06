@@ -7,6 +7,13 @@
       [records]="authAdmin.users$ | async"
       presetKey="userAdmin"
     ></app-bd-data-grouping>
+    <app-bd-panel-button
+      #bulkMode
+      icon="library_add_check"
+      text="Bulk Manipulation"
+      [route]="['panels', 'admin', 'user-bulk-manip']"
+      tooltip="below"
+    ></app-bd-panel-button>
     <mat-divider [vertical]="true"></mat-divider>
     <app-bd-panel-button
       [collapsed]="false"
@@ -26,6 +33,10 @@
         [columns]="columns"
         [recordRoute]="getRecordRoute"
         [sort]="sort"
+        [checkMode]="bulkMode.toggle && !!bulkMode.rla?.isActive"
+        [checked]="bulk.selection$ | async"
+        (checkedChange)="bulk.selection$.next($event)"
+        [checkedFrozenWhen$]="bulk.frozen$"
       >
       </app-bd-data-display>
     </div>

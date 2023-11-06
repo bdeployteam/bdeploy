@@ -137,4 +137,10 @@ public interface AuthAdminResource {
     @Path("/import-ldap-accounts")
     public String importAccountsLdapServer(LDAPSettingsDto dto);
 
+    @Path("/user-bulk")
+    public UserBulkResource getUserBulkResource();
+
+    @Path("/user-group-bulk")
+    public UserGroupBulkResource getUserGroupBulkResource();
+
 }

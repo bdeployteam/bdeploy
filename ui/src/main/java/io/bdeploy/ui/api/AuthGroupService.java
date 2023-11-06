@@ -10,6 +10,14 @@ import io.bdeploy.interfaces.UserInfo;
 public interface AuthGroupService {
 
     /**
+     * Lookup the given group's information.
+     *
+     * @param groupId the ID of the user group
+     * @return all known information for the user group.
+     */
+    public UserGroupInfo getUserGroup(String groupId);
+
+    /**
      * @return all user groups known to the system with full user group information
      */
     public SortedSet<UserGroupInfo> getAll();
@@ -40,9 +48,9 @@ public interface AuthGroupService {
     /**
      * Deletes the given user group
      *
-     * @param group the id of the user group.
+     * @param groupId the ID of the user group.
      */
-    public void deleteUserGroup(String group);
+    public void deleteUserGroup(String groupId);
 
     /**
      * @param info - user

@@ -1,0 +1,9 @@
+<div class="grid grid-cols-[16px_85px_auto] gap-x-1 gap-y-2 items-center max-h-60 overflow-auto pr-1 pl-0.5">
+  <ng-container *ngFor="let res of bulkOpResult.results">
+    <mat-icon [style.width.px]="16" [style.height.px]="16" [style.font-size.px]="16"
+      >{{ res.type === 'INFO' ? 'info' : (res.type === 'ERROR' ? 'error' : 'warning') }}</mat-icon
+    >
+    <span class="text-xs font-mono tracking-tighter">{{res.target}}</span>
+    <span class="text-xs">{{res.message}}</span>
+  </ng-container>
+</div>

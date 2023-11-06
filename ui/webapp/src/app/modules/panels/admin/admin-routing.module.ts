@@ -33,7 +33,12 @@ import { SoftwareBulkManipulationComponent } from './components/software-bulk-ma
 import { SoftwareDetailsComponent } from './components/software-details/software-details.component';
 import { SoftwareUploadComponent } from './components/software-upload/software-upload.component';
 import { UserAdminDetailComponent } from './components/user-admin-detail/user-admin-detail.component';
+import { UserBulkAddToGroupComponent } from './components/user-bulk-add-to-group/user-bulk-add-to-group.component';
+import { UserBulkAssignPermissionComponent } from './components/user-bulk-assign-permission/user-bulk-assign-permission.component';
+import { UserBulkManipulationComponent } from './components/user-bulk-manipulation/user-bulk-manipulation.component';
 import { UserGroupAdminDetailComponent } from './components/user-group-admin-detail/user-group-admin-detail.component';
+import { UserGroupBulkAssignPermissionComponent } from './components/user-group-bulk-assign-permission/user-group-bulk-assign-permission.component';
+import { UserGroupBulkManipulationComponent } from './components/user-group-bulk-manipulation/user-group-bulk-manipulation.component';
 
 const routes: Routes = [
   {
@@ -215,6 +220,34 @@ const routes: Routes = [
   {
     path: 'user-group-detail/:group/permission',
     component: AssignUserGroupPermissionComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'user-bulk-manip',
+    component: UserBulkManipulationComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'user-bulk-manip/permission',
+    component: UserBulkAssignPermissionComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'user-bulk-manip/add-to-group',
+    component: UserBulkAddToGroupComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'user-group-bulk-manip',
+    component: UserGroupBulkManipulationComponent,
+    canActivate: [AdminGuard],
+  },
+  {
+    path: 'user-group-bulk-manip/permission',
+    component: UserGroupBulkAssignPermissionComponent,
     canActivate: [AdminGuard],
     canDeactivate: [DirtyDialogGuard],
   },

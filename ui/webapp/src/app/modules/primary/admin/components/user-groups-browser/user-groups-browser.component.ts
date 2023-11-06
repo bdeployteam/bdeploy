@@ -7,6 +7,7 @@ import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { UserGroupsColumnsService } from 'src/app/modules/core/services/user-groups-columns.service';
+import { UserGroupBulkService } from 'src/app/modules/panels/admin/services/user-group-bulk.service';
 import { getGlobalPermission } from 'src/app/modules/panels/admin/utils/permission.utils';
 import { AuthAdminService } from '../../services/auth-admin.service';
 
@@ -19,6 +20,7 @@ export class UserGroupsBrowserComponent {
   private groupCols = inject(UserGroupsColumnsService);
   protected authAdmin = inject(AuthAdminService);
   protected settings = inject(SettingsService);
+  protected bulk = inject(UserGroupBulkService);
 
   private colPermLevel: BdDataColumn<UserGroupInfo> = {
     id: 'permLevel',
@@ -36,8 +38,8 @@ export class UserGroupsBrowserComponent {
   };
 
   protected columns: BdDataColumn<UserGroupInfo>[] = [
-    this.colInact,
     ...this.groupCols.defaultColumns,
+    this.colInact,
     this.colPermLevel,
   ];
 

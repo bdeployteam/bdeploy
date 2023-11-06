@@ -3,12 +3,13 @@ import { Sort } from '@angular/material/sort';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BdDataColumn, BdDataGroupingDefinition } from 'src/app/models/data';
-import { LDAPSettingsDto, SpecialAuthenticators, UserInfo } from 'src/app/models/gen.dtos';
+import { LDAPSettingsDto, Permission, SpecialAuthenticators, UserGroupInfo, UserInfo } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { SettingsService } from 'src/app/modules/core/services/settings.service';
 import { UsersColumnsService } from 'src/app/modules/core/services/users-columns.service';
+import { UserBulkService } from 'src/app/modules/panels/admin/services/user-bulk.service';
 import { getGlobalPermission } from 'src/app/modules/panels/admin/utils/permission.utils';
 import { AuthAdminService } from '../../services/auth-admin.service';
 
@@ -21,11 +22,26 @@ export class UsersBrowserComponent {
   private userColumns = inject(UsersColumnsService);
   protected authAdmin = inject(AuthAdminService);
   protected settings = inject(SettingsService);
+  protected bulk = inject(UserBulkService);
+
+  private colInGroups: BdDataColumn<UserInfo> = {
+    id: 'inGroups',
+    name: 'In Groups',
+    data: (r) => this.getInGroups(r),
+  };
 
   private colPermLevel: BdDataColumn<UserInfo> = {
     id: 'permLevel',
     name: 'Global Permission',
     data: (r) => getGlobalPermission(r.permissions),
+    component: BdDataPermissionLevelCellComponent,
+    width: '100px',
+  };
+
+  private colInheritedPermLevel: BdDataColumn<UserInfo> = {
+    id: 'inheritedPermLevel',
+    name: 'Inherited Global Permission',
+    data: (r) => this.getInheritedGlobalPermission(r),
     component: BdDataPermissionLevelCellComponent,
     width: '100px',
   };
@@ -60,6 +76,8 @@ export class UsersBrowserComponent {
   protected columns: BdDataColumn<UserInfo>[] = [
     ...this.userColumns.defaultUsersColumns,
     this.colPermLevel,
+    this.colInGroups,
+    this.colInheritedPermLevel,
     this.colInact,
     this.colAuthBy,
     this.colLastLogin,
@@ -84,6 +102,21 @@ export class UsersBrowserComponent {
 
   protected addUser: Partial<UserInfo>;
   protected addConfirm: string;
+
+  private getGroups(userInfo: UserInfo): UserGroupInfo[] {
+    return this.authAdmin.userGroups$.value?.filter((g) => userInfo.groups.some((gid) => gid === g.id)) || [];
+  }
+
+  private getInGroups(userInfo: UserInfo): string {
+    return this.getGroups(userInfo)
+      .map((g) => g.name)
+      .join(', ');
+  }
+
+  private getInheritedGlobalPermission(userInfo: UserInfo): Permission {
+    const groupPermissions = this.getGroups(userInfo).flatMap((g) => g.permissions);
+    return getGlobalPermission(groupPermissions);
+  }
 
   private getAuthenticatedBy(userInfo: UserInfo): string {
     if (userInfo.externalSystem) {

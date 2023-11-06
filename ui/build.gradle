@@ -354,6 +354,8 @@ task genDtos(type: cz.habarta.typescript.generator.gradle.GenerateTask, dependsO
         'io.bdeploy.ui.dto.SystemTemplateResultDto',
         'io.bdeploy.ui.dto.InstanceProcessStatusDto',
         'io.bdeploy.ui.dto.BulkOperationResultDto',
+        'io.bdeploy.ui.dto.UserBulkAssignPermissionDto',
+        'io.bdeploy.ui.dto.UserGroupBulkAssignPermissionDto',
         // Other, generic
         'io.bdeploy.common.Version',
         'io.bdeploy.common.security.ApiAccessToken',

@@ -515,12 +515,12 @@ public class UserDatabase implements AuthService {
     }
 
     @Override
-    public void addUserToGroup(String group, String user) {
+    public void addUserToGroup(String groupId, String user) {
         UserInfo info = getUser(user);
         if (info == null) {
             throw new IllegalStateException("Cannot find user " + user);
         }
-        info.groups.add(group);
+        info.groups.add(groupId);
         internalUpdate(info.name, info);
     }
 
