@@ -40,6 +40,13 @@
           [relative]="true"
           [route]="['view', entry.instanceTag]"
         ></app-bd-panel-button>
+        <app-bd-button
+          [collapsed]="false"
+          [toggle]="false"
+          icon="visibility"
+          text="View Product"
+          (click)="goToProductPage()"
+        ></app-bd-button>
         <app-bd-panel-button
           [collapsed]="false"
           [toggle]="false"
