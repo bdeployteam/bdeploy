@@ -25,8 +25,6 @@ import java.util.function.Consumer;
 
 import org.glassfish.jersey.client.ClientProperties;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.ApiAccessToken;
@@ -180,8 +178,7 @@ public class ProcessController {
         this.processConfig = pc;
         this.recoverAttempts = pc.processControl.noOfRetries;
         this.processDir = processDir;
-        this.executorService = Executors.newSingleThreadScheduledExecutor(
-                new ThreadFactoryBuilder().setDaemon(true).setNameFormat(processConfig.id).build());
+        this.executorService = Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name(processConfig.id).factory());
     }
 
     @Override

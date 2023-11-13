@@ -30,7 +30,7 @@ public class ParallelBulkControl extends AbstractBulkControl {
         super(user, instance, tag, group, processes);
 
         logger.setMdcValue(instance);
-        parallelExec = Executors.newCachedThreadPool(r -> new Thread(r, "Parallel Bulk / " + instance));
+        parallelExec = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("Parallel Bulk / " + instance).factory());
     }
 
     @Override
