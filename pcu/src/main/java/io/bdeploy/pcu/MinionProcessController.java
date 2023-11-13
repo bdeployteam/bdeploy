@@ -16,7 +16,6 @@ import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.common.util.FutureHelper;
 import io.bdeploy.common.util.MdcLogger;
-import io.bdeploy.common.util.NamedDaemonThreadFactory;
 import io.bdeploy.interfaces.configuration.pcu.ProcessDetailDto;
 import io.bdeploy.interfaces.manifest.InstanceNodeManifest;
 
@@ -80,12 +79,10 @@ public class MinionProcessController {
     }
 
     private void doParallelAndWait(String name, List<Runnable> logic) {
-        ExecutorService es = Executors.newCachedThreadPool(new NamedDaemonThreadFactory(name));
-
-        // need to use collection to satisfy the java compiler...
-        FutureHelper.awaitAll(logic.stream().map(es::submit).collect(Collectors.toCollection(() -> new ArrayList<>())));
-
-        es.shutdownNow();
+        try (ExecutorService es = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name(name).factory())) {
+            // need to use collection to satisfy the java compiler...
+            FutureHelper.awaitAll(logic.stream().map(es::submit).collect(Collectors.toCollection(() -> new ArrayList<>())));
+        }
     }
 
     /**

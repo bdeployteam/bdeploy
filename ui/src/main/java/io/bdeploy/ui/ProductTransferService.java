@@ -37,7 +37,7 @@ public class ProductTransferService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductTransferService.class);
     private final SortedMap<String, SortedSet<ProductDto>> inTransfer = new TreeMap<>();
-    private final ExecutorService transferExec = Executors.newFixedThreadPool(2);
+    private final ExecutorService transferExec = Executors.newVirtualThreadPerTaskExecutor();
 
     public void initTransfer(BHive instanceGroupHive, String groupName, ProductTransferDto data) {
         synchronized (inTransfer) {

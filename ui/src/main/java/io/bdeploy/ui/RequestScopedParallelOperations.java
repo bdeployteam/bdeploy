@@ -27,16 +27,16 @@ public class RequestScopedParallelOperations {
         Supplier<String> threadId = () -> id + "-" + threadNum.incrementAndGet();
 
         // create a pool with a fixed size, which is capable of inheriting the current request scope.
-        ExecutorService pool = Executors.newFixedThreadPool(MAX_OPS,
-                new RequestScopedNamedDaemonThreadFactory(scope, tx, scopeService, threadId));
+        try (ExecutorService pool = Executors.newFixedThreadPool(MAX_OPS,
+                new RequestScopedNamedDaemonThreadFactory(scope, tx, scopeService, threadId))) {
 
-        // submit all tasks and map to their result.
-        List<Future<?>> tasks = new ArrayList<>();
-        tasks.addAll(actions.stream().map(pool::submit).toList());
+            // submit all tasks and map to their result.
+            List<Future<?>> tasks = new ArrayList<>();
+            tasks.addAll(actions.stream().map(pool::submit).toList());
 
-        // wait for all tasks and shutdown the pool.
-        FutureHelper.awaitAll(tasks);
-        pool.shutdown();
+            // wait for all tasks and shutdown the pool.
+            FutureHelper.awaitAll(tasks);
+        }
     }
 
 }
