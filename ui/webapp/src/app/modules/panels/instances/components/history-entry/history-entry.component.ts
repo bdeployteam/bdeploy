@@ -1,16 +1,18 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { isEqual } from 'lodash-es';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { finalize, map } from 'rxjs/operators';
-import { Actions, HistoryEntryDto, HistoryEntryType, InstanceStateRecord } from 'src/app/models/gen.dtos';
+import { finalize, map, skipWhile, switchMap } from 'rxjs/operators';
+import { Actions, HistoryEntryDto, HistoryEntryType, InstanceStateRecord, ManifestKey } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { HistoryService } from 'src/app/modules/primary/instances/services/history.service';
 import { InstanceStateService } from 'src/app/modules/primary/instances/services/instance-state.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ServersService } from 'src/app/modules/primary/servers/services/servers.service';
+import { HistoryDetailsService } from '../../services/history-details.service';
 import { histKey, histKeyDecode } from '../../utils/history-key.utils';
 
 @Component({
@@ -20,7 +22,9 @@ import { histKey, histKeyDecode } from '../../utils/history-key.utils';
 export class HistoryEntryComponent implements OnInit, OnDestroy {
   private areas = inject(NavAreasService);
   private history = inject(HistoryService);
+  private details = inject(HistoryDetailsService);
   private actions = inject(ActionsService);
+  private groups = inject(GroupsService);
   protected instances = inject(InstancesService);
   protected states = inject(InstanceStateService);
   protected servers = inject(ServersService);
@@ -50,6 +54,7 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
   protected isCreate: boolean;
   protected isInstalled: boolean;
   protected isActive: boolean;
+  protected product: ManifestKey;
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -71,6 +76,14 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
           this.isActive = state?.activeTag === entry?.instanceTag;
         }
       }
+    );
+    this.subscription.add(
+      this.entry$
+        .pipe(
+          skipWhile((entry) => !entry),
+          switchMap((entry) => this.details.getVersionDetails(entry.instanceTag))
+        )
+        .subscribe((cache) => (this.product = cache.config.product))
     );
   }
 
@@ -123,5 +136,13 @@ export class HistoryEntryComponent implements OnInit, OnDestroy {
           .pipe(finalize(() => this.deleting$.next(false)))
           .subscribe(() => this.areas.closePanel(true));
       });
+  }
+
+  protected goToProductPage() {
+    const group = this.groups.current$.value.name;
+    this.areas.navigateBoth(
+      ['products', 'browser', group],
+      ['panels', 'products', 'details', this.product.name, this.product.tag]
+    );
   }
 }
