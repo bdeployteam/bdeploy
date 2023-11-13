@@ -75,12 +75,12 @@ $mdc-typography-config: mat.define-typography-config(
 
   // checkbox theme fixups to match old checkbox.
   .mdc-checkbox {
-    padding: unset;
+    padding: 0;
   }
 
   .mdc-checkbox .mdc-checkbox__background {
-    top: unset;
-    left: unset;
+    top: 0;
+    left: 0;
   }
 
   // general element themings
