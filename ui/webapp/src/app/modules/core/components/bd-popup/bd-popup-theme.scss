@@ -133,12 +133,24 @@
 /** These classes are applied to the panel of the popup, thus they MUST be global */
 @mixin bd-popup-theme($theme) {
   $dark: map-get($theme, "is-dark");
-  $bg: map-get($theme, "background");
+  $bg: map-get(mat.get-color-config($theme), "background");
 
   $outline: if($dark, #595959, #e0e0e0); // TODO: figure out better way to achieve this when re-writing themes.
 
   @include _bd-popup-theme-colored("default", map-get($bg, "card"), $outline);
-  @include _bd-popup-theme-colored("primary", mat.get-color-from-palette(map-get($theme, "primary")), $outline);
-  @include _bd-popup-theme-colored("accent", mat.get-color-from-palette(map-get($theme, "accent")), $outline);
-  @include _bd-popup-theme-colored("warn", mat.get-color-from-palette(map-get($theme, "warn")), $outline);
+  @include _bd-popup-theme-colored(
+    "primary",
+    mat.get-color-from-palette(map-get(mat.get-color-config($theme), "primary")),
+    $outline
+  );
+  @include _bd-popup-theme-colored(
+    "accent",
+    mat.get-color-from-palette(map-get(mat.get-color-config($theme), "accent")),
+    $outline
+  );
+  @include _bd-popup-theme-colored(
+    "warn",
+    mat.get-color-from-palette(map-get(mat.get-color-config($theme), "warn")),
+    $outline
+  );
 }

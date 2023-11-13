@@ -56,8 +56,8 @@
 
   /* A rectangular "card". This is different from mat-card in that it does not have rouded corners, *and* it does not have any spacing, margin or else associated. */
   .bd-rect-card {
-    $background: map-get($theme, background);
-    $foreground: map-get($theme, foreground);
+    $background: map-get(mat.get-color-config($theme), background);
+    $foreground: map-get(mat.get-color-config($theme), foreground);
 
     background: mat.get-color-from-palette($background, card);
     color: mat.get-color-from-palette($foreground, text);

@@ -22,8 +22,6 @@ $mdc-typography-config: mat.define-typography-config(
 @import "app/modules/primary/admin/components/admin-shell/admin-shell.theme.scss";
 
 @mixin all-themes($theme) {
-  @include mat.all-component-themes($theme);
-
   @include common-classes($theme);
   @include bd-popup-theme($theme);
   @include bd-image-upload-theme($theme);
@@ -61,14 +59,15 @@ $mdc-typography-config: mat.define-typography-config(
   @include mat.checkbox-density(-3);
 
   $dark: map-get($theme, "is-dark");
-  $primary: map-get($theme, "primary");
-  $accent: map-get($theme, "accent");
-  $warn: map-get($theme, "warn");
-  $bg: map-get($theme, "background");
-  $fg: map-get($theme, "foreground");
-  $maintb: map-get($theme, "main-toolbar");
-  $maintb-dark: map-get($theme, "main-toolbar-darker");
-  $success: map-get($theme, "success");
+  $color: mat.get-color-config($theme);
+  $primary: map-get($color, "primary");
+  $accent: map-get($color, "accent");
+  $warn: map-get($color, "warn");
+  $bg: map-get($color, "background");
+  $fg: map-get($color, "foreground");
+  $maintb: map-get($color, "main-toolbar");
+  $maintb-dark: map-get($color, "main-toolbar-darker");
+  $success: map-get($color, "success");
 
   .mat-mdc-form-field-focus-overlay {
     pointer-events: none;
@@ -111,7 +110,7 @@ $mdc-typography-config: mat.define-typography-config(
 
   // Define scrollbar style on each element as it is not inherited in some cases.
   * {
-    @include scrollbars(mat.get-color-from-palette(map-get($theme, "primary")), if($dark, #555555, #cccccc));
+    @include scrollbars(mat.get-color-from-palette($primary), if($dark, #555555, #cccccc));
   }
 
   // Pseudo selector to define variables on the main theme class.
@@ -155,10 +154,11 @@ $mdc-typography-config: mat.define-typography-config(
 }
 
 @mixin theme-chooser($theme) {
-  $theme-bg: map-get($theme, "background");
-  $theme-primary: mat.get-color-from-palette(map-get($theme, "primary"));
-  $theme-accent: mat.get-color-from-palette(map-get($theme, "accent"));
-  $theme-main-tb: mat.get-color-from-palette(map-get($theme, "main-toolbar"));
+  $color: mat.get-color-config($theme);
+  $theme-bg: map-get($color, "background");
+  $theme-primary: mat.get-color-from-palette(map-get($color, "primary"));
+  $theme-accent: mat.get-color-from-palette(map-get($color, "accent"));
+  $theme-main-tb: mat.get-color-from-palette(map-get($color, "main-toolbar"));
 
   .preview-background {
     cursor: pointer;
@@ -210,28 +210,42 @@ $mdc-typography-config: mat.define-typography-config(
 
 /* Theme definitions - keep in sync with ThemeService.Theme */
 @function add-custom-colors($theme, $toolbar-palette, $toolbar-darker-palette, $success-palette) {
-  @return map-merge(
-    $theme,
+  $colors: map-merge(
+    mat.get-color-config($theme),
     (
       "main-toolbar": $toolbar-palette,
       "main-toolbar-darker": $toolbar-darker-palette,
       "success": $success-palette,
     )
   );
+
+  $result: map-merge(
+    $theme,
+    (
+      "color": $colors,
+    )
+  );
+  @return $result;
 }
 
 @function override-theme-background($theme, $key, $value) {
-  $bg: map-get($theme, background);
+  $bg: map-get(mat.get-color-config($theme), background);
   $bg: map-merge(
     $bg,
     (
       $key: $value,
     )
   );
+  $colors: map-merge(
+    mat.get-color-config($theme),
+    (
+      background: $bg,
+    )
+  );
   @return map-merge(
     $theme,
     (
-      background: $bg,
+      color: $colors,
     )
   );
 }
@@ -241,7 +255,17 @@ $app-light-primary: mat.define-palette($md-bdblue, 500);
 $app-light-accent: mat.define-palette($md-bdblue, 500);
 $app-light-warning: mat.define-palette($md-bdred, 500);
 $app-light-theme: add-custom-colors(
-  mat.define-light-theme($app-light-primary, $app-light-accent, $app-light-warning),
+  mat.define-light-theme(
+    (
+      color: (
+        primary: $app-light-primary,
+        accent: $app-light-accent,
+        warn: $app-light-warning,
+      ),
+      typography: mat.define-typography-config(),
+      density: 0,
+    )
+  ),
   $app-light-primary,
   mat.define-palette($md-bdblue, 700),
   mat.define-palette($md-bdgreen, 700)
@@ -253,18 +277,32 @@ $app-light-theme: add-custom-colors(
   @include theme-chooser($app-light-theme);
 }
 
+// only do this for the first theme - following themes only define their colors.
+@include mat.all-component-themes($app-light-theme);
+
 /* dark theme */
 $app-dark-primary: mat.define-palette($md-bdorange, 500);
 $app-dark-accent: mat.define-palette($md-bdorange, 500);
 $app-dark-warning: mat.define-palette($md-bdred, 500);
 $app-dark-theme: add-custom-colors(
-  mat.define-dark-theme($app-dark-primary, $app-dark-accent, $app-dark-warning),
+  mat.define-dark-theme(
+    (
+      color: (
+        primary: $app-dark-primary,
+        accent: $app-dark-accent,
+        warn: $app-dark-warning,
+      ),
+      typography: mat.define-typography-config(),
+      density: 0,
+    )
+  ),
   mat.define-palette($md-bdgrey, 500),
   mat.define-palette($md-bdgrey, 700),
   mat.define-palette($md-bdgreen, 700)
 );
 $app-dark-theme: override-theme-background($app-dark-theme, app-bar, #2e2e2e);
 .app-dark-theme {
+  @include mat.all-component-colors($app-dark-theme);
   @include all-themes($app-dark-theme);
   @include ngx-charts-dark();
 }

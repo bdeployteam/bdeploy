@@ -3,7 +3,7 @@
 @mixin bd-image-upload-theme($theme) {
   $dark: map-get($theme, "is-dark");
 
-  $palette: map-get($theme, "main-toolbar");
+  $palette: map-get(mat.get-color-config($theme), "main-toolbar");
 
   .bd-image-upload-title-container {
     background-color: mat.get-color-from-palette($palette);
