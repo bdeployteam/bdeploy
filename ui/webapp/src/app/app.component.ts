@@ -1,10 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
-import {
-  RouteConfigLoadEnd,
-  RouteConfigLoadStart,
-  Router,
-} from '@angular/router';
+import { RouteConfigLoadEnd, RouteConfigLoadStart, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -22,7 +18,7 @@ export class AppComponent implements OnInit {
   constructor(
     private router: Router,
     private areas: NavAreasService,
-    @Inject(DOCUMENT) document: Document
+    @Inject(DOCUMENT) document: Document,
   ) {
     console.log('----------------------------------------');
     console.log('BDeploy started...');
@@ -32,9 +28,6 @@ export class AppComponent implements OnInit {
     if (environment.uiTest) {
       document.body.classList.add('ui-test');
     }
-
-    // potential official fix for broken history on cancelled navigation, see https://github.com/angular/angular/issues/13586
-    router.canceledNavigationResolution = 'computed';
   }
 
   ngOnInit() {
@@ -49,19 +42,15 @@ export class AppComponent implements OnInit {
     });
 
     this.subscription.add(
-      this.router.events
-        .pipe(filter((e) => e instanceof RouteConfigLoadStart))
-        .subscribe(() => {
-          this.loadCount++;
-        })
+      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadStart)).subscribe(() => {
+        this.loadCount++;
+      }),
     );
 
     this.subscription.add(
-      this.router.events
-        .pipe(filter((e) => e instanceof RouteConfigLoadEnd))
-        .subscribe(() => {
-          this.decreaseLoadCount();
-        })
+      this.router.events.pipe(filter((e) => e instanceof RouteConfigLoadEnd)).subscribe(() => {
+        this.decreaseLoadCount();
+      }),
     );
   }
 

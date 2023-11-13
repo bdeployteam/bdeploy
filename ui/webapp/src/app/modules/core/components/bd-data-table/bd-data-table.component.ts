@@ -18,7 +18,7 @@ import {
   ViewEncapsulation,
   inject,
 } from '@angular/core';
-import { MatLegacyCheckbox } from '@angular/material/legacy-checkbox';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -104,7 +104,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   @Input() set columns(val: BdDataColumn<T>[]) {
     // either unset or CARD is OK, only TABLE is not OK.
     this._columns = val.filter(
-      (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH
+      (c) => !c.display || c.display === BdDataColumnDisplay.TABLE || c.display === BdDataColumnDisplay.BOTH,
     );
     this.updateColumnsToDisplay();
     this.updateMediaSubscriptions();
@@ -216,7 +216,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   /** The treeControl provides the hierarchy and flattened nodes rendered by the table */
   treeControl = new FlatTreeControl<FlatNode<T>>(
     (node) => node.level,
-    (node) => node.expandable
+    (node) => node.expandable,
   );
 
   /** The transformer bound to 'this', so we can use this in the transformer function */
@@ -225,7 +225,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     this.boundTransformer,
     (n) => n.level,
     (n) => n.expandable,
-    (n) => n.children
+    (n) => n.children,
   );
   private subscription: Subscription;
   private mediaSubscription: Subscription;
@@ -283,7 +283,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     if (this.dragReorderMode) {
       if (!!this.sortData || !!this.grouping?.length || this.checkMode) {
         throw new Error(
-          'Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.'
+          'Table drag-reorder mode may only be enabled when user-sorting, grouping and checking is disabled.',
         );
       }
     }
@@ -297,7 +297,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     this._columns
       .filter((c) => !!c.showWhen)
       .forEach((c) =>
-        this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe(() => this.updateColumnsToDisplay()))
+        this.mediaSubscription.add(this.media.observe(c.showWhen).subscribe(() => this.updateColumnsToDisplay())),
       );
   }
 
@@ -418,7 +418,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
             return grouping[0].definition.sort(a[0], b[0], a[1], b[1]);
           }
           return bdSortGroups(a[0], b[0]);
-        })
+        }),
       );
 
       // create nodes for groups, recurse grouping.
@@ -481,7 +481,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     return 'help'; // default fallback.
   }
 
-  protected toggleCheck(node: FlatNode<T>, cb: MatLegacyCheckbox) {
+  protected toggleCheck(node: FlatNode<T>, cb: MatCheckbox) {
     if (!node.expandable) {
       const target = !this.checkSelection.isSelected(node);
       let confirm = of(true);

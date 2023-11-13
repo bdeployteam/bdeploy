@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { MatLegacyCheckboxChange } from '@angular/material/legacy-checkbox';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Subscription } from 'rxjs';
 import {
   BdDataGrouping,
@@ -74,7 +74,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
     // calculate possible values for the grouping.
     if (!!this.grouping?.definition && this.records?.length) {
       this.groupingValues = bdExtractGroups(this.grouping.definition, this.records).sort(
-        this.grouping.definition.sort ? this.grouping.definition.sort : bdSortGroups
+        this.grouping.definition.sort ? this.grouping.definition.sort : bdSortGroups,
       );
 
       // remove any "stale" grouping from the current setting (i.e. row value no longer present)
@@ -88,7 +88,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
 
       // selected values should show up first
       this.groupingValues.sort((a, b) =>
-        this.grouping.selected.includes(a) ? -1 : this.grouping.selected.includes(b) ? 1 : 0
+        this.grouping.selected.includes(a) ? -1 : this.grouping.selected.includes(b) ? 1 : 0,
       );
     }
   }
@@ -104,7 +104,7 @@ export class BdDataGroupingPanelComponent<T> implements OnInit, OnChanges, OnDes
     this.groupingChange.emit(this.grouping);
   }
 
-  protected groupCheckChanged(group: string, change: MatLegacyCheckboxChange) {
+  protected groupCheckChanged(group: string, change: MatCheckboxChange) {
     if (!this.grouping || !this.grouping.definition) {
       return;
     }

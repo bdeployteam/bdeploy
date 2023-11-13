@@ -32,9 +32,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "allowedCommonJsDependencies": [
-              "clone-deep"
-            ],
+            "allowedCommonJsDependencies": ["clone-deep"],
             "outputPath": "dist/webapp",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -156,37 +154,37 @@
         "serve": {
           "builder": "ngx-build-plus:dev-server",
           "options": {
-            "browserTarget": "webapp:build",
+            "buildTarget": "webapp:build",
             "proxyConfig": "src/proxy/proxy.conf.js"
           },
           "configurations": {
             "production": {
-              "browserTarget": "webapp:build:production"
+              "buildTarget": "webapp:build:production"
             },
             "central": {
-              "browserTarget": "webapp:build:central",
+              "buildTarget": "webapp:build:central",
               "proxyConfig": "src/proxy/proxy.conf.dev-central.js",
               "port": 4201
             },
             "managed": {
-              "browserTarget": "webapp:build:managed",
+              "buildTarget": "webapp:build:managed",
               "proxyConfig": "src/proxy/proxy.conf.dev-managed.js",
               "port": 4202
             },
             "cov-standalone": {
-              "browserTarget": "webapp:build:cov-standalone",
+              "buildTarget": "webapp:build:cov-standalone",
               "proxyConfig": "src/proxy/proxy.conf.cov-standalone.js",
               "port": 4210,
               "extraWebpackConfig": "./cypress/coverage.webpack.js"
             },
             "cov-central": {
-              "browserTarget": "webapp:build:cov-central",
+              "buildTarget": "webapp:build:cov-central",
               "proxyConfig": "src/proxy/proxy.conf.cov-central.js",
               "port": 4211,
               "extraWebpackConfig": "./cypress/coverage.webpack.js"
             },
             "cov-managed": {
-              "browserTarget": "webapp:build:cov-managed",
+              "buildTarget": "webapp:build:cov-managed",
               "proxyConfig": "src/proxy/proxy.conf.cov-managed.js",
               "port": 4212,
               "extraWebpackConfig": "./cypress/coverage.webpack.js"
@@ -196,16 +194,13 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "webapp:build"
+            "buildTarget": "webapp:build"
           }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }
@@ -213,9 +208,7 @@
   },
   "cli": {
     "analytics": false,
-    "schematicCollections": [
-      "@angular-eslint/schematics"
-    ]
+    "schematicCollections": ["@angular-eslint/schematics"]
   },
   "schematics": {
     "@angular-eslint/schematics:application": {

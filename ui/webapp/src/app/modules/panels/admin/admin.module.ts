@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
-import { PasswordStrengthMeterModule } from 'angular-password-strength-meter';
+import { PasswordStrengthMeterComponent } from 'angular-password-strength-meter';
+import { provideZxvbnServiceForPSM } from 'angular-password-strength-meter/zxcvbn';
 import { CoreModule } from '../../core/core.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AddGlobalAttributeComponent } from './components/add-global-attribute/add-global-attribute.component';
@@ -85,13 +86,7 @@ import { UserGroupBulkManipulationComponent } from './components/user-group-bulk
     UserGroupBulkManipulationComponent,
     UserGroupBulkAssignPermissionComponent,
   ],
-  imports: [
-    CommonModule,
-    CoreModule,
-    AdminRoutingModule,
-    MatTabsModule,
-    MatCardModule,
-    PasswordStrengthMeterModule.forRoot(),
-  ],
+  imports: [CommonModule, CoreModule, AdminRoutingModule, MatTabsModule, MatCardModule, PasswordStrengthMeterComponent],
+  providers: [provideZxvbnServiceForPSM()],
 })
 export class AdminModule {}

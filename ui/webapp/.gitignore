@@ -6,6 +6,7 @@
 /out-tsc
 /coverage
 .nyc_output
+.nx
 
 # dependencies
 /node_modules

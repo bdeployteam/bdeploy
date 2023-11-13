@@ -8,7 +8,7 @@ import {
   inject,
 } from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
-import { MatLegacyCheckbox } from '@angular/material/legacy-checkbox';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
@@ -27,8 +27,8 @@ export class BdFormToggleComponent implements ControlValueAccessor {
   @Input() appearance: 'slide' | 'checkbox' = 'checkbox';
   @Input() prefix: TemplateRef<any>;
 
-  @ViewChild(MatLegacyCheckbox, { static: false })
-  private checkbox: MatLegacyCheckbox;
+  @ViewChild(MatCheckbox, { static: false })
+  private checkbox: MatCheckbox;
   @ViewChild(MatSlideToggle, { static: false }) private slide: MatSlideToggle;
 
   protected get value() {

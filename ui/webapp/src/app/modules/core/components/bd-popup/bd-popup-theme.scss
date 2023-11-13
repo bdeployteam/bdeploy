@@ -1,5 +1,4 @@
 @use "@angular/material" as mat;
-@import "@angular/material/theming";
 
 @mixin _bd-popup-theme-colored($name, $card-color, $outline-var) {
   .bd-popup-panel-below-left-#{$name}::after {
@@ -136,26 +135,10 @@
   $dark: map-get($theme, "is-dark");
   $bg: map-get($theme, "background");
 
-  $outline: if(
-    $dark,
-    #595959,
-    #e0e0e0
-  ); // TODO: figure out better way to achieve this when re-writing themes.
+  $outline: if($dark, #595959, #e0e0e0); // TODO: figure out better way to achieve this when re-writing themes.
 
   @include _bd-popup-theme-colored("default", map-get($bg, "card"), $outline);
-  @include _bd-popup-theme-colored(
-    "primary",
-    mat.get-color-from-palette(map-get($theme, "primary")),
-    $outline
-  );
-  @include _bd-popup-theme-colored(
-    "accent",
-    mat.get-color-from-palette(map-get($theme, "accent")),
-    $outline
-  );
-  @include _bd-popup-theme-colored(
-    "warn",
-    mat.get-color-from-palette(map-get($theme, "warn")),
-    $outline
-  );
+  @include _bd-popup-theme-colored("primary", mat.get-color-from-palette(map-get($theme, "primary")), $outline);
+  @include _bd-popup-theme-colored("accent", mat.get-color-from-palette(map-get($theme, "accent")), $outline);
+  @include _bd-popup-theme-colored("warn", mat.get-color-from-palette(map-get($theme, "warn")), $outline);
 }
