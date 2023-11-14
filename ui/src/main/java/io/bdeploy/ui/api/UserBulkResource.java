@@ -6,6 +6,7 @@ import io.bdeploy.common.security.RequiredPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.ui.dto.BulkOperationResultDto;
 import io.bdeploy.ui.dto.UserBulkAssignPermissionDto;
+import io.bdeploy.ui.dto.UserBulkRemovePermissionDto;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -27,8 +28,12 @@ public interface UserBulkResource {
     public BulkOperationResultDto setInactive(@PathParam("inactive") boolean inactive, Set<String> userNames);
 
     @POST
-    @Path("/permission")
+    @Path("/assign-permission")
     public BulkOperationResultDto assignPermission(UserBulkAssignPermissionDto dto);
+
+    @POST
+    @Path("/remove-permission")
+    public BulkOperationResultDto removePermission(UserBulkRemovePermissionDto dto);
 
     @POST
     @Path("/add-to-group/{groupId}")

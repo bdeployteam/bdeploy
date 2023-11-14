@@ -1,6 +1,7 @@
 package io.bdeploy.ui.api.impl;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import io.bdeploy.ui.dto.BulkOperationResultDto.OperationResultType;
 import io.bdeploy.ui.dto.ObjectChangeDetails;
 import io.bdeploy.ui.dto.ObjectChangeType;
 import io.bdeploy.ui.dto.UserBulkAssignPermissionDto;
+import io.bdeploy.ui.dto.UserBulkRemovePermissionDto;
 import jakarta.inject.Inject;
 
 public class UserBulkResourceImpl implements UserBulkResource {
@@ -93,14 +95,43 @@ public class UserBulkResourceImpl implements UserBulkResource {
                 continue;
             }
             try {
-                boolean updated = user.permissions.removeIf(perm -> perm.scope == scopedPerm.scope);
+                boolean updated = user.permissions.removeIf(perm -> Objects.equals(perm.scope, scopedPerm.scope));
                 user.permissions.add(scopedPerm);
                 auth.updateUserInfo(user);
                 result.add(new OperationResult(user.name, OperationResultType.INFO,
                         updated ? "Permission updated" : "Permission assigned"));
                 cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
             } catch (Exception e) {
-                log.warn("Error while updating inactive flag for user {}", name, e);
+                log.warn("Error while assigning permission to user {}", name, e);
+                result.add(new OperationResult(name, OperationResultType.ERROR, e.getMessage()));
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public BulkOperationResultDto removePermission(UserBulkRemovePermissionDto dto) {
+        BulkOperationResultDto result = new BulkOperationResultDto();
+
+        for (String name : dto.userNames) {
+            UserInfo user = auth.getUser(name);
+            if (user == null) {
+                result.add(new OperationResult(name, OperationResultType.ERROR, "Cannot find user with name " + name));
+                continue;
+            }
+            boolean removed = user.permissions.removeIf(perm -> Objects.equals(perm.scope, dto.scope));
+            ;
+            if (!removed) {
+                result.add(new OperationResult(user.name, OperationResultType.INFO, "Skipped, no permission of given scope"));
+                continue;
+            }
+            try {
+                auth.updateUserInfo(user);
+                result.add(new OperationResult(user.name, OperationResultType.INFO, "Permission removed"));
+                cem.change(ObjectChangeType.USER, Collections.singletonMap(ObjectChangeDetails.USER_NAME, name));
+            } catch (Exception e) {
+                log.warn("Error while removing permission from user {}", name, e);
                 result.add(new OperationResult(name, OperationResultType.ERROR, e.getMessage()));
             }
         }

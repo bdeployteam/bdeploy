@@ -36,9 +36,11 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
 import { UserBulkAddToGroupComponent } from './components/user-bulk-add-to-group/user-bulk-add-to-group.component';
 import { UserBulkAssignPermissionComponent } from './components/user-bulk-assign-permission/user-bulk-assign-permission.component';
 import { UserBulkManipulationComponent } from './components/user-bulk-manipulation/user-bulk-manipulation.component';
+import { UserBulkRemovePermissionComponent } from './components/user-bulk-remove-permission/user-bulk-remove-permission.component';
 import { UserGroupAdminDetailComponent } from './components/user-group-admin-detail/user-group-admin-detail.component';
 import { UserGroupBulkAssignPermissionComponent } from './components/user-group-bulk-assign-permission/user-group-bulk-assign-permission.component';
 import { UserGroupBulkManipulationComponent } from './components/user-group-bulk-manipulation/user-group-bulk-manipulation.component';
+import { UserGroupBulkRemovePermissionComponent } from './components/user-group-bulk-remove-permission/user-group-bulk-remove-permission.component';
 
 const routes: Routes = [
   {
@@ -229,8 +231,14 @@ const routes: Routes = [
     canActivate: [AdminGuard],
   },
   {
-    path: 'user-bulk-manip/permission',
+    path: 'user-bulk-manip/assign-permission',
     component: UserBulkAssignPermissionComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'user-bulk-manip/remove-permission',
+    component: UserBulkRemovePermissionComponent,
     canActivate: [AdminGuard],
     canDeactivate: [DirtyDialogGuard],
   },
@@ -246,8 +254,14 @@ const routes: Routes = [
     canActivate: [AdminGuard],
   },
   {
-    path: 'user-group-bulk-manip/permission',
+    path: 'user-group-bulk-manip/assign-permission',
     component: UserGroupBulkAssignPermissionComponent,
+    canActivate: [AdminGuard],
+    canDeactivate: [DirtyDialogGuard],
+  },
+  {
+    path: 'user-group-bulk-manip/remove-permission',
+    component: UserGroupBulkRemovePermissionComponent,
     canActivate: [AdminGuard],
     canDeactivate: [DirtyDialogGuard],
   },

@@ -5,6 +5,7 @@ import {
   BulkOperationResultDto,
   ScopedPermission,
   UserBulkAssignPermissionDto,
+  UserBulkRemovePermissionDto,
   UserInfo,
 } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
@@ -75,7 +76,21 @@ export class UserBulkService {
       map((users) => users.map((user) => user.name)),
       map((userNames) => ({ scopedPermission, userNames })),
       switchMap((data: UserBulkAssignPermissionDto) => {
-        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/permission`, data);
+        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/assign-permission`, data);
+      }),
+      tap((r) => this.logResult(r)),
+      finalize(() => this.frozen$.next(false))
+    );
+  }
+
+  public removePermission(scope: string): Observable<BulkOperationResultDto> {
+    this.frozen$.next(true);
+    return this.selection$.pipe(
+      take(1),
+      map((users) => users.map((user) => user.name)),
+      map((userNames) => ({ scope, userNames })),
+      switchMap((data: UserBulkRemovePermissionDto) => {
+        return this.http.post<BulkOperationResultDto>(`${this.bulkApiPath()}/remove-permission`, data);
       }),
       tap((r) => this.logResult(r)),
       finalize(() => this.frozen$.next(false))

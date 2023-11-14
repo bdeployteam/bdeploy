@@ -41,9 +41,11 @@ import { UserAdminDetailComponent } from './components/user-admin-detail/user-ad
 import { UserBulkAddToGroupComponent } from './components/user-bulk-add-to-group/user-bulk-add-to-group.component';
 import { UserBulkAssignPermissionComponent } from './components/user-bulk-assign-permission/user-bulk-assign-permission.component';
 import { UserBulkManipulationComponent } from './components/user-bulk-manipulation/user-bulk-manipulation.component';
+import { UserBulkRemovePermissionComponent } from './components/user-bulk-remove-permission/user-bulk-remove-permission.component';
 import { UserGroupAdminDetailComponent } from './components/user-group-admin-detail/user-group-admin-detail.component';
 import { UserGroupBulkAssignPermissionComponent } from './components/user-group-bulk-assign-permission/user-group-bulk-assign-permission.component';
 import { UserGroupBulkManipulationComponent } from './components/user-group-bulk-manipulation/user-group-bulk-manipulation.component';
+import { UserGroupBulkRemovePermissionComponent } from './components/user-group-bulk-remove-permission/user-group-bulk-remove-permission.component';
 
 @NgModule({
   declarations: [
@@ -82,9 +84,11 @@ import { UserGroupBulkManipulationComponent } from './components/user-group-bulk
     NodeConversionComponent,
     UserBulkManipulationComponent,
     UserBulkAssignPermissionComponent,
+    UserBulkRemovePermissionComponent,
     UserBulkAddToGroupComponent,
     UserGroupBulkManipulationComponent,
     UserGroupBulkAssignPermissionComponent,
+    UserGroupBulkRemovePermissionComponent,
   ],
   imports: [CommonModule, CoreModule, AdminRoutingModule, MatTabsModule, MatCardModule, PasswordStrengthMeterComponent],
   providers: [provideZxvbnServiceForPSM()],

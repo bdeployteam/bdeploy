@@ -10,10 +10,17 @@
       <mat-divider></mat-divider>
       <app-bd-panel-button
         [collapsed]="false"
-        [disabled]="!selections.length"
+        [disabled]="!selections.length || (currentUserSelected$ | async)"
         text="Assign Permission..."
         icon="security"
-        [route]="['panels', 'admin', 'user-bulk-manip', 'permission']"
+        [route]="['panels', 'admin', 'user-bulk-manip', 'assign-permission']"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [disabled]="!selections.length || (currentUserSelected$ | async)"
+        text="Remove Permission..."
+        icon="gpp_bad"
+        [route]="['panels', 'admin', 'user-bulk-manip', 'remove-permission']"
       ></app-bd-panel-button>
       <app-bd-panel-button
         [collapsed]="false"

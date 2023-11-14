@@ -13,7 +13,14 @@
         [disabled]="!selections.length"
         text="Assign Permission..."
         icon="security"
-        [route]="['panels', 'admin', 'user-group-bulk-manip', 'permission']"
+        [route]="['panels', 'admin', 'user-group-bulk-manip', 'assign-permission']"
+      ></app-bd-panel-button>
+      <app-bd-panel-button
+        [collapsed]="false"
+        [disabled]="!selections.length"
+        text="Remove Permission..."
+        icon="gpp_bad"
+        [route]="['panels', 'admin', 'user-group-bulk-manip', 'remove-permission']"
       ></app-bd-panel-button>
       <app-bd-button
         [collapsed]="false"
