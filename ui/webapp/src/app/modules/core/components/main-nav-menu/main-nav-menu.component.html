@@ -1,8 +1,5 @@
 <ng-template #actionsPopup>
-  <mat-card
-    appearance="outlined"
-    class="local-action-popup-sizing flex flex-col gap-1 p-2.5"
-  >
+  <mat-card appearance="outlined" class="local-action-popup-sizing flex flex-col gap-1 p-2.5">
     <app-bd-actions></app-bd-actions>
   </mat-card>
 </ng-template>
@@ -11,11 +8,7 @@
   <!-- Logo & Expand Button -->
   <div class="flex justify-center items-center pb-4 min-h-[100px] h-[100px]">
     <div class="local-hamburger-button">
-      <div
-        class="hamburger hamburger--arrow"
-        [ngClass]="{ 'is-active': expanded }"
-        (click)="expanded = !expanded"
-      >
+      <div class="hamburger hamburger--arrow" [ngClass]="{ 'is-active': expanded }" (click)="expanded = !expanded">
         <span class="hamburger-box">
           <span class="hamburger-inner"></span>
         </span>
@@ -128,7 +121,7 @@
     icon="source"
     text="Data Files"
     [collapsed]="!expanded"
-    [route]="['/instances', 'data-files', areas.groupContext$.value, areas.instanceContext$.value]"
+    [route]="['/instances', 'data-files', areas.groupContext$.value, areas.instanceContext$.value, masterNode]"
   ></app-main-nav-button>
 
   <app-main-nav-button
@@ -142,9 +135,7 @@
   <!-- Footer -->
   <div class="flex-auto"></div>
   <div class="local-server-type-wrapper-expanded" *ngIf="expanded">
-    <span
-      class="local-server-type"
-      [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
+    <span class="local-server-type" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
       >{{ cfgService.config.mode }}</span
     >
   </div>
@@ -166,12 +157,7 @@
     <div *ngIf="!!(actions.actions$ | async)?.length" class="bd-text pl-2.5">
       {{ (actions.actions$ | async)?.length }} Actions.
     </div>
-    <div
-      *ngIf="!(actions.actions$ | async)?.length"
-      class="bd-disabled-text pl-2.5"
-    >
-      No Actions.
-    </div>
+    <div *ngIf="!(actions.actions$ | async)?.length" class="bd-disabled-text pl-2.5">No Actions.</div>
   </div>
 
   <div
@@ -185,10 +171,7 @@
   </div>
 
   <div *ngIf="!expanded" class="local-short-version">
-    <div
-      class="w-9"
-      [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }"
-    >
+    <div class="w-9" [@delayedFadeIn]="{ value: 'dummy', params: { delay: '0.15s' } }">
       {{ cfgService.config.version | formatVersionShort }}
     </div>
   </div>
@@ -221,19 +204,7 @@
     [route]="['/admin/']"
     [disabled]="!(authService.isGlobalAdmin$ | async)"
   ></app-main-nav-button>
-  <a
-    href="/assets/doc/index.html"
-    target="_blank"
-    class="bd-button-link"
-    aria-label="Help"
-    class=""
-  >
-    <app-bd-button
-      class="flex"
-      icon="help_outline"
-      text="Help"
-      color="toolbar"
-      [collapsed]="!expanded"
-    ></app-bd-button>
+  <a href="/assets/doc/index.html" target="_blank" class="bd-button-link" aria-label="Help" class="">
+    <app-bd-button class="flex" icon="help_outline" text="Help" color="toolbar" [collapsed]="!expanded"></app-bd-button>
   </a>
 </div>

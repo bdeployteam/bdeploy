@@ -37,7 +37,7 @@ const INSTANCES_ROUTES: Route[] = [
     canDeactivate: [DirtyDialogGuard],
   },
   {
-    path: 'data-files/:group/:instance',
+    path: 'data-files/:group/:instance/:path',
     component: DataFilesComponent,
     canActivate: [ScopedReadGuard],
     canDeactivate: [DirtyDialogGuard],

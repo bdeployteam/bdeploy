@@ -1,5 +1,6 @@
 import { animate, animateChild, group, query, state, style, transition, trigger } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, HostBinding, Input, inject } from '@angular/core';
+import { encodeDataFilePath } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { delayedFadeIn, delayedFadeOut } from '../../animations/fades';
 import { scaleWidthFromZero, scaleWidthToZero } from '../../animations/sizes';
 import { ActionsService } from '../../services/actions.service';
@@ -40,6 +41,7 @@ export class MainNavMenuComponent {
   protected authService = inject(AuthenticationService);
   protected areas = inject(NavAreasService);
   protected actions = inject(ActionsService);
+  protected masterNode = encodeDataFilePath({ minion: 'master', path: '' });
 
   @Input() set expanded(val: boolean) {
     this.areas.menuMaximized$.next(!this.areas.menuMaximized$.value);

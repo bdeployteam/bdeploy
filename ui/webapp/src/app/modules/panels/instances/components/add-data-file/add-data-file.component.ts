@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { BehaviorSubject, Observable, Subscription, finalize, map, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map, of, switchMap, tap } from 'rxjs';
 import { FileStatusDto, FileStatusType, RemoteDirectory } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { DataFilesService } from 'src/app/modules/primary/instances/services/data-files.service';
+import { decodeDataFilePath } from '../../utils/data-file-utils';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
-  selector: 'add-data-file',
+  selector: 'app-add-data-file',
   templateUrl: './add-data-file.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -19,8 +19,9 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
 
   protected minions$ = new BehaviorSubject<string[]>([]);
 
+  private currentPath$ = new BehaviorSubject('');
+  protected fileMinion$ = new BehaviorSubject<string>(null);
   protected tempFilePath: string;
-  protected tempFileMinion: string;
   protected tempFileError: string;
   protected tempFileContentLoading$ = new BehaviorSubject<boolean>(false);
   private tempFileContent = '';
@@ -47,7 +48,17 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
           }
         }
         this.minions$.next(dd.map((d) => d.minion));
-      })
+      }),
+    );
+    this.subscription.add(
+      combineLatest([this.minions$, this.areas.primaryRoute$]).subscribe(([minions, route]) => {
+        if (!minions?.length || !route?.params || !route?.params['path']) {
+          return;
+        }
+        const path = decodeDataFilePath(route.params['path']);
+        this.fileMinion$.next(minions.find((minion) => path.minion === minion));
+        this.currentPath$.next(path.path + (path.path ? '/' : ''));
+      }),
     );
   }
 
@@ -67,20 +78,24 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.doSave().subscribe();
   }
 
+  get filePath(): string {
+    return this.currentPath$.value + this.tempFilePath;
+  }
+
   public doSave(): Observable<any> {
     this.saving$.next(true);
     this.fileToSave = {
-      file: this.tempFilePath,
+      file: this.filePath,
       type: FileStatusType.ADD,
       content: this.tempFileContent,
     };
-    this.directory = this.df.directories$.value.find((d) => d.minion === this.tempFileMinion);
+    this.directory = this.df.directories$.value.find((d) => d.minion === this.fileMinion$.value);
 
     // standard update
     let update: Observable<any> = this.df.updateFile(this.directory, this.fileToSave).pipe(
       switchMap(() => {
         return of(true);
-      })
+      }),
     );
 
     // replace update
@@ -94,7 +109,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
             return this.df.updateFile(this.directory, this.fileToSave).pipe(map(() => true));
           }
           return of(false);
-        })
+        }),
       );
     }
 
@@ -102,7 +117,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
       finalize(() => this.saving$.next(false)),
       tap((r) => {
         if (r) this.reset();
-      })
+      }),
     );
   }
 
@@ -111,7 +126,7 @@ export class AddDataFileComponent implements OnInit, OnDestroy, DirtyableDialog 
   }
 
   private shouldReplace() {
-    return !!this.directory.entries.find((e) => e.path === this.tempFilePath);
+    return !!this.directory.entries.find((e) => e.path.replace('\\', '/') === this.filePath);
   }
 
   protected doAddFileContent(file: File) {

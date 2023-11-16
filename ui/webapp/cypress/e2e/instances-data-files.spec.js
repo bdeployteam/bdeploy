@@ -27,18 +27,14 @@ describe('Instance Data Files Tests', () => {
     // Add Server Process
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should('exist');
       cy.get('app-config-node[data-cy="master"]').within((node) => {
         cy.get('button[data-cy^="Add Application"]').click();
       });
     });
 
     cy.inMainNavFlyin('app-add-process', () => {
-      cy.contains('tr', 'Server Application')
-        .find('button[data-cy^="Add Server"]')
-        .click();
+      cy.contains('tr', 'Server Application').find('button[data-cy^="Add Server"]').click();
       cy.pressToolbarButton('Close');
     });
 
@@ -59,11 +55,7 @@ describe('Instance Data Files Tests', () => {
       // add optional output parameter with default value
       cy.contains('mat-expansion-panel', 'Test Parameters').within(() => {
         cy.get('mat-panel-title').click();
-        cy.get('mat-expansion-panel-header').should(
-          'have.attr',
-          'aria-expanded',
-          'true'
-        );
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
 
         cy.get('button[data-cy^="Select Parameters"]').click();
 
@@ -89,9 +81,7 @@ describe('Instance Data Files Tests', () => {
     cy.inMainNavContent(() => {
       // "added" border should be gone, we're in sync now.
       cy.get('app-config-node[data-cy="master"]').within((node) => {
-        cy.contains('tr', 'Server Application')
-          .find('.bd-status-border-none')
-          .should('exist');
+        cy.contains('tr', 'Server Application').find('.bd-status-border-none').should('exist');
       });
     });
   });
@@ -171,8 +161,8 @@ describe('Instance Data Files Tests', () => {
       cy.pressToolbarButton('Add File');
     });
 
-    cy.inMainNavFlyin('add-data-file', () => {
-      cy.fillFormSelect('minion', 'master');
+    cy.inMainNavFlyin('app-add-data-file', () => {
+      cy.contains('strong[name="targetNode"]', 'master').should('exist');
       cy.fillFormInput('path', 'test.txt');
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
@@ -213,8 +203,8 @@ describe('Instance Data Files Tests', () => {
       cy.pressToolbarButton('Add File');
     });
 
-    cy.inMainNavFlyin('add-data-file', () => {
-      cy.fillFormSelect('minion', 'master');
+    cy.inMainNavFlyin('app-add-data-file', () => {
+      cy.contains('strong[name="targetNode"]', 'master').should('exist');
       cy.fillFormInput('path', 'test.txt');
       cy.get('button[data-cy="Save"]').should('be.enabled').click();
     });
@@ -243,17 +233,13 @@ describe('Instance Data Files Tests', () => {
     });
 
     cy.inMainNavFlyin('app-data-files-bulk-manipulation', () => {
-      cy.get('button[data-cy="Delete Selected Data Files"]')
-        .should('be.enabled')
-        .click();
+      cy.get('button[data-cy="Delete Selected Data Files"]').should('be.enabled').click();
     });
 
-    cy.contains('app-bd-notification-card', 'Delete 1 data files?').within(
-      () => {
-        cy.fillFormInput('confirm', 'I UNDERSTAND');
-        cy.get('button[data-cy="Yes"]').should('be.enabled').click();
-        cy.contains('tr', 'test.txt').should('not.exist');
-      }
-    );
+    cy.contains('app-bd-notification-card', 'Delete 1 data files?').within(() => {
+      cy.fillFormInput('confirm', 'I UNDERSTAND');
+      cy.get('button[data-cy="Yes"]').should('be.enabled').click();
+      cy.contains('tr', 'test.txt').should('not.exist');
+    });
   });
 });
