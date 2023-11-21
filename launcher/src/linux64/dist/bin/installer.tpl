@@ -24,10 +24,13 @@ EOF
 
 # Check tooling
 require_tool() {
-   type "$@" > /dev/null
+   type "$1" > /dev/null 2>&1
    local S=$?
    if [[ ${S} -ne 0 ]]; then
-      echo "This installer requires the '$@' command. Please install it. Cannot continue."
+      echo "This installer requires the '$1' command. Please install it. Cannot continue."
+      if [[ -n "$2" ]]; then
+        echo "(Hint: $2)"
+      fi
       exit 1
    fi
 }
@@ -129,30 +132,32 @@ if [[ -z "${BDEPLOY_APP_UID}" ]]; then
 fi
 
 # STEP 2: Find the icon file or download
-echo "Updating icon..."
-B_ICONS="${B_HOME}/apps/${BDEPLOY_APP_UID}"
-APP_ICON="${B_ICONS}/app.ico"
-APP_ICON_PNG="${B_ICONS}/app.png"
-if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
-    require_tool convert
-    require_tool identify
+if [[ -z "${SKIP_ICON}" ]]; then
+    echo "Updating icon..."
+    B_ICONS="${B_HOME}/apps/${BDEPLOY_APP_UID}"
+    APP_ICON="${B_ICONS}/app.ico"
+    APP_ICON_PNG="${B_ICONS}/app.png"
+    if [[ -n "${BDEPLOY_ICON_URL}" && ${HAVE_XDG_DESKTOP_MENU} == 0 ]]; then
+        require_tool convert "convert is part of the ImageMagick suite."
+        require_tool identify "convert is part of the ImageMagick suite."
 
-    # Icon URL set, need download
-    mkdir -p "${B_ICONS}"
-    rm -f "${APP_ICON}"
-    dl "${BDEPLOY_ICON_URL}" "${APP_ICON}"
+        # Icon URL set, need download
+        mkdir -p "${B_ICONS}"
+        rm -f "${APP_ICON}"
+        dl "${BDEPLOY_ICON_URL}" "${APP_ICON}"
 
-    T_CONV="${T}/icon"
-    mkdir -p "${T_CONV}"
-    cd "${T_CONV}"
-    convert "${APP_ICON}" "${T_CONV}/${BDEPLOY_APP_UID}.png"
+        T_CONV="${T}/icon"
+        mkdir -p "${T_CONV}"
+        cd "${T_CONV}"
+        convert "${APP_ICON}" "${T_CONV}/${BDEPLOY_APP_UID}.png"
 
-    # produced multiple PNG's per ICO frame.
-    largest=$(identify -format '%w %i\n' "${T_CONV}/${BDEPLOY_APP_UID}*.png" | sort -n | tail -n 1 | awk '{ print $2; }')
-    if [[ ! -f "${largest}" ]]; then
-        echo "Cannot find icon for application."
-    else
-        cp "${largest}" "${APP_ICON_PNG}"
+        # produced multiple PNG's per ICO frame.
+        largest=$(identify -format '%w %i\n' "${T_CONV}/${BDEPLOY_APP_UID}*.png" | sort -n | tail -n 1 | awk '{ print $2; }')
+        if [[ ! -f "${largest}" ]]; then
+            echo "Cannot find icon for application."
+        else
+            cp "${largest}" "${APP_ICON_PNG}"
+        fi
     fi
 fi
 

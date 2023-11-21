@@ -66,6 +66,10 @@ The effect of enabling the recommended settings as per the report above will hav
 
 The **Installer** stores the **Launcher** and all **Client Applications** in _$HOME/.bdeploy_. This location can be changed by setting the environment variable **BDEPLOY_HOME**.
 
+!!!info Note
+The installer uses the ImageMagick suite to read and convert icons for the applications. If this is undesired or not possible, settings the `SKIP_ICON` environment variable to any value will skip this step. The installed application(s) will have no icon associated with them.
+!!!
+
 ## Click & Start
 **Click & Start** enables the launching of **Client Application** by simply clicking a link in the web browser. In this case the applications are not integrated into the operating system (Start Menu, Desktop Shortcut). A prerequisite is that the **Click & Start Launcher** is deployed on the client computer. This can be done by using the **Click & Start Installer** available in the top-right corner of the **Client Applications** page. The installer will download the **Click & Start Launcher** and associate it with **.bdeploy** files. 
 
