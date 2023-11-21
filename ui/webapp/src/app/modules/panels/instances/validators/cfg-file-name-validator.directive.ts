@@ -29,7 +29,7 @@ export class CfgFileNameValidatorDirective implements Validator {
     }
 
     const errors = {};
-    for (const f of this.cfgFiles.files$.value) {
+    for (const f of this.cfgFiles.files$.value || []) {
       const p = this.cfgFiles.getPath(f);
       if (!!f.persistent && !f.persistent.instanceId) {
         continue; // file only in product, we can create/rename it.

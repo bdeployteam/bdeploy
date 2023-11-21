@@ -113,26 +113,23 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     this.restarting$,
     null,
     null,
-    this.pid$
+    this.pid$,
   );
 
   protected performing$ = combineLatest([this.mappedStart$, this.mappedStop$, this.mappedRestart$]).pipe(
-    map(([a, b, c]) => a || b || c)
+    map(([a, b, c]) => a || b || c),
   );
 
   // legacy warning. isRunning, etc. is available through trigger outdated$
   private disabledBase = combineLatest([this.auth.isCurrentScopeWrite$, this.performing$, this.outdated$]);
   protected startDisabled$ = this.disabledBase.pipe(
-    map(([perm, perform, outdated]) => !perm || perform || outdated || this.isRunning || this.isStopping)
+    map(([perm, perform, outdated]) => !perm || perform || outdated || this.isRunning || this.isStopping),
   );
   protected stopDisabled$ = this.disabledBase.pipe(
-    map(
-      ([perm, perform]) =>
-        !perm || perform || this.isStopping || !(this.isRunning || this.isCrashedWaiting || this.isStartPlanned)
-    )
+    map(([perm]) => !perm || this.isStopping || !(this.isRunning || this.isCrashedWaiting)),
   );
   protected restartDisabled$ = this.disabledBase.pipe(
-    map(([perm, perform, outdated]) => !perm || perform || outdated || !(this.isRunning || this.isCrashedWaiting))
+    map(([perm, perform, outdated]) => !perm || perform || outdated || !(this.isRunning || this.isCrashedWaiting)),
   );
   protected verifyDisabled$ = combineLatest([
     this.auth.isCurrentScopeWrite$,
@@ -160,11 +157,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.processConfig = config;
       this.startType = this.formatStartType(this.processConfig?.processControl.startType);
       this.nodeCfg = nodes?.nodeConfigDtos?.find(
-        (n) => n.nodeConfiguration.applications.findIndex((a) => a.id === config?.id) !== -1
+        (n) => n.nodeConfiguration.applications.findIndex((a) => a.id === config?.id) !== -1,
       );
 
       const app = nodes?.applications?.find(
-        (a) => a.key.name === config?.application?.name && a.key.tag === config?.application?.tag
+        (a) => a.key.name === config?.application?.name && a.key.tag === config?.application?.tag,
       );
 
       const system = systems?.find((s) => s.key.name === active?.instanceConfiguration?.system?.name);
@@ -184,7 +181,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
                   config: active.instanceConfiguration,
                   nodeDtos: nodes?.nodeConfigDtos,
                 },
-                system?.config
+                system?.config,
               ),
               type: desc.type,
             };
@@ -202,7 +199,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
               config: active?.instanceConfiguration,
               nodeDtos: nodes?.nodeConfigDtos,
             },
-            system?.config
+            system?.config,
           );
           const enabled = !!preview && preview !== 'false' && !preview.match(/{{([^}]+)}}/g);
           return enabled;
@@ -248,11 +245,11 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
       this.details.processConfig$
         .pipe(
           map((config) => config?.id),
-          distinctUntilChanged()
+          distinctUntilChanged(),
         )
         .subscribe(() => {
           this.dialog?.messageComp.reset();
-        })
+        }),
     );
   }
 
