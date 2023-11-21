@@ -20,8 +20,8 @@ dependencies {
         project(":ui"),
         project(":schema"),
 
-        'org.bouncycastle:bcpkix-jdk18on:1.76',
-        'org.bouncycastle:bcprov-jdk18on:1.76',
+        'org.bouncycastle:bcpkix-jdk18on:1.77',
+        'org.bouncycastle:bcprov-jdk18on:1.77',
         'org.quartz-scheduler:quartz:2.3.2',
         'net.jsign:jsign-core:5.0',
         'com.nimbusds:oauth2-oidc-sdk:11.6'

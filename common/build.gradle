@@ -15,10 +15,10 @@ dependencies {
     )
 
     implementation (
-        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.3',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3',
-        'org.apache.commons:commons-compress:1.24.0',
+        'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.0',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.0',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.0',
+        'org.apache.commons:commons-compress:1.25.0',
     )
 
     // this dep is not allowed, as logging depends on common - circle. it works for gradle,
