@@ -42,6 +42,7 @@ import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ContentHelper;
 import io.bdeploy.common.TestActivityReporter;
+import io.bdeploy.common.audit.NullAuditor;
 import io.bdeploy.common.security.RemoteService;
 
 @ExtendWith(TestHive.class)
@@ -152,6 +153,9 @@ class RemoteHiveTest extends RemoteHiveTestBase {
         assertThat(Files.size(topLvlFile), is(Files.size(exp.resolve("top-lvl"))));
 
         Path tmpRemote = tmp.resolve("push");
+        try (BHive init = new BHive(tmpRemote.toUri(), new NullAuditor(), r)) {
+            // just to initialize the BHive!
+        }
         hive.execute(new PushOperation().addManifest(keyD).setRemote(new RemoteService(tmpRemote.toUri())));
 
         try (BHive h = new BHive(tmpRemote.toUri(), null, r)) {
