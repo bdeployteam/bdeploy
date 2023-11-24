@@ -17,7 +17,7 @@ export class TokenComponent implements OnInit {
   protected loading$ = new BehaviorSubject<boolean>(true);
   protected user$ = new BehaviorSubject<UserInfo>(null);
   protected pack$ = new BehaviorSubject<string>('');
-  protected genFull = false;
+  protected genFull = true;
 
   ngOnInit(): void {
     this.authService.getUserInfo().subscribe((r) => {
@@ -43,7 +43,7 @@ export class TokenComponent implements OnInit {
       () =>
         this.snackbarService.open('Unable to write to clipboard.', null, {
           duration: 1000,
-        })
+        }),
     );
   }
 }

@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { PasswordStrengthMeterComponent } from 'angular-password-strength-meter';
 import { provideZxvbnServiceForPSM } from 'angular-password-strength-meter/zxcvbn';
 import { CoreModule } from '../../core/core.module';
@@ -12,7 +14,14 @@ import { UserRoutingModule } from './user-routing.module';
 
 @NgModule({
   declarations: [ThemesComponent, SettingsComponent, EditComponent, TokenComponent, PasswordComponent],
-  imports: [CommonModule, CoreModule, UserRoutingModule, PasswordStrengthMeterComponent],
+  imports: [
+    CommonModule,
+    CoreModule,
+    UserRoutingModule,
+    PasswordStrengthMeterComponent,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   providers: [provideZxvbnServiceForPSM()],
 })
 export class UserModule {}
