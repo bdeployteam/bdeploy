@@ -8,8 +8,9 @@
         <div class="local-login-area flex flex-col flex-auto gap-2.5 m-4">
           <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
             <div class="local-header">BDeploy Login</div>
-            <app-bd-form-input [(ngModel)]="user" name="user" label="Username" required></app-bd-form-input>
+            <app-bd-form-input #userInput [(ngModel)]="user" name="user" label="Username" required></app-bd-form-input>
             <app-bd-form-input
+              #passInput
               [(ngModel)]="pass"
               name="pass"
               label="Password"
@@ -22,7 +23,14 @@
                 <mat-error>{{ loginFailedMessage }}</mat-error>
               </div>
               <div class="flex-auto"></div>
-              <button mat-raised-button [disabled]="loginForm.invalid" type="submit" color="accent">Login</button>
+              <button
+                mat-raised-button
+                [disabled]="loginForm.invalid && !(userInput.autoFilled && passInput.autoFilled)"
+                type="submit"
+                color="accent"
+              >
+                Login
+              </button>
             </div>
           </form>
           <div class="flex flex-col gap-2.5" *ngIf="cfg.webAuthCfg?.auth0?.enabled || cfg.webAuthCfg?.okta?.enabled">

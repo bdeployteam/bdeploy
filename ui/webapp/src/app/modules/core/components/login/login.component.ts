@@ -83,7 +83,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         catchError((e) => {
           this.loading$.next(false);
           throw e;
-        })
+        }),
       )
       .subscribe(() => {
         forkJoin([firstValueFrom(this.auth0.user$), this.auth0.getAccessTokenSilently()]).subscribe(([u, t]) => {

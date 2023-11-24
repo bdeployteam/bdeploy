@@ -51,6 +51,8 @@ export class BdFormInputComponent implements ControlValueAccessor, ErrorStateMat
   protected showPassword = false;
   protected filteredSuggested$ = new BehaviorSubject<string[]>([]);
 
+  accessor autoFilled = false;
+
   public get value() {
     return this.internalValue;
   }

@@ -1,10 +1,5 @@
 <div class="flex flex-col">
-  <mat-form-field
-    #formField
-    appearance="fill"
-    class="bd-form-input-form-field"
-    appClickStopPropagation
-  >
+  <mat-form-field #formField appearance="fill" class="bd-form-input-form-field" appClickStopPropagation>
     <mat-label>{{ label }}</mat-label>
     <app-bd-content-assist-menu
       #assistContent
@@ -13,6 +8,7 @@
       [prefixes]="assistPrefixes"
     ></app-bd-content-assist-menu>
     <input
+      (cdkAutofill)="autoFilled = $event.isAutofilled"
       matInput
       [matAutocomplete]="auto"
       [(ngModel)]="value"
@@ -28,10 +24,7 @@
       (focus)="focus.emit(true)"
     />
     <mat-autocomplete #auto="matAutocomplete">
-      <mat-option
-        *ngFor="let suggestedValue of filteredSuggested$ | async"
-        [value]="suggestedValue"
-      >
+      <mat-option *ngFor="let suggestedValue of filteredSuggested$ | async" [value]="suggestedValue">
         {{ suggestedValue }}
       </mat-option>
     </mat-autocomplete>
@@ -46,11 +39,7 @@
         >{{ showPassword ? 'visibility_off' : 'visibility'}}</mat-icon
       >
     </div>
-    <mat-error *ngIf="errorFallback || (ngControl && ngControl.invalid)"
-      >{{ getErrorMessage() }}</mat-error
-    >
-    <mat-hint class="truncate" *ngIf="statusMessage">
-      {{statusMessage}}
-    </mat-hint>
+    <mat-error *ngIf="errorFallback || (ngControl && ngControl.invalid)">{{ getErrorMessage() }}</mat-error>
+    <mat-hint class="truncate" *ngIf="statusMessage"> {{statusMessage}} </mat-hint>
   </mat-form-field>
 </div>
