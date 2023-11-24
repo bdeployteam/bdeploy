@@ -1,4 +1,4 @@
-package io.bdeploy.dcu;
+package io.bdeploy.common;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -62,10 +62,10 @@ public class TaskSynchronizer {
             log.warn("Null key not allowed in future", new IllegalStateException("Null key, task: " + task));
         }
 
-        Future<?> existing;
-        CompletableFuture<?> tracker = null;
+        Future<T> existing;
+        CompletableFuture<T> tracker = null;
         synchronized (this) {
-            existing = tasks.get(key);
+            existing = (Future<T>) tasks.get(key);
 
             if (existing == null) {
                 tracker = new CompletableFuture<>();
@@ -75,7 +75,7 @@ public class TaskSynchronizer {
 
         if (existing != null) {
             try {
-                return (T) existing.get(); // just wait for the existing one.
+                return existing.get(); // just wait for the existing one.
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Task interrupted", e);
@@ -85,7 +85,7 @@ public class TaskSynchronizer {
         } else {
             try {
                 T result = task.call();
-                tracker.complete(null);
+                tracker.complete(result);
                 return result;
             } catch (RuntimeException e) {
                 tracker.completeExceptionally(e);

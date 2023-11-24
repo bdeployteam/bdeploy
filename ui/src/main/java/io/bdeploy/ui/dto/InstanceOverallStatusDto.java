@@ -3,6 +3,7 @@ package io.bdeploy.ui.dto;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.manifest.state.InstanceOverallStateRecord;
@@ -31,6 +32,12 @@ public class InstanceOverallStatusDto {
         this.status = rec.status;
         this.timestamp = rec.timestamp;
         this.messages = rec.messages;
+    }
+
+    @JsonCreator
+    public InstanceOverallStatusDto(@JsonProperty("id") String id, @JsonProperty("status") OverallStatus status,
+            @JsonProperty("timestamp") long timestamp, @JsonProperty("messages") List<String> messages) {
+
     }
 
 }

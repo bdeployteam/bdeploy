@@ -42,6 +42,7 @@ import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.remote.jersey.JerseyRemoteBHive;
 import io.bdeploy.common.ActivityReporter;
+import io.bdeploy.common.TaskSynchronizer;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.security.RemoteService;
@@ -132,6 +133,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
 
     @Inject
     private VersionSorterService vss;
+
+    @Inject
+    private TaskSynchronizer tasks;
 
     @Override
     public void tryAutoAttach(String groupName, ManagedMasterDto target) {
@@ -381,24 +385,26 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         if (minion.getMode() != MinionMode.CENTRAL) {
             return null;
         }
-        try (ActionHandle h = af.run(Actions.SYNCHRONIZING, groupName, null, serverName)) {
-            BHive hive = getInstanceGroupHive(groupName);
-            try (Transaction t = hive.getTransactions().begin()) {
-                return synchronizeTransacted(hive, groupName, serverName);
-            } catch (Exception e) {
-                log.warn("Cannot synchronize {}: {}", serverName, e.toString());
-                if (log.isDebugEnabled()) {
-                    log.debug("Error:", e);
-                }
+        return tasks.perform("Sync-" + groupName + "-" + serverName, () -> {
+            try (ActionHandle h = af.run(Actions.SYNCHRONIZING, groupName, null, serverName)) {
+                BHive hive = getInstanceGroupHive(groupName);
+                try (Transaction t = hive.getTransactions().begin()) {
+                    return synchronizeTransacted(hive, groupName, serverName);
+                } catch (Exception e) {
+                    log.warn("Cannot synchronize {}: {}", serverName, e.toString());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Error:", e);
+                    }
 
-                // in case we have a dedicated status associated.
-                if (e instanceof WebApplicationException) {
-                    throw e;
-                }
+                    // in case we have a dedicated status associated.
+                    if (e instanceof WebApplicationException) {
+                        throw e;
+                    }
 
-                throw new WebApplicationException("Cannot synchronize " + serverName, e);
+                    throw new WebApplicationException("Cannot synchronize " + serverName, e);
+                }
             }
-        }
+        });
     }
 
     private MinionSyncResultDto synchronizeTransacted(BHive hive, String groupName, String serverName) {
