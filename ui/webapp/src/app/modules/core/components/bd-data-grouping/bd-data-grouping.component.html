@@ -1,17 +1,17 @@
 <app-bd-button-popup
   #popup
   [text]="groupBy"
-  tooltip="below"
   [collapsed]="false"
+  [matTooltip]="groupByFull"
+  matTooltipPosition="below"
+  matTooltipShowDelay="500"
 >
   <mat-card appearance="outlined" class="flex flex-col gap-1 p-2.5">
     <div class="flex gap-1 justify-end items-center">
       <mat-form-field class="preset-select" appearance="outline">
         <mat-label>Favorite</mat-label>
         <mat-select [value]="presetType" (valueChange)="setPresetType($event)">
-          <mat-option *ngFor="let fav of presetTypes" [value]="fav"
-            >{{ capitalize(fav) }}</mat-option
-          >
+          <mat-option *ngFor="let fav of presetTypes" [value]="fav">{{ capitalize(fav) }}</mat-option>
         </mat-select>
       </mat-form-field>
       <app-bd-button
@@ -50,9 +50,7 @@
           [removeDisabled]="groupings.length === 1 && !groupings[0].definition"
           (removeClicked)="removeGrouping($event)"
         >
-          <mat-icon cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]"
-            >drag_indicator</mat-icon
-          >
+          <mat-icon cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]">drag_indicator</mat-icon>
         </app-bd-data-grouping-panel>
       </div>
 

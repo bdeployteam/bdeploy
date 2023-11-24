@@ -62,13 +62,17 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
     const selectedDefinitions = this.groupings.map((g) => g.definition);
     return this.definitions.filter((def) => !selectedDefinitions.includes(def));
   }
-  protected get groupBy(): string {
+  protected get groupByFull(): string {
     const groupings =
       this.groupings
         .map((g) => g.definition?.name)
         .filter((item) => !!item)
         .join(', ') || 'None';
-    const groupBy = `Group By: ${groupings}`;
+    return `Group By: ${groupings}`;
+  }
+
+  protected get groupBy(): string {
+    const groupBy = this.groupByFull;
     return groupBy.length > 30 ? `${groupBy.substring(0, 30)}...` : groupBy;
   }
 
@@ -153,7 +157,7 @@ export class BdDataGroupingComponent<T> implements OnInit, OnChanges {
           ({
             name: g.definition.name,
             selected: g.selected,
-          } as CustomDataGrouping)
+          }) as CustomDataGrouping,
       );
   }
 
