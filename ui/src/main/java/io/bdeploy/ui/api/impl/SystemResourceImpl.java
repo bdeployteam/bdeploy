@@ -205,7 +205,7 @@ public class SystemResourceImpl implements SystemResource {
             }
 
             if (mappings.get().groupToNode.isEmpty()) {
-                result.results.add(new InstanceTemplateReferenceResultDto(instName, InstanceTemplateReferenceStatus.WARNING,
+                result.results.add(new InstanceTemplateReferenceResultDto(instName, InstanceTemplateReferenceStatus.OK,
                         "Instance skipped."));
                 continue;
             }

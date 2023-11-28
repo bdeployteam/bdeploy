@@ -7,6 +7,8 @@ import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
+
 public class TemplateApplication {
 
     @JsonPropertyDescription("The ID of the application to use, as given in the product-info.yaml file of the product.")
@@ -20,6 +22,9 @@ public class TemplateApplication {
 
     @JsonPropertyDescription("The name of the resulting process configuration.")
     public String processName;
+
+    @JsonPropertyDescription("A list of supported operating systems for this template. It will be skipped silently on other platforms.")
+    public List<OperatingSystem> applyOn = new ArrayList<>();
 
     @JsonPropertyDescription("A description of the process created by this template.")
     public String description;

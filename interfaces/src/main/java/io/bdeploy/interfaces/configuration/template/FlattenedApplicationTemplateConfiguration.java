@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import io.bdeploy.common.util.OsHelper.OperatingSystem;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.interfaces.descriptor.template.ApplicationTemplateDescriptor;
 import io.bdeploy.interfaces.descriptor.template.TemplateApplication;
@@ -32,6 +33,8 @@ public class FlattenedApplicationTemplateConfiguration {
     public String description;
 
     public String preferredProcessControlGroup;
+
+    public List<OperatingSystem> applyOn;
 
     public Map<String, Object> processControl;
 
@@ -59,6 +62,7 @@ public class FlattenedApplicationTemplateConfiguration {
         this.description = original.description;
         this.preferredProcessControlGroup = original.preferredProcessControlGroup;
         this.processControl = original.processControl;
+        this.applyOn = new ArrayList<>(original.applyOn);
         this.children = new ArrayList<>(children);
 
         if (this.name != null) {

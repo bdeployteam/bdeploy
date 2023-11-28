@@ -72,8 +72,8 @@ export class ProcessEditService {
       this.node$.next(state.config.nodeDtos.find((n) => n.nodeName === nodeName));
       this.product$.next(
         prods.find(
-          (p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag
-        )
+          (p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag,
+        ),
       );
       this.applications$.next(apps);
 
@@ -88,7 +88,7 @@ export class ProcessEditService {
     return this.applications$.pipe(
       skipWhile((a) => !a),
       map((a) => a.find((x) => x.key.name === key)),
-      first()
+      first(),
     );
   }
 
@@ -100,7 +100,7 @@ export class ProcessEditService {
     const apps = this.node$.value.nodeConfiguration.applications;
     apps.splice(
       apps.findIndex((a) => a.id === this.process$.value.id),
-      1
+      1,
     );
 
     // remove from control group(s)
@@ -121,7 +121,7 @@ export class ProcessEditService {
       // different OS with OS bound application - need to find a more suitable one :)
       const keyName = getAppKeyName(appConfig.application);
       const replacement = this.applications$.value?.find(
-        (a) => getAppKeyName(a.key) === keyName && getAppOs(a.key) === state.os
+        (a) => getAppKeyName(a.key) === keyName && getAppOs(a.key) === state.os,
       );
 
       if (!replacement) {
@@ -191,13 +191,13 @@ export class ProcessEditService {
     application: ApplicationDto,
     template: FlattenedApplicationTemplateConfiguration,
     variableValues: { [key: string]: string },
-    status: StatusMessage[]
+    status: StatusMessage[],
   ): Observable<string> {
     const start: CommandConfiguration = this.calculateInitialCommand(
       application.descriptor.startCommand,
       template ? template.startParameters : [],
       variableValues,
-      status
+      status,
     );
     const stop: CommandConfiguration = this.calculateInitialCommand(application.descriptor.stopCommand, [], {}, status);
 
@@ -268,7 +268,7 @@ export class ProcessEditService {
 
         targetGroup.processOrder.push(id);
         this.preliminary.splice(this.preliminary.indexOf(process), 1);
-      })
+      }),
     );
   }
 
@@ -355,7 +355,7 @@ export class ProcessEditService {
     descriptor: ExecutableDescriptor,
     templates: TemplateParameter[],
     values: { [key: string]: string },
-    status: StatusMessage[]
+    status: StatusMessage[],
   ): CommandConfiguration {
     if (!descriptor) {
       return null;
@@ -406,8 +406,8 @@ export class ProcessEditService {
               executable: descriptor.launcherPath,
               parameters: mandatoryParams,
             },
-          } as ApplicationConfiguration
-        )
+          } as ApplicationConfiguration,
+        ),
       ),
     };
   }
@@ -418,14 +418,14 @@ export class ProcessEditService {
       map(([app, cfg]) => {
         return this.meetsConditionOnGiven(param, app.descriptor.startCommand, cfg);
       }),
-      first()
+      first(),
     );
   }
 
   public meetsConditionOnGiven(
     param: ParameterDescriptor,
     descriptor: ExecutableDescriptor,
-    process: ApplicationConfiguration
+    process: ApplicationConfiguration,
   ): boolean {
     if (!param.condition || (!param.condition.parameter && !param.condition.expression)) {
       return true; // no condition, all OK :)
@@ -447,7 +447,7 @@ export class ProcessEditService {
       createLinkedValue(expression),
       process,
       this.edit.state$.value?.config,
-      system?.config
+      system?.config,
     );
 
     // no value or value could not be resolved fully.

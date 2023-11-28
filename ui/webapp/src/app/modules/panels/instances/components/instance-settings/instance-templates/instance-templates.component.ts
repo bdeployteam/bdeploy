@@ -96,7 +96,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     this.subscription = combineLatest([this.instanceEdit.state$, this.products.products$]).subscribe(
       ([state, prods]) => {
         const prod = prods?.find(
-          (p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag
+          (p) => p.key.name === state?.config?.config?.product.name && p.key.tag === state?.config?.config?.product.tag,
         );
 
         if (!prod) {
@@ -107,7 +107,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         this.product = prod;
         this.records = prod.instanceTemplates ? prod.instanceTemplates : [];
         this.recordsLabel = this.records.map((record) => record.name);
-      }
+      },
     );
   }
 
@@ -200,7 +200,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
     // prepare available process control groups
     const pcgs = this.template.processControlGroups.map(
-      (p) => Object.assign({}, p) as ProcessControlGroupConfiguration
+      (p) => Object.assign({}, p) as ProcessControlGroupConfiguration,
     );
     pcgs.forEach((p) => (p.processOrder = []));
 
@@ -214,7 +214,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
         const processed = cloneDeep(v);
         const status: StatusMessage[] = [];
         processed.value = createLinkedValue(
-          performTemplateVariableSubst(getPreRenderable(processed.value), this.variables, status)
+          performTemplateVariableSubst(getPreRenderable(processed.value), this.variables, status),
         );
         status.forEach((e) =>
           this.messages.push({
@@ -223,7 +223,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
             appname: null,
             template: null,
             message: e,
-          })
+          }),
         );
 
         const index = instance.instanceVariables.findIndex((x) => x.id === v.id);
@@ -286,7 +286,6 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
           applyResult = this.dialog.message({
             header: 'Template Messages',
             template: this.tplMessages,
-            dismissResult: null,
             actions: [ACTION_CANCEL, ACTION_OK],
           });
         } else {
@@ -308,7 +307,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     observables: Observable<string>[],
     node: InstanceNodeConfigurationDto,
     groupName: string,
-    nodeName: string
+    nodeName: string,
   ) {
     for (const template of group.applications) {
       // need to find all apps in the product which match the key name...
@@ -327,10 +326,10 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
                     appname: template?.name ? template.name : app.name,
                     template: template,
                     message: e,
-                  })
+                  }),
                 );
-              })
-            )
+              }),
+            ),
           );
         }
       }
@@ -339,15 +338,15 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
 
   private applyServerGroup(
     group: FlattenedInstanceTemplateGroupConfiguration,
-    node: InstanceNodeConfigurationDto,
+    nodeCfg: InstanceNodeConfigurationDto,
     pcgs: ProcessControlGroupConfiguration[],
     groupName: string,
     nodeName: string,
-    observables: Observable<string>[]
+    observables: Observable<string>[],
   ) {
     for (const app of group.applications) {
       // need to prepare process control groups synchronously before adding applications.
-      this.prepareProcessControlGroups(app, node, pcgs, groupName, nodeName);
+      this.prepareProcessControlGroups(app, nodeCfg, pcgs, groupName, nodeName);
 
       observables.push(
         this.instanceEdit.nodes$.pipe(
@@ -356,14 +355,22 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
           // pick the first valid node info
           first(),
           // map the node info to the application key we need for our node.
-          map((n) =>
-            this.instanceEdit.stateApplications$.value?.find(
-              (a) => a.key.name === getTemplateAppKey(this.product, app, n[nodeName])
-            )
-          ),
+          map((n) => {
+            return {
+              node: n[nodeName],
+              appDto: this.instanceEdit.stateApplications$.value?.find(
+                (a) => a.key.name === getTemplateAppKey(this.product, app, n[nodeName]),
+              ),
+            };
+          }),
           // map the key of the app to an observable to actually add the application if possible.
-          map((a) => {
-            if (!a) {
+          map(({ node, appDto }) => {
+            if (app.applyOn?.length && !app.applyOn.includes(node.os)) {
+              // skip application, not wanted on this OS
+              return of<string>(null);
+            }
+
+            if (!appDto) {
               this.messages.push({
                 group: groupName,
                 node: nodeName,
@@ -377,24 +384,24 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
               return of<string>(null);
             } else {
               const status = [];
-              return this.edit.addProcess(node, a, app, this.variables, status).pipe(
+              return this.edit.addProcess(nodeCfg, appDto, app, this.variables, status).pipe(
                 finalize(() => {
                   status.forEach((e) =>
                     this.messages.push({
                       group: groupName,
                       node: nodeName,
-                      appname: app?.name ? app.name : a.name,
+                      appname: app?.name ? app.name : appDto.name,
                       template: app,
                       message: e,
-                    })
+                    }),
                   );
-                })
+                }),
               );
             }
           }),
           // since adding returns an observable we concat them, so a subscription to the observable will yield the addProcess response.
-          concatAll()
-        )
+          concatAll(),
+        ),
       );
     }
   }
@@ -407,7 +414,7 @@ export class InstanceTemplatesComponent implements OnInit, OnDestroy {
     node: InstanceNodeConfigurationDto,
     pcgs: ProcessControlGroupConfiguration[],
     groupName: string,
-    nodeName: string
+    nodeName: string,
   ) {
     const cg = app.preferredProcessControlGroup;
     if (cg) {

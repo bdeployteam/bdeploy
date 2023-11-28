@@ -339,6 +339,11 @@ public class InstanceTemplateResourceImpl implements InstanceTemplateResource {
         OperatingSystem targetOs = status.config.os;
 
         for (var reqApp : group.applications) {
+            if (!reqApp.applyOn.isEmpty() && !reqApp.applyOn.contains(targetOs)) {
+                log.debug("Skipping application {}, not applicable to {}", reqApp.name, targetOs);
+                continue;
+            }
+
             ApplicationConfiguration cfg = createApplicationFromTemplate(reqApp,
                     apps.stream().filter(appFilter.apply(reqApp.application, targetOs)).findFirst()
                             .orElseThrow(() -> new IllegalStateException("Cannot find application with ID " + reqApp.application
