@@ -4,13 +4,12 @@
       <div class="bd-type-text">Virtual Node</div>
       <div class="bd-title-text">Client Applications</div>
     </div>
-    <app-node-state-panel
-      [items]="nodeStateItems$ | async"
-      [narrowWhen$]="narrowWhen$"
-    ></app-node-state-panel>
+    <app-node-state-panel [items]="nodeStateItems$ | async" [narrowWhen$]="narrowWhen$"></app-node-state-panel>
+    <ng-container *ngIf="!(collapsedWhen$ | async)">
+      <mat-divider></mat-divider>
+    </ng-container>
   </div>
   <ng-container *ngIf="!(collapsedWhen$ | async)">
-    <mat-divider></mat-divider>
     <div class="bd-default-padding">
       <app-bd-data-display
         [records]="node.nodeConfiguration.applications"

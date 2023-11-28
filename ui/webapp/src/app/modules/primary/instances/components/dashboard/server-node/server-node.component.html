@@ -1,22 +1,21 @@
 <div class="bd-rect-card flex flex-col sticky-container">
   <div class="sticky">
-    <app-node-header class="flex flex-col" [node]="node">
-      <div class="flex">
-        <div class="flex flex-col">
-          <div class="bd-type-text">NODE</div>
-          <div class="bd-title-text">{{ node.nodeName }}</div>
-        </div>
-        <div class="flex-auto"></div>
-        <div class="flex gap-1 justify-center items-center pointer-events-auto">
-          <app-bd-panel-button
-            text="Details"
-            icon="info"
-            [route]="['panels', 'instances', 'node', node.nodeName]"
-            tooltip="below"
-          ></app-bd-panel-button>
-        </div>
+    <div class="flex local-header-bg p-[10px]">
+      <div class="flex flex-col">
+        <div class="bd-type-text">NODE</div>
+        <div class="bd-title-text">{{ node.nodeName }}</div>
       </div>
-    </app-node-header>
+      <div class="flex-auto"></div>
+      <div class="flex gap-1 justify-center items-center pointer-events-auto">
+        <app-bd-panel-button
+          text="Details"
+          icon="info"
+          [route]="['panels', 'instances', 'node', node.nodeName]"
+          tooltip="below"
+        ></app-bd-panel-button>
+      </div>
+    </div>
+    <app-node-header class="flex flex-col" [node]="node"> </app-node-header>
     <app-node-state-panel
       [items]="nodeStateItems$ | async"
       [narrowWhen$]="narrowWhen$"
@@ -24,9 +23,11 @@
       [refreshingWhen$]="processes.loading$"
       (manualRefresh)="processes.reload()"
     ></app-node-state-panel>
+    <ng-container *ngIf="!(collapsedWhen$ | async)">
+      <mat-divider></mat-divider>
+    </ng-container>
   </div>
   <ng-container *ngIf="!(collapsedWhen$ | async)">
-    <mat-divider></mat-divider>
     <app-node-process-list
       class="bd-default-padding"
       [node]="node"

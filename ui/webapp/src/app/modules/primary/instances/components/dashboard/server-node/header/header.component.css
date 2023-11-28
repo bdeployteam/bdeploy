@@ -1,8 +1,7 @@
 .local-header-sizing {
-  height: 110px;
+  height: 90px;
 
   position: relative;
-
   overflow: hidden;
 
   background-color: var(--bd-bg-toolbar);
@@ -17,7 +16,7 @@
   left: 0px;
 
   width: 100%;
-  height: 100px;
+  height: 80px;
 
   overflow: visible;
 
@@ -99,13 +98,10 @@
 .local-max-label {
   fill: #888888;
   font-size: smaller;
-
-  /** give room for the details button */
-  transform: translateX(-10px);
 }
 
 .local-max-label-padded {
-  transform: translateX(-60px);
+  transform: translateX(-10px);
 }
 
 .local-graph-point {
