@@ -654,8 +654,10 @@ groups: <7>
     startParameters: <11>
     - id: param.sleep
       value: "{{T:sleep-timeout}}"
+    applyTo: <12>
+    - LINUX
 - name: "Client Apps"
-  type: CLIENT <12>
+  type: CLIENT <13>
   description: "All client applications"
   
   applications:
@@ -674,7 +676,8 @@ groups: <7>
 9. When referencing an application template, it is possible to define _overrides_ for the template variables (`{{X:...}}`) used in the template. Use provided values will **not** be taken into account for this variable when applying the template, instead the _fixed_ value will be used.
 10. A template group contains one or more applications to configure, which each can consist of process control configuration and parameter definitions for the start command of the resulting process - exactly the same fields are valid as for **Application Tempaltes** - except for the `id` which is not required.
 11. Start command parameters are referenced by their ID, defined in [`app-info.yaml`](#app-infoyaml). If a value is given, this value is applied. If not, the default value is used. If a parameter is optional, it will be added to the configuration if it is referenced in the template, regardless of whether a value is given or not.
-12. A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
+12. Using `applyTo`, an application can be restricted to be applied only to certain nodes, running a specified operating system. A list of supported operating systems can be specified. If this is not specified, the application is assumed to be capable of being applied to nodes running any of all supported operating systems.
+13. A template group can have either type `SERVER` (default) or `CLIENT`. A group may only contain applications of a compatible type, i.e. only `SERVER` applications in `SERVER` type group. When applying the group to a node, applications will be instantiated to processes according to their supported OS and the nodes physical OS. If a `SERVER` application does not support the target nodes OS, it is ignored.
 
 An instance template will be presented to the user when visiting an [Empty Instance](/user/instance/#instance-templates).
 
