@@ -6,18 +6,18 @@ icon: device-desktop
 
 BDeploy uses the **Eclipse IDE** for backend- and **VSCode** for frontend-development. You will need:
 
-* Get the latest [OpenJDK 17](https://adoptium.net/).
-* Get the latest [Eclipse IDE](https://www.eclipse.org/downloads/) including Java 17 support.
+* Get the latest [OpenJDK 21](https://adoptium.net/).
+* Get the latest [Eclipse IDE](https://www.eclipse.org/downloads/) including Java 21 support.
     * You need to have the [Launch Configuration DSL (LcDsl)](https://marketplace.eclipse.org/content/launch-configuration-dsl) extension installed.
 * [VSCode](https://code.visualstudio.com/download)
     * You need to have the [Angular Essentials](https://marketplace.visualstudio.com/items?itemName=johnpapa.angular-essentials) extension installed.
-* [Node.js](https://nodejs.org/de) including npm, currently 18.x LTS.
+* [Node.js](https://nodejs.org/de) including npm, currently 20.x LTS.
     * Some people prefer to use [NVM](https://github.com/nvm-sh/nvm)
 * [GIT](https://git-scm.com/downloads)
 
 ## Environment Setup
 
-* You will want to set the `JAVA_HOME` environment variable to point to the path where you extracted the **OpenJDK 17** package to assure that the build picks up the correct Java.
+* You will want to set the `JAVA_HOME` environment variable to point to the path where you extracted the **OpenJDK 21** package to assure that the build picks up the correct Java.
 * Make sure that the `npm` command works from the command line where you will run `gradle` builds (`cmd.exe` on Windows, `bash` on Linux).
 * Install the **Angular CLI** globally for easier working by running `npm install -g @angular/cli`.
 
@@ -91,9 +91,9 @@ This makes it necessary to open a second tab in the browser and navigate to [htt
 You can build distribution packages for other platforms by installing their respective JDKs. You need to specify those JDKs as properties during the build. To simplify the process, you can create these entries in `~/.gradle/gradle.properties`:
 
 ```properties ~/.gradle/gradle.properties
-systemProp.win64jdk=/path/to/jdks/windows/jdk-17.0.1+12
-systemProp.linux64jdk=/path/to/jdks/linux/jdk-17.0.1+12
-#systemProp.mac64jdk=/path/to/jdks/mac/jdk-17.0.1+12/Contents/Home
+systemProp.win64jdk=/path/to/jdks/windows/jdk-21
+systemProp.linux64jdk=/path/to/jdks/linux/jdk-21
+#systemProp.mac64jdk=/path/to/jdks/mac/jdk-21/Contents/Home
 ```
 
 !!!info Tip
