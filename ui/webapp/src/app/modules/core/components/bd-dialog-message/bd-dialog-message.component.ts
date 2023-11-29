@@ -139,7 +139,7 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('body:keydown.Enter', ['$event'])
+  @HostListener('document:keydown.Enter', ['$event'])
   private onEnterPress(event: KeyboardEvent): void {
     // in case a content-assist is currently active, we do not want to trigger the default button;
     if (event.defaultPrevented) {

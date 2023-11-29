@@ -6,6 +6,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostListener,
   Input,
   OnChanges,
   OnDestroy,
@@ -80,9 +81,9 @@ export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewI
               (s) => {
                 this.valid = s;
                 this.cd.markForCheck();
-              }
-            )
-          )
+              },
+            ),
+          ),
         );
       });
     });
@@ -90,6 +91,24 @@ export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewI
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+  }
+
+  @HostListener('body:keydown.Enter', ['$event'])
+  protected onEnter(ev: KeyboardEvent) {
+    if (this.popup) {
+      ev.preventDefault();
+      if (this.valid) {
+        this.apply();
+      }
+    }
+  }
+
+  @HostListener('body:keydown.Escape', ['$event'])
+  protected onEscape(ev: KeyboardEvent) {
+    if (this.popup) {
+      ev.preventDefault();
+      this.popup.closeOverlay();
+    }
   }
 
   protected prepareEditor() {
@@ -107,7 +126,7 @@ export class BdCustomEditorComponent implements OnChanges, OnDestroy, AfterViewI
   protected apply() {
     this.editor = null;
     this.valueConfirmed.emit(this.currentValue);
-    this.popup.closeOverlay();
+    this.popup?.closeOverlay();
   }
 
   private findEditor(): CustomEditor {

@@ -276,6 +276,7 @@ export class BdPopupDirective implements OnDestroy {
         this.popupService.setClickPopup(null);
       }
     }
+    this.appBdPopupOpened.emit(null);
   }
 
   private checkCloseOnLeave() {

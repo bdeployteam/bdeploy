@@ -1,18 +1,11 @@
 <ng-template #editorPopup>
-  <mat-card
-    appearance="outlined"
-    class="flex flex-col gap-2.5 p-2.5 min-w-[500px]"
-  >
+  <mat-card appearance="outlined" class="flex flex-col gap-2.5 p-2.5 min-w-[500px]">
     <div class="truncate">
       <strong>Edit Value</strong>
     </div>
     <div #editorPanel *ngIf="editor" class="editorPanel"></div>
     <div class="flex gap-2.5 justify-end">
-      <app-bd-button
-        text="Cancel"
-        [collapsed]="false"
-        (click)="popup.closeOverlay()"
-      ></app-bd-button>
+      <app-bd-button text="Cancel" [collapsed]="false" (click)="popup.closeOverlay()"></app-bd-button>
       <app-bd-button
         text="Apply"
         color="primary"
