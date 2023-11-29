@@ -15,6 +15,7 @@ import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.BackendInfoResource;
@@ -167,6 +168,17 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
         ManagedServersResource msr = ResourceProvider.getResource(remote, ManagedServersResource.class, getLocalContext());
         Manifest.Key pkey = Manifest.Key.parse(config.product());
+
+        ManagedMasterDto msrv = null;
+        for (var srv : msr.getManagedServers(config.instanceGroup())) {
+            if (srv.hostName.equals(config.transferToManaged())) {
+                msrv = srv;
+            }
+        }
+        if (msrv == null) {
+            return createResultWithErrorMessage(
+                    "Managed Server " + config.transferToManaged() + " does not exist in " + config.instanceGroup());
+        }
 
         ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
                 .getProductResource(config.instanceGroup());
