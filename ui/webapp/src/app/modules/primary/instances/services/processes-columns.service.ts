@@ -57,7 +57,8 @@ export class ProcessesColumnsService {
     id: 'appName',
     name: 'Application Type',
     data: (r) =>
-      this.instances.activeNodeCfgs$.value?.applications?.find((app) => app.name === r.name)?.descriptor?.name, // this.edit.getApplicationDescriptor(r.application.name)?.name,
+      this.instances.activeNodeCfgs$.value?.applications?.find((app) => app.key.name === r.application.name)?.descriptor
+        ?.name,
     width: '200px',
     showWhen: '(min-width: 1180px)',
   };
