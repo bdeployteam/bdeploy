@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { CLIENT_NODE_NAME } from 'src/app/models/consts';
 import { OperatingSystem } from 'src/app/models/gen.dtos';
+import { AuthenticationService } from 'src/app/modules/core/services/authentication.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
 
@@ -11,8 +13,11 @@ import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/servic
   styleUrls: ['./client-detail.component.css'],
 })
 export class ClientDetailComponent implements OnInit, OnDestroy {
-  private areas = inject(NavAreasService);
+  protected areas = inject(NavAreasService);
   protected clients = inject(ClientsService);
+  protected auth = inject(AuthenticationService);
+
+  protected readonly CLIENT_NODE = CLIENT_NODE_NAME;
 
   protected app$ = new BehaviorSubject<ClientApp>(null);
 
@@ -39,7 +44,7 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
         if (app && launcher) {
           this.hasLauncher = this.clients.hasLauncher(app.client.os);
         }
-      }
+      },
     );
   }
 

@@ -1,13 +1,19 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [header]="(app$ | async)?.client.description"
-    [panel]="true"
-  >
-    <mat-icon
-      class="ml-2.5"
-      *ngIf="(app$ | async)?.client?.os"
-      [svgIcon]="(app$ | async).client.os"
-    ></mat-icon>
+  <app-bd-dialog-toolbar [header]="(app$ | async)?.client.description" [panel]="true">
+    <mat-icon class="ml-2.5" *ngIf="(app$ | async)?.client?.os" [svgIcon]="(app$ | async).client.os"></mat-icon>
+    <ng-container *ngIf="areas.instanceContext$.value === app$.value.instanceId">
+      <div class="flex-auto"></div>
+      <mat-divider [vertical]="true"></mat-divider>
+      <app-bd-button
+        text="Jump to Configuration"
+        icon="settings"
+        tooltip="below"
+        [disabled]="!(auth.isCurrentScopeWrite$ | async)"
+        (click)="
+          areas.navigateBoth(['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value], ['panels', 'instances', 'config', 'process', CLIENT_NODE, app$.value.client.id])
+        "
+      ></app-bd-button>
+    </ng-container>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <div class="flex flex-col gap-2.5" *ngIf="app$ | async as app">
@@ -19,11 +25,7 @@
         <strong>Instance:</strong>
         <div>{{ app.instanceName }}</div>
       </div>
-      <app-bd-expand-button
-        text="Usage Statistics"
-        icon="insights"
-        [expanded]="true"
-      >
+      <app-bd-expand-button text="Usage Statistics" icon="insights" [expanded]="true">
         <div class="local-graph flex">
           <app-client-usage-graph
             class="flex-auto"
@@ -53,12 +55,9 @@
       ></app-bd-button>
       <mat-divider></mat-divider>
       <div class="bd-description-text text-justify">
-        For <em>Click & Start</em> to work, you need to have the
-        <em>BDeploy Launcher</em> application installed. This is done by
-        <strong>any</strong> installer automatically. If you still don't have
-        the launcher and don't want to install the application using its
-        installer from above, you can download the standalone launcher from
-        there.
+        For <em>Click & Start</em> to work, you need to have the <em>BDeploy Launcher</em> application installed. This
+        is done by <strong>any</strong> installer automatically. If you still don't have the launcher and don't want to
+        install the application using its installer from above, you can download the standalone launcher from there.
       </div>
       <app-bd-button
         [svgIcon]="app.client.os"
