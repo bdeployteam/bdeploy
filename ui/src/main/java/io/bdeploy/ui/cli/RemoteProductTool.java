@@ -22,6 +22,7 @@ import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.ProductResource;
+import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.cli.RemoteProductTool.ProductConfig;
 import io.bdeploy.ui.dto.ProductDto;
 import io.bdeploy.ui.dto.ProductTransferDto;
@@ -33,7 +34,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     public @interface ProductConfig {
 
-        @Help("Name of the instance group or software repository.")
+        @Help("Name of the instance group.")
         @EnvironmentFallback("REMOTE_BHIVE")
         String instanceGroup();
 
@@ -46,7 +47,7 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         @Help(value = "Transfer product from central to given managed server")
         String transferToManaged();
 
-        @Help(value = "The source software repository for --copy")
+        @Help(value = "The source software repository.")
         String repository();
 
         @Help(value = "The product version to copy")
@@ -63,15 +64,19 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     @Override
     protected RenderableResult run(ProductConfig config, RemoteService remote) {
-        helpAndFailIfMissing(config.instanceGroup(), "--instanceGroup missing");
+        if (config.repository() == null && config.instanceGroup() == null) {
+            helpAndFail("--instanceGroup or --repository missing");
+        }
 
         if (config.list()) {
             return list(remote, config);
         } else if (config.copy()) {
+            helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
             helpAndFailIfMissing(config.repository(), "Missing --repository");
             helpAndFailIfMissing(config.product(), "Missing --product");
             return copy(remote, config);
         } else if (config.transferToManaged() != null) {
+            helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
             helpAndFailIfMissing(config.product(), "Missing --product");
             return transferToManaged(remote, config);
         } else if (config.details() != null) {
@@ -81,11 +86,22 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         }
     }
 
+    private ProductResource getProductRsrc(RemoteService svc, ProductConfig config) {
+        if (config.instanceGroup() != null) {
+            return ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext())
+                    .getProductResource(config.instanceGroup());
+        } else if (config.repository() != null) {
+            return ResourceProvider.getResource(svc, SoftwareRepositoryResource.class, getLocalContext())
+                    .getProductResource(config.repository());
+        }
+
+        throw new IllegalStateException("Need either --instanceGroup or --repository");
+    }
+
     private RenderableResult showDetails(RemoteService remote, ProductConfig config) {
         DataResult result = createEmptyResult();
 
-        ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
-                .getProductResource(config.instanceGroup());
+        ProductResource pr = getProductRsrc(remote, config);
 
         Manifest.Key key = Manifest.Key.parse(config.details());
 
@@ -116,14 +132,15 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     private DataTable list(RemoteService remote, ProductConfig config) {
         DataTable table = createDataTable();
-        table.setCaption("Products in " + config.instanceGroup() + " on " + remote.getUri());
+        table.setCaption("Products in " + config.instanceGroup() != null ? config.instanceGroup()
+                : config.repository() + " on " + remote.getUri());
 
         table.column("Name", 25).column("Key", 30).column("Version", 20);
         table.column(new DataTableColumn("NoOfInstanceTemplates", "# Ins.Templ.", 12));
         table.column(new DataTableColumn("NoOfApplicationTemplates", "# App.Templ.", 12));
 
-        ProductResource pr = ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
-                .getProductResource(config.instanceGroup());
+        ProductResource pr = getProductRsrc(remote, config);
+        ;
 
         for (ProductDto dto : pr.list(null)) {
             table.row().cell(dto.name).cell(dto.key.getName()).cell(dto.key.getTag()).cell(dto.instanceTemplates.size())
