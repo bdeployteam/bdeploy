@@ -9,6 +9,8 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -22,6 +24,9 @@ import io.bdeploy.gradle.extensions.ServerExtension;
  * Pushes a previously built product to a specified server.
  */
 public class BDeployPushTask extends DefaultTask {
+
+
+	private static final Logger log = LoggerFactory.getLogger(BDeployPushTask.class);
 
 	private BDeployProductTask productTask;
 	private DirectoryProperty localBHive;
@@ -68,6 +73,13 @@ public class BDeployPushTask extends DefaultTask {
 			try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
 				local.execute(new PushOperation().setRemote(svc).setHiveName(target.getInstanceGroup().get())
 						.addManifest(key.get()));
+			} catch (IllegalStateException ise) {
+				Throwable e =ise;
+				while (e.getCause() != null){
+					e = e.getCause();
+				}
+				log.error("Cannot push to target: {}", e.getMessage());
+				throw ise;
 			}
 		}
 	}

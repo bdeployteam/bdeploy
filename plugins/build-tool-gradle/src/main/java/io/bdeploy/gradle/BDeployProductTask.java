@@ -91,6 +91,8 @@ public class BDeployProductTask extends DefaultTask {
 
 		if (repositoryServer.isConfigured()) {
 			fetcher = new RemoteDependencyFetcher(repositoryServer.getRemote(), null, reporter);
+		}else {
+			throw new IllegalArgumentException("repositoryServer for ProductTask not configured");
 		}
 
 		if (prodInfoYaml == null || !prodInfoYaml.exists()) {
@@ -167,6 +169,9 @@ public class BDeployProductTask extends DefaultTask {
 			try (BHive localHive = new BHive(hive.toURI(), null, reporter)) {
 				key = ProductManifestBuilder.importFromDescriptor(prodInfoYaml.toPath(), localHive, fetcher, true);
 				System.out.println(" >> Imported " + key);
+			}catch(IllegalStateException e){
+				log.error("Versions information available for applications: {}", pvd.appInfo.keySet());
+				throw e;
 			}
 		} finally {
 			if (delete) {
