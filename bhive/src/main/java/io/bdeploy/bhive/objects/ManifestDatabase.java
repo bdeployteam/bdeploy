@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -182,7 +183,7 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
                 }
             }
             manifestCache.put(manifest.getKey(), manifest);
-            manifestListCache.invalidateAll();
+            updateListCaches(manifest.getKey(), c -> c.add(manifest.getKey()));
             scheduleNotify(manifest.getKey());
         });
     }
@@ -198,8 +199,26 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
         locked(() -> {
             PathHelper.deleteIfExistsRetry(getPathForKey(key));
             manifestCache.invalidate(key);
-            manifestListCache.invalidateAll();
+            updateListCaches(key, c -> c.remove(key));
         });
+    }
+
+    /**
+     * Allows manipulation of all list cache segments which may contain the given key.
+     */
+    private void updateListCaches(Manifest.Key key, Consumer<Set<Manifest.Key>> manipulator) {
+        Path resolved = root.resolve(key.getName()).normalize();
+
+        synchronized (manifestListCache) {
+            for (Path p : manifestListCache.asMap().keySet()) {
+                if (resolved.startsWith(p)) {
+                    Set<Manifest.Key> segment = manifestListCache.getIfPresent(p);
+                    if (segment != null) {
+                        manipulator.accept(segment);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -212,7 +231,10 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
 
     private Set<Manifest.Key> collectManifestsCached(Path r) {
         try {
-            return manifestListCache.get(r, () -> collectManifests(r));
+            synchronized (manifestListCache) {
+                // need to copy the internal list cache, as this will be updated over time.
+                return new TreeSet<>(manifestListCache.get(r, () -> collectManifests(r)));
+            }
         } catch (ExecutionException e) {
             log.warn("Cannot fetch manifest list cache", e);
             return collectManifests(r); // fallback.
@@ -307,7 +329,9 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
      */
     public void invalidateCaches() {
         this.manifestCache.invalidateAll();
-        this.manifestListCache.invalidateAll();
+        synchronized (manifestListCache) {
+            this.manifestListCache.invalidateAll();
+        }
     }
 
 }
