@@ -223,9 +223,8 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
   protected get crumbs$(): Observable<CrumbInfo[]> {
     return this.path$.pipe(
       map((segments) => {
-        if (!segments) return [];
         const acc = [];
-        const crumbs = segments.map((s) => {
+        const crumbs = (segments || []).map((s) => {
           acc.push(s);
           const path = [...acc];
           const label = typeof s !== 'string' ? `${(s as ManifestKey).name}:${(s as ManifestKey).tag}` : s;

@@ -21,7 +21,9 @@
     ></app-bd-button>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
-    <app-bd-breadcrumbs [crumbs]="crumbs$ | async"></app-bd-breadcrumbs>
+    <div class="mx-1.5">
+      <app-bd-breadcrumbs [crumbs]="crumbs$ | async"></app-bd-breadcrumbs>
+    </div>
     <app-bd-data-table
       [records]="entries$ | async"
       [columns]="columns"

@@ -46,7 +46,7 @@
         >
           <mat-tab *ngFor="let node of nodes$ | async" [label]="node.minion"> </mat-tab>
         </mat-tab-group>
-        <div class="mt-2">
+        <div class="mt-2 mx-1.5">
           <app-bd-breadcrumbs *ngIf="selectedPath" [crumbs]="selectedPath.crumbs"></app-bd-breadcrumbs>
         </div>
 

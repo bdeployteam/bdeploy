@@ -1,7 +1,6 @@
-<ul class="breadcrumbs">
-  <li class="breadcrumb" *ngFor="let crumb of crumbs; last as last; index as index" (click)="onClick(crumb, last)">
-    <span *ngIf="!isMiddle(index)" class="link">{{ crumb.label }}</span>
-    <span *ngIf="isMiddle(index)" class="link">...</span>
-    <span class="separator" *ngIf="!last">></span>
-  </li>
-</ul>
+<div class="breadcrumb">
+  <a *ngFor="let crumb of crumbs; last as last; index as index" (click)="onClick(crumb, last)">
+    <span class="truncate" *ngIf="!isMiddle(index)">{{ crumb.label }}</span>
+    <span *ngIf="isMiddle(index)">...</span>
+  </a>
+</div>
