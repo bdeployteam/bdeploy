@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Base64 } from 'js-base64';
 import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
-import { HiveEntryDto, ManifestKey, TreeEntryType } from 'src/app/models/gen.dtos';
+import { HiveEntryDto, TreeEntryType } from 'src/app/models/gen.dtos';
 import { CrumbInfo } from 'src/app/modules/core/components/bd-breadcrumbs/bd-breadcrumbs.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
@@ -15,7 +15,13 @@ import { SearchService } from 'src/app/modules/core/services/search.service';
 import { HiveService } from 'src/app/modules/primary/admin/services/hive.service';
 import { ManifestDeleteActionComponent } from './manifest-delete-action/manifest-delete-action.component';
 
-type BHivePathSegment = string | ManifestKey;
+interface PathIdName {
+  name: string;
+  tag?: string;
+  id?: string;
+}
+
+type BHivePathSegment = PathIdName;
 
 @Component({
   selector: 'app-bhive-browser',
@@ -109,8 +115,8 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
       });
     } else {
       const lastSegment = this.path$.value[this.path$.value.length - 1];
-      if (typeof lastSegment === 'string') {
-        this.hives.list(this.bhive$.value, lastSegment).subscribe((entries) => {
+      if (lastSegment?.id) {
+        this.hives.list(this.bhive$.value, lastSegment.id).subscribe((entries) => {
           this.entries$.next(entries);
         });
       } else {
@@ -136,7 +142,7 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
     if (!path?.length) {
       return null;
     }
-    const allStrings = path.map((s) => (typeof s === 'string' ? s : `|[${s.name}|${s.tag}]|`));
+    const allStrings = path.map((s) => `|[${s.name}|${s.tag ? s.tag : ''}|${s.id ? s.id : ''}]|`);
     return Base64.encode(JSON.stringify(allStrings), true);
   }
 
@@ -146,7 +152,11 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
     return allStrings.map((s) => {
       if (s.startsWith('|[') && s.endsWith(']|')) {
         const parts = s.substring(2, s.length - 2).split('|');
-        return { name: parts[0], tag: parts[1] };
+        return {
+          name: parts[0],
+          tag: parts[1]?.length ? parts[1] : undefined,
+          id: parts[2]?.length ? parts[2] : undefined,
+        };
       }
       return s;
     });
@@ -194,7 +204,7 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
     if (r.type === TreeEntryType.MANIFEST) {
       path.push({ name: r.mName, tag: r.mTag });
     } else if (r.type === TreeEntryType.TREE) {
-      path.push(r.id);
+      path.push({ name: r.name, id: r.id });
     } else {
       // limit for inline viewing of files.
       if (r.size <= 1024 * 1024 * 1024) {
@@ -227,7 +237,7 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
         const crumbs = (segments || []).map((s) => {
           acc.push(s);
           const path = [...acc];
-          const label = typeof s !== 'string' ? `${(s as ManifestKey).name}:${(s as ManifestKey).tag}` : s;
+          const label = `${s.name}${s.tag ? ':' + s.tag : ''}`;
           const onClick = () => this.navigateTo(path);
           return { label, onClick };
         });
