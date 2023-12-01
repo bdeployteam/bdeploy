@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@a
 import { Sort } from '@angular/material/sort';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Base64 } from 'js-base64';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { HiveEntryDto, ManifestKey, TreeEntryType } from 'src/app/models/gen.dtos';
+import { CrumbInfo } from 'src/app/modules/core/components/bd-breadcrumbs/bd-breadcrumbs.component';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
 import { BdDataSizeCellComponent } from 'src/app/modules/core/components/bd-data-size-cell/bd-data-size-cell.component';
 import { ACTION_CLOSE } from 'src/app/modules/core/components/bd-dialog-message/bd-dialog-message.component';
@@ -215,10 +216,32 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
     if (this.path$.value?.length) {
       const path = [...this.path$.value];
       path.pop();
-      this.router.navigate([], {
-        relativeTo: this.activatedRoute,
-        queryParams: { q: this.encodePathForUrl(path) },
-      });
+      this.navigateTo(path);
     }
+  }
+
+  protected get crumbs$(): Observable<CrumbInfo[]> {
+    return this.path$.pipe(
+      map((segments) => {
+        if (!segments) return [];
+        const acc = [];
+        const crumbs = segments.map((s) => {
+          acc.push(s);
+          const path = [...acc];
+          const label = typeof s !== 'string' ? `${(s as ManifestKey).name}:${(s as ManifestKey).tag}` : s;
+          const onClick = () => this.navigateTo(path);
+          return { label, onClick };
+        });
+        const root = { label: this.bhive$.value, onClick: () => this.navigateTo(null) };
+        return [root, ...crumbs];
+      }),
+    );
+  }
+
+  private navigateTo(path: BHivePathSegment[]) {
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: { q: this.encodePathForUrl(path) },
+    });
   }
 }

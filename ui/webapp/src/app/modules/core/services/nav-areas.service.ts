@@ -43,7 +43,7 @@ export class NavAreasService {
     this.router.events
       .pipe(
         filter((e) => e instanceof NavigationEnd),
-        map(() => this.activatedRoute)
+        map(() => this.activatedRoute),
       )
       .subscribe((route) => {
         // SOMEthing changed in the routing, some navigation happened. we need to find out which outlet changed

@@ -1,0 +1,13 @@
+.breadcrumbs {
+  display: flex;
+  margin-bottom: 1em;
+}
+
+.breadcrumb:not(:last-child) .link {
+  cursor: pointer;
+  color: cadetblue;
+}
+
+.separator {
+  margin: 0 0.3em;
+}

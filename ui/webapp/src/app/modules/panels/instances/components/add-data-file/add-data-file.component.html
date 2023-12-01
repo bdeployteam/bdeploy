@@ -1,17 +1,8 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar
-    header="Add Data File"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Data File" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" class="flex flex-col gap-1">
-      <app-bd-form-select
-        name="minion"
-        label="Target Node"
-        [(ngModel)]="tempFileMinion"
-        [values]="minions$ | async"
-        required
-      ></app-bd-form-select>
+      <div class="my-2">Target Node: <strong name="targetNode">{{ fileMinion$ | async }}</strong></div>
       <app-bd-form-input
         #tempFileInput
         name="path"
@@ -25,16 +16,14 @@
         hintText="Drop file to add initial content"
       ></app-bd-file-drop>
       <div *ngIf="tempFileContentLoading$ | async">Loading...</div>
-      <div *ngIf="tempFileError" class="bd-warning-text">
-        {{ tempFileError }}
-      </div>
+      <div *ngIf="tempFileError" class="bd-warning-text">{{ tempFileError }}</div>
       <app-bd-button
         color="primary"
         [collapsed]="false"
         text="Save"
         icon="save"
         (click)="onSave()"
-        [disabled]="form.invalid"
+        [disabled]="form.invalid || !(fileMinion$ | async)"
       ></app-bd-button>
     </form>
   </app-bd-dialog-content>

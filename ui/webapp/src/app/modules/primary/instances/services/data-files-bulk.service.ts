@@ -2,12 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { RemoteDirectory, RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
+import { RemoteDirectoryEntry } from 'src/app/models/gen.dtos';
 import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { DownloadService } from 'src/app/modules/core/services/download.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
+import { toFileList } from 'src/app/modules/panels/instances/utils/data-file-utils';
 import { GroupsService } from '../../groups/services/groups.service';
-import { DataFilesService } from './data-files.service';
+import { DataFilePath, DataFilesService, FileListEntry } from './data-files.service';
 import { InstancesService } from './instances.service';
 
 @Injectable({
@@ -22,10 +23,8 @@ export class DataFilesBulkService {
   private http = inject(HttpClient);
   private dataFilesService = inject(DataFilesService);
 
-  public selection: {
-    directory: RemoteDirectory;
-    entry: RemoteDirectoryEntry;
-  }[] = [];
+  public selection: DataFilePath[] = [];
+
   public frozen$ = new BehaviorSubject<boolean>(false);
 
   private apiPath = (g, i) => `${this.cfg.config.api}/group/${g}/instance/${i}`;
@@ -35,17 +34,21 @@ export class DataFilesBulkService {
     this.areas.primaryRoute$.subscribe(() => (this.selection = []));
   }
 
-  public deleteFiles(): Observable<any> {
-    // FIXME: issue only a single call, not multiple!
-    return of(...this.selection).pipe(mergeMap((file) => this.dataFilesService.deleteFile(file.directory, file.entry)));
+  get selectedDataFiles(): FileListEntry[] {
+    return this.selection.flatMap((dfp) => toFileList(dfp));
   }
 
-  public downloadDataFile() {
+  public deleteFiles(dataFiles: FileListEntry[]): Observable<any> {
+    // FIXME: issue only a single call, not multiple!
+    return of(...dataFiles).pipe(mergeMap((file) => this.dataFilesService.deleteFile(file.directory, file.entry)));
+  }
+
+  public downloadDataFiles(dataFiles: FileListEntry[]) {
     const path = this.apiPath(this.groups.current$.value.name, this.instances.current$.value.instanceConfiguration.id);
 
-    const minion = this.selection[0]?.directory?.minion;
+    const minion = dataFiles[0]?.directory?.minion;
     const entries: RemoteDirectoryEntry[] = [];
-    for (const sel of this.selection) {
+    for (const sel of dataFiles) {
       if (sel.directory.minion !== minion) {
         throw new Error('Cannot download files from multiple minions');
       }
