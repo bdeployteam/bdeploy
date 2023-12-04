@@ -91,6 +91,8 @@ public class BDeployProductTask extends DefaultTask {
 
 		if (repositoryServer.isConfigured()) {
 			fetcher = new RemoteDependencyFetcher(repositoryServer.getRemote(), null, reporter);
+		} else {
+			log.warn("No repository server configured. Will not be able to fetch runtime dependencies.");
 		}
 
 		if (prodInfoYaml == null || !prodInfoYaml.exists()) {
@@ -106,11 +108,11 @@ public class BDeployProductTask extends DefaultTask {
 			Path relPath = prodInfoLocation.relativize(desc.toPath());
 
 			if (!desc.isFile()) {
-				throw new IllegalArgumentException("Cannot find application descriptor at " + desc);
+				throw new IllegalArgumentException("While processing " + app.getName() + ": Cannot find application descriptor at " + desc);
 			}
 			
 			if(!desc.getName().equals("app-info.yaml")) {
-				throw new IllegalArgumentException("Application description must be named 'app-info.yaml', but is: " + desc);
+				throw new IllegalArgumentException("While processing " + app.getName() + ": Application description must be named 'app-info.yaml', but is: " + desc);
 			}
 
 			Map<OperatingSystem, String> oss = new TreeMap<>();
@@ -141,20 +143,27 @@ public class BDeployProductTask extends DefaultTask {
 
 		File pvdFile = new File(prodInfoYaml.getParentFile(), pd.versionFile);
 
-		log.info(" :: Repository Server: {}", repositoryServer.getRemote().getUri());
-		log.info(" :: Product: {}", pd.product);
-		log.info(" :: Product Version: {}", version);
-		log.info(" :: Local BHive: {}", hive);
+		if(repositoryServer.isConfigured()) {
+			log.warn(" :: Repository Server: {}", repositoryServer.getRemote().getUri());
+		}
+		log.warn(" :: Product: {}", pd.product);
+		log.warn(" :: Product Version: {}", version);
+		log.warn(" :: Local BHive: {}", hive);
+		
+		log.warn(" :: Applications:");
+		for(var app : pvd.appInfo.entrySet()) {
+			log.warn("      " + app.getKey() + " " + app.getValue().keySet());
+		}
 
 		if (dryRun) {
-			System.out.println(" >> DRY-RUN - Aborting");
+			log.warn(" >> DRY-RUN - Aborting");
 			return;
 		}
 
 		boolean delete = false;
 		try {
 			if (pvdFile.exists()) {
-				System.out.println("Using existing version descriptor " + pd.versionFile);
+				log.warn("Using existing version descriptor " + pd.versionFile);
 			} else {
 				pvdFile.getParentFile().mkdirs();
 
@@ -167,6 +176,11 @@ public class BDeployProductTask extends DefaultTask {
 			try (BHive localHive = new BHive(hive.toURI(), null, reporter)) {
 				key = ProductManifestBuilder.importFromDescriptor(prodInfoYaml.toPath(), localHive, fetcher, true);
 				System.out.println(" >> Imported " + key);
+			}
+		} catch(Exception e) {
+			log.error("Unexpected error: {}", e.toString());
+			if(log.isInfoEnabled()) {
+				log.info("Exception:", e);
 			}
 		} finally {
 			if (delete) {

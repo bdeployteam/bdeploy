@@ -58,8 +58,8 @@ public class BDeployValidationTask extends DefaultTask {
 			throw new IllegalArgumentException("product-validation.yaml is not set or does not exist: " + descriptorYaml);
 		}
 
-		log.info(" :: Repository Server: {}", sourceServer.getUri());
-		log.info(" :: Product Validation: {}", descriptorYaml);
+		log.warn(" :: Repository Server: {}", sourceServer.getUri());
+		log.warn(" :: Product Validation: {}", descriptorYaml);
 
 		ProductValidationResponseApi validate = ProductValidationHelper.validate(descriptorYaml.toPath(), sourceServer);
 		
