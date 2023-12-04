@@ -127,7 +127,7 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
         }).forEach(dto -> updates.add(dto));
 
         try (ActionHandle h = af.runMulti(Actions.UPDATE_PRODUCT_VERSION, group, instanceKeys.keySet())) {
-            // 2) validate all are using the same product (name, not version).
+            // 2) validate all are using the same product (name, not version) and that version restrictions match.
             var refProd = updates.get(0).config.config.product.getName();
 
             new ArrayList<>(updates).stream().forEach(i -> {
@@ -135,6 +135,10 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
                     updates.remove(i);
                     result.add(new OperationResult(i.config.config.id, OperationResultType.ERROR,
                             "All instances must be based on the same product."));
+                } else if (!InstanceResourceImpl.matchesProductFilterRegex(productTag, i.config.config.productFilterRegex)) {
+                    updates.remove(i);
+                    result.add(new OperationResult(i.config.config.id, OperationResultType.ERROR,
+                            "Instance product version restriction does not match selected target version."));
                 }
             });
 

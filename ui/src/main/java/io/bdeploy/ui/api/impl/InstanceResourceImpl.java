@@ -242,11 +242,11 @@ public class InstanceResourceImpl implements InstanceResource {
         String productTag = config.product.getTag();
         String productFilterRegex = config.productFilterRegex;
         return keys.stream().filter(key -> key.getName().equals(productName)).map(Key::getTag)
-                .filter(tag -> this.matchesProductFilterRegex(tag, productFilterRegex))
+                .filter(tag -> matchesProductFilterRegex(tag, productFilterRegex))
                 .anyMatch(tag -> productVersionComparator.compare(tag, productTag) > 0); // filter out older or current versions
     }
 
-    private boolean matchesProductFilterRegex(String tag, String productFilterRegex) {
+    static boolean matchesProductFilterRegex(String tag, String productFilterRegex) {
         if (productFilterRegex == null || productFilterRegex.isEmpty()) {
             return true;
         }

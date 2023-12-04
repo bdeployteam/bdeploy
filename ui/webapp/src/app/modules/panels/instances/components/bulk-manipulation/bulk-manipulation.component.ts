@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
 import { finalize, map, switchMap } from 'rxjs/operators';
-import { Actions, BulkOperationResultDto, ProductDto } from 'src/app/models/gen.dtos';
+import { Actions, BulkOperationResultDto, InstanceDto, ProductDto } from 'src/app/models/gen.dtos';
 import {
   ACTION_CANCEL,
   ACTION_OK,
@@ -56,7 +56,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
       this.isAllSameProduct = selections.every(
         (i) =>
           !!i?.instanceConfiguration?.product?.name &&
-          i.instanceConfiguration.product.name === selections[0].instanceConfiguration.product.name
+          i.instanceConfiguration.product.name === selections[0].instanceConfiguration.product.name,
       );
     });
 
@@ -71,7 +71,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
       ]).subscribe((a) => {
         const running = !a.every((e) => !e);
         this.bulk?.frozen$.next(running);
-      })
+      }),
     );
   }
 
@@ -88,7 +88,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.starting$.next(false))
+        finalize(() => this.starting$.next(false)),
       )
       .subscribe();
   }
@@ -106,7 +106,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.stopping$.next(false))
+        finalize(() => this.stopping$.next(false)),
       )
       .subscribe();
   }
@@ -118,7 +118,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
         `This will delete <strong>${this.bulk.selection$.value.length}</strong> instances. This action is irreversible. If you want to continue, confirm using <em>I UNDERSTAND</em>. Continue?`,
         'warning',
         'I UNDERSTAND',
-        null
+        null,
       )
       .subscribe((r) => {
         if (!r) {
@@ -137,7 +137,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
                 actions: [ACTION_OK],
               });
             }),
-            finalize(() => this.deleting$.next(false))
+            finalize(() => this.deleting$.next(false)),
           )
           .subscribe();
       });
@@ -156,7 +156,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
             actions: [ACTION_OK],
           });
         }),
-        finalize(() => this.installing$.next(false))
+        finalize(() => this.installing$.next(false)),
       )
       .subscribe();
   }
@@ -168,7 +168,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
         'This will activate the latest versions of each selected instance. Are you sure?',
         'warning',
         'I UNDERSTAND',
-        'Confirm using I UNDERSTAND'
+        'Confirm using I UNDERSTAND',
       )
       .subscribe((r) => {
         if (!r) return;
@@ -185,7 +185,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
                 actions: [ACTION_OK],
               });
             }),
-            finalize(() => this.activating$.next(false))
+            finalize(() => this.activating$.next(false)),
           )
           .subscribe();
       });
@@ -193,6 +193,10 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
 
   protected onFetchStates() {
     this.bulk.fetchStates();
+  }
+
+  protected countRestrictions(sel: InstanceDto[]): number {
+    return sel.filter((d) => d.instanceConfiguration.productFilterRegex?.length)?.length;
   }
 
   protected onUpdate() {
@@ -237,7 +241,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
               actions: [ACTION_OK],
             });
           }),
-          finalize(() => this.updating$.next(false))
+          finalize(() => this.updating$.next(false)),
         )
         .subscribe();
     });
