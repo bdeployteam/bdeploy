@@ -17,6 +17,7 @@ import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.cfg.ExistingPathValidator;
 import io.bdeploy.common.cfg.PathOwnershipValidator;
 import io.bdeploy.common.security.RemoteService;
+import io.bdeploy.common.util.ZipHelper;
 
 /**
  * Represents a possibly remote (might also be "remote" in the sense of another
@@ -100,17 +101,19 @@ public interface RemoteBHive extends AutoCloseable {
         switch (svc.getUri().getScheme().toLowerCase()) {
             case "file":
             case "jar":
-                // in case we're trying to go local, the BHive must exist and be initialized.
-                // we do this with the same means as the CLI to align with it.
-                Path p = Paths.get(svc.getUri());
-                if (!new ExistingPathValidator().validate(p.toString())) {
-                    throw new IllegalArgumentException("Target local BHive does not exist.");
-                }
-                if (!new ExistingPathValidator().validate(p.resolve("objects").toString())) {
-                    throw new IllegalArgumentException("Target local BHive does not seem to be an initialized BHive.");
-                }
-                if (!new PathOwnershipValidator().validate(p.toString())) {
-                    throw new IllegalArgumentException("Target local BHive is not owned by the current user.");
+                if (!ZipHelper.isZipUri(svc.getUri())) {
+                    // in case we're trying to go local, the BHive must exist and be initialized.
+                    // we do this with the same means as the CLI to align with it.
+                    Path p = Paths.get(svc.getUri());
+                    if (!new ExistingPathValidator().validate(p.toString())) {
+                        throw new IllegalArgumentException("Target local BHive does not exist.");
+                    }
+                    if (!new ExistingPathValidator().validate(p.resolve("objects").toString())) {
+                        throw new IllegalArgumentException("Target local BHive does not seem to be an initialized BHive.");
+                    }
+                    if (!new PathOwnershipValidator().validate(p.toString())) {
+                        throw new IllegalArgumentException("Target local BHive is not owned by the current user.");
+                    }
                 }
                 return new LocalBHiveAdapter(new BHive(svc.getUri(), null, reporter));
             case "https":
