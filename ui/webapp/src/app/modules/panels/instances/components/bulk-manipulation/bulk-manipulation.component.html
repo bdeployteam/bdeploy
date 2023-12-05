@@ -4,6 +4,14 @@
       >Choose the target product version to set on
       <strong>{{ (bulk.selection$ | async)?.length }}</strong> instances</span
     >
+    <ng-container *ngIf="countRestrictions(bulk.selection$ | async) as count">
+      <app-bd-notification-card [dismissable]="false" type="warning" header="Version Restriction">
+        <div>
+          <strong>{{count}}</strong> instance(s) have configured version restrictions. Selecting a version which does
+          not match the restriction will lead to failure.
+        </div>
+      </app-bd-notification-card>
+    </ng-container>
     <app-bd-form-select
       name="prodVersion"
       [(ngModel)]="selectedTarget"

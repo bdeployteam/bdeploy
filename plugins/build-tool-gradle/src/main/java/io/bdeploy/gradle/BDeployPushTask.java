@@ -9,6 +9,8 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -23,6 +25,8 @@ import io.bdeploy.gradle.extensions.ServerExtension;
  */
 public class BDeployPushTask extends DefaultTask {
 
+	private static final Logger log = LoggerFactory.getLogger(BDeployPushTask.class);
+	
 	private BDeployProductTask productTask;
 	private DirectoryProperty localBHive;
 	private Property<Key> key;
@@ -60,15 +64,25 @@ public class BDeployPushTask extends DefaultTask {
 
 		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
 				: new ActivityReporter.Null();
+		boolean failedOne = false;
 		for (ServerExtension target : ext.getServers().getAsMap().values()) {
 			RemoteService svc = target.getRemote();
 
-			System.out.println(" >> Pushing " + key.get() + " to " + target.getName());
+			log.warn(" >> Pushing {} to {}", key.get(), target.getName());
 
 			try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
 				local.execute(new PushOperation().setRemote(svc).setHiveName(target.getInstanceGroup().get())
 						.addManifest(key.get()));
+			} catch(Exception e) {
+				log.error("Cannot push {} to {}: {}", key.get(), target.getName(), e.toString());
+				if(log.isInfoEnabled()) {
+					log.info("Exception:", e);
+				}
+				failedOne = true;
 			}
+		}
+		if(failedOne) {
+			throw new RuntimeException("Could not push to all targets. Run with --info to receive more information.");
 		}
 	}
 

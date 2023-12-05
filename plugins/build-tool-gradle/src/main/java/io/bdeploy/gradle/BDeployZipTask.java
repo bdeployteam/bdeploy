@@ -13,6 +13,8 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.bdeploy.bhive.BHive;
 import io.bdeploy.bhive.model.Manifest.Key;
@@ -26,6 +28,8 @@ import jakarta.ws.rs.core.UriBuilder;
  */
 public class BDeployZipTask extends DefaultTask {
 
+	private static final Logger log = LoggerFactory.getLogger(BDeployZipTask.class);
+	
 	private BDeployProductTask productTask;
 	private DirectoryProperty localBHive;
 	private Property<Key> key;
@@ -57,13 +61,18 @@ public class BDeployZipTask extends DefaultTask {
 	 */
 	@TaskAction
 	public void perform() {
-		System.out.println(" >> Zip'ing " + key.get());
+		log.warn(" >> Zip'ing " + key.get());
 
 		ActivityReporter reporter = getProject().hasProperty("verbose") ? new ActivityReporter.Stream(System.out)
 				: new ActivityReporter.Null();
 		URI targetUri = UriBuilder.fromUri("jar:" + output.getAsFile().get().toURI()).build();
 		try (BHive local = new BHive(localBHive.getAsFile().get().toURI(), null, reporter)) {
 			local.execute(new PushOperation().setRemote(new RemoteService(targetUri)).addManifest(key.get()));
+		} catch(Exception e) {
+			log.error("Cannot create zip: {}", e.toString());
+			if(log.isInfoEnabled()) {
+				log.info("Exception:", e);
+			}
 		}
 	}
 
