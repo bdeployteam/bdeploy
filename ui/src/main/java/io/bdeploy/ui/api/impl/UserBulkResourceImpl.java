@@ -121,7 +121,6 @@ public class UserBulkResourceImpl implements UserBulkResource {
                 continue;
             }
             boolean removed = user.permissions.removeIf(perm -> Objects.equals(perm.scope, dto.scope));
-            ;
             if (!removed) {
                 result.add(new OperationResult(user.name, OperationResultType.INFO, "Skipped, no permission of given scope"));
                 continue;

@@ -1,17 +1,3 @@
-/* .breadcrumbs {
-  display: flex;
-  margin-bottom: 1em;
-}
-
-.breadcrumb:not(:last-child) .link {
-  cursor: pointer;
-  color: cadetblue;
-}
-
-.separator {
-  margin: 0 0.3em;
-} */
-
 .breadcrumb {
   display: flex;
   flex-direction: row;
@@ -44,9 +30,6 @@
    the left padding to make it look consistent with other links */
 .breadcrumb a:first-child {
   padding-left: 36px;
-}
-.breadcrumb a:first-child:before {
-  left: 14px;
 }
 .breadcrumb a:last-child {
   padding-right: 20px;

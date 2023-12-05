@@ -38,6 +38,10 @@ public class InstanceOverallStatusDto {
     public InstanceOverallStatusDto(@JsonProperty("id") String id, @JsonProperty("status") OverallStatus status,
             @JsonProperty("timestamp") long timestamp, @JsonProperty("messages") List<String> messages) {
 
+        this.id = id;
+        this.status = status;
+        this.timestamp = timestamp;
+        this.messages = messages;
     }
 
 }

@@ -141,7 +141,6 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         table.column(new DataTableColumn("NoOfApplicationTemplates", "# App.Templ.", 12));
 
         ProductResource pr = getProductRsrc(remote, config);
-        ;
 
         for (ProductDto dto : pr.list(null)) {
             table.row().cell(dto.name).cell(dto.key.getName()).cell(dto.key.getTag()).cell(dto.instanceTemplates.size())

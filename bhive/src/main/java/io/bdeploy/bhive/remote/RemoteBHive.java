@@ -104,13 +104,13 @@ public interface RemoteBHive extends AutoCloseable {
                 // we do this with the same means as the CLI to align with it.
                 Path p = Paths.get(svc.getUri());
                 if (!new ExistingPathValidator().validate(p.toString())) {
-                    throw new RuntimeException("Target local BHive does not exist.");
+                    throw new IllegalArgumentException("Target local BHive does not exist.");
                 }
                 if (!new ExistingPathValidator().validate(p.resolve("objects").toString())) {
-                    throw new RuntimeException("Target local BHive does not seem to be an initialized BHive.");
+                    throw new IllegalArgumentException("Target local BHive does not seem to be an initialized BHive.");
                 }
                 if (!new PathOwnershipValidator().validate(p.toString())) {
-                    throw new RuntimeException("Target local BHive is not owned by the current user.");
+                    throw new IllegalArgumentException("Target local BHive is not owned by the current user.");
                 }
                 return new LocalBHiveAdapter(new BHive(svc.getUri(), null, reporter));
             case "https":
