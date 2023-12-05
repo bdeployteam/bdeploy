@@ -214,7 +214,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         srv.afterStartup().thenRun(() -> r.afterStartup(false));
 
         srv.setAuditor(r.getAuditor());
-        r.setRestartManager(new JerseyAwareMinionRestartManager(srv));
+        r.setRestartManager(new JerseyAwareMinionRestartManager(srv, r));
         r.setupServerTasks(r.getMode());
 
         return registerCommonResources(srv, r, repo);
