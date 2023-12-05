@@ -133,8 +133,8 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
     private DataTable list(RemoteService remote, ProductConfig config) {
         DataTable table = createDataTable();
-        table.setCaption("Products in " + config.instanceGroup() != null ? config.instanceGroup()
-                : config.repository() + " on " + remote.getUri());
+        table.setCaption("Products in " + (config.instanceGroup() != null ? config.instanceGroup() : config.repository()) + " on "
+                + remote.getUri());
 
         table.column("Name", 25).column("Key", 30).column("Version", 20);
         table.column(new DataTableColumn("NoOfInstanceTemplates", "# Ins.Templ.", 12));
