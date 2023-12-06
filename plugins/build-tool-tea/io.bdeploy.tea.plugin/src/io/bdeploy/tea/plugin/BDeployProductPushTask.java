@@ -15,7 +15,6 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.Manifest.Key;
 import io.bdeploy.bhive.op.remote.PushOperation;
 import io.bdeploy.common.ActivityReporter;
-import io.bdeploy.common.NoThrowAutoCloseable;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.tea.plugin.server.BDeployTargetSpec;
 import jakarta.ws.rs.core.UriBuilder;
@@ -45,10 +44,8 @@ public class BDeployProductPushTask {
         try (BHive bhive = new BHive(hive.toURI(), null, reporter)) {
             // 1: optionally push
             log.info("Pushing result to " + svc.getUri() + " | " + target.instanceGroup);
-            try (NoThrowAutoCloseable proxy = reporter.proxyActivities(svc)) {
-                PushOperation pushOp = new PushOperation();
-                bhive.execute(pushOp.addManifest(product.get()).setHiveName(target.instanceGroup).setRemote(svc));
-            }
+            PushOperation pushOp = new PushOperation();
+            bhive.execute(pushOp.addManifest(product.get()).setHiveName(target.instanceGroup).setRemote(svc));
         }
     }
 
