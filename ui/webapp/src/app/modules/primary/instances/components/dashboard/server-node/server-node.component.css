@@ -10,5 +10,5 @@
 }
 
 .local-header-bg {
-  background-color: var(--bd-bg-toolbar);
+  background: linear-gradient(var(--bd-bg-toolbar-gradient), var(--bd-bg-toolbar));
 }

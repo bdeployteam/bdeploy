@@ -143,6 +143,7 @@ $mdc-typography-config: mat.define-typography-config(
 
     --bd-lighten-bg: #{if($dark, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.5))};
     --bd-breadcrumb-hover: #{if($dark, #333, #ccc)};
+    --bd-bg-toolbar-gradient: #{if($dark, #222222, #e6e6e6)};
   }
 
   .inline-code {

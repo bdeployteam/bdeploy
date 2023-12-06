@@ -1,7 +1,7 @@
 .local-header {
   margin-top: 0px;
   padding-top: 10px;
-  background-color: var(--bd-bg-toolbar);
+  background: linear-gradient(var(--bd-bg-toolbar-gradient), var(--bd-bg-toolbar));
 }
 
 .sticky-container {
