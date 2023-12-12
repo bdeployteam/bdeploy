@@ -91,9 +91,9 @@ public class SyncLdapUserGroupsJob implements Job {
 
         String cachedSchedule = context.getMergedJobDataMap().getString(SCHEDULE);
         String currentSchedule = mr.getState().ldapSyncSchedule;
-        if (!Objects.equals(cachedSchedule, currentSchedule)) {
+        if (currentSchedule != null && !Objects.equals(cachedSchedule, currentSchedule)) {
             // update schedule of self, but continue with execution
-            log.info("Cleanup schedule changed, updating to '{}'", currentSchedule);
+            log.info("Sync LDAP schedule changed, updating to '{}'", currentSchedule);
             create(mr, currentSchedule);
         }
 
