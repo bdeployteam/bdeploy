@@ -137,6 +137,10 @@ public class MetaManifest<T> {
      * @return the {@link Key} of the current metadata manifest.
      */
     public Manifest.Key write(BHiveExecution target, T meta) {
+        if (log.isTraceEnabled()) {
+            log.trace("Writing meta manifest {} from following stack:", metaName, new RuntimeException("Trace"));
+        }
+
         synchronized (target.getSynchronizationObject(getMetaName())) {
             String targetTag = "1";
             Optional<Long> id = target.execute(new ManifestMaxIdOperation().setManifestName(metaName));

@@ -211,9 +211,15 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
 
         synchronized (manifestListCache) {
             for (Path p : manifestListCache.asMap().keySet()) {
+                if (log.isTraceEnabled()) {
+                    log.trace("Path check {} vs. {}", resolved, p);
+                }
                 if (resolved.startsWith(p)) {
                     Set<Manifest.Key> segment = manifestListCache.getIfPresent(p);
                     if (segment != null) {
+                        if (log.isTraceEnabled()) {
+                            log.trace("Update cache for path {}, manipulate {}", p, key);
+                        }
                         manipulator.accept(segment);
                     }
                 }
@@ -230,14 +236,15 @@ public class ManifestDatabase extends LockableDatabase implements AutoCloseable 
     }
 
     private Set<Manifest.Key> collectManifestsCached(Path r) {
+        Path normalized = r.normalize();
         try {
             synchronized (manifestListCache) {
                 // need to copy the internal list cache, as this will be updated over time.
-                return new TreeSet<>(manifestListCache.get(r, () -> collectManifests(r)));
+                return new TreeSet<>(manifestListCache.get(normalized, () -> collectManifests(normalized)));
             }
         } catch (ExecutionException e) {
             log.warn("Cannot fetch manifest list cache", e);
-            return collectManifests(r); // fallback.
+            return collectManifests(normalized); // fallback.
         }
     }
 
