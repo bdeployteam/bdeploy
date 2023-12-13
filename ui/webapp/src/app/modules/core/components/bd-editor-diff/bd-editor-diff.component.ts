@@ -23,6 +23,7 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
     theme: this.themeService.isDarkTheme() ? 'vs-dark' : 'vs',
     language: 'plaintext',
     automaticLayout: true,
+    glyphMargin: true,
   };
 
   protected inited$ = new BehaviorSubject<boolean>(false);
@@ -36,7 +37,7 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
   }
 
   public update() {
-    this.monaco.getModifiedEditor().getModel().setValue(this.modifiedContent);
+    this.initMonaco();
   }
 
   onMonacoInit(monaco) {
@@ -59,12 +60,12 @@ export class BdEditorDiffComponent implements OnInit, OnDestroy {
       original: this.globalMonaco.editor.createModel(
         this.originalContent,
         undefined,
-        this.globalMonaco.Uri.parse(`a/${this.path}`)
+        this.globalMonaco.Uri.parse(`a/${this.path}`),
       ),
       modified: this.globalMonaco.editor.createModel(
         this.modifiedContent,
         undefined,
-        this.globalMonaco.Uri.parse(`b/${this.path}`)
+        this.globalMonaco.Uri.parse(`b/${this.path}`),
       ),
     };
     this.monaco.setModel(model);
