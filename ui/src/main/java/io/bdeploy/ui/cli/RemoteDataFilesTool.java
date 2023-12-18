@@ -191,9 +191,8 @@ public class RemoteDataFilesTool extends RemoteServiceTool<DataFilesConfig> {
     private DataResult doDelete(Map<RemoteDirectory, List<RemoteDirectoryEntry>> matchingFiles, DataFilesConfig config,
             InstanceResource ir) {
         for (var dirSnapshot : matchingFiles.entrySet()) {
-            for (var entry : dirSnapshot.getValue()) {
-                ir.deleteDataFile(config.uuid(), dirSnapshot.getKey().minion, entry);
-            }
+            List<RemoteDirectoryEntry> entries = dirSnapshot.getValue();
+            ir.deleteDataFiles(config.uuid(), dirSnapshot.getKey().minion, entries);
         }
         return createSuccess().addField("Delete files", "Successfully deleted " + countFiles(matchingFiles) + " files");
     }

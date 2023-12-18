@@ -227,7 +227,7 @@ export class DataFilesComponent implements OnInit, OnDestroy {
       .subscribe((confirm) => {
         if (confirm) {
           this.dataFilesBulkService
-            .deleteFiles(dataFiles)
+            .deleteFiles(r.minion, dataFiles)
             .pipe(finalize(() => this.load(this.instance)))
             .subscribe();
         }
