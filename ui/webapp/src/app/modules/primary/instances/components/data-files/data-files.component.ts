@@ -51,7 +51,7 @@ const colModTime: BdDataColumn<DataFilePath> = {
 const colAvatar: BdDataColumn<DataFilePath> = {
   id: 'avatar',
   name: '',
-  data: (r) => (!r.entry ? 'folder' : 'insert_drive_file'),
+  data: (r) => (!r.entry ? 'topic' : 'insert_drive_file'),
   width: '75px',
   component: BdDataIconCellComponent,
 };
