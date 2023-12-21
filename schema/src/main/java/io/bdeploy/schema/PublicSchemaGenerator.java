@@ -22,8 +22,6 @@ import io.bdeploy.interfaces.JsonSchemaAllowedTypes;
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
 import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
-import io.bdeploy.interfaces.descriptor.template.TemplateParameter;
-import io.bdeploy.interfaces.descriptor.template.TemplateVariable;
 
 public class PublicSchemaGenerator {
 
@@ -77,15 +75,8 @@ public class PublicSchemaGenerator {
         cfgBuilder.forTypesInGeneral().withTypeAttributeOverride((node, scope, context) -> {
             if (scope.getType().isInstanceOf(ParameterDescriptor.class)) {
                 var arr = node.putArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
-                exlusiveField(arr, context, "id", "uid", "template");
-                exlusiveField(arr, context, "uid", "id", "template");
-                exlusiveField(arr, context, "template", "id", "uid");
-            }
-
-            if (scope.getType().isInstanceOf(TemplateParameter.class) || scope.getType().isInstanceOf(TemplateVariable.class)) {
-                var arr = node.putArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
-                exlusiveField(arr, context, "id", "uid");
-                exlusiveField(arr, context, "uid", "id");
+                exlusiveField(arr, context, "id", "template");
+                exlusiveField(arr, context, "template", "id");
             }
 
             if (scope.getType().isInstanceOf(TemplateableVariableConfiguration.class)) {
