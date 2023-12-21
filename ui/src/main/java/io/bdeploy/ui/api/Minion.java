@@ -3,6 +3,7 @@ package io.bdeploy.ui.api;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 
 import io.bdeploy.common.audit.Auditor;
 import io.bdeploy.common.security.RemoteService;
@@ -11,6 +12,7 @@ import io.bdeploy.interfaces.configuration.SettingsConfiguration;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.plugin.PluginManager;
 import io.bdeploy.jersey.JerseySessionConfiguration;
+import io.bdeploy.ui.dto.JobDto;
 
 /**
  * Represents a node.
@@ -141,4 +143,14 @@ public interface Minion {
      * @return the web session configuration.
      */
     public JerseySessionConfiguration getSessionConfiguration();
+
+    /**
+     * @return returns the list of jobs
+     */
+    public List<JobDto> listJobs();
+
+    /**
+     * Run job immediately
+     */
+    public void runJob(JobDto jobDto);
 }

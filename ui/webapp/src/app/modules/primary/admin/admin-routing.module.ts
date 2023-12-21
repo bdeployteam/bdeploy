@@ -6,6 +6,7 @@ import { setRouteId } from '../../core/utils/routeId-generator';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { BHiveComponent } from './components/bhive/bhive.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
+import { ManualJobsComponent } from './components/manual-jobs/manual-jobs.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { NodesComponent } from './components/nodes/nodes.component';
@@ -56,6 +57,11 @@ const ADMIN_ROUTES: Route[] = [
       {
         path: 'manualcleanup',
         component: MasterCleanupComponent,
+        outlet: 'admin',
+      },
+      {
+        path: 'manualjobs',
+        component: ManualJobsComponent,
         outlet: 'admin',
       },
       { path: 'metrics', component: MetricsOverviewComponent, outlet: 'admin' },

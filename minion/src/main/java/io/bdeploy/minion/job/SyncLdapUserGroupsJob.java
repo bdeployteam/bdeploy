@@ -33,6 +33,8 @@ import io.bdeploy.minion.MinionRoot;
  */
 public class SyncLdapUserGroupsJob implements Job {
 
+    public static final JobKey JOB_KEY = new JobKey("SyncLdapUserGroupsJob", "Master");
+
     private static final Logger log = LoggerFactory.getLogger(SyncLdapUserGroupsJob.class);
 
     public static final String DEFAULT_SYNC_SCHEDULE = "0 0 0 * * ?"; // every midnight
@@ -40,8 +42,6 @@ public class SyncLdapUserGroupsJob implements Job {
     private static final String MINION = MinionRoot.class.getSimpleName();
 
     private static final String SCHEDULE = "CronSchedule";
-
-    private static final JobKey JOB_KEY = new JobKey("SyncLdapUserGroupsJob", "Master");
 
     private static final TriggerKey TRIGGER_KEY = new TriggerKey("SyncLdapUserGroupsTrigger", "Master");
 

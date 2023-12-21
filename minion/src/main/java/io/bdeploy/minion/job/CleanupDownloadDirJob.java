@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -16,6 +17,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -25,11 +27,14 @@ import org.slf4j.LoggerFactory;
 
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.common.util.PathHelper;
+import io.bdeploy.minion.MinionRoot;
 
 /**
  * A job that cleans top-level files and directories that are older than one hour.
  */
 public class CleanupDownloadDirJob implements Job {
+
+    public static final JobKey JOB_KEY = new JobKey("CleanupDownloadDirJob", "Master");
 
     private static final Logger log = LoggerFactory.getLogger(CleanupDownloadDirJob.class);
 
@@ -38,18 +43,21 @@ public class CleanupDownloadDirJob implements Job {
 
     private static final String DOWNLOAD_DIR = "downloadDir";
 
+    private static final String MINION = MinionRoot.class.getSimpleName();
+
     /**
      * Initializes the job that cleans the download directory
      *
      * @param scheduler the quartz scheduler
      * @param downloadDir the directory to clean
      */
-    public static void create(Scheduler scheduler, Path downloadDir) {
+    public static void create(Scheduler scheduler, Path downloadDir, MinionRoot minion) {
         JobBuilder jBuilder = JobBuilder.newJob(CleanupDownloadDirJob.class);
-        jBuilder.withIdentity("Downloads", "Master").withDescription("Cleanup download dir");
+        jBuilder.withIdentity(JOB_KEY).withDescription("Cleanup download dir");
         jBuilder.usingJobData(new JobDataMap(Collections.singletonMap(DOWNLOAD_DIR, downloadDir)));
+        jBuilder.usingJobData(new JobDataMap(Map.of(DOWNLOAD_DIR, downloadDir, MINION, minion)));
 
-        TriggerBuilder<Trigger> tBuilder = TriggerBuilder.newTrigger().withIdentity("Downloads", "Master");
+        TriggerBuilder<Trigger> tBuilder = TriggerBuilder.newTrigger().withIdentity("CleanupDownloadDirTrigger", "Master");
         tBuilder.withSchedule(CronScheduleBuilder.cronSchedule(DEFAULT_CLEANUP_SCHEDULE));
 
         try {
@@ -65,12 +73,17 @@ public class CleanupDownloadDirJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
+        if (mr == null) {
+            throw new IllegalStateException("No minion root set");
+        }
         Path downloadDir = (Path) context.getMergedJobDataMap().get(DOWNLOAD_DIR);
         try (Stream<Path> paths = Files.list(downloadDir)) {
             paths.forEach(CleanupDownloadDirJob::checkAndDelete);
         } catch (IOException ioe) {
             log.error("Failed to cleanup download dir", ioe);
         }
+        mr.modifyState(s -> s.cleanupDownloadsDirLastRun = System.currentTimeMillis());
     }
 
     /**

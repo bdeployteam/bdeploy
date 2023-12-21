@@ -14,12 +14,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -29,9 +32,12 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.quartz.impl.DirectSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.simpl.RAMJobStore;
 import org.quartz.simpl.SimpleThreadPool;
 import org.slf4j.Logger;
@@ -93,6 +99,7 @@ import io.bdeploy.pcu.ProcessController;
 import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
+import io.bdeploy.ui.dto.JobDto;
 import jakarta.ws.rs.WebApplicationException;
 import net.jsign.AuthenticodeSigner;
 import net.jsign.pe.PEFile;
@@ -457,6 +464,59 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     }
 
     @Override
+    public List<JobDto> listJobs() {
+        try {
+            Set<JobKey> currentJobs = scheduler.getCurrentlyExecutingJobs().stream().map(j -> j.getJobDetail().getKey())
+                    .collect(Collectors.toSet());
+            List<JobDto> result = new ArrayList<>();
+            for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.anyGroup())) {
+                JobDto dto = new JobDto();
+                dto.name = jobKey.getName();
+                dto.group = jobKey.getGroup();
+                dto.isRunning = currentJobs.contains(jobKey);
+                Optional.ofNullable(scheduler.getTriggersOfJob(jobKey)).map(List::getLast).map(Trigger::getNextFireTime)
+                        .ifPresent(nextFireTime -> dto.nextRunTime = nextFireTime.getTime());
+                getLastRunTime(jobKey).ifPresent(time -> dto.lastRunTime = time);
+                result.add(dto);
+            }
+            return result;
+        } catch (SchedulerException e) {
+            log.warn("Failed to list jobs");
+            if (log.isTraceEnabled()) {
+                log.trace("SchedulerException", e);
+            }
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private Optional<Long> getLastRunTime(JobKey jobKey) {
+        if (jobKey.equals(SyncLdapUserGroupsJob.JOB_KEY)) {
+            return Optional.ofNullable(getState().ldapSyncLastRun);
+        } else if (jobKey.equals(CheckLatestGitHubReleaseJob.JOB_KEY)) {
+            return Optional.ofNullable(getState().checkLatestGitHubReleaseLastRun);
+        } else if (jobKey.equals(MasterCleanupJob.JOB_KEY)) {
+            return Optional.ofNullable(getState().cleanupLastRun);
+        } else if (jobKey.equals(CleanupDownloadDirJob.JOB_KEY)) {
+            return Optional.ofNullable(getState().cleanupDownloadsDirLastRun);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public void runJob(JobDto jobDto) {
+        try {
+            JobKey jobKey = new JobKey(jobDto.name, jobDto.group);
+            scheduler.triggerJob(jobKey);
+        } catch (SchedulerException e) {
+            log.warn("Failed to trigger job {} immediately", jobDto.name);
+            if (log.isTraceEnabled()) {
+                log.trace("SchedulerException", e);
+            }
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
     public NodeManager getNodeManager() {
         return nodeManager;
     }
@@ -494,7 +554,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         if (minionMode != MinionMode.NODE) {
             MasterCleanupJob.create(this, getState().cleanupSchedule);
         }
-        CleanupDownloadDirJob.create(scheduler, downloadDir);
+        CleanupDownloadDirJob.create(scheduler, downloadDir, this);
 
         if (minionMode == MinionMode.STANDALONE) {
             CheckLatestGitHubReleaseJob.create(this);

@@ -16,6 +16,7 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { BHiveComponent } from './components/bhive/bhive.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
+import { ManualJobsComponent } from './components/manual-jobs/manual-jobs.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
 import { MetricsOverviewComponent } from './components/metrics-overview/metrics-overview.component';
 import { NodesComponent } from './components/nodes/nodes.component';
@@ -42,6 +43,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     LogFilesBrowserComponent,
     UpdateBrowserComponent,
     MasterCleanupComponent,
+    ManualJobsComponent,
     MetricsOverviewComponent,
     AdminShellComponent,
     SettingsGeneralComponent,

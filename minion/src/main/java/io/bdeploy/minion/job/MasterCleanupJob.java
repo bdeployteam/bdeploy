@@ -45,6 +45,8 @@ import io.bdeploy.ui.cleanup.CleanupHelper;
  */
 public class MasterCleanupJob implements Job {
 
+    public static final JobKey JOB_KEY = new JobKey("Cleanup", "Master");
+
     private static final Logger log = LoggerFactory.getLogger(MasterCleanupJob.class);
 
     /** Default schedule for cleanup job - once a day at 2:00am. */
@@ -65,7 +67,7 @@ public class MasterCleanupJob implements Job {
         }
 
         JobBuilder builder = JobBuilder.newJob(MasterCleanupJob.class);
-        builder.withIdentity("Cleanup", "Master").withDescription("Master Cleanup Job");
+        builder.withIdentity(JOB_KEY).withDescription("Master Cleanup Job");
         builder.usingJobData(new JobDataMap(Collections.singletonMap(DATA_ROOT, minion)));
 
         JobDetail job = builder.build();

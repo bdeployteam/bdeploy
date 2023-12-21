@@ -87,6 +87,16 @@ public class MinionState {
     public long ldapSyncLastRun;
 
     /**
+     * Timestamp of last successful cleanup downloads dir execution on this minion.
+     */
+    public long cleanupDownloadsDirLastRun;
+
+    /**
+     * Timestamp of last successful execution of Check Latest GitHub Release Job on this minion.
+     */
+    public long checkLatestGitHubReleaseLastRun;
+
+    /**
      * The last minion version which was successfully migrated to.
      */
     public String fullyMigratedVersion;

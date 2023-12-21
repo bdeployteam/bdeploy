@@ -46,6 +46,7 @@ public class UiResources {
 
         server.register(AuthResourceImpl.class);
         server.register(HiveResourceImpl.class);
+        server.register(JobResourceImpl.class);
         server.register(BackendInfoResourceImpl.class);
         server.register(NodeManagementResourceImpl.class);
 

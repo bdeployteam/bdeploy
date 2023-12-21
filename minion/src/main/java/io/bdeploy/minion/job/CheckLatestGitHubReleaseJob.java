@@ -34,6 +34,8 @@ import jakarta.ws.rs.core.MediaType;
  */
 public class CheckLatestGitHubReleaseJob implements Job {
 
+    public static final JobKey JOB_KEY = new JobKey("CheckLatestGitHubReleaseJob", "Master");
+
     private static final Logger log = LoggerFactory.getLogger(CheckLatestGitHubReleaseJob.class);
 
     private static final String DEFAULT_CHECK_SCHEDULE = "0 0 */6 * * ?";
@@ -44,13 +46,11 @@ public class CheckLatestGitHubReleaseJob implements Job {
         try {
             Scheduler scheduler = minion.getScheduler();
 
-            JobKey jobKey = new JobKey("GitHubRelease", "Master");
-
-            JobDetail job = JobBuilder.newJob(CheckLatestGitHubReleaseJob.class).withIdentity(jobKey)
+            JobDetail job = JobBuilder.newJob(CheckLatestGitHubReleaseJob.class).withIdentity(JOB_KEY)
                     .withDescription("Check Latest GitHub Release Job")
                     .usingJobData(new JobDataMap(Collections.singletonMap(MINION, minion))).build();
 
-            Trigger trigger = TriggerBuilder.newTrigger().withIdentity("GitHubChecker", "Master")
+            Trigger trigger = TriggerBuilder.newTrigger().withIdentity("CheckLatestGitHubReleaseTrigger", "Master")
                     .withSchedule(CronScheduleBuilder.cronSchedule(DEFAULT_CHECK_SCHEDULE)).build();
 
             Date nextRun = scheduler.scheduleJob(job, trigger);
@@ -59,7 +59,7 @@ public class CheckLatestGitHubReleaseJob implements Job {
                     FormatHelper.format(nextRun));
 
             // trigger job immediately
-            scheduler.triggerJob(jobKey);
+            scheduler.triggerJob(JOB_KEY);
         } catch (SchedulerException e) {
             throw new IllegalStateException("Cannot schedule job", e);
         }
@@ -69,13 +69,16 @@ public class CheckLatestGitHubReleaseJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         log.info("GitHub check latest release job started");
+        MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
+        if (mr == null) {
+            throw new IllegalStateException("No minion root set");
+        }
 
         try (Client client = ClientBuilder.newClient()) {
             LatestGitHubReleaseDto resp = client.target("https://api.github.com/repos/bdeployteam/bdeploy/releases/latest")
                     .request(MediaType.APPLICATION_JSON).get(LatestGitHubReleaseDto.class);
             String v = resp.tagName.startsWith("v") ? resp.tagName.substring(1) : resp.tagName;
             Version latestRelease = VersionHelper.parse(v);
-            MinionRoot mr = (MinionRoot) context.getMergedJobDataMap().get(MINION);
             mr.setLatestGitHubReleaseVersion(latestRelease);
             log.info("Latest GitHub Release Version {}", latestRelease);
         } catch (Exception e) {
@@ -84,6 +87,7 @@ public class CheckLatestGitHubReleaseJob implements Job {
                 log.debug("Error", e);
             }
         }
+        mr.modifyState(s -> s.checkLatestGitHubReleaseLastRun = System.currentTimeMillis());
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
