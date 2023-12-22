@@ -7,9 +7,13 @@ instanceVariables:
     description: Inline
   - template: shared.vars
 
+instanceVariableDefaults:
+  - id: xxx
+    value: "fixed"
+
 groups:
   - name: Primary
     description: The primary group
 
     applications:
-      - application: test
+      - application: test-app

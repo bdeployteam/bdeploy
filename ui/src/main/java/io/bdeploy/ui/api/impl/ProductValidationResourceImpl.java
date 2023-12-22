@@ -26,6 +26,8 @@ import io.bdeploy.common.util.PathHelper;
 import io.bdeploy.common.util.TemplateHelper;
 import io.bdeploy.common.util.ZipHelper;
 import io.bdeploy.interfaces.configuration.TemplateableVariableConfiguration;
+import io.bdeploy.interfaces.configuration.TemplateableVariableDefaultConfiguration;
+import io.bdeploy.interfaces.configuration.dcu.LinkedValueConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedApplicationTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.FlattenedInstanceTemplateConfiguration;
 import io.bdeploy.interfaces.configuration.template.TrackingTemplateOverrideResolver;
@@ -121,12 +123,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
         // validate on instanceVariable values, application names and application startParameters
         TrackingTemplateOverrideResolver res = new TrackingTemplateOverrideResolver(Collections.emptyList());
         for (var v : t.instanceVariables) {
-            visitSingleInstanceVariable(v, desc, res);
-        }
-        for (var v : t.instanceVariableDefaults) {
-            if (v.value != null) {
-                TemplateHelper.process(v.value.getPreRenderable(), res, res::canResolve);
-            }
+            visitSingleInstanceVariable(v, desc, res, t.instanceVariableDefaults);
         }
 
         for (var group : t.groups) {
@@ -159,12 +156,23 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
     }
 
     private List<ProductValidationIssueApi> visitSingleInstanceVariable(TemplateableVariableConfiguration tvc,
-            ProductValidationConfigDescriptor desc, TrackingTemplateOverrideResolver res) {
+            ProductValidationConfigDescriptor desc, TrackingTemplateOverrideResolver res,
+            List<TemplateableVariableDefaultConfiguration> defaults) {
         List<ProductValidationIssueApi> result = new ArrayList<>();
 
-        if (tvc.value != null) {
-            TemplateHelper.process(tvc.value.getPreRenderable(), res, res::canResolve);
-        } else if (tvc.template != null && !tvc.template.isBlank()) {
+        if (tvc.template == null || tvc.template.isBlank()) {
+            // it is not a template - check if there is an override in the template directly.
+            LinkedValueConfiguration val = tvc.value;
+            var override = defaults.stream().filter(d -> d.id.equals(tvc.id)).findAny();
+            if (override.isPresent()) {
+                val = override.get().value;
+            }
+
+            // if either value or override is set, collect variables from there.
+            if (val != null) {
+                TemplateHelper.process(val.getPreRenderable(), res, res::canResolve);
+            }
+        } else {
             // find the template and validate each variable in there recursively.
             var tpl = desc.instanceVariableTemplates.stream().filter(t -> t.id.equals(tvc.template)).findFirst();
             if (!tpl.isPresent()) {
@@ -172,7 +180,7 @@ public class ProductValidationResourceImpl implements ProductValidationResource 
                         "Cannot find instance variable template with ID " + tvc.template));
             } else {
                 for (var tplv : tpl.get().instanceVariables) {
-                    result.addAll(visitSingleInstanceVariable(tplv, desc, res));
+                    result.addAll(visitSingleInstanceVariable(tplv, desc, res, defaults));
                 }
             }
         }
