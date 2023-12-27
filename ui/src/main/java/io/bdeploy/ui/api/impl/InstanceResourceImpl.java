@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -1043,15 +1044,30 @@ public class InstanceResourceImpl implements InstanceResource {
     }
 
     @Override
-    public void deleteDataFile(String instanceId, String minion, RemoteDirectoryEntry entry) {
-        InstanceManifest im = readInstance(instanceId, entry.tag);
-        if (im == null) {
-            throw new WebApplicationException("Cannot load " + instanceId + ":" + entry.tag, Status.NOT_FOUND);
+    public void deleteDataFiles(String instanceId, String minion, List<RemoteDirectoryEntry> entries) {
+        Set<String> tags = entries.stream().map(e -> e.tag).collect(Collectors.toSet());
+        if (tags.size() != 1) {
+            throw new WebApplicationException("Data file tag is not consistent", Status.BAD_REQUEST);
         }
 
+        String tag = tags.iterator().next();
+        InstanceManifest im = readInstance(instanceId, tag);
+        if (im == null) {
+            throw new WebApplicationException("Cannot load " + instanceId + ":" + tag, Status.NOT_FOUND);
+        }
         RemoteService svc = mp.getControllingMaster(hive, im.getManifest());
         MasterRootResource root = ResourceProvider.getVersionedResource(svc, MasterRootResource.class, context);
-        root.getNamedMaster(group).deleteDataEntry(minion, entry);
+
+        for (RemoteDirectoryEntry entry : entries) {
+            try {
+                root.getNamedMaster(group).deleteDataEntry(minion, entry);
+            } catch (Exception e) {
+                log.error("Failed to delete data file {}", entry.path, e);
+                if (log.isTraceEnabled()) {
+                    log.trace("Exception", e);
+                }
+            }
+        }
     }
 
     @Override

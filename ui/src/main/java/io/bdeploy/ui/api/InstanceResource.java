@@ -22,8 +22,8 @@ import io.bdeploy.interfaces.manifest.state.InstanceStateRecord;
 import io.bdeploy.interfaces.manifest.statistics.ClientUsageData;
 import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.minion.MinionStatusDto;
-import io.bdeploy.jersey.Scope;
 import io.bdeploy.jersey.JerseyAuthenticationProvider.Unsecured;
+import io.bdeploy.jersey.Scope;
 import io.bdeploy.ui.dto.HistoryFilterDto;
 import io.bdeploy.ui.dto.HistoryResultDto;
 import io.bdeploy.ui.dto.InstanceDto;
@@ -127,8 +127,7 @@ public interface InstanceResource {
     @POST
     @Path("/{instance}/validate")
     @RequiredPermission(permission = Permission.WRITE)
-    public List<ApplicationValidationDto> validate(@Scope @PathParam("instance") String instanceId,
-            InstanceUpdateDto state);
+    public List<ApplicationValidationDto> validate(@Scope @PathParam("instance") String instanceId, InstanceUpdateDto state);
 
     @GET
     @Path("/{instance}/state")
@@ -191,8 +190,8 @@ public interface InstanceResource {
     @GET
     @Path("/{instance}/output/{tag}/{app}")
     @RequiredPermission(permission = Permission.READ)
-    public RemoteDirectory getOutputEntry(@Scope @PathParam("instance") String instanceId,
-            @Scope @PathParam("tag") String tag, @PathParam("app") String app);
+    public RemoteDirectory getOutputEntry(@Scope @PathParam("instance") String instanceId, @Scope @PathParam("tag") String tag,
+            @PathParam("app") String app);
 
     @POST
     @Path("/{instance}/content/{minion}")
@@ -204,8 +203,8 @@ public interface InstanceResource {
     @POST
     @Path("/{instance}/request/{minion}")
     @RequiredPermission(permission = Permission.READ)
-    public String getContentStreamRequest(@Scope @PathParam("instance") String instanceId,
-            @PathParam("minion") String minion, RemoteDirectoryEntry entry);
+    public String getContentStreamRequest(@Scope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
+            RemoteDirectoryEntry entry);
 
     @POST
     @Path("/{instance}/requestMultiZip/{minion}")
@@ -222,8 +221,8 @@ public interface InstanceResource {
     @POST
     @Path("/{instance}/delete/{minion}")
     @RequiredPermission(permission = Permission.WRITE)
-    public void deleteDataFile(@Scope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
-            RemoteDirectoryEntry entry);
+    public void deleteDataFiles(@Scope @PathParam("instance") String instanceId, @PathParam("minion") String minion,
+            List<RemoteDirectoryEntry> entries);
 
     @GET
     @Unsecured
@@ -235,8 +234,7 @@ public interface InstanceResource {
     @Unsecured
     @Path("/{instance}/streamMultiZip/{token}")
     @RequiredPermission(permission = Permission.READ)
-    public Response getContentMultiZipStream(@Scope @PathParam("instance") String instanceId,
-            @PathParam("token") String token);
+    public Response getContentMultiZipStream(@Scope @PathParam("instance") String instanceId, @PathParam("token") String token);
 
     @POST
     @Path("/{instance}/check-ports/{minion}")

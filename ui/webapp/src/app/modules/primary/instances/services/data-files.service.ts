@@ -53,18 +53,6 @@ export class DataFilesService {
       .subscribe((d) => this.directories$.next(d));
   }
 
-  public deleteFile(rd: RemoteDirectory, rde: RemoteDirectoryEntry): Observable<any> {
-    return this.http
-      .post(
-        `${this.apiPath(
-          this.groups.current$.value.name,
-          this.instances.current$.value.instanceConfiguration.id,
-        )}/delete/${rd.minion}`,
-        rde,
-      )
-      .pipe(measure('Delete Instance Data File'));
-  }
-
   public updateFile(rd: RemoteDirectory, file: FileStatusDto): Observable<any> {
     return this.http
       .post(

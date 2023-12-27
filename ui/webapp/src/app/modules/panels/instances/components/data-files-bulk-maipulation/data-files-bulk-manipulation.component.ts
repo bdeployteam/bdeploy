@@ -35,9 +35,10 @@ export class DataFilesBulkManipulationComponent {
           return;
         }
 
+        const minion = this.dataFilesBulkService.selectedDataFiles[0].directory.minion;
         this.deleting$.next(true);
         this.dataFilesBulkService
-          .deleteFiles(this.dataFilesBulkService.selectedDataFiles)
+          .deleteFiles(minion, this.dataFilesBulkService.selectedDataFiles)
           .pipe(finalize(() => this.deleting$.next(false)))
           .subscribe(() => {
             this.dataFilesService.load();
