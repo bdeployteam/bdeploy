@@ -194,15 +194,15 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       this.updatePreview$
         .pipe(
           skipWhile((x) => !x),
-          debounceTime(500)
+          debounceTime(500),
         )
-        .subscribe(() => this.preview.update())
+        .subscribe(() => this.preview.update()),
     );
 
     this.subscription.add(
       this.bop.observe('(max-width: 800px)').subscribe((bs) => {
         this.narrow$.next(bs.matches);
-      })
+      }),
     );
 
     this.subscription.add(
@@ -216,10 +216,10 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         }
 
         this.system = s.find(
-          (x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag
+          (x) => x.key.name === i.config.config.system.name && x.key.tag === i.config.config.system.tag,
         )?.config;
         this.completions = this.buildCompletions();
-      })
+      }),
     );
 
     this.subscription.add(this.searchService.register(this));
@@ -231,7 +231,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       this.instance,
       this.system,
       this.process,
-      this.instances.stateApplications$.value
+      this.instances.stateApplications$.value,
     );
   }
 
@@ -281,7 +281,6 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       // create the new parameter.
       p.value = {
         id: p.descriptor.id,
-        uid: p.descriptor.id, // compat
         value: initialValue,
         pinned: false,
         preRendered: [],
@@ -305,13 +304,13 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         paramList.splice(
           paramList.findIndex((x) => x.id === nextDesc.id),
           0,
-          p.value
+          p.value,
         );
       }
     } else {
       paramList.splice(
         paramList.findIndex((x) => x.id === p.value.id),
-        1
+        1,
       );
 
       if (g.isCustom) {
@@ -341,7 +340,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
 
   protected getAllValueIdLabels() {
     return this.getAllValueIds().map(
-      (u) => this.edit.application$.value.descriptor.startCommand.parameters.find((x) => x.id === u)?.name || u
+      (u) => this.edit.application$.value.descriptor.startCommand.parameters.find((x) => x.id === u)?.name || u,
     );
   }
 
@@ -423,7 +422,6 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       descriptor: null,
       value: {
         id: this.customTemp.id,
-        uid: this.customTemp.id, // compat
         value: createLinkedValue(this.customTemp.value),
         pinned: false,
         preRendered: [],
@@ -438,7 +436,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
       this.edit.process$.value.start.parameters.unshift(param.value);
     } else {
       const predecessorIndex = this.edit.process$.value.start.parameters.findIndex(
-        (p) => p.id === this.customTemp.predecessor
+        (p) => p.id === this.customTemp.predecessor,
       );
       if (predecessorIndex === this.edit.process$.value.start.parameters.length - 1) {
         // last parameter
@@ -525,7 +523,7 @@ export class ConfigProcessParamGroupComponent implements OnInit, OnDestroy, BdSe
         (p) =>
           p.descriptor?.mandatory &&
           !p.value?.value &&
-          this.edit.meetsConditionOnGiven(p.descriptor, this.app.descriptor.startCommand, this.process)
+          this.edit.meetsConditionOnGiven(p.descriptor, this.app.descriptor.startCommand, this.process),
       )?.length > 0
     );
   }

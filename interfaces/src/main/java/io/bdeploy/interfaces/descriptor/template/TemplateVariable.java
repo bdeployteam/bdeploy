@@ -3,7 +3,6 @@ package io.bdeploy.interfaces.descriptor.template;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.JsonSchemaAllowedTypes;
@@ -13,16 +12,6 @@ public class TemplateVariable {
     @JsonAlias("uid")
     @JsonPropertyDescription("The unique ID of the variable. Variables with matching ID are queried from the user only once when applying a template.")
     public String id;
-
-    /**
-     * @deprecated Compat with 4.x
-     */
-    @Deprecated(forRemoval = true)
-    @JsonProperty("uid")
-    @JsonPropertyDescription("DEPRECATED: Use 'id' instead")
-    public String getUid() {
-        return id;
-    }
 
     @JsonPropertyDescription("A short human readable name of the variable.")
     public String name;

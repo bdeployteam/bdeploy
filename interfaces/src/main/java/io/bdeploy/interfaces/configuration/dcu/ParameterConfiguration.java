@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor;
 import io.bdeploy.interfaces.descriptor.application.ParameterDescriptor.ParameterType;
@@ -26,15 +25,6 @@ public class ParameterConfiguration {
      */
     @JsonAlias("uid")
     public String id;
-
-    /**
-     * @deprecated Compat with 4.x
-     */
-    @Deprecated(forRemoval = true)
-    @JsonProperty("uid")
-    public String getUid() {
-        return id;
-    }
 
     /**
      * Whether this parameter is pinned. This information is used by the web UI to

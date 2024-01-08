@@ -1,7 +1,6 @@
 package io.bdeploy.interfaces.directory;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 
@@ -37,15 +36,6 @@ public class RemoteDirectoryEntry {
      */
     @JsonAlias("uuid")
     public String id;
-
-    /**
-     * @deprecated Compat with 4.x
-     */
-    @Deprecated(forRemoval = true)
-    @JsonProperty("uuid")
-    public String getUuid() {
-        return id;
-    }
 
     /**
      * The instance tag this entry belongs to

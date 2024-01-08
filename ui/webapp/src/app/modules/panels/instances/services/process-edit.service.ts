@@ -139,7 +139,6 @@ export class ProcessEditService {
     this.groups.newId().subscribe((id) => {
       appConfig.application.tag = this.product$.value.key.tag;
       appConfig.id = id;
-      appConfig.uid = id; // compat
 
       // no need to update mandatory (etc.) parameters here. the normal validation
       // will trigger according errors which need to be manually fixed by the user.
@@ -205,7 +204,6 @@ export class ProcessEditService {
 
     const process: ApplicationConfiguration = {
       id: null, // calculated later
-      uid: null, // compat
       application: application.key,
       name: templateProcessName
         ? performTemplateVariableSubst(templateProcessName, variableValues, status)
@@ -254,7 +252,6 @@ export class ProcessEditService {
     return this.groups.newId().pipe(
       tap((id) => {
         process.id = id;
-        process.uid = id; // compat
         node.nodeConfiguration.applications.push(process);
 
         const reqGrp = template?.preferredProcessControlGroup;
@@ -381,7 +378,6 @@ export class ProcessEditService {
 
         return {
           id: p.id,
-          uid: p.id, // compat
           value: val,
           pinned: false,
           preRendered: this.preRenderParameter(p, val),

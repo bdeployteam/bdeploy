@@ -69,7 +69,11 @@ export type EditFactory = (description: string, base: GlobalEditState, state: Gl
 export class InstanceEdit implements Edit {
   private state: GlobalEditState;
 
-  constructor(public description: string, base: GlobalEditState, current: GlobalEditState) {
+  constructor(
+    public description: string,
+    base: GlobalEditState,
+    current: GlobalEditState,
+  ) {
     // clone current state so nobody outside can modify what we stored.
     this.state = cloneDeep(current);
   }
@@ -93,7 +97,7 @@ export class InstanceApplicationMoveEdit implements Edit {
     private previousIndex: number,
     private currentIndex: number,
     private source: string,
-    private target: string
+    private target: string,
   ) {}
 
   public apply(current: GlobalEditState): GlobalEditState {
@@ -223,7 +227,7 @@ export class InstanceEditService {
     previous: number,
     current: number,
     source: string,
-    target: string
+    target: string,
   ): EditFactory {
     return (desc: string) => {
       return new InstanceApplicationMoveEdit(desc, node, previous, current, source, target);
@@ -296,12 +300,12 @@ export class InstanceEditService {
         minions: this.http.get<{ [key: string]: MinionDto }>(
           `${this.apiPath(this.groups.current$.value.name)}/${inst.instanceConfiguration.id}/${
             inst.instance.tag
-          }/minionConfiguration`
+          }/minionConfiguration`,
         ),
       })
         .pipe(
           finalize(() => this.loading$.next(false)),
-          measure('Load Node Configurations for Edit')
+          measure('Load Node Configurations for Edit'),
         )
         .subscribe(({ nodes, minions }) => {
           this.baseApplications$.next(nodes.applications);
@@ -343,7 +347,7 @@ export class InstanceEditService {
                 this.serverSupportsVariables$.next(
                   n.version.major === 0 || // dev version
                     n.version.major > 4 || // 5.0+
-                    (n.version.major === 4 && n.version.minor >= 6) // 4.6+
+                    (n.version.major === 4 && n.version.minor >= 6), // 4.6+
                 );
               }
             }
@@ -411,7 +415,7 @@ export class InstanceEditService {
       .pipe(
         finalize(() => this.saving$.next(false)),
         measure('Save Instance'),
-        tap(() => this.reset()) // success :) lets reset.
+        tap(() => this.reset()), // success :) lets reset.
       );
   }
 
@@ -469,7 +473,6 @@ export class InstanceEditService {
         product: instance.product,
         purpose: instance.purpose,
         id: instance.id,
-        uuid: instance.id, // compat
         applications: [],
         controlGroups: [cloneDeep(DEF_CONTROL_GROUP)],
         variables: {},
@@ -562,11 +565,11 @@ export class InstanceEditService {
     this.http
       .post<ApplicationValidationDto[]>(
         `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.id}/validate`,
-        upd
+        upd,
       )
       .pipe(
         finalize(() => this.validating$.next(false)),
-        measure('Validate Instance Configuration')
+        measure('Validate Instance Configuration'),
       )
       .subscribe((u) => this.issues$.next(u?.length ? u : null));
   }
@@ -583,13 +586,13 @@ export class InstanceEditService {
         `${this.apiPath(this.groups.current$.value.name)}/${this.state$.value?.config.config.id}/updateProductVersion/${
           target.key.tag
         }`,
-        upd
+        upd,
       ),
       apps: this.products.loadApplications(target),
     })
       .pipe(
         finalize(() => this.validating$.next(false)),
-        measure('Update Product Version')
+        measure('Update Product Version'),
       )
       .subscribe(({ update, apps }) => {
         this.stateApplications$.next(apps);
@@ -618,7 +621,7 @@ export class InstanceEditService {
       : !!products.find(
           (p) =>
             p.key.name === this.state$.value.config.config.product.name &&
-            p.key.tag === this.state$.value.config.config.product.tag
+            p.key.tag === this.state$.value.config.config.product.tag,
         );
   }
 
@@ -627,7 +630,7 @@ export class InstanceEditService {
       return null;
     }
     return getNodeOfApplication(this.state$.value?.config?.nodeDtos, id)?.nodeConfiguration.applications.find(
-      (a) => a.id === id
+      (a) => a.id === id,
     );
   }
 
