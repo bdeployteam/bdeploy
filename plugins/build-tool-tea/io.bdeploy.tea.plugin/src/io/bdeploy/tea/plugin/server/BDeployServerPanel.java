@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -79,6 +80,10 @@ public class BDeployServerPanel extends Composite {
 
         tv.getControl().setEnabled(enabled);
         tb.setEnabled(enabled);
+
+        if (!enabled) {
+            tv.setSelection(new StructuredSelection());
+        }
     }
 
     private void createPanel() {
@@ -180,9 +185,13 @@ public class BDeployServerPanel extends Composite {
 
             @Override
             public void selectionChanged(SelectionChangedEvent event) {
-                Object element = event.getStructuredSelection().getFirstElement();
-                if (element instanceof BDeployTargetSpec) {
-                    listener.selected((BDeployTargetSpec) element);
+                if (event.getStructuredSelection().isEmpty()) {
+                    listener.selected(null);
+                } else {
+                    Object element = event.getStructuredSelection().getFirstElement();
+                    if (element instanceof BDeployTargetSpec) {
+                        listener.selected((BDeployTargetSpec) element);
+                    }
                 }
             }
         });
