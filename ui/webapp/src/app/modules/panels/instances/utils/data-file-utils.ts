@@ -43,14 +43,24 @@ export function constructDataFilePaths(
     directory: undefined,
     entry: undefined,
     children: [],
+    lastModified: undefined,
+    size: undefined,
   };
   root.crumbs.push({ label: minion, onClick: () => selectPath(root) });
   for (const e of entries) {
     const paths = e.entry.path.replace('\\', '/').split('/');
     addNode(minion, root, e, paths, selectPath);
   }
+  calculateSizeAndLastModifiedDate(root);
   sortDataFiles(root);
   return root;
+}
+
+function calculateSizeAndLastModifiedDate(node: DataFilePath) {
+  if (node.entry) return; // for file lastModified and size are already set
+  node.children.forEach((child) => calculateSizeAndLastModifiedDate(child));
+  node.lastModified = Math.max(...node.children.map((child) => child.lastModified));
+  node.size = node.children.map((child) => child.size).reduce((a, b) => a + b, 0);
 }
 
 function addNode(
@@ -71,6 +81,8 @@ function addNode(
       directory: entry.directory,
       entry: entry.entry,
       children: [],
+      lastModified: entry.entry.lastModified,
+      size: entry.entry.size,
     };
     leaf.crumbs.push({ label: name, onClick: () => selectPath(leaf) });
     parent.children.push(leaf);
@@ -87,6 +99,8 @@ function addNode(
       directory: entry.directory,
       entry: undefined,
       children: [],
+      lastModified: undefined, // will be calculated after tree is constructed
+      size: undefined, // will be calculated after tree is constructed
     };
     node.crumbs.push({ label: name, onClick: () => selectPath(node) });
     parent.children.push(node);

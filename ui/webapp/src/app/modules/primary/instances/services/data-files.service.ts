@@ -22,6 +22,8 @@ export interface DataFilePath {
   children: DataFilePath[];
   directory: RemoteDirectory;
   entry: RemoteDirectoryEntry;
+  lastModified: number;
+  size: number;
 }
 
 @Injectable({
