@@ -33,16 +33,23 @@ const colPath: BdDataColumn<DataFilePath> = {
 const colSize: BdDataColumn<DataFilePath> = {
   id: 'size',
   name: 'Size',
-  data: (r) => (r.entry ? r.entry.size : undefined),
+  data: (r) => r.size,
   width: '100px',
   showWhen: '(min-width: 700px)',
   component: BdDataSizeCellComponent,
 };
 
+const colItems: BdDataColumn<DataFilePath> = {
+  id: 'items',
+  name: 'Items',
+  data: (r) => (!r.children?.length ? '' : r.children.length === 1 ? '1 item' : `${r.children.length} items`),
+  width: '100px',
+};
+
 const colModTime: BdDataColumn<DataFilePath> = {
   id: 'lastMod',
   name: 'Last Modification',
-  data: (r) => (r.entry ? r.entry.lastModified : undefined),
+  data: (r) => r.lastModified,
   width: '155px',
   showWhen: '(min-width: 800px)',
   component: BdDataDateCellComponent,
@@ -92,6 +99,7 @@ export class DataFilesComponent implements OnInit, OnDestroy {
   protected columns: BdDataColumn<DataFilePath>[] = [
     colAvatar,
     colPath,
+    colItems,
     colModTime,
     colSize,
     this.colDownload,
