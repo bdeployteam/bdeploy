@@ -33,6 +33,7 @@ if NOT "%ERRORLEVEL%" == "0" (
 IF NOT "%ERRORLEVEL%"=="42" (
     IF NOT "%ERRORLEVEL%"=="0" (
         echo "Minion terminated with exit code %ERRORLEVEL%."
+        goto :fail
     )
     goto :end
 )
@@ -76,6 +77,10 @@ echo "Update applied. Restarting application."
 goto :execute
 
 :fail
-exit /b 1
+if "%ERRORLEVEL%" == "0" (
+    exit /b 1
+)
+exit /b %ERRORLEVEL%
 
 :end
+exit /b 0
