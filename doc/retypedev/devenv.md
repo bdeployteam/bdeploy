@@ -64,7 +64,7 @@ BDeploy uses **LcDsl** launch configurations to run binaries. You can find launc
 
 * Find and run (hint: right click) the `Master-Init` launch configuration.
     * This will initialize a BDeploy **master root** inside the chosen workspace directory, e.g. `/work/bdeploy/workspace/runtime/master`.
-    * A default user will be created: username = admin, password = admin.
+    * A default user will be created: username = admin, password = adminadminadmin.
 * Finally find and run the `Master` launch configuration to spin up a BDeploy **master**.
 
 !!!info Note
