@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.common.util.TemplateHelper;
@@ -30,15 +29,6 @@ public class ApplicationConfiguration {
      */
     @JsonAlias("uid")
     public String id;
-
-    /**
-     * @deprecated Compat with 4.x
-     */
-    @Deprecated(forRemoval = true)
-    @JsonProperty("uid")
-    public String getUid() {
-        return id;
-    }
 
     /**
      * The human readable name of the application configuration (e.g. "My App 1").

@@ -67,12 +67,11 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
-      })
+      }),
     );
     this.subscription.add(
       this.groups.newId().subscribe((r) => {
         this.config.id = r;
-        this.config.uuid = r; // compat;
         this.subscription.add(
           this.products.products$.subscribe((products) => {
             products?.forEach((p) => {
@@ -84,7 +83,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
               item.versions.push(p.key.tag);
             });
             this.productNames = this.prodList.map((p) => p.name);
-          })
+          }),
         );
 
         const snap = this.areas.panelRoute$.value;
@@ -102,14 +101,14 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         }
 
         this.loading$.next(false);
-      })
+      }),
     );
 
     this.subscription.add(
       this.servers.servers$.subscribe((s) => {
         this.serverList = s;
         this.serverNames = this.serverList.map((c) => `${c.hostName} - ${c.description}`);
-      })
+      }),
     );
 
     this.subscription.add(
@@ -119,7 +118,7 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
         }
         this.systemKeys = s.map((s) => s.key);
         this.systemLabels = s.map((s) => `${s.config.name} (${s.config.description})`);
-      })
+      }),
     );
   }
 

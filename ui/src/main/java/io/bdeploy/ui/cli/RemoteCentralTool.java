@@ -7,10 +7,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import io.bdeploy.bhive.util.StorageHelper;
+import io.bdeploy.common.ActivityReporter.Activity;
 import io.bdeploy.common.Version;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cfg.Configuration.Validator;
@@ -21,14 +29,18 @@ import io.bdeploy.common.cli.ToolCategory;
 import io.bdeploy.common.cli.data.DataResult;
 import io.bdeploy.common.cli.data.DataTable;
 import io.bdeploy.common.cli.data.DataTableColumn;
+import io.bdeploy.common.cli.data.DataTableRowBuilder;
 import io.bdeploy.common.cli.data.RenderableResult;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.FormatHelper;
+import io.bdeploy.common.util.VersionHelper;
 import io.bdeploy.interfaces.configuration.instance.InstanceConfiguration;
 import io.bdeploy.interfaces.manifest.managed.ManagedMasterDto;
+import io.bdeploy.interfaces.minion.MinionDto;
 import io.bdeploy.interfaces.remote.ResourceProvider;
 import io.bdeploy.jersey.cli.RemoteServiceTool;
 import io.bdeploy.ui.api.BackendInfoResource;
+import io.bdeploy.ui.api.InstanceGroupResource;
 import io.bdeploy.ui.api.ManagedServersResource;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.cli.RemoteCentralTool.CentralConfig;
@@ -95,6 +107,13 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
 
         @Help("When updating a managed server, update the authentication token to the given value. EXPERT only!")
         String auth();
+
+        @Help(value = "Collect and print a report of in-use server versions for a given Instance Group, or all groups if none is given.",
+              arg = false)
+        boolean versionReport();
+
+        @Help(value = "Instead of grouping by instance group, sort the result table by server version", arg = false)
+        boolean sortByVersion();
     }
 
     public RemoteCentralTool() {
@@ -152,6 +171,8 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
             }
         } else if (config.update() != null) {
             return updateManagedServer(config, msr);
+        } else if (config.versionReport()) {
+            return reportVersions(config, remote, msr);
         } else {
             return createNoOp();
         }
@@ -258,6 +279,93 @@ public class RemoteCentralTool extends RemoteServiceTool<CentralConfig> {
                     .cell(mmd.lastSync != null ? FormatHelper.format(mmd.lastSync) : "never").cell(mmd.minions.values().size())
                     .cell(instances.size()).build();
         }
+        return table;
+    }
+
+    private RenderableResult reportVersions(CentralConfig config, RemoteService remote, ManagedServersResource msr) {
+        DataTable table = createDataTable();
+        table.setCaption("Server Version Report of " + remote.getUri());
+
+        table.column("Instance Group", 30).column("Name", 20).column("Last Sync", 20).column("Master Ver.", 10)
+                .column("# Divergent Nodes", 10);
+
+        List<String> groups;
+        try (Activity fetchGroups = getActivityReporter().start("Fetching instance groups...")) {
+            if (config.instanceGroup() != null) {
+                groups = Collections.singletonList(config.instanceGroup());
+            } else {
+                groups = new ArrayList<>(ResourceProvider.getResource(remote, InstanceGroupResource.class, getLocalContext())
+                        .list().stream().map(ig -> ig.instanceGroupConfiguration.name).toList());
+
+                groups.sort(Comparator.naturalOrder());
+            }
+        }
+
+        Map<Version, List<DataTableRowBuilder>> rowsByVersion = new TreeMap<>();
+        try (Activity prepare = getActivityReporter().start("Fetching server information from instance groups...",
+                groups.size())) {
+            for (var group : groups) {
+                List<ManagedMasterDto> mmds;
+                try {
+                    mmds = msr.getManagedServers(group);
+                } catch (Exception e) {
+                    out().println("Cannot fetch information for " + group + ": " + e.toString());
+                    if (isVerbose()) {
+                        e.printStackTrace(out());
+                    }
+                    continue;
+                }
+
+                for (var mmd : mmds) {
+                    var row = table.row().cell(group).cell(mmd.hostName)
+                            .cell(mmd.lastSync != null ? FormatHelper.format(mmd.lastSync) : "never");
+
+                    MinionDto master = null;
+                    Set<Version> versions = new TreeSet<>();
+                    for (var node : mmd.minions.entrySet()) {
+                        if (node.getValue().master) {
+                            if (master != null) {
+                                out().println("Warning: multiple masters found for " + mmd.hostName + " in " + group);
+                            }
+                            master = node.getValue();
+                        }
+                        if (node.getValue().version != null) {
+                            versions.add(node.getValue().version);
+                        }
+                    }
+
+                    if (master == null) {
+                        out().println("Warning: no master found for " + mmd.hostName + " in " + group);
+                    }
+
+                    if (master == null) {
+                        row.cell("Unkown").cell(versions.size());
+                    } else {
+                        var mver = master.version;
+                        row.cell(mver.toString()).cell(versions.stream().filter(v -> !mver.equals(v)).count());
+                    }
+
+                    if (config.sortByVersion()) {
+                        var key = master == null ? VersionHelper.UNDEFINED : master.version;
+                        rowsByVersion.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
+                    } else {
+                        row.build();
+                    }
+                }
+
+                prepare.workAndCancelIfRequested(1);
+            }
+        }
+
+        if (config.sortByVersion()) {
+            // build rows in order.
+            for (var entry : rowsByVersion.entrySet()) {
+                for (var row : entry.getValue()) {
+                    row.build();
+                }
+            }
+        }
+
         return table;
     }
 

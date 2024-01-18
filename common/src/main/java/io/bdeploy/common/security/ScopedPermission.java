@@ -2,7 +2,6 @@ package io.bdeploy.common.security;
 
 import javax.annotation.Generated;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -53,7 +52,6 @@ public final class ScopedPermission {
     }
 
     public final String scope;
-    @JsonAlias("capability") // renamed to permission
     public final ScopedPermission.Permission permission;
 
     /**

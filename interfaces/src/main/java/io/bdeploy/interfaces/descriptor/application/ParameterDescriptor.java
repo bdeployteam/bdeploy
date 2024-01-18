@@ -7,7 +7,6 @@ import javax.annotation.processing.Generated;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import io.bdeploy.interfaces.configuration.dcu.ApplicationConfiguration;
@@ -41,16 +40,6 @@ public class ParameterDescriptor implements Comparable<ParameterDescriptor> {
     @JsonAlias("uid")
     @JsonPropertyDescription("The ID of the parameter. This ID must be unique in a given application.")
     public String id;
-
-    /**
-     * @deprecated Compat with 4.x
-     */
-    @Deprecated(forRemoval = true)
-    @JsonProperty("uid")
-    @JsonPropertyDescription("DEPRECATED: Use 'id' instead.")
-    public String getUid() {
-        return id;
-    }
 
     @JsonPropertyDescription("The ID of a parameter template registered for the containing product. The therein defined parameters will be inlined here. If template is given, no other attribute may be set.")
     public String template;

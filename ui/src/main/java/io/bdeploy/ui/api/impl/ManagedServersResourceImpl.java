@@ -654,13 +654,9 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
         updateDto.updateAvailable = VersionHelper.compare(runningVersion, managedVersion) > 0;
         updateDto.forceUpdate = runningVersion.getMajor() > managedVersion.getMajor();
 
-        if (runningVersion.getMajor() == 5 && managedVersion.getMajor() == 4) {
-            // from 4.x -> 5.x no forced update, data from 4.x servers can be read but is persisted in a new format.
-            updateDto.forceUpdate = false;
-        }
-
-        if (runningVersion.getMajor() == 6 && managedVersion.getMajor() == 5) {
-            // from 5.x -> 6.x no forced update, data format is unchanged, major version due to activities/actions ("visuals" only).
+        if (managedVersion.getMajor() == 5 || managedVersion.getMajor() == 6) {
+            // from >=5.x -> 6.x no forced update, data format is unchanged, major version due to activities/actions ("visuals" only).
+            // from >=5.x -> 7.x no forced update. Older servers will not understand our data format (uuid/uid -> id), but >=5.x will.
             updateDto.forceUpdate = false;
         }
 

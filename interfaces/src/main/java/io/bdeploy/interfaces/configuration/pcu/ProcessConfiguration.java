@@ -8,7 +8,6 @@ import java.util.TreeMap;
 import javax.annotation.processing.Generated;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.interfaces.configuration.dcu.EndpointsConfiguration;
@@ -33,15 +32,6 @@ public class ProcessConfiguration implements Comparable<ProcessConfiguration> {
      */
     @JsonAlias("uid")
     public String id;
-
-    /**
-     * @deprecated Compat with 4.x
-     */
-    @Deprecated(forRemoval = true)
-    @JsonProperty("uid")
-    public String getUid() {
-        return id;
-    }
 
     /**
      * Name of the application, used for status reporting

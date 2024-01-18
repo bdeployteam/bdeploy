@@ -3,7 +3,6 @@ package io.bdeploy.api.product.v1;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -42,7 +41,6 @@ public class ProductDescriptor {
     @JsonPropertyDescription("A relative path (from product-info.yaml) to a directory containing plugins which are to be made available dynamically when configuring an instance using this product.")
     public String pluginFolder;
 
-    @JsonAlias("templates") // compat, remove after 2.5.0
     @JsonPropertyDescription("A list of relative paths to ('instance-template.yaml') YAML files containing instance templates.")
     public List<String> instanceTemplates = new ArrayList<>();
 
