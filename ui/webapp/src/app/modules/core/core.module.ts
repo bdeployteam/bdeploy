@@ -41,6 +41,8 @@ import { GlobalErrorHandler } from 'src/app/modules/core/global-error-handler';
 import { BdActionRowComponent } from './components/bd-action-row/bd-action-row.component';
 import { BdActionsComponent } from './components/bd-actions/bd-actions.component';
 import { BdBannerComponent } from './components/bd-banner/bd-banner.component';
+import { BdBHiveBrowserComponent } from './components/bd-bhive-browser/bd-bhive-browser.component';
+import { BdManifestDeleteActionComponent } from './components/bd-bhive-browser/bd-manifest-delete-action/bd-manifest-delete-action.component';
 import { BdBreadcrumbsComponent } from './components/bd-breadcrumbs/bd-breadcrumbs.component';
 import { BdBulkOperationResultComponent } from './components/bd-bulk-operation-result/bd-bulk-operation-result.component';
 import { BdButtonPopupComponent } from './components/bd-button-popup/bd-button-popup.component';
@@ -207,6 +209,8 @@ function loadAppConfig(cfgService: ConfigService) {
     BdIdentifierCellComponent,
     BdBulkOperationResultComponent,
     BdBreadcrumbsComponent,
+    BdManifestDeleteActionComponent,
+    BdBHiveBrowserComponent,
   ],
   providers: [
     httpInterceptorProviders,
@@ -330,6 +334,8 @@ function loadAppConfig(cfgService: ConfigService) {
     BdIdentifierComponent,
     BdBulkOperationResultComponent,
     BdBreadcrumbsComponent,
+    BdManifestDeleteActionComponent,
+    BdBHiveBrowserComponent,
 
     // validators
     IdentifierValidator,

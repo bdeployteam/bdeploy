@@ -29,13 +29,11 @@ describe('Admin UI Tests (BHive)', () => {
       cy.get('button[data-cy^="Browse Contents"]').click();
     });
 
-    cy.inMainNavFlyin('app-bhive-browser', () => {
+    cy.inMainNavFlyin('app-bd-bhive-browser', () => {
       cy.contains('tr', 'meta/minions').click();
 
       cy.get('app-bd-dialog-toolbar').within(() => {
-        cy.get('button[data-cy^="Back to Parent"]')
-          .should('exist')
-          .and('be.enabled');
+        cy.get('button[data-cy^="Back to Parent"]').should('exist').and('be.enabled');
       });
 
       cy.contains('tr', 'minion.json').click();

@@ -15,6 +15,9 @@ public class HiveEntryDto {
     public Tree.EntryType type;
     public long size;
 
+    public HiveEntryDto() {
+    }
+
     public HiveEntryDto(String name, Tree.EntryType type) {
         this.name = name;
         this.type = type;

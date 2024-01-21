@@ -34,8 +34,7 @@ public interface SoftwareResource {
 
     @GET
     @Path("/{name : .+}/{tag}/zip")
-    public String createSoftwareZipFile(@PathParam("name") String name, @PathParam("tag") String tag,
-            @QueryParam("original") boolean original);
+    public String createSoftwareZipFile(@PathParam("name") String name, @PathParam("tag") String tag);
 
     @POST
     @Path("/upload")

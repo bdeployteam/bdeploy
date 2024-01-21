@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -57,9 +57,10 @@ export class ProductDetailsService implements OnDestroy {
       this.prodSubscription?.unsubscribe();
       this.prodSubscription = this.products.products$
         .pipe(
-          map((prods) =>
-            prods?.find((e) => e.key.name === this.productKey$.value && e.key.tag === this.productTag$.value)
-          )
+          map(
+            (prods) =>
+              prods?.find((e) => e.key.name === this.productKey$.value && e.key.tag === this.productTag$.value),
+          ),
         )
         .subscribe((prod) => {
           this.usedIn$.next(null);
@@ -104,10 +105,9 @@ export class ProductDetailsService implements OnDestroy {
     return this.http.delete(this.apiPath());
   }
 
-  public download(original: boolean): Observable<any> {
-    const params = new HttpParams().set('original', original);
+  public download(): Observable<any> {
     return new Observable<any>((s) => {
-      this.http.get(`${this.apiPath()}/zip`, { params, responseType: 'text' }).subscribe((token) => {
+      this.http.get(`${this.apiPath()}/zip`, { responseType: 'text' }).subscribe((token) => {
         this.downloads.download(this.downloads.createDownloadUrl(token));
         s.next(token);
         s.complete();

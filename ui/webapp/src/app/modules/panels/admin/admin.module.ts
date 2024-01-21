@@ -16,8 +16,6 @@ import { AddUserComponent } from './components/add-user/add-user.component';
 import { AssignPermissionComponent } from './components/assign-permission/assign-permission.component';
 import { AssignUserGroupPermissionComponent } from './components/assign-user-group-permission/assign-user-group-permission.component';
 import { AuthTestComponent } from './components/auth-test/auth-test.component';
-import { BHiveBrowserComponent } from './components/bhive-details/bhive-browser/bhive-browser.component';
-import { ManifestDeleteActionComponent } from './components/bhive-details/bhive-browser/manifest-delete-action/manifest-delete-action.component';
 import { BhiveDetailsComponent } from './components/bhive-details/bhive-details.component';
 import { BhiveLogBrowserComponent } from './components/bhive-details/bhive-log-browser/bhive-log-browser.component';
 import { BhiveLogViewerComponent } from './components/bhive-details/bhive-log-viewer/bhive-log-viewer.component';
@@ -53,10 +51,8 @@ import { UserGroupBulkRemovePermissionComponent } from './components/user-group-
     UserAdminDetailComponent,
     UserGroupAdminDetailComponent,
     BhiveDetailsComponent,
-    BHiveBrowserComponent,
     BhiveLogViewerComponent,
     BhiveLogBrowserComponent,
-    ManifestDeleteActionComponent,
     LogFileViewerComponent,
     LogConfigEditorComponent,
     SoftwareUploadComponent,

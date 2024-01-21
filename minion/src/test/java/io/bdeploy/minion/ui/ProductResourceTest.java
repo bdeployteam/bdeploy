@@ -51,7 +51,7 @@ class ProductResourceTest {
 
         Key prod = TestFactory.pushProduct(group.name, remote, tmp).getKey();
         ProductResource productResource = root.getProductResource("Demo");
-        String zipToken = productResource.createProductZipFile(prod.getName(), prod.getTag(), false);
+        String zipToken = productResource.createProductZipFile(prod.getName(), prod.getTag());
         Path zipFile = minion.getDownloadDir().resolve(zipToken);
         assertTrue(zipFile.toFile().isFile());
 

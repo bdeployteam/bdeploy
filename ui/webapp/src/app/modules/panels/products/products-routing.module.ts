@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
+import { BdBHiveBrowserComponent } from '../../core/components/bd-bhive-browser/bd-bhive-browser.component';
 import { ScopedReadGuard } from '../../core/guards/scoped-read.guard';
 import { ScopedWriteGuard } from '../../core/guards/scoped-write.guard';
 import { ServerCentralGuard } from '../../core/guards/server-central.guard';
@@ -22,6 +23,12 @@ const PPRODUCTS_ROUTES: Route[] = [
     path: 'details/:key/:tag',
     component: ProductDetailsComponent,
     canActivate: [ScopedReadGuard],
+  },
+  {
+    path: 'details/:key/:tag/browse/:type',
+    component: BdBHiveBrowserComponent,
+    canActivate: [ScopedReadGuard],
+    data: { max: true },
   },
   {
     path: 'sync',

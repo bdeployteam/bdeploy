@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { BdBHiveBrowserComponent } from '../../core/components/bd-bhive-browser/bd-bhive-browser.component';
 import { AdminGuard } from '../../core/guards/admin.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { setRouteId } from '../../core/utils/routeId-generator';
@@ -12,7 +13,6 @@ import { AddUserComponent } from './components/add-user/add-user.component';
 import { AssignPermissionComponent } from './components/assign-permission/assign-permission.component';
 import { AssignUserGroupPermissionComponent } from './components/assign-user-group-permission/assign-user-group-permission.component';
 import { AuthTestComponent } from './components/auth-test/auth-test.component';
-import { BHiveBrowserComponent } from './components/bhive-details/bhive-browser/bhive-browser.component';
 import { BhiveDetailsComponent as BHiveDetailsComponent } from './components/bhive-details/bhive-details.component';
 import { BhiveLogBrowserComponent } from './components/bhive-details/bhive-log-browser/bhive-log-browser.component';
 import { BhiveLogViewerComponent } from './components/bhive-details/bhive-log-viewer/bhive-log-viewer.component';
@@ -115,8 +115,8 @@ const routes: Routes = [
     data: { max: true },
   },
   {
-    path: 'bhive/:bhive/browse',
-    component: BHiveBrowserComponent,
+    path: 'bhive/:bhive/browse/:type',
+    component: BdBHiveBrowserComponent,
     canActivate: [AdminGuard],
     data: { max: true },
   },

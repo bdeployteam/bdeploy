@@ -21,6 +21,7 @@ import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.op.CopyOperation;
 import io.bdeploy.bhive.op.ExportOperation;
+import io.bdeploy.bhive.op.ExportTreeOperation;
 import io.bdeploy.bhive.op.ObjectListOperation;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.util.PathHelper;
@@ -231,6 +232,34 @@ public class DownloadServiceImpl implements DownloadService {
             throw new WebApplicationException("Error packaging download", e);
         }
         registerForDownload(token, key.directoryFriendlyName() + ".zip");
+        return token;
+    }
+
+    public String downloadBHiveContent(BHive hive, ObjectId id, String dirName) {
+        String token = createNewToken();
+        Path targetFile = getStoragePath(token);
+
+        try {
+            Path tmpFile = Files.createTempFile(minion.getTempDir(), "", ".zip");
+            Path tmpFolder = minion.getTempDir().resolve(token);
+            try {
+                // add once more the dirName, as it should be included in the ZIP!
+                hive.execute(new ExportTreeOperation().setSourceTree(id).setTargetPath(tmpFolder.resolve(dirName)));
+
+                ZipHelper.zip(tmpFile, tmpFolder);
+                Files.copy(tmpFile, targetFile);
+            } finally {
+                try {
+                    PathHelper.deleteIfExistsRetry(tmpFile);
+                    PathHelper.deleteRecursiveRetry(tmpFolder);
+                } catch (Exception e) {
+                    log.warn("Cannot clean temporary files after packaging download", e);
+                }
+            }
+        } catch (IOException e) {
+            throw new WebApplicationException("Error packaging download", e);
+        }
+        registerForDownload(token, dirName + ".zip");
         return token;
     }
 

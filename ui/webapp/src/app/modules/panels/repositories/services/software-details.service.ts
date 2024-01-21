@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -53,8 +53,8 @@ export class SoftwareDetailsService implements OnDestroy {
       this.softwareSubscription = this.repository.data$
         .pipe(
           map((data) =>
-            data.find((e) => e.key.name === this.manifestKey$.value && e.key.tag === this.manifestTag$.value)
-          )
+            data.find((e) => e.key.name === this.manifestKey$.value && e.key.tag === this.manifestTag$.value),
+          ),
         )
         .subscribe((data) => {
           this.softwarePackage$.next(data);
@@ -86,12 +86,10 @@ export class SoftwareDetailsService implements OnDestroy {
     return this.http.delete(this.getApiPath4Type());
   }
 
-  public download(original: boolean): Observable<any> {
-    const params = new HttpParams().set('original', original);
+  public download(): Observable<any> {
     return new Observable<any>((s) => {
       this.http
         .get(`${this.getApiPath4Type()}/zip`, {
-          params,
           responseType: 'text',
         })
         .subscribe((token) => {

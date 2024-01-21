@@ -115,7 +115,7 @@ class RepoResourceTest {
 
         assertTrue(swr.list(true, true).contains(swKey));
 
-        String token = swr.createSoftwareZipFile(swKey.getName(), swKey.getTag(), false);
+        String token = swr.createSoftwareZipFile(swKey.getName(), swKey.getTag());
         Response download = dlService.download(token);
         assertEquals(200, download.getStatus());
 

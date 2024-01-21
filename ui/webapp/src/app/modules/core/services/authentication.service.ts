@@ -33,6 +33,7 @@ export class AuthenticationService {
   }
 
   public isCurrentScopedExclusiveReadClient$: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public isCurrentScopeRead$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   public isCurrentScopeWrite$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   public isCurrentScopeAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   public isGlobalAdmin$: BehaviorSubject<boolean> = new BehaviorSubject(false);
@@ -59,9 +60,11 @@ export class AuthenticationService {
       if (groupContext || repositoryContext) {
         this.isCurrentScopeAdmin$.next(this.isCurrentScopeAdmin());
         this.isCurrentScopeWrite$.next(this.isCurrentScopeWrite());
+        this.isCurrentScopeRead$.next(this.isCurrentScopeRead());
       } else {
         this.isCurrentScopeAdmin$.next(this.isGlobalAdmin());
         this.isCurrentScopeWrite$.next(this.isGlobalWrite());
+        this.isCurrentScopeRead$.next(this.isGlobalRead());
       }
       if (groupContext) {
         this.isCurrentScopedExclusiveReadClient$.next(this.isCurrentScopeExclusiveReadClient());
@@ -99,9 +102,9 @@ export class AuthenticationService {
               tap((userInfo) => {
                 this.userInfoSubject$.next(userInfo);
                 this.tokenSubject.next(t);
-              })
+              }),
             );
-        })
+        }),
       );
   }
 
@@ -144,7 +147,7 @@ export class AuthenticationService {
             console.log('auth0 expired', err);
             this.logout();
             return of(null);
-          })
+          }),
         )
         .subscribe((t) => {
           // if we got one, we want to use it on the server as well.
@@ -153,7 +156,7 @@ export class AuthenticationService {
               catchError((err) => {
                 console.log('cannot update auth0 token on server', err);
                 return of(err);
-              })
+              }),
             )
             .subscribe(() => {
               console.log('auth0 token updated on server');
@@ -184,22 +187,26 @@ export class AuthenticationService {
       }),
       finalize(() => {
         window.location.reload();
-      })
+      }),
     );
   }
 
   public isGlobalAdmin(): boolean {
-    const tokenPayload = this.getTokenPayload();
-    if (tokenPayload && tokenPayload.c) {
-      return !!tokenPayload.c.find((c) => c.scope === null && this.ge(c.permission, Permission.ADMIN));
-    }
-    return false;
+    return this.isGlobal(Permission.ADMIN);
   }
 
   private isGlobalWrite(): boolean {
+    return this.isGlobal(Permission.WRITE);
+  }
+
+  private isGlobalRead(): boolean {
+    return this.isGlobal(Permission.READ);
+  }
+
+  private isGlobal(permission: Permission): boolean {
     const tokenPayload = this.getTokenPayload();
     if (tokenPayload && tokenPayload.c) {
-      return !!tokenPayload.c.find((c) => c.scope === null && this.ge(c.permission, Permission.WRITE));
+      return !!tokenPayload.c.find((c) => c.scope === null && this.ge(c.permission, permission));
     }
     return false;
   }
@@ -275,7 +282,7 @@ export class AuthenticationService {
   private isScoped(scope: string, userInfo: UserInfo, permission: Permission): boolean {
     if (userInfo && userInfo.mergedPermissions) {
       return !!userInfo.mergedPermissions.find(
-        (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, permission)
+        (sc) => (sc.scope === null || sc.scope === scope) && this.ge(sc.permission, permission),
       );
     }
     return false;
@@ -285,11 +292,11 @@ export class AuthenticationService {
     if (this.currentUserInfo && this.currentUserInfo.mergedPermissions) {
       // We have either a global or scoped CLIENT permission,
       const clientPerm = this.currentUserInfo.mergedPermissions.find(
-        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission === Permission.CLIENT
+        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission === Permission.CLIENT,
       );
       // ... and there is *NO* other permission on the user.
       const nonClientPerm = this.currentUserInfo.mergedPermissions.find(
-        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission !== Permission.CLIENT
+        (sc) => (sc.scope === null || sc.scope === scope) && sc.permission !== Permission.CLIENT,
       );
       return !!clientPerm && !nonClientPerm;
     }

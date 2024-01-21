@@ -9,13 +9,14 @@ import io.bdeploy.jersey.Scope;
 import io.bdeploy.ui.dto.HiveEntryDto;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 @Path("/hive")
-@RequiredPermission(permission = Permission.WRITE, scope = "hive", scopeOptional = true)
+@RequiredPermission(permission = Permission.READ, scope = "hive", scopeOptional = true)
 public interface HiveResource {
 
     @GET
@@ -38,6 +39,10 @@ public interface HiveResource {
     @GET
     @Path("/download")
     public Response download(@Scope @QueryParam("hive") String hiveParam, @QueryParam("id") String id);
+
+    @POST
+    @Path("/download")
+    public Response download(@Scope @QueryParam("hive") String hiveParam, HiveEntryDto dto);
 
     @GET
     @Path("/repair-and-prune")

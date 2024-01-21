@@ -123,14 +123,12 @@ export class ProductDetailsComponent implements OnInit {
   protected singleProductPlugins$: Observable<PluginInfoDto[]>;
 
   private deleting$ = new BehaviorSubject<boolean>(false);
-  private preparingCont$ = new BehaviorSubject<boolean>(false);
 
   private p$ = this.singleProduct.product$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
 
   // this one *is* allowed multiple times! so no server action mapping.
   protected preparingBHive$ = new BehaviorSubject<boolean>(false);
   protected mappedDelete$ = this.actions.action([Actions.DELETE_PRODUCT], this.deleting$, null, null, this.p$);
-  protected mappedPrepC$ = this.actions.action([Actions.DOWNLOAD_PRODUCT_C], this.preparingCont$, null, null, this.p$);
   protected loading$ = combineLatest([this.mappedDelete$, this.products.loading$]).pipe(map(([a, b]) => a || b));
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
@@ -155,12 +153,11 @@ export class ProductDetailsComponent implements OnInit {
       });
   }
 
-  protected doDownload(original: boolean) {
-    const preparing$ = original ? this.preparingCont$ : this.preparingBHive$;
-    preparing$.next(true);
+  protected doDownload() {
+    this.preparingBHive$.next(true);
     this.singleProduct
-      .download(original)
-      .pipe(finalize(() => preparing$.next(false)))
+      .download()
+      .pipe(finalize(() => this.preparingBHive$.next(false)))
       .subscribe();
   }
 }

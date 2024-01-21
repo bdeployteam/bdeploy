@@ -73,20 +73,19 @@
 
       <app-bd-button
         [collapsed]="false"
-        text="Download BHive"
+        text="Download"
         icon="cloud_download"
-        (click)="doDownload(false)"
+        (click)="doDownload()"
         [loadingWhen$]="preparingBHive$"
         [disabled]="preparingBHive$ | async"
       ></app-bd-button>
-      <app-bd-button
+      <app-bd-panel-button
+        icon="folder_special"
+        text="View Content"
         [collapsed]="false"
-        text="Download Content"
-        icon="cloud_download"
-        (click)="doDownload(true)"
-        [loadingWhen$]="mappedPrepC$"
-        [disabled]="mappedPrepC$ | async"
-      ></app-bd-button>
+        [relative]="true"
+        [route]="['browse', 'product']"
+      ></app-bd-panel-button>
       <app-bd-button
         [collapsed]="false"
         text="Create new Instance..."

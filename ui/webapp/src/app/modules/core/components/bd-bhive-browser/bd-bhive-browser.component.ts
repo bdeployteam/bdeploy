@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { Base64 } from 'js-base64';
-import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest, map } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { HiveEntryDto, TreeEntryType } from 'src/app/models/gen.dtos';
 import { CrumbInfo } from 'src/app/modules/core/components/bd-breadcrumbs/bd-breadcrumbs.component';
@@ -13,7 +13,9 @@ import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { SearchService } from 'src/app/modules/core/services/search.service';
 import { HiveService } from 'src/app/modules/primary/admin/services/hive.service';
-import { ManifestDeleteActionComponent } from './manifest-delete-action/manifest-delete-action.component';
+import { RepositoriesService } from 'src/app/modules/primary/repositories/services/repositories.service';
+import { DownloadService } from '../../services/download.service';
+import { BdManifestDeleteActionComponent } from './bd-manifest-delete-action/bd-manifest-delete-action.component';
 
 interface PathIdName {
   name: string;
@@ -24,15 +26,17 @@ interface PathIdName {
 type BHivePathSegment = PathIdName;
 
 @Component({
-  selector: 'app-bhive-browser',
-  templateUrl: './bhive-browser.component.html',
+  selector: 'app-bd-bhive-browser',
+  templateUrl: './bd-bhive-browser.component.html',
 })
-export class BHiveBrowserComponent implements OnInit, OnDestroy {
+export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   private areas = inject(NavAreasService);
   private search = inject(SearchService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
   protected hives = inject(HiveService);
+  protected repositories = inject(RepositoriesService);
+  private downloads = inject(DownloadService);
 
   private readonly colAvatar: BdDataColumn<HiveEntryDto> = {
     id: 'avatar',
@@ -57,18 +61,27 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
     component: BdDataSizeCellComponent,
   };
 
+  private readonly colDownload: BdDataColumn<HiveEntryDto> = {
+    id: 'download',
+    name: 'Downl.',
+    data: () => 'Download',
+    action: (r) => this.doDownload(r),
+    icon: () => 'cloud_download',
+    width: '50px',
+  };
+
   private readonly colDelete: BdDataColumn<HiveEntryDto> = {
     id: 'delete',
     name: 'Delete',
     data: (r) => `Delete ${r.name}`,
     width: '40px',
-    component: ManifestDeleteActionComponent,
+    component: BdManifestDeleteActionComponent,
   };
 
   public bhive$ = new BehaviorSubject<string>(null);
   protected path$ = new BehaviorSubject<BHivePathSegment[]>(null);
   protected entries$ = new BehaviorSubject<HiveEntryDto[]>([]);
-  protected columns = [this.colAvatar, this.colName, this.colSize, this.colDelete];
+  protected columns = [this.colAvatar, this.colName, this.colSize, this.colDownload, this.colDelete];
   protected sort: Sort = { active: 'name', direction: 'asc' };
 
   protected previewContent$ = new BehaviorSubject<string>(null);
@@ -80,32 +93,67 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
   private lastQuery: string;
 
+  private type: 'bhive' | 'repo' | 'product' | undefined;
+
   ngOnInit() {
-    this.subscription = this.areas.panelRoute$.subscribe((route) => {
-      if (!route?.params || !route?.params['bhive']) {
-        return;
-      }
-
-      this.bhive$.next(route.params['bhive']);
-      if (route.queryParams['q']) {
-        if (this.lastQuery !== route.queryParams['q']) {
-          this.lastQuery = route.queryParams['q'];
-          this.path$.next(this.decodePathForUrl(route.queryParams['q']));
-
-          // clear out previous search in case we changed paths.
-          this.search.search = '';
+    this.subscription = combineLatest([this.areas.primaryRoute$, this.areas.panelRoute$]).subscribe(
+      ([primaryRoute, panelRoute]) => {
+        if (!primaryRoute || !panelRoute?.params || !panelRoute.params['type']) {
+          return;
         }
-      } else {
-        this.lastQuery = null;
-        this.path$.next(null);
-      }
 
-      this.load();
-    });
+        this.type = panelRoute.params['type'];
+
+        const hive = this.getBHive(primaryRoute, panelRoute);
+
+        if (!hive) {
+          return;
+        }
+
+        this.bhive$.next(hive);
+
+        if (panelRoute.queryParams['q']) {
+          if (this.lastQuery !== panelRoute.queryParams['q']) {
+            this.lastQuery = panelRoute.queryParams['q'];
+            this.path$.next(this.decodePathForUrl(panelRoute.queryParams['q']));
+
+            // clear out previous search in case we changed paths.
+            this.search.search = '';
+          }
+        } else {
+          this.lastQuery = null;
+          this.path$.next(this.getRootPath(panelRoute));
+        }
+
+        this.load();
+      },
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+  }
+
+  private getRootPath(panelRoute: ActivatedRouteSnapshot): PathIdName[] {
+    if (this.type === 'bhive') {
+      return null;
+    } else if (this.type === 'repo' || this.type === 'product') {
+      const name = panelRoute.params['key'];
+      const tag = panelRoute.params['tag'];
+      return [{ name, tag }];
+    }
+  }
+
+  private getBHive(primaryRoute: ActivatedRouteSnapshot, panelRoute: ActivatedRouteSnapshot): string {
+    if (this.type === 'bhive') {
+      return panelRoute.params['bhive'];
+    } else if (this.type === 'repo') {
+      return primaryRoute.params['repository'];
+    } else if (this.type === 'product') {
+      return primaryRoute.params['group'];
+    } else {
+      throw Error(`Unexpected bhive browser type ${this.type}`);
+    }
   }
 
   public load() {
@@ -242,7 +290,7 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
           return { label, onClick };
         });
         const root = { label: this.bhive$.value, onClick: () => this.navigateTo(null) };
-        return [root, ...crumbs];
+        return this.type === 'bhive' ? [root, ...crumbs] : crumbs;
       }),
     );
   }
@@ -252,5 +300,23 @@ export class BHiveBrowserComponent implements OnInit, OnDestroy {
       relativeTo: this.activatedRoute,
       queryParams: { q: this.encodePathForUrl(path) },
     });
+  }
+
+  private doDownload(e: HiveEntryDto) {
+    const name = e.type === TreeEntryType.BLOB ? e.name : `${e.name}.zip`;
+    this.hives.downloadContent(this.bhive$.value, e).subscribe((blob) => this.downloads.downloadBlob(name, blob));
+  }
+
+  protected downloadAll() {
+    const s = this.path$.value[this.path$.value.length - 1];
+    const dto: HiveEntryDto = {
+      id: s.id,
+      mName: s.name,
+      mTag: s.tag,
+      name: s.tag ? `${s.name}:${s.tag}` : s.name,
+      type: s.id ? TreeEntryType.TREE : TreeEntryType.MANIFEST,
+      size: undefined,
+    };
+    this.doDownload(dto);
   }
 }

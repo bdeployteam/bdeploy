@@ -4,6 +4,7 @@
     text="Delete"
     icon="delete"
     (click)="onDelete()"
+    [disabled]="!(auth.isGlobalAdmin$ | async)"
     appClickStopPropagation
   ></app-bd-button>
 </div>

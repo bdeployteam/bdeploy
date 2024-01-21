@@ -1,15 +1,17 @@
 import { Component, forwardRef, inject, Input } from '@angular/core';
 import { HiveEntryDto } from 'src/app/models/gen.dtos';
 import { HiveService } from 'src/app/modules/primary/admin/services/hive.service';
-import { BHiveBrowserComponent } from '../bhive-browser.component';
+import { AuthenticationService } from '../../../services/authentication.service';
+import { BdBHiveBrowserComponent } from '../bd-bhive-browser.component';
 
 @Component({
-  selector: 'app-manifest-delete-action',
-  templateUrl: './manifest-delete-action.component.html',
+  selector: 'app-bd-manifest-delete-action',
+  templateUrl: './bd-manifest-delete-action.component.html',
 })
-export class ManifestDeleteActionComponent {
+export class BdManifestDeleteActionComponent {
   private hives = inject(HiveService);
-  private parent = inject(forwardRef(() => BHiveBrowserComponent));
+  private parent = inject(forwardRef(() => BdBHiveBrowserComponent));
+  protected auth = inject(AuthenticationService);
 
   @Input() record: HiveEntryDto;
 

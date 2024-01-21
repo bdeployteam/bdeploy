@@ -194,16 +194,10 @@ public class ProductResourceImpl implements ProductResource {
     }
 
     @Override
-    public String createProductZipFile(String name, String tag, boolean original) {
+    public String createProductZipFile(String name, String tag) {
         DownloadServiceImpl ds = rc.initResource(new DownloadServiceImpl());
-        if (original) {
-            try (ActionHandle h = af.run(Actions.DOWNLOAD_PRODUCT_C, group, null, name + ":" + tag)) {
-                return ds.createOriginalZipAndRegister(hive, name, tag);
-            }
-        } else {
-            try (ActionHandle h = af.run(Actions.DOWNLOAD_PRODUCT_H, group, null, name + ":" + tag)) {
-                return ds.createManifestZipAndRegister(hive, name, tag);
-            }
+        try (ActionHandle h = af.run(Actions.DOWNLOAD_PRODUCT_H, group, null, name + ":" + tag)) {
+            return ds.createManifestZipAndRegister(hive, name, tag);
         }
     }
 

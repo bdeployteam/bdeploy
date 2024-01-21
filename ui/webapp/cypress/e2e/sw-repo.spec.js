@@ -140,12 +140,31 @@ describe('Software Repository Tests', () => {
         })
         .click('top');
 
-      cy.get('button[data-cy^="Download BHive"]').first().downloadByLocationAssign('product-1.0.0.zip');
+      cy.get('button[data-cy^="Download"]').first().downloadByLocationAssign('product-1.0.0.zip');
       validateZip('product-1.0.0.zip', 'manifests/io.bdeploy/demo/product/1.0.0');
 
-      cy.get('button[data-cy^="Download Content"]').downloadByLocationAssign('original-product-1.0.0.zip');
-      validateZip('original-product-1.0.0.zip', 'io.bdeploy-demo-product_1.0.0/product.json');
+      cy.get('button[data-cy^="View Content"]').click();
+    });
 
+    cy.inMainNavFlyin('app-bd-bhive-browser', () => {
+      cy.contains('app-bd-breadcrumbs', 'Test-Repo').should('not.exist');
+      cy.contains('app-bd-breadcrumbs', 'io.bdeploy/demo/product:1.0.0').should('exist');
+
+      cy.contains('tr', 'appTemplates').click();
+
+      cy.get('app-bd-dialog-toolbar').within(() => {
+        cy.get('button[data-cy^="Back to Parent"]').should('exist').and('be.enabled').click();
+      });
+
+      cy.contains('tr', 'product.json').click();
+      cy.contains('app-bd-notification-card', 'Preview').within(() => {
+        cy.get('button[data-cy^="Close"]').click();
+      });
+
+      cy.pressToolbarButton('Back to Overview');
+    });
+
+    cy.inMainNavFlyin('app-software-details', () => {
       cy.get('button[data-cy^="Delete"]').click();
       cy.contains('app-bd-notification-card', 'Delete 1.0.0').within(() => {
         cy.get('button[data-cy^="Yes"]').click();

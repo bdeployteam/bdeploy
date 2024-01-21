@@ -98,11 +98,9 @@ export class SoftwareDetailsComponent implements OnInit {
   private p$ = this.detailsService.softwarePackage$.pipe(map((p) => p?.key.name + ':' + p?.key.tag));
 
   private deleting$ = new BehaviorSubject<boolean>(false);
-  private preparingC$ = new BehaviorSubject<boolean>(false);
   protected preparingBHive$ = new BehaviorSubject<boolean>(false);
 
   protected mappedDelete$ = this.actions.action([Actions.DELETE_SOFTWARE], this.deleting$, null, null, this.p$);
-  protected mappedPrepC$ = this.actions.action([Actions.DOWNLOAD_SOFTWARE_C], this.preparingC$, null, null, this.p$);
   protected loading$ = combineLatest([this.mappedDelete$, this.repository.loading$]).pipe(map(([a, b]) => a || b));
 
   isRequiredByProduct$ = combineLatest([this.detailsService.softwarePackage$, this.repository.products$]).pipe(
@@ -113,7 +111,7 @@ export class SoftwareDetailsComponent implements OnInit {
         isExternalSoftware &&
         references.some((reference) => software.key.name === reference.name && software.key.tag === reference.tag)
       );
-    })
+    }),
   );
 
   @ViewChild(BdDialogComponent) dialog: BdDialogComponent;
@@ -145,12 +143,11 @@ export class SoftwareDetailsComponent implements OnInit {
       });
   }
 
-  protected doDownload(original: boolean) {
-    const preparing$ = original ? this.preparingC$ : this.preparingBHive$;
-    preparing$.next(true);
+  protected doDownload() {
+    this.preparingBHive$.next(true);
     this.detailsService
-      .download(original)
-      .pipe(finalize(() => preparing$.next(false)))
+      .download()
+      .pipe(finalize(() => this.preparingBHive$.next(false)))
       .subscribe();
   }
 }

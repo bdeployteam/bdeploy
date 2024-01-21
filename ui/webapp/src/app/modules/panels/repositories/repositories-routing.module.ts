@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
+import { BdBHiveBrowserComponent } from '../../core/components/bd-bhive-browser/bd-bhive-browser.component';
 import { AdminGuard } from '../../core/guards/admin.guard';
 import { DirtyDialogGuard } from '../../core/guards/dirty-dialog.guard';
 import { ScopedAdminGuard } from '../../core/guards/scoped-admin.guard';
@@ -44,6 +45,11 @@ const REPOSITORIES_ROUTES: Route[] = [
   {
     path: 'details/:key/:tag',
     component: SoftwareDetailsComponent,
+  },
+  {
+    path: 'details/:key/:tag/browse/:type',
+    component: BdBHiveBrowserComponent,
+    data: { max: true },
   },
 ];
 

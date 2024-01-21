@@ -29,9 +29,6 @@ public enum Actions {
     DOWNLOAD_PRODUCT_H(ActionScope.BHIVE, false, "Prepare Product Download"),
     DOWNLOAD_SOFTWARE_H(ActionScope.BHIVE, false, "Prepare Software Download"),
 
-    DOWNLOAD_PRODUCT_C(ActionScope.BHIVE, true, "Prepare Raw Product Download"),
-    DOWNLOAD_SOFTWARE_C(ActionScope.BHIVE, true, "Prepare Raw Software Download"),
-
     DELETE_PRODUCT(ActionScope.BHIVE, true, "Delete Product Version"),
     DELETE_SOFTWARE(ActionScope.BHIVE, true, "Delete Software"),
 

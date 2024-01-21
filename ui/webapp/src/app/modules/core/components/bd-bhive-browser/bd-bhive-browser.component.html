@@ -10,10 +10,22 @@
 </ng-template>
 
 <app-bd-dialog [loadingWhen$]="hives.loading$">
-  <app-bd-dialog-toolbar [header]="'Browse ' + (bhive$ | async)" [panel]="true" [relative]="true" [route]="['..']">
+  <app-bd-dialog-toolbar
+    [header]="'Browse ' + (bhive$ | async)"
+    [panel]="true"
+    [relative]="true"
+    [route]="['..', '..']"
+  >
     <div class="flex-auto"></div>
     <app-bd-button
-      *ngIf="path$ | async"
+      *ngIf="(path$ | async)?.length > 0"
+      icon="cloud_download"
+      text="Download All"
+      (click)="downloadAll()"
+    ></app-bd-button>
+    <mat-divider *ngIf="(path$ | async)?.length > 0" [vertical]="true"></mat-divider>
+    <app-bd-button
+      *ngIf="(crumbs$ | async)?.length > 1"
       icon="navigate_before"
       text="Back to Parent"
       color="primary"

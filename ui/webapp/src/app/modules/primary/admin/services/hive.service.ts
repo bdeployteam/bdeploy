@@ -21,7 +21,7 @@ export class HiveService {
     this.loading$.next(true);
     return this.http.get<string[]>(`${this.apiPath()}/listHives`).pipe(
       measure('List BHives'),
-      finalize(() => this.loading$.next(false))
+      finalize(() => this.loading$.next(false)),
     );
   }
 
@@ -30,7 +30,7 @@ export class HiveService {
     const options = { params: new HttpParams().set('hive', hive) };
     return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/listManifests`, options).pipe(
       measure('List BHive Manifests'),
-      finalize(() => this.loading$.next(false))
+      finalize(() => this.loading$.next(false)),
     );
   }
 
@@ -41,7 +41,7 @@ export class HiveService {
     };
     return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/listManifest`, options).pipe(
       measure('List BHive Manifest Content'),
-      finalize(() => this.loading$.next(false))
+      finalize(() => this.loading$.next(false)),
     );
   }
 
@@ -52,7 +52,7 @@ export class HiveService {
     };
     return this.http.get<HiveEntryDto[]>(`${this.apiPath()}/list`, options).pipe(
       measure('List BHive Tree'),
-      finalize(() => this.loading$.next(false))
+      finalize(() => this.loading$.next(false)),
     );
   }
 
@@ -64,6 +64,18 @@ export class HiveService {
         params: params,
         responseType: 'blob',
       })
+      .pipe(finalize(() => this.loading$.next(false)));
+  }
+
+  public downloadContent(hive: string, dto: HiveEntryDto) {
+    this.loading$.next(true);
+    const params: HttpParams = new HttpParams().set('hive', hive);
+    return this.http
+      .post(`${this.apiPath()}/download`, dto, {
+        params: params,
+        responseType: 'blob',
+      })
+      .pipe()
       .pipe(finalize(() => this.loading$.next(false)));
   }
 
