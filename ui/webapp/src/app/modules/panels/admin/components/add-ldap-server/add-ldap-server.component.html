@@ -1,8 +1,5 @@
 <app-bd-dialog [loadingWhen$]="saving$">
-  <app-bd-dialog-toolbar
-    header="Add Server"
-    [panel]="true"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Add Server" [panel]="true"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <form #form="ngForm" (ngSubmit)="onSave()" class="flex flex-col gap-1">
       <app-bd-form-input
@@ -18,18 +15,14 @@
         [(ngModel)]="tempServer.description"
         required
       ></app-bd-form-input>
-      <app-bd-form-input
-        label="User"
-        name="user"
-        [(ngModel)]="tempServer.user"
-        required
-      ></app-bd-form-input>
+      <app-bd-form-input label="User" name="user" [(ngModel)]="tempServer.user" required></app-bd-form-input>
       <app-bd-form-input
         label="Password"
         name="pass"
         [(ngModel)]="tempServer.pass"
         type="password"
         [passwordShowable]="true"
+        required
       ></app-bd-form-input>
       <app-bd-form-input
         label="Account and Group Base"
