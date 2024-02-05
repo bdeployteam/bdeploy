@@ -20,7 +20,6 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
   private areas = inject(NavAreasService);
 
   protected tempServer: Partial<LDAPSettingsDto>;
-  protected origServer: Partial<LDAPSettingsDto>;
   protected initialServer: Partial<LDAPSettingsDto>;
   protected isDirty$ = new BehaviorSubject<boolean>(false);
   private subscription: Subscription;
@@ -38,8 +37,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
           return;
         }
         this.tempServer = cloneDeep(this.initialServer);
-        this.origServer = cloneDeep(this.initialServer);
-      })
+      }),
     );
   }
 
@@ -50,7 +48,7 @@ export class EditLdapServerComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription.add(
       this.form.valueChanges.pipe(debounceTime(100)).subscribe(() => {
         this.isDirty$.next(this.isDirty());
-      })
+      }),
     );
   }
 
