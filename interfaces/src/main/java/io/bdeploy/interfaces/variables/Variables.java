@@ -68,7 +68,24 @@ public enum Variables {
     /**
      * A conditional which evaluates a nested expression (must be boolean), and evaluates to one of two given values.
      */
-    CONDITIONAL("IF:");
+    CONDITIONAL("IF:"),
+
+    /**
+     * Escapes characters that could corrupt XML files
+     */
+    ESCAPE_XML("XML:"),
+
+    /**
+     * Escapes characters that could corrupt JSON files
+     */
+    ESCAPE_JSON("JSON:"),
+
+    /**
+     * Escapes characters that could corrupt YAML files
+     */
+    ESCAPE_YAML("YAML:")
+
+    ;
 
     private final String prefix;
 

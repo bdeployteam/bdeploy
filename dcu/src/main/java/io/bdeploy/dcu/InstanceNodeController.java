@@ -51,6 +51,9 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
+import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestRefPathProvider;
@@ -103,6 +106,9 @@ public class InstanceNodeController {
         this.resolvers.add(new EnvironmentVariableResolver());
         this.resolvers.add(new DeploymentPathResolver(paths));
         this.resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(config)));
+        this.resolvers.add(new EscapeJsonCharactersResolver(resolvers));
+        this.resolvers.add(new EscapeXmlCharactersResolver(resolvers));
+        this.resolvers.add(new EscapeYamlCharactersResolver(resolvers));
     }
 
     public InstanceNodeManifest getManifest() {
