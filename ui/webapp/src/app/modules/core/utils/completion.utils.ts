@@ -6,11 +6,11 @@ import {
 } from 'src/app/models/gen.dtos';
 import { ContentCompletion } from '../components/bd-content-assist-menu/bd-content-assist-menu.component';
 import {
+  LinkVariable,
   gatherPathExpansions,
   gatherProcessExpansions,
   gatherSpecialExpansions,
   gatherVariableExpansions,
-  LinkVariable,
 } from './linked-values.utils';
 
 export function buildCompletionPrefixes(): ContentCompletion[] {
@@ -67,6 +67,21 @@ export function buildCompletionPrefixes(): ContentCompletion[] {
       icon: 'data_object',
       description: 'Instance & System Variables',
     },
+    {
+      value: '{{XML:',
+      icon: 'special_character',
+      description: 'Escape special XML characters',
+    },
+    {
+      value: '{{JSON:',
+      icon: 'special_character',
+      description: 'Escape special JSON characters',
+    },
+    {
+      value: '{{YAML:',
+      icon: 'special_character',
+      description: 'Escape special YAML characters',
+    },
   ];
 }
 
@@ -75,7 +90,7 @@ export function buildCompletions(
   instance: InstanceConfigurationDto,
   system: SystemConfiguration,
   process: ApplicationConfiguration,
-  apps: ApplicationDto[]
+  apps: ApplicationDto[],
 ): ContentCompletion[] {
   return [
     ...gatherVariableExpansions(instance, system).map((l) => ({
@@ -101,10 +116,7 @@ export function buildCompletions(
   ].sort((a, b) => a.value.localeCompare(b.value));
 }
 
-export function getPrefixIcon(
-  l: LinkVariable,
-  prefixes: ContentCompletion[]
-): string {
+export function getPrefixIcon(l: LinkVariable, prefixes: ContentCompletion[]): string {
   // find prefix and use its icon;
   const prefix = prefixes.find((p) => l.link.startsWith(p.value));
   return prefix?.icon;

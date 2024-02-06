@@ -15,7 +15,7 @@ public class EscapeYamlCharactersResolver extends PrefixResolver {
     private final VariableResolver parentResolver;
 
     public EscapeYamlCharactersResolver(VariableResolver parentResolver) {
-        super(Variables.ESCAPE_JSON);
+        super(Variables.ESCAPE_YAML);
         this.parentResolver = parentResolver;
     }
 

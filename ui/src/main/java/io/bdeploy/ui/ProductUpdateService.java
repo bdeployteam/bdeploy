@@ -42,6 +42,9 @@ import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.DeploymentPathValidationDummyResolver;
 import io.bdeploy.interfaces.variables.EmptyVariableResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableDummyResolver;
+import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.LocalHostnameResolver;
@@ -401,6 +404,9 @@ public class ProductUpdateService {
         res.add(new LocalHostnameResolver(false));
         res.add(new EnvironmentVariableDummyResolver());
         res.add(new DelayedVariableResolver(res));
+        res.add(new EscapeJsonCharactersResolver(res));
+        res.add(new EscapeXmlCharactersResolver(res));
+        res.add(new EscapeYamlCharactersResolver(res));
 
         return res;
     }

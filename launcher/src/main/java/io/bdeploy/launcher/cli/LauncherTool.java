@@ -93,6 +93,9 @@ import io.bdeploy.interfaces.variables.DeploymentPathProvider;
 import io.bdeploy.interfaces.variables.DeploymentPathProvider.SpecialDirectory;
 import io.bdeploy.interfaces.variables.DeploymentPathResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
+import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.InstanceVariableResolver;
 import io.bdeploy.interfaces.variables.LocalHostnameResolver;
@@ -943,6 +946,9 @@ public class LauncherTool extends ConfiguredCliTool<LauncherConfig> {
         resolvers.add(new OsVariableResolver());
         resolvers.add(new EnvironmentVariableResolver());
         resolvers.add(new ParameterValueResolver(new ApplicationParameterProvider(clientCfg.instanceConfig)));
+        resolvers.add(new EscapeJsonCharactersResolver(resolvers));
+        resolvers.add(new EscapeXmlCharactersResolver(resolvers));
+        resolvers.add(new EscapeYamlCharactersResolver(resolvers));
 
         // Enable resolving of path variables
         resolvers.add(new DeploymentPathResolver(pathProvider));

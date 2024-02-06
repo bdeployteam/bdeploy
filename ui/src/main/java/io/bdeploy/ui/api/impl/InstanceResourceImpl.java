@@ -102,6 +102,9 @@ import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.ApplicationVariableResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
+import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
@@ -1225,6 +1228,9 @@ public class InstanceResourceImpl implements InstanceResource {
         list.add(new ApplicationParameterValueResolver(app.id, ic));
         list.add(new ParameterValueResolver(new ApplicationParameterProvider(ic)));
         list.add(new OsVariableResolver());
+        list.add(new EscapeJsonCharactersResolver(list));
+        list.add(new EscapeXmlCharactersResolver(list));
+        list.add(new EscapeYamlCharactersResolver(list));
 
         HttpEndpoint processed = CommonEndpointHelper.processEndpoint(list, ep.get());
         if (processed == null) {

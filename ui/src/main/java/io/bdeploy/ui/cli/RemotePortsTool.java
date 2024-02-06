@@ -28,6 +28,9 @@ import io.bdeploy.interfaces.variables.ApplicationParameterProvider;
 import io.bdeploy.interfaces.variables.ApplicationParameterValueResolver;
 import io.bdeploy.interfaces.variables.CompositeResolver;
 import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
+import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
 import io.bdeploy.interfaces.variables.ParameterValueResolver;
@@ -212,6 +215,9 @@ public class RemotePortsTool extends RemoteServiceTool<PortsConfig> {
         res.add(new ApplicationParameterValueResolver(process.id, node.nodeConfiguration));
         res.add(new ParameterValueResolver(new ApplicationParameterProvider(node.nodeConfiguration)));
         res.add(new OsVariableResolver());
+        res.add(new EscapeJsonCharactersResolver(res));
+        res.add(new EscapeXmlCharactersResolver(res));
+        res.add(new EscapeYamlCharactersResolver(res));
         return res;
     }
 

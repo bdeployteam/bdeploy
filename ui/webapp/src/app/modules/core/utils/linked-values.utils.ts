@@ -9,12 +9,11 @@ import {
   ParameterType,
   SystemConfiguration,
 } from 'src/app/models/gen.dtos';
+import { SpecialCharacterType, escapeSpecialCharacters } from './escape-special-characters.utils';
 import { getAppOs } from './manifest.utils';
 
 export function createLinkedValue(val: string): LinkedValueConfiguration {
-  return !!val && val.indexOf('{{') != -1
-    ? { linkExpression: val, value: null }
-    : { linkExpression: null, value: val };
+  return !!val && val.indexOf('{{') != -1 ? { linkExpression: val, value: null } : { linkExpression: null, value: val };
 }
 
 export function getPreRenderable(val: LinkedValueConfiguration): string {
@@ -22,13 +21,8 @@ export function getPreRenderable(val: LinkedValueConfiguration): string {
 }
 
 /** returns the pre-renderable (non-expanded) value, but masks out passwords in case a direct value is used. */
-export function getMaskedPreRenderable(
-  val: LinkedValueConfiguration,
-  type: ParameterType
-): string {
-  return val?.linkExpression
-    ? val?.linkExpression
-    : maskIfPassword(val?.value, type);
+export function getMaskedPreRenderable(val: LinkedValueConfiguration, type: ParameterType): string {
+  return val?.linkExpression ? val?.linkExpression : maskIfPassword(val?.value, type);
 }
 
 export class LinkVariable {
@@ -45,7 +39,7 @@ export function getRenderPreview(
   val: LinkedValueConfiguration,
   process: ApplicationConfiguration,
   instance: InstanceConfigurationDto,
-  system: SystemConfiguration
+  system: SystemConfiguration,
 ): string {
   if (val.linkExpression) {
     // need to expand. gather all supported expansions for the preview.
@@ -97,7 +91,7 @@ export function expand(val: string, vars: LinkVariable[]) {
 
 export function gatherVariableExpansions(
   instance: InstanceConfigurationDto,
-  system: SystemConfiguration
+  system: SystemConfiguration,
 ): LinkVariable[] {
   const result: LinkVariable[] = [];
 
@@ -149,7 +143,7 @@ export function maskIfPassword(value: string, type: ParameterType) {
 export function gatherProcessExpansions(
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
-  apps: ApplicationDto[] = []
+  apps: ApplicationDto[] = [],
 ): LinkVariable[] {
   if (!instance?.nodeDtos?.length) {
     return [];
@@ -168,11 +162,7 @@ export function gatherProcessExpansions(
 
   for (const node of instance.nodeDtos) {
     for (const app of node.nodeConfiguration.applications) {
-      if (
-        node.nodeName === CLIENT_NODE_NAME &&
-        app.name === process?.name &&
-        app.id !== process?.id
-      ) {
+      if (node.nodeName === CLIENT_NODE_NAME && app.name === process?.name && app.id !== process?.id) {
         // client app for different OS - this is actually not well supported, we cannot resolve parameters of this.
         continue;
       }
@@ -195,7 +185,7 @@ function processParameter(
   app: ApplicationConfiguration,
   param: ParameterConfiguration,
   apps: ApplicationDto[],
-  result: LinkVariable[]
+  result: LinkVariable[],
 ) {
   let link = `{{V:${app.name}:${param.id}}}`;
   let group = app.name;
@@ -210,9 +200,7 @@ function processParameter(
   let desc = '';
 
   // process value according to type is possible and required.
-  const appDesc = apps?.find(
-    (a) => a.key.name === app.application.name
-  )?.descriptor;
+  const appDesc = apps?.find((a) => a.key.name === app.application.name)?.descriptor;
   if (appDesc) {
     for (const paramDesc of appDesc.startCommand.parameters) {
       if (paramDesc.id === param.id) {
@@ -251,40 +239,35 @@ export function gatherPathExpansions(): LinkVariable[] {
   });
   result.push({
     name: 'P:RUNTIME',
-    description:
-      'The directory where version specific runtime information is stored.',
+    description: 'The directory where version specific runtime information is stored.',
     preview: '/deploy/instance/bin/1/runtime',
     link: '{{P:RUNTIME}}',
     group: null,
   });
   result.push({
     name: 'P:BIN',
-    description:
-      'The directory where binaries are installed without pooling (per instance version).',
+    description: 'The directory where binaries are installed without pooling (per instance version).',
     preview: '/deploy/instance/bin/1',
     link: '{{P:BIN}}',
     group: null,
   });
   result.push({
     name: 'P:DATA',
-    description:
-      'The directory where applications can place version independant data.',
+    description: 'The directory where applications can place version independant data.',
     preview: '/deploy/instance/data',
     link: '{{P:DATA}}',
     group: null,
   });
   result.push({
     name: 'P:MANIFEST_POOL',
-    description:
-      'The directory where globally pooled applications are installed.',
+    description: 'The directory where globally pooled applications are installed.',
     preview: '/deploy/pool',
     link: '{{P:MANIFEST_POOL}}',
     group: null,
   });
   result.push({
     name: 'P:INSTANCE_MANIFEST_POOL',
-    description:
-      'The directory where instance-locally pooled applications are installed.',
+    description: 'The directory where instance-locally pooled applications are installed.',
     preview: '/deploy/instance/pool',
     link: '{{P:INSTANCE_MANIFEST_POOL}}',
     group: null,
@@ -295,7 +278,7 @@ export function gatherPathExpansions(): LinkVariable[] {
 export function gatherSpecialExpansions(
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
-  system: SystemConfiguration
+  system: SystemConfiguration,
 ): LinkVariable[] {
   const result: LinkVariable[] = [];
 
@@ -401,8 +384,7 @@ export function gatherSpecialExpansions(
 
   result.push({
     name: 'WINDOWS',
-    description:
-      'Expands to the provided value only in case of the target node running Windows.',
+    description: 'Expands to the provided value only in case of the target node running Windows.',
     preview: '<windows-value>',
     link: '{{WINDOWS:<windows-value>}}',
     group: null,
@@ -417,8 +399,7 @@ export function gatherSpecialExpansions(
 
   result.push({
     name: 'LINUX',
-    description:
-      'Expands to the provided value only in case of the target node running Linux.',
+    description: 'Expands to the provided value only in case of the target node running Linux.',
     preview: '<linux-value>',
     link: '{{LINUX:<linux-value>}}',
     group: null,
@@ -442,14 +423,63 @@ export function gatherSpecialExpansions(
     expand: (s) => expandCondition(s, instance, process, system),
   });
 
+  result.push({
+    name: 'XML',
+    description: 'Escapes special XML characters',
+    preview: '<xml>',
+    link: '{{XML:<xml>}}',
+    group: null,
+    matches: (s) => s.startsWith('{{XML:') && s.endsWith('}}'),
+    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.XML, s, instance, process, system),
+  });
+
+  result.push({
+    name: 'JSON',
+    description: 'Escapes special JSON characters',
+    preview: '<json>',
+    link: '{{JSON:<json>}}',
+    group: null,
+    matches: (s) => s.startsWith('{{JSON:') && s.endsWith('}}'),
+    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.JSON, s, instance, process, system),
+  });
+
+  result.push({
+    name: 'YAML',
+    description: 'Escapes special YAML characters',
+    preview: '<yaml>',
+    link: '{{YAML:<yaml>}}',
+    group: null,
+    matches: (s) => s.startsWith('{{YAML:') && s.endsWith('}}'),
+    expand: (s) => expandEscapeSpecialCharacters(SpecialCharacterType.YAML, s, instance, process, system),
+  });
+
   return result;
+}
+
+function expandEscapeSpecialCharacters(
+  type: SpecialCharacterType,
+  s: string,
+  instance: InstanceConfigurationDto,
+  process: ApplicationConfiguration,
+  system: SystemConfiguration,
+): string {
+  const prefix = `{{${type}:`;
+  if (!s.startsWith(prefix) || !s.endsWith('}}')) {
+    return s; // malformed, don't expand
+  }
+  const expr = s.substring(prefix.length, s.indexOf('}}'));
+  let unescaped = getRenderPreview(createLinkedValue(`{{${expr}}}`), process, instance, system);
+  if (unescaped.startsWith('{{') && unescaped.endsWith('}}')) {
+    unescaped = unescaped.substring('{{'.length, unescaped.indexOf('}}'));
+  }
+  return escapeSpecialCharacters(type, unescaped);
 }
 
 export function expandCondition(
   condition: string,
   instance: InstanceConfigurationDto,
   process: ApplicationConfiguration,
-  system: SystemConfiguration
+  system: SystemConfiguration,
 ) {
   const match = condition.match(/{{IF:([^?]*)\?([^:]*):(.*)}}/);
 
@@ -461,19 +491,9 @@ export function expandCondition(
   const valIfTrue = match[2];
   const valIfFalse = match[3];
 
-  const exprResult = getRenderPreview(
-    createLinkedValue(`{{${expr}}}`),
-    process,
-    instance,
-    system
-  );
+  const exprResult = getRenderPreview(createLinkedValue(`{{${expr}}}`), process, instance, system);
 
-  if (
-    exprResult !== null &&
-    exprResult !== undefined &&
-    exprResult.trim() !== '' &&
-    exprResult.trim() !== 'false'
-  ) {
+  if (exprResult !== null && exprResult !== undefined && exprResult.trim() !== '' && exprResult.trim() !== 'false') {
     return valIfTrue;
   }
   return valIfFalse;

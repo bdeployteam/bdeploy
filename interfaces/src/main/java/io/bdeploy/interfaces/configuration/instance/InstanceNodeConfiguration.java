@@ -29,6 +29,9 @@ import io.bdeploy.interfaces.variables.ConditionalExpressionResolver;
 import io.bdeploy.interfaces.variables.DelayedVariableResolver;
 import io.bdeploy.interfaces.variables.EmptyVariableResolver;
 import io.bdeploy.interfaces.variables.EnvironmentVariableResolver;
+import io.bdeploy.interfaces.variables.EscapeJsonCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeXmlCharactersResolver;
+import io.bdeploy.interfaces.variables.EscapeYamlCharactersResolver;
 import io.bdeploy.interfaces.variables.InstanceAndSystemVariableResolver;
 import io.bdeploy.interfaces.variables.ManifestSelfResolver;
 import io.bdeploy.interfaces.variables.OsVariableResolver;
@@ -117,6 +120,9 @@ public class InstanceNodeConfiguration {
             list.add(new ApplicationParameterValueResolver(app.id, dc));
             list.add(new ManifestSelfResolver(app.application, valueResolver));
             list.add(valueResolver);
+            list.add(new EscapeJsonCharactersResolver(list));
+            list.add(new EscapeXmlCharactersResolver(list));
+            list.add(new EscapeYamlCharactersResolver(list));
             ProcessConfiguration pc = app.renderDescriptor(list);
             pgc.applications.add(pc);
         }
