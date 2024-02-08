@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$">
-  <app-bd-dialog-toolbar header="Data Files - {{ instance?.instanceConfiguration?.name }}">
+  <app-bd-dialog-toolbar header="Data Files">
     <div class="flex-auto"></div>
     <ng-container *ngIf="cfg.isCentral$ | async">
       <app-bd-server-sync-button [server]="instance?.managedServer"></app-bd-server-sync-button>

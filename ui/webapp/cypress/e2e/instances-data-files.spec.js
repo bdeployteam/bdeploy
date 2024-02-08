@@ -27,7 +27,7 @@ describe('Instance Data Files Tests', () => {
     // Add Server Process
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should('exist');
+      cy.contains('mat-toolbar', instanceName).should('exist');
       cy.get('app-config-node[data-cy="master"]').within((node) => {
         cy.get('button[data-cy^="Add Application"]').click();
       });

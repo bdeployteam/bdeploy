@@ -1,7 +1,5 @@
 <app-bd-dialog [loadingWhen$]="clients.loading$">
-  <app-bd-dialog-toolbar
-    header="Client Applications - {{ (groups.current$ | async)?.name }}"
-  >
+  <app-bd-dialog-toolbar header="Client Applications">
     <div class="flex-auto"></div>
     <app-bd-data-grouping
       [multiple]="!isCardView"
@@ -30,9 +28,7 @@
       [grid]="isCardView"
     >
       <app-bd-no-data>
-        <p class="text-center">
-          No instance in this instance group has configured client applications.
-        </p>
+        <p class="text-center">No instance in this instance group has configured client applications.</p>
       </app-bd-no-data>
     </app-bd-data-display>
   </app-bd-dialog-content>

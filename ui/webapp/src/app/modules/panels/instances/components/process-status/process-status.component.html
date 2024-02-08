@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="loading$" [hideContentWhenLoading]="false">
-  <app-bd-dialog-toolbar [panel]="true" header="Process {{ processConfig?.name }}">
+  <app-bd-dialog-toolbar [panel]="true" header="{{ processConfig?.name }}">
     <div class="flex-auto"></div>
     <app-process-status-icon
       [record]="processConfig"

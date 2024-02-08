@@ -21,7 +21,7 @@ import { BdPanelButtonComponent } from '../bd-panel-button/bd-panel-button.compo
 })
 export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
   private title = inject(Title);
-  private areas = inject(NavAreasService);
+  protected areas = inject(NavAreasService);
   private bop = inject(BreakpointObserver);
 
   protected narrow$ = new BehaviorSubject<boolean>(true);
@@ -40,7 +40,7 @@ export class BdDialogToolbarComponent implements OnInit, OnChanges, OnDestroy {
     this.subscription = combineLatest([this.bop.observe('(max-width: 800px)'), this.areas.panelMaximized$]).subscribe(
       ([bs, max]) => {
         this.narrow$.next(bs.matches || !max);
-      }
+      },
     );
 
     this.ngOnChanges();

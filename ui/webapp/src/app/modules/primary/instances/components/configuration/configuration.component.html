@@ -1,5 +1,5 @@
 <app-bd-dialog [loadingWhen$]="edit.saving$">
-  <app-bd-dialog-toolbar header="Configuration - {{ headerName$ | async }}">
+  <app-bd-dialog-toolbar header="Configuration{{ dirtyMarker$ | async }}">
     <div class="flex-auto"></div>
     <div class="local-version-text" *ngIf="edit.current$ | async as inst">
       <ng-container *ngIf="!(narrow$ | async)"

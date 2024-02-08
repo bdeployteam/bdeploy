@@ -11,7 +11,7 @@
 
 <app-bd-dialog [loadingWhen$]="hives.loading$">
   <app-bd-dialog-toolbar
-    [header]="'Browse ' + (bhive$ | async)"
+    [header]="type === 'bhive' ? ('Browse ' + (bhive$ | async)) : 'View Content'"
     [panel]="true"
     [relative]="true"
     [route]="['..', '..']"

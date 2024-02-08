@@ -28,9 +28,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });
@@ -47,9 +45,7 @@ describe('Instance Settings Tests', () => {
     });
 
     cy.inMainNavContent(() => {
-      cy.contains('mat-toolbar', `Configuration - ${instanceName} (*)`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', `Configuration*`).should('exist');
       cy.pressToolbarButton('Local Changes');
     });
 
@@ -65,12 +61,8 @@ describe('Instance Settings Tests', () => {
     cy.checkMainNavFlyinClosed();
 
     cy.inMainNavContent(() => {
-      cy.contains('mat-toolbar', `Configuration - ${instanceName} (*)`).should(
-        'not.exist'
-      );
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', `Configuration*`).should('not.exist');
+      cy.contains('mat-toolbar', `Configuration`).should('exist');
     });
   });
 
@@ -81,9 +73,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });
@@ -134,18 +124,14 @@ describe('Instance Settings Tests', () => {
     // Add Server Process
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
       cy.get('app-config-node[data-cy="master"]').within((node) => {
         cy.get('button[data-cy^="Add Application"]').click();
       });
     });
 
     cy.inMainNavFlyin('app-add-process', () => {
-      cy.contains('tr', 'Server Application')
-        .find('button[data-cy^="Add Server"]')
-        .click();
+      cy.contains('tr', 'Server Application').find('button[data-cy^="Add Server"]').click();
       cy.waitUntilContentLoaded();
       cy.pressToolbarButton('Close');
     });
@@ -167,11 +153,7 @@ describe('Instance Settings Tests', () => {
       // add optional sleep parameter and set value
       cy.contains('mat-expansion-panel', 'Test Parameters').within(() => {
         cy.get('mat-panel-title').click();
-        cy.get('mat-expansion-panel-header').should(
-          'have.attr',
-          'aria-expanded',
-          'true'
-        );
+        cy.get('mat-expansion-panel-header').should('have.attr', 'aria-expanded', 'true');
 
         cy.get('button[data-cy^="Select Parameters"]').click();
 
@@ -189,9 +171,7 @@ describe('Instance Settings Tests', () => {
           cy.get('app-bd-form-input[name="param.text_val"]').within(() => {
             cy.contains('mat-button-toggle', 'data_object').click();
           });
-          cy.get('app-bd-form-input[name="param.text_link"]')
-            .should('exist')
-            .click();
+          cy.get('app-bd-form-input[name="param.text_link"]').should('exist').click();
         });
       });
     });
@@ -220,9 +200,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });
@@ -239,11 +217,9 @@ describe('Instance Settings Tests', () => {
         cy.get('button[data-cy="Delete"]').click({ force: true }); // .hidden
       });
 
-      cy.contains('app-bd-notification-card', 'Delete dummy2.cfg').within(
-        () => {
-          cy.get('button[data-cy="Yes"]').click();
-        }
-      );
+      cy.contains('app-bd-notification-card', 'Delete dummy2.cfg').within(() => {
+        cy.get('button[data-cy="Yes"]').click();
+      });
 
       cy.contains('tr', 'dummy2.cfg').should('not.exist');
 
@@ -252,12 +228,10 @@ describe('Instance Settings Tests', () => {
         cy.get('button[data-cy="Rename"]').click({ force: true }); // .hidden
       });
 
-      cy.contains('app-bd-notification-card', 'Rename binary.cfg').within(
-        () => {
-          cy.fillFormInput('newName', 'binary2.cfg');
-          cy.get('button[data-cy="Confirm"]').should('be.enabled').click();
-        }
-      );
+      cy.contains('app-bd-notification-card', 'Rename binary.cfg').within(() => {
+        cy.fillFormInput('newName', 'binary2.cfg');
+        cy.get('button[data-cy="Confirm"]').should('be.enabled').click();
+      });
     });
 
     cy.inMainNavFlyin('app-config-files', () => {
@@ -297,10 +271,7 @@ describe('Instance Settings Tests', () => {
             cy.get('button[data-cy="Rename"]').should('be.disabled');
             cy.get('button[data-cy="Edit"]').should('be.disabled');
 
-            cy.get('button[data-cy^="Create from product"]')
-              .should('exist')
-              .and('be.enabled')
-              .click({ force: true }); // .hidden
+            cy.get('button[data-cy^="Create from product"]').should('exist').and('be.enabled').click({ force: true }); // .hidden
           });
       });
 
@@ -320,12 +291,10 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavFlyin('app-config-files', () => {
       cy.pressToolbarButton('Add File');
-      cy.contains('app-bd-notification-card', 'Add Configuration File').within(
-        () => {
-          cy.fillFormInput('path', 'test.json');
-          cy.get('button[data-cy="OK"]').click();
-        }
-      );
+      cy.contains('app-bd-notification-card', 'Add Configuration File').within(() => {
+        cy.fillFormInput('path', 'test.json');
+        cy.get('button[data-cy="OK"]').click();
+      });
 
       cy.contains('tr', 'test.json')
         .should('exist')
@@ -359,9 +328,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });
@@ -380,16 +347,8 @@ describe('Instance Settings Tests', () => {
         .click('top');
 
       cy.get('app-bd-banner').within(() => {
-        cy.get('[data-cy=banner]').should(
-          'have.css',
-          'background-color',
-          'rgb(46, 125, 50)'
-        );
-        cy.get('[data-cy=banner]').should(
-          'have.css',
-          'color',
-          'rgb(255, 255, 255)'
-        );
+        cy.get('[data-cy=banner]').should('have.css', 'background-color', 'rgb(46, 125, 50)');
+        cy.get('[data-cy=banner]').should('have.css', 'color', 'rgb(255, 255, 255)');
         cy.contains('This is a banner text').should('exist');
       });
     });
@@ -402,16 +361,8 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-bd-banner').within(() => {
-        cy.get('[data-cy=banner]').should(
-          'have.css',
-          'background-color',
-          'rgb(46, 125, 50)'
-        );
-        cy.get('[data-cy=banner]').should(
-          'have.css',
-          'color',
-          'rgb(255, 255, 255)'
-        );
+        cy.get('[data-cy=banner]').should('have.css', 'background-color', 'rgb(46, 125, 50)');
+        cy.get('[data-cy=banner]').should('have.css', 'color', 'rgb(255, 255, 255)');
         cy.contains('This is a banner text').should('exist');
       });
     });
@@ -427,11 +378,7 @@ describe('Instance Settings Tests', () => {
       cy.get('button[data-cy^="Remove"]').should('be.disabled');
 
       cy.get('app-bd-banner').within(() => {
-        cy.get('[data-cy=banner]').should(
-          'not.have.css',
-          'background-color',
-          'rgb(46, 125, 50)'
-        );
+        cy.get('[data-cy=banner]').should('not.have.css', 'background-color', 'rgb(46, 125, 50)');
         cy.contains('This is a banner text').should('not.exist');
       });
     });
@@ -448,9 +395,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });
@@ -461,11 +406,9 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavFlyin('app-ports', () => {
       cy.get('button[data-cy^="Export"]').downloadByLinkClick('ports.csv');
-      cy.readFile(Cypress.config('downloadsFolder') + '/ports.csv').then(
-        (content) => {
-          expect(content).to.contain('Application,Name,Description,Port');
-        }
-      );
+      cy.readFile(Cypress.config('downloadsFolder') + '/ports.csv').then((content) => {
+        expect(content).to.contain('Application,Name,Description,Port');
+      });
     });
   });
 
@@ -476,9 +419,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });
@@ -564,9 +505,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });
@@ -616,9 +555,7 @@ describe('Instance Settings Tests', () => {
 
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
-      cy.contains('mat-toolbar', `Configuration - ${instanceName}`).should(
-        'exist'
-      );
+      cy.contains('mat-toolbar', instanceName).should('exist');
 
       cy.pressToolbarButton('Instance Settings');
     });

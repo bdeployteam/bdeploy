@@ -178,7 +178,7 @@ describe('Groups Tests', () => {
 
     // "Create new Instance" switches back to the Instance Group dialog...
     cy.inMainNavContent(() => {
-      cy.contains('mat-toolbar', `Instances of ${groupName}`).should('exist');
+      cy.contains('mat-toolbar', `Instances`).should('exist');
     });
     // ...with opened "Add Instance" flyin
     cy.inMainNavFlyin('app-add-instance', () => {
