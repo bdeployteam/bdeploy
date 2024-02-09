@@ -28,7 +28,7 @@ function escapeXmlCharacters(unescaped: string): string {
 
 function escapeJsonCharacters(unescaped: string): string {
   return unescaped
-    .replace(/\b/g, '\\b') // Backspace is replaced with \b
+    .replace(/x08/g, '\\b') // Backspace is replaced with \b
     .replace(/\f/g, '\\f') // Form feed is replaced with \f
     .replace(/\n/g, '\\n') // Newline is replaced with \n
     .replace(/\r/g, '\\r') // Carriage return is replaced with \r
