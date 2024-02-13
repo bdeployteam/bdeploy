@@ -85,6 +85,7 @@ import io.bdeploy.jersey.actions.ActionService;
 import io.bdeploy.jersey.actions.ActionService.ActionHandle;
 import io.bdeploy.jersey.ws.change.ObjectChangeWebSocket;
 import io.bdeploy.logging.audit.RollingFileAuditor;
+import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.store.imap.custom.ExecuteUnreadMessagesReceiver;
 import io.bdeploy.messaging.transport.smtp.SMTPTransportConnectionHandler;
@@ -93,7 +94,6 @@ import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
 import io.bdeploy.minion.job.SyncLdapUserGroupsJob;
-import io.bdeploy.minion.mail.MinionRootMailHandler;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
 import io.bdeploy.minion.nodes.NodeManagerImpl;
@@ -178,7 +178,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         this.nodeManager = new NodeManagerImpl();
 
         this.mailReceiver.addSearchTerm(new SubjectTerm(MAIL_SUBJECT_PATTERN_CONFIG_OF));
-        this.mailReceiver.addOnUnreadMessageFoundListener(new MinionRootMailHandler(this)::handleMail);
+    }
+
+    public void configureMessageHandler(Consumer<MessageDataHolder> listener) {
+        this.mailReceiver.addOnUnreadMessageFoundListener(listener);
     }
 
     public void markConnectionCheckFailed() {

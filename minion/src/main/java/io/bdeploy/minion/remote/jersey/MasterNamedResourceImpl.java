@@ -122,6 +122,7 @@ import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.MimeFile;
 import io.bdeploy.messaging.util.MessagingUtils;
 import io.bdeploy.minion.MinionRoot;
+import io.bdeploy.minion.mail.AttachmentUtils;
 import io.bdeploy.ui.RequestScopedParallelOperationsService;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
@@ -636,7 +637,7 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
                 if (root.getMode() == MinionMode.MANAGED && root.getSettings().mailSenderSettings.enabled) {
                     //Note that we are not allowed to use Files.createTempFile() here, because that method always immediately creates the file.
                     //This is not okay to do here, because the constructor of BHive requires the Path-object to not yet exist in the file system.
-                    String uniqueId = name + "#" + instanceConfig.id;
+                    String uniqueId = AttachmentUtils.getAttachmentNameFromData(name, instanceConfig.id);
                     Path targetFile = root.getTempDir().resolve(getClass().getName() + "#TempMailBHive#" + uniqueId + ".zip");
 
                     URI targetUri = targetFile.toUri();

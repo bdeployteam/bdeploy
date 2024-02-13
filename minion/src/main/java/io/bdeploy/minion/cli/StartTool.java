@@ -55,6 +55,7 @@ import io.bdeploy.minion.api.v1.PublicProductValidationResourceImpl;
 import io.bdeploy.minion.api.v1.PublicRootResourceImpl;
 import io.bdeploy.minion.cli.StartTool.MasterConfig;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdownImpl;
+import io.bdeploy.minion.mail.MinionRootMailHandler;
 import io.bdeploy.minion.plugin.VersionSorterServiceImpl;
 import io.bdeploy.minion.remote.jersey.CentralUpdateResourceImpl;
 import io.bdeploy.minion.remote.jersey.CommonDirectoryEntryResourceImpl;
@@ -300,6 +301,8 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         srv.register(new MinionCommonBinder(root, ocws));
         srv.registerResource(r);
+
+        root.configureMessageHandler(new MinionRootMailHandler(root.getTempDir(), r)::handleMail);
 
         SchemaResources.register(srv);
 
