@@ -40,6 +40,9 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
         @Help("A full authentication pack which is used instead of user and password to authenticate")
         String token();
 
+        @Help("Instructs the --add command to replace existing users instead of throwing an error upon duplicate name entry")
+        boolean replace() default false;
+
         @Help("Remove the given stored login session")
         String remove();
 
@@ -110,7 +113,7 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
             pass = System.console().readPassword();
         }
 
-        llm.login(config.add(), config.remote(), user, new String(pass));
+        llm.login(config.replace(), config.add(), config.remote(), user, pass);
     }
 
 }

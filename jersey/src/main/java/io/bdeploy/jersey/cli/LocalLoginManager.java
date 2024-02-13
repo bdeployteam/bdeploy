@@ -82,16 +82,16 @@ public class LocalLoginManager {
         }
     }
 
-    public void login(String serverName, String url, String user, String password) {
+    public void login(boolean replace, String serverName, String url, String user, char[] password) {
         LocalLoginData data = read();
 
-        if (data.servers.containsKey(serverName)) {
+        if (!replace && data.servers.containsKey(serverName)) {
             throw new IllegalStateException("Server with name " + serverName + " already exists.");
         }
 
         AuthDto auth = new AuthDto();
         auth.user = user;
-        auth.password = password;
+        auth.password = new String(password);
 
         // Cannot use JerseyClientFactory as we do not have a token yet... need to trust all servers here.
         ClientBuilder builder = ClientBuilder.newBuilder().hostnameVerifier((h, s) -> true).sslContext(createTrustAllContext());
