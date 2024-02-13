@@ -44,6 +44,7 @@ interface Node<T> {
   item: T;
   groupOrFirstColumn: any;
   children: Node<T>[];
+  checkForbidden: boolean;
 }
 
 /** Represents a flattened presentation of Node<T> which is used by the underlying control to render rows */
@@ -160,6 +161,12 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
   @Input() checkChangeAllowed: (row: T, target: boolean) => Observable<boolean>;
 
   /**
+   * checkChangeAllowed is invoked on checkbox click and is currently used to prompt user confirmation for selection
+   * checkChangeForbidden is invoked during generateModel phase and should be used when we want to exclude certain records (and subsequently groups with header) from selection
+   */
+  @Input() checkChangeForbidden: (record: T) => boolean = () => false;
+
+  /**
    * If given, disables *all* checkboxes in check mode (including the header checkboxes) in case the value is true.
    */
   @Input() checkedFrozenWhen$: BehaviorSubject<boolean>;
@@ -238,6 +245,9 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
 
   /** The model holding the current checkbox selection state */
   protected checkSelection = new SelectionModel<FlatNode<T>>(true);
+
+  /** The flag that disables header checkbox in checkMode. Recalculated on every update */
+  protected headerCheckForbidden = false;
 
   /** The data source used by the table - using the flattened hierarchy given by the treeControl */
   /* tempalte */ dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
@@ -354,6 +364,9 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       this.treeControl.expandAll();
     }
 
+    // if some node cannot be selected, when header selection should be disabled as well
+    this.headerCheckForbidden = this.dataSource.data.some((node) => node.checkForbidden);
+
     // columns may change due to grouping.
     this.updateColumnsToDisplay();
     this.redraw();
@@ -433,6 +446,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
             item: null,
             groupOrFirstColumn: key,
             children: children,
+            checkForbidden: children.some((child) => child.checkForbidden),
           });
         }
       }
@@ -462,6 +476,7 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
       item: i,
       groupOrFirstColumn: this._columns[0].data(i),
       children: [],
+      checkForbidden: this.checkChangeForbidden(i),
     }));
   }
 
@@ -514,12 +529,13 @@ export class BdDataTableComponent<T> implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  protected toggleCheckAll() {
+  protected toggleCheckAll(cb: MatCheckbox) {
     const isChecked = this.isAnyChecked();
     isChecked
       ? this.checkSelection.deselect(...this.treeControl.dataNodes)
       : this.checkSelection.select(...this.treeControl.dataNodes);
     this.checkedChange.emit(this.checkSelection.selected.filter((s) => !!s.node.item).map((s) => s.node.item));
+    cb.checked = !isChecked;
   }
 
   protected isChecked(node: FlatNode<T>) {

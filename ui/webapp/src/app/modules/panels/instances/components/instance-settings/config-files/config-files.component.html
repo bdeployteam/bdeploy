@@ -19,17 +19,22 @@
 </ng-template>
 
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    header="Configuration Files"
-    [panel]="true"
-    [route]="['..']"
-  >
+  <app-bd-dialog-toolbar header="Configuration Files" [panel]="true" [route]="['..']">
     <div class="flex-auto"></div>
     <app-bd-button
-      text="Add File"
-      icon="add"
-      (click)="doAddFile(addDialog)"
+      *ngIf="bulkMode && (bulkSelection$ | async).length"
+      text="Delete Selected Files"
+      icon="delete"
+      (click)="bulkDelete()"
+      tooltip="below"
     ></app-bd-button>
+    <app-bd-button
+      icon="library_add_check"
+      text="Bulk Manipulation"
+      (click)="bulkMode = !bulkMode"
+      tooltip="below"
+    ></app-bd-button>
+    <app-bd-button text="Add File" icon="add" (click)="doAddFile(addDialog)"></app-bd-button>
     <mat-divider [vertical]="true"></mat-divider>
   </app-bd-dialog-toolbar>
   <app-bd-dialog-content>
@@ -38,6 +43,10 @@
       [records]="records$ | async"
       [columns]="columns"
       [sort]="{ active: 'name', direction: 'asc' }"
+      [checkMode]="bulkMode"
+      [checked]="bulkSelection$ | async"
+      (checkedChange)="bulkSelection$.next($event)"
+      [checkChangeForbidden]="checkChangeForbidden"
     ></app-bd-data-table>
   </app-bd-dialog-content>
 </app-bd-dialog>
