@@ -135,8 +135,7 @@ public class ProductResourceImpl implements ProductResource {
             Manifest.Key key = new Manifest.Key(name, tag);
             Set<Key> existing = hive.execute(new ManifestListOperation().setManifestName(key.toString()));
             if (existing.size() != 1) {
-                log.warn("Cannot uniquely identify {} to delete", key);
-                return;
+                throw new WebApplicationException("Cannot identify " + key + " to delete", Status.BAD_REQUEST);
             }
 
             if (!getProductUsedIn(name, tag).isEmpty()) {
