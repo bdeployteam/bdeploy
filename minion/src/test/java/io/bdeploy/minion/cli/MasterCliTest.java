@@ -28,7 +28,6 @@ import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.util.UuidHelper;
 import io.bdeploy.interfaces.manifest.MinionManifest;
 import io.bdeploy.interfaces.remote.ResourceProvider;
-import io.bdeploy.jersey.cli.LocalLoginTool;
 import io.bdeploy.minion.BCX509Helper;
 import io.bdeploy.minion.MinionRoot;
 import io.bdeploy.minion.cli.shutdown.RemoteShutdown;

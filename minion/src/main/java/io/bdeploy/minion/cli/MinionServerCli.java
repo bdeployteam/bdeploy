@@ -1,7 +1,6 @@
 package io.bdeploy.minion.cli;
 
 import io.bdeploy.common.cli.ToolBase;
-import io.bdeploy.jersey.cli.LocalLoginTool;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.cli.RemoteNodeTool;
 import io.bdeploy.ui.cli.TextUIResources;
