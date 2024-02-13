@@ -42,6 +42,9 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         @Help(value = "List products on the remote", arg = false)
         boolean list() default false;
 
+        @Help(value = "The product version to delete")
+        String delete();
+
         @Help(value = "Copy a product from a software repository", arg = false)
         boolean copy() default false;
 
@@ -71,6 +74,8 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
 
         if (config.list()) {
             return list(remote, config);
+        } else if (config.delete() != null) {
+            return delete(remote, config);
         } else if (config.copy()) {
             helpAndFailIfMissing(config.instanceGroup(), "Missing --instanceGroup");
             helpAndFailIfMissing(config.repository(), "Missing --repository");
@@ -148,6 +153,12 @@ public class RemoteProductTool extends RemoteServiceTool<ProductConfig> {
         }
 
         return table;
+    }
+
+    private DataResult delete(RemoteService remote, ProductConfig config) {
+        Manifest.Key pkey = Manifest.Key.parse(config.delete());
+        getProductRsrc(remote, config).delete(pkey.getName(), pkey.getTag());
+        return createSuccess();
     }
 
     private DataResult copy(RemoteService remote, ProductConfig config) {
