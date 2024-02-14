@@ -60,6 +60,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                 log.error("Failed to start idle.", e);
             }
         });
+        idleThread.start();
     }
 
     @Override
