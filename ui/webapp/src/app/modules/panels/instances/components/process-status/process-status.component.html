@@ -185,7 +185,8 @@
             [text]="'Open UI: ' + ep.id"
             icon="preview"
             [collapsed]="false"
-            [routerLink]="getRouterLink(ep)"
+            [disabled]="!ep.proxying && !ep.directUri"
+            (click)="openUI(ep)"
           ></app-bd-button>
         </ng-container>
         <ng-container *ngIf="pinnedParameters?.length">
