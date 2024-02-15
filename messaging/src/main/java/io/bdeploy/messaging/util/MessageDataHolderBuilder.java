@@ -1,8 +1,8 @@
 package io.bdeploy.messaging.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,9 +101,6 @@ public class MessageDataHolderBuilder {
                 // we therefore add 1 to the digits to make sure that we have sufficient space for the String.format call
                 int totalAmountOfBytes = bodyPart.getSize();
                 int digitsInBase10PlusOne = 2 + (int) Math.log10(totalAmountOfBytes);
-                ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[totalAmountOfBytes]);
-                byte[] nBytes;
-
                 BiConsumer<Integer, Integer> loggingListener = (readBytesCount, progress) -> {
                     if (traceEnabled) {
                         log.trace(String.format("Reading attachment: %3s%% (%" + digitsInBase10PlusOne + "s/%s)", progress,
@@ -111,13 +108,15 @@ public class MessageDataHolderBuilder {
                     }
                 };
 
+                ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+                byte[] tempBuffer = new byte[BYTES_PER_LOOP];
+                int nRead;
                 try (ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, totalAmountOfBytes);) {
                     progressInputStream.addListener(loggingListener);
                     try {
-                        do {
-                            nBytes = progressInputStream.readNBytes(BYTES_PER_LOOP);
-                            byteBuffer.put(nBytes);
-                        } while (nBytes.length == BYTES_PER_LOOP);
+                        while ((nRead = progressInputStream.read(tempBuffer, 0, tempBuffer.length)) != -1) {
+                            byteBuffer.write(tempBuffer, 0, nRead);
+                        }
                     } catch (IOException e) {
                         log.error("Failed to read bytes of input stream. The body part will be skipped.", e);
                         continue;
@@ -127,7 +126,7 @@ public class MessageDataHolderBuilder {
                     continue;
                 }
 
-                attachments.add(new MimeFile(bodyPart.getFileName(), byteBuffer.array(), bodyPart.getContentType()));
+                attachments.add(new MimeFile(bodyPart.getFileName(), byteBuffer.toByteArray(), bodyPart.getContentType()));
             } else {
                 sb.append(getTextFromBodyPart(bodyPart, attachments));
             }
