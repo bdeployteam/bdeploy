@@ -205,33 +205,39 @@ public class ManagedServersResourceImpl implements ManagedServersResource {
     public String manualAttachCentral(String central) {
         CentralIdentDto dto = minion.getDecryptedPayload(central, CentralIdentDto.class);
 
-        RemoteService selfSvc = minion.getSelf();
-        RemoteService testSelf = new RemoteService(selfSvc.getUri(), dto.local.auth);
-
-        // will throw if there is an authentication problem.
-        InstanceGroupResource self = ResourceProvider.getVersionedResource(testSelf, InstanceGroupResource.class, context);
-
-        dto.config.logo = null; // later.
-        self.create(dto.config);
-        if (dto.logo != null) {
-            try (ByteArrayInputStream bis = new ByteArrayInputStream(dto.logo); MultiPart mp = new MultiPart();) {
-                StreamDataBodyPart bp = new StreamDataBodyPart("image", bis);
-                bp.setFilename("logo.png");
-                bp.setMediaType(new MediaType("image", "png"));
-                mp.bodyPart(bp);
-
-                WebTarget target = ResourceProvider.of(testSelf).getBaseTarget(new JerseyOnBehalfOfFilter(context))
-                        .path("/group/" + dto.config.name + "/image");
-                Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
-
-                if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-                    throw new IllegalStateException("Image update failed: " + response.getStatusInfo().getReasonPhrase());
-                }
-            } catch (IOException e) {
-                log.error("Failed to update instance group logo", e);
-            }
+        if (dto.config.name == null) {
+            throw new WebApplicationException("Invalid data from central server");
         }
-        return dto.config.name;
+
+        try (ActionHandle handle = af.run(Actions.ATTACH_TO_CENTRAL, dto.config.name)) {
+            RemoteService selfSvc = minion.getSelf();
+            RemoteService testSelf = new RemoteService(selfSvc.getUri(), dto.local.auth);
+
+            // will throw if there is an authentication problem.
+            InstanceGroupResource self = ResourceProvider.getVersionedResource(testSelf, InstanceGroupResource.class, context);
+
+            dto.config.logo = null; // later.
+            self.create(dto.config);
+            if (dto.logo != null) {
+                try (ByteArrayInputStream bis = new ByteArrayInputStream(dto.logo); MultiPart mp = new MultiPart();) {
+                    StreamDataBodyPart bp = new StreamDataBodyPart("image", bis);
+                    bp.setFilename("logo.png");
+                    bp.setMediaType(new MediaType("image", "png"));
+                    mp.bodyPart(bp);
+
+                    WebTarget target = ResourceProvider.of(testSelf).getBaseTarget(new JerseyOnBehalfOfFilter(context))
+                            .path("/group/" + dto.config.name + "/image");
+                    Response response = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE));
+
+                    if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+                        throw new IllegalStateException("Image update failed: " + response.getStatusInfo().getReasonPhrase());
+                    }
+                } catch (IOException e) {
+                    log.error("Failed to update instance group logo", e);
+                }
+            }
+            return dto.config.name;
+        }
     }
 
     @Override

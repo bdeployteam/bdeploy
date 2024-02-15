@@ -58,6 +58,8 @@ public enum Actions {
     TRANSFER_PRODUCT_MANAGED(ActionScope.BHIVE, true, "Transfer Product to Managed"),
     REMOVE_MANAGED(ActionScope.BHIVE, true, "Remove Managed Server"),
 
+    ATTACH_TO_CENTRAL(ActionScope.BHIVE, true, "Attach Instance Group to Central"),
+
     /// ---- server/node
     ADD_NODE(ActionScope.GLOBAL, true, "Add Node"),
     EDIT_NODE(ActionScope.GLOBAL, true, "Edit Node"),
