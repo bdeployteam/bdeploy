@@ -98,7 +98,7 @@ export class ConfigFilesActionsComponent implements OnInit {
     this.parent.dialog
       .confirm(
         `Delete ${this.path}?`,
-        `This will remove the file ${this.path} from the current set of configuration files.`
+        `This will remove the file ${this.path} from the current set of configuration files.`,
       )
       .subscribe((r) => {
         if (r) {
@@ -124,7 +124,7 @@ export class ConfigFilesActionsComponent implements OnInit {
         this.cfgFiles.edit(
           this.record.persistent?.path ? this.record.persistent.path : this.record.modification.file,
           this.tempFileContent,
-          this.tempFileIsBin
+          this.tempFileIsBin,
         );
       });
   }
@@ -164,7 +164,7 @@ export class ConfigFilesActionsComponent implements OnInit {
     this.edit.state$
       .pipe(
         skipWhile((s) => !s?.config?.config?.product),
-        first()
+        first(),
       )
       .subscribe((s) => {
         this.cfgFiles.loadTemplate(this.path, s.config.config.product).subscribe((t) => {
@@ -177,7 +177,7 @@ export class ConfigFilesActionsComponent implements OnInit {
     this.edit.state$
       .pipe(
         skipWhile((s) => !s?.config?.config?.product),
-        first()
+        first(),
       )
       .subscribe((s) => {
         this.cfgFiles.loadTemplate(this.path, s.config.config.product).subscribe((t) => {

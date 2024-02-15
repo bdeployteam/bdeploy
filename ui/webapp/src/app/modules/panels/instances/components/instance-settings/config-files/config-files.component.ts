@@ -36,6 +36,9 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
   protected tempFileContent = '';
   private tempFileIsBin = false;
 
+  protected bulkMode = false;
+  protected bulkSelection$ = new BehaviorSubject<ConfigFile[]>([]);
+
   @ViewChild(BdDialogComponent) public dialog: BdDialogComponent;
   @ViewChild('tempFileInput', { static: false }) private tempFileInput: BdFormInputComponent;
 
@@ -114,5 +117,23 @@ export class ConfigFilesComponent implements OnInit, OnDestroy {
       this.tempFileContentLoading$.next(false);
     };
     reader.readAsDataURL(file);
+  }
+
+  protected bulkDelete() {
+    const selected = this.bulkSelection$.value;
+    this.dialog
+      .confirm(
+        `Delete ${selected.length} files?`,
+        `This will remove ${selected.length} files from the current set of configuration files.`,
+      )
+      .subscribe((r) => {
+        if (r) {
+          selected.map((file) => this.cfgFiles.getPath(file)).forEach((path) => this.cfgFiles.delete(path));
+        }
+      });
+  }
+
+  protected checkChangeForbidden(file: ConfigFile): boolean {
+    return !file?.persistent?.instanceId && !file?.modification?.file;
   }
 }

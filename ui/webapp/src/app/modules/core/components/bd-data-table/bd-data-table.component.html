@@ -53,11 +53,7 @@
 
     <!-- In case no data is available (empty data, filter, etc.)-->
     <tr class="mdc-data-table__row" *matNoDataRow>
-      <td
-        class="mdc-data-table__cell"
-        [attr.colspan]="_visibleColumns.length"
-        class="bd-hint-text"
-      >
+      <td class="mdc-data-table__cell" [attr.colspan]="_visibleColumns.length" class="bd-hint-text">
         No data to show.
       </td>
     </tr>
@@ -69,10 +65,7 @@
       [style.display]="hasMoreData ? 'table-row' : 'none'"
     ></tr>
 
-    <ng-container
-      *ngFor="let col of _columns; let i = index"
-      [matColumnDef]="col.id"
-    >
+    <ng-container *ngFor="let col of _columns; let i = index" [matColumnDef]="col.id">
       <!-- Column headers -->
       <th
         scope="col"
@@ -97,20 +90,15 @@
           *ngIf="checkMode && i === 0"
           [checked]="isAllChecked()"
           [indeterminate]="!isAllChecked() && isAnyChecked()"
-          (change)="toggleCheckAll()"
+          (change)="toggleCheckAll(cb)"
           appClickStopPropagation
-          [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
+          [disabled]="headerCheckForbidden || (!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async))"
           class="truncate local-table-checkbox"
           >{{ col.name }}</mat-checkbox
         >
       </th>
 
-      <td
-        mat-footer-cell
-        *matFooterCellDef
-        [attr.colspan]="_visibleColumns.length"
-        class="bd-hint-text w-auto max-w-0"
-      >
+      <td mat-footer-cell *matFooterCellDef [attr.colspan]="_visibleColumns.length" class="bd-hint-text w-auto max-w-0">
         Some data is hidden. Use the search and/or sort to find it.
       </td>
 
@@ -143,24 +131,17 @@
                 appClickStopPropagation
               >
                 <mat-icon class="mat-icon-rtl-mirror">
-                  {{ treeControl.isExpanded(row) ? 'expand_more' :
-                  'chevron_right' }}
+                  {{ treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right' }}
                 </mat-icon>
               </button>
 
               <!-- Either simple label or check box in check mode -->
               <ng-container *ngIf="!checkMode">
                 <!-- issue with angular: it cannot pick up the drag handle since it is in a child template, so the *whole* row can be dragged... -->
-                <mat-icon
-                  *ngIf="dragReorderMode"
-                  cdkDragHandle
-                  class="local-drag-handle cursor-grab mb-[1px]"
+                <mat-icon *ngIf="dragReorderMode" cdkDragHandle class="local-drag-handle cursor-grab mb-[1px]"
                   >drag_indicator</mat-icon
                 >
-                <div
-                  *ngIf="!col.component || row.expandable"
-                  class="truncate grow basis-0 text-left"
-                >
+                <div *ngIf="!col.component || row.expandable" class="truncate grow basis-0 text-left">
                   {{ row.node.groupOrFirstColumn }}
                 </div>
                 <app-bd-data-component-cell
@@ -177,13 +158,10 @@
                 [indeterminate]="isPartiallyChecked(row)"
                 (change)="toggleCheck(row, cb)"
                 appClickStopPropagation
-                [disabled]="!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async)"
+                [disabled]="row.node.checkForbidden || (!checkedFrozenWhen$ ? false : (checkedFrozenWhen$ | async))"
                 class="truncate local-table-checkbox"
               >
-                <div
-                  *ngIf="!col.component || row.expandable"
-                  class="truncate grow basis-0 text-left"
-                >
+                <div *ngIf="!col.component || row.expandable" class="truncate grow basis-0 text-left">
                   {{ row.node.groupOrFirstColumn }}
                 </div>
                 <app-bd-data-component-cell
@@ -239,11 +217,7 @@
 
         <!-- Items with an action (collapsed button), this may not occur on the first column -->
         <ng-container *ngIf="col.action && !row.expandable">
-          <td
-            mat-cell
-            [style.width]="col.width ? col.width : 'auto'"
-            class="max-w-0"
-          >
+          <td mat-cell [style.width]="col.width ? col.width : 'auto'" class="max-w-0">
             <div class="flex justify-start items-center">
               <app-bd-button
                 *ngIf="row.node.item"
