@@ -116,7 +116,6 @@ public class ExecuteUnreadMessagesReceiver extends IMAPStoreConnectionHandler {
 
         try {
             message.setFlag(Flag.SEEN, true);
-            message.saveChanges();
         } catch (MessagingException e) {
             log.error("Failed to set message " + message.getMessageNumber() + " to seen.", e);
         }
