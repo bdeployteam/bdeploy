@@ -1,5 +1,5 @@
 import { Component, NgZone, OnDestroy, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, Subscription, combineLatest, iif, of } from 'rxjs';
 import { delay, distinctUntilChanged, finalize, map, switchMap } from 'rxjs/operators';
 import { BdDataColumn } from 'src/app/models/data';
@@ -26,6 +26,7 @@ import { ConfigService } from 'src/app/modules/core/services/config.service';
 import { ConfirmationService } from 'src/app/modules/core/services/confirmation.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
 import { getRenderPreview } from 'src/app/modules/core/utils/linked-values.utils';
+import { ClientApp, ClientsService } from 'src/app/modules/primary/groups/services/clients.service';
 import { GroupsService } from 'src/app/modules/primary/groups/services/groups.service';
 import { InstancesService } from 'src/app/modules/primary/instances/services/instances.service';
 import { ProcessesService } from 'src/app/modules/primary/instances/services/processes.service';
@@ -56,6 +57,10 @@ const colPinnedValue: BdDataColumn<PinnedParameter> = {
   component: PinnedParameterValueComponent,
 };
 
+interface ProcessUiEndpoint extends HttpEndpoint {
+  directUri?: string;
+}
+
 @Component({
   selector: 'app-process-status',
   templateUrl: './process-status.component.html',
@@ -68,6 +73,8 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   private systems = inject(SystemsService);
   private zone = inject(NgZone);
   private actions = inject(ActionsService);
+  private router = inject(Router);
+  private clients = inject(ClientsService);
 
   protected auth = inject(AuthenticationService);
   protected groups = inject(GroupsService);
@@ -99,7 +106,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
   protected startType: 'Instance' | 'Manual' | 'Confirmed Manual';
   protected pinnedParameters: PinnedParameter[] = [];
   protected pinnedColumns: BdDataColumn<PinnedParameter>[] = [colPinnedName, colPinnedValue];
-  protected uiEndpoints: HttpEndpoint[] = [];
+  protected uiEndpoints: ProcessUiEndpoint[] = [];
 
   // we only show a loading spinner if loading takes longer than 200ms.
   protected loading$ = this.details.loading$.pipe(switchMap((l) => iif(() => l, of(l).pipe(delay(200)), of(l))));
@@ -204,6 +211,21 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
           const enabled = !!preview && preview !== 'false' && !preview.match(/{{([^}]+)}}/g);
           return enabled;
         });
+
+      if (active?.instanceConfiguration?.id && this.uiEndpoints) {
+        this.uiEndpoints.forEach((e) => {
+          const app = {
+            instanceId: active.instanceConfiguration.id,
+            endpoint: {
+              id: this.processConfig.id,
+              endpoint: e,
+            },
+          } as ClientApp;
+          this.clients.getDirectUiURI(app).subscribe((url) => {
+            e.directUri = url;
+          });
+        });
+      }
 
       // when switching to another process, we *need* to forget those, even if we cannot restore them later on.
       this.starting$.next(false);
@@ -351,9 +373,21 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected getRouterLink(r: HttpEndpoint) {
+  protected openUI(endpoint: ProcessUiEndpoint) {
+    if (!endpoint?.proxying) {
+      this.openUiEndpointDirect(endpoint);
+    } else {
+      this.openInline(endpoint);
+    }
+  }
+
+  private openUiEndpointDirect(r: ProcessUiEndpoint) {
+    window.open(r.directUri, '_blank', 'noreferrer,noopener');
+  }
+
+  private openInline(r: ProcessUiEndpoint) {
     const returnUrl = this.route.snapshot.pathFromRoot.map((s) => s.url.map((u) => u.toString()).join('/')).join('/');
-    return [
+    this.router.navigate([
       '',
       {
         outlets: {
@@ -369,7 +403,7 @@ export class ProcessStatusComponent implements OnInit, OnDestroy {
           ],
         },
       },
-    ];
+    ]);
   }
 
   private doCalculateUptimeString(detail) {
