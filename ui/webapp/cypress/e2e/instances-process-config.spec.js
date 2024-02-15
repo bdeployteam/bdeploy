@@ -364,10 +364,6 @@ describe('Instance Process Config Tests', () => {
     cy.enterInstance(groupName, instanceName);
     cy.pressMainNavButton('Instance Configuration');
 
-    cy.inMainNavContent(() => {
-      cy.pressToolbarButton('Instance Settings');
-    });
-
     cy.screenshot('Doc_InstanceProductUpdateAvail');
 
     cy.inMainNavFlyin('app-instance-settings', () => {

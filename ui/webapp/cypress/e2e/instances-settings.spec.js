@@ -29,8 +29,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -74,8 +72,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -201,8 +197,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -248,7 +242,6 @@ describe('Instance Settings Tests', () => {
 
     // save navigates to dashboard, navigate back
     cy.pressMainNavButton('Instance Configuration');
-    cy.pressToolbarButton('Instance Settings');
 
     cy.inMainNavFlyin('app-instance-settings', () => {
       cy.get('button[data-cy^="Configuration Files"]').click();
@@ -329,8 +322,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -396,8 +387,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -420,8 +409,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -506,8 +493,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
@@ -556,8 +541,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.get('app-configuration').should('exist');
       cy.contains('mat-toolbar', instanceName).should('exist');
-
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {
