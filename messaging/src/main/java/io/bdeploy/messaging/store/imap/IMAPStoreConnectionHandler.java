@@ -71,18 +71,15 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     }
 
     @Override
-    protected void modifyProperties(Properties properties) {
-        super.modifyProperties(properties);
-        properties.put("mail.imap.peek", "true");
-    }
-
-    @Override
     protected Session createSession(Properties properties) throws NoSuchProviderException {
         String protocol = getProtocol();
         switch (protocol) {
             case "imap":
                 properties.put("mail.imap.starttls.enable", "true");
+                properties.put("mail.imap.peek", "true");
+                return Session.getInstance(properties);
             case "imaps":
+                properties.put("mail.imaps.peek", "true");
                 return Session.getInstance(properties);
         }
         throw new NoSuchProviderException("Transport protocol " + protocol + " is not supported.");
