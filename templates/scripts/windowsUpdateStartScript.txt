@@ -39,6 +39,9 @@ IF NOT "%ERRORLEVEL%"=="42" (
 )
 echo "Minion signalled restart request."
 
+@rem Add the --skipAutoStart to avoid re-starting intentionally stopped instances.
+set CMD_LINE_ARGS=%CMD_LINE_ARGS% --skipAutoStart
+
 @rem Check if we have the expected update in place
 IF NOT EXIST "%APP_UPDATE_NEXT%\\lib" (
     echo "No update to be applied has been found. Restarting."

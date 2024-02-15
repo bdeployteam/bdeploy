@@ -93,7 +93,7 @@ public class TestMinion extends TestServer {
 
         // now is the time :D run the after startup.
         CloseableMinionRoot cmr = getExtensionStore(context).get(CloseableMinionRoot.class, CloseableMinionRoot.class);
-        super.afterStartup().thenRun(() -> cmr.mr.afterStartup(true));
+        super.afterStartup().thenRun(() -> cmr.mr.afterStartup(true, false));
     }
 
     @Override

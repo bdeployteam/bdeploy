@@ -109,6 +109,9 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         @Help(value = "Skip the check for a valid host/port configuration", arg = false)
         boolean skipConnectionCheck() default false;
+
+        @Help(value = "Skip auto-start of instances which are configured to automatically start.", arg = false)
+        boolean skipAutoStart() default false;
     }
 
     public StartTool() {
@@ -212,7 +215,7 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
     private BHiveRegistry setupServerCommon(ActivityReporter repo, MinionRoot r, JerseyServer srv, MasterConfig config) {
         r.onStartup(config.consoleLog());
-        srv.afterStartup().thenRun(() -> r.afterStartup(false));
+        srv.afterStartup().thenRun(() -> r.afterStartup(false, config.skipAutoStart()));
 
         srv.setAuditor(r.getAuditor());
         r.setRestartManager(new JerseyAwareMinionRestartManager(srv, r));
