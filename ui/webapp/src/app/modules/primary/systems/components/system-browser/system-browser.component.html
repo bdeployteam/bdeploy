@@ -1,7 +1,5 @@
 <app-bd-dialog [loadingWhen$]="systems.loading$">
-  <app-bd-dialog-toolbar
-    header="Systems of {{ (groups.current$ | async)?.name }}"
-  >
+  <app-bd-dialog-toolbar header="Systems">
     <div class="flex-auto"></div>
     <app-bd-button
       [isToggle]="true"

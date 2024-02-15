@@ -1,7 +1,5 @@
 <app-bd-dialog [loadingWhen$]="products.loading$">
-  <app-bd-dialog-toolbar
-    header="Products of {{ (groups.current$ | async)?.title }}"
-  >
+  <app-bd-dialog-toolbar header="Products">
     <div class="flex-auto"></div>
     <app-bd-data-sorting
       [columns]="productColumns.defaultProductsColumns"

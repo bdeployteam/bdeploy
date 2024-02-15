@@ -1,9 +1,10 @@
 <mat-toolbar class="bd-page-toolbar">
   <mat-toolbar-row class="gap-1">
-    <span [matTooltip]="header" [matTooltipShowDelay]="1000" class="truncate"
-      >{{ header }}</span
-    >
-    <div class="flex-auto flex gap-1">
+    <div class="flex flex-col truncate">
+      <app-bd-current-scope *ngIf="!panel || (areas.panelMaximized$ | async)"></app-bd-current-scope>
+      <span [matTooltip]="header" [matTooltipShowDelay]="1000" class="truncate">{{ header }}</span>
+    </div>
+    <div class="flex-auto flex gap-1 items-center">
       <ng-content></ng-content>
     </div>
     <app-bd-button

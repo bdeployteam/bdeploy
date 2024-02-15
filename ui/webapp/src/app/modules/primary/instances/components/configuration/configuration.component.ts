@@ -79,7 +79,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
   ];
 
   protected narrow$ = new BehaviorSubject<boolean>(true);
-  protected headerName$ = new BehaviorSubject<string>('Loading');
+  protected dirtyMarker$ = new BehaviorSubject<string>('');
 
   protected config$ = new BehaviorSubject<InstanceConfiguration>(null);
   protected serverNodes$ = new BehaviorSubject<InstanceNodeConfigurationDto[]>([]);
@@ -101,41 +101,39 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
-      })
+      }),
     );
 
     this.subscription.add(
-      combineLatest([this.edit.state$, this.products.products$]).subscribe(([state, products]) => {
-        if (!state || !products) {
-          this.config$.next(null);
-          this.serverNodes$.next([]);
-          this.clientNode$.next(null);
-        } else {
-          this.config$.next(state.config.config);
-          this.headerName$.next(
-            this.edit.hasPendingChanges() || this.edit.hasSaveableChanges$.value
-              ? `${state.config.config.name}*`
-              : state.config.config.name
-          );
+      combineLatest([this.edit.state$, this.products.products$, this.edit.hasSaveableChanges$]).subscribe(
+        ([state, products, saveable]) => {
+          if (!state || !products) {
+            this.config$.next(null);
+            this.serverNodes$.next([]);
+            this.clientNode$.next(null);
+          } else {
+            this.config$.next(state.config.config);
+            this.dirtyMarker$.next(this.edit.hasPendingChanges() || saveable ? '*' : '');
 
-          this.serverNodes$.next(
-            state.config.nodeDtos
-              .filter((p) => !this.isClientNode(p))
-              .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName))
-          );
-          this.clientNode$.next(state.config.nodeDtos.find((n) => this.isClientNode(n)));
+            this.serverNodes$.next(
+              state.config.nodeDtos
+                .filter((p) => !this.isClientNode(p))
+                .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)),
+            );
+            this.clientNode$.next(state.config.nodeDtos.find((n) => this.isClientNode(n)));
 
-          const prod = products.find(
-            (p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag
-          );
-          if (prod) {
-            this.templates$.next(prod.instanceTemplates);
+            const prod = products.find(
+              (p) => p.key.name === state.config.config.product.name && p.key.tag === state.config.config.product.tag,
+            );
+            if (prod) {
+              this.templates$.next(prod.instanceTemplates);
+            }
+
+            this.edit.requestValidation();
           }
-
-          this.edit.requestValidation();
-        }
-        this.isEmptyInstance$.next(this.isEmptyInstance());
-      })
+          this.isEmptyInstance$.next(this.isEmptyInstance());
+        },
+      ),
     );
     this.subscription.add(
       combineLatest([this.edit.current$, this.edit.state$]).subscribe(([current, state]) => {
@@ -150,7 +148,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
         const product = current.instanceConfiguration.product;
         const newerVersionOnManaged = current?.managedServer?.productUpdates?.newerVersionAvailable[product.name];
         this.newerProductVerionsAvailable$.next(current.newerVersionAvailable || newerVersionOnManaged);
-      })
+      }),
     );
   }
 
@@ -225,7 +223,7 @@ export class ConfigurationComponent implements OnInit, OnDestroy, DirtyableDialo
       ['products', 'browser', this.groups.current$.value.name],
       ['panels', 'products', 'transfer'],
       {},
-      { queryParams: { product, repo } }
+      { queryParams: { product, repo } },
     );
   }
 }

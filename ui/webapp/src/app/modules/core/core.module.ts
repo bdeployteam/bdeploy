@@ -50,6 +50,7 @@ import { BdButtonComponent } from './components/bd-button/bd-button.component';
 import { BdConfirmationComponent } from './components/bd-confirmation/bd-confirmation.component';
 import { BdContentAssistMenuComponent } from './components/bd-content-assist-menu/bd-content-assist-menu.component';
 import { BdContentAssistDirective } from './components/bd-content-assist/bd-content-assist.directive';
+import { BdCurrentScopeComponent } from './components/bd-current-scope/bd-current-scope.component';
 import { BdCustomEditorComponent } from './components/bd-custom-editor/bd-custom-editor.component';
 import { BdDataCardComponent } from './components/bd-data-card/bd-data-card.component';
 import { BdDataComponentCellComponent } from './components/bd-data-component-cell/bd-data-component-cell.component';
@@ -144,6 +145,7 @@ function loadAppConfig(cfgService: ConfigService) {
     MainNavMenuComponent,
     MainNavContentComponent,
     BdSearchFieldComponent,
+    BdCurrentScopeComponent,
     BdButtonComponent,
     BdDataTableComponent,
     BdDataGridComponent,

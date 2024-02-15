@@ -1,7 +1,5 @@
 <app-bd-dialog [loadingWhen$]="instances.loading$">
-  <app-bd-dialog-toolbar
-    header="Dashboard - {{ !!activeInstance ? activeInstance.instanceConfiguration.name : currentInstance?.instanceConfiguration.name }}"
-  >
+  <app-bd-dialog-toolbar header="Dashboard">
     <div class="flex-auto"></div>
     <div
       class="local-version-text"

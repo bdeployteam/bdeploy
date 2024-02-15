@@ -4,15 +4,11 @@
   [restoreScrollAfterLoad]="true"
   [hideContentWhenLoading]="false"
 >
-  <app-bd-dialog-toolbar
-    header="History - {{ (instances.current$ | async)?.instanceConfiguration.name }}"
-  >
+  <app-bd-dialog-toolbar header="History">
     <div class="flex-auto"></div>
     <ng-container *ngIf="isCentral">
       <ng-container *ngIf="instances.current$ | async as instance">
-        <app-bd-server-sync-button
-          [server]="instance.managedServer"
-        ></app-bd-server-sync-button>
+        <app-bd-server-sync-button [server]="instance.managedServer"></app-bd-server-sync-button>
         <mat-divider [vertical]="true"></mat-divider>
       </ng-container>
     </ng-container>

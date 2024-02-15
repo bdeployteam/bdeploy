@@ -93,7 +93,7 @@ export class BdBHiveBrowserComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
   private lastQuery: string;
 
-  private type: 'bhive' | 'repo' | 'product' | undefined;
+  protected type: 'bhive' | 'repo' | 'product' | undefined;
 
   ngOnInit() {
     this.subscription = combineLatest([this.areas.primaryRoute$, this.areas.panelRoute$]).subscribe(

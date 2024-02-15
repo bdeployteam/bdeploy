@@ -1,7 +1,5 @@
 <app-bd-dialog [loadingWhen$]="repository.loading$">
-  <app-bd-dialog-toolbar
-    header="Software Packages of {{ (repositories.current$ | async)?.name }}"
-  >
+  <app-bd-dialog-toolbar header="Software Packages and Products">
     <div class="flex-auto"></div>
     <app-bd-data-grouping
       [multiple]="!isCardView"

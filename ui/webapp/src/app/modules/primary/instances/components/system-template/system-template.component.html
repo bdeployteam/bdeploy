@@ -1,7 +1,5 @@
 <app-bd-dialog>
-  <app-bd-dialog-toolbar
-    [header]="'Apply System Template in ' + (groups.current$ | async)?.name"
-  >
+  <app-bd-dialog-toolbar header="Apply System Template">
     <div class="flex-auto"></div>
     <app-bd-button
       text="Back to Instance Browser"
@@ -21,23 +19,11 @@
         labelPosition="bottom"
         animationDuration="200"
       >
-        <mat-step
-          label="Target Server"
-          [completed]="serverSelectionCompleted"
-          [editable]="!serverSelectionCompleted"
-        >
-          <div
-            [attr.data-cy]="'step-server'"
-            class="flex flex-col gap-2.5 p-2.5"
-          >
-            <div *ngIf="!isCentral; else selectManaged">
-              Choosing a target server is not required for your setup.
-            </div>
+        <mat-step label="Target Server" [completed]="serverSelectionCompleted" [editable]="!serverSelectionCompleted">
+          <div [attr.data-cy]="'step-server'" class="flex flex-col gap-2.5 p-2.5">
+            <div *ngIf="!isCentral; else selectManaged">Choosing a target server is not required for your setup.</div>
             <ng-template #selectManaged>
-              <div>
-                Choose the target server. The system and all instances will be
-                created on the selected server.
-              </div>
+              <div>Choose the target server. The system and all instances will be created on the selected server.</div>
               <app-bd-form-select
                 [values]="serverDtos"
                 [labels]="serverLabels"
@@ -59,10 +45,7 @@
           </div>
         </mat-step>
         <mat-step label="System Template" [completed]="!!this.template">
-          <div
-            [attr.data-cy]="'step-template-upload'"
-            class="flex flex-col gap-2.5 p-2.5"
-          >
+          <div [attr.data-cy]="'step-template-upload'" class="flex flex-col gap-2.5 p-2.5">
             <app-bd-file-drop
               *ngIf="!file"
               [types]="['.yaml']"
@@ -89,10 +72,7 @@
           </div>
         </mat-step>
         <mat-step label="Name and Purpose" [completed]="name && purpose">
-          <div
-            [attr.data-cy]="'step-name-purpose'"
-            class="flex flex-col gap-2.5 p-2.5"
-          >
+          <div [attr.data-cy]="'step-name-purpose'" class="flex flex-col gap-2.5 p-2.5">
             <form #namePurposeForm="ngForm">
               <app-bd-form-input
                 errorDisplay="immediate"
@@ -123,14 +103,8 @@
             </div>
           </div>
         </mat-step>
-        <mat-step
-          label="System Template Variables"
-          [completed]="isAllSystemVariablesSet"
-        >
-          <div
-            [attr.data-cy]="'step-system-variables'"
-            class="flex flex-col gap-2.5 p-2.5"
-          >
+        <mat-step label="System Template Variables" [completed]="isAllSystemVariablesSet">
+          <div [attr.data-cy]="'step-system-variables'" class="flex flex-col gap-2.5 p-2.5">
             <ng-container *ngFor="let v of requiredSystemVariables">
               <app-bd-form-input
                 [(ngModel)]="systemVariables[v.id]"
@@ -145,9 +119,7 @@
               ></app-bd-form-input>
             </ng-container>
             <ng-container *ngIf="!requiredSystemVariables.length">
-              <div class="bd-description-text pb-5">
-                No system template variables.
-              </div>
+              <div class="bd-description-text pb-5">No system template variables.</div>
             </ng-container>
             <div class="flex">
               <app-bd-button
@@ -160,14 +132,8 @@
             </div>
           </div>
         </mat-step>
-        <mat-step
-          label="Instance Templates"
-          [completed]="isAllTemplateGroupsSelected && isAllVariablesSet"
-        >
-          <div
-            [attr.data-cy]="'step-instance-templates'"
-            class="flex flex-col gap-2.5 p-2.5"
-          >
+        <mat-step label="Instance Templates" [completed]="isAllTemplateGroupsSelected && isAllVariablesSet">
+          <div [attr.data-cy]="'step-instance-templates'" class="flex flex-col gap-2.5 p-2.5">
             <mat-tab-group #tabGroup animationDuration="0ms">
               <mat-tab *ngFor="let tpl of templates">
                 <ng-template matTabLabel>
@@ -177,10 +143,7 @@
                     {{ tpl.expandedName }}
                   </div>
                 </ng-template>
-                <div
-                  [attr.data-cy]="'tab-' + tpl.expandedName"
-                  class="flex gap-1"
-                >
+                <div [attr.data-cy]="'tab-' + tpl.expandedName" class="flex gap-1">
                   <div class="flex-auto flex flex-col gap-2.5 p-2.5">
                     <app-bd-form-toggle
                       label="Apply this instance"
@@ -218,15 +181,11 @@
                         ></app-bd-form-input>
                       </ng-container>
                       <ng-container *ngIf="!tpl.requiredVariables.length">
-                        <div class="bd-description-text py-4">
-                          No template variables.
-                        </div>
+                        <div class="bd-description-text py-4">No template variables.</div>
                       </ng-container>
                     </ng-container>
                     <ng-template #noApply>
-                      <div class="bd-description-text py-4">
-                        This instance will not be applied.
-                      </div>
+                      <div class="bd-description-text py-4">This instance will not be applied.</div>
                     </ng-template>
                   </div>
                 </div>
@@ -244,10 +203,7 @@
           </div>
         </mat-step>
         <mat-step label="Application">
-          <div
-            [attr.data-cy]="'step-applying'"
-            class="flex flex-col gap-2.5 p-5"
-          >
+          <div [attr.data-cy]="'step-applying'" class="flex flex-col gap-2.5 p-5">
             <div class="flex gap-2.5 justify-start items-center">
               <mat-spinner [diameter]="24"></mat-spinner>
               <div>Working on it...</div>
@@ -255,11 +211,7 @@
           </div>
         </mat-step>
         <mat-step label="Result">
-          <div
-            [attr.data-cy]="'step-done'"
-            class="flex flex-col gap-2.5 p-5"
-            *ngIf="result"
-          >
+          <div [attr.data-cy]="'step-done'" class="flex flex-col gap-2.5 p-5" *ngIf="result">
             <div *ngIf="resultIsSuccess">
               <app-bd-notification-card
                 icon="check"
@@ -269,32 +221,19 @@
               >
                 <div>
                   You may now head back to the
-                  <a
-                    [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]"
-                    >Instance Browser</a
-                  >
-                  to start using the created instances, or inspect detailed
-                  results below.
+                  <a [routerLink]="['/instances', 'browser', (groups.current$ | async)?.name]">Instance Browser</a>
+                  to start using the created instances, or inspect detailed results below.
                 </div>
               </app-bd-notification-card>
             </div>
             <div *ngIf="!resultIsSuccess">
-              <app-bd-notification-card
-                type="error"
-                header="Problems occured."
-                [dismissable]="false"
-              >
-                Applying was not fully successful. You can find details about
-                the problem(s) encountered below. Note that some instance may
-                still have been created successfully. Please make sure to create
-                the remaining instances manually.
+              <app-bd-notification-card type="error" header="Problems occured." [dismissable]="false">
+                Applying was not fully successful. You can find details about the problem(s) encountered below. Note
+                that some instance may still have been created successfully. Please make sure to create the remaining
+                instances manually.
               </app-bd-notification-card>
             </div>
-            <app-bd-data-table
-              [records]="result.results"
-              [columns]="resultCols"
-              [sortData]="null"
-            ></app-bd-data-table>
+            <app-bd-data-table [records]="result.results" [columns]="resultCols" [sortData]="null"></app-bd-data-table>
             <div class="flex">
               <app-bd-button
                 text="Finish"

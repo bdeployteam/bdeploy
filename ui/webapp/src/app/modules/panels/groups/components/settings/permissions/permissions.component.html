@@ -1,20 +1,12 @@
 <app-bd-dialog #dlg [loadingWhen$]="users.loading$">
-  <app-bd-dialog-toolbar
-    header="Permissions - {{ (groups.current$ | async)?.name }}"
-    [panel]="true"
-    [route]="['..']"
-  ></app-bd-dialog-toolbar>
+  <app-bd-dialog-toolbar header="Permissions" [panel]="true" [route]="['..']"></app-bd-dialog-toolbar>
   <app-bd-dialog-content>
     <mat-tab-group animationDuration="0ms">
       <mat-tab label="Users">
-        <app-instance-group-user-permissions
-          [dialog]="dlg"
-        ></app-instance-group-user-permissions>
+        <app-instance-group-user-permissions [dialog]="dlg"></app-instance-group-user-permissions>
       </mat-tab>
       <mat-tab label="User Groups">
-        <app-instance-group-user-group-permissions
-          [dialog]="dlg"
-        ></app-instance-group-user-group-permissions>
+        <app-instance-group-user-group-permissions [dialog]="dlg"></app-instance-group-user-group-permissions>
       </mat-tab>
     </mat-tab-group>
   </app-bd-dialog-content>

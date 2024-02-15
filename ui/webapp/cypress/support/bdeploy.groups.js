@@ -111,7 +111,7 @@ Cypress.Commands.add('verifyProductVersion', function (groupName, productName, p
 Cypress.Commands.add('enterGroup', function (groupName) {
   cy.inMainNavContent(() => {
     cy.contains('tr', groupName).should('exist').click();
-    cy.contains('mat-toolbar', `Instances of ${groupName}`).should('exist');
+    cy.contains('mat-toolbar', groupName).should('exist');
   });
 });
 
@@ -157,7 +157,7 @@ Cypress.Commands.add('attachCentralSide', function (groupName) {
       .within(() => {
         cy.get('input[data-cy="managed-ident"]').selectFile(
           { contents: Cypress.config('fixturesFolder') + '/managed-ident.txt' },
-          { force: true }
+          { force: true },
         );
       });
     cy.contains('div', 'Details for server to link').should('exist');
@@ -182,8 +182,8 @@ Cypress.Commands.add('cleanAllGroups', function (mode = 'STANDALONE') {
     mode === 'STANDALONE'
       ? Cypress.config('baseUrl')
       : mode === 'MANAGED'
-      ? Cypress.env('baseUrlManaged')
-      : Cypress.env('baseUrlCentral');
+        ? Cypress.env('baseUrlManaged')
+        : Cypress.env('baseUrlCentral');
 
   cy.authenticatedRequest({ method: 'GET', url: `${backend}/api/group` }, mode).then((resp) => {
     if (!Array.isArray(resp.body)) {
@@ -202,8 +202,8 @@ Cypress.Commands.add('cleanAllSoftwareRepos', function (mode = 'STANDALONE') {
     mode === 'STANDALONE'
       ? Cypress.config('baseUrl')
       : mode === 'MANAGED'
-      ? Cypress.env('baseUrlManaged')
-      : Cypress.env('baseUrlCentral');
+        ? Cypress.env('baseUrlManaged')
+        : Cypress.env('baseUrlCentral');
 
   cy.authenticatedRequest({ method: 'GET', url: `${backend}/api/softwarerepository` }, mode).then((resp) => {
     if (!Array.isArray(resp.body)) {
@@ -217,7 +217,7 @@ Cypress.Commands.add('cleanAllSoftwareRepos', function (mode = 'STANDALONE') {
           method: 'DELETE',
           url: `${backend}/api/softwarerepository/${softwareRepository}`,
         },
-        mode
+        mode,
       );
     }
   });
