@@ -115,7 +115,8 @@ public abstract class TransportConnectionHandler<T extends Transport>//
 
         getService().sendMessage(message, message.getAllRecipients());
 
-        log.info("Sent message '" + subject + "' via " + getService().getURLName() + " to " + recipients.size() + " recipients.");
+        log.info("Sent message '" + subject + "' via " + getService().getURLName() + " to " + recipients.size()
+                + " recipient(s).");
     }
 
     @Override
