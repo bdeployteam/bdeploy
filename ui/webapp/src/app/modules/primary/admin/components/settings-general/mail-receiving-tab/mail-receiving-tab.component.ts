@@ -11,6 +11,10 @@ export class MailReceivingTabComponent {
   protected settings = inject(SettingsService);
   protected connectionTestStatusMsg$ = new BehaviorSubject<string>(null);
 
+  protected onPasswordChange(e) {
+    this.settings.settings$.value.mailReceiverSettings.password = e || null;
+  }
+
   protected clearMessages() {
     this.connectionTestStatusMsg$.next('');
   }

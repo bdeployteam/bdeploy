@@ -27,7 +27,8 @@
       appTrimmed
     ></app-bd-form-input>
     <app-bd-form-input
-      [(ngModel)]="settings.settings$.value.mailSenderSettings.password"
+      [ngModel]="settings.settings$.value.mailSenderSettings.password"
+      (ngModelChange)="onPasswordChange($event)"
       [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
       label="Password"
       name="password"

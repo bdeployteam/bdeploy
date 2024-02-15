@@ -14,6 +14,10 @@ export class MailSendingTabComponent {
   protected connectionTestStatusMsg$ = new BehaviorSubject<string>(null);
   protected mailSendingTestStatusMsg$ = new BehaviorSubject<string>(null);
 
+  protected onPasswordChange(e) {
+    this.settings.settings$.value.mailSenderSettings.password = e || null;
+  }
+
   protected clearMessages() {
     this.connectionTestStatusMsg$.next('');
     this.mailSendingTestStatusMsg$.next('');
