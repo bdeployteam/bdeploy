@@ -1,7 +1,5 @@
 package io.bdeploy.messaging.transport;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,6 +10,7 @@ import io.bdeploy.messaging.MessageDataHolder;
 import io.bdeploy.messaging.MessageSender;
 import io.bdeploy.messaging.MimeFile;
 import io.bdeploy.messaging.ServiceConnectionHandler;
+import io.bdeploy.messaging.util.MessagingUtils;
 import jakarta.activation.DataHandler;
 import jakarta.mail.Address;
 import jakarta.mail.BodyPart;
@@ -98,16 +97,7 @@ public abstract class TransportConnectionHandler<T extends Transport>//
             message.setContent(multipart);
         }
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        int sizeInBytes = -1;
-        try {
-            message.writeTo(os);
-            sizeInBytes = os.size();
-        } catch (IOException e) {
-            log.error("Failed to determine size of message " + message.getMessageNumber(), e);
-            sizeInBytes = -1;
-        }
-
+        int sizeInBytes = MessagingUtils.calculateSize(message);
         if (maxMessageSizeInBytes > 0 && sizeInBytes > maxMessageSizeInBytes) {
             throw new MessagingException("Message is too big. Determined size is " + sizeInBytes
                     + "B but currently set maximum size is " + maxMessageSizeInBytes + "B.");

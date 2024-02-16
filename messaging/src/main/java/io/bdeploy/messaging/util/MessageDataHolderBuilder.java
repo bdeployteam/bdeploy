@@ -97,21 +97,19 @@ public class MessageDataHolderBuilder {
                     continue;
                 }
 
-                // getSize() practically always returns a wrong value, and for small files the deviation can be up to 25% of the file size
-                // we therefore add 1 to the digits to make sure that we have sufficient space for the String.format call
-                int totalAmountOfBytes = bodyPart.getSize();
-                int digitsInBase10PlusOne = 2 + (int) Math.log10(totalAmountOfBytes);
+                int sizeInBytes = MessagingUtils.calculateSize(bodyPart);
                 BiConsumer<Integer, Integer> loggingListener = (readBytesCount, progress) -> {
                     if (traceEnabled) {
+                        int digitsInBase10PlusOne = 2 + (int) Math.log10(sizeInBytes);
                         log.trace(String.format("Reading attachment: %3s%% (%" + digitsInBase10PlusOne + "s/%s)", progress,
-                                readBytesCount, totalAmountOfBytes));
+                                readBytesCount, sizeInBytes));
                     }
                 };
 
                 ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
                 byte[] tempBuffer = new byte[BYTES_PER_LOOP];
                 int nRead;
-                try (ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, totalAmountOfBytes);) {
+                try (ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, sizeInBytes);) {
                     progressInputStream.addListener(loggingListener);
                     try {
                         while ((nRead = progressInputStream.read(tempBuffer, 0, tempBuffer.length)) != -1) {

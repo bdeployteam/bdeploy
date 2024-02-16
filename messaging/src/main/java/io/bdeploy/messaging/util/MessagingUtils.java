@@ -1,8 +1,15 @@
 package io.bdeploy.messaging.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.bdeploy.common.util.StringHelper;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Part;
 import jakarta.mail.URLName;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
@@ -13,6 +20,7 @@ import jakarta.mail.internet.InternetAddress;
 public class MessagingUtils {
 
     public static final Pattern MAIL_ADDRESS_PATTERN = Pattern.compile("[a-zA-Z0-9-_\\.]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]+");
+    private static final Logger log = LoggerFactory.getLogger(MessagingUtils.class);
 
     /**
      * Builds a new {@link URLName} which copies the protocol-, host-, port- and file-part of the given url, but sets the provided
@@ -73,6 +81,23 @@ public class MessagingUtils {
             return new InternetAddress(address.trim());
         } catch (AddressException e) {
             throw new IllegalArgumentException("Failed to parse address.", e);
+        }
+    }
+
+    /**
+     * Calculates the size of the given {@link Part} in bytes.
+     *
+     * @param part The {@link Part} to calculate the size of
+     * @return The size of the {@link Part}, or -1 if the calculation failed
+     */
+    public static int calculateSize(Part part) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            part.writeTo(os);
+            return os.size();
+        } catch (MessagingException | IOException e) {
+            log.error("Failed to determine size of part.", e);
+            return -1;
         }
     }
 }
