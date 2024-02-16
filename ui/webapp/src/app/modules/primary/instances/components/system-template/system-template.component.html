@@ -196,7 +196,7 @@
                 color="primary"
                 [collapsed]="false"
                 text="Next"
-                [disabled]="!isAllTemplateGroupsSelected || !isAllVariablesSet"
+                [disabled]="!isAllTemplateGroupsSelected || !isAllVariablesSet || !isAnyInstanceApplied"
                 (click)="stepper.next()"
               ></app-bd-button>
             </div>
