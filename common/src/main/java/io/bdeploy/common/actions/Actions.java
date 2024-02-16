@@ -50,6 +50,9 @@ public enum Actions {
     PRUNE_BHIVE(ActionScope.BHIVE, true, "Prune Objects"),
     VERIFY_APPLICATION(ActionScope.GLOBAL, true, "Application Consistency Check"),
     REINSTALL_APPLICATION(ActionScope.GLOBAL, true, "Application Reinstall"),
+    REORGANIZE_POOL(ActionScope.GLOBAL, true, "Re-organize Pool Storage"),
+    ENABLE_POOL(ActionScope.BHIVE, true, "Enable Pool"),
+    DISABLE_POOL(ActionScope.BHIVE, true, "Disable Pool"),
 
     /// ---- central/managed
     MANAGED_UPDATE_TRANSFER(ActionScope.BHIVE, true, "Transfer Update to Server"),

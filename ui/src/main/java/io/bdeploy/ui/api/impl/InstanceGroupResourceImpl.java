@@ -187,6 +187,10 @@ public class InstanceGroupResourceImpl implements InstanceGroupResource {
 
         try {
             BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
+            Path defaultPool = minion.getDefaultPoolPath();
+            if (defaultPool != null) {
+                h.enablePooling(defaultPool, false);
+            }
             registry.register(config.name, h);
             InstanceGroupManifest igm = new InstanceGroupManifest(h);
             igm.update(config);

@@ -7,6 +7,7 @@ import io.bdeploy.common.security.ScopedPermission.Permission;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
 import io.bdeploy.jersey.Scope;
 import io.bdeploy.ui.dto.HiveEntryDto;
+import io.bdeploy.ui.dto.HiveInfoDto;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -21,7 +22,7 @@ public interface HiveResource {
 
     @GET
     @Path("/listHives")
-    public List<String> listHives();
+    public List<HiveInfoDto> listHives();
 
     @GET
     @Path("/listManifests")
@@ -54,6 +55,14 @@ public interface HiveResource {
     @RequiredPermission(permission = Permission.ADMIN, scope = "hive")
     public void delete(@Scope @QueryParam("hive") String hive, @QueryParam("name") String manifestName,
             @QueryParam("tag") String manifestTag);
+
+    @GET
+    @Path("/pool/enable")
+    public void enablePool(@Scope @QueryParam("hive") String hive);
+
+    @GET
+    @Path("/pool/disable")
+    public void disablePool(@Scope @QueryParam("hive") String hive);
 
     @Path("/{hive}/logging")
     public HiveLoggingResource getLoggingResource(@Scope @PathParam("hive") String hive);

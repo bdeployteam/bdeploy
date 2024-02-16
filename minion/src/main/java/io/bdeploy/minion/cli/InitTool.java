@@ -93,6 +93,9 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
 
         @Help(value = "Skip the check for a valid host/port configuration", arg = false)
         boolean skipConnectionCheck() default false;
+
+        @Help("An optional pool directory which will be used to pool common objects.")
+        String pool();
     }
 
     public InitTool() {
@@ -171,6 +174,14 @@ public class InitTool extends ConfiguredCliTool<InitConfig> {
                         Paths.get(dist), getActivityReporter());
 
                 result.addField("Software Imported", keys);
+            }
+
+            if (config.pool() != null) {
+                Path path = Paths.get(config.pool()).toAbsolutePath().normalize();
+                mr.modifyState(s -> {
+                    s.poolDefaultPath = path;
+                });
+                result.addField("Object Pool", path);
             }
         } catch (Exception e) {
             PathHelper.deleteRecursiveRetry(root);

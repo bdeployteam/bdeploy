@@ -47,7 +47,7 @@ public class CheckLatestGitHubReleaseJob implements Job {
             Scheduler scheduler = minion.getScheduler();
 
             JobDetail job = JobBuilder.newJob(CheckLatestGitHubReleaseJob.class).withIdentity(JOB_KEY)
-                    .withDescription("Check Latest GitHub Release Job")
+                    .withDescription("Check GitHub for Latest Release")
                     .usingJobData(new JobDataMap(Collections.singletonMap(MINION, minion))).build();
 
             Trigger trigger = TriggerBuilder.newTrigger().withIdentity("CheckLatestGitHubReleaseTrigger", "Master")
@@ -82,7 +82,7 @@ public class CheckLatestGitHubReleaseJob implements Job {
             mr.setLatestGitHubReleaseVersion(latestRelease);
             log.info("Latest GitHub Release Version {}", latestRelease);
         } catch (Exception e) {
-            log.warn("Failed to check latest release version: {}", e.getMessage());
+            log.warn("Failed to check latest release version", e);
             if (log.isDebugEnabled()) {
                 log.debug("Error", e);
             }

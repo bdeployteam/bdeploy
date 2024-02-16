@@ -1,15 +1,17 @@
-import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { BehaviorSubject, Subscription, map, switchMap, timer } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
 import { JobDto } from 'src/app/models/gen.dtos';
 import { BdDataDateCellComponent } from 'src/app/modules/core/components/bd-data-date-cell/bd-data-date-cell.component';
+import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { timeAgo } from 'src/app/modules/core/utils/time.utils';
 import { JobService } from '../../services/jobs.service';
 
 const colName: BdDataColumn<JobDto> = {
   id: 'name',
   name: 'Name',
-  data: (r) => r.name,
-  width: '150px',
+  data: (r) => r.description,
+  width: '200px',
 };
 
 const colGroup: BdDataColumn<JobDto> = {
@@ -22,16 +24,16 @@ const colGroup: BdDataColumn<JobDto> = {
 const colIsRunning: BdDataColumn<JobDto> = {
   id: 'isRunning',
   name: 'Is Running',
-  data: (r) => r.isRunning,
+  data: (r) => (r.isRunning ? 'play_arrow' : 'stop'),
   width: '150px',
+  component: BdDataIconCellComponent,
 };
 
 const colLastRunTime: BdDataColumn<JobDto> = {
   id: 'lastRunTime',
   name: 'Last Run Time',
-  data: (r) => r.lastRunTime,
+  data: (r) => timeAgo(r.lastRunTime),
   width: '155px',
-  component: BdDataDateCellComponent,
 };
 
 const colNextRunTime: BdDataColumn<JobDto> = {
@@ -47,13 +49,14 @@ const colNextRunTime: BdDataColumn<JobDto> = {
   templateUrl: './manual-jobs.component.html',
   encapsulation: ViewEncapsulation.None,
 })
-export class ManualJobsComponent implements OnInit {
+export class ManualJobsComponent implements OnInit, OnDestroy {
   private readonly colRun: BdDataColumn<JobDto> = {
     id: 'run',
     name: 'Run',
     data: (r) => `Run ${r.name} Immediately`,
     action: (r) => this.run(r),
-    icon: () => 'arrow_right',
+    actionDisabled: (r) => r.isRunning,
+    icon: () => 'play_arrow',
     width: '50px',
   };
 
@@ -67,9 +70,26 @@ export class ManualJobsComponent implements OnInit {
     this.colRun,
   ];
   protected records$ = new BehaviorSubject<JobDto[]>(null);
+  private subscription: Subscription;
 
   ngOnInit() {
+    // while any job is running, reload every 5 seconds, otherwise every 30 seconds.
+    this.subscription = this.records$
+      .pipe(
+        map((r) => r?.some((x) => x.isRunning)),
+        switchMap((r) => (r ? timer(0, 5000) : timer(0, 30000))),
+      )
+      .subscribe((x) => {
+        if (x) {
+          this.load();
+        }
+      });
+
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   load() {

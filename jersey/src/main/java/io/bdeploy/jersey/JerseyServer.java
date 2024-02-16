@@ -6,8 +6,10 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -287,7 +289,11 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
 
             SSLEngineConfigurator sslEngine = new SSLEngineConfigurator(ctx, false, false, false);
             sslEngine.setEnabledProtocols(new String[] { "TLSv1.2", "TLSv1.3" });
-            sslEngine.setEnabledCipherSuites(cipherSuites);
+
+            // in case we're running on java 11 (or any non-21 (currently) FWIW), we need to check
+            // each cipher if it is supported;
+
+            sslEngine.setEnabledCipherSuites(getSupportedCiphers(ctx, cipherSuites));
 
             // default features
             registerDefaultResources(rc);
@@ -344,6 +350,21 @@ public class JerseyServer implements AutoCloseable, RegistrationTarget {
         } catch (GeneralSecurityException | IOException e) {
             throw new IllegalStateException("Cannot start server on " + port, e);
         }
+    }
+
+    private static String[] getSupportedCiphers(SSLContext ctx, String[] requested) {
+        List<String> supported = new ArrayList<>();
+        List<String> builtin = Arrays.asList(ctx.getServerSocketFactory().getSupportedCipherSuites());
+        for (String cipher : requested) {
+            if (builtin.contains(cipher)) {
+                supported.add(cipher);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Ignoring unsupported cipher suite {}", cipher);
+                }
+            }
+        }
+        return supported.toArray(new String[supported.size()]);
     }
 
     /**

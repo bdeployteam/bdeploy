@@ -11,11 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
 import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -74,8 +71,10 @@ public class ObjectDatabase extends LockableDatabase {
             PathHelper.mkdirs(root);
         }
 
-        if (!PathHelper.exists(tmp)) {
-            PathHelper.mkdirs(tmp);
+        if (tmp != null) {
+            if (!PathHelper.exists(tmp)) {
+                PathHelper.mkdirs(tmp);
+            }
         }
     }
 
@@ -169,7 +168,7 @@ public class ObjectDatabase extends LockableDatabase {
         Path tmpFile = Files.createTempFile(this.tmp, "obj", ".tmp");
         try {
             ObjectId id = writer.write(tmpFile);
-            Path target = getObjectFile(id);
+            Path target = getObjectFileLocal(id);
 
             // Done outside the lock and before the existence check. This is to make sure
             // that we touch an object even though another transaction might have inserted
@@ -214,20 +213,28 @@ public class ObjectDatabase extends LockableDatabase {
      * WARNING: use with care, this can cause corruption!
      */
     public void removeObject(ObjectId id) {
-        Path file = getObjectFile(id);
+        Path file = getObjectFileLocal(id);
+        if (!PathHelper.exists(file)) {
+            return; // not there at all.
+        }
         locked(() -> {
-            if (!hasObject(id)) {
-                return;
-            }
             PathHelper.deleteIfExistsRetry(file);
         });
     }
 
     /**
      * Calculate the {@link Path} where a certain {@link ObjectId} can be found in
-     * the database. Use with caution.
+     * the database. Use with caution. This can be overridden by implementations to enable pooling.
      */
     public Path getObjectFile(ObjectId id) {
+        return getObjectFileLocal(id);
+    }
+
+    /**
+     * Calculate the {@link Path} where a certain {@link ObjectId} can be found in
+     * the database. Use with caution.
+     */
+    protected final Path getObjectFileLocal(ObjectId id) {
         String rawId = id.getId();
         String l1 = rawId.substring(0, 2);
         String l2 = rawId.substring(2, 4);
@@ -244,19 +251,22 @@ public class ObjectDatabase extends LockableDatabase {
     /**
      * Scan for and retrieve all objects in the database. This is potentially an
      * expensive operation, as object presence is not cached.
-     *
-     * @throws IOException in case of an error.
-     * @throws InterruptedException when interrupted.
+     * <p>
+     * The consumer will be notified for each {@link ObjectId} which is <b>directly</b>
+     * present in this {@link ObjectDatabase}. {@link AugmentedObjectDatabase} will not
+     * contribute augmented objects.
      */
-    public SortedSet<ObjectId> getAllObjects() throws IOException, InterruptedException {
+    public void walkAllObjects(Consumer<ObjectId> consumer) {
         try (Activity scan = reporter.start("Listing Objects", 0)) {
             long xctpCount = 0;
             do {
                 try {
                     try (Stream<Path> walk = Files.walk(root)) {
-                        return walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
-                                .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1))
-                                .collect(Collectors.toCollection(TreeSet::new));
+                        walk.filter(Files::isRegularFile).map(Path::getFileName).map(Object::toString).map(ObjectId::parse)
+                                .filter(Objects::nonNull).peek(e -> scan.workAndCancelIfRequested(1)).forEach(consumer::accept);
+
+                        // done. explicit return to escape the exception handling retry loop :)
+                        return;
                     } catch (UncheckedIOException e) {
                         // something was removed in the middle of the walk... retry.
                         if (!(e.getCause() instanceof NoSuchFileException) || xctpCount++ > 20) {
@@ -265,13 +275,24 @@ public class ObjectDatabase extends LockableDatabase {
                     }
                 } catch (NoSuchFileException e) {
                     // this happens if the path does not exist at all anymore, so there are zero objects.
-                    return Collections.emptySortedSet();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Path to walk not found", e);
+                    }
+                } catch (IOException e) {
+                    throw new IllegalStateException("Cannot walk objects", e);
                 }
 
                 // Delay the loop a little
-                Thread.sleep(50);
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Walking object interrupted");
+                    }
+                    Thread.currentThread().interrupt();
+                    return;
+                }
             } while (true);
         }
     }
-
 }

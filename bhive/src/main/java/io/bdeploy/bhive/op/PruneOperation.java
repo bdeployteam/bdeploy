@@ -68,23 +68,25 @@ public class PruneOperation extends BHive.Operation<SortedMap<ObjectId, Long>> {
                     referenced = new TreeSet<>();
                 }
 
-                SortedSet<ObjectId> orig = getObjectManager().db(db -> {
-                    try {
-                        return db.getAllObjects();
-                    } catch (InterruptedException e1) {
-                        Thread.currentThread().interrupt();
-                        throw new IllegalStateException("Interrupted", e1);
-                    }
+                // collect all the objects directly contained which are not referenced
+                all = new TreeSet<>();
+                getObjectManager().db(db -> {
+                    // ATTENTION: this includes only objects which are DIRECTLY in the BHive, which is exactly what we want :)
+                    // (i.e. objects which reside in a pool (see AugmentedObjectDatabase) will not be included in the list.
+                    db.walkAllObjects(o -> {
+                        if (!referenced.contains(o)) {
+                            all.add(o);
+                        }
+                    });
+                    return null;
                 });
-                all = new TreeSet<>(orig);
-                all.removeAll(referenced);
 
                 // read all existing marker databases and regard any existing object as referenced.
                 try (DirectoryStream<Path> markerDbs = Files.newDirectoryStream(getMarkerRoot())) {
                     for (Path markerDb : markerDbs) {
                         if (Files.isDirectory(markerDb)) {
                             MarkerDatabase mdb = new MarkerDatabase(markerDb, getActivityReporter());
-                            all.removeAll(mdb.getAllObjects());
+                            mdb.walkAllObjects(all::remove);
                         }
                     }
                 }

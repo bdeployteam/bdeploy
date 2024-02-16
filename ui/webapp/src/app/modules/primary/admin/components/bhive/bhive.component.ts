@@ -1,23 +1,41 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Sort } from '@angular/material/sort';
-import { BehaviorSubject } from 'rxjs';
 import { BdDataColumn } from 'src/app/models/data';
+import { HiveInfoDto, HiveType } from 'src/app/models/gen.dtos';
 import { BdDataIconCellComponent } from 'src/app/modules/core/components/bd-data-icon-cell/bd-data-icon-cell.component';
+import { BdDataPermissionLevelCellComponent } from 'src/app/modules/core/components/bd-data-permission-level-cell/bd-data-permission-level-cell.component';
 import { HiveService } from '../../services/hive.service';
+import { PoolingStatusCellComponent } from './pooling-status-cell/pooling-status-cell.component';
 
-const colAvatar: BdDataColumn<string> = {
+const colAvatar: BdDataColumn<HiveInfoDto> = {
   id: 'avatar',
   name: '',
-  data: () => 'sd_storage',
+  data: (r) =>
+    r.type === HiveType.PLAIN ? 'sd_storage' : r.type === HiveType.INSTANCE_GROUP ? 'view_carousel' : 'storage',
   component: BdDataIconCellComponent,
   width: '30px',
 };
 
-const colId: BdDataColumn<string> = {
+const colId: BdDataColumn<HiveInfoDto> = {
   id: 'id',
   name: 'BHive',
-  data: (r) => r,
-  isId: true,
+  data: (r) => r.name,
+};
+
+const colPoolEnabled: BdDataColumn<HiveInfoDto> = {
+  id: 'isPooling',
+  name: 'Pool Enabled',
+  data: (r) => r.pooling,
+  component: PoolingStatusCellComponent,
+  width: '60px',
+};
+
+const colPerm: BdDataColumn<HiveInfoDto> = {
+  id: 'minPerm',
+  name: 'Min. Perm.',
+  data: (r) => r.minPermission,
+  component: BdDataPermissionLevelCellComponent,
+  width: '120px',
 };
 
 @Component({
@@ -27,12 +45,11 @@ const colId: BdDataColumn<string> = {
 export class BHiveComponent implements OnInit {
   protected hives = inject(HiveService);
 
-  protected records$ = new BehaviorSubject<string[]>(null);
-  protected columns: BdDataColumn<string>[] = [colAvatar, colId];
+  protected columns: BdDataColumn<HiveInfoDto>[] = [colAvatar, colId, colPoolEnabled, colPerm];
   protected sort: Sort = { active: 'id', direction: 'asc' };
 
-  protected getRecordRoute = (row: string) => {
-    return ['', { outlets: { panel: ['panels', 'admin', 'bhive', row] } }];
+  protected getRecordRoute = (row: HiveInfoDto) => {
+    return ['', { outlets: { panel: ['panels', 'admin', 'bhive', row.name] } }];
   };
 
   ngOnInit() {
@@ -40,6 +57,6 @@ export class BHiveComponent implements OnInit {
   }
 
   protected load() {
-    this.hives.listHives().subscribe((hives) => this.records$.next(hives));
+    this.hives.loadHives();
   }
 }

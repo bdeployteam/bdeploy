@@ -114,6 +114,10 @@ public class CommonRootResourceImpl implements CommonRootResource {
         }
 
         BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
+        Path defaultPool = minion.getDefaultPoolPath();
+        if (defaultPool != null) {
+            h.enablePooling(defaultPool, false);
+        }
         registry.register(config.name, h);
         new SoftwareRepositoryManifest(h).update(config);
     }
@@ -170,6 +174,12 @@ public class CommonRootResourceImpl implements CommonRootResource {
         meta.managed = (minion.getMode() != MinionMode.STANDALONE);
 
         BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
+
+        Path defaultPool = minion.getDefaultPoolPath();
+        if (defaultPool != null) {
+            h.enablePooling(defaultPool, false);
+        }
+
         registry.register(meta.name, h);
         new InstanceGroupManifest(h).update(meta);
     }

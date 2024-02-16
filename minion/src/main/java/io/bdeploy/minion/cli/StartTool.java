@@ -220,7 +220,6 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
 
         srv.setAuditor(r.getAuditor());
         r.setRestartManager(new JerseyAwareMinionRestartManager(srv, r));
-        r.setupServerTasks(r.getMode());
 
         return registerCommonResources(srv, r, repo);
     }
@@ -278,6 +277,8 @@ public class StartTool extends ConfiguredCliTool<MasterConfig> {
         };
 
         BHiveRegistry r = new BHiveRegistry(reporter, hivePermissionClassifier);
+
+        root.setupServerTasks(root.getMode(), r);
 
         // register the root hive as default.
         r.register(JerseyRemoteBHive.DEFAULT_NAME, root.getHive());

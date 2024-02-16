@@ -67,7 +67,7 @@ public class MasterCleanupJob implements Job {
         }
 
         JobBuilder builder = JobBuilder.newJob(MasterCleanupJob.class);
-        builder.withIdentity(JOB_KEY).withDescription("Master Cleanup Job");
+        builder.withIdentity(JOB_KEY).withDescription("Master Cleanup");
         builder.usingJobData(new JobDataMap(Collections.singletonMap(DATA_ROOT, minion)));
 
         JobDetail job = builder.build();
@@ -93,7 +93,7 @@ public class MasterCleanupJob implements Job {
                     .usingJobData(MasterCleanupJob.SCHEDULE, cronSchedule)
                     .withSchedule(CronScheduleBuilder.cronScheduleNonvalidatedExpression(cronSchedule)).build();
         } catch (ParseException e) {
-            log.error("Invalid cron schedule: {} using default instead", cronSchedule);
+            log.error("Invalid cron schedule: {} using default instead", cronSchedule, e);
             return TriggerBuilder.newTrigger().forJob(job).startNow()
                     .withSchedule(CronScheduleBuilder.cronSchedule(DEFAULT_CLEANUP_SCHEDULE)).build();
         }

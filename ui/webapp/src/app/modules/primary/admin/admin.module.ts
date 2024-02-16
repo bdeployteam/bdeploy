@@ -15,6 +15,7 @@ import { CoreModule } from '../../core/core.module';
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminShellComponent } from './components/admin-shell/admin-shell.component';
 import { BHiveComponent } from './components/bhive/bhive.component';
+import { PoolingStatusCellComponent } from './components/bhive/pooling-status-cell/pooling-status-cell.component';
 import { LogFilesBrowserComponent } from './components/log-files-browser/log-files-browser.component';
 import { ManualJobsComponent } from './components/manual-jobs/manual-jobs.component';
 import { MasterCleanupComponent } from './components/master-cleanup/master-cleanup.component';
@@ -68,6 +69,7 @@ import { UsersBrowserComponent } from './components/users-browser/users-browser.
     OktaTabComponent,
     MailSendingTabComponent,
     MailReceivingTabComponent,
+    PoolingStatusCellComponent,
   ],
   imports: [
     CommonModule,

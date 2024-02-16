@@ -6,6 +6,7 @@ package io.bdeploy.ui.dto;
 public class JobDto {
 
     public String name;
+    public String description;
     public String group;
     public String schedule;
     public long lastRunTime;

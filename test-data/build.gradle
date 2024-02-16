@@ -109,7 +109,7 @@ void createServerTasks(String name, String root, int port) {
             // save some time on startup...
             args = [ "init", "--port=${port}", "--dist=ignore", "--mode=" + name, "--initUser=admin", "--initPassword=adminadminadmin" ]
         } else {
-            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin" ]
+            args = [ "init", "--port=${port}", "--dist="+project(':minion').tasks[taskName].outputs.files[0], "--mode=standalone", "--initUser=admin", "--initPassword=adminadminadmin", "--pool=${buildDir}/test-pool" ]
         }
 
         mustRunAfter("externalSoftwareZip")

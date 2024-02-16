@@ -161,4 +161,9 @@ public interface Minion {
      * Run job immediately
      */
     public void runJob(JobDto jobDto);
+
+    /**
+     * @return the configured default object pool path if any.
+     */
+    public Path getDefaultPoolPath();
 }

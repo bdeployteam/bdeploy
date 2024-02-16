@@ -1,0 +1,25 @@
+.local-chip {
+  text-transform: uppercase;
+  font-size: smaller;
+  border-radius: 3px;
+  padding: 0px 5px;
+
+  min-width: 70px;
+
+  text-align: center;
+}
+
+.local-ENABLED-chip {
+  background-color: #2f729e;
+  color: white;
+}
+
+.local-PENDING-chip {
+  background-color: #303f9f;
+  color: white;
+}
+
+.local-DISABLED-chip {
+  background-color: #c2185b;
+  color: white;
+}

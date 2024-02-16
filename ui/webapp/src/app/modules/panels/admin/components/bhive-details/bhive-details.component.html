@@ -16,6 +16,24 @@
         [relative]="true"
         [route]="['browse', 'bhive']"
       ></app-bd-panel-button>
+      <mat-divider></mat-divider>
+      <app-bd-button
+        icon="dataset_linked"
+        text="Enabled Pooling"
+        [collapsed]="false"
+        (click)="doEnablePool()"
+        [loadingWhen$]="mappedEnablePool$"
+        [disabled]="(mappedEnablePool$ | async) || (details$ | async)?.pooling || !(details$ | async)?.canPool"
+      ></app-bd-button>
+      <app-bd-button
+        icon="dataset"
+        text="Disable Pooling"
+        [collapsed]="false"
+        (click)="doDisablePool()"
+        [loadingWhen$]="mappedDisablePool$"
+        [disabled]="(mappedDisablePool$ | async) || !(details$ | async)?.pooling"
+      ></app-bd-button>
+      <mat-divider></mat-divider>
       <app-bd-button
         icon="construction"
         text="Repair and Prune Unused Objects"

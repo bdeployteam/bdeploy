@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { Actions } from 'src/app/models/gen.dtos';
+import { Actions, HiveInfoDto } from 'src/app/models/gen.dtos';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { ActionsService } from 'src/app/modules/core/services/actions.service';
 import { NavAreasService } from 'src/app/modules/core/services/nav-areas.service';
@@ -17,15 +17,20 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
   private hives = inject(HiveService);
 
   protected bhive$ = new BehaviorSubject<string>(null);
+  protected details$ = new BehaviorSubject<HiveInfoDto>(null);
 
   private repairing$ = new BehaviorSubject<boolean>(false);
+  private enablingPool$ = new BehaviorSubject<boolean>(false);
+  private disablingPool$ = new BehaviorSubject<boolean>(false);
 
   private actions = inject(ActionsService);
   protected mappedRepair$ = this.actions.action(
     [Actions.FSCK_BHIVE, Actions.PRUNE_BHIVE],
     this.repairing$,
-    this.bhive$
+    this.bhive$,
   );
+  protected mappedEnablePool$ = this.actions.action([Actions.ENABLE_POOL], this.enablingPool$, this.bhive$);
+  protected mappedDisablePool$ = this.actions.action([Actions.DISABLE_POOL], this.disablingPool$, this.bhive$);
 
   @ViewChild(BdDialogComponent) private dialog: BdDialogComponent;
 
@@ -38,6 +43,10 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
       }
 
       this.bhive$.next(route.params['bhive']);
+
+      this.hives.hives$.subscribe((list) => {
+        this.details$.next(list.find((h) => h.name === this.bhive$.value));
+      });
     });
   }
 
@@ -55,7 +64,7 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
             .repairAndPrune(this.bhive$.value, true)
             .pipe(
               finalize(() => this.repairing$.next(false)),
-              measure('Repairing and Pruning ' + this.bhive$.value)
+              measure('Repairing and Pruning ' + this.bhive$.value),
             )
             .subscribe(({ repaired, pruned }) => {
               console.groupCollapsed('Damaged Objects');
@@ -73,5 +82,21 @@ export class BhiveDetailsComponent implements OnInit, OnDestroy {
             });
         }
       });
+  }
+
+  protected doEnablePool() {
+    this.enablingPool$.next(true);
+    this.hives
+      .enablePool(this.bhive$.value)
+      .pipe(finalize(() => this.enablingPool$.next(false)))
+      .subscribe();
+  }
+
+  protected doDisablePool() {
+    this.disablingPool$.next(true);
+    this.hives
+      .disablePool(this.bhive$.value)
+      .pipe(finalize(() => this.disablingPool$.next(false)))
+      .subscribe();
   }
 }

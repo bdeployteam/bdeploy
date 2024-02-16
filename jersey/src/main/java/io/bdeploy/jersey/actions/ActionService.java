@@ -122,6 +122,9 @@ public class ActionService {
     }
 
     private void internalAdd(Action action, ActionExecution exec, boolean failOnConflict) {
+        if (action == null || exec == null) {
+            throw new IllegalArgumentException("Neither action nor execution may be null");
+        }
         withExecutions(action, execs -> {
             // if exclusive, either the set is empty, or the only entry is our own execution.
             if (action.getType().isExclusive() && !execs.isEmpty() && !(execs.size() == 1 && execs.contains(exec))) {

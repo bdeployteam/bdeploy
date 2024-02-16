@@ -54,6 +54,12 @@
 			<AppenderRef ref="GlobalRoute" />
 		</Logger>
 		
+		<!-- Pooling -->
+		<Logger name="io.bdeploy.bhive.BHivePoolOrganizer" additivity="false" level="info" >
+			<AppenderRef ref="GlobalRoute" />
+		</Logger>
+		
+		
 		<!-- Cleanup - set all three to debug or trace depending on information required. -->
 		<Logger name="io.bdeploy.ui.cleanup" additivity="false" level="info" ><AppenderRef ref="GlobalRoute" /></Logger>
 		<Logger name="io.bdeploy.minion.remote.jersey.NodeCleanupResourceImpl" additivity="false" level="info" ><AppenderRef ref="GlobalRoute" /></Logger>

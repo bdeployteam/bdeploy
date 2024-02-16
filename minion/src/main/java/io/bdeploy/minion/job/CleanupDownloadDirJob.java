@@ -53,7 +53,7 @@ public class CleanupDownloadDirJob implements Job {
      */
     public static void create(Scheduler scheduler, Path downloadDir, MinionRoot minion) {
         JobBuilder jBuilder = JobBuilder.newJob(CleanupDownloadDirJob.class);
-        jBuilder.withIdentity(JOB_KEY).withDescription("Cleanup download dir");
+        jBuilder.withIdentity(JOB_KEY).withDescription("Cleanup Download Directory");
         jBuilder.usingJobData(new JobDataMap(Collections.singletonMap(DOWNLOAD_DIR, downloadDir)));
         jBuilder.usingJobData(new JobDataMap(Map.of(DOWNLOAD_DIR, downloadDir, MINION, minion)));
 

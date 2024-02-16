@@ -22,6 +22,7 @@ import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.logging.audit.RollingFileAuditor;
 import io.bdeploy.ui.api.AuthGroupService;
 import io.bdeploy.ui.api.AuthService;
+import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.ProductResource;
 import io.bdeploy.ui.api.SoftwareRepositoryResource;
 import io.bdeploy.ui.api.SoftwareResource;
@@ -40,6 +41,9 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
 
     @Inject
     private BHiveRegistry registry;
+
+    @Inject
+    private Minion minion;
 
     @Inject
     private AuthService auth;
@@ -98,6 +102,10 @@ public class SoftwareRepositoryResourceImpl implements SoftwareRepositoryResourc
         }
 
         BHive h = new BHive(hive.toUri(), RollingFileAuditor.getFactory().apply(hive), registry.getActivityReporter());
+        Path defaultPool = minion.getDefaultPoolPath();
+        if (defaultPool != null) {
+            h.enablePooling(defaultPool, false);
+        }
         registry.register(config.name, h);
         SoftwareRepositoryManifest srm = new SoftwareRepositoryManifest(h);
         srm.update(config);

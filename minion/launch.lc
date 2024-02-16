@@ -37,6 +37,7 @@ java configuration Master-Init : minion-base {
 	argument "--initUser=admin";
 	argument "--initPassword=adminadminadmin";
 	argument "--tokenFile=${workspace_loc}/runtime/token.txt";
+	argument "--pool=${workspace_loc}/runtime/master-pool";
 }
 
 /**

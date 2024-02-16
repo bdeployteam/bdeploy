@@ -27,10 +27,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.audit.AuditParameterExtractor;
+import io.bdeploy.bhive.objects.AugmentedObjectDatabase;
 import io.bdeploy.bhive.objects.ManifestDatabase;
 import io.bdeploy.bhive.objects.ObjectDatabase;
 import io.bdeploy.bhive.objects.ObjectManager;
+import io.bdeploy.bhive.objects.ReadOnlyObjectDatabase;
 import io.bdeploy.bhive.remote.RemoteBHive;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.ActivityReporter.Activity;
@@ -56,6 +59,8 @@ import io.bdeploy.common.util.ZipHelper;
  */
 public class BHive implements AutoCloseable, BHiveExecution {
 
+    private static final String POOLREF = ".poolref";
+
     private static final Logger log = LoggerFactory.getLogger(BHive.class);
 
     private final URI uri;
@@ -63,12 +68,13 @@ public class BHive implements AutoCloseable, BHiveExecution {
     private final Path objTmp;
     private final Path markerTmp;
     private final BHiveTransactions transactions;
-    private final ObjectDatabase objects;
+    private ObjectDatabase objects;
     private final ManifestDatabase manifests;
     private final ActivityReporter reporter;
     private final Auditor auditor;
     private int parallelism = 4;
     private boolean auditSlowOps = true;
+    private boolean isPooling = false;
 
     private Predicate<String> lockContentValidator = null;
     private Supplier<String> lockContentSupplier = null;
@@ -116,9 +122,96 @@ public class BHive implements AutoCloseable, BHiveExecution {
 
         this.auditor = auditor == null ? new NullAuditor() : auditor;
         this.transactions = new BHiveTransactions(this, markerTmp, reporter);
-        this.objects = new ObjectDatabase(objRoot, objTmp, reporter, transactions);
+        if (zipFs != null) {
+            this.objects = new ObjectDatabase(objRoot, objTmp, reporter, transactions);
+        } else {
+            Path pool = getPoolPath();
+            if (pool != null) {
+                log.trace("Using pool from {}" + pool);
+                this.objects = new AugmentedObjectDatabase(objRoot, objTmp, reporter, transactions,
+                        new ReadOnlyObjectDatabase(pool, reporter));
+                this.isPooling = true;
+            } else {
+                this.objects = new ObjectDatabase(objRoot, objTmp, reporter, transactions);
+            }
+        }
         this.manifests = new ManifestDatabase(relRoot.resolve("manifests"));
         this.reporter = reporter;
+    }
+
+    /**
+     * @param poolPath the pool to enable on this {@link BHive}.
+     * @param force whether to force enabling even if pooling is already configured on the {@link BHive}.
+     */
+    public synchronized void enablePooling(Path poolPath, boolean force) {
+        if (ZipHelper.isZipUri(uri)) {
+            throw new UnsupportedOperationException("Pooling not supported on ZIP files");
+        }
+        Path relRoot = Paths.get(uri);
+        Path poolRefFile = relRoot.resolve(POOLREF);
+        if (PathHelper.exists(poolRefFile)) {
+            Path recorded = getPoolPath();
+            if (!recorded.equals(poolPath) && !force) {
+                throw new UnsupportedOperationException("Pooling is already configured to a different location");
+            }
+        }
+
+        PathHelper.mkdirs(poolPath);
+        try {
+            // attach the pool immediately.
+            this.objects = new AugmentedObjectDatabase(relRoot.resolve("objects"), objTmp, reporter, transactions,
+                    new ReadOnlyObjectDatabase(poolPath, reporter));
+            this.isPooling = true;
+
+            // only persist if attaching the pool worked
+            Files.writeString(poolRefFile, poolPath.toAbsolutePath().normalize().toString());
+            log.info("Enabled pooling on {}, using pool {}", poolRefFile.getParent(), poolPath);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot attach pool configuration to " + poolRefFile, e);
+        }
+    }
+
+    public synchronized void disablePooling() {
+        Path relRoot = Paths.get(uri);
+        Path poolRefFile = relRoot.resolve(POOLREF);
+
+        ObjectDatabase newobj = new ObjectDatabase(relRoot.resolve("objects"), objTmp, reporter, transactions);
+
+        try (Transaction tx = transactions.begin()) {
+            BHivePoolOrganizer.unpoolHive(this, newobj);
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot unpool BHive", e);
+        }
+
+        PathHelper.deleteIfExistsRetry(poolRefFile);
+        this.isPooling = false;
+        this.objects = newobj;
+    }
+
+    /**
+     * @return the configured pool path. Note that this may return a path even though not (yet) pooling due to a missing restart.
+     */
+    public synchronized Path getPoolPath() {
+        if (ZipHelper.isZipUri(uri)) {
+            return null;
+        }
+        Path poolRefFile = Paths.get(uri).resolve(POOLREF);
+        if (!PathHelper.exists(poolRefFile)) {
+            return null;
+        }
+        try {
+            return Paths.get(Files.readString(poolRefFile).trim());
+        } catch (Exception e) {
+            log.warn("Cannot read existing pool path!", e);
+            return null;
+        }
+    }
+
+    /**
+     * @return whether this instance has pooling already enabled.
+     */
+    public synchronized boolean isPooling() {
+        return isPooling;
     }
 
     public URI getUri() {

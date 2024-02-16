@@ -85,6 +85,8 @@ public class TestMinion extends TestServer {
                 .createPluginManager(getExtensionStore(context).get(CloseableServer.class, CloseableServer.class).getServer());
         BHiveRegistry reg = StartTool.registerCommonResources(this, cmr.mr, new ActivityReporter.Null());
         StartTool.registerMasterResources(this, reg, true, cmr.mr, pm, RollingFileAuditor.getFactory(), false);
+
+        getExtensionStore(context).put(BHiveRegistry.class, reg);
     }
 
     @Override
@@ -103,6 +105,10 @@ public class TestMinion extends TestServer {
             return true;
         }
 
+        if (parameterContext.getParameter().getType().isAssignableFrom(BHiveRegistry.class)) {
+            return true;
+        }
+
         if (parameterContext.isAnnotated(AuthPack.class)) {
             return true;
         }
@@ -115,6 +121,10 @@ public class TestMinion extends TestServer {
             throws ParameterResolutionException {
         if (parameterContext.getParameter().getType().isAssignableFrom(MinionRoot.class)) {
             return getExtensionStore(extensionContext).get(CloseableMinionRoot.class, CloseableMinionRoot.class).mr;
+        }
+
+        if (parameterContext.getParameter().getType().isAssignableFrom(BHiveRegistry.class)) {
+            return getExtensionStore(extensionContext).get(BHiveRegistry.class, BHiveRegistry.class);
         }
 
         if (parameterContext.isAnnotated(AuthPack.class)) {
@@ -135,8 +145,8 @@ public class TestMinion extends TestServer {
                 root = Files.createTempDirectory("mr-");
                 mr = new MinionRoot(root, new ActivityReporter.Null());
                 InitTool.initMinionRoot(root, mr, "localhost", port, null, mode, true);
+                mr.modifyState(s -> s.poolDefaultPath = root.resolve("objpool"));
                 mr.onStartup(true);
-                mr.setupServerTasks(mr.getMode());
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

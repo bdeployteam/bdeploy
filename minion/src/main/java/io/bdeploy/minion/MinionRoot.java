@@ -32,6 +32,7 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -50,6 +51,7 @@ import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.objects.LockableDatabase;
 import io.bdeploy.bhive.op.FsckOperation;
 import io.bdeploy.bhive.op.ManifestListOperation;
+import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.bhive.util.StorageHelper;
 import io.bdeploy.common.ActivityReporter;
 import io.bdeploy.common.TaskSynchronizer;
@@ -93,6 +95,7 @@ import io.bdeploy.messaging.util.MessagingUtils;
 import io.bdeploy.minion.job.CheckLatestGitHubReleaseJob;
 import io.bdeploy.minion.job.CleanupDownloadDirJob;
 import io.bdeploy.minion.job.MasterCleanupJob;
+import io.bdeploy.minion.job.OrganizePoolJob;
 import io.bdeploy.minion.job.SyncLdapUserGroupsJob;
 import io.bdeploy.minion.migration.SettingsConfigurationMigration;
 import io.bdeploy.minion.migration.SystemUserMigration;
@@ -549,8 +552,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                     .collect(Collectors.toSet());
             List<JobDto> result = new ArrayList<>();
             for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.anyGroup())) {
+                JobDetail detail = scheduler.getJobDetail(jobKey);
                 JobDto dto = new JobDto();
                 dto.name = jobKey.getName();
+                dto.description = detail.getDescription();
                 dto.group = jobKey.getGroup();
                 dto.isRunning = currentJobs.contains(jobKey);
                 Optional.ofNullable(scheduler.getTriggersOfJob(jobKey)).map(List::getLast).map(Trigger::getNextFireTime)
@@ -577,6 +582,8 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
             return Optional.ofNullable(getState().cleanupLastRun);
         } else if (jobKey.equals(CleanupDownloadDirJob.JOB_KEY)) {
             return Optional.ofNullable(getState().cleanupDownloadsDirLastRun);
+        } else if (jobKey.equals(OrganizePoolJob.JOB_KEY)) {
+            return Optional.ofNullable(getState().poolOrganizationLastRun);
         }
         return Optional.empty();
     }
@@ -623,7 +630,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * Setup tasks which should only run when this root is used for serving a
      * minion.
      */
-    public void setupServerTasks(MinionMode minionMode) {
+    public void setupServerTasks(MinionMode minionMode, BHiveRegistry registry) {
         // cleanup any stale things so periodic tasks don't get them wrong.
         PathHelper.deleteRecursiveRetry(getTempDir());
         PathHelper.mkdirs(getTempDir());
@@ -644,6 +651,7 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
         }
 
         SyncLdapUserGroupsJob.create(this, getState().ldapSyncSchedule);
+        OrganizePoolJob.create(this, registry, getState().poolOrganizationSchedule);
     }
 
     private void createJobScheduler() {
@@ -1106,5 +1114,10 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     public ActionService getActions() {
         return actions;
+    }
+
+    @Override
+    public Path getDefaultPoolPath() {
+        return getState().poolDefaultPath;
     }
 }

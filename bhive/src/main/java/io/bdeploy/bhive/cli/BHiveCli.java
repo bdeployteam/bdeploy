@@ -32,6 +32,7 @@ public class BHiveCli extends ToolBase {
         register(FetchTool.class);
 
         register(ServeTool.class);
+        register(PoolTool.class);
     }
 
     public static void main(String... args) throws Exception {

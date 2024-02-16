@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { measure } from 'src/app/modules/core/utils/performance.utils';
-import { HiveEntryDto, RepairAndPruneResultDto } from '../../../../models/gen.dtos';
+import { HiveEntryDto, HiveInfoDto, RepairAndPruneResultDto } from '../../../../models/gen.dtos';
 import { ConfigService } from '../../../core/services/config.service';
 
 @Injectable({
@@ -14,15 +14,19 @@ export class HiveService {
   private http = inject(HttpClient);
 
   public loading$ = new BehaviorSubject<boolean>(false);
+  public hives$ = new BehaviorSubject<HiveInfoDto[]>([]);
 
   private apiPath = () => `${this.cfg.config.api}/hive`;
 
-  public listHives(): Observable<string[]> {
+  public loadHives() {
     this.loading$.next(true);
-    return this.http.get<string[]>(`${this.apiPath()}/listHives`).pipe(
-      measure('List BHives'),
-      finalize(() => this.loading$.next(false)),
-    );
+    this.http
+      .get<HiveInfoDto[]>(`${this.apiPath()}/listHives`)
+      .pipe(
+        measure('List BHives'),
+        finalize(() => this.loading$.next(false)),
+      )
+      .subscribe((l) => this.hives$.next(l));
   }
 
   public listManifests(hive: string): Observable<HiveEntryDto[]> {
@@ -81,7 +85,7 @@ export class HiveService {
 
   public delete(hive: string, name: string, tag: string) {
     const params: HttpParams = new HttpParams().set('hive', hive).set('name', name).set('tag', tag);
-    return this.http.delete(`${this.apiPath()}/delete`, { params: params });
+    return this.http.delete(`${this.apiPath()}/delete`, { params: params }).pipe(finalize(() => this.loadHives()));
   }
 
   public repairAndPrune(hive: string, fix: boolean): Observable<RepairAndPruneResultDto> {
@@ -89,5 +93,15 @@ export class HiveService {
     return this.http.get<RepairAndPruneResultDto>(`${this.apiPath()}/repair-and-prune`, {
       params: params,
     });
+  }
+
+  public enablePool(hive: string): Observable<any> {
+    const params = new HttpParams().set('hive', hive);
+    return this.http.get(`${this.apiPath()}/pool/enable`, { params }).pipe(finalize(() => this.loadHives()));
+  }
+
+  public disablePool(hive: string) {
+    const params = new HttpParams().set('hive', hive);
+    return this.http.get(`${this.apiPath()}/pool/disable`, { params }).pipe(finalize(() => this.loadHives()));
   }
 }

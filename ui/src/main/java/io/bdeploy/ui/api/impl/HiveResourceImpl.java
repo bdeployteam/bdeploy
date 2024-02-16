@@ -3,8 +3,10 @@ package io.bdeploy.ui.api.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,11 +37,16 @@ import io.bdeploy.bhive.remote.jersey.BHiveRegistry;
 import io.bdeploy.common.actions.Actions;
 import io.bdeploy.common.util.FormatHelper;
 import io.bdeploy.interfaces.RepairAndPruneResultDto;
+import io.bdeploy.interfaces.manifest.InstanceGroupManifest;
+import io.bdeploy.interfaces.manifest.SoftwareRepositoryManifest;
 import io.bdeploy.interfaces.plugin.VersionSorterService;
 import io.bdeploy.jersey.actions.ActionFactory;
 import io.bdeploy.ui.api.HiveLoggingResource;
 import io.bdeploy.ui.api.HiveResource;
+import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.dto.HiveEntryDto;
+import io.bdeploy.ui.dto.HiveInfoDto;
+import io.bdeploy.ui.dto.HiveInfoDto.HiveType;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceContext;
@@ -50,6 +57,9 @@ import jakarta.ws.rs.core.StreamingOutput;
 public class HiveResourceImpl implements HiveResource {
 
     private static final Logger log = LoggerFactory.getLogger(HiveResourceImpl.class);
+
+    @Inject
+    private Minion minion;
 
     @Inject
     private BHiveRegistry registry;
@@ -64,11 +74,33 @@ public class HiveResourceImpl implements HiveResource {
     private ActionFactory af;
 
     @Override
-    public List<String> listHives() {
+    public List<HiveInfoDto> listHives() {
         log.debug("listHives()");
-        ArrayList<String> list = new ArrayList<>(registry.getAll().keySet());
-        Collections.sort(list);
-        return list;
+        List<HiveInfoDto> result = new ArrayList<>();
+
+        for (var entry : registry.getAll().entrySet()) {
+            HiveInfoDto hid = new HiveInfoDto();
+            hid.name = entry.getKey();
+
+            BHive hive = entry.getValue();
+            hid.canPool = minion.getDefaultPoolPath() != null;
+            hid.pooling = hive.isPooling();
+            Path pool = hive.getPoolPath();
+            hid.poolPath = pool != null ? pool.toString() : null;
+            hid.minPermission = registry.getRequiredPermission(hive);
+
+            if (new InstanceGroupManifest(hive).read() != null) {
+                hid.type = HiveType.INSTANCE_GROUP;
+            } else if (new SoftwareRepositoryManifest(hive).read() != null) {
+                hid.type = HiveType.SOFTWARE_REPO;
+            }
+
+            result.add(hid);
+        }
+
+        Collections.sort(result, Comparator.comparing(d -> d.name));
+
+        return result;
     }
 
     @Override
@@ -203,6 +235,32 @@ public class HiveResourceImpl implements HiveResource {
         BHive hive = registry.get(hiveParam);
 
         hive.execute(new ManifestDeleteOperation().setToDelete(new Manifest.Key(manifestName, manifestTag)));
+    }
+
+    @Override
+    public void enablePool(String hive) {
+        BHive bh = registry.get(hive);
+
+        if (bh.isPooling() || minion.getDefaultPoolPath() == null) {
+            return;
+        }
+
+        try (var handle = af.run(Actions.ENABLE_POOL, hive)) {
+            bh.enablePooling(minion.getDefaultPoolPath(), false);
+        }
+    }
+
+    @Override
+    public void disablePool(String hive) {
+        BHive bh = registry.get(hive);
+
+        if (!bh.isPooling()) {
+            return;
+        }
+
+        try (var handle = af.run(Actions.DISABLE_POOL, hive)) {
+            bh.disablePooling();
+        }
     }
 
     @Override

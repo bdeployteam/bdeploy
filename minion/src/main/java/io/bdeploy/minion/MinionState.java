@@ -115,4 +115,25 @@ public class MinionState {
      * The timeout of web sessions within which a user needs to be active to have the session be kept alive.
      */
     public Integer webSessionActiveTimeoutHours = 24 * 1;
+
+    /**
+     * Amount of times an object needs to be referenced for it to be moved to a global pool.
+     */
+    public Integer poolUsageThreshold = 2;
+
+    /**
+     * Schedule for the pool re-organization job.
+     */
+    public String poolOrganizationSchedule;
+
+    /**
+     * Timestamp of last pool re-organization.
+     */
+    public long poolOrganizationLastRun;
+
+    /**
+     * The default pool path which will be set automatically on new BHives created by the server. Existing BHives need to be setup
+     * manually or if setup continue to use the already configured path.
+     */
+    public Path poolDefaultPath;
 }

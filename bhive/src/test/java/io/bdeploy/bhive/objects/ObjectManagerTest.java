@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.bdeploy.bhive.CollectingConsumer;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.model.ObjectId;
 import io.bdeploy.bhive.model.Tree;
@@ -56,7 +57,7 @@ class ObjectManagerTest extends DbTestBase {
             ObjectId tree = mgr.importTree(mySource, false);
 
             // 3 trees (root, dir, subDir), 3 blobs (test.txt, file.txt, child.txt).
-            assertThat(getObjectDatabase().getAllObjects().size(), is(6));
+            assertThat(CollectingConsumer.collect(getObjectDatabase()::walkAllObjects).size(), is(6));
 
             // re-create tree in other directory.
             mgr.exportTree(tree, myTarget, new DefaultReferenceHandler(mgr));
