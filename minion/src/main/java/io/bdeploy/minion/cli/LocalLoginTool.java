@@ -60,6 +60,10 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
 
         @Help("The name of the stored login session to switch to")
         String use();
+
+        @Help("Path to the directory which contains the local login data")
+        @EnvironmentFallback("BDEPLOY_LOGIN_STORAGE")
+        String loginStorage();
     }
 
     public LocalLoginTool() {
@@ -68,7 +72,7 @@ public class LocalLoginTool extends ConfiguredCliTool<LoginConfig> {
 
     @Override
     protected RenderableResult run(LoginConfig config) {
-        LocalLoginManager llm = new LocalLoginManager();
+        LocalLoginManager llm = new LocalLoginManager(config.loginStorage());
 
         if (config.add() != null) {
             addUser(config, llm);

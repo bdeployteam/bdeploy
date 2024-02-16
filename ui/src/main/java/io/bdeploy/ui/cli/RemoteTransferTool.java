@@ -10,6 +10,7 @@ import io.bdeploy.bhive.BHiveTransactions.Transaction;
 import io.bdeploy.bhive.model.Manifest;
 import io.bdeploy.bhive.op.remote.FetchOperation;
 import io.bdeploy.bhive.op.remote.PushOperation;
+import io.bdeploy.common.cfg.Configuration.EnvironmentFallback;
 import io.bdeploy.common.cfg.Configuration.Help;
 import io.bdeploy.common.cli.ToolBase.CliTool.CliName;
 import io.bdeploy.common.cli.ToolCategory;
@@ -52,6 +53,10 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
 
         @Help("The version of the product or external software to transfer, can be found using remote-product or remote-repo-software tools.")
         String version();
+
+        @Help("Path to the directory which contains the local login data")
+        @EnvironmentFallback("BDEPLOY_LOGIN_STORAGE")
+        String loginStorage();
     }
 
     public RemoteTransferTool() {
@@ -69,7 +74,7 @@ public class RemoteTransferTool extends RemoteServiceTool<TransferConfig> {
         RemoteService target = null;
 
         if (config.targetLogin() != null) {
-            target = new LocalLoginManager().getNamedService(config.targetLogin());
+            target = new LocalLoginManager(config.loginStorage()).getNamedService(config.targetLogin());
         } else if (config.targetRemote() != null && config.targetToken() != null) {
             target = new RemoteService(UriBuilder.fromUri(config.targetRemote()).build(), config.targetToken());
         }

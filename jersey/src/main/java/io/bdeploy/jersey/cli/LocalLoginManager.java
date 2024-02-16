@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 
@@ -19,6 +18,7 @@ import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.RemoteService;
 import io.bdeploy.common.security.SecurityHelper;
 import io.bdeploy.common.util.JacksonHelper;
+import io.bdeploy.common.util.StringHelper;
 import io.bdeploy.jersey.TrustAllServersTrustManager;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -39,12 +39,10 @@ public class LocalLoginManager {
 
     private final Path home;
 
-    public LocalLoginManager(Path home) {
-        this.home = home;
-    }
-
-    public LocalLoginManager() {
-        this(Paths.get(System.getProperty("user.home")).resolve(".bdeploy"));
+    public LocalLoginManager(String path) {
+        this.home = StringHelper.isNullOrBlank(path)//
+                ? Path.of(System.getProperty("user.home")).resolve(".bdeploy")//
+                : Path.of(path);
     }
 
     private Path getDataFile() {

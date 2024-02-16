@@ -61,6 +61,10 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         @Help("Override which named login session to use for this command.")
         @EnvironmentFallback("BDEPLOY_LOGIN")
         String useLogin();
+
+        @Help("Path to the directory which contains the local login data")
+        @EnvironmentFallback("BDEPLOY_LOGIN_STORAGE")
+        String loginStorage();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -96,7 +100,7 @@ public abstract class RemoteServiceTool<T extends Annotation> extends Configured
         boolean optional = isOptional();
 
         boolean isTestMode = ToolBase.isTestModeLLM();
-        LocalLoginManager llm = new LocalLoginManager();
+        LocalLoginManager llm = new LocalLoginManager(rc.loginStorage());
 
         if (!optional && (!isTestMode && (llm.getCurrent() == null && rc.useLogin() == null))) {
             helpAndFailIfMissing(rc.remote(), "Missing --remote, --useLogin, or current login using `bdeploy login`");
