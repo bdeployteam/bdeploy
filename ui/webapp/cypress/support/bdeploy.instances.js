@@ -46,9 +46,6 @@ Cypress.Commands.add('deleteInstance', function (groupName, instanceName) {
   cy.enterInstance(groupName, instanceName);
 
   cy.pressMainNavButton('Instance Configuration');
-  cy.inMainNavContent(() => {
-    cy.pressToolbarButton('Instance Settings');
-  });
 
   cy.inMainNavFlyin('app-instance-settings', () => {
     cy.get(`app-bd-button[text="Delete Instance"]`).click();

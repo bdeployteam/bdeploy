@@ -55,6 +55,13 @@ export class MainNavMenuComponent {
     return this.expanded ? 'open' : 'closed';
   }
 
+  goToInstanceConfiguration() {
+    this.areas.navigateBoth(
+      ['/instances', 'configuration', this.areas.groupContext$.value, this.areas.instanceContext$.value],
+      ['panels', 'instances', 'settings'],
+    );
+  }
+
   goToGitHub(): void {
     window.open('https://github.com/bdeployteam/bdeploy/releases/latest', '_blank').focus();
   }

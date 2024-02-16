@@ -267,7 +267,6 @@ describe('Instance Settings Tests', () => {
     cy.inMainNavContent(() => {
       cy.contains('Current Version: 1').should('exist');
       cy.contains('.bd-rect-card', 'The instance is currently empty').should('exist');
-      cy.pressToolbarButton('Instance Settings');
     });
 
     cy.inMainNavFlyin('app-instance-settings', () => {

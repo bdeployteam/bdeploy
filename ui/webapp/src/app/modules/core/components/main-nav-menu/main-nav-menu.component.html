@@ -110,7 +110,7 @@
     svgIcon="instance-settings"
     text="Instance Configuration"
     [collapsed]="!expanded"
-    [route]="['/instances', 'configuration', areas.groupContext$.value, areas.instanceContext$.value]"
+    (click)="goToInstanceConfiguration()"
     [disabled]="!(authService.isCurrentScopeWrite$ | async)"
     [matTooltip]="(authService.isCurrentScopeWrite$ | async) ? null : 'Insufficient permissions to change configuration'"
     matTooltipPosition="right"
