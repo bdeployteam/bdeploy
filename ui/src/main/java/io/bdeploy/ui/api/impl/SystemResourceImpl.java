@@ -240,10 +240,13 @@ public class SystemResourceImpl implements SystemResource {
         scd.config.name = TemplateHelper.process(request.name, ttor, ttor::canResolve);
         scd.config.description = TemplateHelper.process(request.template.description, ttor, ttor::canResolve);
 
-        for (var v : request.template.systemVariables) {
-            // expand template variables inline for each system variable.
-            v.value = new LinkedValueConfiguration(TemplateHelper.process(v.value.getPreRenderable(), ttor, ttor::canResolve));
-            scd.config.systemVariables.add(v);
+        if (request.template.systemVariables != null && !request.template.systemVariables.isEmpty()) {
+            for (var v : request.template.systemVariables) {
+                // expand template variables inline for each system variable.
+                v.value = new LinkedValueConfiguration(
+                        TemplateHelper.process(v.value.getPreRenderable(), ttor, ttor::canResolve));
+                scd.config.systemVariables.add(v);
+            }
         }
 
         return update(scd);

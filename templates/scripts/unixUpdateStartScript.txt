@@ -235,7 +235,7 @@ fi
 
 if [ \$state == 42 ]; then
     echo "Minion signalled restart request, restarting"
-    exec "\$0" "\${ORIG_ARGS[@]}"
+    exec "\$0" "\${ORIG_ARGS[@]}" "--skipAutoStart"
 fi
 
 exit \$state

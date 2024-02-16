@@ -274,14 +274,20 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
      * Called once *after* starting the actual HTTPS server. Can be used for initialization which requires the
      * server to be online already.
      */
-    public void afterStartup(boolean isTest) {
+    public void afterStartup(boolean isTest, boolean skipAutoStart) {
         // first initialize the node manager.
         nodeManager.initialize(this, isTest);
 
-        // then start auto-start processes and so on. note: only auto-starts on *this* node.
-        // we *must* do it after startup of server to already have a UI where startup
-        // could be aborted/monitored/etc.
-        processController.autoStart();
+        // E.g. after applying an update, we do not want to auto-start instances
+        // that were stopped manually before the update.
+        if (!skipAutoStart) {
+            // then start auto-start processes and so on. note: only auto-starts on *this* node.
+            // we *must* do it after startup of server to already have a UI where startup
+            // could be aborted/monitored/etc.
+            processController.autoStart();
+        } else {
+            log.info("Auto-starting of instances has been skipped.");
+        }
 
         // in case we're in a test, we want to aggressively wait for certain conditions
         // when stopping processes. This is mostly irrelevant in the real world, so save the wait.
