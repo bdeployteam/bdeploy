@@ -30,7 +30,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     this.saving$,
     null,
     null,
-    this.nodeName$
+    this.nodeName$,
   );
 
   protected data: RemoteService;
@@ -58,7 +58,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
         this.orig = cloneDeep(n.find((x) => x.name === r.params.node).status?.config?.remote);
         this.orig.authPack = ''; // clear existing pack, not relevant AT ALL.
         this.data = cloneDeep(this.orig);
-      })
+      }),
     );
   }
 
@@ -105,9 +105,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   protected onDrop(event: DragEvent) {
     event.preventDefault();
 
-    if (event.dataTransfer.files.length > 0) {
-      this.readFile(event.dataTransfer.files[0]);
-    } else if (event.dataTransfer.types.includes(NODE_MIME_TYPE)) {
+    if (event.dataTransfer.types.includes(NODE_MIME_TYPE)) {
       const x = JSON.parse(event.dataTransfer.getData(NODE_MIME_TYPE));
       this.data.uri = x.remote.uri;
       this.data.authPack = x.remote.authPack;

@@ -49,7 +49,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
     skipWhile((n) => !n?.length),
     map((n) => n.map((x) => x.name)),
     tap(() => setTimeout(() => this.form?.controls['name'].updateValueAndValidity())),
-    startWith([])
+    startWith([]),
   );
   protected mappedAdd$ = this.actions.action(
     [Actions.ADD_NODE, Actions.CONVERT_TO_NODE],
@@ -57,7 +57,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
     null,
     null,
     // the dummy string is to not react on *any* node beind manipulated from remote events until the user starts typing.
-    this.nodeName$.pipe(map((n) => (!n?.length ? '__DUMMY__' : n)))
+    this.nodeName$.pipe(map((n) => (!n?.length ? '__DUMMY__' : n))),
   );
   protected data = cloneDeep(DEF_NODE);
 
@@ -94,7 +94,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
       finalize(() => {
         this.adding$.next(false);
         this.nodeName$.next(null);
-      })
+      }),
     );
   }
 
@@ -130,9 +130,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
   protected onDrop(event: DragEvent) {
     event.preventDefault();
 
-    if (event.dataTransfer.files.length > 0) {
-      this.readFile(event.dataTransfer.files[0]);
-    } else if (event.dataTransfer.types.includes(NODE_MIME_TYPE)) {
+    if (event.dataTransfer.types.includes(NODE_MIME_TYPE)) {
       this.data = JSON.parse(event.dataTransfer.getData(NODE_MIME_TYPE));
     }
   }
