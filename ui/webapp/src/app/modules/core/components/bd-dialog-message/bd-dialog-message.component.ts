@@ -145,6 +145,7 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
     if (event.defaultPrevented) {
       return;
     }
+    event.preventDefault();
 
     // find single confirm action.
     const x = this.message$.value?.actions?.filter((a) => a.confirm);

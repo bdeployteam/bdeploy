@@ -77,7 +77,7 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
             this.storedPosition = null;
           });
         }
-      })
+      }),
     );
   }
 
@@ -94,7 +94,7 @@ export class BdDialogComponent implements OnInit, AfterViewInit, OnDestroy {
     message: string,
     icon?: string,
     confirmation?: string,
-    hint?: string
+    hint?: string,
   ): Observable<boolean> {
     return this.message({
       header,
