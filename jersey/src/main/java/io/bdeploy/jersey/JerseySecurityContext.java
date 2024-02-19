@@ -4,11 +4,10 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 
-import jakarta.ws.rs.core.SecurityContext;
-
 import io.bdeploy.common.security.ApiAccessToken;
 import io.bdeploy.common.security.ScopedPermission;
 import io.bdeploy.common.security.ScopedPermission.Permission;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * A simple {@link SecurityContext} which provides information based on the
@@ -48,6 +47,10 @@ public class JerseySecurityContext implements SecurityContext {
     @Override
     public String getAuthenticationScheme() {
         return JerseyAuthenticationProvider.AUTHENTICATION_SCHEME;
+    }
+
+    public Collection<ScopedPermission> getPermissions() {
+        return token.getPermissions();
     }
 
     /**

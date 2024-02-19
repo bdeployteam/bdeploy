@@ -6,6 +6,8 @@ import io.bdeploy.common.cfg.Configuration.ValidationMessage;
 @ValidationMessage("Invalid remote: '%s'. A remote must be a local path or start with 'https://' and end with '/api'")
 public class RemoteValidator implements ConfigValidator<String> {
 
+    public static final String API_SUFFIX = "/api";
+
     @Override
     public boolean validate(String value) {
         String lower = value.toLowerCase();
@@ -15,7 +17,7 @@ public class RemoteValidator implements ConfigValidator<String> {
             return true;
         }
 
-        return lower.startsWith("https://") && lower.endsWith("/api");
+        return lower.startsWith("https://") && lower.endsWith(API_SUFFIX);
     }
 
 }

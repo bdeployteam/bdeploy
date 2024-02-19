@@ -58,7 +58,17 @@ public interface AuthResource {
      */
     @GET
     @Path("/session")
-    public String getSessionToken(@CookieParam(SessionManager.SESSION_COOKIE) Cookie session);
+    @Unsecured
+    public Response getSessionToken(@CookieParam(SessionManager.SESSION_COOKIE) Cookie cookie, @QueryParam("otp") String otp);
+
+    /**
+     * Creates a new session with an one time password which can be used for a single login.
+     *
+     * @return The one time password
+     */
+    @POST
+    @Path("/session/otp/create")
+    public String createSessionWithOtp();
 
     /**
      * Terminates the current session and logs the use off.
