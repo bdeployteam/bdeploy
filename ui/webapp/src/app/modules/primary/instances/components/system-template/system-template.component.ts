@@ -62,8 +62,8 @@ const colInstResIcon: BdDataColumn<InstanceTemplateReferenceResultDto> = {
     r.status === InstanceTemplateReferenceStatus.OK
       ? 'check'
       : r.status === InstanceTemplateReferenceStatus.ERROR
-      ? 'error'
-      : 'warning',
+        ? 'error'
+        : 'warning',
   component: BdDataIconCellComponent,
   width: '50px',
 };
@@ -104,6 +104,7 @@ export class SystemTemplateComponent implements OnInit {
   protected nodeNames: string[];
   protected isAllTemplateGroupsSelected = false;
   protected isAllVariablesSet = false;
+  protected isAnyInstanceApplied = false;
   protected result: SystemTemplateResultDto;
   protected resultCols: BdDataColumn<InstanceTemplateReferenceResultDto>[] = [
     colInstResIcon,
@@ -237,14 +238,13 @@ export class SystemTemplateComponent implements OnInit {
   }
 
   private onConfigureInstanceTemplatesStep() {
-    // FIXME: possibility to skip instance.
     this.isAllTemplateGroupsSelected = false;
     this.nodeNames = Object.keys(this.template.nodes);
     this.templates = this.template.template.instances.map((i) => {
       // cannot be null, as the backend would otherwise reject.
       const prod = this.template.products.find(
         (p) =>
-          p.product === i.productId && (!i.productVersionRegex || new RegExp(i.productVersionRegex).test(p.key.tag))
+          p.product === i.productId && (!i.productVersionRegex || new RegExp(i.productVersionRegex).test(p.key.tag)),
       );
 
       const expStatus: StatusMessage[] = [];
@@ -295,12 +295,11 @@ export class SystemTemplateComponent implements OnInit {
         isAllVariablesSet: false,
       };
 
-      this.validateAnyGroupSelected(result);
-
       return result;
     });
 
     // once re-calculate after all templates are finally defined.
+    this.templates.forEach((t) => this.validateAnyGroupSelected(t));
     this.validateAllTemplateGroupsSelected();
   }
 
@@ -410,6 +409,7 @@ export class SystemTemplateComponent implements OnInit {
       }
     }
     this.isAllTemplateGroupsSelected = true;
+    this.isAnyInstanceApplied = !this.templates.every((t) => !t.isApplyInstance);
   }
 
   protected validateAnyGroupSelected(tpl: TemplateSelection) {
