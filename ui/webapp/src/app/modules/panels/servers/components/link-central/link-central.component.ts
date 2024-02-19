@@ -31,7 +31,7 @@ export class LinkCentralComponent implements OnInit, OnDestroy {
       .subscribe((r) => (this.payload = r));
 
     this.subscription = this.changes.subscribe(ObjectChangeType.MANAGED_MASTER_ATTACH, EMPTY_SCOPE, () =>
-      this.areas.closePanel()
+      this.areas.closePanel(),
     );
   }
 
@@ -47,9 +47,7 @@ export class LinkCentralComponent implements OnInit, OnDestroy {
   protected onDrop(event: DragEvent) {
     event.preventDefault();
 
-    if (event.dataTransfer.files.length > 0) {
-      this.readFile(event.dataTransfer.files[0]);
-    } else if (event.dataTransfer.types.includes(ATTACH_MIME_TYPE)) {
+    if (event.dataTransfer.types.includes(ATTACH_MIME_TYPE)) {
       const data = event.dataTransfer.getData(ATTACH_MIME_TYPE);
       this.onManualAttach(data);
     }

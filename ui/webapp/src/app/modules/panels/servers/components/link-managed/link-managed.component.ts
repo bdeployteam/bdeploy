@@ -52,9 +52,7 @@ export class LinkManagedComponent {
   protected onDrop(event: DragEvent) {
     event.preventDefault();
 
-    if (event.dataTransfer.files.length > 0) {
-      this.readFile(event.dataTransfer.files[0]);
-    } else if (event.dataTransfer.types.includes(ATTACH_MIME_TYPE)) {
+    if (event.dataTransfer.types.includes(ATTACH_MIME_TYPE)) {
       this.payload = JSON.parse(event.dataTransfer.getData(ATTACH_MIME_TYPE));
     }
   }
@@ -81,7 +79,7 @@ export class LinkManagedComponent {
   protected onDownloadCentralIdent() {
     this.downloads.downloadBlob(
       'central-' + this.payload.hostName + '.txt',
-      new Blob([this.ident], { type: 'text/plain' })
+      new Blob([this.ident], { type: 'text/plain' }),
     );
     this.areas.closePanel();
   }
