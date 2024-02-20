@@ -56,10 +56,24 @@ export class InstanceBulkService {
       switchMap((i) => {
         return this.http.post<BulkOperationResultDto>(
           `${this.bulkApiPath(this.groups.current$.value.name)}/bulkStart`,
-          i
+          i,
         );
       }),
-      tap((r) => this.logResult('Start', r))
+      tap((r) => this.logResult('Start', r)),
+    );
+  }
+
+  public restart(): Observable<BulkOperationResultDto> {
+    return this.selection$.pipe(
+      take(1),
+      map((i) => i.map((dto) => dto.instanceConfiguration.id)),
+      switchMap((i) => {
+        return this.http.post<BulkOperationResultDto>(
+          `${this.bulkApiPath(this.groups.current$.value.name)}/bulkRestart`,
+          i,
+        );
+      }),
+      tap((r) => this.logResult('Restart', r)),
     );
   }
 
@@ -70,10 +84,10 @@ export class InstanceBulkService {
       switchMap((i) => {
         return this.http.post<BulkOperationResultDto>(
           `${this.bulkApiPath(this.groups.current$.value.name)}/bulkStop`,
-          i
+          i,
         );
       }),
-      tap((r) => this.logResult('Stop', r))
+      tap((r) => this.logResult('Stop', r)),
     );
   }
 
@@ -84,10 +98,10 @@ export class InstanceBulkService {
       switchMap((i) => {
         return this.http.post<BulkOperationResultDto>(
           `${this.bulkApiPath(this.groups.current$.value.name)}/bulkUpdate/${targetVersion}`,
-          i
+          i,
         );
       }),
-      tap((r) => this.logResult('Update', r))
+      tap((r) => this.logResult('Update', r)),
     );
   }
 
@@ -98,10 +112,10 @@ export class InstanceBulkService {
       switchMap((i) => {
         return this.http.post<BulkOperationResultDto>(
           `${this.bulkApiPath(this.groups.current$.value.name)}/bulkDelete`,
-          i
+          i,
         );
       }),
-      tap((r) => this.logResult('Delete', r))
+      tap((r) => this.logResult('Delete', r)),
     );
   }
 
@@ -112,10 +126,10 @@ export class InstanceBulkService {
       switchMap((i) => {
         return this.http.post<BulkOperationResultDto>(
           `${this.bulkApiPath(this.groups.current$.value.name)}/bulkInstall`,
-          i
+          i,
         );
       }),
-      tap((r) => this.logResult('Install', r))
+      tap((r) => this.logResult('Install', r)),
     );
   }
 
@@ -126,10 +140,10 @@ export class InstanceBulkService {
       switchMap((i) => {
         return this.http.post<BulkOperationResultDto>(
           `${this.bulkApiPath(this.groups.current$.value.name)}/bulkActivate`,
-          i
+          i,
         );
       }),
-      tap((r) => this.logResult('Activate', r))
+      tap((r) => this.logResult('Activate', r)),
     );
   }
 

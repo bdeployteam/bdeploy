@@ -25,6 +25,7 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   protected actions = inject(ActionsService);
 
   private starting$ = new BehaviorSubject<boolean>(false);
+  private restarting$ = new BehaviorSubject<boolean>(false);
   private stopping$ = new BehaviorSubject<boolean>(false);
   private deleting$ = new BehaviorSubject<boolean>(false);
   private installing$ = new BehaviorSubject<boolean>(false);
@@ -40,6 +41,12 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
   private ids$ = this.bulk.selection$.pipe(map((i) => i.map((x) => x.instanceConfiguration.id)));
 
   protected mappedStart$ = this.actions.action([Actions.START_INSTANCE], this.starting$, null, this.ids$);
+  protected mappedRestart$ = this.actions.action(
+    [Actions.START_INSTANCE, Actions.STOP_INSTANCE],
+    this.restarting$,
+    null,
+    this.ids$,
+  );
   protected mappedStop$ = this.actions.action([Actions.STOP_INSTANCE], this.stopping$, null, this.ids$);
   protected mappedDelete$ = this.actions.action([Actions.DELETE_INSTANCE], this.deleting$, null, this.ids$);
   protected mappedInstall$ = this.actions.action([Actions.INSTALL], this.installing$, null, this.ids$);
@@ -89,6 +96,24 @@ export class BulkManipulationComponent implements OnInit, OnDestroy {
           });
         }),
         finalize(() => this.starting$.next(false)),
+      )
+      .subscribe();
+  }
+
+  protected onRestart() {
+    this.restarting$.next(true);
+    this.bulk
+      .restart()
+      .pipe(
+        switchMap((r) => {
+          this.bulkOpResult = r;
+          return this.dialog.message({
+            header: 'Result',
+            template: this.opResult,
+            actions: [ACTION_OK],
+          });
+        }),
+        finalize(() => this.restarting$.next(false)),
       )
       .subscribe();
   }

@@ -41,6 +41,14 @@
       ></app-bd-button>
       <app-bd-button
         [collapsed]="false"
+        [disabled]="!selections.length || (mappedRestart$ | async)"
+        [loadingWhen$]="mappedRestart$"
+        text="Restart Selected Instances"
+        icon="replay"
+        (click)="onRestart()"
+      ></app-bd-button>
+      <app-bd-button
+        [collapsed]="false"
         [disabled]="!selections.length || (mappedStop$ | async)"
         [loadingWhen$]="mappedStop$"
         text="Stop Selected Instances"

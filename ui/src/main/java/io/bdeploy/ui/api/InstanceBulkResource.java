@@ -45,6 +45,17 @@ public interface InstanceBulkResource {
     public BulkOperationResultDto startBulk(List<String> instances);
 
     /**
+     * @param instances instances to restart.
+     *            All processes of those instances will be stopped.
+     *            All `INSTANCE` start-type processes will be started.
+     * @return a result for each processed instance
+     */
+    @POST
+    @Path("/bulkRestart")
+    @RequiredPermission(permission = Permission.WRITE)
+    public BulkOperationResultDto restartBulk(List<String> instances);
+
+    /**
      * @param instances instances to stop. All processes of those instances will be stopped.
      * @return a result for each processed instance
      */

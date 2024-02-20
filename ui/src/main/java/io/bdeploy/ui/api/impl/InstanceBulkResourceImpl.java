@@ -267,6 +267,37 @@ public class InstanceBulkResourceImpl implements InstanceBulkResource {
     }
 
     @Override
+    public BulkOperationResultDto restartBulk(List<String> instances) {
+        var result = new BulkOperationResultDto();
+        var ir = getInstanceResource();
+        var sync = new ConcurrentHashMap<Manifest.Key, String>();
+        var actions = instances.stream().map(i -> (Runnable) () -> {
+            var im = InstanceManifest.load(hive, i, null);
+            try {
+                var pr = ir.getProcessResource(i);
+                pr.restartAll();
+
+                sync.put(im.getManifest(), im.getConfiguration().id);
+                result.add(new OperationResult(i, OperationResultType.INFO, "Restarted"));
+            } catch (Exception e) {
+                log.warn("Error while restarting {}", i, e);
+                result.add(new OperationResult(i, OperationResultType.ERROR, e.getMessage()));
+            }
+        }).toList();
+
+        rspos.runAndAwaitAll("Bulk-Start", actions, hive.getTransactions());
+
+        syncBulk(sync.keySet());
+
+        sync.entrySet()
+                .forEach(e -> changes.change(ObjectChangeType.INSTANCE, e.getKey(),
+                        new ObjectScope(group, e.getValue(), e.getKey().getTag()),
+                        Map.of(ObjectChangeDetails.CHANGE_HINT, ObjectChangeHint.STATE)));
+
+        return result;
+    }
+
+    @Override
     public BulkOperationResultDto stopBulk(List<String> instances) {
         var result = new BulkOperationResultDto();
         var ir = getInstanceResource();
