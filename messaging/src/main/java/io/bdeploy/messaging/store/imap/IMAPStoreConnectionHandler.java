@@ -1,6 +1,8 @@
 package io.bdeploy.messaging.store.imap;
 
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.angus.mail.imap.DefaultFolder;
 import org.eclipse.angus.mail.imap.IMAPFolder;
@@ -10,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdeploy.messaging.store.StoreConnectionHandler;
-import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.Folder;
 import jakarta.mail.FolderClosedException;
 import jakarta.mail.MessagingException;
@@ -51,24 +52,15 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
     }
 
     @Override
-    public void connect(URLName url) throws AuthenticationFailedException, MessagingException {
-        super.connect(url);
-        idleThread = new Thread(() -> {
-            try {
-                idle(url);
-            } catch (MessagingException e) {
-                log.error("Failed to start idle.", e);
-            }
-        });
-        idleThread.start();
+    public CompletableFuture<Void> connect(URLName url) {
+        return super.connect(url).thenRun(() -> idle(url));
     }
 
     @Override
-    public void close() {
+    public void disconnect() {
         if (idleThread != null && idleThread.isAlive()) {
             idleThread.interrupt();
         }
-        super.close();
     }
 
     @Override
@@ -108,46 +100,55 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
         return folderOpeningStyle;
     }
 
-    private void idle(URLName url) throws MessagingException {
-        IMAPFolder folder = getFolder();
+    private Void idle(URLName url) {
+        idleThread = new Thread(() -> {
+            IMAPFolder folder = getFolder();
 
-        boolean supportsIdle = false;
-        try {
-            folder.idle();
-            supportsIdle = true;
-        } catch (FolderClosedException e) {
-            throw e;
-        } catch (MessagingException e) {
-            supportsIdle = false;
-        }
+            boolean supportsIdle = false;
+            try {
+                folder.idle();
+                supportsIdle = true;
+            } catch (FolderClosedException e) {
+                return;
+            } catch (MessagingException e) {
+                supportsIdle = false;
+            }
 
-        if (supportsIdle) {
-            while (!Thread.interrupted()) {
-                if (!folder.isOpen()) {
-                    try {
-                        folder.open(folderOpeningStyle.value);
-                    } catch (MessagingException e1) {
-                        log.error("Failed to reopen folder.", e1);
+            try {
+                if (supportsIdle) {
+                    while (!Thread.interrupted()) {
+                        if (!folder.isOpen()) {
+                            try {
+                                folder.open(folderOpeningStyle.value);
+                            } catch (MessagingException e1) {
+                                log.error("Failed to reopen folder.", e1);
+                                try {
+                                    connect(url).get();
+                                } catch (InterruptedException e) {
+                                    return;
+                                } catch (ExecutionException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        folder.idle();
+                        log.trace("idle done");
+                    }
+                } else {
+                    while (!Thread.interrupted()) {
                         try {
-                            connect(url);
-                        } catch (MessagingException e2) {
-                            log.error("Failed to reconnect.", e2);
+                            Thread.sleep(IDLE_TIME);
+                        } catch (InterruptedException e) {
                             return;
                         }
+                        folder.getMessageCount();
                     }
                 }
-                folder.idle();
-                log.trace("idle done");
+            } catch (MessagingException e) {
+                throw new IllegalStateException("Exception while idleing", e);
             }
-        } else {
-            while (!Thread.interrupted()) {
-                try {
-                    Thread.sleep(IDLE_TIME);
-                } catch (InterruptedException e) {
-                    return;
-                }
-                folder.getMessageCount();
-            }
-        }
+        });
+        idleThread.start();
+        return null;
     }
 }

@@ -107,7 +107,6 @@ import io.bdeploy.ui.api.Minion;
 import io.bdeploy.ui.api.MinionMode;
 import io.bdeploy.ui.api.NodeManager;
 import io.bdeploy.ui.dto.JobDto;
-import jakarta.mail.MessagingException;
 import jakarta.mail.URLName;
 import jakarta.mail.search.SubjectTerm;
 import jakarta.ws.rs.WebApplicationException;
@@ -318,8 +317,6 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                 mailSender.connect(parsedUrl);
             } catch (IllegalArgumentException e) {
                 log.error("Mail sender URL is incomplete.", e);
-            } catch (MessagingException e) {
-                log.error("Failed to start mail sender to " + parsedUrl, e);
             }
         } else {
             mailSender.close();
@@ -333,8 +330,6 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
                 mailReceiver.connect(parsedUrl);
             } catch (IllegalArgumentException e) {
                 log.error("Mail receiver URL is incomplete.", e);
-            } catch (MessagingException e) {
-                log.error("Failed to start mail receiver to " + parsedUrl, e);
             }
         } else {
             mailReceiver.close();

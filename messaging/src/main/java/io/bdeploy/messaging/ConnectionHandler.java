@@ -1,37 +1,38 @@
 package io.bdeploy.messaging;
 
 import java.io.Closeable;
+import java.util.concurrent.CompletableFuture;
 
-import jakarta.mail.AuthenticationFailedException;
-import jakarta.mail.MessagingException;
-import jakarta.mail.NoSuchProviderException;
 import jakarta.mail.URLName;
 
 /**
  * Basic connection handler that contains methods for connecting to a server.
  *
- * @apiNote Ensure that the open connection is terminated in {@link #close()}.
+ * @apiNote Ensure that the open connection is terminated in {@link #disconnect()}.
  */
 public interface ConnectionHandler extends Closeable {
 
     /**
      * Establishes a connection to the server with the given parameters.
-     * <p>
-     * Calling this method will terminate the existing connection by calling {@link #close()} before opening the new one.
      *
      * @param url The {@link URLName} which contains the connection parameters
-     * @throws NoSuchProviderException If no provider could be found for the given protocol
-     * @throws AuthenticationFailedException For authentication failures
-     * @throws MessagingException For other failures
-     * @see #close()
+     * @return A {@link CompletableFuture} of the connection process
+     * @see #disconnect()
      */
-    void connect(URLName url) throws NoSuchProviderException, AuthenticationFailedException, MessagingException;
+    CompletableFuture<Void> connect(URLName url);
 
     /**
      * Terminates the open connection.
      *
-     * @see Closeable
+     * @see #connect(URLName)
+     */
+    void disconnect();
+
+    /**
+     * By default this just calls {@link #disconnect()}.
      */
     @Override
-    void close();
+    default void close() {
+        disconnect();
+    }
 }

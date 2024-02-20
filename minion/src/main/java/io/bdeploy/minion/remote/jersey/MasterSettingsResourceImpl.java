@@ -3,6 +3,7 @@ package io.bdeploy.minion.remote.jersey;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -85,9 +86,9 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
 
         try (SMTPTransportConnectionHandler testMailSender = new SMTPTransportConnectionHandler()) {
             try {
-                testMailSender.connect(url);
-            } catch (MessagingException e) {
-                throw new IllegalStateException("Failed to connect.", e);
+                testMailSender.connect(url).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new IllegalStateException("Connecting was aborted", e);
             }
 
             InternetAddress senderAddress = StringHelper.isNullOrBlank(mailSenderSettingsDto.senderAddress) ? null
@@ -133,9 +134,9 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
         URLName parsedUrl = MessagingUtils.checkAndParseUrl(url, username, password);
 
         try (ConnectionHandler handler = handlerCreator.get()) {
-            handler.connect(parsedUrl);
-        } catch (MessagingException e) {
-            throw new IllegalStateException(e);
+            handler.connect(parsedUrl).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new IllegalStateException("Connecting was aborted", e);
         }
     }
 }
