@@ -32,7 +32,9 @@ Cypress.Commands.add('createInstance', function (groupName, instanceName, produc
 
     cy.contains('button', 'Save').should('exist').and('be.enabled').click();
   });
-  cy.checkMainNavFlyinClosed();
+  cy.inMainNavFlyin('app-instance-settings', () => {
+    cy.contains('Instance Settings').should('exist');
+  });
 
   cy.inMainNavContent(() => {
     cy.contains('Configuration').should('exist');

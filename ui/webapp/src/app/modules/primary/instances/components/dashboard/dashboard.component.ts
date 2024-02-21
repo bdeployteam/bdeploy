@@ -96,7 +96,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.cfg.isCentral$.subscribe((value) => {
         this.isCentral = value;
-      })
+      }),
     );
     this.subscription.add(
       this.instances.activeNodeCfgs$.subscribe((nodes) => {
@@ -110,34 +110,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.serverNodes$.next(
           nodes.nodeConfigDtos
             .filter((p) => p.nodeName !== CLIENT_NODE_NAME && !!p.nodeConfiguration?.applications?.length)
-            .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName))
+            .sort((a, b) => sortNodesMasterFirst(a.nodeName, b.nodeName)),
         );
 
         const allApps = [];
         nodes.nodeConfigDtos.forEach((x) =>
-          allApps.push(...(x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : []))
+          allApps.push(...(x?.nodeConfiguration?.applications ? x.nodeConfiguration.applications : [])),
         );
         this.allApplications$.next(allApps);
         this.clientNode$.next(
-          nodes.nodeConfigDtos.find((p) => p.nodeName === CLIENT_NODE_NAME && p.nodeConfiguration?.applications?.length)
+          nodes.nodeConfigDtos.find(
+            (p) => p.nodeName === CLIENT_NODE_NAME && p.nodeConfiguration?.applications?.length,
+          ),
         );
-      })
+      }),
     );
     this.subscription.add(
       this.states.state$.subscribe((s) => {
         this.states$.next(s);
         this.isInstalled = !!s?.installedTags?.find((c) => c === this.currentInstance?.instance.tag);
-      })
+      }),
     );
     this.subscription.add(
       this.instances.current$.subscribe((currentInstance) => {
         this.currentInstance = currentInstance;
-      })
+      }),
     );
     this.subscription.add(
       this.instances.active$.subscribe((activeInstance) => {
         this.activeInstance = activeInstance;
-      })
+      }),
     );
 
     this.isCardView = this.cardViewService.checkCardView('processList');
@@ -194,5 +196,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const indexB = node.nodeConfiguration.controlGroups?.findIndex((g) => b?.startsWith(g.name + ' ['));
 
     return indexA - indexB;
+  }
+
+  protected goToInstanceConfiguration() {
+    this.areas.navigateBoth(
+      ['/instances', 'configuration', this.areas.groupContext$.value, this.areas.instanceContext$.value],
+      ['panels', 'instances', 'settings'],
+    );
   }
 }

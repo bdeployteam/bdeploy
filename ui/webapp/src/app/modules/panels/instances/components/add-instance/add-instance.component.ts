@@ -136,7 +136,10 @@ export class AddInstanceComponent implements OnInit, OnDestroy, DirtyableDialog 
 
   protected onSave(): void {
     this.doSave().subscribe(() => {
-      this.router.navigate(['instances', 'configuration', this.areas.groupContext$.value, this.config.id]);
+      this.areas.navigateBoth(
+        ['/instances', 'configuration', this.areas.groupContext$.value, this.config.id],
+        ['panels', 'instances', 'settings'],
+      );
       this.subscription?.unsubscribe();
     });
   }

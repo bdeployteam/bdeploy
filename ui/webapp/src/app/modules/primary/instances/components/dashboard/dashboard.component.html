@@ -136,7 +136,7 @@
               text="Configure Instance"
               icon="settings"
               [collapsed]="false"
-              [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
+              (click)="goToInstanceConfiguration()"
               [disabled]="!(auth.isCurrentScopeWrite$ | async)"
             ></app-bd-button>
           </app-bd-no-data>
@@ -171,7 +171,7 @@
           text="Configure Instance"
           icon="settings"
           [collapsed]="false"
-          [routerLink]="['/instances', 'configuration', areas.groupContext$ | async, areas.instanceContext$ | async]"
+          (click)="goToInstanceConfiguration()"
           [disabled]="!(auth.isCurrentScopeWrite$ | async)"
         ></app-bd-button>
       </app-bd-no-data>

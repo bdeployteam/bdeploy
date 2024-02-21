@@ -47,7 +47,7 @@ export class MainNavMenuComponent {
     return this.areas.menuMaximized$.value ? 'open' : 'closed';
   }
 
-  goToInstanceConfiguration() {
+  protected goToInstanceConfiguration() {
     this.areas.navigateBoth(
       ['/instances', 'configuration', this.areas.groupContext$.value, this.areas.instanceContext$.value],
       ['panels', 'instances', 'settings'],
