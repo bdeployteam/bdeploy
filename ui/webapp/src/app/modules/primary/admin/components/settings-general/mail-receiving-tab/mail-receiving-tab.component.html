@@ -34,6 +34,7 @@
       (ngModelChange)="onPasswordChange($event)"
       [disabled]="!settings.settings$.value.mailReceiverSettings.enabled"
       label="Password"
+      placeholder="Leave empty to use stored password"
       name="password"
       type="password"
       [passwordShowable]="true"

@@ -16,8 +16,8 @@ public class AttachmentUtils {
      *
      * @return The name of the attachment (excluding the file extension)
      */
-    public static String getAttachmentNameFromData(String name, String instanceId) {
-        return name + HASH + instanceId;
+    public static String getAttachmentNameFromData(String name, String instanceId, String managedServerName) {
+        return name + HASH + instanceId + HASH + managedServerName;
     }
 
     /**
@@ -36,13 +36,17 @@ public class AttachmentUtils {
      * <td>[1]</td>
      * <td>instance id</td>
      * </tr>
+     * <tr>
+     * <td>[2]</td>
+     * <td>server name</td>
+     * </tr>
      * </table>
      *
      * @param path The path to the file
      */
     public static String[] getAttachmentDataFromName(Path path) {
         String[] split = FilenameUtils.removeExtension(path.getFileName().toString()).split(HASH);
-        if (split.length != 2) {
+        if (split.length != 3) {
             throw new IllegalArgumentException("Filename " + path.toString() + " could not be parsed.");
         }
         return split;

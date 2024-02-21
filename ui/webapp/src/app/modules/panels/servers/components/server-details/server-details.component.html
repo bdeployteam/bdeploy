@@ -12,6 +12,8 @@
         <div class="truncate">{{ server.uri }}</div>
         <strong>Last Sync.:</strong>
         <div>{{ server.lastSync | date: 'dd.MM.yyyy HH:mm' }}</div>
+        <strong>Last Message:</strong>
+        <div>{{ server.lastMessageReceived | date: 'dd.MM.yyyy HH:mm' }}</div>
         <ng-container *ngIf="server.update?.updateAvailable">
           <strong>Update available:</strong>
           <div class="flex justify-start items-center">

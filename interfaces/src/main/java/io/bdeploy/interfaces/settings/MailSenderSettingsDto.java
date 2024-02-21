@@ -8,4 +8,5 @@ public class MailSenderSettingsDto {
     public String password;
     public String senderAddress;
     public String receiverAddress;
+    public String managedServerName;
 }

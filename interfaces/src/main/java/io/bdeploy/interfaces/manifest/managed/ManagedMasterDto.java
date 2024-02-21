@@ -14,6 +14,7 @@ public class ManagedMasterDto {
     public String uri;
     public String auth;
     public Instant lastSync;
+    public Instant lastMessageReceived;
     public MinionConfiguration minions;
     public MinionUpdateDto update;
     public MinionProductUpdatesDto productUpdates;

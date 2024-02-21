@@ -6,7 +6,7 @@
     (ngModelChange)="clearMessages()"
   ></app-bd-form-toggle>
   <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
-    Configure the SMTP/SMTPS server below if enabled.
+    Configure the SMTP/SMTPS server:
   </p>
   <form #smtpConnectionData="ngForm">
     <app-bd-form-input
@@ -31,6 +31,7 @@
       (ngModelChange)="onPasswordChange($event)"
       [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
       label="Password"
+      placeholder="Leave empty to use stored password"
       name="password"
       type="password"
       [passwordShowable]="true"
@@ -47,6 +48,9 @@
     <div class="text-center pl-4">{{ (connectionTestStatusMsg$ | async) }}</div>
   </div>
   <br />
+  <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
+    Configure an optional sender address. This might be ignored by the SMTP server:
+  </p>
   <app-bd-form-input
     [(ngModel)]="settings.settings$.value.mailSenderSettings.senderAddress"
     [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
@@ -56,7 +60,7 @@
     appTrimmed
   ></app-bd-form-input>
   <p [class.bd-disabled-text]="!settings.settings$.value.mailSenderSettings.enabled">
-    Configure the receiver below if enabled.
+    Configure the receiver. This address will be sent configuration changes from this server:
   </p>
   <form #receiver="ngForm">
     <app-bd-form-input
@@ -67,6 +71,14 @@
       label="Receiver Address"
       type="email"
       email
+      appTrimmed
+    ></app-bd-form-input>
+    <app-bd-form-input
+      name="managedServerName"
+      [(ngModel)]="settings.settings$.value.mailSenderSettings.managedServerName"
+      [disabled]="!settings.settings$.value.mailSenderSettings.enabled"
+      [required]="true"
+      label="Managed Server Name"
       appTrimmed
     ></app-bd-form-input>
   </form>

@@ -1079,7 +1079,12 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
     @Override
     public void setSettings(SettingsConfiguration settings) {
         SettingsManifest.write(hive, settings, getEncryptionKey());
-        updateMailHandling();
+
+        try {
+            updateMailHandling();
+        } catch (Exception e) {
+            log.error("Cannot update mail handling", e);
+        }
     }
 
     public void setLatestGitHubReleaseVersion(Version v) {
