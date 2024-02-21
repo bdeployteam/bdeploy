@@ -303,36 +303,52 @@ public class MinionRoot extends LockableDatabase implements Minion, AutoCloseabl
 
     /**
      * Reads the current {@link SettingsConfiguration} and updates the mail handlers accordingly.
+     * <p>
+     * <b>Never</b> throws an {@link Exception}.
      */
     public void updateMailHandling() {
-        SettingsConfiguration settings = getSettings(false);
-        MailSenderSettingsDto mailSenderSettings = settings.mailSenderSettings;
-        MailReceiverSettingsDto mailReceiverSettings = settings.mailReceiverSettings;
-
-        if (mailSenderSettings.enabled) {
-            URLName parsedUrl = null;
-            try {
-                parsedUrl = MessagingUtils//
-                        .checkAndParseUrl(mailSenderSettings.url, mailSenderSettings.username, mailSenderSettings.password);
-                mailSender.connect(parsedUrl);
-            } catch (IllegalArgumentException e) {
-                log.error("Mail sender URL is incomplete.", e);
-            }
-        } else {
-            mailSender.close();
+        SettingsConfiguration settings;
+        try {
+            settings = getSettings(false);
+        } catch (Exception e) {
+            log.error("Failed to retrieve settings.", e);
+            return;
         }
 
-        if (mailReceiverSettings.enabled) {
-            URLName parsedUrl = null;
-            try {
-                parsedUrl = MessagingUtils//
-                        .checkAndParseUrl(mailReceiverSettings.url, mailReceiverSettings.username, mailReceiverSettings.password);
-                mailReceiver.connect(parsedUrl);
-            } catch (IllegalArgumentException e) {
-                log.error("Mail receiver URL is incomplete.", e);
+        try {
+            MailSenderSettingsDto mailSenderSettings = settings.mailSenderSettings;
+            if (mailSenderSettings.enabled) {
+                URLName parsedUrl = null;
+                try {
+                    parsedUrl = MessagingUtils.checkAndParseUrl(//
+                            mailSenderSettings.url, mailSenderSettings.username, mailSenderSettings.password);
+                    mailSender.connect(parsedUrl);
+                } catch (IllegalArgumentException e) {
+                    log.error("Mail sender URL is incomplete.", e);
+                }
+            } else {
+                mailSender.close();
             }
-        } else {
-            mailReceiver.close();
+        } catch (Exception e) {
+            log.error("Failed to update mail sender.", e);
+        }
+
+        try {
+            MailReceiverSettingsDto mailReceiverSettings = settings.mailReceiverSettings;
+            if (mailReceiverSettings.enabled) {
+                URLName parsedUrl = null;
+                try {
+                    parsedUrl = MessagingUtils.checkAndParseUrl(//
+                            mailReceiverSettings.url, mailReceiverSettings.username, mailReceiverSettings.password);
+                    mailReceiver.connect(parsedUrl);
+                } catch (IllegalArgumentException e) {
+                    log.error("Mail receiver URL is incomplete.", e);
+                }
+            } else {
+                mailReceiver.close();
+            }
+        } catch (Exception e) {
+            log.error("Failed to update mail receiver.", e);
         }
     }
 

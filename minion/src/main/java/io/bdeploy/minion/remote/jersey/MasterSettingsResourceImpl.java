@@ -81,6 +81,13 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
 
     @Override
     public boolean sendTestMail(MailSenderSettingsDto mailSenderSettingsDto) {
+        if (StringHelper.isNullOrBlank(mailSenderSettingsDto.password)) {
+            SettingsConfiguration stored = root.getSettings(false);
+            if (stored != null && stored.mailSenderSettings != null) {
+                mailSenderSettingsDto.password = stored.mailSenderSettings.password;
+            }
+        }
+
         URLName url = MessagingUtils.checkAndParseUrl(mailSenderSettingsDto.url, mailSenderSettingsDto.username,
                 mailSenderSettingsDto.password);
 
@@ -109,6 +116,12 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
 
     @Override
     public boolean testSenderConnection(MailSenderSettingsDto mailSenderSettingsDto) {
+        if (StringHelper.isNullOrBlank(mailSenderSettingsDto.password)) {
+            SettingsConfiguration stored = root.getSettings(false);
+            if (stored != null && stored.mailSenderSettings != null) {
+                mailSenderSettingsDto.password = stored.mailSenderSettings.password;
+            }
+        }
         testConnection(mailSenderSettingsDto.enabled, mailSenderSettingsDto.url, mailSenderSettingsDto.username,
                 mailSenderSettingsDto.password, SMTPTransportConnectionHandler::new);
         return true;
@@ -116,6 +129,12 @@ public class MasterSettingsResourceImpl implements MasterSettingsResource {
 
     @Override
     public boolean testReceiverConnection(MailReceiverSettingsDto mailReceiverSettingsDto) {
+        if (StringHelper.isNullOrBlank(mailReceiverSettingsDto.password)) {
+            SettingsConfiguration stored = root.getSettings(false);
+            if (stored != null && stored.mailReceiverSettings != null) {
+                mailReceiverSettingsDto.password = stored.mailReceiverSettings.password;
+            }
+        }
         testConnection(mailReceiverSettingsDto.enabled, mailReceiverSettingsDto.url, mailReceiverSettingsDto.username,
                 mailReceiverSettingsDto.password, IMAPStoreConnectionHandler::new);
         return true;

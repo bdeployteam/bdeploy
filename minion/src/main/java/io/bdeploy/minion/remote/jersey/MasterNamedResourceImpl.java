@@ -634,46 +634,53 @@ public class MasterNamedResourceImpl implements MasterNamedResource {
 
                 Key newInstanceVersionKey = createInstanceVersion(rootKey, state.config, nodeMap);
 
-                if (root.getMode() == MinionMode.MANAGED && root.getSettings().mailSenderSettings.enabled) {
-                    //Note that we are not allowed to use Files.createTempFile() here, because that method always immediately creates the file.
-                    //This is not okay to do here, because the constructor of BHive requires the Path-object to not yet exist in the file system.
-                    String uniqueId = AttachmentUtils.getAttachmentNameFromData(name, instanceConfig.id);
-                    Path targetFile = root.getTempDir().resolve(getClass().getName() + "#TempMailBHive#" + uniqueId + ".zip");
-
-                    URI targetUri = targetFile.toUri();
-
-                    ActivityReporter.Null nullReporter = new ActivityReporter.Null();
-
-                    try {
-                        try (BHive zipHive = new BHive(targetUri, null, nullReporter)) {
-                            CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
-                            op.addManifest(newInstanceVersionKey);
-                            hive.execute(new ObjectListOperation().addManifest(newInstanceVersionKey)).forEach(op::addObject);
-                            hive.execute(op);
-                        }
-
-                        sendMail(MinionRoot.MAIL_SUBJECT_PATTERN_CONFIG_OF + uniqueId,// subject
-                                "Instance group ID: " + name + "\n"// text
-                                        + "Instance ID: " + instanceConfig.id + "\n"//
-                                        + "Datetime: "
-                                        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss +S")),//
-                                MediaType.TEXT_PLAIN,// MIME type of text
-                                uniqueId + ".zip",// name of attachment
-                                Files.readAllBytes(targetFile),// attachment as byte[]
-                                Files.probeContentType(targetFile)// MIME type of attachment
-                        );
-                    } catch (MessagingException e) {
-                        log.error("Failed to send mail.", e);
-                    } catch (IOException e) {
-                        log.error("Parsing failed.", e);
-                    } finally {
-                        if (targetFile != null) {
-                            PathHelper.deleteRecursiveRetry(targetFile);
-                        }
-                    }
+                if (root.getMode() == MinionMode.MANAGED) {
+                    sendConfigurationChange(newInstanceVersionKey, instanceConfig.id);
                 }
 
                 return newInstanceVersionKey;
+            }
+        }
+    }
+
+    private void sendConfigurationChange(Key newInstanceVersionKey, String instanceConfigId) {
+        if (!root.getSettings().mailSenderSettings.enabled) {
+            return;
+        }
+
+        //Note that we are not allowed to use Files.createTempFile() here, because that method always immediately creates the file.
+        //This is not okay to do here, because the constructor of BHive requires the Path-object to not yet exist in the file system.
+        String uniqueId = AttachmentUtils.getAttachmentNameFromData(name, instanceConfigId);
+        Path targetFile = root.getTempDir().resolve(getClass().getName() + "#TempMailBHive#" + uniqueId + ".zip");
+
+        URI targetUri = targetFile.toUri();
+
+        ActivityReporter.Null nullReporter = new ActivityReporter.Null();
+
+        try {
+            try (BHive zipHive = new BHive(targetUri, null, nullReporter)) {
+                CopyOperation op = new CopyOperation().setDestinationHive(zipHive);
+                op.addManifest(newInstanceVersionKey);
+                hive.execute(new ObjectListOperation().addManifest(newInstanceVersionKey)).forEach(op::addObject);
+                hive.execute(op);
+            }
+
+            sendMail(MinionRoot.MAIL_SUBJECT_PATTERN_CONFIG_OF + uniqueId,// subject
+                    "Instance group ID: " + name + "\n"// text
+                            + "Instance ID: " + instanceConfigId + "\n"//
+                            + "Datetime: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss +S")),//
+                    MediaType.TEXT_PLAIN,// MIME type of text
+                    uniqueId + ".zip",// name of attachment
+                    Files.readAllBytes(targetFile),// attachment as byte[]
+                    Files.probeContentType(targetFile)// MIME type of attachment
+            );
+        } catch (MessagingException e) {
+            log.error("Failed to send mail.", e);
+        } catch (IOException e) {
+            log.error("Parsing failed.", e);
+        } finally {
+            if (targetFile != null) {
+                PathHelper.deleteRecursiveRetry(targetFile);
             }
         }
     }

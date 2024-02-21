@@ -1,5 +1,6 @@
 package io.bdeploy.messaging.store.imap;
 
+import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -27,7 +28,7 @@ import jakarta.mail.URLName;
 public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore, IMAPFolder> {
 
     private static final Logger log = LoggerFactory.getLogger(IMAPStoreConnectionHandler.class);
-    private static final int IDLE_TIME = 300000;
+    private static final Duration IDLE_TIME = Duration.ofMinutes(5);
 
     private final FolderOpeningStyle folderOpeningStyle;
 
@@ -125,6 +126,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                                 try {
                                     connect(url).get();
                                 } catch (InterruptedException e) {
+                                    Thread.currentThread().interrupt();
                                     return;
                                 } catch (ExecutionException e) {
                                     e.printStackTrace();
@@ -139,6 +141,7 @@ public class IMAPStoreConnectionHandler extends StoreConnectionHandler<IMAPStore
                         try {
                             Thread.sleep(IDLE_TIME);
                         } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
                             return;
                         }
                         folder.getMessageCount();

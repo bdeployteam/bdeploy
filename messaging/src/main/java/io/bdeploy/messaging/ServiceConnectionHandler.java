@@ -92,9 +92,8 @@ public abstract class ServiceConnectionHandler<S extends Service> implements Con
                     log.trace("Skipped connection because current URL equals new URL.");
                     return null;
                 }
+                disconnect();
             }
-
-            disconnect();
 
             boolean traceEnabled = log.isTraceEnabled();
             if (traceEnabled) {
