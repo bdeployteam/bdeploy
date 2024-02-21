@@ -47,7 +47,7 @@ export function getRenderPreview(
 
     expansions.push(...gatherVariableExpansions(instance, system));
     expansions.push(...gatherProcessExpansions(instance, process));
-    expansions.push(...gatherPathExpansions());
+    expansions.push(...gatherPathExpansions(instance));
     expansions.push(...gatherSpecialExpansions(instance, process, system));
 
     // now expand the expression
@@ -221,54 +221,54 @@ function processParameter(
   });
 }
 
-export function gatherPathExpansions(): LinkVariable[] {
+export function gatherPathExpansions(instance: InstanceConfigurationDto): LinkVariable[] {
   const result: LinkVariable[] = [];
   result.push({
     name: 'P:ROOT',
     description: 'The root directory of the instance version installation.',
-    preview: '/deploy/instance',
+    preview: `/deploy/${instance.config.id}`,
     link: '{{P:ROOT}}',
     group: null,
   });
   result.push({
     name: 'P:CONFIG',
     description: 'Resolved path to the configuration folder.',
-    preview: '/deploy/instance/bin/1/config',
+    preview: `/deploy/${instance.config.id}/bin/N/config`,
     link: '{{P:CONFIG}}',
     group: null,
   });
   result.push({
     name: 'P:RUNTIME',
     description: 'The directory where version specific runtime information is stored.',
-    preview: '/deploy/instance/bin/1/runtime',
+    preview: `/deploy/${instance.config.id}/bin/N/runtime`,
     link: '{{P:RUNTIME}}',
     group: null,
   });
   result.push({
     name: 'P:BIN',
     description: 'The directory where binaries are installed without pooling (per instance version).',
-    preview: '/deploy/instance/bin/1',
+    preview: `/deploy/${instance.config.id}/bin/N`,
     link: '{{P:BIN}}',
     group: null,
   });
   result.push({
     name: 'P:DATA',
     description: 'The directory where applications can place version independant data.',
-    preview: '/deploy/instance/data',
+    preview: `/deploy/${instance.config.id}/data`,
     link: '{{P:DATA}}',
     group: null,
   });
   result.push({
     name: 'P:MANIFEST_POOL',
     description: 'The directory where globally pooled applications are installed.',
-    preview: '/deploy/pool',
+    preview: `/deploy/pool`,
     link: '{{P:MANIFEST_POOL}}',
     group: null,
   });
   result.push({
     name: 'P:INSTANCE_MANIFEST_POOL',
     description: 'The directory where instance-locally pooled applications are installed.',
-    preview: '/deploy/instance/pool',
+    preview: `/deploy/${instance.config.id}/pool`,
     link: '{{P:INSTANCE_MANIFEST_POOL}}',
     group: null,
   });

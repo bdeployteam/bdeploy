@@ -103,7 +103,7 @@ export function buildCompletions(
       icon: 'build',
       description: l.description,
     })),
-    ...gatherPathExpansions().map((l) => ({
+    ...gatherPathExpansions(instance).map((l) => ({
       value: l.link,
       icon: 'folder',
       description: l.description,

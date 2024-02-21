@@ -70,7 +70,7 @@ export class BdExpressionPickerComponent implements OnChanges {
     // instance variables take precedence over system variables
     this.varRecords = gatherVariableExpansions(this.instance, this.system);
     this.paramRecords = gatherProcessExpansions(this.instance, this.process, this.applications);
-    this.pathRecords = gatherPathExpansions();
+    this.pathRecords = gatherPathExpansions(this.instance);
     this.specialRecords = gatherSpecialExpansions(this.instance, this.process, this.system);
   }
 
