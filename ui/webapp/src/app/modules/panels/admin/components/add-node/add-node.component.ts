@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription, finalize, map, of, skipWhile, startWith, tap } from 'rxjs';
 import { Actions, MinionMode, NodeAttachDto } from 'src/app/models/gen.dtos';
@@ -40,6 +41,7 @@ const ACTION_MIGRATE: BdDialogMessageAction<boolean> = {
 export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
   private areas = inject(NavAreasService);
   private actions = inject(ActionsService);
+  private snackbar = inject(MatSnackBar);
   protected nodesAdmin = inject(NodesAdminService);
 
   private adding$ = new BehaviorSubject<boolean>(false);
@@ -122,7 +124,7 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
   private readFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      this.data = JSON.parse(reader.result.toString());
+      this.setData(JSON.parse(reader.result.toString()));
     };
     reader.readAsText(file);
   }
@@ -131,8 +133,17 @@ export class AddNodeComponent implements DirtyableDialog, OnInit, OnDestroy {
     event.preventDefault();
 
     if (event.dataTransfer.types.includes(NODE_MIME_TYPE)) {
-      this.data = JSON.parse(event.dataTransfer.getData(NODE_MIME_TYPE));
+      this.setData(JSON.parse(event.dataTransfer.getData(NODE_MIME_TYPE)));
     }
+  }
+
+  private setData(data: NodeAttachDto) {
+    if (!data?.remote?.authPack?.length || !data?.remote?.uri?.length || !data?.name?.length) {
+      this.snackbar.open('Invalid Data - Make sure to drag the correct card.', 'DISMISS', { duration: 10000 });
+      return;
+    }
+
+    this.data = data;
   }
 
   protected onOver(event: DragEvent) {

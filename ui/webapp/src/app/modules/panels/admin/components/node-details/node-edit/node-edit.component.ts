@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { cloneDeep } from 'lodash-es';
 import { BehaviorSubject, Observable, Subscription, combineLatest, finalize } from 'rxjs';
-import { Actions, RemoteService } from 'src/app/models/gen.dtos';
+import { Actions, NodeAttachDto, RemoteService } from 'src/app/models/gen.dtos';
 import { BdDialogToolbarComponent } from 'src/app/modules/core/components/bd-dialog-toolbar/bd-dialog-toolbar.component';
 import { BdDialogComponent } from 'src/app/modules/core/components/bd-dialog/bd-dialog.component';
 import { DirtyableDialog } from 'src/app/modules/core/guards/dirty-dialog.guard';
@@ -20,6 +21,7 @@ import { NODE_MIME_TYPE } from '../../add-node/add-node.component';
 export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private areas = inject(NavAreasService);
   private actions = inject(ActionsService);
+  private snackbar = inject(MatSnackBar);
   protected nodesAdmin = inject(NodesAdminService);
 
   private saving$ = new BehaviorSubject<boolean>(false);
@@ -95,9 +97,7 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
   private readFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      const x = JSON.parse(reader.result.toString());
-      this.data.uri = x.remote.uri;
-      this.data.authPack = x.remote.authPack;
+      this.setData(JSON.parse(reader.result.toString()));
     };
     reader.readAsText(file);
   }
@@ -106,10 +106,18 @@ export class NodeEditComponent implements OnInit, OnDestroy, DirtyableDialog {
     event.preventDefault();
 
     if (event.dataTransfer.types.includes(NODE_MIME_TYPE)) {
-      const x = JSON.parse(event.dataTransfer.getData(NODE_MIME_TYPE));
-      this.data.uri = x.remote.uri;
-      this.data.authPack = x.remote.authPack;
+      this.setData(JSON.parse(event.dataTransfer.getData(NODE_MIME_TYPE)));
     }
+  }
+
+  private setData(data: NodeAttachDto) {
+    if (!data?.remote?.authPack?.length || !data?.remote?.uri?.length) {
+      this.snackbar.open('Invalid Data - Make sure to drag the correct card.', 'DISMISS', { duration: 10000 });
+      return;
+    }
+
+    this.data.authPack = data.remote.authPack;
+    this.data.uri = data.remote.uri;
   }
 
   protected onOver(event: DragEvent) {

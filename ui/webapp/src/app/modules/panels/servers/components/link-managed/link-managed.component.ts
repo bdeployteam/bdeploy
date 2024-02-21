@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { BehaviorSubject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { ManagedMasterDto } from 'src/app/models/gen.dtos';
@@ -16,6 +17,7 @@ export class LinkManagedComponent {
   private servers = inject(ServersService);
   private areas = inject(NavAreasService);
   private downloads = inject(DownloadService);
+  private snackbar = inject(MatSnackBar);
 
   protected payload: ManagedMasterDto;
   protected ident: string;
@@ -26,7 +28,7 @@ export class LinkManagedComponent {
   private readFile(file: File) {
     const reader = new FileReader();
     reader.onload = () => {
-      this.payload = JSON.parse(reader.result.toString());
+      this.setPayload(JSON.parse(reader.result.toString()));
     };
     reader.readAsText(file);
   }
@@ -53,8 +55,17 @@ export class LinkManagedComponent {
     event.preventDefault();
 
     if (event.dataTransfer.types.includes(ATTACH_MIME_TYPE)) {
-      this.payload = JSON.parse(event.dataTransfer.getData(ATTACH_MIME_TYPE));
+      this.setPayload(JSON.parse(event.dataTransfer.getData(ATTACH_MIME_TYPE)));
     }
+  }
+
+  private setPayload(payload: ManagedMasterDto) {
+    if (!payload?.auth?.length || !payload?.uri?.length || !payload?.hostName?.length) {
+      this.snackbar.open('Invalid Data - Make sure to drag the correct card.', 'DISMISS', { duration: 10000 });
+      return;
+    }
+
+    this.payload = payload;
   }
 
   protected onOver(event: DragEvent) {
