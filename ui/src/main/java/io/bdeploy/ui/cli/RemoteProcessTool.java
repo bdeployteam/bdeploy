@@ -114,20 +114,27 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         InstanceResource ir = ResourceProvider.getResource(svc, InstanceGroupResource.class, getLocalContext())
                 .getInstanceResource(groupName);
 
+        InstanceStateRecord deploymentStates = ir.getDeploymentStates(instanceId);
+
+        if (deploymentStates.activeTag == null) {
+            return createResultWithErrorMessage("This tool requires an active instance version for the given instance");
+        }
+
         if (config.list()) {
-            return doList(config, ir, svc);
+            return doList(config, ir, svc, deploymentStates);
         } else if (config.start() || config.stop()) {
             return doStartStop(config, instanceId, ir);
         }
         return createNoOp();
     }
 
-    private RenderableResult doList(RemoteProcessConfig config, InstanceResource ir, RemoteService svc) {
+    private RenderableResult doList(RemoteProcessConfig config, InstanceResource ir, RemoteService svc,
+            InstanceStateRecord deploymentStates) {
         String groupName = config.instanceGroup();
         String instanceId = config.uuid();
         String appId = config.application();
         if (appId == null) {
-            return createAllProcessesTable(config, svc, ir);
+            return createAllProcessesTable(config, svc, ir, deploymentStates);
         } else {
             InstanceProcessStatusDto allStatus = ir.getProcessResource(instanceId).getStatus();
             ProcessDetailDto appStatus = ir.getProcessResource(instanceId).getDetails(allStatus.processToNode.get(appId), appId);
@@ -218,7 +225,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         }
     }
 
-    private DataTable createAllProcessesTable(RemoteProcessConfig config, RemoteService svc, InstanceResource ir) {
+    private DataTable createAllProcessesTable(RemoteProcessConfig config, RemoteService svc, InstanceResource ir,
+            InstanceStateRecord deploymentStates) {
         DataTable table = createDataTable();
         table.setCaption("Processes for Instance " + config.uuid() + " in Instance Group " + config.instanceGroup() + " on "
                 + svc.getUri());
@@ -235,10 +243,8 @@ public class RemoteProcessTool extends RemoteServiceTool<RemoteProcessConfig> {
         table.column("Startup Status", 5);
         table.column("Lifeness Status", 5);
 
-        String instanceId = config.uuid();
         Map<String, Optional<InstanceConfiguration>> instanceInfos = new TreeMap<>();
         Map<String, Optional<InstanceNodeConfigurationListDto>> nodeDtos = new TreeMap<>();
-        InstanceStateRecord deploymentStates = ir.getDeploymentStates(instanceId);
         List<ProcessStatusDto> processEntries = getOrderedProcessEntries(config, ir, deploymentStates.activeTag);
 
         ProcessResource pr = ir.getProcessResource(config.uuid());
