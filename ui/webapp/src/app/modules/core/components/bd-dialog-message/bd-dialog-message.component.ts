@@ -145,7 +145,6 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
     if (event.defaultPrevented) {
       return;
     }
-    event.preventDefault();
 
     // find single confirm action.
     const x = this.message$.value?.actions?.filter((a) => a.confirm);
@@ -161,6 +160,7 @@ export class BdDialogMessageComponent implements OnInit, OnDestroy {
       return; // not valid or enabled!
     }
 
+    event.preventDefault(); // nobody else should handle this key press.
     this.complete(x[0].result);
   }
 
